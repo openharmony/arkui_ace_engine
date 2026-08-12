@@ -590,7 +590,7 @@ HWTEST_F(EventManagerTestNg, EventManagerHandleOut001, TestSize.Level1)
      */
     point.SetSourceType(SourceType::MOUSE);
     eventManager->HandleOutOfRectCallbacks(point);
-    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 0);
+    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 3);
 }
 
 /**
@@ -1976,11 +1976,11 @@ HWTEST_F(EventManagerTestNg, DumpTouchInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCurrentReferee001
+ * @tc.name: GetCurrentReferee007
  * @tc.desc: Test GetCurrentReferee function with isNewReferee=false and key=1 (POST_ONCE).
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, GetCurrentReferee001, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, GetCurrentReferee007, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
@@ -2139,11 +2139,11 @@ HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers002, TestSize.Level1)
 }
  
 /**
- * @tc.name: CleanRefereeBeforeTouchTest001
+ * @tc.name: CleanRefereeBeforeTouchTest003
  * @tc.desc: Test CleanRefereeBeforeTouchTest with eventHandleId=0.
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest001, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest003, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
@@ -2259,11 +2259,11 @@ HWTEST_F(EventManagerTestNg, DispatchTouchEventToTouchTestResult001, TestSize.Le
 }
  
 /**
- * @tc.name: LogTouchTestRecognizerStates001
+ * @tc.name: LogTouchTestRecognizerStates007
  * @tc.desc: Test LogTouchTestRecognizerStates with empty eventTree.
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates001, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates007, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);

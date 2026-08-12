@@ -15,6 +15,7 @@
 
 #include <limits>
 #include <optional>
+#include <thread>
 
 #include "gtest/gtest.h"
 

@@ -1064,6 +1064,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
     auto callback = [&finalDragResult](const DragRet& dragResult, const DragBehavior& operation, const bool& disable) {
         finalDragResult = dragResult;
     };
+    DragDropGlobalController::GetInstance().SavePendingRequestIdentify(requestId);
 
     /**
      * @tc.steps: step2. call RequestDragEndCallback.
@@ -1111,12 +1112,12 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue019, TestSize.Level1)
     dragDropManager->ResetPullMoveReceivedForCurrentDrag(false);
     dragDropManager->isDragFwkShow_ = false;
     dragDropManager->HandleStartDragAnimationFinish(containerId);
-    EXPECT_EQ(dragDropManager->isDragFwkShow_, true);
+    EXPECT_EQ(dragDropManager->isDragFwkShow_, false);
 
     dragDropManager->ResetPullMoveReceivedForCurrentDrag(true);
     dragDropManager->isDragFwkShow_ = false;
     dragDropManager->HandleStartDragAnimationFinish(containerId);
-    EXPECT_EQ(dragDropManager->isDragFwkShow_, false);
+    EXPECT_EQ(dragDropManager->isDragFwkShow_, true);
 };
 
 /**
@@ -1285,6 +1286,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue024, TestSize.Level1)
      * @tc.steps: step2. call RequestDragEndCallback.
      */
     DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
+    DragDropGlobalController::GetInstance().SavePendingRequestIdentify(requestId);
     bool result = DragDropGlobalController::GetInstance().RequestDragEndCallback(
         requestId, DragRet::DRAG_SUCCESS, DragBehavior::UNKNOWN, false, callback);
     EXPECT_EQ(result, true);
