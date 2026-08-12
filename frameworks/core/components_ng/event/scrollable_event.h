@@ -181,7 +181,7 @@ class ScrollableActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(ScrollableActuator, GestureEventActuator);
 public:
     explicit ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
-    ~ScrollableActuator() override;
+    ~ScrollableActuator() override = default;
 
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent);
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent);

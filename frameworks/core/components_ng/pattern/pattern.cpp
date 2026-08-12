@@ -19,7 +19,6 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -190,11 +189,6 @@ void Pattern::CheckLocalized()
     layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
     layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
-}
-
-RefPtr<VerticalOverflowHandler> Pattern::GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
-{
-    return nullptr;
 }
 
 void Pattern::PropagateForegroundColorToChildren()
