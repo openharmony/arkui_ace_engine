@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -883,6 +883,8 @@ public:
     void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
+    bool IsRootInnerWeb();
+    RefPtr<FrameNode> FindFirstExportTextureAncestor();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     bool Backward();
     void OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionConfig &config);
@@ -1148,6 +1150,12 @@ public:
                 const std::string&, // request
                 const std::string&, // result
                 WebRequestErrorCode)>& finishCallback);
+
+    // PageScene Rule-Based Perception
+    void RegisterPageSceneRulesForWeb(int32_t processId);
+    void GetPageSceneForWeb(int32_t processId, const std::string& ruleJson);
+    void TriggerPageSceneMatch();
+    void PostTriggerPageSceneMatch();
 
     bool IsTextSelectionEnable()
     {
@@ -1519,6 +1527,8 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId, bool needFilter = true);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
+    void RegisterPageSceneReadyJavaScript();
+    void UnRegisterPageSceneReadyJavaScript();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove = false);
     void HideMagnifier();

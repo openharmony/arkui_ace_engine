@@ -24,6 +24,13 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 using OptCacheItem = RepeatVirtualScroll2Caches::OptCacheItem;
 using GetFrameChildResult = RepeatVirtualScroll2Caches::GetFrameChildResult;
 
+namespace {
+constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000; // 2 seconds in nanoseconds
+constexpr int32_t MEMORY_LEVEL_LOW = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
+constexpr int32_t MEMORY_LEVEL_NORMAL = 0;
+} // namespace
+
 /**
  * @tc.name: CreateNode001
  * @tc.desc: Test creation of FrameNode
@@ -1022,12 +1029,10 @@ HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation003, TestSize.Level1)
  */
 HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation004, TestSize.Level1)
 {
-    LazyForEachUtils::SetEnableRepeatAnimation(false);
     auto listNode = CreateNode(V2::LIST_ETS_TAG);
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
     listNode->AddChild(repeatNode);
-    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
-    LazyForEachUtils::SetEnableRepeatAnimation(true);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), true);
 }
 
 /**
@@ -1037,12 +1042,10 @@ HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation004, TestSize.Level1)
  */
 HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation005, TestSize.Level1)
 {
-    LazyForEachUtils::SetEnableRepeatAnimation(false);
-    auto gridNode = CreateNode(V2::LIST_ETS_TAG);
+    auto gridNode = CreateNode(V2::GRID_ETS_TAG);
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
     gridNode->AddChild(repeatNode);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
-    LazyForEachUtils::SetEnableRepeatAnimation(true);
 }
 
 /**
@@ -1211,6 +1214,591 @@ HWTEST_F(RepeatVirtual2TestNg, ModelIsChildOnMainTree001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RepeatVirtualScroll2NodeOnWindowShow001
+ * @tc.desc: Test OnWindowShow schedules restore cache task
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeOnWindowShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    ASSERT_FALSE(repeatNode->pendingRestoreCache_);
+
+    /**
+     * @tc.steps: step2. Call OnWindowShow
+     * @tc.expected: Should schedule restore cache task
+     */
+    repeatNode->OnWindowShow();
+
+    EXPECT_TRUE(repeatNode->pendingRestoreCache_);
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeOnWindowHide001
+ * @tc.desc: Test OnWindowHide triggers synchronous cache cleanup
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeOnWindowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = true;
+    repeatNode->pendingRestoreCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call OnWindowHide
+     * @tc.expected: Should call CleanCache with syncClean=true and reset flags
+     */
+    repeatNode->OnWindowHide();
+
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+    EXPECT_FALSE(repeatNode->pendingRestoreCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeOnNotifyMemoryLevel001
+ * @tc.desc: Test OnNotifyMemoryLevel with MEMORY_LEVEL_LOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeOnNotifyMemoryLevel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = true;
+    repeatNode->pendingRestoreCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with MEMORY_LEVEL_LOW
+     * @tc.expected: Should call CleanCache with async mode
+     */
+    repeatNode->OnNotifyMemoryLevel(MEMORY_LEVEL_LOW);
+
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+    EXPECT_FALSE(repeatNode->pendingRestoreCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeOnNotifyMemoryLevel002
+ * @tc.desc: Test OnNotifyMemoryLevel with MEMORY_LEVEL_CRITICAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeOnNotifyMemoryLevel002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with MEMORY_LEVEL_CRITICAL
+     * @tc.expected: Should call CleanCache with async mode
+     */
+    repeatNode->OnNotifyMemoryLevel(MEMORY_LEVEL_CRITICAL);
+
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeOnNotifyMemoryLevel003
+ * @tc.desc: Test OnNotifyMemoryLevel with normal level (no action)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeOnNotifyMemoryLevel003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with normal level
+     * @tc.expected: Should NOT call CleanCache
+     */
+    repeatNode->OnNotifyMemoryLevel(MEMORY_LEVEL_NORMAL);
+
+    EXPECT_TRUE(repeatNode->pendingCleanCache_); // Flag should remain unchanged
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeScheduleCleanCacheTask001
+ * @tc.desc: Test ScheduleCleanCacheTask when pendingCleanCache_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeScheduleCleanCacheTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node with pendingCleanCache_ = false
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = false;
+    repeatNode->pendingRestoreCache_ = true; // Should be cleared
+
+    /**
+     * @tc.steps: step2. Call ScheduleCleanCacheTask
+     * @tc.expected: pendingCleanCache_ should be set to true, pendingRestoreCache_ cleared, timestamp recorded
+     */
+    int64_t beforeCall = GetSysTimestamp();
+    repeatNode->ScheduleCleanCacheTask();
+    int64_t afterCall = GetSysTimestamp();
+
+    EXPECT_TRUE(repeatNode->pendingCleanCache_);
+    EXPECT_FALSE(repeatNode->pendingRestoreCache_);
+    EXPECT_GE(repeatNode->cacheTaskPostTime_, beforeCall);
+    EXPECT_LE(repeatNode->cacheTaskPostTime_, afterCall);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeScheduleCleanCacheTask002
+ * @tc.desc: Test ScheduleCleanCacheTask when pendingCleanCache_ is already true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeScheduleCleanCacheTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node with pendingCleanCache_ = true
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->pendingCleanCache_ = true;
+    int64_t originalTimestamp = repeatNode->cacheTaskPostTime_;
+
+    /**
+     * @tc.steps: step2. Call ScheduleCleanCacheTask again
+     * @tc.expected: Should return early without modifying timestamp (CHECK_EQUAL_VOID)
+     */
+    repeatNode->ScheduleCleanCacheTask();
+
+    EXPECT_TRUE(repeatNode->pendingCleanCache_);
+    EXPECT_EQ(repeatNode->cacheTaskPostTime_, originalTimestamp);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeScheduleRestoreCacheTask001
+ * @tc.desc: Test ScheduleRestoreCacheTask when pendingRestoreCache_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeScheduleRestoreCacheTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node with pendingRestoreCache_ = false
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    ASSERT_FALSE(repeatNode->pendingRestoreCache_);
+
+    repeatNode->pendingCleanCache_ = true; // Should be cleared
+
+    /**
+     * @tc.steps: step2. Call ScheduleRestoreCacheTask
+     * @tc.expected: pendingRestoreCache_ should be set to true, pendingCleanCache_ cleared, timestamp recorded
+     */
+    int64_t beforeCall = GetSysTimestamp();
+    repeatNode->ScheduleRestoreCacheTask();
+    int64_t afterCall = GetSysTimestamp();
+
+    EXPECT_TRUE(repeatNode->pendingRestoreCache_);
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+    EXPECT_GE(repeatNode->cacheTaskPostTime_, beforeCall);
+    EXPECT_LE(repeatNode->cacheTaskPostTime_, afterCall);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeScheduleRestoreCacheTask002
+ * @tc.desc: Test ScheduleRestoreCacheTask when pendingRestoreCache_ is already true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeScheduleRestoreCacheTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node with pendingRestoreCache_ = true
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->pendingRestoreCache_ = true;
+    int64_t originalTimestamp = repeatNode->cacheTaskPostTime_;
+
+    /**
+     * @tc.steps: step2. Call ScheduleRestoreCacheTask again
+     * @tc.expected: Should return early without modifying timestamp (CHECK_EQUAL_VOID)
+     */
+    repeatNode->ScheduleRestoreCacheTask();
+
+    EXPECT_TRUE(repeatNode->pendingRestoreCache_);
+    EXPECT_EQ(repeatNode->cacheTaskPostTime_, originalTimestamp);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask001
+ * @tc.desc: Test TryExecuteScheduledCacheTask when no tasks are pending
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node with no pending tasks
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->pendingCleanCache_ = false;
+    repeatNode->pendingRestoreCache_ = false;
+    repeatNode->postUpdateTaskHasBeenScheduled_ = false;
+
+    /**
+     * @tc.steps: step2. Call TryExecuteScheduledCacheTask
+     * @tc.expected: Should return early without executing (CHECK_EQUAL_VOID)
+     */
+    repeatNode->TryExecuteScheduledCacheTask();
+
+    // No IdleTask posted
+    EXPECT_FALSE(repeatNode->postUpdateTaskHasBeenScheduled_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask002
+ * @tc.desc: Test TryExecuteScheduledCacheTask when delay time hasn't elapsed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node and schedule a task
+     * @tc.expected: RepeatVirtualScroll2Node is created with pending task
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->ScheduleCleanCacheTask();
+
+    /**
+     * @tc.steps: step2. Call TryExecuteScheduledCacheTask immediately
+     * @tc.expected: Should return early without executing (CHECK_EQUAL_VOID)
+     */
+    repeatNode->TryExecuteScheduledCacheTask();
+
+    EXPECT_TRUE(repeatNode->pendingCleanCache_); // Flag should remain
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask003
+ * @tc.desc: Test TryExecuteScheduledCacheTask executes clean cache task
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node and schedule a task with old timestamp
+     * @tc.expected: RepeatVirtualScroll2Node is created with pending task
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->ScheduleCleanCacheTask();
+
+    /**
+     * @tc.steps: step2. Manually set timestamps to simulate elapsed delay
+     * @tc.expected: Timestamps are set to past
+     */
+    repeatNode->cacheTaskPostTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+    repeatNode->setActiveRangeTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+
+    /**
+     * @tc.steps: step3. Call TryExecuteScheduledCacheTask
+     * @tc.expected: Should call CleanCache and reset flags
+     */
+    repeatNode->TryExecuteScheduledCacheTask();
+
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask004
+ * @tc.desc: Test TryExecuteScheduledCacheTask executes restore cache task
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeTryExecuteScheduledCacheTask004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node and schedule a task with old timestamp
+     * @tc.expected: RepeatVirtualScroll2Node is created with pending task
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->ScheduleRestoreCacheTask();
+
+    /**
+     * @tc.steps: step2. Manually set timestamps to simulate elapsed delay
+     * @tc.expected: Timestamps are set to past
+     */
+    repeatNode->cacheTaskPostTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+    repeatNode->setActiveRangeTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+
+    /**
+     * @tc.steps: step3. Call TryExecuteScheduledCacheTask
+     * @tc.expected: Should call CleanCache and reset flags
+     */
+    repeatNode->TryExecuteScheduledCacheTask();
+
+    EXPECT_FALSE(repeatNode->pendingRestoreCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeCleanCache001
+ * @tc.desc: Test CleanCache with syncClean=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeCleanCache001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = true;
+    repeatNode->pendingRestoreCache_ = true;
+    repeatNode->restoringCache_ = true;
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2026, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->pendingRemoveRids_ = { 1, 2 };
+
+    /**
+     * @tc.steps: step2. Call CleanCache with syncClean=true
+     * @tc.expected: Should reset flags
+     */
+    repeatNode->CleanCache(true);
+
+    EXPECT_TRUE(repeatNode->pendingRemoveRids_.empty());
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+    EXPECT_FALSE(repeatNode->pendingRestoreCache_);
+    EXPECT_FALSE(repeatNode->restoringCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeCleanCache002
+ * @tc.desc: Test CleanCache with syncClean=false (async mode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeCleanCache002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = true;
+    repeatNode->pendingRestoreCache_ = true;
+    repeatNode->restoringCache_ = true;
+    repeatNode->pendingRemoveRids_ = { 1, 2 };
+
+    /**
+     * @tc.steps: step2. Call CleanCache with syncClean=false
+     * @tc.expected: Should reset flags
+     */
+    repeatNode->CleanCache(false);
+
+    EXPECT_FALSE(repeatNode->pendingRemoveRids_.empty());
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+    EXPECT_FALSE(repeatNode->pendingRestoreCache_);
+    EXPECT_FALSE(repeatNode->restoringCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeStartRestoreCache001
+ * @tc.desc: Test StartRestoreCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeStartRestoreCache001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->pendingCleanCache_ = true;
+    repeatNode->pendingRestoreCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call StartRestoreCache
+     * @tc.expected: Should start cache restore and reset pending flags
+     */
+    repeatNode->StartRestoreCache();
+
+    EXPECT_FALSE(repeatNode->pendingCleanCache_);
+    EXPECT_FALSE(repeatNode->pendingRestoreCache_);
+    EXPECT_TRUE(repeatNode->restoringCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeRestoreCache001
+ * @tc.desc: Test RestoreCache when canUseLongPredictTask is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeRestoreCache001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->restoringCache_ = true;
+    repeatNode->cleanedCacheIndexes_ = {1, 2, 3};
+
+    /**
+     * @tc.steps: step2. Call RestoreCache with canUseLongPredictTask=false
+     * @tc.expected: Should remain in restoring state
+     */
+    repeatNode->RestoreCache(GetSysTimestamp() + 1000000, false);
+
+    EXPECT_TRUE(repeatNode->restoringCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeRestoreCache002
+ * @tc.desc: Test RestoreCache with empty cleanedCacheIndexes_
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeRestoreCache002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->restoringCache_ = true;
+    repeatNode->cleanedCacheIndexes_.clear();
+
+    /**
+     * @tc.steps: step2. Call RestoreCache
+     * @tc.expected: Should complete restore
+     */
+    repeatNode->RestoreCache(GetSysTimestamp() + 1000000, true);
+
+    EXPECT_FALSE(repeatNode->restoringCache_);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeAddPendingRemoveNodes001
+ * @tc.desc: Test AddPendingRemoveNodes with nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeAddPendingRemoveNodes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    std::vector<uint32_t> rids = {1, 2, 3};
+    std::vector<int32_t> indexes = {10, 20, 30};
+    repeatNode->pendingRemoveRids_.clear();
+    repeatNode->cleanedCacheIndexes_.clear();
+
+    /**
+     * @tc.steps: step2. Call AddPendingRemoveNodes
+     * @tc.expected: Should add nodes to pendingRemoveRids_
+     */
+    repeatNode->AddPendingRemoveNodes(rids, indexes);
+
+    EXPECT_EQ(repeatNode->pendingRemoveRids_.size(), 3);
+    EXPECT_EQ(repeatNode->cleanedCacheIndexes_.size(), 3);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeRemovingExpiringItem001
+ * @tc.desc: Test RemovingExpiringItem with empty pendingRemoveRids_
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeRemovingExpiringItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->pendingRemoveRids_.clear();
+
+    /**
+     * @tc.steps: step2. Call RemovingExpiringItem with empty pendingRemoveRids_
+     * @tc.expected: Should return true
+     */
+    bool result = repeatNode->RemovingExpiringItem(GetSysTimestamp() + 1000000);
+
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: RepeatVirtualScroll2NodeRemovingExpiringItem002
+ * @tc.desc: Test RemovingExpiringItem with pending rids
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeRemovingExpiringItem002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RepeatVirtualScroll2Node
+     * @tc.expected: RepeatVirtualScroll2Node is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2026, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+
+    repeatNode->pendingRemoveRids_ = {1, 2, 3};
+
+    /**
+     * @tc.steps: step2. Call RemovingExpiringItem
+     * @tc.expected: Should remove at least one item
+     */
+
+    repeatNode->RemovingExpiringItem(GetSysTimestamp() + 1000000000);
+
+    // After removal, pendingRemoveRids_ should be smaller
+    EXPECT_LT(repeatNode->pendingRemoveRids_.size(), 3);
+}
+
+/**
 * @tc.name: SetEnableSyncLoadTest001
 * @tc.desc: Test RepeatVirtualScroll2Caches::SetEnableSyncLoad
 * @tc.type: FUNC
@@ -1225,6 +1813,113 @@ HWTEST_F(RepeatVirtual2TestNg, SetEnableSyncLoadTest001, TestSize.Level1)
 
     repeatNode->caches_.SetEnableSyncLoad(false);
     EXPECT_EQ(repeatNode->caches_.enableSyncLoad_, false);
+}
+
+/**
+* @tc.name: SetIsSyncLoadTest001
+* @tc.desc: Test RepeatVirtualScroll2Caches::SetIsSyncLoad with true value
+* @tc.type: FUNC
+*/
+HWTEST_F(RepeatVirtual2TestNg, SetIsSyncLoadTest001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->caches_.SetIsSyncLoad(true);
+    EXPECT_EQ(repeatNode->caches_.isSyncLoad_, true);
+
+    repeatNode->caches_.SetIsSyncLoad(false);
+    EXPECT_EQ(repeatNode->caches_.isSyncLoad_, false);
+}
+
+/**
+ * @tc.name: ProcessSyncLoadTempChildrenTest001
+ * @tc.desc: Test RepeatVirtualScroll2Caches::ProcessSyncLoadTempChildren when enableSyncLoad is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, ProcessSyncLoadTempChildrenTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RepeatVirtualNode
+     * @tc.expected: RepeatVirtualNode is created successfully
+     */
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+    std::list<RefPtr<UINode>> children;
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("node", 2027, AceType::MakeRefPtr<Pattern>());
+
+    repeatNode->caches_.SetEnableSyncLoad(true);
+    repeatNode->caches_.SetIsSyncLoad(true);
+    repeatNode->caches_.syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    repeatNode->caches_.ProcessSyncLoadTempChildren(children, 0, 5);
+    EXPECT_TRUE(children.empty());
+
+    repeatNode->caches_.SetEnableSyncLoad(true);
+    repeatNode->caches_.SetIsSyncLoad(false);
+    repeatNode->caches_.syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    repeatNode->caches_.ProcessSyncLoadTempChildren(children, 0, 5);
+    EXPECT_TRUE(children.empty());
+
+    repeatNode->caches_.SetEnableSyncLoad(false);
+    repeatNode->caches_.SetIsSyncLoad(true);
+    repeatNode->caches_.syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    repeatNode->caches_.ProcessSyncLoadTempChildren(children, 0, 5);
+    EXPECT_TRUE(children.empty());
+
+    repeatNode->caches_.SetEnableSyncLoad(false);
+    repeatNode->caches_.SetIsSyncLoad(false);
+    repeatNode->caches_.syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    repeatNode->caches_.ProcessSyncLoadTempChildren(children, 0, 5);
+    EXPECT_FALSE(children.empty());
+}
+
+/**
+* @tc.name: LazyForEachUtilsSetRepeatMemOptStrategy001
+* @tc.desc: Test LazyForEachUtils::SetRepeatMemOptStrategy
+* @tc.type: FUNC
+*/
+HWTEST_F(RepeatVirtual2TestNg, LazyForEachUtilsSetRepeatMemOptStrategy001, TestSize.Level1)
+{
+    LazyForEachUtils::SetRepeatMemOptStrategy("ENABLE_AUTO_CACHE_OPTIMIZATION");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(),
+        RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+    LazyForEachUtils::SetRepeatMemOptStrategy("DEFAULT");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+    LazyForEachUtils::SetRepeatMemOptStrategy("INVALID_STRATEGY");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+    LazyForEachUtils::SetRepeatMemOptStrategy("");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+}
+
+/**
+* @tc.name: RepeatVirtualScroll2NodeGetMemOptStrategy001
+* @tc.desc: Test RepeatVirtualScroll2Node::GetMemOptStrategy
+* @tc.type: FUNC
+*/
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeGetMemOptStrategy001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    auto strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    LazyForEachUtils::repeatMemOptStrategy_ = RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    LazyForEachUtils::repeatMemOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = 1;
+    strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = -1;
+    strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::DEFAULT);
 }
 
 } // namespace OHOS::Ace::NG

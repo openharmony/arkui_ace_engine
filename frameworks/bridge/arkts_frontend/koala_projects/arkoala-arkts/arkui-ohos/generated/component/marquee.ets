@@ -24,19 +24,18 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
-import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr, VoidCallback, LengthMetrics as arkui_component_units_LengthMetrics } from './units'
+import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr, VoidCallback } from './units'
 import { Color as arkui_component_enums_Color, FontWeight, MarqueeUpdateStrategy } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { AttributeModifier, hookMarqueeAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, hookMarqueeAttributeModifier, AttributeUpdater, extractors } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { MarqueeModifier } from './../MarqueeModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
     marqueeAttributeSet?: MarqueeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -428,7 +427,8 @@ export class MarqueeOptions_serializer {
         if (valueHolderForSpacing !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpacingTmpValue = valueHolderForSpacing!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
+            const valueHolderForSpacingTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForSpacingTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForSpacingTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -476,7 +476,8 @@ export class MarqueeOptions_serializer {
         const spacingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let spacingTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            spacingTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const spacingTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            spacingTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(spacingTmpBufOptDeserialized)
         }
         const spacingTmpResult: arkui_component_units_LengthMetrics | undefined = spacingTmpBuf
         const delayTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()

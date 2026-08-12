@@ -28,7 +28,7 @@
 #include "core/common/font_manager.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -744,7 +744,7 @@ bool MultipleParagraphLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* la
             paraStyle = ParagraphUtil::GetParagraphStyle(spanTextStyle);
         }
         reLayout |= spanTextStyle.NeedReLayout();
-        textStyles.emplace_back(spanTextStyle);
+        textStyles.emplace_back(std::move(spanTextStyle));
         child->ResetReCreateAndReLayout();
         index++;
     }
@@ -839,13 +839,13 @@ bool MultipleParagraphLayoutAlgorithm::PlaceholderSpanMeasure(const RefPtr<Place
     return placeholderSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
-void MultipleParagraphLayoutAlgorithm::MeasureChildren(
+bool MultipleParagraphLayoutAlgorithm::MeasureChildren(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
 {
-    CHECK_NULL_VOID(!spans_.empty());
-    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_RETURN(!spans_.empty(), false);
+    CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, false);
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     auto placeHolderLayoutConstrain = layoutConstrain;
     placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
@@ -906,8 +906,9 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(
             }
         }
     }
-    CHECK_NULL_VOID(needReCreateParagraph);
+    CHECK_NULL_RETURN(needReCreateParagraph, false);
     layoutProperty->OnPropertyChangeMeasure();
+    return true;
 }
 
 ChildrenListWithGuard MultipleParagraphLayoutAlgorithm::GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper)

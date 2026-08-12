@@ -13,10 +13,21 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("container_reader_test_ng") {
-  type = "new"
-  module_name = "Layout-Stack"
-  sources = [
-    "container_reader_test_ng.cpp",
-  ]
+test_sources = [
+  "container_reader_test_ng.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("container_reader_test_ng") {
+    type = "host_components"
+    module_name = "Layout-Stack"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("container_reader_test_ng") {
+    type = "new"
+    module_name = "Layout-Stack"
+    sources = test_sources
+  }
 }

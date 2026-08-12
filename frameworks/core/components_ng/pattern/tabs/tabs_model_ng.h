@@ -164,6 +164,8 @@ public:
         FrameNode* frameNode, TabJsResType colorType, const RefPtr<ResourceObject>& resObj);
     static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
 
+    static void InitTabBarChildNodes(RefPtr<TabsNode> tabsNode);
+
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
     static RefPtr<SwiperController> GetSwiperController(const RefPtr<FrameNode>& swiperNode,

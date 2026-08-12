@@ -51,6 +51,9 @@ public:
     std::string TakeNavigationHomeInfo(const std::string& navigationId);
     void SetNavigationHomeInfo(const std::string& navigationId, const std::string& homeInfo);
 
+    std::string TakeNavigationHomeState(const std::string& navigationId);
+    void SetNavigationHomeState(const std::string& navigationId, const std::string& homeState);
+
 private:
     std::unordered_map<int32_t, std::unordered_map<int32_t, RestoreInfo>>& GetRestoreInfo(bool isNavigationType)
     {
@@ -66,6 +69,8 @@ private:
     int32_t restoreCallbackId_ = 0;
 
     std::unordered_map<std::string, std::string> homeNavigationInfo_;
+    // restore info: navigationId --> onSaveState
+    std::unordered_map<std::string, std::string> homeOnSaveState_;
     // restore info: NavDestinationNodeBaseId --> [callbackId --> restoreInfo]
     std::unordered_map<int32_t, std::unordered_map<int32_t, RestoreInfo>> navigationRestoreInfos_;
     // restore info: pageId --> [callbackId --> restoreInfo]

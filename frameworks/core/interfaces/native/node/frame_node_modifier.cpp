@@ -1319,11 +1319,9 @@ ArkUI_Int32 SetUiDvsyncSwitch(ArkUIContext* context, bool enable)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(pipelineContext, ERROR_CODE_PARAM_INVALID, "pipeline is invalid.");
     if (!pipelineContext->CheckThreadSafe()) {
-        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID,
-            "SetUiDvsyncSwitch is not running on UI thread.");
-        return ERROR_CODE_PARAM_INVALID;
+        LOGF_ABORT("SetUiDvsyncSwitch doesn't run on UI thread");
     }
-    pipelineContext->SetUiDvsyncSwitch(enable);
+    pipelineContext->SetUiDvsyncSwitch(enable, FromWhom::API);
     return ERROR_CODE_NO_ERROR;
 }
 

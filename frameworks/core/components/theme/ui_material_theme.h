@@ -22,10 +22,6 @@
 
 namespace OHOS::Ace {
 
-namespace NG {
-class PipelineContext;
-};
-
 class ACE_FORCE_EXPORT UiMaterialTheme : public virtual Theme {
     DECLARE_ACE_TYPE(UiMaterialTheme, Theme);
 
@@ -38,13 +34,11 @@ public:
     };
     UiMaterialTheme() = default;
     ~UiMaterialTheme() override = default;
-    std::optional<UiMaterialParam> GetUiMaterialParam(MaterialType type, NG::PipelineContext* pipeline);
-    std::optional<UiMaterialParam> GetUiMaterialParam(MaterialType type, const RefPtr<NG::FrameNode>& node);
+    std::optional<UiMaterialParam> GetUiMaterialParam(
+        MaterialType type, const RefPtr<NG::FrameNode>& node, ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED);
     void SetInstanceId(int32_t instanceId);
 
 private:
-    bool ParseUiMaterialParam(MaterialType type, NG::PipelineContext* pipeline, ColorMode colorMode,
-        UiMaterialParam& result);
     bool ParseUiMaterialParam(
         MaterialType type, const RefPtr<NG::FrameNode>& node, const ColorMode& colorMode, UiMaterialParam& result);
     bool GetThemeColor(const RefPtr<NG::FrameNode>& node, const ColorMode& colorMode, int32_t resId, Color& color);

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ArkUIExtensionComponentComponent extends ArkComponent implements UIExtensionComponentAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {

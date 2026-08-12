@@ -13,32 +13,56 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("container_picker_test") {
-  module_name = "PickerSet-Picker"
-  type = "new"
-  sources = [
-    "container_picker_accessibility_property_test.cpp",
-    "container_picker_event_hub_test.cpp",
-    "container_picker_layout_algorithm_test.cpp",
-    "container_picker_paint_method_test.cpp",
-    "container_picker_theme_wrapper_test.cpp",
-    "container_picker_pattern_test.cpp",
-    "container_picker_pattern_test_two.cpp",
-    "container_picker_resource_test.cpp",
-    "container_picker_model_test.cpp",
-    "container_picker_supplement_test.cpp",
-  ]
+test_sources = [
+  "container_picker_accessibility_property_test.cpp",
+  "container_picker_event_hub_test.cpp",
+  "container_picker_layout_algorithm_test.cpp",
+  "container_picker_paint_method_test.cpp",
+  "container_picker_theme_wrapper_test.cpp",
+  "container_picker_pattern_test.cpp",
+  "container_picker_pattern_test_two.cpp",
+  "container_picker_resource_test.cpp",
+  "container_picker_model_test.cpp",
+  "container_picker_supplement_test.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "container_picker_test_min.cpp",
-      "container_picker_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "container_picker_test_min.cpp",
-      "container_picker_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("container_picker_test") {
+    type = "host_components"
+    module_name = "PickerSet-Picker"
+    sources = test_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "container_picker_test_min.cpp",
+        "container_picker_test_core.cpp",
+      ]
+    } else {
+      sources += [
+        "container_picker_test_min.cpp",
+        "container_picker_test_core.cpp",
+      ]
+    }
+  }
+} else {
+  ace_unittest("container_picker_test") {
+    type = "new"
+    module_name = "PickerSet-Picker"
+    sources = test_sources
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "container_picker_test_min.cpp",
+        "container_picker_test_core.cpp",
+      ]
+    } else {
+      sources += [
+        "container_picker_test_min.cpp",
+        "container_picker_test_core.cpp",
+      ]
+    }
   }
 }

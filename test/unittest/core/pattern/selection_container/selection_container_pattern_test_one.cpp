@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #define private public
 #define protected public
 
@@ -1260,6 +1261,9 @@ HWTEST_F(SelectionContainerPatternTestNg, HandleClickOnTextAndSpanForContainer00
 {
     auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
     selectionChild->selectionText_ = SCT_TEST_SELECTION_TEXT1;
+#ifdef ACE_HOST_PRODUCT
+    selectionChild->SetHostNode(childNode1_);
+#endif
     pattern_->RegisterChild(selectionChild);
 
     EXPECT_EQ(pattern_->GetSelectionText(), SCT_TEST_SELECTION_TEXT1);
@@ -1304,6 +1308,9 @@ HWTEST_F(SelectionContainerPatternTestNg, HandleMouseLeftMoveActionForContainer0
 {
     auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
     selectionChild->selectionText_ = SCT_TEST_SELECTION_TEXT1;
+#ifdef ACE_HOST_PRODUCT
+    selectionChild->SetHostNode(childNode1_);
+#endif
     pattern_->RegisterChild(selectionChild);
 
     EXPECT_EQ(pattern_->GetSelectionText(), SCT_TEST_SELECTION_TEXT1);
@@ -1318,6 +1325,9 @@ HWTEST_F(SelectionContainerPatternTestNg, HandleMouseLeftReleaseActionForContain
 {
     auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
     selectionChild->selectionText_ = SCT_TEST_SELECTION_TEXT1;
+#ifdef ACE_HOST_PRODUCT
+    selectionChild->SetHostNode(childNode1_);
+#endif
     pattern_->RegisterChild(selectionChild);
 
     EXPECT_FALSE(pattern_->GetSelectionText().empty());

@@ -301,6 +301,8 @@ interface ChipNodeTheme {
   activated: boolean;
   backgroundColor: ResourceColor;
   activatedBackgroundColor: ResourceColor;
+  backgroundSystemMaterial: uiMaterial.Material;
+  activatedBackgroundSystemMaterial: uiMaterial.Material;
   focusOutlineColor: ResourceColor;
   borderColor: ResourceColor,
   defaultBorderWidth: Dimension;
@@ -551,6 +553,13 @@ export struct ChipV2 {
       activated: false,
       backgroundColor: $r('sys.color.chip_background_color'),
       activatedBackgroundColor: $r('sys.color.chip_container_activated_color'),
+      backgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+      }),
+      activatedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+        materialColor: $r('sys.color.comp_background_emphasize')
+      }),
       focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
       focusOutlineMargin: 2,
       borderColor: $r('sys.color.chip_border_color'),
@@ -614,6 +623,7 @@ export struct ChipV2 {
   @Local breakPoint: BreakPointsType = BreakPointsType.SM;
   @Local fontSizeScale: number = 1;
   @Local useAdaptiveLineHeight: boolean = false;
+  @Local actualChipHeight: number = 0;
 
   private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)');
   private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)');
@@ -853,12 +863,15 @@ export struct ChipV2 {
     .size(this.getChipSize())
     .enabled(this.isChipEnabled())
     .direction(this.chipV2Options.direction)
-    .backgroundColor(this.getChipBackgroundColor())
     .systemMaterial(this.getBackgroundSystemMaterial())
+    .backgroundColor(this.getChipBackgroundColor())
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
     .responseRegion(this.getChipResponseRegion())
+    .onSizeChange((oldValue, newValue) => {
+      this.actualChipHeight = (newValue?.height ?? 0) as number;
+    })
     .scale(this.chipScale)
     .opacity(this.chipOpacity)
     .accessibilityGroup(true)
@@ -1214,7 +1227,9 @@ export struct ChipV2 {
 
   private getChipResponseRegion(): Rectangle | undefined {
     if (deviceInfo.sdkApiVersion >= 26) {
-      const chipHeight = this.getChipHeight();
+      // Large-font scaling (e.g. care mode) can stretch the chip beyond the themed or
+      // user-specified height, so prefer the measured height once layout has happened.
+      const chipHeight = this.actualChipHeight > 0 ? this.actualChipHeight : this.getChipHeight();
       if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
         return {
           x: 0,
@@ -1517,10 +1532,18 @@ export struct ChipV2 {
     if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
-    if (this.isChipActivated()) {
-      return this.chipV2Options.activatedBackgroundSystemMaterial;
+    const info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.DISABLE) {
+      return undefined;
     }
-    return this.chipV2Options.backgroundSystemMaterial;
+    if (this.isChipActivated()) {
+      return info.state === uiMaterial.MaterialState.ENABLE && !this.chipV2Options.activatedBackgroundSystemMaterial ?
+        this.theme.chipNode.activatedBackgroundSystemMaterial :
+        this.chipV2Options.activatedBackgroundSystemMaterial;
+    }
+    return info.state === uiMaterial.MaterialState.ENABLE && !this.chipV2Options.backgroundSystemMaterial ?
+      this.theme.chipNode.backgroundSystemMaterial :
+      this.chipV2Options.backgroundSystemMaterial;
   }
 
   getColor(color: ColorMetrics | undefined, defaultColor: ResourceColor): ResourceColor {

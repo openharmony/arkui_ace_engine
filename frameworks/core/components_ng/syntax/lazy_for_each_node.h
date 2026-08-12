@@ -224,6 +224,7 @@ public:
 
     bool hasRegisterLazyForEachToCustomNode = false;
     LazyForEachMemOptStrategy GetMemOptStrategy();
+    void SetMemOptStrategy(LazyForEachMemOptStrategy strategy);
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -289,12 +290,12 @@ private:
         RegisterBuilderListener();
     }
 
-    void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override
+    void OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode) override
     {
         // LazyForEachNode::GetChildren() may add some children to disappearingChildren_, execute earlier to ensure
         // disappearingChildren_ is correct before calling GenerateOneDepthVisibleFrameWithTransition.
         GetChildren();
-        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
+        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleNode);
     }
 
     int32_t GetParentId() const
@@ -314,6 +315,7 @@ private:
     bool requestLongPredict_ = true;
     bool isRegisterListener_ = false;
     bool isLoop_ = false;
+    LazyForEachMemOptStrategy memOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
 
     mutable std::list<RefPtr<UINode>> tempChildren_;
     mutable std::list<RefPtr<UINode>> children_;

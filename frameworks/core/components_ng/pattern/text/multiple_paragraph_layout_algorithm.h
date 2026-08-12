@@ -26,7 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -105,7 +105,7 @@ protected:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
     ACE_FORCE_EXPORT virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    ACE_FORCE_EXPORT void MeasureChildren(
+    ACE_FORCE_EXPORT bool MeasureChildren(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     void CalcHeightWithMinLines(TextStyle& textStyle, LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& contentConstraint);

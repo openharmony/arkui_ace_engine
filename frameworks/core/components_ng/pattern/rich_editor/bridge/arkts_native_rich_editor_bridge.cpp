@@ -21,9 +21,11 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/common/properties/text_style_gradient.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
@@ -319,13 +321,12 @@ std::function<void(int32_t, int32_t)> ParseMenuCallback(EcmaVM* vm, const FrameN
     auto onMenuCallbackValue = menuOptions->Get(vm, stringRef);
     if (!onMenuCallbackValue->IsUndefined() && !onMenuCallbackValue->IsNull() && onMenuCallbackValue->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> jsOnMenuCallbackFunc = onMenuCallbackValue->ToObject(vm);
-        std::function<void(int32_t, int32_t)> onMenuCallback = [vm, frameNode, isJsView, name,
-                                                                   func =
-                                                                       panda::CopyableGlobal(vm, jsOnMenuCallbackFunc)](
-                                                                   int32_t start, int32_t end) {
+        std::function<void(int32_t, int32_t)> onMenuCallback = [vm, isJsView, name,
+            weakNode = AceType::WeakClaim(const_cast<FrameNode*>(frameNode)),
+            func = panda::CopyableGlobal(vm, jsOnMenuCallbackFunc)](int32_t start, int32_t end) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(const_cast<FrameNode*>(frameNode)));
+            PipelineContext::SetCallBackNode(weakNode);
             panda::Local<panda::JSValueRef> params[NUM_2] = {
                 panda::NumberRef::New(vm, start), panda::NumberRef::New(vm, end)
             };
@@ -401,10 +402,11 @@ ArkUINativeModuleValue RichEditorBridge::BindSelectionMenu(ArkUIRuntimeCallInfo*
     }
     std::function<void(void)> buildFunc = nullptr;
     if (!builderFunc.IsEmpty()) {
-        buildFunc = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, builderFunc)]() {
+        buildFunc = [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+                     func = panda::CopyableGlobal(vm, builderFunc)]() {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             auto ret = func->Call(vm, func.ToLocal(), nullptr, 0);
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
         };
@@ -418,12 +420,12 @@ ArkUINativeModuleValue RichEditorBridge::BindSelectionMenu(ArkUIRuntimeCallInfo*
         auto onAppearValue = menuOptions->Get(vm, stringRef);
         if (!onAppearValue->IsUndefined() && !onAppearValue->IsNull() && onAppearValue->IsFunction(vm)) {
             panda::Local<panda::FunctionRef> jsOnAppearFunc = onAppearValue->ToObject(vm);
-            std::function<void(int32_t, int32_t)> onAppear = [vm, frameNode, isJsView,
-                                                                 func = panda::CopyableGlobal(vm, jsOnAppearFunc)](
-                                                                 int32_t start, int32_t end) {
+            std::function<void(int32_t, int32_t)> onAppear = [vm, isJsView,
+                weakNode = AceType::WeakClaim(frameNode),
+                func = panda::CopyableGlobal(vm, jsOnAppearFunc)](int32_t start, int32_t end) {
                 panda::LocalScope pandaScope(vm);
                 panda::TryCatch trycatch(vm);
-                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                PipelineContext::SetCallBackNode(weakNode);
                 panda::Local<panda::JSValueRef> params[NUM_2] = {
                     panda::NumberRef::New(vm, start), panda::NumberRef::New(vm, end)
                 };
@@ -437,10 +439,11 @@ ArkUINativeModuleValue RichEditorBridge::BindSelectionMenu(ArkUIRuntimeCallInfo*
         if (!onDisappearValue->IsUndefined() && !onDisappearValue->IsNull() && onDisappearValue->IsFunction(vm)) {
             panda::Local<panda::FunctionRef> jsOnDisAppearFunc = onDisappearValue->ToObject(vm);
             std::function<void()> onDisappear =
-                [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, jsOnDisAppearFunc)]() {
+                [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+                 func = panda::CopyableGlobal(vm, jsOnDisAppearFunc)]() {
                     panda::LocalScope pandaScope(vm);
                     panda::TryCatch trycatch(vm);
-                    PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                    PipelineContext::SetCallBackNode(weakNode);
                     auto ret = func->Call(vm, func.ToLocal(), nullptr, 0);
                     ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
                 };
@@ -678,10 +681,11 @@ ArkUINativeModuleValue RichEditorBridge::SetDataDetectorConfig(ArkUIRuntimeCallI
     std::function<void(const std::string&)> callback;
     if (callbackArg->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-        callback = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+        callback = [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+                    func = panda::CopyableGlobal(vm, func)](const std::string& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             panda::Local<panda::JSValueRef> params[NUM_1] = {
                 panda::StringRef::NewFromUtf8(vm, info.c_str()) };
             auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -873,11 +877,12 @@ ArkUINativeModuleValue RichEditorBridge::SetOnIMEInputComplete(ArkUIRuntimeCallI
         ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(RichEditorAbstractSpanResult&)> callback = [vm, frameNode, isJsView,
+    std::function<void(RichEditorAbstractSpanResult&)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](RichEditorAbstractSpanResult& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         auto onIMEInputCompleteObj = CreateAbstractSpanResult(vm, event);
         onIMEInputCompleteObj->SetNativePointerFieldCount(vm, NUM_1);
         onIMEInputCompleteObj->SetNativePointerField(vm, NUM_0, static_cast<void*>(&event));
@@ -1311,10 +1316,11 @@ ArkUINativeModuleValue RichEditorBridge::SetOnWillChange(ArkUIRuntimeCallInfo* r
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<bool(const RichEditorChangeValue&)> callback =
-        [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const RichEditorChangeValue& changeValue) {
+        [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+         func = panda::CopyableGlobal(vm, func)](const RichEditorChangeValue& changeValue) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             auto eventObject = CreateOnWillChange(vm, changeValue, isJsView);
             panda::Local<panda::JSValueRef> params[NUM_1] = { eventObject };
             auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -1366,10 +1372,11 @@ ArkUINativeModuleValue RichEditorBridge::SetOnDidChange(ArkUIRuntimeCallInfo* ru
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const RichEditorChangeValue&)> callback =
-        [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const RichEditorChangeValue& changeValue) {
+        [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+         func = panda::CopyableGlobal(vm, func)](const RichEditorChangeValue& changeValue) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
 
             const auto& rangeBeforeValue = changeValue.GetRangeBefore();
             const char* keysOfRangeBefore[] = { "start", "end" };
@@ -1519,10 +1526,11 @@ ArkUINativeModuleValue RichEditorBridge::SetAboutToDelete(ArkUIRuntimeCallInfo* 
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<bool(const RichEditorDeleteValue&)> callback =
-        [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const RichEditorDeleteValue& deleteValue) {
+        [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+         func = panda::CopyableGlobal(vm, func)](const RichEditorDeleteValue& deleteValue) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             auto deleteSpansObj = CreateDeleteSpans(vm, deleteValue, isJsView);
             const char* keys[] = { "offset", "direction", "length", "richEditorDeleteSpans" };
             Local<JSValueRef> values[] = { panda::NumberRef::New(vm, deleteValue.GetOffset()),
@@ -1708,7 +1716,7 @@ ArkUINativeModuleValue RichEditorBridge::SetPlaceholder(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->setRichEditorPlaceholder(
         nativeNode, stringParameters.data(), stringParameters.size(), valuesVector.data(), valuesVector.size(),
-        AceType::RawPtr(resourceObject));
+        AceType::RawPtr(resourceObject), isJsView);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1784,10 +1792,11 @@ ArkUINativeModuleValue RichEditorBridge::SetOnSelectionChange(ArkUIRuntimeCallIn
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+         func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         const auto* changeInfo = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
         if (!changeInfo) {
             TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "richEditor SetOnSelectionChange callback execute failed.");
@@ -1878,10 +1887,11 @@ ArkUINativeModuleValue RichEditorBridge::SetOnSelect(ArkUIRuntimeCallInfo* runti
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+         func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::JSValueRef> params[NUM_1];
         CreatSelectEvent(vm, info, params, isJsView);
         auto result = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -1928,11 +1938,12 @@ ArkUINativeModuleValue RichEditorBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t, NG::TextFieldCommonEvent&)> callback = [vm, frameNode, isJsView,
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](int32_t key, NG::TextFieldCommonEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         const char* keys[] = { "text", "keepEditableState" };
         Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf16(vm, event.GetText().c_str()),
             panda::FunctionRef::New(vm, JsKeepEditableStateInternal) };
@@ -1986,10 +1997,11 @@ ArkUINativeModuleValue RichEditorBridge::SetAboutToIMEInput(ArkUIRuntimeCallInfo
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<bool(const RichEditorInsertValue&)> callback =
-        [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const RichEditorInsertValue& insertValue) {
+        [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+         func = panda::CopyableGlobal(vm, func)](const RichEditorInsertValue& insertValue) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         const char* keys[] = { "insertOffset", "insertValue", "previewText" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, insertValue.GetInsertOffset()),
             panda::StringRef::NewFromUtf16(vm, insertValue.GetInsertValue().c_str()),
@@ -2044,10 +2056,11 @@ ArkUINativeModuleValue RichEditorBridge::SetOnReady(ArkUIRuntimeCallInfo* runtim
         ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         auto result = func->Call(vm, func.ToLocal(), nullptr, NUM_0);
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
@@ -2091,10 +2104,11 @@ ArkUINativeModuleValue RichEditorBridge::SetOnDeleteComplete(ArkUIRuntimeCallInf
         ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         auto ret = func->Call(vm, func.ToLocal(), nullptr, NUM_0);
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
@@ -2139,11 +2153,12 @@ ArkUINativeModuleValue RichEditorBridge::SetOnEditingChange(ArkUIRuntimeCallInfo
         ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(bool)> callback = [vm, frameNode, isJsView,
+    std::function<void(bool)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](bool isInEditStatus) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::JSValueRef> params[NUM_1] = {
             panda::BooleanRef::New(vm, isInEditStatus) };
         auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -2237,11 +2252,12 @@ ArkUINativeModuleValue RichEditorBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(TextCommonEvent&)> callback = [vm, frameNode, isJsView,
+    std::function<void(TextCommonEvent&)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](TextCommonEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::JSValueRef> params[NUM_1];
         CreateCommonEvent(vm, event, params);
         auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -2288,11 +2304,12 @@ ArkUINativeModuleValue RichEditorBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(TextCommonEvent&)> callback = [vm, frameNode, isJsView,
+    std::function<void(TextCommonEvent&)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](TextCommonEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::JSValueRef> params[NUM_1];
         CreateCommonEvent(vm, event, params);
         auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -2339,11 +2356,12 @@ ArkUINativeModuleValue RichEditorBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(TextCommonEvent&)> callback = [vm, frameNode, isJsView,
+    std::function<void(TextCommonEvent&)> callback = [vm, isJsView,
+        weakNode = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](TextCommonEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::JSValueRef> params[NUM_1];
         CreateCommonEvent(vm, event, params);
         auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -2764,10 +2782,11 @@ ArkUINativeModuleValue RichEditorBridge::SetCustomKeyboardJS(ArkUIRuntimeCallInf
             panda::Local<panda::FunctionRef> builderFunc = builder->ToObject(vm);
             auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
             CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-            std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, builderFunc)]() {
+            std::function<void(void)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+                func = panda::CopyableGlobal(vm, builderFunc)]() {
                 panda::LocalScope pandaScope(vm);
                 panda::TryCatch trycatch(vm);
-                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                PipelineContext::SetCallBackNode(weakNode);
                 auto ret = func->Call(vm, func.ToLocal(), nullptr, 0);
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
             };
@@ -2826,11 +2845,11 @@ ArkUINativeModuleValue RichEditorBridge::SetOnDidIMEInput(ArkUIRuntimeCallInfo* 
         ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(TextRange&)> callback = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
-                                                   TextRange& event) {
+    std::function<void(TextRange&)> callback = [vm, isJsView, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](TextRange& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         const auto& textRange = event;
         const char* keysOfTextRange[] = { "start", "end" };
@@ -2880,7 +2899,9 @@ ArkUINativeModuleValue RichEditorBridge::SetOnWillAttachIME(ArkUIRuntimeCallInfo
         nodeModifiers->getRichEditorModifier()->resetRichEditorOnWillAttachIME(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    IMEAttachCallback callback = TextInputBridge::ParseAndCreateIMEAttachCallback(vm, callbackArg, frameNode, isJsView);
+    auto* customModifier = NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(customModifier, panda::JSValueRef::Undefined(vm));
+    IMEAttachCallback callback = customModifier->parseAndCreateIMEAttachCallback(vm, callbackArg, frameNode, isJsView);
     CHECK_NULL_RETURN(callback, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->setRichEditorOnWillAttachIME(
         nativeNode, reinterpret_cast<void*>(&callback));

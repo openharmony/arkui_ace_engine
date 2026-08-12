@@ -1387,6 +1387,7 @@ bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPatt
         CHECK_NULL_RETURN(menuRenderContext, false);
         menuRenderContext->UpdateOpacity(0.0);
         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
+        wrapperPattern->ForceSetMenuStatus(MenuStatus::HIDE);
         SubwindowManager::GetInstance()->HideMenuNG(wrapperPattern->GetHost(), targetId);
         return false;
     }
@@ -1396,7 +1397,7 @@ bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPatt
     CHECK_NULL_RETURN(stackContext, false);
     stackContext->UpdateOpacity(1.0);
 
-    wrapperPattern->CallMenuAboutToAppearCallback();
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     wrapperPattern->CheckAndShowAnimation();
     return true;
 }
@@ -2320,6 +2321,10 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
 {
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
+    if (option->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto themeScopeId = option->GetThemeScopeId();
+        row->SetThemeScopeId(themeScopeId);
+    }
     if (optionsHasIcon) {
         auto iconNode = CreateSymbol(params[index].symbol, row, nullptr, params[index].symbolUserDefinedIdealFontSize);
         pattern->SetIconNode(iconNode);
@@ -2341,14 +2346,14 @@ void MenuView::CreateOption(const OptionValueInfo& value, const std::string& ico
 {
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
+    if (option->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto themeScopeId = option->GetThemeScopeId();
+        row->SetThemeScopeId(themeScopeId);
+    }
     if (value.optionsHasIcon) {
         auto iconNode = CreateIcon(icon, row);
         pattern->SetIconNode(iconNode);
         pattern->SetIcon(icon);
-    }
-    if (option->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        auto themeScopeId = option->GetThemeScopeId();
-        row->SetThemeScopeId(themeScopeId);
     }
     auto textNode = CreateText(value.content, row, false, value.isAIMenuOption);
     row->MountToParent(option);

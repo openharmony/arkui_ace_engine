@@ -235,14 +235,33 @@ void TextScrollBar2D::UpdateHorizontalBar(float offset, float estimatedHeight, c
     UpdateScrollBar({ offset, estimatedHeight, viewPort, viewOffset }, false);
 }
 
-void TextScrollBar2D::OnDraw(DrawingContext& context) const
+void TextScrollBar2D::OnDraw(DrawingContext& context, const RefPtr<OverlayModifier>& modifier) const
 {
     if (verticalModifier_) {
         verticalModifier_->onDraw(context);
+        UpdateBoundsRect(modifier, verticalModifier_->GetBoundsRect());
     }
     if (horizontalModifier_) {
         horizontalModifier_->onDraw(context);
+        UpdateBoundsRect(modifier, horizontalModifier_->GetBoundsRect());
     }
+}
+
+void TextScrollBar2D::UpdateBoundsRect(const RefPtr<OverlayModifier>& modifier, const RectF& rect) const
+{
+    CHECK_NULL_VOID(modifier);
+    auto modifierRect = modifier->GetBoundsRect();
+    if (rect.IsWrappedBy(modifierRect)) {
+        return;
+    }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto ctx = host->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    modifier->SetBoundsRect(modifierRect.CombineRectT(rect));
+    ctx->FlushOverlayModifier(modifier);
 }
 
 bool TextScrollBar2D::HandleScrollPositionCallback(

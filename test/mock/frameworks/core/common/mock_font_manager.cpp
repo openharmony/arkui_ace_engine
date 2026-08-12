@@ -114,7 +114,7 @@ void FontManager::UpdateStyleOptimizeFlagInCurrentLanguage() {}
 
 bool FontManager::GetFallbackLineSpacingStyleOptimizeFlag()
 {
-    return false;
+    return fallbackLineSpacingStyleOptimizeFlag_;
 }
 
 bool FontManager::GetPunctuationOverflowStyleOptimizeFlag()

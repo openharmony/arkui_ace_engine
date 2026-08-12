@@ -22,6 +22,7 @@
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #define private public
@@ -29,7 +30,7 @@
 #undef private
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 
 namespace OHOS::Ace::NG {
 class GridScrollLayoutTestNg : public GridTestNg {
@@ -1037,5 +1038,84 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutAlgorithmWrapperInitTest, TestS
     GridLayoutInfo info;
     GridScrollLayoutAlgorithm algorithm(info);
     EXPECT_EQ(algorithm.wrapper_, nullptr);
+}
+
+/**
+ * @tc.name: GridScrollLayoutStartLineNonNegative001
+ * @tc.desc: After scroll-to-end then reload-to-start sequences, startMainLineIndex_
+ *           must stay non-negative and gridMatrix_ must never contain a -1 row key,
+ *           and CheckGridMatrix must pass. Regression guard for the
+ *           "check grid matrix failed ... row -1" failure caused by ReloadToStartIndex
+ *           decrementing startMainLineIndex_ below 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutStartLineNonNegative001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateFixedItems(60);
+    CreateDone();
+
+    ScrollToIndex(50, true, ScrollAlign::END);
+    FlushUITasks();
+    ScrollToIndex(0, true, ScrollAlign::START);
+    FlushUITasks();
+    ScrollToIndex(40, true, ScrollAlign::END);
+    FlushUITasks();
+    ScrollToIndex(0, true, ScrollAlign::START);
+    FlushUITasks();
+    UpdateCurrentOffset(-80.0f);
+    FlushUITasks();
+
+    auto& info = pattern_->info_;
+    EXPECT_GE(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.gridMatrix_.find(-1), info.gridMatrix_.end());
+    EXPECT_TRUE(info.CheckGridMatrix(5));
+}
+
+/**
+ * @tc.name: GridScrollLayoutCheckGridMatrixReload001
+ * @tc.desc: When CheckGridMatrix detects matrix inconsistency during layout, the grid
+ *           should be marked for data reload (ChildrenUpdatedFrom(0) + MarkDirtyNode).
+ *           The actual matrix clear and rebuild happens on the next frame via CheckReset.
+ *           After reload, the matrix should be rebuilt and CheckGridMatrix should pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutCheckGridMatrixReload001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateFixedItems(60);
+    CreateDone();
+
+    // Scroll down so startIndex_ > 0, ensuring IsResetted() returns true after matrix clear
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE * 6);
+    auto& info = pattern_->info_;
+    ASSERT_GT(info.startIndex_, 0);
+    ASSERT_FALSE(info.gridMatrix_.empty());
+    ASSERT_EQ(frameNode_->GetChildrenUpdated(), -1);
+
+    // Corrupt the matrix: add a cache line beyond endMainLineIndex_ with an item index
+    // less than endIndex_, which causes CheckGridMatrix to return false.
+    const int32_t badLine = info.endMainLineIndex_ + 1;
+    info.gridMatrix_[badLine] = { { 0, 0 } };
+
+    // Set times_ so that the next layout tick triggers CheckGridMatrix
+    info.times_ = GRID_CHECK_INTERVAL - 1;
+
+    // Flush: Layout runs, CheckGridMatrix fails, ChildrenUpdatedFrom(0) + MarkDirtyNode
+    // called, then return. The matrix is NOT cleared yet (clear happens next frame).
+    FlushUITasks();
+
+    // After failed check, reload is scheduled: childrenUpdatedFrom_ set to 0
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
+
+    // Flush again: CheckReset detects updateIdx == 0, clears and rebuilds matrix
+    // via ReloadToStartIndex. Normal path end calls ChildrenUpdatedFrom(-1).
+    FlushUITasks();
+
+    // After reload, matrix should be rebuilt and consistent
+    EXPECT_FALSE(info.gridMatrix_.empty());
+    EXPECT_TRUE(info.CheckGridMatrix(1));
 }
 } // namespace OHOS::Ace::NG

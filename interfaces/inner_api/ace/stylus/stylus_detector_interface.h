@@ -36,7 +36,7 @@ struct ResultData {
     std::string resultData;
 };
 
-enum CommandType {
+enum class CommandType {
     COMMAND_REQUEST_FOCUS,
     COMMAND_CLEAR_HIT,
     COMMAND_SET_TEXT,

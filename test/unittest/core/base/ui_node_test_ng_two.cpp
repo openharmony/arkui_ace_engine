@@ -1000,12 +1000,13 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo069, TestSize.Level1)
     testNode1->AddChild(testNode4, 1, false);
     OffsetT<float> offset;
     std::list<RefPtr<FrameNode>> visibleList;
+    std::vector<RefPtr<FrameNode>> visibleVector;
     testNode1->GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
     testNode1->AddDisappearingChild(testNode2, 1);
     testNode1->AddDisappearingChild(testNode3, 2);
     testNode1->AddDisappearingChild(testNode4, 3);
     testNode1->AddDisappearingChild(testNode5, 4);
-    testNode1->GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    testNode1->GenerateOneDepthVisibleFrameWithTransition(visibleVector);
     testNode1->GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
     EXPECT_EQ(testNode1->GetChildren().size(), 3);
 }
@@ -1182,6 +1183,37 @@ HWTEST_F(UINodeTestNgTwo, GetPerformanceCheckData004, TestSize.Level1)
     child->tag_ = V2::JS_FOR_EACH_ETS_TAG;
     child->UINode::GetPerformanceCheckData(nodeMap);
     EXPECT_EQ(child->nodeInfo_->nodeTag, "ForEach");
+}
+
+/**
+ * @tc.name: GetPerformanceCheckData005
+ * @tc.desc: Test collecting child data when parent nodeInfo is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNgTwo, GetPerformanceCheckData005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a parent without nodeInfo and a child with nodeInfo
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+    parent->nodeInfo_.reset();
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    child->SetBuildByJs(true);
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2. collect performance check data from the parent
+     * @tc.expected: skip the parent and continue collecting the child
+     */
+    PerformanceCheckNodeMap nodeMap;
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+
+    EXPECT_EQ(nodeMap.count(parentId), 0);
+    ASSERT_EQ(nodeMap.count(childId), 1);
+    EXPECT_EQ(nodeMap.at(childId).nodeTag, "child");
 }
 
 /**

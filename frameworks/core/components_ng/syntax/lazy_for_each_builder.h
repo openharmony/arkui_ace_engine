@@ -50,6 +50,7 @@ enum class LazyForEachCustomComponentFreezeMode {
 };
 
 enum class LazyForEachMemOptStrategy {
+    UNDEFINED = -1,
     DEFAULT = 0,
     ENABLE_AUTO_CACHE_OPTIMIZATION = 1
 };
@@ -164,7 +165,7 @@ public:
 
     void RemoveAllChild();
 
-    bool SetActiveChildRange(int32_t start, int32_t end);
+    bool SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0);
 
     int32_t GetChildIndex(const RefPtr<FrameNode>& targetNode);
 
@@ -177,7 +178,7 @@ public:
     RefPtr<UINode> CacheItem(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout);
 
-    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count);
+    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count, bool outOfScreen = false);
 
     bool PreBuildByIndex(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask);
@@ -381,7 +382,11 @@ private:
     bool isSyncLoad_ = true;
     int32_t activeRangeStart_ = -1;
     int32_t activeRangeEnd_ = -1;
-    void RecordActiveRange(int32_t start, int32_t end);
+    int32_t cachedCountStart_ = 0;
+    int32_t cachedCountEnd_ = 0;
+    void RecordActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
+    bool CheckOutOfScreenAndUpdateCachedCount();
+    void RemoveIllegalIndex(std::set<int32_t>& indexes, int32_t count);
     std::map<std::string, std::map<std::string, std::set<WeakPtr<UINode>>>> recyclableNodeSet_;
     std::set<std::string> GetReuseIdsCanBeRecycled() const;
     WeakPtr<LazyForEachNode> lazyForEachNode_;

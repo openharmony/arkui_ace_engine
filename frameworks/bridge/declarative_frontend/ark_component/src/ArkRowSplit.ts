@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class RowSplitResizeableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {

@@ -15,6 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
+#include <cmath>
 #include <optional>
 
 #include "base/geometry/dimension.h"
@@ -115,7 +116,7 @@ void SetSelectionIndicatorImpl(Ark_NativePointer node,
     auto pickerIndicatorStyle = Converter::OptConvertPtr<PickerIndicatorStyle>(value);
     ContainerPickerModelStatic::SetIndicatorStyle(frameNode, pickerIndicatorStyle);
 }
-void SetItemHeightImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void SetItemHeightImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -124,6 +125,9 @@ void SetItemHeightImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
         return;
     }
     Dimension dim = Converter::Convert<Dimension>(value->value);
+    if (dim.IsNegative() || !std::isfinite(dim.Value())) {
+        return;
+    }
     ContainerPickerModelStatic::SetItemHeight(frameNode, dim);
 }
 void SetDisplayedItemCountImpl(Ark_NativePointer node, const Opt_Int32* value)

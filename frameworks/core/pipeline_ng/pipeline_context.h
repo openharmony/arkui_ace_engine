@@ -54,6 +54,7 @@ class RSUIDirector;
 
 namespace OHOS::Ace::NG {
     class RecycleManager;
+    class RenderContext;
 }
 
 namespace OHOS::Ace {
@@ -1250,9 +1251,13 @@ public:
     }
 
     bool IsDisplayInForceSplitMode() const override;
-    void SetAfterRenderZindexRebuild(int32_t nodeId);
-    void UpdateIdUpdateZOrderIndex();
-    size_t GetIdUpdateZOrderIndex() const;
+    // Per-parent throttle gate for synchronous render-tree rebuilds. Drop-in for any property setter
+    // that would otherwise call FrameNode::RebuildRenderContextTree() many times per vsync (z-index,
+    // visibility, ...). `renderContext` is the changed node's context; on overflow the next frame is
+    // requested via RenderContext::RequestNextFrame() (keeps its FREE_NODE_CHECK / requestFrame_ path).
+    // Returns true when the rebuild for `nodeId` was deferred/coalesced (caller must skip its
+    // synchronous rebuild); false to rebuild eagerly now.
+    bool ThrottleRenderTreeRebuild(int32_t nodeId, const RefPtr<RenderContext>& renderContext);
 
     void SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId);
 
@@ -1372,7 +1377,7 @@ private:
     void FlushFocusView();
     void FlushRelaxedInteraction();
     void FlushFocusScroll();
-    void FlushZindexUpdate();
+    void FlushRebuildRenderTree();
 
     void ProcessDelayTasks();
 
@@ -1607,8 +1612,10 @@ private:
     std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
-    std::unordered_map<int32_t, size_t> idUpdateZOrder_;
-    size_t idUpdateZOrderIndex_ = 0;
+    static constexpr size_t MAX_RENDER_TREE_REBUILD_PER_VSYNC = 20;
+    std::unordered_map<int32_t, size_t> deferredRebuildRenderTree_; // parentId -> flush order
+    std::unordered_map<int32_t, size_t> rebuildRenderTreeCount_;    // parentId -> rebuild attempts this vsync
+    size_t rebuildRenderTreeOrder_ = 0;                             // monotonic order for coalesced flush
 
     RefPtr<FrameNode> predictNode_;
 

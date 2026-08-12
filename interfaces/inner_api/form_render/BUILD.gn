@@ -28,6 +28,7 @@ config("form_render_config") {
 
 ohos_shared_library("ace_form_render") {
   branch_protector_ret = "pac_ret"
+  branch_protector_frt = "bti"
 
   if (current_os == "ohos") {
     sanitize = {

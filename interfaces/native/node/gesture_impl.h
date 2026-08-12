@@ -27,17 +27,6 @@
 extern "C" {
 #endif
 
-struct ArkUI_GestureRecognizer {
-    int32_t type = -1;
-    ArkUIGesture* gesture = nullptr;
-    void* extraData = nullptr;
-    void* attachNode = nullptr;
-    bool capi = true;
-    void* recognizer = nullptr;
-    ArkUIGestureEventTargetInfo targetInfo = {};
-    int32_t attachNodeId = -1;
-};
-
 struct ArkUI_GestureEventTargetInfo {
     void* uiNode = nullptr;
 };

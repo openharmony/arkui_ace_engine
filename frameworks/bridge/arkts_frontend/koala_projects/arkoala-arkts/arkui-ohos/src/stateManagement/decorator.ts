@@ -215,6 +215,11 @@ export interface ConsumeOptions<T> {
     defaultValue?: T
 }
 
+export interface MakeMonitorOptions {
+  owner?: IVariableOwner;
+  functionName?: string;
+}
+
 export interface EnvOptions<T> {
     initValue?: T;
     watchFunc?: WatchFuncType;
@@ -222,11 +227,6 @@ export interface EnvOptions<T> {
 
 export interface CustomEnvOptions<T> {
     watchFunc?: WatchFuncType;
-}
-
-export interface MakeMonitorOptions {
-  owner?: IVariableOwner;
-  functionName?: string;
 }
 
 export interface IEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};

@@ -51,7 +51,10 @@ bool InputMethodManager::NeedSoftKeyboard() const
 
 void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard) {}
 
-void InputMethodManager::CloseKeyboardInProcess() {}
+void InputMethodManager::CloseKeyboardInProcess()
+{
+    lastKeep_ = true;
+}
 
 void InputMethodManager::CloseKeyboardInPipelineDestroy() {}
 

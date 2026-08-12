@@ -204,7 +204,11 @@ private:
         const int MOVEOP = 4;
         const int EXCHANGEOP = 5;
         const int RELOAD = 6;
-        switch (operationTypeMap[operationType]) {
+        auto iter = operationTypeMap.find(operationType);
+        if (iter == operationTypeMap.end()) {
+            return;
+        }
+        switch (iter->second) {
             case ADDOP:
                 TransferIndex(value, dataOperation);
                 TransferCount(value, dataOperation);

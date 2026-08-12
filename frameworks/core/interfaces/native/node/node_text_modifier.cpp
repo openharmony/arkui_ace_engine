@@ -2866,12 +2866,14 @@ void SetFontColorWithPlaceholder(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI
     TextModelNG::SetTextColor(frameNode, result);
 }
 
-void* GetCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy)
+void* GetCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy, ArkUI_Int32 encoding)
 {
 #ifndef PREVIEW
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    PositionWithAffinity positionWithAffinity = TextModelNG::GetCharacterPositionAtCoordinate(frameNode, dx, dy);
+    auto aceEncoding = static_cast<NG::TextEncoding>(encoding);
+    PositionWithAffinity positionWithAffinity =
+        TextModelNG::GetCharacterPositionAtCoordinate(frameNode, dx, dy, aceEncoding);
     OHOS::Rosen::IndexAndAffinity* indexAndAffinity = new OHOS::Rosen::IndexAndAffinity(0, OHOS::Rosen::Affinity::PREV);
     indexAndAffinity->index = positionWithAffinity.position_;
     indexAndAffinity->affinity = static_cast<OHOS::Rosen::Affinity>(positionWithAffinity.affinity_);
@@ -2882,13 +2884,14 @@ void* GetCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, A
 }
 
 void GetGlyphRangeForCharacterRange(
-    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range)
 {
 #ifndef PREVIEW
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto aceEncoding = static_cast<NG::TextEncoding>(encoding);
     std::pair<OHOS::Ace::TextRange, OHOS::Ace::TextRange> textRect =
-        TextModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end);
+        TextModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end, aceEncoding);
     range->glyphStart = textRect.first.start;
     range->glyphEnd = textRect.first.end;
     range->charStart = textRect.second.start;
@@ -2898,13 +2901,14 @@ void GetGlyphRangeForCharacterRange(
 }
 
 void GetCharacterRangeForGlyphRange(
-    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range)
 {
 #ifndef PREVIEW
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto aceEncoding = static_cast<NG::TextEncoding>(encoding);
     std::pair<OHOS::Ace::TextRange, OHOS::Ace::TextRange> textRect =
-        TextModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end);
+        TextModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end, aceEncoding);
     range->charStart = textRect.first.start;
     range->charEnd = textRect.first.end;
     range->glyphStart = textRect.second.start;

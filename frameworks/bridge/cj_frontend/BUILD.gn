@@ -19,6 +19,7 @@ template("cj_frontend") {
   forward_variables_from(invoker, "*")
 
   ohos_shared_library(target_name) {
+    branch_protector_ret = "pac_ret"
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     innerapi_tags = [ "platformsdk" ]
@@ -35,6 +36,7 @@ template("cj_frontend") {
       "ability_runtime:cj_environment",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
+      "bounds_checking_function:libsec_shared",
     ]
 
     sources = [

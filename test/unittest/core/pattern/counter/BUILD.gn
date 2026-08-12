@@ -13,15 +13,24 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("counter_test_ng") {
-  type = "new"
-  module_name = "InfoShowSet-Counter"
-  sources = [ "counter_test_ng.cpp" ]
+test_sources = [
+  "counter_test_core.cpp",
+  "counter_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "counter_test_core.cpp" ]
-  } else {
-    sources += [ "counter_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("counter_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-Counter"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("counter_test_ng") {
+    type = "new"
+    module_name = "InfoShowSet-Counter"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "counter_test_core.cpp" ]
+    }
   }
 }

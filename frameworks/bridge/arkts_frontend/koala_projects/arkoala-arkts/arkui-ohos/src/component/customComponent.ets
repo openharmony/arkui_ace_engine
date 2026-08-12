@@ -106,21 +106,7 @@ export class ReuseObject {
             }
             return key;
         } else {
-            if (this._raw! instanceof Record) {
-                return Array.from((this._raw! as Record<string, RecordData>).keySet());
-            }
-            if (this._raw! instanceof Array) {
-                let rawArray = this._raw! as Array<RecordData>;
-                let res: string[] = [];
-                for (let i = 0; i < rawArray.length; i++) {
-                    res.push(String(i));
-                }
-                return res;
-            }
-            let cls = Class.of(this._raw! as Object);
-            let keys: string[] = [...reflect.getInstanceFieldsRecursive(cls).map<string>(field => field.getName()),
-                ...reflect.getInstanceGettersRecursive(cls).map<string>(getter => getter.getName().substring("%%get-".length))];
-            return keys;
+            return Object.getOwnPropertyNames(this._raw!);
         }
     }
 
@@ -324,7 +310,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     aboutToBeDeletedInternal(): void {
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_ && this.instance instanceof BaseCustomComponent) {
             ArkUIObjectFinalizationRegisterProxy.call(new WeakRef<object>(this.instance),
-                `${Class.of(this.instance).getName()}[${this.getUniqueId()}] is in process of destruction`);
+                `${Type.of(this.instance)}[${this.getUniqueId()}] is in process of destruction`);
         }
         this.instance.__clearStateVariables__Internal();
         const envSet = this.instance.getEnvSet();
@@ -696,7 +682,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     onCleanup(): void {
-        scheduleCallback(() => {
+        ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
             this.aboutToDisappear(); // aboutToDisappear can change variable
         });
     }

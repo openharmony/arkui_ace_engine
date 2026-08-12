@@ -426,7 +426,7 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
     CHECK_NULL_VOID(textFieldPattern);
     if (textFieldPattern->GetScrollBarVisible() && textFieldPattern->IsTextArea()) {
         if (textFieldPattern->IsFreeScrollEnabled()) {
-            textFieldPattern->GetFreeScroller()->OnDrawScrollBar(context);
+            textFieldPattern->GetFreeScroller()->OnDrawScrollBar(context, Claim(this));
         } else {
             ScrollBarOverlayModifier::onDraw(context);
         }

@@ -20,7 +20,6 @@ import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { extractors, initializers } from '#handwritten'
 import { Vector2 } from 'arkui.Graphics'
 import { CallbackTransformer } from './CallbackTransformer'
-import { arkui_Graphics_LengthMetrics_serializer } from './framework/Graphics'
 import { UIUtils as UIUtils } from 'arkui.stateManagement.utils';
 import { IObservedObject as IObservedObject } from 'arkui.stateManagement.decorator';
 import { IMutableStateMeta as IMutableStateMeta } from 'arkui.stateManagement.decorator';

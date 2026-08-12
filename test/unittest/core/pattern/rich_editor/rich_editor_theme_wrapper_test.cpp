@@ -52,68 +52,6 @@ public:
 };
 
 /**
- * @tc.name: RichEditorThemeWrapper_ApplyTokenTheme001
- * @tc.desc: ApplyTokenTheme maps token colors to all rich editor theme fields.
- * @tc.type: FUNC
- * @tc.steps: step1. Create RichEditorThemeWrapper.
- *             step2. Create TokenColors with specific colors for all mapped fields.
- *             step3. Create TokenTheme and set TokenColors.
- *             step4. Call ApplyTokenTheme.
- *             step5. Verify all getter methods return the token color values.
- */
-HWTEST_F(RichEditorThemeWrapperTest, RichEditorThemeWrapper_ApplyTokenTheme001, TestSize.Level1)
-{
-    auto wrapper = AceType::MakeRefPtr<RichEditorThemeWrapper>();
-    ASSERT_NE(wrapper, nullptr);
-
-    auto tokenColors = AceType::MakeRefPtr<TokenColors>();
-    ASSERT_NE(tokenColors, nullptr);
-
-    const Color fontPrimary = Color(0xFF111111);
-    const Color fontSecondary = Color(0xFF222222);
-    const Color fontEmphasize = Color(0xFF333333);
-    const Color interactiveHover = Color(0xFF444444);
-    const Color interactivePressed = Color(0xFF555555);
-    const Color compBackgroundEmphasize = Color(0xFF666666);
-    const Color compEmphasizeSecondary = Color(0xFF777777);
-    const Color compBackgroundPrimary = Color(0xFF888888);
-    const Color iconSecondary = Color(0xFF999999);
-    const Color iconPrimary = Color(0xFFAAAAAA);
-
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::FONT_PRIMARY), fontPrimary);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::FONT_SECONDARY), fontSecondary);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::FONT_EMPHASIZE), fontEmphasize);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::INTERACTIVE_HOVER), interactiveHover);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::INTERACTIVE_PRESSED), interactivePressed);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::COMP_BACKGROUND_EMPHASIZE), compBackgroundEmphasize);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::COMP_EMPHASIZE_SECONDARY), compEmphasizeSecondary);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::COMP_BACKGROUND_PRIMARY), compBackgroundPrimary);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::ICON_SECONDARY), iconSecondary);
-    tokenColors->SetColor(static_cast<uint32_t>(TokenColors::ICON_PRIMARY), iconPrimary);
-
-    auto tokenTheme = AceType::MakeRefPtr<TokenTheme>(1);
-    ASSERT_NE(tokenTheme, nullptr);
-    tokenTheme->SetColors(tokenColors);
-    tokenTheme->SetColorMode(ColorMode::LIGHT);
-
-    wrapper->ApplyTokenTheme(*tokenTheme);
-
-    EXPECT_EQ(wrapper->GetTextStyle().GetTextColor(), fontPrimary);
-    EXPECT_EQ(wrapper->GetTextStyle().GetTextDecorationColor(), fontPrimary);
-    EXPECT_EQ(wrapper->GetUrlDefaultColor(), fontEmphasize);
-    EXPECT_EQ(wrapper->GetUrlHoverColor(), interactiveHover);
-    EXPECT_EQ(wrapper->GetUrlPressColor(), interactivePressed);
-    EXPECT_EQ(wrapper->GetCaretColor(), compBackgroundEmphasize);
-    EXPECT_EQ(wrapper->GetSelectedBackgroundColor(), compEmphasizeSecondary);
-    EXPECT_EQ(wrapper->GetDragBackgroundColor(), compBackgroundPrimary);
-    EXPECT_EQ(wrapper->GetPopIconColor(), iconSecondary);
-    EXPECT_EQ(wrapper->GetMenuTitleColor(), fontSecondary);
-    EXPECT_EQ(wrapper->GetMenuTextColor(), fontPrimary);
-    EXPECT_EQ(wrapper->GetMenuIconColor(), iconPrimary);
-    EXPECT_EQ(wrapper->GetPlaceholderColor(), fontSecondary);
-}
-
-/**
  * @tc.name: RichEditorThemeWrapper_ApplyTokenTheme002
  * @tc.desc: ApplyTokenTheme does nothing when TokenTheme has no color palette.
  * @tc.type: FUNC

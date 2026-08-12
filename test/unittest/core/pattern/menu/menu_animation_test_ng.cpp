@@ -457,7 +457,7 @@ HWTEST_F(MenuAnimationTestNg, CheckAndShowAnimation002, TestSize.Level1)
     ASSERT_NE(context->GetTransformCenter(), std::nullopt);
     EXPECT_EQ(context->GetTransformCenter()->GetX().Value(), MENU_OFFSET_X);
     EXPECT_EQ(context->GetTransformCenter()->GetY().Value(), MENU_OFFSET_Y);
-    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::INIT);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::ON_START_ANIMATION);
     MockAnimationManager::Enable(true);
     MockAnimationManager::GetInstance().SetTicks(2);
     menuItemPattern->OnClick();

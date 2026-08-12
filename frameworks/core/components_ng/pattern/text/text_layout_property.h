@@ -60,6 +60,11 @@ public:                                                                     \
         propNeedReCreateParagraph_ = true;                                  \
     }
 
+#define ACE_CLONE_TEXT_OPTIONAL_PROPERTY(name) \
+    if (prop##name##_.has_value()) {          \
+        value->prop##name##_ = Clone##name(); \
+    }
+
 class InspectorFilter;
 
 struct TextMarqueeOptions {
@@ -81,11 +86,6 @@ public:
     TextLayoutProperty() = default;
 
     ~TextLayoutProperty() override = default;
-
-    bool NeedReadFontScaleFromEnv() const override
-    {
-        return true;
-    }
 
     RefPtr<LayoutProperty> Clone() const override
     {
@@ -357,30 +357,30 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
-        value->propSelectedBackgroundColorFlagByUser_ = CloneSelectedBackgroundColorFlagByUser();
-        value->propCopyOptionFlagByUser_ = CloneCopyOptionFlagByUser();
-        value->propTextColorFlagByUser_ = CloneTextColorFlagByUser();
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(SelectedBackgroundColorFlagByUser);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(CopyOptionFlagByUser);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextColorFlagByUser);
         value->propClipEdge_ = CloneClipEdge();
-        value->propFontForegroudGradiantColor_ = CloneFontForegroudGradiantColor();
-        value->propSelectedDragPreviewStyle_ = CloneSelectedDragPreviewStyle();
-        value->propEnableAutoSpacing_ = CloneEnableAutoSpacing();
-        value->propColorShaderStyle_ = CloneColorShaderStyle();
-        value->propTextEffectStrategy_ = CloneTextEffectStrategy();
-        value->propIncrementalUpdatePolicy_ = CloneIncrementalUpdatePolicy();
-        value->propMinLines_ = CloneMinLines();
-        value->propTextFlipDirection_ = CloneTextFlipDirection();
-        value->propTextFlipEnableBlur_ = CloneTextFlipEnableBlur();
-        value->propLineHeightMultiply_ = CloneLineHeightMultiply();
-        value->propMinimumLineHeight_ = CloneMinimumLineHeight();
-        value->propMaximumLineHeight_ = CloneMaximumLineHeight();
-        value->propIncludeFontPadding_ = CloneIncludeFontPadding();
-        value->propFallbackLineSpacing_ = CloneFallbackLineSpacing();
-        value->propCopyOption_ = CloneCopyOption();
-        value->propTextSelectableMode_ = CloneTextSelectableMode();
-        value->propIsAnimationNeeded_ = CloneIsAnimationNeeded();
-        value->propIsTextMaxlinesFirst_ = CloneIsTextMaxlinesFirst();
-        value->propEnableSmallLanguageTruncation_ = CloneEnableSmallLanguageTruncation();
-        value->propEnablePunctuationOverflowOptimize_ = CloneEnablePunctuationOverflowOptimize();
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(FontForegroudGradiantColor);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(SelectedDragPreviewStyle);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(EnableAutoSpacing);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(ColorShaderStyle);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextEffectStrategy);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IncrementalUpdatePolicy);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(MinLines);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextFlipDirection);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextFlipEnableBlur);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(LineHeightMultiply);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(MinimumLineHeight);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(MaximumLineHeight);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IncludeFontPadding);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(FallbackLineSpacing);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(CopyOption);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextSelectableMode);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IsAnimationNeeded);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IsTextMaxlinesFirst);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(EnableSmallLanguageTruncation);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(EnablePunctuationOverflowOptimize);
         if (advancedTextLayoutProperty_) {
             value->advancedTextLayoutProperty_ = advancedTextLayoutProperty_->Clone();
         }

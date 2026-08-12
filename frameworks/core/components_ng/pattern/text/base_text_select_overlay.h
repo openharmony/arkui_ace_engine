@@ -235,7 +235,8 @@ public:
         UpdateAllHandlesOffset();
         UpdateViewPort();
     }
-    virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
+    virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed = true,
+        bool transformTriggersEmbed = true);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override
     {

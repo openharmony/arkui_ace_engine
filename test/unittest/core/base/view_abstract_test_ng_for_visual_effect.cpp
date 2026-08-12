@@ -451,6 +451,69 @@ HWTEST_F(ViewAbstractTestNg, ResetSystemMaterialEffect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemoveBorderAndBackgroundEffect001
+ * @tc.desc: RemoveBorderAndBackgroundEffect should clear background/border when Has* returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RemoveBorderAndBackgroundEffect001, TestSize.Level1)
+{
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    Color bgColor(0xFF00FF);
+    renderContext->UpdateBackgroundColor(bgColor);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(Dimension(5.0f));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, AceType::RawPtr(node));
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, AceType::RawPtr(node));
+    BorderColorProperty borderColor;
+    borderColor.SetColor(Color::RED);
+    renderContext->UpdateBorderColor(borderColor);
+
+    EXPECT_TRUE(renderContext->HasBackgroundColor());
+    EXPECT_TRUE(renderContext->HasBorderWidth());
+    EXPECT_TRUE(renderContext->HasBorderColor());
+
+    ViewAbstract::RemoveBorderAndBackgroundEffect(node, renderContext);
+
+    ASSERT_TRUE(renderContext->GetBackgroundColor().has_value());
+    EXPECT_EQ(renderContext->GetBackgroundColor().value(), Color::TRANSPARENT);
+    auto borderWidthResult = renderContext->GetBorderWidth();
+    ASSERT_TRUE(borderWidthResult.has_value());
+    BorderWidthProperty expectedBorderWidth;
+    expectedBorderWidth.SetBorderWidth(Dimension(0));
+    EXPECT_EQ(borderWidthResult.value(), expectedBorderWidth);
+    auto borderColorResult = renderContext->GetBorderColor();
+    ASSERT_TRUE(borderColorResult.has_value());
+    BorderColorProperty expectedBorderColor;
+    expectedBorderColor.SetColor(Color::BLACK);
+    EXPECT_EQ(borderColorResult.value(), expectedBorderColor);
+}
+
+/**
+ * @tc.name: RemoveBorderAndBackgroundEffect002
+ * @tc.desc: RemoveBorderAndBackgroundEffect should skip properties when Has* returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RemoveBorderAndBackgroundEffect002, TestSize.Level1)
+{
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    EXPECT_FALSE(renderContext->HasBackgroundColor());
+    EXPECT_FALSE(renderContext->HasBorderWidth());
+    EXPECT_FALSE(renderContext->HasBorderColor());
+
+    ViewAbstract::RemoveBorderAndBackgroundEffect(node, renderContext);
+
+    EXPECT_FALSE(renderContext->HasBackgroundColor());
+    EXPECT_FALSE(renderContext->HasBorderWidth());
+    EXPECT_FALSE(renderContext->HasBorderColor());
+}
+
+/**
  * @tc.name: SetSystemMaterialWithScale001
  * @tc.desc: Test the SetSystemMaterialWithScale function of View_Abstract with IMMERSIVE material
  * @tc.type: FUNC

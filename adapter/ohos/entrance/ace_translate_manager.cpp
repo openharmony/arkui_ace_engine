@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,27 @@ void UiTranslateManagerImpl::ForEachArkUITranslateFrameNode(
         callback(listener.second.frameNode);
     }
 }
+
+void UiTranslateManagerImpl::TraverseAndMatchAllWeb(int32_t processId, const std::string& ruleJson, bool isGetResult)
+{
+#ifdef WEB_SUPPORTED
+    for (auto listener : listenerMap_) {
+        auto pattern = GetWebPattern(listener.second.translateNode);
+        if (pattern) {
+            if (isGetResult && !ruleJson.empty()) {
+                // GetPageScene path: temp register + match + cleanup
+                pattern->GetPageSceneForWeb(processId, ruleJson);
+            } else {
+                // Register path: reportOnRegister initial match with merge
+                pattern->RegisterPageSceneRulesForWeb(processId);
+            }
+        }
+    }
+#else
+    LOGW("TraverseAndMatchAllWeb not supported on this platform.");
+#endif
+}
+
 void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
 {
     for (auto listener : listenerMap_) {

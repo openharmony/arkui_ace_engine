@@ -141,7 +141,9 @@ void PatternLockPattern::HandleAccessibilityHoverEvent(bool isHover, Accessibili
         for (const auto& accessibilityProperty : accessibilityPropertyVec_) {
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         }
-        AddPointEnd();
+        if (!choosePoint_.empty()) {
+            AddPointEnd();
+        }
         auto host = GetHost();
         auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);

@@ -453,4 +453,54 @@ void NavDestinationNodeBase::SetRestoreInfo(const std::string& info)
         restoreInfo_.insert(std::make_pair(restoreItem->GetString("componentId"), restoreItem->GetString("info")));
     }
 }
+
+void NavDestinationNodeBase::SetExpectMoreMenuViewColorMode(ColorMode mode)
+{
+    expectLandscapeMoreMenuColorMode_ = mode;
+    expectMoreMenuColorMode_ = mode;
+}
+
+RefPtr<FrameNode> NavDestinationNodeBase::RecreateMoreMenuViewIfNeeded(bool isLandscapeMenu)
+{
+    ColorMode expectMode;
+    if (isLandscapeMenu) {
+        if (!expectLandscapeMoreMenuColorMode_.has_value() ||
+            expectLandscapeMoreMenuColorMode_.value() == curLandscapeMoreMenuColorMode_) {
+            return nullptr;
+        }
+        expectMode = expectLandscapeMoreMenuColorMode_.value();
+    } else {
+        if (!expectMoreMenuColorMode_.has_value() ||
+            expectMoreMenuColorMode_.value() == curMoreMenuColorMode_) {
+            return nullptr;
+        }
+        expectMode = expectMoreMenuColorMode_.value();
+    }
+    RecreateMoreMenuViewCallback callback;
+    if (isLandscapeMenu) {
+        CHECK_NULL_RETURN(moreLandscapeMenuNode_, nullptr);
+        callback = recreateLandscapeMoreMenuViewCallback_;
+    } else {
+        CHECK_NULL_RETURN(moreMenuNode_, nullptr);
+        callback = recreateMoreMenuViewCallback_;
+    }
+    CHECK_NULL_RETURN(callback, nullptr);
+    auto menuNode = isLandscapeMenu ?
+        AceType::DynamicCast<FrameNode>(landscapeMenu_) : AceType::DynamicCast<FrameNode>(menu_);
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    auto children = menuNode->GetChildren();
+    if (children.empty()) {
+        return nullptr;
+    }
+    auto menuBindTarget = AceType::DynamicCast<FrameNode>(children.back());
+    if (!menuBindTarget || menuBindTarget->GetTag() != V2::MENU_ITEM_ETS_TAG) {
+        return nullptr;
+    }
+    if (isLandscapeMenu) {
+        curLandscapeMoreMenuColorMode_ = expectMode;
+    } else {
+        curMoreMenuColorMode_ = expectMode;
+    }
+    return callback(expectMode, isLandscapeMenu);
+}
 } // namespace OHOS::Ace::NG

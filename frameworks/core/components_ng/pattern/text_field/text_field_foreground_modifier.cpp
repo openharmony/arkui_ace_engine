@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/text_field/text_field_foreground_modifier.h"
 
-#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -23,14 +22,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t OFFESET_VALUE = 2;
 }
+
 TextFieldForegroundModifier::TextFieldForegroundModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
-    : pattern_(pattern)
-{
-    innerBorderWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
-    innerBorderColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
-    AttachProperty(innerBorderWidth_);
-    AttachProperty(innerBorderColor_);
-}
+    : CounterForegroundModifier(pattern) {}
 
 void TextFieldForegroundModifier::onDraw(DrawingContext& context)
 {
@@ -50,7 +44,7 @@ void TextFieldForegroundModifier::onDraw(DrawingContext& context)
     auto& canvas = context.canvas;
     RSPen pen;
     pen.SetColor(paintProperty->GetInnerBorderColorValue(Color()).GetValue());
-    auto width = innerBorderWidth_->Get();
+    auto width = GetInnerBorderWidth();
     pen.SetWidth(width);
     pen.SetAntiAlias(true);
     auto textFrameRect = textFieldPattern->GetFrameRect();
@@ -62,21 +56,5 @@ void TextFieldForegroundModifier::onDraw(DrawingContext& context)
     canvas.AttachPen(pen);
     canvas.DrawRoundRect(rrect);
     canvas.DetachPen();
-}
-
-std::vector<RSPoint> TextFieldForegroundModifier::MakeRRadius(
-    const BorderRadiusProperty& border, float borderWidth) const
-{
-    std::vector<RSPoint> rectRadii;
-    rectRadii.resize(RSRoundRect::CORNER_NUMBER);
-    auto topLeft = static_cast<float>(border.radiusTopLeft.value_or(Dimension()).ConvertToPx()) - borderWidth;
-    rectRadii[RSRoundRect::TOP_LEFT_POS] = RSPoint(topLeft, topLeft);
-    auto topRight = static_cast<float>(border.radiusTopRight.value_or(Dimension()).ConvertToPx()) - borderWidth;
-    rectRadii[RSRoundRect::TOP_RIGHT_POS] = RSPoint(topRight, topRight);
-    auto bottomRight = static_cast<float>(border.radiusBottomRight.value_or(Dimension()).ConvertToPx()) - borderWidth;
-    rectRadii[RSRoundRect::BOTTOM_RIGHT_POS] = RSPoint(bottomRight, bottomRight);
-    auto bottomLeft = static_cast<float>(border.radiusBottomLeft.value_or(Dimension()).ConvertToPx()) - borderWidth;
-    rectRadii[RSRoundRect::BOTTOM_LEFT_POS] = RSPoint(bottomLeft, bottomLeft);
-    return rectRadii;
 }
 } // namespace OHOS::Ace::NG

@@ -63,6 +63,15 @@ public:
      * Get color value from platform constants.
      * Color::BLACK will be returned if value not found or corresponding value is not Color.
      * @param[in] key Target color key.
+     * @param[in] colorMode Target colorMode.
+     * @return Color corresponding to the key in specified ColorMode.
+     */
+    Color GetColor(uint32_t key, ColorMode colorMode) const;
+
+    /*
+     * Get color value from platform constants.
+     * Color::BLACK will be returned if value not found or corresponding value is not Color.
+     * @param[in] key Target color key.
      * @return Color corresponding to the name.
      */
     Color GetColorByName(const std::string& resName) const;

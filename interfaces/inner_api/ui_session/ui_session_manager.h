@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,20 @@ public:
     using PageTranslateResetFunction = std::function<void(int32_t)>;
     using PageTranslateResultFunction = std::function<void(const std::vector<TranslateResult>&)>;
     using PageSceneDetectFunction = std::function<void(int32_t, const std::string&, bool)>;
+
+    enum class WebPageSceneOp {
+        RegisterRules,    // Register rules + traverse for reportOnRegister
+        UnregisterRules,  // Unregister rules
+        Traverse,         // Traverse web components (GetPageScene)
+    };
+    using WebPageSceneFunction = std::function<void(WebPageSceneOp op, int32_t processId, const std::string& ruleJson,
+        bool isGetResult)>;
+
+    enum class PageSceneNodeStateChange : uint8_t {
+        VISIBILITY,
+        ACTIVE,
+        FOCUSABILITY,
+    };
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -302,6 +316,11 @@ public:
     virtual void NotifyPageSceneContentChanged() {};
     virtual void FlushPageSceneNodeChanged() {};
     virtual void SavePageSceneDetectFunction(PageSceneDetectFunction&& function) {};
+    virtual void SaveWebPageSceneFunction(WebPageSceneFunction&& function) {};
+    // Internal PageScene scheduling hook. Keep it at the end of the virtual interface to preserve
+    // the slot order of the existing UiSessionManager methods.
+    virtual void NotifyPageSceneNodeStateChanged(
+        const std::string& nodeTag, PageSceneNodeStateChange stateChange) {};
 
 protected:
     UiSessionManager() = default;
@@ -378,6 +397,8 @@ protected:
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
     PageSceneDetectFunction pageSceneDetectFunction_;
     std::mutex pageSceneDetectFunctionMutex_;
+    WebPageSceneFunction webPageSceneFunction_;
+    std::mutex webPageSceneMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

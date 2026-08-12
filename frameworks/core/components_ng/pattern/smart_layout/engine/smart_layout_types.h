@@ -21,14 +21,23 @@
 namespace OHOS::Ace::NG {
 
 /**
- * @brief Layout direction type for smart layout
+ * @brief Empty-area ratio threshold for triggering smart layout scale-up.
+ *        Single source of truth shared by the entry check
+ *        (IsContentUnderutilizedForSmartLayout) and the constraint
+ *        builder (AddScaleUpConstraints).
+ */
+constexpr double SMART_LAYOUT_EMPTY_RATIO_THRESHOLD = 0.1;
+
+/**
+ * @brief Layout handling type for smart layout
  */
 enum class SmartLayoutType {
     UNKNOWN,
     GENERAL,
     COLUMN,
     ROW,
-    FLEX
+    FLEX,
+    TEXT
 };
 
 /**

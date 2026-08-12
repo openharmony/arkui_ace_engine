@@ -1855,4 +1855,40 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGSetAxisResetOffset001, TestSize.Level
     EXPECT_DOUBLE_EQ(pattern->lastOffset_, 0.0);
     EXPECT_EQ(pattern->GetCurrentOffset(), Offset(0.0, 0.0));
 }
+
+/**
+ * @tc.name: ScrollModelNGSetAxisResetOffset002
+ * @tc.desc: Verify changing between vertical and horizontal axes resets both offsets
+ *           while a repeated axis preserves them.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, ScrollModelNGSetAxisResetOffset002, TestSize.Level1)
+{
+    auto frameNode = ScrollModelNG::CreateFrameNode(13);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode), Axis::VERTICAL);
+    pattern->OnModifyDone();
+    pattern->currentOffset_ = -120.0;
+    pattern->lastOffset_ = -120.0;
+
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode), Axis::VERTICAL);
+    EXPECT_DOUBLE_EQ(pattern->currentOffset_, -120.0);
+    EXPECT_DOUBLE_EQ(pattern->lastOffset_, -120.0);
+
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode), Axis::HORIZONTAL);
+    EXPECT_EQ(pattern->GetAxis(), Axis::HORIZONTAL);
+    EXPECT_DOUBLE_EQ(pattern->currentOffset_, 0.0);
+    EXPECT_DOUBLE_EQ(pattern->lastOffset_, 0.0);
+    EXPECT_EQ(pattern->GetCurrentOffset(), Offset(0.0, 0.0));
+
+    pattern->currentOffset_ = -60.0;
+    pattern->lastOffset_ = -60.0;
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode), Axis::VERTICAL);
+    EXPECT_EQ(pattern->GetAxis(), Axis::VERTICAL);
+    EXPECT_DOUBLE_EQ(pattern->currentOffset_, 0.0);
+    EXPECT_DOUBLE_EQ(pattern->lastOffset_, 0.0);
+}
 } // namespace OHOS::Ace::NG

@@ -347,10 +347,11 @@ bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
     }
     std::stack<RefPtr<FrameNode>> nodeStack;
     nodeStack.push(node);
+    std::vector<RefPtr<FrameNode>> children;
     while (!nodeStack.empty()) {
         auto curNode = nodeStack.top();
         nodeStack.pop();
-        std::list<RefPtr<FrameNode>> children;
+        children.clear();
         curNode->GenerateOneDepthVisibleFrameWithTransition(children);
         for (auto& child : children) {
             if (!child) {
@@ -504,6 +505,7 @@ std::unique_ptr<JsonValue> NavigationManager::GetNavigationJsonInfo()
         auto homeDestination =
             AceType::DynamicCast<NavDestinationNodeBase>(navigation->GetNavBarOrHomeDestinationNode());
         if (homeDestination) {
+            navigationInfo->Put("state", stack->GetHomeDestinationState().c_str());
             auto context = pipeline_.Upgrade();
             CHECK_NULL_RETURN(context, nullptr);
             auto recoverableMgr = context->GetRecoverableManager();
@@ -534,6 +536,8 @@ void NavigationManager::StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue>
     for (int32_t i = 0; i < arraySize; ++ i) {
         auto navigationInfo = allNavigationInfo->GetArrayItem(i);
         auto navigationId = navigationInfo->GetString("id");
+        auto homeState = navigationInfo->GetString("state");
+        recoverableMgr->SetNavigationHomeState(navigationId, homeState);
         auto homeInfo = navigationInfo->GetString("home");
         recoverableMgr->SetNavigationHomeInfo(navigationId, homeInfo);
         auto stackInfo = navigationInfo->GetValue("stack");

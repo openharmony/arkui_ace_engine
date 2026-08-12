@@ -24,7 +24,7 @@
 #include "core/components_ng/base/linear_vector.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 
@@ -121,7 +121,6 @@ public:
     {
         return paintOffset_;
     }
-
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
@@ -263,7 +262,6 @@ private:
     float lastLineHeight_ = 0.0f;
 
     WeakPtr<Pattern> pattern_;
-
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 

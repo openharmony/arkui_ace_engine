@@ -1336,19 +1336,6 @@ HWTEST_F(NavDestinationModelStaticTestNg, SetPreferredOrientation002, TestSize.L
     TearDownTestCase();
 }
 
-HWTEST_F(NavDestinationModelStaticTestNg, SetSystemBarStyle001, TestSize.Level1)
-{
-    SetUpTestCase();
-    auto navDestinationNode = CreateNavDestinationNode();
-    ASSERT_NE(navDestinationNode, nullptr);
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(navDestinationPattern, nullptr);
-    auto frameNode = AceType::RawPtr(navDestinationNode);
-    NavDestinationModelStatic::SetSystemBarStyle(frameNode, TEST_SYSTEM_BAR_COLOR);
-    EXPECT_TRUE(navDestinationPattern->GetCurrentStyle().has_value());
-    TearDownTestCase();
-}
-
 HWTEST_F(NavDestinationModelStaticTestNg, SetSystemBarStyle002, TestSize.Level1)
 {
     SetUpTestCase();

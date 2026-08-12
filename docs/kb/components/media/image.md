@@ -1,7 +1,7 @@
 # Image Context
 
 > 文档版本：v1.1
-> 更新时间：2026-07-10
+> 更新时间：2026-07-24
 > 来源：`docs/context_registry.json` 主题 `Image`
 
 ## 定位
@@ -159,5 +159,10 @@ Image 功能域：`specs/05-ui-components/08-image-components/01-image/`
 
 - `ImageAnimator`：`docs/kb/components/media/image_animator.md`
 - `DrawableDescriptor`：`docs/kb/capabilities/drawable_descriptor.md`
-- 图片加载机制（通用能力）：`specs/04-common-capability/01-image-loading/01-image-loading-mechanism/`
+- `ImageLoading`：`docs/kb/capabilities/image-loading.md`
+- `SVG`：`docs/kb/capabilities/svg.md`
+- `ImageAnalyzer`：`docs/kb/capabilities/image-analyzer.md`
+- `BackgroundImage`：`docs/kb/capabilities/background-image.md`
+- [渲染树同步](../../architecture/render-tree-sync.md) — ImagePattern::OnAttachToMainRenderTree 和 OnWindowHide 依赖 isPendingState_
+- [同帧下树重新上树 isPendingState_ 状态错乱](../../issues/lifecycle/ispending-state-render-tree-diff.md) — Image 节点同帧下树重新上树后 RecycleImageData 误触
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

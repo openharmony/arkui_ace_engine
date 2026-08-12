@@ -26,12 +26,15 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
+#include <cmath>
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 500;
 constexpr Dimension COMMON_BLUR_OFFSET = 8.0_vp;
 constexpr Dimension GRADUAL_BLUR_OFFSET = 56.0_vp;
+constexpr double SCROLL_FLING_BLUR_DISABLE_OFFSET = 10.0;
+constexpr double SCROLL_FLING_BLUR_RESTORE_OFFSET = 9.0;
 
 bool IsCustomTitleBarTextStyleUpdate(const RefPtr<TitleBarNode>& titleBarNode)
 {
@@ -523,56 +526,86 @@ void NavDestinationPatternBase::OnColorConfigurationUpdate()
     InitScrollEffectOptions();
 }
 
+bool NavDestinationPatternBase::IsTouchListenerNeeded(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->IsForceSplitSupported(false)) {
+        return true;
+    }
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    CHECK_NULL_RETURN(navNode, false);
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navPattern, false);
+    return navPattern->IsClearContentStackNeeded();
+}
+
 void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_VOID(forceSplitMgr);
-    if (!forceSplitMgr->IsForceSplitSupported(false)) {
+    /**
+     * function invoke sequence:
+     * 1. CreateNavDestiantion
+     * 2. NavDestiantionPatternBase -> SetNavigation
+     * 3. NavDestiantionPatter/NavBarPattern -> OnAttchToMainTree
+     * 4. NavDestiantionPatternBase -> InitOnTouchEvent
+     */
+    if (!IsTouchListenerNeeded(host)) {
         return;
     }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     auto eventManager = context->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->RegisterHitTestFrameNodeListener(host->GetId(), [weak = WeakClaim(this)](const TouchEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto navNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetNavigationNode());
-        CHECK_NULL_VOID(navNode);
-        auto navPattern = navNode->GetPattern<NavigationPattern>();
-        CHECK_NULL_VOID(navPattern);
-        if (!navPattern->IsForceSplitSuccess()) {
-            return;
-        }
-        auto touchedDest = AceType::DynamicCast<NavDestinationGroupNode>(host);
-        auto topPrimaryDest = navPattern->GetTopPrimaryDestination();
-        auto topSecondaryDest = navPattern->GetTopSecondaryDestination();
-        ResetForceSplitTouchTargets(navPattern);
-        if (navPattern->IsForceSplitUseNavBar()) {
-            RecordTouchWhenNavBarIsHome(navPattern, host, touchedDest, topPrimaryDest, topSecondaryDest);
-            return;
-        }
-        RecordTouchWhenHomeDestinationIsHome(navPattern, touchedDest, topPrimaryDest, topSecondaryDest);
+        pattern->OnTouchEvent();
     });
 }
 
-void NavDestinationPatternBase::RemoveOnTouchEvent(FrameNode* frameNode)
+void NavDestinationPatternBase::OnTouchEvent()
 {
-    CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_VOID(forceSplitMgr);
-    if (!forceSplitMgr->IsForceSplitSupported(false)) {
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    CHECK_NULL_VOID(navNode);
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navPattern);
+    if (!navPattern->IsForceSplitSuccess()) {
+        if (!navPattern->IsClearContentStackNeeded()) {
+            return;
+        }
+        auto navBarOrHomeDest = navNode->GetNavBarOrHomeDestinationNode();
+        navPattern->SetIsHomeNodeTouched(navBarOrHomeDest == host);
         return;
     }
+    auto touchedDest = AceType::DynamicCast<NavDestinationGroupNode>(host);
+    auto topPrimaryDest = navPattern->GetTopPrimaryDestination();
+    auto topSecondaryDest = navPattern->GetTopSecondaryDestination();
+    ResetForceSplitTouchTargets(navPattern);
+    if (navPattern->IsForceSplitUseNavBar()) {
+        RecordTouchWhenNavBarIsHome(navPattern, host, touchedDest, topPrimaryDest, topSecondaryDest);
+        return;
+    }
+    RecordTouchWhenHomeDestinationIsHome(navPattern, touchedDest, topPrimaryDest, topSecondaryDest);
+}
+
+void NavDestinationPatternBase::RemoveOnTouchEvent(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    if (!IsTouchListenerNeeded(host)) {
+        return;
+    }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     auto eventManager = context->GetEventManager();
     CHECK_NULL_VOID(eventManager);
-    eventManager->UnRegisterHitTestFrameNodeListener(frameNode->GetId());
+    eventManager->UnRegisterHitTestFrameNodeListener(host->GetId());
 }
 
 void NavDestinationPatternBase::UpdateTitleBarOptions(float currentOffset)
@@ -648,13 +681,7 @@ void NavDestinationPatternBase::UpdateTitleBarStartOptions(const RefPtr<TitleBar
     const bool isCustomTitle = IsCustomTitleBarTextStyleUpdate(titleBarNode);
     auto bgStyle = titleBarPattern->GetOriginalTitleBarBgStyle();
     auto mainTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
-    if (mainTitleNode) {
-        TitleBarPattern::SetTextColor(mainTitleNode, bgStyle.titleColor);
-    }
     auto subtitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
-    if (subtitleNode) {
-        TitleBarPattern::SetTextColor(subtitleNode, bgStyle.subTitleColor);
-    }
     TitleBarPattern::SetBackButtonIconColor(titleBarNode, bgStyle.iconColor);
     TitleBarPattern::SetMenuItemsStyle(titleBarNode, bgStyle.iconColor, bgStyle.titleColor);
     if (!isCustomTitle && bgStyle.titleShadow.has_value() && mainTitleNode) {
@@ -676,13 +703,7 @@ void NavDestinationPatternBase::UpdateTitleBarEndOptions(const RefPtr<TitleBarPa
     const bool isCustomTitle = IsCustomTitleBarTextStyleUpdate(titleBarNode);
     auto bgStyle = titleBarPattern->GetScrollEffectTitleBarBgStyle();
     auto mainTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
-    if (mainTitleNode) {
-        TitleBarPattern::SetTextColor(mainTitleNode, bgStyle.titleColor);
-    }
     auto subtitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
-    if (subtitleNode) {
-        TitleBarPattern::SetTextColor(subtitleNode, bgStyle.subTitleColor);
-    }
     TitleBarPattern::SetBackButtonIconColor(titleBarNode, bgStyle.iconColor);
     TitleBarPattern::SetMenuItemsStyle(titleBarNode, bgStyle.iconColor, bgStyle.titleColor);
     if (!isCustomTitle && bgStyle.titleShadow.has_value() && mainTitleNode) {
@@ -761,10 +782,33 @@ bool NavDestinationPatternBase::IsScrollEffectEnabled() const
     return titleBarPattern->IsScrollEffectEnabled();
 }
 
-void NavDestinationPatternBase::OnContentScrollUpdate(double offset, double currentOffset)
+void NavDestinationPatternBase::OnContentScrollUpdate(double offset, double currentOffset, bool isFling)
 {
     currentScrollOffset_ = currentOffset;
+    auto hostNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto absOffset = std::abs(offset);
+    if (isFling && GreatNotEqual(absOffset, SCROLL_FLING_BLUR_DISABLE_OFFSET)) {
+        titleBarPattern->SetIsFlinging(true);
+    } else if (!isFling || LessNotEqual(absOffset, SCROLL_FLING_BLUR_RESTORE_OFFSET)) {
+        titleBarPattern->SetIsFlinging(false);
+    }
     UpdateTitleBarOptions(static_cast<float>(currentScrollOffset_));
+}
+
+void NavDestinationPatternBase::OnContentFlingStop()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetIsFlinging(false);
 }
 
 } // namespace OHOS::Ace::NG

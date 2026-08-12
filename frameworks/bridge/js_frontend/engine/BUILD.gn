@@ -47,7 +47,12 @@ template("js_engine") {
     # if support napi
     sources = [ "common/js_engine.cpp" ]
 
-    external_deps += [ "napi:ace_napi" ]
+    external_deps += [
+      "napi:ace_napi",
+      "node:node_header_notice",
+      "libuv:uv",
+      "ets_runtime:libark_jsruntime",
+    ]
 
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {

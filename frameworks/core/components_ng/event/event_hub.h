@@ -334,6 +334,7 @@ protected:
 private:
     void AddPressedListener();
     void AddHoverListener();
+    void NotifyPageSceneFocusabilityChanged(bool previousFocusable);
 
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;

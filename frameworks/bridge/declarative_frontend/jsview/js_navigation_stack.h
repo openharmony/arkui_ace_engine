@@ -28,6 +28,7 @@ namespace OHOS::Ace::Framework {
 struct HomePathInfo {
     std::string name;
     JSRef<JSVal> param;
+    std::string autoCleanedState;
 };
 
 struct NavPathInfoUINode {
@@ -116,6 +117,7 @@ public:
     bool CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
         const WeakPtr<NG::UINode>& node) override;
+    bool CreateNodeByPreloadItem(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node);
     void SetJSExecutionContext(const JSExecutionContext& context);
     std::string GetRouteParam() const override;
     void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
@@ -137,6 +139,7 @@ public:
 
     std::string GetStringifyParamByIndex(int32_t index) const override;
     std::string GetSerializedParamSafely(int32_t index) const override;
+    std::string GetSerializedParamForRecovery(int32_t index) const override;
     void SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo) override;
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
@@ -168,9 +171,21 @@ public:
         homePathInfo_ = std::move(pathInfo);
     }
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+    void SaveHomeDestinationState(const std::string& state) override;
+    std::string GetHomeDestinationState() const override;
 
     bool CreateRelatedDestination(
         const std::string& name, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+
+    // Preload methods override
+    void AddPreloadItem(const std::string& name, const std::string& paramString,
+        const RefPtr<NG::UINode>& uiNode) override;
+    RefPtr<NG::UINode> GetFromPreloadItem(const std::string& name, const std::string& paramString) override;
+    void RemovePreloadItem() override;
+    void PreloadItemOnDestroy() override;
+    void InitPreloadInfoByIndex(int32_t index, const RefPtr<NG::UINode>& node) override;
+    void PreloadNodeBefore();
+    void ProcessPreloadPromise(const JSRef<JSObject>& pathInfo, int32_t errorCode);
 
     bool IsStaticStack() override
     {
@@ -236,6 +251,7 @@ private:
 
     std::optional<HomePathInfo> homePathInfo_;
     WeakPtr<NG::NavDestinationGroupNode> homeDestinationNode_;
+    std::optional<NG::PreloadItem> preloadItem_;
 };
 } // namespace OHOS::Ace::Framework
 

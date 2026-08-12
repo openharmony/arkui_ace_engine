@@ -57,7 +57,9 @@ ohos_shared_library("ace_xcomponent_controller") {
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "napi:ace_napi",
-    "runtime_core:ani"
+    "node:node_header_notice",
+    "libuv:uv",
+    "runtime_core:ani",
   ]
   public_external_deps = [ "hilog:libhilog" ]
 

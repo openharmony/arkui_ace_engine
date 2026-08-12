@@ -29,7 +29,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
-constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
 
 OffsetF GetHandleAnchorPoint(const RectF& rect)
 {
@@ -78,11 +77,6 @@ int32_t GetVisualEndHandleIndex(const RefPtr<SelectionContainerChild>& child)
 bool SelectionSelectOverlay::CheckHandleVisible(const RectF& paintRect)
 {
     return !paintRect.IsEmpty();
-}
-
-void SelectionSelectOverlay::CalcHandleLevelMode(const RectF&, const RectF&)
-{
-    SetHandleLevelMode(HandleLevelMode::OVERLAY);
 }
 
 RefPtr<FrameNode> SelectionSelectOverlay::GetOwner()
@@ -258,16 +252,28 @@ std::optional<RectF> SelectionSelectOverlay::GetAncestorNodeViewPort()
     if (startViewPorts.empty() || endViewPorts.empty()) {
         return BaseTextSelectOverlay::GetAncestorNodeViewPort();
     }
+    // Both the nearest and outer common ancestors constrain cross-node handles.
+    std::optional<RectF> commonViewPort;
     for (const auto& startViewPort : startViewPorts) {
         auto startAncestor = startViewPort.ancestorNode.Upgrade();
         CHECK_NULL_CONTINUE(startAncestor);
+        bool isCommonAncestor = false;
         for (const auto& endViewPort : endViewPorts) {
             auto endAncestor = endViewPort.ancestorNode.Upgrade();
             CHECK_NULL_CONTINUE(endAncestor);
             if (startAncestor == endAncestor) {
-                return startViewPort.viewPort;
+                isCommonAncestor = true;
+                break;
             }
         }
+        if (!isCommonAncestor) {
+            continue;
+        }
+        commonViewPort = commonViewPort.has_value()
+            ? commonViewPort->Constrain(startViewPort.viewPort) : startViewPort.viewPort;
+    }
+    if (commonViewPort.has_value()) {
+        return commonViewPort;
     }
     return BaseTextSelectOverlay::GetAncestorNodeViewPort();
 }
@@ -463,12 +469,14 @@ void SelectionSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
     OnMenuItemAction(id, type);
 }
 
-void SelectionSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+void SelectionSelectOverlay::OnAncestorNodeChanged(
+    FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed, bool transformTriggersEmbed)
 {
     auto isDragging = GetIsHandleDragging();
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    if (IsAncestorNodeGeometryChange(flag)) {
+    // Cross-node specific: refresh boundary children's handle info on geometry change.
+    if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         auto startChild = pattern->GetSelectionStartChild();
         auto endChild = pattern->GetSelectionEndChild();
         if (startChild) {
@@ -489,27 +497,14 @@ void SelectionSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         UpdateAllHandlesOffset();
         FlushHandleNodeIfNeeded();
     }
-
     if (isDragging) {
         return;
     }
-
-    auto isStartScroll = IsAncestorNodeStartScroll(flag);
-    auto isStartAnimation = IsAncestorNodeStartAnimation(flag);
-    auto isTransformChanged = IsAncestorNodeTransformChange(flag);
-    auto isStartTransition = IsAncestorNodeHasTransition(flag);
-    auto isScrollEnd = IsAncestorNodeEndScroll(flag) || ((flag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG);
-    UpdateMenuWhileAncestorNodeChanged(
-        isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd, flag);
-
-    if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
-        UpdateViewPort();
-        UpdateAllHandlesOffset();
-        FlushHandleNodeIfNeeded();
-    }
-    if ((flag & FRAME_NODE_CONTENT_CLIP_CHANGE) == FRAME_NODE_CONTENT_CLIP_CHANGE) {
-        UpdateViewPort();
-    }
+    // Delegate menu visibility + embed/overlay switching + content-clip to the base. The container
+    // pattern calls this with scrollTriggersEmbed=false: the single handle node embeds under the
+    // container on keyboard-avoid / ancestor transform / transition (rigid container motion) but
+    // switches to overlay on scroll, since the container does not move with an inner scroll.
+    BaseTextSelectOverlay::OnAncestorNodeChanged(flag, scrollTriggersEmbed, transformTriggersEmbed);
 }
 
 SelectionSelectOverlay::FlushHandleNodeGuard::FlushHandleNodeGuard(const RefPtr<SelectionSelectOverlay>& overlay)
@@ -581,7 +576,10 @@ void SelectionSelectOverlay::OnHandleMove(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(containerNode);
     auto startChild = pattern->GetSelectionStartChild();
     auto endChild = pattern->GetSelectionEndChild();
-    auto movingPointInContainer = ConvertWindowPointToContainer(GetHandleAnchorPoint(rect), containerNode);
+    // embed: rect from UpdateOffsetOnMove is localPaintRect (container-local); overlay: paintRect (global).
+    auto anchorPoint = GetHandleAnchorPoint(rect);
+    auto movingPointInContainer = IsOverlayMode()
+        ? ConvertWindowPointToContainer(anchorPoint, containerNode) : anchorPoint;
     pattern->HandleSelectionUpdate(movingPointInContainer);
     if (startChild != pattern->GetSelectionStartChild() || endChild != pattern->GetSelectionEndChild()) {
         needUpdateViewPortOnMoveDone_ = true;
@@ -598,7 +596,10 @@ void SelectionSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(manager);
     auto containerNode = pattern->GetHostNode();
     CHECK_NULL_VOID(containerNode);
-    auto movingPointInContainer = ConvertWindowPointToContainer(GetHandleAnchorPoint(rect), containerNode);
+    // embed: rect from UpdateOffsetOnMove is localPaintRect (container-local); overlay: paintRect (global).
+    auto anchorPoint = GetHandleAnchorPoint(rect);
+    auto movingPointInContainer = IsOverlayMode()
+        ? ConvertWindowPointToContainer(anchorPoint, containerNode) : anchorPoint;
     pattern->ProcessHandleMoveSelectionEnd(movingPointInContainer);
     if (!pattern->IsSelectedTypeChange()) {
         manager->ShowOptionMenu();

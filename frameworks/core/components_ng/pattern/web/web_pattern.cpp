@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/web/web_agent_utils.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_command_wrapper.h"
@@ -678,6 +678,9 @@ constexpr char ACCESSIBILITY_IMAGE[] = "image";
 constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
 constexpr char WEB_NODE_URL[] = "url";
 
+const std::string PAGE_SCENE_READY_PROXY_OBJ = "ArkWebPageSceneReady";
+const std::string PAGE_SCENE_READY_PROXY_METHOD = "onDomReady";
+
 constexpr std::string_view STRING_LF = "\n";
 constexpr std::string_view DRAG_DATA_TYPE_TEXT = "general.plain-text";
 constexpr std::string_view DRAG_DATA_TYPE_HTML = "general.html";
@@ -750,6 +753,7 @@ WebPattern::~WebPattern()
         delegate_->SetAudioMuted(true);
         delegate_->UnRegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME);
     }
+    UnRegisterPageSceneReadyJavaScript();
 
     if (observer_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern observer_ start NotifyDestory");
@@ -1509,9 +1513,12 @@ void WebPattern::EnableSecurityLayer(bool isNeedSecurityLayer)
         return;
     }
     renderContextForSurface_->SetSecurityLayer(isNeedSecurityLayer);
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
-    CHECK_NULL_VOID(rosenRenderContext);
-    rosenRenderContext->FlushImplicitTransaction();
+    if (isNeedSecurityLayer) {
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+        CHECK_NULL_VOID(rosenRenderContext);
+        TAG_LOGI(AceLogTag::ACE_WEB, "Flush Web security layer transaction, webId:%{public}d", GetWebId());
+        rosenRenderContext->FlushImplicitTransaction();
+    }
 }
 
 void WebPattern::OnAttachToMainTree()
@@ -4369,23 +4376,30 @@ void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
     isEnabledHapticFeedback_ = enable;
 }
 
-bool WebPattern::IsRootNeedExportTexture()
+RefPtr<FrameNode> WebPattern::FindFirstExportTextureAncestor()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    bool isNeedExportTexture = false;
+    CHECK_NULL_RETURN(host, nullptr);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
         RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
-            continue;
-        }
-        isNeedExportTexture = frameNode->IsNeedExportTexture();
-        if (isNeedExportTexture) {
-            auto textureInfo = frameNode->GetExportTextureInfo();
-            return SameLayerSurface::HasSurfaceId(textureInfo->GetSurfaceId());
+        if (frameNode && frameNode->IsNeedExportTexture()) {
+            return frameNode;
         }
     }
-    return isNeedExportTexture;
+    return nullptr;
+}
+
+bool WebPattern::IsRootNeedExportTexture()
+{
+    auto frameNode = FindFirstExportTextureAncestor();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textureInfo = frameNode->GetExportTextureInfo();
+    return SameLayerSurface::HasSurfaceId(textureInfo->GetSurfaceId());
+}
+
+bool WebPattern::IsRootInnerWeb()
+{
+    return FindFirstExportTextureAncestor() != nullptr;
 }
 
 void WebPattern::OnAttachContext(PipelineContext *context)
@@ -4641,6 +4655,7 @@ void WebPattern::OnModifyDone()
             }
         }
         RecordWebEvent(true);
+        RegisterPageSceneReadyJavaScript();
         RegisterWebDomNativeInterface();
 
         UpdateJavaScriptOnDocumentStartByOrder();
@@ -4814,6 +4829,8 @@ void WebPattern::OnModifyDone()
         CHECK_NULL_VOID(webPattern);
         if (webPattern->IsRootNeedExportTexture() && webPattern->delegate_) {
             webPattern->delegate_->UpdateNativeEmbedModeEnabled(false);
+        }
+        if (webPattern->IsRootInnerWeb() && webPattern->delegate_) {
             webPattern->delegate_->SetNativeInnerWeb(true);
         }
     };
@@ -8132,6 +8149,26 @@ void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
     }
 }
 
+void WebPattern::PostTriggerPageSceneMatch()
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        TriggerPageSceneMatch();
+    } else {
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->TriggerPageSceneMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneNavMatch");
+    }
+}
+
 void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
@@ -8148,6 +8185,7 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     isScrollStarted_ = false;
     SetIsNestedInterrupt(false);
     expectedScrollAxis_ = Axis::FREE;
+    PostTriggerPageSceneMatch();
 }
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
@@ -9955,6 +9993,9 @@ void WebPattern::DumpInfo()
 {
     DumpSurfaceInfo();
     DumpGpuInfo();
+    bool isSelfDrawing = (renderContextForSurface_ && renderContextForSurface_->IsSelfDrawingNode()) ||
+                         (renderContextForPopupSurface_ && renderContextForPopupSurface_->IsSelfDrawingNode());
+    DumpLog::GetInstance().AddDesc(std::string("isSelfDrawingNode: ").append(isSelfDrawing ? "true" : "false"));
 }
 
 void WebPattern::DumpGpuInfo()
@@ -10611,6 +10652,62 @@ void WebPattern::EndTranslate()
         }
         TAG_LOGI(AceLogTag::ACE_WEB, "EndTranslateText WebId:%{public}d", webPattern->GetWebId());
         }, TaskExecutor::TaskType::UI, "ArkUIWebEndTranslate");
+}
+
+void WebPattern::RegisterPageSceneRulesForWeb(int32_t processId)
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->RegisterPageSceneRulesForWeb(processId);
+}
+
+void WebPattern::GetPageSceneForWeb(int32_t processId, const std::string& ruleJson)
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->GetPageSceneForWeb(processId, ruleJson);
+}
+
+void WebPattern::TriggerPageSceneMatch()
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->ExecuteAllRuleSetMatch();
+}
+
+void WebPattern::RegisterPageSceneReadyJavaScript()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "RegisterPageSceneReadyJavaScript, WebId: %{public}d", GetWebId());
+    std::vector<std::string> methods = { PAGE_SCENE_READY_PROXY_METHOD };
+    std::vector<std::function<void(const std::vector<std::string>&)>> funcs = {
+        [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "ArkWebPageSceneReady.onDomReady callback, WebId=%{public}d paramCount=%{public}zu",
+                webPattern->GetWebId(), param.size());
+            auto context = webPattern->GetContext();
+            CHECK_NULL_VOID(context);
+            if (param.size() < 2) {
+                return;
+            }
+            context->GetTaskExecutor()->PostTask(
+                [weak, resultJson = param[0], selectorJson = param[1]]() {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    auto delegate = pattern->delegate_;
+                    CHECK_NULL_VOID(delegate);
+                    delegate->ProcessPageSceneDomReadyResult(resultJson, selectorJson);
+                },
+                TaskExecutor::TaskType::UI, "PageSceneDomReadyWithResult");
+        }
+    };
+    CHECK_NULL_VOID(delegate_);
+    delegate_->RegisterNativeJavaScriptProxy(PAGE_SCENE_READY_PROXY_OBJ, methods, funcs, false, "", false);
+}
+
+void WebPattern::UnRegisterPageSceneReadyJavaScript()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "UnRegisterPageSceneReadyJavaScript, WebId: %{public}d", GetWebId());
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UnRegisterNativeArkJSFunction(PAGE_SCENE_READY_PROXY_OBJ);
 }
 
 void WebPattern::InitRotationEventCallback()

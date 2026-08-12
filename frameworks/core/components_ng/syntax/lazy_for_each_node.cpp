@@ -92,6 +92,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         node->RegisterBuilderListener();
     }
+    node->SetMemOptStrategy(LazyForEachMemOptStrategy::DEFAULT);
     return node;
 }
 
@@ -266,7 +267,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
-        const auto& nodeList = builder_->OnDataBulkDeleted(index, count);
+        const auto nodeList = builder_->OnDataBulkDeleted(index, count);
         for (const auto& node : nodeList) {
             if (node.second == nullptr) {
                 continue;
@@ -312,7 +313,7 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
     auto changedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
-        const auto& nodeList = builder_->OnDataBulkChanged(index, count);
+        const auto nodeList = builder_->OnDataBulkChanged(index, count);
         for (const auto& node : nodeList) {
             if (node.second == nullptr) {
                 continue;
@@ -431,6 +432,8 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     auto child = builder_->GetChildByIndex(index, needBuild, isCache);
     CHECK_NULL_RETURN(child.second, nullptr);
     child.second->UpdateThemeScopeId(GetThemeScopeId());
+    // Builder-created items bypass UINode::DoAddChild, so propagate the selection container ID explicitly.
+    child.second->UpdateSelectionContainerId(GetSelectionContainerId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
         if (!addToRenderTree) {
@@ -533,7 +536,7 @@ void LazyForEachNode::DoSetActiveChildRange(
     }
     ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d], cacheStart[%d], cacheEnd[%d], showCache[%d]",
         start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
-    bool needRender = builder_->SetActiveChildRange(start, end);
+    bool needRender = builder_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
     if (GetMemOptStrategy() == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
         setActiveRangeTime_ = GetSysTimestamp();
         needRender |= IsCachedCountReduced(cacheStart, cacheEnd);
@@ -843,7 +846,28 @@ void LazyForEachNode::EnablePreBuild(bool enable)
 
 LazyForEachMemOptStrategy LazyForEachNode::GetMemOptStrategy()
 {
-    return builder_? builder_->GetLazyForEachMemOptStrategy() : LazyForEachMemOptStrategy::DEFAULT;
+    if (memOptStrategy_ != LazyForEachMemOptStrategy::UNDEFINED) {
+        return memOptStrategy_;
+    }
+    auto memOptStrategy = builder_ ? builder_->GetLazyForEachMemOptStrategy() : LazyForEachMemOptStrategy::DEFAULT;
+    if (memOptStrategy != LazyForEachMemOptStrategy::UNDEFINED) {
+        memOptStrategy_ = memOptStrategy;
+        return memOptStrategy_;
+    }
+    auto applicationStrategy = LazyForEachUtils::GetLazyForEachMemOptStrategy();
+    if (applicationStrategy != LazyForEachMemOptStrategy::UNDEFINED) {
+        memOptStrategy_ = applicationStrategy;
+        return memOptStrategy_;
+    }
+    auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
+    memOptStrategy_ = systemStrategy == 1 ?
+        LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : LazyForEachMemOptStrategy::DEFAULT;
+    return memOptStrategy_;
+}
+
+void LazyForEachNode::SetMemOptStrategy(LazyForEachMemOptStrategy strategy)
+{
+    memOptStrategy_ = strategy;
 }
 
 void LazyForEachNode::OnWindowShow()

@@ -80,7 +80,7 @@
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -1709,6 +1709,10 @@ UIContentErrorCode AceContainer::SetViewNew(const RefPtr<AceView>& view, double 
             window->Destroy();
             window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
         }
+        auto runtimeContext = container->runtimeContext_.lock();
+        if (runtimeContext && runtimeContext->GetApplicationInfo()) {
+            window->SetIsSystemApp(runtimeContext->GetApplicationInfo()->isSystemApp);
+        }
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
@@ -1953,7 +1957,9 @@ private:
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
 
         auto trans = node->GetTransformRelativeOffset();
-        auto bottomAvoidHeight = GetBottomAvoidHeight();
+        auto safeArea = GetSystemSafeArea();
+        auto topAvoidHeight = safeArea.top_.Length();
+        auto bottomAvoidHeight = safeArea.bottom_.Length();
         auto edge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_EDGE_INTERVAL);
         auto minEdge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_MIN_EDGE);
 
@@ -1968,7 +1974,7 @@ private:
             } else {
                 deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge * POPUP_CALCULATE_RATIO;
             }
-        } else if (rectf.GetY() > size.height + edge + minEdge) {
+        } else if (trans.GetY() - topAvoidHeight > size.height + edge + minEdge) {
             if (isBottom) {
                 deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
             } else {
@@ -2021,22 +2027,22 @@ private:
         return deltaX;
     }
 
-    uint32_t GetBottomAvoidHeight()
+    NG::SafeAreaInsets GetSystemSafeArea()
     {
         auto containerId = Container::CurrentId();
         RefPtr<NG::PipelineContext> pipelineContext;
         if (containerId >= MIN_SUBCONTAINER_ID) {
             auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
             auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-            CHECK_NULL_RETURN(parentContainer, 0);
+            CHECK_NULL_RETURN(parentContainer, NG::SafeAreaInsets());
             pipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
         } else {
             pipelineContext = NG::PipelineContext::GetCurrentContext();
         }
-        CHECK_NULL_RETURN(pipelineContext, 0);
+        CHECK_NULL_RETURN(pipelineContext, NG::SafeAreaInsets());
         auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_RETURN(safeAreaManager, 0);
-        return safeAreaManager->GetSystemSafeArea().bottom_.Length();
+        CHECK_NULL_RETURN(safeAreaManager, NG::SafeAreaInsets());
+        return safeAreaManager->GetSystemSafeArea();
     }
 
     void ProcessOnFinish()
@@ -3066,6 +3072,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement");
     }
 
+    if (fontManager) {
+        fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+    }
+
     aceView_->Launch();
 
 #ifdef NG_BUILD
@@ -3566,6 +3576,8 @@ void AceContainer::ReleaseResourceAdapter()
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
+            ResourceManager::GetInstance().RemoveResourceAdapter(
+                GetBundleName(), GetModuleName(), INSTANCE_ID_UNDEFINED);
         }
     } else {
         ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);

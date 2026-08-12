@@ -2321,6 +2321,7 @@ export class SegmentButton extends ViewPU {
       'hoverColorArray'
     );
     this.doSelectedChangeAnimate = false;
+    this.isTapGesture = false;
     this.isCurrentPositionSelected = false;
     this.isCurrentPositionPressed = false;
     this.panGestureStartPoint = { x: 0, y: 0 };
@@ -2865,6 +2866,7 @@ export class SegmentButton extends ViewPU {
           }
           this.doSelectedChangeAnimate =
             this.selectedIndexes[0] > Math.min(this.options.buttons.length, this.buttonItemsSize.length) ? false : true;
+          this.isTapGesture = true;
           let realClickIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
           if (this.onItemClicked) {
             this.onItemClicked(realClickIndex);
@@ -3076,13 +3078,19 @@ export class SegmentButton extends ViewPU {
       PanGesture.onActionEnd(event => {
         this.isGestureInProgress = false;
         if (this.options === void 0 || this.options.buttons === void 0) {
+          this.isPanGestureMoved = false;
+          this.swipeHandled = false;
           return;
         }
         if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+          this.isPanGestureMoved = false;
+          this.swipeHandled = false;
           return;
         }
         let fingerInfo = event.fingerList.find(Boolean);
         if (fingerInfo === void 0) {
+          this.isPanGestureMoved = false;
+          this.swipeHandled = false;
           return;
         }
         if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX, fingerInfo.globalY)) {
@@ -3094,6 +3102,8 @@ export class SegmentButton extends ViewPU {
               this.zoomScaleArray[this.selectedIndexes[0]] = 1;
             });
             this.isCurrentPositionSelected = false;
+            this.isPanGestureMoved = false;
+            this.swipeHandled = false;
             return;
           }
           this.swipeHandled = true;
@@ -3128,6 +3138,8 @@ export class SegmentButton extends ViewPU {
             this.zoomScaleArray[this.selectedIndexes[0]] = 1;
           });
           this.isCurrentPositionSelected = false;
+          this.isPanGestureMoved = false;
+          this.swipeHandled = false;
           return;
         }
         if (this.isBackgroundSystemMaterialEnabled()) {
@@ -3170,19 +3182,27 @@ export class SegmentButton extends ViewPU {
           });
         }
         this.isCurrentPositionSelected = false;
+        this.isPanGestureMoved = false;
+        this.swipeHandled = false;
       });
       PanGesture.onActionCancel(() => {
         this.isGestureInProgress = false;
         if (this.options === void 0 || this.options.buttons === void 0) {
+          this.isPanGestureMoved = false;
+          this.swipeHandled = false;
           return;
         }
         if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+          this.isPanGestureMoved = false;
+          this.swipeHandled = false;
           return;
         }
         Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
           this.zoomScaleArray[this.selectedIndexes[0]] = 1;
         });
         this.isCurrentPositionSelected = false;
+        this.isPanGestureMoved = false;
+        this.swipeHandled = false;
         if (this.isBackgroundSystemMaterialEnabled()) {
           this.finishSelectMaterialAnimation();
         }
@@ -3533,8 +3553,18 @@ export class SegmentButton extends ViewPU {
           : (this.options.fontColor ?? segmentButtonTheme.FONT_COLOR);
       });
     };
-    if (curve) {
-      if (this.options.backgroundSystemMaterial) {
+    if (!curve) {
+      setAnimatedPropertyFunc();
+      this.updateButtonFont();
+      this.isTapGesture = false;
+      return;
+    }
+    if (this.options.backgroundSystemMaterial) {
+      if (this.isTapGesture) {
+        this.openSelectedItemSystemMaterial = true;
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+        this.openSelectedItemSystemMaterial = false;
+      } else {
         this.getUIContext().animateTo(
           {
             curve: curves.interpolatingSpring(0, 1, 195, 14),
@@ -3554,13 +3584,12 @@ export class SegmentButton extends ViewPU {
             this.openSelectedItemSystemMaterial = false;
           }
         );
-      } else {
-        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
       }
     } else {
-      setAnimatedPropertyFunc();
+      this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
     }
     this.updateButtonFont();
+    this.isTapGesture = false;
   }
   updateButtonFont() {
     this.buttonItemsSelected.forEach((selected, index) => {
@@ -3600,7 +3629,7 @@ function resourceToNumber(context, resource, defaultValue) {
     case RESOURCE_TYPE_INTEGER:
       try {
         if (resource.id !== -1) {
-          return resourceManager.getNumber(resource);
+          return resourceManager.getNumber(resource.id);
         }
         return resourceManager.getNumberByName(resource.params[0].split('.')[2]);
       } catch (error) {

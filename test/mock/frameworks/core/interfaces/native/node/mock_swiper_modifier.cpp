@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -24,13 +25,52 @@ ArkUINodeHandle CreateSwiperFrameNode(ArkUI_Int32 nodeId)
     frameNode->IncRefCount();
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
 }
+
+ArkUINodeHandle GetSwiperController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = SwiperModelNG::GetOrCreateSwiperController(frameNode);
+    CHECK_NULL_RETURN(controller, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
+}
 namespace NodeModifier {
 const ArkUISwiperCustomModifier* GetSwiperCustomModifier()
 {
     static const ArkUISwiperCustomModifier modifier = {
         .createFrameNode = CreateSwiperFrameNode,
+        .getSwiperController = GetSwiperController,
     };
     return &modifier;
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
+
+namespace {
+void MockSetSwiperFinishAnimation(ArkUINodeHandle node)
+{
+}
+
+void MockCallSwiperShowPrevious(ArkUINodeHandle node)
+{
+}
+
+void MockCallSwiperShowNext(ArkUINodeHandle node)
+{
+}
+
+ArkUI_Int32 MockGetSwiperCurrentIndex(ArkUINodeHandle node, ArkUI_Bool original)
+{
+    return 0;
+}
+} // namespace
+
+const ArkUISwiperModifier* GetMockSwiperModifier()
+{
+    static ArkUISwiperModifier modifier = {};
+    modifier.setSwiperFinishAnimation = MockSetSwiperFinishAnimation;
+    modifier.getSwiperCurrentIndex = MockGetSwiperCurrentIndex;
+    modifier.callSwiperShowPrevious = MockCallSwiperShowPrevious;
+    modifier.callSwiperShowNext = MockCallSwiperShowNext;
+    return &modifier;
+}

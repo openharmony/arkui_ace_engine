@@ -530,7 +530,7 @@ bool ButtonLayoutAlgorithm::IsAging(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(pipeline, false);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, false);
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(layoutWrapper->GetHostNode());
     if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
             NearEqual(fontScale, buttonTheme->GetLargeFontSizeScale()) ||
             NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {

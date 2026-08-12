@@ -824,17 +824,29 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
     if (scrollPositionCallback_) {
         isTouchScreen_ = info.GetInputEventType() == InputEventType::TOUCH_SCREEN;
         auto mainDelta = info.GetMainDelta();
+        auto adjustedDelta = IsReverse() ? -mainDelta : mainDelta;
         bool canOverScroll =
-            isTouchScreen_ && canOverScrollWithDelta_ && canOverScrollWithDelta_(IsReverse() ? -mainDelta : mainDelta);
-        // The offset of the mouse wheel and gesture is opposite.
-        auto offset = (info.GetInputEventType() == InputEventType::AXIS || canOverScroll)
-                          ? mainDelta
-                          : CalcPatternOffset(mainDelta);
-        if (IsReverse()) {
-            offset = -offset;
-        }
-        if (canOverScroll) {
-            offset = -offset;
+            isTouchScreen_ && canOverScrollWithDelta_ && canOverScrollWithDelta_(adjustedDelta);
+        double offset;
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            offset = adjustedDelta;
+        } else if (canOverScroll && getOverScrollOffset_) {
+            // Split the delta at the boundary so the in-bounds portion uses the scaled
+            // CalcPatternOffset path and the over-bounds portion uses the 1:1 path.
+            // Query the over-scroll split using the 1:1 content delta (-adjustedDelta).
+            auto overScroll = getOverScrollOffset_(-adjustedDelta);
+            auto overContent = overScroll.start + overScroll.end;
+            if (!NearZero(overContent)) {
+                auto overBar = -overContent;
+                auto normalBar = adjustedDelta - overBar;
+                offset = CalcPatternOffset(static_cast<float>(normalBar)) + overContent;
+            } else {
+                offset = CalcPatternOffset(static_cast<float>(adjustedDelta));
+            }
+        } else if (canOverScroll) {
+            offset = -adjustedDelta;
+        } else {
+            offset = CalcPatternOffset(static_cast<float>(adjustedDelta));
         }
         ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
         auto isMouseWheelScroll =
@@ -842,9 +854,11 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
         int32_t source = canOverScroll ? SCROLL_FROM_BAR_OVER_DRAG : SCROLL_FROM_BAR;
         scrollPositionCallback_(offset, source, isMouseWheelScroll);
         if (dragFRCSceneCallback_) {
-            dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
-                                                                : info.GetMainVelocity() / info.GetMainDelta() * offset,
-                NG::SceneStatus::RUNNING);
+          dragFRCSceneCallback_(NearZero(info.GetMainDelta())
+                                    ? info.GetMainVelocity()
+                                    : info.GetMainVelocity() /
+                                          info.GetMainDelta() * offset,
+                                NG::SceneStatus::RUNNING);
         }
     }
 }

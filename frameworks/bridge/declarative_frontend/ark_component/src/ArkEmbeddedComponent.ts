@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 declare type OnTerminatedCallback = (event: TerminationInfo) => void;
 class EmbeddedComponentOnTerminatedModifier extends ModifierWithKey<OnTerminatedCallback> {

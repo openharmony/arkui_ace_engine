@@ -130,7 +130,7 @@ void JSScrollableBase::SetScrollBarHeight(const JSCallbackInfo& info)
     auto args = info[0];
     if (!args->IsObject() ||
         !JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(args), parsedValue, resObj) ||
-        std::isnan(parsedValue.Value()) || LessNotEqual(parsedValue.Value(), 0.0)) {
+        !std::isfinite(parsedValue.Value()) || LessNotEqual(parsedValue.Value(), 0.0)) {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         NG::ScrollableModelNG::ResetScrollBarHeight(frameNode);

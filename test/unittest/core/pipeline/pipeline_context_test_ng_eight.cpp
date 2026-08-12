@@ -32,7 +32,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
@@ -1889,5 +1889,71 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextEightTest065, TestSize.Level1
         context_->eventManager_->passThroughResult_);
 
     context_->postEventManager_ = nullptr;
+}
+
+// ==========================================================================
+// InfiniteAnimationFlushExceeded
+// ==========================================================================
+
+/**
+ * @tc.name: PipelineContextEightTest066
+ * @tc.desc: Test normal (no exceeded) and single-layer exceeded: Pop resets to false when stack empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextEightTest066, TestSize.Level1)
+{
+    AssertValidContext();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PushInfiniteAnimationFlushExceeded();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PopInfiniteAnimationFlushExceeded();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+
+    context_->SetInfiniteAnimationFlushExceeded(true);
+    EXPECT_TRUE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PushInfiniteAnimationFlushExceeded();
+    EXPECT_TRUE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PopInfiniteAnimationFlushExceeded();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+}
+
+/**
+ * @tc.name: PipelineContextEightTest067
+ * @tc.desc: Test nested animation: outer exceeded, inner not. Inner Pop restores outer true, outer Pop resets false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextEightTest067, TestSize.Level1)
+{
+    AssertValidContext();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->SetInfiniteAnimationFlushExceeded(true);
+    context_->PushInfiniteAnimationFlushExceeded();
+    EXPECT_TRUE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PushInfiniteAnimationFlushExceeded();
+    EXPECT_TRUE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PopInfiniteAnimationFlushExceeded();
+    EXPECT_TRUE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PopInfiniteAnimationFlushExceeded();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+}
+
+/**
+ * @tc.name: PipelineContextEightTest068
+ * @tc.desc: Test sequential animations: first exceeded then not exceeded, exceeded does not persist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextEightTest068, TestSize.Level1)
+{
+    AssertValidContext();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->SetInfiniteAnimationFlushExceeded(true);
+    context_->PushInfiniteAnimationFlushExceeded();
+    EXPECT_TRUE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PopInfiniteAnimationFlushExceeded();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PushInfiniteAnimationFlushExceeded();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
+    context_->PopInfiniteAnimationFlushExceeded();
+    EXPECT_FALSE(context_->IsInfiniteAnimationFlushExceeded());
 }
 } // namespace OHOS::Ace::NG

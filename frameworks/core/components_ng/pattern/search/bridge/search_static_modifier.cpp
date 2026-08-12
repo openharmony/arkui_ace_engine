@@ -769,7 +769,7 @@ void SetTextDirectionImpl(Ark_NativePointer node, const Opt_TextDirection* value
     CHECK_NULL_VOID(frameNode);
     SearchModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
 }
-void SetStrokeWidthImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void SetStrokeWidthImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

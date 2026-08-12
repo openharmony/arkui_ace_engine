@@ -121,20 +121,19 @@ void SetOnDraw_callbackImpl(
 Callback_LengthMetrics GetGetLeadingMargin_callbackImpl(Ark_LeadingMarginSpan peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto handler = [peer](Callback_LengthMetrics_Void continuation) {
+    auto handler = [peer](Callback_LengthMetricsProxy_Void continuation) {
         CHECK_NULL_VOID(peer && peer->span);
         auto getLeadingMarginFunc = peer->span->getLeadingMarginFunc_;
         CHECK_NULL_VOID(getLeadingMarginFunc);
         auto res = getLeadingMarginFunc();
-        auto result = Converter::ArkValue<Ark_LengthMetrics>(res);
+        auto result = Converter::ArkValue<Ark_LengthMetricsProxy>(res);
         if (continuation.callSync) {
             (*continuation.callSync)(
                 CallbackHelper<VoidCallback>::GetVMContext(), continuation.resource.resourceId, result);
         }
     };
-    auto callback =
-        CallbackKeeper::ReturnReverseCallback<Callback_LengthMetrics, std::function<void(Callback_LengthMetrics_Void)>>(
-            handler);
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_LengthMetrics,
+        std::function<void(Callback_LengthMetricsProxy_Void)>>(handler);
     return callback;
 }
 
@@ -145,9 +144,9 @@ void SetGetLeadingMargin_callbackImpl(
     peer->span->getLeadingMarginFunc_ = nullptr;
     if (getLeadingMargin_callback) {
         auto callback = [arkCallback = CallbackHelper(*getLeadingMargin_callback)]() -> CalcDimension {
-            Ark_LengthMetrics result {};
-            auto handler = [&result](Ark_LengthMetrics value) { result = value; };
-            auto continuation = CallbackKeeper::Claim<Callback_LengthMetrics_Void>(std::move(handler));
+            Ark_LengthMetricsProxy result {};
+            auto handler = [&result](Ark_LengthMetricsProxy value) { result = value; };
+            auto continuation = CallbackKeeper::Claim<Callback_LengthMetricsProxy_Void>(std::move(handler));
             arkCallback.InvokeSync(continuation.ArkValue());
             return Converter::Convert<CalcDimension>(result);
         };

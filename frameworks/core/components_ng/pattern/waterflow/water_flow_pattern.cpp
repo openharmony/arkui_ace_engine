@@ -450,6 +450,11 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         return false;
     }
 
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->ResetDragUpdateDelta();
+    }
+
     if (layoutInfo_->isDataValid_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -475,6 +480,14 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateScrollBarOffset();
     CheckScrollable();
 
+    auto swInfo = DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_);
+    if (swInfo && swInfo->contentSizeDiminished_) {
+        if (!GetCanStayOverScroll() && IsOutOfBoundary(false)) {
+            CheckRestartSpring(true);
+        }
+        swInfo->contentSizeDiminished_ = false;
+    }
+
     if (layoutInfo_->measureInNextFrame_) {
         ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
         PostAsyncLoadTask();
@@ -489,6 +502,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     ChangeAnimateOverScroll();
     ChangeCanStayOverScroll();
+    ResetAccessibilityScrollSourceIfIdle();
     return NeedRender();
 }
 

@@ -323,6 +323,11 @@ public:
         return recycleImageEnabled_;
     }
 
+    static bool GetNavigationImageRecycleEnabled()
+    {
+        return navigationImageRecycleEnabled_;
+    }
+
     static bool GetImageReleaseManageObjectEnabled()
     {
         return imageReleaseManageObjectEnabled_;
@@ -796,6 +801,16 @@ public:
         return isOpenYuvDecode_;
     }
 
+    static int32_t GetSyntaxMemOptStrategy()
+    {
+        return syntaxMemOptStrategy_;
+    }
+
+    static int32_t GetBootVendorDdrSize()
+    {
+        return bootVendorDdrSize_;
+    }
+
     static UiMaterialLevel GetUiMaterialLevel();
     static bool IsDeviceSystemMaterialSupported();
 
@@ -867,6 +882,7 @@ private:
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool recycleImageEnabled_;
+    static bool navigationImageRecycleEnabled_;
     static bool imageReleaseManageObjectEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
@@ -918,6 +934,8 @@ private:
     static bool syncLoadEnabled_;
     static bool whiteBlockEnabled_;
     static int32_t previewStatus_;
+    static int32_t syntaxMemOptStrategy_;
+    static int32_t bootVendorDdrSize_;
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;

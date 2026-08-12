@@ -13,17 +13,30 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("selection_container_test_ng") {
-  module_name = "TextSet-TextSelection"
-  type = "new"
-  sources = [
-    "selection_container_pattern_test_one.cpp",
-    "selection_container_pattern_test_two.cpp",
-    "selection_container_child_test_ng.cpp",
-    "selection_container_model_ng_test.cpp",
-    "selection_container_test_ng.cpp",
-    "selection_select_overlay_test_ng.cpp",
-  ]
-  defines = [ "ENABLE_ROSEN_BACKEND" ]
-  cflags = [ "-fno-access-control" ]
+test_sources = [
+  "selection_container_child_test_ng.cpp",
+  "selection_container_model_ng_test.cpp",
+  "selection_container_pattern_test_one.cpp",
+  "selection_container_pattern_test_two.cpp",
+  "selection_container_model_static_test_ng.cpp",
+  "selection_container_test_ng.cpp",
+  "selection_select_overlay_test_ng.cpp",
+]
+
+if (is_host_product) {
+  # ENABLE_ROSEN_BACKEND intentionally omitted: host has no Rosen render backend
+  ace_unittest("selection_container_test_ng") {
+    type = "host_components"
+    module_name = "TextSet-TextSelection"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("selection_container_test_ng") {
+    module_name = "TextSet-TextSelection"
+    type = "new"
+    sources = test_sources
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+    cflags = [ "-fno-access-control" ]
+  }
 }

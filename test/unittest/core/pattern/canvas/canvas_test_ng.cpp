@@ -146,54 +146,55 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
-    DirtySwapConfig config;
     bool needReset;
 
+    /**
+     * @tc.steps: step2. needReset = false; first time onReady && Visibility is None.
+     * @tc.expected: needResetSurface_ is false.
+     */
     needReset = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
-    pattern->OnSizeChanged(config, needReset);
+    pattern->dirtyFrameSize_ = { -1, -1 };
+    pattern->dirtyContentSize_ = { -1, -1 };
+    pattern->dirtyFrameOffset_ = { -1, -1 };
+    pattern->dirtyContentOffset_ = { -1, -1 };
+    pattern->OnSizeChanged(needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier1 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier1->needResetSurface_);
 
-    needReset = false;
-    config.frameSizeChange = false;
-    config.contentSizeChange = false;
-    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
-    pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
-    pattern->OnSizeChanged(config, needReset);
-    ASSERT_NE(pattern->contentModifier_, nullptr);
-
-    needReset = false;
-    config.frameSizeChange = true;
-    config.contentSizeChange = true;
-    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
-    pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
-    pattern->OnSizeChanged(config, needReset);
-    ASSERT_NE(pattern->contentModifier_, nullptr);
-
+    /**
+     * @tc.steps: step3. needReset = true; all geometry baselines unchanged.
+     * @tc.expected: needResetSurface_ is false.
+     */
     needReset = true;
-    config.frameSizeChange = false;
-    config.contentSizeChange = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
-    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
-    pattern->OnSizeChanged(config, needReset);
+    pattern->dirtyPixelGridRoundSize_ = frameNode->GetGeometryNode()->GetPixelGridRoundSize();
+    pattern->dirtyFrameSize_ = frameNode->GetGeometryNode()->GetFrameSize();
+    pattern->dirtyContentSize_ = frameNode->GetGeometryNode()->GetContentSize();
+    pattern->dirtyFrameOffset_ = frameNode->GetGeometryNode()->GetFrameOffset();
+    pattern->dirtyContentOffset_ = frameNode->GetGeometryNode()->GetContentOffset();
+    pattern->OnSizeChanged(needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier2 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier2->needResetSurface_);
 
+    /**
+     * @tc.steps: step4. needReset = true; frameSize changed.
+     * @tc.expected: needResetSurface_ is true.
+     */
     needReset = true;
-    config.frameSizeChange = true;
-    config.contentSizeChange = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
-    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
-    pattern->OnSizeChanged(config, needReset);
+    pattern->dirtyPixelGridRoundSize_ = frameNode->GetGeometryNode()->GetPixelGridRoundSize();
+    pattern->dirtyFrameSize_ = { -1, -1 };
+    pattern->dirtyContentSize_ = frameNode->GetGeometryNode()->GetContentSize();
+    pattern->dirtyFrameOffset_ = frameNode->GetGeometryNode()->GetFrameOffset();
+    pattern->dirtyContentOffset_ = frameNode->GetGeometryNode()->GetContentOffset();
+    pattern->OnSizeChanged(needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
-
-    needReset = true;
-    config.frameSizeChange = false;
-    config.contentSizeChange = true;
-    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
-    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
-    pattern->OnSizeChanged(config, needReset);
-    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier3 = pattern->contentModifier_;
+    EXPECT_TRUE(contentModifier3->needResetSurface_);
 }
 
 /**
@@ -894,5 +895,149 @@ HWTEST_F(CanvasTestNg, CanvasUINodeTraceTest001, TestSize.Level0)
     paintMethod->UpdateRecordingCanvas(300.0f, 300.0f);
     uint64_t traceId = GetLastTraceId();
     EXPECT_EQ(traceId, nodeId);
+}
+
+/**
+ * @tc.name: CanvasPatternOnDirtyLayoutWrapperSwapTest
+ * @tc.desc: CanvasPattern::OnDirtyLayoutWrapperSwap generation dedup & needReset OR-merge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternOnDirtyLayoutWrapperSwapTest, TestSize.Level0)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(pattern->contentModifier_, frameNode);
+    int32_t readyFireCount = 0;
+    pattern->SetOnReady([&readyFireCount]() { readyFireCount++; });
+
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetUseFlushUITasks(true);
+
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    config.skipMeasure = false;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    config.skipMeasure = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+
+    EXPECT_EQ(readyFireCount, 0);
+    EXPECT_TRUE(pattern->recordNeedReset_);
+    EXPECT_EQ(pattern->onSizeChangedGen_, 3u);
+
+    pipelineContext->taskScheduler_->FlushAfterLayoutTask();
+
+    EXPECT_EQ(readyFireCount, 1);
+    EXPECT_FALSE(pattern->recordNeedReset_);
+    EXPECT_EQ(pattern->onSizeChangedGen_, 0u);
+
+    pipelineContext->SetUseFlushUITasks(false);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: CanvasPatternOnSizeChangedFireConditionTest
+ * @tc.desc: CanvasPattern::OnSizeChanged fire condition under API10+ / API10-.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternOnSizeChangedFireConditionTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create canvas node, paintMethod, readyEvent counter; set up mock pipeline/container.
+     * @tc.expected: All pointers non-null and counter initialized.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(pattern->contentModifier_, frameNode);
+    int32_t readyFireCount = 0;
+    pattern->SetOnReady([&readyFireCount]() { readyFireCount++; });
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+
+    /**
+     * @tc.steps: step2. API10+: all baselines are {-1,-1} (default) => all changed, call OnSizeChanged(true).
+     * @tc.expected: readyFireCount == 1 (fire = pgrs && (frameSize||contentSize)).
+     */
+    MockContainer::Current()->SetApiTargetVersion(10);
+    readyFireCount = 0;
+    pattern->OnSizeChanged(true);
+    EXPECT_EQ(readyFireCount, 1);
+
+    /**
+     * @tc.steps: step3. API10+: mark pixelGridRoundSize changed only, call OnSizeChanged(true).
+     * @tc.expected: readyFireCount == 0 (needs size change too).
+     */
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    readyFireCount = 0;
+    pattern->OnSizeChanged(true);
+    EXPECT_EQ(readyFireCount, 0);
+
+    /**
+     * @tc.steps: step4. API10+: mark size/offset changed (pixelGridRoundSize unchanged), call OnSizeChanged(true).
+     * @tc.expected: readyFireCount == 0 (pixelGridRoundSize required on API10+).
+     */
+    pattern->dirtyFrameSize_ = { -1, -1 };
+    pattern->dirtyContentSize_ = { -1, -1 };
+    pattern->dirtyFrameOffset_ = { -1, -1 };
+    pattern->dirtyContentOffset_ = { -1, -1 };
+    readyFireCount = 0;
+    pattern->OnSizeChanged(true);
+    EXPECT_EQ(readyFireCount, 0);
+
+    /**
+     * @tc.steps: step5. API10-: set version=0, mark frameOffset changed, call OnSizeChanged(true).
+     * @tc.expected: readyFireCount == 1 (fire = frameSize||contentSize||frameOffset||contentOffset).
+     */
+    MockContainer::Current()->SetApiTargetVersion(0);
+    pattern->dirtyFrameOffset_ = { -1, -1 };
+    readyFireCount = 0;
+    pattern->OnSizeChanged(true);
+    EXPECT_EQ(readyFireCount, 1);
+
+    /**
+     * @tc.steps: step6. API10-: nothing changed, call OnSizeChanged(true).
+     * @tc.expected: readyFireCount == 0.
+     */
+    readyFireCount = 0;
+    pattern->OnSizeChanged(true);
+    EXPECT_EQ(readyFireCount, 0);
+
+    /**
+     * @tc.steps: step7. API10-: mark pixelGridRoundSize changed only, call OnSizeChanged(true).
+     * @tc.expected: readyFireCount == 0 (pixelGridRoundSize not in API10- condition).
+     */
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    readyFireCount = 0;
+    pattern->OnSizeChanged(true);
+    EXPECT_EQ(readyFireCount, 0);
+
+    /**
+     * @tc.steps: step8. Restore API target version and tear down mocks.
+     * @tc.expected: API version restored.
+     */
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

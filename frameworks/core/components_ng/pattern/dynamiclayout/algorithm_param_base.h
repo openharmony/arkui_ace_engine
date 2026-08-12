@@ -181,7 +181,8 @@ public:
     void FireOnVisibleIndexesChange(const std::vector<int32_t>& indexes) const
     {
         if (onVisibleIndexesChangeEvent_) {
-            onVisibleIndexesChangeEvent_(indexes);
+            auto onVisibleIndexesChangeEvent = onVisibleIndexesChangeEvent_;
+            onVisibleIndexesChangeEvent(indexes);
         }
     }
 

@@ -81,9 +81,9 @@ ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallIn
     if (isJsView) {
         nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         if (!ArkTSUtils::ParseJsColor(vm, secondArg, color, blankResObj)) {
-            CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setColor, panda::JSValueRef::Undefined(vm));
-            GetArkUINodeModifiers()->getBlankModifier()->setColor(
-                nativeNode, Color::TRANSPARENT.GetValue(), AceType::RawPtr(blankResObj));
+            CHECK_NULL_RETURN(
+                GetArkUINodeModifiers()->getBlankModifier()->resetColor, panda::JSValueRef::Undefined(vm));
+            GetArkUINodeModifiers()->getBlankModifier()->resetColor(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
         CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setColor, panda::JSValueRef::Undefined(vm));

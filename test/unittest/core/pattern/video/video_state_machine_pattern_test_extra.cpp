@@ -1651,11 +1651,11 @@ HWTEST_F(VideoStateMachinePatternTestNg, HiddenChange001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnVisibleChange001
- * @tc.desc: Test OnVisibleChange visible=true/false.
+ * @tc.name: OnVisibleAreaChange001
+ * @tc.desc: Test OnVisibleAreaChange visible=true/false.
  * @tc.type: FUNC
  */
-HWTEST_F(VideoStateMachinePatternTestNg, OnVisibleChange001, TestSize.Level1)
+HWTEST_F(VideoStateMachinePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
 {
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
@@ -1666,16 +1666,16 @@ HWTEST_F(VideoStateMachinePatternTestNg, OnVisibleChange001, TestSize.Level1)
     pattern->SetHiddenChangeEvent([&visibleResult](bool hidden) { visibleResult = hidden; });
 
     // visible=true => hidden=false
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     EXPECT_FALSE(visibleResult);
 
     // visible=false => hidden=true
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleAreaChange(false);
     EXPECT_TRUE(visibleResult);
 
     // null event
     pattern->SetHiddenChangeEvent(nullptr);
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     EXPECT_TRUE(pattern->hiddenChangeEvent_ == nullptr);
 }
 

@@ -19,6 +19,7 @@
 #include "core/accessibility/accessibility_manager_ng.h"
 
 #include <cmath>
+#include <unistd.h>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/draw_delegate.h"
@@ -110,7 +111,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
@@ -711,9 +712,9 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
     if (!CheckThreadSafe()) {
         LOGW("AddDirtyPropertyNode doesn't run on UI thread!");
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (dirtyNode && isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
-        LOGW("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
     }
@@ -729,9 +730,9 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
         LOGW("dirtyNode invalid");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
-        LOGW("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
     }
@@ -759,9 +760,9 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty layout node as the pipeline context is destroyed.");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
-        LOGW("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
     }
@@ -824,9 +825,9 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty render node as the pipeline context is destroyed.");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
-        LOGW("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
     }
@@ -857,9 +858,9 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
 {
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (node && isIsolatedThread_ != node->IsIsolatedThread()) {
-        LOGW("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, node->GetId(), node->IsIsolatedThread());
     }
@@ -1246,7 +1247,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     if (frameCount != UINT64_MAX) {
         DispatchDisplaySync(nanoTimestamp);
     }
-    FlushZindexUpdate();
+    FlushRebuildRenderTree();
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
@@ -1648,6 +1649,7 @@ void PipelineContext::HandleSpecialContainerNode()
         parentToChildrenMap[parentId].push_back(positionZNodeId);
     }
     // Process each unique parent node only once
+    std::vector<RefPtr<FrameNode>> childrenList;
     for (const auto& [parentId, childIds] : parentToChildrenMap) {
         auto parentNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(parentId));
         if (!parentNode) {
@@ -1656,7 +1658,7 @@ void PipelineContext::HandleSpecialContainerNode()
         if (parentNode->GetRenderContext()) {
             parentNode->GetRenderContext()->SetDrawNode();
         }
-        std::list<RefPtr<FrameNode>> childrenList;
+        childrenList.clear();
         parentNode->GenerateOneDepthVisibleFrameWithTransition(childrenList);
         for (auto& node : childrenList) {
             if (node && node->GetRenderContext()) {
@@ -1921,28 +1923,28 @@ void PipelineContext::FlushFocusScroll()
     }
 }
 
-void PipelineContext::SetAfterRenderZindexRebuild(int32_t nodeId)
+bool PipelineContext::ThrottleRenderTreeRebuild(int32_t nodeId, const RefPtr<RenderContext>& renderContext)
 {
-    // need to create vector with frameNode update order.
-    idUpdateZOrder_[nodeId] = idUpdateZOrderIndex_++;
+    // Per-parent throttle. Allow up to MAX eager synchronous rebuilds per vsync for this parent;
+    // beyond that, record it (dedup by id, monotonic order) and coalesce into one rebuild flushed
+    // by FlushRebuildRenderTree(). The count map is cleared every vsync. RequestNextFrame is kept on
+    // the node's RenderContext to preserve its FREE_NODE_CHECK / requestFrame_ behavior.
+    if (++rebuildRenderTreeCount_[nodeId] > MAX_RENDER_TREE_REBUILD_PER_VSYNC) {
+        deferredRebuildRenderTree_[nodeId] = rebuildRenderTreeOrder_++;
+        if (renderContext) {
+            renderContext->RequestNextFrame();
+        }
+        return true;
+    }
+    return false;
 }
 
-void PipelineContext::UpdateIdUpdateZOrderIndex()
-{
-    idUpdateZOrderIndex_++;
-}
-
-size_t PipelineContext::GetIdUpdateZOrderIndex() const
-{
-    return idUpdateZOrderIndex_;
-}
-
-void PipelineContext::FlushZindexUpdate()
+void PipelineContext::FlushRebuildRenderTree()
 {
     std::vector<std::pair<int32_t, size_t>> pairs;
-    pairs.reserve(idUpdateZOrder_.size());
+    pairs.reserve(deferredRebuildRenderTree_.size());
     // create with [nodeA, 1], [nodeA, 2], [nodeB, 3], [nodeC, 4], [nodeA, 5], then update with order B C A.
-    for (const auto& pair : idUpdateZOrder_) {
+    for (const auto& pair : deferredRebuildRenderTree_) {
         pairs.push_back(pair);
     }
     std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
@@ -1959,8 +1961,9 @@ void PipelineContext::FlushZindexUpdate()
             }
         }
     }
-    idUpdateZOrderIndex_ = 0;
-    idUpdateZOrder_.clear();
+    rebuildRenderTreeOrder_ = 0;
+    rebuildRenderTreeCount_.clear();
+    deferredRebuildRenderTree_.clear();
 }
 
 void PipelineContext::FlushPipelineImmediately()
@@ -3876,7 +3879,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         config.isReportTid = container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     }
     if (config.isReportTid) {
-        config.tid = static_cast<uint64_t>(pthread_self());
+        config.tid = static_cast<uint64_t>(gettid());
     }
 #endif
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
@@ -6848,8 +6851,14 @@ void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& optio
     int32_t flushCount = 0;
     bool isDirtyLayoutNodesEmpty = IsDirtyLayoutNodesEmpty();
     while (!isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+                option.ToString().c_str(), isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            infiniteAnimationFlushExceeded_ = true;
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
                 option.ToString().c_str(), isDirtyLayoutNodesEmpty);
             break;
         }
@@ -6877,6 +6886,7 @@ void PipelineContext::OpenFrontendAnimation(
         }
     }
     FlushAnimationDirtysWhenExist(option);
+    PushInfiniteAnimationFlushExceeded();
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback, Claim(this));
 }
 
@@ -6886,6 +6896,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         if (forceClose) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION, "force close animation");
             AnimationUtils::CloseImplicitAnimation();
+            PopInfiniteAnimationFlushExceeded();
         }
         return;
     }
@@ -6902,6 +6913,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         pendingFrontendAnimation_.pop();
     }
     AnimationUtils::CloseImplicitAnimation(Claim(this));
+    PopInfiniteAnimationFlushExceeded();
 }
 
 bool PipelineContext::IsDragging() const

@@ -100,6 +100,7 @@ ohos_shared_library("ui_service_mgr") {
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
+  branch_protector_ret = "pac_ret"
 }
 
 ohos_shared_library("uiservice_manager_interface_set") {
@@ -125,4 +126,5 @@ ohos_shared_library("uiservice_manager_interface_set") {
   ]
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
+  branch_protector_ret = "pac_ret"
 }

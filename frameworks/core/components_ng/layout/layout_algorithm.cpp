@@ -23,10 +23,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+thread_local bool g_isInFormComponent = false;
 const std::unordered_set<std::string> OVERFLOW_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::COLUMN_ETS_TAG,
     OHOS::Ace::V2::FLEX_ETS_TAG,
@@ -40,6 +42,7 @@ const std::unordered_set<std::string> SMART_LAYOUT_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::FLEX_ETS_TAG,
     OHOS::Ace::V2::STACK_ETS_TAG,
     OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG,
+    OHOS::Ace::V2::TEXT_ETS_TAG,
 };
 
 bool IsComponentSupportSmartLayout(const RefPtr<FrameNode>& hostNode)
@@ -129,8 +132,12 @@ void LayoutAlgorithmWrapper::Layout(LayoutWrapper* layoutWrapper)
         }
         return;
     }
+    const bool prevInFormComponent = g_isInFormComponent;
+    g_isInFormComponent = prevInFormComponent ||
+        SmartLayoutAlgorithm::HasSmartLayoutIdName(layoutWrapper->GetHostNode());
     layoutAlgorithm_->Layout(layoutWrapper);
     HandleContentOverflowWithSmartLayout(layoutWrapper);
+    g_isInFormComponent = prevInFormComponent;
 }
 
 void LayoutAlgorithmWrapper::SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm)
@@ -260,27 +267,41 @@ bool LayoutAlgorithm::HandleContentOverflowWithSmartLayout(LayoutWrapper* layout
     if (!IsSmartLayoutEffective(hostNode)) {
         return false;
     }
-
     TryRestoreSmartLayoutForHost(layoutWrapper);
-    if (!IsContentOverflowForSmartLayout(layoutWrapper)) {
-        return false;
+
+    RectF childRect;
+    if (hostNode->GetTag() != V2::TEXT_ETS_TAG) {
+        auto collectResult = CollectOverflowFromFrameNode(AceType::RawPtr(hostNode), true, true);
+        if (collectResult.overflowDisabled || !collectResult.totalChildFrameRect.has_value()) {
+            return false;
+        }
+        childRect = collectResult.totalChildFrameRect.value();
     }
-    SmartLayoutAlgorithm smartLayoutAlgorithm;
-    return smartLayoutAlgorithm.PerformSmartLayout(layoutWrapper);
+
+    if (IsContentOverflowForSmartLayout(layoutWrapper, childRect)) {
+        SmartLayoutAlgorithm smartLayoutAlgorithm;
+        return smartLayoutAlgorithm.PerformSmartLayout(layoutWrapper);
+    } else if (IsContentUnderutilizedForSmartLayout(layoutWrapper, childRect)) {
+        SmartLayoutAlgorithm smartLayoutAlgorithm;
+        return smartLayoutAlgorithm.PerformSmartLayoutScaleUp(layoutWrapper);
+    }
+
+    return false;
 }
 
-bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper)
+bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper, const RectF& childRect)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(hostNode, false);
 
-    // 收集子节点包围盒
-    auto collectResult = CollectOverflowFromFrameNode(AceType::RawPtr(hostNode), true, true);
-    if (collectResult.overflowDisabled || !collectResult.totalChildFrameRect.has_value()) {
-        return false;
+    if (hostNode->GetTag() == V2::TEXT_ETS_TAG) {
+        auto textPattern = hostNode->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(textPattern, false);
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        return textPattern->IsContentOverflowForSmartLayout(geometryNode->GetContentSize());
     }
-    const auto& childRect = collectResult.totalChildFrameRect.value();
 
     // 父容器在本地坐标系下的区域
     auto geometry = hostNode->GetGeometryNode();
@@ -289,16 +310,68 @@ bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapp
     RectF parentRect(0.0f, 0.0f, frameSize.Width(), frameSize.Height());
 
     // 子节点包围盒是否超出父容器
-    constexpr double MAX_GAP = 2.0;
-    return LessNotEqual(childRect.Top(), parentRect.Top() - MAX_GAP) ||
-        GreatNotEqual(childRect.Bottom(), parentRect.Bottom() + MAX_GAP) ||
-        LessNotEqual(childRect.Left(), parentRect.Left() - MAX_GAP) ||
-        GreatNotEqual(childRect.Right(), parentRect.Right() + MAX_GAP);
+    return LessOrEqual(childRect.Top(), parentRect.Top()) ||
+        GreatOrEqual(childRect.Bottom(), parentRect.Bottom()) ||
+        LessOrEqual(childRect.Left(), parentRect.Left()) ||
+        GreatOrEqual(childRect.Right(), parentRect.Right());
+}
+
+bool LayoutAlgorithm::IsContentUnderutilizedForSmartLayout(LayoutWrapper* layoutWrapper, const RectF& childRect)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto geometry = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometry, false);
+    auto frameSize = geometry->GetFrameSize();
+
+    auto* context = hostNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+
+    // 1px tolerance for matching host frame size against smart layout root size
+    constexpr float ROOT_SIZE_EPSILON = 1.0f;
+    auto isRootSizeMatched = [&frameSize](float width, float height) {
+        return NearEqual(width, frameSize.Width(), ROOT_SIZE_EPSILON) &&
+            NearEqual(height, frameSize.Height(), ROOT_SIZE_EPSILON);
+    };
+    if (context->IsFormRender()) {
+        auto rootRect = context->GetRootRect();
+        if (!isRootSizeMatched(rootRect.Width(), rootRect.Height())) {
+            return false;
+        }
+    } else {
+        auto formNode = SmartLayoutAlgorithm::FindGenUIRenderComp(hostNode);
+        CHECK_NULL_RETURN(formNode, false);
+        auto formGeo = formNode->GetGeometryNode();
+        CHECK_NULL_RETURN(formGeo, false);
+        auto formSize = formGeo->GetFrameSize();
+        if (!isRootSizeMatched(formSize.Width(), formSize.Height())) {
+            return false;
+        }
+    }
+
+    double containerArea = static_cast<double>(frameSize.Width()) * static_cast<double>(frameSize.Height());
+    if (containerArea <= 0) {
+        return false;
+    }
+    double bbArea = static_cast<double>(childRect.Width()) * static_cast<double>(childRect.Height());
+    if (bbArea <= 0) {
+        return false;
+    }
+
+    double emptyRatio = 1.0 - (bbArea / containerArea);
+    // Empty area over the shared threshold of container is considered sparse
+    return GreatNotEqual(emptyRatio, SMART_LAYOUT_EMPTY_RATIO_THRESHOLD);
 }
 
 void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto parentHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(parentHost);
+    if (parentHost->GetTag() == V2::TEXT_ETS_TAG) {
+        return;
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     for (const auto& child : children) {
         CHECK_NULL_CONTINUE(child);
@@ -392,11 +465,34 @@ std::string LayoutAlgorithm::ComputeCurrentPathHash(FrameNode* hostNode)
 
 bool LayoutAlgorithm::IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode)
 {
-    if (!FeatureParam::IsSmartLayoutPageOverflowFixEnabled() || !hostNode ||
-        !IsComponentSupportSmartLayout(hostNode) || !hostNode->IsOnMainTree()) {
+    CHECK_NULL_RETURN(hostNode, false);
+    if (!IsComponentSupportSmartLayout(hostNode)) {
         return false;
     }
+    return IsSmartLayoutEffectiveByA2UIForm(hostNode) || IsSmartLayoutEffectiveByPathHash(hostNode);
+}
 
+bool LayoutAlgorithm::IsSmartLayoutEffectiveByA2UIForm(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, false);
+    auto pattern = hostNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    const auto& vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(hostNode)));
+    CHECK_NULL_RETURN(vOverflowHandler, false);
+
+    if (g_isInFormComponent) {
+        vOverflowHandler->SetIsInFormComponent(true);
+        return true;
+    }
+    return vOverflowHandler->IsInFormComponent();
+}
+
+bool LayoutAlgorithm::IsSmartLayoutEffectiveByPathHash(const RefPtr<FrameNode>& hostNode)
+{
+    if (!FeatureParam::IsSmartLayoutPageOverflowFixEnabled()) {
+        return false;
+    }
     auto pattern = hostNode->GetPattern();
     CHECK_NULL_RETURN(pattern, false);
     const auto& vOverflowHandler =

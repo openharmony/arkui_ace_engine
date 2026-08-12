@@ -29,6 +29,9 @@ namespace {
 constexpr float LAZY_GRID_ITEM_HEIGHT = 50.0f;
 constexpr float LAZY_GRID_GAP = 5.0f;
 constexpr int32_t LAZY_GRID_SMALL_ITEM_COUNT = 4;
+constexpr float ADJUST_OFFSET_START_POSITIVE = 20.0f;
+constexpr float ADJUST_OFFSET_START_NEGATIVE = -20.0f;
+constexpr float ADJUST_OFFSET_END = 15.0f;
 
 void CreateLazyVGridInScroll(float itemHeight, int32_t itemCount)
 {
@@ -2372,6 +2375,570 @@ HWTEST_F(ScrollLayoutTestNg, MeasureLazyChild005, TestSize.Level1)
     EXPECT_EQ(viewPosRef.viewPosEnd, HEIGHT);
     EXPECT_EQ(viewPosRef.referenceEdge, ReferenceEdge::START);
     EXPECT_EQ(viewPosRef.axis, axis);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest001
+ * @tc.desc: Test GetLazyChildAdjustOffset with positive start adjustOffset applied during MeasureLazyChildAgain
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_POSITIVE, 0.0f };
+
+    auto initialOffset = layoutAlgorithm->currentOffset_;
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialOffset - ADJUST_OFFSET_START_POSITIVE);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest002
+ * @tc.desc: Test GetLazyChildAdjustOffset with negative start adjustOffset (currentOffset increases)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest002, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_NEGATIVE, 0.0f };
+
+    auto initialOffset = layoutAlgorithm->currentOffset_;
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialOffset - ADJUST_OFFSET_START_NEGATIVE);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest003
+ * @tc.desc: Test that non-lazy child does not trigger GetLazyChildAdjustOffset (hasLazyLayoutChild_ is false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest003, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    auto initialOffset = layoutAlgorithm->currentOffset_;
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, false);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialOffset);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest004
+ * @tc.desc: Test GetLazyChildAdjustOffset with zero adjustOffset (no effect on currentOffset_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest004, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { 0.0f, 0.0f };
+
+    auto initialOffset = layoutAlgorithm->currentOffset_;
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialOffset);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest005
+ * @tc.desc: Test that only end adjustOffset (start=0) has no effect on currentOffset_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest005, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { 0.0f, ADJUST_OFFSET_END };
+
+    auto initialOffset = layoutAlgorithm->currentOffset_;
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialOffset);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest006
+ * @tc.desc: Test GetAndResetAdjustOffset resets adjustOffset after being consumed during MeasureLazyChildAgain
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest006, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_POSITIVE, ADJUST_OFFSET_END };
+
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(gridPattern->layoutInfo_->adjustOffset_.start, 0.0f);
+    EXPECT_EQ(gridPattern->layoutInfo_->adjustOffset_.end, 0.0f);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest007
+ * @tc.desc: Test that second MeasureLazyChildAgain gets default AdjustOffset after first call consumed it
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest007, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_POSITIVE, ADJUST_OFFSET_END };
+
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    auto offsetAfterFirstCall = layoutAlgorithm->currentOffset_;
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, offsetAfterFirstCall);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest008
+ * @tc.desc: Test GetLazyChildAdjustOffset returns default when child has no LazyLayoutPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest008, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateContentChild(10);
+    CreateScrollDone();
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    auto initialOffset = layoutAlgorithm->currentOffset_;
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialOffset);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest009
+ * @tc.desc: Test positive start adjustOffset with both start and end values set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest009, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_POSITIVE, ADJUST_OFFSET_END };
+
+    auto initialOffset = layoutAlgorithm->currentOffset_;
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialOffset - ADJUST_OFFSET_START_POSITIVE);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest010
+ * @tc.desc: Test that adjustOffset is fully reset (both start and end) after consumption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest010, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_POSITIVE, ADJUST_OFFSET_END };
+
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(gridPattern->layoutInfo_->adjustOffset_.start, 0.0f);
+    EXPECT_EQ(gridPattern->layoutInfo_->adjustOffset_.end, 0.0f);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest011
+ * @tc.desc: Test that second MeasureLazyChildAgain with a new algorithm gets zero adjustOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest011, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_POSITIVE, 0.0f };
+
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    auto offsetAfterFirstCall = layoutAlgorithm->currentOffset_;
+
+    auto layoutAlgorithm2 = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(offsetAfterFirstCall);
+    layoutAlgorithm2->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm2->currentOffset_, offsetAfterFirstCall);
+}
+
+/**
+ * @tc.name: GetLazyChildAdjustOffsetTest012
+ * @tc.desc: Test GetLazyChildAdjustOffset with non-zero initial scroll offset and positive adjustOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, GetLazyChildAdjustOffsetTest012, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    double initialScrollOffset = -100.0;
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(initialScrollOffset);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    gridPattern->layoutInfo_->adjustOffset_ = { ADJUST_OFFSET_START_POSITIVE, 0.0f };
+
+    auto padding = scrollLayoutProperty->CreatePaddingAndBorder();
+    layoutAlgorithm->MeasureLazyChildAgain(
+        childWrapper, childLayoutConstraint, axis, contentSize, padding, true);
+
+    EXPECT_EQ(layoutAlgorithm->currentOffset_, initialScrollOffset - ADJUST_OFFSET_START_POSITIVE);
 }
 
 } // namespace OHOS::Ace::NG

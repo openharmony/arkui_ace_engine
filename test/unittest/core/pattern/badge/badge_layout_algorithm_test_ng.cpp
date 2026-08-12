@@ -67,7 +67,8 @@ public:
     void TearDown() override;
     void GetInstance();
     OffsetF GetTextDataOffset(const BadgePosition badgePosition, const TextDirection layoutDirection,
-        float badgeCircleDiameter, const OffsetF offset, const SizeF parentSize, bool textIsSpace);
+        float badgeCircleDiameter, const OffsetF offset, const SizeF parentSize, bool textIsSpace,
+        float textWidth = 0.0f, float textHeight = 0.0f);
     OffsetF GetTextOffsetByPosition(
         const RefPtr<BadgeLayoutProperty> layoutProperty, const RefPtr<GeometryNode>& geometryNode);
 
@@ -151,34 +152,40 @@ void BadgeLayoutAlgorithmTestNg::CreateFrameNodeAndBadgeModelNG(const Dimension 
 
 OffsetF BadgeLayoutAlgorithmTestNg::GetTextDataOffset(const BadgePosition badgePosition,
     const TextDirection layoutDirection, float badgeCircleDiameter, const OffsetF offset, const SizeF parentSize,
-    bool textIsSpace)
+    bool textIsSpace, float textWidth, float textHeight)
 {
-    auto badgeCircleRadius = badgeCircleDiameter / 2;
     auto width = parentSize.Width();
     auto height = parentSize.Height();
     OffsetF textOffset;
     if (badgePosition == BadgePosition::RIGHT_TOP) {
         if (layoutDirection == TextDirection::RTL) {
-            textOffset = OffsetF(offset.GetX(), offset.GetY());
+            textOffset = OffsetF(offset.GetX() + badgeCircleDiameter - textWidth, offset.GetY());
         } else {
             textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY());
         }
         if (!textIsSpace) {
-            textOffset += OffsetF(Dimension(2.0_vp).ConvertToPx(), -Dimension(2.0_vp).ConvertToPx());
+            float adjustOffset = Dimension(2.0_vp).ConvertToPx();
+            if (layoutDirection == TextDirection::RTL) {
+                textOffset += OffsetF(-adjustOffset, -adjustOffset);
+            } else {
+                textOffset += OffsetF(adjustOffset, -adjustOffset);
+            }
         }
     } else if (badgePosition == BadgePosition::RIGHT) {
         if (layoutDirection == TextDirection::RTL) {
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + badgeCircleDiameter - textWidth,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         } else {
-            textOffset = OffsetF(
-                offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         }
     } else if (badgePosition == BadgePosition::LEFT) {
         if (layoutDirection == TextDirection::RTL) {
-            textOffset = OffsetF(
-                offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         } else {
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + badgeCircleDiameter - textWidth,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         }
     } else {
         textOffset = OffsetF(offset.GetX(), offset.GetY());
@@ -453,17 +460,20 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg007, TestSize.Lev
     OffsetF frameOffset = OffsetF(0, 0);
     SizeF frameSize(400.0, 400.0);
     OffsetF result = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result.GetX(), 370.0f);
     EXPECT_EQ(result.GetY(), 0.0f);
 
     OffsetF result2 =
-        GetTextDataOffset(BadgePosition::RIGHT, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true);
+        GetTextDataOffset(BadgePosition::RIGHT, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true,
+            badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result2.GetX(), 370.0f);
     EXPECT_EQ(result2.GetY(), 185.0f);
 
     OffsetF result3 =
-        GetTextDataOffset(BadgePosition::LEFT, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true);
+        GetTextDataOffset(BadgePosition::LEFT, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true,
+            badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result3.GetX(), 0.0f);
     EXPECT_EQ(result3.GetY(), 185.0f);
 
@@ -471,17 +481,20 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg007, TestSize.Lev
      * @tc.steps: step3. Check the results generated by using different TextDirection as input parameters for bb.
      */
     OffsetF result4 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::RTL, badgeCircleDiameter, frameOffset, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::RTL, badgeCircleDiameter, frameOffset, frameSize, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result4.GetX(), 0.0f);
     EXPECT_EQ(result4.GetY(), 0.0f);
 
     OffsetF result5 =
-        GetTextDataOffset(BadgePosition::RIGHT, TextDirection::RTL, badgeCircleDiameter, frameOffset, frameSize, true);
+        GetTextDataOffset(BadgePosition::RIGHT, TextDirection::RTL, badgeCircleDiameter, frameOffset, frameSize, true,
+            badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result5.GetX(), 0.0f);
     EXPECT_EQ(result5.GetY(), 185.0f);
 
     OffsetF result6 =
-        GetTextDataOffset(BadgePosition::LEFT, TextDirection::RTL, badgeCircleDiameter, frameOffset, frameSize, true);
+        GetTextDataOffset(BadgePosition::LEFT, TextDirection::RTL, badgeCircleDiameter, frameOffset, frameSize, true,
+            badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result6.GetX(), 370.0f);
     EXPECT_EQ(result6.GetY(), 185.0f);
 }
@@ -517,19 +530,22 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg008, TestSize.Lev
     OffsetF frameOffset = OffsetF(0, 0);
     SizeF frameSize(200.0, 50.0);
     OffsetF result = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result.GetX(), 185.0f);
     EXPECT_EQ(result.GetY(), 0.0f);
 
     auto badgeCircleDiameter2 = BADGE_CIRCLE_SIZE.ConvertToPx();
     OffsetF result2 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter2, frameOffset, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter2, frameOffset, frameSize, true,
+        badgeCircleDiameter2, badgeCircleDiameter2);
     EXPECT_EQ(result2.GetX(), 170.0f);
     EXPECT_EQ(result2.GetY(), 0.0f);
 
     auto badgeCircleDiameter3 = BADGE_CIRCLE_SIZE.ConvertToPx() * 2;
     OffsetF result3 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter3, frameOffset, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter3, frameOffset, frameSize, true,
+        badgeCircleDiameter3, badgeCircleDiameter3);
     EXPECT_EQ(result3.GetX(), 140.0f);
     EXPECT_EQ(result3.GetY(), 0.0f);
 }
@@ -566,19 +582,22 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg009, TestSize.Lev
     OffsetF frameOffset = OffsetF(0, 0);
     SizeF frameSize(200.0, 50.0);
     OffsetF result4 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, false);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, false,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result4.GetX(), 187.0f);
     EXPECT_EQ(result4.GetY(), -2.0f);
 
     auto badgeCircleDiameter2 = BADGE_CIRCLE_SIZE.ConvertToPx();
     OffsetF result5 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter2, frameOffset, frameSize, false);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter2, frameOffset, frameSize, false,
+        badgeCircleDiameter2, badgeCircleDiameter2);
     EXPECT_EQ(result5.GetX(), 172.0f);
     EXPECT_EQ(result5.GetY(), -2.0f);
 
     auto badgeCircleDiameter3 = BADGE_CIRCLE_SIZE.ConvertToPx() * 2;
     OffsetF result6 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter3, frameOffset, frameSize, false);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter3, frameOffset, frameSize, false,
+        badgeCircleDiameter3, badgeCircleDiameter3);
     EXPECT_EQ(result6.GetX(), 142.0f);
     EXPECT_EQ(result6.GetY(), -2.0f);
 }
@@ -614,19 +633,22 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg010, TestSize.Lev
     OffsetF frameOffset = OffsetF(0, 0);
     SizeF frameSize(200.0, 50.0);
     OffsetF result = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result.GetX(), 170.0f);
     EXPECT_EQ(result.GetY(), 0.0f);
 
     SizeF frameSize2(100.0, 50.0);
     OffsetF result2 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize2, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize2, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result2.GetX(), 70.0f);
     EXPECT_EQ(result2.GetY(), 0.0f);
 
     SizeF frameSize3(50.0, 100.0);
     OffsetF result3 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize3, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize3, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result3.GetX(), 20.0f);
     EXPECT_EQ(result3.GetY(), 0.0f);
 
@@ -635,13 +657,15 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg010, TestSize.Lev
      */
     OffsetF frameOffset2 = OffsetF(20, 0);
     OffsetF result4 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset2, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset2, frameSize, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result4.GetX(), 190.0f);
     EXPECT_EQ(result4.GetY(), 0.0f);
 
     OffsetF frameOffset3 = OffsetF(0, 30);
     OffsetF result5 = GetTextDataOffset(
-        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset3, frameSize, true);
+        BadgePosition::RIGHT_TOP, TextDirection::LTR, badgeCircleDiameter, frameOffset3, frameSize, true,
+        badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result5.GetX(), 170.0f);
     EXPECT_EQ(result5.GetY(), 30.0f);
 }
@@ -988,7 +1012,8 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg020, TestSize.Lev
     OffsetF frameOffset(12.0f, 24.0f);
     SizeF frameSize(200.0f, 80.0f);
     OffsetF result =
-        GetTextDataOffset(BadgePosition(6), TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true);
+        GetTextDataOffset(BadgePosition(6), TextDirection::LTR, badgeCircleDiameter, frameOffset, frameSize, true,
+            badgeCircleDiameter, badgeCircleDiameter);
     EXPECT_EQ(result.GetX(), frameOffset.GetX());
     EXPECT_EQ(result.GetY(), frameOffset.GetY());
 }
@@ -1248,7 +1273,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg026, TestSize.Lev
 
 /**
  * @tc.name: BadgeLayoutAlgorithmTestNg027
- * @tc.desc: Test AdjustTextOffsetForBadge keeps X offset unchanged for RIGHT position in RTL.
+ * @tc.desc: Test AdjustTextOffsetForBadge adjusts offset for RIGHT position in RTL.
  * @tc.type: FUNC
  */
 HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg027, TestSize.Level1)
@@ -1277,14 +1302,21 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg027, TestSize.Lev
     layoutProperty_->UpdateIsEnableAutoAvoidance(true);
     FlushUITasks(frameNode_);
     auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
 
-    EXPECT_EQ(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), textWidth - badgeCircleDiameter);
     EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
 }
 
 /**
  * @tc.name: BadgeLayoutAlgorithmTestNg028
- * @tc.desc: Test AdjustTextOffsetForBadge keeps X offset unchanged for LEFT position in LTR.
+ * @tc.desc: Test AdjustTextOffsetForBadge adjusts offset for LEFT position in LTR.
  * @tc.type: FUNC
  */
 HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg028, TestSize.Level1)
@@ -1313,14 +1345,21 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg028, TestSize.Lev
     layoutProperty_->UpdateIsEnableAutoAvoidance(true);
     FlushUITasks(frameNode_);
     auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
 
-    EXPECT_EQ(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), textWidth - badgeCircleDiameter);
     EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
 }
 
 /**
  * @tc.name: BadgeLayoutAlgorithmTestNg029
- * @tc.desc: Test AdjustTextOffsetForBadge keeps offsets unchanged for RIGHT_TOP position in RTL with empty text.
+ * @tc.desc: Test AdjustTextOffsetForBadge adjusts offset for RIGHT_TOP position in RTL with empty text.
  * @tc.type: FUNC
  */
 HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg029, TestSize.Level1)
@@ -1349,8 +1388,15 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg029, TestSize.Lev
     layoutProperty_->UpdateIsEnableAutoAvoidance(true);
     FlushUITasks(frameNode_);
     auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
 
-    EXPECT_EQ(offsetWithAvoidance.GetX(), offsetWithoutAvoidance.GetX());
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), badgeCircleDiameter - textWidth);
     EXPECT_EQ(offsetWithAvoidance.GetY(), offsetWithoutAvoidance.GetY());
 }
 
@@ -1385,9 +1431,17 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg030, TestSize.Lev
     layoutProperty_->UpdateIsEnableAutoAvoidance(true);
     FlushUITasks(frameNode_);
     auto offsetWithAvoidance = badgeTextNode->GetGeometryNode()->GetMarginFrameOffset();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto badgeCircleDiameter = pipeline->GetFontScale() >= AGE_FONT_SIZE_SCALE ?
+        badgeTheme->GetBadgeAgeCircleSize().ConvertToPx() : badgeTheme->GetBadgeCircleSize().ConvertToPx();
+    auto textWidth = badgeTextNode->GetGeometryNode()->GetFrameSize().Width();
+    auto adjust2vp = Dimension(2.0_vp).ConvertToPx();
 
-    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), -Dimension(2.0_vp).ConvertToPx());
-    EXPECT_EQ(offsetWithAvoidance.GetY() - offsetWithoutAvoidance.GetY(), Dimension(2.0_vp).ConvertToPx());
+    EXPECT_EQ(offsetWithAvoidance.GetX() - offsetWithoutAvoidance.GetX(), textWidth - badgeCircleDiameter + adjust2vp);
+    EXPECT_EQ(offsetWithAvoidance.GetY() - offsetWithoutAvoidance.GetY(), adjust2vp);
 }
 
 /**
@@ -1777,5 +1831,78 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg040, TestSize.Lev
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     EXPECT_EQ(frameSize.Width(), 60.0f);
     EXPECT_EQ(frameSize.Height(), 40.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg041
+ * @tc.desc: Test GetTextDataOffset in RTL when textWidth greater than badgeCircleDiameter for RIGHT_TOP position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg041, TestSize.Level1)
+{
+    auto badgeCircleDiameter = BADGE_CIRCLE_SIZE.ConvertToPx();
+    float textWidth = badgeCircleDiameter + 20.0f;
+    float textHeight = badgeCircleDiameter + 5.0f;
+    OffsetF frameOffset(0.0f, 0.0f);
+    SizeF frameSize(400.0f, 400.0f);
+    OffsetF result = GetTextDataOffset(BadgePosition::RIGHT_TOP, TextDirection::RTL, badgeCircleDiameter,
+        frameOffset, frameSize, true, textWidth, textHeight);
+    EXPECT_EQ(result.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_EQ(result.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg042
+ * @tc.desc: Test GetTextDataOffset in RTL when textWidth greater than badgeCircleDiameter for RIGHT position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg042, TestSize.Level1)
+{
+    auto badgeCircleDiameter = BADGE_CIRCLE_SIZE.ConvertToPx();
+    float textWidth = badgeCircleDiameter + 15.0f;
+    float textHeight = badgeCircleDiameter + 3.0f;
+    OffsetF frameOffset(0.0f, 0.0f);
+    SizeF frameSize(400.0f, 400.0f);
+    OffsetF result = GetTextDataOffset(BadgePosition::RIGHT, TextDirection::RTL, badgeCircleDiameter,
+        frameOffset, frameSize, true, textWidth, textHeight);
+    EXPECT_EQ(result.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_EQ(result.GetY(), frameSize.Height() * PERCENT_HALF - textHeight * PERCENT_HALF);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg043
+ * @tc.desc: Test GetTextDataOffset in LTR when textWidth greater than badgeCircleDiameter for LEFT position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg043, TestSize.Level1)
+{
+    auto badgeCircleDiameter = BADGE_CIRCLE_SIZE.ConvertToPx();
+    float textWidth = badgeCircleDiameter + 25.0f;
+    float textHeight = badgeCircleDiameter + 8.0f;
+    OffsetF frameOffset(0.0f, 0.0f);
+    SizeF frameSize(400.0f, 400.0f);
+    OffsetF result = GetTextDataOffset(BadgePosition::LEFT, TextDirection::LTR, badgeCircleDiameter,
+        frameOffset, frameSize, true, textWidth, textHeight);
+    EXPECT_EQ(result.GetX(), badgeCircleDiameter - textWidth);
+    EXPECT_EQ(result.GetY(), frameSize.Height() * PERCENT_HALF - textHeight * PERCENT_HALF);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg044
+ * @tc.desc: Test GetTextDataOffset in RTL with non-space text for RIGHT_TOP position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg044, TestSize.Level1)
+{
+    auto badgeCircleDiameter = BADGE_CIRCLE_SIZE.ConvertToPx();
+    float textWidth = badgeCircleDiameter + 10.0f;
+    float textHeight = badgeCircleDiameter + 3.0f;
+    OffsetF frameOffset(0.0f, 0.0f);
+    SizeF frameSize(400.0f, 400.0f);
+    OffsetF result = GetTextDataOffset(BadgePosition::RIGHT_TOP, TextDirection::RTL, badgeCircleDiameter,
+        frameOffset, frameSize, false, textWidth, textHeight);
+    float adjustOffset = Dimension(2.0_vp).ConvertToPx();
+    EXPECT_EQ(result.GetX(), badgeCircleDiameter - textWidth - adjustOffset);
+    EXPECT_EQ(result.GetY(), -adjustOffset);
 }
 } // namespace OHOS::Ace::NG

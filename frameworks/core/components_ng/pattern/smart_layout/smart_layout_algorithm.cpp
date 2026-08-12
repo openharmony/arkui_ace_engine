@@ -14,17 +14,27 @@
  */
 
 #include "frameworks/core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
+#include "base/utils/string_utils.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_engine_loader.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr double SMART_LAYOUT_TEXT_ADAPT_MIN_FONT_SIZE_LIMIT_RATIO = 0.6;
+
+/**
+ * @brief Fixed inspector id prefix marking smart layout enabled containers, matched by prefix.
+ */
+constexpr char GENUI_RENDER_COMPONENT_ID_NAME[] = "__genui_render_component__";
+
 /**
  * @brief Convert FlexAlign to SmartLayoutAlign for decoupling
  */
@@ -44,6 +54,24 @@ SmartLayoutAlign ConvertFlexAlignToSmartLayoutAlign(FlexAlign flexAlign)
 
 } // namespace
 
+bool SmartLayoutAlgorithm::HasSmartLayoutIdName(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    const auto& idName = node->GetInspectorId();
+    return idName.has_value() && StringUtils::StartWith(idName.value(), GENUI_RENDER_COMPONENT_ID_NAME);
+}
+
+RefPtr<FrameNode> SmartLayoutAlgorithm::FindGenUIRenderComp(const RefPtr<FrameNode>& hostNode)
+{
+    auto node = hostNode;
+    while (node) {
+        if (HasSmartLayoutIdName(node)) {
+            return node;
+        }
+        node = node->GetAncestorNodeOfFrame(false);
+    }
+    return nullptr;
+}
 
 SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* layoutWrapper)
 {
@@ -54,6 +82,9 @@ SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* la
     }
     if (hostTag == V2::ROW_ETS_TAG) {
         return SmartLayoutType::ROW;
+    }
+    if (hostTag == V2::TEXT_ETS_TAG) {
+        return SmartLayoutType::TEXT;
     }
     if (hostTag == V2::FLEX_ETS_TAG) {
         auto hostNode = layoutWrapper->GetHostNode();
@@ -80,6 +111,9 @@ bool SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
     ACE_SCOPED_TRACE("PerformSmartLayout");
     auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
     CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
+    if (layoutType == SmartLayoutType::TEXT) {
+        return HandleTextContentOverflow(layoutWrapper);
+    }
     LOGD("SmartLayout: Detected layout %{public}s content overflow!!",
         layoutWrapper->GetHostTag().c_str());
     return ExecuteLayout(layoutWrapper, layoutType);
@@ -187,25 +221,38 @@ OffsetF SmartLayoutAlgorithm::CalculateOffsetWithMargin(
     const ISmartLayoutNode& layoutNode,
     const RefPtr<GeometryNode> geoNode,
     double boundingBoxOffsetX,
-    double boundingBoxOffsetY)
+    double boundingBoxOffsetY,
+    bool isFormRender)
 {
     double offsetX = layoutNode.GetPosition().offsetX.value;
     double offsetY = layoutNode.GetPosition().offsetY.value;
 
-    if (rootNode_->GetLayoutType() == SmartLayoutType::ROW) {
-        return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY + boundingBoxOffsetY));
-    } else if (rootNode_->GetLayoutType() == SmartLayoutType::COLUMN) {
-        return OffsetF(static_cast<float>(offsetX + boundingBoxOffsetX), static_cast<float>(offsetY));
+    if (isFormRender) {
+        return OffsetF(static_cast<float>(offsetX + boundingBoxOffsetX),
+            static_cast<float>(offsetY + boundingBoxOffsetY));
     }
-    return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY));
+
+    auto layoutType = rootNode_->GetLayoutType();
+    if (layoutType != SmartLayoutType::ROW && layoutType != SmartLayoutType::COLUMN) {
+        return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY));
+    }
+
+    auto& context = rootNode_->GetContext();
+    bool centerX = (layoutType == SmartLayoutType::ROW)
+        ? (context.mainAxisAlign == SmartLayoutAlign::CENTER)
+        : (context.crossAxisAlign == SmartLayoutAlign::CENTER);
+    bool centerY = (layoutType == SmartLayoutType::ROW)
+        ? (context.crossAxisAlign == SmartLayoutAlign::CENTER)
+        : (context.mainAxisAlign == SmartLayoutAlign::CENTER);
+
+    return OffsetF(static_cast<float>(centerX ? offsetX + boundingBoxOffsetX : offsetX),
+        static_cast<float>(centerY ? offsetY + boundingBoxOffsetY : offsetY));
 }
 
 void SmartLayoutAlgorithm::ApplyChildLayout(
     const RefPtr<LayoutWrapper>& childWrapper,
     const std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>>& nodeMap,
-    double sizeScale,
-    double boundingBoxOffsetX,
-    double boundingBoxOffsetY)
+    double sizeScale, double boundingBoxOffsetX, double boundingBoxOffsetY)
 {
     CHECK_NULL_VOID(childWrapper);
     auto hostNode = childWrapper->GetHostNode();
@@ -219,8 +266,7 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
         return;
     }
 
-    int64_t nodeId = hostNode->GetId();
-    auto it = nodeMap.find(nodeId);
+    auto it = nodeMap.find(hostNode->GetId());
     if (it == nodeMap.end()) {
         return;
     }
@@ -229,7 +275,27 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
 
     auto geoNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
-    OffsetF offset = CalculateOffsetWithMargin(*layoutNode, geoNode, boundingBoxOffsetX, boundingBoxOffsetY);
+    auto* context = hostNode->GetContext();
+    bool isFormRender = false;
+    // 1px tolerance for matching smart layout root size against form/page root size
+    constexpr float FORM_SIZE_EPSILON = 1.0f;
+    const auto& rootSize = rootNode_->GetContext().size;
+    auto isRootSizeMatched = [&rootSize](float width, float height) {
+        return NearEqual(width, rootSize.Width(), FORM_SIZE_EPSILON) &&
+            NearEqual(height, rootSize.Height(), FORM_SIZE_EPSILON);
+    };
+    if (context != nullptr && context->IsFormRender()) {
+        isFormRender = isRootSizeMatched(context->GetRootRect().Width(), context->GetRootRect().Height());
+    } else {
+        auto formNode = FindGenUIRenderComp(hostNode);
+        if (formNode != nullptr) {
+            auto formGeo = formNode->GetGeometryNode();
+            CHECK_NULL_VOID(formGeo);
+            isFormRender = isRootSizeMatched(formGeo->GetFrameSize().Width(), formGeo->GetFrameSize().Height());
+        }
+    }
+    OffsetF offset =
+        CalculateOffsetWithMargin(*layoutNode, geoNode, boundingBoxOffsetX, boundingBoxOffsetY, isFormRender);
     geoNode->SetFrameOffset(offset);
     renderContext->SetRenderPivot(0.0f, 0.0f);
     hostNode->ForceSyncGeometryNode();
@@ -239,10 +305,8 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
     LOGD("SmartLayout: Applied layout for child %{public}s [%{public}s]: \
         offset=(%{public}f, %{public}f), size=(%{public}f, %{public}f)",
         layoutNode->GetName().c_str(), hostNode->GetTag().c_str(),
-        layoutNode->GetPosition().offsetX.value,
-        layoutNode->GetPosition().offsetY.value,
-        layoutNode->GetSize().width.value,
-        layoutNode->GetSize().height.value);
+        layoutNode->GetPosition().offsetX.value, layoutNode->GetPosition().offsetY.value,
+        layoutNode->GetSize().width.value, layoutNode->GetSize().height.value);
 }
 
 bool SmartLayoutAlgorithm::ApplyLayoutResults(LayoutWrapper* layoutWrapper)
@@ -259,6 +323,9 @@ bool SmartLayoutAlgorithm::ApplyLayoutResults(LayoutWrapper* layoutWrapper)
     auto [boundingBoxOffsetX, boundingBoxOffsetY] = CalculateBoundingBoxOffsets();
     auto nodeMap = BuildNodeIdMap(children);
     double sizeScale = rootNode_->GetScaleInfo().sizeScale.value;
+    if (NearZero(sizeScale)) {
+        return false;
+    }
     for (const auto& childWrapper : layoutWrapper->GetAllChildrenWithBuild(false)) {
         ApplyChildLayout(childWrapper, nodeMap, sizeScale, boundingBoxOffsetX, boundingBoxOffsetY);
     }
@@ -295,8 +362,18 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
         context.size = SmartLayoutSize(0.0, 0.0);
     }
 
+    auto hostNode = layoutWrapper->GetHostNode();
+    auto pipeline = hostNode ? hostNode->GetContext() : nullptr;
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     if (layoutProp) {
+        if (pipeline) {
+            auto padding = layoutProp->CreatePaddingWithoutBorder();
+            context.padding.left = static_cast<double>(padding.left.value_or(0));
+            context.padding.right = static_cast<double>(padding.right.value_or(0));
+            context.padding.top = static_cast<double>(padding.top.value_or(0));
+            context.padding.bottom = static_cast<double>(padding.bottom.value_or(0));
+        }
+
         auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutProp);
         if (flexProp) {
             auto mainAlign = flexProp->GetMainAxisAlign().value_or(FlexAlign::FLEX_START);
@@ -308,7 +385,6 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
 
     rootNode_->SetFixedSizeConstraints(context.size.Width(), context.size.Height());
 
-    auto hostNode = layoutWrapper->GetHostNode();
     if (hostNode) {
         OffsetF absoluteOffset = hostNode->GetTransformRelativeOffset();
         if (NearZero(absoluteOffset.GetY())) {
@@ -316,6 +392,124 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
         }
     }
     return true;
+}
+
+bool SmartLayoutAlgorithm::HandleTextContentOverflow(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto spanItems = textPattern->GetSpanItemChildren();
+    bool propertyChanged = false;
+    std::optional<Dimension> explicitSpanFontSize;
+    if (spanItems.size() == 1 && spanItems.front() && spanItems.front()->fontStyle &&
+        spanItems.front()->fontStyle->HasFontSize()) {
+        explicitSpanFontSize = spanItems.front()->fontStyle->GetFontSize();
+        spanItems.front()->fontStyle->ResetFontSize();
+        layoutProperty->UpdateFontSize(explicitSpanFontSize.value());
+        propertyChanged = true;
+    }
+    auto currentFontSize = layoutProperty->GetFontSize().value_or(textPattern->GetTextStyle().GetFontSize());
+    auto targetMinFontSize = currentFontSize * SMART_LAYOUT_TEXT_ADAPT_MIN_FONT_SIZE_LIMIT_RATIO;
+    auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
+    if (!adaptMinFontSize.has_value() || NearZero(adaptMinFontSize->ConvertToPx()) ||
+        GreatNotEqual(adaptMinFontSize->ConvertToPx(), targetMinFontSize.ConvertToPx())) {
+        layoutProperty->UpdateAdaptMinFontSize(targetMinFontSize);
+        propertyChanged = true;
+    }
+    auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
+    if (explicitSpanFontSize.has_value() || !adaptMaxFontSize.has_value() ||
+        NearZero(adaptMaxFontSize->ConvertToPx())) {
+        layoutProperty->UpdateAdaptMaxFontSize(explicitSpanFontSize.value_or(currentFontSize));
+        propertyChanged = true;
+    }
+    if (!layoutProperty->HasHeightAdaptivePolicy() ||
+        layoutProperty->GetHeightAdaptivePolicy() != TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST) {
+        layoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+        propertyChanged = true;
+    }
+    if (!propertyChanged) {
+        return true;
+    }
+    layoutProperty->OnPropertyChangeMeasure();
+    return RemeasureText(layoutWrapper);
+}
+
+bool SmartLayoutAlgorithm::RemeasureText(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto layoutAlgorithm = layoutAlgorithmWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
+
+    auto parentNode = hostNode->GetParentFrameNode();
+    bool isButtonLabel = hostNode->IsInternal() && parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG;
+    OffsetF previousCenter;
+    if (isButtonLabel) {
+        previousCenter = geometryNode->GetMarginFrameRect().Center();
+    }
+
+    // Rebuild and lay out the adapted paragraph before the current FrameNode layout is committed.
+    auto contentSize = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), layoutWrapper);
+    if (contentSize.has_value()) {
+        geometryNode->SetContentSize(contentSize.value());
+    }
+    layoutAlgorithm->Measure(layoutWrapper);
+    if (isButtonLabel) {
+        auto marginFrameSize = geometryNode->GetMarginFrameSize();
+        geometryNode->SetMarginFrameOffset(OffsetF(previousCenter.GetX() - marginFrameSize.Width() / 2.0f,
+            previousCenter.GetY() - marginFrameSize.Height() / 2.0f));
+    }
+    layoutAlgorithm->Layout(layoutWrapper);
+    return true;
+}
+
+bool SmartLayoutAlgorithm::PerformSmartLayoutScaleUp(LayoutWrapper* layoutWrapper)
+{
+    ACE_SCOPED_TRACE("PerformSmartLayoutScaleUp");
+    auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
+    CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
+    LOGD("SmartLayout: Detected layout %{public}s content underutilized, scaling up",
+        layoutWrapper->GetHostTag().c_str());
+
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto* engine = SmartLayoutEngineLoader::GetInstance().GetEngine();
+    CHECK_NULL_RETURN(engine, false);
+
+    rootNode_ = engine->CreateRootNode();
+    CHECK_NULL_RETURN(rootNode_, false);
+    rootNode_->SetLayoutType(layoutType);
+
+    if (!InitializeLayoutContext(layoutWrapper)) {
+        return false;
+    }
+    ProcessLayoutChildren(layoutWrapper);
+
+    // Calculate bounding box
+    auto boundingBox = rootNode_->GetChildrenBoundingBox();
+    if (!boundingBox.IsValid()) {
+        return false;
+    }
+    rootNode_->SetBoundingBox(boundingBox);
+
+    // Apply scale-up constraints
+    rootNode_->ApplyScaleUpConstraints();
+
+    if (!rootNode_->SolveLayout()) {
+        return false;
+    }
+    return ApplyLayoutResults(layoutWrapper);
 }
 
 } // namespace OHOS::Ace::NG

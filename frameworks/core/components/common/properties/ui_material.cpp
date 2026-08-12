@@ -31,6 +31,41 @@ const char UI_MATERIAL_FUNC_NAME[] = "SetMaterial";
 const char UI_MATERIAL_FUNC_GET_ID[] = "GetMaterialId";
 
 namespace {
+std::string ColorModeToString(ColorMode colorMode)
+{
+    switch (colorMode) {
+        case ColorMode::LIGHT:
+            return "LIGHT";
+        case ColorMode::DARK:
+            return "DARK";
+        default:
+            return "UNDEFINED";
+    }
+}
+
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
+
+std::string ImmersiveStyleToString(UiMaterialStyle style)
+{
+    static const std::string ImmersiveStyleStrs[] = { "ULTRA_THIN", "THIN", "REGULAR", "THICK", "ULTRA_THICK",
+        "ULTRA_THIN_EC", "THIN_EC", "REGULAR_EC", "THICK_EC", "ULTRA_THICK_EC",
+        "ULTRA_THIN_EC_SUB", "THIN_EC_SUB", "REGULAR_EC_SUB", "THICK_EC_SUB", "ULTRA_THICK_EC_SUB" };
+    auto index = static_cast<int32_t>(style);
+    if (index >= 0 && index < static_cast<int32_t>(sizeof(ImmersiveStyleStrs) / sizeof(ImmersiveStyleStrs[0]))) {
+        return ImmersiveStyleStrs[index];
+    }
+    return "UNKNOWN";
+}
+
 constexpr float IMMERSIVE_SHADOW_RADIUS = 26.0f;  // in vp
 constexpr float IMMERSIVE_SHADOW_OFFSET_Y = 8.0f; // in vp
 const Color IMMERSIVE_SHADOW_COLOR(0x14050505);
@@ -247,6 +282,35 @@ std::optional<bool> UiMaterial::IsInteractived() const
     return false;
 }
 
+std::string UiMaterial::ToString() const
+{
+    std::string result;
+    if (AceType::TypeId(this) != UiMaterial::TypeId()) {
+        result.append("isUiMaterial: false");
+    } else {
+        result.append("systemMaterial type: ").append(MaterialTypeToString(type_));
+        if (immersiveOptions_) {
+            result.append(", immersive style: ")
+                .append(ImmersiveStyleToString(immersiveOptions_->style))
+                .append("(")
+                .append(std::to_string(static_cast<int32_t>(immersiveOptions_->style)))
+                .append(")");
+            result.append(", materialColor: ")
+                .append(immersiveOptions_->materialColor.has_value() ? immersiveOptions_->materialColor->ColorToString()
+                                                                     : "#00000000");
+            result.append(", colorInvert: ").append(immersiveOptions_->colorInvert ? "true" : "false");
+            result.append(", applyShadow: ").append(immersiveOptions_->applyShadow ? "true" : "false");
+            if (immersiveOptions_->interactive.has_value()) {
+                result.append(", interactive: ").append(immersiveOptions_->interactive.value() ? "true" : "false");
+            }
+            if (immersiveOptions_->colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
+                result.append(", colorMode: ").append(ColorModeToString(immersiveOptions_->colorMode));
+            }
+        }
+    }
+    return result;
+}
+
 std::size_t UiMaterialMapKeyHasher::operator()(const UiMaterialMapKey& key) const
 {
     static constexpr int levelDigit = 8;
@@ -293,8 +357,7 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     auto materialLevel = SystemProperties::GetUiMaterialLevel();
     LowerGearLevel(materialLevel, node);
     ImmersiveMaterialConfig result {
-        .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false),
-        .lightEffectOptions = options->lightEffectOptions
+        .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false)
     };
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
@@ -308,6 +371,9 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
             result.materialColor = materialColor;
         }
         return result;
+    }
+    if (options->HasLightEffect()) {
+        result.lightEffectOptions = std::make_shared<LightEffectOptions>(options->lightEffectOptions.value());
     }
     int32_t transparency = TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel));
     bool finalInvertColor = ValidColorInvert(options, materialLevel, static_cast<UiMaterialTransparency>(transparency));

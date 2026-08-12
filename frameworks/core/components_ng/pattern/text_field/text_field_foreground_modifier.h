@@ -16,14 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FIELD_TEXT_FIELD_FOREGROUND_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FIELD_TEXT_FIELD_FOREGROUND_MODIFIER_H
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/common_text/counter_foreground_modifier.h"
 
 namespace OHOS::Ace::NG {
-class TextFieldForegroundModifier : public ForegroundModifier {
-    DECLARE_ACE_TYPE(TextFieldForegroundModifier, ForegroundModifier);
+class TextFieldForegroundModifier : public CounterForegroundModifier {
+    DECLARE_ACE_TYPE(TextFieldForegroundModifier, CounterForegroundModifier);
 
 public:
     explicit TextFieldForegroundModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern);
@@ -31,24 +28,7 @@ public:
 
     void onDraw(DrawingContext& context) override;
 
-    void SetInnerBorderWidth(float value)
-    {
-        CHECK_NULL_VOID(innerBorderWidth_);
-        innerBorderWidth_->Set(value);
-    }
-
-    void SetInnerBorderColor(Color value)
-    {
-        CHECK_NULL_VOID(innerBorderColor_);
-        innerBorderColor_->Set(value);
-    }
-
 private:
-    std::vector<RSPoint> MakeRRadius(const BorderRadiusProperty& border, float borderWidth) const;
-    WeakPtr<Pattern> pattern_;
-
-    RefPtr<PropertyColor> innerBorderColor_;
-    RefPtr<PropertyFloat> innerBorderWidth_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldForegroundModifier);
 };
 } // namespace OHOS::Ace::NG

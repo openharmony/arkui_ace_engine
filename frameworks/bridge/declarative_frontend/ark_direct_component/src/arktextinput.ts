@@ -2310,6 +2310,28 @@ function loadComponent(): ComponentObj | undefined {
       }
     }
     (TextInputStrokeJoinStyleModifier as any).identity = Symbol('textInputStrokeJoinStyle');
+class TextInputShaderStyleModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node, reset) { 
+        if (reset) { 
+          getUINativeModule().textInput.resetShaderStyle(node, this.value); 
+        } else { 
+          if (this.value.options) { 
+            getUINativeModule().textInput.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle, 
+              this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color); 
+          } else { 
+            getUINativeModule().textInput.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle, 
+              this.value.direction, this.value.repeating, this.value.colors, this.value.color); 
+          } 
+        } 
+      } 
+      checkObjectDiff() { 
+        return !isBaseOrResourceEqual(this.stageValue, this.value); 
+      }
+    }
+    (TextInputShaderStyleModifier as any).identity = Symbol('textInputShaderStyle');
 
     loadComponent.componentObj = { 'component': ArkTextInputComponent };
   }
@@ -2573,7 +2595,7 @@ class JSTextInput extends JSViewAbstract {
     if (value === null || value === undefined) {
       return;
     }
-    getUINativeModule().textInput.setCancelButton(true, value.style, value.icon);
+    getUINativeModule().textInput.setCancelButtonJs(true, value);
   }
   static voiceButton(value: any): void {
     getUINativeModule().textInput.setVoiceButton(true, value);
@@ -2660,7 +2682,17 @@ class JSTextInput extends JSViewAbstract {
     getUINativeModule().textInput.setStrokeJoinStyle(true, value);
   }
   static shaderStyle(value: any): void {
-    getUINativeModule().textInput.setShaderStyle(true, value);
+    if (value === null || value === undefined || !isObject(value)) {
+      getUINativeModule().textInput.resetShaderStyle(true, value);
+      return;
+    }
+    if (value.options) {
+      getUINativeModule().textInput.setShaderStyle(true, value.options.center, value.options.radius, value.options.angle,
+        value.options.direction, value.options.repeating, value.options.colors, value.options.color);
+    } else {
+      getUINativeModule().textInput.setShaderStyle(true, value.center, value.radius, value.angle,
+        value.direction, value.repeating, value.colors, value.color);
+    }
   }
   static enableAutoSpacing(value: any): void {
     getUINativeModule().textInput.setEnableAutoSpacing(true, value);

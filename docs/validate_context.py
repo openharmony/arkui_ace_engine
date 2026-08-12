@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-ALLOWED_CONTEXT_KINDS = {"component", "feature", "sdk", "architecture", "common_capability"}
+ALLOWED_CONTEXT_KINDS = {"component", "feature", "sdk", "architecture", "common_capability", "issue"}
 ALLOWED_CONTEXT_STATUS = {"active", "draft", "deprecated"}
 ALLOWED_SPEC_STATUS = {"Draft", "Baselined", "Deprecated"}
 ALLOWED_REGISTRY_SPEC_STATUS = {"active", "pending"}
@@ -55,7 +55,6 @@ REQUIRED_CONTEXT_FIELDS = {
     "keywords",
     "aliases",
     "kb",
-    "spec_status",
     "status",
     "last_verified",
 }
@@ -74,6 +73,17 @@ REQUIRED_KB_SECTIONS = [
 REQUIRED_KB_SECTIONS_COMPONENT = [
     "### API 解析实现路径",
     "### 相关 Spec",
+]
+
+REQUIRED_KB_SECTIONS_ISSUE = [
+    "## 问题概述",
+    "## 关联模块",
+    "## 根因分类",
+    "## 排查路径",
+    "## 修复方案",
+    "## 关联变更",
+    "## 预防措施",
+    "## 相关主题",
 ]
 
 
@@ -156,7 +166,13 @@ class Validator:
                 self.error(entry_path, "context entry must be an object")
                 continue
 
-            missing = sorted(REQUIRED_CONTEXT_FIELDS - set(entry.keys()))
+            missing = set(REQUIRED_CONTEXT_FIELDS - set(entry.keys()))
+            if entry.get("kind") == "issue":
+                if "func_ids" not in entry:
+                    missing.add("func_ids")
+            elif "spec_status" not in entry:
+                missing.add("spec_status")
+            missing = sorted(missing)
             if missing:
                 self.error(entry_path, f"missing required fields: {', '.join(missing)}")
 
@@ -200,7 +216,7 @@ class Validator:
         spec_domain = entry.get("spec_domain")
         func_id = entry.get("func_id")
         spec_status = entry.get("spec_status")
-        if spec_status and spec_status not in ALLOWED_REGISTRY_SPEC_STATUS:
+        if kind != "issue" and spec_status and spec_status not in ALLOWED_REGISTRY_SPEC_STATUS:
             self.error(entry_path, f"`spec_status` must be one of {sorted(ALLOWED_REGISTRY_SPEC_STATUS)}")
         if spec_domain:
             if not isinstance(spec_domain, str) or not spec_domain.startswith("specs/"):
@@ -218,7 +234,9 @@ class Validator:
             else:
                 self.warn_missing_specs_once()
 
-        if kind == "component":
+        if kind == "issue":
+            self.validate_string_list(entry_path, entry, "func_ids", min_count=1)
+        elif kind == "component":
             if not spec_domain:
                 self.warn(entry_path, "component entry is missing `spec_domain`")
             if not func_id:
@@ -444,6 +462,11 @@ class Validator:
         return result
 
     def validate_kb_sections(self, rel_path: Path, text: str, kind: str | None) -> None:
+        if kind == "issue":
+            for section in REQUIRED_KB_SECTIONS_ISSUE:
+                if section not in text:
+                    self.warn(rel_path, f"missing required issue section `{section}`")
+            return
         for section in REQUIRED_KB_SECTIONS:
             if section not in text:
                 self.warn(rel_path, f"missing required section `{section}`")

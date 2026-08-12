@@ -716,11 +716,11 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
 
 void FocusHub::CheckScopeFocusDependence()
 {
-    if (GetLastWeakFocusNode().Upgrade()) {
-        return;
-    }
     auto current = AceType::Claim(this);
     while (current) {
+        if (current->GetLastWeakFocusNode().Upgrade()) {
+            return;
+        }
         auto frameNode = current->GetFrameNode();
         auto focusView = frameNode ? frameNode->GetPattern<FocusView>() : nullptr;
         if (focusView) {
@@ -735,9 +735,16 @@ void FocusHub::CheckScopeFocusDependence()
 
 void FocusHub::SetParentFocusable(bool parentFocusable)
 {
+    bool previousFocusable = IsFocusable();
     parentFocusable_ = parentFocusable;
     if (!parentFocusable_) {
         CloseChildFocusView();
+    }
+    if (previousFocusable != IsFocusable()) {
+        auto frameNode = GetFrameNode();
+        if (frameNode) {
+            frameNode->NotifyPageSceneFocusabilityChanged();
+        }
     }
 }
 
@@ -888,6 +895,7 @@ bool FocusHub::IsChildFocusableNode()
 
 void FocusHub::SetFocusable(bool focusable, bool isExplicit)
 {
+    bool previousFocusable = IsFocusable();
     if (isExplicit) {
         isFocusableExplicit_ = true;
     } else if (isFocusableExplicit_) {
@@ -899,16 +907,21 @@ void FocusHub::SetFocusable(bool focusable, bool isExplicit)
         focusDepend_ = FocusDependence::AUTO;
     }
 
-    if (focusable_ == focusable) {
-        return;
-    }
-    focusable_ = focusable;
-    if (!focusable) {
-        if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/ " SEC_PLD(%{public}d)
-                " to be unfocusable", GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
+    if (focusable_ != focusable) {
+        focusable_ = focusable;
+        if (!focusable) {
+            if (SystemProperties::GetDebugEnabled()) {
+                TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/ " SEC_PLD(%{public}d)
+                    " to be unfocusable", GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
+            }
+            RemoveSelf(BlurReason::FOCUS_SWITCH);
         }
-        RemoveSelf(BlurReason::FOCUS_SWITCH);
+    }
+    if (previousFocusable != IsFocusable()) {
+        auto frameNode = GetFrameNode();
+        if (frameNode) {
+            frameNode->NotifyPageSceneFocusabilityChanged();
+        }
     }
 }
 

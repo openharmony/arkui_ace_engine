@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
@@ -56,6 +57,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -95,6 +97,8 @@ public:
 protected:
     static void CreateCalendarPicker();
     static RefPtr<FrameNode> CalendarDialogShow(RefPtr<FrameNode> entryNode);
+    static RefPtr<FrameNode> CreateMockDialogNode(const DialogProperties& properties);
+    static void ApplyBackBlurStyle(const RefPtr<FrameNode>& dialogNode, const DialogProperties& properties);
 };
 
 void CalendarPickerTestNg::SetUpTestCase()
@@ -162,6 +166,83 @@ RefPtr<FrameNode> CalendarPickerTestNg::CalendarDialogShow(RefPtr<FrameNode> ent
     return dialogNode;
 }
 
+RefPtr<FrameNode> CalendarPickerTestNg::CreateMockDialogNode(const DialogProperties& properties)
+{
+    CalendarSettingData settingData;
+    std::vector<ButtonInfo> buttonInfos;
+
+    // 创建带 CalendarDialogPattern 的 contentColumn
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarDialogPattern>());
+    CalendarDialogView::OperationsToPattern(contentColumn, settingData, properties, buttonInfos);
+
+    // 创建 calendarNode 和 scrollFrameNode
+    auto calendarNode = FrameNode::CreateFrameNode(V2::CALENDAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarPattern>());
+    auto scrollFrameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ScrollPattern>());
+    calendarNode->MountToParent(scrollFrameNode);
+
+    // 创建 titleNode, weekFrameNode, operationsNode
+    auto titleNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    auto weekFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    auto operationsNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+
+    // 创建按钮节点
+    auto buttonConfirmNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonCancelNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    buttonConfirmNode->MountToParent(operationsNode);
+    buttonCancelNode->MountToParent(operationsNode);
+
+    // 挂载到 contentColumn
+    titleNode->MountToParent(contentColumn);
+    weekFrameNode->MountToParent(contentColumn);
+    scrollFrameNode->MountToParent(contentColumn);
+    operationsNode->MountToParent(contentColumn);
+
+    // 创建 Dialog 节点
+    auto dialogNode = DialogView::CreateDialogNode(properties, contentColumn, nullptr);
+    ApplyBackBlurStyle(dialogNode, properties);
+    contentColumn->MarkModifyDone();
+    calendarNode->MarkModifyDone();
+    return dialogNode;
+}
+
+void CalendarPickerTestNg::ApplyBackBlurStyle(
+    const RefPtr<FrameNode>& dialogNode, const DialogProperties& properties)
+{
+    auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    if (!contentNode) {
+        return;
+    }
+    auto renderContext = contentNode->GetRenderContext();
+    if (!renderContext) {
+        return;
+    }
+    BlurStyleOption styleOption;
+    if (properties.backgroundBlurStyle.has_value()) {
+        styleOption.blurStyle = static_cast<BlurStyle>(properties.backgroundBlurStyle.value());
+    } else {
+        auto theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+        if (theme) {
+            styleOption.blurStyle = static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle());
+        }
+    }
+    renderContext->UpdateBackBlurStyle(styleOption);
+}
 /**
  * @tc.name: CalendarModelNGTest001
  * @tc.desc: Create Calendar Picker Function Test
@@ -875,43 +956,22 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest014, TestSize.Level0)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest008, TestSize.Level0)
 {
-    /**
-     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
-     * @tc.expected: mock successfully.
-     */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    /**
-     * @tc.steps: step2. create dialogNodeProps.
-     * @tc.expected: the dialogNodeProps created successfully.
-     */
-    CalendarSettingData settingData;
+
     DialogProperties properties;
     properties.alignment = DialogAlignment::BOTTOM;
     properties.customStyle = true;
     properties.offset = DimensionOffset(Offset(0, -1.0f));
-    auto selectedDate = PickerDate(2000, 1, 1);
-    settingData.selectedDate = selectedDate;
-    settingData.dayRadius = TEST_SETTING_RADIUS;
-    std::map<std::string, NG::DialogEvent> dialogEvent;
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    /**
-     * @tc.steps: step3. execute CalendarDialogView::Show.
-     * @tc.expected: show successfully.
-     */
-    std::vector<ButtonInfo> buttonInfos;
-    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-    /**
-     * @tc.steps: step4. get dialogNode's grandsonNode.
-     * @tc.expected: getNode successfully.
-     */
+
+    auto dialogNode = CreateMockDialogNode(properties);
+    ASSERT_NE(dialogNode, nullptr);
+
     auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     ASSERT_NE(contentNode, nullptr);
+
     RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
     ASSERT_NE(theme, nullptr);
-    /**
-     * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
-     * @tc.expected: equal static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle()).
-     */
+
     EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle,
         static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle()));
 }
@@ -923,42 +983,20 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest008, TestSize.Level0)
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest009, TestSize.Level0)
 {
-    /**
-     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
-     * @tc.expected: mock successfully.
-     */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    /**
-     * @tc.steps: step2. create dialogNodeProps.
-     * @tc.expected: the dialogNodeProps created successfully.
-     */
-    CalendarSettingData settingData;
+
     DialogProperties properties;
     properties.alignment = DialogAlignment::BOTTOM;
     properties.customStyle = true;
     properties.offset = DimensionOffset(Offset(0, -1.0f));
     properties.backgroundBlurStyle = static_cast<int32_t>(BlurStyle::REGULAR);
-    auto selectedDate = PickerDate(2000, 1, 1);
-    settingData.selectedDate = selectedDate;
-    settingData.dayRadius = TEST_SETTING_RADIUS;
-    std::map<std::string, NG::DialogEvent> dialogEvent;
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    /**
-     * @tc.steps: step3. execute CalendarDialogView::Show.
-     * @tc.expected: show successfully.
-     */
-    std::vector<ButtonInfo> buttonInfos;
-    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-    /**
-     * @tc.steps: step4. get dialogNode's grandsonNode.
-     * @tc.expected: getNode successfully.
-     */
+
+    auto dialogNode = CreateMockDialogNode(properties);
+    ASSERT_NE(dialogNode, nullptr);
+
     auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     ASSERT_NE(contentNode, nullptr);
-    /**
-     * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
-     * @tc.expected: equal REGULAR.
-     */
+
     EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
 }
 

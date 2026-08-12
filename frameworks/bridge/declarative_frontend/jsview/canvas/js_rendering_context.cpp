@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "napi/native_node_api.h"
 
 #include "base/error/error_code.h"
 #include "base/log/ace_scoring_log.h"
@@ -83,6 +84,7 @@ RefPtr<AceType> GetCanvasPattern(NG::FrameNode* frameNode)
 void SetCanvasRenderingContext2DCallbacks(
     const RefPtr<RenderingContext2DModel>& context, std::function<void()> onAttach, std::function<void()> onDetach)
 {
+    CHECK_NULL_VOID(context);
     auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->setCanvasRenderingContext2DCallbacks);
@@ -144,6 +146,7 @@ void TransferCanvasRenderingContext2DFromImageBitmap(
 void StartCanvasImageAnalyzer(
     const RefPtr<RenderingContext2DModel>& context, void* config, OnAnalyzedCallback& onAnalyzed)
 {
+    CHECK_NULL_VOID(context);
     auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->startCanvasImageAnalyzer);
@@ -152,6 +155,7 @@ void StartCanvasImageAnalyzer(
 
 void StopCanvasImageAnalyzer(const RefPtr<RenderingContext2DModel>& context)
 {
+    CHECK_NULL_VOID(context);
     auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->stopCanvasImageAnalyzer);
@@ -166,6 +170,7 @@ JSRenderingContext::JSRenderingContext()
 #else
     if (Container::IsCurrentUseNewPipeline()) {
         renderingContext2DModel_ = CreateCanvasRenderingContextModel();
+        CHECK_NULL_VOID(renderingContext2DModel_);
         auto onAttach = [weakCtx = WeakClaim(this)]() {
             auto ctx = weakCtx.Upgrade();
             CHECK_NULL_VOID(ctx);
@@ -378,7 +383,11 @@ void JSRenderingContext::JsGetCanvas(const JSCallbackInfo& info)
     CHECK_NULL_VOID(nodeId >= 0);
 
     auto vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
+    if (globalObj.IsEmpty()) {
+        return;
+    }
     auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getFrameNodeByNodeId__"));
     JsiValue jsiValue(globalFunc);
     JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
@@ -458,7 +467,12 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
     napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
     void* nativeObj = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, napiValue, &nativeObj));
-    auto jsImage = (JSRenderImage*)nativeObj;
+    bool isTypeMatch = false;
+    napi_status tagStatus = napi_check_object_type_tag(env, napiValue, &JS_RENDER_IMAGE_TYPE_TAG, &isTypeMatch);
+    if (tagStatus != napi_ok || !isTypeMatch) {
+        return;
+    }
+    auto jsImage = static_cast<JSRenderImage*>(nativeObj);
     CHECK_NULL_VOID(jsImage);
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = jsImage->GetPixelMap();
@@ -570,6 +584,7 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
 void JSRenderingContext::JsStopImageAnalyzer(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(renderingContext2DModel_);
     StopCanvasImageAnalyzer(renderingContext2DModel_);
 }
 

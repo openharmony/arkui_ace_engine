@@ -70,19 +70,19 @@ std::mutex FrameNodePeer::peerMapMutex_;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-Opt_LengthMetrics GetOptLengthMetricsFromDimension(const std::optional<Dimension>& dimension)
+Opt_LengthMetricsProxy GetOptLengthMetricsFromDimension(const std::optional<Dimension>& dimension)
 {
-    Opt_LengthMetrics result { .tag = InteropTag::INTEROP_TAG_UNDEFINED };
+    Opt_LengthMetricsProxy result { .tag = InteropTag::INTEROP_TAG_UNDEFINED };
     if (dimension.has_value()) {
-        result = Converter::ArkValue<Opt_LengthMetrics>(dimension);
+        result = Converter::ArkValue<Opt_LengthMetricsProxy>(dimension);
     }
     return result;
 }
-Opt_LengthMetrics GetOptLengthMetricsFromCalcLength(const std::optional<CalcLength>& calcLength)
+Opt_LengthMetricsProxy GetOptLengthMetricsFromCalcLength(const std::optional<CalcLength>& calcLength)
 {
-    Opt_LengthMetrics result { .tag = InteropTag::INTEROP_TAG_UNDEFINED };
+    Opt_LengthMetricsProxy result { .tag = InteropTag::INTEROP_TAG_UNDEFINED };
     if (calcLength.has_value()) {
-        result = Converter::ArkValue<Opt_LengthMetrics>(calcLength->GetDimension());
+        result = Converter::ArkValue<Opt_LengthMetricsProxy>(calcLength->GetDimension());
     }
     return result;
 }
@@ -962,13 +962,13 @@ Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
         auto height = std::make_optional<CalcLength>();
         auto calcSize = std::make_optional<CalcSize>(width, height);
         Ark_SizeTLengthMetrics retValue = {
-            .width = Converter::ArkValue<Ark_LengthMetrics>(calcSize->Width()->GetDimension()),
-            .height = Converter::ArkValue<Ark_LengthMetrics>(calcSize->Height()->GetDimension()) };
+            .width = Converter::ArkValue<Ark_LengthMetricsProxy>(calcSize->Width()->GetDimension()),
+            .height = Converter::ArkValue<Ark_LengthMetricsProxy>(calcSize->Height()->GetDimension()) };
         return retValue;
     }
     Ark_SizeTLengthMetrics retValue = {
-        .width = Converter::ArkValue<Ark_LengthMetrics>(size->Width()->GetDimension()),
-        .height = Converter::ArkValue<Ark_LengthMetrics>(size->Height()->GetDimension())
+        .width = Converter::ArkValue<Ark_LengthMetricsProxy>(size->Width()->GetDimension()),
+        .height = Converter::ArkValue<Ark_LengthMetricsProxy>(size->Height()->GetDimension())
     };
     return retValue;
 }

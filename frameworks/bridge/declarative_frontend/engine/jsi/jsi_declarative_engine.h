@@ -98,6 +98,7 @@ public:
     static void PreloadAceModuleForCustomRuntime(void* runtime);
     static void RemoveInvalidEnv(void* env);
     static void PreloadAceModuleWorker(void* runtime);
+    static void CleanupWorkerResource();
     static void UnloadAceModule();
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     static void PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime);

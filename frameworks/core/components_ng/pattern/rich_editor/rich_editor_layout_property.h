@@ -46,6 +46,18 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         PlaceholderFontStyle, FontFamily, PlaceholderFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
 
+    void ResetPlaceholderTextColor()
+    {
+        if (!HasPlaceholderTextColor()) {
+            return;
+        }
+        auto& groupProperty = GetPlaceholderFontStyle();
+        if (groupProperty) {
+            groupProperty->ResetTextColor();
+            UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+
     void UpdateScrollBarColor(const std::optional<Color>& color)
     {
         if (color.has_value()) {

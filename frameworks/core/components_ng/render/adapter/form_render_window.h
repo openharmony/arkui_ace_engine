@@ -43,7 +43,7 @@ public:
 
     void RequestFrame() override;
     void Destroy() override;
-    void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    void SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom = FromWhom::INNER) override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
     void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;
@@ -100,6 +100,10 @@ public:
         CHECK_NULL_RETURN(rsUIDirector_, 0);
         return rsUIDirector_->GetAnimateExpectedRate();
     }
+    inline void SetIsSystemApp(bool isSystemApp)
+    {
+        isSystemApp_ = isSystemApp;
+    }
 #endif
 
     void OnShow() override;
@@ -112,10 +116,13 @@ public:
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
 private:
+    bool ShouldRequestFrame();
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
     UIContentType uiContentType_ = UIContentType::UNDEFINED;
 #ifdef ENABLE_ROSEN_BACKEND
+    uint32_t forceVsyncFrameCount_ = 0;
+    bool isSystemApp_ = false;
     void InitOnVsyncCallback();
     static std::recursive_mutex globalMutex_;
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;

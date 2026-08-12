@@ -331,6 +331,8 @@ abstract class ViewPU extends PUV2ViewBase
       delete ObserveV2.getObserve().id2cmp_[this.id_];
     }
 
+    ObserveV2.removeCustomEnvOwner(this);
+
     if (this.hasRecycleManager()) {
       this.getRecycleManager().purgeAllCachedRecycleNode();
     }
@@ -845,7 +847,7 @@ abstract class ViewPU extends PUV2ViewBase
     this.watchedProps.set(propStr, callback);
   }
 
-  protected override __notifyDecoratedWatch__Internal(varName: string): void {
+  public override __notifyDecoratedWatch__Internal(varName: string): void {
     if (this.isCompFreezeAllowed() && !this.isViewActive()) {
       stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} delays @Watch function while component is frozen`);
       this.__getOrCreateDelayedWatchedProps__Internal().add(varName);
@@ -1473,15 +1475,17 @@ abstract class ViewPU extends PUV2ViewBase
    * - If the JSView object is managed by the RecycleManager, the CustomNode is reused.
    *
    * @param {string} reuseId - The ID used for recycling the component.
+   * @param {number} memOptStrategy - The memory optimization strategy (-1 = UNDEFINED, 0 = DEFAULT, 1 = ENABLE_AUTO_CACHE_OPTIMIZATION).
+   * @param {number} cachedCount - The size of reuse pool.
   */
-  public recycleSelf(name: string): void {
+  public recycleSelf(name: string, memOptStrategy: number = 0, cachedCount: number = 8): void {
     const parent = this.getParent() as ViewPU;
     const ctor = this.constructor as new (...args: ViewPU[]) => ViewPU;
     const globalPool = this.__myReusePool__Internal;
     // Check if Legacy Reuse Pool exists
     if (!globalPool && parent && !(parent as ViewPU).isDeleting_) {
-      parent.getOrCreateRecycleManager().pushRecycleNode(name, this);
-      if (this.__getReusableMemOptStrategy__Internal() === 1) {
+      parent.getOrCreateRecycleManager().pushRecycleNode(name, this, memOptStrategy, cachedCount);
+      if (memOptStrategy === 1) {
         parent.__startMemOpt__Internal();
       }
       this.hasBeenRecycled_ = true;

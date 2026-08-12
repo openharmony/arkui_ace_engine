@@ -6,9 +6,9 @@
 
 ## 定位
 
-FolderStack 是面向折叠设备悬停场景的布局容器。它复用 Stack 的基础布局能力，并通过内部 Group、上半区和控制区节点处理子项分区、折痕区域、折叠与悬停事件、过渡动画及窗口方向联动。
+FolderStack 是面向折叠场景的布局容器，其中悬停能力为双折叠设备设计，且仅在双折叠设备生效。它复用 Stack 的基础布局能力，并通过内部 Group、上半区和控制区节点处理子项分区、折痕区域、折叠与悬停事件、过渡动画及窗口方向联动。
 
-FolderStack 已完成组件化改造，运行时通过独立 SO `libarkui_folderstack.z.so` 提供统一 Bridge 和 Dynamic/Static modifier。本文档仅提供稳定路由；具体行为、默认值、设备适用条件和版本兼容性以当前 SDK、源码、测试和 Spec 为准。
+FolderStack 接口仅可在 Stage 模型下使用。组件已完成组件化改造；非 wearable 目标通过独立 SO `libarkui_folderstack.z.so` 提供统一 Bridge 和 Dynamic modifier，Static modifier 源码还受 `!is_arkui_x` 条件控制。`folder_stack/BUILD.gn` 的源集和 `adapter/ohos/build/BUILD.gn` 的组件模块聚合均受非 wearable 条件控制，开发者文档也将 wearable 标为不支持。本文档仅提供稳定路由；具体行为、默认值、设备适用条件和版本兼容性以当前 SDK、源码、测试和 Spec 为准。
 
 ## 快速路由
 
@@ -29,7 +29,7 @@ FolderStack 已完成组件化改造，运行时通过独立 SO `libarkui_folder
 | 组件化 Bridge | `frameworks/core/components_ng/pattern/folder_stack/bridge/` | 统一 Bridge、Dynamic/Static modifier 和 Dynamic Module |
 | node modifier 委托 | `frameworks/core/interfaces/native/node/node_folder_stack_modifier.cpp`、`frameworks/core/interfaces/native/node/node_folder_stack_modifier.h` | 通过 DynamicModuleHelper 取得组件动态 modifier |
 | 动态模块加载映射 | `adapter/ohos/osal/dynamic_module_helper.cpp` | FolderStack 到 `folderstack` 动态库名的映射 |
-| 组件构建入口 | `frameworks/core/components_ng/pattern/folder_stack/BUILD.gn` | FolderStack 组件化源码和 Ark 源集 |
+| 组件构建入口 | `frameworks/core/components_ng/pattern/folder_stack/BUILD.gn`、`adapter/ohos/build/BUILD.gn` | FolderStack 组件化源码、Ark 源集及非 wearable 条件下的模块聚合入口；Static modifier 另受 `!is_arkui_x` 控制 |
 
 ### API 入口
 
@@ -61,7 +61,7 @@ FolderStack **已完成组件化改造**：旧 JSView 和旧 nativeModule Bridge
 | Dynamic Module | `frameworks/core/components_ng/pattern/folder_stack/bridge/folder_stack_dynamic_module.cpp`、`frameworks/core/components_ng/pattern/folder_stack/bridge/folder_stack_dynamic_module.h` | `FolderStackDynamicModule` 及动态 / 静态 / CJ modifier 导出入口 |
 | node_modifier 委托层 | `frameworks/core/interfaces/native/node/node_folder_stack_modifier.cpp` | 通过 DynamicModuleHelper 加载模块并缓存 modifier |
 
-独立 SO：`libarkui_folderstack.z.so`。
+独立 SO：`libarkui_folderstack.z.so`，仅在非 wearable 目标中构建并聚合。
 
 ### 外部依赖入口
 
@@ -99,12 +99,13 @@ FolderStack 功能域：`specs/05-ui-components/01-layout-components/12-folder-s
 | 问题 | 优先查看 |
 |------|----------|
 | `upperItems` 子项分区不符合预期 | Dynamic/Static SDK、两个 Model、`FolderStackGroupNode`、Feat-01 |
-| 设备半折后未进入预期布局 | `FolderStackPattern`、布局算法、DisplayInfo 适配、窗口模式、Feat-01 |
+| 双折叠设备半折后未进入预期布局 | 先确认 FolderStack 未被 if/else 父节点包裹，再检查 `FolderStackPattern`、布局算法、DisplayInfo 适配、窗口模式和 Feat-01 |
 | 折痕区域或上下分区尺寸异常 | `FolderStackLayoutAlgorithm`、`DisplayInfoUtils`、Pattern / Layout 测试、Feat-01 |
 | 折叠或悬停回调未触发 / payload 异常 | EventInfo、EventHub、统一 Bridge、Static modifier、Feat-02 |
 | 过渡动画异常 | `FolderStackPattern`、`FolderStackLayoutProperty`、Feat-03 |
 | `autoHalfFold` 方向联动或恢复异常 | `FolderStackPattern`、`ContainerWindowManager`、AceContainer 窗口适配、Feat-03 |
 | 组件动态模块加载失败 | DynamicModuleHelper 映射、`folder_stack_dynamic_module.*`、node modifier、组件 BUILD |
+| wearable 目标无法使用 FolderStack | 这是当前 SDK 与 BUILD 的明确限制；wearable 不构建 `libarkui_folderstack.z.so`，不能按非 wearable 链路排查 |
 | 查找 Dynamic FolderStackModifier SDK | 当前无该文件；核对 Dynamic 组件声明和 Static Modifier 声明，避免推断不存在的接口 |
 
 ## 调试入口
@@ -113,7 +114,7 @@ FolderStack 功能域：`specs/05-ui-components/01-layout-components/12-folder-s
 - 布局链路：先确认窗口模式、FoldStatus、Rotation 和折痕区域，再检查布局算法选择的普通 Stack 或分区入口。
 - 事件链路：从 Pipeline 折叠监听进入 Pattern，随后检查 EventInfo、EventHub 和 Bridge 回调包装。
 - 方向链路：从 Pattern 的窗口方向操作定位 `ContainerWindowManager` 和 AceContainer 平台适配。
-- 组件化链路：从 `node_folder_stack_modifier.cpp` 跟踪 DynamicModuleHelper、`FolderStackDynamicModule` 和独立 SO。
+- 组件化链路：先确认目标不是 wearable，再从 `node_folder_stack_modifier.cpp` 跟踪 DynamicModuleHelper、`FolderStackDynamicModule` 和独立 SO。
 - 回归验证：优先运行 `test/unittest/core/pattern/folder_stack/` 和 FolderStack modifier 定向测试。
 
 ## 相关主题

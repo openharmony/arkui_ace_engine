@@ -28,6 +28,7 @@
 #include "parameters.h"
 
 #include "adapter/ohos/osal/window_utils.h"
+#include "base/thread/background_task_executor.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/properties/ui_material.h"
 
@@ -54,6 +55,7 @@ constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.
 #endif
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
+constexpr char ENABLE_NAVIGATION_IMAGE_KEY[] = "const.arkui.recycle.navigation.image.enable";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
 constexpr char ENABLE_IMAGE_AUTO_RESIZE_KEY[] = "persist.ace.image.autoresize.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
@@ -132,6 +134,11 @@ bool IsDownloadByNetworkDisabled()
 bool IsRecycleImageEnabled()
 {
     return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
+}
+
+bool IsNavigationImageRecycleEnabled()
+{
+    return system::GetBoolParameter(ENABLE_NAVIGATION_IMAGE_KEY, false);
 }
 
 bool IsImageReleaseManageObjectEnabled()
@@ -320,6 +327,16 @@ float ReadScrollCoefficients()
         return StringUtils::StringToFloat(ret);
     }
     return DEFAULT_SCROLL_COEFFICEIENT;
+}
+
+int32_t ReadSyntaxMemOptStrategy()
+{
+    return system::GetIntParameter<int32_t>("persist.ace.trace.syntax.memoptstrategy", -1);
+}
+
+int32_t ReadBootVendorDdrSize()
+{
+    return system::GetIntParameter<int32_t>("ohos.boot.vendor.ddrsize", 12); // Set default memory size as 12
 }
 
 int64_t GetDebugFlags()
@@ -784,6 +801,7 @@ bool SystemProperties::gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnab
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
+bool SystemProperties::navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
 bool SystemProperties::imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
@@ -847,6 +865,8 @@ bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::autoResizeEnabled_ = false;
+int32_t SystemProperties::syntaxMemOptStrategy_ = ReadSyntaxMemOptStrategy();
+int32_t SystemProperties::bootVendorDdrSize_ = ReadBootVendorDdrSize();
 int32_t SystemProperties::sensorCorrectionEnable_ = 0;
 
 std::once_flag SystemProperties::getSysPropertiesFlag_;
@@ -983,7 +1003,7 @@ void SystemProperties::InitDeviceInfo(
 
 void SystemProperties::ReadSystemParametersCallOnce()
 {
-    std::call_once(getSysPropertiesFlag_, [] () {
+    std::call_once(getSysPropertiesFlag_, []() {
         developerModeOn_ = IsDeveloperModeOn();
         debugEnabled_ = IsDebugEnabled();
         eventBenchMarkEnabled_ = IsEventBenchMarkEnabled();
@@ -1008,6 +1028,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
         recycleImageEnabled_ = IsRecycleImageEnabled();
+        navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
         imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
         pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
         forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
@@ -1050,6 +1071,10 @@ void SystemProperties::ReadSystemParametersCallOnce()
             "const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
 
         InitDeviceTypeBySystemProperty();
+        BackgroundTaskExecutor::GetInstance().PostTask([]() {
+            [[maybe_unused]] auto supported = SystemProperties::IsDeviceSystemMaterialSupported();
+            [[maybe_unused]] auto level = SystemProperties::GetUiMaterialLevel();
+        });
     });
 }
 

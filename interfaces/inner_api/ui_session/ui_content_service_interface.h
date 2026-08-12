@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -591,7 +591,7 @@ public:
         const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) = 0;
     virtual void SendPageText(int32_t nodeId, const std::string& text, int64_t version) {}
-    virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
+    virtual void ReportPageSceneEvent(const std::string& sceneJson, bool isGetResult = false) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

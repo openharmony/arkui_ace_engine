@@ -13,35 +13,50 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_root = "//foundation/arkui/ace_engine"
-
-ace_unittest("stage_test_ng") {
-  module_name = "Animation-PageTransition"
-  type = "new"
-  sources = [
-    "page_test_ng.cpp",
-    "stage_test_ng.cpp",
-  ]
-  if (!ace_enable_full_test_suite) {
-    sources = []
+if (is_host_product) {
+  ace_unittest("stage_test_ng") {
+    type = "host_components"
+    module_name = "Animation-PageTransition"
     sources = [
-      "stage_test_min.cpp",
-      "stage_test_core.cpp",
+      "page_test_ng.cpp",
+      "stage_test_ng.cpp",
     ]
-  } else {
     sources += [
       "stage_test_min.cpp",
       "stage_test_core.cpp",
     ]
   }
+} else {
+  ace_unittest("stage_test_ng") {
+    module_name = "Animation-PageTransition"
+    type = "new"
+    sources = [
+      "page_test_ng.cpp",
+      "stage_test_ng.cpp",
+    ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "stage_test_min.cpp",
+        "stage_test_core.cpp",
+      ]
+    } else {
+      sources += [
+        "stage_test_min.cpp",
+        "stage_test_core.cpp",
+      ]
+    }
+  }
 }
 
-ace_unittest("force_split_stage_test_ng") {
-  module_name = "Animation-Frame"
-  type = "new"
-  sources = [
-    "force_split_stage_test_ng.cpp",
-    "force_split_stage_test_two_ng.cpp",
-    "force_split_stage_test_three_ng.cpp",
-  ]
+if (!is_host_product) {
+  ace_unittest("force_split_stage_test_ng") {
+    module_name = "Animation-Frame"
+    type = "new"
+    sources = [
+      "force_split_stage_test_ng.cpp",
+      "force_split_stage_test_two_ng.cpp",
+      "force_split_stage_test_three_ng.cpp",
+    ]
+  }
 }

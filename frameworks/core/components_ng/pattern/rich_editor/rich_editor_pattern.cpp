@@ -72,7 +72,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
-#include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/text/one_step_drag_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
@@ -88,8 +88,8 @@
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
+#include "core/common/text_field_manager_ng.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/text/html_utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -108,9 +108,7 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 
-#ifdef CROSS_PLATFORM
 #include "core/common/ime/input_method_manager.h"
-#endif
 #include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
@@ -797,6 +795,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
     if (needInitSpanItem) {
         TextPattern::PreCreateLayoutWrapper();
         hasUrlSpan_ = std::any_of(spans_.begin(), spans_.end(), URL_SPAN_FILTER);
+        ClearTextForDisplayIfEmpty();
     } else if (contentMod_) {
         contentMod_->ContentChange();
     }
@@ -818,7 +817,8 @@ void RichEditorPattern::ClearOnFocusTextField(FrameNode* node)
     auto context = node->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    IF_PRESENT(textFieldManager, ClearOnFocusTextField(node->GetId()));
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->ClearOnFocusTextField(node->GetId());
 }
 
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -4887,20 +4887,23 @@ PositionWithAffinity RichEditorPattern::GetGlyphPositionAtCoordinate(int32_t x, 
     return paragraphs_.GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
 }
 
-PositionWithAffinity RichEditorPattern::GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+PositionWithAffinity RichEditorPattern::GetCharacterPositionAtCoordinate(
+    int32_t x, int32_t y, TextEncoding encoding)
 {
     Offset offset(x, y);
-    return paragraphs_.GetCharacterPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
+    return paragraphs_.GetCharacterPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset), encoding);
 }
 
-std::pair<TextRange, TextRange> RichEditorPattern::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> RichEditorPattern::GetGlyphRangeForCharacterRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return paragraphs_.GetGlyphRangeForCharacterRange(start, end);
+    return paragraphs_.GetGlyphRangeForCharacterRange(start, end, encoding);
 }
 
-std::pair<TextRange, TextRange> RichEditorPattern::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> RichEditorPattern::GetCharacterRangeForGlyphRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return paragraphs_.GetCharacterRangeForGlyphRange(start, end);
+    return paragraphs_.GetCharacterRangeForGlyphRange(start, end, encoding);
 }
 
 void RichEditorPattern::InitDragDropEvent()
@@ -5817,13 +5820,15 @@ void RichEditorPattern::ChangeMouseStyle(MouseFormat format, bool freeMouseHoldN
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
     SourceType sourceType)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "request keyboard, opts=%{public}d, %{public}d, %{public}d",
-        isFocusViewChanged, needStartTwinkling, needShowSoftKeyboard);
+    auto needSoftKeyboard = NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "request keyboard, opts=%{public}d, %{public}d, %{public}d, %{public}d",
+        isFocusViewChanged, needStartTwinkling, needShowSoftKeyboard, needSoftKeyboard);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
-    if (!NeedSoftKeyboard()) {
+    if (!needSoftKeyboard) {
+        InputMethodManager::GetInstance()->CloseKeyboardInProcess();
         return false;
     }
     if (customKeyboardNode_ || customKeyboardBuilder_) {
@@ -5878,7 +5883,11 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     if (richEditTextChangeListener_ == nullptr) {
-        richEditTextChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+        auto* textInputModifier = NodeModifier::GetTextInputCustomModifier();
+        CHECK_NULL_RETURN(textInputModifier, false);
+        auto* listener = reinterpret_cast<OHOS::MiscServices::OnTextChangedListener*>(
+            textInputModifier->createTextChangedListenerImpl(WeakClaim(this)));
+        richEditTextChangeListener_ = listener;
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     CHECK_NULL_RETURN(inputMethod, false);
@@ -6605,9 +6614,9 @@ bool RichEditorPattern::UpdatePreviewText(const std::u16string& previewTextValue
     return true;
 }
 
-const PreviewTextInfo RichEditorPattern::GetPreviewTextInfo() const
+const Ace::PreviewTextInfo RichEditorPattern::GetPreviewTextInfo() const
 {
-    PreviewTextInfo info;
+    Ace::PreviewTextInfo info;
     if (!previewTextRecord_.previewContent.empty()) {
         info.value = previewTextRecord_.previewContent;
         info.offset = previewTextRecord_.startOffset;
@@ -9333,8 +9342,8 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     }
     SetLastCaretPos(caretPosY);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
-    textFieldManager->SetHeight(NearZero(caretHeight) ?
-        richEditorTheme->GetDefaultCaretHeight().ConvertToPx() : caretHeight);
+    textFieldManager->SetHeight(
+        NearZero(caretHeight) ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx() : caretHeight);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
@@ -10384,9 +10393,8 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     CHECK_NULL_VOID(safeAreaManager);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     textFieldManager->SetClickPosition({ offset.GetX() + caretOffset.GetX(), offset.GetY() + caretOffset.GetY() });
-    textFieldManager->SetHeight(NearZero(caretHeight)
-                                    ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
-                                    : caretHeight);
+    textFieldManager->SetHeight(
+        NearZero(caretHeight) ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx() : caretHeight);
     textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -11241,7 +11249,10 @@ bool RichEditorPattern::NeedAiAnalysis(
         return false;
     }
 
-    if (!InputAIChecker::NeedAIAnalysis(content.empty(), targeType, lastClickTimeStamp_ - lastAiPosTimeStamp_)) {
+    auto* textInputModifier = NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(textInputModifier, false);
+    if (!textInputModifier->needAIAnalysis(
+        content.empty(), targeType, lastClickTimeStamp_ - lastAiPosTimeStamp_)) {
         return false;
     }
 
@@ -11337,13 +11348,15 @@ bool RichEditorPattern::IsTouchBeforeCaret(int32_t caretPos, const Offset& textO
 
 bool RichEditorPattern::IsClickBoundary(const int32_t position)
 {
-    if (InputAIChecker::IsSingleClickAtBoundary(position, GetTextContentLength())) {
+    auto* textInputModifier = NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(textInputModifier, false);
+    if (textInputModifier->isSingleClickAtBoundary(position, GetTextContentLength())) {
         return true;
     }
 
     float height = 0;
     auto handleOffset = CalcCursorOffsetByPosition(position, height);
-    if (InputAIChecker::IsMultiClickAtBoundary(handleOffset, TextPattern::GetTextRect())) {
+    if (textInputModifier->isMultiClickAtBoundary(handleOffset, TextPattern::GetTextRect())) {
         return true;
     }
     return false;
@@ -11406,7 +11419,11 @@ void RichEditorPattern::HandleOnCameraInput()
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnCameraInput");
 #if defined(ENABLE_STANDARD_INPUT)
     if (richEditTextChangeListener_ == nullptr) {
-        richEditTextChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+        auto* textInputModifier = NodeModifier::GetTextInputCustomModifier();
+        CHECK_NULL_VOID(textInputModifier);
+        auto* listener = reinterpret_cast<OHOS::MiscServices::OnTextChangedListener*>(
+            textInputModifier->createTextChangedListenerImpl(WeakClaim(this)));
+        richEditTextChangeListener_ = listener;
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
@@ -13590,9 +13607,9 @@ bool RichEditorPattern::CheckTripClickEvent(GestureEvent& info)
         clickInfo_.erase(clickInfo_.begin());
     }
     if (clickInfo_.size() == MAX_CLICK) {
-        std::chrono::duration<float, std::ratio<1, InputAIChecker::SECONDS_TO_MILLISECONDS>>
+        std::chrono::duration<float, std::ratio<1, 1000>>
             clickTimeIntervalOne = clickInfo_[1] - clickInfo_[0];
-        std::chrono::duration<float, std::ratio<1, InputAIChecker::SECONDS_TO_MILLISECONDS>>
+        std::chrono::duration<float, std::ratio<1, 1000>>
             clickTimeIntervalTwo = clickInfo_[2] - clickInfo_[1];
         if (clickTimeIntervalOne.count() < DOUBLE_CLICK_INTERVAL_MS
             && clickTimeIntervalTwo.count() < DOUBLE_CLICK_INTERVAL_MS) {

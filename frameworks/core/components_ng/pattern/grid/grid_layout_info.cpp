@@ -518,12 +518,24 @@ float GridLayoutInfo::GetIrregularHeight(float mainGap) const
         return 0.0f;
     }
     auto childrenCount = childrenCount_ + repeatDifference_;
+    if (childrenCount <= 0) {
+        TAG_LOGW(ACE_GRID, "GetIrregularHeight: non-positive childrenCount %{public}d", childrenCount);
+        return 0.0f;
+    }
     int32_t lastKnownLine = lineHeightMap_.rbegin()->first;
-    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount);
-    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
-
     auto knownLineCnt = static_cast<float>(lineHeightMap_.size());
     float knownHeight = synced_ ? avgLineHeight_ * knownLineCnt : GetTotalLineHeight(0.0f);
+    int32_t endIdx = FindEndIdx(lastKnownLine).itemIdx;
+    // lastKnownLine comes from lineHeightMap_ but FindEndIdx looks up gridMatrix_. When the line
+    // is missing, FindEndIdx returns itemIdx = -1, making (endIdx + 1) == 0 and itemRatio == 0,
+    // which divides by zero on estTotalLines. Fall back to the measured lines' height plus the
+    // gaps between them (equivalent to the fully-known result of the normal formula).
+    if (endIdx < 0) {
+        TAG_LOGW(ACE_GRID, "GetIrregularHeight: invalid endIdx %{public}d at line %{public}d", endIdx, lastKnownLine);
+        return knownHeight + (knownLineCnt - 1) * mainGap;
+    }
+    float itemRatio = static_cast<float>(endIdx + 1) / static_cast<float>(childrenCount);
+    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
     float avgHeight = synced_ ? avgLineHeight_ : knownHeight / knownLineCnt;
     return knownHeight + (estTotalLines - knownLineCnt) * avgHeight + (estTotalLines - 1) * mainGap;
 }
@@ -1264,8 +1276,11 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
         for (const auto& cell : endRow->second) {
             if (cell.second < endIndex_) {
                 TAG_LOGW(AceLogTag::ACE_GRID,
-                    "check grid matrix failed, index %{public}d is less than endIndex %{public}d", cell.second,
-                    endIndex_);
+                    "check grid matrix failed, index %{public}d is less than endIndex %{public}d, "
+                    "cachedCount: %{public}d, startIndex: %{public}d, startMainLineIndex: %{public}d, "
+                    "endMainLineIndex: %{public}d, childrenCount: %{public}d",
+                    cell.second, endIndex_, cachedCount, startIndex_, startMainLineIndex_, endMainLineIndex_,
+                    GetChildrenCount());
                 PrintMatrix();
                 return false;
             }
@@ -1285,8 +1300,11 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
         for (const auto& cell : startRow->second) {
             if (cell.second > startIndex_) {
                 TAG_LOGW(AceLogTag::ACE_GRID,
-                    "check grid matrix failed, index %{public}d is greater than startIndex %{public}d", cell.second,
-                    startIndex_);
+                    "check grid matrix failed, index %{public}d is greater than startIndex %{public}d, "
+                    "cachedCount: %{public}d, startMainLineIndex: %{public}d, endMainLineIndex: %{public}d, "
+                    "endIndex: %{public}d, childrenCount: %{public}d",
+                    cell.second, startIndex_, cachedCount, startMainLineIndex_, endMainLineIndex_, endIndex_,
+                    GetChildrenCount());
                 PrintMatrix();
                 return false;
             }

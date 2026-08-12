@@ -710,6 +710,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
             return;
         }
         jsView->needsUpdate_ = false;
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         {
             ACE_SCOPED_TRACE("JSView: ExecuteRerender");
             jsView->jsViewFunction_->ExecuteRerender();
@@ -786,10 +787,23 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         if (name.empty()) {
             return;
         }
+        CHECK_NULL_VOID(recycleNode);
         auto recycleUINode = AceType::DynamicCast<NG::UINode>(recycleNode);
+        CHECK_NULL_VOID(recycleUINode);
         recycleUINode->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+        auto memOptStrategy = static_cast<int32_t>(recycleNode->GetReusableMemOptStrategy());
+
+        // Calculate cachedCount based on device memory size
+        int32_t cachedCount = 2; // if deviceMemory <= 6G, cachedCount = 2
+        int32_t deviceMemory = SystemProperties::GetBootVendorDdrSize();
+        if (deviceMemory > 8) {
+            cachedCount = 48; // if deviceMemory > 8G, cachedCount = 48
+        } else if (deviceMemory > 6) {
+            cachedCount = 4; // if 6G < deviceMemory <= 8G, cachedCount = 4
+        }
+
+        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName(), memOptStrategy, cachedCount);
         if (!recycleNode->HasRecycleRenderFunc() && jsView->recycleCustomNode_) {
             recycleUINode->SetJSViewActive(false, false, true);
             jsView->jsViewFunction_->ExecuteAboutToRecycle();
@@ -851,6 +865,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     auto clearAllRecycleFunc = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteClearAllRecycle();
     };
@@ -911,6 +926,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
     };
@@ -921,6 +937,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
     };
@@ -932,6 +949,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto measureSizeFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
             auto jsView = weak.Upgrade();
             CHECK_NULL_VOID(jsView);
+            CHECK_NULL_VOID(jsView->jsViewFunction_);
             ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->ExecuteMeasureSize(layoutWrapper);
         };
@@ -942,6 +960,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto placeChildren = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
             auto jsView = weak.Upgrade();
             CHECK_NULL_VOID(jsView);
+            CHECK_NULL_VOID(jsView->jsViewFunction_);
             ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->ExecutePlaceChildren(layoutWrapper);
         };
@@ -972,6 +991,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto updateParamFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
             auto jsView = weak.Upgrade();
             CHECK_NULL_VOID(jsView);
+            CHECK_NULL_VOID(jsView->jsViewFunction_);
             ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->InitJsParam(layoutWrapper);
         };
@@ -1527,20 +1547,22 @@ void JSViewPartialUpdate::JSGetDialogController(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
 {
+    auto result = JSRef<JSObject>::New();
+    result->SetProperty<bool>("found", false);
     if (info.Length() < 1 || !info[0]->IsNumber()) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
 
     ContainerScope scope(GetInstanceId());
     auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
     if (!node) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
     auto environmentManager = GetEnvironmentManager(node);
     if (!environmentManager) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
 
@@ -1548,10 +1570,14 @@ void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
     auto stringKey = std::to_string(key);
     std::any customValue;
     if (!environmentManager->FindCustomEnvValueByKey(node, stringKey, customValue)) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
-    info.SetReturnValue(std::any_cast<JSRef<JSVal>>(customValue));
+    result->SetProperty<bool>("found", true);
+    if (auto* jsValue = std::any_cast<JSRef<JSVal>>(&customValue)) {
+        result->SetPropertyObject("value", *jsValue);
+    }
+    info.SetReturnValue(result);
 }
 
 void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)

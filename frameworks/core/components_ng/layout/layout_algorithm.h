@@ -125,11 +125,14 @@ public:
     bool IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCollector& collector);
 
 private:
-    bool IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper);
+    bool IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper, const RectF& childRect);
+    bool IsContentUnderutilizedForSmartLayout(LayoutWrapper* layoutWrapper, const RectF& childRect);
     void TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper);
     uint64_t NodePath2Hash(const std::string& path);
     std::string ComputeCurrentPathHash(FrameNode* hostNode);
     bool IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode);
+    bool IsSmartLayoutEffectiveByA2UIForm(const RefPtr<FrameNode>& hostNode);
+    bool IsSmartLayoutEffectiveByPathHash(const RefPtr<FrameNode>& hostNode);
 
 protected:
     virtual void OnReset() {}

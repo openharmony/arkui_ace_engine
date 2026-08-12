@@ -22,6 +22,10 @@ namespace OHOS::Ace::NG {
 // Maximum layout size bound (16K resolution, sufficient for all practical screen sizes)
 constexpr double MAX_LAYOUT_SIZE = 16384.0;
 
+// Minimum constraint count for a meaningful solve: the container width and height
+// constraints. If only these exist, there is nothing else to solve.
+constexpr size_t CONTAINER_SIZE_CONSTRAINT_COUNT = 2;
+
 std::shared_ptr<SmartLayoutNode> SmartLayoutNode::CreateRootNode(const std::string& name)
 {
     auto engine = std::make_shared<localsmt::Engine>();
@@ -78,7 +82,7 @@ std::shared_ptr<SmartLayoutNode> SmartLayoutNode::CreateChildNode(
 
 bool SmartLayoutNode::SolveLayout()
 {
-    if (!engine_) {
+    if (!engine_ || engine_->GetConstraints().size() == CONTAINER_SIZE_CONSTRAINT_COUNT) {
         return false;
     }
     bool result = engine_->Solve();
@@ -272,6 +276,12 @@ void SmartLayoutNode::ApplyGeneralConstraints()
 {
     SmartLayoutConstraints constraintsBuilder;
     constraintsBuilder.AddGeneralConstraints(*this);
+}
+
+void SmartLayoutNode::ApplyScaleUpConstraints(double emptyRatioThreshold)
+{
+    SmartLayoutConstraints constraintsBuilder;
+    constraintsBuilder.AddScaleUpConstraints(*this, emptyRatioThreshold);
 }
 
 } // namespace OHOS::Ace::NG

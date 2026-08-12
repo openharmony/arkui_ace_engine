@@ -73,6 +73,19 @@ public:
         other.env_ = nullptr;
         other.ref_ = nullptr;
     }
+    AniLocalRefGuard& operator=(AniLocalRefGuard&& other) noexcept
+    {
+        if (this != &other) {
+            if (env_ && ref_) {
+                env_->Reference_Delete(ref_);
+            }
+            env_ = other.env_;
+            ref_ = other.ref_;
+            other.env_ = nullptr;
+            other.ref_ = nullptr;
+        }
+        return *this;
+    }
     ani_ref Get() const { return ref_; }
     explicit operator ani_ref() const { return ref_; }
     explicit operator ani_object() const { return reinterpret_cast<ani_object>(ref_); }

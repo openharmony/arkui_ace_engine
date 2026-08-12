@@ -560,7 +560,101 @@ HWTEST_F(GridContentClipTest, GridClipIrregularScrollToIndexStartExtensionAfterS
     EXPECT_TRUE(GetItem(info.startIndex_, false)->IsActive());
 }
 
-// ===================== onScrollIndex non-negative (irregular items) =====================
+// Irregular layout: after scrollToIndex(6, START) with top padding 200 (startFixOffset_ = 200),
+// scrolling upward must keep items that enter the top padding extension area laid out
+// (active) every frame. Without the fix, MeasureBackward's targetLen ignores startFixOffset_
+// and SolveForwardWithExtension only goes forward from startMainLineIndex_, so lines above
+// the start line that become visible in the extension area have no lineHeightMap_ entry and
+// are skipped by LayoutChildren — the nodes do not participate in layout every frame.
+// Grid matrix (2 columns, items 1 & 3 are 2-row irregulars):
+//   row 0: item0(1x1) | item1(2x1, top)
+//   row 1: item2(1x1) | -1 (item1 cont.)
+//   row 2: item3(2x1, top) | item4(1x1)
+//   row 3: -3 (item3 cont.) | item5(1x1)
+//   row 4: item6(1x1) | item7(1x1)
+// After scrollToIndex(6, START): startMainLineIndex_ = 2, currentOffset_ = -200 (rows 2,3 in
+// padding area, row 4 at content top). Scrolling up 100 (currentOffset_ = -100) makes row 1
+// visible at the frame top (padding area). Item 1 (row 0-1) and item 2 (row 1) must be active.
+HWTEST_F(GridContentClipTest, GridClipIrregularScrollUpKeepsExtensionActive001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(0));
+    model.SetColumnsGap(Dimension(0));
+    ConfigureLayout(model, LayoutKind::IRREGULAR);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
+
+    // Jump to item 6 (row 4) with START align. Items above the jump line that fit in
+    // startFixOffset_ (200px = 2 rows of 100px) must be measured and active.
+    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
+    FlushUITasks();
+
+    // Scroll upward by 100 (currentOffset_ goes from -200 to -100). Row 1 should now be
+    // visible at the frame top (in the padding extension area). Items at row 1 (item 1
+    // continuation and item 2) must remain laid out (active).
+    UpdateCurrentOffset(ITEM_HEIGHT);
+    const auto& info = pattern_->GetGridLayoutInfo();
+    // The start line must extend into the extension area (startMainLineIndex_ < 4).
+    EXPECT_LT(info.startMainLineIndex_, 4);
+    // Item 1 (irregular, rows 0-1) and item 2 (row 1) are in the top extension area.
+    ASSERT_TRUE(GetItem(1, false));
+    EXPECT_TRUE(GetItem(1, false)->IsActive());
+    ASSERT_TRUE(GetItem(2, false));
+    EXPECT_TRUE(GetItem(2, false)->IsActive());
+
+    // Continue scrolling upward by another 100 (currentOffset_ reaches 0 / positive).
+    // Row 0 should now enter the extension area. Item 0 and item 1 must remain active.
+    UpdateCurrentOffset(ITEM_HEIGHT);
+    const auto& info2 = pattern_->GetGridLayoutInfo();
+    ASSERT_TRUE(GetItem(0, false));
+    EXPECT_TRUE(GetItem(0, false)->IsActive());
+    ASSERT_TRUE(GetItem(1, false));
+    EXPECT_TRUE(GetItem(1, false)->IsActive());
+    // Verify the start line extended backward into the extension area.
+    EXPECT_LE(info2.startMainLineIndex_, 1);
+}
+
+// Custom layout: scrollToIndex to a middle item with START align and top padding.
+// JumpToTargetIndex calls ClearCache (wipes lineHeightMap_ and gridMatrix_) and only fills
+// forward from startMainLineIndex_. FindStartingRow's NearZero branch would call SolveBackward
+// which fails because lineHeightMap_ has no entries above startMainLineIndex_. Without the
+// guard (lineHeightMap_.find(startMainLineIndex_ - 1) != end()), SolveBackward returns {0, 0, 0}
+// and corrupts the visible range (startMainLineIndex_ = 0 with no lineHeightMap_[0],
+// endIndex_ = -1, no items laid out). With the guard, the range stays valid.
+HWTEST_F(GridContentClipTest, GridClipCustomScrollToIndexStartExtension001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(0));
+    model.SetColumnsGap(Dimension(0));
+    ConfigureLayout(model, LayoutKind::CUSTOM);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
+
+    // Jump to item 6 (line 3 in a 2-column grid). START align puts the item at the content
+    // top (currentOffset_ = 0). The custom layout doesn't pre-measure lines above the jump
+    // target (ClearCache wipes the matrix), so the start extension is not filled — but the
+    // visible range must remain valid (not corrupted).
+    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
+    FlushUITasks();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    // endIndex_ must be valid (not -1 which indicates corruption from SolveBackward failure).
+    EXPECT_GE(info.endIndex_, 0);
+    EXPECT_GE(info.startMainLineIndex_, 0);
+    // The start item must be active (laid out).
+    ASSERT_TRUE(GetItem(info.startIndex_, false));
+    EXPECT_TRUE(GetItem(info.startIndex_, false)->IsActive());
+}
+
 // Multi-row irregular items store -itemIdx in continuation rows of gridMatrix_. Without
 // abs(), SyncReportRange would report negative indices via onScrollIndex when a continuation
 // row is the first or last visible row in the content area.

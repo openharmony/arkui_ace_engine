@@ -6,7 +6,7 @@
 
 ## 定位
 
-Blank 是 ArkUI 的基础布局占位组件，公开接口包含最小尺寸和填充颜色配置。它与 Divider 一同完成组件化改造，由 spacing 聚合模块承载。
+Blank 是 ArkUI 的基础布局占位组件，公开接口包含最小尺寸和填充颜色配置。根据 SDK 与开发者文档，自动填充父容器主轴剩余空间的行为仅在父组件为 Row、Column 或 Flex 时成立；在其他父容器中不能据此推断同样的占位效果。Blank 与 Divider 一同完成组件化改造，由 spacing 聚合模块承载。
 
 本文档用于快速定位 Blank 的源码、SDK 声明、属性解析、测试和 Spec。具体行为、边界条件和版本兼容性以当前 SDK、源码、测试及 Spec 为准。
 
@@ -85,7 +85,7 @@ Blank 功能域：`specs/05-ui-components/01-layout-components/01-blank/`（功�
 
 | 问题 | 优先查看 |
 |------|----------|
-| Blank 未按预期参与父容器布局 | `blank_layout_property.h`、`blank_pattern.*`、父容器布局算法及 Blank Spec |
+| Blank 未自动填充剩余空间 | 先确认直接父组件是否为 Row、Column 或 Flex，再查看 `blank_layout_property.h`、父容器布局算法及 Blank Spec |
 | 构造参数未生效 | Dynamic/Static SDK 的 Blank 构造声明、统一 Bridge、Dynamic/Static Modifier |
 | 填充颜色未更新 | SDK `color` 声明、`blank_paint_property.h`、`blank_paint_method.cpp` |
 | 动态与静态范式结果不一致 | `blank_dynamic_modifier.cpp`、`blank_static_modifier.cpp` 和对应 modifier 测试 |
@@ -94,7 +94,7 @@ Blank 功能域：`specs/05-ui-components/01-layout-components/01-blank/`（功�
 ## 调试入口
 
 - 创建链路：从前端 Blank 定义进入统一 Bridge，再核对 Dynamic/Static Modifier 与 `BlankModelNG`。
-- 布局链路：核对 `BlankLayoutProperty`、父布局约束及对应父容器布局算法。
+- 布局链路：先核对直接父组件类型；仅 Row、Column 或 Flex 提供 Blank 自动填充主轴剩余空间的语义，再检查 `BlankLayoutProperty`、父布局约束及对应算法。
 - 绘制链路：核对 PaintProperty、PaintMethod、GeometryNode 内容区域和 Rosen RenderContext。
 - 组件化链路：确认 Blank 映射到 spacing 模块，且 `libarkui_spacing.z.so` 已随目标产物安装。
 - 回归验证：优先运行 `test/unittest/core/pattern/blank/` 下的定向用例，再运行内部 modifier 测试。

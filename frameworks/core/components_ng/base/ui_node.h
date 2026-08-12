@@ -22,6 +22,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <string_view>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -134,7 +135,7 @@ class ACE_FORCE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
+    UINode(std::string_view tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
     void RegisterReleaseFunc(bool enableRegister);
@@ -276,10 +277,10 @@ public:
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
     std::list<RefPtr<UINode>> MergeChildrenWithDisappearingChildren();
-    void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
-    void GenerateSelfVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+    void GenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode);
+    void GenerateSelfVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
     {
-        OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+        OnGenerateOneDepthVisibleFrameWithTransition(visibleNode);
     }
     void GenerateOneDepthVisibleFrameWithOffset(
         std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
@@ -698,6 +699,13 @@ public:
 
     // return value: true if the node can be removed immediately.
     virtual bool OnRemoveFromParent(bool allowTransition);
+
+    virtual bool NeedClearDisappearingChildrenRecursively() const
+    {
+        return false;
+    }
+
+    void ClearDisappearingChildren();
 
     void MarkForceMeasure();
 
@@ -1217,7 +1225,7 @@ protected:
         }
     }
 
-    virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+    virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode);
 
     virtual void OnGenerateOneDepthVisibleFrameWithOffset(
         std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);

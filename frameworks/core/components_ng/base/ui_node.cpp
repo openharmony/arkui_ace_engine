@@ -65,7 +65,7 @@ const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Col
     "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 std::atomic_int32_t UINode::count_;
 
-UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
+UINode::UINode(std::string_view tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
     ++count_;
@@ -119,16 +119,17 @@ UINode::~UINode()
     } while (false);
 #endif
 
+    auto* elementReg = ElementRegister::GetInstance();
     if (!removeSilently_) {
-        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+        elementReg->RemoveItem(nodeId_);
     } else {
-        ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
+        elementReg->RemoveItemSilently(nodeId_);
     }
     if (isThreadSafeNode_) {
         ElementRegisterMultiThread::GetInstance()->RemoveThreadSafeNode(nodeId_);
     }
     if (propInspectorId_.has_value()) {
-        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
+        elementReg->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
     }
     if (!onMainTree_) {
         return;
@@ -189,17 +190,36 @@ void UINode::OnDelete()
     children_.clear();
 }
 
+// Recurively clean up child nodes in scenariors where Repeat is combined with animations
+void UINode::ClearDisappearingChildren()
+{
+    // Recursively clean up child nodes
+    for (const auto& child : GetChildren(true)) {
+        CHECK_NULL_CONTINUE(child);
+        child->ClearDisappearingChildren();
+    }
+    // Recursively clean up disappearingChildren
+    for (const auto& item : disappearingChildren_) {
+        const auto& child = std::get<0>(item);
+        CHECK_NULL_CONTINUE(child);
+        child->ClearDisappearingChildren();
+        child->SetActive(false);
+        child->isDisappearing_ = false;
+    }
+    disappearingChildren_.clear();
+}
+
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     CHECK_NULL_VOID(context);
     context_ = context;
     context_->RegisterAttachedNode(this);
     instanceId_ = context->GetInstanceId();
-    // IsolatedThread consistency validation: warn if node and pipeline
+    // IsolatedThread consistency validation: log if node and pipeline
     // belong to different thread domains (e.g., node created in dc thread
     // attaching to non-dc pipeline, or vice versa).
     if (isIsolatedThread_ != context->IsIsolatedThread()) {
-        LOGW("AttachContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+        LOGD("AttachContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "context instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
     }
@@ -719,7 +739,7 @@ void UINode::AllowForceDark(bool forceDarkAllowed)
 void UINode::UpdateForceDarkAllowedNode(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (ACE_UNLIKELY(!SystemProperties::ConfigChangePerform())) {
         return;
     }
 
@@ -1846,18 +1866,18 @@ std::list<RefPtr<UINode>> UINode::MergeChildrenWithDisappearingChildren()
     return allChildren;
 }
 
-void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void UINode::GenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
 {
     if (disappearingChildren_.empty()) {
         // normal child
         for (const auto& child : GetChildren()) {
-            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleNode);
         }
         return;
     }
     auto allChildren = MergeChildrenWithDisappearingChildren();
     for (const auto& child : allChildren) {
-        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleNode);
     }
 }
 
@@ -1906,46 +1926,32 @@ PipelineContext* UINode::GetContext() const
         } else {
             context = PipelineContext::GetCurrentContextPtrSafely();
         }
-    }
-    // IsolatedThread consistency validation: warn if node and resolved pipeline
-    // belong to different thread domains during context resolution.
-    if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
-        LOGW("GetContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
-            "pipeline instanceId=%{public}d isolated=%{public}d",
-            nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
+        // IsolatedThread consistency validation: log if node and resolved pipeline
+        // belong to different thread domains during context resolution.
+        if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
+            LOGD("GetContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+                "pipeline instanceId=%{public}d isolated=%{public}d",
+                nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
+        }
     }
     return context;
 }
 
 PipelineContext* UINode::GetAttachedContext() const
 {
-    // IsolatedThread consistency validation: warn if node and attached pipeline
-    // belong to different thread domains.
-    if (context_ && isIsolatedThread_ != context_->IsIsolatedThread()) {
-        LOGW("GetAttachedContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
-            "pipeline instanceId=%{public}d isolated=%{public}d",
-            nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-    }
     return context_;
 }
 
 PipelineContext* UINode::GetContextWithCheck()
 {
     if (context_) {
-        // IsolatedThread consistency validation: warn if node and attached pipeline
-        // belong to different thread domains (cached context path).
-        if (isIsolatedThread_ != context_->IsIsolatedThread()) {
-            LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
-                "pipeline instanceId=%{public}d isolated=%{public}d",
-                nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-        }
         return context_;
     }
     auto* context = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    // IsolatedThread consistency validation: warn if node and resolved pipeline
+    // IsolatedThread consistency validation: log if node and resolved pipeline
     // belong to different thread domains (fallback resolution path).
     if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
-        LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+        LOGD("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
     }
@@ -2344,9 +2350,9 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     return true;
 }
 
-void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
 {
-    GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    GenerateOneDepthVisibleFrameWithTransition(visibleNode);
 }
 
 void UINode::OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
@@ -2383,19 +2389,21 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         }
     }
 
-    if (tag_ == V2::COMMON_VIEW_ETS_TAG) {
-        if (!children.empty()) {
-            auto begin = children.begin();
-            nodeInfo_->nodeTag = (*begin)->GetCustomTag();
+    if (nodeInfo_) {
+        if (tag_ == V2::COMMON_VIEW_ETS_TAG) {
+            if (!children.empty()) {
+                auto begin = children.begin();
+                nodeInfo_->nodeTag = (*begin)->GetCustomTag();
+            }
+        } else {
+            nodeInfo_->nodeTag = GetCustomTag();
         }
-    } else {
-        nodeInfo_->nodeTag = GetCustomTag();
-    }
 
-    nodeInfo_->pageDepth = depth_;
-    nodeInfo_->childrenSize = static_cast<int32_t>(children.size());
-    if (isBuildByJS_) {
-        nodeMap.insert({ nodeId_, *(nodeInfo_) });
+        nodeInfo_->pageDepth = depth_;
+        nodeInfo_->childrenSize = static_cast<int32_t>(children.size());
+        if (isBuildByJS_) {
+            nodeMap.insert({ nodeId_, *(nodeInfo_) });
+        }
     }
     for (const auto& child : children) {
         // Recursively traverse the child nodes of each node

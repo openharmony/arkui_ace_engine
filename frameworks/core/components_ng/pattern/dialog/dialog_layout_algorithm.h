@@ -106,15 +106,28 @@ private:
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
 
     void ResizeDialogSubwindow(bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow);
-
+    bool IsSplitModeEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
     float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
     void AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode);
     bool IsDefaultPosition(const RefPtr<DialogLayoutProperty>& dialogProp);
     void AvoidTitlebarInSubwindow(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp);
-    void UpdateDistortionNodeSize(
-        const RefPtr<FrameNode>& hostNode, const Dimension& dialogWidth, const Dimension& dialogHeight);
+    bool NeedAdaptToAgingWidth(const RefPtr<FrameNode>& frameNode);
+    // Pre-measure for fixed-style dialog to determine scroll/list layout constraints
+    void PreMeasureForFixedStyleDialog(const RefPtr<FrameNode>& dialog,
+        const LayoutConstraintF childLayoutConstraint, RefPtr<LayoutWrapper> childLayoutWrapper);
+    void ApplyDialogSizeToContent(const RefPtr<FrameNode>& dialog, const RefPtr<LayoutProperty>& contentLayoutProp,
+        const LayoutConstraintF& constraint);
+    float MeasureFixedContentHeight(const RefPtr<FrameNode>& contentColumn,
+        const std::optional<LayoutConstraintF>& constraint);
+    void UpdateContentMaxSizeForScroll(const RefPtr<LayoutProperty>& contentLayoutProp,
+        const LayoutConstraintF& constraint, float contentHeightWithoutScroll);
+    // Reset calc max size constraints for scroll/list children
+    void ResetConstraint(const RefPtr<FrameNode>& frameNode);
+    // Update inner scroll and list max height based on remaining space
+    void UpdateInnerScrollAndListMaxHeight(const RefPtr<LayoutWrapper>& scroll, const RefPtr<LayoutWrapper>& list,
+        float scrollHeight, float listHeight, float restHeight);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;

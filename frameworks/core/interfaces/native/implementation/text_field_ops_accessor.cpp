@@ -18,13 +18,68 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
-#include "core/components_ng/pattern/text_field/text_field_model_static.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+const ArkUITextInputCustomModifier* GetTextFieldCustomModifier()
+{
+    return NodeModifier::GetTextInputCustomModifier();
+}
+
+void SetTextFieldWidthAuto(FrameNode* frameNode, bool value)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldWidthAuto(frameNode, value);
+}
+
+void SetTextFieldPadding(FrameNode* frameNode, const PaddingProperty& newPadding, bool tmp)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldPadding(frameNode, newPadding, tmp);
+}
+
+void SetTextFieldMargin(FrameNode* frameNode)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldMargin(frameNode);
+}
+
+void SetTextFieldBackBorder(FrameNode* frameNode)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldBackBorder(frameNode);
+}
+
+void SetTextFieldBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldBackgroundColor(frameNode, color);
+}
+
+void UpdateTextFieldValueAtCreation(FrameNode* frameNode, const std::optional<std::u16string>& value)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->updateTextFieldValueAtCreation(frameNode, value);
+}
+
+void SetTextFieldOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldOnChangeEvent(frameNode, std::move(func));
+}
+} // namespace
+
 namespace TextFieldOpsAccessor {
 Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
                                                      const Ark_ResourceStr* value,
@@ -34,19 +89,13 @@ Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
     CHECK_NULL_RETURN(frameNode && value && callback, nullptr);
     auto text = Converter::OptConvert<std::u16string>(*value);
 
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto textValue = pattern->GetTextUtf16Value();
-    if (text.has_value() && text.value() != textValue) {
-        auto changed = pattern->InitValueText(text.value());
-        pattern->SetTextChangedAtCreation(changed);
-    }
+    UpdateTextFieldValueAtCreation(frameNode, text);
     auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
         arkCallback.InvokeSync(arkContent);
     };
-    TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
+    SetTextFieldOnChangeEvent(frameNode, std::move(onEvent));
     return node;
 }
 Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
@@ -57,7 +106,7 @@ Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
     Converter::VisitUnion(*value,
         [frameNode](const Ark_Length& value) {
             auto result = Converter::OptConvert<CalcDimension>(value);
-            TextFieldModelStatic::SetWidthAuto(frameNode, false);
+            SetTextFieldWidthAuto(frameNode, false);
             Validator::ValidateNonNegative(result);
             if (!result) {
                 ViewAbstract::ClearWidthOrHeight(frameNode, true);
@@ -110,9 +159,9 @@ Ark_NativePointer TextFieldOpsSetPaddingImpl(Ark_NativePointer node,
     auto padding = Converter::OptConvertPtr<PaddingProperty>(value);
     ViewAbstractModelStatic::SetPadding(frameNode, padding);
     if (padding) {
-        TextFieldModelStatic::SetPadding(frameNode, padding.value(), false);
+        SetTextFieldPadding(frameNode, padding.value(), false);
     } else {
-        TextFieldModelStatic::SetPadding(frameNode, NG::PaddingProperty(), true);
+        SetTextFieldPadding(frameNode, NG::PaddingProperty(), true);
     }
     return {};
 }
@@ -122,7 +171,7 @@ Ark_NativePointer TextFieldOpsSetMarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
-    TextFieldModelStatic::SetMargin(frameNode);
+    SetTextFieldMargin(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderImpl(Ark_NativePointer node,
@@ -156,7 +205,7 @@ Ark_NativePointer TextFieldOpsSetBorderImpl(Ark_NativePointer node,
     if (dashWidth) {
         ViewAbstractModelStatic::SetDashWidth(frameNode, dashWidth.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderWidthImpl(Ark_NativePointer node,
@@ -168,7 +217,7 @@ Ark_NativePointer TextFieldOpsSetBorderWidthImpl(Ark_NativePointer node,
     if (width) {
         ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderColorImpl(Ark_NativePointer node,
@@ -180,7 +229,7 @@ Ark_NativePointer TextFieldOpsSetBorderColorImpl(Ark_NativePointer node,
     if (color) {
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderStyleImpl(Ark_NativePointer node,
@@ -192,7 +241,7 @@ Ark_NativePointer TextFieldOpsSetBorderStyleImpl(Ark_NativePointer node,
     if (style) {
         ViewAbstractModelStatic::SetBorderStyle(frameNode, style.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderRadiusImpl(Ark_NativePointer node,
@@ -204,7 +253,7 @@ Ark_NativePointer TextFieldOpsSetBorderRadiusImpl(Ark_NativePointer node,
     if (radiuses) {
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBackgroundColorImpl(Ark_NativePointer node,
@@ -214,7 +263,7 @@ Ark_NativePointer TextFieldOpsSetBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto color = Converter::OptConvertPtr<Color>(value);
     ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
-    TextFieldModelStatic::SetBackgroundColor(frameNode, color);
+    SetTextFieldBackgroundColor(frameNode, color);
     return {};
 }
 } // TextFieldOpsAccessor

@@ -843,6 +843,104 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TouchUpWithRemainingFinger001
+ * @tc.desc: Do not start snap animation when one of multiple fingers is lifted in edit mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, TouchUpWithRemainingFinger001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetEnableEditMode(true);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    auto scrollable = pattern_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    auto gestureHub = frameNode_->GetOrCreateGestureEventHub();
+    ASSERT_FALSE(gestureHub->touchEventActuator_->touchEvents_.empty());
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+
+    TouchEventInfo downInfo("default");
+    TouchLocationInfo downTouch(0);
+    downTouch.SetTouchType(TouchType::DOWN);
+    downInfo.AddTouchLocationInfo(std::move(downTouch));
+    TouchLocationInfo changedDownTouch(0);
+    changedDownTouch.SetTouchType(TouchType::DOWN);
+    downInfo.AddChangedTouchLocationInfo(std::move(changedDownTouch));
+    callback(downInfo);
+    EXPECT_FALSE(scrollable->IsAnimationNotRunning());
+
+    TouchEventInfo partialUpInfo("default");
+    TouchLocationInfo releasedTouch(0);
+    releasedTouch.SetTouchType(TouchType::UP);
+    partialUpInfo.AddTouchLocationInfo(std::move(releasedTouch));
+    TouchLocationInfo activeTouch(1);
+    activeTouch.SetTouchType(TouchType::MOVE);
+    partialUpInfo.AddTouchLocationInfo(std::move(activeTouch));
+    TouchLocationInfo changedReleasedTouch(0);
+    changedReleasedTouch.SetTouchType(TouchType::UP);
+    partialUpInfo.AddChangedTouchLocationInfo(std::move(changedReleasedTouch));
+    callback(partialUpInfo);
+    EXPECT_FALSE(scrollable->IsAnimationNotRunning());
+    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+
+    TouchEventInfo finalUpInfo("default");
+    TouchLocationInfo finalTouch(1);
+    finalTouch.SetTouchType(TouchType::UP);
+    finalUpInfo.AddTouchLocationInfo(std::move(finalTouch));
+    TouchLocationInfo changedFinalTouch(1);
+    changedFinalTouch.SetTouchType(TouchType::UP);
+    finalUpInfo.AddChangedTouchLocationInfo(std::move(changedFinalTouch));
+    callback(finalUpInfo);
+    EXPECT_TRUE(scrollable->IsAnimationNotRunning());
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+}
+
+/**
+ * @tc.name: TouchUpWithRemainingFinger002
+ * @tc.desc: Keep the original touch-up behavior when edit mode is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, TouchUpWithRemainingFinger002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    auto scrollable = pattern_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    auto gestureHub = frameNode_->GetOrCreateGestureEventHub();
+    ASSERT_FALSE(gestureHub->touchEventActuator_->touchEvents_.empty());
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+
+    TouchEventInfo downInfo("default");
+    TouchLocationInfo downTouch(0);
+    downTouch.SetTouchType(TouchType::DOWN);
+    downInfo.AddTouchLocationInfo(std::move(downTouch));
+    TouchLocationInfo changedDownTouch(0);
+    changedDownTouch.SetTouchType(TouchType::DOWN);
+    downInfo.AddChangedTouchLocationInfo(std::move(changedDownTouch));
+    callback(downInfo);
+    EXPECT_FALSE(scrollable->IsAnimationNotRunning());
+
+    TouchEventInfo partialUpInfo("default");
+    TouchLocationInfo releasedTouch(0);
+    releasedTouch.SetTouchType(TouchType::UP);
+    partialUpInfo.AddTouchLocationInfo(std::move(releasedTouch));
+    TouchLocationInfo activeTouch(1);
+    activeTouch.SetTouchType(TouchType::MOVE);
+    partialUpInfo.AddTouchLocationInfo(std::move(activeTouch));
+    TouchLocationInfo changedReleasedTouch(0);
+    changedReleasedTouch.SetTouchType(TouchType::UP);
+    partialUpInfo.AddChangedTouchLocationInfo(std::move(changedReleasedTouch));
+    callback(partialUpInfo);
+    EXPECT_TRUE(scrollable->IsAnimationNotRunning());
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+}
+
+/**
  * @tc.name: OnScrollVisibleContentChange001
  * @tc.desc: Test OnScrollVisibleContentChange
  * @tc.type: FUNC

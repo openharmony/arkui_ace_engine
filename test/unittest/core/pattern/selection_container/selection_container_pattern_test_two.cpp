@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #define private public
 #define protected public
 
@@ -647,6 +648,104 @@ HWTEST_F(SelectionContainerPatternTestNg, HandleKeyEvent002, TestSize.Level1)
     keyEvent.code = KeyCode::KEY_B;
     auto result = pattern_->HandleKeyEvent(keyEvent);
     EXPECT_FALSE(result);
+}
+
+/* ==================== UpdateShiftFlag / ShiftFlag ==================== */
+
+/**
+ * @tc.name: ShiftFlag001
+ * @tc.desc: Container shiftFlag defaults to false and toggles via SetShiftFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, ShiftFlag001, TestSize.Level1)
+{
+    EXPECT_FALSE(pattern_->IsShiftFlagSet());
+    pattern_->SetShiftFlag(true);
+    EXPECT_TRUE(pattern_->IsShiftFlagSet());
+    pattern_->SetShiftFlag(false);
+    EXPECT_FALSE(pattern_->IsShiftFlagSet());
+}
+
+/**
+ * @tc.name: UpdateShiftFlag001
+ * @tc.desc: UpdateShiftFlag sets the flag true on a Shift-DOWN event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, UpdateShiftFlag001, TestSize.Level1)
+{
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern_->UpdateShiftFlag(keyEvent);
+    EXPECT_TRUE(pattern_->IsShiftFlagSet());
+}
+
+/**
+ * @tc.name: UpdateShiftFlag002
+ * @tc.desc: UpdateShiftFlag clears the flag on a non-shift DOWN event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, UpdateShiftFlag002, TestSize.Level1)
+{
+    pattern_->SetShiftFlag(true);
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_B;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_B);
+    pattern_->UpdateShiftFlag(keyEvent);
+    EXPECT_FALSE(pattern_->IsShiftFlagSet());
+}
+
+/**
+ * @tc.name: UpdateShiftFlag003
+ * @tc.desc: UpdateShiftFlag clears the flag on a Shift-UP (release) event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, UpdateShiftFlag003, TestSize.Level1)
+{
+    pattern_->SetShiftFlag(true);
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern_->UpdateShiftFlag(keyEvent);
+    EXPECT_FALSE(pattern_->IsShiftFlagSet());
+}
+
+/**
+ * @tc.name: HandleKeyEventShift001
+ * @tc.desc: HandleKeyEvent maintains the shift flag: Shift-DOWN sets it true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, HandleKeyEventShift001, TestSize.Level1)
+{
+    auto focusHub = containerNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    EXPECT_FALSE(pattern_->IsShiftFlagSet());
+    pattern_->HandleKeyEvent(keyEvent);
+    EXPECT_TRUE(pattern_->IsShiftFlagSet());
+}
+
+/**
+ * @tc.name: HandleKeyEventShift002
+ * @tc.desc: HandleKeyEvent clears the shift flag on Shift-UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, HandleKeyEventShift002, TestSize.Level1)
+{
+    auto focusHub = containerNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    pattern_->SetShiftFlag(true);
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    pattern_->HandleKeyEvent(keyEvent);
+    EXPECT_FALSE(pattern_->IsShiftFlagSet());
 }
 
 /* ==================== MarkContainerPropertyUpdate ==================== */

@@ -715,6 +715,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->ResetDragUpdateDelta();
+    }
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
         auto eventhub = GetEventHub<GridEventHub>();
@@ -767,10 +771,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
-    if (!IsScrolling()) {
-        // Reset accessibilityScrollSource_ when scrolling is not in progress
-        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
-    }
+    ResetAccessibilityScrollSourceIfIdle();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
@@ -1471,12 +1472,31 @@ void GridPattern::DumpAdvanceInfo()
     auto property = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(property);
     ScrollablePattern::DumpAdvanceInfo();
+    GetGridLayoutOptionsDumpInfo();
+    GetGridStateDumpInfo();
+    GetGridOffsetDumpInfo();
+    GetGridIndexDumpInfo();
+    GetGridLayoutPropertyDumpInfo();
+    GetScrollAlignDumpInfo();
+    PrintGridMatrix();
+    PrintLineHeightMap();
+    PrintIrregularItemsPosition();
+}
+
+void GridPattern::GetGridLayoutOptionsDumpInfo()
+{
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
     if (!property->HasLayoutOptions()) {
         DumpLog::GetInstance().AddDesc("GridLayoutOptions:null");
-    } else {
-        DumpLog::GetInstance().AddDesc("GridLayoutOptions:true");
-        DumpLog::GetInstance().AddDesc(GetIrregularIndexesString());
+        return;
     }
+    DumpLog::GetInstance().AddDesc("GridLayoutOptions:true");
+    DumpLog::GetInstance().AddDesc(GetIrregularIndexesString());
+}
+
+void GridPattern::GetGridStateDumpInfo()
+{
     supportAnimation_ ? DumpLog::GetInstance().AddDesc("supportAnimation:true")
                       : DumpLog::GetInstance().AddDesc("supportAnimation:false");
     isConfigScrollable_ ? DumpLog::GetInstance().AddDesc("isConfigScrollable:true")
@@ -1494,6 +1514,10 @@ void GridPattern::DumpAdvanceInfo()
                       : DumpLog::GetInstance().AddDesc("hasBigItem:false");
     info_.synced_ ? DumpLog::GetInstance().AddDesc("synced:true") : DumpLog::GetInstance().AddDesc("synced:false");
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
+}
+
+void GridPattern::GetGridOffsetDumpInfo()
+{
     DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(info_.prevHeight_));
     DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(info_.currentHeight_));
     DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(endHeight_));
@@ -1501,6 +1525,13 @@ void GridPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info_.prevOffset_));
     DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info_.lastMainSize_));
     DumpLog::GetInstance().AddDesc("totalHeightOfItemsInView:" + std::to_string(info_.totalHeightOfItemsInView_));
+    DumpLog::GetInstance().AddDesc("startFixOffset:" + std::to_string(info_.startFixOffset_));
+    DumpLog::GetInstance().AddDesc("endFixOffset:" + std::to_string(info_.endFixOffset_));
+    DumpLog::GetInstance().AddDesc("contentEndPadding:" + std::to_string(info_.contentEndPadding_));
+}
+
+void GridPattern::GetGridIndexDumpInfo()
+{
     DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info_.startIndex_));
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info_.endIndex_));
     DumpLog::GetInstance().AddDesc("reportStartIndex:" + std::to_string(info_.reportStartIndex_));
@@ -1508,8 +1539,14 @@ void GridPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info_.jumpIndex_));
     DumpLog::GetInstance().AddDesc("crossCount:" + std::to_string(info_.crossCount_));
     DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info_.childrenCount_));
-    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+}
+
+void GridPattern::GetGridLayoutPropertyDumpInfo()
+{
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate().value_or("").c_str());
+    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate().value_or("").c_str());
     property->GetRowsGap().has_value()
         ? DumpLog::GetInstance().AddDesc("RowsGap:" + std::to_string(property->GetRowsGap().value().Value()))
         : DumpLog::GetInstance().AddDesc("RowsGap:null");
@@ -1519,6 +1556,8 @@ void GridPattern::DumpAdvanceInfo()
     property->GetCachedCount().has_value()
         ? DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value()))
         : DumpLog::GetInstance().AddDesc("CachedCount:null");
+    DumpLog::GetInstance().AddDesc(
+        std::string("ShowCache:").append(property->GetShowCachedItemsValue(false) ? "true" : "false"));
     property->GetMaxCount().has_value()
         ? DumpLog::GetInstance().AddDesc("MaxCount:" + std::to_string(property->GetMaxCount().value()))
         : DumpLog::GetInstance().AddDesc("MaxCount:null");
@@ -1544,6 +1583,10 @@ void GridPattern::DumpAdvanceInfo()
             break;
         }
     }
+}
+
+void GridPattern::GetScrollAlignDumpInfo()
+{
     switch (info_.scrollAlign_) {
         case ScrollAlign::NONE: {
             DumpLog::GetInstance().AddDesc("ScrollAlign:NONE");
@@ -1569,38 +1612,53 @@ void GridPattern::DumpAdvanceInfo()
             break;
         }
     }
-    if (!info_.gridMatrix_.empty()) {
-        DumpLog::GetInstance().AddDesc("-----------start print gridMatrix------------");
-        std::string res = std::string("");
-        for (auto item : info_.gridMatrix_) {
-            res.append(std::to_string(item.first));
-            res.append(": ");
-            for (auto index : item.second) {
-                res.append("[")
-                    .append(std::to_string(index.first))
-                    .append(",")
-                    .append(std::to_string(index.second))
-                    .append("] ");
-            }
-            DumpLog::GetInstance().AddDesc(res);
-            res.clear();
-        }
-        DumpLog::GetInstance().AddDesc("-----------end print gridMatrix------------");
+}
+
+void GridPattern::PrintGridMatrix()
+{
+    if (info_.gridMatrix_.empty()) {
+        return;
     }
-    if (!info_.lineHeightMap_.empty()) {
-        DumpLog::GetInstance().AddDesc("-----------start print lineHeightMap------------");
-        for (auto item : info_.lineHeightMap_) {
-            DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
+    DumpLog::GetInstance().AddDesc("-----------start print gridMatrix------------");
+    std::string res = std::string("");
+    for (auto item : info_.gridMatrix_) {
+        res.append(std::to_string(item.first));
+        res.append(": ");
+        for (auto index : item.second) {
+            res.append("[")
+                .append(std::to_string(index.first))
+                .append(",")
+                .append(std::to_string(index.second))
+                .append("] ");
         }
-        DumpLog::GetInstance().AddDesc("-----------end print lineHeightMap------------");
+        DumpLog::GetInstance().AddDesc(res);
+        res.clear();
     }
-    if (!info_.irregularItemsPosition_.empty()) {
-        DumpLog::GetInstance().AddDesc("-----------start print irregularItemsPosition_------------");
-        for (auto item : info_.irregularItemsPosition_) {
-            DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
-        }
-        DumpLog::GetInstance().AddDesc("-----------end print irregularItemsPosition_------------");
+    DumpLog::GetInstance().AddDesc("-----------end print gridMatrix------------");
+}
+
+void GridPattern::PrintLineHeightMap()
+{
+    if (info_.lineHeightMap_.empty()) {
+        return;
     }
+    DumpLog::GetInstance().AddDesc("-----------start print lineHeightMap------------");
+    for (auto item : info_.lineHeightMap_) {
+        DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
+    }
+    DumpLog::GetInstance().AddDesc("-----------end print lineHeightMap------------");
+}
+
+void GridPattern::PrintIrregularItemsPosition()
+{
+    if (info_.irregularItemsPosition_.empty()) {
+        return;
+    }
+    DumpLog::GetInstance().AddDesc("-----------start print irregularItemsPosition_------------");
+    for (auto item : info_.irregularItemsPosition_) {
+        DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
+    }
+    DumpLog::GetInstance().AddDesc("-----------end print irregularItemsPosition_------------");
 }
 
 void GridPattern::GetEventDumpInfo()
@@ -1749,6 +1807,9 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             UpdateStartIndex(index, align);
             ContentChangeReport(host, ContentChangeManager::SCROLL_TO_INDEX);
         }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_GRID, "ScrollToIndex with invalid index: %{public}d, total children: %{public}d",
+            index, totalChildCount);
     }
     FireAndCleanScrollingListener();
 }
@@ -1928,21 +1989,21 @@ void GridPattern::BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json)
             children->Put(std::to_string(item.first).c_str(), res.c_str());
             res.clear();
         }
-        children->Put("gridMatrix", children);
+        json->Put("gridMatrix", children);
     }
     if (!info_.lineHeightMap_.empty()) {
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
         for (auto item : info_.lineHeightMap_) {
             children->Put(std::to_string(item.first).c_str(), std::to_string(item.second).c_str());
         }
-        children->Put("lineHeightMap", children);
+        json->Put("lineHeightMap", children);
     }
     if (!info_.irregularItemsPosition_.empty()) {
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
         for (auto item : info_.irregularItemsPosition_) {
             children->Put(std::to_string(item.first).c_str(), std::to_string(item.second).c_str());
         }
-        children->Put("irregularItemsPosition_", children);
+        json->Put("irregularItemsPosition", children);
     }
 }
 
@@ -1951,6 +2012,18 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     auto property = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(property);
     ScrollablePattern::DumpAdvanceInfo(json);
+    BuildGridStateInfo(json);
+    BuildGridOffsetInfo(json);
+    BuildGridIndexInfo(json);
+    BuildGridLayoutPropertyInfo(json);
+    BuildScrollAlignInfo(json);
+    BuildGridLayoutInfo(json);
+}
+
+void GridPattern::BuildGridStateInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
     json->Put("GridLayoutOptions", property->HasLayoutOptions() ? GetIrregularIndexesString().c_str() : "null");
     json->Put("supportAnimation", supportAnimation_);
     json->Put("isConfigScrollable", isConfigScrollable_);
@@ -1962,6 +2035,10 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("hasBigItem", info_.hasBigItem_);
     json->Put("synced", info_.synced_);
     json->Put("scrollStop", std::to_string(scrollStop_).c_str());
+}
+
+void GridPattern::BuildGridOffsetInfo(std::unique_ptr<JsonValue>& json)
+{
     json->Put("prevHeight", info_.prevHeight_);
     json->Put("currentHeight", info_.currentHeight_);
     json->Put("endHeight", endHeight_);
@@ -1969,13 +2046,33 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("prevOffset", std::to_string(info_.prevOffset_).c_str());
     json->Put("lastMainSize", std::to_string(info_.lastMainSize_).c_str());
     json->Put("totalHeightOfItemsInView", std::to_string(info_.totalHeightOfItemsInView_).c_str());
+    json->Put("startFixOffset", std::to_string(info_.startFixOffset_).c_str());
+    json->Put("endFixOffset", std::to_string(info_.endFixOffset_).c_str());
+    json->Put("contentEndPadding", std::to_string(info_.contentEndPadding_).c_str());
+}
+
+void GridPattern::BuildGridIndexInfo(std::unique_ptr<JsonValue>& json)
+{
     json->Put("startIndex", info_.startIndex_);
     json->Put("endIndex", info_.endIndex_);
+    json->Put("reportStartIndex", info_.reportStartIndex_);
+    json->Put("reportEndIndex", info_.reportEndIndex_);
     json->Put("jumpIndex", info_.jumpIndex_);
     json->Put("crossCount", info_.crossCount_);
     json->Put("childrenCount", info_.childrenCount_);
+}
+
+void GridPattern::BuildGridLayoutPropertyInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
     json->Put("RowsTemplate", property->GetRowsTemplate().value_or("").c_str());
     json->Put("ColumnsTemplate", property->GetColumnsTemplate().value_or("").c_str());
+    json->Put("RowsGap",
+        property->GetRowsGap().has_value() ? std::to_string(property->GetRowsGap().value().Value()).c_str() : "null");
+    json->Put("ColumnsGap",
+        property->GetColumnsGap().has_value() ? std::to_string(property->GetColumnsGap().value().Value()).c_str()
+                                              : "null");
     json->Put("CachedCount",
         property->GetCachedCount().has_value() ? std::to_string(property->GetCachedCount().value()).c_str() : "null");
     json->Put("ShowCache", std::to_string(property->GetShowCachedItemsValue(false)).c_str());
@@ -1990,10 +2087,7 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ScrollEnabled", property->GetScrollEnabled().has_value()
                                    ? std::to_string(property->GetScrollEnabled().value()).c_str()
                                    : "null");
-
     json->Put("AlignItems", property->GetAlignItems() ? "GridItemAlignment.STRETCH" : "GridItemAlignment.DEFAULT");
-    BuildScrollAlignInfo(json);
-    BuildGridLayoutInfo(json);
 }
 
 SizeF GridPattern::GetChildrenExpandedSize()

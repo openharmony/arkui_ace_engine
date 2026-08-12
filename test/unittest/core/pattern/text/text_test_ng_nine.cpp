@@ -15,7 +15,7 @@
 
 #include "text_base.h"
 #include "core/accessibility/accessibility_manager.h"
-#include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/text/one_step_drag_controller.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -1912,5 +1912,139 @@ HWTEST_F(TextTestNgNine, SetTailIndents008, TestSize.Level1)
     EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
     EXPECT_FALSE(tailIndentsValue->indentsArray->at(0).IsNegative());
     EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 0.0f);
+}
+
+/**
+ * @tc.name: TextStyleTailIndentOptional001
+ * @tc.desc: Test TextStyle HasTailIndent and GetTailIndent with optional return type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, TextStyleTailIndentOptional001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a default TextStyle without setting TailIndent.
+     * @tc.expected: HasTailIndent() returns false, GetTailIndent() returns std::nullopt.
+     */
+    TextStyle textStyle;
+    EXPECT_FALSE(textStyle.HasTailIndent());
+    EXPECT_FALSE(textStyle.GetTailIndent().has_value());
+
+    /**
+     * @tc.steps: step2. Set TailIndent with a value.
+     * @tc.expected: HasTailIndent() returns true, GetTailIndent() returns the set value.
+     */
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(10.0, DimensionUnit::VP));
+    NG::TailIndents tailIndents;
+    tailIndents.indentsArray = indentsArray;
+    textStyle.SetTailIndent(tailIndents);
+
+    EXPECT_TRUE(textStyle.HasTailIndent());
+    EXPECT_TRUE(textStyle.GetTailIndent().has_value());
+    EXPECT_TRUE(textStyle.GetTailIndent().value().indentsArray.has_value());
+    EXPECT_EQ(textStyle.GetTailIndent().value().indentsArray->size(), 1);
+    EXPECT_FLOAT_EQ(textStyle.GetTailIndent().value().indentsArray->at(0).ConvertToVp(), 10.0f);
+
+    /**
+     * @tc.steps: step3. Set TailIndent with std::nullopt to reset.
+     * @tc.expected: HasTailIndent() returns false, GetTailIndent() returns std::nullopt.
+     */
+    textStyle.SetTailIndent(std::optional<NG::TailIndents>(std::nullopt));
+    EXPECT_FALSE(textStyle.HasTailIndent());
+    EXPECT_FALSE(textStyle.GetTailIndent().has_value());
+}
+
+/**
+ * @tc.name: TextStyleTailIndentOptional002
+ * @tc.desc: Test TextStyle GetTailIndentValue and ResetTailIndent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, TextStyleTailIndentOptional002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a default TextStyle and call GetTailIndentValue with default.
+     * @tc.expected: GetTailIndentValue returns the provided default value.
+     */
+    TextStyle textStyle;
+    NG::TailIndents defaultTailIndents;
+    NG::TailIndentsArray defaultArray;
+    defaultArray.push_back(Dimension(5.0, DimensionUnit::VP));
+    defaultTailIndents.indentsArray = defaultArray;
+
+    const NG::TailIndents& result = textStyle.GetTailIndentValue(defaultTailIndents);
+    EXPECT_TRUE(result.indentsArray.has_value());
+    EXPECT_EQ(result.indentsArray->size(), 1);
+    EXPECT_FLOAT_EQ(result.indentsArray->at(0).ConvertToVp(), 5.0f);
+
+    /**
+     * @tc.steps: step2. Set TailIndent and call GetTailIndentValue with same default.
+     * @tc.expected: GetTailIndentValue returns the actual set value, not the default.
+     */
+    NG::TailIndentsArray setArray;
+    setArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    NG::TailIndents setTailIndents;
+    setTailIndents.indentsArray = setArray;
+    textStyle.SetTailIndent(setTailIndents);
+
+    const NG::TailIndents& result2 = textStyle.GetTailIndentValue(defaultTailIndents);
+    EXPECT_TRUE(result2.indentsArray.has_value());
+    EXPECT_EQ(result2.indentsArray->size(), 1);
+    EXPECT_FLOAT_EQ(result2.indentsArray->at(0).ConvertToVp(), 20.0f);
+
+    /**
+     * @tc.steps: step3. Reset TailIndent via SetTailIndent(std::nullopt).
+     * @tc.expected: HasTailIndent returns false after reset.
+     */
+    textStyle.SetTailIndent(std::optional<NG::TailIndents>(std::nullopt));
+    EXPECT_FALSE(textStyle.HasTailIndent());
+    EXPECT_FALSE(textStyle.GetTailIndent().has_value());
+}
+
+/**
+ * @tc.name: TextStyleTailIndentOptional003
+ * @tc.desc: Test TextStyle operator== with TailIndent optional behavior
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, TextStyleTailIndentOptional003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Compare two default TextStyles (both TailIndent nullopt).
+     * @tc.expected: operator== returns true for TailIndent comparison.
+     */
+    TextStyle textStyle1;
+    TextStyle textStyle2;
+    EXPECT_EQ(textStyle1.GetTailIndent(), textStyle2.GetTailIndent());
+    EXPECT_FALSE(textStyle1.GetTailIndent().has_value());
+    EXPECT_FALSE(textStyle2.GetTailIndent().has_value());
+
+    /**
+     * @tc.steps: step2. Set TailIndent on one TextStyle, compare with default.
+     * @tc.expected: operator== returns false (nullopt != value).
+     */
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(10.0, DimensionUnit::VP));
+    NG::TailIndents tailIndents;
+    tailIndents.indentsArray = indentsArray;
+    textStyle1.SetTailIndent(tailIndents);
+
+    EXPECT_NE(textStyle1.GetTailIndent(), textStyle2.GetTailIndent());
+
+    /**
+     * @tc.steps: step3. Set same TailIndent on both TextStyles.
+     * @tc.expected: operator== returns true (value == value).
+     */
+    textStyle2.SetTailIndent(tailIndents);
+    EXPECT_EQ(textStyle1.GetTailIndent(), textStyle2.GetTailIndent());
+
+    /**
+     * @tc.steps: step4. Set different TailIndent on textStyle2.
+     * @tc.expected: operator== returns false (value != value).
+     */
+    NG::TailIndentsArray diffArray;
+    diffArray.push_back(Dimension(30.0, DimensionUnit::VP));
+    NG::TailIndents diffTailIndents;
+    diffTailIndents.indentsArray = diffArray;
+    textStyle2.SetTailIndent(diffTailIndents);
+    EXPECT_NE(textStyle1.GetTailIndent(), textStyle2.GetTailIndent());
 }
 } // namespace OHOS::Ace::NG

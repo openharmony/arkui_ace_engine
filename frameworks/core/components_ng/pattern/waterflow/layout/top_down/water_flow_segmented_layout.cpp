@@ -578,6 +578,17 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
     }
 }
 
+void WaterFlowSegmentedLayout::MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>& item, int32_t segment,
+    int32_t crossIndex, float startMainPos, float userDefMainSize, std::optional<int64_t> deadline) const
+{
+    auto ref = CreateLazyChildViewPosReference(info_, mainSize_, startMainPos + info_->currentOffset_,
+        ReferenceEdge::START, axis_, deadline, true);
+    auto itemConstraint = WaterFlowLayoutUtils::CreateChildConstraint(
+        { itemsCrossSize_[segment][crossIndex], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_, item);
+    LazyLayoutUtils::SetStickyInsets(itemConstraint, info_->contentStartOffset_, info_->contentEndOffset_);
+    item->Measure(itemConstraint);
+}
+
 RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, std::optional<int64_t> deadline) const
 {
@@ -589,20 +600,21 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     }
     auto seg = info_->GetSegment(idx);
     if (itemsCrossSize_[seg].size() == 1 && item->GetLayoutProperty()->GetNeedLazyLayout()) {
-        auto ref = CreateLazyChildViewPosReference(info_, mainSize_, position.second + info_->currentOffset_,
-            ReferenceEdge::START, axis_, deadline, true);
-        auto itemConstraint = WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_,
-            item);
-        // Pass WaterFlow's contentStart/EndOffset through the constraint so changes trigger child lazy remeasure.
-        LazyLayoutUtils::SetStickyInsets(itemConstraint, info_->contentStartOffset_, info_->contentEndOffset_);
-        item->Measure(itemConstraint);
+        MeasureLazyLayoutItem(item, seg, position.first, position.second, userDefMainSize, deadline);
         auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(item);
-        info_->currentOffset_ -= adjustOffset.start;
-        if (idx < info_->endIndex_ || !IsForWard()) {
-            info_->currentOffset_ -= adjustOffset.end;
+        const bool includeEndOffset = idx < info_->endIndex_ || !IsForWard();
+        const bool needReanchor =
+            AdjustLazyChildOffset(info_->currentOffset_, info_->contentStartOffset_, adjustOffset.start,
+                adjustOffset.end, includeEndOffset, deadline.has_value());
+        if (needReanchor) {
+            // Remeasure to rebuild the active window at the start boundary.
+            MeasureLazyLayoutItem(item, seg, position.first, position.second, userDefMainSize, deadline);
+            ConsumeLazyChildReanchorOffset(item, idx);
         }
-        if (postJumpOffset_) {
+        if (postJumpOffset_ && needReanchor) {
+            // Re-anchoring discards the previous jump anchor.
+            *postJumpOffset_ = 0.0f;
+        } else if (postJumpOffset_) {
             *postJumpOffset_ -= adjustOffset.start;
         }
     } else {

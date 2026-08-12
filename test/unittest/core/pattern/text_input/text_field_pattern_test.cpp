@@ -3125,11 +3125,15 @@ HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Leve
     ASSERT_NE(stateHolder, nullptr);
     stateHolder->SetAutoFillPasswordTriggered(true);
     stateHolder->SetAutoFillNewPasswordTriggered(true);
-
+    /**
+     * @tc.steps: step3. SetAutoFillTriggeredStateByType ACE_UNSPECIFIED.
+     */
     AceAutoFillType autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
     pattern->SetAutoFillTriggeredStateByType(autoFillType);
     EXPECT_EQ(stateHolder->IsAutoFillPasswordTriggered(), true);
-
+    /**
+     * @tc.steps: step4. SetAutoFillTriggeredStateByType ACE_USER_NAME.
+     */
     autoFillType = AceAutoFillType::ACE_USER_NAME;
     pattern->SetAutoFillTriggeredStateByType(autoFillType);
     EXPECT_EQ(stateHolder->IsAutoFillPasswordTriggered(), true);

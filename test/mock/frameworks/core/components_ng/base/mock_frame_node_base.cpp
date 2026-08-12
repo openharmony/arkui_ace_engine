@@ -30,7 +30,7 @@ public:
 };
 
 FrameNode::FrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern), isLayoutNode_(isLayoutNode)
 {
     uiNodeType_ = UINodeType::FRAME_NODE;
@@ -413,7 +413,7 @@ void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& vis
 void FrameNode::OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
 {}
 
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
 {}
 
 void FrameNode::OnNotifyMemoryLevel(int32_t level)

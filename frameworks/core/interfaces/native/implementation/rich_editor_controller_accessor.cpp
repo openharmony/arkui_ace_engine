@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/common/container.h"
+
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -615,7 +615,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
         dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
             static_cast<TextDirection>(src.textDirection.value()));
     } else {
-        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
     ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }
@@ -641,7 +641,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
         dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
             static_cast<TextDirection>(src.textDirection.value()));
     } else {
-        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
     ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }

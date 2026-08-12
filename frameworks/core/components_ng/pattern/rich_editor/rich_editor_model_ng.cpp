@@ -385,7 +385,6 @@ void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::
 
 void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 {
-    ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontStyle);
     if (options.value.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value());
     }
@@ -400,13 +399,14 @@ void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
     }
     if (options.fontColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
 }
 
 void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options)
 {
-    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontStyle, frameNode);
     if (options.value.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value(), frameNode);
     }
@@ -425,6 +425,8 @@ void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions&
     if (options.fontColor.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor, frameNode);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies, frameNode);
 }
@@ -615,30 +617,31 @@ PositionWithAffinity RichEditorModelNG::GetGlyphPositionAtCoordinate(FrameNode* 
     return pattern->GetGlyphPositionAtCoordinate(x, y);
 }
 
-PositionWithAffinity RichEditorModelNG::GetCharacterPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y)
+PositionWithAffinity RichEditorModelNG::GetCharacterPositionAtCoordinate(
+    FrameNode* frameNode, int32_t x, int32_t y, TextEncoding encoding)
 {
     CHECK_NULL_RETURN(frameNode, PositionWithAffinity(0, TextAffinity::UPSTREAM));
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, PositionWithAffinity(0, TextAffinity::UPSTREAM));
-    return pattern->GetCharacterPositionAtCoordinate(x, y);
+    return pattern->GetCharacterPositionAtCoordinate(x, y, encoding);
 }
 
 std::pair<TextRange, TextRange> RichEditorModelNG::GetGlyphRangeForCharacterRange(
-    FrameNode* frameNode, int32_t start, int32_t end)
+    FrameNode* frameNode, int32_t start, int32_t end, TextEncoding encoding)
 {
     CHECK_NULL_RETURN(frameNode, {});
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    return pattern->GetGlyphRangeForCharacterRange(start, end);
+    return pattern->GetGlyphRangeForCharacterRange(start, end, encoding);
 }
 
 std::pair<TextRange, TextRange> RichEditorModelNG::GetCharacterRangeForGlyphRange(
-    FrameNode* frameNode, int32_t start, int32_t end)
+    FrameNode* frameNode, int32_t start, int32_t end, TextEncoding encoding)
 {
     CHECK_NULL_RETURN(frameNode, {});
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    return pattern->GetCharacterRangeForGlyphRange(start, end);
+    return pattern->GetCharacterRangeForGlyphRange(start, end, encoding);
 }
 
 void RichEditorModelNG::SetTypingParagraphStyle(FrameNode* frameNode,

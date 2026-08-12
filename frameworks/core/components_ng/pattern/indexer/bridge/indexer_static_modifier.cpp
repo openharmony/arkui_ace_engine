@@ -526,7 +526,7 @@ void FontImpl(Ark_NativePointer node,
     }
 }
 void ItemSizeImpl(Ark_NativePointer node,
-                  const Opt_LengthMetrics* size)
+                  const Opt_LengthMetricsProxy* size)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

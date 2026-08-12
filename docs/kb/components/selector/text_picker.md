@@ -1,7 +1,7 @@
 # TextPicker Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-11
+> 文档版本：v1.1
+> 更新时间：2026-07-24
 > 来源：`docs/context_registry.json` 主题 `TextPicker`
 
 ## 定位
@@ -106,7 +106,7 @@ TextPicker 已完成组件化改造，声明式组件和动态属性统一进入
 
 ## 相关主题
 
-- DatePicker Context
-- TimePicker Context
-- UIPickerComponent Context
-- 组件化改造通用方案
+- `TextPickerDialog`：`docs/kb/components/selector/text_picker_dialog.md`
+- `DatePicker`：`docs/kb/components/selector/date_picker.md`
+- `TimePicker`：`docs/kb/components/selector/time_picker.md`
+- `UIPickerComponent`：`docs/kb/components/selector/ui_picker_component.md`

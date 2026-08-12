@@ -74,7 +74,7 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
@@ -1774,7 +1774,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest030, TestSize.Level1)
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         ASSERT_NE(toastTheme, nullptr);
         expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
-        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps, false);
     }
 
     const auto& safeArea = toastProps->GetSafeAreaInsets();
@@ -1906,7 +1906,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest032, TestSize.Level1)
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         ASSERT_NE(toastTheme, nullptr);
         expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
-        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps, false);
     }
 
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
@@ -1976,7 +1976,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest033, TestSize.Level1)
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         ASSERT_NE(toastTheme, nullptr);
         expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
-        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps, false);
     }
 
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());

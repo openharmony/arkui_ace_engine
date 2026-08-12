@@ -54,7 +54,13 @@ build_component_ng("slider_pattern_ng") {
         ]
       }
     if (is_ohos_standard_system) {
-      external_deps = [ "accessibility:accessibility_common", "napi:ace_napi"]
+      external_deps = [
+        "accessibility:accessibility_common",
+        "napi:ace_napi",
+        "node:node_header_notice",
+        "libuv:uv",
+        "ets_runtime:libark_jsruntime",
+      ]
 
     }
   }

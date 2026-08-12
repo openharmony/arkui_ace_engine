@@ -36,6 +36,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
@@ -53,7 +54,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/property/accessibility_property_helper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
@@ -459,7 +460,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
-    scale_ = targetNodeContext->GetFontScale();
+    scale_ = targetNodeContext->GetFontScaleFromEnv(targetNode);
     lineSpacingOptimizeFlag_ = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(targetNodeContext);
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
@@ -598,13 +599,10 @@ void SheetPresentationPattern::SetSheetCloseIconMaterial()
 {
     auto material = AceType::MakeRefPtr<UiMaterial>();
     material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
-    ImmersiveOptions options;
-    options.style = UiMaterialStyle::ULTRA_THIN;
-    options.applyShadow = true;
+    ImmersiveOptions options { .style = UiMaterialStyle::ULTRA_THIN, .applyShadow = true, .interactive = true };
     if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
         options.colorInvert = true;
-        options.interactive = true;
-        LightEffectOptions lightEffectOptions;
+        LightEffectOptions lightEffectOptions {};
         options.lightEffectOptions = lightEffectOptions;
     }
     material->SetImmersiveOptions(options);
@@ -623,6 +621,13 @@ void SheetPresentationPattern::SetSheetCloseIconMaterial()
     CHECK_NULL_VOID(symbolLayoutProperty);
     symbolLayoutProperty->UpdateSymbolColorList({closeIconSymbolColor});
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), AceType::RawPtr(material));
+    auto buttonEventHub = sheetCloseIcon->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+        buttonEventHub->SetStateEffect(true);
+    } else {
+        buttonEventHub->SetStateEffect(false);
+    }
 }
 
 void SheetPresentationPattern::ClearSheetCloseIconMaterial()
@@ -630,6 +635,9 @@ void SheetPresentationPattern::ClearSheetCloseIconMaterial()
     auto sheetCloseIcon = GetSheetCloseIcon();
     CHECK_NULL_VOID(sheetCloseIcon);
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), nullptr);
+    auto buttonEventHub = sheetCloseIcon->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(true);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1548,7 +1556,7 @@ void SheetPresentationPattern::UpdateTitleColumnSize()
     bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(pipeline);
     // layout constraints can be added only in non-senior-friendly and non-minority language scenarios.
     if (operationColumn && sheetStyle.sheetTitle.has_value() &&
-        NearEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) && !needSpacingOptimize) {
+        NearEqual(pipeline->GetFontScaleFromEnv(host), sheetTheme->GetSheetNormalScale()) && !needSpacingOptimize) {
         auto layoutProps = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(
@@ -1695,7 +1703,7 @@ void SheetPresentationPattern::UpdateSheetTitle()
         auto titleProp = titleNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(titleProp);
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
-        if (pipeline->GetFontScale() != scale_) {
+        if (pipeline->GetFontScaleFromEnv(host) != scale_) {
             titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1764,7 +1772,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
-    if (pipeline->GetFontScale() != scale_ || needSpacingOptimize != lineSpacingOptimizeFlag_) {
+    if (pipeline->GetFontScaleFromEnv(host) != scale_ || needSpacingOptimize != lineSpacingOptimizeFlag_) {
         auto operationNode = GetTitleBuilderNode();
         CHECK_NULL_VOID(operationNode);
         auto titleColumnNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(0));
@@ -1779,7 +1787,8 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         // the value is true when the title is a character string and in age-friendly or minority language scenario.
         bool isFontScaledOrOptimizeInSystemTitle =
             sheetStyle.isTitleBuilder.has_value() && !sheetStyle.isTitleBuilder.value() &&
-            (GreatNotEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) || needSpacingOptimize);
+            (GreatNotEqual(pipeline->GetFontScaleFromEnv(host), sheetTheme->GetSheetNormalScale()) ||
+            needSpacingOptimize);
         if (isSheetHasNoTitle || isFontScaledOrOptimizeInSystemTitle) {
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
@@ -1801,7 +1810,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         }
         UpdateSheetTitle();
         UpdateSheetTitleLineOptimize(needSpacingOptimize);
-        scale_ = pipeline->GetFontScale();
+        scale_ = pipeline->GetFontScaleFromEnv(host);
         lineSpacingOptimizeFlag_ = needSpacingOptimize;
         auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_VOID(sheetWrapper);

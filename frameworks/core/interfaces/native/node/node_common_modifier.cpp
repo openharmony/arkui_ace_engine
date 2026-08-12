@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
@@ -9215,6 +9216,45 @@ void ResetNextFocus(ArkUINodeHandle node)
     ViewAbstract::ResetNextFocus(frameNode);
 }
 
+ArkUINodeHandle GetNextFocus(ArkUINodeHandle node, ::FocusMove idx)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+
+    FocusIntension key;
+    switch (idx) {
+        case ::FocusMove::FOCUS_MOVE_FORWARD:
+            key = FocusIntension::TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_BACKWARD:
+            key = FocusIntension::SHIFT_TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_UP:
+            key = FocusIntension::UP;
+            break;
+        case ::FocusMove::FOCUS_MOVE_DOWN:
+            key = FocusIntension::DOWN;
+            break;
+        case ::FocusMove::FOCUS_MOVE_LEFT:
+            key = FocusIntension::LEFT;
+            break;
+        case ::FocusMove::FOCUS_MOVE_RIGHT:
+            key = FocusIntension::RIGHT;
+            break;
+        default:
+            return nullptr;
+    }
+
+    auto nextFocus = focusHub->GetNextFocus(static_cast<int32_t>(key));
+    auto nextFocusNode = std::get_if<WeakPtr<AceType>>(&nextFocus);
+    CHECK_NULL_RETURN(nextFocusNode, nullptr);
+    auto nextFrameNode = AceType::DynamicCast<FrameNode>(nextFocusNode->Upgrade());
+    CHECK_NULL_RETURN(nextFrameNode, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(nextFrameNode));
+}
+
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
     ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue,
     void* focusBoxResObjs)
@@ -9270,6 +9310,35 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::FocusBoxStyle style;
     ViewAbstract::SetFocusBoxStyle(frameNode, style, true);
+}
+
+ArkUI_Bool GetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    CHECK_NULL_RETURN(values, false);
+    CHECK_NULL_RETURN(color, false);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    auto style = focusHub->GetFocusBox().GetStyle();
+
+    Color paintColor;
+    focusHub->GetPaintColorFromBox(paintColor);
+    Dimension paintWidth;
+    focusHub->GetPaintWidthFromBox(paintWidth);
+    Dimension focusPaddingVp;
+    focusHub->GetPaintPaddingVp(focusPaddingVp);
+
+    values[NUM_0] = (style && style->margin)
+        ? static_cast<ArkUI_Float32>(style->margin.value().Value())
+        : static_cast<ArkUI_Float32>(focusPaddingVp.Value());
+    values[NUM_1] = (style && style->strokeWidth)
+        ? static_cast<ArkUI_Float32>(style->strokeWidth.value().Value())
+        : static_cast<ArkUI_Float32>(paintWidth.Value());
+    *color = (style && style->strokeColor)
+        ? style->strokeColor.value().GetValue()
+        : paintColor.GetValue();
+    return true;
 }
 
 void SetClickDistance(ArkUINodeHandle node, ArkUI_Float32 valueMargin)
@@ -9535,6 +9604,9 @@ ArkUI_Int32 PostTouchEventWithStrategy(
     touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
     touchEvent.operatingHand = arkUITouchEvent->actionTouchPoint.operatingHand;
     touchEvent.deviceId = arkUITouchEvent->deviceId;
+    touchEvent.tiltX = static_cast<float>(arkUITouchEvent->actionTouchPoint.tiltX);
+    touchEvent.tiltY = static_cast<float>(arkUITouchEvent->actionTouchPoint.tiltY);
+    touchEvent.rollAngle = static_cast<float>(arkUITouchEvent->actionTouchPoint.rollAngle);
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
     TimeStamp time(nanoseconds);
     touchEvent.time = time;
@@ -9557,6 +9629,9 @@ ArkUI_Int32 PostTouchEventWithStrategy(
         TimeStamp downTime(downNanoseconds);
         point.downTime = downTime;
         point.force = touchPointes[index].pressure;
+        point.tiltX = static_cast<float>(touchPointes[index].tiltX);
+        point.tiltY = static_cast<float>(touchPointes[index].tiltY);
+        point.rollAngle = static_cast<float>(touchPointes[index].rollAngle);
         touchEvent.pointers.emplace_back(point);
     }
     touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
@@ -9614,8 +9689,10 @@ ArkUI_Int32 PostMouseEventWithStrategy(
     }
 
     int32_t* pressedButtons = arkUIMouseEvent->pressedButtons;
-    for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
-        mouseEvent.pressedButtonsArray.emplace_back(static_cast<MouseButton>(pressedButtons[index]));
+    if (pressedButtons) {
+        for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
+            mouseEvent.pressedButtonsArray.emplace_back(static_cast<MouseButton>(pressedButtons[index]));
+        }
     }
     ArkUIMouseEvent* arkUIMouseEventCloned = const_cast<ArkUIMouseEvent*>(arkUIMouseEvent);
     NG::SetPostMousePointerEvent(mouseEvent, arkUIMouseEventCloned);
@@ -11959,7 +12036,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetMaterialShadow = ResetMaterialShadow,
         .getCurrentLocation = GetCurrentLocation,
         .setDoubleSided = SetDoubleSided,
-        .resetDoubleSided = ResetDoubleSided
+        .resetDoubleSided = ResetDoubleSided,
+        .getNextFocus = GetNextFocus,
+        .getFocusBoxStyle = GetFocusBoxStyle
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

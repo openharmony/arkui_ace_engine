@@ -231,6 +231,11 @@ public:
 
     virtual void OnTouchDown(const TouchEventInfo& info);
 
+    virtual bool ShouldIgnoreTouchUpWithActiveFingers() const
+    {
+        return false;
+    }
+
     void OnTouchpadInteraction(PointF point);
 
     virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};
@@ -268,6 +273,7 @@ public:
     {
         return !scrollBarProxy_ || scrollBarProxy_->Idle();
     }
+    bool InnerScrollBarIdle();
     void SetScrollEnabled(bool enabled)
     {
         CHECK_NULL_VOID(scrollableEvent_);
@@ -603,6 +609,8 @@ public:
     {
         accessibilityScrollSource_ = source;
     }
+
+    void ResetAccessibilityScrollSourceIfIdle();
 
     std::string GetAccessibilityScrollSource();
 

@@ -85,6 +85,7 @@ bool EventInfoConvertor::ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo,
     touchEventInfo.AddChangedTouchLocationInfo(std::move(changedTouchLoactionInfo));
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+    touchEventInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
     return true;
 }
 

@@ -5973,9 +5973,10 @@ ArkUINativeModuleValue CommonBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    ArkUINodeHandle nativeNode = nullptr;
+    ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension wVal(0.0, DimensionUnit::VP);
     CalcDimension hVal(0.0, DimensionUnit::VP);
     RefPtr<ResourceObject> widthResObj;

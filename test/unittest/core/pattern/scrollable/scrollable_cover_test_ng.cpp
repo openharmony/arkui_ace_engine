@@ -1724,6 +1724,32 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionRefreshPause001, TestSize.Lev
 }
 
 /**
+ * @tc.name: ProcessScrollMotionRefreshPause002
+ * @tc.desc: Test refresh coordination only bypasses the pause while it is active.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionRefreshPause002, TestSize.Level1)
+{
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->canOverScroll_ = true;
+    scrollable->state_ = Scrollable::AnimationState::FRICTION;
+    NestableScrollCallback callback = [](float, int32_t, NestedState) { return ScrollResult { 0.0, false }; };
+    scrollable->SetHandleScrollCallback(std::move(callback));
+
+    scrollable->SetIsRefreshScrollCallback([]() { return false; });
+    scrollable->ProcessScrollMotion(10.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_TRUE(scrollable->scrollPause_);
+
+    scrollable->scrollPause_ = false;
+    scrollable->state_ = Scrollable::AnimationState::FRICTION;
+    scrollable->SetIsRefreshScrollCallback([]() { return true; });
+    scrollable->needScrollSnapChange_ = true;
+    scrollable->ProcessScrollMotion(20.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_TRUE(scrollable->scrollPause_);
+}
+
+/**
  * @tc.name: UpdateScrollSnapEndWithOffsetTest001
  * @tc.desc: Test the UpdateScrollSnapEndWithOffset method
  * @tc.type: FUNC

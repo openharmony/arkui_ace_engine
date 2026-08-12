@@ -78,6 +78,11 @@ const std::string FIRST_INPUT_TEXT = "account";
 const std::string SECOND_INPUT_TEXT = "password";
 const std::string FIRST_PLACEHOLDER_TEXT = "input account";
 const std::u16string FIRST_PLACEHOLDER_TEXT_U16 = u"input account";
+const std::string EMPTY_RULES_JSON = R"({
+    "version": 1,
+    "ruleSetId": "empty_scene_rules",
+    "rules": []
+})";
 
 std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = false,
     bool deduplicate = true, int32_t minReportIntervalMs = DEFAULT_MIN_REPORT_INTERVAL_MS,
@@ -275,6 +280,7 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_RegisterRuleSet001, Te
 {
     PageSceneRuleManager manager;
     EXPECT_EQ(manager.RegisterRuleSet(TEST_PROCESS_ID, "invalid json"), PAGE_SCENE_PARAM_INVALID);
+    EXPECT_EQ(manager.RegisterRuleSet(TEST_PROCESS_ID, EMPTY_RULES_JSON), PAGE_SCENE_PARAM_INVALID);
     EXPECT_EQ(manager.RegisterRuleSet(TEST_PROCESS_ID, BuildRuleJson()), PAGE_SCENE_NO_ERROR);
     EXPECT_EQ(manager.RegisterRuleSet(TEST_PROCESS_ID, BuildRuleJson()), PAGE_SCENE_LAST_UNFINISH);
 

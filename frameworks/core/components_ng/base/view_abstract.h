@@ -1284,10 +1284,14 @@ private:
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
     static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    // Reset to the value of the universal attribute first, if not set, reset to no effect.
     static void ResetBorderAndBackgroundEffect(
         FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
-    static void RegisterMaterialInteractionEvent(
-        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    // If has corresponding universal attribute, set it to no effect value.
+    static void RemoveBorderAndBackgroundEffect(
+        const RefPtr<FrameNode>& frameNode, const RefPtr<RenderContext>& renderContext);
+    static void RegisterMaterialInteractionEvent(const RefPtr<FrameNode>& frameNode,
+        const std::shared_ptr<ImmersiveOptions>& optionsPtr, bool enableLightEffect);
     static void UnRegisterMaterialInteractionEvent(FrameNode* frameNode);
     static void SetImmersiveOptions(
         const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);

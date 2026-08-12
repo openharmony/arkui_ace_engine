@@ -35,7 +35,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text/text_base.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -185,8 +185,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MeasureHeader(layoutWrapper);
     if (totalItemCount_ > 0) {
-        OnSurfaceChanged(layoutWrapper);
-
         stickyStyle_ = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
         childLayoutConstraint_ = listLayoutProperty->CreateChildConstraint();
         auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint_.percentReference, axis_);
@@ -201,6 +199,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         ProcessStackFromEnd();
         currentOffset_ = currentDelta_;
+        OnSurfaceChanged(layoutWrapper);
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
         CalculateFixOffset(layoutConstraint.scaleProperty);
@@ -2152,7 +2151,7 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     auto offset = contentMainSize_ + globalOffset.GetY() - caretPos - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     if (LessOrEqual(offset, 0.0)) {
         // negative offset to scroll down
-        currentDelta_ -= static_cast<float>(offset);
+        currentOffset_ -= static_cast<float>(offset);
     }
 }
 

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class RatingStarsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
@@ -164,8 +163,8 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   }
 }
 
-class RatingOptionsModifier extends ModifierWithKey<object> {
-  constructor(value: object) {
+class RatingOptionsModifier extends ModifierWithKey<RatingOptions> {
+  constructor(value: RatingOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('ratingOptions');

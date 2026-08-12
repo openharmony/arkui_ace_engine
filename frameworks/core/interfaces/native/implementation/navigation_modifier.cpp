@@ -436,6 +436,10 @@ void SetConfigurationImpl(Ark_NativePointer node,
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED && value->value.stackSizeLimit.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         config.stackSizeLimit = Converter::Convert<int32_t>(value->value.stackSizeLimit.value);
     }
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        value->value.recyclePagesOnLowMemory.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        config.recyclePagesOnLowMemory = Converter::Convert<bool>(value->value.recyclePagesOnLowMemory.value);
+    }
     NavigationModelNG::SetNavigationConfiguration(frameNode, config);
 }
 

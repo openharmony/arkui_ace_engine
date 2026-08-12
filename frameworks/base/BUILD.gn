@@ -220,6 +220,18 @@ foreach(item, ace_platforms) {
       if (defined(config.hichecker_exists) && config.hichecker_exists) {
         external_deps += [ "hichecker:libhichecker" ]
       }
+
+      sources += [
+        "$ace_root/frameworks/base/thread/background_task_executor.cpp",
+        "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+      ]
+      if (frame_trace_support) {
+        sources += [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp" ]
+        external_deps += [ "frame_aware_sched:frame_trace_intf" ]
+        defines += [ "FRAME_TRACE_ENABLE" ]
+      } else {
+        sources += [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp" ]
+      }
     }
   }
 }

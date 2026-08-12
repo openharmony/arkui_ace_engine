@@ -41,9 +41,6 @@ public:
     ACE_FORCE_EXPORT static bool ShouldApplySystemMaterialShadow(const RefPtr<UiMaterial>& systemMaterial);
     ACE_FORCE_EXPORT static bool HandleSmoothImmersiveMaterial(
         const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial);
-    static void SetSmoothImmersiveBackground(const RefPtr<RenderContext>& renderContext);
-    static void SetSmoothImmersiveShadow(
-        const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial);
 
     RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
 

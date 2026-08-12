@@ -107,6 +107,7 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(WeakPtr<AceType>& canvasPatt
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         ScopeRAII scope(env);
         double density = context->GetDensity();

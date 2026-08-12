@@ -629,12 +629,12 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_setBindContextMenu0TestBorderRadiu
     auto arkBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto responseType = Converter::ArkValue<Opt_ResponseType>(ARK_RESPONSE_TYPE_LONG_PRESS);
     CommonMethodModifierTest16::InitBindContextMenu0();
-    auto arkLength = ArkValue<Ark_LengthMetrics>(LENGTH_TEST_VALUE);
+    auto arkLength = ArkValue<Ark_LengthMetricsProxy>(LENGTH_TEST_VALUE);
     Ark_LocalizedBorderRadiuses arkRadiuses = {
-        .topStart = ArkValue<Opt_LengthMetrics>(arkLength),
-        .topEnd = ArkValue<Opt_LengthMetrics>(arkLength),
-        .bottomStart = ArkValue<Opt_LengthMetrics>(arkLength),
-        .bottomEnd = ArkValue<Opt_LengthMetrics>(arkLength),
+        .topStart = ArkValue<Opt_LengthMetricsProxy>(arkLength),
+        .topEnd = ArkValue<Opt_LengthMetricsProxy>(arkLength),
+        .bottomStart = ArkValue<Opt_LengthMetricsProxy>(arkLength),
+        .bottomEnd = ArkValue<Opt_LengthMetricsProxy>(arkLength),
     };
     auto radiuses =
         ArkUnion<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses, Ark_LocalizedBorderRadiuses>(arkRadiuses);
@@ -1215,12 +1215,12 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_setBindContextMenu1TestBorderRadiu
     auto builder = getBuilderCb();
     auto arkBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
-    auto arkLength = ArkValue<Ark_LengthMetrics>(LENGTH_TEST_VALUE);
+    auto arkLength = ArkValue<Ark_LengthMetricsProxy>(LENGTH_TEST_VALUE);
     Ark_LocalizedBorderRadiuses arkRadiuses = {
-        .topStart = ArkValue<Opt_LengthMetrics>(arkLength),
-        .topEnd = ArkValue<Opt_LengthMetrics>(arkLength),
-        .bottomStart = ArkValue<Opt_LengthMetrics>(arkLength),
-        .bottomEnd = ArkValue<Opt_LengthMetrics>(arkLength),
+        .topStart = ArkValue<Opt_LengthMetricsProxy>(arkLength),
+        .topEnd = ArkValue<Opt_LengthMetricsProxy>(arkLength),
+        .bottomStart = ArkValue<Opt_LengthMetricsProxy>(arkLength),
+        .bottomEnd = ArkValue<Opt_LengthMetricsProxy>(arkLength),
     };
     auto radiuses =
         ArkUnion<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses, Ark_LocalizedBorderRadiuses>(arkRadiuses);

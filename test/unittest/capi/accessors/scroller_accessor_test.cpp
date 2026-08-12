@@ -533,14 +533,15 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestAlign, TestSize.Level1)
 
 static Opt_ScrollToIndexOptions GetOptions(Ark_LengthUnit unit, float value)
 {
-    const Ark_LengthMetrics arkLengthMetrics = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, value);
+    const Ark_LengthMetricsProxy arkLengthMetrics =
+        Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, value);
     const Ark_ScrollToIndexOptions arkOptions {
-        .extraOffset = Converter::ArkValue<Opt_LengthMetrics, Ark_LengthMetrics>(arkLengthMetrics)
+        .extraOffset = Converter::ArkValue<Opt_LengthMetricsProxy, Ark_LengthMetricsProxy>(arkLengthMetrics)
     };
     return Converter::ArkValue<Opt_ScrollToIndexOptions, Ark_ScrollToIndexOptions>(arkOptions);
 }
 
-/**
+/**test/unittest/capi/accessors/styled_string_accessor_test.cpp
  * @tc.name: scrollToIndexTestOptions
  * @tc.desc:
  * @tc.type: FUNC
@@ -569,7 +570,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTestOptions, TestSize.Level1)
     const std::optional<float> emptyOptionsRes = std::nullopt;
     const auto optOptionsEmpty1 = Converter::ArkValue<Opt_ScrollToIndexOptions>(Ark_Empty());
     Ark_ScrollToIndexOptions arkOptionsEmpty2 {
-        .extraOffset = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty())
+        .extraOffset = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty())
     };
     const auto optOptionsEmpty2 = Converter::ArkValue<Opt_ScrollToIndexOptions, Ark_ScrollToIndexOptions>(
         arkOptionsEmpty2);

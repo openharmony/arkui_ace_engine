@@ -191,6 +191,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
             ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
         }
     }
+
     auto heightRawPtr = AceType::RawPtr(heightResObj);
     if (isJsView) {
         if (LessNotEqual(jsHeight.Value(), 0.0)) {
@@ -231,7 +232,6 @@ void CounterBridge::UpdateLayoutPolicy(ArkUIRuntimeCallInfo* runtimeCallInfo, bo
     CHECK_NULL_VOID(vm);
     Local<JSValueRef> value = runtimeCallInfo->GetCallArgRef(1);
     LayoutCalPolicy policy = LayoutCalPolicy::NO_MATCH;
-
     if (value->IsObject(vm)) {
         auto obj = value->ToObject(vm);
         CHECK_NULL_VOID(!obj.IsEmpty());
@@ -279,6 +279,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
             ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         }
     }
+
     auto widthRawPtr = AceType::RawPtr(widthResObj);
     if (isJsView) {
         if (LessNotEqual(jsWidth.Value(), 0.0)) {

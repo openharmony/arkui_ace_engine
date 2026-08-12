@@ -529,10 +529,11 @@ ArkUINativeModuleValue MenuItemBridge::SetOnChange(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(bool)> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)](bool flag) {
+    std::function<void(bool)> callback = [vm, isJsView, node = AceType::WeakClaim(frameNode),
+                                             func = panda::CopyableGlobal(vm, func)](bool flag) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::BooleanRef::New(vm, flag) };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {

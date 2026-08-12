@@ -144,8 +144,6 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
         SetHoverRectForTV(stackNode, rect, iconSize, hoverRectHeight, isFocus);
         return;
     }
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(stackNode);
     auto stackGeometryNode = stackNode->GetGeometryNode();
     CHECK_NULL_VOID(stackGeometryNode);
@@ -160,15 +158,8 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
     }
 
     auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
-    auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL) {
-        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding,
-            stackRect.GetY() - stackHoverPadding, hoverRectHeight, hoverRectHeight);
-    } else {
-        rect = RectF(stackRect.GetX() - iconHoverPadding, stackRect.GetY() - stackHoverPadding,
-            hoverRectHeight, hoverRectHeight);
-    }
+    rect = RectF(stackRect.GetX() + imageRect.GetX() - iconHoverPadding,
+        stackRect.GetY() + imageRect.GetY() - iconHoverPadding, hoverRectHeight, hoverRectHeight);
 }
 
 void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
@@ -176,8 +167,6 @@ void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, Rect
 {
     auto textFieldPattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(textFieldPattern);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(stackNode);
     auto stackGeometryNode = stackNode->GetGeometryNode();
     CHECK_NULL_VOID(stackGeometryNode);
@@ -202,19 +191,9 @@ void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, Rect
     }
 
     auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
-    auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL) {
-        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding - iconOffsetPadding,
-            stackRect.GetY() - stackHoverPadding - iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
-    } else {
-        rect = RectF(stackRect.GetX() - iconHoverPadding - iconOffsetPadding,
-            stackRect.GetY() - stackHoverPadding - iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
-    }
+    rect = RectF(stackRect.GetX() + imageRect.GetX() - iconHoverPadding - iconOffsetPadding,
+        stackRect.GetY() + imageRect.GetY() - iconHoverPadding - iconOffsetPadding,
+        hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding, hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
 }
 
 void TextInputResponseArea::SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight)

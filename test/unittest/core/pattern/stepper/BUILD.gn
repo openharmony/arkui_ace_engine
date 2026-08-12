@@ -13,16 +13,29 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("stepper_test_ng") {
-  module_name = "NavigationSet-StepperAndNStepperItem"
-  type = "new"
+if (is_host_product) {
+  ace_unittest("stepper_test_ng") {
+    type = "host_components"
+    module_name = "NavigationSet-StepperAndNStepperItem"
+    sources = [
+      "stepper_test_ng.cpp"
+    ]
+    sources += [
+      "stepper_test_core.cpp"
+    ]
+  }
+} else {
+  ace_unittest("stepper_test_ng") {
+    module_name = "NavigationSet-StepperAndNStepperItem"
+    type = "new"
 
-  sources = [ "stepper_test_ng.cpp" ]
+    sources = [ "stepper_test_ng.cpp" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "stepper_test_core.cpp" ]
-  } else {
-    sources += [ "stepper_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "stepper_test_core.cpp" ]
+    } else {
+      sources += [ "stepper_test_core.cpp" ]
+    }
   }
 }

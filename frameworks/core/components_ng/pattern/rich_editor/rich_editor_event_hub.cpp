@@ -19,515 +19,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
-void RichEditorInsertValue::SetInsertOffset(int32_t insertOffset)
-{
-    insertOffset_ = insertOffset;
-}
-
-int32_t RichEditorInsertValue::GetInsertOffset() const
-{
-    return insertOffset_;
-}
-
-void RichEditorInsertValue::SetInsertValue(const std::u16string& insertValue)
-{
-    insertValue_ = insertValue;
-}
-
-void RichEditorInsertValue::SetPreviewText(const std::u16string& previewText)
-{
-    previewText_ = previewText;
-}
-
-const std::u16string& RichEditorInsertValue::GetInsertValue() const
-{
-    return insertValue_;
-}
-
-const std::u16string& RichEditorInsertValue::GetPreviewText() const
-{
-    return previewText_;
-}
-
-void RichEditorAbstractSpanResult::SetSpanIndex(int32_t spanIndex)
-{
-    spanIndex_ = spanIndex;
-}
-
-int32_t RichEditorAbstractSpanResult::GetSpanIndex() const
-{
-    return spanIndex_;
-}
-
-void RichEditorAbstractSpanResult::SetSpanRangeStart(int32_t spanRangeStart)
-{
-    spanRangeStart_ = spanRangeStart;
-}
-
-int32_t RichEditorAbstractSpanResult::GetSpanRangeStart() const
-{
-    return spanRangeStart_;
-}
-
-void RichEditorAbstractSpanResult::SetSpanRangeEnd(int32_t spanRangeEnd)
-{
-    spanRangeEnd_ = spanRangeEnd;
-}
-
-int32_t RichEditorAbstractSpanResult::GetSpanRangeEnd() const
-{
-    return spanRangeEnd_;
-}
-
-void RichEditorAbstractSpanResult::SetSpanType(SpanResultType spanType)
-{
-    spanType_ = spanType;
-}
-
-SpanResultType RichEditorAbstractSpanResult::GetType() const
-{
-    return spanType_;
-}
-
-void RichEditorAbstractSpanResult::SetOffsetInSpan(int32_t offsetInSpan)
-{
-    offsetInSpan_ = offsetInSpan;
-}
-
-int32_t RichEditorAbstractSpanResult::OffsetInSpan() const
-{
-    return offsetInSpan_;
-}
-
-void RichEditorAbstractSpanResult::SetEraseLength(int32_t eraseLength)
-{
-    eraseLength_ = eraseLength;
-}
-
-int32_t RichEditorAbstractSpanResult::GetEraseLength() const
-{
-    return eraseLength_;
-}
-
-void RichEditorAbstractSpanResult::SetValue(const std::u16string& value)
-{
-    value_ = value;
-}
-
-const std::u16string& RichEditorAbstractSpanResult::GetValue() const
-{
-    return value_;
-}
-
-void RichEditorAbstractSpanResult::SetPreviewText(const std::u16string& previewText)
-{
-    previewText_ = previewText;
-}
-
-const std::u16string& RichEditorAbstractSpanResult::GetPreviewText() const
-{
-    return previewText_;
-}
-
-void RichEditorAbstractSpanResult::SetFontColor(const std::string& fontColor)
-{
-    fontColor_ = fontColor;
-}
-
-void RichEditorAbstractSpanResult::SetFontFeature(const FONT_FEATURES_LIST& fontFeature)
-{
-    fontFeature_ = fontFeature;
-}
-
-const FONT_FEATURES_LIST& RichEditorAbstractSpanResult::GetFontFeatures() const
-{
-    return fontFeature_;
-}
-
-void RichEditorAbstractSpanResult::SetTextStyle(TextStyleResult textStyle)
-{
-    textStyle_ = textStyle;
-}
-
-TextStyleResult RichEditorAbstractSpanResult::GetTextStyle() const
-{
-    return textStyle_;
-}
-
-void RichEditorAbstractSpanResult::SetLineHeight(double lineHeight)
-{
-    lineHeight_ = lineHeight;
-}
-
-double RichEditorAbstractSpanResult::GetLineHeight() const
-{
-    return lineHeight_;
-}
-
-void RichEditorAbstractSpanResult::SetHalfLeading(bool halfLeading)
-{
-    halfLeading_ = halfLeading;
-}
-
-bool RichEditorAbstractSpanResult::GetHalfLeading() const
-{
-    return halfLeading_;
-}
-
-void RichEditorAbstractSpanResult::SetLetterspacing(double letterSpacing)
-{
-    letterSpacing_ = letterSpacing;
-}
-
-double RichEditorAbstractSpanResult::GetLetterspacing() const
-{
-    return letterSpacing_;
-}
-
-const std::string& RichEditorAbstractSpanResult::GetFontColor() const
-{
-    return fontColor_;
-}
-
-void RichEditorAbstractSpanResult::SetFontSize(double fontSize)
-{
-    fontSize_ = fontSize;
-}
-
-double RichEditorAbstractSpanResult::GetFontSize() const
-{
-    return fontSize_;
-}
-
-void RichEditorAbstractSpanResult::SetValueResource(const RefPtr<ResourceObject>& valueResource)
-{
-    valueResource_ = valueResource;
-}
-
-const RefPtr<ResourceObject> RichEditorAbstractSpanResult::GetValueResource() const
-{
-    return valueResource_;
-}
-
-void RichEditorAbstractSpanResult::SetValueString(const std::string& valueString)
-{
-    valueString_ = valueString;
-}
-
-const std::string RichEditorAbstractSpanResult::GetValueString() const
-{
-    return valueString_;
-}
-
-void RichEditorAbstractSpanResult::SetSymbolSpanStyle(const SymbolSpanStyle& symbolSpanStyle)
-{
-    symbolSpanStyle_ = symbolSpanStyle;
-}
-
-const SymbolSpanStyle RichEditorAbstractSpanResult::GetSymbolSpanStyle() const
-{
-    return symbolSpanStyle_;
-}
-
-void RichEditorAbstractSpanResult::SetFontWeight(int32_t fontWeigth)
-{
-    fontWeigth_ = fontWeigth;
-}
-
-int32_t RichEditorAbstractSpanResult::GetFontWeight() const
-{
-    return fontWeigth_;
-}
-
-void RichEditorAbstractSpanResult::SetFontFamily(const std::string& fontFamily)
-{
-    fontFamily_ = fontFamily;
-}
-
-const std::string& RichEditorAbstractSpanResult::GetFontFamily() const
-{
-    return fontFamily_;
-}
-
-void RichEditorAbstractSpanResult::SetTextDecoration(TextDecoration textDecoration)
-{
-    textDecoration_ = textDecoration;
-}
-
-TextDecoration RichEditorAbstractSpanResult::GetTextDecoration() const
-{
-    return textDecoration_;
-}
-
-void RichEditorAbstractSpanResult::SetColor(const std::string& color)
-{
-    color_ = color;
-}
-
-const std::string& RichEditorAbstractSpanResult::GetColor() const
-{
-    return color_;
-}
-
-void RichEditorAbstractSpanResult::SetTextDecorationStyle(TextDecorationStyle textDecorationStyle)
-{
-    textDecorationStyle_ = textDecorationStyle;
-}
-
-TextDecorationStyle RichEditorAbstractSpanResult::GetTextDecorationStyle() const
-{
-    return textDecorationStyle_;
-}
-
-void RichEditorAbstractSpanResult::SetLineThicknessScale(float thicknessScale)
-{
-    lineThicknessScale_ = thicknessScale;
-}
-
-float RichEditorAbstractSpanResult::GetLineThicknessScale() const
-{
-    return lineThicknessScale_;
-}
-
-void RichEditorAbstractSpanResult::SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap)
-{
-    valuePixelMap_ = valuePixelMap;
-}
-
-const RefPtr<PixelMap>& RichEditorAbstractSpanResult::GetValuePixelMap() const
-{
-    return valuePixelMap_;
-}
-
-void RichEditorAbstractSpanResult::SetValueResourceStr(const std::string valueResourceStr)
-{
-    valueResourceStr_ = valueResourceStr;
-}
-
-const std::string& RichEditorAbstractSpanResult::GetValueResourceStr() const
-{
-    return valueResourceStr_;
-}
-
-void RichEditorAbstractSpanResult::SetSizeWidth(int32_t width)
-{
-    width_ = width;
-}
-
-int32_t RichEditorAbstractSpanResult::GetSizeWidth() const
-{
-    return width_;
-}
-
-void RichEditorAbstractSpanResult::SetSizeHeight(int32_t height)
-{
-    height_ = height;
-}
-
-int32_t RichEditorAbstractSpanResult::GetSizeHeight() const
-{
-    return height_;
-}
-
-void RichEditorAbstractSpanResult::SetVerticalAlign(VerticalAlign verticalAlign)
-{
-    verticalAlign_ = verticalAlign;
-}
-
-VerticalAlign RichEditorAbstractSpanResult::GetVerticalAlign() const
-{
-    return verticalAlign_;
-}
-
-void RichEditorAbstractSpanResult::SetImageFit(ImageFit objectFit)
-{
-    objectFit_ = objectFit;
-}
-
-ImageFit RichEditorAbstractSpanResult::GetObjectFit() const
-{
-    return objectFit_;
-}
-
-void RichEditorAbstractSpanResult::SetUrlAddress(const std::u16string& urlAddress)
-{
-    urlAddress_ = urlAddress;
-}
-
-const std::u16string& RichEditorAbstractSpanResult::GetUrlAddress() const
-{
-    return urlAddress_;
-}
-
-void RichEditorAbstractSpanResult::SetStrokeWidth(double strokeWidth)
-{
-    strokeWidth_ = strokeWidth;
-}
-
-double RichEditorAbstractSpanResult::GetStrokeWidth() const
-{
-    return strokeWidth_;
-}
-
-void RichEditorAbstractSpanResult::SetStrokeColor(const std::string& strokeColor)
-{
-    strokeColor_ = strokeColor;
-}
-
-const std::string& RichEditorAbstractSpanResult::GetStrokeColor() const
-{
-    return strokeColor_;
-}
-
-void RichEditorDeleteValue::SetOffset(int32_t offset)
-{
-    offset_ = offset;
-}
-
-int32_t RichEditorDeleteValue::GetOffset() const
-{
-    return offset_;
-}
-
-void RichEditorDeleteValue::SetRichEditorDeleteDirection(RichEditorDeleteDirection direction)
-{
-    direction_ = direction;
-}
-
-RichEditorDeleteDirection RichEditorDeleteValue::GetRichEditorDeleteDirection() const
-{
-    return direction_;
-}
-
-void RichEditorDeleteValue::SetLength(int32_t length)
-{
-    length_ = length;
-}
-
-int32_t RichEditorDeleteValue::GetLength() const
-{
-    return length_;
-}
-
-void RichEditorDeleteValue::SetRichEditorDeleteSpans(const RichEditorAbstractSpanResult& deleteSpan)
-{
-    richEditorDeleteSpans_.emplace_back(deleteSpan);
-}
-
-void RichEditorDeleteValue::ResetRichEditorDeleteSpans()
-{
-    richEditorDeleteSpans_.clear();
-}
-
-const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEditorDeleteSpans() const
-{
-    return richEditorDeleteSpans_;
-}
-
-void RichEditorChangeValue::SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span)
-{
-    originalSpans_.emplace_back(span);
-}
-
-const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
-{
-    return originalSpans_;
-}
-
-void RichEditorChangeValue::SetRichEditorReplacedSpans(const RichEditorAbstractSpanResult& span)
-{
-    replacedSpans_.emplace_back(span);
-}
-
-const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
-{
-    return replacedSpans_;
-}
-
-void RichEditorChangeValue::SetRichEditorReplacedImageSpans(const RichEditorAbstractSpanResult& span)
-{
-    replacedImageSpans_.emplace_back(span);
-}
-
-const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedImageSpans() const
-{
-    return replacedImageSpans_;
-}
-
-void RichEditorChangeValue::SetRichEditorReplacedSymbolSpans(const RichEditorAbstractSpanResult& span)
-{
-    replacedSymbolSpans_.emplace_back(span);
-}
-
-const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSymbolSpans() const
-{
-    return replacedSymbolSpans_;
-}
-
-void RichEditorChangeValue::SetRangeBefore(const TextRange& rangeBefore)
-{
-    rangeBefore_ = rangeBefore;
-}
-
-TextRange RichEditorChangeValue::GetRangeBefore() const
-{
-    return rangeBefore_;
-}
-
-void RichEditorChangeValue::SetRangeAfter(const TextRange& rangeAfter)
-{
-    rangeAfter_ = rangeAfter;
-}
-
-TextRange RichEditorChangeValue::GetRangeAfter() const
-{
-    return rangeAfter_;
-}
-
-TextChangeReason RichEditorChangeValue::GetChangeReason() const
-{
-    return changeReason_;
-}
-
-void StyledStringChangeValue::SetRangeBefore(const TextRange& range)
-{
-    rangeBefore_ = range;
-}
-
-TextRange StyledStringChangeValue::GetRangeBefore() const
-{
-    return rangeBefore_;
-}
-
-void StyledStringChangeValue::SetRangeAfter(const TextRange& range)
-{
-    rangeAfter_ = range;
-}
-
-TextRange StyledStringChangeValue::GetRangeAfter() const
-{
-    return rangeAfter_;
-}
-
-void StyledStringChangeValue::SetReplacementString(const RefPtr<SpanStringBase>& styledString)
-{
-    replacementString_ = styledString;
-}
-
-const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() const
-{
-    return replacementString_;
-}
-
-void StyledStringChangeValue::SetPreviewText(const RefPtr<SpanStringBase>& previewText)
-{
-    previewText_ = previewText;
-}
-
-const RefPtr<SpanStringBase> StyledStringChangeValue::GetPreviewText() const
-{
-    return previewText_;
-}
 
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
@@ -536,14 +27,16 @@ void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 
 void RichEditorEventHub::FireOnReady()
 {
-    if (onReady_) {
-        onReady_();
-        auto host = GetFrameNode();
-        CHECK_NULL_VOID(host);
-        auto* context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        context->AddAfterRenderTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
+    if (!onReady_) {
+        return;
     }
+    auto callback = onReady_;
+    callback();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto* context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterRenderTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
 }
 
 void RichEditorEventHub::SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func)
@@ -567,8 +60,11 @@ void RichEditorEventHub::SetOnIMEInputComplete(std::function<void(const RichEdit
 
 void RichEditorEventHub::FireOnIMEInputComplete(const RichEditorAbstractSpanResult& info)
 {
-    if (onIMEInputComplete_)
-        onIMEInputComplete_(info);
+    if (!onIMEInputComplete_) {
+        return;
+    }
+    auto callback = onIMEInputComplete_;
+    callback(info);
 }
 
 void RichEditorEventHub::SetOnDidIMEInput(std::function<void(const TextRange&)>&& func)
@@ -578,8 +74,11 @@ void RichEditorEventHub::SetOnDidIMEInput(std::function<void(const TextRange&)>&
 
 void RichEditorEventHub::FireOnDidIMEInput(const TextRange& range)
 {
-    if (onDidIMEInput_)
-        onDidIMEInput_(range);
+    if (!onDidIMEInput_) {
+        return;
+    }
+    auto callback = onDidIMEInput_;
+    callback(range);
 }
 
 void RichEditorEventHub::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
@@ -602,13 +101,15 @@ void RichEditorEventHub::SetOnDeleteComplete(std::function<void()>&& func)
 }
 void RichEditorEventHub::FireOnDeleteComplete()
 {
-    if (onDeleteComplete_) {
-        onDeleteComplete_();
-#ifndef CROSS_PLATFORM
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.onDeleteComplete",
-            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
-#endif
+    if (!onDeleteComplete_) {
+        return;
     }
+    auto callback = onDeleteComplete_;
+    callback();
+#ifndef CROSS_PLATFORM
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.onDeleteComplete",
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type)
@@ -636,9 +137,11 @@ void RichEditorEventHub::SetOnEditingChange(std::function<void(const bool&)>&& f
  
 void RichEditorEventHub::FireOnEditingChange(bool isEditing)
 {
-    if (onEditingChange_) {
-        onEditingChange_(isEditing);
+    if (!onEditingChange_) {
+        return;
     }
+    auto callback = onEditingChange_;
+    callback(isEditing);
 }
 
 void RichEditorEventHub::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
@@ -667,9 +170,11 @@ void RichEditorEventHub::SetOnDidChange(std::function<void(const RichEditorChang
 
 void RichEditorEventHub::FireOnDidChange(const RichEditorChangeValue& changeValue)
 {
-    if (onDidChange_) {
-        onDidChange_(changeValue);
+    if (!onDidChange_) {
+        return;
     }
+    auto callback = onDidChange_;
+    callback(changeValue);
 }
 
 bool RichEditorEventHub::HasOnDidChange() const
@@ -689,9 +194,11 @@ void RichEditorEventHub::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& fu
 
 void RichEditorEventHub::FireOnCut(NG::TextCommonEvent& value)
 {
-    if (onCut_) {
-        onCut_(value);
+    if (!onCut_) {
+        return;
     }
+    auto callback = onCut_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
@@ -701,9 +208,11 @@ void RichEditorEventHub::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& f
 
 void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
 {
-    if (onCopy_) {
-        onCopy_(value);
+    if (!onCopy_) {
+        return;
     }
+    auto callback = onCopy_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func)
@@ -713,9 +222,11 @@ void RichEditorEventHub::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& 
 
 void RichEditorEventHub::FireOnShare(NG::TextCommonEvent& value)
 {
-    if (onShare_) {
-        onShare_(value);
+    if (!onShare_) {
+        return;
     }
+    auto callback = onShare_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)>&& func)
@@ -744,9 +255,11 @@ void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const Sty
 
 void RichEditorEventHub::FireOnStyledStringDidChange(const StyledStringChangeValue& info)
 {
-    if (onStyledStringDidChange_) {
-        onStyledStringDidChange_(info);
+    if (!onStyledStringDidChange_) {
+        return;
     }
+    auto callback = onStyledStringDidChange_;
+    callback(info);
 }
 
 bool RichEditorEventHub::HasOnStyledStringDidChange() const
@@ -786,9 +299,11 @@ void RichEditorEventHub::SetOnSelect(std::function<void(const BaseEventInfo*)>&&
 
 void RichEditorEventHub::FireOnSelect(BaseEventInfo* value)
 {
-    if (onSelect_) {
-        onSelect_(value);
+    if (!onSelect_) {
+        return;
     }
+    auto callback = onSelect_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
@@ -798,9 +313,11 @@ void RichEditorEventHub::SetOnSelectionChange(std::function<void(const BaseEvent
 
 void RichEditorEventHub::FireOnSelectionChange(BaseEventInfo* value)
 {
-    if (OnSelectionChange_) {
-        OnSelectionChange_(value);
+    if (!OnSelectionChange_) {
+        return;
     }
+    auto callback = OnSelectionChange_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetTimestamp(long long timestamp)
@@ -815,9 +332,11 @@ void RichEditorEventHub::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& 
 
 void RichEditorEventHub::FireOnPaste(NG::TextCommonEvent& value)
 {
-    if (onPaste_) {
-        onPaste_(value);
+    if (!onPaste_) {
+        return;
     }
+    auto callback = onPaste_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
@@ -827,9 +346,11 @@ void RichEditorEventHub::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCo
 
 void RichEditorEventHub::FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
 {
-    if (onSubmit_) {
-        onSubmit_(value, event);
+    if (!onSubmit_) {
+        return;
     }
+    auto callback = onSubmit_;
+    callback(value, event);
 }
 
 void RichEditorEventHub::SetOnWillAttachIME(IMEAttachCallback&& func)
@@ -839,54 +360,16 @@ void RichEditorEventHub::SetOnWillAttachIME(IMEAttachCallback&& func)
 
 void RichEditorEventHub::FireOnWillAttachIME(IMEClient& info)
 {
-    if (onWillAttachIME_) {
-        onWillAttachIME_(info);
+    if (!onWillAttachIME_) {
+        return;
     }
+    auto callback = onWillAttachIME_;
+    callback(info);
 }
 
 RefPtr<GestureEventHub> RichEditorEventHub::CreateGestureEventHub()
 {
     return MakeRefPtr<RichEditorGestureEventHub>(WeakClaim(this));
-}
-
-void RichEditorAbstractSpanResult::SetBorderRadius(const std::string& borderRadius)
-{
-    borderRadius_ = borderRadius;
-}
-
-const std::string& RichEditorAbstractSpanResult::GetBorderRadius() const
-{
-    return borderRadius_;
-}
-
-void RichEditorAbstractSpanResult::SetMargin(const std::string& margin)
-{
-    margin_ = margin;
-}
-
-const std::string& RichEditorAbstractSpanResult::GetMargin() const
-{
-    return margin_;
-}
-
-void RichEditorAbstractSpanResult::SetFontStyle(OHOS::Ace::FontStyle fontStyle)
-{
-    fontStyle_ = fontStyle;
-}
-
-OHOS::Ace::FontStyle RichEditorAbstractSpanResult::GetFontStyle() const
-{
-    return fontStyle_;
-}
-
-void RichEditorAbstractSpanResult::SetStrokeJoinStyle(StrokeJoinStyle style)
-{
-    strokeJoinStyle_ = style;
-}
- 
-StrokeJoinStyle RichEditorAbstractSpanResult::GetStrokeJoinStyle() const
-{
-    return strokeJoinStyle_;
 }
 
 void RichEditorChangeValue::reset()

@@ -1685,7 +1685,7 @@ void SideBarContainerPattern::HandleLongPressEvent()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    float scale = pipeline->GetFontScale();
+    float scale = pipeline->GetFontScaleFromEnv(host);
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         return;
     }

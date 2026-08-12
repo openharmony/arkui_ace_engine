@@ -280,6 +280,8 @@ CounterConstant.AUSPICIOUS_FEBRUARY_DAYS = 29;
 CounterConstant.AUSPICIOUS_FOUR = 4;
 CounterConstant.AUSPICIOUS_HUNDRED = 100;
 CounterConstant.AUSPICIOUS_FOUR_HUNDRED = 400;
+CounterConstant.COUNTER_DEFAULT_TIMEZONE = 'Asia/Shanghai';
+CounterConstant.COUNTER_DEFAULT_LOCALE = 'zh-Hans-CN';
 export class CounterComponent extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
     super(parent, __localStorage, elmtId, extraInfo);
@@ -874,19 +876,26 @@ export class CounterComponent extends ViewPU {
     });
     return px2vp(widthPx);
   }
+  getTimezone() {
+    const tz = systemDateTime.getTimezoneSync();
+    return tz ? tz : CounterConstant.COUNTER_DEFAULT_TIMEZONE;
+  }
+  getLocaleID() {
+    const localeID = new intl.Locale().toString();
+    return localeID ? localeID : CounterConstant.COUNTER_DEFAULT_LOCALE;
+  }
   getDate(value) {
     return `[n2] ${value} [n0]`;
   }
   getDateYear(value) {
-    let locale = new intl.Locale();
-    let localeID = locale.toString();
+    let localeID = this.getLocaleID();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
     let dateFormatYear;
     try {
       dateFormatYear = new Intl.DateTimeFormat(localeID, {
         year: 'numeric',
-        timeZone: systemDateTime.getTimezoneSync(),
+        timeZone: this.getTimezone(),
       });
     }
     catch (error) {
@@ -899,14 +908,13 @@ export class CounterComponent extends ViewPU {
     return this.getDate(formattedDateYear);
   }
   getDateMonth(value) {
-    let locale = new intl.Locale();
-    let localeID = locale.toString();
+    let localeID = this.getLocaleID();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
     let dateFormatMonth;
     try {
       dateFormatMonth = new Intl.DateTimeFormat(localeID, { month: 'long',
-        timeZone: systemDateTime.getTimezoneSync() });
+        timeZone: this.getTimezone() });
     }
     catch (error) {
       console.log(`Accessility getDateMonth fail. message: ${error.message}, code: ${error.code}`);

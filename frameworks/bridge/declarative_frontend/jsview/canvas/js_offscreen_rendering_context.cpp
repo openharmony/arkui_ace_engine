@@ -15,6 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 
+#include <cmath>
+#include <limits>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -77,7 +80,10 @@ std::unique_ptr<ImageData> GetImageData(
 JSOffscreenRenderingContext::JSOffscreenRenderingContext()
 {
     apiVersion_ = Container::GetCurrentApiTargetVersion();
-    id_ = offscreenPatternCount_;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        id_ = offscreenPatternCount_;
+    }
 #ifdef NG_BUILD
     renderingContext2DModel_ = CreateOffscreenCanvasRenderingContextModel();
 #else
@@ -92,6 +98,7 @@ JSOffscreenRenderingContext::JSOffscreenRenderingContext()
         }
     }
 #endif
+    CHECK_NULL_VOID(renderingContext2DModel_);
 }
 
 void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
@@ -226,15 +233,23 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     double width = 0.0;
     double height = 0.0;
     double density = jsRenderContext->GetDensity();
-    if (args.GetDoubleArg(0, width) && args.GetDoubleArg(1, height)) {
+    if (args.GetDoubleArg(0, width, true) && args.GetDoubleArg(1, height, true)) {
+        if (!std::isfinite(width) || !std::isfinite(height) || width <= 0.0 || height <= 0.0) {
+            return;
+        }
         width *= density;
         height *= density;
+        constexpr double kInt32Max = static_cast<double>(std::numeric_limits<int32_t>::max());
+        if (width > kInt32Max || height > kInt32Max) {
+            return;
+        }
         jsRenderContext->SetWidth(width);
         jsRenderContext->SetHeight(height);
         auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
         CHECK_NULL_VOID(bridge);
         CHECK_NULL_VOID(bridge->createOffscreenPattern);
-        auto offscreenPattern = bridge->createOffscreenPattern(round(width), round(height));
+        auto offscreenPattern =
+            bridge->createOffscreenPattern(static_cast<int32_t>(round(width)), static_cast<int32_t>(round(height)));
         CHECK_NULL_VOID(offscreenPattern);
         CHECK_NULL_VOID(bridge->getOffscreenBitmapSize);
         size_t bitmapSize = bridge->getOffscreenBitmapSize(offscreenPattern);
@@ -286,7 +301,12 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
     }
     void* nativeObj = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, renderImage, &nativeObj));
-    auto jsImage = (JSRenderImage*)nativeObj;
+    bool isTypeMatch = false;
+    napi_status tagStatus = napi_check_object_type_tag(env, renderImage, &JS_RENDER_IMAGE_TYPE_TAG, &isTypeMatch);
+    if (tagStatus != napi_ok || !isTypeMatch) {
+        return;
+    }
+    auto jsImage = static_cast<JSRenderImage*>(nativeObj);
     CHECK_NULL_VOID(jsImage);
 #ifndef PIXEL_MAP_SUPPORTED
     auto imageData = GetImageData(offscreenCanvasPattern, 0, 0, width_, height_);

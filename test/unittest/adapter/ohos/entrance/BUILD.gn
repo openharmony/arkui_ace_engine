@@ -252,6 +252,7 @@ ohos_unittest("layout_inspector_test") {
     "ability_runtime:napi_common",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "image_framework:image_native",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -350,9 +351,42 @@ ohos_unittest("mmi_event_converter_test") {
   ]
 }
 
+ohos_unittest("background_force_flush_vsync_test") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_window.cpp",
+    "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
+    "background_force_flush_vsync_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "window_manager:libwm",
+  ]
+}
+
 group("entrance_unittest") {
   testonly = true
   deps = [
+    ":background_force_flush_vsync_test",
     ":container_test",
     ":high_contrast_observer_test",
     ":layout_inspector_test",

@@ -13,27 +13,43 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("linear_indicator_test_ng") {
-  module_name = "ImperativeFramework-TypedFrameNode"
-  type = "new"
-
-  sources = [
-    "linear_indicator_controller_test_ng.cpp",
-    "linear_indicator_pattern_test_ng.cpp",
-    "linear_indicator_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
+if (is_host_product) {
+  ace_unittest("linear_indicator_test_ng") {
+    type = "host_components"
+    module_name = "ImperativeFramework-TypedFrameNode"
     sources = [
-      "linear_indicator_test_min.cpp",
-      "linear_indicator_test_core.cpp",
+      "linear_indicator_controller_test_ng.cpp",
+      "linear_indicator_pattern_test_ng.cpp",
+      "linear_indicator_test_ng.cpp",
     ]
-  } else {
     sources += [
       "linear_indicator_test_min.cpp",
       "linear_indicator_test_core.cpp",
     ]
   }
+} else {
+  ace_unittest("linear_indicator_test_ng") {
+    module_name = "ImperativeFramework-TypedFrameNode"
+    type = "new"
 
+    sources = [
+      "linear_indicator_controller_test_ng.cpp",
+      "linear_indicator_pattern_test_ng.cpp",
+      "linear_indicator_test_ng.cpp",
+    ]
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "linear_indicator_test_min.cpp",
+        "linear_indicator_test_core.cpp",
+      ]
+    } else {
+      sources += [
+        "linear_indicator_test_min.cpp",
+        "linear_indicator_test_core.cpp",
+      ]
+    }
+
+  }
 }

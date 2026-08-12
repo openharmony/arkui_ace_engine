@@ -88,6 +88,9 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
+#ifdef WEB_SUPPORTED
+#include "core/components/web/resource/web_page_scene_manager.h"
+#endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "interfaces/napi/kits/observer/ui_observer.h"
 
@@ -129,6 +132,7 @@
 #include "bridge/arkts_frontend/arkts_frontend_loader.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -146,7 +150,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
@@ -1425,6 +1429,7 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window *window,
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
     ContainerScope scope(instanceId_);
     napi_value result = nullptr;
     auto frontend = container->GetFrontend();
@@ -2261,15 +2266,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
-    // Read the enableCustomComponentFreeze configuration from metadata and set it in LazyForEachUtils.
-    bool enableCustomComponentFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
-    bool enableRepeatAnimation = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableRepeatAnimation" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableRepeatAnimation(enableRepeatAnimation);
+    // Read metadata configurations and set them in LazyForEachUtils
+    for (const auto& metaDataItem : metaData) {
+        NG::LazyForEachUtils::ParseMetaData(metaDataItem.name, metaDataItem.value);
+    }
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
@@ -2279,11 +2279,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             return metaDataItem.name == "enableCustomComponentCrossAbility" && metaDataItem.value == "true";
         });
     AceApplicationInfo::GetInstance().SetEnableCustomComponentCrossAbility(enableCustomComponentCrossAbility);
+    bool needInitTransparency = false;
     // Read UIMaterial metadata from entry module only
     if (hapModuleInfo && hapModuleInfo->moduleType == OHOS::AppExecFwk::ModuleType::ENTRY) {
         for (const auto& metaDataItem : metaData) {
             if (metaDataItem.name == "ohos.arkui.UIMaterial.state") {
                 AceApplicationInfo::GetInstance().SetUIMaterialState(metaDataItem.value);
+                needInitTransparency = metaDataItem.value != "disable";
             } else if (metaDataItem.name == "ohos.arkui.UIMaterial.type") {
                 AceApplicationInfo::GetInstance().SetUIMaterialType(metaDataItem.value);
             }
@@ -2513,6 +2515,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetPageProfile(pageProfile);
     container->Initialize();
     ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (needInitTransparency && taskExecutor) {
+        taskExecutor->PostTask([]() { TransparencyUtils::InitTransparencyLevelOnce(); },
+            TaskExecutor::TaskType::BACKGROUND, "InitUIMaterialTransparency", PriorityType::VIP);
+    }
     auto front = container->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -3006,6 +3013,22 @@ void UIContentImpl::Background()
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
+}
+
+// Should be called on UI thread. Atomic variables ensure safety if called from non-UI thread.
+void UIContentImpl::SetBackgroundForceFlushVsync(bool enable, size_t count)
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: SetBackgroundForceFlushVsync enable:%{public}d count:%{public}zu",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, enable, count);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto window = pipelineContext->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetBackgroundForceFlushVsync(enable, count);
 }
 
 void UIContentImpl::NotifyWindowAttachStateChange(bool status)
@@ -6261,6 +6284,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
     SaveArkUIPageTranslateFunctions(taskExecutor);
+    SaveTraverseWebForPageSceneCallback(taskExecutor);
     auto pageSceneMatcher = std::make_shared<NG::PageSceneRuleManager>();
     auto pageSceneDetectCallback = [weakTaskExecutor = taskExecutor, pageSceneMatcher](
         int32_t processId, const std::string& ruleJson, bool isGetResult) {
@@ -6397,6 +6421,7 @@ void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>&
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                CHECK_NULL_VOID(uiTranslateManager);
                 uint32_t windowId = pipeline->GetWindowId();
                 uiTranslateManager->GetWebInfoByRequest(windowId, webId, request);
             },
@@ -6905,6 +6930,17 @@ OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
     return window_;
 }
 
+void UIContentImpl::ForceRequestFrame()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetForceVsyncRequests(true);
+}
+
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
@@ -6952,6 +6988,54 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
             },
             TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
     });
+}
+
+void UIContentImpl::PostTraverseWebTask(const WeakPtr<TaskExecutor>& weakTaskExecutor,
+    std::function<void()>&& task)
+{
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+    if (!taskExecutor) {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        taskExecutor = pipeline->GetTaskExecutor();
+    }
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "TraverseWebForPageScene");
+}
+
+void UIContentImpl::SaveTraverseWebForPageSceneCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+#ifdef WEB_SUPPORTED
+    auto&& webPageSceneFunc = [weakTaskExecutor = taskExecutor](
+        UiSessionManager::WebPageSceneOp op, int32_t processId, const std::string& ruleJson, bool isGetResult) {
+        switch (op) {
+            case UiSessionManager::WebPageSceneOp::RegisterRules:
+                WebPageSceneManager::GetInstance().RegisterPageSceneRules(processId, ruleJson);
+                PostTraverseWebTask(weakTaskExecutor, [processId]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    uiTranslateManager->TraverseAndMatchAllWeb(processId, "", false);
+                });
+                break;
+            case UiSessionManager::WebPageSceneOp::UnregisterRules:
+                WebPageSceneManager::GetInstance().UnregisterPageSceneRules(processId);
+                break;
+            case UiSessionManager::WebPageSceneOp::Traverse:
+                PostTraverseWebTask(weakTaskExecutor, [processId, ruleJson, isGetResult]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    uiTranslateManager->TraverseAndMatchAllWeb(processId, ruleJson, isGetResult);
+                });
+                break;
+            default:
+                break;
+        }
+    };
+    UiSessionManager::GetInstance()->SaveWebPageSceneFunction(std::move(webPageSceneFunc));
+#endif
 }
 
 void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)

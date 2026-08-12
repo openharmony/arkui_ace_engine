@@ -65,12 +65,12 @@ void Bottom0Impl(Ark_Indicator peer,
     peer->SetBottom(optBottom);
 }
 void Bottom1Impl(Ark_Indicator peer,
-                 const Opt_Union_LengthMetrics_Length* bottom,
+                 const Opt_Union_LengthMetricsProxy_Length* bottom,
                  Ark_Boolean ignoreSize)
 {
     CHECK_NULL_VOID(peer);
     Converter::VisitUnion(*bottom,
-        [peer](const Ark_LengthMetrics& bottom) {
+        [peer](const Ark_LengthMetricsProxy& bottom) {
             auto optBottom = Converter::OptConvert<Dimension>(bottom);
             peer->SetBottom(optBottom);
         },
@@ -83,14 +83,14 @@ void Bottom1Impl(Ark_Indicator peer,
     peer->SetBottomIgnoreSize(hasIgnoreSize);
 }
 void StartImpl(Ark_Indicator peer,
-               const Opt_LengthMetrics* value)
+               const Opt_LengthMetricsProxy* value)
 {
     CHECK_NULL_VOID(peer);
     auto optStart = Converter::OptConvertPtr<Dimension>(value);
     peer->SetStart(optStart);
 }
 void EndImpl(Ark_Indicator peer,
-             const Opt_LengthMetrics* value)
+             const Opt_LengthMetricsProxy* value)
 {
     CHECK_NULL_VOID(peer);
     auto optEnd = Converter::OptConvertPtr<Dimension>(value);

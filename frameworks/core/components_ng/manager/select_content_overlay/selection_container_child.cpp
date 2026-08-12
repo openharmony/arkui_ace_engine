@@ -789,6 +789,31 @@ void SelectionContainerChild::NotifySelectionChanged(const std::u16string& selec
     }
 }
 
+void SelectionContainerChild::SyncShiftFlagToContainer(bool flag)
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->SetShiftFlag(flag);
+        return;
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    if (container) {
+        container->SetShiftFlag(flag);
+    }
+}
+
+bool SelectionContainerChild::IsContainerShiftFlagSet()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->IsShiftFlagSet();
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    return container && container->IsShiftFlagSet();
+}
+
 void SelectionContainerChild::RecordSelectedChild()
 {
     auto parentContainer = GetSelectionContainer();

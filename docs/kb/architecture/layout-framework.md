@@ -42,16 +42,16 @@ Layout Framework 是 ArkUI NG（`components_ng` + `pipeline_ng`）中负责布�
 
 ### API 入口
 
-Layout Framework 本身是引擎内部机制，没有独立 SDK API。应用侧公共布局属性从下列 SDK 声明进入，再由前端桥接和组件 Model 写入布局属性；属性语义和 API 版本以 SDK 声明为准。
+Layout Framework 本身是引擎内部机制，没有独立 SDK API。应用侧公共布局属性从下列 SDK 声明进入，再由前端桥接和组件 Model 按属性族写入相关节点状态；属性语义和 API 版本以 SDK 声明为准。
 
 | 范式 | 稳定路径 | 说明 |
 |------|----------|------|
 | Dynamic 公共属性 | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | 公共组件属性声明；可按 `width`、`height`、`layoutWeight`、`alignSelf` 等具体属性名检索 |
 | Static 公共属性 | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态 ArkTS 公共组件属性声明 |
-| Dynamic Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts` | 动态 Modifier 公共属性声明 |
-| Static Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets` | 静态 Modifier 公共属性声明 |
+| Dynamic Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts` | Dynamic Modifier 类型入口；具体布局属性由继承的 `CommonAttribute` 提供，仍需回到 Dynamic Common API 核实 |
+| Static Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets` | Static Modifier 类型入口；具体布局属性仍需回到 Static Common API 核实 |
 
-公共属性从前端到 `LayoutProperty` 的解析路径属于“基础布局属性”主题；排查某个具体组件时，还应进入该组件的 Model、bridge/node modifier 和 `*LayoutProperty`。
+公共布局属性的解析和写入路径属于“基础布局属性”主题：约束类属性主要进入 `LayoutProperty`，position、offset 等绘制位置属性则进入 `RenderContext`。排查某个具体组件时，还应进入该组件的 Model、bridge/node modifier 和 `*LayoutProperty`。
 
 ### 外部依赖入口
 
@@ -106,6 +106,11 @@ Layout Framework 本身是引擎内部机制，没有独立 SDK API。应用侧�
 
 - 基础渲染管线 Spec：`specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/`
 - 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
+- 自定义测量/布局：`docs/kb/capabilities/custom-measure-layout.md`
+- 像素取整：`docs/kb/capabilities/pixel-rounding.md`
 - 安全区域机制：`docs/kb/capabilities/safe-area.md`
+- 分割布局：`docs/kb/components/container/column_split.md`、`docs/kb/components/container/row_split.md`
+- 相对布局：`docs/kb/components/container/relative_container.md`
+- 动态布局：`docs/kb/components/container/dynamic_layout.md`
 - 基础布局属性 Spec：`specs/04-common-capability/03-common-attributes/01-layout-attributes/`
 - 组件布局算法：`frameworks/core/components_ng/pattern/<component>/`

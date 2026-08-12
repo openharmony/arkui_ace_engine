@@ -476,6 +476,11 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
         ignoreLayoutSafeAreaOpts_ =
             std::make_unique<IgnoreLayoutSafeAreaOpts>(*layoutProperty->ignoreLayoutSafeAreaOpts_);
     }
+    UpdateLayoutPropertyValues(layoutProperty);
+}
+
+void LayoutProperty::UpdateLayoutPropertyValues(const LayoutProperty* layoutProperty)
+{
     geometryTransition_ = layoutProperty->geometryTransition_;
     propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
@@ -490,6 +495,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
         layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_;
     isUserSetBackgroundColor_ = layoutProperty->isUserSetBackgroundColor_;
     userDefinedHeightConfigured_ = layoutProperty->userDefinedHeightConfigured_;
+    needLazyLayout_ = layoutProperty->needLazyLayout_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -980,7 +986,7 @@ void LayoutProperty::ConstraintContentBySafeAreaPadding()
 PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPadding(bool forceReCreate)
 {
     auto host = GetHost();
-    return GetOrCreateSafeAreaPaddingInner(host);
+    return GetOrCreateSafeAreaPaddingInner(host, forceReCreate);
 }
 
 PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPaddingInner(RefPtr<FrameNode>& host, bool forceReCreate)
@@ -1197,6 +1203,9 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
     if (preVisibility.value_or(VisibleType::VISIBLE) != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
+        if (pipeline && pipeline->ThrottleRenderTreeRebuild(parent->GetId(), host->GetRenderContext())) {
+            return;
+        }
         parent->RebuildRenderContextTree();
         return;
     }
@@ -1399,9 +1408,6 @@ TextDirection LayoutProperty::GetLayoutDirection() const
 
 std::optional<float> LayoutProperty::GetEnvFontScale() const
 {
-    if (!NeedReadFontScaleFromEnv()) {
-        return std::nullopt;
-    }
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
     if (!host || !pipeline || !pipeline->IsEnvManagerActive()) {
@@ -1475,6 +1481,7 @@ void LayoutProperty::UpdateLocalizedAlignment(std::string value)
     if (!positionProperty_) {
         positionProperty_ = std::make_unique<PositionProperty>();
     }
+    positionProperty_->UpdateLocalizedAlignmentRaw(value);
     if (positionProperty_->UpdateLocalizedAlignment(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
     }
@@ -2607,7 +2614,7 @@ void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
 {
     CHECK_NULL_VOID(GetPositionProperty());
     if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
-        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignmentRaw().value_or("center");
         auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
         GetPositionProperty()->UpdateLocalizedAlignment(alignment);
     }

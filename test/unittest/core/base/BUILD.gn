@@ -24,6 +24,9 @@ ace_unittest("view_stack_processor_test_ng") {
 ace_unittest("distributed_ui_test_ng") {
   module_name = "Modifier-AttributeModifier"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "distributed_ui_test_ng.cpp" ]
 }
 
@@ -50,6 +53,9 @@ ace_unittest("frame_node_drop_test_ng") {
 ace_unittest("geometry_node_test_ng") {
   module_name = "CommonEvent-NodeMount"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "geometry_node_test_ng.cpp" ]
 }
 
@@ -122,6 +128,9 @@ ace_unittest("view_partial_update_model_test_ng") {
 ace_unittest("observer_test_ng") {
   module_name = "NavigationSet-NavigationAndNavDestination"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "observer_test_ng.cpp" ]
 }
 
@@ -134,13 +143,24 @@ ace_unittest("view_abstract_model_test_ng") {
   ]
 }
 
-ace_unittest("view_abstract_model_static_test_ng") {
-  module_name = "DialogSet-Menu"
-  type = "new"
-  sources = [
-    "view_abstract_model_static_test_two_ng.cpp",
-    "view_abstract_spatial_effect_test_ng.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("view_abstract_model_static_test_ng") {
+    type = "host_components"
+    module_name = "DialogSet-Menu"
+    sources = [
+      "view_abstract_model_static_test_two_ng.cpp",
+      "view_abstract_spatial_effect_test_ng.cpp",
+    ]
+  }
+} else {
+  ace_unittest("view_abstract_model_static_test_ng") {
+    module_name = "DialogSet-Menu"
+    type = "new"
+    sources = [
+      "view_abstract_model_static_test_two_ng.cpp",
+      "view_abstract_spatial_effect_test_ng.cpp",
+    ]
+  }
 }
 
 ace_unittest("short_cuts_little_test_ng") {
@@ -158,24 +178,35 @@ ace_unittest("short_cuts_test_ng") {
 ace_unittest("extension_handler_test_ng") {
   module_name = "CommonProperties-DrawModifier"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "extension_handler_test_ng.cpp" ]
 }
 
 ace_unittest("node_render_status_monitor_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "node_render_status_monitor_test_ng.cpp" ]
 }
 
-ace_unittest("force_split_base_test_ng") {
-  module_name = "FormAndSelection-Rating"
-  type = "new"
-  sources = [ "force_split_base_test_ng.cpp" ]
+if (!is_host_product) {
+  ace_unittest("force_split_base_test_ng") {
+    module_name = "FormAndSelection-Rating"
+    type = "new"
+    sources = [ "force_split_base_test_ng.cpp" ]
+  }
 }
 
 ace_unittest("thread_safe_node_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "thread_safe_node_test_ng.cpp" ]
 }
 
@@ -191,38 +222,54 @@ ace_unittest("transparent_node_detector_test_ng") {
 ace_unittest("modifier_test_ng") {
   module_name = "basic"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "modifier_test_ng.cpp" ]
 }
 
 group("core_base_unittest") {
   testonly = true
-  deps = [
-    ":distributed_ui_test_ng",
-    ":extension_handler_test_ng",
-    ":frame_node_drop_test_ng",
-    ":frame_node_test_ng",
-    ":geometry_node_test_ng",
-    ":inspector_test_ng",
-    ":node_render_status_monitor_test_ng",
-    ":observer_test_ng",
-    ":short_cuts_little_test_ng",
-    ":short_cuts_test_ng",
-    ":simplified_inspector_test_ng",
-    ":thread_safe_node_test_ng",
-    ":transparent_node_detector_test_ng",
-    ":ui_node_gc_test_ng",
-    ":ui_node_test_ng",
-    ":view_abstract_model_static_test_ng",
-    ":view_abstract_model_test_ng",
-    ":view_abstract_test_ng",
-    ":view_abstract_test_resetposition_ng",
-    ":view_full_update_model_ng_test",
-    ":view_partial_update_model_test_ng",
-    ":view_stack_processor_test_ng",
-    ":modifier_test_ng",
-  ]
+  if (is_host_product) {
+    deps = [
+      ":distributed_ui_test_ng",
+      ":extension_handler_test_ng",
+      ":geometry_node_test_ng",
+      ":modifier_test_ng",
+      ":node_render_status_monitor_test_ng",
+      ":observer_test_ng",
+      ":thread_safe_node_test_ng",
+      ":view_abstract_model_static_test_ng",
+    ]
+  } else {
+    deps = [
+      ":distributed_ui_test_ng",
+      ":extension_handler_test_ng",
+      ":frame_node_drop_test_ng",
+      ":frame_node_test_ng",
+      ":geometry_node_test_ng",
+      ":inspector_test_ng",
+      ":node_render_status_monitor_test_ng",
+      ":observer_test_ng",
+      ":short_cuts_little_test_ng",
+      ":short_cuts_test_ng",
+      ":simplified_inspector_test_ng",
+      ":thread_safe_node_test_ng",
+      ":transparent_node_detector_test_ng",
+      ":ui_node_gc_test_ng",
+      ":ui_node_test_ng",
+      ":view_abstract_model_static_test_ng",
+      ":view_abstract_model_test_ng",
+      ":view_abstract_test_ng",
+      ":view_abstract_test_resetposition_ng",
+      ":view_full_update_model_ng_test",
+      ":view_partial_update_model_test_ng",
+      ":view_stack_processor_test_ng",
+      ":modifier_test_ng",
+    ]
 
-  if (ace_engine_feature_enable_split_mode) {
-    deps += [ ":force_split_base_test_ng" ]
+    if (ace_engine_feature_enable_split_mode) {
+      deps += [ ":force_split_base_test_ng" ]
+    }
   }
 }

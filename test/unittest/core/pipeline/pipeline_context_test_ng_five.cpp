@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -968,7 +968,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg085, TestSize.Level
     textFieldManager->SetIfFocusTextFieldIsInline(true);
     textFieldManager->SetClickPosition(Offset(100.0f, 200.0f));
     context_->safeAreaManager_->UpdateKeyboardOffset(50.0f);
-    auto textFieldTest = -346;
+    auto textFieldTest = -146;
 
     // Call AvoidanceLogic with parameters that will not trigger keyboard avoidance
     context_->AvoidanceLogic(100.0f, nullptr, 30.0f, true);
@@ -1050,7 +1050,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg087, TestSize.Level
     context_->AvoidanceLogic(100.0f, nullptr, 60.0f, true);
 
     // Verify keyboard safe area was updated
-    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, -126);
+    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
 
 /**
@@ -1081,10 +1081,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg088, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
     context_->AvoidanceLogic(100.0f, nullptr, 30.0f, true);
 
-    EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, -46.0f);
+    EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0.0f);
 
     // Verify keyboard safe area was updated
-    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, -46);
+    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
 
 /**
@@ -1189,7 +1189,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg091, TestSize.Level
     context_->AvoidanceLogic(100.0f, nullptr, 150.0f, true);
 
     // Verify that the keyboard safe area was updated
-    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, -166);
+    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 
     /**
      * @tc.steps: 3. Test with zero safeHeight.

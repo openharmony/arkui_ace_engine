@@ -39,6 +39,8 @@ public:
     static void JsOnRouter(const JSCallbackInfo& info);
     static void JsOnLoad(const JSCallbackInfo& info);
     static void JsOnUpdate(const JSCallbackInfo& info);
+private:
+    static bool GetFormInfoId(JSRef<JSVal> id, int64_t& formInfoId);
 };
 
 } // namespace OHOS::Ace::Framework

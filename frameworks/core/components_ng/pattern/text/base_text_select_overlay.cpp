@@ -28,7 +28,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -839,13 +839,15 @@ void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect
     }
 }
 
-void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed,
+    bool transformTriggersEmbed)
 {
     auto isStartScroll = IsAncestorNodeStartScroll(flag);
     auto isStartAnimation = IsAncestorNodeStartAnimation(flag);
     auto isTransformChanged = IsAncestorNodeTransformChange(flag);
     auto isStartTransition = IsAncestorNodeHasTransition(flag);
-    auto isSwitchToEmbed = isStartScroll || isStartAnimation || isTransformChanged || isStartTransition;
+    auto isSwitchToEmbed = (isStartScroll && scrollTriggersEmbed) || isStartAnimation
+        || (isTransformChanged && transformTriggersEmbed) || isStartTransition;
     // parent size changes but the child does not change.
     if (IsAncestorNodeGeometryChange(flag)) {
         isSwitchToEmbed = isSwitchToEmbed || CheckAndUpdateHostGlobalPaintRect();
@@ -856,10 +858,17 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd, flag);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
+    auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd, isStartScroll,
+                          scrollTriggersEmbed]() {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         if (isScrollEnd) {
+            overlay->SwitchToOverlayMode();
+            return;
+        }
+        // scroll-start switches to overlay when this host does not embed on scroll
+        // (e.g. cross-node: container embed does not ride an inner scroll).
+        if (isStartScroll && !scrollTriggersEmbed) {
             overlay->SwitchToOverlayMode();
             return;
         }

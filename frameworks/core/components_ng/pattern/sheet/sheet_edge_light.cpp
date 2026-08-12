@@ -24,8 +24,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t UI_MATERIAL_LEVEL_LOW = 2;
-
 constexpr float NUM_NOT_ZERO = 1.0f;
 constexpr int EDGE_LIGHT_SHOW_ANIMATE_DURATION = 166;
 #ifndef PREVIEW
@@ -87,7 +85,7 @@ std::function<void()> SheetEdgeLightBase::GetSheetEdgeLightAnimateFinishEvent(Re
         SheetEdgeLightBase::SetSheetEdgeLightTransitionEnd(sheetNode);
     };
     const std::function<void()> edgeLightFinishEvent = [sheetWK = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, true);
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, false);
         auto sheetNode = sheetWK.Upgrade();
         CHECK_NULL_VOID(sheetNode);
         auto renderContext = sheetNode->GetRenderContext();
@@ -110,15 +108,14 @@ bool SheetEdgeLightBase::CheckIfNeedShowEdgeLight(EdgeLightMode mode, SheetType 
     if (sheetType != SHEET_BOTTOM) {
         return false;
     }
-    int32_t currentLevel = static_cast<int32_t>(SystemProperties::GetUiMaterialLevel());
     if (mode == EdgeLightMode::EDGELIGHT_DISABLED) {
         return false;
     }
     if (mode == EdgeLightMode::EDGELIGHT_ENABLED) {
         return true;
     }
-    if (mode == EdgeLightMode::EDGELIGHT_AUTO && currentLevel != UI_MATERIAL_LEVEL_LOW) {
-        return true;
+    if (mode == EdgeLightMode::EDGELIGHT_AUTO) {
+        return false;
     }
     return false;
 }

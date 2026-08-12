@@ -6,7 +6,7 @@
 
 ## 定位
 
-Layout Attributes 是 ArkUI 组件共享的基础布局属性能力，覆盖尺寸与约束、边距与内边距、位置与偏移、对齐和布局方向，以及 Flex 子项属性。它连接应用侧 Common API、前端参数解析、ViewAbstract 属性写入和 NG `LayoutProperty` 约束消费，不等同于 Flex、Row、Column 等具体布局组件。
+Layout Attributes 是 ArkUI 组件共享的基础布局属性能力，覆盖尺寸与约束、边距与内边距、位置与偏移、对齐和布局方向，以及 Flex 子项属性。它连接应用侧 Common API、前端参数解析和 ViewAbstract 属性写入；不同属性族会分别进入 NG `LayoutProperty` 或 `RenderContext` 等状态，并非全部由布局约束链路消费。该能力不等同于 Flex、Row、Column 等具体布局组件。
 
 本文档用于快速定位属性声明、解析、存储、测试与 Spec。属性语义、API 版本、边界条件和兼容性应以当前 SDK、源码、测试及 Spec 为准。
 
@@ -20,6 +20,7 @@ Layout Attributes 是 ArkUI 组件共享的基础布局属性能力，覆盖尺�
 | Static 公共属性写入 | `frameworks/core/components_ng/base/view_abstract_model_static.cpp` | 静态 ArkTS 公共布局属性写入入口 |
 | 布局属性与约束 | `frameworks/core/components_ng/layout/layout_property.h`、`frameworks/core/components_ng/layout/layout_property.cpp` | 通用布局属性存储、父子约束生成和更新标记入口 |
 | 测量属性数据结构 | `frameworks/core/components_ng/property/measure_property.h`、`frameworks/core/components_ng/property/measure_property.cpp` | 尺寸、边距、约束等测量数据结构与辅助逻辑 |
+| 渲染位置状态 | `frameworks/core/components_ng/render/render_context.h` | position、offset、markAnchor 等由 ViewAbstract 写入的渲染位置属性入口；不要将其误判为 `LayoutProperty` 约束 |
 | Dynamic JSView 解析 | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | Common 属性的声明式 JS/ArkTS 动态参数解析入口 |
 | ArkTS Common Bridge | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp` | AttributeModifier 和 FrameNode 动态属性解析入口 |
 | Common node modifier | `frameworks/core/interfaces/native/node/node_common_modifier.cpp` | Common Bridge 到 ViewAbstract/ModelNG 的 native 属性入口 |
@@ -31,7 +32,7 @@ Layout Attributes 是 ArkUI 组件共享的基础布局属性能力，覆盖尺�
 | 属性族 | 建议检索词 |
 |--------|------------|
 | 尺寸与约束 | `Width`、`Height`、`Size`、`ConstraintSize`、`Padding`、`Margin` |
-| 位置与方向 | `Position`、`Offset`、`MarkAnchor`、`Align`、`LayoutDirection` |
+| 位置、偏移与布局方向 | `Position`、`Offset`、`MarkAnchor`、`Align`、`LayoutDirection` |
 | Flex 子项 | `FlexGrow`、`FlexShrink`、`FlexBasis`、`AlignSelf`、`LayoutWeight`、`DisplayPriority` |
 
 ### API 入口
@@ -79,7 +80,7 @@ Layout Attributes 是 ArkUI 组件共享的基础布局属性能力，覆盖尺�
 ## 调试入口
 
 - 从具体 SDK 属性名定位 Dynamic/Static 声明，再进入对应前端解析入口。
-- 在 ViewAbstract/Model 写入点确认值是否进入节点，并检查 `LayoutProperty` 的 property change flag。
+- 在 ViewAbstract/Model 写入点确认值进入 `LayoutProperty` 还是 `RenderContext`；仅对布局属性检查 `LayoutProperty` 的 property change flag。
 - 测量问题同时观察父约束、当前节点 layout constraint、content constraint 与 child constraint。
 - Flex 子项问题需要同时核对父布局组件算法，避免只检查子节点属性是否写入。
 - 回归优先运行 `test/unittest/core/layout/` 和具体属性相关的 CAPI modifier 用例。
@@ -87,6 +88,7 @@ Layout Attributes 是 ArkUI 组件共享的基础布局属性能力，覆盖尺�
 ## 相关主题
 
 - 布局框架：`docs/kb/architecture/layout-framework.md`
+- Pixel Rounding：`docs/kb/capabilities/pixel-rounding.md`
 - Safe Area：`docs/kb/capabilities/safe-area.md`
 - Flex：`docs/kb/components/container/flex.md`
 - Column：`docs/kb/components/container/column.md`

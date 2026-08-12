@@ -2387,7 +2387,17 @@ class JSTextArea extends JSViewAbstract {
     getUINativeModule().textArea.setStrokeJoinStyle(true, value);
   }
   static shaderStyle(value: any): void {
-    getUINativeModule().textArea.setShaderStyle(true, value);
+    if (value === null || value === undefined || !isObject(value)) {
+      getUINativeModule().textArea.resetShaderStyle(true, value);
+      return;
+    }
+    if (value.options) {
+      getUINativeModule().textArea.setShaderStyle(true, value.options.center, value.options.radius, value.options.angle,
+        value.options.direction, value.options.repeating, value.options.colors, value.options.color);
+    } else {
+      getUINativeModule().textArea.setShaderStyle(true, value.center, value.radius, value.angle,
+        value.direction, value.repeating, value.colors, value.color);
+    }
   }
   static enableAutoSpacing(value: any): void {
     getUINativeModule().textArea.setEnableAutoSpacing(true, value);

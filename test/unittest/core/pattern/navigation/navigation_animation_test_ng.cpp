@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -265,6 +266,10 @@ HWTEST_F(NavigationAnimationTest, NavigationCancelAnimation003, TestSize.Level1)
     */
     auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     CHECK_NULL_VOID(pattern);
+    auto contentChangeManager = MockPipelineContext::GetCurrent()->GetContentChangeManager();
+    ASSERT_NE(contentChangeManager, nullptr);
+    contentChangeManager->currentContentChangeConfig_ = ContentChangeConfig();
+    contentChangeManager->transitioningNodes_.clear();
     pattern->SetNavigationTransition([](const RefPtr<NavDestinationContext>& preContext,
         const RefPtr<NavDestinationContext> topContext,
         NavigationOperation operation) -> NavigationTransition {
@@ -282,13 +287,20 @@ HWTEST_F(NavigationAnimationTest, NavigationCancelAnimation003, TestSize.Level1)
     auto stack = pattern->GetNavigationStack();
     EXPECT_NE(stack, nullptr);
     stack->UpdateRecoveryList();
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(nodeId);
     auto destinationA = CreateDestination("pageA");
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     stack->Add("pageA", destinationA);
     pattern->UpdateNavPathList();
     pattern->RefreshNavDestination();
     ASSERT_NE(pattern->GetTopNavigationProxy(), nullptr);
+    EXPECT_TRUE(contentChangeManager->IsTransitioning());
     pattern->GetTopNavigationProxy()->CancelInteractiveAnimation();
     ASSERT_EQ(stack->Size(), 0);
+    EXPECT_FALSE(contentChangeManager->IsTransitioning());
+    contentChangeManager->currentContentChangeConfig_.reset();
+    contentChangeManager->transitioningNodes_.clear();
 }
 
 /**

@@ -46,6 +46,7 @@
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/common/properties/text_style_gradient.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/select_content_overlay/selection_container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -55,7 +56,7 @@
 #include "core/components_ng/pattern/text/span/span_group_hash_calculator.h"
 #include "core/components_ng/pattern/text/text_selection_child.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/text/html_utils.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
@@ -65,7 +66,7 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/text/one_step_drag_controller.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {
@@ -235,7 +236,18 @@ void TextPattern::OnAttachToMainTree()
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
     isDetachFromMainTree_ = false;
+    auto oldSelectionChild = selectionChild_;
     UpdateSelectionChildRegistration();
+    // Text in a custom component may finish OnModifyDone before it is mounted to the SelectionContainer.
+    // Sync container properties after the child is newly registered, and avoid repeating the sync for an
+    // already registered child.
+    if (selectionChild_ && selectionChild_ != oldSelectionChild) {
+        constexpr uint32_t containerPropertyFlags =
+            static_cast<uint32_t>(SelectionContainerPropertyChange::COPY_OPTION) |
+            static_cast<uint32_t>(SelectionContainerPropertyChange::ENABLE_HAPTIC_FEEDBACK) |
+            static_cast<uint32_t>(SelectionContainerPropertyChange::SELECTED_BACKGROUND_COLOR);
+        selectionChild_->OnContainerPropertyUpdate(containerPropertyFlags);
+    }
 }
 
 void TextPattern::OnDetachFromMainTree()
@@ -305,7 +317,7 @@ void TextPattern::CloseSelectOverlay(bool animation)
 
 void TextPattern::ResetSelection()
 {
-    if (shiftFlag_) {
+    if (IsShiftFlag()) {
         return;
     }
     if (selectionChild_) {
@@ -1207,7 +1219,11 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     textLineStyle.UpdateParagraphSpacing(textStyle->GetParagraphSpacing());
     textLineStyle.SetOptGradient(GradientConvert::ToNGGradient(textStyle->GetGradient()));
     textLineStyle.UpdateColorShaderStyle(textStyle->GetColorShaderStyle());
-    textLineStyle.UpdateTailIndents(textStyle->GetTailIndent());
+    if (textStyle->HasTailIndent()) {
+        textLineStyle.UpdateTailIndents(textStyle->GetTailIndent().value());
+    } else {
+        textLineStyle.ResetTailIndents();
+    }
 }
 
 RefPtr<TaskExecutor> TextPattern::GetTaskExecutorItem()
@@ -3149,7 +3165,7 @@ void TextPattern::InitCopyOption(const RefPtr<GestureEventHub>& gestureEventHub,
             clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
         }
         InitLongPressEvent(gestureEventHub);
-        if (host->IsDraggable() && !shiftFlag_) {
+        if (host->IsDraggable() && !IsShiftFlag()) {
             InitDragEvent();
         }
         InitKeyEvent();
@@ -3334,7 +3350,7 @@ bool TextPattern::HandleMouseLeftPressForContainer(const Offset& textOffset)
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset nodeLocalOffset = {
         textOffset.GetX() + textPaintOffset.GetX(), textOffset.GetY() + textPaintOffset.GetY() };
-    if (shiftFlag_) {
+    if (IsShiftFlag()) {
         return selectionChild_->ExtendSelectionFromFixedAnchor(nodeLocalOffset);
     } else {
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
@@ -3346,7 +3362,7 @@ bool TextPattern::HandleMouseLeftPressForContainer(const Offset& textOffset)
 void TextPattern::HandleMouseLeftPressForLocal(const Offset& textOffset)
 {
     CHECK_NULL_VOID(pManager_);
-    if (shiftFlag_) {
+    if (IsShiftFlag()) {
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
         HandleSelectionChange(textSelector_.lastValidStart, end);
     } else {
@@ -3365,7 +3381,7 @@ void TextPattern::HandleMouseLeftPressForLocal(const Offset& textOffset)
 void TextPattern::HandleMouseLeftReleaseForLocal(
     const MouseInfo& info, MouseStatus oldMouseStatus, int32_t start, int32_t end)
 {
-    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || IsShiftFlag()) {
         HandleSelectionChange(start, end);
         ReportSelectedText();
     }
@@ -3381,7 +3397,7 @@ void TextPattern::HandleMouseLeftReleaseForLocal(
 void TextPattern::HandleMouseLeftReleaseForContainer(
     const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, bool mousePressReleaseNoChange)
 {
-    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || IsShiftFlag()) {
         if (!HasAnySelectionInContainer() || mousePressReleaseNoChange) {
             ResetSelection();
             CloseSelectOverlay(true);
@@ -3496,7 +3512,7 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         leftMousePressed_ = false;
         return;
     }
-    if (blockPress_ && !shiftFlag_) {
+    if (blockPress_ && !IsShiftFlag()) {
         return;
     }
     if (isMousePressed_) {
@@ -3696,6 +3712,9 @@ void TextPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     }
     if (flag != shiftFlag_) {
         shiftFlag_ = flag;
+        if (selectionChild_) {
+            selectionChild_->SyncShiftFlagToContainer(flag);
+        }
         if (!shiftFlag_) {
             // open drag
             InitDragEvent();
@@ -3704,6 +3723,14 @@ void TextPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
             ClearDragEvent();
         }
     }
+}
+
+bool TextPattern::IsShiftFlag() const
+{
+    if (selectionChild_) {
+        return selectionChild_->IsContainerShiftFlagSet();
+    }
+    return shiftFlag_;
 }
 
 bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -3778,7 +3805,7 @@ bool TextPattern::HandleOnSelect(KeyCode code)
     }
     // Only when shiftFlag is true AND (UP/DOWN key), do NOT reset origin caret position.
     // This preserves the original coordinate during Shift+UP/DOWN multi-line selection.
-    if (!(shiftFlag_ && (code == KeyCode::KEY_DPAD_UP ||
+    if (!(IsShiftFlag() && (code == KeyCode::KEY_DPAD_UP ||
                          code == KeyCode::KEY_DPAD_DOWN))) {
         ResetOriginCaretPosition();
     }
@@ -8252,20 +8279,23 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
 }
 
-PositionWithAffinity TextPattern::GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+PositionWithAffinity TextPattern::GetCharacterPositionAtCoordinate(
+    int32_t x, int32_t y, TextEncoding encoding)
 {
     Offset offset(x, y);
-    return pManager_->GetCharacterPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+    return pManager_->GetCharacterPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset), encoding);
 }
 
-std::pair<TextRange, TextRange> TextPattern::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> TextPattern::GetGlyphRangeForCharacterRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return pManager_->GetGlyphRangeForCharacterRange(start, end);
+    return pManager_->GetGlyphRangeForCharacterRange(start, end, encoding);
 }
 
-std::pair<TextRange, TextRange> TextPattern::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> TextPattern::GetCharacterRangeForGlyphRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return pManager_->GetCharacterRangeForGlyphRange(start, end);
+    return pManager_->GetCharacterRangeForGlyphRange(start, end, encoding);
 }
 
 void TextPattern::ProcessMarqueeVisibleAreaCallback()
@@ -9356,6 +9386,38 @@ std::vector<ParagraphManager::ParagraphInfo> TextPattern::GetParagraphs() const
 const RefPtr<ParagraphManager>& TextPattern::GetParagraphManager() const
 {
     return pManager_;
+}
+
+bool TextPattern::IsContentOverflowForSmartLayout(const SizeF& allocatedSize)
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto textLayoutProperty = hostNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    CHECK_NULL_RETURN(pManager_, false);
+
+    auto content = textLayoutProperty->GetContent().value_or(u"");
+    const auto& displayContent = GetTextForDisplay();
+    auto spanCount = GetSpanItemChildren().size();
+    if (content.empty() && displayContent.empty() && spanCount == 0) {
+        return false;
+    }
+
+    auto actualLayoutWidth = pManager_->GetLongestLineWithIndent();
+    auto actualTextHeight = pManager_->GetHeight();
+    bool widthOverflow = GreatNotEqual(actualLayoutWidth, allocatedSize.Width());
+    bool heightOverflow = GreatNotEqual(actualTextHeight, allocatedSize.Height());
+    bool contentClipped = pManager_->DidExceedMaxLinesInner();
+    auto ellipsisRange = pManager_->GetEllipsisTextRange();
+    bool ellipsisApplied = ellipsisRange.first < ellipsisRange.second;
+    const auto& textStyle = GetTextStyle();
+    auto maxLines = textLayoutProperty->GetMaxLinesValue(textStyle.GetMaxLines());
+    auto parentNode = hostNode->GetParentFrameNode();
+    bool singleLineContentNeedsRepair =
+        textLayoutProperty->HasMaxLines() && maxLines == 1 && contentClipped && !ellipsisApplied;
+    bool isButtonLabel = hostNode->IsInternal() && parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG;
+    bool buttonTextNeedsRepair = isButtonLabel && (widthOverflow || heightOverflow || contentClipped);
+    return heightOverflow || singleLineContentNeedsRepair || buttonTextNeedsRepair;
 }
 
 void TextPattern::MarkContentChange()

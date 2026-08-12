@@ -14,7 +14,9 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 test_sources = [
+  "../lazy_layout/lazy_layout_test_utils.cpp",
   "lazy_water_flow_integration_test.cpp",
+  "lazy_water_flow_layout_estimate_test.cpp",
   "lazy_water_flow_layout_header_footer_test.cpp",
   "lazy_water_flow_layout_test.cpp",
 ]
@@ -24,12 +26,13 @@ if (is_host_product) {
     type = "host_components"
     module_name = "ScrollingSet-LazyVWaterFlowLayout"
     sources = test_sources
-      cflags = [ "-fno-access-control" ]
+    cflags = [ "-fno-access-control" ]
   }
 } else {
   ace_unittest("lazy_water_flow_layout_test") {
     module_name = "ScrollingSet-LazyVWaterFlowLayout"
     type = "new"
     sources = test_sources
+    cflags = [ "-fno-access-control" ]
   }
 }

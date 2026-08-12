@@ -387,6 +387,15 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
     return { itemIndex.crossIndex, mainHeight + mainGap_ };
 }
 
+void WaterFlowLayoutAlgorithm::MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>& item, float crossSize,
+    float startMainPos, float mainSize, const RefPtr<WaterFlowLayoutProperty>& layoutProperty) const
+{
+    auto ref = CreateLazyChildViewPosReference(layoutInfo_, mainSize, startMainPos + layoutInfo_->currentOffset_,
+        ReferenceEdge::START, axis_, std::nullopt, true);
+    item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+        { crossSize, mainSize_, axis_ }, ref, layoutProperty, item));
+}
+
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
     layoutInfo_->UpdateItemStart(canOverScrollStart_);
@@ -411,13 +420,16 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
                 { itemCrossSize->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
         } else {
-            auto ref = CreateLazyChildViewPosReference(
-                layoutInfo_, mainSize, position.startMainPos + layoutInfo_->currentOffset_, ReferenceEdge::START, axis_,
-                std::nullopt, true);
-            itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-                { itemCrossSize->second, mainSize_, axis_ }, ref, layoutProperty, itemWrapper));
+            MeasureLazyLayoutItem(
+                itemWrapper, itemCrossSize->second, position.startMainPos, mainSize, layoutProperty);
             auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(itemWrapper);
-            layoutInfo_->currentOffset_ -= adjustOffset.start;
+            if (AdjustLazyChildOffset(layoutInfo_->currentOffset_, layoutInfo_->contentStartOffset_, adjustOffset.start,
+                adjustOffset.end, false, false)) {
+                // Remeasure to rebuild the active window at the start boundary.
+                MeasureLazyLayoutItem(
+                    itemWrapper, itemCrossSize->second, position.startMainPos, mainSize, layoutProperty);
+                ConsumeLazyChildReanchorOffset(itemWrapper, currentIndex);
+            }
         }
 
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();

@@ -13,45 +13,83 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("text_picker_test_ng") {
-  type = "new"
-  module_name = "PickerSet-Picker"
-  sources = [
-    "text_picker_layout_algorithm_test_ng.cpp",
-    "text_picker_model_test_ng.cpp",
-    "text_picker_pattern_test_ng.cpp",
-    "text_picker_resource_test.cpp",
-    "text_picker_show_test_ng.cpp",
-    "text_picker_test_ng.cpp",
-    "text_picker_test_update.cpp",
-    "text_picker_test_update_button.cpp",
-    "text_picker_tojson.cpp",
-    "textpicker_model_static_test_ng.cpp",
-  ]
-}
+text_picker_test_sources = [
+  "text_picker_layout_algorithm_test_ng.cpp",
+  "text_picker_model_test_ng.cpp",
+  "text_picker_pattern_test_ng.cpp",
+  "text_picker_resource_test.cpp",
+  "text_picker_show_test_ng.cpp",
+  "text_picker_test_ng.cpp",
+  "text_picker_test_update.cpp",
+  "text_picker_test_update_button.cpp",
+  "text_picker_tojson.cpp",
+  "textpicker_model_static_test_ng.cpp",
+]
 
-ace_unittest("text_picker_extend_test_ng") {
-  type = "new"
-  module_name = "Layout-Divider"
-  sources = [
-    "text_picker_Extend_test_ng.cpp",
-    "text_picker_divider_add_test.cpp",
-    "text_picker_divider_test.cpp",
-    "text_picker_event_test_ng.cpp",
-    "text_picker_gradient_height_test_ng.cpp",
-    "text_picker_gradient_height_test_two_ng.cpp",
-    "text_picker_other_test_ng.cpp",
-  ]
-}
+text_picker_extend_test_sources = [
+  "text_picker_Extend_test_ng.cpp",
+  "text_picker_divider_add_test.cpp",
+  "text_picker_divider_test.cpp",
+  "text_picker_event_test_ng.cpp",
+  "text_picker_gradient_height_test_ng.cpp",
+  "text_picker_gradient_height_test_two_ng.cpp",
+  "text_picker_other_test_ng.cpp",
+]
 
-ace_unittest("text_picker_column_test_ng") {
-  type = "new"
-  module_name = "Layout-Column"
-  sources = [
+
+if (is_host_product) {
+  # host excludes text_picker_column_test_one_ng.cpp (private member access causes segfault)
+  host_text_picker_column_test_sources = [
+    "text_picker_column_extend_test_ng.cpp",
+    "text_picker_column_test_ng.cpp",
+    "text_picker_column_test_three_ng.cpp",
+    "text_picker_column_test_two_ng.cpp",
+  ]
+
+  ace_unittest("text_picker_test_ng") {
+    type = "host_components"
+    module_name = "PickerSet-Picker"
+    sources = text_picker_test_sources
+  }
+
+  ace_unittest("text_picker_extend_test_ng") {
+    type = "host_components"
+    module_name = "Layout-Divider"
+    sources = text_picker_extend_test_sources
+  }
+
+  ace_unittest("text_picker_column_test_ng") {
+    type = "host_components"
+    module_name = "Layout-Column"
+    sources = host_text_picker_column_test_sources
+  }
+} else {
+  text_picker_column_test_sources = [
     "text_picker_column_extend_test_ng.cpp",
     "text_picker_column_test_ng.cpp",
     "text_picker_column_test_one_ng.cpp",
     "text_picker_column_test_three_ng.cpp",
     "text_picker_column_test_two_ng.cpp",
   ]
+
+  ace_unittest("text_picker_test_ng") {
+    type = "new"
+    module_name = "PickerSet-Picker"
+    sources = text_picker_test_sources
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+  }
+
+  ace_unittest("text_picker_extend_test_ng") {
+    type = "new"
+    module_name = "Layout-Divider"
+    sources = text_picker_extend_test_sources
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+  }
+
+  ace_unittest("text_picker_column_test_ng") {
+    type = "new"
+    module_name = "Layout-Column"
+    sources = text_picker_column_test_sources
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+  }
 }

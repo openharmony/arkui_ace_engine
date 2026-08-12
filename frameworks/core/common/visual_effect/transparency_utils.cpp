@@ -33,13 +33,24 @@ constexpr int32_t INVALID_ID = -1;
 constexpr int32_t DIFF = 3;
 } // namespace
 
-bool TransparencyUtils::transparencyLevelGet_ = false;
+std::atomic<bool> TransparencyUtils::transparencyLevelGet_ = false;
 int32_t TransparencyUtils::userId_ = DEFAULT_USER_ID;
 bool TransparencyUtils::userIdGet_ = false;
-bool TransparencyUtils::listenerSet_ = false;
+std::atomic<bool> TransparencyUtils::listenerSet_ = false;
 TransparencyIdMap TransparencyUtils::callbackIdsMap_ {};
 std::mutex TransparencyUtils::callbackMutex_;
+std::mutex TransparencyUtils::listenerMutex_;
+std::mutex TransparencyUtils::transparencyLevelMutex_;
 int32_t TransparencyUtils::callbackId_ = INVALID_ID;
+
+void TransparencyUtils::InitTransparencyLevelOnce()
+{
+    static std::once_flag flag;
+    std::call_once(flag, [] {
+        ACE_SCOPED_TRACE("TransparencyUtils::InitTransparencyLevelOnce | call_once");
+        GetTransparencyLevel(0);
+    });
+}
 
 int32_t TransparencyUtils::GetTransparencyLevel(int32_t materialLevel)
 {
@@ -54,6 +65,10 @@ int32_t TransparencyUtils::GetTransparencyLevel(int32_t materialLevel)
         return transparency;
     }
 
+    std::lock_guard<std::mutex> lock(transparencyLevelMutex_);
+    if (transparencyLevelGet_) {
+        return static_cast<int32_t>(LookupTransparency(materialLevelValue));
+    }
     SettingDataManager& manager = SettingDataManager::GetInstance();
     if (!manager.IsInitialized()) {
         auto code = manager.Initialize();
@@ -65,7 +80,9 @@ int32_t TransparencyUtils::GetTransparencyLevel(int32_t materialLevel)
     TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT, "TransparencyUtils::GetTransparencyLevel from settings: %{public}d",
         transparency);
 
-    AdjustTransparencyForLevel(transparency);
+    if (code == ERR_OK) {
+        AdjustTransparencyForLevel(transparency);
+    }
     if (code == ERR_OK || code == ERR_NAME_NOT_FOUND) {
         transparencyLevelGet_ = true;
     }
@@ -76,6 +93,16 @@ void TransparencyUtils::AdjustTransparencyForLevel(int32_t transparency)
 {
     std::unique_lock lock(GetLevelLock());
     auto& levelMap = GetLevelMap();
+#ifdef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // only adjust the transparency level of the correct level when custom
+    if (transparency >= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THIN) &&
+        transparency <= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THICK)) {
+        levelMap[UiMaterialLevel::GENTLE] = static_cast<UiMaterialTransparency>(transparency);
+    } else if (transparency >= static_cast<int32_t>(UiMaterialTransparency::THIN) &&
+               transparency <= static_cast<int32_t>(UiMaterialTransparency::THICK)) {
+        levelMap[UiMaterialLevel::EXQUISITE] = static_cast<UiMaterialTransparency>(transparency);
+    }
+#else
     if (transparency >= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THIN) &&
         transparency <= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THICK)) {
         levelMap[UiMaterialLevel::GENTLE] = static_cast<UiMaterialTransparency>(transparency);
@@ -85,6 +112,7 @@ void TransparencyUtils::AdjustTransparencyForLevel(int32_t transparency)
         levelMap[UiMaterialLevel::EXQUISITE] = static_cast<UiMaterialTransparency>(transparency);
         levelMap[UiMaterialLevel::GENTLE] = static_cast<UiMaterialTransparency>(transparency + DIFF);
     }
+#endif
 }
 
 TransparencyLevelMap& TransparencyUtils::GetLevelMap()
@@ -133,17 +161,23 @@ int32_t TransparencyUtils::GetCurrentUserId()
 std::optional<int32_t> TransparencyUtils::RegisterTransparencyListener(
     const WeakPtr<NG::FrameNode>& node, TransparencyCallback&& callback)
 {
-    if (RegisterListenerInner()) {
-        auto containerId = Container::CurrentIdSafelyWithCheck();
-        if (containerId < 0) {
-            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "invalid container id when register transparency listener");
-            return std::nullopt;
-        }
-        std::lock_guard<std::mutex> lock(callbackMutex_);
-        callbackIdsMap_[++callbackId_] = { std::move(callback), node, containerId };
-        return callbackId_;
+    auto containerId = Container::CurrentIdSafelyWithCheck();
+    if (containerId < 0) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "invalid container id when register transparency listener");
+        return std::nullopt;
     }
-    return std::nullopt;
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    callbackIdsMap_[++callbackId_] = { std::move(callback), node, containerId };
+    if (!listenerSet_) {
+        auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
+        if (taskExecutor) {
+            taskExecutor->PostTask(RegisterListenerInner, TaskExecutor::TaskType::BACKGROUND,
+                "RegisterTransparencyListener", PriorityType::VIP);
+        } else {
+            RegisterListenerInner();
+        }
+    }
+    return callbackId_;
 }
 
 bool TransparencyUtils::RegisterListenerInner()
@@ -152,6 +186,10 @@ bool TransparencyUtils::RegisterListenerInner()
         return true;
     }
     SettingDataManager& manager = SettingDataManager::GetInstance();
+    std::lock_guard<std::mutex> lock(listenerMutex_);
+    if (listenerSet_) {
+        return true;
+    }
     if (!manager.IsInitialized()) {
         auto code = manager.Initialize();
         if (code != ERR_OK || manager.IsInitialized() == false) {

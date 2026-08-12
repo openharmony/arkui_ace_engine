@@ -212,6 +212,10 @@ public:
     void HandleExtDragUpdate();
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
+    void ResetDragUpdateDelta()
+    {
+        dragUpdateDelta_.reset();
+    }
     void HandleScrollEnd(const std::optional<float>& velocity);
     void HandleExtScroll();
     bool HandleOverScroll(double velocity);
@@ -551,6 +555,8 @@ public:
         return axisAnimator_ && axisAnimator_->IsRunning();
     }
 
+    bool IsAllAnimationStopped() const;
+
     double GetCurrentPos() const
     {
         return currentPos_;
@@ -852,6 +858,7 @@ private:
     IsRefreshScrollCallback isRefreshScrollCallback_;
     uint64_t lastVsyncTime_ = 0;
     uint64_t lastAxisVsyncTime_ = 0; // only used in mouse wheel scenes
+    std::optional<double> dragUpdateDelta_;
     AnimationState state_ = AnimationState::IDLE;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
     float finalPosition_ = 0.0f;

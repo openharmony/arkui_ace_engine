@@ -1,7 +1,7 @@
 # TimePicker Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-11
+> 文档版本：v1.1
+> 更新时间：2026-07-24
 > 来源：`docs/context_registry.json` 主题 `TimePicker`
 
 ## 定位
@@ -109,7 +109,7 @@ TimePicker 已完成组件化改造，Bridge 和动态属性路径统一到 `pat
 
 ## 相关主题
 
-- DatePicker Context
-- TextPicker Context
-- UIPickerComponent Context
-- 组件化改造通用方案
+- `TimePickerDialog`：`docs/kb/components/selector/time_picker_dialog.md`
+- `DatePicker`：`docs/kb/components/selector/date_picker.md`
+- `TextPicker`：`docs/kb/components/selector/text_picker.md`
+- `UIPickerComponent`：`docs/kb/components/selector/ui_picker_component.md`

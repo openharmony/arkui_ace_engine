@@ -1262,4 +1262,53 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg_CheckScopeFocusDependence_005, TestSize.
     columnFocusHub->CheckScopeFocusDependence();
     EXPECT_TRUE(pagePattern->isViewRootScopeFocused_);
 }
+
+/**
+ * @tc.name: FocusHubTestNg_CheckScopeFocusDependence_006
+ * @tc.desc: Test CheckScopeFocusDependence when an intermediate ancestor has non-null
+ *           lastWeakFocusNode_, should return early without setting isViewRootScopeFocused.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_CheckScopeFocusDependence_006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct tree.
+     * - Page(FocusView)
+     *   - Navigation(lastWeakFocusNode_ = Button)
+     *     - Column(rootScope, lastWeakFocusNode_ = null)
+     */
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    rootNode->AddChild(pageNode);
+
+    auto navNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto navFocusHub = navNode->GetOrCreateFocusHub();
+
+    auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
+    auto columnNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
+    auto columnFocusHub = columnNode->GetOrCreateFocusHub();
+
+    auto buttonNode = FrameNodeOnTree::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonFocusHub = buttonNode->GetOrCreateFocusHub();
+
+    pageNode->AddChild(navNode);
+    navNode->AddChild(columnNode);
+
+    /**
+     * @tc.steps: step2. intermediate ancestor navFocusHub holds a non-null lastWeakFocusNode_.
+     */
+    navFocusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(buttonFocusHub));
+    columnFocusHub->lastWeakFocusNode_ = nullptr;
+    pagePattern->isViewRootScopeFocused_ = false;
+
+    /**
+     * @tc.steps: step3. call CheckScopeFocusDependence on columnFocusHub.
+     * @tc.expected: returns at navFocusHub without setting isViewRootScopeFocused, since the
+     *               ancestor still holds a focus dependency.
+     */
+    columnFocusHub->CheckScopeFocusDependence();
+    EXPECT_FALSE(pagePattern->isViewRootScopeFocused_);
+}
 } // namespace OHOS::Ace::NG

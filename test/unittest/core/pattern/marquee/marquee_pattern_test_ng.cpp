@@ -21,20 +21,22 @@
 #define protected public
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #undef protected
 #undef private
 
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "ui/animation/animation_option.h"
+#include "marquee_test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;

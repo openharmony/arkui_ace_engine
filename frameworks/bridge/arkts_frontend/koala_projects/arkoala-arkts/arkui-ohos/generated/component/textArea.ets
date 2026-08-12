@@ -19,12 +19,11 @@
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Font as arkui_component_units_Font, Length, ResourceStr, Dimension, LengthMetrics as arkui_component_units_LengthMetrics, ColorMetrics as arkui_component_units_ColorMetrics } from './units'
+import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Font as arkui_component_units_Font, Length, ResourceStr, Dimension, ColorMetrics as arkui_component_units_ColorMetrics } from './units'
 import { CaretStyle_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, VoiceButtonOptions_serializer, MaxLinesOptions_serializer, LineSpacingOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, IMEClient, SelectedDragPreviewStyle, TextDirection, VoiceButtonOptions, StrokeJoinStyle, MaxLinesOptions, LineSpacingOptions, MaxLinesMode } from './textCommon'
 import { TextDecorationOptions_serializer, InputCounterOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, TextDecorationOptions, InputCounterOptions, Bindable, ArkCommonMethodComponent, Bindable_ResourceStr_serializer, Bindable_Resource_serializer, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
-import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
-import { extractors, AttributeModifier, ShaderStyle, initializers, hookTextAreaAttributeModifier, AttributeUpdater } from '#handwritten'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
+import { extractors, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, AttributeModifier, ShaderStyle, initializers, hookTextAreaAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from './richEditor'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
@@ -34,7 +33,7 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { Color as arkui_component_enums_Color, TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { EnterKeyType, SubmitEvent, ContentType } from './textInput'
-import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics, LengthUnit } from 'arkui.Graphics'
+import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthUnit } from 'arkui.Graphics'
 import { CustomBuilder } from './builder'
 import { ComponentContentBase } from 'arkui.ComponentContent'
 import { Content } from 'arkui.Content'
@@ -987,7 +986,8 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1265,7 +1265,8 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }

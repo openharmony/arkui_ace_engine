@@ -43,6 +43,7 @@ public:
     MOCK_METHOD1(SetTaskExecutor, void(const RefPtr<TaskExecutor>& taskExecutor));
     MOCK_METHOD1(SetVsyncCallback, void(AceVsyncCallback&& callback));
     MOCK_METHOD1(SetRootRenderNode, void(const RefPtr<RenderNode>& root));
+    MOCK_METHOD2(SetUiDvsyncSwitch, void(bool dvsyncSwitch, FromWhom fromWhom));
     MOCK_METHOD1(FlushAnimation, bool(uint64_t timeStamp));
     MOCK_METHOD2(RecordFrameTime, void(uint64_t timeStamp, const std::string& name));
     MOCK_METHOD2(ForceFlushVsync, void(uint64_t nanoTimestamp, uint64_t frameCount));

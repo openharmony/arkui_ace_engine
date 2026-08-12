@@ -56,6 +56,10 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
+#undef private
+#undef protected
+
+
 namespace OHOS::Ace::NG {
 
 const InspectorFilter filter;

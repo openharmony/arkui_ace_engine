@@ -18,7 +18,7 @@
  
 #include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 
 namespace OHOS::Ace::NG  {
 class LayoutInfoInterface : public virtual AceType {
@@ -57,19 +57,22 @@ public:
         return finalResult;
     }
 
-    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(
+        int32_t x, int32_t y, TextEncoding encoding = TextEncoding::UTF8)
     {
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
 
-    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;
     }
 
-    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;

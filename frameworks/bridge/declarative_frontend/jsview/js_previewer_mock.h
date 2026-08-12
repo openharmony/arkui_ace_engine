@@ -38,25 +38,6 @@ public:
     static void JSBind(BindingTarget globalObj);
 };
 
-class JSXComponent : public JSContainerBase {
-public:
-    static void Create(const JSCallbackInfo& info);
-    static void Mock(const JSCallbackInfo& info);
-    static void JSBind(BindingTarget globalObj);
-};
-
-class JSXComponentController : public Referenced {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Mock(const JSCallbackInfo& args);
-};
-
-class JSXComponentControllerBinding final : public JSXComponentController {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Mock(const JSCallbackInfo& args);
-};
-
 class JSWeb : public JSContainerBase {
 public:
     static void Create(const JSCallbackInfo& info);
@@ -67,25 +48,6 @@ public:
 class JSWebController : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj);
-};
-
-class JSVideo : public JSViewAbstract, public JSInteractableView {
-public:
-    static void Create(const JSCallbackInfo& info);
-    static void Mock(const JSCallbackInfo& info);
-    static void JSBind(BindingTarget globalObj);
-};
-
-class JSVideoController : public Referenced {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Mock(const JSCallbackInfo& info);
-};
-
-class JSVideoControllerAsync : public Referenced {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Mock(const JSCallbackInfo& info);
 };
 
 class JSPlugin : public JSViewAbstract, public JSInteractableView {

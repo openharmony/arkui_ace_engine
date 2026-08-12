@@ -33,7 +33,7 @@ public:
     void RequestFrame() override;
     void RegisterVsyncCallback(AceVsyncCallback&& callback) override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override;
-    void SetUiDvsyncSwitch(bool vsyncSwitch) override;
+    void SetUiDvsyncSwitch(bool vsyncSwitch, FromWhom fromWhom = FromWhom::INNER) override;
 
 private:
     void VsyncThreadMain();
