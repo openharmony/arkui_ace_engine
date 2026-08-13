@@ -200,11 +200,6 @@ int32_t AxisInfo::GetScrollStep() const
     return scrollStep_;
 }
 
-void AxisInfo::SetScrollStep(int32_t scrollStep)
-{
-    scrollStep_ = scrollStep;
-}
-
 void AxisInfo::SetRotateAxisAngle(float angle)
 {
     rotateAxisAngle_ = angle;
