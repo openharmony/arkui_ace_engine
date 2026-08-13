@@ -95,6 +95,8 @@ struct IndexPage {
     new TextList(61, 'ListEventReport', 'pages/List/ListEventReport'),
     new TextList(62, 'ListEventReportNestedScroll', 'pages/List/ListEventReportNestedScroll'),
     new TextList(63, 'ListEmptyBranch', 'pages/List/ListEmptyBranch'),
+    new TextList(64, 'ListItemGroupStickyHeaderWithHorizontalList',
+      'pages/List/ListItemGroupStickyHeaderWithHorizontalList'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

@@ -51,6 +51,7 @@
     "pages/Swiper/SwiperKeyEvent",
     "pages/Swiper/IndicatorCaseTest",
     "pages/List/ListMainPage",
+    "pages/List/ListItemGroupStickyHeaderWithHorizontalList",
     "pages/List/ListTabBar",
     "pages/List/OnItemEvent",
     "pages/List/childrenMainSize/ListItemGroupScenario",
