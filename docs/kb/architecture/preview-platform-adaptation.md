@@ -53,13 +53,13 @@ Preview Platform Adaptation 没有独立的应用侧 ArkTS、Modifier 或 Native
 |------|----------|------|
 | 组件测试宿主 | `test/component_test/tools/previewer_host/` | 组件测试使用的 Previewer 宿主工具。 |
 | Previewer 示例 | `adapter/preview/entrance/samples/BUILD.gn` | 各设备形态的预览示例可执行目标。 |
-| Spec HostPreview 框架 | `spec/spec-test/tools/host_preview/`、`spec/spec-test/docs/HostPreview_Test_Framework_Design.md` | 启动 Previewer、采集 Inspector 并对规格用例断言的工具与设计说明。 |
+| Spec HostPreview 框架 | `specs/spec-test/tools/host_preview/`、`specs/spec-test/docs/HostPreview_Test_Framework_Design.md` | 启动 Previewer、采集 Inspector 并对规格用例断言的工具与设计说明。 |
 
 未发现仅覆盖 `adapter/preview/` 平台适配层的 ace_engine 单元测试目录；对某个能力的验证应继续进入其组件测试或 HostPreview 用例。
 
 ### 相关 Spec
 
-预览器平台适配功能域：`spec/02-cross-platform/01-platform-adapter/04-previewer-platform-adapter/`（功能 ID `02-01-04`）。当前已有 `design.md`，registry 标记为 `spec_status: active`；Feature 规格的补录状态应以该功能域的 registry 为准。
+预览器平台适配功能域：`specs/02-cross-platform/01-platform-adapter/04-previewer-platform-adapter/`（功能 ID `02-01-04`）。当前已有 `design.md`，registry 标记为 `spec_status: active`；Feature 规格的补录状态应以该功能域的 registry 为准。
 
 ## 常见问题定位
 
@@ -85,4 +85,4 @@ Preview Platform Adaptation 没有独立的应用侧 ArkTS、Modifier 或 Native
 - 窗口机制：`docs/kb/architecture/window-mechanism.md`
 - UI 上下文：`docs/kb/capabilities/ui-context.md`
 - 布局框架：`docs/kb/architecture/layout-framework.md`
-- 预览器平台适配 Spec：`spec/02-cross-platform/01-platform-adapter/04-previewer-platform-adapter/`
+- 预览器平台适配 Spec：`specs/02-cross-platform/01-platform-adapter/04-previewer-platform-adapter/`
