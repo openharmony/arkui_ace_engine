@@ -246,15 +246,22 @@ void ProcessImageNode(const RefPtr<UINode>& node, std::string& imageIds)
     }
 }
 
-bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
+bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, SnapshotDFXInfo& dfxInfo)
 {
     CHECK_NULL_RETURN(node, false);
     auto frameNode = AceType::DynamicCast<FrameNode>(node);
-    if (frameNode && !frameNode->IsVisible()) {
-        return true;
+    if (frameNode) {
+        dfxInfo.nodeCount++;
+        if (frameNode->GetIsDelete()) {
+            dfxInfo.deletedCount++;
+        }
+        if (!frameNode->IsVisible()) {
+            dfxInfo.invisibleCount++;
+            return true;
+        }
     }
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
-        imageCount++;
+        dfxInfo.imageCount++;
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_RETURN(imageNode, false);
         auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
@@ -275,11 +282,34 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
 
     auto children = node->GetChildren();
     for (const auto& child : children) {
-        if (!CheckImageSuccessfullyLoad(child, imageCount)) {
+        if (!CheckImageSuccessfullyLoad(child, dfxInfo)) {
             return false;
         }
     }
     return true;
+}
+
+void LogRsCaptureRejected(int32_t nodeId, uint64_t rsNodeId)
+{
+    TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "TakeSurfaceCaptureForUIWithConfig rejected by RS, "
+        "Id=" SEC_PLD(%{public}d) " RsNodeId=%{public}" PRIu64,
+        SEC_PARAM(nodeId), rsNodeId);
+}
+
+int32_t BuildRsConfig(const RefPtr<FrameNode>& node, const SnapshotOptions& options,
+    Rosen::RSSurfaceCaptureConfig& rsConfig)
+{
+    if (options.regionMode != NG::SnapshotRegionMode::NO_REGION) {
+        Rosen::Drawing::Rect specifiedAreaRect = {};
+        int32_t setRegionReslut = SetCaptureReigon(node, options, specifiedAreaRect);
+        if (setRegionReslut != ERROR_CODE_NO_ERROR) {
+            return setRegionReslut;
+        }
+        rsConfig.specifiedAreaRect = specifiedAreaRect;
+    }
+    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
+    return ERROR_CODE_NO_ERROR;
 }
 
 bool GetTaskExecutor(const RefPtr<AceType>& customNode, RefPtr<PipelineContext>& pipeline,
@@ -356,8 +386,10 @@ void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rose
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         Rosen::RSSurfaceCaptureConfig rsConfig;
         ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(
-            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
+        if (!rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(
+            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig)) {
+            LogRsCaptureRejected(node->GetId(), rsNode->GetId());
+        }
         return;
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
@@ -370,8 +402,10 @@ void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rose
     Rosen::RSSurfaceCaptureConfig rsConfig;
     rsConfig.specifiedAreaRect = specifiedAreaRect;
     ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(
-        rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
+    if (!rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(
+        rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig)) {
+        LogRsCaptureRejected(node->GetId(), rsNode->GetId());
+    }
 }
 
 void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callback, const SnapshotOptions& options)
@@ -411,13 +445,13 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     }
     ACE_SCOPED_TRACE("ComponentSnapshot::Get_key=%s_Id=%d_RsId=%s", componentId.c_str(), node->GetId(),
         std::to_string(rsNode->GetId()).c_str());
-    int32_t imageCount = 0;
-    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    bool checkImage = CheckImageSuccessfullyLoad(node, dfxInfo);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Get ComponentSnapshot options=%{public}s Id=" SEC_PLD(%{public}d) " Depth=%{public}d Tag=%{public}s "
         "imageCount=%{public}d checkImage=%{public}d RsNodeId=%{public}" PRIu64 "",
         options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
-        imageCount, checkImage, rsNode->GetId());
+        dfxInfo.imageCount, checkImage, rsNode->GetId());
     TakeCaptureWithCallback(node, rsNode, options, callback);
 }
 
@@ -456,12 +490,13 @@ void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, c
         return;
     }
     ACE_SCOPED_TRACE("ComponentSnapshot::GetByUniqueId_Id=%d_RsId=%" PRIu64 "", node->GetId(), rsNode->GetId());
-    int32_t imageCount = 0;
-    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    bool checkImage = CheckImageSuccessfullyLoad(node, dfxInfo);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "GetByUniqueId ComponentSnapshot options=%{public}s Id=%{public}d Tag=%{public}s imageCount=%{public}d "
         "checkImage=%{public}d RsNodeId=%{public}" PRIu64 "",
-        options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), imageCount, checkImage, rsNode->GetId());
+        options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), dfxInfo.imageCount, checkImage,
+        rsNode->GetId());
     TakeCaptureWithCallback(node, rsNode, options, callback);
 }
 
@@ -531,7 +566,10 @@ void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, Nor
         return;
     }
     auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
-    rsRenderInterface->TakeSurfaceCaptureForUI(rsNode, std::make_shared<NormalCaptureCallback>(std::move(callback)));
+    if (!rsRenderInterface->TakeSurfaceCaptureForUI(
+        rsNode, std::make_shared<NormalCaptureCallback>(std::move(callback)))) {
+        LogRsCaptureRejected(frameNode->GetId(), rsNode->GetId());
+    }
 }
 
 void ComponentSnapshot::PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& executor, JsCallback&& callback,
@@ -550,8 +588,8 @@ void ComponentSnapshot::PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& exec
 void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode>& node, bool enableInspector,
     const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param)
 {
-    int32_t imageCount = 0;
-    auto checkResult = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    auto checkResult = CheckImageSuccessfullyLoad(node, dfxInfo);
     if (param.checkImageStatus && !checkResult) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Image loading failed! rootId=%{public}d rootNode=%{public}s",
@@ -575,27 +613,19 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to take surfaceCapture for ui, rootId=" SEC_PLD(%{public}d) " depth=%{public}d param=%{public}s "
-        "imageCount=%{public}d size=%{public}s, regionMode=%{public}d",
-        SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), imageCount,
+        "dfxInfo=%{public}s size=%{public}s, regionMode=%{public}d",
+        SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), dfxInfo.ToString().c_str(),
         node->GetGeometryNode()->GetFrameSize().ToString().c_str(), param.options.regionMode);
-    if (param.options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
-        Rosen::RSSurfaceCaptureConfig rsConfig; 
-        ConvertSnapshotOptionsToRSConfig(param.options, rsConfig);
-        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode,
-            std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr), rsConfig);
-        return;
-    }
-    Rosen::Drawing::Rect specifiedAreaRect = {};
-    int32_t setRegionReslut = SetCaptureReigon(node, param.options, specifiedAreaRect);
-    if (setRegionReslut != ERROR_CODE_NO_ERROR) {
-        callback(nullptr, setRegionReslut, nullptr);
-        return;
-    }
     Rosen::RSSurfaceCaptureConfig rsConfig;
-    rsConfig.specifiedAreaRect = specifiedAreaRect;
-    ConvertSnapshotOptionsToRSConfig(param.options, rsConfig);
-    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode,
-        std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr), rsConfig);
+    int32_t buildResult = BuildRsConfig(node, param.options, rsConfig);
+    if (buildResult != ERROR_CODE_NO_ERROR) {
+        callback(nullptr, buildResult, nullptr);
+        return;
+    }
+    auto cb = std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr);
+    if (!rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, cb, rsConfig)) {
+        LogRsCaptureRejected(node->GetId(), rsNode->GetId());
+    }
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
@@ -637,21 +667,14 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
         ACE_SCOPED_TRACE("ComponentSnapshot::GetSync_TakeSurfaceCaptureForUI_%s_%d_%" PRIu64 "",
             node->GetInspectorIdValue("").c_str(), node->GetId(), rsNode->GetId());
     }
-    if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
-        Rosen::RSSurfaceCaptureConfig rsConfig;
-        ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
-        return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
-    }
-    Rosen::Drawing::Rect specifiedAreaRect = {};
-    int32_t setRegionReslut = SetCaptureReigon(node, options, specifiedAreaRect);
-    if (setRegionReslut != ERROR_CODE_NO_ERROR) {
-        return {setRegionReslut, nullptr};
-    }
     Rosen::RSSurfaceCaptureConfig rsConfig;
-    rsConfig.specifiedAreaRect = specifiedAreaRect;
-    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+    int32_t buildResult = BuildRsConfig(node, options, rsConfig);
+    if (buildResult != ERROR_CODE_NO_ERROR) {
+        return {buildResult, nullptr};
+    }
+    if (!rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig)) {
+        LogRsCaptureRejected(node->GetId(), rsNode->GetId());
+    }
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
@@ -664,25 +687,16 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const Ref
     }
     auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
-    {
-        ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncByUniqueId_TakeSurfaceCaptureForUI_%d_%" PRIu64 "",
-            node->GetId(), rsNode->GetId());
-    }
-    if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
-        Rosen::RSSurfaceCaptureConfig rsConfig;
-        ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
-        return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
-    }
-    Rosen::Drawing::Rect specifiedAreaRect = {};
-    int32_t setRegionReslut = SetCaptureReigon(node, options, specifiedAreaRect);
-    if (setRegionReslut != ERROR_CODE_NO_ERROR) {
-        return {setRegionReslut, nullptr};
-    }
+    ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncByUniqueId_TakeSurfaceCaptureForUI_%d_%" PRIu64 "",
+        node->GetId(), rsNode->GetId());
     Rosen::RSSurfaceCaptureConfig rsConfig;
-    rsConfig.specifiedAreaRect = specifiedAreaRect;
-    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+    int32_t buildResult = BuildRsConfig(node, options, rsConfig);
+    if (buildResult != ERROR_CODE_NO_ERROR) {
+        return {buildResult, nullptr};
+    }
+    if (!rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig)) {
+        LogRsCaptureRejected(node->GetId(), rsNode->GetId());
+    }
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
@@ -805,8 +819,8 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         node->GetInspectorId().value_or("").c_str());
     std::string imageIds = "";
     HandleCreateSyncNode(node, pipeline, imageIds);
-    int32_t imageCount = 0;
-    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    bool checkImage = CheckImageSuccessfullyLoad(node, dfxInfo);
     if (!checkImage) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Image loading failed! rootId=" SEC_PLD(%{public}d) " depth=%{public}d rootNode=%{public}s",
@@ -827,7 +841,9 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     options.scale = 1.f;
     options.waitUntilRenderFinished = true;
     ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+    if (!rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig)) {
+        LogRsCaptureRejected(node->GetId(), rsNode->GetId());
+    }
     auto pair = syncCallback->GetPixelMap(CREATE_SNAPSHOT_TIMEOUT_DURATION);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "CreateSync, root size=%{public}s Id=" SEC_PLD(%{public}d) " depth=%{public}d Tag=%{public}s code:%{public}d "
