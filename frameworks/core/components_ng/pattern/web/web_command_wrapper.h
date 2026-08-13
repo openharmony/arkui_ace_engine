@@ -225,7 +225,6 @@ private:
         const std::unique_ptr<JsonValue>& comJson,
         int32_t& outIndex);
 
-    
     static int ParseAutoFillDefaultMode(
         const std::unique_ptr<JsonValue>& comJson,
         OHOS::NWeb::AutoFillMode& outDefaultMode);
