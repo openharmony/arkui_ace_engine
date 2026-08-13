@@ -54,6 +54,8 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
+#include "core/common/text_field_manager_ng.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
@@ -115,9 +117,7 @@ void OverlayManagerTestFiveNg::TearDown()
 
 /**
  * @tc.name: OverlayManagerOptionsAndPopupErase001
- * @tc.desc: Test SetOverlayManagerOptions (both branches of if (overlayInfo_.has_value())) and
- *           ErasePopupInfo (both branches of if (popupMap_.find(targetId) != end)) using a fully
- *           isolated OverlayManager instance to avoid any shared-state side effects.
+ * @tc.desc: Test SetOverlayManagerOptions
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, OverlayManagerOptionsAndPopupErase001, TestSize.Level1)
@@ -163,9 +163,7 @@ HWTEST_F(OverlayManagerTestFiveNg, OverlayManagerOptionsAndPopupErase001, TestSi
 
 /**
  * @tc.name: DumpMapInfo001
- * @tc.desc: Test both DumpMapInfo overloads covering all branches of if (hasTarget) in the for loop:
- *           true branch (hasTarget=true -> DumpEntry) and false branch (hasTarget=false -> GetMapNodeLog),
- *           including the null-node path where GetMapNodeLog returns "" via CHECK_NULL_RETURN.
+ * @tc.desc: Test both DumpMapInfo
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, DumpMapInfo001, TestSize.Level1)
@@ -210,9 +208,7 @@ HWTEST_F(OverlayManagerTestFiveNg, DumpMapInfo001, TestSize.Level1)
 
 /**
  * @tc.name: RemoveMenuCheckMenuManager001
- * @tc.desc: Test RemoveMenuBadgeNode and RemoveMenuInSubWindow covering both branches of
- *           if (!CheckMenuManager()): true branch (menuManager_ null -> CheckMenuManager false -> return)
- *           and false branch (menuManager_ non-null -> CheckMenuManager true -> continue past if).
+ * @tc.desc: Test RemoveMenuBadgeNode
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, RemoveMenuCheckMenuManager001, TestSize.Level1)
@@ -244,10 +240,7 @@ HWTEST_F(OverlayManagerTestFiveNg, RemoveMenuCheckMenuManager001, TestSize.Level
 
 /**
  * @tc.name: CheckPageNeedAvoidKeyboard001
- * @tc.desc: Test CheckPageNeedAvoidKeyboard covering both branches of
- *           if (child->GetTag() != V2::SHEET_WRAPPER_TAG):
- *           true branch (tag != SHEET_WRAPPER_TAG -> return true) and
- *           false branch (tag == SHEET_WRAPPER_TAG -> continue to focus check).
+ * @tc.desc: Test CheckPageNeedAvoidKeyboard
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, CheckPageNeedAvoidKeyboard001, TestSize.Level1)
@@ -293,10 +286,7 @@ HWTEST_F(OverlayManagerTestFiveNg, CheckPageNeedAvoidKeyboard001, TestSize.Level
 
 /**
  * @tc.name: OnKeyboardAvoid001
- * @tc.desc: Test OnKeyboardAvoid for-loop covering all branches of if/else if:
- *           if true (child tag == POPUP_ETS_TAG -> MarkDirtyNode),
- *           else if true (child tag == MENU_WRAPPER_ETS_TAG -> NotifyDirtyChildren),
- *           else (child null or other tag -> no action), and edge case root null.
+ * @tc.desc: Test OnKeyboardAvoid
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, OnKeyboardAvoid001, TestSize.Level1)
@@ -331,8 +321,7 @@ HWTEST_F(OverlayManagerTestFiveNg, OnKeyboardAvoid001, TestSize.Level1)
 
 /**
  * @tc.name: UpdateModalUIExtensionConfig001
- * @tc.desc: Test UpdateModalUIExtensionConfig covering both branches of if (!targetModalNode):
- *           true branch (no matching modal -> return) and false branch (modal found -> set config).
+ * @tc.desc: Test UpdateModalUIExtensionConfig
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, UpdateModalUIExtensionConfig001, TestSize.Level1)
@@ -364,10 +353,7 @@ HWTEST_F(OverlayManagerTestFiveNg, UpdateModalUIExtensionConfig001, TestSize.Lev
 
 /**
  * @tc.name: UpdatePixelMapScale001
- * @tc.desc: Test UpdatePixelMapScale covering false branch of if (height==0||width==0) with
- *           non-zero pixelMap, and nested if/else combinations under default device dimensions
- *           (720x1280): if B false (else B), if D false (textDraggable false),
- *           else if E true (large pixelMap -> scale set) and false (small pixelMap -> unchanged).
+ * @tc.desc: Test UpdatePixelMapScale
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, UpdatePixelMapScale001, TestSize.Level1)
@@ -410,9 +396,7 @@ HWTEST_F(OverlayManagerTestFiveNg, UpdatePixelMapScale001, TestSize.Level1)
 
 /**
  * @tc.name: UpdatePixelMapScale002
- * @tc.desc: Test UpdatePixelMapScale covering if B true branch and nested if C with modified
- *           device dimensions (width=2000, height=500): maxDeviceLength*0.5 > minDeviceLength
- *           is true, and if C (height > minDeviceLength*0.5) with large pixelMap.
+ * @tc.desc: Test UpdatePixelMapScale
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, UpdatePixelMapScale002, TestSize.Level1)
@@ -457,9 +441,7 @@ HWTEST_F(OverlayManagerTestFiveNg, UpdatePixelMapScale002, TestSize.Level1)
 
 /**
  * @tc.name: RemovePixelMapAnimation001
- * @tc.desc: Test RemovePixelMapAnimation covering code after CHECK_NULL_VOID(imageNode):
- *           if E true branch (shadow.has_value()==false -> create default shadow) with
- *           startDrag=false path reaching the full animation setup.
+ * @tc.desc: Test RemovePixelMapAnimation
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, RemovePixelMapAnimation001, TestSize.Level1)
@@ -498,9 +480,7 @@ HWTEST_F(OverlayManagerTestFiveNg, RemovePixelMapAnimation001, TestSize.Level1)
 
 /**
  * @tc.name: RemovePixelMapAnimation002
- * @tc.desc: Test RemovePixelMapAnimation covering if E false branch
- *           (shadow.has_value()==true -> use existing shadow) by pre-setting a back shadow
- *           on the imageNode's RenderContext.
+ * @tc.desc: Test RemovePixelMapAnimation
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, RemovePixelMapAnimation002, TestSize.Level1)
@@ -534,6 +514,105 @@ HWTEST_F(OverlayManagerTestFiveNg, RemovePixelMapAnimation002, TestSize.Level1)
 
     // if E false: shadow already has value → skip CreateShadow
     overlayManager->RemovePixelMapAnimation(false, 0, 0, false);
+}
+
+/**
+ * @tc.name: TriggerCustomKeyboardAvoid001
+ * @tc.desc: Test TriggerCustomKeyboardAvoid
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, TriggerCustomKeyboardAvoid001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->customKeyboardMap_.clear();
+
+    // === true branch: targetId not in map -> find returns end() -> return ===
+    overlayManager->TriggerCustomKeyboardAvoid(999, 100.0f);
+
+    // === false branch: targetId in map -> find succeeds -> continue ===
+    // With non-KeyboardPattern FrameNode: GetPattern<KeyboardPattern> returns null -> CHECK_NULL_VOID returns
+    auto fakeNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(fakeNode, nullptr);
+    overlayManager->customKeyboardMap_[200] = fakeNode;
+    overlayManager->TriggerCustomKeyboardAvoid(200, 50.0f); // false branch, pattern null -> return
+
+    // With real KeyboardPattern: GetPattern succeeds -> SetKeyboardSafeHeight/SetKeyboardAreaChange called
+    auto keyboardNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<KeyboardPattern>(300));
+    ASSERT_NE(keyboardNode, nullptr);
+    overlayManager->customKeyboardMap_[300] = keyboardNode;
+    overlayManager->keyboardAvoidance_ = true;
+    overlayManager->TriggerCustomKeyboardAvoid(300, 75.0f); // false branch, full path
+
+    overlayManager->customKeyboardMap_.clear();
+}
+
+/**
+ * @tc.name: ChangeBindKeyboardWithNode001
+ * @tc.desc: Test ChangeBindKeyboardWithNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, ChangeBindKeyboardWithNode001, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    // Set up TextFieldManagerNG with continueFeature_ = true on the pipeline
+    auto pipeline = rootNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    ASSERT_NE(textFieldManager, nullptr);
+    textFieldManager->continueFeature_ = true;
+    pipeline->SetTextFieldManager(textFieldManager);
+
+    // Create a KeyboardPattern FrameNode for customKeyboardNode_
+    auto keyboardNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<KeyboardPattern>(100));
+    ASSERT_NE(keyboardNode, nullptr);
+
+    // === Compound if TRUE + nested if B TRUE (oldTargetId_ != -1) ===
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = 100;
+    overlayManager->customKeyboardMap_[100] = keyboardNode;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // 100 != 200 → all 3 true, 100 != -1 → erase
+    EXPECT_TRUE(overlayManager->isKeyBoardContinue_);
+    EXPECT_EQ(overlayManager->customKeyboardMap_.find(100), overlayManager->customKeyboardMap_.end());
+
+    // === Compound if TRUE + nested if B FALSE (oldTargetId_ == -1) ===
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = -1;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // -1 != 200 → all 3 true, -1 == -1 → skip erase
+    EXPECT_TRUE(overlayManager->isKeyBoardContinue_);
+
+    // === Compound if FALSE: customKeyboardNode null ===
+    overlayManager->customKeyboardNode_ = nullptr;
+    overlayManager->oldTargetId_ = 100;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // customKeyboardNode null → else
+    EXPECT_FALSE(overlayManager->isKeyBoardContinue_);
+
+    // === Compound if FALSE: isKeyBoardContinue false ===
+    textFieldManager->continueFeature_ = false;
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = 100;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // isKeyBoardContinue false → else
+    EXPECT_FALSE(overlayManager->isKeyBoardContinue_);
+
+    // === Compound if FALSE: oldTargetId_ == targetId ===
+    textFieldManager->continueFeature_ = true;
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = 200;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // 200 == 200 → else
+    EXPECT_FALSE(overlayManager->isKeyBoardContinue_);
 }
 
 /**
