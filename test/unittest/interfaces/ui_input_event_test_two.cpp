@@ -1054,7 +1054,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetPressedButtons, TestSize.Level
     EXPECT_EQ(result, ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH);
 
     mouseEvent->pressedButtonsLength = 1;
-    ArkUI_Int32 mousePressedButtons[1] = { 3 };
+    ArkUI_Int32 mousePressedButtons[1] = { 4 };
     mouseEvent->pressedButtons = mousePressedButtons;
     uiInputEvent->inputEvent = mouseEvent.get();
     result = OH_ArkUI_MouseEvent_GetPressedButtons(uiInputEvent.get(), pressedButtons, &length);

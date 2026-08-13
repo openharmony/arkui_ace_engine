@@ -3329,7 +3329,8 @@ int32_t OH_ArkUI_MouseEvent_GetPressedButtons(const ArkUI_UIInputEvent* event, i
             }
             *length = mouseEvent->pressedButtonsLength;
             for (int i = 0; i < mouseEvent->pressedButtonsLength; i++) {
-                pressedButtons[i] = mouseEvent->pressedButtons[i];
+                pressedButtons[i] =
+                    OHOS::Ace::NodeModel::ConvertToCMouseEventButtonType(mouseEvent->pressedButtons[i]);
             }
             RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
         }
@@ -5365,7 +5366,9 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetPressedButtons(
             }
             if (mouseEvent->pressedButtons) {
                 delete[] mouseEvent->pressedButtons;
+                mouseEvent->pressedButtons = nullptr;
             }
+            mouseEvent->pressedButtonsLength = 0;
             mouseEvent->pressedButtons = new int[length]();
             for (int i = 0; i < length; ++i) {
                 if (pressedButtons[i] < static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_NONE) ||
@@ -5374,8 +5377,10 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetPressedButtons(
                     mouseEvent->pressedButtons = nullptr;
                     RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
                 }
-                mouseEvent->pressedButtons[i] = pressedButtons[i];
+                mouseEvent->pressedButtons[i] =
+                    OHOS::Ace::NodeModel::ConvertToOriginMouseButtonType(pressedButtons[i]);
             }
+            mouseEvent->pressedButtonsLength = length;
             break;
         }
         default:
