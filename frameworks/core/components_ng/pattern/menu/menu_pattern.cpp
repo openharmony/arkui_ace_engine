@@ -2495,7 +2495,7 @@ void MenuPattern::PlayLightAnimation(int32_t delay)
         option.SetDelay(delay);
     }
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(
+    edgeLightAnimation_ = AnimationUtils::StartAnimation(
         option,
         [renderContext, param2]() {
             renderContext->UpdateEdgeLightParam(param2);
@@ -2518,10 +2518,15 @@ void MenuPattern::PlayLightAnimation(int32_t delay)
         finalDelay += delay;
     }
     option1.SetDelay(finalDelay);
-    option1.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
+    option1.SetOnFinishEvent([weak = WeakClaim(this), weakRender = WeakPtr<RenderContext>(renderContext)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern && pattern->edgeLightAnimation_) {
+            AnimationUtils::StopAnimation(pattern->edgeLightAnimation_);
+        }
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
     });
     AnimationUtils::Animate(
         option1,
