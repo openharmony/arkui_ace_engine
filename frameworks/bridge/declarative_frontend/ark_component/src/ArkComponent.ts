@@ -2311,7 +2311,7 @@ class OnAreaChangeModifier extends ModifierWithKey<ArkOnAreaChange> {
   }
   static identity: Symbol = Symbol('onAreaChange');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || this.value.event === undefined || this.value.event === null) {
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
       if (!this.value.hasOptionsArg) {
