@@ -23,13 +23,17 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> SyncCustomizedCallback::Get
     std::unique_lock<std::mutex> lock(mutex_);
     auto status = cv_.wait_for(lock, timeout);
     if (ERROR_CODE_NO_ERROR != errorCode_) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Sync snapshot failed, errorCode=%{public}d", errorCode_);
         return { errorCode_, nullptr };
     }
     if (status == std::cv_status::timeout) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Sync snapshot timeout, timeout=%{public}dms", timeout.count());
         return { ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT, nullptr };
     }
     if (pixelMap_) {
         result = { ERROR_CODE_NO_ERROR, pixelMap_ };
+    } else {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Sync snapshot returned null pixelmap without error");
     }
     return result;
 }
