@@ -40,8 +40,8 @@ EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::IsCompatibleF
     }
     auto configJson = JsonUtil::ParseJsonString(config);
     if (!configJson || configJson->IsNull() || !configJson->IsObject()) {
-        TAG_LOGI(AceLogTag::AceLogTag::ACE_UIEVENT,
-            "key multiModalInputOptions, value is not a valid json string： %{public}s", config.c_str());
+        TAG_LOGE(AceLogTag::AceLogTag::ACE_UIEVENT,
+            "key multiModalInputOptions, value is not valid json string: %{public}s", config.c_str());
         return Mouse2TouchEventModeResult::NOT_FOUND;
     }
     auto value = configJson->GetString(MOUSE_2_TOUCH_EVENT_MODE);
@@ -95,6 +95,7 @@ bool EventInfoConvertor::ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo,
     touchEventInfo.AddChangedTouchLocationInfo(std::move(changedTouchLoactionInfo));
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+    touchEventInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
     return true;
 }
 
