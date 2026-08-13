@@ -507,9 +507,11 @@ template("declarative_js_engine") {
     }
 
     include_dirs = []
-    if (defined(vendor_configs.ace_engine_advanced)) {
-      include_dirs += vendor_configs.ace_advance_dirs
-      sources += vendor_configs.ace_engine_advanced_jsview
+    if (defined(global_parts_info.multimedia_image_extension)) {
+      external_deps += ["access_token:libtokenid_sdk"]
+      sources += [
+        "$ace_root/frameworks/core/components_ng/pattern/cached_image/js_cached_image.cpp"
+      ]
     } else {
       sources += [ "jsview/js_cached_image.cpp" ]
     }
