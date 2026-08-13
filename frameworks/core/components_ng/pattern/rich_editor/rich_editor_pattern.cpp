@@ -2653,7 +2653,7 @@ void RichEditorPattern::SetPlaceholderStyledString(const RefPtr<SpanString>& val
     CHECK_NULL_VOID(value);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPlaceholderStyledString, len=%{public}d", value->GetLength());
     styledPlaceholder_ = value->GetSubSpanString(0, value->GetLength());
-    auto host = GetHost();
+    auto host = GetContentHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }

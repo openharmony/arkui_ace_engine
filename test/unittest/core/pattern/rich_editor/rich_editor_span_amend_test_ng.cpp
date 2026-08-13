@@ -350,8 +350,18 @@ HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
     ASSERT_NE(richEditorController, nullptr);
     auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
     ASSERT_NE(spanString, nullptr);
+    // Setup content host so MarkDirtyNode can be triggered
+    richEditorPattern->OnAttachToFrameNode();
+    auto host = richEditorPattern->GetContentHost();
+    ASSERT_NE(host, nullptr);
+    auto hostLayoutProperty = host->GetLayoutProperty();
+    ASSERT_NE(hostLayoutProperty, nullptr);
+    hostLayoutProperty->CleanDirty();
     richEditorController->SetPlaceholderStyledString(spanString);
     EXPECT_NE(richEditorPattern->styledPlaceholder_, nullptr);
+    // Branch: host != nullptr, verify content host marked dirty with PROPERTY_UPDATE_MEASURE
+    EXPECT_EQ(hostLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE,
+        PROPERTY_UPDATE_MEASURE);
     richEditorPattern->isShowPlaceholder_ = true;
     richEditorPattern->richTextRect_ = RectF(50, 50, 100, 140);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
