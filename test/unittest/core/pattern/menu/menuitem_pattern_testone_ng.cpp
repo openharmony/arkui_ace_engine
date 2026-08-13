@@ -1703,4 +1703,216 @@ HWTEST_F(MenuItemPatternTestOneNg, ApplySelectedThemeStyles001, TestSize.Level1)
     EXPECT_EQ(itemPattern->bgColor_.value(), selectTheme->GetSelectedColor());
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), selectTheme->GetBackgroundColor());
 }
+
+/**
+ * @tc.name: InitFocusEvent004
+ * @tc.desc: Test InitFocusEvent focusTask lambda covering both branches of
+ *           if (IsOptionPattern()): true (OptionHandleFocusEvent) and
+ *           false (HandleFocusEvent + UpdateTextMarquee) by triggering the registered callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent004, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(99);
+    MockPipelineContextGetTheme();
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
+
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(itemNode->GetRenderContext());
+    EXPECT_CALL(*mockRenderContext, SetClipToBounds(_)).Times(AnyNumber());
+
+    // === focusTask lambda: if true (IsOptionPattern() == true -> OptionHandleFocusEvent) ===
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->OnModifyDone();
+    itemPattern->InitFocusEvent();
+    auto focusHub = itemNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    ASSERT_TRUE(focusHub->onFocusInternal_);
+    focusHub->onFocusInternal_(FocusReason::DEFAULT); // triggers lambda -> if true
+
+    // === focusTask lambda: if false (IsOptionPattern() == false -> HandleFocusEvent + UpdateTextMarquee) ===
+    itemPattern->isOptionPattern_ = false;
+    itemPattern->isFocused_ = false;
+    focusHub->onFocusInternal_(FocusReason::DEFAULT); // triggers lambda -> if false
+    EXPECT_EQ(itemPattern->isFocused_, true);
+}
+
+/**
+ * @tc.name: InitFocusEvent005
+ * @tc.desc: Test InitFocusEvent blurTask lambda covering both branches of
+ *           if (IsOptionPattern()): true (OptionHandleBlurEvent) and
+ *           false (HandleBlurEvent + UpdateTextMarquee) by triggering the registered callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent005, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(99);
+    MockPipelineContextGetTheme();
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>([](GestureEvent&) {});
+
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(itemNode->GetRenderContext());
+    EXPECT_CALL(*mockRenderContext, SetClipToBounds(_)).Times(AnyNumber());
+
+    // === blurTask lambda: if true (IsOptionPattern() == true -> OptionHandleBlurEvent) ===
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->OnModifyDone();
+    itemPattern->InitFocusEvent();
+    auto focusHub = itemNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    ASSERT_TRUE(focusHub->onBlurInternal_);
+    focusHub->onBlurInternal_(); // triggers lambda -> if true
+
+    // === blurTask lambda: if false (IsOptionPattern() == false -> HandleBlurEvent + UpdateTextMarquee) ===
+    itemPattern->isOptionPattern_ = false;
+    itemPattern->isFocused_ = true;
+    itemPattern->isFocusBGColorSet_ = true;
+    itemPattern->isFocusShadowSet_ = true;
+    focusHub->onBlurInternal_(); // triggers lambda -> if false
+    EXPECT_EQ(itemPattern->isFocused_, false);
+    EXPECT_EQ(itemPattern->isFocusBGColorSet_, false);
+    EXPECT_EQ(itemPattern->isFocusShadowSet_, false);
+}
+
+/**
+ * @tc.name: ParseMenuBlurStyleEffect001
+ * @tc.desc: Verify ParseMenuBlurStyleEffect with both BackBlurStyle and BackgroundEffect set (if1=true, if2=true).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ParseMenuBlurStyleEffect001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    auto outterMenuNode = menuItemPattern->GetMenu(true);
+    ASSERT_NE(outterMenuNode, nullptr);
+    auto focusMenuRenderContext = outterMenuNode->GetRenderContext();
+    ASSERT_NE(focusMenuRenderContext, nullptr);
+
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+    focusMenuRenderContext->UpdateBackBlurStyle(styleOption);
+
+    EffectOption effectOption;
+    effectOption.radius = Dimension(10.0f);
+    effectOption.saturation = 1.5f;
+    effectOption.brightness = 1.2f;
+    focusMenuRenderContext->UpdateBackgroundEffect(effectOption);
+
+    MenuParam param;
+    auto result = menuItemPattern->ParseMenuBlurStyleEffect(param, focusMenuRenderContext);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(param.backgroundBlurStyle.has_value());
+    EXPECT_EQ(param.backgroundBlurStyle.value(), static_cast<int32_t>(BlurStyle::COMPONENT_THICK));
+    EXPECT_TRUE(param.blurStyleOption.has_value());
+    EXPECT_EQ(param.blurStyleOption->blurStyle, BlurStyle::COMPONENT_THICK);
+    EXPECT_TRUE(param.effectOption.has_value());
+    EXPECT_EQ(param.effectOption->radius, Dimension(10.0f));
+}
+
+/**
+ * @tc.name: ParseMenuBlurStyleEffect002
+ * @tc.desc: Verify ParseMenuBlurStyleEffect with only BackBlurStyle set (if1=true, if2=false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ParseMenuBlurStyleEffect002, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    auto outterMenuNode = menuItemPattern->GetMenu(true);
+    ASSERT_NE(outterMenuNode, nullptr);
+    auto focusMenuRenderContext = outterMenuNode->GetRenderContext();
+    ASSERT_NE(focusMenuRenderContext, nullptr);
+
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::BACKGROUND_THICK;
+    focusMenuRenderContext->UpdateBackBlurStyle(styleOption);
+
+    MenuParam param;
+    auto result = menuItemPattern->ParseMenuBlurStyleEffect(param, focusMenuRenderContext);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(param.backgroundBlurStyle.has_value());
+    EXPECT_EQ(param.backgroundBlurStyle.value(), static_cast<int32_t>(BlurStyle::BACKGROUND_THICK));
+    EXPECT_TRUE(param.blurStyleOption.has_value());
+    EXPECT_EQ(param.blurStyleOption->blurStyle, BlurStyle::BACKGROUND_THICK);
+    EXPECT_FALSE(param.effectOption.has_value());
+}
+
+/**
+ * @tc.name: ParseMenuBlurStyleEffect003
+ * @tc.desc: Verify ParseMenuBlurStyleEffect with only BackgroundEffect set (if1=false, if2=true).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ParseMenuBlurStyleEffect003, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    auto outterMenuNode = menuItemPattern->GetMenu(true);
+    ASSERT_NE(outterMenuNode, nullptr);
+    auto focusMenuRenderContext = outterMenuNode->GetRenderContext();
+    ASSERT_NE(focusMenuRenderContext, nullptr);
+
+    EffectOption effectOption;
+    effectOption.radius = Dimension(5.0f);
+    effectOption.saturation = 2.0f;
+    effectOption.brightness = 0.8f;
+    focusMenuRenderContext->UpdateBackgroundEffect(effectOption);
+
+    MenuParam param;
+    auto result = menuItemPattern->ParseMenuBlurStyleEffect(param, focusMenuRenderContext);
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(param.backgroundBlurStyle.has_value());
+    EXPECT_FALSE(param.blurStyleOption.has_value());
+    EXPECT_TRUE(param.effectOption.has_value());
+    EXPECT_EQ(param.effectOption->radius, Dimension(5.0f));
+}
 } // namespace OHOS::Ace::NG
