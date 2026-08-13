@@ -84,7 +84,7 @@ const void* MenuDynamicModule::GetCjModifier()
 void* MenuDynamicModule::GetModel()
 {
     static NG::MenuModelNG menuModel;
-    return &menuModel;
+    return static_cast<MenuModel*>(&menuModel);
 }
 
 const void* MenuDynamicModule::GetCustomModifier(const std::string& name)

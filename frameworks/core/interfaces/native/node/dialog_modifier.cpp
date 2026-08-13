@@ -58,44 +58,20 @@ const ArkUIDialogInnerModifier* GetDialogInnerModifier()
     return modifier;
 }
 
-ActionSheetModelNG* GetActionSheetModel()
+ActionSheetModel* GetActionSheetModel()
 {
-    static ActionSheetModelNG* cachedModel = nullptr;
-    if (cachedModel == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Dialog");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find dialog dynamic module");
-        }
-        cachedModel = reinterpret_cast<ActionSheetModelNG*>(module->GetModel("actionSheetModelNG"));
-    }
-    return cachedModel;
+    return DynamicModuleHelper::GetInstance().GetModel<ActionSheetModel>("Dialog", "actionSheetModelNG");
 }
 
-AlertDialogModelNG* GetAlertDialogModel()
+AlertDialogModel* GetAlertDialogModel()
 {
-    static AlertDialogModelNG* cachedModel = nullptr;
-    if (cachedModel == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Dialog");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find dialog dynamic module");
-        }
-        cachedModel = reinterpret_cast<AlertDialogModelNG*>(module->GetModel("alertDialogModelNG"));
-    }
-    return cachedModel;
+    return DynamicModuleHelper::GetInstance().GetModel<AlertDialogModel>("Dialog", "alertDialogModelNG");
 }
 
-CustomDialogControllerModelNG* GetCustomDialogControllerModel()
+CustomDialogControllerModel* GetCustomDialogControllerModel()
 {
-    static CustomDialogControllerModelNG* cachedModel = nullptr;
-    if (cachedModel == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Dialog");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find dialog dynamic module");
-        }
-        cachedModel =
-            reinterpret_cast<CustomDialogControllerModelNG*>(module->GetModel("customDialogControllerModelNG"));
-    }
-    return cachedModel;
+    return DynamicModuleHelper::GetInstance().GetModel<CustomDialogControllerModel>(
+        "Dialog", "customDialogControllerModelNG");
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
