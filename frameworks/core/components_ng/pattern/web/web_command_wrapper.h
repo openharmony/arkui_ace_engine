@@ -224,6 +224,14 @@ private:
     static int ValidateInputSetCursorParameters(
         const std::unique_ptr<JsonValue>& comJson,
         int32_t& outIndex);
+
+    
+    static int ParseAutoFillDefaultMode(
+        const std::unique_ptr<JsonValue>& comJson,
+        OHOS::NWeb::AutoFillMode& outDefaultMode);
+
+    static OHOS::NWeb::AutoFillMode ParseAutoFillItemMode(
+        const std::unique_ptr<JsonValue>& itemValue);
 };
 
 } // namespace Ace
