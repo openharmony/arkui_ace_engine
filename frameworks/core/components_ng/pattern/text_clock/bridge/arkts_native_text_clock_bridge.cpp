@@ -101,6 +101,37 @@ void RemoveJSController(
     }
     TextClockModelNG::SetJSTextClockController(frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
 }
+
+void ParseTextShadowFromShadowObject(ArkUIRuntimeCallInfo* runtimeCallInfo, std::vector<Shadow>& shadows)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    if (runtimeCallInfo->GetArgsNumber() < NUM_1) {
+        return;
+    }
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!secondArg->IsNumber() && !secondArg->IsObject(vm) && !secondArg->IsArray(vm)) {
+        return;
+    }
+    if (!secondArg->IsArray(vm)) {
+        Shadow shadow;
+        if (!ArkTSUtils::ParseShadowProps(vm, secondArg, shadow, false, false)) {
+            return;
+        }
+        shadows.push_back(shadow);
+        return;
+    }
+    auto params = panda::CopyableGlobal<panda::ArrayRef>(vm, secondArg);
+    auto shadowLength = ArkTSUtils::GetArrayLength(vm, secondArg);
+    for (size_t i = 0; i < shadowLength; ++i) {
+        auto shadowJsVal = params->GetValueAt(vm, secondArg, i);
+        Shadow shadow;
+        if (!ArkTSUtils::ParseShadowProps(vm, shadowJsVal, shadow, false, false)) {
+            continue;
+        }
+        shadows.push_back(shadow);
+    }
+}
 } // namespace
 
 ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -436,16 +467,24 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
-    if (!lengthArg->IsNumber()) {
+    if (IsJsView(firstArg, vm)) {
+        std::vector<Shadow> shadows;
+        ParseTextShadowFromShadowObject(runtimeCallInfo, shadows);
+        auto nodeModifiers = GetArkUINodeModifiers();
+        CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+        if (!shadows.empty()) {
+            nodeModifiers->getTextClockModifier()->setTextShadowNew(static_cast<void*>(&shadows), shadows.size());
+        } else {
+            nodeModifiers->getTextClockModifier()->removeResObjByKey(
+                reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode()),
+                "textClock.shadow");
+        }
         return panda::JSValueRef::Undefined(vm);
     }
-    if (lengthArg->Uint32Value(vm) == 0 && IsJsView(firstArg, vm)) {
-        GetArkUINodeModifiers()->getTextClockModifier()->removeResObjByKey(
-            reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode()),
-            "textClock.shadow");
+    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!lengthArg->IsNumber() || lengthArg->Uint32Value(vm) == 0) {
         return panda::JSValueRef::Undefined(vm);
     }
     uint32_t length = lengthArg->Uint32Value(vm);
@@ -459,20 +498,21 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     std::vector<RefPtr<ResourceObject>> colorResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetXResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetYResObjArray;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_1),
         radiusArray.get(), length, ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResObjArray);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, runtimeCallInfo->GetCallArgRef(NUM_3),
-        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray);
+        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray, nodeInfo);
     bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_4),
         offsetXArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetXResObjArray);
     bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_5),
         offsetYArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetYResObjArray);
     bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_6), fillArray.get(), length, ArkTSUtils::parseShadowFill);
-    if (!radiusParseResult || !colorParseResult || !offsetXParseResult || !offsetYParseResult || !fillParseResult ||
-        !typeParseResult) {
+    if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
+        !offsetYParseResult || !fillParseResult || !typeParseResult) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto textShadowArray = std::make_unique<ArkUITextShadowStruct[]>(length);
