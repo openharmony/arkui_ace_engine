@@ -244,6 +244,15 @@ void SetTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, 
     TextClockModelNG::SetTextShadow(frameNode, shadowList);
 }
 
+void SetTextShadowNew(void* shadowsRaw, ArkUI_Uint32 length)
+{
+    CHECK_NULL_VOID(shadowsRaw);
+    FrameNode* frameNode = GetFrameNode(nullptr);
+    CHECK_NULL_VOID(frameNode);
+    const auto& shadowVec = *(static_cast<std::vector<Shadow>*>(shadowsRaw));
+    TextClockModelNG::SetTextShadow(frameNode, shadowVec);
+}
+
 void ParseShadowRadiusUpdate(const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow)
 {
     if (!radiusResObj) {
@@ -458,6 +467,8 @@ void SetTextColorByUser(ArkUINodeHandle node, ArkUI_Bool value)
     TextClockModelNG::SetTextColorByUser(frameNode, value);
 }
 
+void SetTextShadowNewImpl(void* shadowsRaw, ArkUI_Uint32 length) {}
+
 ArkUINodeHandle CreateTextClockFrameNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
@@ -668,6 +679,7 @@ const ArkUITextClockModifier* GetTextClockDynamicModifier()
             .createTextClockController = CreateTextClockControllerImpl,
             .createWithTextColorResourceObj = CreateWithTextColorResourceObjImpl,
             .setTextColorByUser = SetTextColorByUserImpl,
+            .setTextShadowNew = SetTextShadowNewImpl,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -707,6 +719,7 @@ const ArkUITextClockModifier* GetTextClockDynamicModifier()
         .createTextClockController = CreateTextClockController,
         .createWithTextColorResourceObj = CreateWithTextColorResourceObj,
         .setTextColorByUser = SetTextColorByUser,
+        .setTextShadowNew = SetTextShadowNew,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
