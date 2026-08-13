@@ -8321,6 +8321,7 @@ struct ArkUITextClockModifier {
     ArkUINodeHandle (*createTextClockController)();
     void (*createWithTextColorResourceObj)(ArkUINodeHandle node, void* fontColorRawPtr);
     void (*setTextColorByUser)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setTextShadowNew)(void* shadowsRaw, ArkUI_Uint32 length);
 };
 
 struct ArkUITextClockControllerModifier {
