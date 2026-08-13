@@ -39,9 +39,20 @@ public:
 
     int32_t GetWindowId(int32_t instanceId) const;
 
+    void AddExternalResourceId(int32_t externalResourceId, int32_t instanceId);
+
+    void RemoveExternalResourceId(int32_t externalResourceId);
+
+    void RemoveExternalResourceIdByInstanceId(int32_t instanceId);
+
+    int32_t GetInstanceIdByExternalResourceId(int32_t externalResourceId) const;
+
+    int32_t GetExternalResourceId(int32_t instanceId) const;
+
 private:
     mutable std::mutex mutex_;
     std::unordered_map<uint32_t, int32_t> windowToInstance_; // windowId -> instanceId
+    std::unordered_map<int32_t, int32_t> externalResourceToInstance_; // externalResourceId -> instanceId
 };
 
 } // namespace OHOS::Ace

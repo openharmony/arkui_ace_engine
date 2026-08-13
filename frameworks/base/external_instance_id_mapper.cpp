@@ -56,4 +56,49 @@ int32_t ExternalInstanceIdMapper::GetWindowId(int32_t instanceId) const
     return -1;
 }
 
+void ExternalInstanceIdMapper::AddExternalResourceId(int32_t externalResourceId, int32_t instanceId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    externalResourceToInstance_[externalResourceId] = instanceId;
+}
+
+void ExternalInstanceIdMapper::RemoveExternalResourceId(int32_t externalResourceId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    externalResourceToInstance_.erase(externalResourceId);
+}
+
+void ExternalInstanceIdMapper::RemoveExternalResourceIdByInstanceId(int32_t instanceId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto it = externalResourceToInstance_.begin(); it != externalResourceToInstance_.end();) {
+        if (it->second == instanceId) {
+            it = externalResourceToInstance_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+int32_t ExternalInstanceIdMapper::GetInstanceIdByExternalResourceId(int32_t externalResourceId) const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = externalResourceToInstance_.find(externalResourceId);
+    if (it == externalResourceToInstance_.end()) {
+        return -1;
+    }
+    return it->second;
+}
+
+int32_t ExternalInstanceIdMapper::GetExternalResourceId(int32_t instanceId) const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto& entry : externalResourceToInstance_) {
+        if (entry.second == instanceId) {
+            return entry.first;
+        }
+    }
+    return -1;
+}
+
 } // namespace OHOS::Ace
