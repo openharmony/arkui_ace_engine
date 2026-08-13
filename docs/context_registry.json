@@ -12172,11 +12172,9 @@
         "键盘状态下点击错位"
       ],
       "kb": "docs/kb/issues/layout/keyboard-avoid-timing-change.md",
-      "func_ids": [
-        "04-02-01",
-        "03-05-01"
-      ],
-      "spec_status": "pending",
+      "spec_domain": "specs/04-common-capability/02-safe-area/01-safe-area-mechanism",
+      "func_id": "04-02-01",
+      "spec_status": "active",
       "source_paths": {
         "window_adapter": "adapter/ohos/entrance/ui_content_impl.cpp",
         "task_executor": "frameworks/base/thread/task_executor.cpp",
