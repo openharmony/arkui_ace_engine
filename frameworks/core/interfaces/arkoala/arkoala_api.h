@@ -4145,11 +4145,11 @@ struct ArkUITextModifier {
     ArkUI_Uint32 (*getTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
     void (*setFontColorWithPlaceholder)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder);
     void (*setFontColorPtr)(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* fontColorRawPtr);
-    void* (*getCharacterPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
+    void* (*getCharacterPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy, ArkUI_Int32 encoding);
     void (*getGlyphRangeForCharacterRange)(
-        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range);
     void (*getCharacterRangeForGlyphRange)(
-        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range);
     void (*setStyledString)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
     void (*setFontVariations)(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length);
     void (*resetFontVariations)(ArkUINodeHandle node);
@@ -8907,11 +8907,11 @@ struct ArkUIRichEditorModifier {
         ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 heightStyle, ArkUI_Int32 widthStyle);
     void* (*getRichEditorGlyphPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
     ArkUITextLineMetrics (*getRichEditorLineMetrics)(ArkUINodeHandle node, ArkUI_Int32 lineNumber);
-    void* (*getRichEditorCharacterPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
+    void* (*getRichEditorCharacterPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy, ArkUI_Int32 encoding);
     void (*getRichEditorGlyphRangeForCharacterRange)(
-        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range);
     void (*getRichEditorCharacterRangeForGlyphRange)(
-        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range);
     void (*setTypingParagraphStyle)(ArkUINodeHandle node, const ArkUIParagraphStyle& paragraphStyle);
     void (*setRichEditorTypingStyle)(ArkUINodeHandle node, const ArkUIRichEditorTextStyle& style);
     ArkUIRichEditorTextStyle (*getRichEditorTypingStyle)(ArkUINodeHandle node);

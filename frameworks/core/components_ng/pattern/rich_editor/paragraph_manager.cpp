@@ -19,6 +19,31 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float MIN_RECT_TOP = -0.4f;
 constexpr float MIN_RECT_PRECISION = -0.5f;
+
+struct ParagraphMetadata {
+    int32_t actualCharEnd = 0;
+    int32_t actualGlyphEnd = 0;
+    int32_t strippedNewLineCount = 0;
+    int32_t effectiveCharLength = 0;
+    int32_t effectiveGlyphLength = 0;
+    bool isLastParagraph = false;
+};
+
+ParagraphMetadata ComputeParagraphMetadata(
+    const ParagraphManager::ParagraphInfo& info, TextEncoding encoding, bool isLastParagraph)
+{
+    auto paragraphLength = static_cast<int32_t>(info.end - info.start);
+    auto actualRange =
+        info.paragraph->GetCharacterRangeForGlyphRange(0, paragraphLength, encoding);
+    ParagraphMetadata meta;
+    meta.isLastParagraph = isLastParagraph;
+    meta.actualCharEnd = (actualRange.first.end == -1) ? 0 : actualRange.first.end;
+    meta.actualGlyphEnd = (actualRange.second.end == -1) ? 0 : actualRange.second.end;
+    meta.strippedNewLineCount = isLastParagraph ? 0 : 1;
+    meta.effectiveCharLength = meta.actualCharEnd + meta.strippedNewLineCount;
+    meta.effectiveGlyphLength = meta.actualGlyphEnd + meta.strippedNewLineCount;
+    return meta;
+}
 } // namespace
 
 float ParagraphManager::GetHeight() const
@@ -206,118 +231,339 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
     return finalResult;
 }
 
-PositionWithAffinity ParagraphManager::GetCharacterPositionAtCoordinate(Offset offset)
+PositionWithAffinity ParagraphManager::GetCharacterPositionAtCoordinate(
+    Offset offset, TextEncoding encoding)
 {
     PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
     CHECK_NULL_RETURN(!paragraphs_.empty(), finalResult);
     if (LessNotEqual(offset.GetY(), 0.0)) {
         return finalResult;
     }
-    int idx = 0;
-    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+    int32_t charLength = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
         auto& info = *it;
-        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
-            (idx == static_cast<int>(paragraphs_.size()) - 1)) {
-            auto result = info.paragraph->GetCharacterPositionAtCoordinate(offset);
-            finalResult.position_ = result.position_ + static_cast<size_t>(info.start);
+        bool isLastParagraph = std::next(it) == paragraphs_.end();
+        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) || isLastParagraph) {
+            auto result = info.paragraph->GetCharacterPositionAtCoordinate(offset, encoding);
+            finalResult.position_ = result.position_ + static_cast<size_t>(charLength);
             finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
             return finalResult;
         }
-        // get offset relative to each paragraph
+        auto meta = ComputeParagraphMetadata(info, encoding, isLastParagraph);
+        charLength += meta.actualCharEnd + meta.strippedNewLineCount;
         offset.SetY(offset.GetY() - info.paragraph->GetHeight());
     }
     auto info = paragraphs_.back();
-    auto result = info.paragraph->GetCharacterPositionAtCoordinate(offset);
-    finalResult.position_ = static_cast<size_t>(info.end);
+    auto meta = ComputeParagraphMetadata(info, encoding, true);
+    auto result = info.paragraph->GetCharacterPositionAtCoordinate(offset, encoding);
+    finalResult.position_ = static_cast<size_t>(charLength + meta.actualCharEnd);
     finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
     return finalResult;
 }
 
-std::pair<TextRange, TextRange> ParagraphManager::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> ParagraphManager::GetGlyphRangeForCharacterRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
     std::pair<TextRange, TextRange> textRanges;
     bool isInvalidRange = (start < 0) || (end <= 0) || paragraphs_.empty() || (start >= end);
     CHECK_NULL_RETURN(!isInvalidRange, textRanges);
-    int idx = 0;
+    if (SystemProperties::GetTextTraceEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "GetGlyphRangeForCharRange input: start=%{public}d, end=%{public}d, encoding=%{public}d, "
+            "paragraphCount=%{public}zu",
+            start, end, static_cast<int32_t>(encoding), paragraphs_.size());
+    }
     TextRange glyphRange { .start = 0, .end = 0 };
     TextRange charRange { .start = 0, .end = 0 };
     int32_t glyphLength = 0;
     int32_t charLength = 0;
     bool isStart = true;
     bool isEnd = true;
-    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+    int32_t paragraphIndex = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++paragraphIndex) {
         auto& info = *it;
-        auto paragraphLength = static_cast<int32_t>(info.end - info.start);
-        auto actualRange =
-            info.paragraph->GetCharacterRangeForGlyphRange(0, paragraphLength);
-        if (isStart && start >= charLength && start < charLength + actualRange.first.end) {
-            auto range = info.paragraph->GetGlyphRangeForCharacterRange(start - charLength, actualRange.first.end);
-            glyphRange.start = glyphLength + range.first.start;
-            charRange.start = charLength + range.second.start;
+        auto meta = ComputeParagraphMetadata(info, encoding, std::next(it) == paragraphs_.end());
+        if (SystemProperties::GetTextTraceEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_TEXT,
+                "GetGlyphRangeForCharRange paragraph[%{public}d]: info.start=%{public}d, info.end=%{public}d, "
+                "actualCharEnd=%{public}d, actualGlyphEnd=%{public}d, strippedNewLineCount=%{public}d, "
+                "charLength=%{public}d, glyphLength=%{public}d",
+                paragraphIndex, info.start, info.end, meta.actualCharEnd, meta.actualGlyphEnd,
+                meta.strippedNewLineCount, charLength, glyphLength);
+        }
+        // Scenario 1: start and end in same paragraph — single combined target query
+        if (isStart && start >= charLength && start < charLength + meta.effectiveCharLength) {
+            if (isEnd && end > charLength && end <= charLength + meta.effectiveCharLength) {
+                auto localStart = std::min(start - charLength, meta.actualCharEnd);
+                auto localEnd = std::min(end - charLength, meta.actualCharEnd);
+                if (localStart >= meta.actualCharEnd && localEnd >= meta.actualCharEnd) {
+                    // Both start and end are at the paragraph boundary.
+                    glyphRange.start = glyphLength + meta.actualGlyphEnd;
+                    glyphRange.end = glyphLength + meta.actualGlyphEnd + meta.strippedNewLineCount;
+                    charRange.start = charLength + meta.actualCharEnd;
+                    charRange.end = charLength + meta.actualCharEnd + meta.strippedNewLineCount;
+                    if (SystemProperties::GetTextTraceEnabled()) {
+                        TAG_LOGI(AceLogTag::ACE_TEXT,
+                            "GetGlyphRangeForCharRange same-paragraph boundary: "
+                            "glyphRange=[%{public}d,%{public}d], charRange=[%{public}d,%{public}d]",
+                            glyphRange.start, glyphRange.end, charRange.start, charRange.end);
+                    }
+                    return std::make_pair(glyphRange, charRange);
+                }
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetGlyphRangeForCharRange same-paragraph: localStart=%{public}d, localEnd=%{public}d",
+                        localStart, localEnd);
+                }
+                auto range = info.paragraph->GetGlyphRangeForCharacterRange(
+                    localStart, localEnd, encoding);
+                glyphRange.start = glyphLength + range.first.start;
+                glyphRange.end = glyphLength + range.first.end;
+                charRange.start = charLength + range.second.start;
+                charRange.end = charLength + range.second.end;
+                // Extend result if end reaches into the stripped newline region.
+                if (end - charLength > meta.actualCharEnd) {
+                    glyphRange.end = glyphLength + meta.actualGlyphEnd + meta.strippedNewLineCount;
+                    charRange.end = charLength + meta.actualCharEnd + meta.strippedNewLineCount;
+                }
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetGlyphRangeForCharRange same-paragraph result: "
+                        "glyphRange=[%{public}d,%{public}d], charRange=[%{public}d,%{public}d]",
+                        glyphRange.start, glyphRange.end, charRange.start, charRange.end);
+                }
+                return std::make_pair(glyphRange, charRange);
+            }
+            // Scenario 2: cross-paragraph — query start → paragraph end
+            auto localStart = std::min(start - charLength, meta.actualCharEnd);
+            if (localStart >= meta.actualCharEnd) {
+                // Char start is at the paragraph boundary (stripped newline region).
+                // An empty-range query would return -1; set the boundary directly.
+                glyphRange.start = glyphLength + meta.actualGlyphEnd;
+                charRange.start = charLength + meta.actualCharEnd;
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetGlyphRangeForCharRange cross-start boundary: "
+                        "glyphStart=%{public}d, charStart=%{public}d",
+                        glyphRange.start, charRange.start);
+                }
+            } else {
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetGlyphRangeForCharRange cross-start: localStart=%{public}d, localEnd=%{public}d",
+                        localStart, meta.actualCharEnd);
+                }
+                auto range = info.paragraph->GetGlyphRangeForCharacterRange(
+                    localStart, meta.actualCharEnd, encoding);
+                glyphRange.start = glyphLength + range.first.start;
+                charRange.start = charLength + range.second.start;
+            }
             isStart = false;
         }
+        // Scenario 3: cross-paragraph — query paragraph start → end
         if (!isStart && isEnd &&
-            ((end > charLength && end <= charLength + actualRange.first.end) ||
-                (idx == static_cast<int>(paragraphs_.size()) - 1))) {
-            auto range = info.paragraph->GetGlyphRangeForCharacterRange(0, end - charLength);
-            glyphRange.end = glyphLength + range.first.end;
-            charRange.end = charLength + range.second.end;
+            ((end > charLength && end <= charLength + meta.effectiveCharLength) ||
+                (meta.isLastParagraph && end > charLength))) {
+            auto localEnd = std::min(end - charLength, meta.actualCharEnd);
+            if (localEnd <= 0) {
+                // End is at the paragraph start boundary (empty paragraph).
+                glyphRange.end = glyphLength;
+                charRange.end = charLength;
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetGlyphRangeForCharRange cross-end boundary: "
+                        "glyphEnd=%{public}d, charEnd=%{public}d",
+                        glyphRange.end, charRange.end);
+                }
+            } else {
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetGlyphRangeForCharRange cross-end: localStart=0, localEnd=%{public}d",
+                        localEnd);
+                }
+                auto range = info.paragraph->GetGlyphRangeForCharacterRange(
+                    0, localEnd, encoding);
+                glyphRange.end = glyphLength + range.first.end;
+                charRange.end = charLength + range.second.end;
+                // Extend result if end reaches into the stripped newline region.
+                if (end - charLength > meta.actualCharEnd) {
+                    glyphRange.end = glyphLength + meta.actualGlyphEnd + meta.strippedNewLineCount;
+                    charRange.end = charLength + meta.actualCharEnd + meta.strippedNewLineCount;
+                }
+            }
             isEnd = false;
         }
-        CHECK_NULL_RETURN(isStart || isEnd, std::make_pair(glyphRange, charRange));
-        CHECK_NULL_RETURN(!isStart || !isEnd || !(idx == static_cast<int>(paragraphs_.size()) - 1),
-            std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 }));
-        glyphLength += actualRange.second.end == -1 ? 0 : actualRange.second.end;
-        charLength += actualRange.first.end == -1 ? 0 : actualRange.first.end;
+        if (!isStart && !isEnd) {
+            if (SystemProperties::GetTextTraceEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_TEXT,
+                    "GetGlyphRangeForCharRange cross result: "
+                    "glyphRange=[%{public}d,%{public}d], charRange=[%{public}d,%{public}d]",
+                    glyphRange.start, glyphRange.end, charRange.start, charRange.end);
+            }
+            return std::make_pair(glyphRange, charRange);
+        }
+        if (meta.isLastParagraph) {
+            if (SystemProperties::GetTextTraceEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "GetGlyphRangeForCharRange not found, return -1");
+            }
+            return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+        }
+        glyphLength += meta.actualGlyphEnd + meta.strippedNewLineCount;
+        charLength += meta.actualCharEnd + meta.strippedNewLineCount;
     }
-    auto info = paragraphs_.back();
-    auto range = info.paragraph->GetGlyphRangeForCharacterRange(start, end);
-    textRanges.first = range.first;
-    textRanges.second = range.second;
     return textRanges;
 }
 
-std::pair<TextRange, TextRange> ParagraphManager::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> ParagraphManager::GetCharacterRangeForGlyphRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
     std::pair<TextRange, TextRange> textRanges;
     bool isInvalidRange = (start < 0) || (end <= 0) || paragraphs_.empty() || (start >= end);
     CHECK_NULL_RETURN(!isInvalidRange, textRanges);
-    int idx = 0;
+    if (SystemProperties::GetTextTraceEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "GetCharRangeForGlyphRange input: start=%{public}d, end=%{public}d, encoding=%{public}d, "
+            "paragraphCount=%{public}zu",
+            start, end, static_cast<int32_t>(encoding), paragraphs_.size());
+    }
     TextRange charRange { .start = 0, .end = 0 };
     TextRange glyphRange { .start = 0, .end = 0 };
     int32_t charLength = 0;
     int32_t glyphLength = 0;
     bool isStart = true;
     bool isEnd = true;
-    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+    int32_t paragraphIndex = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++paragraphIndex) {
         auto& info = *it;
-        auto paragraphLength = static_cast<int32_t>(info.end - info.start);
-        auto actualRange =
-            info.paragraph->GetCharacterRangeForGlyphRange(0, paragraphLength);
-        if (isStart && start >= glyphLength && start < glyphLength + actualRange.second.end) {
-            auto range = info.paragraph->GetCharacterRangeForGlyphRange(start - glyphLength, info.end - glyphLength);
-            charRange.start = charLength + range.first.start;
-            glyphRange.start = glyphLength + range.second.start;
+        auto meta = ComputeParagraphMetadata(info, encoding, std::next(it) == paragraphs_.end());
+        if (SystemProperties::GetTextTraceEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_TEXT,
+                "GetCharRangeForGlyphRange paragraph[%{public}d]: info.start=%{public}d, info.end=%{public}d, "
+                "actualCharEnd=%{public}d, actualGlyphEnd=%{public}d, strippedNewLineCount=%{public}d, "
+                "charLength=%{public}d, glyphLength=%{public}d",
+                paragraphIndex, info.start, info.end, meta.actualCharEnd, meta.actualGlyphEnd,
+                meta.strippedNewLineCount, charLength, glyphLength);
+        }
+        // Scenario 1: start and end in same paragraph — single combined target query
+        if (isStart && start >= glyphLength && start < glyphLength + meta.effectiveGlyphLength) {
+            if (isEnd && end > glyphLength && end <= glyphLength + meta.effectiveGlyphLength) {
+                auto localStart = std::min(start - glyphLength, meta.actualGlyphEnd);
+                auto localEnd = std::min(end - glyphLength, meta.actualGlyphEnd);
+                if (localStart >= meta.actualGlyphEnd && localEnd >= meta.actualGlyphEnd) {
+                    // Both start and end are at the paragraph boundary.
+                    charRange.start = charLength + meta.actualCharEnd;
+                    charRange.end = charLength + meta.actualCharEnd + meta.strippedNewLineCount;
+                    glyphRange.start = glyphLength + meta.actualGlyphEnd;
+                    glyphRange.end = glyphLength + meta.actualGlyphEnd + meta.strippedNewLineCount;
+                    if (SystemProperties::GetTextTraceEnabled()) {
+                        TAG_LOGI(AceLogTag::ACE_TEXT,
+                            "GetCharRangeForGlyphRange same-paragraph boundary: "
+                            "charRange=[%{public}d,%{public}d], glyphRange=[%{public}d,%{public}d]",
+                            charRange.start, charRange.end, glyphRange.start, glyphRange.end);
+                    }
+                    return std::make_pair(charRange, glyphRange);
+                }
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetCharRangeForGlyphRange same-paragraph: localStart=%{public}d, localEnd=%{public}d",
+                        localStart, localEnd);
+                }
+                auto range = info.paragraph->GetCharacterRangeForGlyphRange(
+                    localStart, localEnd, encoding);
+                charRange.start = charLength + range.first.start;
+                charRange.end = charLength + range.first.end;
+                glyphRange.start = glyphLength + range.second.start;
+                glyphRange.end = glyphLength + range.second.end;
+                // Extend result if end reaches into the stripped newline region.
+                if (end - glyphLength > meta.actualGlyphEnd) {
+                    charRange.end = charLength + meta.actualCharEnd + meta.strippedNewLineCount;
+                    glyphRange.end = glyphLength + meta.actualGlyphEnd + meta.strippedNewLineCount;
+                }
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetCharRangeForGlyphRange same-paragraph result: "
+                        "charRange=[%{public}d,%{public}d], glyphRange=[%{public}d,%{public}d]",
+                        charRange.start, charRange.end, glyphRange.start, glyphRange.end);
+                }
+                return std::make_pair(charRange, glyphRange);
+            }
+            // Scenario 2: cross-paragraph — query start → paragraph glyph end
+            auto localStart = std::min(start - glyphLength, meta.actualGlyphEnd);
+            if (localStart >= meta.actualGlyphEnd) {
+                // Glyph start is at the paragraph boundary (stripped newline region).
+                // An empty-range query would return -1; set the boundary directly.
+                charRange.start = charLength + meta.actualCharEnd;
+                glyphRange.start = glyphLength + meta.actualGlyphEnd;
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetCharRangeForGlyphRange cross-start boundary: "
+                        "charStart=%{public}d, glyphStart=%{public}d",
+                        charRange.start, glyphRange.start);
+                }
+            } else {
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetCharRangeForGlyphRange cross-start: localStart=%{public}d, localEnd=%{public}d",
+                        localStart, meta.actualGlyphEnd);
+                }
+                auto range = info.paragraph->GetCharacterRangeForGlyphRange(
+                    localStart, meta.actualGlyphEnd, encoding);
+                charRange.start = charLength + range.first.start;
+                glyphRange.start = glyphLength + range.second.start;
+            }
             isStart = false;
         }
+        // Scenario 3: cross-paragraph — query paragraph start → end
         if (!isStart && isEnd &&
-            ((end > glyphLength && end <= glyphLength + actualRange.second.end) ||
-                (idx == static_cast<int>(paragraphs_.size()) - 1))) {
-            auto range = info.paragraph->GetCharacterRangeForGlyphRange(0, end - glyphLength);
-            charRange.end = charLength + range.first.end;
-            glyphRange.end = glyphLength + range.second.end;
+            ((end > glyphLength && end <= glyphLength + meta.effectiveGlyphLength) ||
+                (meta.isLastParagraph && end > glyphLength))) {
+            auto localEnd = std::min(end - glyphLength, meta.actualGlyphEnd);
+            if (localEnd <= 0) {
+                // End is at the paragraph start boundary (empty paragraph).
+                charRange.end = charLength;
+                glyphRange.end = glyphLength;
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetCharRangeForGlyphRange cross-end boundary: "
+                        "charEnd=%{public}d, glyphEnd=%{public}d",
+                        charRange.end, glyphRange.end);
+                }
+            } else {
+                if (SystemProperties::GetTextTraceEnabled()) {
+                    TAG_LOGI(AceLogTag::ACE_TEXT,
+                        "GetCharRangeForGlyphRange cross-end: localStart=0, localEnd=%{public}d",
+                        localEnd);
+                }
+                auto range = info.paragraph->GetCharacterRangeForGlyphRange(
+                    0, localEnd, encoding);
+                charRange.end = charLength + range.first.end;
+                glyphRange.end = glyphLength + range.second.end;
+                // Extend result if end reaches into the stripped newline region.
+                if (end - glyphLength > meta.actualGlyphEnd) {
+                    charRange.end = charLength + meta.actualCharEnd + meta.strippedNewLineCount;
+                    glyphRange.end = glyphLength + meta.actualGlyphEnd + meta.strippedNewLineCount;
+                }
+            }
             isEnd = false;
         }
-        CHECK_NULL_RETURN(isStart || isEnd, std::make_pair(charRange, glyphRange));
-        CHECK_NULL_RETURN(!isStart || !isEnd || !(idx == static_cast<int>(paragraphs_.size()) - 1),
-            std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 }));
-        charLength += actualRange.first.end == -1 ? 0 : actualRange.first.end;
-        glyphLength += actualRange.second.end == -1 ? 0 : actualRange.second.end;
+        if (!isStart && !isEnd) {
+            if (SystemProperties::GetTextTraceEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_TEXT,
+                    "GetCharRangeForGlyphRange cross result: "
+                    "charRange=[%{public}d,%{public}d], glyphRange=[%{public}d,%{public}d]",
+                    charRange.start, charRange.end, glyphRange.start, glyphRange.end);
+            }
+            return std::make_pair(charRange, glyphRange);
+        }
+        if (meta.isLastParagraph) {
+            if (SystemProperties::GetTextTraceEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "GetCharRangeForGlyphRange not found, return -1");
+            }
+            return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+        }
+        charLength += meta.actualCharEnd + meta.strippedNewLineCount;
+        glyphLength += meta.actualGlyphEnd + meta.strippedNewLineCount;
     }
-    auto info = paragraphs_.back();
-    auto range = info.paragraph->GetCharacterRangeForGlyphRange(start, end);
-    textRanges.first = range.first;
-    textRanges.second = range.second;
     return textRanges;
 }
 

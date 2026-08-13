@@ -269,7 +269,11 @@ void JSLayoutManager::GetCharacterPositionAtCoordinate(const JSCallbackInfo& arg
     int32_t coordinateY = 0;
     CHECK_NULL_VOID(
         JSContainerBase::ParseJsInt32(args[0], coordinateX) && JSContainerBase::ParseJsInt32(args[1], coordinateY));
-    auto value = layoutInfoInterface->GetCharacterPositionAtCoordinate(coordinateX, coordinateY);
+    NG::TextEncoding encoding = NG::TextEncoding::UTF8;
+    if (args.Length() >= 3 && args[2]->IsNumber()) {
+        encoding = static_cast<NG::TextEncoding>(args[2]->ToNumber<int32_t>());
+    }
+    auto value = layoutInfoInterface->GetCharacterPositionAtCoordinate(coordinateX, coordinateY, encoding);
 
     auto vm = args.GetVm();
     CHECK_NULL_VOID(vm);
@@ -302,7 +306,12 @@ void JSLayoutManager::GetGlyphRangeForCharacterRange(const JSCallbackInfo& args)
 
     auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
     CHECK_NULL_VOID(layoutInfoInterface);
-    std::pair<TextRange, TextRange> textRanges = layoutInfoInterface->GetGlyphRangeForCharacterRange(start, end);
+    NG::TextEncoding encoding = NG::TextEncoding::UTF8;
+    if (args.Length() >= 2 && args[1]->IsNumber()) {
+        encoding = static_cast<NG::TextEncoding>(args[1]->ToNumber<int32_t>());
+    }
+    std::pair<TextRange, TextRange> textRanges =
+        layoutInfoInterface->GetGlyphRangeForCharacterRange(start, end, encoding);
 
     JSRef<JSArray> textRangeArray = JSRef<JSArray>::New();
     JSRef<JSObject> glyphRangeObj = JSRef<JSObject>::New();
@@ -337,7 +346,12 @@ void JSLayoutManager::GetCharacterRangeForGlyphRange(const JSCallbackInfo& args)
 
     auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
     CHECK_NULL_VOID(layoutInfoInterface);
-    std::pair<TextRange, TextRange> textRanges = layoutInfoInterface->GetCharacterRangeForGlyphRange(start, end);
+    NG::TextEncoding encoding = NG::TextEncoding::UTF8;
+    if (args.Length() >= 2 && args[1]->IsNumber()) {
+        encoding = static_cast<NG::TextEncoding>(args[1]->ToNumber<int32_t>());
+    }
+    std::pair<TextRange, TextRange> textRanges =
+        layoutInfoInterface->GetCharacterRangeForGlyphRange(start, end, encoding);
 
     JSRef<JSArray> textRangeArray = JSRef<JSArray>::New();
     JSRef<JSObject> charRangeObj = JSRef<JSObject>::New();

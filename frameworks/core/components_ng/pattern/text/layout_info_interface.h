@@ -57,19 +57,22 @@ public:
         return finalResult;
     }
 
-    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(
+        int32_t x, int32_t y, TextEncoding encoding = TextEncoding::UTF8)
     {
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
 
-    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;
     }
 
-    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;
