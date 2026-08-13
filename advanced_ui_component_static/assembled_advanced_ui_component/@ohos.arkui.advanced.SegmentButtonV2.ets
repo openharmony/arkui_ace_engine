@@ -1760,22 +1760,27 @@ function normalizeInt(value: int, min: int, max: int): int {
 
 function generateUniqueKye(groupId: string) {
   return (item: SegmentButtonV2Item, index: int): string => {
-    let key: string = groupId;
+    let key: string = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
+        key += '_';
         key += item.text;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.text as Resource);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
+        key += '_';
         key += item.icon;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.icon as Resource);
       }
     }
     if (item.symbol) {
+      key += '_';
       key += getResourceUniqueId(item.symbol as Resource);
     }
     return key;
