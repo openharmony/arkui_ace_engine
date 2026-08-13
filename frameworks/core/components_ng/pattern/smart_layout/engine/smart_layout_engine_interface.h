@@ -42,7 +42,7 @@ public:
     virtual void SyncData() = 0;
 
     virtual void CreateChildrenFromInfos(const std::vector<ChildLayoutInfo>& infos) = 0;
-    virtual const std::vector<std::shared_ptr<ISmartLayoutNode>>& GetChildren() const = 0;
+    virtual std::vector<std::shared_ptr<ISmartLayoutNode>> GetChildren() const = 0;
 
     virtual void ApplyColumnConstraints() = 0;
     virtual void ApplyRowConstraints() = 0;
