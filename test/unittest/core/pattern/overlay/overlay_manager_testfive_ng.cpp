@@ -18,6 +18,9 @@
 #define private public
 #define protected public
 
+#include <sstream>
+#include "base/log/dump_log.h"
+
 #include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -50,7 +53,12 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
+#include "core/common/text_field_manager_ng.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -105,6 +113,506 @@ void OverlayManagerTestFiveNg::TearDown()
     if (mockContainer) {
         mockContainer->isSubContainer_ = false;
     }
+}
+
+/**
+ * @tc.name: OverlayManagerOptionsAndPopupErase001
+ * @tc.desc: Test SetOverlayManagerOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, OverlayManagerOptionsAndPopupErase001, TestSize.Level1)
+{
+    // Isolated OverlayManager (nullptr rootNode) — SetOverlayManagerOptions and ErasePopupInfo only
+    // touch overlayInfo_ and popupMap_ members, not rootNode/context.
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+
+    // === SetOverlayManagerOptions: false branch (overlayInfo_ nullopt -> set, return true) ===
+    EXPECT_FALSE(overlayManager->overlayInfo_.has_value());
+    OverlayManagerInfo info;
+    info.renderRootOverlay = true;
+    info.enableBackPressedEvent = true;
+    EXPECT_TRUE(overlayManager->SetOverlayManagerOptions(info));
+    EXPECT_TRUE(overlayManager->overlayInfo_.has_value());
+    EXPECT_EQ(overlayManager->overlayInfo_->renderRootOverlay, true);
+    // === SetOverlayManagerOptions: true branch (already has value -> return false, keep old) ===
+    OverlayManagerInfo info2;
+    info2.renderRootOverlay = false;
+    info2.enableBackPressedEvent = false;
+    EXPECT_FALSE(overlayManager->SetOverlayManagerOptions(info2));
+    EXPECT_EQ(overlayManager->overlayInfo_->renderRootOverlay, true);
+    EXPECT_EQ(overlayManager->overlayInfo_->enableBackPressedEvent, true);
+
+    // === ErasePopupInfo: true branch (targetId exists -> erase) ===
+    int32_t targetId = 987651;
+    int32_t absentId = 987699;
+    PopupInfo popupInfo;
+    popupInfo.popupId = targetId;
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->popupMap_[targetId] = popupInfo;
+    EXPECT_NE(overlayManager->popupMap_.find(targetId), overlayManager->popupMap_.end());
+    overlayManager->ErasePopupInfo(targetId);
+    EXPECT_EQ(overlayManager->popupMap_.find(targetId), overlayManager->popupMap_.end());
+    // === ErasePopupInfo: false branch (already absent -> no-op) ===
+    overlayManager->ErasePopupInfo(targetId);
+    EXPECT_EQ(overlayManager->popupMap_.find(targetId), overlayManager->popupMap_.end());
+    // === ErasePopupInfo: false branch (never existed -> no-op) ===
+    overlayManager->ErasePopupInfo(absentId);
+    EXPECT_EQ(overlayManager->popupMap_.find(absentId), overlayManager->popupMap_.end());
+}
+
+/**
+ * @tc.name: DumpMapInfo001
+ * @tc.desc: Test both DumpMapInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, DumpMapInfo001, TestSize.Level1)
+{
+    // Isolated OverlayManager (nullptr rootNode) — DumpMapInfo only uses the passed map and
+    // ElementRegister::GetInstance(), not rootNode/context.
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    // DumpLog::Print(depth, content) dereferences ostream_ without null check; set a valid
+    // stream so the real (non-mocked) DumpLog implementation does not segfault.
+    DumpLog::GetInstance().SetDumpFile(std::make_unique<std::ostringstream>());
+
+    // === Overload 1: std::unordered_map<int32_t, RefPtr<FrameNode>> ===
+    // Non-empty map with null node — covers the if/else branches (hasTarget drives the branch, not node)
+    std::unordered_map<int32_t, RefPtr<FrameNode>> refMap;
+    refMap[987651] = nullptr;
+    // true branch: hasTarget=true -> calls DumpEntry(targetNode, targetId, nullptr)
+    overlayManager->DumpMapInfo(refMap, "RefPtrMap", true);
+    // false branch: hasTarget=false -> calls GetMapNodeLog(nullptr, false) -> returns ""
+    overlayManager->DumpMapInfo(refMap, "RefPtrMap", false);
+
+    // === Overload 2: std::unordered_map<int32_t, WeakPtr<FrameNode>> ===
+    // Non-empty map with empty weak ptr — Upgrade() returns nullptr
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> weakMap;
+    weakMap[987652] = WeakPtr<FrameNode>();
+    // true branch: hasTarget=true -> calls DumpEntry(targetNode, targetId, nullptr)
+    overlayManager->DumpMapInfo(weakMap, "WeakPtrMap", true);
+    // false branch: hasTarget=false -> calls GetMapNodeLog(nullptr, false) -> returns ""
+    overlayManager->DumpMapInfo(weakMap, "WeakPtrMap", false);
+
+    // Edge case: empty map -> for loop body never executes (no crash)
+    std::unordered_map<int32_t, RefPtr<FrameNode>> emptyRefMap;
+    overlayManager->DumpMapInfo(emptyRefMap, "EmptyRefPtrMap", true);
+    overlayManager->DumpMapInfo(emptyRefMap, "EmptyRefPtrMap", false);
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> emptyWeakMap;
+    overlayManager->DumpMapInfo(emptyWeakMap, "EmptyWeakPtrMap", true);
+    overlayManager->DumpMapInfo(emptyWeakMap, "EmptyWeakPtrMap", false);
+
+    // Restore DumpLog ostream_ to the default (nullptr) state
+    DumpLog::GetInstance().Reset();
+}
+
+/**
+ * @tc.name: RemoveMenuCheckMenuManager001
+ * @tc.desc: Test RemoveMenuBadgeNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemoveMenuCheckMenuManager001, TestSize.Level1)
+{
+    // Isolated OverlayManager (nullptr rootNode) — these methods only use menuManager_ and
+    // NodeModifier, not rootNode/context (when menuManager_ is already set, CheckMenuManager
+    // short-circuits to true without touching rootNode).
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto menuWrapper = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(menuWrapper, nullptr);
+
+    // === true branch: menuManager_ is null, rootNode is null -> CheckMenuManager returns false
+    //     -> !false == true -> enter if -> return early ===
+    overlayManager->menuManager_ = nullptr;
+    overlayManager->RemoveMenuBadgeNode(menuWrapper);              // returns early, no crash
+    EXPECT_FALSE(overlayManager->RemoveMenuInSubWindow(menuWrapper));  // returns false
+
+    // === false branch: menuManager_ is non-null -> CheckMenuManager returns true
+    //     -> !true == false -> skip if -> continue to modifier->removeXxx.
+    //     Using a FrameNode (not a MenuManager) as menuManager_ so DynamicCast<MenuManager>
+    //     fails inside the modifier function -> CHECK_NULL_VOID/RETURN -> safe return. ===
+    overlayManager->menuManager_ = menuWrapper; // FrameNode is not MenuManager
+    overlayManager->RemoveMenuBadgeNode(menuWrapper);              // passes if, DynamicCast fails, safe
+    EXPECT_FALSE(overlayManager->RemoveMenuInSubWindow(menuWrapper));  // passes if, DynamicCast fails, false
+}
+
+/**
+ * @tc.name: CheckPageNeedAvoidKeyboard001
+ * @tc.desc: Test CheckPageNeedAvoidKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, CheckPageNeedAvoidKeyboard001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+
+    // === false branch: last child tag == SHEET_WRAPPER_TAG -> skip if, continue to focus check ===
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto sheetWrapper = FrameNode::CreateFrameNode(
+        V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapper, nullptr);
+    rootNode->children_.push_back(sheetWrapper);
+    overlayManager->rootNodeWeak_ = rootNode;
+    // false branch: continues to DynamicCast<FrameNode> + GetFocusHub + IsCurrentFocus chain
+    overlayManager->CheckPageNeedAvoidKeyboard();
+
+    // === true branch: last child tag != SHEET_WRAPPER_TAG -> return true ===
+    auto rootNode2 = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    rootNode2->children_.push_back(buttonNode);
+    overlayManager->rootNodeWeak_ = rootNode2;
+    EXPECT_TRUE(overlayManager->CheckPageNeedAvoidKeyboard());
+
+    // === edge: root is null -> CHECK_NULL_RETURN(root, true) -> return true ===
+    overlayManager->rootNodeWeak_ = nullptr;
+    EXPECT_TRUE(overlayManager->CheckPageNeedAvoidKeyboard());
+
+    // === edge: root has no children -> CHECK_NULL_RETURN(child, true) -> return true ===
+    auto emptyRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    overlayManager->rootNodeWeak_ = emptyRoot;
+    EXPECT_TRUE(overlayManager->CheckPageNeedAvoidKeyboard());
+}
+
+/**
+ * @tc.name: OnKeyboardAvoid001
+ * @tc.desc: Test OnKeyboardAvoid
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, OnKeyboardAvoid001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    // if true: child with POPUP_ETS_TAG
+    auto popupChild = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<BubblePattern>());
+    // else if true: child with MENU_WRAPPER_ETS_TAG
+    auto menuChild = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    // else: child with other tag (BUTTON)
+    auto otherChild = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    rootNode->children_.push_back(popupChild);
+    rootNode->children_.push_back(menuChild);
+    rootNode->children_.push_back(otherChild);
+    overlayManager->rootNodeWeak_ = rootNode;
+    overlayManager->OnKeyboardAvoid(); // covers if true, else if true, else
+
+    // edge: root is null -> CHECK_NULL_VOID(root) -> return
+    overlayManager->rootNodeWeak_ = nullptr;
+    overlayManager->OnKeyboardAvoid(); // no crash
+}
+
+/**
+ * @tc.name: UpdateModalUIExtensionConfig001
+ * @tc.desc: Test UpdateModalUIExtensionConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, UpdateModalUIExtensionConfig001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+
+    overlayManager->modalList_.clear();
+    ModalUIExtensionAllowedUpdateConfig config;
+    config.prohibitedRemoveByNavigation = true;
+    config.prohibitedRemoveByRouter = false;
+
+    // true branch: no matching modal -> GetModal returns null -> return
+    overlayManager->UpdateModalUIExtensionConfig(999, config);
+
+    // false branch: add a modal node with matching targetId, then call
+    int32_t sessionId = 100;
+    int32_t targetId = -(sessionId); // GetModal uses -(sessionId) as key
+    auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ModalPresentationPattern>(targetId, ModalTransition::NONE, nullptr));
+    ASSERT_NE(modalNode, nullptr);
+    overlayManager->modalList_.push_back(modalNode);
+    overlayManager->UpdateModalUIExtensionConfig(sessionId, config); // false branch -> sets config
+    overlayManager->modalList_.clear();
+}
+
+/**
+ * @tc.name: UpdatePixelMapScale001
+ * @tc.desc: Test UpdatePixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, UpdatePixelMapScale001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(hub, nullptr);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    auto mockPixelMap = AceType::DynamicCast<MockPixelMap>(pixelMap);
+    ASSERT_NE(mockPixelMap, nullptr);
+    hub->SetPixelMap(pixelMap);
+    overlayManager->pixmapColumnNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(columnNode));
+
+    // false branch of if (height==0||width==0): non-zero dimensions
+    // small pixelMap (100x100): if B false (640>720 false), if D false, else if E false (100<240)
+    ON_CALL(*mockPixelMap, GetHeight()).WillByDefault(Return(100));
+    ON_CALL(*mockPixelMap, GetWidth()).WillByDefault(Return(100));
+    float scale1 = 1.0f;
+    overlayManager->UpdatePixelMapScale(scale1);
+
+    // large pixelMap (500x500), textDraggable=false: else if E true (500>240) -> scale set
+    ON_CALL(*mockPixelMap, GetHeight()).WillByDefault(Return(500));
+    ON_CALL(*mockPixelMap, GetWidth()).WillByDefault(Return(500));
+    float scale2 = 1.0f;
+    overlayManager->UpdatePixelMapScale(scale2);
+    EXPECT_LT(scale2, 1.0f);
+
+    // large pixelMap (500x500), textDraggable=true: if D true (500>240, 500>480) -> scale set
+    hub->SetTextDraggable(true);
+    float scale3 = 1.0f;
+    overlayManager->UpdatePixelMapScale(scale3);
+    EXPECT_LT(scale3, 1.0f);
+    hub->SetTextDraggable(false);
+}
+
+/**
+ * @tc.name: UpdatePixelMapScale002
+ * @tc.desc: Test UpdatePixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, UpdatePixelMapScale002, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(hub, nullptr);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    auto mockPixelMap = AceType::DynamicCast<MockPixelMap>(pixelMap);
+    ASSERT_NE(mockPixelMap, nullptr);
+    hub->SetPixelMap(pixelMap);
+    overlayManager->pixmapColumnNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(columnNode));
+
+    // Modify device dimensions to make if B true: max(2000,500)*0.5=1000 > min=500
+    int32_t savedWidth = SystemProperties::deviceWidth_;
+    int32_t savedHeight = SystemProperties::deviceHeight_;
+    SystemProperties::deviceWidth_ = 2000;
+    SystemProperties::deviceHeight_ = 500;
+
+    // if B true, if C true: height=300 > 500*0.5=250 -> scale set
+    ON_CALL(*mockPixelMap, GetHeight()).WillByDefault(Return(300));
+    ON_CALL(*mockPixelMap, GetWidth()).WillByDefault(Return(300));
+    float scale1 = 1.0f;
+    overlayManager->UpdatePixelMapScale(scale1);
+    EXPECT_LT(scale1, 1.0f);
+
+    // if B true, if C false: height=200 < 250 -> scale unchanged
+    ON_CALL(*mockPixelMap, GetHeight()).WillByDefault(Return(200));
+    ON_CALL(*mockPixelMap, GetWidth()).WillByDefault(Return(200));
+    float scale2 = 1.0f;
+    overlayManager->UpdatePixelMapScale(scale2);
+    EXPECT_EQ(scale2, 1.0f);
+
+    SystemProperties::deviceWidth_ = savedWidth;
+    SystemProperties::deviceHeight_ = savedHeight;
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimation001
+ * @tc.desc: Test RemovePixelMapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemovePixelMapAnimation001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    // if A false: isOnAnimation_==false && hasPixelMap_==true
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    // image child so CHECK_NULL_VOID(imageNode) passes
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(imageNode, nullptr);
+    columnNode->children_.push_back(imageNode);
+
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(hub, nullptr);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    auto mockPixelMap = AceType::DynamicCast<MockPixelMap>(pixelMap);
+    ASSERT_NE(mockPixelMap, nullptr);
+    ON_CALL(*mockPixelMap, GetHeight()).WillByDefault(Return(100));
+    ON_CALL(*mockPixelMap, GetWidth()).WillByDefault(Return(100));
+    hub->SetPixelMap(pixelMap);
+
+    overlayManager->pixmapColumnNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(columnNode));
+
+    // startDrag=false → if B false → continue past if D → reach code after CHECK_NULL_VOID(imageNode)
+    // if E true: fresh imageNode has no back shadow → create default
+    overlayManager->RemovePixelMapAnimation(false, 0, 0, false);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimation002
+ * @tc.desc: Test RemovePixelMapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemovePixelMapAnimation002, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(imageNode, nullptr);
+    // Pre-set back shadow so if E false branch is taken
+    imageNode->GetRenderContext()->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::None));
+    columnNode->children_.push_back(imageNode);
+
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(hub, nullptr);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    auto mockPixelMap = AceType::DynamicCast<MockPixelMap>(pixelMap);
+    ASSERT_NE(mockPixelMap, nullptr);
+    ON_CALL(*mockPixelMap, GetHeight()).WillByDefault(Return(100));
+    ON_CALL(*mockPixelMap, GetWidth()).WillByDefault(Return(100));
+    hub->SetPixelMap(pixelMap);
+
+    overlayManager->pixmapColumnNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(columnNode));
+
+    // if E false: shadow already has value → skip CreateShadow
+    overlayManager->RemovePixelMapAnimation(false, 0, 0, false);
+}
+
+/**
+ * @tc.name: TriggerCustomKeyboardAvoid001
+ * @tc.desc: Test TriggerCustomKeyboardAvoid
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, TriggerCustomKeyboardAvoid001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->customKeyboardMap_.clear();
+
+    // === true branch: targetId not in map -> find returns end() -> return ===
+    overlayManager->TriggerCustomKeyboardAvoid(999, 100.0f);
+
+    // === false branch: targetId in map -> find succeeds -> continue ===
+    // With non-KeyboardPattern FrameNode: GetPattern<KeyboardPattern> returns null -> CHECK_NULL_VOID returns
+    auto fakeNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(fakeNode, nullptr);
+    overlayManager->customKeyboardMap_[200] = fakeNode;
+    overlayManager->TriggerCustomKeyboardAvoid(200, 50.0f); // false branch, pattern null -> return
+
+    // With real KeyboardPattern: GetPattern succeeds -> SetKeyboardSafeHeight/SetKeyboardAreaChange called
+    auto keyboardNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<KeyboardPattern>(300));
+    ASSERT_NE(keyboardNode, nullptr);
+    overlayManager->customKeyboardMap_[300] = keyboardNode;
+    overlayManager->keyboardAvoidance_ = true;
+    overlayManager->TriggerCustomKeyboardAvoid(300, 75.0f); // false branch, full path
+
+    overlayManager->customKeyboardMap_.clear();
+}
+
+/**
+ * @tc.name: ChangeBindKeyboardWithNode001
+ * @tc.desc: Test ChangeBindKeyboardWithNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, ChangeBindKeyboardWithNode001, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    // Set up TextFieldManagerNG with continueFeature_ = true on the pipeline
+    auto pipeline = rootNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    ASSERT_NE(textFieldManager, nullptr);
+    textFieldManager->continueFeature_ = true;
+    pipeline->SetTextFieldManager(textFieldManager);
+
+    // Create a KeyboardPattern FrameNode for customKeyboardNode_
+    auto keyboardNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<KeyboardPattern>(100));
+    ASSERT_NE(keyboardNode, nullptr);
+
+    // === Compound if TRUE + nested if B TRUE (oldTargetId_ != -1) ===
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = 100;
+    overlayManager->customKeyboardMap_[100] = keyboardNode;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // 100 != 200 → all 3 true, 100 != -1 → erase
+    EXPECT_TRUE(overlayManager->isKeyBoardContinue_);
+    EXPECT_EQ(overlayManager->customKeyboardMap_.find(100), overlayManager->customKeyboardMap_.end());
+
+    // === Compound if TRUE + nested if B FALSE (oldTargetId_ == -1) ===
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = -1;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // -1 != 200 → all 3 true, -1 == -1 → skip erase
+    EXPECT_TRUE(overlayManager->isKeyBoardContinue_);
+
+    // === Compound if FALSE: customKeyboardNode null ===
+    overlayManager->customKeyboardNode_ = nullptr;
+    overlayManager->oldTargetId_ = 100;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // customKeyboardNode null → else
+    EXPECT_FALSE(overlayManager->isKeyBoardContinue_);
+
+    // === Compound if FALSE: isKeyBoardContinue false ===
+    textFieldManager->continueFeature_ = false;
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = 100;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // isKeyBoardContinue false → else
+    EXPECT_FALSE(overlayManager->isKeyBoardContinue_);
+
+    // === Compound if FALSE: oldTargetId_ == targetId ===
+    textFieldManager->continueFeature_ = true;
+    overlayManager->customKeyboardNode_ = keyboardNode;
+    overlayManager->oldTargetId_ = 200;
+    overlayManager->isKeyBoardContinue_ = false;
+    overlayManager->ChangeBindKeyboardWithNode(200); // 200 == 200 → else
+    EXPECT_FALSE(overlayManager->isKeyBoardContinue_);
 }
 
 /**
@@ -1477,4 +1985,5 @@ HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay008, TestSiz
     bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
     EXPECT_TRUE(result);
 }
+
 } // namespace OHOS::Ace::NG
