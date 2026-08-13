@@ -385,12 +385,7 @@ class JSTextClock extends JSViewAbstract {
     getUINativeModule().textclock.setFontFamily(true, value);
   }
   static textShadow(value: any): void {
-    let shadow = new ArkShadowInfoToArray();
-    if (value !== undefined && value !== null) {
-      shadow.convertShadowOptions(value);
-    }
-    getUINativeModule().textclock.setTextShadow(true, shadow.radius, shadow.type, shadow.color,
-      shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+    getUINativeModule().textclock.setTextShadow(true, value);
   }
   static fontFeature(value: any): void {
     getUINativeModule().textclock.setFontFeature(true, value);
