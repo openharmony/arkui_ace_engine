@@ -56,6 +56,7 @@ export interface IExtendableComponent {
     getUIContext(): UIContext;
     getUniqueId(): int32;
     getPeerNode(): PeerNode | undefined;
+    __getMemOpt__Internal(): int32;
     queryNavigationInfo(): uiObserver.NavigationInfo;
     queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
@@ -274,6 +275,9 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
             const child = weak.deref();
             child?.__aboutToRecycle_Internal();
         });
+        if (this.memopt_ === 1) {
+            this.__getParentNode__Internal()?.setClearPool(true);
+        }
     }
 
     __addMeToParent__Internal(): void {

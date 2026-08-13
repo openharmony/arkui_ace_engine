@@ -1247,17 +1247,22 @@ namespace OHOS::Ace::NG {
 
     void LazyForEachBuilder::PaintDebugBoundaryTreeAll(bool flag)
     {
+        std::vector<RefPtr<UINode>> nodes(cachedItems_.size() + expiringItem_.size());
+        size_t nodeCount = 0;
         for (const auto& node : cachedItems_) {
             if (node.second.second == nullptr) {
                 continue;
             }
-            node.second.second->PaintDebugBoundaryTreeAll(flag);
+            nodes[nodeCount++] = node.second.second;
         }
         for (const auto& node : expiringItem_) {
             if (node.second.second == nullptr) {
                 continue;
             }
-            node.second.second->PaintDebugBoundaryTreeAll(flag);
+            nodes[nodeCount++] = node.second.second;
+        }
+        for (size_t i = 0; i < nodeCount; i++) {
+            nodes[i]->PaintDebugBoundaryTreeAll(flag);
         }
     }
     void LazyForEachBuilder::SetDestroying(bool isDestroying, bool cleanStatus)
