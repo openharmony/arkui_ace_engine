@@ -1025,7 +1025,7 @@ void ContentChangeManager::ReportImageEvent()
         imageJson->Put("$rect", rect.ToBounds().c_str());
         imageJson->Put("sourceType", sourceType.c_str());
         imagesArray->PutRef(std::move(imageJson));
-        
+
         if (!sourceTypes.empty()) {
             sourceTypes += ",";
         }
@@ -1035,7 +1035,7 @@ void ContentChangeManager::ReportImageEvent()
     json->PutRef("images", std::move(imagesArray));
     UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::IMAGE_LOADED, json->ToString());
     lastComponentReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
-    
+
 #ifndef IS_RELEASE_VERSION
     int32_t imageCount = static_cast<int32_t>(imageChangeList.size());
     dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::IMAGE_LOADED, imageCount, sourceTypes));

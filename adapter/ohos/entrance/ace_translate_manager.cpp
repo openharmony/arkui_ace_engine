@@ -331,6 +331,7 @@ void UiTranslateManagerImpl::TraverseAddArkWebImages(const std::vector<int32_t>&
     int32_t webComponentId, const std::function<void(int32_t, const std::map<int32_t,
     std::shared_ptr<Media::PixelMap>>&, MultiImageQueryErrorCode)>& webQueryCallback)
 {
+#ifdef WEB_SUPPORTED
     auto iter = listenerMap_.find(webComponentId);
     auto webPattern = iter == listenerMap_.end() ? nullptr : GetWebPattern(iter->second.translateNode);
     if (webPattern == nullptr) {
@@ -342,6 +343,9 @@ void UiTranslateManagerImpl::TraverseAddArkWebImages(const std::vector<int32_t>&
         return;
     }
     webPattern->GetImagesByIDs(webImageIds, windowId, webQueryCallback);
+#else
+    LOGW("TraverseAddArkWebImages not supported on this platform.");
+#endif
 }
 
 void UiTranslateManagerImpl::MarkCurrentWebImageQueryDone(int32_t currentWebId)
@@ -571,7 +575,9 @@ void UiTranslateManagerImpl::SendArkWebImagesById()
 void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
 {
     CHECK_NULL_VOID(pixelMap);
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> value = { nodeId, pixelMap->GetPixelMapSharedPtr() };
+    auto pixelMapSharedPtr = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(pixelMapSharedPtr);
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> value = { nodeId, pixelMapSharedPtr };
     pixelMap_.push_back(value);
 }
 
