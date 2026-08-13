@@ -4212,6 +4212,7 @@ void SheetPresentationPattern::OnAppear()
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onAppear",
         ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("bindSheet.SheetOptions.OnAppear", 1);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SendMessagesAfterFirstTransitionIn(true);
     }
@@ -4271,6 +4272,7 @@ void SheetPresentationPattern::OnDisappear()
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onDisappear",
         ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("bindSheet.SheetOptions.OnDisappear", 1);
     isDismissProcess_ = false;
 #ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
