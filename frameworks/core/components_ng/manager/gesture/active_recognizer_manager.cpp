@@ -149,4 +149,30 @@ void ActiveRecognizerManager::DumpRecognizerStates() const
             static_cast<int32_t>(recognizer->GetCurrentCallbackState()));
     }
 }
+
+void ActiveRecognizerManager::CleanFinishedRecognizersWithStaleFingers(
+    int32_t currentFingerId, const std::unordered_map<int32_t, int32_t>& downFingerIds)
+{
+    auto snapshot = activeRecognizers_;
+    for (auto& [weakKey, info] : snapshot) {
+        auto recognizer = weakKey.Upgrade();
+        if (!recognizer) {
+            continue;
+        }
+        auto state = recognizer->GetRefereeState();
+        if (state != RefereeState::SUCCEED && state != RefereeState::FAIL) {
+            continue;
+        }
+        auto touchPoints = recognizer->GetTouchPoints();
+        for (const auto& [fingerId, touchEvent] : touchPoints) {
+            if (downFingerIds.find(fingerId) != downFingerIds.end()) {
+                continue;
+            }
+            TAG_LOGD(AceLogTag::ACE_GESTURE,
+                "CleanFinishedRecognizers: finishReferee finger %{public}d for %{public}s recognizer",
+                fingerId, info.recognizerType.c_str());
+            recognizer->FinishReferee(fingerId);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
