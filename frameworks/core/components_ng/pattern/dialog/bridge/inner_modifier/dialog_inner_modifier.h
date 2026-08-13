@@ -27,12 +27,15 @@ struct ButtonInfo;
 class GestureEvent;
 class PickerTime;
 class AceType;
+enum class PromptActionCommonState;
+class DimensionOffset;
 template<typename T>
 class RefPtr;
 template<typename T>
 class WeakPtr;
 namespace NG {
 class FrameNode;
+class Pattern;
 class UINode;
 class Pattern;
 class OverlayManager;
@@ -54,6 +57,20 @@ struct ArkUIDialogInnerModifier {
     RefPtr<FrameNode> (*createDialogNode)(const DialogProperties& param, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> (*createDialogNodeWithThemeNode)(
         const DialogProperties& param, const RefPtr<UINode>& customNode, const RefPtr<UINode>& themeNode);
+    // DialogPattern
+    void (*setIsPickerDialog)(const RefPtr<FrameNode>& dialogNode, bool value);
+    void (*setState)(const RefPtr<FrameNode>& dialogNode);
+    PromptActionCommonState (*getState)(const RefPtr<FrameNode>& dialogNode, PromptActionCommonState defaultState);
+    // NavigationManager
+    bool (*isCustomDialogValid)(const RefPtr<UINode>& node);
+    // CalendarPickerPattern
+    void (*onThemeScopeUpdate)(const WeakPtr<FrameNode>& weakDialogNode, int32_t themeScopeId);
+    // CalendarDialogPattern
+    void (*updateDialogOffset)(const RefPtr<FrameNode>& dialogNode, const DimensionOffset& value);
+    // SubwindowManager
+    bool (*getSubwindowShouldUseNodeId)(const RefPtr<FrameNode>& dialogNode);
+    // WebPattern
+    bool (*isDialogNode)(const RefPtr<FrameNode>& frameNode);
     // OverlayManager
     RefPtr<AceType> (*getDialogInnerManager)(const RefPtr<UINode>& rootNode);
     RefPtr<FrameNode> (*showDialog)(const RefPtr<AceType>& dialogInnerManager,
@@ -110,6 +127,9 @@ struct ArkUIDialogInnerModifier {
     bool (*removeDialogWithContent)(const RefPtr<AceType>& dialogInnerManager,
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& overlay, const DialogProperties& props,
         bool isBackPressed, bool isPageRouter, int32_t subWindowId);
+    bool (*removeDialogWithPressBack)(const RefPtr<AceType>& dialogInnerManager,
+        const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& overlay, const RefPtr<Pattern>& pattern,
+        bool isBackPressed, bool isPageRouter, int32_t subWindowId);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> (*getDialogMap)(const RefPtr<AceType>& dialogInnerManager);
     RefPtr<FrameNode> (*getDialogNodeWithExistContent)(
@@ -128,6 +148,8 @@ struct ArkUIDialogInnerModifier {
     void (*fireNavigationLifecycle)(const RefPtr<AceType>& dialogInnerManager, const RefPtr<UINode>& uiNode,
         int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     void (*setBackPressEvent)(const RefPtr<AceType>& dialogInnerManager, std::function<bool()> event);
+    bool (*getDialogFocusable)(const RefPtr<FrameNode>& dialogNode);
+    bool (*isDialogPattern)(const RefPtr<Pattern>& pattern);
 };
 namespace InnerModifier {
 const ArkUIDialogInnerModifier* GetDialogInnerModifier();

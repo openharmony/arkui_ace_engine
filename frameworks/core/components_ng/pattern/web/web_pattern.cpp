@@ -58,6 +58,7 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/common/properties/placement.h"
 #include "core/common/ime/input_method_manager.h"
 #ifndef CROSS_PLATFORM
@@ -86,7 +87,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -112,6 +112,7 @@
 #include "core/event/touch_event.h"
 #include "core/event/event_info_convertor.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "common_event_manager.h"
@@ -8351,12 +8352,15 @@ bool WebPattern::IsDialogNested()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    CHECK_EQUAL_RETURN(DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Dialog"), false, false);
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, false);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
         RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
         if (!frameNode) {
             continue;
         }
-        if (frameNode->GetPattern<DialogPattern>()) {
+        if (dialogInnerModifier->isDialogNode(frameNode)) {
             return true;
         }
     }

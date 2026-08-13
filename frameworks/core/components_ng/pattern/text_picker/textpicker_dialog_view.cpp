@@ -29,8 +29,6 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -140,9 +138,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
     auto dialogNode = dialogInnerModifier->createDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDialog(true);
+    dialogInnerModifier->setIsPickerDialog(dialogNode, true);
     auto closeDialogEvent = CloseDialogEvent(textPickerPattern, dialogNode);
     auto closeCallback = [func = std::move(closeDialogEvent)](const GestureEvent& /* info */) {
         func();
@@ -169,9 +165,9 @@ std::function<void()> TextPickerDialogView::CloseDialogEvent(const RefPtr<TextPi
         weakPattern = WeakPtr<TextPickerPattern>(textPickerPattern)]() {
         auto dialogNode = weak.Upgrade();
         CHECK_NULL_VOID(dialogNode);
-        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
-        CHECK_NULL_VOID(dialogPattern);
-        dialogPattern->SetIsPickerDialog(false);
+        const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+        CHECK_NULL_VOID(dialogInnerModifier);
+        dialogInnerModifier->setIsPickerDialog(dialogNode, false);
         auto textPickerPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(textPickerPattern);
         if (textPickerPattern->GetIsShowInDialog()) {
@@ -310,10 +306,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
     auto dialogNode = dialogInnerModifier->createDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDialog(true);
-
+    dialogInnerModifier->setIsPickerDialog(dialogNode, true);
     auto closeDialogEvent = CloseDialogEvent(textPickerPattern, dialogNode);
     auto closeCallBack = [func = std::move(closeDialogEvent)](const GestureEvent& /* info */) {
         func();

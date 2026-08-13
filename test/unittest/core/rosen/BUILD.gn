@@ -172,6 +172,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_font_collection.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_paragraph.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_texteffect.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_dialog_modifier.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/text/text_layout_adapter/mock_text_layout_adapter.cpp",

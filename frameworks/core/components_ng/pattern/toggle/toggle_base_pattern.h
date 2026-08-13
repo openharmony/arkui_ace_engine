@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_FORCE_EXPORT ToggleBasePattern : public Pattern {
+class ToggleBasePattern : public Pattern {
     DECLARE_ACE_TYPE(ToggleBasePattern, Pattern);
 
 public:

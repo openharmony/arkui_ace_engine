@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 class FrameNode;
 class UINode;
 
-class ACE_FORCE_EXPORT DialogView {
+class DialogView {
 public:
     static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr,
         const RefPtr<UINode>& themeNode = nullptr);

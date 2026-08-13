@@ -18,8 +18,8 @@
 #include "base/error/error_code.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/select/select_theme.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -727,17 +727,15 @@ void SubwindowManager::SetHotAreas(
     }
 }
 
-RefPtr<Subwindow> SubwindowManager::GetSubwindowByNodeId(int32_t instanceId,  SubwindowType type, int32_t nodeId)
+RefPtr<Subwindow> SubwindowManager::GetSubwindowByNodeId(int32_t instanceId, SubwindowType type, int32_t nodeId)
 {
     auto subwindow = GetSubwindowByType(instanceId, type);
     auto dialogNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeId);
     CHECK_NULL_RETURN(dialogNode, subwindow);
     ACE_UINODE_TRACE(dialogNode);
-    auto dialogPattern = dialogNode->GetPattern<NG::DialogPattern>();
-    CHECK_NULL_RETURN(dialogPattern, subwindow);
-    auto dialogProps = AceType::DynamicCast<NG::DialogLayoutProperty>(dialogNode->GetLayoutProperty());
-    CHECK_NULL_RETURN(dialogProps, subwindow);
-    if (dialogPattern->IsUIExtensionSubWindow() && dialogProps->GetIsModal().value_or(true)) {
+    const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, subwindow);
+    if (dialogInnerModifier->getSubwindowShouldUseNodeId(dialogNode)) {
         return GetSubwindowByType(instanceId, type, nodeId);
     }
     return subwindow;
@@ -909,12 +907,9 @@ void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
     if (pipeline) {
         containerId = pipeline->GetInstanceId();
     }
-    auto dialogPattern = dialogNode->GetPattern<NG::DialogPattern>();
-    CHECK_NULL_VOID(dialogPattern);
-    auto dialogProps = AceType::DynamicCast<NG::DialogLayoutProperty>(dialogNode->GetLayoutProperty());
-    CHECK_NULL_VOID(dialogProps);
-    auto nodeId =
-        dialogPattern->IsUIExtensionSubWindow() && dialogProps->GetIsModal().value_or(true) ? dialogNode->GetId() : -1;
+    const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_VOID(dialogInnerModifier);
+    auto nodeId = dialogInnerModifier->getSubwindowShouldUseNodeId(dialogNode) ? dialogNode->GetId() : -1;
     auto subwindow = GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG, nodeId);
     if (!subwindow) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get subwindow failed.");

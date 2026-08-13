@@ -19,10 +19,10 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/recoverable/recoverable_manager.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
@@ -727,20 +727,9 @@ bool NavigationManager::IsOverlayValid(const RefPtr<UINode>& node)
 
 bool NavigationManager::IsCustomDialogValid(const RefPtr<UINode>& node)
 {
-    auto frameNode = AceType::DynamicCast<FrameNode>(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    // if lower layer is dialog, don't need to trigger lifecycle
-    auto pattern = frameNode->GetPattern();
-    if (!InstanceOf<DialogPattern>(pattern)) {
-        return false;
-    }
-    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
-    if (!dialogPattern) {
-        return false;
-    }
-    auto dialogProperty = dialogPattern->GetDialogProperties();
-    // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
-    return dialogProperty.isUserCreatedDialog;
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, false);
+    return dialogInnerModifier->isCustomDialogValid(node);
 }
 
 void NavigationManager::AddBeforeOrientationChangeTask(const std::function<void()>&& task)

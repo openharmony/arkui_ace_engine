@@ -19,6 +19,12 @@
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Napi {
+void PromptController::Close() {}
+
+PromptActionCommonState PromptController::GetState()
+{
+    return PromptActionCommonState::UNINITIALIZED;
+}
 
 void PromptDialogController::Close()
 {
@@ -47,9 +53,9 @@ PromptActionCommonState PromptDialogController::GetState()
     auto dialogNode = node_.Upgrade();
     CHECK_NULL_RETURN(dialogNode, state);
     ACE_UINODE_TRACE(dialogNode);
-    auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
-    CHECK_NULL_RETURN(pattern, state);
-    state = pattern->GetState();
+    const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, state);
+    state = dialogInnerModifier->getState(dialogNode, state);
     return state;
 }
 

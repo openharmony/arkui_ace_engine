@@ -61,7 +61,6 @@
 #endif
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/interfaces/native/node/bubble_modifier.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"

@@ -27,12 +27,9 @@
 namespace OHOS::Ace {
 struct DialogProperties;
 enum class PromptActionCommonState;
-enum class DialogOperation {
-    DIALOG_OPEN = 0,
-    DIALOG_CLOSE,
-};
+enum class DialogOperation;
 
-class ACE_FORCE_EXPORT CustomDialogControllerModel {
+class CustomDialogControllerModel {
 public:
     static CustomDialogControllerModel* GetInstance();
     virtual ~CustomDialogControllerModel() = default;

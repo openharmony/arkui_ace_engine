@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -1663,5 +1664,29 @@ bool DialogInnerManager::RemoveDialogWithContent(const RefPtr<OverlayManager>& o
         SetBackPressEvent(nullptr);
     }
     return true;
+}
+
+bool DialogInnerManager::RemoveDialogWithPressBack(const RefPtr<OverlayManager>& overlayManager,
+    const RefPtr<FrameNode>& overlay, const RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter,
+    int32_t subWindowId)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
+        return false;
+    }
+    auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+    CHECK_NULL_RETURN(dialogPattern, false);
+    int32_t reason = static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK);
+    if (dialogPattern->CallDismissInNDK(reason)) {
+        return true;
+    } else if (dialogPattern->ShouldDismiss()) {
+        overlayManager->SetDismissDialogId(overlay->GetId());
+        DialogManager::GetInstance().SetDismissDialogInfo(overlay->GetId(), overlay->GetTag());
+        auto currentId = Container::CurrentId();
+        dialogPattern->CallOnWillDismiss(reason, currentId);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss, currentId: %{public}d", currentId);
+        return true;
+    }
+    return RemoveDialogWithContent(
+        overlayManager, overlay, dialogPattern->GetDialogProperties(), isBackPressed, isPageRouter, subWindowId);
 }
 } // namespace OHOS::Ace::NG
