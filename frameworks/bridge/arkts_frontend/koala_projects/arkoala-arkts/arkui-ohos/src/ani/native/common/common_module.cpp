@@ -48,6 +48,7 @@ const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
 const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
 const int32_t FLAG_DRAW_OVERLAY = 1 << 4;
+const int32_t NUM_NEG_1 = -1;
 constexpr char ARRAY_GET[] = "i:Y";
 }
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
@@ -2030,5 +2031,16 @@ void DumpLogPrint(ani_env* env, [[maybe_unused]] ani_object obj, ani_int depth, 
             common->dumpLogPrint(depth, contentStr.c_str());
         }
     }
+}
+ani_int BuilderNodeGetParentViewId(ani_env* env, [[maybe_unused]] ani_object obj, ani_long ptr)
+{
+    CHECK_NULL_RETURN(env, NUM_NEG_1);
+    CHECK_NULL_RETURN(ptr, NUM_NEG_1);
+    auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, NUM_NEG_1);
+    auto* common = modifier->getCommonAniModifier();
+    CHECK_NULL_RETURN(common, NUM_NEG_1);
+    CHECK_NULL_RETURN(common->getBuilderNodeParentViewId, NUM_NEG_1);
+    return common->getBuilderNodeParentViewId(ptr);
 }
 } // namespace OHOS::Ace::Ani

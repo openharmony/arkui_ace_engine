@@ -44,6 +44,7 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
     //@ts-ignore
     constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T) {
         let builderNode = new BuilderNode<T>(uiContext);
+        builderNode.__disableTreeUpdateInternal();
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params);
         this.instanceId_ = (uiContext as UIContext).instanceId_;
@@ -51,6 +52,7 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
 
     constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options: BuildOptions) {
         let builderNode = new BuilderNode<T>(uiContext);
+        builderNode.__disableTreeUpdateInternal();
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params, options);
         this.instanceId_ = (uiContext as UIContext).instanceId_;
@@ -58,6 +60,7 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
 
     constructor(uiContext: UIContext, builder: WrappedBuilder<voidBuilderFunc>) {
         let builderNode = new BuilderNode<T>(uiContext);
+        builderNode.__disableTreeUpdateInternal();
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder);
         this.instanceId_ = (uiContext as UIContext).instanceId_;
@@ -172,6 +175,7 @@ export class ReactiveComponentContent implements ComponentContentBase {
     //@ts-ignore
     constructor(uiContext: UIContext, builder: CustomBuilder, options?: BuildOptions) {
         let builderNode = new ReactiveBuilderNode(uiContext);
+        builderNode.__disableTreeUpdateInternal();
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, options);
         this.instanceId_ = (uiContext as UIContext).instanceId_;

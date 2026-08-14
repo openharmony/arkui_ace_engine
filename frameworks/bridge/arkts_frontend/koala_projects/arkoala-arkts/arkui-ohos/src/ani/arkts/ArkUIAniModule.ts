@@ -562,4 +562,5 @@ export class ArkUIAniModule {
     native static _GestureEventUIObserver_RemoveTapListenerCallback(instanceId: KInt, tag: string, callback?: GestureEventListenerCallback): void
     native static _GestureEventUIObserver_AddGlobalGestureListener(resourceId: KInt, type: KInt, callback: GestureListenerCallback): void
     native static _GestureEventUIObserver_RemoveGlobalGestureListener(type: KInt, callback?: GestureListenerCallback): void
+    native static __BuilderNode_GetParentViewId(ptr: KPointer): KInt;
 }
