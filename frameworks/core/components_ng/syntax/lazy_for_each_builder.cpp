@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "base/log/dump_log.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"

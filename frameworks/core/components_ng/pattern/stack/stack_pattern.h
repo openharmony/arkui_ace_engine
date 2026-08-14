@@ -19,10 +19,9 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 
 namespace OHOS::Ace::NG {
-
-class VerticalOverflowHandler;
 
 class ACE_FORCE_EXPORT StackPattern : public Pattern {
     DECLARE_ACE_TYPE(StackPattern, Pattern);

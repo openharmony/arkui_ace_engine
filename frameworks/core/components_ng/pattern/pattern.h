@@ -47,11 +47,14 @@ namespace OHOS::Ace {
 struct ImmersiveOptions;
 struct UiMaterialParam;
 class NotifyDragEvent;
+class GestureEvent;
+using GestureEventFunc = std::function<void(GestureEvent& info)>;
 }
 
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
+class VerticalOverflowHandler;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -711,10 +714,7 @@ public:
     {
         return false;
     }
-    virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
-    {
-        return nullptr;
-    }
+    virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host);
     virtual void OnHoverWithHightLight(bool isHover) {}
     virtual void OnPaintFocusState(bool isFocus) {}
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
