@@ -2186,6 +2186,31 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReduceCacheCount003, TestSiz
 }
 
 /**
+ * @tc.name: LazyForEachBuilderReduceCacheCount004
+ * @tc.desc: Test ReduceCacheCount on a low-memory device (deviceMemory <= 6G -> maxCacheCount = 0)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReduceCacheCount004, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    int32_t originDdrSize = SystemProperties::bootVendorDdrSize_;
+    lazyForEachBuilder->reduceCache_ = true;
+    SystemProperties::bootVendorDdrSize_ = 6; // deviceMemory <= 6G -> maxCacheCount = 0
+
+    /**
+     * @tc.steps: Call ReduceCacheCount with various counts under low memory
+     * @tc.expected: All counts are capped to 0
+     */
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(4), 0);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(2), 0);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(0), 0);
+
+    SystemProperties::bootVendorDdrSize_ = originDdrSize; // restore mock default
+}
+
+/**
  * @tc.name: RemovingExpiringItemEmptyTest
  * @tc.desc: Test RemovingExpiringItem with empty removingNodeList_
  * @tc.type: FUNC
