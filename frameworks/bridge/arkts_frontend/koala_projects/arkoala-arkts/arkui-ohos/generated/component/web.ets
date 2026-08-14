@@ -1195,6 +1195,9 @@ export class WebResourceError implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceError_getErrorCode(this.peer!.ptr)
         return retval
     }
+    public getCustomErrorCode(): int32 {
+        return this.getCustomErrorCode_serialize()
+    }
     private getCustomErrorCode_serialize(): int32 {
         const retval = ArkUIGeneratedNativeModule._WebResourceError_getCustomErrorCode(this.peer!.ptr)
         return retval

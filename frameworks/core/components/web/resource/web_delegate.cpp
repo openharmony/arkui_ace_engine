@@ -6338,12 +6338,14 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
             webEventHub->FireOnErrorReceiveEvent(std::make_shared<ReceivedErrorEvent>(
                     AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
                         request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
-                    AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
+                    AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode(), error->CustomErrorCode()),
+                    error->CustomErrorCode()));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
 
     if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED ||
-        error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_NAME_NOT_RESOLVED) {
+        error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_NAME_NOT_RESOLVED ||
+        error->CustomErrorCode() != 0) {
         AccessibilityReleasePageEvent();
     }
 }
@@ -6590,7 +6592,8 @@ std::string WebDelegate::OnOverrideErrorPage(
         webResourceRequest->Method(), webResourceRequest->Url(),
         webResourceRequest->FromGesture(), webResourceRequest->IsAboutMainFrame(),
         webResourceRequest->IsRequestRedirect()),
-        AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode()));
+        AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode(), error->CustomErrorCode()),
+        error->CustomErrorCode());
     auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
     jsTaskExecutor.PostSyncTask(
         [weak = WeakClaim(this), info, &result]() {

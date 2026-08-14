@@ -1159,6 +1159,12 @@ int32_t FfiWebGetErrorCode(void* error)
     return errPtr->GetCode();
 }
 
+int32_t FfiWebGetCustomErrorCode(void* error)
+{
+    auto errPtr = *reinterpret_cast<RefPtr<WebError>*>(error);
+    return errPtr->GetCustomCode();
+}
+
 void FfiWebFreeResourceError(void* error)
 {
     RefPtr<WebError>* errPtr = reinterpret_cast<RefPtr<WebError>*>(error);

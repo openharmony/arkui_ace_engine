@@ -185,6 +185,7 @@ public:
         JSClass<JSWebResourceError>::Declare("WebResourceError");
         JSClass<JSWebResourceError>::StaticMethod("getErrorCode", &JSWeb::Mock);
         JSClass<JSWebResourceError>::StaticMethod("getErrorInfo", &JSWeb::Mock);
+        JSClass<JSWebResourceError>::StaticMethod("getCustomErrorCode", &JSWeb::Mock);
         JSClass<JSWebResourceError>::Bind(globalObj);
     }
 };

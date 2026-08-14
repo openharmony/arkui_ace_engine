@@ -1253,17 +1253,20 @@ public:
         JSClass<JSWebResourceError>::Declare("WebResourceError");
         JSClass<JSWebResourceError>::CustomMethod("getErrorCode", &JSWebResourceError::GetErrorCode);
         JSClass<JSWebResourceError>::CustomMethod("getErrorInfo", &JSWebResourceError::GetErrorInfo);
+        JSClass<JSWebResourceError>::CustomMethod("getCustomErrorCode", &JSWebResourceError::GetCustomErrorCode);
         JSClass<JSWebResourceError>::Bind(globalObj, &JSWebResourceError::Constructor, &JSWebResourceError::Destructor);
     }
 
     void SetEvent(const ReceivedErrorEvent& eventInfo)
     {
         error_ = eventInfo.GetError();
+        customCode_ = eventInfo.GetCustomCode();
     }
 
     void SetOverrideErrorPageEvent(const OnOverrideErrorPageEvent& eventInfo)
     {
         error_ = eventInfo.GetError();
+        customCode_ = eventInfo.GetCustomCode();
     }
 
     void GetErrorCode(const JSCallbackInfo& args)
@@ -1277,6 +1280,13 @@ public:
     {
         auto info = JSVal(ToJSValue(error_->GetInfo()));
         auto descriptionRef = JSRef<JSVal>::Make(info);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetCustomErrorCode(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(customCode_));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
         args.SetReturnValue(descriptionRef);
     }
 
@@ -1296,6 +1306,7 @@ private:
     }
 
     RefPtr<WebError> error_;
+    int32_t customCode_ = 0;
 };
 
 class JSWebResourceResponse : public WebTransferBase<RefPtr<WebResponse>> {

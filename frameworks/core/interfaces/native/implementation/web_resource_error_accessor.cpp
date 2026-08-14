@@ -46,6 +46,12 @@ Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
     return Converter::ArkValue<Ark_Int32>(peer->handler->GetCode());
 }
+Ark_Int32 GetCustomErrorCodeImpl(Ark_WebResourceError peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
+    CHECK_NULL_RETURN(peer && peer->handler, errValue);
+    return Converter::ArkValue<Ark_Int32>(peer->handler->GetCustomCode());
+}
 } // WebResourceErrorAccessor
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()
 {
@@ -55,6 +61,7 @@ const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()
         WebResourceErrorAccessor::GetFinalizerImpl,
         WebResourceErrorAccessor::GetErrorInfoImpl,
         WebResourceErrorAccessor::GetErrorCodeImpl,
+        WebResourceErrorAccessor::GetCustomErrorCodeImpl,
     };
     return &WebResourceErrorAccessorImpl;
 }
