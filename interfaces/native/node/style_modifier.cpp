@@ -4825,7 +4825,7 @@ int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto margin = item->value[0].f32;
     auto strokeWidth = item->value[1].f32;
-    auto hasValue = NUM_7;
+    uint32_t hasValue = NUM_7;
     if (margin >= FLT_MAX) {
         hasValue &= ~4;
     }
