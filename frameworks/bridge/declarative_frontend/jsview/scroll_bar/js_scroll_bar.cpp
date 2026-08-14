@@ -25,26 +25,20 @@
 #define AXIS_SIZE 3
 
 namespace OHOS::Ace {
-std::unique_ptr<ScrollBarModel> ScrollBarModel::instance_ = nullptr;
-std::mutex ScrollBarModel::mutex_;
-
 ScrollBarModel* ScrollBarModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ScrollBarModelNG());
+    static NG::ScrollBarModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ScrollBarModelNG());
-            } else {
-                instance_.reset(new Framework::ScrollBarModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ScrollBarModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ScrollBarModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 }
 
