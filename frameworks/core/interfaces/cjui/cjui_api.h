@@ -692,6 +692,7 @@ struct CJUITextModifier {
     void (*setTextLineSpacing)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines, void* resObj);
     ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getIsOnlyBetweenLines)(ArkUINodeHandle node);
     void (*resetTextLineSpacing)(ArkUINodeHandle node);
     void (*setTextSelectedBackgroundColor)(
         ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr);

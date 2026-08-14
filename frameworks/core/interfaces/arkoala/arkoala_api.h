@@ -4132,6 +4132,7 @@ struct ArkUITextModifier {
     void (*setTextLineSpacing)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines, void* resObj);
     ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getIsOnlyBetweenLines)(ArkUINodeHandle node);
     void (*resetTextLineSpacing)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextFontFeature)(ArkUINodeHandle node);
     ArkUI_Int32 (*getEnableDataDetector)(ArkUINodeHandle node);

@@ -13913,9 +13913,15 @@ int32_t SetLineSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0 || LessNotEqual(item->value[0].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    bool isOnlyBetweenLines = false;
+    if (item->object) {
+        auto* options = reinterpret_cast<OH_ArkUI_NativeModule_LineSpacingOptions*>(item->object);
+        CHECK_NULL_RETURN(options, ERROR_CODE_PARAM_INVALID);
+        isOnlyBetweenLines = options->onlyBetweenLines;
+    }
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextLineSpacing(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), false, nullptr);
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), isOnlyBetweenLines, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -14346,6 +14352,10 @@ const ArkUI_AttributeItem* GetLineSpacing(ArkUI_NodeHandle node)
         g_numberValues[NUM_0].f32 =
             fullImpl->getNodeModifiers()->getTextModifier()->getTextLineSpacing(node->uiNodeHandle);
         g_attributeItem.size = REQUIRED_ONE_PARAM;
+        thread_local static OH_ArkUI_NativeModule_LineSpacingOptions options = {};
+        options.onlyBetweenLines = 
+            fullImpl->getNodeModifiers()->getTextModifier()->getIsOnlyBetweenLines(node->uiNodeHandle);
+        g_attributeItem.object = &options;
     }
     return &g_attributeItem;
 }

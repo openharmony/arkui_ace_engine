@@ -217,6 +217,7 @@ public:
     static float GetTextMaximumLineHeight(FrameNode* frameNode);
     static float GetTextMinimumLineHeight(FrameNode* frameNode);
     static float GetLineSpacing(FrameNode* frameNode);
+    static bool GetIsOnlyBetweenLines(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
     static Color GetTextDecorationColor(FrameNode* frameNode);
     static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);

@@ -6983,5 +6983,21 @@
     {
         "first_introduced": "26.0.0",
         "name": "OH_ArkUI_NodeUtils_SetUiDvsyncSwitch"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_LineSpacingOptions_Create"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_LineSpacingOptions_Destroy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_LineSpacingOptions_SetOnlyBetweenLines"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_LineSpacingOptions_GetOnlyBetweenLines"
     }
 ]
