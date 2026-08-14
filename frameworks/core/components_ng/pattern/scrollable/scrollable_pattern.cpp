@@ -3631,7 +3631,7 @@ void ScrollablePattern::ResetAccessibilityScrollSourceIfIdle()
 {
     auto scrollable = GetScrollable();
     if (!IsScrolling() && (!scrollable || scrollable->IsAllAnimationStopped())
-        && !AnimateRunning() && ScrollBarIdle() && InnerScrollBarIdle()) {
+        && ScrollBarIdle() && InnerScrollBarIdle()) {
         SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     }
 }
