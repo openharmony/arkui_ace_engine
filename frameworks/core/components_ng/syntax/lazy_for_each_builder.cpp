@@ -24,6 +24,8 @@
 
 namespace {
 constexpr int32_t MAX_RANDOM_KEY = 10000;
+constexpr int32_t LOW_MEMORY_DDR_THRESHOLD_GB = 6;
+constexpr int32_t MAX_CACHED_COUNT_FOR_MEMORY_OPTIMIZATION = 2;
 }
 
 namespace OHOS::Ace::NG {
@@ -1478,7 +1480,9 @@ namespace OHOS::Ace::NG {
     int32_t LazyForEachBuilder::ReduceCacheCount(int32_t count)
     {
         CHECK_EQUAL_RETURN(!reduceCache_ || startShowCached_ > 0 || endShowCached_ > 0, true, count);
-        const int32_t maxCacheCount = 2;
+        // maxCacheCount defaults to 2; 0 when deviceMemory <= 6G
+        int32_t maxCacheCount = SystemProperties::GetBootVendorDdrSize() <= LOW_MEMORY_DDR_THRESHOLD_GB ?
+            0 : MAX_CACHED_COUNT_FOR_MEMORY_OPTIMIZATION;
         return count < maxCacheCount ? count : maxCacheCount;
     }
 
