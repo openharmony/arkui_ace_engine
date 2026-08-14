@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
