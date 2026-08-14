@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -245,6 +246,17 @@ ContentChangeManager::ContentChangeManager(const RefPtr<TaskExecutor>& taskExecu
 
 void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& config)
 {
+    SetContentChangeConfig(config);
+    UpdateContentChangeParameters();
+    ResetContentChangeState();
+    RegisterContentChangeNodes(config);
+#ifndef IS_RELEASE_VERSION
+    dumpMgr_->AddRegisterRecord(DumpEvent::REGISTER, currentContentChangeConfig_);
+#endif
+}
+
+void ContentChangeManager::SetContentChangeConfig(const ContentChangeConfig& config)
+{
     currentContentChangeConfig_ = config;
     if (LessNotEqual(config.textContentRatio, 0.0) || GreatNotEqual(config.textContentRatio, 1.0)) {
         currentContentChangeConfig_->textContentRatio = DEFAULT_TEXT_CONTENT_RATIO;
@@ -262,6 +274,10 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     if (config.reportDelayTime < 0) {
         currentContentChangeConfig_->reportDelayTime = DEFAULT_COMPONENT_REPORT_DELAY_TIME;
     }
+}
+
+void ContentChangeManager::UpdateContentChangeParameters()
+{
     ACE_SCOPED_TRACE("[ContentChangeManager] StartContentChangeReport: ratio:%f, minReportTime:%d, "
         "minWidth:%d, minHeight:%d, reportDelayTime:%d", currentContentChangeConfig_->textContentRatio,
         currentContentChangeConfig_->minReportTime, currentContentChangeConfig_->minWidth,
@@ -279,20 +295,30 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     imageMinWidth_ = currentContentChangeConfig_->minWidth;
     imageMinHeight_ = currentContentChangeConfig_->minHeight;
     componentReportDelayTime_ = static_cast<uint64_t>(currentContentChangeConfig_->reportDelayTime) * NS_PER_MS;
+}
+
+void ContentChangeManager::ResetContentChangeState()
+{
     changedSwiperNodes_.clear();
     scrollingNodes_.clear();
     transitioningNodes_.clear();
     scrollingSwiperNodes_.clear();
+}
+
+void ContentChangeManager::RegisterContentChangeNodes(const ContentChangeConfig& config)
+{
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
             continue;
         }
+        if (IsIgnoringEventType(ARKWEB_ALL) && node->GetTag() == V2::WEB_ETS_TAG) {
+            LOGI("[ContentChangeManager] unregister web node:%{public}d due to ARKWEB ignored", node->GetId());
+            node->OnContentChangeUnregister();
+            continue;
+        }
         node->OnContentChangeRegister(config);
     }
-#ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddRegisterRecord(DumpEvent::REGISTER, currentContentChangeConfig_);
-#endif
 }
 
 void ContentChangeManager::StopContentChangeReport()
@@ -303,6 +329,9 @@ void ContentChangeManager::StopContentChangeReport()
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
+            continue;
+        }
+        if (IsIgnoringEventType(ARKWEB_ALL) && node->GetTag() == V2::WEB_ETS_TAG) {
             continue;
         }
         node->OnContentChangeUnregister();
@@ -325,6 +354,9 @@ void ContentChangeManager::AddOnContentChangeNode(WeakPtr<FrameNode> node)
     if (IsContentChangeDetectEnable()) {
         auto nodePtr = node.Upgrade();
         CHECK_NULL_VOID(nodePtr);
+        if (IsIgnoringEventType(ARKWEB_ALL) && nodePtr->GetTag() == V2::WEB_ETS_TAG) {
+            return;
+        }
         nodePtr->OnContentChangeRegister(currentContentChangeConfig_.value());
     }
 }
@@ -932,15 +964,25 @@ uint32_t ContentChangeManager::GetIgnoreEventMask(const std::string& ignoreEvent
         return mask;
     }
     auto scrollValue = json->GetValue("SCROLL");
-    if (!scrollValue || !scrollValue->IsArray()) {
-        return mask;
+    if (scrollValue && scrollValue->IsArray()) {
+        int32_t arraySize = scrollValue->GetArraySize();
+        for (int32_t i = 0; i < arraySize; i++) {
+            auto item = scrollValue->GetArrayItem(i);
+            if (item && item->IsString()) {
+                uint32_t eventType = ConvertEventStringToEnum(item->GetString());
+                mask |= eventType;
+            }
+        }
     }
-    int32_t arraySize = scrollValue->GetArraySize();
-    for (int32_t i = 0; i < arraySize; i++) {
-        auto item = scrollValue->GetArrayItem(i);
-        if (item && item->IsString()) {
-            uint32_t eventType = ConvertEventStringToEnum(item->GetString());
-            mask |= eventType;
+    auto arkwebValue = json->GetValue("ARKWEB");
+    if (arkwebValue && arkwebValue->IsArray()) {
+        int32_t arraySize = arkwebValue->GetArraySize();
+        for (int32_t i = 0; i < arraySize; i++) {
+            auto item = arkwebValue->GetArrayItem(i);
+            if (item && item->IsString()) {
+                std::string typeStr = item->GetString();
+                mask |= (typeStr == "all" ? ARKWEB_ALL : NONE);
+            }
         }
     }
     return mask;

@@ -42,6 +42,7 @@ public:
         NONE = 0,                 // no event
         SCROLL_TO = 1 << 0,       // SCROLL: scrollTo
         SCROLL_TO_INDEX = 1 << 1, // SCROLL: scrollToIndex
+        ARKWEB_ALL = 1 << 2,      // ARKWEB: block all web events
     };
 
     explicit ContentChangeManager(const RefPtr<TaskExecutor>& taskExecutor = nullptr);
@@ -91,6 +92,10 @@ public:
 #endif
 
 private:
+    void SetContentChangeConfig(const ContentChangeConfig& config);
+    void UpdateContentChangeParameters();
+    void ResetContentChangeState();
+    void RegisterContentChangeNodes(const ContentChangeConfig& config);
     void ProcessSwiperNodes();
     void ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor);
     void StartTextAABBCollecting();
