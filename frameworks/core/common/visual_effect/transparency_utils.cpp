@@ -117,14 +117,14 @@ void TransparencyUtils::AdjustTransparencyForLevel(int32_t transparency)
 
 TransparencyLevelMap& TransparencyUtils::GetLevelMap()
 {
-    // EXQUISITE(custom)->THIN, EXQUISITE(others)->NORMAL, GENTLE->GENTLE_NORMAL, SMOOTH->NONE
+    // EXQUISITE->NORMAL, GENTLE(custom)->GENTLE_THIN, GENTLE(general)->GENTLE_NORMAL, SMOOTH->NONE
     static TransparencyLevelMap levelMap = {
-#ifdef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
-        { UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN },
-#else
         { UiMaterialLevel::EXQUISITE, UiMaterialTransparency::NORMAL },
-#endif
+#ifdef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+        { UiMaterialLevel::GENTLE, UiMaterialTransparency::GENTLE_THIN },
+#else
         { UiMaterialLevel::GENTLE, UiMaterialTransparency::GENTLE_NORMAL },
+#endif
         { UiMaterialLevel::SMOOTH, UiMaterialTransparency::NONE }
     };
     return levelMap;
