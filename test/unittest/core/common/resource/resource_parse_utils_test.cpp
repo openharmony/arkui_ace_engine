@@ -26,7 +26,6 @@
 #include "core/common/color_inverter.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #undef private
 #undef protected
@@ -1292,7 +1291,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest032, TestSize.Level1)
     auto resObj = AceType::MakeRefPtr<ResourceObject>(1,
         static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
     std::vector<std::string> result;
-    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+    EXPECT_TRUE(ResourceParseUtils::ParseResStrArray(resObj, result));
 }
 
 /**

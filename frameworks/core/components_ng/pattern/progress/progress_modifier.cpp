@@ -288,6 +288,7 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
                 modifier->StopSweepingAnimation(currentDate);
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
                 auto context = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(context);
                 context->RequestFrame();
             }
         }, context);
@@ -547,6 +548,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
                 modifier->StopSweepingAnimation(currentDate);
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
                 auto context = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(context);
                 context->RequestFrame();
             }
         }, contextPtr);
@@ -597,12 +599,14 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
                         return;
                 }
                 auto context = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(context);
                 context->RequestFrame();
             } else {
                 modifier->dateUpdated_ = false;
                 float currentDate = modifier->sweepingDate_->Get();
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
                 auto context = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(context);
                 context->RequestFrame();
             }
         }, nullptr, contextPtr);
@@ -725,6 +729,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
                 modifier->StopSweepingAnimation(currentDate);
                 modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
                 auto context = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(context);
                 context->RequestFrame();
             }
         }, contextPtr);

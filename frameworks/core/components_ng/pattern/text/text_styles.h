@@ -18,8 +18,8 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/image/drawing_color_filter.h"
-#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -85,7 +85,7 @@ struct TextDecorationOptions {
 
 struct LineSpacingOptions {
     std::optional<bool> onlyBetweenLines;
- 
+
     bool IsEqual(const LineSpacingOptions& other) const
     {
         return this->onlyBetweenLines.has_value() == other.onlyBetweenLines.has_value() &&
@@ -400,17 +400,17 @@ struct TextLineStyle {
         CHECK_NULL_VOID(resObj && updateFunc);
         resMap_[key] = {resObj, std::move(updateFunc)};
     }
- 
+
     size_t RemoveResource(const std::string& key)
     {
         return resMap_.erase(key);
     }
- 
+
     void CopyResource(const std::unique_ptr<TextLineStyle>& source)
     {
         resMap_ = source->resMap_;
     }
- 
+
     void ReloadResources()
     {
         for (const auto& [key, resourceUpdater] : resMap_) {

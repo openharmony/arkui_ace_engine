@@ -200,11 +200,6 @@ int32_t AxisInfo::GetScrollStep() const
     return scrollStep_;
 }
 
-void AxisInfo::SetScrollStep(int32_t scrollStep)
-{
-    scrollStep_ = scrollStep;
-}
-
 void AxisInfo::SetRotateAxisAngle(float angle)
 {
     rotateAxisAngle_ = angle;
@@ -371,7 +366,9 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
     auto globalOffset = event.GetOffset();
     info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent = event.passThrough,
                                            postEventNodeId = event.postEventNodeId, globalOffset, localLocation]() {
-        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localLocation);
+        if (frameNodeWeak.Upgrade() == nullptr) {
+            return localLocation;
+        }
         NG::PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
         NG::NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
         return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());

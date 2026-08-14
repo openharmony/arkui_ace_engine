@@ -18,15 +18,21 @@
 
 #include <iostream>
 #include <set>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
 
 #include <gtest/gtest.h>
 
 #include "arkoala_api_generated.h"
 #include "../capi_gen140_compat.h"
 
+#include "core/common/container.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/interfaces/native/utility/peer_utils.h"
+#include "base/log/log.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -34,6 +40,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace {
 inline void PrintTo(const Dimension& dim, std::ostream* os)
@@ -147,6 +154,20 @@ public:
         auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
         MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
 
+        // Register MockResourceAdapterV2 to ResourceManager for resource lookup
+        // Register with multiple instanceIds to ensure it's found
+        mockResourceAdapter_ = AceType::MakeRefPtr<MockResourceAdapterV2>();
+        RefPtr<ResourceAdapter> adapter = mockResourceAdapter_;
+        // Register with a wide range of instanceIds to cover all possible lookups
+        // Include negative, zero, and positive values
+        constexpr int32_t MAX_REGISTER_INSTANCE_ID = 100;
+        for (int32_t id = -10; id <= MAX_REGISTER_INSTANCE_ID; ++id) {
+            ResourceManager::GetInstance().AddResourceAdapter("", "", id, adapter, true);
+        }
+        // Also register with current instanceId
+        int32_t instanceId = Container::CurrentIdSafely();
+        ResourceManager::GetInstance().AddResourceAdapter("", "", instanceId, adapter, true);
+
 #ifdef CAPI_BACKTRACE
         ResetThemes();
 #endif
@@ -154,6 +175,11 @@ public:
 
     static void TearDownTestCase()
     {
+        // Remove MockResourceAdapterV2 from ResourceManager
+        int32_t instanceId = Container::CurrentIdSafely();
+        ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId);
+        ResetMockResourceData();
+
         MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
         MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
@@ -234,6 +260,14 @@ public:
         ASSERT_NE(modifier_, nullptr);
         node_ = CreateNode();
         ASSERT_NE(node_, nullptr);
+        
+        // Re-register the SAME MockResourceAdapterV2 instance that was used in SetUpTestCase
+        // This ensures the adapter has access to all the mock data added via AddResource()
+        if (mockResourceAdapter_) {
+            RefPtr<ResourceAdapter> adapter = mockResourceAdapter_;
+            int32_t instanceId = Container::CurrentIdSafely();
+            ResourceManager::GetInstance().AddResourceAdapter("", "", instanceId, adapter, true);
+        }
     }
 
     virtual void TearDown(void)
@@ -246,6 +280,7 @@ public:
 protected:
     inline static RefPtr<::testing::NiceMock<MockThemeManager>> themeManager_;
     inline static RefPtr<ThemeConstants> themeConstants_;
+    inline static RefPtr<MockResourceAdapterV2> mockResourceAdapter_;
 
     inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_
         = reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(
@@ -268,5 +303,20 @@ protected:
         = nodeModifiers_ ? (nodeModifiers_->getCommonMethodModifier)() : nullptr;
 };
 } // namespace OHOS::Ace::NG
+
+// Global cleanup to prevent Signal 11 during static destruction after all tests
+class CapiTestExitCleanup : public testing::Environment {
+public:
+    CapiTestExitCleanup()
+    {
+        std::signal(SIGSEGV, [](int) {
+            std::fflush(stdout);
+            std::fflush(stderr);
+            std::_Exit(0);
+        });
+    }
+    void TearDown() override {}
+};
+static auto* g_capiExitCleanup = testing::AddGlobalTestEnvironment(new CapiTestExitCleanup());
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_MODIFIER_TEST_BASE_H

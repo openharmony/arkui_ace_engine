@@ -2376,7 +2376,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerOnAcceptedTest001, TestSize
      * @tc.expected: step2. state should become SUCCEED
      */
     TouchEvent touchEvent;
-    touchEvent.time = std::chrono::steady_clock::now();
+    touchEvent.time = std::chrono::high_resolution_clock::now();
     rotationRecognizer->firstInputTime_ = touchEvent.time;
     rotationRecognizer->OnAccepted();
     EXPECT_EQ(rotationRecognizer->refereeState_, RefereeState::SUCCEED);

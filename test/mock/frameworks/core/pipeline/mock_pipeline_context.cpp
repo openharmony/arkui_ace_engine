@@ -62,8 +62,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#include "core/pipeline/container_window_manager.h"
-#include "base/resource/data_provider_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/image/image_cache.h"
@@ -231,12 +229,6 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
 const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() const
 {
     return taihangOptimizer_;
-}
-
-bool PipelineContext::GetIsRequestFrame() const
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestFrame();
 }
 
 std::string PipelineContext::GetBundleName() const
@@ -1479,11 +1471,6 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
     return nullptr;
 }
 
-RefPtr<PlatformResRegister> PipelineBase::GetPlatformResRegister() const
-{
-    return platformResRegister_;
-}
-
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
     bool forceChange)
@@ -1713,6 +1700,32 @@ RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
     return nullptr;
 }
 
+void PipelineBase::SetInfiniteAnimationFlushExceeded(bool exceeded)
+{
+    infiniteAnimationFlushExceeded_ = exceeded;
+}
+
+bool PipelineBase::IsInfiniteAnimationFlushExceeded() const
+{
+    return infiniteAnimationFlushExceeded_;
+}
+
+void PipelineBase::PushInfiniteAnimationFlushExceeded()
+{
+    infiniteAnimationFlushExceededStack_.push(infiniteAnimationFlushExceeded_);
+}
+
+void PipelineBase::PopInfiniteAnimationFlushExceeded()
+{
+    if (!infiniteAnimationFlushExceededStack_.empty()) {
+        infiniteAnimationFlushExceededStack_.pop();
+        infiniteAnimationFlushExceeded_ = infiniteAnimationFlushExceededStack_.empty()
+            ? false : infiniteAnimationFlushExceededStack_.top();
+    } else {
+        infiniteAnimationFlushExceeded_ = false;
+    }
+}
+
 bool NG::PipelineContext::CheckThreadSafe()
 {
     return false;
@@ -1777,7 +1790,7 @@ std::optional<float> NG::PipelineContext::ResolveFontScaleFromEnv(const RefPtr<F
 
 float NG::PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
 {
-    return 1.0f;
+    return fontScale_;
 }
 
 std::optional<TextDirection> NG::PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
@@ -1838,6 +1851,11 @@ const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo() const
 }
 
 std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo) const
+{
+    return "";
+}
+
+std::string NG::PipelineContext::GetNavDestinationJSViewName(const RefPtr<NG::PageInfo>& pageInfo) const
 {
     return "";
 }
@@ -1971,7 +1989,7 @@ bool WindowManager::GetPageViewportConfig(
 namespace OHOS::Ace::NG {
 bool PipelineContext::GetIsFocusActive() const
 {
-    return false;
+    return focusManager_ ? focusManager_->GetIsFocusActive() : false;
 }
 
 RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const
@@ -1981,12 +1999,6 @@ RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() co
 
 void PipelineContext::ChangeSensitiveNodes(bool flag)
 {
-}
-
-bool PipelineContext::GetIsRequestVsync()
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestVsync();
 }
 
 } // namespace OHOS::Ace::NG

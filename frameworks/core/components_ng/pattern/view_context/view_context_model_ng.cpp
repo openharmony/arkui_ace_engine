@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#include "core/common/container.h"
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -41,6 +40,7 @@ void ViewContextModelNG::closeAnimation(const AnimationOption& option, bool need
             ACE_SCOPED_TRACE("Close current nested animation");
             TAG_LOGW(AceLogTag::ACE_ANIMATION, "Animation nested. Try to close current animation.");
             AnimationUtils::CloseImplicitAnimation();
+            pipelineContext->PopInfiniteAnimationFlushExceeded();
             pendingAnimationNodes_.erase(frameNode);
         }
     }

@@ -276,11 +276,11 @@ void PatternLockModelNG::SetDotConnect(FrameNode* frameNode, std::function<void(
 }
 
 void PatternLockModelNG::CreateWithResourceObj(
-    PatternLockResourceType PatternLockResourceType, const RefPtr<ResourceObject>& resObj)
+    PatternLockResourceType PatternLockResourceType, const RefPtr<ResourceObject>& resOb)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CreateWithResourceObj(frameNode, PatternLockResourceType, resObj);
+    CreateWithResourceObj(frameNode, PatternLockResourceType, resOb);
 }
 
 void PatternLockModelNG::CreateWithResourceObj(

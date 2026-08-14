@@ -28,7 +28,7 @@ std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char
     return nullptr;
 }
 
-DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
+__attribute__((weak)) DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
 {
     return nullptr;
 }

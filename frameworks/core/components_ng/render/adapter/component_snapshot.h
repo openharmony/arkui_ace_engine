@@ -26,7 +26,6 @@
 class RSUIContext;
 namespace OHOS::Rosen {
 class RSNode;
-class RSUIContext;
 }
 
 namespace OHOS::Ace::NG {

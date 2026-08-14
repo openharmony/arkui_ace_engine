@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/common/container.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include <chrono>
 #include <cmath>
 #include <cinttypes>
@@ -30,7 +27,6 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -242,12 +238,6 @@ bool MagnifierController::UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pi
     RectF visibleRect;
     RectF frameRect;
     node->GetVisibleRect(visibleRect, frameRect);
-    // if component extends beyond its parent, visibleRect is invalid, use frameRect instead.
-    if (visibleRect.Height() <= 0.0f && frameRect.Height() > 0.0f) {
-        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "visibleRect=%{public}s, frameRect=%{public}s",
-            visibleRect.ToString().c_str(), frameRect.ToString().c_str());
-        visibleRect = frameRect;
-    }
     auto patternFrameTop = windowGlobalRect.Top() + visibleRect.GetY() * windowScale;
     auto patternBottom = visibleRect.Height() * windowScale + patternFrameTop;
     patternVisibleBottom = visibleRect.Bottom();

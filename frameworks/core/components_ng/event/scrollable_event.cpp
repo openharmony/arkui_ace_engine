@@ -28,8 +28,6 @@ namespace OHOS::Ace::NG {
 ScrollableEvent::ScrollableEvent(Axis axis) : axis_(axis) {};
 ScrollableEvent::~ScrollableEvent() = default;
 
-ScrollableActuator::~ScrollableActuator() = default;
-
 ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
     : gestureEventHub_(gestureEventHub)
 {}
@@ -208,28 +206,6 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
         scrollable_->SetGetEventTargetImpl(getEventTargetImpl);
         scrollable_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         scrollable_->OnCollectTouchTarget(result, frameNode, responseLinkResult);
-    }
-}
-
-void ScrollableActuator::AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
-{
-    scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
-}
-
-void ScrollableActuator::RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
-{
-    scrollableEvents_.erase(scrollableEvent->GetAxis());
-}
-
-void ScrollableActuator::AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
-{
-    for (auto it = scrollableEvents_.begin(); it != scrollableEvents_.end(); ++it) {
-        auto scrollableEvent = it->second;
-        if (!scrollableEvent) {
-            continue;
-        }
-        scrollableEvent->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
-        break;
     }
 }
 } // namespace OHOS::Ace::NG

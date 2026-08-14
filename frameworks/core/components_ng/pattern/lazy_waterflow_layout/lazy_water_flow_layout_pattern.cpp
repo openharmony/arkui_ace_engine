@@ -56,6 +56,11 @@ StickyStyle LazyWaterFlowLayoutPattern::GetStickyStyle() const
     return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
 }
 
+bool LazyWaterFlowLayoutPattern::HasStickyHeader() const
+{
+    return GetHeaderNode() && HeaderFooterUtils::IsHeaderSticky(GetStickyStyle());
+}
+
 FocusPattern LazyWaterFlowLayoutPattern::GetFocusPattern() const
 {
     return { FocusType::SCOPE, true };
@@ -340,12 +345,14 @@ void LazyWaterFlowLayoutPattern::DumpAdvanceInfo()
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo();
+    DumpStickyHeaderHandoffInfo();
 }
 
 void LazyWaterFlowLayoutPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo(json);
+    DumpStickyHeaderHandoffInfo(json);
 }
 
 } // namespace OHOS::Ace::NG

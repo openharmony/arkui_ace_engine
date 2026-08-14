@@ -584,11 +584,6 @@ const RefPtr<TextOverlayBase> TextOverlayManager::GetTextOverlayBase() const
     return textOverlayBase;
 }
 
-const std::vector<Rect>& TextOverlayManager::GetTextOverlayRect() const
-{
-    return textOverlayRect_;
-}
-
 void TextOverlayManager::AddTextOverlayRect(const Rect& textOverlayRect)
 {
     textOverlayRect_.emplace_back(textOverlayRect);

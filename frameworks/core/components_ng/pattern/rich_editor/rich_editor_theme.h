@@ -94,8 +94,31 @@ public:
             ParsePatternColor(themeConstants, theme);
         }
 
-        void ParsePatternColor(
-            const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const;
+        void ParsePatternColor(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
+        {
+            CHECK_NULL_VOID(theme);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RICH_EDITOR);
+            CHECK_NULL_VOID(pattern);
+            auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
+                dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
+            }
+            theme->dragBackgroundColor_ = dragBackgroundColor;
+            theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
+            theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
+            theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
+            theme->previewUnderlineColor_ = pattern->GetAttr<Color>("preview_underline_color", Color(0xff007dff));
+            theme->popIconColor_ = pattern->GetAttr<Color>("pop_icon_color", Color(0x99000000));
+            theme->menuTitleColor_ = pattern->GetAttr<Color>("menu_title_color", Color(0x99000000));
+            theme->menuTextColor_ = pattern->GetAttr<Color>("menu_text_color", Color(0x99000000));
+            theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", Color(0x99000000));
+            theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
+            theme->urlDisabledOpacity_ = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
+            theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(theme->urlDisabledOpacity_);
+            theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x0C182431));
+            theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
+            theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
+        }
     };
 
     ~RichEditorTheme() override = default;
@@ -276,6 +299,14 @@ protected:
     Color urlDefaultColor_ = Color(0x99000000);
     Color urlHoverColor_ = Color(0x99000000);
     Color urlPressColor_ = Color(0x99000000);
+    Color placeholderColor_ = Color(0x99000000);
+    Color caretColor_ = Color(0xff007dff);
+    Color selectedBackgroundColor_ = Color(0xff007dff);
+    Color dragBackgroundColor_ = Color::WHITE;
+    Color popIconColor_ = Color(0x99000000);
+    Color menuTitleColor_ = Color(0x99000000);
+    Color menuTextColor_ = Color(0x99000000);
+    Color menuIconColor_ = Color(0x99000000);
 
 private:
     float disabledAlpha_ = 0.0f;
@@ -286,16 +317,8 @@ private:
 
     // UX::insert cursor offset up by 24vp
     Dimension insertCursorOffset_ = 24.0_vp;
-    Color placeholderColor_ = Color(0x99000000);
-    Color caretColor_ = Color(0xff007dff);
-    Color selectedBackgroundColor_ = Color(0xff007dff);
-    Color dragBackgroundColor_ = Color::WHITE;
     Dimension dragCornerRadius_ = 18.0_vp;
     Color previewUnderlineColor_ = Color(0xff007dff);
-    Color popIconColor_ = Color(0x99000000);
-    Color menuTitleColor_ = Color(0x99000000);
-    Color menuTextColor_ = Color(0x99000000);
-    Color menuIconColor_ = Color(0x99000000);
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool richeditorShowHandle_ = false;
     std::string aiWriteBundleName_;

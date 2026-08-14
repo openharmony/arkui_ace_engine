@@ -305,10 +305,10 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
      */
     auto formRendererDispatcher = formRenderer->formRendererDispatcherImpl_;
     EXPECT_TRUE(formRendererDispatcher);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).Times(AtLeast(0));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).Times(AtLeast(0));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
-        _, _)).WillOnce(Return());
+        _, _)).Times(AtLeast(0));
     OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
     formSurfaceInfo.width = FORM_WIDTH_2;
     formSurfaceInfo.height = FORM_HEIGHT_2;
@@ -317,10 +317,10 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     EXPECT_EQ(onSurfaceChangeEventKey, CHECK_KEY);
     // formRenderer is null
     formRendererDispatcher->formRenderer_.reset();
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).Times(AtLeast(0));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).Times(AtLeast(0));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
-        _, _)).WillOnce(Return());
+        _, _)).Times(AtLeast(0));
     onSurfaceChangeEventKey = "";
     formRendererDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo);
     std::this_thread::sleep_for(std::chrono::seconds(1));

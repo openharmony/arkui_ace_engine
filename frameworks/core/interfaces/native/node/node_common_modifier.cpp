@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
-#include "core/common/container.h"
 
 #include "interfaces/native/node/node_model.h"
 
@@ -9614,8 +9613,10 @@ ArkUI_Int32 PostMouseEventWithStrategy(
     }
 
     int32_t* pressedButtons = arkUIMouseEvent->pressedButtons;
-    for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
-        mouseEvent.pressedButtonsArray.emplace_back(static_cast<MouseButton>(pressedButtons[index]));
+    if (pressedButtons) {
+        for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
+            mouseEvent.pressedButtonsArray.emplace_back(static_cast<MouseButton>(pressedButtons[index]));
+        }
     }
     ArkUIMouseEvent* arkUIMouseEventCloned = const_cast<ArkUIMouseEvent*>(arkUIMouseEvent);
     NG::SetPostMousePointerEvent(mouseEvent, arkUIMouseEventCloned);

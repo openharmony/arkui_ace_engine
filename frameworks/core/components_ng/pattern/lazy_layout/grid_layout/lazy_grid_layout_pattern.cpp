@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "base/log/dump_log.h"
@@ -47,6 +50,11 @@ StickyStyle LazyGridLayoutPattern::GetStickyStyle() const
     auto layoutProperty = host->GetLayoutProperty<LazyGridLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, StickyStyle::NONE);
     return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
+}
+
+bool LazyGridLayoutPattern::HasStickyHeader() const
+{
+    return GetHeaderNode() && HeaderFooterUtils::IsHeaderSticky(GetStickyStyle());
 }
 
 float LazyGridLayoutPattern::GetHeaderMainSize() const
@@ -338,11 +346,13 @@ void LazyGridLayoutPattern::DumpAdvanceInfo()
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo();
+    DumpStickyHeaderHandoffInfo();
 }
 
 void LazyGridLayoutPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo(json);
+    DumpStickyHeaderHandoffInfo(json);
 }
 } // namespace OHOS::Ace::NG

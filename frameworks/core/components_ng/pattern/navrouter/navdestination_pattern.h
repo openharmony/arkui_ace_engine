@@ -341,6 +341,7 @@ public:
     }
 
     void CallSavedStateToJS(const std::string& savedState);
+    std::string GetJSViewName();
 
 private:
     struct HideBarOnSwipeContext {

@@ -22,6 +22,7 @@
 
 #include "base/utils/noncopyable.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/container_consts.h"
 #ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #endif
@@ -32,7 +33,6 @@
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/render_context.h"
 #include "core/event/pointer_event.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 
@@ -49,14 +49,11 @@ namespace OHOS::Ace {
 struct ImmersiveOptions;
 struct UiMaterialParam;
 class NotifyDragEvent;
-class GestureEvent;
-using GestureEventFunc = std::function<void(GestureEvent& info)>;
 }
 
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
-class VerticalOverflowHandler;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -716,7 +713,10 @@ public:
     {
         return false;
     }
-    virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host);
+    virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
+    {
+        return nullptr;
+    }
     virtual void OnHoverWithHightLight(bool isHover) {}
     virtual void OnPaintFocusState(bool isFocus) {}
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}

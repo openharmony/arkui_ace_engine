@@ -183,7 +183,7 @@ public:
     {
         return true;
     }
-
+    
     void UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad = false);
     void UpdateIndicatorIconPath(const std::string& iconPath, const std::string& bundleName,
         const std::string& moduleName, bool isFirstLoad = false);
@@ -213,6 +213,7 @@ private:
     void OnImageLoadFail();
 
     Color GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePaintProperty) const;
+    Color GetMinValueColor(const RefPtr<GaugePaintProperty>& gaugePaintProperty) const;
     bool CheckDarkResource(uint32_t resId);
     bool ProcessGradientColors(std::vector<std::vector<std::pair<Color, Dimension>>>& gradientColors,
         std::function<uint32_t(uint32_t)>& invertFunc);

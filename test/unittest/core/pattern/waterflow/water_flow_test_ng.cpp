@@ -23,7 +23,6 @@
 
 #define protected public
 #define private public
-#include "core/common/container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "water_flow_test_ng.h"
@@ -1884,7 +1883,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
      * @tc.expected: function ProvideRestoreInfo is called.
      */
     pattern_->layoutInfo_->startIndex_ = 1;
-    pattern_->layoutInfo_->reportStartIndex_ = 1;
     pattern_->layoutInfo_->storedOffset_ = 1.0f;
     std::string ret = pattern_->ProvideRestoreInfo();
 

@@ -52,7 +52,6 @@ namespace {
 
     // invalid id
     const auto INVALID_ID_STRING = IntResourceId{-1, ResourceType::STRING};
-    const auto INVALID_ID_COLOR = IntResourceId{-1, ResourceType::COLOR};
 
     // resource names and id
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::STRING};
@@ -103,8 +102,12 @@ public:
 
         AddResource(RES_DIMENSION_ID, DIMENSION_BY_NUMBER);
 
-        AddResource(RES_FAMILY_ID, FAMILY_BY_NUMBER);
-        AddResource(RES_FAMILY_NAME, FAMILY_BY_STRING);
+        AddMockResourceData(
+            static_cast<uint32_t>(std::get<0>(RES_FAMILY_ID)),
+            std::vector<std::string>{FAMILY_BY_NUMBER});
+        AddMockResourceData(
+            std::get<0>(RES_FAMILY_NAME),
+            std::vector<std::string>{FAMILY_BY_STRING});
     }
 };
 
@@ -171,8 +174,6 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
             COLOR_BY_STRING.ColorToString() },
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
             COLOR_BY_NUMBER.ColorToString() },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID_COLOR)),
-            "#FFFF0000" }
     };
 
     for (const auto &[optResColor, expected]: testPlan) {

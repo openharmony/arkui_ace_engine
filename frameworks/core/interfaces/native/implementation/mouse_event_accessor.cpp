@@ -261,7 +261,7 @@ Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
-    return Converter::ArkValue<Opt_Float64>(info->GetRawDeltaX());
+    return Converter::ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(info->GetRawDeltaX()));
 }
 void SetRawDeltaXImpl(Ark_MouseEvent peer,
                       const Opt_Float64* rawDeltaX)
@@ -272,7 +272,8 @@ void SetRawDeltaXImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(info);
     auto valueX = Converter::OptConvertPtr<float>(rawDeltaX);
     if (valueX) {
-        info->SetRawDeltaX(valueX.value());
+        auto pixelValue = PipelineBase::Vp2PxWithCurrentDensity(valueX.value());
+        info->SetRawDeltaX(pixelValue);
     }
 }
 Opt_Float64 GetRawDeltaYImpl(Ark_MouseEvent peer)
@@ -281,7 +282,7 @@ Opt_Float64 GetRawDeltaYImpl(Ark_MouseEvent peer)
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
-    return Converter::ArkValue<Opt_Float64>(info->GetRawDeltaY());
+    return Converter::ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(info->GetRawDeltaY()));
 }
 void SetRawDeltaYImpl(Ark_MouseEvent peer,
                       const Opt_Float64* rawDeltaY)
@@ -292,7 +293,8 @@ void SetRawDeltaYImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(info);
     auto valueY = Converter::OptConvertPtr<float>(rawDeltaY);
     if (valueY) {
-        info->SetRawDeltaY(valueY.value());
+        auto pixelValue = PipelineBase::Vp2PxWithCurrentDensity(valueY.value());
+        info->SetRawDeltaY(pixelValue);
     }
 }
 Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)

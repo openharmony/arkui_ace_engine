@@ -14,7 +14,6 @@
  */
 
 #include "core/interfaces/native/node/node_adapter_impl.h"
-#include "core/common/container.h"
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"

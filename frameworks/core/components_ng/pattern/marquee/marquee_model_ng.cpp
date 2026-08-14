@@ -28,6 +28,7 @@ void MarqueeModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", MARQUEE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    ACE_UINODE_TRACE(frameNode);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(
             TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -190,6 +191,7 @@ RefPtr<FrameNode> MarqueeModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(MARQUEE_ETS_TAG, nodeId, AceType::MakeRefPtr<MarqueePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_UINODE_TRACE(frameNode);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(
             TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());

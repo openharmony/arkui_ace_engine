@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/common/container.h"
 
 #include <cstddef>
 
@@ -33,6 +32,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const auto DEFAULT_KEYBOARD_APPERANCE = KeyboardAppearance::NONE_IMMERSIVE;
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MIN_LINES = 1;
 constexpr double DEFAULT_OPACITY = 0.2;
@@ -769,7 +769,7 @@ void TextFieldModelStatic::SetStopBackPress(FrameNode* frameNode, const std::opt
 void TextFieldModelStatic::SetKeyboardAppearance(FrameNode* frameNode,
     const std::optional<KeyboardAppearance>& valueOpt)
 {
-    TextFieldModelNG::SetKeyboardAppearance(frameNode, valueOpt.value_or(KeyboardAppearance::NONE_IMMERSIVE));
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, valueOpt.value_or(DEFAULT_KEYBOARD_APPERANCE));
 }
 
 void TextFieldModelStatic::RequestKeyboardOnFocus(FrameNode* frameNode, const std::optional<bool>& needToRequest)

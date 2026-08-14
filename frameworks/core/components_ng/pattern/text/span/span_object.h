@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace {
@@ -78,7 +79,7 @@ struct SpanParagraphStyle {
         }
         return propGradient == other.propGradient;
     }
- 
+
     bool IsColorShaderStyle(const SpanParagraphStyle& other) const
     {
         CHECK_EQUAL_RETURN(colorShaderStyle.has_value(), !other.colorShaderStyle.has_value(), false);
@@ -87,7 +88,7 @@ struct SpanParagraphStyle {
         }
         return true;
     }
- 
+
     bool IsSameShaderStyle(const SpanParagraphStyle& other) const
     {
         return IsSameGradient(other) && IsColorShaderStyle(other);
@@ -136,7 +137,6 @@ struct GestureStyle {
 
 class SpanBase : public virtual AceType {
     DECLARE_ACE_TYPE(SpanBase, AceType);
-
 public:
     SpanBase() = default;
     SpanBase(int32_t start, int32_t end) : start_(start), end_(end) {}
@@ -163,7 +163,6 @@ private:
 
 class FontSpan : public SpanBase {
     DECLARE_ACE_TYPE(FontSpan, SpanBase);
-
 public:
     FontSpan() = default;
     explicit FontSpan(Font font);
@@ -327,7 +326,6 @@ public:
 
 class TextShadowSpan : public SpanBase {
     DECLARE_ACE_TYPE(TextShadowSpan, SpanBase);
-
 public:
     TextShadowSpan() = default;
     explicit TextShadowSpan(std::vector<Shadow> font);
@@ -347,7 +345,6 @@ private:
 };
 class BackgroundColorSpan : public SpanBase {
     DECLARE_ACE_TYPE(BackgroundColorSpan, SpanBase);
-
 public:
     BackgroundColorSpan() = default;
     explicit BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle_);
@@ -360,7 +357,6 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
-
 private:
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
@@ -560,7 +556,7 @@ public:
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override {}
     void ClearSpecialData() override;
-    void* userData_;
+    void* userData_ = nullptr;
 };
 
 class UrlSpan : public SpanBase {

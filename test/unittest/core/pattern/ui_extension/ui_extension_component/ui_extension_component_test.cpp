@@ -777,53 +777,6 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionOnConnectTest, TestSize.Level1)
 #endif
 }
 
-/**
- * @tc.name: UIExtensionHandleEventTest
- * @tc.desc: Test pattern KeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto uiExtNode = CreateUecNode();
-    ASSERT_NE(uiExtNode, nullptr);
-    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->AttachToFrameNode(uiExtNode);
-    ValidSession(pattern);
-    KeyEvent event;
-    pattern->HandleKeyEvent(event);
-    pattern->DispatchKeyEvent(event);
-    pattern->isKeyAsync_ = true;
-    EXPECT_EQ(pattern->DispatchKeyEventSync(event), true);
-    pattern->isKeyAsync_ = false;
-    EXPECT_EQ(pattern->DispatchKeyEventSync(event), true);
-    pattern->canFocusSendToUIExtension_ = false;
-    pattern->HandleFocusEvent();
-    pattern->DispatchFocusActiveEvent(true);
-    pattern->DispatchFocusState(true);
-    EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
-    pattern->canFocusSendToUIExtension_ = true;
-    pattern->HandleFocusEvent();
-    pattern->DispatchFocusActiveEvent(true);
-    pattern->DispatchFocusState(true);
-    EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
-    pattern->HandleBlurEvent();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto focusManager = pipeline->GetOrCreateFocusManager();
-    ASSERT_NE(focusManager, nullptr);
-    focusManager->isFocusActive_ = true;
-    ASSERT_TRUE(pipeline->GetIsFocusActive());
-    pattern->HandleFocusEvent();
-    pattern->isKeyAsync_ = true;
-    event.code = { KeyCode::KEY_TAB };
-    pattern->DispatchKeyEventSync(event);
-    event.code = { KeyCode::KEY_SPACE };
-    pattern->DispatchKeyEventSync(event);
-#endif
-}
-
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventInValidSession, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM

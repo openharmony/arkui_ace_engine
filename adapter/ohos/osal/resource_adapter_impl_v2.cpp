@@ -25,7 +25,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/components/theme/theme_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -34,6 +33,7 @@ constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
 constexpr uint32_t RESOURCE_COLOR_TYPE = 10001; // ohos_theme
 const Color ERROR_VALUE_COLOR = Color(0xff000000);
 constexpr uint32_t INVALID_RESOURCE_ID = UINT32_MAX;
+constexpr char COMP_BACKGROUND_PRIMARY_TRAN[] = "sys.color.comp_background_primary_tran";
 
 void CheckThemeId(int32_t& themeId)
 {
@@ -179,6 +179,27 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(
     appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
 }
 
+RefPtr<ResourceAdapterImplV2> ResourceAdapterImplV2::CreateOverrideResourceAdapter(
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager, const ResourceInfo& resourceInfo)
+{
+    CHECK_NULL_RETURN(resourceManager, nullptr);
+    std::shared_ptr<Global::Resource::ResConfig> overrideResConfig(Global::Resource::CreateResConfig());
+    CHECK_NULL_RETURN(overrideResConfig, nullptr);
+    resourceManager->GetResConfig(*overrideResConfig);
+    overrideResConfig->SetColorMode(ConvertColorModeToGlobal(resourceInfo.GetResourceConfiguration().GetColorMode()));
+    auto overrideResMgr = resourceManager->GetOverrideResourceManager(overrideResConfig);
+    CHECK_NULL_RETURN(overrideResMgr, nullptr);
+    auto overrideResAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
+
+    auto resPath = resourceInfo.GetPackagePath();
+    auto hapPath = resourceInfo.GetHapPath();
+    overrideResAdapter->packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
+    overrideResAdapter->resConfig_ = overrideResConfig;
+    overrideResAdapter->appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
+    overrideResAdapter->isOverrideResourceAdapter_ = true;
+    return overrideResAdapter;
+}
+
 void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
 {
     std::string resPath = resourceInfo.GetPackagePath();
@@ -246,6 +267,9 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
     auto resConfig = ConvertConfigToGlobal(config);
     auto needUpdateResConfig = NeedUpdateResConfig(resConfig_, resConfig) || themeFlag;
     if (sysResourceManager_ && resConfig != nullptr && needUpdateResConfig) {
+        if (isOverrideResourceAdapter_) {
+            sysResourceManager_->UpdateOverrideResConfig(*resConfig);
+        }
         sysResourceManager_->UpdateResConfig(*resConfig, themeFlag);
     }
     resConfig_ = resConfig;
@@ -466,10 +490,12 @@ Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
     CHECK_NULL_RETURN(manager, Color(result));
     auto state = manager->GetColorByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE,
-            "Get color by name error, name=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
-            "%{public}s",
-            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
+        if (resName != COMP_BACKGROUND_PRIMARY_TRAN) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get color by name error, name=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+                "%{public}s",
+                resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
+        }
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));

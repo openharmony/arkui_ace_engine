@@ -270,7 +270,6 @@ void ContentModifierGaugeImpl(
             GeneratedApiImpl::SetContentNode(node, boxNode);
         }
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            CHECK_NULL_VOID(boxNode);
             auto old = boxNode->GetChildAtIndex(0);
             if (old != nullptr) {
                 boxNode->RemoveChildSilently(old);

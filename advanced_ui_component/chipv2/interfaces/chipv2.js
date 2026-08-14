@@ -32,6 +32,7 @@ const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const mediaquery = requireNapi('mediaquery');
 const deviceInfo = requireNapi('deviceInfo');
+const uiMaterial = requireNapi('arkui.uiMaterial');
 export var ChipV2Size;
 (function (ChipV2Size) {
     ChipV2Size["NORMAL"] = "NORMAL";
@@ -472,6 +473,13 @@ export class ChipV2 extends ViewV2 {
                 activated: false,
                 backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.chip_background_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 activatedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.chip_container_activated_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                backgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+                    style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+                }),
+                activatedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+                    style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+                    materialColor: { "id": -1, "type": 10001, params: ['sys.color.comp_background_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+                }),
                 focusOutlineColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 focusOutlineMargin: 2,
                 borderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -532,6 +540,7 @@ export class ChipV2 extends ViewV2 {
         this.breakPoint = BreakPointsType.SM;
         this.fontSizeScale = 1;
         this.useAdaptiveLineHeight = false;
+        this.actualChipHeight = 0;
         this.smListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)');
         this.mdListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)');
         this.lgListener = mediaquery.matchMediaSync('(840vp<=width)');
@@ -560,6 +569,7 @@ export class ChipV2 extends ViewV2 {
         this.breakPoint = BreakPointsType.SM;
         this.fontSizeScale = 1;
         this.useAdaptiveLineHeight = false;
+        this.actualChipHeight = 0;
     }
     updateLanguageLineHeight() {
         if (deviceInfo.sdkApiVersion < 26) {
@@ -654,12 +664,15 @@ export class ChipV2 extends ViewV2 {
             Button.size(this.getChipSize());
             Button.enabled(this.isChipEnabled());
             Button.direction(this.chipV2Options.direction);
-            Button.backgroundColor(this.getChipBackgroundColor());
             Button.systemMaterial(this.getBackgroundSystemMaterial());
+            Button.backgroundColor(this.getChipBackgroundColor());
             Button.borderWidth(this.getChipNodeBorderWidth());
             Button.borderColor(this.getChipNodeBorderColor());
             Button.borderRadius(this.getChipBorderRadius());
             Button.responseRegion(this.getChipResponseRegion());
+            Button.onSizeChange((oldValue, newValue) => {
+                this.actualChipHeight = newValue?.height ?? 0;
+            });
             Button.scale(this.chipScale);
             Button.opacity(this.chipOpacity);
             Button.accessibilityGroup(true);
@@ -1162,7 +1175,9 @@ export class ChipV2 extends ViewV2 {
     }
     getChipResponseRegion() {
         if (deviceInfo.sdkApiVersion >= 26) {
-            const chipHeight = this.getChipHeight();
+            // Large-font scaling (e.g. care mode) can stretch the chip beyond the themed or
+            // user-specified height, so prefer the measured height once layout has happened.
+            const chipHeight = this.actualChipHeight > 0 ? this.actualChipHeight : this.getChipHeight();
             if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
                 return {
                     x: 0,
@@ -1437,10 +1452,18 @@ export class ChipV2 extends ViewV2 {
         if (deviceInfo.sdkApiVersion < 26) {
             return undefined;
         }
-        if (this.isChipActivated()) {
-            return this.chipV2Options.activatedBackgroundSystemMaterial;
+        const info = uiMaterial.getMaterialInfo();
+        if (info.state === uiMaterial.MaterialState.DISABLE) {
+            return undefined;
         }
-        return this.chipV2Options.backgroundSystemMaterial;
+        if (this.isChipActivated()) {
+            return info.state === uiMaterial.MaterialState.ENABLE && !this.chipV2Options.activatedBackgroundSystemMaterial ?
+                this.theme.chipNode.activatedBackgroundSystemMaterial :
+                this.chipV2Options.activatedBackgroundSystemMaterial;
+        }
+        return info.state === uiMaterial.MaterialState.ENABLE && !this.chipV2Options.backgroundSystemMaterial ?
+            this.theme.chipNode.backgroundSystemMaterial :
+            this.chipV2Options.backgroundSystemMaterial;
     }
     getColor(color, defaultColor) {
         if (!color) {
@@ -1618,6 +1641,9 @@ __decorate([
 __decorate([
     Local
 ], ChipV2.prototype, "useAdaptiveLineHeight", void 0);
+__decorate([
+    Local
+], ChipV2.prototype, "actualChipHeight", void 0);
 function lengthMetricsToLength(length) {
     if (length.unit === LengthUnit.PX) {
         return `${length.value}px`;

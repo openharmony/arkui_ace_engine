@@ -69,6 +69,7 @@ def main():
     env = os.environ.copy()
     env["PATH"] = node_bin_path + os.pathsep + env.get("PATH", "")
     env["PANDA_SDK_PATH"] = panda_sdk_dest
+    env["NODE_PATH"] = os.path.abspath(os.path.join(base_dir, "node_modules"))
 
     # step0 clean previous build artifacts
     print(f"Step0: Running npm run clean in {base_dir}...")
@@ -120,6 +121,42 @@ def main():
     try:
         subprocess.run([npm, "install", "--no-package-lock"], env=env, cwd=base_dir, check=True, capture_output=True, text=True)
         print("npm install completed successfully.")
+
+        arkgen_package = os.path.join(
+            base_dir, "node_modules", "@idlizer", "arkgen"
+        )
+        if os.path.islink(arkgen_package):
+            arkgen_source = os.path.realpath(arkgen_package)
+            os.unlink(arkgen_package)
+            shutil.copytree(arkgen_source, arkgen_package)
+            print("Local @idlizer/arkgen materialized successfully.")
+
+        libohos_templates_source = os.path.abspath(os.path.join(
+            base_dir,
+            "../arkui_idlize/libohos-resources/templates"
+        ))
+        libohos_templates_target = os.path.join(
+            base_dir,
+            "node_modules",
+            "@idlizer",
+            "libohos",
+            "templates"
+        )
+
+        if not os.path.isdir(libohos_templates_source):
+            raise RuntimeError(
+                f"Missing libohos templates: {libohos_templates_source}"
+            )
+
+        if os.path.exists(libohos_templates_target):
+            shutil.rmtree(libohos_templates_target)
+
+        shutil.copytree(
+            libohos_templates_source,
+            libohos_templates_target
+        )
+        print("Local @idlizer/libohos templates deployed successfully.")
+
     except subprocess.CalledProcessError as e:
         print(f"Error: npm install failed with exit code {e.returncode}")
         print("STDOUT:", e.stdout)

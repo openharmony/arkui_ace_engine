@@ -91,6 +91,12 @@ let TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType.DATE_TIME = 4] = 'DATE_TIME';
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
+let TextEncoding;
+(function (TextEncoding) {
+  TextEncoding[TextEncoding.TEXT_ENCODING_UTF8 = 0] = 'TEXT_ENCODING_UTF8';
+  TextEncoding[TextEncoding.TEXT_ENCODING_UTF16 = 1] = 'TEXT_ENCODING_UTF16';
+})(TextEncoding || (TextEncoding = {}));
+
 let DataPanelType;
 (function (DataPanelType) {
   DataPanelType[DataPanelType.Line = 0] = 'Line';
@@ -4145,6 +4151,13 @@ let MenuKeyboardAvoidMode;
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.NONE = 0] = 'NONE';
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
 })(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
+
+let DistortionMode;
+(function (DistortionMode) {
+  DistortionMode[DistortionMode.DISTORTION_AUTO = 0] = 'DISTORTION_AUTO';
+  DistortionMode[DistortionMode.DISTORTION_ENABLED = 1] = 'DISTORTION_ENABLED';
+  DistortionMode[DistortionMode.DISTORTION_DISABLED = 2] = 'DISTORTION_DISABLED';
+})(DistortionMode || (DistortionMode = {}));
 
 let MenuGridPosition;
 (function (MenuGridPosition) {

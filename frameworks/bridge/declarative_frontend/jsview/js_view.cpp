@@ -785,10 +785,23 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         if (name.empty()) {
             return;
         }
+        CHECK_NULL_VOID(recycleNode);
         auto recycleUINode = AceType::DynamicCast<NG::UINode>(recycleNode);
+        CHECK_NULL_VOID(recycleUINode);
         recycleUINode->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+        auto memOptStrategy = static_cast<int32_t>(recycleNode->GetReusableMemOptStrategy());
+
+        // Calculate cachedCount based on device memory size
+        int32_t cachedCount = 2; // if deviceMemory <= 6G, cachedCount = 2
+        int32_t deviceMemory = SystemProperties::GetBootVendorDdrSize();
+        if (deviceMemory > 8) {
+            cachedCount = 48; // if deviceMemory > 8G, cachedCount = 48
+        } else if (deviceMemory > 6) {
+            cachedCount = 4; // if 6G < deviceMemory <= 8G, cachedCount = 4
+        }
+
+        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName(), memOptStrategy, cachedCount);
         if (!recycleNode->HasRecycleRenderFunc() && jsView->recycleCustomNode_) {
             recycleUINode->SetJSViewActive(false, false, true);
             jsView->jsViewFunction_->ExecuteAboutToRecycle();
@@ -803,15 +816,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         CHECK_NULL_RETURN(jsView->jsViewFunction_, true);
         ContainerScope scope(jsView->GetInstanceId());
         return jsView->jsViewFunction_->ExecuteReleaseRecyclePool(remainingTimeMs, isProgressive, shouldCollect);
-    };
-
-    auto enableReleaseExpiringNodesFunc =
-        [weak = AceType::WeakClaim(this)](bool enable, const std::vector<std::string>& reuseIds) -> void {
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        CHECK_NULL_VOID(jsView->jsViewFunction_);
-        ContainerScope scope(jsView->GetInstanceId());
-        jsView->jsViewFunction_->ExecuteEnableReleaseExpiringNodes(enable, reuseIds);
     };
 
     auto triggerLifecycleFunc = [weak = AceType::WeakClaim(this)](int32_t eventId) -> bool {
@@ -890,7 +894,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .hasNodeUpdateFunc = std::move(hasNodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .releaseRecyclePoolFunc = std::move(releaseRecyclePoolFunc),
-        .enableReleaseExpiringNodes = std::move(enableReleaseExpiringNodesFunc),
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
@@ -1160,17 +1163,6 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
     needsUpdate_ = ViewPartialUpdateModel::GetInstance()->MarkNeedUpdate(viewNode_);
-}
-
-void JSViewPartialUpdate::TryReleaseExpiringNode(const JSCallbackInfo& info)
-{
-    if (info.Length() == 0 || !info[0]->IsString()) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
-    }
-    auto reuseId = info[0]->ToString();
-    bool result = ViewPartialUpdateModel::GetInstance()->TryReleaseExpiringNode(viewNode_, reuseId);
-    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
 /**
@@ -1733,7 +1725,6 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
     JSClass<JSViewPartialUpdate>::Method(
         "allowReusableV2Descendant", &JSViewPartialUpdate::JSAllowReusableV2Descendant);
-    JSClass<JSViewPartialUpdate>::CustomMethod("tryReleaseExpiringNode", &JSViewPartialUpdate::TryReleaseExpiringNode);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

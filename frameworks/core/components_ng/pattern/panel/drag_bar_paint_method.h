@@ -21,16 +21,12 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/render/node_paint_method.h"
 
-namespace OHOS::Ace {
-enum class PanelMode;
-}
-
 namespace OHOS::Ace::NG {
 
 class DragBarPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(DragBarPaintMethod, NodePaintMethod);
 public:
-    DragBarPaintMethod();
+    DragBarPaintMethod() = default;
     ~DragBarPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
@@ -56,7 +52,7 @@ protected:
 private:
     void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 
-    PanelMode panelMode_;
+    PanelMode panelMode_ = PanelMode::HALF;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragBarPaintMethod);
 };

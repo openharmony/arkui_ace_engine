@@ -15,19 +15,23 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("key_event_manager_test") {
   module_name = "FormAndSelection-Button"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [ "key_event_manager_test.cpp" ]
 
   if (!ace_enable_full_test_suite) {
     sources = []
     sources = [
-      "key_event_manager_test_min.cpp",
       "key_event_manager_test_core.cpp",
+      "key_event_manager_test_min.cpp",
     ]
   } else {
     sources += [
-      "key_event_manager_test_min.cpp",
       "key_event_manager_test_core.cpp",
+      "key_event_manager_test_min.cpp",
     ]
   }
 }

@@ -505,9 +505,7 @@ void AccessibilityFrameNodeUtils::IsCoveredByBrother(
     auto parentFrameNode = frameNode;
     do {
         parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
-        if (!parentFrameNode) {
-            break;
-        }
+        CHECK_NULL_BREAK(parentFrameNode);
 
         auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_CONTINUE(accessibilityProperty);

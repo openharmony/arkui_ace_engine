@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/common/container.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/log/ace_checker.h"

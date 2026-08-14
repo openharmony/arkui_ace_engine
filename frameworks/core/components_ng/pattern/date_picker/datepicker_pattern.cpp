@@ -51,7 +51,6 @@
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 

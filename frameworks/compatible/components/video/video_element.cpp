@@ -14,7 +14,6 @@
  */
 
 #include "compatible/components/video/video_element.h"
-#include "core/common/container.h"
 
 #include "core/event/key_event.h"
 
@@ -28,7 +27,6 @@
 #include <fcntl.h>
 
 #include "base/i18n/localization.h"
-#include "base/resource/data_provider_manager.h"
 #include "base/image/file_uri_helper.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"

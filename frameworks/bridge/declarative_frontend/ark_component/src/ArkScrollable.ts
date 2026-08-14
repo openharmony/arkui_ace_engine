@@ -301,7 +301,7 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
       modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
       return this;
     }
-    scrollBarHeight(height: LengthMetrics | undefined): this {
+    scrollBarHeight(height: LengthMetrics | undefined): T {
       modifierWithKey(this._modifiersWithKeys, ScrollBarHeightModifier.identity, ScrollBarHeightModifier, height);
       return this;
     }

@@ -880,6 +880,8 @@ public:
     void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
+    bool IsRootInnerWeb();
+    RefPtr<FrameNode> FindFirstExportTextureAncestor();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     bool Backward();
     void OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionConfig &config);

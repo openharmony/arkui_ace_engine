@@ -38,13 +38,6 @@ constexpr float PICKER_SPRING_DAMPING = 10.f;
 constexpr float VMAX = 5.0f;
 } // namespace
 
-TextPickerTossAnimationController::~TextPickerTossAnimationController() = default;
-
-RefPtr<NodeAnimatablePropertyFloat> TextPickerTossAnimationController::GetTossNodeAnimation() const
-{
-    return property_;
-}
-
 void TextPickerTossAnimationController::SetStart(double y)
 {
     auto weak = AceType::WeakClaim(this);

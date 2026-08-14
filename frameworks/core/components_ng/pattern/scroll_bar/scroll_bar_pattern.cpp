@@ -251,10 +251,6 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     auto positionMode = GetPositionMode();
     scrollBar_->SetPositionMode(positionMode);
     scrollBar_->SetUseInnerScrollBar(UseInnerScrollBar());
-    if (UseInnerScrollBar()) {
-        scrollBar_->SetScrollBarHeight(1.0_pct);
-        scrollBar_->SetScrollBarStartMargin(0.0_vp);
-    }
     if (scrollBarOverlayModifier_) {
         scrollBarOverlayModifier_->SetPositionMode(positionMode);
     }

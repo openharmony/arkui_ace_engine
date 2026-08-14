@@ -157,6 +157,9 @@
             "@ohos.arkui.components.ArkDynamicLayout": [
                 "./@ohos.arkui.components.ArkDynamicLayout"
             ],
+            "@ohos.arkui.components.SelectionContainer": [
+                "./@ohos.arkui.components.SelectionContainer.ets"
+            ],
             "@ohos.arkui.components.ArkLazyDynamicLayout": [
                 "./@ohos.arkui.components.ArkLazyDynamicLayout"
             ],

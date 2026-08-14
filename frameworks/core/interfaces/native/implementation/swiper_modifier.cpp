@@ -720,6 +720,19 @@ void SetMaintainVisibleContentPositionImpl(Ark_NativePointer node,
         SwiperModelStatic::SetMaintainVisibleContentPosition(frameNode, *optValue);
     }
 }
+void SetIgnoreHiddenItemImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::OptConvertPtr<bool>(value);
+    if (!optValue) {
+        SwiperModelStatic::SetIgnoreHiddenItem(frameNode, false);
+    } else {
+        SwiperModelStatic::SetIgnoreHiddenItem(frameNode, *optValue);
+    }
+}
 void SetAutoPlay1Impl(Ark_NativePointer node,
                      const Opt_Boolean* autoPlay,
                      const Opt_AutoPlayOptions* options)
@@ -919,6 +932,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::SetPageFlipModeImpl,
         SwiperAttributeModifier::SetOnContentWillScrollImpl,
         SwiperAttributeModifier::SetMaintainVisibleContentPositionImpl,
+        SwiperAttributeModifier::SetIgnoreHiddenItemImpl,
         SwiperAttributeModifier::SetAutoPlay1Impl,
         SwiperAttributeModifier::SetDisplayArrowImpl,
         SwiperAttributeModifier::SetCachedCount1Impl,

@@ -35,7 +35,6 @@
 #include "pointer_event.h"
 #include "configuration.h"
 
-#include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -75,7 +74,6 @@
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -306,7 +304,8 @@ void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const Ref
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
     const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false,
+    bool isDynamicUIContent = false)
 {
     std::string bundleName = "";
     std::string moduleName = "";
@@ -332,9 +331,16 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
-        resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
-        resourceAdapter->SetBundleName(bundleName);
-        resourceAdapter->SetModuleName(moduleName);
+        if (isDynamicUIContent) {
+            resourceAdapter =
+                ResourceAdapterImplV2::CreateOverrideResourceAdapter(context->GetResourceManager(), resourceInfo);
+        } else {
+            resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
+        }
+        if (resourceAdapter) {
+            resourceAdapter->SetBundleName(bundleName);
+            resourceAdapter->SetModuleName(moduleName);
+        }
     } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
@@ -3022,10 +3028,12 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
-                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
+                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock(),
+                                    isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
 
-        InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo);
+        InitResourceAndThemeManager(
+            pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo, false, isDynamicUIContent);
         auto themeManager = pipelineContext->GetThemeManager();
         if (themeManager) {
             pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
@@ -3984,8 +3992,9 @@ void AceContainer::UpdateResource()
     if (pipelineContext_->IsFormRender()) {
         ReleaseResourceAdapter();
     }
+    bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     InitResourceAndThemeManager(
-        pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
+        pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true, isDynamicUIContent);
 
     auto cache = pipelineContext_->GetImageCache();
     if (cache) {
@@ -5218,6 +5227,7 @@ void AceContainer::TerminateUIExtensionInner(int32_t code)
 void AceContainer::GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
     EventPositionInfo& originalPos)
 {
+    CHECK_NULL_VOID(uiWindow_);
     Rosen::EventPositionInfo winEventPositionInfo {eventPositionInfo.displayX, eventPositionInfo.displayY};
     Rosen::EventPositionInfo winOriginalPos {eventPositionInfo.displayX, eventPositionInfo.displayY};
     uiWindow_->GetEventOriginalPosition(winEventPositionInfo, winOriginalPos);

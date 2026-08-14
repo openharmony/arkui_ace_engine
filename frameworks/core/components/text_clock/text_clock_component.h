@@ -32,7 +32,7 @@ class ACE_FORCE_EXPORT TextClockComponent : public TextComponentV2 {
     DECLARE_ACE_TYPE(TextClockComponent, TextComponentV2);
 
 public:
-    explicit TextClockComponent(const std::string& data) : TextComponentV2(data) {}
+    ACE_FORCE_EXPORT explicit TextClockComponent(const std::string& data) : TextComponentV2(data) {}
     ~TextClockComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;

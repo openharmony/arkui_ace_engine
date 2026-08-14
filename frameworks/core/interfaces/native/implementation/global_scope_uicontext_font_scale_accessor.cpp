@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -24,7 +23,7 @@ namespace GlobalScopeUicontextFontScaleAccessor {
 Ark_Boolean IsFollowingSystemFontScaleImpl()
 {
     bool follow = false;
-    auto container = OHOS::Ace::Container::CurrentSafely();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Boolean>(follow));
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Boolean>(follow));
@@ -34,7 +33,7 @@ Ark_Boolean IsFollowingSystemFontScaleImpl()
 Ark_Float64 GetMaxFontScaleImpl()
 {
     float maxFontScale = 0.0f;
-    auto container = OHOS::Ace::Container::CurrentSafely();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, Converter::ArkValue<Ark_Float64>(maxFontScale));
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Float64>(maxFontScale));
@@ -52,3 +51,4 @@ const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicont
 }
 
 }
+

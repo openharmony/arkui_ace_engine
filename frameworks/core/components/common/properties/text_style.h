@@ -620,8 +620,8 @@ public:
     TextStyle(const Color& textColor) : propTextColor_(textColor) {}
     ~TextStyle() = default;
 
-    ACE_FORCE_EXPORT bool operator==(const TextStyle& rhs) const;
     ACE_FORCE_EXPORT bool operator!=(const TextStyle& rhs) const;
+    ACE_FORCE_EXPORT bool operator==(const TextStyle& rhs) const;
 
     static void ToJsonValue(
         std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style, const NG::InspectorFilter& filter);
@@ -689,17 +689,17 @@ public:
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         TextDirection, TextDirection, TextDirection::AUTO, ParagraphStyleAttribute::DIRECTION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
-        OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_DIMENSION_STYLE_WITH_DEFAULT_VALUE(
+        StrokeWidth, Dimension(0.0f, DimensionUnit::PX), 0.0f, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         LineThicknessScale, float, 1.0f, TextStyleAttribute::DECORATION_THICKNESS_SCALE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
-        OrphanCharOptimization, bool, false, ParagraphStyleAttribute::RE_CREATE);
+ 	    OrphanCharOptimization, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         CompressLeadingPunctuation, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(

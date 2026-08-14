@@ -128,9 +128,9 @@ private:
     Color autoFillOriginTextColor_;
     RectF animationTextRect_;
     // for MANUAL_REQUEST
-    int32_t selectedStart_;
-    int32_t selectedEnd_;
-    AutoFillInsertStatus insertStatus_;
+    int32_t selectedStart_ = -1;
+    int32_t selectedEnd_ = -1;
+    AutoFillInsertStatus insertStatus_ = AutoFillInsertStatus::INIT;
 };
 } // namespace OHOS::Ace::NG
 

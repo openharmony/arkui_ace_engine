@@ -21,13 +21,13 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
-#include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
+#include "compatible/components/list_v2/list_component.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/common/window_size_breakpoint.h"
 
@@ -50,6 +50,7 @@ struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
+    bool isLazyChild = false;
     bool isPressed = false;
     float scale = 1.0f;
     float offsetY = 0.0f;
@@ -444,8 +445,6 @@ public:
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
     void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
-
-    void ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info);
 
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 

@@ -22,8 +22,6 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 namespace OHOS::Ace::NG {
-class LayoutWrapper;
-
 class WaterFlowLayoutUtils {
 public:
     static std::string PreParseArgs(const std::string& args);

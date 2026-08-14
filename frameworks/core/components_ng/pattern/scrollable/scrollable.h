@@ -39,10 +39,6 @@ class ExtentPair;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
-class AnimatablePropertyFloat;
-template<typename T, typename S>
-class NodeAnimatableProperty;
-using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 constexpr float FRICTION_FINAL_POSITION_THRESHOLD = 60.0f;
 
 struct SlidInfo {
@@ -87,9 +83,9 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable();
-    Scrollable(ScrollPositionCallback&& callback, Axis axis);
-    Scrollable(const ScrollPositionCallback& callback, Axis axis);
+    Scrollable() = default;
+    Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
+    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
     ~Scrollable() override;
 
     enum class AnimationState {
@@ -799,10 +795,7 @@ private:
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
     bool isCrownDragging_ = false;
-    bool isWillFling_ = false;
-    bool isNeedFireDidStopFling_ = false;
     bool isTouchStopAnimation_ = false;
-    bool isDragOuterScrollBarStopAnimation_ = false;
     bool isUserFling_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
@@ -882,6 +875,7 @@ private:
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
     bool isSlow_ = false;
+    bool isDragOuterScrollBarStopAnimation_ = false;
     std::optional<float> nextStep_;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
 

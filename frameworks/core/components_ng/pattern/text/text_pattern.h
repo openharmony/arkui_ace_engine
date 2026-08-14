@@ -31,6 +31,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
@@ -111,6 +112,13 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
     RefPtr<EventHub> CreateEventHub() override;
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override
+    {
+        if (!vOverflowHandler_) {
+            vOverflowHandler_ = MakeRefPtr<VerticalOverflowHandler>(host);
+        }
+        return vOverflowHandler_;
+    }
     virtual bool IsDragging() const;
     bool IsAtomicNode() const override;
     bool IsTextNode() const;
@@ -279,6 +287,7 @@ public:
     ACE_FORCE_EXPORT void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const;
     const RefPtr<ParagraphManager>& GetParagraphManager() const;
+    bool IsContentOverflowForSmartLayout(const SizeF& allocatedSize);
     void MarkContentChange();
     void ResetContChange();
     bool GetContChange() const;
@@ -380,9 +389,12 @@ public:
     std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
-    PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y) override;
-    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
-    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(
+        int32_t x, int32_t y, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
 
     void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
@@ -565,6 +577,9 @@ protected:
     bool CheckAndClick(const RefPtr<SpanItem>& item);
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     bool SelectOverlayIsOn();
+    bool HasAnySelectionInContainer();
+    bool IsSelfSelectedInContainer();
+    bool HasOwnSelection();
     bool IsSelectOverlayUsingMouse();
     void HideSelectionMenu(bool noAnimation = false, bool showSubMenu = false);
     void HiddenMenu();
@@ -888,6 +903,7 @@ private:
 
     // used to keep same life cycle with TextPattern
     std::function<void()> jsTextControllerBinder_;
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 };
 } // namespace OHOS::Ace::NG
 

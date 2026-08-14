@@ -61,22 +61,25 @@ ace_unittest("measure_utils_test_ng") {
   sources = [ "measure_utils_test_ng.cpp" ]
 }
 
+property_min_sources = [
+  "property_test_min.cpp",
+  "property_test_core.cpp",
+]
+
+property_full_sources = [ "property_test_ng.cpp" ] + property_min_sources
+
 ace_unittest("property_test_ng") {
-  type = "new"
   module_name = "CommonEvent-Input"
-  sources = [ "property_test_ng.cpp" ]
-   if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ 
-      "property_test_min.cpp",
-      "property_test_core.cpp",
-    ]
+  sources = property_full_sources
+
+  if (is_host_product) {
+    type = "host_components"
   } else {
-    sources += [ 
-      "property_test_min.cpp",
-      "property_test_core.cpp",
-    ]
-   }
+    type = "new"
+    if (!ace_enable_full_test_suite) {
+      sources = property_min_sources
+    }
+  }
 }
 
 ace_unittest("layout_constraint_test_ng") {

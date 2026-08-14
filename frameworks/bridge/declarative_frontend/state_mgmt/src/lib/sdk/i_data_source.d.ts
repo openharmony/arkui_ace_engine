@@ -21,7 +21,6 @@
  */
 declare interface DataChangeListener {
   onDataReloaded(): void;
-  onDataReloaded(reuseImmediately: boolean): void;
   onDataAdded(index: number): void;
   onDataMoved(from: number, to: number): void;
   onDataDeleted(index: number): void;

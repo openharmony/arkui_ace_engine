@@ -103,7 +103,7 @@ const auto FAMILY_BY_NUMBER = "second";
 const std::vector<std::tuple<Ark_ResourceStr, std::string>> SRC_RESOURCES_TEST_PLAN = {
     { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
     { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
-    { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "#FFFF0000" },
+    { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "resource:///ohos_test_image.svg" },
 };
 
 const std::vector<std::tuple<Ark_ResourceStr, std::string>> ARK_RESOURCES_TEST_PLAN = {
@@ -164,6 +164,8 @@ public:
         AddResource(RES_FAMILY_NAME, FAMILY_BY_STRING);
         AddMockResourceData(static_cast<uint32_t>(std::get<0>(RES_FAMILY_ID)),
             std::vector<std::string>{FAMILY_BY_NUMBER});
+        AddMockResourceData(std::string(std::get<0>(RES_FAMILY_NAME)),
+            std::vector<std::string>{FAMILY_BY_STRING});
     }
 };
 
@@ -180,7 +182,7 @@ HWTEST_F(SearchModifierResourcesTest, setSearchOptionsTestResources, TestSize.Le
     const std::vector<std::tuple<Ark_ResourceStr, std::string>> testPlan = {
         { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
         { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
-        { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "#FFFF0000" },
+        { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "" },
     };
 
     for (const auto &[src, expected] : testPlan) {

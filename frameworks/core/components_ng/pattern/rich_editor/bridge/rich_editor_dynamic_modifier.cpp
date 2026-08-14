@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_model.h"
@@ -1630,12 +1629,15 @@ ArkUITextLineMetrics GetRichEditorLineMetrics(ArkUINodeHandle node, ArkUI_Int32 
     return Convert(textLineMetrics);
 }
 
-void* GetRichEditorCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy)
+void* GetRichEditorCharacterPositionAtCoordinate(
+    ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy, ArkUI_Int32 encoding)
 {
 #ifndef PREVIEW
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    PositionWithAffinity positionWithAffinity = RichEditorModelNG::GetCharacterPositionAtCoordinate(frameNode, dx, dy);
+    auto aceEncoding = static_cast<NG::TextEncoding>(encoding);
+    PositionWithAffinity positionWithAffinity =
+        RichEditorModelNG::GetCharacterPositionAtCoordinate(frameNode, dx, dy, aceEncoding);
     auto* indexAndAffinity = new OHOS::Rosen::IndexAndAffinity(0, OHOS::Rosen::Affinity::PREV);
     indexAndAffinity->index = positionWithAffinity.position_;
     indexAndAffinity->affinity = static_cast<OHOS::Rosen::Affinity>(positionWithAffinity.affinity_);
@@ -1646,13 +1648,15 @@ void* GetRichEditorCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Flo
 }
 
 void GetRichEditorGlyphRangeForCharacterRange(
-    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range)
 {
 #ifndef PREVIEW
     CHECK_NULL_VOID(range);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto [glyphRange, charRange] = RichEditorModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end);
+    auto aceEncoding = static_cast<NG::TextEncoding>(encoding);
+    auto [glyphRange, charRange] =
+        RichEditorModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end, aceEncoding);
     range->glyphStart = glyphRange.start;
     range->glyphEnd = glyphRange.end;
     range->charStart = charRange.start;
@@ -1662,13 +1666,15 @@ void GetRichEditorGlyphRangeForCharacterRange(
 }
 
 void GetRichEditorCharacterRangeForGlyphRange(
-    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 encoding, GlyphCharacterRange* range)
 {
 #ifndef PREVIEW
     CHECK_NULL_VOID(range);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto [charRange, glyphRange] = RichEditorModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end);
+    auto aceEncoding = static_cast<NG::TextEncoding>(encoding);
+    auto [charRange, glyphRange] =
+        RichEditorModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end, aceEncoding);
     range->glyphStart = glyphRange.start;
     range->glyphEnd = glyphRange.end;
     range->charStart = charRange.start;

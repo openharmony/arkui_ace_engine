@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
-#include "core/common/container.h"
 #include <cstdint>
 #include <optional>
 #include "ui/common/layout/constants.h"
@@ -28,7 +27,6 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1439,7 +1437,7 @@ void TextContentModifier::ResumeAnimation()
     AnimationUtils::ResumeAnimation(raceAnimation_);
     SetMarqueeState(MarqueeState::RUNNING);
 }
-
+ 
 void TextContentModifier::PauseAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
@@ -1653,7 +1651,7 @@ void TextContentModifier::ContentModifierDump()
                             .append(std::to_string(static_cast<uint8_t>(animatableTextColor.GetPlaceholder()))));
     }
     dumpLog.AddDesc(
-        std::string("onlyTextColorAnimation: ")
+        std::string(" onlyTextColorAnimation: ")
             .append(std::to_string(onlyTextColorAnimation_))
             .append(" textColor_:")
             .append(textColor_.has_value() ? textColor_.value().ToString() : "NA")

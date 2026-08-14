@@ -54,8 +54,8 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return MeasureContentForApiNine(contentConstraint, layoutWrapper);
     }
-    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
@@ -128,10 +128,10 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContentForApiNine(
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
     auto progressTheme = host->GetTheme<ProgressTheme>(true);
+    auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth().
@@ -191,7 +191,7 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     CHECK_NULL_RETURN(host, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto progressTheme = host->GetTheme<ProgressTheme>(true);
     Dimension margin = progressTheme->GetTextMargin();
@@ -213,7 +213,7 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     float childHeight =
         paintProperty->GetTextSize().value_or(progressTheme->GetTextSize()).ConvertToPx() + 2 * margin.ConvertToPx();
 
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     if (GreatOrEqualCustomPrecision(fontScale, progressTheme->GetFontScale()) && (GetType() == ProgressType::CAPSULE)) {
         const auto& paddingProperty = layoutProperty->GetPaddingProperty();
         if (!(paddingProperty &&

@@ -252,7 +252,7 @@ void GaugeBridge::RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM
         "resetGaugeStartAngle", "setGaugeEndAngle", "resetGaugeEndAngle", "setGaugeStrokeWidth",
         "resetGaugeStrokeWidth", "setGaugeTrackShadow", "resetGaugeTrackShadow", "setGaugeIndicator",
         "resetGaugeIndicator", "setGaugeColors", "resetGaugeColors", "setContentModifierBuilder", "setDescription",
-        "SetGaugePrivacySensitive", "ResetGaugePrivacySensitive" };
+        "setGaugePrivacySensitive", "resetGaugePrivacySensitive" };
 
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::CreateGauge),

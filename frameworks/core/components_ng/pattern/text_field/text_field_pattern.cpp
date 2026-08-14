@@ -16,7 +16,6 @@
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -26,7 +25,6 @@
 #include <cctype>
 #include <string_view>
 #include "base/geometry/dimension.h"
-#include "base/resource/data_provider_manager.h"
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
 #include "base/utils/string_utils.h"
@@ -7452,6 +7450,15 @@ void TextFieldPattern::ProcessPendingCaretEvent()
     }
 }
 
+EmojiRelation TextFieldPattern::GetEmojiRelation(int index)
+{
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    return TextEmojiProcessor::GetIndexRelationToEmoji(index, GetTextUtf16Value(),
+        emojiStartIndex, emojiEndIndex);
+}
+
+
 bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
 {
 #ifdef CROSS_PLATFORM
@@ -7464,7 +7471,13 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
             if (value->compose.GetStart() == 0 && value->text.empty()) {
                 DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
             } else {
-                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+                EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+                if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+                    relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+                    HandleOnDelete(true);
+                } else {
+                    DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+                }
             }
             value->compose.Update(-1);
         } else {

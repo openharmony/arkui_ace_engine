@@ -18,7 +18,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/system_bar/system_bar_style.h"
-#include "core/common/display_info.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
@@ -969,7 +968,6 @@ private:
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode);
     void UpdatePlaceholderVisibilityIfNeeded();
-    static std::string GetNavDestinationJsViewName(RefPtr<UINode> uiNode);
 
     //-------for force split------- begin------
     bool IsNavBarValid();

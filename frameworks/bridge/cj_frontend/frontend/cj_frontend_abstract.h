@@ -28,9 +28,7 @@
 #include "bridge/common/utils/pipeline_context_holder.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/frontend.h"
-#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 #if defined(PREVIEW)
 #include "adapter/preview/osal/response_data.h"

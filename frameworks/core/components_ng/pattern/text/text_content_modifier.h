@@ -27,9 +27,9 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-class Paragraph;
 class TextPattern;
 
 enum class MarqueeState {
@@ -55,10 +55,11 @@ class ACE_FORCE_EXPORT TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier);
 
 public:
-    explicit TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);
+    ACE_FORCE_EXPORT explicit TextContentModifier(
+        const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);
     ~TextContentModifier() override = default;
 
-    void onDraw(DrawingContext& drawingContext) override;
+    ACE_FORCE_EXPORT void onDraw(DrawingContext& drawingContext) override;
 
     void SetFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
@@ -121,7 +122,6 @@ public:
     {
         return paintOffset_;
     }
-
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
@@ -263,7 +263,6 @@ private:
     float lastLineHeight_ = 0.0f;
 
     WeakPtr<Pattern> pattern_;
-
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 

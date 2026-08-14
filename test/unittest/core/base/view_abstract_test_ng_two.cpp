@@ -49,11 +49,8 @@ HWTEST_F(ViewAbstractTestNg, OpenMenuTest001, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, "Text", MenuType::MENU));
     ASSERT_NE(menuNode, nullptr);
     menuNode->MountToParent(selectNode);
-    selectNode->MountToParent(rootNode);
-    rootNode->MarkDirtyNode();
+    ElementRegister::GetInstance()->AddUINode(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
-    menuNode->onMainTree_ = true;
-    menuNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
     MenuParam menuParam;
     menuParam.isShowInSubWindow = true;
 

@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/list/list_pattern.h"
-
 #include <limits>
-#include "core/common/container.h"
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
@@ -413,7 +411,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     predictSnapEndPos_ = predictSnapEndPos;
 
     if (isScrollEnd_) {
-        FireAccessibilityScrollEndEvent();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         // AccessibilityEventType::SCROLL_END
         isScrollEnd_ = false;
     }
@@ -475,10 +475,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
-    if (!IsScrolling()) {
-        // Reset accessibilityScrollSource_ when scrolling is not in progress
-        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
-    }
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
     snapTrigByScrollBar_ = false;
@@ -1370,7 +1366,6 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
 
     SetScrollSource(source);
-    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
@@ -1906,7 +1901,6 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
-    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // triggered by smart gesture
     ScrollToIndex(curIndex, smooth_, GetScrollToNodeAlign());
     auto pipeline = GetContext();
     if (pipeline) {
@@ -1917,15 +1911,11 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 
 ScrollOffsetAbility ListPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
+    (void)isAccessibility;
     return {
-        [wp = WeakClaim(this), isAccessibility](float moveOffset) -> bool {
+        [wp = WeakClaim(this)](float moveOffset) -> bool {
             auto pattern = wp.Upgrade();
             CHECK_NULL_RETURN(pattern, false);
-            if (isAccessibility) {
-                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
-            } else {
-                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
-            }
             pattern->ScrollBy(-moveOffset);
             return true;
         },
@@ -1940,7 +1930,6 @@ std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
     return [wp = WeakClaim(this)](int32_t index) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         if (index == FocusHub::SCROLL_TO_HEAD) {
             // When the focus framework calls to find Head and Tail, it should reset. Otherwise, due to scrolling, the
             // newly acquired focus will immediately lose focus and set depend to SELF.
@@ -1961,7 +1950,6 @@ std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
-    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     bool isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
     bool needFindNextFocusNode = ScrollListItemGroupForFocus(
         nextIndex, curIndex, nextIndexInGroup, curIndexInGroup, moveStep, step, isScrollIndex);
@@ -2997,12 +2985,13 @@ void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
         if (pos.groupInfo) {
             bool groupAtStart = pos.groupInfo.value().atStart;
             if (groupAtStart) {
-                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup, pos.isLazyChild });
             } else {
-                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
+                posMap_->UpdatePosWithCheck(
+                    index, { currentOffset_ + pos.startPos, height, pos.isGroup, pos.isLazyChild });
             }
         } else {
-            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup, pos.isLazyChild });
         }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
@@ -3019,7 +3008,8 @@ void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChang
     auto prevPosInfo = posMap_->GetPositionInfo(index - 1);
     delta = isStackFromEnd_ ? -(delta + sizeChange) : delta;
     if (Negative(prevPosInfo.mainPos)) {
-        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange, posInfo.isGroup});
+        posMap_->UpdatePos(index,
+            { posInfo.mainPos + delta, posInfo.mainSize + sizeChange, posInfo.isGroup, posInfo.isLazyChild });
     }
     if (index == GetStartIndex()) {
         sizeChange += delta;
@@ -3750,6 +3740,7 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("startPos:" + std::to_string(item.second.startPos));
         DumpLog::GetInstance().AddDesc("endPos:" + std::to_string(item.second.endPos));
         DumpLog::GetInstance().AddDesc("isGroup:" + std::to_string(item.second.isGroup));
+        DumpLog::GetInstance().AddDesc("isLazyChild:" + std::to_string(item.second.isLazyChild));
     }
     DumpLog::GetInstance().AddDesc("------------------------------------------");
     scrollStop_ ? DumpLog::GetInstance().AddDesc("scrollStop:true")
@@ -4371,6 +4362,7 @@ void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
         child->Put("startPos", std::to_string(item.second.startPos).c_str());
         child->Put("endPos", std::to_string(item.second.endPos).c_str());
         child->Put("isGroup", std::to_string(item.second.isGroup).c_str());
+        child->Put("isLazyChild", std::to_string(item.second.isLazyChild).c_str());
         children->Put(child);
     }
     json->Put("itemPosition", children);
@@ -5150,7 +5142,6 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     SetScrollSource(SCROLL_FROM_FOCUS_JUMP);
-    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -5409,7 +5400,6 @@ void ListPattern::ScrollToFocusNodeIndex(int32_t index)
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         SetScrollSource(SCROLL_FROM_FOCUS_JUMP);
-        SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         auto pipeline = host->GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
-#include "core/common/container.h"
 
 #include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
@@ -50,14 +49,14 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textGeometryNode = textWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
 
     double fontSizeInit = 0.0;
     double badgeSizeInit = 0.0;
-    auto fontSizeScale = pipeline->GetFontScale();
+    auto fontSizeScale = pipeline->GetFontScaleFromEnv(host);
     auto isDefaultFontSize = layoutProperty->GetFontSizeIsDefault();
     auto isDefaultBadgeSize = layoutProperty->GetBadgeSizeIsDefault();
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
@@ -248,13 +247,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
 
     double badgeSizeInit;
-    auto fontSizeScale = pipeline->GetFontScale();
+    auto fontSizeScale = pipeline->GetFontScaleFromEnv(host);
     auto isDefaultBadgeSize = layoutProperty->GetBadgeSizeIsDefault();
     auto badgeCircleSize = layoutProperty->GetBadgeCircleSize();
 

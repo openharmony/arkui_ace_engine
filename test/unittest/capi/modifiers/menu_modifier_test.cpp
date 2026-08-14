@@ -167,7 +167,7 @@ public:
         SetupTheme<SelectTheme>();
         SetupTheme<MenuTheme>();
 
-        AddResource(FAMILY_RES_ID, "aa.bb.cc");
+        AddMockResourceData(static_cast<uint32_t>(FAMILY_RES_ID), std::vector<std::string>{"aa.bb.cc"});
     }
 };
 

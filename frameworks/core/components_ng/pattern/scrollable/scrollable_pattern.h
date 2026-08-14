@@ -100,13 +100,6 @@ enum class ScrollError {
     SCROLL_NOT_SCROLLABLE_ERROR,
     SCROLL_ERROR_OTHER
 };
-enum class AccessibilityScrollSource {
-    NONE,
-    USER,
-    API,
-    ACCESSIBILITY,
-    FOCUS,
-};
 struct ScrollOffsetAbility {
     std::function<bool(float)> scrollFunc = nullptr;
     Axis axis = Axis::VERTICAL;
@@ -593,15 +586,6 @@ public:
         scrollSource_ = scrollSource;
     }
 
-    void SetAccessibilityScrollSource(AccessibilityScrollSource source)
-    {
-        accessibilityScrollSource_ = source;
-    }
-
-    std::string GetAccessibilityScrollSource();
-
-    void MarkUserScrollSource(int32_t source);
-
     int32_t GetScrollSource() const
     {
         return scrollSource_;
@@ -917,11 +901,6 @@ public:
         return scrollable->GetNestedScrolling();
     }
 
-    void SetIsScrolling(bool isScrolling)
-    {
-        isScrolling_ = isScrolling;
-    }
-
     bool IsScrolling() const
     {
         return isScrolling_;
@@ -1071,7 +1050,6 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
-    void FireAccessibilityScrollEndEvent();
     void FireObserverOnPanActionEnd(GestureEvent& info);
 
     float FireOnWillScroll(float offset) const;
@@ -1295,7 +1273,6 @@ private:
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     int32_t lastScrollSource_ = SCROLL_FROM_NONE;
-    AccessibilityScrollSource accessibilityScrollSource_ = AccessibilityScrollSource::NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;

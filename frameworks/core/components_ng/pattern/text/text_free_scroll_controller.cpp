@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text/text_free_scroll_controller.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/modifier.h"
 
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"

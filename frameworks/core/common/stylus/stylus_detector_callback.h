@@ -20,10 +20,7 @@
 #include "base/thread/task_executor.h"
 
 #include "core/components_ng/base/frame_node.h"
-
-namespace OHOS::Ace::NG {
-struct PositionWithAffinity;
-}
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
 class StylusDetectorCallBack : public OHOS::Ace::IStylusDetectorCallback {

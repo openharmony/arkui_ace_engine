@@ -17,11 +17,11 @@
 
 #include "core/common/container.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 #include "core/components_ng/pattern/search/bridge/arkts_native_search_bridge.h"
 #include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #ifdef INCLUDE_GENERATED_SOURCES
 #include "core/components_ng/pattern/search/search_model_static.h"
 #endif
@@ -38,7 +38,7 @@ namespace NodeModifier {
 const ArkUISearchModifier* GetSearchDynamicModifier();
 const CJUISearchModifier* GetCJUISearchModifier();
 const ArkUISearchCustomModifier* GetSearchCustomModifier();
-} // namespace NodeModifier
+}
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
 const GENERATED_ArkUISearchModifier* GetSearchStaticModifier();

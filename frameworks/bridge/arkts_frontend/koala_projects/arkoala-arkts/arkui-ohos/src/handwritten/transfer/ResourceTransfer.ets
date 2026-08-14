@@ -26,8 +26,7 @@ export class ResourceTransfer {
         const moduleName = ESValue.wrap(input).getProperty('moduleName').toString();
         const params = ESValue.wrap(input).getProperty('params');
         const paramsArray: Array<string | int | long | double | Resource> = new Array<string | int | long | double | Resource>();
-        const parray = params.unwrap() as Any[];
-        let arrayLength = parray.length;
+        let arrayLength = params.getProperty('length').toNumber();
         for (let i = 0; i < arrayLength; i++) {
             let item = params.getProperty(i);
             if (item.isString()) {

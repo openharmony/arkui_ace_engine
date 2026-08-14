@@ -226,6 +226,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onSelected", &JSSwiper::SetOnSelected);
     JSClass<JSSwiper>::StaticMethod("maintainVisibleContentPosition", &JSSwiper::SetMaintainVisibleContentPosition);
     JSClass<JSSwiper>::StaticMethod("onScrollStateChanged", &JSSwiper::SetOnScrollStateChanged);
+    JSClass<JSSwiper>::StaticMethod("ignoreHiddenItem", &JSSwiper::SetIgnoreHiddenItem);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1982,5 +1983,10 @@ int32_t JSSwiper::GetThemeScopeId()
         return NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;
     }
     return frameNode->GetThemeScopeId();
+}
+
+void JSSwiper::SetIgnoreHiddenItem(bool ignoreHiddenItem)
+{
+    SwiperModel::GetInstance()->SetIgnoreHiddenItem(ignoreHiddenItem);
 }
 } // namespace OHOS::Ace::Framework

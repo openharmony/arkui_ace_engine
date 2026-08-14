@@ -237,6 +237,13 @@ public:
             AddResource(id, res);
             AddResource(strid, res);
         }
+        // Add font family as string array (STRARRAY resource type)
+        AddMockResourceData(
+            static_cast<uint32_t>(FONT_FAMILY_RES_1_ID),
+            std::vector<std::string>{FONT_FAMILY_RES_VALUE});
+        AddMockResourceData(
+            std::string(FONT_FAMILY_RES_NAME),
+            std::vector<std::string>{FONT_FAMILY_RES_VALUE});
     }
 
     void SetUp(void) override

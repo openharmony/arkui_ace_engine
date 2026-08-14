@@ -172,13 +172,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return PUV2ViewBase.__preRenderingPool__Internal;
   }
 
-  protected __reusableMemOptStrategy__Internal: number = 0;
-
   protected __hasStartMemOpt__Internal: boolean = false;
-
-  protected __enableReleaseExpiringNodesFlag__Internal: boolean = false;
-
-  protected __reuseIdForReleaseExpiringNodes__Internal: Set<string> = new Set<string>();
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
@@ -357,14 +351,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public finishUpdateFunc(elmtId: number): void {
     return this.nativeViewPartialUpdate.finishUpdateFunc(elmtId);
   }
-
-  public tryReleaseExpiringNode(reuseId: string): boolean {
-    const result = this.nativeViewPartialUpdate.tryReleaseExpiringNode(reuseId);
-    if (!result) {
-      this.__reuseIdForReleaseExpiringNodes__Internal.delete(reuseId);
-    }
-    return result;
-  }
  
   public setCardId(cardId: number): void {
     return this.nativeViewPartialUpdate.setCardId(cardId);
@@ -430,16 +416,13 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   public __setReusableMemOptStrategy__Internal(reusableMemOptStrategy: ReusableMemOptStrategy): void {
-    let val: number = 0;
-    if (reusableMemOptStrategy === ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION) {
-      val = 1;
+    if (reusableMemOptStrategy === undefined || reusableMemOptStrategy === null) {
+      return this.nativeViewPartialUpdate.setReusableMemOptStrategy(-1);
     }
-    this.__reusableMemOptStrategy__Internal = val;
-    return this.nativeViewPartialUpdate.setReusableMemOptStrategy(val);
-  }
-
-  public __getReusableMemOptStrategy__Internal(): number {
-    return this.__reusableMemOptStrategy__Internal;
+    if (reusableMemOptStrategy === ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION) {
+      return this.nativeViewPartialUpdate.setReusableMemOptStrategy(1);
+    }
+    return this.nativeViewPartialUpdate.setReusableMemOptStrategy(0);
   }
 
   public __setHasStartMemOpt__Internal(hasStartMemOpt: boolean): void {
@@ -455,34 +438,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   public __releaseRecyclePool__Internal(remainingTimeMs: number, isProgressive: boolean, shouldCollect: boolean): boolean { return true; }
-
-  /**
-   * @function __enableReleaseExpiringNodes__Internal
-   * @description
-   * Enable or disable release of expiring nodes from C++ side.
-   * @param {string[]} reuseIds - list of reuseId to track
-   */
-  public __enableReleaseExpiringNodes__Internal(enable: boolean, reuseIds: string[]): void {
-    this.__enableReleaseExpiringNodesFlag__Internal = enable;
-    if (enable) {
-      reuseIds.forEach(reuseId => this.__reuseIdForReleaseExpiringNodes__Internal.add(reuseId));
-    } else {
-      this.__reuseIdForReleaseExpiringNodes__Internal = new Set();
-    }
-    
-  }
-
-  /**
-   * @function __isReleaseExpiringNodesEnabled__Internal
-   * @description
-   * Check if release of expiring nodes is enabled for the given reuseId.
-   * @param {string} reuseId - the reuseId to check
-   * @returns {boolean} - true if enabled for this reuseId, false if disabled or not in list
-   */
-  public __isReleaseExpiringNodesEnabled__Internal(reuseId: string): boolean {
-    return this.__enableReleaseExpiringNodesFlag__Internal &&
-           this.__reuseIdForReleaseExpiringNodes__Internal.has(reuseId);
-  }
 
   /**
    * @function __requestProgressiveRelease__Internal
@@ -1070,6 +1025,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): id generator is not a function. Application error!`);
       stateMgmtProfiler.end();
       return;
+    }
+
+    if (typeof itemArray.forEach !== 'function') {
+      throw new BusinessError(103806, `${this.debugInfo__()}: ForEach id ${elmtId}: the data source dose not have forEach function. Application Error!`);
     }
 
     if (idGenFunc === undefined) {

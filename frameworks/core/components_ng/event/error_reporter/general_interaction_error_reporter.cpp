@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

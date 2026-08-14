@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
-#include "core/components_ng/base/modifier.h"
 
 #include <optional>
 #include <string_view>
@@ -31,7 +30,6 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/event/scrollable_event.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
-#include "core/common/container.h"
 
 #include <algorithm>
 #include <cmath>

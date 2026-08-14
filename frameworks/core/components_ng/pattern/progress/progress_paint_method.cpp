@@ -15,8 +15,6 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
-#include "core/components_ng/render/paint_wrapper.h"
-#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 void ProgressPaintMethod::GetThemeData(PaintWrapper* paintWrapper)
@@ -119,7 +117,7 @@ void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
     bool isInprogress = LessNotEqual(0.0f, value_) && LessNotEqual(value_, maxValue_);
 
     if (!paintProperty->HasBackgroundColor()) {
-        bgColor_ = capsuleInprogressBgColor_;
+        bgColor_ = isInprogress ? capsuleInprogressBgColor_ : bgColor_;
         bgColor_ = isFocused ? capsuleBgFocusedColor_ : bgColor_;
     }
     bgColor_ = progressModifier_->CalculateHoverPressColor(bgColor_);
@@ -130,7 +128,7 @@ void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
     }
     progressModifier_->SetColor(LinearColor(color_));
 
-    if (!paintProperty->GetBorderColorSetByUser().value_or(false)) {
+    if (!paintProperty->GetBorderColorSetByUser().value_or(false) && isInprogress) {
         borderColor_ = capsuleInprogressBorderColor_;
     }
     borderColor_ = progressModifier_->CalculateHoverPressColor(borderColor_);
@@ -156,4 +154,5 @@ void ProgressPaintMethod::SetCapsuleBorderRadius(PaintWrapper* paintWrapper)
         paintProperty->GetBorderRadiusValue(Dimension(contentMinHalf, DimensionUnit::PX)).ConvertToPx());
     progressModifier_->SetCapsuleBorderRadius(std::min(contentMinHalf, borderRadius));
 }
+
 } // namespace OHOS::Ace::NG

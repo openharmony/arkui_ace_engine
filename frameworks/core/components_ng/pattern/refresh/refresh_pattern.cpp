@@ -14,9 +14,6 @@
  */
 
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/base/modifier.h"
-
-#include <string_view>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -57,7 +54,7 @@ constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
 constexpr float DEFAULT_FRICTION = 62.0f;
 const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-constexpr std::string_view REFRESH_DRAG_SCENE = "refresh_drag_scene";
+const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
 constexpr Dimension LOADING_TEXT_TOP_MARGIN = 16.0_vp;
 constexpr Dimension LOADING_TEXT_DISPLAY_DISTANCE = 80.0_vp;
 double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
@@ -65,8 +62,6 @@ double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
     return context ? context->NormalizeToPx(dimension) : dimension.ConvertToPx();
 }
 } // namespace
-
-RefreshPattern::~RefreshPattern() = default;
 
 Dimension RefreshPattern::GetTriggerRefreshDisTance()
 {
@@ -177,7 +172,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<FrameNode>& host)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
-        pattern->UpdateDragFRCSceneInfo(std::string(REFRESH_DRAG_SCENE), speed, SceneStatus::START);
+        pattern->UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::START);
         pattern->HandleDragStart(true, speed);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -190,7 +185,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<FrameNode>& host)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
-        pattern->UpdateDragFRCSceneInfo(std::string(REFRESH_DRAG_SCENE), speed, SceneStatus::END);
+        pattern->UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::END);
         pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
@@ -231,7 +226,7 @@ void RefreshPattern::InitOnKeyEvent(const RefPtr<FrameNode>& host)
 void RefreshPattern::InitProgressNode(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
-    progressChild_ = FrameNode::CreateFrameNode(LOADING_PROGRESS_ETS_TAG,
+    progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
     host->AddChild(progressChild_, 0);
@@ -257,6 +252,23 @@ void RefreshPattern::InitProgressNode(const RefPtr<FrameNode>& host)
     CalcLength length = CalcLength(NormalizeToPx(loadingProgressSizeTheme_, context));
     progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(length, length));
     progressChild_->MarkDirtyNode();
+}
+
+void RefreshPattern::UpdateLoadingTextStyle(const RefPtr<FrameNode>& host,
+    const RefPtr<TextLayoutProperty>& loadingTextLayoutProperty)
+{
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(loadingTextLayoutProperty);
+    auto &textStyle = loadingTextLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    if (fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        loadingTextLayoutProperty->UpdateFallbackLineSpacing(true);
+        loadingTextLayoutProperty->UpdateIncludeFontPadding(true);
+    }
 }
 
 void RefreshPattern::UpdateLoadingTextOpacity(float opacity)
@@ -295,6 +307,8 @@ void RefreshPattern::InitProgressColumn()
         loadingTextLayoutProperty->UpdateTextColor(refreshTheme->GetTextStyle().GetTextColor());
         loadingTextLayoutProperty->UpdateFontSize(refreshTheme->GetTextStyle().GetFontSize());
     }
+
+    UpdateLoadingTextStyle(host, loadingTextLayoutProperty);
 
     PaddingProperty textpadding;
     textpadding.top = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
@@ -482,7 +496,7 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 
 ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
-    UpdateDragFRCSceneInfo(std::string(REFRESH_DRAG_SCENE), mainSpeed, SceneStatus::RUNNING);
+    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
     if (isHigherVersion_) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
@@ -900,7 +914,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     option.SetCurve(curve);
     animation_ = AnimationUtils::StartAnimation(
         option,
-        [weak = AceType::WeakClaim(this), targetOffset]() {
+        [&, weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto offsetProperty = pattern->offsetProperty_;
@@ -1140,12 +1154,7 @@ void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)
         option.SetDuration(LOADING_ANIMATION_DURATION);
     }
     animation_ = AnimationUtils::StartAnimation(
-        option, [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(pattern->lowVersionOffset_);
-            pattern->lowVersionOffset_->Set(pattern->GetTriggerRefreshDisTance().ConvertToPx());
-        });
+        option, [&]() { lowVersionOffset_->Set(GetTriggerRefreshDisTance().ConvertToPx()); });
 }
 
 void RefreshPattern::LoadingProgressExit()
@@ -1156,13 +1165,7 @@ void RefreshPattern::LoadingProgressExit()
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option,
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(pattern->lowVersionOffset_);
-            pattern->lowVersionOffset_->Set(0.0f);
-        },
+        option, [&]() { lowVersionOffset_->Set(0.0f); },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1204,12 +1207,7 @@ void RefreshPattern::CustomBuilderRefreshingAnimation(bool isDrag)
         option.SetDuration(CUSTOM_BUILDER_ANIMATION_DURATION);
     }
     animation_ = AnimationUtils::StartAnimation(
-        option, [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(pattern->lowVersionOffset_);
-            pattern->lowVersionOffset_->Set(pattern->GetTriggerRefreshDisTance().ConvertToPx());
-        });
+        option, [&]() { lowVersionOffset_->Set(GetTriggerRefreshDisTance().ConvertToPx()); });
 }
 
 void RefreshPattern::CustomBuilderExit()
@@ -1219,13 +1217,7 @@ void RefreshPattern::CustomBuilderExit()
     AnimationOption option;
     option.SetDuration(CUSTOM_BUILDER_ANIMATION_DURATION);
     option.SetCurve(DEFAULT_CURVE);
-    animation_ = AnimationUtils::StartAnimation(
-        option, [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(pattern->lowVersionOffset_);
-            pattern->lowVersionOffset_->Set(0.0f);
-        });
+    animation_ = AnimationUtils::StartAnimation(option, [&]() { lowVersionOffset_->Set(0.0f); });
 }
 
 void RefreshPattern::UpdateCustomBuilderProperty()

@@ -188,6 +188,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperOnScrollStateChangedModifier.identity, SwiperOnScrollStateChangedModifier, event);
     return this;
   }
+  ignoreHiddenItem(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperIgnoreHiddenItemModifier.identity, SwiperIgnoreHiddenItemModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey<SwiperController> {
   static identity: Symbol = Symbol('swiperInitialize');
@@ -982,6 +986,19 @@ class SwiperOnScrollStateChangedModifier extends ModifierWithKey<boolean> {
       getUINativeModule().swiper.resetSwiperOnScrollStateChanged(node);
     } else {
       getUINativeModule().swiper.setSwiperOnScrollStateChanged(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperIgnoreHiddenItemModifier extends ModifierWithKey<boolean> {
+  static identity: Symbol = Symbol('swiperIgnoreHiddenItem');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperIgnoreHiddenItem(node);
+    } else {
+      getUINativeModule().swiper.setSwiperIgnoreHiddenItem(node, this.value);
     }
   }
   checkObjectDiff(): boolean {

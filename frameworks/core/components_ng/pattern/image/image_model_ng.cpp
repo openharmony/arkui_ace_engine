@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/common/container.h"
 
 #include "interfaces/native/node/resource.h"
 
@@ -34,7 +33,6 @@
 #endif
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace::NG {
 namespace {

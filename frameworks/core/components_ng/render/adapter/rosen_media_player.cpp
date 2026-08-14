@@ -13,20 +13,16 @@
  * limitations under the License.
  */
 #include "core/components_ng/render/adapter/rosen_media_player.h"
-#include "core/common/container.h"
 
 #include <cstdio>
 #include <string_view>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
-#include "base/resource/data_provider_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/pattern/video/media_player_callback.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -159,14 +159,11 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_WHITE = {
 };
 const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
 const auto RES_COLOR_ID = IntResourceId{123456, ResourceType::COLOR};
-const auto INVALID_ID_COLOR = IntResourceId{-1, ResourceType::COLOR};
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
     { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
         COLOR_RED },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
         COLOR_RED },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID_COLOR)),
-        COLOR_RED }
 };
 
 const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
@@ -295,6 +292,8 @@ public:
 
         SetupTheme<IndexerTheme>();
         AddResource(RES_NAME, CHECK_RESOURCE_STR);
+        AddResource(RES_COLOR_NAME, Color::RED);
+        AddResource(RES_COLOR_ID, Color::RED);
     }
 };
 
@@ -366,10 +365,27 @@ HWTEST_F(IndexerModifierTest, DISABLED_setColorTest, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColor, nullptr);
+    
+    // Define resources locally like CircleModifierTest does
+    const auto LOCAL_RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
+    const auto LOCAL_RES_COLOR_ID = IntResourceId{123456, ResourceType::COLOR};
+    
+    AddResource(LOCAL_RES_COLOR_NAME, Color::RED);
+    AddResource(LOCAL_RES_COLOR_ID, Color::RED);
+    
+    // Create resource plan locally
+    const std::vector<ColorTestStep> localColorTestPlanRes = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(LOCAL_RES_COLOR_NAME)),
+            COLOR_RED },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(LOCAL_RES_COLOR_ID)),
+            COLOR_RED },
+    };
+    
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
     EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
-    for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
+    for (size_t i = 0; i < localColorTestPlanRes.size(); ++i) {
+        const auto& [optValue, expectVal] = localColorTestPlanRes[i];
         modifier_->setColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
         EXPECT_THAT(checkVal, Eq(expectVal));

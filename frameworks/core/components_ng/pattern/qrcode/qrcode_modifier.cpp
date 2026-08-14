@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/qrcode/qrcode_modifier.h"
 
 namespace OHOS::Ace::NG {

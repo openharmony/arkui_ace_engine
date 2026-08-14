@@ -25,18 +25,15 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
-#include "base/log/ace_trace.h"
-#include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
+#include "base/resource/data_provider_manager.h"
 #include "base/thread/task_executor.h"
-#include "base/utils/system_properties.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
@@ -49,13 +46,17 @@
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "ui/resource/resource_configuration.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/non_pointer_event.h"
+#include "core/event/pointer_event.h"
+#include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -65,15 +66,9 @@ enum class AvoidAreaType : uint32_t;
 
 namespace OHOS::Ace {
 class ArkUIPerfMonitor;
-class DataProviderManagerInterface;
 class ScheduleTask;
 class SharedImageManager;
-class PlatformResRegister;
 struct RotationEvent;
-struct NonPointerEvent;
-struct DragPointerEvent;
-enum class FoldStatus : uint32_t;
-enum class FoldDisplayMode : uint32_t;
 namespace NG {
 class FrameNode;
 struct UIExtCallbackEvent;
@@ -108,18 +103,15 @@ class Clipboard;
 class Frontend;
 class OffscreenCanvas;
 class Window;
-class WindowManager;
 class FontManager;
 class ManagerInterface;
 class NavigationController;
 class StatisticEventReporter;
 class EventManager;
 class AccessibilityManager;
-class UIDisplaySyncManager;
 enum class FrontendType;
 enum class PlatformVersion;
 enum class AccessibilityCallbackEventId : uint32_t;
-enum class DragEventAction : int;
 struct AccessibilityEvent;
 using NodeId = int32_t;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
@@ -776,7 +768,10 @@ public:
     {
         return dataProviderManager_;
     }
-    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager);
+    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager)
+    {
+        dataProviderManager_ = dataProviderManager;
+    }
 
     const RefPtr<PlatformBridge>& GetMessageBridge() const
     {
@@ -1033,7 +1028,10 @@ public:
         return density_;
     }
 
-    RefPtr<PlatformResRegister> GetPlatformResRegister() const;
+    RefPtr<PlatformResRegister> GetPlatformResRegister() const
+    {
+        return platformResRegister_;
+    }
 
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
@@ -1570,6 +1568,11 @@ public:
         return true;
     }
 
+    void SetInfiniteAnimationFlushExceeded(bool exceeded);
+    bool IsInfiniteAnimationFlushExceeded() const;
+    void PushInfiniteAnimationFlushExceeded();
+    void PopInfiniteAnimationFlushExceeded();
+
     virtual void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates)
     {
         /* only implemented in PipelineContext for NG */
@@ -1766,6 +1769,7 @@ protected:
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
+    bool infiniteAnimationFlushExceeded_ = false;
     PixelRoundMode pixelRoundMode_ = PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
@@ -1802,6 +1806,7 @@ protected:
     std::stack<bool> pendingImplicitLayout_;
     std::stack<bool> pendingImplicitRender_;
     std::stack<bool> pendingFrontendAnimation_;
+    std::stack<bool> infiniteAnimationFlushExceededStack_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

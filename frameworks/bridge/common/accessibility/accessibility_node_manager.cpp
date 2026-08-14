@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
-#include <regex>
-
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/accessibility/js_inspector/inspect_badge.h"

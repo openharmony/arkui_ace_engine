@@ -40,6 +40,7 @@ public:
     SmartLayoutAlign crossAxisAlign = SmartLayoutAlign::CENTER;
     SmartLayoutSize size = SmartLayoutSize(0.0, 0.0);
     bool avoidSafeArea = false;
+    EdgesSpaces padding = {0.0, 0.0, 0.0, 0.0};
 };
 
 } // namespace OHOS::Ace::NG

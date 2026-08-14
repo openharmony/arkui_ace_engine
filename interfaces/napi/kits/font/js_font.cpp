@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 #include "bridge/common/utils/engine_helper.h"
@@ -311,7 +310,7 @@ static napi_module fontModule = {
     .nm_filename = nullptr,
     .nm_register_func = FontExport,
     .nm_modname = "font",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 

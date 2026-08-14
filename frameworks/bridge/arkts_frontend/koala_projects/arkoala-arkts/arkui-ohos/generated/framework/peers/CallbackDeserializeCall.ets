@@ -60,6 +60,7 @@ import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupData
 import { OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, SubmitEvent_serializer, OnTextSelectionChangeCallback, EnterKeyType, SubmitEvent } from './../../component/textInput'
 import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo_serializer, OnHoverStatusChangeCallback, HoverEventParam_serializer, OnFoldStatusChangeInfo, HoverEventParam } from './../../component/folderStack'
 import { OnListScrollIndexCallback, OnScrollVisibleContentChangeCallback, VisibleListContentInfo_serializer, ScrollState, VisibleListContentInfo } from './../../component/list'
+import { OnMenuItemClickWithTextCallback } from '@ohos.arkui.components.SelectionContainer'
 import { OnRadioChangeCallback, RadioConfiguration_serializer, RadioConfiguration } from './../../component/radio'
 import { OnRatingChangeCallback, RatingConfiguration_serializer, RatingConfiguration } from './../../component/rating'
 import { SurfaceRect_serializer, SurfaceRect } from './../../component/xcomponent'
@@ -2080,6 +2081,11 @@ export function deserializeAndCallCallback_VisibilityChangeReason_Void(thisDeser
     let data: VisibilityChangeReason = VisibilityChangeReason.fromValue(thisDeserializer.readInt32())
     call(data)
 }
+export function deserializeAndCallCallback_Void_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<void, void>)
+    call(undefined)
+}
 export function deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as ((value: WebKeyboardOptions) => void))
@@ -3060,6 +3066,29 @@ export function deserializeAndCallOnMenuItemClickCallback(thisDeserializer: Dese
     resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
     let continuationResult: ((isSelected: boolean) => void) = continuationBufferClosure
     const callResult = call(menuItem, range)
+    continuationResult(callResult)
+}
+export function deserializeAndCallOnMenuItemClickWithTextCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnMenuItemClickWithTextCallback)
+    let menuItem: TextMenuItem = TextMenuItem_serializer.read(thisDeserializer)
+    let value: string = (thisDeserializer.readString() as string)
+    const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
+    const continuationBufferClosure = (isSelected: boolean):void => {
+        const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeBoolean(isSelected);
+        InteropNativeModule._CallCallbackSync(10, -2127714345, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult: ((isSelected: boolean) => void) = continuationBufferClosure
+    const callResult = call(menuItem, value)
     continuationResult(callResult)
 }
 export function deserializeAndCallOnMicrophoneCaptureStateChangeCallback(thisDeserializer: DeserializerBase): void {
@@ -4243,7 +4272,7 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        if (value instanceof CustomBuilder) {
+        if (value instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
             continuationBufferBufArgsSerializer.writeInt8((0).toByte());
             const valueForIdx0 = value as CustomBuilder;
             continuationBufferBufArgsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueForIdx0));
@@ -4594,6 +4623,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_UNION_CUSTOMNODEBUILDER_DRAGITEMINFO_VOID: return deserializeAndCallCallback_Union_CustomNodeBuilder_DragItemInfo_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_USERDATASPAN_VOID: return deserializeAndCallCallback_UserDataSpan_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_VISIBILITYCHANGEREASON_VOID: return deserializeAndCallCallback_VisibilityChangeReason_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_VOID_VOID: return deserializeAndCallCallback_Void_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_WEBKEYBOARDOPTIONS_VOID: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer);
         case CallbackKind.KIND_CHECKBOXGROUPMODIFIERBUILDER: return deserializeAndCallCheckBoxGroupModifierBuilder(thisDeserializer);
         case CallbackKind.KIND_CHECKBOXMODIFIERBUILDER: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
@@ -4662,6 +4692,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_ONLARGESTCONTENTFULPAINTCALLBACK: return deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer);
         case CallbackKind.KIND_ONLISTSCROLLINDEXCALLBACK: return deserializeAndCallOnListScrollIndexCallback(thisDeserializer);
         case CallbackKind.KIND_ONMENUITEMCLICKCALLBACK: return deserializeAndCallOnMenuItemClickCallback(thisDeserializer);
+        case CallbackKind.KIND_ONMENUITEMCLICKWITHTEXTCALLBACK: return deserializeAndCallOnMenuItemClickWithTextCallback(thisDeserializer);
         case CallbackKind.KIND_ONMICROPHONECAPTURESTATECHANGECALLBACK: return deserializeAndCallOnMicrophoneCaptureStateChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ONMOVEHANDLER: return deserializeAndCallOnMoveHandler(thisDeserializer);
         case CallbackKind.KIND_ONNATIVEEMBEDOBJECTPARAMCHANGECALLBACK: return deserializeAndCallOnNativeEmbedObjectParamChangeCallback(thisDeserializer);

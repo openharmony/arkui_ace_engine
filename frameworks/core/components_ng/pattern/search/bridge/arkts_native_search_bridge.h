@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,12 +129,12 @@ public:
     static ArkUINativeModuleValue ResetStopBackPress(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetKeyboardAppearance(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetKeyboardAppearance(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetStrokeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetStrokeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetStrokeColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetStrokeColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetStrokeWidth(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetStrokeWidth(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetStrokeColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetStrokeColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -151,9 +151,9 @@ public:
     static ArkUINativeModuleValue ResetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTextDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTextDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetSearchSymbol(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetSearchSymbol(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -175,11 +175,12 @@ public:
     static ArkUINativeModuleValue SetJsCancelButton(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSearchDefaultIcon(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetJsDefaultCancelButton(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetDefaultSearchButton(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetStrokeJoinStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetStrokeJoinStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
-} // namespace OHOS::Ace::NG
+}
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_BRIDGE_ARKTS_NATIVE_SEARCH_BRIDGE_H
+#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_BRIDGE_ARKTS_NATIVE_SEARCH_BRIDGE_H

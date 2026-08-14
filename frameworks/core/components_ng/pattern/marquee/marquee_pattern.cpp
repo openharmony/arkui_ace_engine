@@ -14,7 +14,6 @@
  */
 
 #include "base/utils/multi_thread.h"
-#include "core/common/container.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
@@ -140,6 +139,7 @@ void MarqueePattern::OnModifyDone()
     auto firstChild = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(firstChild);
     UpdateTextNodeAttr(firstChild);
+
     if (NeedSecondChild()) {
         if (host->GetChildren().size() == 1) {
             CreateSecondChild();
@@ -291,7 +291,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 onFinish();
                 return;
             }
-            TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation oosttask onfinish", animationId);
+            TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation posttask onfinish", animationId);
             taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI,
                 "ArkUIMarqueePlayAnimation", PriorityType::VIP);
         },

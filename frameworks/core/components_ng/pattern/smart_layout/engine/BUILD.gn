@@ -51,7 +51,7 @@ ohos_shared_library("smartlayout") {
   public_configs = [ ":smartlayout_config" ]
 
   external_deps = [
-    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
     "hilog:libhilog",
   ]
 }

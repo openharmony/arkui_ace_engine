@@ -27,11 +27,12 @@
 namespace OHOS::Ace::NG {
 using LoadFontCallback = std::function<void(const std::string&, uint64_t)>;
 
-class ACE_EXPORT FontCollection : public virtual AceType {
+class ACE_FORCE_EXPORT FontCollection : public virtual AceType {
     DECLARE_ACE_TYPE(FontCollection, AceType);
 public:
     ACE_FORCE_EXPORT static RefPtr<FontCollection> Current();
     static RefPtr<FontCollection> Global();
+    ACE_FORCE_EXPORT static RefPtr<FontCollection> Local();
 
     const std::list<LoadFontCallback>& GetUnloadFontFinishCallback()
     {
@@ -56,6 +57,8 @@ public:
         std::unique_lock lock(loadLock_);
         loadFontFinishCallback_.emplace_back(std::move(cb));
     }
+
+    virtual void ClearCaches() {};
 
 private:
     std::list<LoadFontCallback> unloadFontFinishCallback_;

@@ -15,7 +15,6 @@
 
 #include "compatible/components/qrcode/qrcode_declaration.h"
 
-#include <memory>
 #include "compatible/components/qrcode/dom_qrcode.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/qrcode/qrcode_theme.h"

@@ -25,7 +25,6 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/xbar_proxy_wrapper.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
@@ -33,7 +32,6 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

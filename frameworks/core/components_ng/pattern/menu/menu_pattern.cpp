@@ -1556,7 +1556,6 @@ void MenuPattern::SetAccessibilityAction()
         if (firstChild && firstChild->GetTag() == SCROLL_ETS_TAG) {
             auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(scrollPattern);
-            scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             scrollPattern->ScrollPage(false, true);
         }
     });
@@ -1570,7 +1569,6 @@ void MenuPattern::SetAccessibilityAction()
         if (firstChild && firstChild->GetTag() == SCROLL_ETS_TAG) {
             auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(scrollPattern);
-            scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             scrollPattern->ScrollPage(true, true);
         }
     });

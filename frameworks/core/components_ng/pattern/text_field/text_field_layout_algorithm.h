@@ -136,6 +136,7 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float& inlineIdealHeight);
     float ConstraintWithMinWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         RefPtr<Paragraph>& paragraph, float removeValue = 0.0f);
+    float ConstraintHorizontalScrollingWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     SizeF GetConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     SizeF PlaceHolderMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
@@ -205,7 +206,7 @@ private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle, bool isDisabled);
     static void UpdateTextStyleLineHeight(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle);
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle);
     static void UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
         TextStyle& textStyle);
     static void UpdatePlaceholderTextStyleSetTextColor(

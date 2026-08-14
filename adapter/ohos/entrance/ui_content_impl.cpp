@@ -1590,7 +1590,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* wind
             }
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
-        } else {
+        }
+        // Initialize DC components from the context to avoid temporary dark-mode updates
+        // on the main thread affecting their initialization.
+        if (resourceManager == nullptr || uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
             auto config = context->GetConfiguration();
             if (config) {
                 auto configColorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
@@ -2244,17 +2247,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
-    // Read the enableCustomComponentFreeze configuration from metadata and set it in LazyForEachUtils.
-    bool enableCustomComponentFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
-    // Read the idsForRepeatAnimationAllowReuse configuration from metadata
-    auto it = std::find_if(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "idsForRepeatAnimationAllowReuse";
-    });
-    if (it != metaData.end()) {
-        NG::LazyForEachUtils::SetIdsForRepeatAnimationAllowReuse(it->value);
+    // Read metadata configurations and set them in LazyForEachUtils
+    for (const auto& metaDataItem : metaData) {
+        NG::LazyForEachUtils::ParseMetaData(metaDataItem.name, metaDataItem.value);
     }
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);

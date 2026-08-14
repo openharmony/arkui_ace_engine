@@ -18,7 +18,6 @@
 #define private public
 #define protected public
 #include "core/common/event_manager.h"
-#include "core/pipeline/container_window_manager.h"
 #include <cstdio>
 #include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -1766,13 +1765,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
      * @tc.expected: depends on first param, hideSplitButton value is true.
      */
     context_->SetContainerButtonHide(true, true, false, false);
-    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_);
     /**
      * @tc.steps3: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is false.
      */
     context_->SetContainerButtonHide(false, true, false, false);
-    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+    EXPECT_FALSE(containerPattern->hideSplitButton_);
 
     /**
      * @tc.steps4: call SetContainerButtonHide with params false, true, false, false.

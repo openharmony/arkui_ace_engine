@@ -82,10 +82,10 @@ public:
         const std::vector<float>& values, const GaugeType& type);
     static void ResetGradientColors(FrameNode* frameNode);
     static void SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& jsMake);
-    static void SetUseGradient(FrameNode* frameNode, bool useGradient);
-    static void SetUseSpecialDefaultIndicator(FrameNode* frameNode, bool useSpecialDefaultIndicator);
     static void CreateWithResourceObj(
         FrameNode* frameNode, GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
+    static void SetUseGradient(FrameNode* frameNode, bool useGradient);
+    static void SetUseSpecialDefaultIndicator(FrameNode* frameNode, bool useSpecialDefaultIndicator);
     static void SetGradientColorModeInit(FrameNode* frameNode);
     static void SetGradientInit(FrameNode* frameNode, const std::vector<NG::ColorStopArray>& colors);
 };

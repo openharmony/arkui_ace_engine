@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
-#include "core/common/container.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/flex_property.h"
 
@@ -1399,9 +1398,6 @@ TextDirection LayoutProperty::GetLayoutDirection() const
 
 std::optional<float> LayoutProperty::GetEnvFontScale() const
 {
-    if (!NeedReadFontScaleFromEnv()) {
-        return std::nullopt;
-    }
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
     if (!host || !pipeline || !pipeline->IsEnvManagerActive()) {

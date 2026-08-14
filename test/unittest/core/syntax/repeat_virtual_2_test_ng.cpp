@@ -1223,4 +1223,53 @@ HWTEST_F(RepeatVirtual2TestNg, SetEnableSyncLoadTest001, TestSize.Level1)
     EXPECT_EQ(repeatNode->caches_.enableSyncLoad_, false);
 }
 
+/**
+* @tc.name: LazyForEachUtilsSetRepeatMemOptStrategy001
+* @tc.desc: Test LazyForEachUtils::SetRepeatMemOptStrategy
+* @tc.type: FUNC
+*/
+HWTEST_F(RepeatVirtual2TestNg, LazyForEachUtilsSetRepeatMemOptStrategy001, TestSize.Level1)
+{
+    LazyForEachUtils::SetRepeatMemOptStrategy("ENABLE_AUTO_CACHE_OPTIMIZATION");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(),
+        RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+    LazyForEachUtils::SetRepeatMemOptStrategy("DEFAULT");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+    LazyForEachUtils::SetRepeatMemOptStrategy("INVALID_STRATEGY");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+    LazyForEachUtils::SetRepeatMemOptStrategy("");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+}
+
+/**
+* @tc.name: RepeatVirtualScroll2NodeGetMemOptStrategy001
+* @tc.desc: Test RepeatVirtualScroll2Node::GetMemOptStrategy
+* @tc.type: FUNC
+*/
+HWTEST_F(RepeatVirtual2TestNg, RepeatVirtualScroll2NodeGetMemOptStrategy001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    auto strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    LazyForEachUtils::repeatMemOptStrategy_ = RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    LazyForEachUtils::repeatMemOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = 1;
+    strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    repeatNode->memOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = -1;
+    strategy = repeatNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, RepeatMemOptStrategy::DEFAULT);
+}
+
 } // namespace OHOS::Ace::NG

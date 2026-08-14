@@ -15,10 +15,8 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
-#include "core/common/container.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
@@ -43,14 +41,12 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
             TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "replace old lazy for each builder");
             node->builder_ = forEachBuilder;
         }
-        forEachBuilder->SetLazyForEachNode(node);
         return node;
     }
     ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     node->RegisterBuilderListener();
-    forEachBuilder->SetLazyForEachNode(node);
     if (node->GetMemOptStrategy() == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
         node->RegisterWindowStateChangedCallback();
         node->RegisterMemoryLevelChangedCallback();
@@ -92,6 +88,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         node->RegisterBuilderListener();
     }
+    node->SetMemOptStrategy(LazyForEachMemOptStrategy::DEFAULT);
     return node;
 }
 
@@ -158,7 +155,6 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
             } else {
                 node->requestLongPredict_ = true;
                 node->itemConstraint_.reset();
-                node->DisableParentCustomNodeReleaseExpiringNode();
             }
 
             node->builder_->RemovingExpiringItem(deadline);
@@ -170,7 +166,7 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
     });
 }
 
-void LazyForEachNode::OnDataReloaded(bool reuseImmediately)
+void LazyForEachNode::OnDataReloaded()
 {
     ACE_SCOPED_TRACE("LazyForEach OnDataReloaded parendId[%d]", GetParentId());
     if (!children_.empty()) {
@@ -179,7 +175,7 @@ void LazyForEachNode::OnDataReloaded(bool reuseImmediately)
     }
     if (builder_) {
         builder_->SetUseNewInterface(false);
-        builder_->OnDataReloaded(reuseImmediately);
+        builder_->OnDataReloaded();
         if (FrameCount() == 0) {
             PostIdleTask(LazyForEachIdleTaskSource::ON_DATA_RELOADED);
         }
@@ -421,15 +417,17 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
 RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild,
     bool isCache, bool addToRenderTree)
 {
-    ACE_SYNTAX_SCOPED_TRACE("LazyForEach.GetFrameChildByIndex parentId[%d] index[%d] needBuild[%d] isCache[%d] "
-        "addToRenderTree[%d]", GetParentId(), static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
+    ACE_SYNTAX_SCOPED_TRACE(
+        "LazyForEach.GetFrameChildByIndex parentId[%d] index[%d] needBuild[%d] isCache[%d] addToRenderTree[%d]",
+        GetParentId(), static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
         static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
-    CHECK_EQUAL_RETURN(index >= static_cast<uint32_t>(FrameCount()), true, nullptr);
-    if (isParentCustomNodeReleaseExpiringNodeEnabled_) {
-        tempChildren_.clear();
+    if (index >= static_cast<uint32_t>(FrameCount())) {
+        return nullptr;
     }
     auto child = builder_->GetChildByIndex(index, needBuild, isCache);
-    CHECK_NULL_RETURN(child.second, nullptr);
+    if (!child.second) {
+        return nullptr;
+    }
     child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
@@ -843,7 +841,32 @@ void LazyForEachNode::EnablePreBuild(bool enable)
 
 LazyForEachMemOptStrategy LazyForEachNode::GetMemOptStrategy()
 {
-    return builder_? builder_->GetLazyForEachMemOptStrategy() : LazyForEachMemOptStrategy::DEFAULT;
+    if (memOptStrategy_ != LazyForEachMemOptStrategy::UNDEFINED) {
+        return memOptStrategy_;
+    }
+    auto memOptStrategy = builder_ ? builder_->GetLazyForEachMemOptStrategy() : LazyForEachMemOptStrategy::DEFAULT;
+    if (memOptStrategy != LazyForEachMemOptStrategy::UNDEFINED) {
+        memOptStrategy_ = memOptStrategy;
+        return memOptStrategy_;
+    }
+    auto applicationStrategy = LazyForEachUtils::GetLazyForEachMemOptStrategy();
+    if (applicationStrategy != LazyForEachMemOptStrategy::UNDEFINED) {
+        memOptStrategy_ = applicationStrategy;
+        return memOptStrategy_;
+    }
+    auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
+    if (systemStrategy >= 0) {
+        memOptStrategy_ = systemStrategy == 1 ?
+            LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : LazyForEachMemOptStrategy::DEFAULT;
+        return memOptStrategy_;
+    }
+    memOptStrategy_ = LazyForEachMemOptStrategy::DEFAULT;
+    return memOptStrategy_;
+}
+
+void LazyForEachNode::SetMemOptStrategy(LazyForEachMemOptStrategy strategy)
+{
+    memOptStrategy_ = strategy;
 }
 
 void LazyForEachNode::OnWindowShow()
@@ -1047,29 +1070,4 @@ void LazyForEachNode::SetIsSyncLoad(bool value)
     CHECK_NULL_VOID(builder_);
     builder_->SetIsSyncLoad(value);
 }
-
-void LazyForEachNode::EnableParentCustomNodeReleaseExpiringNode(const std::set<std::string>& reuseIds)
-{
-    CHECK_EQUAL_VOID(isParentCustomNodeReleaseExpiringNodeEnabled_, true);
-    auto parentCustomNode = GetParentCustomNode();
-    CHECK_NULL_VOID(parentCustomNode);
-    parentCustomNode->EnableReleaseExpiringNode(AceType::WeakClaim(this), reuseIds);
-    isParentCustomNodeReleaseExpiringNodeEnabled_ = true;
-    return;
-}
-
-void LazyForEachNode::DisableParentCustomNodeReleaseExpiringNode()
-{
-    CHECK_EQUAL_VOID(isParentCustomNodeReleaseExpiringNodeEnabled_, false);
-    auto parentCustomNode = GetParentCustomNode();
-    CHECK_NULL_VOID(parentCustomNode);
-    parentCustomNode->DisableReleaseExpiringNode(AceType::WeakClaim(this));
-    isParentCustomNodeReleaseExpiringNodeEnabled_ = false;
-}
-
-bool LazyForEachNode::ReleaseExpiringNode(std::string reuseId)
-{
-    return builder_->ReleaseExpiringNode(reuseId);
-}
-
 } // namespace OHOS::Ace::NG

@@ -92,7 +92,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
-constexpr std::string_view DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 } // namespace
 
 void TextFieldPattern::OnAttachToFrameNodeMultiThread()
@@ -618,8 +618,7 @@ void TextFieldPattern::ProcessDefaultStyleAndBehaviorsMultiThread()
     CHECK_NULL_VOID(textFieldTheme);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    std::set<std::string> allowDropSet({
-        DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, std::string(DROP_TYPE_STYLED_STRING) });
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());

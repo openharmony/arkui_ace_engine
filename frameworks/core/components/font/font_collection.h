@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT FontCollection : public NonCopyable {
+class FontCollection : public NonCopyable {
 public:
     static FontCollection* GetInstance();
 

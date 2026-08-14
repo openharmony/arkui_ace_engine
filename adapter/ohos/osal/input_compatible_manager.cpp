@@ -16,7 +16,7 @@
 #include "core/common/transform/input_compatible_manager.h"
 
 #include <dlfcn.h>
-
+#include <unordered_map>
 #include "base/log/log.h"
 #include "base/utils/time_util.h"
 #include "base/utils/system_properties.h"

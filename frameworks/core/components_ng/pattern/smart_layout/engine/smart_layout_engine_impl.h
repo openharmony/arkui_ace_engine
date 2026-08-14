@@ -50,6 +50,10 @@ public:
     void ApplyColumnConstraints() override { node_->ApplyColumnConstraints(); }
     void ApplyRowConstraints() override { node_->ApplyRowConstraints(); }
     void ApplyGeneralConstraints() override { node_->ApplyGeneralConstraints(); }
+    void ApplyScaleUpConstraints(double emptyRatioThreshold = SMART_LAYOUT_EMPTY_RATIO_THRESHOLD) override
+    {
+        node_->ApplyScaleUpConstraints(emptyRatioThreshold);
+    }
     void SetBoundingBox(const SmartLayoutRect& box) override { node_->SetBoundingBox(box); }
     const SmartLayoutRect& GetBoundingBox() const override { return node_->GetBoundingBox(); }
 

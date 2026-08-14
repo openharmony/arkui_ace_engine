@@ -45,6 +45,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/common/properties/text_style_gradient.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
@@ -1585,6 +1586,21 @@ bool TextPattern::SelectOverlayIsOn()
     return selectOverlay && selectOverlay->SelectOverlayIsOn();
 }
 
+bool TextPattern::HasAnySelectionInContainer()
+{
+    return selectionChild_ && selectionChild_->HasSelection();
+}
+
+bool TextPattern::IsSelfSelectedInContainer()
+{
+    return selectionChild_ && !selectionChild_->GetSelectionText().empty();
+}
+
+bool TextPattern::HasOwnSelection()
+{
+    return !selectionChild_ || !selectionChild_->GetSelectionText().empty();
+}
+
 bool TextPattern::IsSelectOverlayUsingMouse()
 {
     if (selectionChild_) {
@@ -1998,7 +2014,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 
 void TextPattern::HandleClickOnTextAndSpan(GestureEvent& info)
 {
-    if ((textSelector_.IsValid() || (selectionChild_ && SelectOverlayIsOn())) &&
+    if ((textSelector_.IsValid() || HasAnySelectionInContainer()) &&
         mouseStatus_ != MouseStatus::MOVE && !isMousePressed_) {
         CloseSelectOverlay(true);
         ResetSelection();
@@ -3045,7 +3061,7 @@ void TextPattern::RecoverCopyOption(CopyOptions copyOption)
         return;
     }
     if (copyOption_ == CopyOptions::None) {
-        if (!selectionChild_ || !selectionChild_->GetSelectionText().empty()) {
+        if (HasOwnSelection()) {
             CloseSelectOverlay();
             ResetSelection();
         }
@@ -4711,7 +4727,7 @@ void TextPattern::OnModifyDone()
             ParseOriText(textForDisplay_);
         }
         // textForDisplay_ is updated by ParseOriText
-        if ((GetSelectOverlay() || (selectionChild_ && !selectionChild_->GetSelectionText().empty())) &&
+        if ((GetSelectOverlay() || IsSelfSelectedInContainer()) &&
             textCache != textForDisplay_ && !IsTriggerParentToScroll()) {
             CloseSelectOverlay();
             ResetSelection();
@@ -5078,8 +5094,10 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
             host->GetId(), start, end, textSize, placeholderCount_);
     }
     if (start >= end) {
-        ResetSelection();
-        CloseSelectOverlay();
+        if (HasOwnSelection()) {
+            ResetSelection();
+            CloseSelectOverlay();
+        }
         return;
     }
     HandleSelectionChange(start, end);
@@ -7109,8 +7127,12 @@ void TextPattern::UnBindPreviewMenuByCopyOption()
 
 void TextPattern::CloseSelectionMenu()
 {
-    SetTextResponseType(TextResponseType::NONE);
-    CloseSelectOverlay(true);
+    // Only close this text own menu. A container child without its own selection must not
+    // close another text menu or disturb the container response type.
+    if (HasOwnSelection()) {
+        SetTextResponseType(TextResponseType::NONE);
+        CloseSelectOverlay(true);
+    }
 }
 
 std::shared_ptr<SelectionMenuParams> TextPattern::GetMenuParams(TextSpanType spanType, TextResponseType responseType)
@@ -7436,8 +7458,10 @@ void TextPattern::ActSetSelectionFlag(int32_t selectionStart, int32_t selectionE
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
     if (selectionStart >= selectionEnd) {
-        ResetSelection();
-        CloseSelectOverlay();
+        if (HasOwnSelection()) {
+            ResetSelection();
+            CloseSelectOverlay();
+        }
         return;
     }
     HandleSelectionChange(selectionStart, selectionEnd);
@@ -8189,20 +8213,23 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
 }
 
-PositionWithAffinity TextPattern::GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+PositionWithAffinity TextPattern::GetCharacterPositionAtCoordinate(
+    int32_t x, int32_t y, TextEncoding encoding)
 {
     Offset offset(x, y);
-    return pManager_->GetCharacterPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+    return pManager_->GetCharacterPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset), encoding);
 }
 
-std::pair<TextRange, TextRange> TextPattern::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> TextPattern::GetGlyphRangeForCharacterRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return pManager_->GetGlyphRangeForCharacterRange(start, end);
+    return pManager_->GetGlyphRangeForCharacterRange(start, end, encoding);
 }
 
-std::pair<TextRange, TextRange> TextPattern::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> TextPattern::GetCharacterRangeForGlyphRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return pManager_->GetCharacterRangeForGlyphRange(start, end);
+    return pManager_->GetCharacterRangeForGlyphRange(start, end, encoding);
 }
 
 void TextPattern::ProcessMarqueeVisibleAreaCallback()
@@ -9292,6 +9319,38 @@ std::vector<ParagraphManager::ParagraphInfo> TextPattern::GetParagraphs() const
 const RefPtr<ParagraphManager>& TextPattern::GetParagraphManager() const
 {
     return pManager_;
+}
+
+bool TextPattern::IsContentOverflowForSmartLayout(const SizeF& allocatedSize)
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto textLayoutProperty = hostNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    CHECK_NULL_RETURN(pManager_, false);
+
+    auto content = textLayoutProperty->GetContent().value_or(u"");
+    const auto& displayContent = GetTextForDisplay();
+    auto spanCount = GetSpanItemChildren().size();
+    if (content.empty() && displayContent.empty() && spanCount == 0) {
+        return false;
+    }
+
+    auto actualLayoutWidth = pManager_->GetLongestLineWithIndent();
+    auto actualTextHeight = pManager_->GetHeight();
+    bool widthOverflow = GreatNotEqual(actualLayoutWidth, allocatedSize.Width());
+    bool heightOverflow = GreatNotEqual(actualTextHeight, allocatedSize.Height());
+    bool contentClipped = pManager_->DidExceedMaxLinesInner();
+    auto ellipsisRange = pManager_->GetEllipsisTextRange();
+    bool ellipsisApplied = ellipsisRange.first < ellipsisRange.second;
+    const auto& textStyle = GetTextStyle();
+    auto maxLines = textLayoutProperty->GetMaxLinesValue(textStyle.GetMaxLines());
+    auto parentNode = hostNode->GetParentFrameNode();
+    bool singleLineContentNeedsRepair =
+        textLayoutProperty->HasMaxLines() && maxLines == 1 && contentClipped && !ellipsisApplied;
+    bool isButtonLabel = hostNode->IsInternal() && parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG;
+    bool buttonTextNeedsRepair = isButtonLabel && (widthOverflow || heightOverflow || contentClipped);
+    return heightOverflow || singleLineContentNeedsRepair || buttonTextNeedsRepair;
 }
 
 void TextPattern::MarkContentChange()

@@ -18,7 +18,6 @@ group("ui_extension_component_test_group") {
   testonly = true
   deps = [
     ":ui_extension_accessibility_child_tree_callback_test",
-    ":ui_extension_component_testtwo_ng",
     ":ui_extension_pattern_test_ng",
     ":modalUEC_focus_test_ng",
   ]

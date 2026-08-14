@@ -2832,6 +2832,10 @@ void ArkUINativeModule::RegisterSelectionContainerAttributes(Local<panda::Object
     auto selectionContainer = panda::ObjectRef::New(vm);
     selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::Create));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "closeSelectionMenu"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::CloseSelectionMenu));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearTextSelection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ClearTextSelection));
     selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetCopyOption));
     selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
@@ -3493,6 +3497,10 @@ void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperOnScrollStateChanged));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperOnScrollStateChanged"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperOnScrollStateChanged));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperIgnoreHiddenItem"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperIgnoreHiddenItem));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperIgnoreHiddenItem"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperIgnoreHiddenItem));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "swiper"), swiper);
 }
 

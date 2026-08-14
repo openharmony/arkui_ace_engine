@@ -38,7 +38,7 @@ static napi_module SelectionMenuModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_modname = "arkui.advanced.SelectionMenu",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 

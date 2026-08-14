@@ -200,6 +200,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest004, TestSize.Level0)
      * @tc.steps: step1. Build a object renderContext.
      */
     NG::RenderContext renderContext;
+    renderContext.propForegroundColor_ = Color(0x00000001);
 
     /**
      * @tc.steps: step2. callback ToJsonValue.push propTransformMatrix_ is null.

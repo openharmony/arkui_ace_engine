@@ -24,12 +24,12 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-class LazyForEachNode;
 
 // CustomNode is the frame node of @Component struct.
 class ACE_FORCE_EXPORT CustomNode : public UINode, public CustomNodeBase {
@@ -277,9 +277,6 @@ public:
     void FinishMemOpt();
     void PostMemOptTask();
     void PostIdleTask();
-    void EnableReleaseExpiringNode(const WeakPtr<LazyForEachNode>& node, const std::set<std::string>& reuseIds);
-    void DisableReleaseExpiringNode(const WeakPtr<LazyForEachNode>& node);
-    bool ReleaseExpiringNode(std::string reuseId);
 private:
     // for DFX
     void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
@@ -306,7 +303,6 @@ private:
     bool hasPreparedProgressiveRelease_ = false;
     bool stopMemOptAfterRelease_ = true;
     int64_t cacheTaskPostTime_ = 0;
-    std::set<WeakPtr<UINode>> LazyForEachForReleaseExpiringNode_;
 
     std::function<void()> onPageShowFunc_ = nullptr;
     std::function<void()> onPageHideFunc_ = nullptr;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_UI_MATERIAL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_UI_MATERIAL_H
 
+#include <memory>
 #include <optional>
 
 #include "ui/properties/color.h"
@@ -69,19 +70,26 @@ struct ImmersiveMaterialConfig {
     float dipScale = 1.0f;
     // the result of interactive after the calculation of component.
     bool interactive = false;
-    // the result of lightEffectOptions after the calculation of component. std::nullopt means no lightEffect.
-    std::optional<LightEffectOptions> lightEffectOptions;
+    // Store the lightEffectOptions (color and colorResObj). nullptr means no lightEffect.
+    std::shared_ptr<LightEffectOptions> lightEffectOptions;
+
+    // return true if same, return false if different.
+    bool CompareLightEffectOptions(const ImmersiveMaterialConfig& other) const
+    {
+        return (lightEffectOptions == nullptr && other.lightEffectOptions == nullptr) ||
+               (lightEffectOptions && other.lightEffectOptions && *lightEffectOptions == *other.lightEffectOptions);
+    }
 
     bool operator==(const ImmersiveMaterialConfig& other) const
     {
         return key == other.key && materialColor == other.materialColor && colorInvert == other.colorInvert &&
                applyShadow == other.applyShadow && interactive == other.interactive &&
-               NearEqual(dipScale, other.dipScale) && lightEffectOptions == other.lightEffectOptions;
+               NearEqual(dipScale, other.dipScale) && CompareLightEffectOptions(other);
     }
 
     bool HasLightEffect() const
     {
-        return lightEffectOptions.has_value();
+        return lightEffectOptions != nullptr;
     }
 };
 

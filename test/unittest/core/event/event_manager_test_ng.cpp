@@ -482,6 +482,12 @@ HWTEST_F(EventManagerTestNg, EventManagerTest014, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     retFlag = Container::IsCurrentUseNewPipeline();
     EXPECT_TRUE(retFlag);
+
+    Container::SetCurrentUsePartialUpdate(false);
+    AceForwardCompatibility::isNewPipeline_ = false;
+    if (container) {
+        container->useNewPipeline_ = false;
+    }
 }
 
 /**

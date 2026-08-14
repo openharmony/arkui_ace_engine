@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::MakeRefPtr<ProgressThemeWrapper>();
+            auto wrapper = AceType::Claim(new ProgressThemeWrapper());
             ParsePattern(themeConstants, AceType::DynamicCast<ProgressTheme>(wrapper));
             return wrapper;
         }

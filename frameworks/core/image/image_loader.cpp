@@ -30,7 +30,6 @@
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
 #include "base/log/event_report.h"
-#include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/resource_configuration.h"
@@ -38,13 +37,11 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 namespace {

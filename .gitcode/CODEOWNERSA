@@ -76,8 +76,8 @@ adapter/ohos/entrance/form_module_preloader.cpp @form_framework
 adapter/ohos/entrance/form_module_preloader.h @form_framework
 adapter/ohos/entrance/form_utils_impl.cpp @form_framework
 adapter/ohos/entrance/form_utils_impl.h @form_framework
-adapter/ohos/entrance/hap_asset_provider_impl.cpp @arkui_framework_resource
-adapter/ohos/entrance/hap_asset_provider_impl.h @arkui_framework_resource
+adapter/ohos/entrance/hap_asset_provider_impl.cpp @arkui_framework_xnode
+adapter/ohos/entrance/hap_asset_provider_impl.h @arkui_framework_xnode
 adapter/ohos/entrance/mmi_event_convertor.cpp @ArkUI_Event
 adapter/ohos/entrance/mmi_event_convertor.h @ArkUI_Event
 adapter/ohos/entrance/navigation_controller_helper.cpp @arkui_navigation
@@ -342,13 +342,13 @@ frameworks/base/geometry/least_square_impl.cpp @arkui_framework_resource
 frameworks/base/geometry/least_square_impl.h @arkui_framework_resource
 frameworks/base/geometry/matrix3.cpp @arkui_framework_resource
 frameworks/base/geometry/matrix3.h @arkui_framework_resource
-frameworks/base/geometry/matrix4.cpp @arkui_framework_resource
-frameworks/base/geometry/matrix4.h @arkui_framework_resource
-frameworks/base/geometry/ng/ @arkui_framework_resource
+frameworks/base/geometry/matrix4.cpp @arkuicodepulse
+frameworks/base/geometry/matrix4.h @arkuicodepulse
+frameworks/base/geometry/ng/ @arkui_framework_xnode
 frameworks/base/geometry/offset.h @arkui_framework_resource
 frameworks/base/geometry/point.h @arkui_framework_resource
-frameworks/base/geometry/quaternion.cpp @arkui_framework_resource
-frameworks/base/geometry/quaternion.h @arkui_framework_resource
+frameworks/base/geometry/quaternion.cpp @arkui_framework_xnode
+frameworks/base/geometry/quaternion.h @arkui_framework_xnode
 frameworks/base/geometry/rect.h @arkui_framework_resource
 frameworks/base/geometry/rrect.h @arkui_framework_resource
 frameworks/base/geometry/shape.h @arkui_framework_resource
@@ -373,6 +373,7 @@ frameworks/base/network/ @arkui001
 frameworks/base/perfmonitor/ @arkui_framework_xnode
 frameworks/base/perf/socperf_client.h @arkui_framework_xnode
 frameworks/base/resource/ @arkui_framework_resource
+frameworks/base/resource/binary @arkuipopupwindow_all
 frameworks/base/resource/shared_image_manager.cpp @arkui001
 frameworks/base/resource/shared_image_manager.h @arkui001
 frameworks/base/ressched/ @arkui_framework_xnode
@@ -803,6 +804,31 @@ frameworks/bridge/declarative_frontend/ark_node/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_shape/ @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_theme/ @arkui_framework_resource
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_counter_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_data_panel_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_date_picker_theme.h @arkui001
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_indexer_theme.h @arkui_navigation
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_lazy_foreach_theme.h @arkuieco3
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_list_item_theme.h @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_loading_progress_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_menu_theme.h @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_pattern_lock_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_progress_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_qrcode_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_scroll_theme.h @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h @arkui_navigation
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_text_picker_theme.h @arkui001
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_textinput_theme.h @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_theme.cpp @arkui_framework_resource
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h @arkui_framework_resource
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h @arkui_framework_resource
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_time_picker_theme.h @arkui001
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.cpp @arkui_framework_resource
+frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h @arkui_framework_resource
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_framework_xnode
@@ -1081,8 +1107,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcom
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.h @ArkUI_ability_group
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.cpp @arkui_framework_resource
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h @arkui_framework_resource
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.cpp @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.cpp @arkui_framework_xnode
@@ -1852,8 +1878,8 @@ frameworks/core/common/share/text_share_mgr.h @huawei_g_five
 frameworks/core/common/anr_thread.cpp @arkui_framework_xnode
 frameworks/core/common/anr_thread.h @arkui_framework_xnode
 frameworks/core/common/app_bar_helper.h @arkui_framework_xnode
-frameworks/core/common/asset_manager_impl.cpp @arkui_framework_resource
-frameworks/core/common/asset_manager_impl.h @arkui_framework_resource
+frameworks/core/common/asset_manager_impl.cpp @arkui_framework_xnode
+frameworks/core/common/asset_manager_impl.h @arkui_framework_xnode
 frameworks/core/common/asset_mapping.h @arkui_framework_resource
 frameworks/core/common/autofill/ @huawei_g_five
 frameworks/core/common/backend.h
@@ -1867,7 +1893,7 @@ frameworks/core/common/container.cpp @arkui_framework_xnode
 frameworks/core/common/container.h @arkui_framework_xnode
 frameworks/core/common/container_scope.cpp @arkui_framework_xnode
 frameworks/core/common/container_scope.h @arkui_framework_xnode
-frameworks/core/common/display_info.h @arkui_framework_resource
+frameworks/core/common/display_info.h @arkui_framework_xnode
 frameworks/core/common/draw_delegate.h @arkui_framework_xnode
 frameworks/core/common/dynamic_component_renderer.h @ArkUI_ability_group
 frameworks/core/common/environment/ @arkui_statemgmt
@@ -1906,7 +1932,7 @@ frameworks/core/common/page_url_checker.h @arkui_navigation
 frameworks/core/common/page_viewport_config.h @arkui_navigation
 frameworks/core/common/platform_bridge.cpp @arkui_framework_xnode
 frameworks/core/common/platform_bridge.h @arkui_framework_xnode
-frameworks/core/common/platform_res_register.h @arkui_framework_resource
+frameworks/core/common/platform_res_register.h @arkui_framework_xnode
 frameworks/core/common/platform_window.h @arkui_framework_xnode
 frameworks/core/common/plugin_manager.cpp @ArkUI_ability_group
 frameworks/core/common/plugin_manager.h @ArkUI_ability_group
@@ -1947,6 +1973,7 @@ frameworks/core/common/transform/input_compatible_manager.h @ArkUI_Event
 frameworks/core/common/udmf/ @ArkUI_Event
 frameworks/core/common/update_config_manager.h @arkui_framework_xnode
 frameworks/core/common/vibrator/ @arkuiscroll
+frameworks/core/common/visual_effect/ @arkuicodepulse
 frameworks/core/common/watch_dog.cpp @arkui_framework_xnode
 frameworks/core/common/watch_dog.h @arkui_framework_xnode
 frameworks/core/common/watch_dog_mingw.cpp @arkui_framework_xnode
@@ -2166,6 +2193,12 @@ frameworks/core/components/text_overlay/ @huawei_g_five
 frameworks/core/components/text_span/ @huawei_g_five
 frameworks/core/components/texttimer/ @huawei_g_five
 frameworks/core/components/theme/ @arkui_framework_resource
+frameworks/core/components/theme/blur_style_theme.cpp @arkuicodepulse
+frameworks/core/components/theme/blur_style_theme.h @arkuicodepulse
+frameworks/core/components/theme/shadow_theme.cpp @arkuicodepulse
+frameworks/core/components/theme/shadow_theme.h @arkuicodepulse
+frameworks/core/components/theme/ui_material_theme.cpp @arkuicodepulse
+frameworks/core/components/theme/ui_material_theme.h @arkuicodepulse
 frameworks/core/components/theme/corner_mark_theme.h @arkui_framework_xnode
 frameworks/core/components/tip/ @arkuipopupwindow_all
 frameworks/core/components/toast/ @arkuipopupwindow_all
@@ -2399,8 +2432,8 @@ frameworks/core/components_ng/base/modifier.cpp @arkui_framework_xnode
 frameworks/core/components_ng/base/modifier.h @arkui_framework_xnode
 frameworks/core/components_ng/base/node_flag.h @arkui_framework_xnode
 frameworks/core/components_ng/base/node_render_status_monitor.cpp @ArkUI_Event
-frameworks/core/components_ng/base/observer_handler.cpp @arkui_framework_resource
-frameworks/core/components_ng/base/observer_handler.h @arkui_framework_resource
+frameworks/core/components_ng/base/observer_handler.cpp @arkui_framework_xnode
+frameworks/core/components_ng/base/observer_handler.h @arkui_framework_xnode
 frameworks/core/components_ng/base/symbol_modifier.h @arkui_framework_xnode
 frameworks/core/components_ng/base/ui_node_multi_thread.cpp @arkui_framework_xnode
 frameworks/core/components_ng/base/ui_node.cpp @arkui_architecture
@@ -3243,7 +3276,7 @@ interfaces/napi/kits/luminance_sampler/ @arkuicodepulse
 interfaces/napi/kits/measure/ @huawei_g_five
 interfaces/napi/kits/mediaquery/ @arkuilayout1
 interfaces/napi/kits/napi_lib.gni @arkui_architecture
-interfaces/napi/kits/observer/ @arkui_framework_resource
+interfaces/napi/kits/observer/ @arkui_framework_xnode
 interfaces/napi/kits/overlay/ @arkuipopupwindow_all
 interfaces/napi/kits/performancemonitor/ @arkui_framework_xnode
 interfaces/napi/kits/plugincomponent/ @ArkUI_ability_group
@@ -3576,8 +3609,8 @@ frameworks/core/interfaces/native/implementation/toggle_modifier.cpp @arkuipopup
 frameworks/core/interfaces/native/implementation/toggle_ops_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/union_effect_container_modifier.cpp @arkuicodepulse
 
-interfaces/ets/ani/observer/ @arkui_framework_resource
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.observer.ts @arkui_framework_resource
+interfaces/ets/ani/observer/ @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.observer.ts @arkui_framework_xnode
 frameworks/core/interfaces/native/implementation/stepper_modifier.cpp @arkui_navigation
 
 [Test source]
@@ -3729,6 +3762,7 @@ test/unittest/core/pattern/overlay/overlay_manager_testone_ng.cpp @arkuipopupwin
 test/unittest/core/pattern/overlay/overlay_manager_testthree_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_manager_testtwo_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_manager_toast_test_ng.cpp @arkuipopupwindow_all
+test/unittest/core/pattern/overlay/overlay_manager_toast_test_two_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_material_ec_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/overlay_new_test_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_test_ng.cpp @arkuipopupwindow_all
@@ -4140,10 +4174,10 @@ frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h 
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.h @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.h @arkui_navigation
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.cpp @arkui001
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.h @arkui001
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.cpp @arkui001
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.h @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_badge_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_badge_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_canvas_bridge.cpp @arkuilayout1
@@ -4753,7 +4787,7 @@ interfaces/inner_api/drawable/drawable_descriptor_ani.cpp @arkui001
 interfaces/inner_api/drawable/drawable_descriptor_ani.h @arkui001
 interfaces/napi/kits/color_sampler/js_color_sampler.cpp @arkuicodepulse
 interfaces/napi/kits/color_sampler/js_color_sampler.h @arkuicodepulse
-interfaces/napi/kits/intelligence/image_generation/js_image_generation.cpp @arkui_navigation
+interfaces/napi/kits/intelligence/image_generation/js_image_generation.cpp @arkui001
 interfaces/native/build_check_for_c.c @arkui_framework_xnode
 interfaces/native/build_check_for_cpp.cpp @arkui_framework_xnode
 interfaces/native/event/key_event_impl.cpp @ArkUI_Event

@@ -19,14 +19,11 @@
 #include "core/accessibility/accessibility_manager_ng.h"
 
 #include <cmath>
-#include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
-#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
@@ -76,7 +73,6 @@
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
-#include "core/common/frontend.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_configuration.h"
@@ -120,7 +116,6 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
 #endif
 #include "core/image/image_file_cache.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_context.h"
 #ifdef COMPONENT_TEST_ENABLED
 #include "component_test/pipeline_status.h"
@@ -512,18 +507,6 @@ PipelineContext::PipelineContext()
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
 
-bool PipelineContext::GetIsRequestVsync()
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestVsync();
-}
-
-bool PipelineContext::GetIsRequestFrame() const
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestFrame();
-}
-
 std::string PipelineContext::GetCurrentPageNameCallback()
 {
     auto pageInfo = GetLastPageInfo();
@@ -567,6 +550,41 @@ std::string PipelineContext::GetNavDestinationPageName(const RefPtr<PageInfo>& p
     auto pageNameObj = navDestinationNodes.back();
     std::string pageName = std::get<0>(pageNameObj);
     return pageName;
+}
+
+std::string PipelineContext::GetNavDestinationJSViewName(const RefPtr<PageInfo>& pageInfo) const
+{
+    CHECK_NULL_RETURN(pageInfo, "");
+    int32_t pageId = pageInfo->GetPageId();
+    RefPtr<NavigationGroupNode> navigationNode = nullptr;
+    CHECK_RUN_ON(UI);
+    auto it = pageToNavigationNodes_.find(pageId);
+    if (it == pageToNavigationNodes_.end() || it->second.empty()) {
+        return "";
+    }
+
+    for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+    }
+
+    CHECK_NULL_RETURN(navigationNode, "");
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    CHECK_NULL_RETURN(navigationPattern, "");
+
+    const auto& navDestinationNodes = navigationPattern->GetAllNavDestinationNodes();
+    int32_t size = static_cast<int32_t>(navDestinationNodes.size());
+    if (size == 0) {
+        return "";
+    }
+    auto lastPage = navDestinationNodes.back();
+    auto lastUiNode = lastPage.second;
+    CHECK_NULL_RETURN(lastUiNode, "");
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(lastUiNode));
+    CHECK_NULL_RETURN(navDestinationNode, "");
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, "");
+    return navDestinationPattern->GetJSViewName();
 }
 
 std::string PipelineContext::GetCurrentPageName()
@@ -6827,8 +6845,14 @@ void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& optio
     int32_t flushCount = 0;
     bool isDirtyLayoutNodesEmpty = IsDirtyLayoutNodesEmpty();
     while (!isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+                option.ToString().c_str(), isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            infiniteAnimationFlushExceeded_ = true;
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
                 option.ToString().c_str(), isDirtyLayoutNodesEmpty);
             break;
         }
@@ -6856,6 +6880,7 @@ void PipelineContext::OpenFrontendAnimation(
         }
     }
     FlushAnimationDirtysWhenExist(option);
+    PushInfiniteAnimationFlushExceeded();
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback, Claim(this));
 }
 
@@ -6865,6 +6890,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         if (forceClose) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION, "force close animation");
             AnimationUtils::CloseImplicitAnimation();
+            PopInfiniteAnimationFlushExceeded();
         }
         return;
     }
@@ -6881,6 +6907,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         pendingFrontendAnimation_.pop();
     }
     AnimationUtils::CloseImplicitAnimation(Claim(this));
+    PopInfiniteAnimationFlushExceeded();
 }
 
 bool PipelineContext::IsDragging() const

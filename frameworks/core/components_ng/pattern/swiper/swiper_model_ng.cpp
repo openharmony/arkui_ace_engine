@@ -1900,6 +1900,16 @@ void SwiperModelNG::ResetDisplayCountWithObject(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, frameNode);
 }
 
+void SwiperModelNG::SetIgnoreHiddenItem(bool ignoreHiddenItem)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IgnoreHiddenItem, ignoreHiddenItem);
+}
+
+void SwiperModelNG::SetIgnoreHiddenItem(FrameNode* frameNode, bool ignoreHiddenItem)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IgnoreHiddenItem, ignoreHiddenItem, frameNode);
+}
+
 bool SwiperModelNG::CallSwiperStartFakeDrag(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);

@@ -16,7 +16,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 #include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -1036,6 +1035,21 @@ bool RepeatVirtualScroll2Node::IsChildOnMainTree(uint32_t rid)
 
 RepeatMemOptStrategy RepeatVirtualScroll2Node::GetMemOptStrategy()
 {
+    if (memOptStrategy_ != RepeatMemOptStrategy::UNDEFINED) {
+        return memOptStrategy_;
+    }
+    auto applicationStrategy = LazyForEachUtils::GetRepeatMemOptStrategy();
+    if (applicationStrategy != RepeatMemOptStrategy::UNDEFINED) {
+    memOptStrategy_ = applicationStrategy;
+        return memOptStrategy_;
+    }
+    auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
+    if (systemStrategy >= 0) {
+        memOptStrategy_ = systemStrategy == 1 ?
+            RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : RepeatMemOptStrategy::DEFAULT;
+        return memOptStrategy_;
+    }
+    memOptStrategy_ = RepeatMemOptStrategy::DEFAULT;
     return memOptStrategy_;
 }
 

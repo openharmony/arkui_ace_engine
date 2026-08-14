@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
-#include "core/common/container.h"
 
 #include "base/utils/utils.h"
 #ifdef ENABLE_AUTO_FILL_CONTROLLER

@@ -240,25 +240,30 @@ Opt_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer
 }
 Opt_PositionWithAffinity GetCharacterPositionAtCoordinateImpl(Ark_LayoutManager peer,
                                                               Ark_Float64 x,
-                                                              Ark_Float64 y)
+                                                              Ark_Float64 y,
+                                                              const Opt_TextEncoding* encoding)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
+    auto encodingValue = Converter::OptConvertPtr<TextEncoding>(encoding).value_or(TextEncoding::UTF8);
     PositionWithAffinity result = handler->GetCharacterPositionAtCoordinate(
         Converter::Convert<Ark_Float64>(x),
-        Converter::Convert<Ark_Float64>(y)
-    );
+        Converter::Convert<Ark_Float64>(y),
+        encodingValue);
     return Converter::ArkValue<Opt_PositionWithAffinity>(result);
 }
-Opt_Array_TextRange GetGlyphRangeForCharacterRangeImpl(Ark_LayoutManager peer, const Ark_TextRange* charRange)
+Opt_Array_TextRange GetGlyphRangeForCharacterRangeImpl(Ark_LayoutManager peer,
+                                                       const Ark_TextRange* charRange,
+                                                       const Opt_TextEncoding* encoding)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    auto encodingValue = Converter::OptConvertPtr<TextEncoding>(encoding).value_or(TextEncoding::UTF8);
     std::pair<TextRange, TextRange> textRanges =
         handler->GetGlyphRangeForCharacterRange(Converter::OptConvert<int32_t>(charRange->start).value(),
-            Converter::OptConvert<int32_t>(charRange->end).value());
+            Converter::OptConvert<int32_t>(charRange->end).value(), encodingValue);
     std::vector<Ark_TextRange> values;
     auto first = Converter::ArkValue<Ark_TextRange>(textRanges.first);
     values.push_back(first);
@@ -266,14 +271,17 @@ Opt_Array_TextRange GetGlyphRangeForCharacterRangeImpl(Ark_LayoutManager peer, c
     values.push_back(second);
     return Converter::ArkValue<Opt_Array_TextRange>(values, Converter::FC);
 }
-Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer, const Ark_TextRange* glyphRange)
+Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer,
+                                                       const Ark_TextRange* glyphRange,
+                                                       const Opt_TextEncoding* encoding)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    auto encodingValue = Converter::OptConvertPtr<TextEncoding>(encoding).value_or(TextEncoding::UTF8);
     std::pair<TextRange, TextRange> textRanges =
         handler->GetCharacterRangeForGlyphRange(Converter::OptConvert<int32_t>(glyphRange->start).value(),
-            Converter::OptConvert<int32_t>(glyphRange->end).value());
+            Converter::OptConvert<int32_t>(glyphRange->end).value(), encodingValue);
     std::vector<Ark_TextRange> values;
     auto first = Converter::ArkValue<Ark_TextRange>(textRanges.first);
     values.push_back(first);
@@ -281,13 +289,14 @@ Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer, c
     values.push_back(second);
     return Converter::ArkValue<Opt_Array_TextRange>(values, Converter::FC);
 }
+
 Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                         Ark_Int32 lineNumber)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
-    int32_t lineCount = handler->GetLineCount();
+    int32_t lineCount = static_cast<int32_t>(handler->GetLineCount());
     bool isValid = (lineNumber >= 0 && lineNumber < lineCount);
     CHECK_NULL_RETURN(isValid, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     TextLineMetrics lineMetrics = handler->GetLineMetrics(Converter::Convert<int>(lineNumber));
@@ -315,6 +324,22 @@ Opt_Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
     }
     return Converter::ArkValue<Opt_Array_text_TextBox>(values, Converter::FC);
 }
+Opt_PositionWithAffinity GetCharacterPositionAtCoordinate0Impl(Ark_LayoutManager peer,
+                                                               Ark_Float64 x,
+                                                               Ark_Float64 y)
+{
+    return GetCharacterPositionAtCoordinateImpl(peer, x, y, nullptr);
+}
+Opt_Array_TextRange GetGlyphRangeForCharacterRange0Impl(Ark_LayoutManager peer,
+                                                        const Ark_TextRange* charRange)
+{
+    return GetGlyphRangeForCharacterRangeImpl(peer, charRange, nullptr);
+}
+Opt_Array_TextRange GetCharacterRangeForGlyphRange0Impl(Ark_LayoutManager peer,
+                                                         const Ark_TextRange* glyphRange)
+{
+    return GetCharacterRangeForGlyphRangeImpl(peer, glyphRange, nullptr);
+}
 } // LayoutManagerAccessor
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
 {
@@ -324,8 +349,11 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
         LayoutManagerAccessor::GetFinalizerImpl,
         LayoutManagerAccessor::GetLineCountImpl,
         LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+        LayoutManagerAccessor::GetCharacterPositionAtCoordinate0Impl,
         LayoutManagerAccessor::GetCharacterPositionAtCoordinateImpl,
+        LayoutManagerAccessor::GetGlyphRangeForCharacterRange0Impl,
         LayoutManagerAccessor::GetGlyphRangeForCharacterRangeImpl,
+        LayoutManagerAccessor::GetCharacterRangeForGlyphRange0Impl,
         LayoutManagerAccessor::GetCharacterRangeForGlyphRangeImpl,
         LayoutManagerAccessor::GetLineMetricsImpl,
         LayoutManagerAccessor::GetRectsForRangeImpl,

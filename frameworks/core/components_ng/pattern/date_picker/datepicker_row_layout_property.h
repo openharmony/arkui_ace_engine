@@ -23,6 +23,7 @@
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/date_picker/picker_types.h"
@@ -31,8 +32,6 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-class InspectorFilter;
-
 class ACE_EXPORT DataPickerRowLayoutProperty : public PickerLayoutProperty {
     DECLARE_ACE_TYPE(DataPickerRowLayoutProperty, PickerLayoutProperty);
 

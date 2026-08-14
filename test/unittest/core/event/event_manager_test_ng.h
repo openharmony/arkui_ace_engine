@@ -44,6 +44,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"

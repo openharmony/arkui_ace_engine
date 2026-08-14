@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text/text_select_overlay.h"
-
-#include "core/common/container.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -757,7 +755,9 @@ void TextSelectOverlay::UpdateAISelectMenu()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
-    manager->FocusFirstFocusableChildInMenu();
+    if (!IsUsingMouse()) {
+        manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
+        manager->FocusFirstFocusableChildInMenu();
+    }
 }
 } // namespace OHOS::Ace::NG

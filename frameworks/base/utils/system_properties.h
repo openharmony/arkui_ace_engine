@@ -240,6 +240,16 @@ public:
         return apiVersion_;
     }
 
+    static const std::string& GetSdkPatchApiVersion()
+    {
+        return sdkPatchApiVersion_;
+    }
+
+    static const std::string& GetSdkMinorApiVersion()
+    {
+        return sdkMinorApiVersion_;
+    }
+
     static const std::string& GetReleaseType()
     {
         return releaseType_;
@@ -786,6 +796,16 @@ public:
         return isOpenYuvDecode_;
     }
 
+    static int32_t GetSyntaxMemOptStrategy()
+    {
+        return syntaxMemOptStrategy_;
+    }
+
+    static int32_t GetBootVendorDdrSize()
+    {
+        return bootVendorDdrSize_;
+    }
+
     static UiMaterialLevel GetUiMaterialLevel();
     static bool IsDeviceSystemMaterialSupported();
 
@@ -831,6 +851,8 @@ private:
     static std::string model_;
     static std::string product_;
     static std::string apiVersion_;
+    static std::string sdkPatchApiVersion_;
+    static std::string sdkMinorApiVersion_;
     static std::string releaseType_;
     static std::string paramDeviceType_;
     static int32_t mcc_;
@@ -906,6 +928,8 @@ private:
     static bool syncLoadEnabled_;
     static bool whiteBlockEnabled_;
     static int32_t previewStatus_;
+    static int32_t syntaxMemOptStrategy_;
+    static int32_t bootVendorDdrSize_;
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;

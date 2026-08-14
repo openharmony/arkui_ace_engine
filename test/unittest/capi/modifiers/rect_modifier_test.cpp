@@ -171,9 +171,9 @@ HWTEST_F(RectModifierTest, setRadiusTestRectModifierSetRadius, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     auto checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_THAT(checkVal1, Eq(std::nullopt));
+    EXPECT_THAT(checkVal1, Eq(std::make_optional(0)));
     auto checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_THAT(checkVal2, Eq(std::nullopt));
+    EXPECT_THAT(checkVal2, Eq(std::make_optional(0)));
 
     auto optRadius = Converter::ArkUnion<Opt_Union_Length_Array_RadiusItem, Ark_Length>(WIDTH_STR);
     modifier_->setRadius(frameNode, &optRadius);

@@ -353,6 +353,9 @@ HWTEST_F(EventManagerTestThreeNg, EventManagerTest098, TestSize.Level1)
     container->isSubContainer_ = false;
     container->isDialogContainer_ = true;
     EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**

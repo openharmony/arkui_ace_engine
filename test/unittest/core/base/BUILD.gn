@@ -17,7 +17,13 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("view_stack_processor_test_ng") {
   module_name = "EmbeddedDisPlayCrossProcess-EmbeddedComponent"
-  type = "new"
+
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  } else {
+    type = "new"
+  }
   sources = [ "view_stack_processor_test_ng.cpp" ]
 }
 
@@ -43,7 +49,11 @@ ace_unittest("frame_node_test_ng") {
 
 ace_unittest("frame_node_drop_test_ng") {
   module_name = "ImperativeFramework-NodeAdapter"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [ "frame_node_drop_test_ng.cpp" ]
 }
 
@@ -75,10 +85,10 @@ ace_unittest("ui_node_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
   sources = [
+    "ui_node_isolated_thread_test.cpp",
     "ui_node_multi_thread_test.cpp",
     "ui_node_test_ng.cpp",
     "ui_node_test_ng_two.cpp",
-    "ui_node_isolated_thread_test.cpp",
   ]
 }
 
@@ -103,19 +113,31 @@ ace_unittest("view_abstract_test_ng") {
 
 ace_unittest("view_abstract_test_resetposition_ng") {
   module_name = "PickerSet-TimePicker/TimePickerDialog"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [ "view_abstract_test_resetposition_ng.cpp" ]
 }
 
 ace_unittest("view_full_update_model_ng_test") {
   module_name = "ImperativeFramework-NodeContainer"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [ "view_full_update_model_ng_test.cpp" ]
 }
 
 ace_unittest("view_partial_update_model_test_ng") {
   module_name = "CommonProperties-LayoutAndBorder"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [ "view_partial_update_model_test_ng.cpp" ]
 }
 
@@ -127,7 +149,11 @@ ace_unittest("observer_test_ng") {
 
 ace_unittest("view_abstract_model_test_ng") {
   module_name = "Animation-Frame"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [
     "view_abstract_model_test_ng.cpp",
     "view_abstract_model_test_two_ng.cpp",
@@ -145,13 +171,21 @@ ace_unittest("view_abstract_model_static_test_ng") {
 
 ace_unittest("short_cuts_little_test_ng") {
   module_name = "Animation-Frame"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [ "short_cuts_little_test_ng.cpp" ]
 }
 
 ace_unittest("short_cuts_test_ng") {
   module_name = "Animation-Frame"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [ "short_cuts_test_ng.cpp" ]
 }
 
@@ -181,7 +215,11 @@ ace_unittest("thread_safe_node_test_ng") {
 
 ace_unittest("transparent_node_detector_test_ng") {
   module_name = "NavigationSet-NavigationAndNavDestination"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [
     "$ace_root/frameworks/core/components_ng/base/transparent_node_detector.cpp",
     "transparent_node_detector_test_ng.cpp",
@@ -203,6 +241,7 @@ group("core_base_unittest") {
     ":frame_node_test_ng",
     ":geometry_node_test_ng",
     ":inspector_test_ng",
+    ":modifier_test_ng",
     ":node_render_status_monitor_test_ng",
     ":observer_test_ng",
     ":short_cuts_little_test_ng",
@@ -219,7 +258,6 @@ group("core_base_unittest") {
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
-    ":modifier_test_ng",
   ]
 
   if (ace_engine_feature_enable_split_mode) {

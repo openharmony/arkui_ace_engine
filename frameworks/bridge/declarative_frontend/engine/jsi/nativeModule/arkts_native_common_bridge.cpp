@@ -42,7 +42,6 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/input_event_monitor_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/event/focus_axis_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
@@ -6206,6 +6205,8 @@ ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *run
     if (secondArg->IsString(vm)) {
         typeCppStr = secondArg->ToString(vm)->ToString(vm);
         safeAreaType = ParseStrToUint(typeCppStr);
+    } else if (secondArg->IsNumber()) {
+        safeAreaType = secondArg->ToNumber(vm)->Value();
     } else {
         safeAreaType = NG::SAFE_AREA_TYPE_ALL;
     }
@@ -6213,6 +6214,8 @@ ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *run
     if (thirdArg->IsString(vm)) {
         edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
         safeAreaEdge = ParseStrToUint(edgesCppStr);
+    } else if (thirdArg->IsNumber()) {
+        safeAreaEdge = thirdArg->ToNumber(vm)->Value();
     } else {
         safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
     }

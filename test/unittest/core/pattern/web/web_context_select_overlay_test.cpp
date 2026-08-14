@@ -35,7 +35,7 @@ using namespace testing::ext;
 using namespace OHOS::Ace;
 
 namespace OHOS::Ace::NG {
-
+namespace {
 class MockWebContextMenuParam : public WebContextMenuParam {
     DECLARE_ACE_TYPE(MockWebContextMenuParam, WebContextMenuParam);
 public:
@@ -106,6 +106,7 @@ public:
     MOCK_METHOD(void, PasteAndMatchStyle, (), (const, override));
     MOCK_METHOD(void, RequestPasswordAutoFill, (), (const, override));
 };
+}
 
 class WebContextSelectOverlayTest : public testing::Test {
 public:

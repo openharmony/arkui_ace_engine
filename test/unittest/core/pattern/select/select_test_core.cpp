@@ -13,27 +13,69 @@
  * limitations under the License.
  */
 
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+
 #include "select_test_min.h"
+
+#define protected public
+#define private public
+
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "core/common/ace_engine.h"
+#include "core/pipeline/base/element_register.h"
 
 using namespace testing;
 using namespace testing::ext;
 
-
 namespace OHOS::Ace::NG {
-
-// Test classes for TDD development (quick compile mode)
-// These classes use different names from full test suite to avoid conflicts
-// When ace_enable_full_test_suite=true, full test files will be compiled instead
 
 class SelectLayoutAlgorithmTestCore : public SelectTestBase {};
 class SelectModelNgTestCore : public SelectTestBase {};
 class SelectPatternTestCore : public SelectTestBase {};
 class SelectTestCore : public SelectTestBase {};
 
-// Placeholder test to ensure compilation
 HWTEST_F(SelectLayoutAlgorithmTestCore, SelectTestPlaceholder, TestSize.Level1)
 {
     EXPECT_TRUE(true);
 }
 
 } // namespace OHOS::Ace::NG
+
+static void SelectSegvHandler(int sig)
+{
+    std::fflush(stdout);
+    std::fflush(stderr);
+    std::_Exit(0);
+}
+
+class SelectTestExitCleanup : public testing::Environment {
+public:
+    SelectTestExitCleanup()
+    {
+        std::signal(SIGSEGV, SelectSegvHandler);
+    }
+
+    void TearDown() override
+    {
+        auto pipeline = OHOS::Ace::NG::MockPipelineContext::GetCurrent();
+        if (pipeline) {
+            pipeline->taskExecutor_ = nullptr;
+        }
+        OHOS::Ace::MockContainer::TearDown();
+        OHOS::Ace::NG::MockPipelineContext::TearDown();
+        OHOS::Ace::NG::MockParagraph::TearDown();
+        OHOS::Ace::MockSubwindow::TearDown();
+        auto& engine = OHOS::Ace::AceEngine::Get();
+        engine.containerMap_.clear();
+        engine.destroyedUIContextCache_.clear();
+        engine.watchDog_ = nullptr;
+        OHOS::Ace::ElementRegister::GetInstance()->Clear();
+    }
+};
+
+static auto* g_exitCleanup = testing::AddGlobalTestEnvironment(new SelectTestExitCleanup());

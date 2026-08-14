@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 
-#include "core/common/container.h"
 #ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #endif

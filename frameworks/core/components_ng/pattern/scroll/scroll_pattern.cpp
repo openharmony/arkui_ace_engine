@@ -175,8 +175,10 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         return false;
     }
     UpdateScrollBarOffset();
-    if (config.frameSizeChange && isInitialized_ && GetScrollBar() != nullptr) {
-        GetScrollBar()->ScheduleDisappearDelayTask();
+    if (config.frameSizeChange && isInitialized_) {
+        if (GetScrollBar() != nullptr) {
+            GetScrollBar()->ScheduleDisappearDelayTask();
+        }
     }
     auto eventHub = host->GetEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
@@ -205,10 +207,6 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
     SetAccessibilityFocusScroll(false);
-    if (!IsScrolling()) {
-        // Reset accessibilityScrollSource_ when scrolling is not in progress
-        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
-    }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
@@ -504,7 +502,15 @@ double ScrollPattern::ValidateOffset(int32_t source, double willScrollOffset)
     // restrict position between top and bottom
     if (IsRestrictBoundary() || source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING ||
         source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
-        willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0);
+        if (GetAxis() == Axis::HORIZONTAL) {
+            if (IsRowReverse()) {
+                willScrollOffset = std::clamp(willScrollOffset, 0.0, scrollableDistance_);
+            } else {
+                willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0);
+            }
+        } else {
+            willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0);
+        }
     }
     return willScrollOffset;
 }
@@ -518,7 +524,15 @@ void ScrollPattern::ValidateOffset(int32_t source)
     // restrict position between top and bottom
     if (IsRestrictBoundary() || source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING ||
         source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
-        currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
+        if (GetAxis() == Axis::HORIZONTAL) {
+            if (IsRowReverse()) {
+                currentOffset_ = std::clamp(currentOffset_, 0.0, scrollableDistance_);
+            } else {
+                currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
+            }
+        } else {
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
+        }
     }
 }
 
@@ -773,7 +787,6 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         return false;
     }
     SetScrollSource(source);
-    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     lastOffset_ = currentOffset_;
     auto willScrollPosition = currentOffset_ + delta;
@@ -902,9 +915,10 @@ void ScrollPattern::ScrollTo(float position)
 
 void ScrollPattern::DoJump(float position, int32_t source)
 {
-    if ((!NearEqual(currentOffset_, position) && GreatOrEqual(scrollableDistance_, 0.0f)) ||
+    float setPosition = (GetAxis() == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
+    if ((!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) ||
         GetCanStayOverScroll()) {
-        UpdateCurrentOffset(position - currentOffset_, source);
+        UpdateCurrentOffset(setPosition - currentOffset_, source);
     }
 }
 
@@ -917,28 +931,36 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        CHECK_NULL_RETURN(scroll, 0.0);
-        if (Negative(scroll->GetScrollableDistance())) {
-            return 0.0;
+        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+            if (Negative(scroll->GetScrollableDistance())) {
+                return 0.0;
+            }
+            return -scroll->GetScrollableDistance();
         }
-        return -scroll->GetScrollableDistance();
+        return 0.0;
     });
     scrollEffect->SetTrailingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_RETURN(scroll, 0.0);
+        if (scroll->IsRowReverse() || scroll->IsColReverse()) {
+            return scroll->GetScrollableDistance();
+        }
         return 0.0;
     });
     scrollEffect->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_RETURN(scroll, 0.0);
-        if (Negative(scroll->GetScrollableDistance())) {
-            return 0.0;
+        if (!scroll->IsRowReverse() && !scroll->IsColReverse()) {
+            return -scroll->GetScrollableDistance();
         }
-        return -scroll->GetScrollableDistance();
+        return scroll->GetContentStartOffset();
     });
     scrollEffect->SetInitTrailingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_RETURN(scroll, 0.0);
+        if (scroll->IsRowReverse() || scroll->IsColReverse()) {
+            return scroll->GetScrollableDistance();
+        }
         return 0.0;
     });
 }
@@ -1004,7 +1026,6 @@ void ScrollPattern::SetAccessibilityAction()
             pattern->IsScrollable(), pattern->IsPositiveScrollableDistance(), scrollType,
             static_cast<int32_t>(host->GetAccessibilityId()));
         if (pattern->IsScrollable() && pattern->IsPositiveScrollableDistance()) {
-            pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             pattern->ScrollPage(false, true, scrollType);
         }
     });
@@ -1019,7 +1040,6 @@ void ScrollPattern::SetAccessibilityAction()
             pattern->IsScrollable(), pattern->IsPositiveScrollableDistance(), scrollType,
             static_cast<int32_t>(host->GetAccessibilityId()));
         if (pattern->IsScrollable() && pattern->IsPositiveScrollableDistance()) {
-            pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             pattern->ScrollPage(true, true, scrollType);
         }
     });
@@ -1080,7 +1100,6 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         moveOffset = scrollFrameLength - focusNodeDiffToScroll - focusNodeLength;
     }
     if (!NearZero(moveOffset)) {
-        SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         return OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
     }
     return false;
@@ -1093,9 +1112,6 @@ ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility(bool isAccessibility)
                 CHECK_NULL_RETURN(pattern, false);
                 if (isAccessibility) {
                     pattern->SetAccessibilityFocusScroll(true);
-                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
-                } else {
-                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
                 }
                 auto ret = pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
                 if (isAccessibility && !ret) {

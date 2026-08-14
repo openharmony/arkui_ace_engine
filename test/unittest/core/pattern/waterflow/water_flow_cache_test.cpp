@@ -20,8 +20,6 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "water_flow_test_ng.h"
 
-#include "core/common/container.h"
-
 namespace OHOS::Ace::NG {
 /**
  * @tc.name: Cache001

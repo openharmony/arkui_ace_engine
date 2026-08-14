@@ -93,6 +93,8 @@ public:
     static ArkUINativeModuleValue ReSetSwiperMaintainVisibleContentPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSwiperOnScrollStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSwiperOnScrollStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSwiperIgnoreHiddenItem(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSwiperIgnoreHiddenItem(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

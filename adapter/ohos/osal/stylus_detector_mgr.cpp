@@ -14,7 +14,6 @@
  */
 
 #include "core/common/stylus/stylus_detector_mgr.h"
-#include "core/common/container.h"
 
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_callback.h"
@@ -41,10 +40,7 @@ bool IsHitVisibleResponseArea(const NG::PointF& point, const RefPtr<NG::TextInpu
 
     auto responseFrameNode = cleanLikeResponseArea->GetFrameNode();
     CHECK_NULL_RETURN(responseFrameNode, false);
-    auto responseGeometryNode = responseFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(responseGeometryNode, false);
-    auto globalFrameRect = responseGeometryNode->GetFrameRect();
-    globalFrameRect.SetOffset(responseFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
+    auto globalFrameRect = responseFrameNode->GetTransformRectRelativeToWindow();
     return globalFrameRect.IsInRegion(point);
 }
 } // namespace

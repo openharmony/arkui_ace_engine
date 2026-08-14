@@ -537,6 +537,13 @@ int32_t GridModelNG::GetScrollBarMode(FrameNode* frameNode)
         frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value_or(DisplayMode::AUTO));
 }
 
+float GridModelNG::GetScrollBarWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_SCROLL_BAR_WIDTH.ConvertToVp());
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
+    return value.ConvertToVp();
+}
+
 void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth)
 {
     if (scrollBarWidth &&
@@ -549,13 +556,6 @@ void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Di
         frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_WIDTH);
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
-}
-
-float GridModelNG::GetScrollBarWidth(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, DEFAULT_SCROLL_BAR_WIDTH.ConvertToVp());
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
-    return value.ConvertToVp();
 }
 
 void GridModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor)
@@ -914,7 +914,7 @@ void GridModelNG::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc
 void GridModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(onScrollStart));
 }
@@ -922,7 +922,7 @@ void GridModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& on
 void GridModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
@@ -1034,7 +1034,7 @@ void GridModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
@@ -1272,7 +1272,6 @@ void GridModelNG::SetScrollToIndex(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
 }
 

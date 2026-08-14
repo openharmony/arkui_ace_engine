@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -42,7 +40,6 @@
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #endif
 #include "core/components_ng/render/paint_wrapper.h"
-#include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
@@ -263,11 +260,6 @@ void UpdateNeedRenderInfoAfterRequestFrame(const RefPtr<FrameNode>& frameNode)
     }
 }
 } // namespace
-
-bool FrameNode::ShouldDetectAceObjTypeConvertion()
-{
-    return SystemProperties::DetectAceObjTypeConvertion();
-}
 
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
@@ -682,10 +674,7 @@ private:
 
 FrameNode::FrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
-    : UINode(tag, nodeId, isRoot),
-      LayoutWrapper(WeakClaim(this)),
-      renderContext_(RenderContext::Create()),
-      pattern_(pattern)
+    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
     if (isRoot) {
         isPendingState_ = true;
@@ -719,41 +708,6 @@ FrameNode::FrameNode(
     }
     uiNodeType_ = UINodeType::FRAME_NODE;
     mountPolicy_ = MountPolicy::SINGLE_IF_RENDER_NODE;
-}
-
-bool FrameNode::ZIndexComparator::operator()(
-    const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
-{
-    auto left = weakLeft.Upgrade();
-    auto right = weakRight.Upgrade();
-    if (left && right) {
-        auto leftContext = left->GetRenderContext();
-        auto rightContext = right->GetRenderContext();
-        CHECK_NULL_RETURN(leftContext, false);
-        CHECK_NULL_RETURN(rightContext, false);
-        return leftContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE) < rightContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
-    }
-    return false;
-}
-
-bool FrameNode::HasPositionProp() const
-{
-    CHECK_NULL_RETURN(renderContext_, false);
-    return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
-           renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
-}
-
-bool FrameNode::IsOutOfLayout() const
-{
-    CHECK_NULL_RETURN(renderContext_, false);
-    return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
-}
-
-void FrameNode::UpdateOcclusionCullingStatus(bool enable)
-{
-    if (renderContext_) {
-        renderContext_->UpdateOcclusionCullingStatus(enable);
-    }
 }
 
 void FrameNode::OnDelete()
@@ -5384,20 +5338,6 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType, const std
     }
 }
 
-void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo)
-{
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        AccessibilityEvent event;
-        event.type = eventType;
-        event.nodeId = accessibilityId_;
-        event.extraEventInfo = extraEventInfo;
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->SendEventToAccessibility(event);
-    }
-}
-
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacksMap_) {
@@ -6332,7 +6272,9 @@ void FrameNode::UpdateFocusState()
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
         focusHub->ClearFocusState(false);
-        focusHub->PaintFocusState(false);
+        if (focusHub->PaintFocusState(false)) {
+            focusHub->RaiseZIndex();
+        }
     }
 }
 

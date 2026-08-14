@@ -78,6 +78,18 @@ public:
         isDynamicLayout_ = isDynamic;
     }
 
+    AdjustOffset GetAdjustOffset() const override
+    {
+        return layoutInfo_->adjustOffset_;
+    }
+
+    AdjustOffset GetAndResetAdjustOffset() override
+    {
+        AdjustOffset ret = layoutInfo_->adjustOffset_;
+        layoutInfo_->adjustOffset_ = AdjustOffset();
+        return ret;
+    }
+
     // Mount the header node (replaces any existing header). Validates via IsValidHeaderFooter first.
     void AddHeader(const RefPtr<UINode>& header);
     // Mount the footer node (replaces any existing footer). Validates via IsValidHeaderFooter first.
@@ -113,17 +125,7 @@ public:
     // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH); defaults to NONE.
     StickyStyle GetStickyStyle() const;
 
-    AdjustOffset GetAdjustOffset() const override
-    {
-        return layoutInfo_->adjustOffset_;
-    }
-
-    AdjustOffset GetAndResetAdjustOffset() override
-    {
-        AdjustOffset ret = layoutInfo_->adjustOffset_;
-        layoutInfo_->adjustOffset_ = AdjustOffset();
-        return ret;
-    }
+    bool HasStickyHeader() const override;
 
     void SetOnVisibleIndexesChange(std::function<void(int32_t, int32_t)>&& onVisibleIndexesChange)
     {

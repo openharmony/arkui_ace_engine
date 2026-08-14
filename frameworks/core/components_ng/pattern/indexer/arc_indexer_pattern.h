@@ -28,15 +28,11 @@ class AccessibilitySAObserverCallback;
 }
 
 namespace OHOS::Ace::NG {
-class AnimatablePropertyFloat;
-template<typename T, typename S>
-class NodeAnimatableProperty;
-using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class ArcIndexerPattern : public IndexerPattern {
     DECLARE_ACE_TYPE(ArcIndexerPattern, IndexerPattern);
 public:
     ArcIndexerPattern() = default;
-    ~ArcIndexerPattern() override;
+    ~ArcIndexerPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {

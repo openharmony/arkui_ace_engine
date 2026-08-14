@@ -25,7 +25,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/list/list_properties.h"
+#include "compatible/components/list_v2/list_component.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;

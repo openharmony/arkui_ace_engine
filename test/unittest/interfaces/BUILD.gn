@@ -1555,6 +1555,35 @@ ohos_unittest("node_utils_error_test") {
   ]
 }
 
+ohos_unittest("native_material_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/interfaces/native/node/native_material_impl.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_node_model.cpp",
+    "native_material_test.cpp",
+  ]
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    ":c_api_configs",
+  ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+  ]
+}
+
 group("interfaces_unittest") {
   testonly = true
   deps = [
@@ -1568,6 +1597,7 @@ group("interfaces_unittest") {
     ":extension_custom_node_test_ng",
     ":js_drawable_descriptor_test",
     ":native_key_event_test",
+    ":native_material_test",
     ":native_node_extended_error_test",
     ":native_node_napi_test",
     ":native_render_node_property_test",

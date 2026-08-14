@@ -16,7 +16,6 @@
 #define NAPI_VERSION 8 
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
@@ -4893,20 +4892,23 @@ PositionWithAffinity RichEditorPattern::GetGlyphPositionAtCoordinate(int32_t x, 
     return paragraphs_.GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
 }
 
-PositionWithAffinity RichEditorPattern::GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+PositionWithAffinity RichEditorPattern::GetCharacterPositionAtCoordinate(
+    int32_t x, int32_t y, TextEncoding encoding)
 {
     Offset offset(x, y);
-    return paragraphs_.GetCharacterPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
+    return paragraphs_.GetCharacterPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset), encoding);
 }
 
-std::pair<TextRange, TextRange> RichEditorPattern::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> RichEditorPattern::GetGlyphRangeForCharacterRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return paragraphs_.GetGlyphRangeForCharacterRange(start, end);
+    return paragraphs_.GetGlyphRangeForCharacterRange(start, end, encoding);
 }
 
-std::pair<TextRange, TextRange> RichEditorPattern::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+std::pair<TextRange, TextRange> RichEditorPattern::GetCharacterRangeForGlyphRange(
+    int32_t start, int32_t end, TextEncoding encoding)
 {
-    return paragraphs_.GetCharacterRangeForGlyphRange(start, end);
+    return paragraphs_.GetCharacterRangeForGlyphRange(start, end, encoding);
 }
 
 void RichEditorPattern::InitDragDropEvent()
