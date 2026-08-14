@@ -297,6 +297,8 @@ RefPtr<FrameNode> ToggleModelNG::CreateCheckboxFrameNode(int32_t nodeId, bool is
     auto rawFrameNode = reinterpret_cast<FrameNode*>(checkboxModifier->createToggleCheckboxFrameNode(nodeId));
     CHECK_NULL_RETURN(rawFrameNode, nullptr);
     auto frameNode = AceType::Claim(rawFrameNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->DecRefCount();
     UpdateCheckboxIsOn(frameNode, isOn);
     return frameNode;
 }
