@@ -643,6 +643,7 @@ ohos_static_library("ace_base") {
     "$ace_root/frameworks/base/memory/memory_monitor.cpp",
     "$ace_root/frameworks/base/resource/data_provider_manager.cpp",
     "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
+    "$ace_root/frameworks/base/external_instance_id_mapper.cpp",
     "$ace_root/frameworks/base/thread/task_executor.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/date_util.cpp",
