@@ -428,8 +428,8 @@ bool SmartLayoutAlgorithm::HandleTextContentOverflow(LayoutWrapper* layoutWrappe
         propertyChanged = true;
     }
     if (!layoutProperty->HasHeightAdaptivePolicy() ||
-        layoutProperty->GetHeightAdaptivePolicy() != TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST) {
-        layoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+        layoutProperty->GetHeightAdaptivePolicy() != TextHeightAdaptivePolicy::MAX_LINES_FIRST) {
+        layoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
         propertyChanged = true;
     }
     if (!propertyChanged) {
