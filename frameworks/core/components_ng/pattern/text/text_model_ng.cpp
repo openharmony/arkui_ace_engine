@@ -1226,6 +1226,14 @@ float TextModelNG::GetLineSpacing(FrameNode* frameNode)
     return static_cast<float>(value.Value());
 }
 
+bool TextModelNG::GetIsOnlyBetweenLines(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetIsOnlyBetweenLines().value_or(false);
+}
+
 TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);

@@ -1881,6 +1881,13 @@ float GetTextLineSpacing(ArkUINodeHandle node)
     return TextModelNG::GetLineSpacing(frameNode);
 }
 
+ArkUI_Bool GetIsOnlyBetweenLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return TextModelNG::GetIsOnlyBetweenLines(frameNode);
+}
+
 void ResetTextLineSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3127,6 +3134,7 @@ const ArkUITextModifier* GetTextModifier()
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
+        .getIsOnlyBetweenLines = GetIsOnlyBetweenLines,
         .resetTextLineSpacing = ResetTextLineSpacing,
         .setTextCaretColor = SetTextCaretColor,
         .getTextCaretColor = GetTextCaretColor,
@@ -3342,6 +3350,7 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
         .setTextLineSpacing = SetTextLineSpacing,
         .getTextLineSpacing = GetTextLineSpacing,
+        .getIsOnlyBetweenLines = GetIsOnlyBetweenLines,
         .resetTextLineSpacing = ResetTextLineSpacing,
         .setTextSelectedBackgroundColor = SetTextSelectedBackgroundColor,
         .getTextSelectedBackgroundColor = GetTextSelectedBackgroundColor,
