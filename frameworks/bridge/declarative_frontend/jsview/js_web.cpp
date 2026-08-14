@@ -3482,6 +3482,17 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                     "innerWebNativeMessageManager received null or unexpected event type");
                 return;
             }
+
+            napi_env env = GetNapiEnv();
+            if (!env) {
+                return;
+            }
+            napi_handle_scope scope = nullptr;
+            auto napi_status = napi_open_handle_scope(env, &scope);
+            if (napi_status != napi_ok) {
+                return;
+            }
+
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             JSRef<JSObject> handlerObj = JSClass<JSFullScreenVideoOverlayHandler>::NewInstance();
             auto callbackEvent = Referenced::Claim(handlerObj->Unwrap<JSFullScreenVideoOverlayHandler>());
@@ -3492,6 +3503,8 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             obj->SetPropertyObject("mediaInfo", mediaInfo);
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
             auto result = func->Call(webviewController, 1, argv);
+
+            napi_close_handle_scope(env, scope);
         };
     }
 
