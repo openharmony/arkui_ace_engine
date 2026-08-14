@@ -1855,6 +1855,11 @@ std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::Page
     return "";
 }
 
+std::string NG::PipelineContext::GetNavDestinationJSViewName(const RefPtr<NG::PageInfo>& pageInfo) const
+{
+    return "";
+}
+
 std::string NG::PipelineContext::GetCurrentPageName()
 {
     return "";
