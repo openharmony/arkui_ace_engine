@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <securec.h>
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/linear_map.h"
@@ -2996,6 +2997,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(
 
 void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("TextAttribute.BindSelectionMenu", 1);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_VOID(menuModifier);
     selectMenu_ = menuModifier->getOrCreateMenuNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -3134,6 +3136,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
 
 void SelectOverlayNode::NewMaterialMoreAnimation(bool noAnimation)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("TextAttribute.EditMenuOptions", 1);
     CHECK_NULL_VOID(selectMenuInner_);
     CHECK_NULL_VOID(extensionMenu_);
     auto selectMenuInnerContext = selectMenuInner_->GetRenderContext();
