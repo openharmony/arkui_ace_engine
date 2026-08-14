@@ -1317,6 +1317,39 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("AnchorPosition: " + dumpInfo_.anchorPosition.ToString());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     DumpLog::GetInstance().AddDesc("ModalMode: " + modalMode);
+    DumpRootNodeDirtyMarkInfo();
+}
+
+void MenuWrapperPattern::DumpRootNodeDirtyMarkInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto frameRoot = AceType::DynamicCast<FrameNode>(rootNode);
+    CHECK_NULL_VOID(frameRoot);
+    bool isLayoutDirtyMarked = frameRoot->IsLayoutDirtyMarked();
+    DumpLog::GetInstance().AddDesc("RootNodeIsLayoutDirtyMarked: " + std::to_string(isLayoutDirtyMarked));
+    if (!isLayoutDirtyMarked) {
+        return;
+    }
+    auto dirtyLayoutNodes = pipeline->GetDirtyLayoutNodes();
+    DumpLog::GetInstance().AddDesc("DirtyLayoutNodesSize: " + std::to_string(dirtyLayoutNodes.size()));
+    for (const auto& dirtyNode : dirtyLayoutNodes) {
+        if (!dirtyNode) {
+            continue;
+        }
+        if (dirtyNode->GetTag() != ROOT_ETS_TAG) {
+            continue;
+        }
+        DumpLog::GetInstance().AddDesc("DirtyRootNode id: " + std::to_string(dirtyNode->GetId()) +
+            ", depth: " + std::to_string(dirtyNode->GetDepth()) +
+            ", pageId: " + std::to_string(dirtyNode->GetPageId()));
+    }
 }
 
 void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1346,6 +1379,44 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("AnchorPosition", dumpInfo_.anchorPosition.ToString().c_str());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     json->Put("ModalMode", modalMode.c_str());
+    DumpRootNodeDirtyMarkInfo(json);
+}
+
+void MenuWrapperPattern::DumpRootNodeDirtyMarkInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto frameRoot = AceType::DynamicCast<FrameNode>(rootNode);
+    CHECK_NULL_VOID(frameRoot);
+    bool isLayoutDirtyMarked = frameRoot->IsLayoutDirtyMarked();
+    json->Put("RootNodeIsLayoutDirtyMarked", std::to_string(isLayoutDirtyMarked).c_str());
+    if (!isLayoutDirtyMarked) {
+        return;
+    }
+    auto dirtyLayoutNodes = pipeline->GetDirtyLayoutNodes();
+    json->Put("DirtyLayoutNodesSize", std::to_string(dirtyLayoutNodes.size()).c_str());
+    std::string dirtyRootNodes;
+    for (const auto& dirtyNode : dirtyLayoutNodes) {
+        if (!dirtyNode) {
+            continue;
+        }
+        if (dirtyNode->GetTag() != ROOT_ETS_TAG) {
+            continue;
+        }
+        if (!dirtyRootNodes.empty()) {
+            dirtyRootNodes += "; ";
+        }
+        dirtyRootNodes += "id:" + std::to_string(dirtyNode->GetId()) +
+            ",depth:" + std::to_string(dirtyNode->GetDepth()) +
+            ",pageId:" + std::to_string(dirtyNode->GetPageId());
+    }
+    json->Put("DirtyRootNodes", dirtyRootNodes.c_str());
 }
 
 bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point)

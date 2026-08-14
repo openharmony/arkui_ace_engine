@@ -153,6 +153,11 @@ public:
         return dirtyLayoutNodes_.empty();
     }
 
+    const std::list<RefPtr<FrameNode>>& GetDirtyLayoutNodes() const
+    {
+        return dirtyLayoutNodes_;
+    }
+
     void AddSyncGeometryNodeTask(std::function<void()>&& task)
     {
         syncGeometryNodeTasks_.emplace_back(task);

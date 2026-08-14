@@ -1057,6 +1057,11 @@ public:
         return taskScheduler_->IsDirtyLayoutNodesEmpty();
     }
 
+    const std::list<RefPtr<FrameNode>>& GetDirtyLayoutNodes() const
+    {
+        return taskScheduler_->GetDirtyLayoutNodes();
+    }
+
     bool IsDirtyPropertyNodesEmpty() const override
     {
         return dirtyPropertyNodes_.empty();
