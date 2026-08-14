@@ -643,7 +643,7 @@ void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& sa
     const RefPtr<SafeAreaManager>& safeAreaManager, const RefPtr<MenuLayoutProperty>& props,
     const RefPtr<MenuPattern>& menuPattern)
 {
-    if (!targetInUIExtension_) {
+    if (!targetInUIExtension_ || showInSubWindow_) {
         wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
         return;
     }
