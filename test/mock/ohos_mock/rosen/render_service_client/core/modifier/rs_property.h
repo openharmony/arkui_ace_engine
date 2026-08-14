@@ -39,10 +39,29 @@ enum class ThresholdType {
 
 class RSPropertyBase : public std::enable_shared_from_this<RSPropertyBase> {
 public:
-    RSPropertyBase() =default;
+    RSPropertyBase() = default;
     virtual ~RSPropertyBase() = default;
     virtual void SetThresholdType(ThresholdType thresholdType) {}
 };
-}
-}
+
+class RSAnimationTimingProtocol {};
+class RSAnimationTimingCurve {};
+
+template<typename T>
+class RSProperty : public RSPropertyBase {};
+
+template<typename T>
+class RSAnimatableProperty : public RSProperty<T> {};
+
+template<typename T>
+class RSAnimatableArithmetic {
+public:
+    virtual ~RSAnimatableArithmetic() = default;
+    virtual T Add(const T& value) const = 0;
+    virtual T Minus(const T& value) const = 0;
+    virtual T Multiply(float scale) const = 0;
+    virtual bool IsEqual(const T& value) const = 0;
+};
+} // namespace Rosen
+} // namespace OHOS
 #endif // RENDER_SERVICE_CLIENT_CORE_MODIFIER_RS_PROPERTY_H
