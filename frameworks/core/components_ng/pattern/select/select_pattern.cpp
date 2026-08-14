@@ -602,6 +602,13 @@ void SelectPattern::RegisterOnHover()
     inputHub->AddOnHoverEvent(mouseEvent);
 }
 
+bool SelectPattern::IsSystemMaterialLightEffectActive(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_RETURN(renderContext, false);
+    auto config = renderContext->GetImmersiveMaterialConfig();
+    return config.has_value() && config->HasLightEffect();
+}
+
 // change background color when pressed
 void SelectPattern::RegisterOnPress()
 {
@@ -614,12 +621,15 @@ void SelectPattern::RegisterOnPress()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        const auto& renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (pattern->IsSystemMaterialLightEffectActive(renderContext)) {
+            return;
+        }
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
-        const auto& renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select touch type %{public}zu", (size_t)state);
         if (state == UI_STATE_PRESSED) {

@@ -402,6 +402,7 @@ private:
 
     // change background color when pressed
     void RegisterOnPress();
+    bool IsSystemMaterialLightEffectActive(const RefPtr<RenderContext>& renderContext);
     // change background color when hovered
     void RegisterOnHover();
     // add click event to show menu
