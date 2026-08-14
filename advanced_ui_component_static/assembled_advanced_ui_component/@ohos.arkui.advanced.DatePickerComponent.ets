@@ -87,8 +87,8 @@ export class DatePickerComponentOptions {
 }
 
 class DatePickerConstant {
-  public static readonly MIN_YEAR: int = 0;
-  public static readonly MAX_YEAR: int = 10000;
+  public static readonly MIN_YEAR: int = 1;
+  public static readonly MAX_YEAR: int = 9999;
   public static readonly DEFAULT_START_YEAR: int = 1970;
   public static readonly DEFAULT_END_YEAR: int = 2100;
   public static readonly MIN_MONTH: int = 0;
@@ -161,6 +161,9 @@ export struct DatePickerComponent {
   private formatter: intl.NumberFormat = new intl.NumberFormat();
   private yearFormatter: intl.NumberFormat = new intl.NumberFormat('', { useGrouping: false });
   private userLunar: boolean = false;  // Save user-set lunar value
+  private hourFormatter: intl.DateTimeFormat | null = null;
+  private minuteFormatter: intl.DateTimeFormat | null = null;
+  private secondFormatter: intl.DateTimeFormat | null = null;
   
   aboutToAppear(): void {
     const locale = i18n.System.getSystemLocaleInstance();
@@ -246,6 +249,11 @@ export struct DatePickerComponent {
     this.formatter = new intl.NumberFormat();
     this.yearFormatter = new intl.NumberFormat(this.localeID, { useGrouping: false });
     
+    // Reset cached formatters when locale changes
+    this.hourFormatter = null;
+    this.minuteFormatter = null;
+    this.secondFormatter = null;
+    
     const isChinese: boolean = this.isChineseLocale();
     const prevLunar: boolean = this.lunar;
     const prevLunarCalendar: i18n.Calendar | null = this.lunarCalendar;
@@ -265,13 +273,14 @@ export struct DatePickerComponent {
       this.lunarCalendar = null;
     }
     
-    // Convert date when switching between lunar and gregorian modes
+// Convert date when switching between lunar and gregorian modes
     if (prevLunar !== this.lunar) {
       if (!prevLunar && this.lunar && this.lunarCalendar !== null) {
         // Switching from gregorian to lunar: convert gregorian date to lunar date
-        this.lunarCalendar!.setTime(new Date(this.selectedYear, this.selectedMonth, this.selectedDay));
-        this.selectedMonth = this.lunarCalendar!.get('month')!.toInt();
-        this.selectedDay = this.lunarCalendar!.get('date')!.toInt();
+        const gregorianDate: Date = this.createDateFromParams(this.selectedYear, this.selectedMonth, this.selectedDay);
+        this.lunarCalendar!.setTime(gregorianDate);
+        this.selectedMonth = this.lunarCalendar!.get('month').toInt();
+        this.selectedDay = this.lunarCalendar!.get('date').toInt();
       } else if (prevLunar && !this.lunar && prevLunarCalendar !== null) {
         // Switching from lunar to gregorian: convert lunar date to gregorian date
         // Use prevLunarCalendar for conversion since current lunarCalendar is null
@@ -352,11 +361,11 @@ export struct DatePickerComponent {
     
       for (let m: int = 0; m < 12; m++) {
         for (let d: int = 1; d <= 31; d++) {
-          const testDate = new Date(gregorianYear, m, d);
+          const testDate: Date = this.createDateFromParams(gregorianYear, m, d);
           if (this.lunarCalendar !== null) {
             this.lunarCalendar!.setTime(testDate);
-            const currentLunarMonth: int = this.lunarCalendar!.get('month');
-            const currentLunarDay: int = this.lunarCalendar!.get('date');
+            const currentLunarMonth: int = this.lunarCalendar!.get('month').toInt();
+            const currentLunarDay: int = this.lunarCalendar!.get('date').toInt();
         
             if (currentLunarMonth === lunarMonth && currentLunarDay === 1 && month1Start === null) {
               month1Start = testDate;
@@ -409,7 +418,7 @@ export struct DatePickerComponent {
       // Priority 1: Search in gregorianYear
       for (let month: int = 0; month < 12; month++) {
         for (let day: int = 1; day <= 31; day++) {
-          const testDate: Date = new Date(gregorianYear, month, day);
+          const testDate: Date = this.createDateFromParams(gregorianYear, month, day);
           calendar.setTime(testDate);
           const currentLunarYear: int = calendar.get('year').toInt();
           const currentLunarMonth: int = calendar.get('month').toInt();
@@ -427,14 +436,15 @@ export struct DatePickerComponent {
         const year: int = gregorianYear + yearOffset;
         for (let month: int = 0; month < 12; month++) {
           for (let day: int = 1; day <= 31; day++) {
-            const testDate: Date = new Date(year, month, day);
+            const testDate: Date = this.createDateFromParams(year, month, day);
             calendar.setTime(testDate);
             const currentLunarMonth: int = calendar.get('month').toInt();
             const currentLunarDay: int = calendar.get('date').toInt();
             
             if (currentLunarMonth === lunarMonth && currentLunarDay === lunarDay) {
               // Verify this date is within our valid range
-              if (testDate.getFullYear() >= this.startYear && testDate.getFullYear() <= this.endYear) {
+              const testYear: int = testDate.getFullYear().toInt();
+              if (testYear >= this.startYear && testYear <= this.endYear) {
                 return testDate;
               }
             }
@@ -449,7 +459,15 @@ export struct DatePickerComponent {
   }
   
   private formatLunarYear(gregorianYear: int): string {
-    return this.yearFormatter.format(gregorianYear) + '年';
+    // Try formatter for localization, fallback to plain string
+    if (this.yearFormatter) {
+      try {
+        return this.yearFormatter.format(gregorianYear) + '年';
+      } catch (error) {
+        return String(gregorianYear) + '年';
+      }
+    }
+    return String(gregorianYear) + '年';
   }
   
   private formatLunarMonth(month: int, isLeap: boolean): string {
@@ -463,9 +481,14 @@ export struct DatePickerComponent {
   }
   
   private formatLunarDay(day: int): string {
-    const lunarDayNames: string[] = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-                   '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
-                   '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+    const lunarDayNames: string[] = [
+      '初一', '初二', '初三', '初四', '初五',
+      '初六', '初七', '初八', '初九', '初十',
+      '十一', '十二', '十三', '十四', '十五',
+      '十六', '十七', '十八', '十九', '二十',
+      '廿一', '廿二', '廿三', '廿四', '廿五',
+      '廿六', '廿七', '廿八', '廿九', '三十'
+    ];
   
     if (day >= 1 && day <= 30) {
       const idx: int = (day - 1).toInt();
@@ -525,7 +548,7 @@ export struct DatePickerComponent {
     } else {
       this.hourArray = [];
       for (let i: int = this.startHour; i <= this.endHour; i++) {
-        this.hourArray.push(this.formatNumber(i));
+        this.hourArray.push(this.formatHour(i));
       }
     }
   
@@ -587,28 +610,28 @@ export struct DatePickerComponent {
       // Check if 12 AM (hour24=0) is within range
       const hour24ForAm12: int = 0;
       if (hour24ForAm12 >= this.startHour && hour24ForAm12 <= this.endHour) {
-        this.hourArray.push('12');
+        this.hourArray.push(this.formatHour12(12));
       }
       
       // Check if 1-11 AM (hour24=1-11) are within range
       for (let displayHour: int = 1; displayHour <= 11; displayHour++) {
         const hour24: int = displayHour;
         if (hour24 >= this.startHour && hour24 <= this.endHour) {
-          this.hourArray.push(this.formatNumber(displayHour));
+          this.hourArray.push(this.formatHour12(displayHour));
         }
       }
     } else {
       // Check if 12 PM (hour24=12) is within range
       const hour24ForPm12: int = 12;
       if (hour24ForPm12 >= this.startHour && hour24ForPm12 <= this.endHour) {
-        this.hourArray.push('12');
+        this.hourArray.push(this.formatHour12(12));
       }
       
       // Check if 1-11 PM (hour24=13-23) are within range
       for (let displayHour: int = 1; displayHour <= 11; displayHour++) {
         const hour24: int = displayHour + 12;
         if (hour24 >= this.startHour && hour24 <= this.endHour) {
-          this.hourArray.push(this.formatNumber(displayHour));
+          this.hourArray.push(this.formatHour12(displayHour));
         }
       }
     }
@@ -616,7 +639,7 @@ export struct DatePickerComponent {
     // Fallback: if no hours available for current period, show all 12 hours
     if (this.hourArray.length === 0) {
       for (let i: int = 1; i <= 12; i++) {
-        this.hourArray.push(this.formatNumber(i));
+        this.hourArray.push(this.formatHour12(i));
       }
     }
   }
@@ -694,13 +717,42 @@ export struct DatePickerComponent {
   }
   
   private formatYear(year: int): string {
-    if (this.isChineseLocale()) {
-      return this.yearFormatter.format(year) + '年';
+    // Previewer or invalid locale: default to Chinese format
+    const localeStr: string = this.localeID;
+    if (!localeStr || localeStr.length === 0) {
+      return year + '年';
     }
-    return this.yearFormatter.format(year);
+    
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    if (this.isChineseLocale()) {
+      if (this.yearFormatter) {
+        try {
+          return this.yearFormatter.format(year) + '年';
+        } catch (error) {
+          return year + '年';
+        }
+      }
+      return year + '年';
+    }
+    
+    // Non-Chinese: try formatter for localized numbers, fallback to plain
+    if (this.yearFormatter) {
+      try {
+        return this.yearFormatter.format(year);
+      } catch (error) {
+        return String(year);
+      }
+    }
+    return String(year);
   }
   
   private formatMonth(month: int): string {
+    // Previewer or invalid locale: default to Chinese format
+    const localeStr: string = this.localeID;
+    if (!localeStr || localeStr.length === 0) {
+      return (month + 1) + '月';
+    }
+    
     if (this.isChineseLocale()) {
       return (month + 1) + '月';
     }
@@ -714,11 +766,6 @@ export struct DatePickerComponent {
                                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   
     try {
-      const localeStr: string = this.localeID;
-      if (!localeStr || localeStr.length === 0) {
-        return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
-      }
-    
       const monthFormat: string = this.displayMode === DisplayMode.DATE_TIME ? 'short' : 'long';
       const dateFormat = new intl.DateTimeFormat(localeStr, {
         month: monthFormat
@@ -732,16 +779,26 @@ export struct DatePickerComponent {
   }
   
   private formatDay(day: int): string {
-    if (this.isChineseLocale()) {
-      return this.formatter.format(day) + '日';
+    // Previewer or invalid locale: default to Chinese format
+    const localeStr: string = this.localeID;
+    if (!localeStr || localeStr.length === 0) {
+      return day + '日';
     }
-  
-    try {
-      const localeStr: string = this.localeID;
-      if (!localeStr || localeStr.length === 0) {
-        return this.formatter.format(day);
-      }
     
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    if (this.isChineseLocale()) {
+      if (this.formatter) {
+        try {
+          return this.formatter.format(day) + '日';
+        } catch (error) {
+          return day + '日';
+        }
+      }
+      return day + '日';
+    }
+    
+    // Non-Chinese: use DateTimeFormat for localized date format
+    try {
       const dateFormat = new intl.DateTimeFormat(localeStr, {
         day: 'numeric'
       });
@@ -749,47 +806,198 @@ export struct DatePickerComponent {
       const date = new Date(2026, 0, safeDay);
       return dateFormat.format(date);
     } catch (error) {
-      return this.formatter.format(day);
+      return String(day);
+    }
+  }
+  
+  private formatHour(hour24: int): string {
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
+    try {
+      const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
+      if (!localeStr || localeStr.length === 0) {
+        return this.formatNumber(hour24);
+      }
+      
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(hour24);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
+      if (this.hourFormatter === null) {
+        this.hourFormatter = new intl.DateTimeFormat(localeStr, {
+          hour: '2-digit',
+          hour12: false
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, hour24, 0, 0);
+      return this.hourFormatter!.format(date);
+    } catch (error) {
+      return this.formatNumber(hour24);
+    }
+  }
+  
+  private formatHour12(displayHour: int): string {
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
+    try {
+      const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
+      if (!localeStr || localeStr.length === 0) {
+        return this.formatNumber(displayHour);
+      }
+      
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(displayHour);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
+      if (this.hourFormatter === null) {
+        this.hourFormatter = new intl.DateTimeFormat(localeStr, {
+          hour: '2-digit',
+          hour12: true
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, displayHour, 0, 0);
+      const formatted: string = this.hourFormatter!.format(date);
+      
+      // Remove any non-digit characters (like AM/PM, spaces, etc.)
+      // This gives us just the hour number in locale format
+      // Include Unicode ranges for all localized digits:
+      // Arabic-Indic, Persian, Devanagari, Bengali, Thai, Lao, Myanmar, Khmer
+      const pattern =
+        '[\\d\\u0660-\\u0669\\u06F0-\\u06F9]' +
+        '[\\u0966-\\u096F\\u09E6-\\u09EF]' +
+        '[\\u0E50-\\u0E59\\u0ED0-\\u0ED9]' +
+        '[\\u1040-\\u1049\\u17E0-\\u17E9]+';
+      const digitPattern = new RegExp(pattern);
+      const hourMatch: RegExpMatchArray | null = formatted.match(digitPattern);
+      if (hourMatch !== null && hourMatch.length > 0) {
+        return hourMatch[0]!;
+      }
+      
+      return this.formatNumber(displayHour);
+    } catch (error) {
+      return this.formatNumber(displayHour);
     }
   }
   
   private formatMinute(minute: int): string {
-    return this.formatNumber(minute);
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
+    try {
+      const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
+      if (!localeStr || localeStr.length === 0) {
+        return this.formatNumber(minute);
+      }
+      
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(minute);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
+      if (this.minuteFormatter === null) {
+        this.minuteFormatter = new intl.DateTimeFormat(localeStr, {
+          minute: '2-digit'
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, 0, minute, 0);
+      return this.minuteFormatter!.format(date);
+    } catch (error) {
+      return this.formatNumber(minute);
+    }
   }
   
   private formatSecond(second: int): string {
-    return this.formatNumber(second);
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
+    try {
+      const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
+      if (!localeStr || localeStr.length === 0) {
+        return this.formatNumber(second);
+      }
+      
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(second);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
+      if (this.secondFormatter === null) {
+        this.secondFormatter = new intl.DateTimeFormat(localeStr, {
+          second: '2-digit'
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, 0, 0, second);
+      return this.secondFormatter!.format(date);
+    } catch (error) {
+      return this.formatNumber(second);
+    }
   }
   
   private formatPeriod(isAM: boolean): string {
+    // Direct translation map for period markers in different languages
+    // Only include languages with non-AM/PM period markers
+    
     try {
       const localeStr: string = this.localeID;
+      
+      // Previewer or invalid locale: use Chinese period markers as default
       if (!localeStr || localeStr.length === 0) {
-        return isAM ? 'AM' : 'PM';
-      }
-    
-      if (this.isChineseLocale()) {
         return isAM ? '上午' : '下午';
       }
-    
-      const hour: int = isAM ? 10 : 22;
-      const dateFormat = new intl.DateTimeFormat(localeStr, {
-        hour: 'numeric',
-        hour12: true
-      });
-      const date = new Date(2026, 0, 1, hour, 0, 0);
-      const formatted: string = dateFormat.format(date);
-    
-      if (formatted.includes('上午')) {
+      
+      // Check language code prefix (e.g., 'zh-CN' -> 'zh')
+      const langCode: string = localeStr.split('-')[0];
+      
+      // Languages with special period markers
+      if (langCode === 'zh') {
         return isAM ? '上午' : '下午';
-      } else if (formatted.includes('下午')) {
-        return isAM ? '上午' : '下午';
-      } else if (formatted.includes('AM') || formatted.includes('am')) {
-        return isAM ? 'AM' : 'PM';
-      } else if (formatted.includes('PM') || formatted.includes('pm')) {
-        return isAM ? 'AM' : 'PM';
+      } else if (langCode === 'ja') {
+        return isAM ? '午前' : '午後';
+      } else if (langCode === 'ko') {
+        return isAM ? '오전' : '오후';
+      } else if (langCode === 'ar') {
+        return isAM ? 'ص' : 'م';
+      } else if (langCode === 'my') {
+        return isAM ? 'နံနက်' : 'ညနေ';
+      } else if (langCode === 'th') {
+        return isAM ? 'น.' : 'ทุ่ม';
+      } else if (langCode === 'fa') {
+        return isAM ? 'ق.ظ' : 'ب.ظ';
+      } else if (langCode === 'ur') {
+        return isAM ? 'صبح' : 'شام';
+      } else if (langCode === 'hi') {
+        return isAM ? 'पूर्वाह्न' : 'अपराह्न';
+      } else if (langCode === 'bn') {
+        return isAM ? 'পূর্বাহ্ণ' : 'অপরাহ্ণ';
+      } else if (langCode === 'vi') {
+        return isAM ? 'SA' : 'CH';
+      } else if (langCode === 'ms') {
+        return isAM ? 'PG' : 'PTG';
+      } else if (langCode === 'tr') {
+        return isAM ? 'ÖÖ' : 'AS';
       }
-    
+      
+      // Fallback to AM/PM for all other languages
       return isAM ? 'AM' : 'PM';
     } catch (error) {
       return isAM ? 'AM' : 'PM';
@@ -822,17 +1030,19 @@ export struct DatePickerComponent {
   
   private validateDate(date: Date): Date | undefined {
     try {
-      const year: int = date.getFullYear().toInt();
+      const jsYear: int = date.getFullYear().toInt();
       const month: int = date.getMonth().toInt();
       const day: int = date.getDate().toInt();
     
       // Check for Invalid Date (NaN values)
-      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+      if (isNaN(jsYear) || isNaN(month) || isNaN(day)) {
         return undefined;
       }
     
+      let actualYear: int = jsYear;
+    
       // Check if year, month, day are in valid ranges
-      if (year < DatePickerConstant.MIN_YEAR || year > DatePickerConstant.MAX_YEAR) {
+      if (actualYear < DatePickerConstant.MIN_YEAR || actualYear > DatePickerConstant.MAX_YEAR) {
         return undefined;
       }
       if (month < DatePickerConstant.MIN_MONTH || month > DatePickerConstant.MAX_MONTH) {
@@ -842,15 +1052,17 @@ export struct DatePickerComponent {
         return undefined;
       }
     
-      const daysInMonth: int = this.getDaysInMonth(year, month);
+      const daysInMonth: int = this.getDaysInMonth(actualYear, month);
       if (day > daysInMonth) {
         return undefined;
       }
     
-      // Detect JavaScript auto-correction by checking year jump
-      // If year jumped significantly (> 1 year), it indicates abnormal input
+      // Create corrected date using setFullYear to preserve exact year
+      const correctedDate: Date = new Date();
+      correctedDate.setFullYear(actualYear, month, day);
+    
+      // Verify the date matches what was input (no overflow correction)
       const originalTime: number = date.getTime();
-      const correctedDate: Date = new Date(year, month, day);
       const correctedTime: number = correctedDate.getTime();
     
       // If time difference > 365 days, indicates year jump due to abnormal month/day
@@ -894,7 +1106,7 @@ export struct DatePickerComponent {
       const day: int = date.getDate().toInt();
     
       const originalTime: number = date.getTime();
-      const correctedTime: number = new Date(year, month, day, hour, minute, second).getTime();
+      const correctedTime: number = this.createDateWithTime(year, month, day, hour, minute, second).getTime();
     
       // If time difference > 1 hour, indicates abnormal minute/second overflow
       const timeDiff: number = Math.abs(originalTime - correctedTime);
@@ -912,7 +1124,16 @@ export struct DatePickerComponent {
   }
   
   private createDateFromParams(year: int, month: int, day: int): Date {
-    return new Date(year, month, day);
+    const date: Date = new Date();
+    date.setFullYear(year, month, day);
+    return date;
+  }
+  
+  private createDateWithTime(year: int, month: int, day: int, hour: int, minute: int, second: int): Date {
+    const date: Date = new Date();
+    date.setFullYear(year, month, day);
+    date.setHours(hour, minute, second);
+    return date;
   }
   
   private onOptionsChange(str: string): void {
@@ -1127,12 +1348,12 @@ export struct DatePickerComponent {
     
     // Calculate lunar date range when in lunar mode
     if (this.lunar && this.lunarCalendar !== null) {
-      const startGregorian: Date = new Date(this.startYear, this.startMonth, this.startDay);
+      const startGregorian: Date = this.createDateFromParams(this.startYear, this.startMonth, this.startDay);
       this.lunarCalendar!.setTime(startGregorian);
       this.lunarStartMonth = this.lunarCalendar!.get('month').toInt();
       this.lunarStartDay = this.lunarCalendar!.get('date').toInt();
       
-      const endGregorian: Date = new Date(this.endYear, this.endMonth, this.endDay);
+      const endGregorian: Date = this.createDateFromParams(this.endYear, this.endMonth, this.endDay);
       this.lunarCalendar!.setTime(endGregorian);
       this.lunarEndMonth = this.lunarCalendar!.get('month').toInt();
       this.lunarEndDay = this.lunarCalendar!.get('date').toInt();
@@ -1541,16 +1762,54 @@ private onYearChange(selectedIndex: int): void {
     }
     this.dateOnChange(this.getResult());
   }
-  
-private onHourChange(selectedIndex: int): void {
+
+    private onHourChange(selectedIndex: int): void {
       if (this.useMilitaryTime) {
         this.selectedHour = this.startHour + selectedIndex;
       } else {
         const oldDisplayHour: int = this.selectedHour === 0 || this.selectedHour === 12 ? 12 : 
                                   (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
         
-        // Get the actual display hour from hourArray
-        const newDisplayHour: int = parseInt(this.hourArray[selectedIndex]).toInt();
+        // Calculate the actual display hour from selectedIndex using the SAME logic as getHourSelectedIndex()
+        // This ensures bidirectional consistency
+        const isAM: boolean = this.selectedPeriod === 0;
+        let newDisplayHour: int = 12; // default fallback
+        
+        // Find displayHour by counting valid hours (same as getHourSelectedIndex logic)
+        let validIndex: int = 0;
+        if (isAM) {
+          // AM period: check 12 AM (hour24=0) and 1-11 AM (hour24=1-11)
+          if (0 >= this.startHour && 0 <= this.endHour) {
+            if (validIndex === selectedIndex) {
+              newDisplayHour = 12;
+            }
+            validIndex++;
+          }
+          for (let h: int = 1; h <= 11; h++) {
+            if (h >= this.startHour && h <= this.endHour) {
+              if (validIndex === selectedIndex) {
+                newDisplayHour = h;
+              }
+              validIndex++;
+            }
+          }
+        } else {
+          // PM period: check 12 PM (hour24=12) and 1-11 PM (hour24=13-23)
+          if (12 >= this.startHour && 12 <= this.endHour) {
+            if (validIndex === selectedIndex) {
+              newDisplayHour = 12;
+            }
+            validIndex++;
+          }
+          for (let h: int = 13; h <= 23; h++) {
+            if (h >= this.startHour && h <= this.endHour) {
+              if (validIndex === selectedIndex) {
+                newDisplayHour = h === 12 ? 12 : h - 12;
+              }
+              validIndex++;
+            }
+          }
+        }
         
         // Crossing 11↔12 always triggers period toggle
         const crossingBoundary: boolean = (oldDisplayHour === 11 && newDisplayHour === 12) || 
@@ -1645,6 +1904,7 @@ private onHourChange(selectedIndex: int): void {
   }
   
   private updateTimeArrays(): void {
+    // Optimize: only update arrays when range actually changes
     this.minuteArray = [];
     let startMinuteIndex: int = DatePickerConstant.MIN_MINUTE;
     let endMinuteIndex: int = DatePickerConstant.MAX_MINUTE;
@@ -1656,8 +1916,10 @@ private onHourChange(selectedIndex: int): void {
       endMinuteIndex = this.endMinute;
     }
     
-    for (let i: int = startMinuteIndex; i <= endMinuteIndex; i++) {
-      this.minuteArray.push(this.formatMinute(i));
+    // Use pre-allocated array with direct assignment for better performance
+    const minuteCount: int = endMinuteIndex - startMinuteIndex + 1;
+    for (let i: int = 0; i < minuteCount; i++) {
+      this.minuteArray.push(this.formatMinute(startMinuteIndex + i));
     }
     
     if (this.selectedMinute < startMinuteIndex) {
@@ -1682,8 +1944,10 @@ private onHourChange(selectedIndex: int): void {
       endSecondIndex = this.endSecond;
     }
     
-    for (let i: int = startSecondIndex; i <= endSecondIndex; i++) {
-      this.secondArray.push(this.formatSecond(i));
+    // Use pre-allocated array with direct assignment for better performance
+    const secondCount: int = endSecondIndex - startSecondIndex + 1;
+    for (let i: int = 0; i < secondCount; i++) {
+      this.secondArray.push(this.formatSecond(startSecondIndex + i));
     }
     
     if (this.selectedSecond < startSecondIndex) {
@@ -1763,21 +2027,72 @@ private onHourChange(selectedIndex: int): void {
     if (this.useMilitaryTime) {
       return this.selectedHour - this.startHour;
     } else {
-      // Convert selectedHour to display hour (1-12)
+      // For 12-hour format, calculate index directly based on hourArray generation logic
+      // hourArray structure:
+      // - AM period: [12, 1, 2, ..., 11] (if in range)
+      // - PM period: [12, 1, 2, ..., 11] (if in range)
+      
+      const isAM: boolean = this.selectedPeriod === 0;
       const displayHour: int = this.selectedHour === 0 || this.selectedHour === 12 ? 12 : 
                               (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
       
-      // Find the index of displayHour in hourArray
-      const displayHourStr: string = displayHour.toString().padStart(2, '0');
-      let index: int = 0;
-      for (let i: int = 0; i < this.hourArray.length; i++) {
-        if (this.hourArray[i] === displayHourStr) {
-          index = i;
-          break;
+      // Calculate index by matching display hour to hourArray structure
+      // hourArray[0] = 12, hourArray[1] = 1, hourArray[2] = 2, ..., hourArray[11] = 11
+      let targetIndex: int = 0;
+      
+      if (displayHour === 12) {
+        targetIndex = 0;
+      } else {
+        targetIndex = displayHour;
+      }
+      
+      // Ensure the targetIndex is within valid hourArray bounds
+      // Need to verify this index exists in hourArray based on actual time range
+      const actualHour24: int = isAM ? (displayHour === 12 ? 0 : displayHour) : 
+                                    (displayHour === 12 ? 12 : displayHour + 12);
+      
+      // Check if this hour is actually in hourArray
+      if (actualHour24 >= this.startHour && actualHour24 <= this.endHour) {
+        // Find the actual index in hourArray by counting valid hours
+        let validIndex: int = 0;
+        if (isAM) {
+          // AM period: check 12 AM (hour24=0) and 1-11 AM (hour24=1-11)
+          if (0 >= this.startHour && 0 <= this.endHour) {
+            if (displayHour === 12) {
+              return validIndex;
+            }
+            validIndex++;
+          }
+          for (let h: int = 1; h <= 11; h++) {
+            if (h >= this.startHour && h <= this.endHour) {
+              if (h === displayHour) {
+                return validIndex;
+              }
+              validIndex++;
+            }
+          }
+        } else {
+          // PM period: check 12 PM (hour24=12) and 1-11 PM (hour24=13-23)
+          if (12 >= this.startHour && 12 <= this.endHour) {
+            if (displayHour === 12) {
+              return validIndex;
+            }
+            validIndex++;
+          }
+          for (let h: int = 13; h <= 23; h++) {
+            if (h >= this.startHour && h <= this.endHour) {
+              const hDisplay: int = h === 12 ? 12 : h - 12;
+              if (hDisplay === displayHour) {
+                return validIndex;
+              }
+              validIndex++;
+            }
+          }
         }
       }
       
-      return index;
+      // Fallback: return first element index
+      return 0;
     }
   }
   
@@ -1989,7 +2304,7 @@ private onHourChange(selectedIndex: int): void {
     return Math.max(Math.floor(calculatedRadius), 0).toInt();
   }
   
-  build(): void {
+  build() {
     Row() {
       if (this.displayMode === DisplayMode.DATE || this.displayMode === DisplayMode.DATE_TIME) {
         if (this.dateMode === DateMode.DATE) {
@@ -2010,7 +2325,6 @@ private onHourChange(selectedIndex: int): void {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.onYearChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2037,7 +2351,6 @@ private onHourChange(selectedIndex: int): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           
@@ -2058,7 +2371,6 @@ private onHourChange(selectedIndex: int): void {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.onDayChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2087,7 +2399,6 @@ private onHourChange(selectedIndex: int): void {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.onYearChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2114,7 +2425,6 @@ private onHourChange(selectedIndex: int): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2144,7 +2454,6 @@ private onHourChange(selectedIndex: int): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2171,7 +2480,6 @@ private onHourChange(selectedIndex: int): void {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.onDayChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
