@@ -34,77 +34,17 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 bool BindMenuStatus::IsNotNeedShowPreview() const
 {
     return (isBindCustomMenu && isShow) || isBindLongPressMenu;
 }
 
-constexpr int32_t MAX_FRAME_NODE_DEPTH = 2;
-constexpr int32_t MIN_RECOGNIZER_GROUP_LOOP_SIZE = 3;
 constexpr const char* HIT_TEST_MODE[] = {
     "HitTestMode.Default",
     "HitTestMode.Block",
     "HitTestMode.Transparent",
     "HitTestMode.None",
 };
-
-bool IsDifferentFrameNodeCollected(
-    const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& host, int32_t depth = 0)
-{
-    CHECK_NULL_RETURN(current, true);
-    if (depth >= MAX_FRAME_NODE_DEPTH) {
-        return false;
-    }
-
-    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
-    if (!recognizerGroup) {
-        auto recognizerNode = current->GetAttachedNode().Upgrade();
-        if (recognizerNode != host) {
-            return false;
-        }
-        return true;
-    }
-
-    auto recognizerList = recognizerGroup->GetGroupRecognizer();
-    for (auto recognizer : recognizerList) {
-        if (!recognizer) {
-            continue;
-        }
-        if (AceType::InstanceOf<RecognizerGroup>(recognizer) &&
-            !IsDifferentFrameNodeCollected(recognizer, host, depth + 1)) {
-            return false;
-        } else {
-            auto recognizerNode = recognizer->GetAttachedNode().Upgrade();
-            if (recognizerNode != host) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool IsSystemRecognizerCollected(const RefPtr<NGGestureRecognizer>& current)
-{
-    CHECK_NULL_RETURN(current, false);
-    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
-    CHECK_NULL_RETURN(recognizerGroup, false);
-    auto recognizerList = recognizerGroup->GetGroupRecognizer();
-    for (const auto &recognizer : recognizerList) {
-        if (!recognizer) {
-            continue;
-        }
-        if (AceType::InstanceOf<RecognizerGroup>(recognizer) && IsSystemRecognizerCollected(recognizer)) {
-            return true;
-        } else {
-            if (recognizer->IsSystemGesture()) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 
 void TruncateResponseLinkResult(ResponseLinkResult& result, size_t keepSize)
 {
@@ -177,7 +117,6 @@ HitTestResult ApplyGestureCollectIntervention(
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
 GestureEventHub::~GestureEventHub() = default;
-
 
 GestureCollectIntervention GestureEventHub::TriggerOnGestureCollectIntercept(
     const TouchTestResult& newComingTargets, const ResponseLinkResult& responseLinkResult)
@@ -549,6 +488,64 @@ void GestureEventHub::ProcessExternalExclusiveRecognizer(const Offset& offset, i
         current = *recognizers.begin();
     }
 }
+
+namespace {
+constexpr int32_t MAX_FRAME_NODE_DEPTH = 2;
+constexpr int32_t MIN_RECOGNIZER_GROUP_LOOP_SIZE = 3;
+bool IsDifferentFrameNodeCollected(
+    const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& host, int32_t depth = 0)
+{
+    CHECK_NULL_RETURN(current, true);
+    if (depth >= MAX_FRAME_NODE_DEPTH) {
+        return false;
+    }
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
+    if (!recognizerGroup) {
+        auto recognizerNode = current->GetAttachedNode().Upgrade();
+        if (recognizerNode != host) {
+            return false;
+        }
+        return true;
+    }
+    auto recognizerList = recognizerGroup->GetGroupRecognizer();
+    for (auto recognizer : recognizerList) {
+        if (!recognizer) {
+            continue;
+        }
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer) &&
+            !IsDifferentFrameNodeCollected(recognizer, host, depth + 1)) {
+            return false;
+        } else {
+            auto recognizerNode = recognizer->GetAttachedNode().Upgrade();
+            if (recognizerNode != host) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool IsSystemRecognizerCollected(const RefPtr<NGGestureRecognizer>& current)
+{
+    CHECK_NULL_RETURN(current, false);
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
+    CHECK_NULL_RETURN(recognizerGroup, false);
+    auto recognizerList = recognizerGroup->GetGroupRecognizer();
+    for (const auto &recognizer : recognizerList) {
+        if (!recognizer) {
+            continue;
+        }
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer) && IsSystemRecognizerCollected(recognizer)) {
+            return true;
+        } else {
+            if (recognizer->IsSystemGesture()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+} // namespace
 
 bool GestureEventHub::CheckLastInnerRecognizerCollected(GesturePriority priority, int32_t gestureGroupIndex)
 {
