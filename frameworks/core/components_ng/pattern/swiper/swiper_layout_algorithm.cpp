@@ -427,6 +427,15 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
     for (const auto& index : removeIndexs) {
         needUnmountIndexs_.erase(index);
     }
+
+    if (!customAnimationToIndex_ && indexsInAnimation_.empty()) {
+        int32_t totalChildCount = layoutWrapper->GetTotalChildCount();
+        for (int32_t i = 0; i < totalChildCount; ++i) {
+            if (i != currentIndex) {
+                layoutWrapper->RemoveChildInRenderTree(i);
+            }
+        }
+    }
 }
 
 void SwiperLayoutAlgorithm::MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper,
