@@ -436,10 +436,6 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
         return;
     }
     for (auto& map : maps) {
-        if (map.second == nullptr) {
-            LOGW("SendShowingImage empty pixelMap");
-            continue;
-        }
         if (!messageData.WriteInt32(map.first) || !map.second->Marshalling(messageData)) {
             LOGW("SendShowingImage write data failed");
             return;
