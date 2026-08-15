@@ -47,6 +47,7 @@ test_sources = [
   "menuitem_pattern_basic_test_ng.cpp",
   "menuitem_pattern_option_test_ng.cpp",
   "menuitem_pattern_testone_ng.cpp",
+  "menuitem_pattern_transform_test_ng.cpp",
   "menuitem_test_ng.cpp",
   "menuitem_testone_ng.cpp",
   "menuitemgroup_accessibility_property_test_ng.cpp",
