@@ -246,13 +246,13 @@ bool WebPageSceneManager::ParseWebRulesFromRuleJson(
     return !parsed.webRules.empty();
 }
 
-bool WebPageSceneManager::RegisterPageSceneRules(int32_t processId, const std::string& ruleJson)
+int32_t WebPageSceneManager::RegisterPageSceneRules(int32_t processId, const std::string& ruleJson)
 {
     PageSceneRuleJson parsed;
     if (!ParseWebRulesFromRuleJson(ruleJson, parsed)) {
         TAG_LOGW(AceLogTag::ACE_WEB,
             "RegisterPageSceneRules: parse failed, processId=%{public}d", processId);
-        return false;
+        return PAGE_SCENE_ERR_PARAM_INVALID;
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
@@ -261,7 +261,7 @@ bool WebPageSceneManager::RegisterPageSceneRules(int32_t processId, const std::s
     if (registeredRules_.find(processId) != registeredRules_.end()) {
         TAG_LOGW(AceLogTag::ACE_WEB,
             "RegisterPageSceneRules: processId %{public}d already registered, reject", processId);
-        return false;
+        return PAGE_SCENE_ERR_LAST_UNFINISH;
     }
 
     WebPageSceneRuleSet ruleSet;
@@ -275,14 +275,20 @@ bool WebPageSceneManager::RegisterPageSceneRules(int32_t processId, const std::s
     TAG_LOGI(AceLogTag::ACE_WEB,
         "RegisterPageSceneRules: processId=%{public}d ruleSetId=%{public}s rules=%{public}zu",
         processId, parsed.ruleSetId.c_str(), parsed.webRules.size());
-    return true;
+    return PAGE_SCENE_ERR_OK;
 }
 
-void WebPageSceneManager::UnregisterPageSceneRules(int32_t processId)
+int32_t WebPageSceneManager::UnregisterPageSceneRules(int32_t processId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    if (registeredRules_.find(processId) == registeredRules_.end()) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "UnregisterPageSceneRules: not registered, processId=%{public}d", processId);
+        return PAGE_SCENE_ERR_PARAM_INVALID;
+    }
     registeredRules_.erase(processId);
     TAG_LOGI(AceLogTag::ACE_WEB, "UnregisterPageSceneRules: processId=%{public}d", processId);
+    return PAGE_SCENE_ERR_OK;
 }
 
 std::optional<WebPageSceneRuleSet> WebPageSceneManager::GetPageSceneRules(int32_t processId)
@@ -293,6 +299,48 @@ std::optional<WebPageSceneRuleSet> WebPageSceneManager::GetPageSceneRules(int32_
         return it->second;
     }
     return std::nullopt;
+}
+
+int32_t WebPageSceneManager::BeginGetPageScene(int32_t processId,
+    const std::string& ruleJsonOrRuleSetId, std::optional<WebPageSceneRuleSet>& ruleSetOut)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pendingGetProcesses_.find(processId) != pendingGetProcesses_.end()) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "BeginGetPageScene: already has in-flight get, processId=%{public}d", processId);
+        return PAGE_SCENE_ERR_LAST_UNFINISH;
+    }
+    // Check if already registered with matching ruleSetId — reuse
+    auto regIt = registeredRules_.find(processId);
+    if (regIt != registeredRules_.end()) {
+        ruleSetOut = regIt->second;
+        pendingGetProcesses_.insert(processId);
+        return PAGE_SCENE_ERR_OK;
+    }
+    // No registered rules — parse and store temporarily
+    PageSceneRuleJson parsed;
+    if (!ParseWebRulesFromRuleJson(ruleJsonOrRuleSetId, parsed)) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "BeginGetPageScene: parse failed, processId=%{public}d", processId);
+        return PAGE_SCENE_ERR_PARAM_INVALID;
+    }
+    WebPageSceneRuleSet ruleSet;
+    ruleSet.ruleSetId = parsed.ruleSetId;
+    ruleSet.globalConfig = parsed.globalConfig;
+    for (const auto& rule : parsed.webRules) {
+        ruleSet.rules.emplace_back(rule);
+    }
+    pendingGetRules_[processId] = ruleSet;
+    ruleSetOut = ruleSet;
+    pendingGetProcesses_.insert(processId);
+    return PAGE_SCENE_ERR_OK;
+}
+
+void WebPageSceneManager::CompleteGetPageScene(int32_t processId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    pendingGetRules_.erase(processId);
+    pendingGetProcesses_.erase(processId);
 }
 
 namespace {
@@ -402,10 +450,15 @@ void WebPageSceneManager::FlushExitOnNavigate(int32_t processId, int32_t webId)
 void WebPageSceneManager::OnMatchResult(int32_t processId, const std::string& sceneJson, bool isGetResult)
 {
     if (sceneJson.empty()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "WebPageSceneManager::OnMatchResult sceneJson is empty, isGetResult=%{public}d",
-            isGetResult);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "PageSceneReport: OnMatchResult EMPTY processId=%{public}d isGetResult=%{public}d",
+            processId, isGetResult);
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "PageSceneReport: OnMatchResult SUCCESS processId=%{public}d isGetResult=%{public}d "
+        "sceneJson len=%{public}zu sceneJson=%{public}s",
+        processId, isGetResult, sceneJson.size(), sceneJson.c_str());
     UiSessionManager::GetInstance()->ReportPageSceneEvent(processId, sceneJson, isGetResult);
 }
 
@@ -589,12 +642,21 @@ bool WebPageSceneManager::ShouldReportEventInner(int32_t processId, int32_t webI
     const auto& ruleState = stateIt->second;
 
     if (eventName == "TEXT_EDITOR_EXIT" && !ruleState.textEditorTriggered) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPageSceneManager::ShouldReportEvent: filtered by EXIT without prior trigger, "
+            "processId=%{public}d webId=%{public}d", processId, webId);
         return false;
     }
     if (IsDuplicatedEvent(*ruleOpt, matchedCount, controls, ruleState)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPageSceneManager::ShouldReportEvent: filtered by deduplicate, "
+            "processId=%{public}d webId=%{public}d ruleId=%{public}s eventName=%{public}s "
+            "matchedCount=%{public}d lastMatchedCount=%{public}d", processId, webId, ruleId.c_str(), eventName.c_str(),
+            matchedCount, ruleState.lastMatchedCount);
         return false;
     }
     if (IsWithinMinInterval(*ruleOpt, ruleState)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPageSceneManager::ShouldReportEvent: filtered by minReportInterval, "
+            "processId=%{public}d webId=%{public}d ruleId=%{public}s eventName=%{public}s minInterval=%{public}dms",
+            processId, webId, ruleId.c_str(), eventName.c_str(), ruleOpt->policy.minReportIntervalMs);
         return false;
     }
     return true;
@@ -788,18 +850,30 @@ std::vector<std::string> WebPageSceneManager::ProcessQueryResultCore(int32_t pro
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        auto procIt = registeredRules_.find(processId);
-        if (procIt == registeredRules_.end()) {
+        std::map<int32_t, WebPageSceneRuleSet>* rulesMap = nullptr;
+        std::map<int32_t, WebPageSceneRuleSet>::iterator ruleIt;
+        auto regIt = registeredRules_.find(processId);
+        if (regIt != registeredRules_.end()) {
+            rulesMap = &registeredRules_;
+            ruleIt = regIt;
+        } else {
+            auto pendIt = pendingGetRules_.find(processId);
+            if (pendIt != pendingGetRules_.end()) {
+                rulesMap = &pendingGetRules_;
+                ruleIt = pendIt;
+            }
+        }
+        if (!rulesMap) {
             return results;
         }
-        const std::string& ruleSetId = procIt->second.ruleSetId;
+        const std::string& ruleSetId = ruleIt->second.ruleSetId;
 
         if (controls.empty() && !isGetResult) {
-            ProcessEmptyControlsInner(ruleSetId, processId, webId, selectorJson, registeredRules_, results);
+            ProcessEmptyControlsInner(ruleSetId, processId, webId, selectorJson, *rulesMap, results);
         } else {
             int32_t matchedCount = static_cast<int32_t>(controls.size());
             ProcessMatchedControlsInner(ruleSetId, processId, webId, selectorJson,
-                matchedCount, isGetResult, controls, registeredRules_, results);
+                matchedCount, isGetResult, controls, *rulesMap, results);
         }
     } // lock released
 

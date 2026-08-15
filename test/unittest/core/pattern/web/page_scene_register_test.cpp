@@ -62,11 +62,11 @@ static std::optional<WebPageSceneRuleSet> GetRuleSetCopy(int32_t pid, const std:
 }
 
 /**
- * @tc.name: RegisterPageSceneRulesForWeb_WebEnabled
+ * @tc.name: ExecuteReportOnRegisterMatch_WebEnabled
  * @tc.desc: Test register with sourceConfig.web=true succeeds.
  * @tc.type: FUNC
  */
-HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_WebEnabled, TestSize.Level0)
+HWTEST_F(PageSceneRegisterTest, ExecuteReportOnRegisterMatch_WebEnabled, TestSize.Level0)
 {
     std::string ruleJson = R"({
         "ruleSetId": "rs1",
@@ -83,11 +83,11 @@ HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_WebEnabled, TestSiz
 }
 
 /**
- * @tc.name: RegisterPageSceneRulesForWeb_WebDisabled
+ * @tc.name: ExecuteReportOnRegisterMatch_WebDisabled
  * @tc.desc: Test register with sourceConfig.web=false does not add rules.
  * @tc.type: FUNC
  */
-HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_WebDisabled, TestSize.Level0)
+HWTEST_F(PageSceneRegisterTest, ExecuteReportOnRegisterMatch_WebDisabled, TestSize.Level0)
 {
     std::string ruleJson = R"({
         "ruleSetId": "rs2",
@@ -100,11 +100,11 @@ HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_WebDisabled, TestSi
 }
 
 /**
- * @tc.name: RegisterPageSceneRulesForWeb_ReportOnRegister
+ * @tc.name: ExecuteReportOnRegisterMatch_ReportOnRegister
  * @tc.desc: Test that reportOnRegister=true is parsed and stored correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_ReportOnRegister, TestSize.Level0)
+HWTEST_F(PageSceneRegisterTest, ExecuteReportOnRegisterMatch_ReportOnRegister, TestSize.Level0)
 {
     std::string ruleJson = R"({
         "ruleSetId": "rs3",
@@ -122,11 +122,11 @@ HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_ReportOnRegister, T
 }
 
 /**
- * @tc.name: RegisterPageSceneRulesForWeb_SameRuleSetIdReplace
+ * @tc.name: ExecuteReportOnRegisterMatch_SameRuleSetIdReplace
  * @tc.desc: Test that re-registering same ruleSetId is skipped (singleton dedup).
  * @tc.type: FUNC
  */
-HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_SameRuleSetIdReplace, TestSize.Level0)
+HWTEST_F(PageSceneRegisterTest, ExecuteReportOnRegisterMatch_SameRuleSetIdReplace, TestSize.Level0)
 {
     std::string ruleJson1 = R"({
         "ruleSetId": "rs4",
@@ -158,11 +158,11 @@ HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_SameRuleSetIdReplac
 }
 
 /**
- * @tc.name: RegisterPageSceneRulesForWeb_ParseFailureNoSideEffect
+ * @tc.name: ExecuteReportOnRegisterMatch_ParseFailureNoSideEffect
  * @tc.desc: Test that parse failure does not modify existing rules.
  * @tc.type: FUNC
  */
-HWTEST_F(PageSceneRegisterTest, RegisterPageSceneRulesForWeb_ParseFailureNoSideEffect, TestSize.Level0)
+HWTEST_F(PageSceneRegisterTest, ExecuteReportOnRegisterMatch_ParseFailureNoSideEffect, TestSize.Level0)
 {
     std::string validJson = R"({
         "ruleSetId": "rs5",

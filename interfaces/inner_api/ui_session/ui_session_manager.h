@@ -70,12 +70,12 @@ public:
     using PageSceneDetectFunction = std::function<void(int32_t, const std::string&, bool)>;
 
     enum class WebPageSceneOp {
-        RegisterRules,    // Register rules + traverse for reportOnRegister
+        RegisterRules,    // Register rules + match for reportOnRegister
         UnregisterRules,  // Unregister rules
-        Traverse,         // Traverse web components (GetPageScene)
+        GetPageScene,     // Get page scene (temp register + match + cleanup)
     };
-    using WebPageSceneFunction = std::function<void(WebPageSceneOp op, int32_t processId, const std::string& ruleJson,
-        bool isGetResult)>;
+    using WebPageSceneFunction = std::function<int32_t(WebPageSceneOp op, int32_t processId,
+        const std::string& ruleJson, bool isGetResult)>;
 
     enum class PageSceneNodeStateChange : uint8_t {
         VISIBILITY,

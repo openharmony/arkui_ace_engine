@@ -49,19 +49,35 @@ public:
      * Returns false if processId already registered (reject, not overwrite).
      * Returns true on success.
      */
-    bool RegisterPageSceneRules(int32_t processId, const std::string& ruleJson);
+    int32_t RegisterPageSceneRules(int32_t processId, const std::string& ruleJson);
 
     /**
      * Unregister PageScene rules for a process.
      * Clears all rules and match states for the given processId.
      */
-    void UnregisterPageSceneRules(int32_t processId);
+    int32_t UnregisterPageSceneRules(int32_t processId);
 
     /**
      * Get the registered rule set for a process (copy-on-read).
      * Returns nullopt if no rules registered for this processId.
      */
     std::optional<WebPageSceneRuleSet> GetPageSceneRules(int32_t processId);
+
+    /**
+     * Begin a Get/PageScene query for a process.
+     * If rules are already registered with matching ruleSetId, reuse them (no temp register).
+     * Otherwise, parse ruleJson and store in pendingGetRules_ for temporary use.
+     * Returns PAGE_SCENE_ERR_OK on success, or an error code on failure.
+     * On success, ruleSetOut is set to the rules to query against.
+     */
+    int32_t BeginGetPageScene(int32_t processId, const std::string& ruleJsonOrRuleSetId,
+        std::optional<WebPageSceneRuleSet>& ruleSetOut);
+
+    /**
+     * Complete a Get/PageScene query for a process.
+     * Cleans up pendingGetRules_ and pendingGetProcesses_ for temporary queries.
+     */
+    void CompleteGetPageScene(int32_t processId);
 
     /**
      * Update RuleMatchState under lock protection.
@@ -180,6 +196,10 @@ private:
 
     // Rule definitions: processId -> ruleSet (one-to-one)
     std::map<int32_t, WebPageSceneRuleSet> registeredRules_;
+
+    // Temporary Get query storage (separate from registered rules)
+    std::map<int32_t, WebPageSceneRuleSet> pendingGetRules_;
+    std::set<int32_t> pendingGetProcesses_;
 };
 
 } // namespace OHOS::Ace

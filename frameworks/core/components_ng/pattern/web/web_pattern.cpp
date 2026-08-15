@@ -83,6 +83,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components/web/resource/web_page_scene_manager.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
@@ -10658,10 +10659,10 @@ void WebPattern::EndTranslate()
         }, TaskExecutor::TaskType::UI, "ArkUIWebEndTranslate");
 }
 
-void WebPattern::RegisterPageSceneRulesForWeb(int32_t processId)
+void WebPattern::ExecuteReportOnRegisterMatch(int32_t processId)
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->RegisterPageSceneRulesForWeb(processId);
+    delegate_->ExecuteReportOnRegisterMatch(processId);
 }
 
 void WebPattern::GetPageSceneForWeb(int32_t processId, const std::string& ruleJson)

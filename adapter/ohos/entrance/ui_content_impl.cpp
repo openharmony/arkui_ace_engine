@@ -7005,11 +7005,15 @@ void UIContentImpl::PostTraverseWebTask(const WeakPtr<TaskExecutor>& weakTaskExe
 void UIContentImpl::SaveTraverseWebForPageSceneCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
 #ifdef WEB_SUPPORTED
-    auto&& webPageSceneFunc = [weakTaskExecutor = taskExecutor](
-        UiSessionManager::WebPageSceneOp op, int32_t processId, const std::string& ruleJson, bool isGetResult) {
+    auto&& webPageSceneFunc = [this, weakTaskExecutor = taskExecutor](
+        UiSessionManager::WebPageSceneOp op, int32_t processId, const std::string& ruleJson,
+        bool isGetResult) -> int32_t {
         switch (op) {
-            case UiSessionManager::WebPageSceneOp::RegisterRules:
-                WebPageSceneManager::GetInstance().RegisterPageSceneRules(processId, ruleJson);
+            case UiSessionManager::WebPageSceneOp::RegisterRules: {
+                int32_t ret = WebPageSceneManager::GetInstance().RegisterPageSceneRules(processId, ruleJson);
+                if (ret != PAGE_SCENE_ERR_OK) {
+                    return ret;
+                }
                 PostTraverseWebTask(weakTaskExecutor, [processId]() {
                     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                     CHECK_NULL_VOID(pipeline);
@@ -7017,11 +7021,11 @@ void UIContentImpl::SaveTraverseWebForPageSceneCallback(const WeakPtr<TaskExecut
                     CHECK_NULL_VOID(uiTranslateManager);
                     uiTranslateManager->TraverseAndMatchAllWeb(processId, "", false);
                 });
-                break;
+                return PAGE_SCENE_ERR_OK;
+            }
             case UiSessionManager::WebPageSceneOp::UnregisterRules:
-                WebPageSceneManager::GetInstance().UnregisterPageSceneRules(processId);
-                break;
-            case UiSessionManager::WebPageSceneOp::Traverse:
+                return WebPageSceneManager::GetInstance().UnregisterPageSceneRules(processId);
+            case UiSessionManager::WebPageSceneOp::GetPageScene: {
                 PostTraverseWebTask(weakTaskExecutor, [processId, ruleJson, isGetResult]() {
                     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                     CHECK_NULL_VOID(pipeline);
@@ -7029,10 +7033,10 @@ void UIContentImpl::SaveTraverseWebForPageSceneCallback(const WeakPtr<TaskExecut
                     CHECK_NULL_VOID(uiTranslateManager);
                     uiTranslateManager->TraverseAndMatchAllWeb(processId, ruleJson, isGetResult);
                 });
-                break;
-            default:
-                break;
+                return PAGE_SCENE_ERR_OK;
+            }
         }
+        return PAGE_SCENE_ERR_FAILED;
     };
     UiSessionManager::GetInstance()->SaveWebPageSceneFunction(std::move(webPageSceneFunc));
 #endif
