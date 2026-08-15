@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-08-10
-> 主题数：239
+> 主题数：241
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -261,6 +261,8 @@ docs/kb/
 | CapiGestureDisposeUaf | CAPI手势接口UAF问题 | `docs/kb/issues/interaction/capi-gesture-dispose-uaf.md` | 新建 |
 | BackgroundPixelmapDestructionCrash | background异常崩溃问题 | `docs/kb/issues/rendering/background-pixelmap-destruction-crash.md` | 新建 |
 | VisibleAreaChangeNodeIdLeak | 可见区域变化事件注册组件id泄漏问题 | `docs/kb/issues/performance/visible-area-change-node-id-leak.md` | 新建 |
+| EtcAbcLoadingFailure | etc目录ABC文件加载失败 | `docs/kb/issues/compatibility/etc-abc-loading-failure.md` | 新建 |
+| ElementRegisterThreadLocalLeak | ElementRegister线程局部内存泄漏与VM生命周期稳定性风险 | `docs/kb/issues/lifecycle/element-register-thread-local-leak.md` | 新建 |
 
 ## 检索
 
