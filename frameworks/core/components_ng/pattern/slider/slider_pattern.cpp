@@ -4145,15 +4145,18 @@ void SliderPattern::ResetHostMaterialEffects()
     } else {
         BorderWidthProperty borderWidth;
         borderWidth.SetBorderWidth(Dimension(0));
-        borderWidth.leftDimen = Dimension(0);
-        borderWidth.rightDimen = Dimension(0);
-        borderWidth.topDimen = Dimension(0);
-        borderWidth.bottomDimen = Dimension(0);
         auto layoutProperty = host->GetLayoutProperty();
         if (layoutProperty) {
             layoutProperty->UpdateBorderWidth(borderWidth);
         }
         renderContext->UpdateBorderWidth(borderWidth);
+    }
+    
+    auto preBackShadow = renderContext->GetPreBackShadow();
+    if (preBackShadow.has_value()) {
+        renderContext->UpdateBackShadow(preBackShadow.value());
+    } else {
+        renderContext->ResetBackShadow();
     }
 }
 
