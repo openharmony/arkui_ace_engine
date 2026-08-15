@@ -8250,7 +8250,7 @@ void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
     }
     auto value = args[0]->ToNumber<int32_t>();
     constexpr int32_t POLICY_MIN = static_cast<int32_t>(ScrollbarLayoutPolicy::CONTENT);
-    constexpr int32_t POLICY_MAX = static_cast<int32_t>(ScrollbarLayoutPolicy::CONTENT);
+    constexpr int32_t POLICY_MAX = static_cast<int32_t>(ScrollbarLayoutPolicy::SYSTEM);
     if (value < POLICY_MIN || value > POLICY_MAX) {
         return;
     }
