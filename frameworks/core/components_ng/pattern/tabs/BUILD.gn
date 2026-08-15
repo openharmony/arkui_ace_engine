@@ -34,6 +34,10 @@ build_component_ng("tabs_pattern_ng") {
     "tabs_model_static.cpp",
     "tabs_node.cpp",
     "tabs_pattern.cpp",
+    "tabs_side_bar_layout_algorithm.cpp",
+    "tabs_side_bar_pattern.cpp",
+    "tabs_side_bar_tab_list_layout_algorithm.cpp",
+    "tabs_side_bar_tab_list_pattern.cpp",
   ]
 
   ark_sources = [

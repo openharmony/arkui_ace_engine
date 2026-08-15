@@ -37,6 +37,9 @@
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_side_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_side_bar_tab_list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
@@ -153,6 +156,12 @@ RefPtr<TabsNode> TabContentModelNG::FindTabsNode(const RefPtr<UINode>& tabConten
 
 void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update)
 {
+    AddBottomStyleTabBarItem(tabContent, position, update);
+    AddSideBarAdaptableStyleTabBarItem(tabContent, position, update);
+}
+
+void TabContentModelNG::AddBottomStyleTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update)
+{
     CHECK_NULL_VOID(tabContent);
     ACE_UINODE_TRACE(tabContent);
     auto tabContentId = tabContent->GetId();
@@ -185,7 +194,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(tabContentPattern);
     const auto& tabBarParam = tabContentPattern->GetTabBarParam();
-
     // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId(),
         []() { return AceType::MakeRefPtr<TabBarItemPattern>(); });
@@ -550,7 +558,50 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+void TabContentModelNG::AddSideBarAdaptableStyleTabBarItem(
+    const RefPtr<UINode>& tabContent, int32_t position, bool update)
+{
+    CHECK_NULL_VOID(tabContent);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContent);
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabsNode = FindTabsNode(tabContent);
+    CHECK_NULL_VOID(tabsNode);
+    // Always record TabContentNode in TabsPattern for deferred SideBar registration
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    if (tabsPattern) {
+        tabsPattern->AddTabContentNode(tabContentNode);
+    }
+    AddSideBarTabListItem(tabsNode, tabContentNode, position, update);
+}
+
+void TabContentModelNG::AddSideBarTabListItem(const RefPtr<TabsNode>& tabsNode,
+    const RefPtr<TabContentNode>& tabContentNode, int32_t position, bool update)
+{
+    CHECK_NULL_VOID(tabsNode);
+    CHECK_NULL_VOID(tabContentNode);
+    if (update && !tabContentNode->HasSideBarTabBarItemId()) {
+        return;
+    }
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto sideBarNode = tabsPattern->GetSideBarNode();
+    CHECK_NULL_VOID(sideBarNode);
+    auto sideBarPattern = sideBarNode->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sideBarPattern);
+    auto tabListNode = sideBarPattern->GetTabListNode();
+    CHECK_NULL_VOID(tabListNode);
+    auto tabListPattern = tabListNode->GetPattern<TabsSideBarTabListPattern>();
+    CHECK_NULL_VOID(tabListPattern);
+    tabListPattern->AddOrUpdateTabListItem(tabContentNode, position, update);
+}
+
 void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
+{
+    RemoveBottomStyleTabBarItem(tabContentNode);
+    RemoveSideBarAdaptableStyleTabBarItem(tabContentNode);
+}
+
+void TabContentModelNG::RemoveBottomStyleTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
 {
     CHECK_NULL_VOID(tabContentNode);
     if (!tabContentNode->HasTabBarItemId()) {
@@ -574,6 +625,48 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     CHECK_NULL_VOID(tabsNode);
     tabsNode->RemoveBuilderByContentId(tabContentNode->GetId());
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void TabContentModelNG::RemoveSideBarAdaptableStyleTabBarItem(const RefPtr<TabContentNode>& tabContentNode)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabsNode = FindTabsNode(tabContentNode);
+    CHECK_NULL_VOID(tabsNode);
+    // Remove from TabsPattern's record
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    if (tabsPattern) {
+        tabsPattern->RemoveTabContentNode(tabContentNode);
+    }
+    RemoveSideBarTabBarItem(tabsNode, tabContentNode);
+}
+
+void TabContentModelNG::RemoveSideBarTabBarItem(const RefPtr<TabsNode>& tabsNode,
+    const RefPtr<TabContentNode>& tabContentNode)
+{
+    CHECK_NULL_VOID(tabsNode);
+    CHECK_NULL_VOID(tabContentNode);
+
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto sideBarNode = tabsPattern->GetSideBarNode();
+    CHECK_NULL_VOID(sideBarNode);
+    auto sideBarPattern = sideBarNode->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sideBarPattern);
+    auto tabListNode = sideBarPattern->GetTabListNode();
+    CHECK_NULL_VOID(tabListNode);
+    auto tabListPattern = tabListNode->GetPattern<TabsSideBarTabListPattern>();
+    CHECK_NULL_VOID(tabListPattern);
+    auto tabItemContainerNode = tabListPattern->GetTabItemContainerNode();
+    CHECK_NULL_VOID(tabItemContainerNode);
+
+    auto sideBarTabBarItemId = tabContentNode->GetSideBarTabBarItemId();
+    auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(sideBarTabBarItemId);
+    if (tabBarItemNode) {
+        tabItemContainerNode->RemoveChild(tabBarItemNode);
+    }
+    tabContentNode->ResetSideBarTabBarItemId();
+    tabListPattern->RemoveBuilderByContentId(tabContentNode->GetId());
+    tabItemContainerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 template<typename T>

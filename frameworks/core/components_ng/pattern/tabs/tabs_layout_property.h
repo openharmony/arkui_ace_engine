@@ -53,6 +53,9 @@ public:
         value->propHeightAuto_ = CloneHeightAuto();
         value->propCachedMaxCount_ = CloneCachedMaxCount();
         value->propCacheMode_ = CloneCacheMode();
+        value->propBarLayoutStyle_ = CloneBarLayoutStyle();
+        value->propBarDisplayModeBreakpoint_ = CloneBarDisplayModeBreakpoint();
+        value->propSidebarPosition_ = CloneSidebarPosition();
         return value;
     }
 
@@ -71,6 +74,9 @@ public:
         ResetBarOverlap();
         ResetCachedMaxCount();
         ResetCacheMode();
+        ResetBarLayoutStyle();
+        ResetBarDisplayModeBreakpoint();
+        ResetSidebarPosition();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -189,6 +195,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarBackgroundColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarFloatingStyle, BarFloatingStyleParameters, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarLayoutStyle, TabBarLayoutStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
+        BarDisplayModeBreakpoint, TabBarDisplayModeBreakpoint, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarPosition, SideBarPosition, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

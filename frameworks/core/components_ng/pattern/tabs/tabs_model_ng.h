@@ -82,6 +82,12 @@ public:
     void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) override;
     void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) override;
     void ResetBarFloatingStyle() override;
+    void SetBarLayoutStyle(TabBarLayoutStyle barLayoutStyle) override;
+    void SetSidebarPosition(SideBarPosition position) override;
+    void SetSidebarHeader(const RefPtr<AceType>& header) override;
+    void SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options) override;
+    void SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint& breakpoint) override;
+
     static void ProcessDimensionWithResourceObj(
         FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj);
     static void ProcessColorWithResourceObj(
@@ -160,6 +166,11 @@ public:
 
     static void SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters);
     static void ResetBarFloatingStyle(FrameNode* frameNode);
+    static void SetBarLayoutStyle(FrameNode* frameNode, TabBarLayoutStyle barLayoutStyle);
+    static void SetSidebarPosition(FrameNode* frameNode, SideBarPosition position);
+    static void SetSidebarHeader(FrameNode* frameNode, const RefPtr<AceType>& header);
+    static void SetSidebarSearchableOptions(FrameNode* frameNode, const TabsSidebarSearchableOptions& options);
+    static void SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint);
     static void CreateWithResourceObj(
         FrameNode* frameNode, TabJsResType colorType, const RefPtr<ResourceObject>& resObj);
     static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);

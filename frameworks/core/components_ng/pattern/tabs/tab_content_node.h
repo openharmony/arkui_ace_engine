@@ -57,6 +57,24 @@ public:
         return tabBarItemId_.value();
     }
 
+    void ResetSideBarTabBarItemId()
+    {
+        sideBarTabBarItemId_ = std::nullopt;
+    }
+
+    bool HasSideBarTabBarItemId() const
+    {
+        return sideBarTabBarItemId_.has_value();
+    }
+
+    int32_t GetSideBarTabBarItemId()
+    {
+        if (!sideBarTabBarItemId_.has_value()) {
+            sideBarTabBarItemId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return sideBarTabBarItemId_.value();
+    }
+
     void UpdataTabBarItem();
 
 private:
@@ -67,6 +85,7 @@ private:
     Dimension GetDefaultFontSize() const;
 
     std::optional<int32_t> tabBarItemId_;
+    std::optional<int32_t> sideBarTabBarItemId_;
     ACE_DISALLOW_COPY_AND_MOVE(TabContentNode);
 };
 
