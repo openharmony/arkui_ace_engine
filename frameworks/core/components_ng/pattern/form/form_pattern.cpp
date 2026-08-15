@@ -2828,20 +2828,14 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
 
 void FormPattern::InitUpdateFormDoneCallback(int32_t instanceID)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    formManagerBridge_->AddFormUpdateDoneCallback([weak = WeakClaim(this), instanceID, pipeline](const int64_t formId) {
+    formManagerBridge_->AddFormUpdateDoneCallback([weak = WeakClaim(this), instanceID](const int64_t formId) {
         ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([formId, weak, instanceID] {
+        PostUITask([formId, weak, instanceID] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->FireOnUpdateFormDone(formId);
-            }, "ArkUIFormFireUpdateDoneEvent", GetFormTaskPriority());
+        }, "ArkUIFormFireUpdateDoneEvent");
     });
 }
 
