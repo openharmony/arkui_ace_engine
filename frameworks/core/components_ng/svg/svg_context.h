@@ -182,6 +182,11 @@ public:
         hrefResolveCount_ = 0;
     }
 
+    void ResetHrefResolving()
+    {
+        hrefResolving_.clear();
+    }
+
     bool IncrementDrawDepth()
     {
         return ++drawDepth_ <= MAX_DRAW_DEPTH;

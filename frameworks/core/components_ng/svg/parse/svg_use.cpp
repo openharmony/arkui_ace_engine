@@ -60,13 +60,13 @@ RSRecordingPath SvgUse::AsPath(const Size& viewPort) const
         LOGE("href is empty");
         return {};
     }
-    if (!svgContext->PushHrefResolving(attributes_.href)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath circular reference detected for href=%{public}s",
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
             attributes_.href.c_str());
         return RSRecordingPath();
     }
-    if (!svgContext->IncrementHrefResolveCount()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath circular reference detected for href=%{public}s",
             attributes_.href.c_str());
         return RSRecordingPath();
     }
@@ -87,13 +87,13 @@ RSRecordingPath SvgUse::AsPath(const SvgLengthScaleRule& lengthRule)
         LOGE("href is empty");
         return {};
     }
-    if (!svgContext->PushHrefResolving(attributes_.href)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath circular reference detected for href=%{public}s",
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
             attributes_.href.c_str());
         return RSRecordingPath();
     }
-    if (!svgContext->IncrementHrefResolveCount()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath circular reference detected for href=%{public}s",
             attributes_.href.c_str());
         return RSRecordingPath();
     }
@@ -113,13 +113,13 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
     if (attributes_.href.empty()) {
         return;
     }
-    if (!svgContext->PushHrefResolving(attributes_.href)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw circular reference detected for href=%{public}s",
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw href resolve count exceeded limit for href=%{public}s",
             attributes_.href.c_str());
         return;
     }
-    if (!svgContext->IncrementHrefResolveCount()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw href resolve count exceeded limit for href=%{public}s",
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw circular reference detected for href=%{public}s",
             attributes_.href.c_str());
         return;
     }
@@ -162,13 +162,13 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     if (attributes_.href.empty()) {
         return;
     }
-    if (!svgContext->PushHrefResolving(attributes_.href)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw circular reference detected for href=%{public}s",
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw href resolve count exceeded limit for href=%{public}s",
             attributes_.href.c_str());
         return;
     }
-    if (!svgContext->IncrementHrefResolveCount()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw href resolve count exceeded limit for href=%{public}s",
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw circular reference detected for href=%{public}s",
             attributes_.href.c_str());
         return;
     }

@@ -364,6 +364,7 @@ void SvgDom::DrawImage(
     InitStyles();
     svgContext_->ResetHrefResolveCount();
     svgContext_->ResetDrawDepth();
+    svgContext_->ResetHrefResolving();
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);
