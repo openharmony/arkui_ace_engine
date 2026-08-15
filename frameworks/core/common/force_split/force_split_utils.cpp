@@ -48,7 +48,7 @@ constexpr int32_t HOME_PAGE_CHILD_NODE_COUNT_THRESHOLD = 100;
 constexpr char NAV_BAR_HOME_PAGE_NAME[] = "navBar";
 constexpr char HOME_PAGE_KEY[] = "homePage";
 constexpr char RELATED_PAGE_KEY[] = "relatedPage";
-constexpr char ENABLE_HOOK_KEY[] = "enableReducedContainerSize";
+constexpr char ENABLE_HOOK_KEY[] = "enableHook";
 constexpr char HOME_NAVIGATION_ID_KEY[] = "homeNavigationId";
 constexpr char HOME_NAVIGATION_DEPTH_KEY[] = "homeNavigationDepth";
 constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "navigationDisablePlaceholder";
@@ -562,7 +562,7 @@ bool ForceSplitUtils::ParseForceSplitParam(
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, ArkUIOption is an invalid json object!");
         return false;
     }
-    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, false);
+    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, true);
     if (configJson->Contains(HOME_PAGE_KEY)) {
         auto homePageJson = configJson->GetValue(HOME_PAGE_KEY);
         if (!homePageJson->IsString()) {
