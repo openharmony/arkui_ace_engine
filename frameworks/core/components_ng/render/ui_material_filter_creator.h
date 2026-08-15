@@ -43,6 +43,8 @@ public:
         const ImmersiveMaterialConfig& params);
     static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToUiMaterialECFilter(const ImmersiveMaterialConfig& params);
     static std::shared_ptr<Rosen::RSNGShaderBase> ConvertToUiMaterialECSubShader(const ImmersiveMaterialConfig& params);
+    static std::shared_ptr<Rosen::RSNGShaderBase> ConvertToUiMaterialECSubShaderOverlay(
+        const ImmersiveMaterialConfig &params);
     static std::shared_ptr<OHOS::Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);
 };
 } // namespace OHOS::Ace::NG

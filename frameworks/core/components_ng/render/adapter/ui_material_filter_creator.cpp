@@ -776,12 +776,14 @@ std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMater
     newConfig.key.style = static_cast<UiMaterialStyle>(style % UI_MATERIAL_STYLES_COUNT);
 
     std::shared_ptr<Rosen::RSNGShaderBase> shader;
+    bool needSplitOverlayShader = params.needSplitOverlayShader;
     if (!MaterialUtils::GetUiMaterialShaderECSub(newConfig, shader)) {
         auto iter = MATERIAL_PARAM_MAP.find(newConfig.key);
         if (iter == MATERIAL_PARAM_MAP.end()) {
             return nullptr;
         }
-        shader = RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSub(*(iter->second), newConfig.dipScale);
+        shader = RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSub(
+            *(iter->second), newConfig.dipScale, needSplitOverlayShader);
     }
 #if defined(CROSS_PLATFORM)
     return shader;
@@ -798,6 +800,35 @@ std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMater
     glassEffect->Setter<Rosen::FrostedGlassEffectMaterialColorTag>(rsColor);
     return shader;
 #endif
+}
+
+std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMaterialECSubShaderOverlay(
+    const ImmersiveMaterialConfig& params)
+{
+    if (!params.needSplitOverlayShader) {
+        return nullptr;
+    }
+    int32_t style = static_cast<int32_t>(params.key.style);
+    ImmersiveMaterialConfig newConfig = params;
+    newConfig.key.style = static_cast<UiMaterialStyle>(style % UI_MATERIAL_STYLES_COUNT);
+
+    std::shared_ptr<Rosen::RSNGShaderBase> overlay;
+    if (!MaterialUtils::GetUiMaterialECSubShaderOverlay(newConfig, overlay)) {
+        auto iter = MATERIAL_PARAM_MAP.find(newConfig.key);
+        if (iter == MATERIAL_PARAM_MAP.end()) {
+            return nullptr;
+        }
+        overlay =
+            RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSubOverlay(*(iter->second), newConfig.dipScale);
+    }
+    auto glassEffect = std::static_pointer_cast<Rosen::RSNGFrostedGlassEffect>(overlay);
+    CHECK_NULL_RETURN(glassEffect, nullptr);
+    auto materialColor = newConfig.materialColor.value_or(Color::TRANSPARENT);
+    if (materialColor.GetAlpha() > 0) {
+        glassEffect->Setter<Rosen::FrostedGlassEffectWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+        // no darkmode param till now
+    }
+    return overlay;
 }
 
 std::shared_ptr<OHOS::Rosen::Filter> UiMaterialFilterCreator::CreateRosenFilter(

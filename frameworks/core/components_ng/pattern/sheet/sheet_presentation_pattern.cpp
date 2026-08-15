@@ -660,11 +660,20 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
         ACE_ENGINE_HISTOGRAM_BOOLEAN("bindSheet.SheetOptions.systemMaterial", 1);
         if (CheckIfUseEffectComponent(sheetStyle)) {
             sheetStyle.systemMaterialECSub = ViewAbstract::ConvertToImmersiveECSub(sheetStyle.systemMaterial);
+            SetMaterialNeedSplitOverlayShader(sheetStyle.systemMaterialECSub);
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterialECSub));
         } else {
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
         }
         SetSheetCloseIconMaterial();
+    }
+}
+
+void SheetPresentationPattern::SetMaterialNeedSplitOverlayShader(const RefPtr<UiMaterial>& material)
+{
+    auto options = material ? material->GetImmersiveOptions() : nullptr;
+    if (options) {
+        options->needSplitOverlayShader = true;
     }
 }
 

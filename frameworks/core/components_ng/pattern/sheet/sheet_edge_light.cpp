@@ -90,7 +90,7 @@ std::function<void()> SheetEdgeLightBase::GetSheetEdgeLightAnimateFinishEvent(Re
         CHECK_NULL_VOID(sheetNode);
         auto renderContext = sheetNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->SetForegroundShader(nullptr);
+        renderContext->SetOverlayNGShader(nullptr);
     };
     return [edgeLightEvent = edgeLightMoveEvent, finishEvent = edgeLightFinishEvent,
                sheetWK = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
@@ -162,7 +162,7 @@ void SheetEdgeLightBase::SetSheetEdgeLightTransitionPreShow(RefPtr<FrameNode>& s
         std::static_pointer_cast<Rosen::RSNGMaskBase>(radialGradientMask));
 
     auto edgeLightModifier = std::make_shared<RenderEdgeLightModifier>(edgeLightFilter);
-    renderContext->SetForegroundShader(edgeLightModifier);
+    renderContext->SetOverlayNGShader(edgeLightModifier);
 #endif
 }
 
@@ -208,7 +208,7 @@ void SheetEdgeLightBase::SetSheetEdgeLightTransitionStart(RefPtr<FrameNode>& she
         std::static_pointer_cast<Rosen::RSNGMaskBase>(radialGradientMask));
 
     auto edgeLightModifier = std::make_shared<RenderEdgeLightModifier>(edgeLightFilter);
-    renderContext->SetForegroundShader(edgeLightModifier);
+    renderContext->SetOverlayNGShader(edgeLightModifier);
 #endif
 }
 
@@ -254,7 +254,7 @@ void SheetEdgeLightBase::SetSheetEdgeLightTransitionEnd(RefPtr<FrameNode>& sheet
         std::static_pointer_cast<Rosen::RSNGMaskBase>(radialGradientMask));
 
     auto edgeLightModifier = std::make_shared<RenderEdgeLightModifier>(edgeLightFilter);
-    renderContext->SetForegroundShader(edgeLightModifier);
+    renderContext->SetOverlayNGShader(edgeLightModifier);
 #endif
 }
 

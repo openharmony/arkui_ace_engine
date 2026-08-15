@@ -368,7 +368,7 @@ public:
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}
 
-    virtual void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) {}
+    virtual void SetOverlayNGShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) {}
 
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
     virtual std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
@@ -379,6 +379,7 @@ public:
     virtual void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) {}
 
     virtual void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) {}
+    virtual void SetMaterialShaderECSubOverlay(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) {}
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
     {}

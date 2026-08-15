@@ -74,6 +74,7 @@ using SetMaterialFunc = void (*)(NG::FrameNode*, const UiMaterial*);
 using GetMaterialIdFunc = int32_t (*)(const UiMaterial*);
 using CreateMaterialFilterFunc = void* (*)(const ArkUIMaterialKeyParams*);
 using ReleaseMaterialFilterFunc = void (*)(void*);
+using CreateMaterialFilterWithSplitFunc = void* (*)(const ArkUIMaterialKeyParams*, bool);
 using GetEnableColorInvertFunc = int32_t (*)(int32_t, int32_t);
 using GetGlobalMaterialLevelFunc = int32_t (*)();
 using GetEnableMaterialFunc = bool (*)();
@@ -94,6 +95,8 @@ const char UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC[] = "CreateUiMaterialFilterEC"
 const char UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC[] = "ReleaseUiMaterialFilterEC";
 const char UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC_SUB[] = "CreateUiMaterialShaderECSub";
 const char UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC_SUB[] = "ReleaseUiMaterialShaderECSub";
+const char UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC_SUB_OVERLAY[] = "CreateUiMaterialShaderECSubOverlay";
+const char UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC_SUB_OVERLAY[] = "ReleaseUiMaterialShaderECSubOverlay";
 const char UI_MATERIAL_FUNC_GET_ENABLE_COLOR_INVERT[] = "GetEnableColorInvert";
 const char UI_MATERIAL_FUNC_GET_GLOBAL_LEVEL[] = "GetGlobalMaterialLevel";
 const char UI_MATERIAL_FUNC_GET_ENABLE_MATERIAL[] = "IsSystemMaterialSupported";
@@ -357,7 +360,8 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     auto materialLevel = SystemProperties::GetUiMaterialLevel();
     LowerGearLevel(materialLevel, node);
     ImmersiveMaterialConfig result {
-        .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false)
+        .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false),
+        .needSplitOverlayShader = options->needSplitOverlayShader
     };
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
@@ -549,6 +553,44 @@ bool MaterialUtils::GetUiMaterialShaderECSub(
         return false;
     }
 #endif
+    static CreateMaterialFilterWithSplitFunc createFunc = nullptr;
+    static ReleaseMaterialFilterFunc releaseFunc = nullptr;
+#ifndef _WIN32
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        auto handle = GetMaterialLib();
+        CHECK_NULL_VOID(handle);
+        createFunc = reinterpret_cast<CreateMaterialFilterWithSplitFunc>(
+            LOADSYM(handle, UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC_SUB));
+        releaseFunc =
+            reinterpret_cast<ReleaseMaterialFilterFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC_SUB));
+    });
+#endif
+    if (createFunc && releaseFunc) {
+        auto arkParam = ConvertToArkUIMaterialKeyParams(params);
+        auto shaderStructVoid = createFunc(&arkParam, params.needSplitOverlayShader);
+        auto shaderStruct = reinterpret_cast<MaterialShaderECSubStruct*>(shaderStructVoid);
+        if (!shaderStruct) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "not find param, (%{public}d, %{public}d, %{public}d)",
+                arkParam.style, arkParam.transparency, arkParam.colorMode);
+            return true;
+        }
+        shader = shaderStruct->shader;
+        releaseFunc(shaderStructVoid);
+        return true;
+    }
+    return false;
+}
+
+bool MaterialUtils::GetUiMaterialECSubShaderOverlay(
+    const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader)
+{
+#ifndef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // do not need judge level when customized
+    if (params.key.level != UiMaterialLevel::EXQUISITE) {
+        return false;
+    }
+#endif
     static CreateMaterialFilterFunc createFunc = nullptr;
     static ReleaseMaterialFilterFunc releaseFunc = nullptr;
 #ifndef _WIN32
@@ -556,23 +598,23 @@ bool MaterialUtils::GetUiMaterialShaderECSub(
     std::call_once(onceFlag, []() {
         auto handle = GetMaterialLib();
         CHECK_NULL_VOID(handle);
-        createFunc =
-            reinterpret_cast<CreateMaterialFilterFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC_SUB));
-        releaseFunc =
-            reinterpret_cast<ReleaseMaterialFilterFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC_SUB));
+        createFunc = reinterpret_cast<CreateMaterialFilterFunc>(
+            LOADSYM(handle, UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC_SUB_OVERLAY));
+        releaseFunc = reinterpret_cast<ReleaseMaterialFilterFunc>(
+            LOADSYM(handle, UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC_SUB_OVERLAY));
     });
 #endif
     if (createFunc && releaseFunc) {
         auto arkParam = ConvertToArkUIMaterialKeyParams(params);
-        auto filterStructVoid = createFunc(&arkParam);
-        auto filterStruct = reinterpret_cast<MaterialShaderECSubStruct*>(filterStructVoid);
-        if (!filterStruct) {
+        auto overlayShaderStructVoid = createFunc(&arkParam);
+        auto overlayShaderStruct = reinterpret_cast<MaterialShaderECSubStruct*>(overlayShaderStructVoid);
+        if (!overlayShaderStruct) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "not find param, (%{public}d, %{public}d, %{public}d)",
                 arkParam.style, arkParam.transparency, arkParam.colorMode);
             return true;
         }
-        shader = filterStruct->shader;
-        releaseFunc(filterStructVoid);
+        shader = overlayShaderStruct->shader;
+        releaseFunc(overlayShaderStructVoid);
         return true;
     }
     return false;

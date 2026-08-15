@@ -35,6 +35,12 @@ std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMater
     return nullptr;
 }
 
+std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMaterialECSubShaderOverlay(
+    const ImmersiveMaterialConfig& params)
+{
+    return nullptr;
+}
+
 std::shared_ptr<OHOS::Rosen::Filter> UiMaterialFilterCreator::CreateRosenFilter(
     const ImmersiveMaterialConfig& params)
 {

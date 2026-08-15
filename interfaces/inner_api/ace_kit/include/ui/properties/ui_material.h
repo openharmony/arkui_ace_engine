@@ -49,7 +49,9 @@ struct ImmersiveOptions {
     std::optional<LightEffectOptions> lightEffectOptions = std::nullopt;
     RefPtr<ResourceObject> colorResObj = nullptr;
     ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED; // options' colorMode will override GetNodeColorMode
-    
+    // when needSplitOverlayShader is true, split material shader into base and overlay layers
+    bool needSplitOverlayShader = false;
+
     bool HasLightEffect() const
     {
         return !disableLightEffect && lightEffectOptions.has_value();
