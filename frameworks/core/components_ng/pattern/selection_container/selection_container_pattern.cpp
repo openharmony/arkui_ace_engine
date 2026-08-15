@@ -882,6 +882,11 @@ std::string SelectionContainerPattern::GetBindSelectionMenuInJson() const
 void SelectionContainerPattern::OnModifyDone()
 {
     StackPattern::OnModifyDone();
+    // Re-assert non-draggable on every property update so a runtime draggable(true)/onDragStart cannot
+    // re-enable the generic drag recognizer for the container itself.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetCustomerDraggable(false);
     if (GetCopyOption() != CopyOptions::None || HasSelectableText()) {
         InitKeyEvent();
     }

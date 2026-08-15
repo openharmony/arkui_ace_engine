@@ -21,6 +21,7 @@
 
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/text_selection_child.h"
 
 using namespace testing;
@@ -53,6 +54,28 @@ public:
     bool hideNoAnimation_ = false;
     bool hideShowSubMenu_ = false;
 };
+
+/**
+ * @tc.name: RuntimeDraggableStillDisabledAfterOnModifyDone001
+ * @tc.desc: Setting draggable(true) at runtime must be forced back off by OnModifyDone so SelectionContainer
+ *           never becomes a drag source itself.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, RuntimeDraggableStillDisabledAfterOnModifyDone001, TestSize.Level1)
+{
+    containerNode_->SetDraggable(true);
+    EXPECT_TRUE(containerNode_->IsDraggable());
+
+    pattern_->OnModifyDone();
+
+    auto eventHub = containerNode_->GetEventHub<EventHub>();
+    auto gestureHub = containerNode_->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_FALSE(containerNode_->IsDraggable());
+    EXPECT_TRUE(containerNode_->IsCustomerSet());
+    EXPECT_FALSE(gestureHub->IsAllowedDrag(eventHub));
+}
 
 /* ==================== GetSelectionText ==================== */
 
