@@ -393,11 +393,12 @@ void ParseFloatInitRange(JSRef<JSVal>& floatRangeJsValue, OHOS::Ace::NG::Particl
 bool SrcAddResIfNeed(JSRef<JSVal>& srcJsValue,
     std::string& src, NG::ImageParticleParameter& imageParameter)
 {
+    std::string bundleName;
+    std::string moduleName;
+    int32_t resId = 0;
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
-        if (srcJsValue->IsString()) {
-            src = srcJsValue->ToString();
-        } else if (!JSParticle::ParseJsMedia(srcJsValue, src, resObj)) {
+        if (!JSParticle::ParseJsMediaWithBundleName(srcJsValue, src, bundleName, moduleName, resId, resObj)) {
             return false;
         }
         if (resObj) {
@@ -412,12 +413,12 @@ bool SrcAddResIfNeed(JSRef<JSVal>& srcJsValue,
             imageParameter.RemoveResource("ImageParticleParameter.src");
         }
     } else {
-        if (srcJsValue->IsString()) {
-            src = srcJsValue->ToString();
-        } else if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+        if (!JSParticle::ParseJsMediaWithBundleName(srcJsValue, src, bundleName, moduleName, resId)) {
             return false;
         }
     }
+    imageParameter.SetBundleName(bundleName);
+    imageParameter.SetModuleName(moduleName);
     return true;
 }
 
