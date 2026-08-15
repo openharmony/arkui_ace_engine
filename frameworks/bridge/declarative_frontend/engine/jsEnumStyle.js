@@ -1082,7 +1082,8 @@ let BarPosition;
 let TabBarStyle;
 (function (TabBarStyle) {
   TabBarStyle[TabBarStyle.BOTTOM = 0] = 'BOTTOM';
-  TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 1] = 'SIDEBAR_ADAPTABLE';
+  TabBarStyle[TabBarStyle.SIDEBAR = 1] = 'SIDEBAR';
+  TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 2] = 'SIDEBAR_ADAPTABLE';
 })(TabBarStyle || (TabBarStyle = {}));
 
 let TabBarDisplayMode;

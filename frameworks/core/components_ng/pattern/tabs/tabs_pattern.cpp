@@ -549,15 +549,19 @@ void TabsPattern::OnModifyDone()
 
 TabBarDisplayMode TabsPattern::CalculateTabBarDisplayMode(float width)
 {
-    if (width < MIN_SIDEBAR_ADAPTABLE_WIDTH.ConvertToPx()) {
-        return TabBarDisplayMode::BOTTOMTABBAR;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, TabBarDisplayMode::BOTTOMTABBAR);
     auto property = GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_RETURN(property, TabBarDisplayMode::BOTTOMTABBAR);
     auto barLayoutStyle = property->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    if (barLayoutStyle == TabBarLayoutStyle::SIDEBAR) {
+        return TabBarDisplayMode::SIDEBAR;
+    }
     if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
+        return TabBarDisplayMode::BOTTOMTABBAR;
+    }
+    // adaptable
+    if (width < MIN_SIDEBAR_ADAPTABLE_WIDTH.ConvertToPx()) {
         return TabBarDisplayMode::BOTTOMTABBAR;
     }
     auto context = host->GetContext();
@@ -1721,14 +1725,15 @@ void TabsPattern::UpdateSideBarIfNeeded()
     if (preStyle == TabBarLayoutStyle::BOTTOM && newStyle == TabBarLayoutStyle::BOTTOM) {
         return;
     }
-    if (preStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE && newStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE) {
+    if ((preStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE || preStyle == TabBarLayoutStyle::SIDEBAR) &&
+        (newStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE || newStyle == TabBarLayoutStyle::SIDEBAR)) {
         // barStyle unchanged, but sidebar properties (header/searchable) may have changed
         if (sideBarNode_) {
             SyncPropertiesToSideBar();
         }
         return;
     }
-    // adaptable -> bottom
+    // adaptable/sidebar -> bottom
     if (newStyle == TabBarLayoutStyle::BOTTOM) {
         // Remove SideBar and SideBarDivider
         if (sideBarNode_) {
@@ -1746,7 +1751,7 @@ void TabsPattern::UpdateSideBarIfNeeded()
         ResetSideBarTabListItemIds();
         return;
     }
-    // bottom -> adaptable
+    // bottom -> adaptable/sidebar
     sideBarDividerNode_ = CreateSideBarDividerNode();
     host->AddChild(sideBarDividerNode_);
     sideBarNode_ = CreateSideBarNode();

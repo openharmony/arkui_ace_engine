@@ -24,8 +24,9 @@
 namespace OHOS::Ace::NG {
 
 enum class TabBarLayoutStyle {
-    BOTTOM,
-    SIDEBAR_ADAPTABLE
+    BOTTOM = 0,
+    SIDEBAR,
+    SIDEBAR_ADAPTABLE,
 };
 
 enum class TabBarDisplayMode {
