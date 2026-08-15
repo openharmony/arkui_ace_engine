@@ -359,6 +359,8 @@ void UiReportStub::ReportComponentChangeEvent(const std::string& data)
 {
     if (ComponentChangeEventCallback_ != nullptr) {
         ComponentChangeEventCallback_(data);
+    } else {
+        LOGW("ReportComponentChangeEvent ComponentChangeEventCallback_ is null");
     }
 }
 
@@ -686,6 +688,11 @@ void UiReportStub::RegisterComponentChangeEventCallback(const EventCallback& eve
     ComponentChangeEventCallback_ = std::move(eventCallback);
 }
 
+bool UiReportStub::IsComponentChangeEventCallbackRegistered() const
+{
+    return ComponentChangeEventCallback_ != nullptr;
+}
+
 void UiReportStub::RegisterWebUnfocusEventCallback(
     const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback)
 {
@@ -872,6 +879,11 @@ void UiReportStub::RegisterContentChangeCallback(
     contentChangeCallback_ = callback;
 }
 
+bool UiReportStub::IsContentChangeCallbackRegistered() const
+{
+    return contentChangeCallback_ != nullptr;
+}
+
 void UiReportStub::UnregisterContentChangeCallback()
 {
     contentChangeCallback_ = nullptr;
@@ -881,6 +893,8 @@ void UiReportStub::SendContentChange(ChangeType type, const std::string& simpleT
 {
     if (contentChangeCallback_) {
         contentChangeCallback_(type, simpleTree);
+    } else {
+        LOGW("SendContentChange contentChangeCallback_ is null");
     }
 }
 
