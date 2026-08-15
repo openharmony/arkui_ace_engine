@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/symbol_modifier.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
@@ -992,6 +993,7 @@ private:
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isShowHoverImage_ = false;
     bool isFirstShow_ = false;
+    std::shared_ptr<AnimationUtils::Animation> edgeLightAnimation_ = nullptr;
     bool isExtensionMenuShow_ = false;
     bool isExtensionInnerMenu_ = false;
     bool isSubMenuShow_ = false;
