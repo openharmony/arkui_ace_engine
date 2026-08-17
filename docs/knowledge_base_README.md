@@ -198,5 +198,5 @@ PY
 
 - 2026-07-30：04-14-04 特性整体更名 zh「键盘控制」→「输入法交互」、目录 `04-keyboard-control/`→`04-input-method-interaction/`。同步更新 functions.yaml/functions.yaml 路径与标题、5 个 Feat spec 路径、design.md 与 Feat 内部引用、KB 文件 `keyboard-control.md`→`input-method-interaction.md`、context_registry 条目（id/name/name_cn/spec_domain/kb）及 text-shortcuts 交叉链接。
 
-- 2026-07-30：新增触摸事件、按键事件、事件分发和拦截、组件组合键、鼠标事件、手势能力、事件基础框架 7 个新版 KB 主题；新版 registry 增至 213 条，旧索引保持 22 条。
-- 2026-07-31：新增 Gesture Modifier 通用能力 KB，关联 Func-04-05-07；新版 registry 增至 214 条，旧索引保持 22 条。
+- 2026-07-30：新增触摸事件、按键事件、事件分发和拦截、组件组合键、鼠标事件、手势能力、事件基础框架、交互归一化、手写笔能力、组件相关事件、可见区域机制、焦点机制、ComponentUtils 13 个新版 KB 主题；新版 registry 增至 214 条，旧索引保持 22 条。
+- 2026-07-31：新增 Gesture Modifier 通用能力 KB，关联 Func-04-05-07；新版 registry 增至 215 条，旧索引保持 22 条。

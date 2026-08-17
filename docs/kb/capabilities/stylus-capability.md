@@ -80,7 +80,7 @@
 ## 调试入口
 
 - 输入字段检索：`SourceTool`、`PEN`、`pressure`、`tiltX`、`tiltY`、`rollAngle`。
-- 悬停链路检索：`OnPenHoverEvent`、`EventManagerPen`、`HoverEventTarget`。
+- 悬停链路检索：`OnPenHoverEvent`、`PenHoverTest`、`UpdatePenHoverNode`、`HoverEventTarget`。
 - 服务链路检索：`StylusDetectorMgr`、`StylusDetectorLoader`、`Notify`。
 - 编辑命令检索：`StylusDetectorCallBack`、`CommandType`、`TextInputClient`。
 

@@ -225,7 +225,6 @@ docs/kb/
 | WindowToolbar | 窗口工具栏 | `docs/kb/capabilities/window-toolbar.md` | 新建（Spec 待补） |
 | AtomicServiceAppBar | 元服务 AppBar | `docs/kb/capabilities/atomic-service-appbar.md` | 新建（Spec 待补） |
 | RenderTreeSync | 渲染树同步 | `docs/kb/architecture/render-tree-sync.md` | 新建 |
-
 | TouchEvents | 触摸事件 | `docs/kb/capabilities/touch-events.md` | 新建 |
 | KeyEvents | 按键事件 | `docs/kb/capabilities/key-events.md` | 新建 |
 | EventDispatchIntercept | 事件分发和拦截 | `docs/kb/capabilities/event-dispatch-intercept.md` | 新建 |
