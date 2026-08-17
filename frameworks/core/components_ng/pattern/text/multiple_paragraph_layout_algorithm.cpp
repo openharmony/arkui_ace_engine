@@ -793,11 +793,15 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
     CHECK_NULL_RETURN(theme, false);
     auto width = 0.0f;
     auto height = 0.0f;
-    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
+    auto fontScale = context->GetFontScaleFromEnv(frameNode);
+    if (LessOrEqual(fontScale, 0.0f)) {
+        fontScale = 1.0f;
+    }
+    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * fontScale;
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
     auto fontSizeOpt = textLayoutProperty->GetFontSize();
     if (fontSizeOpt.has_value()) {
-        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
+        fontSize = fontSizeOpt.value().ConvertToVp() * fontScale;
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
@@ -811,7 +815,7 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
         CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize, maxWidth, layoutPolicy });
         width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
         height = static_cast<float>(
-        customSpanMetrics.height.value_or(fontSize / context->GetFontScaleFromEnv(frameNode)) * context->GetDipScale());
+        customSpanMetrics.height.value_or(fontSize / fontScale) * context->GetDipScale());
     }
     PlaceholderStyle placeholderStyle;
     placeholderStyle.width = width;

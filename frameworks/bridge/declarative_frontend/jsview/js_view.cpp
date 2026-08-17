@@ -130,7 +130,11 @@ std::optional<JSRef<JSVal>> MakeSystemEnvValue(const std::string& key, const std
         }
     }
     if (key == NG::ENV_KEY_FONT_SCALE) {
-        CHECK_NULL_RETURN(value, std::nullopt);
+        if (!value) {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_RETURN(pipeline, JSVal::Undefined());
+            return JSRef<JSVal>::Make(ToJSValue(static_cast<double>(pipeline->GetFontScale())));
+        }
         auto doubleValue = value->GetDouble();
         CHECK_NULL_RETURN(doubleValue, JSVal::Undefined());
         return JSRef<JSVal>::Make(ToJSValue(*doubleValue));
