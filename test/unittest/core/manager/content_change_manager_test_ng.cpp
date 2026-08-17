@@ -1684,6 +1684,26 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 }
 
 /**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest015
+ * @tc.desc: Test GetIgnoreEventMask with ARKWEB ignore events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest015, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    auto mask = contentChangeMgr->GetIgnoreEventMask(R"({"ARKWEB": ["all"]})");
+    EXPECT_EQ(mask, ContentChangeManager::ARKWEB_ALL);
+
+    mask = contentChangeMgr->GetIgnoreEventMask(R"({"SCROLL": ["scrollTo"], "ARKWEB": ["all"]})");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO | ContentChangeManager::ARKWEB_ALL);
+
+    mask = contentChangeMgr->GetIgnoreEventMask(R"({"ARKWEB": ["ALL"]})");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
  * @tc.name: ContentChangeManagerTest020
  * @tc.desc: Test OnTransitionAdded
  * @tc.type: FUNC
