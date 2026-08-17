@@ -26,6 +26,11 @@
       "buildFunction": "CustomDialogBuilder"
     },
     {
+      "name": "CustomDialogSystemMaterial",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/customDialogSystemMaterial.ets",
+      "buildFunction": "CustomDialogSystemMaterialBuilder"
+    },
+    {
       "name": "PromptAction",
       "pageSourceFile": "src/main/ets/pages/components/dialog/promptAction.ets",
       "buildFunction": "PromptActionBuilder"

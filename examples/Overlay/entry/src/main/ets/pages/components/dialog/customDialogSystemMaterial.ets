@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import router from '@ohos.router';
+
+import { TestListOption } from '../../../common/DataModel'
+
+@Builder
+export function CustomDialogSystemMaterialBuilder(name: string, param: Object) {
+  CustomDialogSystemMaterialIndex()
+}
+
+const testList: TestListOption[] = [
+  { title: 'SystemMaterial_沉浸式材质样式_ULTRA_THIN~ULTRA_THICK', url: 'pages/components/dialog/page/CustomDialogSystemMaterial_Styles' },
+  { title: 'SystemMaterial_材质属性_颜色_阴影_交互_光效', url: 'pages/components/dialog/page/CustomDialogSystemMaterial_Properties' },
+  { title: 'SystemMaterial_组合场景_材质与其他弹窗属性', url: 'pages/components/dialog/page/CustomDialogSystemMaterial_Combined' },
+]
+
+@Entry
+@Component
+struct CustomDialogSystemMaterialIndex {
+  pathStack: NavPathStack = new NavPathStack()
+
+  build() {
+    NavDestination() {
+      List({ space: 8 }) {
+        ForEach(testList, (item: TestListOption) => {
+          ListItem() {
+            Text(item.title)
+              .width('100%')
+              .backgroundColor(Color.Pink)
+              .fontSize(16)
+              .padding(12)
+              .onClick(() => {
+                router.pushUrl({
+                  url: item.url
+                }, router.RouterMode.Single)
+              })
+          }
+        }, (item: TestListOption) => item.title)
+      }.borderWidth(2).padding(5)
+    }
+    .title('CustomDialog SystemMaterial')
+    .onBackPressed(() => {
+      this.pathStack.pop()
+      return true
+    })
+    .onReady((context: NavDestinationContext) => {
+      this.pathStack = context.pathStack;
+    })
+  }
+}
