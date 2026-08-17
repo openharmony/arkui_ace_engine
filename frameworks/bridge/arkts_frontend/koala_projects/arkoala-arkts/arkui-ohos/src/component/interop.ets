@@ -649,11 +649,11 @@ export function unwrapTransferCompatibleUpdatableBuilder<T>(
  * to intercept property getter operations.
  */
 function makeBuilderParameterStaticProxy(name: string, value: Object, sourceGetter: Any): Object {
-    const cls = Class.of(value);
-    const ifaces = cls.getInterfaces();
-    if (ifaces.length == 0) {
+    if (!StateMgmtTool.isObjectLiteral(value)) {
         return value;
     }
+    const cls = Class.of(value);
+    const ifaces = cls.getInterfaces();
     return reflect.Proxy.create(cls.getLinker(), ifaces, new InteropBuilderLiteralProxyHandler(value, sourceGetter));
 }
 
