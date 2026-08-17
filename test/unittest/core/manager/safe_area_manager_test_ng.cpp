@@ -291,6 +291,72 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateKeyboardSafeAreaTooLargeTest
+ * @tc.desc: UpdateKeyboardSafeArea with keyboardHeight greater than bottom should clamp start to zero,
+ *           keeping the inset valid (start <= end) instead of producing a negative float to uint32_t
+ *           conversion (undefined behavior, differs between arm and x86).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTooLargeTest, TestSize.Level0)
+{
+    constexpr float TOO_LARGE_KEYBOARD_HEIGHT = 2000.0f;
+    /**
+     * @tc.steps: step1 keyboardHeight is greater than root height.
+     * @tc.expected: start is clamped to 0, inset keeps start <= end.
+     */
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    auto ret = safeAreaManager_->UpdateKeyboardSafeArea(TOO_LARGE_KEYBOARD_HEIGHT);
+    EXPECT_EQ(ret, true);
+    auto keyboardInset = safeAreaManager_->GetKeyboardInset();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    EXPECT_GT(TOO_LARGE_KEYBOARD_HEIGHT, 0.0f + rootHeight);
+    EXPECT_EQ(keyboardInset.start, 0);
+    EXPECT_EQ(keyboardInset.end, rootHeight);
+    EXPECT_LE(keyboardInset.start, keyboardInset.end);
+    EXPECT_TRUE(keyboardInset.IsValid());
+    EXPECT_EQ(keyboardInset.Length(), keyboardInset.end);
+    /**
+     * @tc.steps: step2 keyboardHeight is greater than the explicit rootHeight param.
+     * @tc.expected: start is clamped to 0, inset keeps start <= end.
+     */
+    uint32_t smallRootHeight = KEYBOARD_HEIGHT - 20;
+    ret = safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT, smallRootHeight);
+    EXPECT_EQ(ret, true);
+    keyboardInset = safeAreaManager_->GetKeyboardInset();
+    EXPECT_EQ(keyboardInset.start, 0);
+    EXPECT_EQ(keyboardInset.end, smallRootHeight);
+    EXPECT_LE(keyboardInset.start, keyboardInset.end);
+    EXPECT_TRUE(keyboardInset.IsValid());
+    /**
+     * @tc.steps: step3 keyboardHeight is greater than the bottom of valid systemArea.
+     * @tc.expected: start is clamped to 0, inset keeps start <= end.
+     */
+    MockContainer container(nullptr);
+    MockContainer::SetUp();
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    ret = safeAreaManager_->UpdateKeyboardSafeArea(TOO_LARGE_KEYBOARD_HEIGHT);
+    EXPECT_EQ(ret, true);
+    keyboardInset = safeAreaManager_->GetKeyboardInset();
+    EXPECT_GT(TOO_LARGE_KEYBOARD_HEIGHT, 0.0f + SYSTEM_BOTTOM_START);
+    EXPECT_EQ(keyboardInset.start, 0);
+    EXPECT_EQ(keyboardInset.end, SYSTEM_BOTTOM_START);
+    EXPECT_LE(keyboardInset.start, keyboardInset.end);
+    EXPECT_TRUE(keyboardInset.IsValid());
+    /**
+     * @tc.steps: step4 keyboardHeight equals bottom, boundary condition.
+     * @tc.expected: start is 0, inset is a full-height valid inset.
+     */
+    ret = safeAreaManager_->UpdateKeyboardSafeArea(SYSTEM_BOTTOM_START);
+    EXPECT_EQ(ret, false);
+    keyboardInset = safeAreaManager_->GetKeyboardInset();
+    EXPECT_EQ(keyboardInset.start, 0);
+    EXPECT_EQ(keyboardInset.end, SYSTEM_BOTTOM_START);
+    EXPECT_TRUE(keyboardInset.IsValid());
+    MockContainer::TearDown();
+}
+
+/**
  * @tc.name: CheckCutoutSafeAreaTest
  * @tc.desc: Use CheckCutoutSafeArea and test.
  * @tc.type: FUNC
