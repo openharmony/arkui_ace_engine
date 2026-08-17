@@ -24,6 +24,7 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkLineCreate(double width, int32_t widthUnit, double height, int32_t heightUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkLineCreateEx(NativeOptionLength width, NativeOptionLength height);
 CJ_EXPORT void FfiOHOSAceFrameworkLineSetStart(double x, double y);
 CJ_EXPORT void FfiOHOSAceFrameworkLineSetEnd(double x, double y);
 }

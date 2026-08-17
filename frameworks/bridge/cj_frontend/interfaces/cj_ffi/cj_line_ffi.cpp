@@ -64,4 +64,15 @@ void FfiOHOSAceFrameworkLineSetEnd(double x, double y)
     endPoint.second = Dimension(y, DimensionUnit::VP);
     GetLineModel()->EndPoint(endPoint);
 }
+
+void FfiOHOSAceFrameworkLineCreateEx(NativeOptionLength width, NativeOptionLength height)
+{
+    GetLineModel()->Create();
+    if (width.hasValue) {
+        FfiOHOSAceFrameworkShapeSetWidth(width.value.value, width.value.unitType);
+    }
+    if (height.hasValue) {
+        FfiOHOSAceFrameworkShapeSetHeight(height.value.value, height.value.unitType);
+    }
+}
 }
