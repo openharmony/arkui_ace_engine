@@ -589,8 +589,6 @@ int32_t TextFieldPattern::OnInjectionEvent(const std::string& command)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d OnInjectionEvent cmd:%{public}s", host->GetId(),
-        command.c_str());
     if (!ParseCommand(command)) {
         return RET_FAILED;
     }
@@ -645,6 +643,8 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
     CHECK_NULL_RETURN(json && !cmd.empty(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d OnInjectionEvent cmd:%{public}s", host->GetId(),
+        (cmd == "addText" || cmd == "setText") ? cmd.c_str() : command.c_str());
     if (cmd == "MSDP_AutoFill") {
         return HandleMSDPAutoFillCommand(json);
     } else if (cmd == "addText" || cmd == "setText" || cmd == "deleteText") {
