@@ -71,7 +71,7 @@
 
 - API 检索：`onVisibleAreaChange`、`onVisibleAreaApproximateChange`、`VisibleAreaEventOptions`。
 - 核心检索：`VisibleArea`、`VisibleRatio`、`ProcessAllVisibleCallback`、`expectedUpdateInterval`。
-- Native 检索：`VISIBLE_AREA`、`VISIBLE_AREA_APPROXIMATE`、`RegisterCommonVisibleAreaChangeEvent`。
+- Native 检索：`VISIBLE_AREA`、`VISIBLE_AREA_APPROXIMATE`、`NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT`、`ON_VISIBLE_AREA_APPROXIMATE_CHANGE`。
 
 ## 相关主题
 
