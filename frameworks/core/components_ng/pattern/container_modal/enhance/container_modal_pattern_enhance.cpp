@@ -370,15 +370,30 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(cubicBezierCurve);
 
-    if (isShow && CanShowFloatingTitle()) {
-        floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+    const bool isSupportedWindowMode =
+        windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    const bool interruptHiding = isShow && GetIsFloatingTitleHiding();
+    if (isShow && isSupportedWindowMode && (interruptHiding || CanShowFloatingTitle())) {
+        SetFloatingTitleAnimationToken(GetFloatingTitleAnimationToken() + 1);
+        SetIsFloatingTitleHiding(false);
+        if (interruptHiding) {
+            // Stop the in-progress hide animation and continue from its current position.
+            floatingContext->GetShowingTranslateProperty();
+            buttonsContext->GetShowingTranslateProperty();
+        } else {
+            floatingContext->OnTransformTranslateUpdate(
+                { 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+            buttonsContext->OnTransformTranslateUpdate(
+                { 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+            controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+            hasControlButtonVisibleBeforeAnim_ = true;
+        }
         floatingLayoutProperty->UpdateVisibility(floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
         AnimationUtils::Animate(option, [floatingContext, height]() {
             auto rect = floatingContext->GetPaintRectWithoutTransform();
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         }, nullptr, nullptr, GetContextRefPtr());
-        buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
-        controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         auto buttonPopupDistance =
             floatTitleMgr_ ? 0.0f : ((titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx()) / 2);
@@ -390,6 +405,13 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     }
 
     if (!isShow && CanHideFloatingTitle()) {
+        if (!hasControlButtonVisibleBeforeAnim_) {
+            controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+            hasControlButtonVisibleBeforeAnim_ = true;
+        }
+        SetIsFloatingTitleHiding(true);
+        SetFloatingTitleAnimationToken(GetFloatingTitleAnimationToken() + 1);
+        const auto animationToken = GetFloatingTitleAnimationToken();
         auto beforeVisible = controlButtonVisibleBeforeAnim_;
         AnimationUtils::Animate(
             option,
@@ -398,11 +420,16 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 buttonsContext->OnTransformTranslateUpdate({ 0.0f,
                     beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
-            [floatingLayoutProperty, controlButtonsLayoutProperty, weak = WeakClaim(this)]() {
+            [floatingLayoutProperty, controlButtonsLayoutProperty, animationToken, weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                if (animationToken != pattern->GetFloatingTitleAnimationToken() ||
+                    !pattern->GetIsFloatingTitleHiding()) {
+                    return;
+                }
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 controlButtonsLayoutProperty->UpdateVisibility(pattern->controlButtonVisibleBeforeAnim_);
+                pattern->SetIsFloatingTitleHiding(false);
             }, nullptr, GetContextRefPtr());
     }
 }
