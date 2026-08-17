@@ -6774,6 +6774,15 @@ void TextFieldPattern::ProcessPendingCaretEvent()
     }
 }
 
+EmojiRelation TextFieldPattern::GetEmojiRelation(int index)
+{
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    return TextEmojiProcessor::GetIndexRelationToEmoji(index, GetTextUtf16Value(),
+        emojiStartIndex, emojiEndIndex);
+}
+
+
 bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
 {
 #ifdef CROSS_PLATFORM
@@ -6786,7 +6795,13 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
             if (value->compose.GetStart() == 0 && value->text.empty()) {
                 DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
             } else {
-                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+                EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+                if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+                    relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+                    HandleOnDelete(true);
+                } else {
+                    DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+                }
             }
             value->compose.Update(-1);
         } else {
