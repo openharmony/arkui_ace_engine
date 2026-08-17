@@ -38,6 +38,7 @@ text_input_test_sources = [
   "text_input_cursor_test.cpp",
   "text_input_decoration_test.cpp",
   "text_input_decorator_test.cpp",
+  "text_input_filter_test.cpp",
   "text_input_menu_test.cpp",
   "text_input_modify_test.cpp",
   "text_input_preview_test.cpp",

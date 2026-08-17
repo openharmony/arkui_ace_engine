@@ -28,39 +28,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-static constexpr char16_t DIGIT_WHITE_LIST[] = u"[0-9]";
-static constexpr char16_t DIGIT_DECIMAL_WHITE_LIST[] = u"[0-9.]";
-static constexpr char16_t PHONE_WHITE_LIST[] = uR"([0-9 \+\-\*\#\(\)])";
-static constexpr char16_t EMAIL_WHITE_LIST[] = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@"-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 constexpr static int32_t EMOJI_RANGE_LEFT = 150;
 constexpr static int32_t EMOJI_RANGE_RIGHT = 150;
-
-inline std::wstring ContentToWstring(const std::u16string& str)
-{
-    auto utf16Len = str.length();
-    std::unique_ptr<wchar_t[]> pBuf16 = std::make_unique<wchar_t[]>(utf16Len);
-    wchar_t *wBuf = pBuf16.get();
-    for (uint32_t i = 0; i < utf16Len; i++) {
-        wBuf[i] = static_cast<wchar_t>(str[i]);
-    }
-
-    return std::wstring(wBuf, utf16Len);
-}
-
-inline std::u16string ContentToU16string(const std::wstring& str)
-{
-    auto utf16Len = str.length();
-    std::unique_ptr<char16_t[]> pBuf16 = std::make_unique<char16_t[]>(utf16Len);
-    char16_t *buf16 = pBuf16.get();
-    for (uint32_t i = 0; i < utf16Len; i++) {
-        buf16[i] = static_cast<char16_t>(str[i]);
-    }
-
-    return std::u16string(buf16, utf16Len);
-}
 } // namespace
 
 std::u16string ContentController::PreprocessString(int32_t startIndex, int32_t endIndex, const std::u16string& value)
@@ -78,15 +50,9 @@ std::u16string ContentController::PreprocessString(int32_t startIndex, int32_t e
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     bool hasInputFilter =
         property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
-    if (!hasInputFilter && property->GetTextInputType().has_value() &&
-        (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
-            property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
-        char16_t specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ? u'.' : u'@';
-        if (content_.find(specialChar) != std::u16string::npos && value.find(specialChar) != std::u16string::npos &&
-            GetSelectedValue(startIndex, endIndex).find(specialChar) == std::u16string::npos) {
-            tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char16_t c) { return c == specialChar; }),
-                tmp.end());
-        }
+    if (!hasInputFilter && property->GetTextInputType().has_value()) {
+        tmp = TextInputFilter::PreprocessValue(
+            property->GetTextInputType().value(), content_, tmp, selectValue);
     }
     FilterValueType(tmp);
     auto maxLength = static_cast<uint32_t>(textField->GetMaxLength());
@@ -151,42 +117,20 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::u16string& 
     if (!property->GetTextInputType().has_value()) {
         return;
     }
-    switch (property->GetTextInputType().value()) {
-        case TextInputType::ONE_TIME_CODE_NUMBER:
-        case TextInputType::NUMBER: {
-            textChanged |= FilterWithEvent(DIGIT_WHITE_LIST, result);
-            break;
-        }
-        case TextInputType::PHONE: {
-            textChanged |= FilterWithEvent(PHONE_WHITE_LIST, result);
-            break;
-        }
-        case TextInputType::EMAIL_ADDRESS: {
-            textChanged |= FilterWithEvent(EMAIL_WHITE_LIST, result);
-            textChanged |= FilterWithEmail(result);
-            break;
-        }
-        case TextInputType::VISIBLE_PASSWORD:
-            break;
-        case TextInputType::NEW_PASSWORD:
-            break;
-        case TextInputType::NUMBER_PASSWORD: {
-            textChanged |= FilterWithEvent(DIGIT_WHITE_LIST, result);
-            break;
-        }
-        case TextInputType::SCREEN_LOCK_PASSWORD: {
-            textChanged |= FilterWithAscii(result);
-            break;
-        }
-        case TextInputType::NUMBER_DECIMAL: {
-            textChanged |= FilterWithEvent(DIGIT_DECIMAL_WHITE_LIST, result);
-            textChanged |= FilterWithDecimal(result);
-            break;
-        }
-        default: {
-            break;
-        }
+    auto host = textField->GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
     }
+    auto onError = [weak = WeakClaim(RawPtr(host))](const std::u16string& error) -> bool {
+        auto host = weak.Upgrade();
+        CHECK_NULL_RETURN(host, false);
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
+        eventHub->FireOnInputFilterError(error);
+        return true;
+    };
+    textChanged |= TextInputFilter::FilterByInputType(
+        property->GetTextInputType().value(), result, onError);
 }
 
 bool ContentController::FilterValue()
@@ -286,109 +230,6 @@ void ContentController::FilterValue(std::u16string& value)
     }
 }
 
-std::u16string ContentController::RemoveErrorTextFromValue(const std::u16string& value, const std::u16string& errorText)
-{
-    std::u16string result;
-    int32_t valuePtr = 0;
-    int32_t errorTextPtr = 0;
-    auto valueSize = static_cast<int32_t>(value.length());
-    auto errorTextSize = static_cast<int32_t>(errorText.length());
-    while (errorTextPtr < errorTextSize) {
-        while (value[valuePtr] != errorText[errorTextPtr] && valuePtr < valueSize) {
-            result += value[valuePtr];
-            valuePtr++;
-        }
-        // no more text left to remove in value
-        if (valuePtr >= valueSize) {
-            return result;
-        }
-        // increase both value ptr and error text ptr if char in value is removed
-        valuePtr++;
-        errorTextPtr++;
-    }
-    valuePtr = std::clamp(valuePtr, 0, static_cast<int32_t>(value.length()));
-    result += value.substr(valuePtr);
-    return result;
-}
-
-std::u16string ContentController::FilterWithRegex(const std::u16string& filter, std::u16string& result)
-{
-    // convert wstring for processing unicode characters
-    std::wstring wFilter = ContentToWstring(filter);
-    std::wstring wResult = ContentToWstring(result);
-    std::wregex wFilterRegex(wFilter);
-    std::wstring wErrorText = std::regex_replace(wResult, wFilterRegex, L"");
-    std::u16string errorText = ContentToU16string(wErrorText);
-    result = RemoveErrorTextFromValue(result, errorText);
-    return errorText;
-}
-
-bool ContentController::FilterWithEmail(std::u16string& result)
-{
-    auto valueToUpdate = result;
-    bool first = true;
-    std::replace_if(
-        result.begin(), result.end(),
-        [&first](const char16_t c) {
-            if (c == u'@' && !first) {
-                return true;
-            }
-            if (c == u'@') {
-                first = false;
-            }
-            return false;
-        },
-        u' ');
-
-    // remove the spaces
-    result.erase(std::remove(result.begin(), result.end(), u' '), result.end());
-    return result != valueToUpdate;
-}
-
-bool ContentController::FilterWithAscii(std::u16string& result)
-{
-    if (result.empty()) {
-        return false;
-    }
-    auto valueToUpdate = result;
-    bool textChange = true;
-    std::u16string errorText;
-    result.clear();
-    for (char16_t valuePtr : valueToUpdate) {
-        if (isascii(valuePtr)) {
-            result += valuePtr;
-        } else {
-            errorText += valuePtr;
-        }
-    }
-    if (errorText.empty()) {
-        textChange = false;
-    } else {
-        LOGI("FilterWithAscii Error text size %{public}zu", UtfUtils::Str16DebugToStr8(errorText).size());
-    }
-    return textChange;
-}
-
-bool ContentController::FilterWithDecimal(std::u16string& result)
-{
-    auto valueToUpdate = result;
-    bool first = true;
-    std::replace_if(
-        result.begin(), result.end(),
-        [&first](const char16_t c) {
-            if (c == u'.' && !first) {
-                return true;
-            }
-            if (c == u'.') {
-                first = false;
-            }
-            return false;
-        },
-        u' ');
-    result.erase(std::remove(result.begin(), result.end(), u' '), result.end());
-    return result != valueToUpdate;
-}
-
 bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16string& result)
 {
     auto pattern = pattern_.Upgrade();
@@ -399,15 +240,15 @@ bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16st
     if (host) {
         ACE_UINODE_TRACE(host);
     }
-    
-    auto errorValue = FilterWithRegex(filter, result);
-    if (!errorValue.empty()) {
+    auto onError = [weak = WeakClaim(RawPtr(host))](const std::u16string& error) -> bool {
+        auto host = weak.Upgrade();
         CHECK_NULL_RETURN(host, false);
         auto eventHub = host->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
-        eventHub->FireOnInputFilterError(errorValue);
-    }
-    return !errorValue.empty();
+        eventHub->FireOnInputFilterError(error);
+        return true;
+    };
+    return TextInputFilter::FilterWithEvent(filter, result, onError);
 }
 
 void ContentController::erase(int32_t startIndex, int32_t length)

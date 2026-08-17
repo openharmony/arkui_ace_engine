@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/password_icon_host.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -78,7 +79,7 @@ protected:
     RectF areaRect_;
 };
 
-class PasswordResponseArea : public TextInputResponseArea {
+class ACE_FORCE_EXPORT PasswordResponseArea : public TextInputResponseArea {
     DECLARE_ACE_TYPE(PasswordResponseArea, TextInputResponseArea);
 
 public:
@@ -93,6 +94,12 @@ public:
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
 
     void AddEvent(const RefPtr<FrameNode>& node);
+
+    void InitHoverEvent();
+    void InitTouchEvent();
+
+    void HandleIconHover(bool isHover, const HoverInfo& info);
+    void HandleIconTouch(bool isTouched);
 
     void SetObscured(bool isObscured)
     {
@@ -126,7 +133,7 @@ public:
 private:
     void LoadImageSourceInfo();
     void AddImageEventOnError();
-    void ChangeObscuredState();
+    ACE_FORCE_EXPORT void ChangeObscuredState();
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     void UpdateSymbolSource();

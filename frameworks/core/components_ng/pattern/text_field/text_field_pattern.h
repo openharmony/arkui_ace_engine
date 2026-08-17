@@ -42,6 +42,7 @@
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/password_icon_host.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -317,9 +318,9 @@ class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public Magnifier,
                          public TextGestureSelector,
                          public LayoutInfoInterface,
-                         public ICounterHost {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
-        Magnifier, TextGestureSelector);
+                         public ICounterHost, public IPasswordIconHost {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient,
+        TextBase, Magnifier, TextGestureSelector, IPasswordIconHost);
 
 public:
     TextFieldPattern();
@@ -873,6 +874,32 @@ public:
     static std::u16string CreateObscuredText(int32_t len);
     static std::u16string CreateDisplayText(
         const std::u16string& content, int32_t nakedCharPosition, bool needObscureText, bool showPasswordDirectly);
+
+    // IPasswordIconHost interface implementations
+    RefPtr<FrameNode> GetHost() const override
+    {
+        return Pattern::GetHost();
+    }
+    TextDirection GetLayoutDirection() override
+    {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+        return layoutProperty->GetNonAutoLayoutDirection();
+    }
+    bool CheckLayoutProperty() override
+    {
+        return GetLayoutProperty<TextFieldLayoutProperty>() != nullptr;
+    }
+    ImageSourceInfo GetShowPasswordSourceInfo(const ImageSourceInfo& defaultInfo) override
+    {
+        return GetShowPasswordSourceInfoImpl(GetLayoutProperty<TextFieldLayoutProperty>(), defaultInfo);
+    }
+    ImageSourceInfo GetHidePasswordSourceInfo(const ImageSourceInfo& defaultInfo) override
+    {
+        return GetHidePasswordSourceInfoImpl(GetLayoutProperty<TextFieldLayoutProperty>(), defaultInfo);
+    }
+    bool IsDisabled() override;
+
     bool IsTextArea() const override;
 
     const RefPtr<TouchEventImpl>& GetTouchListener()
@@ -932,7 +959,6 @@ public:
     void ProcessNumberOfLines();
     void OnCursorMoveDone(
         TextAffinity textAffinity = TextAffinity::UPSTREAM, std::optional<Offset> offset = std::nullopt);
-    bool IsDisabled();
     bool AllowCopy();
 
     bool GetIsMousePressed() const
@@ -1183,6 +1209,9 @@ public:
     void GetAIWriteInfo(AIWriteInfo& info);
     bool IsShowAIWrite();
     void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    // Inputs for the shared TextInput menu per-field helpers in BaseTextSelectOverlay (T030).
+    bool IsSelectionMenuHidden() const;
+    bool IsCameraInputSupported() const;
     void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
@@ -1425,7 +1454,7 @@ public:
     virtual RefPtr<FocusHub> GetFocusHub() const;
     void UpdateCaretInfoToController(bool forceUpdate = false);
     void UpdateCaretInfoToControllerMultiThread();
-    void OnObscuredChanged(bool isObscured);
+    void OnObscuredChanged(bool isObscured) override;
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {
         return responseArea_;
@@ -1456,7 +1485,7 @@ public:
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const override;
     std::optional<bool> IsShowPasswordText() const;
-    bool IsInPasswordMode() const;
+    bool IsInPasswordMode() const override;
     bool IsOneTimeCodeType() const;
     bool IsShowCancelButtonMode() const;
     bool IsShowVoiceButtonMode() const;
@@ -1582,7 +1611,16 @@ public:
     void UpdateBorderColor(const BorderColorProperty& color) override;
     // ========== ICounterHost interface implementations end ==========
     void ResetContextAttr();
-    void RestoreDefaultMouseState();
+    void RestoreDefaultMouseState() override;
+    bool SetPasswordIconHoverColor(const std::vector<RoundRect>& rects, uint32_t color) override;
+    bool ClearPasswordIconHoverColor() override;
+    bool GetPasswordIconHoverColor(uint32_t& color) override;
+    bool GetPasswordIconPressColor(uint32_t& color) override;
+    void SetResponseButtonTouched(bool isTouched) override
+    {
+        cancelButtonTouched_ = isTouched;
+    }
+    void OnHover(bool isHover, const HoverInfo& info) override;
 
     inline void RegisterWindowSizeCallback()
     {
@@ -1777,7 +1815,7 @@ public:
         isPasswordSymbol_ = isPasswordSymbol;
     }
 
-    bool IsShowPasswordSymbol() const
+    bool IsShowPasswordSymbol() const override
     {
         return isPasswordSymbol_ &&
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
@@ -2005,7 +2043,7 @@ public:
     virtual void FireSubmitAction(TextInputAction action, bool forceCloseKeyboard);
 
     // tv function
-    bool IsTV() const
+    bool IsTV() const override
     {
         auto theme = GetTheme();
         CHECK_NULL_RETURN(theme, false);
@@ -2170,7 +2208,6 @@ private:
     void InitCancelButtonMouseEvent();
     void InitPasswordButtonMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
-    void OnHover(bool isHover, const HoverInfo& info);
     void UpdateHoverStyle(bool isHover);
     void UpdatePressStyle(bool isPressed);
     void PlayAnimationHoverAndPress(const Color& color);

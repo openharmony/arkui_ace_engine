@@ -431,6 +431,31 @@ protected:
     EdgeF ConvertWindowToScreenDomain(EdgeF edge);
     std::string GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom);
     void FlushAfterOverlayShowTask();
+    // Per-field helpers for the TextInput selection-menu spec. Each takes the conditions it needs
+    // as parameters (gathered by the caller from its own pattern), so TextFieldSelectOverlay and
+    // RichEditorSelectOverlay (plain-text-input mode) reuse the exact same per-field logic instead
+    // of duplicating it. The caller assembles them in OnUpdateMenuInfo. See T030.
+    static bool IsDirtyCopyAllItem(SelectOverlayDirtyFlag dirtyFlag)
+    {
+        return (dirtyFlag & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM;
+    }
+    ACE_FORCE_EXPORT void FillMenuHasOnPrepareMenuCallback(SelectMenuInfo& menuInfo);
+    ACE_FORCE_EXPORT void FillMenuShowCopyAll(SelectMenuInfo& menuInfo, bool hasText, bool isSelectAll);
+    ACE_FORCE_EXPORT void FillMenuShowCameraInput(SelectMenuInfo& menuInfo, bool isSelected, bool isCameraSupported,
+        bool isInPasswordMode, bool hasCustomKeyboard);
+    ACE_FORCE_EXPORT void FillMenuVisibility(SelectMenuInfo& menuInfo, bool hasText, bool showCameraInput,
+        bool isShowAutoFill, bool isSelectionMenuHidden, SelectOverlayDirtyFlag dirtyFlag);
+    ACE_FORCE_EXPORT void FillMenuShowPaste(SelectMenuInfo& menuInfo);
+    ACE_FORCE_EXPORT void FillMenuMenuType(SelectMenuInfo& menuInfo);
+    ACE_FORCE_EXPORT void FillMenuShowCopyAndCut(SelectMenuInfo& menuInfo, bool hasText, bool allowCopy,
+        bool isSelected);
+    ACE_FORCE_EXPORT void FillMenuShowAutoFill(SelectMenuInfo& menuInfo, bool isShowAutoFill);
+    ACE_FORCE_EXPORT void FillMenuShowTranslate(SelectMenuInfo& menuInfo, bool showCopy, bool isShowTranslate);
+    ACE_FORCE_EXPORT void FillMenuShowSearch(SelectMenuInfo& menuInfo, bool showCopy, bool isShowSearch);
+    ACE_FORCE_EXPORT void FillMenuShowShare(SelectMenuInfo& menuInfo, bool showCopy);
+    ACE_FORCE_EXPORT void FillMenuShowAIWrite(SelectMenuInfo& menuInfo, bool isShowAIWrite);
+    ACE_FORCE_EXPORT void FillMenuAIMenuOptionType(SelectMenuInfo& menuInfo, bool isInPasswordMode,
+        bool isShowAIMenuOption, bool hasAiItem, TextDataDetectType aiType);
     bool isAutoFillPaste = false;
 
 private:

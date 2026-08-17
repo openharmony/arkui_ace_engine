@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
+#include "core/common/ime/text_input_filter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -100,11 +101,6 @@ private:
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
     bool FilterWithEvent(const std::u16string& filter, std::u16string& result);
     std::u16string PreprocessString(int32_t startIndex, int32_t endIndex, const std::u16string& value);
-    static std::u16string RemoveErrorTextFromValue(const std::u16string& value, const std::u16string& errorText);
-    static std::u16string FilterWithRegex(const std::u16string& filter, std::u16string& result);
-    static bool FilterWithEmail(std::u16string& result);
-    static bool FilterWithAscii(std::u16string& result);
-    static bool FilterWithDecimal(std::u16string& result);
 
     std::u16string insertValue_;
     std::u16string content_;

@@ -1952,6 +1952,7 @@
       "OHOS::Ace::NG::ParagraphUtil::GetParagraphStyle(OHOS::Ace::TextStyle const&)";
       "OHOS::Ace::NG::ParagraphUtil::GetTextOwnDirection(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, OHOS::Ace::TextDirection, OHOS::Ace::TextDirection)";
       "OHOS::Ace::NG::ParseTemplateArgs(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, double, double, int)";
+      "OHOS::Ace::NG::PasswordResponseArea::ChangeObscuredState()";
       "OHOS::Ace::NG::PasteButtonModelNG::CreateNode(int, int, int, bool, unsigned int)";
       "OHOS::Ace::NG::PasteButtonModelNG::GetInstance()";
       "OHOS::Ace::NG::Pattern::AddResCache(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -4256,6 +4257,7 @@
       "OHOS::Ace::NG::AppBarView::RegistAppBarNodeBuilder(std::__h::function<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> (OHOS::Ace::NG::AppBarView*, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)>)";
       "OHOS::Ace::NG::AppBarView::SetRectChangeCallback(std::__h::function<void (OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::RectT<float> const&)>&&)";
       "OHOS::Ace::NG::AtomicServicePattern::RegisterBeforeCreateLayoutBuilder(std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::optional<bool>)>)";
+      OHOS::Ace::NG::BaseTextSelectOverlay::FillMenu*;
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateMenuFromThemeChange(int)";
       "OHOS::Ace::NG::BoxLayoutAlgorithm::IsAsyncLoadAvailable(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::BuildMenuBarRow(OHOS::Ace::NG::AppBarView*, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
@@ -5251,6 +5253,7 @@
       construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Animator;
       construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Container;
       construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Framework::MediaQueryInfo;
+      construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::NG::PasswordResponseArea;
       construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Platform::AceContainer;
       construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Scheduler;
       construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::ThemeConstants;
@@ -5266,6 +5269,7 @@
       construction?vtable?for?OHOS::Ace::NG::LayoutProperty-in-OHOS::Ace::NG::LinearLayoutProperty;
       construction?vtable?for?OHOS::Ace::NG::LayoutProperty-in-OHOS::Ace::NG::MovingPhotoLayoutProperty;
       construction?vtable?for?OHOS::Ace::NG::LayoutWrapper-in-OHOS::Ace::NG::MovingPhotoNode;
+      construction?vtable?for?OHOS::Ace::NG::TextInputResponseArea-in-OHOS::Ace::NG::PasswordResponseArea;
       construction?vtable?for?OHOS::Ace::NG::LazyLayoutPattern-in-OHOS::Ace::NG::LazyDynamicLayoutPattern;
       construction?vtable?for?OHOS::Ace::NG::LazyLayoutPattern-in-OHOS::Ace::NG::LazyGridLayoutPattern;
       construction?vtable?for?OHOS::Ace::NG::UINode-in-OHOS::Ace::NG::MovingPhotoNode;
@@ -5467,6 +5471,7 @@
       vtable?for?OHOS::Ace::NG::ParallelPagePattern;
       vtable?for?OHOS::Ace::NG::ParallelRecognizer;
       vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
+      vtable?for?OHOS::Ace::NG::PasswordResponseArea;
       vtable?for?OHOS::Ace::NG::Pattern;
       vtable?for?OHOS::Ace::NG::PinchGesture;
       vtable?for?OHOS::Ace::NG::ProgressPattern;
@@ -5611,6 +5616,7 @@
       VTT?for?OHOS::Ace::NG::PanGesture;
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
       VTT?for?OHOS::Ace::NG::ParallelRecognizer;
+      VTT?for?OHOS::Ace::NG::PasswordResponseArea;
       VTT?for?OHOS::Ace::NG::Pattern;
       VTT?for?OHOS::Ace::NG::PinchGesture;
       VTT?for?OHOS::Ace::NG::PlaceholderSpanItem;

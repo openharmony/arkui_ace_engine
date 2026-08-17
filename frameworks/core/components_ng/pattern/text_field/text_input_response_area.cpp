@@ -23,8 +23,10 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/password_icon_host.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -50,8 +52,8 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t in
     CHECK_NULL_VOID(frameNode);
     auto children = frameNode->GetChildren();
     CHECK_NULL_VOID(!children.empty());
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
+    auto hostPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(hostPattern);
     auto textInputGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textInputGeometryNode);
     auto contentRect = textInputGeometryNode->GetContentRect();
@@ -73,9 +75,9 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t in
 OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
     auto offset = Alignment::GetAlignPosition(parentSize, childSize, Alignment::CENTER);
-    auto textFieldPattern = hostPattern_.Upgrade();
-    CHECK_NULL_RETURN(textFieldPattern, offset);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, offset);
+    auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, offset);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
@@ -90,9 +92,9 @@ SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     SizeF size(0, 0);
     CHECK_NULL_RETURN(layoutWrapper, size);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textfieldLayoutProperty, size);
-    auto childLayoutConstraint = textfieldLayoutProperty->CreateChildConstraint();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, size);
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     CHECK_NULL_RETURN(childWrapper, size);
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
     childWrapper->Measure(childLayoutConstraint);
@@ -138,9 +140,9 @@ RefPtr<FrameNode> TextInputResponseArea::CreateResponseAreaImageNode(const Image
 void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
     float hoverRectHeight, bool isFocus)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    if (textFieldPattern->IsTV()) {
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    if (passwordHost->IsTV()) {
         SetHoverRectForTV(stackNode, rect, iconSize, hoverRectHeight, isFocus);
         return;
     }
@@ -165,8 +167,8 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
 void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
     float hoverRectHeight, bool isFocus)
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
-    CHECK_NULL_VOID(textFieldPattern);
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
     CHECK_NULL_VOID(stackNode);
     auto stackGeometryNode = stackNode->GetGeometryNode();
     CHECK_NULL_VOID(stackGeometryNode);
@@ -176,7 +178,7 @@ void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, Rect
     auto imageGeometryNode = imageFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(imageGeometryNode);
     auto imageRect = imageGeometryNode->GetFrameRect();
-    auto host = textFieldPattern->GetHost();
+    auto host = passwordHost->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -242,8 +244,8 @@ const RefPtr<FrameNode> PasswordResponseArea::GetFrameNode()
 
 RefPtr<FrameNode> PasswordResponseArea::CreateNode()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, nullptr);
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(passwordHost, nullptr);
     auto iconSize = GetIconSize();
     auto rightOffset = GetIconRightOffset();
     auto hotZoneSize = iconSize + rightOffset;
@@ -254,9 +256,8 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+    CHECK_NULL_RETURN(passwordHost->CheckLayoutProperty(), nullptr);
+    stackLayoutProperty->UpdateAlignment(GetStackAlignment(passwordHost->GetLayoutDirection()));
     AddEvent(stackNode);
     stackNode->MarkModifyDone();
 
@@ -372,19 +373,96 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         info.SetStopPropagation(true);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto textfield = DynamicCast<TextFieldPattern>(pattern);
-        CHECK_NULL_VOID(textfield);
-        textfield->RestoreDefaultMouseState();
+        auto passwordHost = DynamicCast<IPasswordIconHost>(pattern);
+        CHECK_NULL_VOID(passwordHost);
+        passwordHost->RestoreDefaultMouseState();
     };
     auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
         info.SetStopPropagation(true);
     };
-
     auto inputHub = node->GetOrCreateInputEventHub();
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
+}
+
+void PasswordResponseArea::InitHoverEvent()
+{
+    auto stackNode = GetFrameNode();
+    CHECK_NULL_VOID(stackNode);
+    auto inputHub = stackNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, const HoverInfo& info) {
+        auto area = weak.Upgrade();
+        CHECK_NULL_VOID(area);
+        area->HandleIconHover(isHover, info);
+    };
+    inputHub->AddOnHoverEvent(MakeRefPtr<InputEvent>(std::move(hoverTask)));
+}
+
+void PasswordResponseArea::InitTouchEvent()
+{
+    auto stackNode = GetFrameNode();
+    CHECK_NULL_VOID(stackNode);
+    auto gesture = stackNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+        auto area = weak.Upgrade();
+        CHECK_NULL_VOID(area);
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            area->HandleIconTouch(true);
+        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            area->HandleIconTouch(false);
+        }
+    };
+    gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
+}
+
+void PasswordResponseArea::HandleIconHover(bool isHover, const HoverInfo& info)
+{
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    passwordHost->OnHover(isHover, info);
+    if (isHover) {
+        RoundRect mouseRect;
+        CreateIconRect(mouseRect, false);
+        float cornerRadius = mouseRect.GetRect().Width() / 2;
+        mouseRect.SetCornerRadius(cornerRadius);
+        uint32_t hoverColor = 0;
+        if (passwordHost->GetPasswordIconHoverColor(hoverColor)) {
+            std::vector<RoundRect> roundRectVector;
+            roundRectVector.push_back(mouseRect);
+            passwordHost->SetPasswordIconHoverColor(roundRectVector, hoverColor);
+        }
+    } else {
+        passwordHost->ClearPasswordIconHoverColor();
+    }
+}
+
+void PasswordResponseArea::HandleIconTouch(bool isTouched)
+{
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    if (isTouched) {
+        RoundRect mouseRect;
+        CreateIconRect(mouseRect, false);
+        float cornerRadius = mouseRect.GetRect().Width() / 2;
+        mouseRect.SetCornerRadius(cornerRadius);
+        uint32_t pressColor = 0;
+        if (passwordHost->GetPasswordIconPressColor(pressColor)) {
+            std::vector<RoundRect> roundRectVector;
+            roundRectVector.push_back(mouseRect);
+            if (passwordHost->SetPasswordIconHoverColor(roundRectVector, pressColor)) {
+                passwordHost->SetResponseButtonTouched(true);
+            }
+        }
+    } else {
+        if (passwordHost->ClearPasswordIconHoverColor()) {
+            passwordHost->SetResponseButtonTouched(false);
+        }
+    }
 }
 
 void PasswordResponseArea::Refresh()
@@ -395,12 +473,11 @@ void PasswordResponseArea::Refresh()
         return;
     }
 
-    auto textFieldPattern = hostPattern_.Upgrade();
-    if (textFieldPattern && stackNode_) {
-        auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    if (passwordHost && stackNode_) {
         auto stackLayoutProperty = stackNode_->GetLayoutProperty<LayoutProperty>();
-        if (stackLayoutProperty && layoutProperty) {
-            stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+        if (stackLayoutProperty && passwordHost->CheckLayoutProperty()) {
+            stackLayoutProperty->UpdateAlignment(GetStackAlignment(passwordHost->GetLayoutDirection()));
         }
         if (stackLayoutProperty) {
             auto iconSize = GetIconSize();
@@ -497,14 +574,14 @@ void PasswordResponseArea::UpdatePasswordIconColor(const Color& color)
 
 void PasswordResponseArea::ChangeObscuredState()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
     if (IsSymbolIcon() && SystemProperties::IsNeedSymbol()) {
         UpdateSymbolSource();
     } else {
         UpdateImageSource();
     }
-    textFieldPattern->OnObscuredChanged(isObscured_);
+    passwordHost->OnObscuredChanged(isObscured_);
 }
 
 SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
@@ -565,14 +642,14 @@ float PasswordResponseArea::GetIconRightOffset()
 
 void PasswordResponseArea::LoadImageSourceInfo()
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    showIcon_ = layoutProperty->GetShowPasswordSourceInfoValue(GetDefaultSourceInfo(false));
-    hideIcon_ = layoutProperty->GetHidePasswordSourceInfoValue(GetDefaultSourceInfo(true));
-    auto tmpHost = textFieldPattern->GetHost();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    auto tmpHost = passwordHost->GetHost();
     CHECK_NULL_VOID(tmpHost);
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    showIcon_ = passwordHost->GetShowPasswordSourceInfo(GetDefaultSourceInfo(false));
+    hideIcon_ = passwordHost->GetHidePasswordSourceInfo(GetDefaultSourceInfo(true));
     auto pipeline = tmpHost->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
@@ -644,9 +721,9 @@ void PasswordResponseArea::UpdateImageSource()
 
 void PasswordResponseArea::UpdateSymbolSource()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    auto host = passwordHost->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -674,9 +751,9 @@ void PasswordResponseArea::UpdateSymbolSource()
 
 void PasswordResponseArea::UpdateSymbolColor()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    auto host = passwordHost->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -688,10 +765,10 @@ void PasswordResponseArea::UpdateSymbolColor()
     CHECK_NULL_VOID(symbolNode);
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
 
     Color color = textFieldTheme->GetSymbolColor();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIsDisabledValue(false)) {
         color = textFieldTheme->GetTextColorDisable();
     }
@@ -721,9 +798,9 @@ void PasswordResponseArea::InitSymbolEffectOptions()
 
 bool PasswordResponseArea::IsShowSymbol()
 {
-    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsShowPasswordSymbol();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(passwordHost, false);
+    return passwordHost->IsShowPasswordSymbol();
 }
 
 bool PasswordResponseArea::IsSymbolIcon()
@@ -735,9 +812,9 @@ bool PasswordResponseArea::IsSymbolIcon()
 
 bool PasswordResponseArea::IsShowPasswordIcon()
 {
-    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsShowPasswordIcon();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(passwordHost, false);
+    return passwordHost->IsShowPasswordIcon();
 }
 
 void PasswordResponseArea::OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme)
