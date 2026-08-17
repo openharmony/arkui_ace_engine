@@ -36,7 +36,9 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/ime/text_input_filter.h"
 #include "core/common/ime/text_input_formatter.h"
+#include "core/common/ime/text_input_obscure_utils.h"
 #ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #endif
@@ -101,14 +103,11 @@ constexpr double STIFFNESS = 428.0;
 constexpr double DAMPING = 10.0;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
-constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char SEARCH_FIELD_ETS_TAG[] = "SearchField";
 constexpr char SELECT_ETS_TAG[] = "Select";
 constexpr char TEXTAREA_ETS_TAG[] = "TextArea";
 constexpr char TEXTINPUT_ETS_TAG[] = "TextInput";
-constexpr char16_t OBSCURING_CHARACTER = u'•';
-constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 constexpr std::string_view NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(std::string(NEWLINE));
 constexpr std::string_view INSPECTOR_PREFIX = "__SearchField__";
@@ -294,19 +293,6 @@ static std::unordered_map<FocuseIndex, FocuseIndex> focusBackwardMap_ = {
     { FocuseIndex::CANCEL, FocuseIndex::TEXT }
 };
 
-constexpr std::u16string_view OTP_PLACEHOLDER_KEYWORD_CN = u"验证码";
-constexpr std::string_view OTP_PLACEHOLDER_KEYWORD_EN = "verification code";
-
-bool IsVerificationCodePlaceholder(const std::u16string& placeholder)
-{
-    if (placeholder.find(OTP_PLACEHOLDER_KEYWORD_CN) != std::u16string::npos) {
-        return true;
-    }
-    auto placeholderLower = UtfUtils::Str16DebugToStr8(placeholder);
-    std::transform(placeholderLower.begin(), placeholderLower.end(), placeholderLower.begin(),
-        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return placeholderLower.find(OTP_PLACEHOLDER_KEYWORD_EN) != std::string::npos;
-}
 } // namespace
 
 void TextFieldPattern::OnAttachContext(PipelineContext* context)
@@ -462,29 +448,14 @@ void TextFieldPattern::CalcScrollRect(Rect& inlineScrollRect)
 
 std::u16string TextFieldPattern::CreateObscuredText(int32_t len)
 {
-    std::u16string obscuredText;
-    if (Localization::GetInstance()->GetLanguage() == "ar") { // ar is the abbreviation of Arabic.
-        obscuredText = std::u16string(len, OBSCURING_CHARACTER_FOR_AR);
-    } else {
-        obscuredText = std::u16string(len, OBSCURING_CHARACTER);
-    }
-    return obscuredText;
+    return TextInputObscureUtils::CreateObscuredText(len);
 }
 
 std::u16string TextFieldPattern::CreateDisplayText(
     const std::u16string& content, int32_t nakedCharPosition, bool needObscureText, bool showPasswordDirectly)
 {
-    if (!content.empty() && needObscureText) {
-        auto text =
-            TextFieldPattern::CreateObscuredText(static_cast<int32_t>(content.length()));
-        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())) {
-            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !showPasswordDirectly) {
-                text[nakedCharPosition] = content[nakedCharPosition];
-            }
-        }
-        return text;
-    }
-    return content;
+    return TextInputObscureUtils::CreateDisplayText(
+        content, nakedCharPosition, needObscureText, showPasswordDirectly);
 }
 
 float TextFieldPattern::GetTextOrPlaceHolderFontSize()
@@ -1635,7 +1606,7 @@ void TextFieldPattern::CheckAndUpdateInputTypeForOTP()
         return;
     }
     auto placeholder = layoutProperty->GetPlaceholderValue(u"");
-    if (placeholder.empty() || !IsVerificationCodePlaceholder(placeholder)) {
+    if (placeholder.empty() || !TextInputFilter::IsVerificationCodePlaceholder(placeholder)) {
         return;
     }
     layoutProperty->UpdateTypeChanged(true);
@@ -6661,16 +6632,16 @@ void TextFieldPattern::UpdateObscure(const std::u16string& insertValue, bool has
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
+        auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
         if (insertValue.length() == 1 &&
-            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD ||
-                std::isdigit(insertValue[0])) &&
+            (inputType != TextInputType::NUMBER_PASSWORD || std::isdigit(insertValue[0])) &&
             hasInsertValue) {
             auto content = contentController_->GetTextUtf16Value();
-            auto insertIndex = selectController_->GetCaretIndex() - 1;
-            insertIndex = std::clamp(insertIndex, 0, static_cast<int32_t>(content.length()));
-            auto strBeforeCaret = content.empty() ? u"" : content.substr(insertIndex, 1);
-            obscureTickCountDown_ = strBeforeCaret == insertValue ? OBSCURE_SHOW_TICKS : 0;
-            nakedCharPosition_ = strBeforeCaret == insertValue ? insertIndex : -1;
+            auto result = TextInputObscureUtils::UpdateObscureState(
+                inputType, insertValue, hasInsertValue, content,
+                selectController_->GetCaretIndex());
+            obscureTickCountDown_ = result.tickCountDown;
+            nakedCharPosition_ = result.nakedCharPosition;
         } else {
             obscureTickCountDown_ = 0;
             nakedCharPosition_ = -1;
@@ -8486,16 +8457,14 @@ void TextFieldPattern::HandleCloseKeyboard(bool forceClose)
 
 int32_t TextFieldPattern::GetNakedCharPosition() const
 {
-    if (IsTextArea() || !IsInPasswordMode() || obscureTickCountDown_ <= 0 || !GetTextObscured()) {
+    if (!TextInputObscureUtils::ShouldRevealNakedChar(
+            !IsTextArea(), IsInPasswordMode(), GetTextObscured(), obscureTickCountDown_)) {
         return -1;
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, -1);
     auto content = contentController_->GetTextUtf16Value();
-    if (content.empty()) {
-        return -1;
-    }
-    return nakedCharPosition_;
+    return content.empty() ? -1 : nakedCharPosition_;
 }
 
 std::string TextFieldPattern::TextInputTypeToString() const
@@ -9587,8 +9556,7 @@ bool TextFieldPattern::IsInPasswordMode() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-    return inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
-           inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
+    return IsPasswordInputType(inputType);
 }
 
 bool TextFieldPattern::IsOneTimeCodeType() const
@@ -9596,7 +9564,7 @@ bool TextFieldPattern::IsOneTimeCodeType() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-    return inputType == TextInputType::ONE_TIME_CODE || inputType == TextInputType::ONE_TIME_CODE_NUMBER;
+    return IsOneTimeCodeInputType(inputType);
 }
 
 bool TextFieldPattern::IsNormalInlineState() const
@@ -10671,8 +10639,7 @@ bool TextFieldPattern::IsShowPasswordIcon() const
     CHECK_NULL_RETURN(layoutProperty, false);
     auto textfieldTheme = GetTheme();
     CHECK_NULL_RETURN(textfieldTheme, false);
-    bool isShowPasswordIcon = textfieldTheme->IsShowPasswordIcon();
-    return layoutProperty->GetShowPasswordIconValue(isShowPasswordIcon) && IsInPasswordMode();
+    return IsShowPasswordIconImpl(layoutProperty, textfieldTheme->IsShowPasswordIcon()) && IsInPasswordMode();
 }
 
 std::optional<bool> TextFieldPattern::IsShowPasswordText() const
@@ -12296,8 +12263,9 @@ bool TextFieldPattern::IsShowAIWrite()
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::None ||
-        !IsUnspecifiedOrTextType()) {
+        !ShouldShowAIWriteForInputType(inputType)) {
         return false;
     }
 
@@ -12327,6 +12295,23 @@ bool TextFieldPattern::IsShowAIWrite()
     }
 
     return isAISupport;
+}
+
+bool TextFieldPattern::IsSelectionMenuHidden() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetSelectionMenuHiddenValue(false);
+}
+
+bool TextFieldPattern::IsCameraInputSupported() const
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    return inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
+#else
+    return false;
+#endif
 }
 
 void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
@@ -13346,41 +13331,8 @@ void TextFieldPattern::InitPasswordButtonMouseEvent()
     CHECK_NULL_VOID(responseArea_);
     auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_VOID(passwordResponseArea);
-    auto stackNode = passwordResponseArea->GetFrameNode();
-    CHECK_NULL_VOID(stackNode);
-    auto imageTouchHub = stackNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(imageTouchHub);
-    auto imageInputHub = stackNode->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this), responseAreaWeak =
-        WeakPtr<TextInputResponseArea>(responseArea_)](bool isHover, const HoverInfo& info) {
-            auto responseArea = responseAreaWeak.Upgrade();
-            CHECK_NULL_VOID(responseArea);
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->OnHover(isHover, info);
-                pattern->HandleButtonMouseEvent(responseArea, isHover);
-            }
-    };
-    imageHoverEvent_ = MakeRefPtr<InputEvent>(std::move(imageHoverTask));
-    imageInputHub->AddOnHoverEvent(imageHoverEvent_);
-
-    auto imageTouchTask = [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)]
-        (const TouchEventInfo& info) {
-            auto responseArea = responseAreaWeak.Upgrade();
-            CHECK_NULL_VOID(responseArea);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto touchType = info.GetTouches().front().GetTouchType();
-            if (touchType == TouchType::DOWN) {
-                pattern->HandleResponseButtonTouchDown(responseArea);
-            }
-            if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-                pattern->HandleResponseButtonTouchUp();
-            }
-    };
-    imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
-    imageTouchHub->AddTouchEvent(imageTouchEvent_);
+    passwordResponseArea->InitHoverEvent();
+    passwordResponseArea->InitTouchEvent();
 }
 
 void TextFieldPattern::HandleResponseButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea)
@@ -13435,6 +13387,36 @@ void TextFieldPattern::HandleButtonMouseEvent(const RefPtr<TextInputResponseArea
         textFieldOverlayModifier_->ClearHoverColorAndRects();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+bool TextFieldPattern::SetPasswordIconHoverColor(const std::vector<RoundRect>& rects, uint32_t color)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return SetPasswordIconHoverColorImpl(textFieldOverlayModifier_, rects, color, host, PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+bool TextFieldPattern::ClearPasswordIconHoverColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return ClearPasswordIconHoverColorImpl(textFieldOverlayModifier_, host, PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+bool TextFieldPattern::GetPasswordIconHoverColor(uint32_t& color)
+{
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    color = textFieldTheme->GetHoverColor().GetValue();
+    return true;
+}
+
+bool TextFieldPattern::GetPasswordIconPressColor(uint32_t& color)
+{
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    color = textFieldTheme->GetPressColor().GetValue();
+    return true;
 }
 
 double TextFieldPattern::GetPercentReferenceWidth() const
@@ -13704,8 +13686,7 @@ void TextFieldPattern::OnAccessibilityEventTextChange(const std::string& changeT
     event.nodeId = host->GetAccessibilityId();
     std::string finalText;
     if (IsInPasswordMode() && GetTextObscured()) {
-        char16_t obscuring =
-        Localization::GetInstance()->GetLanguage() == "ar" ? OBSCURING_CHARACTER_FOR_AR : OBSCURING_CHARACTER;
+        char16_t obscuring = TextInputObscureUtils::GetObscuringCharacter();
         finalText = UtfUtils::Str16DebugToStr8(std::u16string(changeString.length(), obscuring));
     } else {
         finalText = changeString;

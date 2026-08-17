@@ -685,7 +685,7 @@ HWTEST_F(TextFieldControllerTest, ContentController004, TestSize.Level1)
      */
     std::u16string text = u"3.1.4.";
     pattern_->contentController_->InsertValue(0, text);
-    EXPECT_TRUE(pattern_->contentController_->FilterWithDecimal(text));
+    EXPECT_TRUE(TextInputFilter::FilterWithDecimal(text));
     EXPECT_EQ(pattern_->GetTextValue(), "3.14");
 }
 
@@ -712,7 +712,7 @@ HWTEST_F(TextFieldControllerTest, ContentController005, TestSize.Level1)
      */
     std::u16string text = u"3.14";
     pattern_->contentController_->InsertValue(0, text);
-    EXPECT_FALSE(pattern_->contentController_->FilterWithDecimal(text));
+    EXPECT_FALSE(TextInputFilter::FilterWithDecimal(text));
     EXPECT_EQ(pattern_->GetTextValue(), "3.14");
 }
 
