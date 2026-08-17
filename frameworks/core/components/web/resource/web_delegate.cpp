@@ -7198,6 +7198,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
     const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
 {
     CHECK_NULL_VOID(taskExecutor_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNew start");
     taskExecutor_->PostSyncTask(
         [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
             auto delegate = weak.Upgrade();
@@ -7212,10 +7213,12 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
             CHECK_NULL_VOID(webEventHub);
             auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
             if (propOnWindowNewExtEvent) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNew ExtEvent-ng not null");
                 return;
             }
             auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
             CHECK_NULL_VOID(propOnWindowNewEvent);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNew Event-ng on");
             propOnWindowNewEvent(param);
             return;
 #else
@@ -7226,18 +7229,22 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
                 CHECK_NULL_VOID(webEventHub);
                 auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
                 if (propOnWindowNewExtEvent) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNew ExtEvent not null");
                     return;
                 }
                 auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
                 CHECK_NULL_VOID(propOnWindowNewEvent);
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNew Event on");
                 propOnWindowNewEvent(param);
                 return;
             }
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
             if (webCom->HasOnWindowNewExtEvent()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNewEvent has windownewext");
                 return;
             }
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNewEvent webCom");
             webCom->OnWindowNewEvent(param);
 #endif
         },
@@ -7247,10 +7254,12 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
 void WebDelegate::OnWindowNewExt(std::shared_ptr<OHOS::NWeb::NWebWindowNewEventInfo> dataInfo)
 {
     if (!dataInfo) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNewExt dataInfo is null");
         return;
     }
 
     CHECK_NULL_VOID(taskExecutor_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNewExt start");
     taskExecutor_->PostSyncTask(
         [weak = WeakClaim(this), dataInfo]() {
             auto delegate = weak.Upgrade();
@@ -7270,6 +7279,7 @@ void WebDelegate::OnWindowNewExt(std::shared_ptr<OHOS::NWeb::NWebWindowNewEventI
             CHECK_NULL_VOID(webEventHub);
             auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
             CHECK_NULL_VOID(propOnWindowNewExtEvent);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNewExtEvent-ng on");
             propOnWindowNewExtEvent(param);
             return;
 #else
@@ -7280,11 +7290,13 @@ void WebDelegate::OnWindowNewExt(std::shared_ptr<OHOS::NWeb::NWebWindowNewEventI
                 CHECK_NULL_VOID(webEventHub);
                 auto propOnWindowNewExtEvent = webEventHub->GetOnWindowNewExtEvent();
                 CHECK_NULL_VOID(propOnWindowNewExtEvent);
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNewExtEvent on");
                 propOnWindowNewExtEvent(param);
                 return;
             }
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnWindowNewExtEvent webCom");
             webCom->OnWindowNewExtEvent(param);
 #endif
         },
