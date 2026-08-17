@@ -2835,7 +2835,7 @@ void FormPattern::InitUpdateFormDoneCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->FireOnUpdateFormDone(formId);
-        }, "ArkUIFormFireUpdateDoneEvent");
+            }, "ArkUIFormFireUpdateDoneEvent");
     });
 }
 
