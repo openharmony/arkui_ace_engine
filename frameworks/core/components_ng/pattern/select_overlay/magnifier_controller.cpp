@@ -348,13 +348,11 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     }
     auto magnifierPaintOffsetY = std::clamp(magnifierY - offsetY, 0.f, rootFrameSize.Height() - menuHeight);
     magnifierPaintOffset.SetY(magnifierPaintOffsetY);
-    magnifierOffset.y = offsetY;
-    zoomOffset.y = (globalOffset_.GetY() - (magnifierY + halfMenuHeight)) * windowScale;
-    float preScaledMagnifierHeight = static_cast<float>(MAGNIFIER_HEIGHT.ConvertToPx() / MAGNIFIER_FACTOR);
-    float halfMagnifierInnerPaddingY = static_cast<float>(MAGNIFIER_SHADOWSIZE.ConvertToPx());
-    float maxZoomOffsetY = (menuHeight - preScaledMagnifierHeight) * windowScale / 2 +
-                          halfMagnifierInnerPaddingY / MAGNIFIER_FACTOR;
-    zoomOffset.y = std::clamp(zoomOffset.y, -maxZoomOffsetY, maxZoomOffsetY);
+    float desiredOffsetY = (globalOffset_.GetY() - halfMenuHeight) - magnifierPaintOffsetY;
+    float maxSnapshotOffsetY = rootFrameSize.Height() - magnifierPaintOffsetY - menuHeight;
+    magnifierOffset.y = std::clamp(desiredOffsetY, 0.f, maxSnapshotOffsetY);
+    zoomOffset.y = (globalOffset_.GetY() - (magnifierPaintOffsetY + magnifierOffset.y + halfMenuHeight)) *
+                  windowScale * MAGNIFIER_FACTOR;
     return true;
 }
 
