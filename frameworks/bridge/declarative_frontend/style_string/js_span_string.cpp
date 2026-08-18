@@ -252,6 +252,23 @@ void JSSpanString::GetSubSpanString(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSClass<JSSpanString>::NewInstance();
     auto jsSpanString = Referenced::Claim(obj->Unwrap<JSSpanString>());
     jsSpanString->SetController(spanString);
+    const auto& spansMap = spanString->GetSpansMap();
+    auto customSpanIter = spansMap.find(SpanType::CustomSpan);
+    if (customSpanIter != spansMap.end()) {
+        for (const auto& spanBase : customSpanIter->second) {
+            auto jsCustomSpan = AceType::DynamicCast<JSCustomSpan>(spanBase);
+            if (!jsCustomSpan) {
+                continue;
+            }
+            auto jsCustomSpanObj = jsCustomSpan->GetJsCustomSpanObject();
+            if (jsCustomSpanObj.IsEmpty()) {
+                continue;
+            }
+            auto newIndex = customSpanStoreIndex_.fetch_add(1);
+            std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
+            obj->SetPropertyObject(key.c_str(), jsCustomSpanObj);
+        }
+    }
     info.SetReturnValue(obj);
 }
 
