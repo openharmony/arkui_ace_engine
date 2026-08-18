@@ -1243,6 +1243,9 @@ public:
     static void ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode);
     static void SetJSFrameNodeOnScrollVisibleContentChange(
         FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void ApplyImmersiveMaterialStyle(const RefPtr<RenderContext>& renderContext,
+ 	    const ImmersiveMaterialConfig& config, const std::optional<ImmersiveMaterialConfig>& preConfig);
+    static void UpdateImmersiveMaterialOnTransparencyChange(const RefPtr<FrameNode>& frameNode);
     static void ClearJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode);
     static void SetJSFrameNodeOnScrollWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& onWillScroll);
     static void ClearJSFrameNodeOnScrollWillScroll(FrameNode* frameNode);

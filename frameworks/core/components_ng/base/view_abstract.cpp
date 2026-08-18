@@ -7022,17 +7022,39 @@ void ViewAbstract::RegisterTransparencyListener(const RefPtr<FrameNode>& frameNo
         auto callbackId = TransparencyUtils::RegisterTransparencyListener(weakNode, [weak = weakNode](int32_t _) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
-            auto renderContext = frameNode->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            auto material = renderContext->GetSystemMaterial();
-            if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
-                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "material has changed, no need transparency callback");
-                return;
-            }
-            ViewAbstract::SetImmersiveOptions(frameNode, material->GetImmersiveOptions());
+            ViewAbstract::UpdateImmersiveMaterialOnTransparencyChange(frameNode);
         });
         renderContext->SetTransparencyCallbackId(callbackId);
     }
+}
+
+void ViewAbstract::UpdateImmersiveMaterialOnTransparencyChange(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "material has changed, no need transparency callback");
+        return;
+    }
+    auto optionsPtr = material->GetImmersiveOptions();
+    CHECK_NULL_VOID(optionsPtr);
+    auto config = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
+    if (!config) {
+        return;
+    }
+    if (config->key.level == UiMaterialLevel::SMOOTH) {
+        return;
+    }
+    // Mid/high level materials only refresh the material effect and cache the new config into renderContext.
+    // Other properties such as background color must be kept untouched.
+    auto preConfig = renderContext->GetImmersiveMaterialConfig();
+    if (preConfig == config) {
+        return;
+    }
+    ApplyImmersiveMaterialStyle(renderContext, *config, preConfig);
+    renderContext->SetImmersiveMaterialConfig(config);
 }
 
 void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const std::optional<ImmersiveMaterialConfig>& config)
@@ -7082,31 +7104,8 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
     if (preConfig == config) {
         return;
     }
-    int32_t style = static_cast<int32_t>(config->key.style);
-    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
-        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
-        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECFilter(*config);
-        renderContext->SetBackgroundNGFilterEC(materialFilter);
-        if (config->colorInvert) {
-            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::CONTRAST, 500);
-        } else if (preConfig && preConfig->colorInvert) {
-            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 500);
-        }
-    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
-               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
-        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(*config);
-        auto materialFilterOverlay = UiMaterialFilterCreator::ConvertToUiMaterialECSubShaderOverlay(*config);
-        renderContext->SetMaterialShaderECSub(materialFilter);
-        renderContext->SetMaterialShaderECSubOverlay(materialFilterOverlay);
-    } else {
-        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
-        if (preConfig && preConfig->colorInvert && !config->colorInvert) {
-            // reset color picker
-            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
-        }
-        renderContext->SetMaterialWithQualityLevel(
-            materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
-    }
+    ApplyImmersiveMaterialStyle(renderContext, *config, preConfig);
+
     if (config->applyShadow) {
         Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale);
         renderContext->UpdateBackShadow(shadow);
@@ -7127,6 +7126,37 @@ void ViewAbstract::ResetImmersiveShadowToDefault(
         renderContext->ResetBackShadow();
         renderContext->OnBackShadowUpdate(shadow);
         pattern->OnBackShadowReset();
+    }
+}
+
+void ViewAbstract::ApplyImmersiveMaterialStyle(const RefPtr<RenderContext>& renderContext,
+ 	const ImmersiveMaterialConfig& config, const std::optional<ImmersiveMaterialConfig>& preConfig)
+{
+    CHECK_NULL_VOID(renderContext);
+    int32_t style = static_cast<int32_t>(config.key.style);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECFilter(config);
+        renderContext->SetBackgroundNGFilterEC(materialFilter);
+        if (config.colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::CONTRAST, 500);
+        } else if (preConfig && preConfig->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 500);
+        }
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+            style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(config);
+        auto materialFilterOverlay = UiMaterialFilterCreator::ConvertToUiMaterialECSubShaderOverlay(config);
+        renderContext->SetMaterialShaderECSub(materialFilter);
+        renderContext->SetMaterialShaderECSubOverlay(materialFilterOverlay);
+    } else {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(config);
+        if (preConfig && preConfig->colorInvert && !config.colorInvert) {
+            // reset color picker
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+        }
+        renderContext->SetMaterialWithQualityLevel(
+            materialFilter, config.colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     }
 }
 
