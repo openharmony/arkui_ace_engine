@@ -1770,14 +1770,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         auto bgColor = menuItemModifier->getBgColor(options_[0]);
         json->PutExtAttr("optionBgColor", bgColor.ColorToString().c_str(), filter);
         json->PutExtAttr("optionFont", menuItemModifier->inspectorGetFont(options_[0]).c_str(), filter);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContextWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(selectTheme);
-        json->PutExtAttr("optionFontColor",
-            optionFont_.FontColor.value_or(selectTheme->GetMenuFontColor()).ColorToString().c_str(), filter);
+        ToJsonOptionFontColor(json, filter);
     }
     ToJsonOptionAlign(json, filter);
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -1819,6 +1812,26 @@ void SelectPattern::ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>&
     json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
     json->PutExtAttr(
         "selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
+}
+
+void SelectPattern::ToJsonOptionFontColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    if (textOptionApply_) {
+        auto fontColor = selected_ == 0 ? selectedFont_.FontColor.value_or(Color::BLACK)
+                                        : menuItemModifier->getFontColor(options_[0]);
+        json->PutExtAttr("optionFontColor", fontColor.ColorToString().c_str(), filter);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        json->PutExtAttr("optionFontColor",
+            optionFont_.FontColor.value_or(selectTheme->GetMenuFontColor()).ColorToString().c_str(), filter);
+    }
 }
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
