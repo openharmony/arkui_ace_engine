@@ -813,6 +813,60 @@ HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridLayoutInfo::FindEndIdx003
+ * @tc.desc: Test FindEndIdx returns the maximum positive id in the row, not the first
+ *           positive from the right. In irregular layouts a higher-indexed item can sit
+ *           at a lower column (item 5 at col 0, item 4 at col 2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } } },
+        { 1, { { 0, 5 }, { 1, -1 }, { 2, 4 }, { 3, -4 } } },
+        { 2, { { 0, -5 }, { 2, -4 }, { 3, -4 } } },
+    };
+
+    // Row 2 has only continuations, so FindEndIdx falls back to row 1 where
+    // the maximum positive id is 5 (at col 0), not 4 (at col 2).
+    auto result = info.FindEndIdx(2);
+    EXPECT_EQ(result.itemIdx, 5);
+    EXPECT_EQ(result.y, 1);
+    EXPECT_EQ(result.x, 0);
+
+    // Querying row 1 directly must also pick the max positive id (5).
+    auto resultRow1 = info.FindEndIdx(1);
+    EXPECT_EQ(resultRow1.itemIdx, 5);
+    EXPECT_EQ(resultRow1.y, 1);
+    EXPECT_EQ(resultRow1.x, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FindEndIdx004
+ * @tc.desc: TDD case for the max-positive fix. Three positive items share a row
+ *           (3, 7, 5) with the max (7) sitting in the MIDDLE column. The old
+ *           right-to-left scan would return 5 (first positive from the right);
+ *           the fix must return 7. This case is distinct from FindEndIdx003
+ *           because the max is neither leftmost nor rightmost, proving the full
+ *           row is scanned rather than early-exiting at an edge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 } } },
+        { 1, { { 0, 3 }, { 1, 7 }, { 2, 5 } } },
+    };
+
+    auto result = info.FindEndIdx(1);
+    EXPECT_EQ(result.itemIdx, 7);
+    EXPECT_EQ(result.y, 1);
+    EXPECT_EQ(result.x, 1);
+}
+
+/**
  * @tc.name: GridLayoutInfo::ClearMapsToEnd001
  * @tc.desc: Test ClearMapsToEnd removes lines from index onwards
  * @tc.type: FUNC
