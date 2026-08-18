@@ -867,11 +867,11 @@ void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
         return;
     }
     auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    if (swiperPattern->GetMaxDisplayCount() > 0) {
-        return;
+    if (swiperNode) {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        if (swiperPattern && swiperPattern->GetMaxDisplayCount() > 0) {
+            return;
+        }
     }
     GetMouseClickIndex();
     CHECK_NULL_VOID(mouseClickIndex_);
@@ -907,13 +907,13 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     auto axis = GetDirection();
     auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
     auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    if (swiperPattern->GetMaxDisplayCount() > 0 && overlongDotIndicatorModifier_) {
-        auto bounds = overlongDotIndicatorModifier_->GetVisualBounds();
-        lengthBeforeCurrentIndex = bounds.first;
-        lengthWithCurrentIndex = bounds.second;
+    if (swiperNode) {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        if (swiperPattern && swiperPattern->GetMaxDisplayCount() > 0 && overlongDotIndicatorModifier_) {
+            auto bounds = overlongDotIndicatorModifier_->GetVisualBounds();
+            lengthBeforeCurrentIndex = bounds.first;
+            lengthWithCurrentIndex = bounds.second;
+        }
     }
     if (mainClickOffset < lengthBeforeCurrentIndex) {
         isRtl ? ShowNext() : ShowPrevious();
