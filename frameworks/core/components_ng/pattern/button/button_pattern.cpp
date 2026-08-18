@@ -1273,7 +1273,8 @@ void ButtonPattern::DumpInfo()
     if (host) {
         DumpLog::GetInstance().AddDesc("BackgroundColor: " + backgroundColor_.ToString());
         auto renderContext = host->GetRenderContext();
-        DumpLog::GetInstance().AddDesc("RenderContext BgColor: " + renderContext->GetBackgroundColorValue().ToString());
+        DumpLog::GetInstance().AddDesc(
+            "RenderContext BgColor: " + renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).ToString());
         auto buttonTheme = host->GetTheme<ButtonTheme>(true);
         ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
         ButtonStyleMode buttonStyleMode = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
