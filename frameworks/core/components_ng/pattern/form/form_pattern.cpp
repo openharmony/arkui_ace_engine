@@ -2122,7 +2122,12 @@ void FormPattern::OnActionEvent(const std::string& action)
         return;
     }
 
-    RemoveDelayResetManuallyClickFlagTask();
+    ContainerScope containerScope(scopeId_);
+    PostUITask([weak = WeakClaim(this)] {
+                auto formPattern = weak.Upgrade();
+                CHECK_NULL_VOID(formPattern);
+                formPattern->RemoveDelayResetManuallyClickFlagTask();
+        }, "ArkUIFormRemoveDelayResetManuallyClickFlagTask");
     auto subContainer = GetSubContainer();
     CHECK_NULL_VOID(subContainer);
     if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
