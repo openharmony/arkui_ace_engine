@@ -202,6 +202,12 @@ bool BubbleView::SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, co
 }
 
 #if defined(ENABLE_ROSEN_BACKEND)
+constexpr float REFRACT_PARAMS_FIRST = -0.03f;
+constexpr float REFRACT_PARAMS_SECOND = 0.4f;
+constexpr float REFRACT_PARAMS_THIRD = 0.13f;
+constexpr size_t REFRACT_PARAMS_FIRST_INDEX = 0;
+constexpr size_t REFRACT_PARAMS_SECOND_INDEX = 1;
+constexpr size_t REFRACT_PARAMS_THIRD_INDEX = 2;
 void BubbleView::ApplyBubbleRefractParam(const RefPtr<FrameNode>& bubbleNode)
 {
     CHECK_NULL_VOID(bubbleNode);
@@ -215,8 +221,13 @@ void BubbleView::ApplyBubbleRefractParam(const RefPtr<FrameNode>& bubbleNode)
     CHECK_NULL_VOID(filter);
     auto glassFilter = std::static_pointer_cast<Rosen::RSNGFrostedGlassFilter>(filter);
     CHECK_NULL_VOID(glassFilter);
+    auto pipelineContext = bubbleNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    float dipScale = static_cast<float>(pipelineContext->GetDipScale());
     auto refractParams = glassFilter->Getter<Rosen::FrostedGlassRefractParamsTag>()->Get();
-    refractParams[1] = 0.3f;
+    refractParams[REFRACT_PARAMS_FIRST_INDEX] = REFRACT_PARAMS_FIRST * dipScale;
+    refractParams[REFRACT_PARAMS_SECOND_INDEX] = REFRACT_PARAMS_SECOND;
+    refractParams[REFRACT_PARAMS_THIRD_INDEX] = REFRACT_PARAMS_THIRD;
     glassFilter->Setter<Rosen::FrostedGlassRefractParamsTag>(refractParams);
     renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
 }
