@@ -1152,7 +1152,7 @@ public:
                 WebRequestErrorCode)>& finishCallback);
 
     // PageScene Rule-Based Perception
-    void RegisterPageSceneRulesForWeb(int32_t processId);
+    void ExecuteReportOnRegisterMatch(int32_t processId);
     void GetPageSceneForWeb(int32_t processId, const std::string& ruleJson);
     void TriggerPageSceneMatch();
     void PostTriggerPageSceneMatch();

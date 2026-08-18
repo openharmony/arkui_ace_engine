@@ -158,6 +158,7 @@ public:
     void GetWebInfoByRequest(int32_t webId, const std::string& request) override;
     void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) override;
+    int32_t RegisterWebPageSceneRules(int32_t processId, const std::string& ruleJson);
     int32_t RegisterPageSceneRules(int32_t processId, const std::string& ruleJson) override;
     int32_t UnregisterPageSceneRules(int32_t processId, const std::string& ruleSetId) override;
     int32_t GetPageScene(int32_t processId, const std::string& ruleJsonOrRuleSetId) override;

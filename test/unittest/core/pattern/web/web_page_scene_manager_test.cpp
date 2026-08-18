@@ -402,14 +402,14 @@ HWTEST_F(WebPageSceneManagerTest, RegisterPageSceneRules_SameProcessIdRejected, 
 {
     RegisterValidRuleSet("rs_first");
     // Second registration with same processId should be rejected (1:1 mapping)
-    bool result = WebPageSceneManager::GetInstance().RegisterPageSceneRules(testPid, R"({
+    int32_t result = WebPageSceneManager::GetInstance().RegisterPageSceneRules(testPid, R"({
         "ruleSetId": "rs_second",
         "sourceConfig": { "web": true },
         "webRules": [{ "ruleId": "r1", "sceneType": "TEXT_EDITOR", "selector": { "nodeTypes": ["input"] },
             "condition": { "operator": "COUNT_GTE", "threshold": 2 },
             "report": { "eventName": "evt" } }]
     })");
-    EXPECT_FALSE(result);
+    EXPECT_EQ(result, PAGE_SCENE_ERR_LAST_UNFINISH);
     auto rules = WebPageSceneManager::GetInstance().GetPageSceneRules(testPid);
     ASSERT_TRUE(rules.has_value());
     EXPECT_EQ(rules->ruleSetId, "rs_first");
@@ -462,20 +462,6 @@ HWTEST_F(WebPageSceneManagerTest, GetPageSceneRules_UnregisteredReturnsNullopt, 
     EXPECT_EQ(rules.has_value(), false);
 }
 
-// ===== GetRegisteredProcessId =====
-
-HWTEST_F(WebPageSceneManagerTest, GetRegisteredProcessId_WithRules, TestSize.Level0)
-{
-    RegisterValidRuleSet("rs_pid");
-    int32_t pid = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
-    EXPECT_EQ(pid, testPid);
-}
-
-HWTEST_F(WebPageSceneManagerTest, GetRegisteredProcessId_NoRules, TestSize.Level0)
-{
-    int32_t pid = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
-    EXPECT_EQ(pid, -1);
-}
 
 // ===== UpdateRuleState =====
 

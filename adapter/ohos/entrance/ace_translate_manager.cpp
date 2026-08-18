@@ -90,11 +90,11 @@ void UiTranslateManagerImpl::TraverseAndMatchAllWeb(int32_t processId, const std
         auto pattern = GetWebPattern(listener.second.translateNode);
         if (pattern) {
             if (isGetResult && !ruleJson.empty()) {
-                // GetPageScene path: temp register + match + cleanup
+                // Get path: temp register + match + cleanup
                 pattern->GetPageSceneForWeb(processId, ruleJson);
             } else {
                 // Register path: reportOnRegister initial match with merge
-                pattern->RegisterPageSceneRulesForWeb(processId);
+                pattern->ExecuteReportOnRegisterMatch(processId);
             }
         }
     }

@@ -476,6 +476,30 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
     reportObjectMap_[processId] = reportStub;
 }
 
+int32_t UiSessionManagerOhos::RegisterWebPageSceneRules(int32_t processId, const std::string& ruleJson)
+{
+    WebPageSceneFunction webPageSceneFunc;
+    {
+        std::lock_guard<std::mutex> lock(webPageSceneMutex_);
+        webPageSceneFunc = webPageSceneFunction_;
+    }
+    if (!webPageSceneFunc) {
+        return FAILED;
+    }
+    int32_t webRet = webPageSceneFunc(WebPageSceneOp::RegisterRules, processId, ruleJson, false);
+    if (webRet != NO_ERROR) {
+        LOGW("RegisterPageSceneRules web-side failed ret=%{public}d, rollback processId=%{public}d",
+            webRet, processId);
+        {
+            std::lock_guard<std::mutex> lock(pageSceneMutex_);
+            pageSceneRuleSets_.erase(processId);
+            pageSceneRuleRegisterProcesses_.fetch_sub(1);
+        }
+        EraseProcessId("pageScene", processId);
+    }
+    return webRet;
+}
+
 int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const std::string& ruleJson)
 {
     sptr<IRemoteObject> reportObject;
@@ -511,14 +535,7 @@ int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const st
         TriggerPageSceneDetect(processId, registerRuleJson, false);
     }
     if (webEnabled) {
-        WebPageSceneFunction webPageSceneFunc;
-        {
-            std::lock_guard<std::mutex> lock(webPageSceneMutex_);
-            webPageSceneFunc = webPageSceneFunction_;
-        }
-        if (webPageSceneFunc) {
-            webPageSceneFunc(WebPageSceneOp::RegisterRules, processId, ruleJson, false);
-        }
+        return RegisterWebPageSceneRules(processId, ruleJson);
     }
     return NO_ERROR;
 }
@@ -610,7 +627,15 @@ int32_t UiSessionManagerOhos::GetPageScene(int32_t processId, const std::string&
             webPageSceneFunc = webPageSceneFunction_;
         }
         if (webPageSceneFunc) {
-            webPageSceneFunc(WebPageSceneOp::Traverse, processId, ruleJsonOrRuleSetId, true);
+            int32_t webRet = webPageSceneFunc(WebPageSceneOp::GetPageScene, processId, ruleJsonOrRuleSetId, true);
+            if (webRet != NO_ERROR) {
+                LOGW("GetPageScene web-side failed ret=%{public}d, processId=%{public}d", webRet, processId);
+                {
+                    std::lock_guard<std::mutex> lock(pageSceneMutex_);
+                    pendingPageSceneGets_.erase(processId);
+                }
+                return webRet;
+            }
         }
     }
     return NO_ERROR;

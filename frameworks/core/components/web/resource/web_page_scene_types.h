@@ -60,6 +60,13 @@ constexpr int32_t PAGE_SCENE_OBSERVER_TIMEOUT_MS = 5000; // Auto-disconnect time
 constexpr int32_t PAGE_SCENE_DEFAULT_MIN_REPORT_INTERVAL_MS = 500;
 constexpr int32_t PAGE_SCENE_DEFAULT_THRESHOLD = 0;
 
+// Error codes (aligned with ui_content_errors.h ErrorCode)
+constexpr int32_t PAGE_SCENE_ERR_OK = 0;
+constexpr int32_t PAGE_SCENE_ERR_NOT_CONNECTED = 1;
+constexpr int32_t PAGE_SCENE_ERR_FAILED = 2;
+constexpr int32_t PAGE_SCENE_ERR_PARAM_INVALID = 4;
+constexpr int32_t PAGE_SCENE_ERR_LAST_UNFINISH = 5;
+
 struct PageSceneCondition {
     std::string conditionOperator;  // "COUNT_GTE"
     int32_t threshold = 0;

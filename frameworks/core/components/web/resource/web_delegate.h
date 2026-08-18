@@ -1791,23 +1791,17 @@ public:
 
     // ===== PageScene Rule-Based Perception Methods =====
 
-    void RegisterPageSceneRulesForWeb(int32_t processId);
+    void ExecuteReportOnRegisterMatch(int32_t processId);
     void GetPageSceneForWeb(int32_t processId, const std::string& ruleJsonOrRuleSetId);
 
     // Selector & query
     void QueryPageControls(const std::string& selectorJson,
         const std::string& ruleId, const std::vector<std::string>& nodeTypes,
         std::function<void(const std::string& resultJson)>&& callback);
-    static std::string BuildQueryControlsScript(const std::string& selectorJson,
-        const std::string& ruleId, const std::vector<std::string>& nodeTypes);
-    static std::string EscapeSelectorJson(const std::string& selectorJson);
-    static std::string BuildPageSceneQueryJs();
-    static std::string BuildXpathJsFragment();
-    static std::string BuildPerRuleObserverJs(const std::string& ruleId, const std::vector<std::string>& nodeTypes);
 
     // Page scene match execution
     void ProcessPageSceneDomReadyResult(const std::string& resultJson, const std::string& selectorJson);
-    void ExecuteGetPageSceneMatch(int32_t processId, bool isTemporary);
+    void ExecuteGetPageSceneMatch(int32_t processId, const WebPageSceneRuleSet& ruleSet, bool isTemporary);
     void ExecuteAllRuleSetMatch();
 
 private:
