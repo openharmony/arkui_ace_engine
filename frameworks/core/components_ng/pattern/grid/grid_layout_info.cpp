@@ -916,14 +916,36 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
     // Create reverse iterator starting from endLine position
     for (auto rIt = std::make_reverse_iterator(++it); rIt != gridMatrix_.rend(); ++rIt) {
         const auto& row = rIt->second;
-        // Search backwards in the row for first positive index
-        for (auto cell = row.rbegin(); cell != row.rend(); ++cell) {
-            if (cell->second > 0) {
-                return { .itemIdx = cell->second, .y = rIt->first, .x = cell->first };
+        // Find the maximum positive index in the row. In irregular layouts a
+        // higher-indexed item can sit at a lower column, so taking the first
+        // positive from the right is insufficient. The maximum positive id is
+        // the true last item. For example:
+        //   0: [0, 0] [1, 1] [2, 2] [3, 3]
+        //   1: [0, 5] [1,-1] [2, 4] [3,-4]
+        //   2: [0,-5]        [2,-4] [3,-4]
+        // At row 1, a right-to-left scan would return 4, but the true last
+        // item is 5 (sitting at col 0).
+        int32_t maxIdx = -1;
+        int32_t maxCol = -1;
+        for (const auto& [col, val] : row) {
+            if (val > 0 && val > maxIdx) {
+                maxIdx = val;
+                maxCol = col;
             }
         }
+        if (maxIdx > 0) {
+            return {
+                .itemIdx = maxIdx,
+                .y = rIt->first,
+                .x = maxCol,
+            };
+        }
     }
-    return { .itemIdx = 0, .y = 0, .x = 0 };
+    return {
+        .itemIdx = 0,
+        .y = 0,
+        .x = 0,
+    };
 }
 
 int32_t GridLayoutInfo::FindItemStartRow(int32_t startRow, int32_t colIdx) const
