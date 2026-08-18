@@ -461,6 +461,7 @@ private:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonOptionFontColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
