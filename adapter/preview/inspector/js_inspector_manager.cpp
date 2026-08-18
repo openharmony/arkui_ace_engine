@@ -225,7 +225,10 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
             // Quickly modify components
             auto iter = parents_.find(nodeId);
             if (iter != parents_.end()) {
-                auto uiNode = iter->second.Upgrade()->GetChildAtIndex(slots_[nodeId]);
+                auto parent = iter->second.Upgrade();
+                CHECK_NULL_RETURN(parent, false);
+                auto uiNode = parent->GetChildAtIndex(slots_[nodeId]);
+                CHECK_NULL_RETURN(uiNode, false);
                 slots_.emplace(uiNode->GetId(), slots_[nodeId]);
                 parents_.emplace(uiNode->GetId(), parents_[nodeId]);
                 return OperateGeneralUINode(parents_[uiNode->GetId()].Upgrade(), slots_[uiNode->GetId()], newChild);
