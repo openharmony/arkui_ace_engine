@@ -107,6 +107,8 @@ public:
      */
     void RegisterComponentChangeEventCallback(const EventCallback& eventCallback);
 
+    bool IsComponentChangeEventCallbackRegistered() const;
+
     /**
      * @description: register a callback when get inspector tree
      * @param eventCallback callback to be performed
@@ -264,6 +266,7 @@ public:
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
     void RegisterContentChangeCallback(
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback);
+    bool IsContentChangeCallbackRegistered() const;
     void UnregisterContentChangeCallback();
     void RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& callback);
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;

@@ -56,6 +56,8 @@ constexpr char PAGE_SCENE_TEXT_AREA_TAG[] = "TextArea";
 constexpr char PAGE_SCENE_SEARCH_TAG[] = "Search";
 constexpr char PAGE_SCENE_SEARCH_FIELD_TAG[] = "SearchField";
 constexpr char PAGE_SCENE_RICH_EDITOR_TAG[] = "RichEditor";
+constexpr char GESTURE_TYPE_KEY[] = "GestureType";
+constexpr char CLICK_GESTURE_TYPE[] = "Click";
 
 bool IsValidPageSceneId(const std::string& id)
 {
@@ -332,6 +334,12 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
     if (!GetComponentChangeEventRegistered() || !NeedComponentChangeTypeReporting(eventType)) {
         return;
     }
+    bool isClickGestureEvent = false;
+    if (eventType == ComponentEventType::COMPONENT_EVENT_GESTURE) {
+        auto eventValue = InspectorJsonUtil::ParseJsonString(value);
+        isClickGestureEvent = eventValue != nullptr && eventValue->IsObject() &&
+                              eventValue->GetString(GESTURE_TYPE_KEY) == CLICK_GESTURE_TYPE;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
@@ -339,6 +347,10 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
+            if (isClickGestureEvent) {
+                LOGI("[UiSessionManagerOhos] ReportComponentChangeEvent gesture eventType:%{public}u nodeId:%{public}d",
+                    eventType, nodeId);
+            }
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component event failed, process id:%{public}d", pair.first);
@@ -1033,14 +1045,17 @@ void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
 {
     if (status) {
         componentChangeEventRegisterProcesses_.fetch_add(1);
+        LOGI("SetComponentChangeEventRegistered register component change event");
     } else {
         componentChangeEventRegisterProcesses_.fetch_sub(1);
+        LOGI("SetComponentChangeEventRegistered unregister component change event");
     }
 }
 
 void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
 {
     componentChangeEventMask_ = mask;
+    LOGI("SetComponentChangeEventMask mask:%{public}u", mask);
 }
 
 void UiSessionManagerOhos::SetScrollEventRegistered(bool status)
