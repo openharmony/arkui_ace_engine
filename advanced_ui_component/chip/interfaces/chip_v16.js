@@ -2057,14 +2057,14 @@ export class ChipComponent extends ViewPU {
   getChipBackgroundColor() {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
-      if (!!this.activatedBackgroundSystemMaterial) {
+      if (!isNullOrEmptyMaterial(this.activatedBackgroundSystemMaterial)) {
         return undefined;
       }
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor()
         ? themeChipNode.focusActivatedBgColor
         : this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
     }
-    if (!!this.backgroundSystemMaterial) {
+    if (!isNullOrEmptyMaterial(this.backgroundSystemMaterial)) {
       return undefined;
     }
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor()
@@ -2080,13 +2080,23 @@ export class ChipComponent extends ViewPU {
       return undefined;
     }
     if (this.isChipActivated()) {
-      return info.state === uiMaterial.MaterialState.ENABLE && !this.activatedBackgroundSystemMaterial
-        ? this.theme.chipNode.activatedBackgroundSystemMaterial
-        : this.activatedBackgroundSystemMaterial;
+      if (!this.activatedBackgroundSystemMaterial) {
+        return info.state === uiMaterial.MaterialState.ENABLE ?
+          this.theme.chipNode.activatedBackgroundSystemMaterial : this.activatedBackgroundSystemMaterial;
+      }
+      if (isNullOrEmptyMaterial(this.activatedBackgroundSystemMaterial)) {
+        return undefined;
+      }
+      return this.activatedBackgroundSystemMaterial;
     }
-    return info.state === uiMaterial.MaterialState.ENABLE && !this.backgroundSystemMaterial
-      ? this.theme.chipNode.backgroundSystemMaterial
-      : this.backgroundSystemMaterial;
+    if (!this.backgroundSystemMaterial) {
+      return info.state === uiMaterial.MaterialState.ENABLE ?
+        this.theme.chipNode.backgroundSystemMaterial : this.backgroundSystemMaterial;
+    }
+    if (isNullOrEmptyMaterial(this.backgroundSystemMaterial)) {
+      return undefined;
+    }
+    return this.backgroundSystemMaterial;
   }
   getColor(color, defaultColor) {
     if (!color) {
@@ -2242,6 +2252,16 @@ export class ChipComponent extends ViewPU {
   rerender() {
     this.updateDirtyElements();
   }
+}
+
+function isNullOrEmptyMaterial(material) {
+  if (!material) {
+    return true;
+  }
+  if (material === uiMaterial.Material.empty) {
+    return true;
+  }
+  return false;
 }
 
 export default {
