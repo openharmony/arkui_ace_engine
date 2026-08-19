@@ -25,6 +25,7 @@ namespace OHOS {
 namespace Ace {
 namespace {
 constexpr char FORM_DISABLE_UIFIRST_KEY[] = "ohos.extra.param.key.disable_uifirst";
+constexpr int64_t INVALID_DISPLAY_ID = -1;
 constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
@@ -86,6 +87,7 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
             static_cast<int32_t>(AppExecFwk::AddFormFailedErrorType::UI_CONTENT_INIT_FAILED),
             0);
     }
+    uiContent_->SetFormDisplayId(formDisplayId_);
     uiContent_->SetFormViewScale(uiWidth, uiHeight, formViewScale_);
 }
 
@@ -165,6 +167,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
     formViewScale_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_VIEW_SCALE, 1.0f);
+    formDisplayId_ = static_cast<uint64_t>(
+        want.GetLongParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DISPLAY_ID_KEY, INVALID_DISPLAY_ID));
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
@@ -619,6 +623,7 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         || !NearEqual(borderWidth_, lastBorderWidth_)) {
         uiContent_->SetFormWidth(width);
         uiContent_->SetFormHeight(height);
+        uiContent_->SetFormDisplayId(formDisplayId_);
         uiContent_->SetFormViewScale(width, height, formViewScale_);
         lastBorderWidth_ = borderWidth_;
         uiContent_->OnFormSurfaceChange(width, height);

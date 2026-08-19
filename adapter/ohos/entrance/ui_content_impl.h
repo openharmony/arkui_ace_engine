@@ -192,6 +192,7 @@ public:
     float GetFormHeight() override { return formHeight_; }
 
     void SetFormViewScale(float width, float height, float formViewScale) override;
+    void SetFormDisplayId(const uint64_t displayId) override;
     void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;
@@ -563,6 +564,7 @@ protected:
     bool isBundle_ = false;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
+    uint64_t formDisplayId_ = static_cast<uint64_t>(-1);
     std::string formData_;
     bool fontScaleFollowSystem_ = true;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
