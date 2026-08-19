@@ -283,10 +283,13 @@ void NavigationManager::OnDumpInfo()
 
 void NavigationManager::FireNavigationUpdateCallback()
 {
-    for (const auto& func : updateCallbacks_) {
-        func();
+    std::vector<std::function<void()>> callbacks;
+    callbacks.swap(updateCallbacks_);
+    for (const auto& func : callbacks) {
+        if (func) {
+            func();
+        }
     }
-    updateCallbacks_.clear();
 }
 
 std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPtr<AceType>& node)

@@ -3308,7 +3308,12 @@ void TitleBarPattern::HandleLongPress(const RefPtr<FrameNode>& backButtonNode)
     }
     auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageProperty);
-    ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
+    ImageSourceInfo imageSourceInfo;
+    if (!imageProperty->HasImageSourceInfo()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "back button image source info is not set");
+    } else {
+        imageSourceInfo = imageProperty->GetImageSourceInfoValue();
+    }
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo, host->GetThemeScopeId());
 }
 
