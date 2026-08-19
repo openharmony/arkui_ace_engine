@@ -52,9 +52,11 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPosition(ArkUI_NodeHandle node, ArkUI_IntOff
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    auto value = impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutPositionWithoutMargin(node->uiNodeHandle);
-    localOffset->x = static_cast<int32_t>(value[0]);
-    localOffset->y = static_cast<int32_t>(value[1]);
+    ArkUI_Float32 tempPosition[2] = { 0.0f, 0.0f };
+    impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutPositionWithoutMargin(
+        node->uiNodeHandle, &tempPosition);
+    localOffset->x = static_cast<int32_t>(tempPosition[0]);
+    localOffset->y = static_cast<int32_t>(tempPosition[1]);
 
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
