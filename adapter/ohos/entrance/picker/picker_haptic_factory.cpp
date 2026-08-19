@@ -19,20 +19,24 @@
 #endif
 
 namespace OHOS::Ace::NG {
-std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::instance_ { nullptr };
+std::weak_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::instance_;
 std::mutex PickerAudioHapticFactory::mutex_;
 
 std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::GetInstance(
     const std::string& uri, const std::string& effectId)
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (instance_ == nullptr) {
-#if defined(AUDIO_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-            instance_ = std::make_shared<PickerAudioHapticImpl>(uri, effectId);
-#endif
-        }
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto existing = instance_.lock();
+    if (existing) {
+        return existing;
     }
-    return instance_;
+
+#if defined(AUDIO_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
+    auto newInstance = std::make_shared<PickerAudioHapticImpl>(uri, effectId);
+    instance_ = newInstance;
+    return newInstance;
+#else
+    return nullptr;
+#endif
 }
 } // namespace OHOS::Ace::NG

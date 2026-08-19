@@ -81,6 +81,7 @@ void PickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     isTossPlaying_ = false;
     if (hapticController_) {
         hapticController_->Stop();
+        hapticController_ = nullptr;
     }
     UnregisterWindowStateChangedCallback(frameNode);
 }

@@ -32,7 +32,7 @@ public:
         const std::string& uri = "", const std::string& effectId = "");
 
 private:
-    static std::shared_ptr<IPickerAudioHaptic> instance_;
+    static std::weak_ptr<IPickerAudioHaptic> instance_;
     static std::mutex mutex_;
 };
 } // namespace OHOS::Ace::NG
