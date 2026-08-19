@@ -51,7 +51,7 @@ class LazyColumnLayoutSpaceModifier extends ModifierWithKey<LengthMetrics | unde
   }
   static identity: Symbol = Symbol('lazyColumnLayoutSpace');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !isObject(this.value)) {
       getUINativeModule().lazyColumnLayout.resetSpace(node);
     } else {
       getUINativeModule().lazyColumnLayout.setSpace(node, this.value!);
