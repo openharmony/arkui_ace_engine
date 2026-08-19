@@ -154,6 +154,6 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 ## 相关主题
 
 - `docs/kb/components/shape/canvas.md`
-- Canvas 功能域：`05-14-02`
+- [Canvas 功能域：`05-14-02`](../../components/shape/canvas.md)
 - Canvas Spec：`specs/05-ui-components/14-drawing-components/02-canvas/`（当前目录尚未建立，行为以源码、测试及公开 API 文档为准）
 - [CanvasRenderingContext2D onDetach/off(onDetach)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-canvasrenderingcontext2d#offondetach13)

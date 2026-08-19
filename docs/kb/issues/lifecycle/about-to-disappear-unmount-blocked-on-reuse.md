@@ -15,6 +15,21 @@
 - 应用升级 API19 后出现（引入了"自定义组件前端对象删除前移"的性能优化需求）
 - 组件在 `aboutToDisappear` 中通过修改状态变量（如 `flg = false`）控制子节点下树时触发
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | symptom_surface | jsi_view_register_impl_ng | frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register_impl_ng.cpp | verified |
+| architecture | root_cause_owner | frame_node | frameworks/core/components_ng/base/frame_node.cpp | verified |
+| architecture | root_cause_owner | ui_node | frameworks/core/components_ng/base/ui_node.cpp | verified |
+| capability | root_cause_owner | custom_node_base | frameworks/core/components_ng/pattern/custom/custom_node_base.cpp | verified |
+| capability | root_cause_owner | pipeline_context | frameworks/core/pipeline_ng/pipeline_context.cpp | verified |
+| capability | root_cause_owner | builder_node_ops_accessor | frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -106,8 +121,8 @@
 
 ## 相关主题
 
-- `docs/kb/frontend/state_management/custom_component.md` — 自定义组件机制（FuncID 07-03-01）
-- `docs/kb/frontend/state_management/static_custom_component.md` — 静态自定义组件状态相关（FuncID 07-03-07）
-- `docs/kb/architecture/component_reuse_framework.md` — 组件复用框架（FuncID 04-19-01）
-- `docs/kb/capabilities/transition_animation.md` — 转场动画（FuncID 03-02-05）
-- `docs/kb/capabilities/geometry_transition.md` — 组件共享元素动画（FuncID 03-02-07）
+- `docs/kb/frontend/state_management/custom-component.md` — 自定义组件机制（FuncID 07-03-01）
+- `docs/kb/frontend/state_management/static-custom-component.md` — 静态自定义组件状态相关（FuncID 07-03-07）
+- `docs/kb/architecture/component-reuse-framework.md` — 组件复用框架（FuncID 04-19-01）
+- `docs/kb/capabilities/transition-animation.md` — 转场动画（FuncID 03-02-05）
+- `docs/kb/capabilities/geometry-transition.md` — 组件共享元素动画（FuncID 03-02-07）

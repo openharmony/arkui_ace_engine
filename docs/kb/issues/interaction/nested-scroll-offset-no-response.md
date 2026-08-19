@@ -14,6 +14,17 @@ List（父）内嵌套 WaterFlow（子）以 PARENT_FIRST 嵌套滚动模式运�
 - 概率性触发，与 List 当前布局停在倒数第二个子节点、尾部 height-0 子节点未实际放置有关
 - 松手后无回弹、无惯性滑动，界面静止但进程正常运行
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | symptom_surface | list_pattern | frameworks/core/components_ng/pattern/list/list_pattern.cpp | verified |
+| capability | root_cause_owner | scrollable_pattern | frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -58,9 +69,9 @@ List（父）内嵌套 WaterFlow（子）以 PARENT_FIRST 嵌套滚动模式运�
 | 4 | 在子组件 `HandleScrollParentFirst` 中检查 `result.remain` | `remain == 0`（子组件收到 0 偏移量，不处理） | 命中根因 B |
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp:2813` `HandleScrollSelfOnly()`：`remainOffset = (allOffset - offset) + overOffset`，当两者均为 0 时返回 `{0, false}`
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp:2722` `HandleScrollParentFirst()`：子组件调用 `parent->HandleScroll()`，若父返回 `remain=0` 则子组件获得 0 偏移量，不处理
-- `frameworks/core/components_ng/pattern/list/list_pattern.cpp:1261` `GetOverScrollOffset()`：`endIndex == GetMaxIndexByRepeat()` 判定决定 `offset.end`，使用实际 `endIndex_`
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `HandleScrollSelfOnly()`：`remainOffset = (allOffset - offset) + overOffset`，当两者均为 0 时返回 `{0, false}`
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `HandleScrollParentFirst()`：子组件调用 `parent->HandleScroll()`，若父返回 `remain=0` 则子组件获得 0 偏移量，不处理
+- `frameworks/core/components_ng/pattern/list/list_pattern.cpp` `GetOverScrollOffset()`：`endIndex == GetMaxIndexByRepeat()` 判定决定 `offset.end`，使用实际 `endIndex_`
 
 ## 修复方案
 

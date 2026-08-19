@@ -87,7 +87,6 @@ Image 组件**尚未进行组件化改造**，属性解析仍采用双路径架�
 | **C API（NDK）** | `frameworks/core/interfaces/native/node/node_image_modifier.cpp` + `interfaces/native/node/style_modifier.cpp` | Image 无专属 `image_native_impl.*`；`NODE_IMAGE_*` 枚举通过通用 node_model/style_modifier 框架分发到 `node_image_modifier` |
 | **前端 Modifier（ArkTS 侧）** | `frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts` | ArkTS `ImageModifier` 类定义 |
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后上述 JSView 和 Bridge 双路径将统一到 `pattern/image/bridge/arkts_native_image_bridge.cpp`，并输出独立 so。
 
 ### 外部依赖入口
 
@@ -157,8 +156,8 @@ Image 功能域：`specs/05-ui-components/08-image-components/01-image/`
 
 ## 相关主题
 
-- `ImageAnimator`：`docs/kb/components/media/image_animator.md`
-- `DrawableDescriptor`：`docs/kb/capabilities/drawable_descriptor.md`
+- `ImageAnimator`：`docs/kb/components/media/image-animator.md`
+- `DrawableDescriptor`：`docs/kb/capabilities/drawable-descriptor.md`
 - `ImageLoading`：`docs/kb/capabilities/image-loading.md`
 - `SVG`：`docs/kb/capabilities/svg.md`
 - `ImageAnalyzer`：`docs/kb/capabilities/image-analyzer.md`

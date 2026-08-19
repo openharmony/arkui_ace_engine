@@ -76,7 +76,7 @@ Pixel Rounding 功能 ID 为 `04-24-01`，规划功能域为 `specs/04-common-ca
 
 ## 相关主题
 
-- Layout Framework：`docs/kb/architecture/layout-framework.md`
-- Layout Attributes：`docs/kb/capabilities/layout-attributes.md`
-- UIContext：`docs/kb/capabilities/ui-context.md`
+- [Layout Framework：`docs/kb/architecture/layout-framework.md`](../architecture/layout-framework.md)
+- [Layout Attributes：`docs/kb/capabilities/layout-attributes.md`](layout-attributes.md)
+- [UIContext：`docs/kb/capabilities/ui-context.md`](ui-context.md)
 - Safe Area：`docs/kb/capabilities/safe-area.md`

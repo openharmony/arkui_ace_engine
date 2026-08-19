@@ -104,11 +104,11 @@
 
 ## 相关主题
 
-- 总览：`docs/kb/frontend/state_management.md`
-- V1 核心（`ObservedPropertyPU` 是存储 `link()` 的返回基础）：`docs/kb/frontend/state_management/v1_core.md`
-- V2 核心（`PersistenceV2` 经 `ObserveV2` 依赖图自动追踪）：`docs/kb/frontend/state_management/v2_core.md`
-- V1 装饰器（`@StorageLink`/`@StorageProp`/`@LocalStorageLink`/`@LocalStorageProp`）：`docs/kb/frontend/state_management/v1_decorators.md`
-- V2 装饰器（`@Env`/`@CustomEnv`/`@Type`）：`docs/kb/frontend/state_management/v2_decorators.md`
-- C++ 绑定（`JSLocalStorage`/`JSPersistent`/`JSEnvironment`）：`docs/kb/frontend/state_management/cpp_bindings.md`
-- Interop（跨前端存储可见）：`docs/kb/frontend/state_management/interop_bridge.md`
-- 静态存储体系（arkoala 侧）：`docs/kb/frontend/state_management/static_storage.md`
+- 总览：`docs/kb/frontend/state-management.md`
+- V1 核心（`ObservedPropertyPU` 是存储 `link()` 的返回基础）：`docs/kb/frontend/state_management/v1-core.md`
+- V2 核心（`PersistenceV2` 经 `ObserveV2` 依赖图自动追踪）：`docs/kb/frontend/state_management/v2-core.md`
+- V1 装饰器（`@StorageLink`/`@StorageProp`/`@LocalStorageLink`/`@LocalStorageProp`）：`docs/kb/frontend/state_management/v1-decorators.md`
+- V2 装饰器（`@Env`/`@CustomEnv`/`@Type`）：`docs/kb/frontend/state_management/v2-decorators.md`
+- C++ 绑定（`JSLocalStorage`/`JSPersistent`/`JSEnvironment`）：`docs/kb/frontend/state_management/cpp-bindings.md`
+- Interop（跨前端存储可见）：`docs/kb/frontend/state_management/interop-bridge.md`
+- [静态存储体系（arkoala 侧）：`docs/kb/frontend/state_management/static-storage.md`](static-storage.md)

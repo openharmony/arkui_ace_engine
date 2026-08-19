@@ -109,7 +109,7 @@ Frame Callback 是 UIContext 的子能力域，提供一次性帧回调（postFr
 
 - UIContext 入口架构：`docs/kb/capabilities/ui-context.md`
 - Ability 上下文与窗口信息：`docs/kb/capabilities/ability-context.md`
-- 动效框架：`docs/kb/capabilities/animation_framework.md`
+- [动效框架：`docs/kb/capabilities/animation-framework.md`](animation-framework.md)
 - 渲染管线：`docs/kb/architecture/basic-render-pipeline.md`
-- 窗口机制：`docs/kb/architecture/window-mechanism.md`
+- [窗口机制：`docs/kb/architecture/window-mechanism.md`](../architecture/window-mechanism.md)
 - [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — JS 前端历史配对问题（已修复）与帧回调实例路由排查

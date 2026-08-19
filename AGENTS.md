@@ -53,7 +53,7 @@ This file defines working rules for agents in `ace_engine`.
 ### Build Outputs
 
 - Main output dir: `out/rk3568/arkui/ace_engine/`
-- Detailed library listing: `docs/kb/architecture/build-outputs.md`
+- Detailed library listing: `docs/architecture/build-outputs.md`
 
 ### Frontend Support
 
@@ -63,7 +63,7 @@ This file defines working rules for agents in `ace_engine`.
 | **ArkTS Frontend** | ArkTS static version | Incremental engine-based frontend |
 | **JavaScript Frontend** | JavaScript | Legacy web-style development |
 
-- Frontend architecture details: `docs/kb/frontend/frontend-overview.md`
+- Frontend architecture details: `docs/architecture/frontend-overview.md`
 
 ## 3. Knowledge Base
 
@@ -100,9 +100,9 @@ Before editing any file, the agent MUST state:
 | **Term: PipelineContext, FlushTask, UITaskScheduler** | `docs/kb/architecture/layout-framework.md` |
 | **Term: Modifier, node_modifier, ArkUIModifier** | `docs/kb/api/` or `docs/kb/components/<category>/` |
 | **Term: CustomNode, CustomSpan, FrameNodeAdapter** | `docs/kb/components/custom-node/` |
-| **Term: LazyForEach, Repeat, Swiper+LazyForEach** | `docs/kb/syntax/lazy_for_each.md`, `docs/kb/syntax/repeat.md` |
+| **Term: LazyForEach, Repeat, Swiper+LazyForEach** | `docs/kb/syntax/lazy-for-each.md`, `docs/kb/syntax/repeat.md` |
 | **Term: DragFrameSuite, DragDropManager** | `docs/kb/architecture/drag-framework.md` |
-| **Term: ComponentReuse, RecycleNode** | `docs/kb/architecture/component_reuse_framework.md` |
+| **Term: ComponentReuse, RecycleNode** | `docs/kb/architecture/component-reuse-framework.md` |
 | **Term: Subwindow, Popup, Menu, bindSheet** | `docs/kb/architecture/subwindow-mechanism.md` |
 | **Term: ResourceAdapter, instanceId, dark mode switching** | `docs/kb/architecture/resource-dynamic-switching.md` |
 | **Term: NodePaintMethod, RenderContext** | `docs/kb/capabilities/` |

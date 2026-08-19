@@ -105,8 +105,8 @@ Stack 功能域：`specs/05-ui-components/01-layout-components/11-stack/`
 
 ## 相关主题
 
-- DynamicLayout：`docs/kb/components/container/dynamic_layout.md`
-- FolderStack：`docs/kb/components/container/folder_stack.md`
-- Layout Framework：`docs/kb/architecture/layout-framework.md`
-- Layout Attributes：`docs/kb/capabilities/layout-attributes.md`
+- [DynamicLayout：`docs/kb/components/container/dynamic-layout.md`](dynamic-layout.md)
+- [FolderStack：`docs/kb/components/container/folder-stack.md`](folder-stack.md)
+- [Layout Framework：`docs/kb/architecture/layout-framework.md`](../../architecture/layout-framework.md)
+- [Layout Attributes：`docs/kb/capabilities/layout-attributes.md`](../../capabilities/layout-attributes.md)
 - Safe Area：`docs/kb/capabilities/safe-area.md`

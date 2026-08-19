@@ -14,6 +14,20 @@
 - 某应用创建系统级 Toast 弹窗后，页面间切换触发概率复现
 - 仅在涉及 HSP 包资源的场景下出现，本包资源不受影响
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | symptom_surface | resource_manager | frameworks/core/common/resource/resource_manager.cpp | verified |
+| capability | root_cause_owner | resource_adapter | frameworks/core/components/theme/resource_adapter.h | verified |
+| architecture | root_cause_owner | resource_adapter_impl_v2 | adapter/ohos/osal/resource_adapter_impl_v2.cpp | verified |
+| architecture | root_cause_owner | subwindow_manager | frameworks/base/subwindow/subwindow_manager.cpp | verified |
+| architecture | root_cause_owner | ace_container | adapter/ohos/entrance/ace_container.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |

@@ -94,6 +94,6 @@
 
 ## 相关主题
 
-- 窗口工具栏：`docs/kb/capabilities/window-toolbar.md`（同属 08-root-view）
-- 窗口机制：`docs/kb/architecture/window-mechanism.md`（ContainerModal/窗口框架）
+- [窗口工具栏：`docs/kb/capabilities/window-toolbar.md`（同属 08-root-view）](window-toolbar.md)
+- [窗口机制：`docs/kb/architecture/window-mechanism.md`（ContainerModal/窗口框架）](../architecture/window-mechanism.md)
 - UI 上下文：`docs/kb/capabilities/ui-context.md`（`UIContext.getAtomicServiceBar()` 入口）

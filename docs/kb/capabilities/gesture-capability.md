@@ -79,6 +79,6 @@ Gesture Capability 是 ArkUI 将触摸序列识别为点击、长按、拖动、
 
 ## 相关主题
 
-- 触摸事件：`docs/kb/capabilities/touch-events.md`
-- 事件分发和拦截：`docs/kb/capabilities/event-dispatch-intercept.md`
-- 事件基础框架：`docs/kb/architecture/event-base-framework.md`
+- [触摸事件：`docs/kb/capabilities/touch-events.md`](touch-events.md)
+- [事件分发和拦截：`docs/kb/capabilities/event-dispatch-intercept.md`](event-dispatch-intercept.md)
+- [事件基础框架：`docs/kb/architecture/event-base-framework.md`](../architecture/event-base-framework.md)

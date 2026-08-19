@@ -14,6 +14,17 @@ FrameNode::ProcessRenderTreeDiff 中将父节点的 isPendingState_ 作为 isOnM
 - OnAttachToMainRenderTree/OnDetachFromMainRenderTree 生命周期回调在同一帧下树重新上树时漏调或错调
 - 节点实际仍在渲染树上，但 isPendingState_ 为 false，后续状态判断失准
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| architecture | symptom_surface | frame_node | frameworks/core/components_ng/base/frame_node.cpp | verified |
+| capability | root_cause_owner | image_pattern | frameworks/core/components_ng/pattern/image/image_pattern.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -76,8 +87,8 @@ FrameNode::ProcessRenderTreeDiff 中将父节点的 isPendingState_ 作为 isOnM
 - [渲染树同步](../../architecture/render-tree-sync.md) — 渲染树同步机制代码型 KB，覆盖 ProcessRenderTreeDiff 全链路
 - [基础渲染管线](../../architecture/basic-render-pipeline.md) — FlushVsync 编排，RebuildRenderContextTree 在 FlushTask 阶段执行
 - [布局框架](../../architecture/layout-framework.md) — FrameNode Measure/Layout，与渲染树同步在帧编排中的位置
-- [FrameNode](../../capabilities/frame_node.md) — ArkTS FrameNode API，C++ 底层能力提供者
-- [RenderNode](../../capabilities/render_node.md) — RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制
+- [FrameNode](../../capabilities/frame-node.md) — ArkTS FrameNode API，C++ 底层能力提供者
+- [RenderNode](../../capabilities/render-node.md) — RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制
 - [Image](../../components/media/image.md) — ImagePattern::OnAttachToMainRenderTree 和 OnWindowHide 依赖 isPendingState_，受已知缺陷影响
-- [转场动画](../../capabilities/transition_animation.md) — TransitionEffect 的转出动画通过 HasTransitionOutAnimation 影响可见子节点收集
-- [共享元素动画](../../capabilities/geometry_transition.md) — GeometryTransition 触发二次布局和 isDeleteRsNode_ 传播
+- [转场动画](../../capabilities/transition-animation.md) — TransitionEffect 的转出动画通过 HasTransitionOutAnimation 影响可见子节点收集
+- [共享元素动画](../../capabilities/geometry-transition.md) — GeometryTransition 触发二次布局和 isDeleteRsNode_ 传播

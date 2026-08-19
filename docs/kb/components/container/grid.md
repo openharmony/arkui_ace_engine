@@ -122,9 +122,9 @@ Grid 功能域：`specs/05-ui-components/03-scroll-container-components/04-grid-
 
 ## 相关主题
 
-- GridItem：`docs/kb/components/container/grid_item.md`
-- GridRow：`docs/kb/components/container/grid_row.md`
-- GridCol：`docs/kb/components/container/grid_col.md`
+- [GridItem：`docs/kb/components/container/grid-item.md`](grid-item.md)
+- [GridRow：`docs/kb/components/container/grid-row.md`](grid-row.md)
+- [GridCol：`docs/kb/components/container/grid-col.md`](grid-col.md)
 - LazyGrid：`docs/pattern/lazy_layout/LazyGrid_Knowledge_Base.md`
 - ScrollablePattern：`frameworks/core/components_ng/pattern/scrollable/`
-- 布局属性：`docs/kb/capabilities/layout-attributes.md`
+- [布局属性：`docs/kb/capabilities/layout-attributes.md`](../../capabilities/layout-attributes.md)

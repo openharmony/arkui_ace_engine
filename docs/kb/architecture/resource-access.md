@@ -67,5 +67,5 @@ ArkUI 资源访问机制负责 `$r` / `$rawfile` 表达式解析、资源查找�
 
 ## 相关主题
 
-- 主题分层访问
-- 资源动态切换
+- [主题分层访问](theme-layered-access.md)
+- [资源动态切换](resource-dynamic-switching.md)

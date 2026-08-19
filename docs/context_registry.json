@@ -421,7 +421,7 @@
         "垂直分割布局",
         "LinearSplit Column"
       ],
-      "kb": "docs/kb/components/container/column_split.md",
+      "kb": "docs/kb/components/container/column-split.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/04-column-split",
       "func_id": "05-01-04",
       "spec_status": "active",
@@ -530,7 +530,7 @@
         "响应式列",
         "Grid Column"
       ],
-      "kb": "docs/kb/components/container/grid_col.md",
+      "kb": "docs/kb/components/container/grid-col.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/06-grid-col",
       "func_id": "05-01-06",
       "spec_status": "active",
@@ -583,7 +583,7 @@
         "响应式行",
         "Grid Row"
       ],
-      "kb": "docs/kb/components/container/grid_row.md",
+      "kb": "docs/kb/components/container/grid-row.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/07-grid-row",
       "func_id": "05-01-07",
       "spec_status": "active",
@@ -709,7 +709,7 @@
         "网格项",
         "网格子项"
       ],
-      "kb": "docs/kb/components/container/grid_item.md",
+      "kb": "docs/kb/components/container/grid-item.md",
       "spec_domain": "specs/05-ui-components/03-scroll-container-components/04-grid-grid-item",
       "func_id": "05-03-04",
       "spec_status": "active",
@@ -763,7 +763,7 @@
         "锚定布局",
         "Relative Layout"
       ],
-      "kb": "docs/kb/components/container/relative_container.md",
+      "kb": "docs/kb/components/container/relative-container.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/08-relative-container",
       "func_id": "05-01-08",
       "spec_status": "active",
@@ -873,7 +873,7 @@
         "水平分割布局",
         "LinearSplit Row"
       ],
-      "kb": "docs/kb/components/container/row_split.md",
+      "kb": "docs/kb/components/container/row-split.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/10-row-split",
       "func_id": "05-01-10",
       "spec_status": "active",
@@ -980,7 +980,7 @@
         "折痕避让布局",
         "Folder Stack"
       ],
-      "kb": "docs/kb/components/container/folder_stack.md",
+      "kb": "docs/kb/components/container/folder-stack.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/12-folder-stack",
       "func_id": "05-01-12",
       "spec_status": "active",
@@ -1037,7 +1037,7 @@
         "运行时布局切换",
         "ArkDynamicLayout"
       ],
-      "kb": "docs/kb/components/container/dynamic_layout.md",
+      "kb": "docs/kb/components/container/dynamic-layout.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/13-dynamic-layout",
       "func_id": "05-01-13",
       "spec_status": "active",
@@ -1216,7 +1216,7 @@
         "离屏Canvas",
         "离屏画布对象"
       ],
-      "kb": "docs/kb/components/shape/offscreen_canvas.md",
+      "kb": "docs/kb/components/shape/offscreen-canvas.md",
       "spec_domain": "specs/05-ui-components/14-drawing-components/03-offscreen-canvas",
       "func_id": "05-14-03",
       "spec_status": "active",
@@ -1325,7 +1325,7 @@
         "富文本编辑",
         "RichEditorPattern"
       ],
-      "kb": "docs/kb/components/basic/rich_editor.md",
+      "kb": "docs/kb/components/basic/rich-editor.md",
       "spec_domain": "specs/05-ui-components/09-text-components/02-rich-editor",
       "func_id": "05-09-02",
       "spec_status": "active",
@@ -1514,7 +1514,7 @@
         "帧动画",
         "ImageAnimatorPattern"
       ],
-      "kb": "docs/kb/components/media/image_animator.md",
+      "kb": "docs/kb/components/media/image-animator.md",
       "spec_domain": "specs/05-ui-components/08-image-components/02-image-animator",
       "func_id": "05-08-02",
       "spec_status": "active",
@@ -1577,7 +1577,7 @@
         "Drawable描述",
         "ArkUI_DrawableDescriptor"
       ],
-      "kb": "docs/kb/capabilities/drawable_descriptor.md",
+      "kb": "docs/kb/capabilities/drawable-descriptor.md",
       "spec_domain": "specs/04-common-capability/01-image-loading/03-drawable-descriptor",
       "func_id": "04-01-03",
       "spec_status": "active",
@@ -2164,7 +2164,7 @@
         "侧边栏容器",
         "SideBarContainerPattern"
       ],
-      "kb": "docs/kb/components/container/side_bar_container.md",
+      "kb": "docs/kb/components/container/side-bar-container.md",
       "spec_domain": "specs/05-ui-components/02-navigation-components/06-sidebar-container",
       "func_id": "05-02-06",
       "spec_status": "active",
@@ -2381,7 +2381,7 @@
         "文本滚动选择器",
         "TextPickerPattern"
       ],
-      "kb": "docs/kb/components/selector/text_picker.md",
+      "kb": "docs/kb/components/selector/text-picker.md",
       "spec_domain": "specs/05-ui-components/05-picker-components/03-text-picker",
       "func_id": "05-05-03",
       "spec_status": "active",
@@ -2444,7 +2444,7 @@
         "日期滚动选择器",
         "DatePickerPattern"
       ],
-      "kb": "docs/kb/components/selector/date_picker.md",
+      "kb": "docs/kb/components/selector/date-picker.md",
       "spec_domain": "specs/05-ui-components/05-picker-components/02-date-picker",
       "func_id": "05-05-02",
       "spec_status": "active",
@@ -2507,7 +2507,7 @@
         "时间滚动选择器",
         "TimePickerRowPattern"
       ],
-      "kb": "docs/kb/components/selector/time_picker.md",
+      "kb": "docs/kb/components/selector/time-picker.md",
       "spec_domain": "specs/05-ui-components/05-picker-components/04-time-picker",
       "func_id": "05-05-04",
       "spec_status": "active",
@@ -2570,7 +2570,7 @@
         "日历选择器弹窗",
         "CalendarDialog"
       ],
-      "kb": "docs/kb/components/selector/calendar_picker_dialog.md",
+      "kb": "docs/kb/components/selector/calendar-picker-dialog.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/05-calendar-picker-dialog",
       "func_id": "05-06-05",
       "spec_status": "active",
@@ -2624,7 +2624,7 @@
         "日期选择器弹窗",
         "DateDialog"
       ],
-      "kb": "docs/kb/components/selector/date_picker_dialog.md",
+      "kb": "docs/kb/components/selector/date-picker-dialog.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/06-date-picker-dialog",
       "func_id": "05-06-06",
       "spec_status": "active",
@@ -2679,7 +2679,7 @@
         "时间选择器弹窗",
         "TimeDialog"
       ],
-      "kb": "docs/kb/components/selector/time_picker_dialog.md",
+      "kb": "docs/kb/components/selector/time-picker-dialog.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/07-time-picker-dialog",
       "func_id": "05-06-07",
       "spec_status": "active",
@@ -2735,7 +2735,7 @@
         "文本选择器弹窗",
         "TextDialog"
       ],
-      "kb": "docs/kb/components/selector/text_picker_dialog.md",
+      "kb": "docs/kb/components/selector/text-picker-dialog.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/08-text-picker-dialog",
       "func_id": "05-06-08",
       "spec_status": "active",
@@ -2791,7 +2791,7 @@
         "ContainerPicker",
         "容器选择器"
       ],
-      "kb": "docs/kb/components/selector/ui_picker_component.md",
+      "kb": "docs/kb/components/selector/ui-picker-component.md",
       "spec_domain": "specs/05-ui-components/05-picker-components/06-picker",
       "func_id": "05-05-06",
       "spec_status": "active",
@@ -2854,7 +2854,7 @@
         "索引组件",
         "IndexerPattern"
       ],
-      "kb": "docs/kb/components/data_display/alphabet_indexer.md",
+      "kb": "docs/kb/components/data_display/alphabet-indexer.md",
       "spec_domain": "specs/05-ui-components/03-scroll-container-components/02-alphabet-indexer",
       "func_id": "05-03-02",
       "spec_status": "active",
@@ -3006,7 +3006,7 @@
         "Placeholder Component",
         "占位"
       ],
-      "kb": "docs/kb/capabilities/placeholder_component.md",
+      "kb": "docs/kb/capabilities/placeholder-component.md",
       "spec_domain": "specs/04-common-capability/06-custom-node/01-placeholder-component",
       "func_id": "04-06-01",
       "spec_status": "active",
@@ -3044,7 +3044,7 @@
         "NodeAdapter适配器",
         "命令式适配器"
       ],
-      "kb": "docs/kb/capabilities/node_adapter.md",
+      "kb": "docs/kb/capabilities/node-adapter.md",
       "spec_domain": "specs/04-common-capability/06-custom-node/06-node-adapter",
       "func_id": "04-06-06",
       "spec_status": "active",
@@ -3089,7 +3089,7 @@
         "UINode 复用",
         "Recycle Framework"
       ],
-      "kb": "docs/kb/architecture/component_reuse_framework.md",
+      "kb": "docs/kb/architecture/component-reuse-framework.md",
       "spec_domain": "specs/04-common-capability/19-component-reuse/01-component-reuse-framework",
       "func_id": "04-19-01",
       "spec_status": "active",
@@ -3135,7 +3135,7 @@
         "能力组件",
         "跨进程嵌入组件"
       ],
-      "kb": "docs/kb/components/embedded/ability_component.md",
+      "kb": "docs/kb/components/embedded/ability-component.md",
       "spec_domain": "specs/05-ui-components/12-embedded-display-components/02-ability-component",
       "func_id": "05-12-02",
       "spec_status": "active",
@@ -3177,7 +3177,7 @@
         "节点容器",
         "占位容器组件"
       ],
-      "kb": "docs/kb/components/custom-node/node_container.md",
+      "kb": "docs/kb/components/custom-node/node-container.md",
       "spec_domain": "specs/05-ui-components/16-custom-placeholder-components/01-node-container",
       "func_id": "05-16-01",
       "spec_status": "active",
@@ -3229,7 +3229,7 @@
         "内容插槽",
         "占位插槽组件"
       ],
-      "kb": "docs/kb/components/custom-node/content_slot.md",
+      "kb": "docs/kb/components/custom-node/content-slot.md",
       "spec_domain": "specs/05-ui-components/16-custom-placeholder-components/02-content-slot",
       "func_id": "05-16-02",
       "spec_status": "active",
@@ -3281,7 +3281,7 @@
         "ForEach 语法",
         "Render Control"
       ],
-      "kb": "docs/kb/syntax/render_control.md",
+      "kb": "docs/kb/syntax/render-control.md",
       "spec_domain": "specs/07-frontend/05-render-control/01-render-control-syntax",
       "func_id": "07-05-01",
       "spec_status": "active",
@@ -3334,7 +3334,7 @@
         "懒加载循环",
         "LazyForEach 语法"
       ],
-      "kb": "docs/kb/syntax/lazy_for_each.md",
+      "kb": "docs/kb/syntax/lazy-for-each.md",
       "spec_domain": "specs/07-frontend/05-render-control/02-lazy-foreach",
       "func_id": "07-05-02",
       "spec_status": "active",
@@ -3502,7 +3502,7 @@
         "ObservedPropertyPU",
         "PU 核心"
       ],
-      "kb": "docs/kb/frontend/state_management/v1_core.md",
+      "kb": "docs/kb/frontend/state_management/v1-core.md",
       "spec_status": "active",
       "source_paths": {
         "pu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_view.ts",
@@ -3557,7 +3557,7 @@
         "ObserveV2 单例",
         "V2 依赖图"
       ],
-      "kb": "docs/kb/frontend/state_management/v2_core.md",
+      "kb": "docs/kb/frontend/state_management/v2-core.md",
       "spec_status": "active",
       "source_paths": {
         "v2_change_observation": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_change_observation.ts",
@@ -3613,7 +3613,7 @@
         "@State @Prop @Link",
         "@Provide @Consume"
       ],
-      "kb": "docs/kb/frontend/state_management/v1_decorators.md",
+      "kb": "docs/kb/frontend/state_management/v1-decorators.md",
       "spec_status": "active",
       "source_paths": {
         "pu_observed_property": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_observed_property.ts",
@@ -3659,7 +3659,7 @@
         "V1 Data Object State",
         "@Observed/@Track"
       ],
-      "kb": "docs/kb/frontend/state_management/v1_decorators.md",
+      "kb": "docs/kb/frontend/state_management/v1-decorators.md",
       "spec_status": "active",
       "source_paths": {
         "observed_object": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/observed_object.ts",
@@ -3707,7 +3707,7 @@
         "@ObservedV2 @Trace",
         "@Param @Once @Event"
       ],
-      "kb": "docs/kb/frontend/state_management/v2_decorators.md",
+      "kb": "docs/kb/frontend/state_management/v2-decorators.md",
       "spec_status": "active",
       "source_paths": {
         "v2_decorators": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_decorators.ts",
@@ -4517,7 +4517,7 @@
         "Popup",
         "Bubble"
       ],
-      "kb": "docs/kb/components/overlay/bind_popup.md",
+      "kb": "docs/kb/components/overlay/bind-popup.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/11-popup",
       "func_id": "05-06-11",
       "spec_status": "active",
@@ -4559,7 +4559,7 @@
         "PopupV2",
         "@ohos.arkui.advanced.Popup"
       ],
-      "kb": "docs/kb/components/overlay/popup_advanced.md",
+      "kb": "docs/kb/components/overlay/popup-advanced.md",
       "spec_domain": "specs/07-frontend/01-arkts-advanced-components/16-popup",
       "func_id": "07-01-16",
       "spec_status": "active",
@@ -4648,7 +4648,7 @@
         "Tips",
         "气泡提示"
       ],
-      "kb": "docs/kb/components/overlay/bind_tips.md",
+      "kb": "docs/kb/components/overlay/bind-tips.md",
       "spec_domain": "specs/04-common-capability/03-common-attributes/05-popup-attributes",
       "func_id": "04-03-05",
       "spec_status": "active",
@@ -4838,7 +4838,7 @@
         "圆弧滑动选择器",
         "@ohos.arkui.advanced.ArcSlider"
       ],
-      "kb": "docs/kb/components/selector/arc_slider.md",
+      "kb": "docs/kb/components/selector/arc-slider.md",
       "spec_domain": "specs/10-product-customization/01-wearable/01-arc-component",
       "func_id": "10-01-01",
       "spec_status": "active",
@@ -4872,7 +4872,7 @@
         "圆弧按钮",
         "@ohos.arkui.advanced.ArcButton"
       ],
-      "kb": "docs/kb/components/selector/arc_button.md",
+      "kb": "docs/kb/components/selector/arc-button.md",
       "spec_domain": "specs/10-product-customization/01-wearable/01-arc-component",
       "func_id": "10-01-01",
       "spec_status": "active",
@@ -4910,7 +4910,7 @@
         "动画框架",
         "Animator"
       ],
-      "kb": "docs/kb/capabilities/animation_framework.md",
+      "kb": "docs/kb/capabilities/animation-framework.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/01-animation-framework",
       "func_id": "03-02-01",
       "spec_status": "active",
@@ -4954,7 +4954,7 @@
         "属性动画",
         "PropertyAnimation"
       ],
-      "kb": "docs/kb/capabilities/property_animation.md",
+      "kb": "docs/kb/capabilities/property-animation.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/02-property-animation",
       "func_id": "03-02-02",
       "spec_status": "active",
@@ -4992,7 +4992,7 @@
         "显式动画",
         "animateTo"
       ],
-      "kb": "docs/kb/capabilities/explicit_animation.md",
+      "kb": "docs/kb/capabilities/explicit-animation.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/03-explicit-animation",
       "func_id": "03-02-03",
       "spec_status": "active",
@@ -5029,7 +5029,7 @@
         "关键帧动画",
         "keyframeAnimateTo"
       ],
-      "kb": "docs/kb/capabilities/keyframe_animation.md",
+      "kb": "docs/kb/capabilities/keyframe-animation.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/04-keyframe-animation",
       "func_id": "03-02-04",
       "spec_status": "active",
@@ -5069,7 +5069,7 @@
         "转场动画",
         "TransitionEffect"
       ],
-      "kb": "docs/kb/capabilities/transition_animation.md",
+      "kb": "docs/kb/capabilities/transition-animation.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/05-transition-animation",
       "func_id": "03-02-05",
       "spec_status": "active",
@@ -5110,7 +5110,7 @@
         "共享元素动画",
         "sharedTransition"
       ],
-      "kb": "docs/kb/capabilities/shared_transition.md",
+      "kb": "docs/kb/capabilities/shared-transition.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/06-shared-transition",
       "func_id": "03-02-06",
       "spec_status": "active",
@@ -5149,7 +5149,7 @@
         "组件共享元素动画",
         "geometryTransition"
       ],
-      "kb": "docs/kb/capabilities/geometry_transition.md",
+      "kb": "docs/kb/capabilities/geometry-transition.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/07-geometry-transition",
       "func_id": "03-02-07",
       "spec_status": "active",
@@ -5185,7 +5185,7 @@
         "路径动画",
         "motionPath"
       ],
-      "kb": "docs/kb/capabilities/motion_path.md",
+      "kb": "docs/kb/capabilities/motion-path.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/08-motion-path",
       "func_id": "03-02-08",
       "spec_status": "active",
@@ -5226,7 +5226,7 @@
         "SpringMotion",
         "弹簧动画"
       ],
-      "kb": "docs/kb/capabilities/physics_animation.md",
+      "kb": "docs/kb/capabilities/physics-animation.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/09-physics-animation",
       "func_id": "03-02-09",
       "spec_status": "active",
@@ -5271,7 +5271,7 @@
         "AnimationInterface",
         "Curve"
       ],
-      "kb": "docs/kb/capabilities/animation_interface.md",
+      "kb": "docs/kb/capabilities/animation-interface.md",
       "spec_domain": "specs/03-engine-framework/02-animation-capability/10-animation-interface",
       "func_id": "03-02-10",
       "spec_status": "active",
@@ -6039,7 +6039,7 @@
         "警告对话框",
         "Alert Dialog"
       ],
-      "kb": "docs/kb/components/overlay/alert_dialog.md",
+      "kb": "docs/kb/components/overlay/alert-dialog.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/02-alert-dialog",
       "func_id": "05-06-02",
       "spec_status": "active",
@@ -6091,7 +6091,7 @@
         "操作表",
         "List Selection Dialog"
       ],
-      "kb": "docs/kb/components/overlay/action_sheet.md",
+      "kb": "docs/kb/components/overlay/action-sheet.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/03-list-selection-dialog",
       "func_id": "05-06-03",
       "spec_status": "active",
@@ -6141,7 +6141,7 @@
         "上下文菜单",
         "Context Menu"
       ],
-      "kb": "docs/kb/components/overlay/context_menu.md",
+      "kb": "docs/kb/components/overlay/context-menu.md",
       "spec_domain": "specs/05-ui-components/06-popup-components/09-context-menu",
       "func_id": "05-06-09",
       "spec_status": "active",
@@ -6201,7 +6201,7 @@
         "ContentCover",
         "Full Modal"
       ],
-      "kb": "docs/kb/components/overlay/bind_content_cover.md",
+      "kb": "docs/kb/components/overlay/bind-content-cover.md",
       "spec_domain": "specs/05-ui-components/07-modal-components/02-full-modal",
       "func_id": "05-07-02",
       "spec_status": "active",
@@ -6246,7 +6246,7 @@
         "主题作用域",
         "Theme Scope"
       ],
-      "kb": "docs/kb/components/container/with_theme.md",
+      "kb": "docs/kb/components/container/with-theme.md",
       "spec_domain": "specs/05-ui-components/15-theme-components/01-with-theme",
       "func_id": "05-15-01",
       "spec_status": "active",
@@ -6352,7 +6352,7 @@
         "State Management",
         "状态管理子系统"
       ],
-      "kb": "docs/kb/frontend/state_management.md",
+      "kb": "docs/kb/frontend/state-management.md",
       "spec_status": "pending",
       "source_paths": {
         "ts_library_root": "frameworks/bridge/declarative_frontend/state_mgmt/",
@@ -6458,7 +6458,7 @@
         "宿主节点",
         "CustomNode 宿主"
       ],
-      "kb": "docs/kb/frontend/state_management/cpp_bindings.md",
+      "kb": "docs/kb/frontend/state_management/cpp-bindings.md",
       "spec_status": "active",
       "source_paths": {
         "jsi_engine": "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp",
@@ -6609,7 +6609,7 @@
         "组件复用与生命周期",
         "状态管理自定义组件"
       ],
-      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "kb": "docs/kb/frontend/state_management/custom-component.md",
       "spec_status": "active",
       "source_paths": {
         "pu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_view.ts",
@@ -6660,7 +6660,7 @@
         "Component Lifecycle",
         "自定义组件生命周期状态机"
       ],
-      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "kb": "docs/kb/frontend/state_management/custom-component.md",
       "spec_status": "active",
       "source_paths": {
         "lifecycle": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/pu_lifecycle.ts",
@@ -6702,7 +6702,7 @@
         "Component Reuse",
         "状态管理组件复用"
       ],
-      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "kb": "docs/kb/frontend/state_management/custom-component.md",
       "spec_status": "active",
       "source_paths": {
         "v1_recycle_manager": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_recycle_manager.ts",
@@ -6745,7 +6745,7 @@
         "Component Freeze",
         "freezeWhenInactive"
       ],
-      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "kb": "docs/kb/frontend/state_management/custom-component.md",
       "spec_status": "active",
       "source_paths": {
         "view_base": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_base.ts",
@@ -6793,7 +6793,7 @@
         "动态静态互操作",
         "Static Interop"
       ],
-      "kb": "docs/kb/frontend/state_management/interop_bridge.md",
+      "kb": "docs/kb/frontend/state_management/interop-bridge.md",
       "spec_status": "active",
       "source_paths": {
         "interop_configure": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_configure.ts",
@@ -6835,7 +6835,7 @@
         "Static V1 Core",
         "arkoala V1 核心"
       ],
-      "kb": "docs/kb/frontend/state_management/static_v1_core.md",
+      "kb": "docs/kb/frontend/state_management/static-v1-core.md",
       "func_id": "07-02-08",
       "spec_domain": "specs/07-frontend/02-state-management/08-static-v1-component-state",
       "spec_status": "active",
@@ -6946,7 +6946,7 @@
         "arkoala V1 装饰器",
         "静态 V1 状态管理装饰器"
       ],
-      "kb": "docs/kb/frontend/state_management/static_v1_decorators.md",
+      "kb": "docs/kb/frontend/state_management/static-v1-decorators.md",
       "func_id": "07-02-08",
       "spec_domain": "specs/07-frontend/02-state-management/08-static-v1-component-state",
       "spec_status": "active",
@@ -7216,7 +7216,7 @@
         "Static V2 Core",
         "arkoala V2 核心"
       ],
-      "kb": "docs/kb/frontend/state_management/static_v2_core.md",
+      "kb": "docs/kb/frontend/state_management/static-v2-core.md",
       "func_id": "07-02-11",
       "spec_domain": "specs/07-frontend/02-state-management/11-static-v2-component-state",
       "spec_status": "active",
@@ -7517,7 +7517,7 @@
         "UIPlugin 转换",
         "静态 V2 状态管理装饰器"
       ],
-      "kb": "docs/kb/frontend/state_management/static_v2_decorators.md",
+      "kb": "docs/kb/frontend/state_management/static-v2-decorators.md",
       "func_id": "07-02-11",
       "spec_domain": "specs/07-frontend/02-state-management/11-static-v2-component-state",
       "spec_status": "active",
@@ -7571,7 +7571,7 @@
         "arkoala 存储",
         "静态状态管理存储"
       ],
-      "kb": "docs/kb/frontend/state_management/static_storage.md",
+      "kb": "docs/kb/frontend/state_management/static-storage.md",
       "func_id": "07-02-10",
       "spec_domain": "specs/07-frontend/02-state-management/10-static-v1-app-state",
       "spec_status": "active",
@@ -7628,7 +7628,7 @@
         "Static Interop Bridge",
         "arkoala 互操作"
       ],
-      "kb": "docs/kb/frontend/state_management/static_interop_bridge.md",
+      "kb": "docs/kb/frontend/state_management/static-interop-bridge.md",
       "func_id": "07-02-14",
       "spec_domain": "specs/07-frontend/02-state-management/14-state-management-interop",
       "spec_status": "active",
@@ -7674,7 +7674,7 @@
         "arkoala 自定义组件",
         "静态状态管理自定义组件"
       ],
-      "kb": "docs/kb/frontend/state_management/static_custom_component.md",
+      "kb": "docs/kb/frontend/state_management/static-custom-component.md",
       "func_id": "07-03-07",
       "spec_domain": "specs/07-frontend/03-custom-components/07-static-custom-component-state",
       "spec_status": "active",
@@ -7847,7 +7847,7 @@
         "多行文本",
         "TextFieldPattern"
       ],
-      "kb": "docs/kb/components/basic/text_area.md",
+      "kb": "docs/kb/components/basic/text-area.md",
       "spec_domain": "specs/05-ui-components/09-text-components/05-text-area",
       "func_id": "05-09-05",
       "spec_status": "active",
@@ -8077,7 +8077,7 @@
         "ImageSpanItem",
         "ImageSpanView"
       ],
-      "kb": "docs/kb/components/basic/image_span.md",
+      "kb": "docs/kb/components/basic/image-span.md",
       "spec_domain": "specs/05-ui-components/09-text-components/06-span-components",
       "func_id": "05-09-06",
       "spec_status": "active",
@@ -8127,7 +8127,7 @@
         "滚动条",
         "Scrollbar"
       ],
-      "kb": "docs/kb/components/container/scroll_bar.md",
+      "kb": "docs/kb/components/container/scroll-bar.md",
       "spec_domain": "specs/05-ui-components/03-scroll-container-components/03-scroll-bar",
       "func_id": "05-03-03",
       "spec_status": "active",
@@ -8715,7 +8715,7 @@
         "SymbolSpanModelNG",
         "SymbolSpanBridge"
       ],
-      "kb": "docs/kb/components/basic/symbol_span.md",
+      "kb": "docs/kb/components/basic/symbol-span.md",
       "spec_domain": "specs/05-ui-components/09-text-components/06-span-components",
       "func_id": "05-09-06",
       "spec_status": "active",
@@ -8764,7 +8764,7 @@
         "ContainerSpanNode",
         "JSContainerSpan"
       ],
-      "kb": "docs/kb/components/basic/container_span.md",
+      "kb": "docs/kb/components/basic/container-span.md",
       "spec_domain": "specs/05-ui-components/09-text-components/06-span-components",
       "func_id": "05-09-06",
       "spec_status": "active",
@@ -9319,7 +9319,7 @@
         "Draw Modifier",
         "自定义绘制扩展"
       ],
-      "kb": "docs/kb/capabilities/draw_modifier.md",
+      "kb": "docs/kb/capabilities/draw-modifier.md",
       "spec_domain": "specs/04-common-capability/05-custom-extension/01-draw-modifier",
       "func_id": "04-05-01",
       "spec_status": "active",
@@ -9374,13 +9374,13 @@
         "Attribute Modifier",
         "动态属性通路"
       ],
-      "kb": "docs/kb/capabilities/attribute_modifier.md",
+      "kb": "docs/kb/capabilities/attribute-modifier.md",
       "spec_domain": "specs/04-common-capability/05-custom-extension/02-dynamic-attributes",
       "func_id": "04-05-02",
       "spec_status": "active",
       "source_paths": {
         "ark_component_ts": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
-        "ark_common_modifier_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-preprocessed/arkui/hooks/modifiers/ArkCommonModifier.ets",
+        "ark_common_modifier_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkCommonModifier.ets",
         "ark_modifier_dir": "frameworks/bridge/declarative_frontend/ark_modifier/src/",
         "arkoala_api_generated_h": "frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h",
         "modifier_impl_dir": "frameworks/core/interfaces/native/implementation/"
@@ -9424,7 +9424,7 @@
         "Custom Property",
         "节点自定义属性"
       ],
-      "kb": "docs/kb/capabilities/custom_property.md",
+      "kb": "docs/kb/capabilities/custom-property.md",
       "spec_domain": "specs/04-common-capability/05-custom-extension/05-custom-property",
       "func_id": "04-05-05",
       "spec_status": "active",
@@ -9447,7 +9447,7 @@
         "frame_node_static": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.static.d.ets"
       },
       "test_paths": [
-        "test/unittest/core/base/frame_node_test_ng*.cpp",
+        "test/unittest/core/base/frame_node_test_ng.cpp",
         "test/unittest/capi/"
       ],
       "status": "active",
@@ -9508,14 +9508,14 @@
         "frame_node",
         "ArkUI节点"
       ],
-      "kb": "docs/kb/capabilities/frame_node.md",
+      "kb": "docs/kb/capabilities/frame-node.md",
       "spec_domain": "specs/04-common-capability/06-custom-node/02-frame-node",
       "func_id": "04-06-02",
       "spec_status": "active",
       "source_paths": {
         "arkts_frame_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/frame_node.ts",
         "ark_node_src_dir": "frameworks/bridge/declarative_frontend/ark_node/src",
-        "static_frame_node_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-preprocessed/arkui/FrameNode.ets",
+        "static_frame_node_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ets",
         "jsi_bridge_cpp": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp",
         "frame_node_modifier_cpp": "frameworks/core/interfaces/native/node/frame_node_modifier.cpp",
         "node_api_cpp": "frameworks/core/interfaces/native/node/node_api.cpp",
@@ -9576,7 +9576,7 @@
         "render_node",
         "自定义绘制节点"
       ],
-      "kb": "docs/kb/capabilities/render_node.md",
+      "kb": "docs/kb/capabilities/render-node.md",
       "spec_domain": "specs/04-common-capability/06-custom-node/03-render-node",
       "func_id": "04-06-03",
       "spec_status": "active",
@@ -9632,7 +9632,7 @@
         "builder_node",
         "自定义叶子节点"
       ],
-      "kb": "docs/kb/capabilities/builder_node.md",
+      "kb": "docs/kb/capabilities/builder-node.md",
       "spec_domain": "specs/04-common-capability/06-custom-node/04-builder-node",
       "func_id": "04-06-04",
       "spec_status": "active",
@@ -9685,7 +9685,7 @@
         "组件内容",
         "component_content"
       ],
-      "kb": "docs/kb/capabilities/component_content.md",
+      "kb": "docs/kb/capabilities/component-content.md",
       "spec_domain": "specs/04-common-capability/06-custom-node/05-component-content",
       "func_id": "04-06-05",
       "spec_status": "active",
@@ -9730,7 +9730,7 @@
         "typed_frame_node",
         "typeNode"
       ],
-      "kb": "docs/kb/capabilities/typed_frame_node.md",
+      "kb": "docs/kb/capabilities/typed-frame-node.md",
       "spec_domain": "specs/04-common-capability/06-custom-node/07-typed-frame-node",
       "func_id": "04-06-07",
       "spec_status": "active",
@@ -9777,7 +9777,7 @@
         "命令式Modifier类",
         "Command Modifier"
       ],
-      "kb": "docs/kb/capabilities/component_modifier.md",
+      "kb": "docs/kb/capabilities/component-modifier.md",
       "spec_domain": "specs/04-common-capability/05-custom-extension/06-component-modifier",
       "func_id": "04-05-06",
       "spec_status": "active",
@@ -9785,7 +9785,6 @@
         "common_modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/common_modifier.ts",
         "modifier_utilities_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts",
         "modifier_dir": "frameworks/bridge/declarative_frontend/ark_modifier/src/",
-        "static_modifier_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-preprocessed/arkui/",
         "static_modifier_bridge": "frameworks/core/components_ng/pattern/",
         "modifier_impl_dir": "frameworks/core/interfaces/native/implementation/"
       },
@@ -9871,7 +9870,7 @@
       "kb": "docs/kb/components/data_display/qrcode.md",
       "func_id": "05-10-06",
       "spec_domain": "specs/05-ui-components/10-information-display-components/06-qrcode",
-      "spec_status": "active",
+      "spec_status": "pending",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
         "model": "frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
@@ -10196,7 +10195,7 @@
         "数据面板",
         "占比图"
       ],
-      "kb": "docs/kb/components/data_display/data_panel.md",
+      "kb": "docs/kb/components/data_display/data-panel.md",
       "spec_domain": "specs/05-ui-components/10-information-display-components/01-data-panel",
       "func_id": "05-10-01",
       "spec_status": "active",
@@ -10306,7 +10305,7 @@
         "加载进度",
         "Loading组件"
       ],
-      "kb": "docs/kb/components/data_display/loading_progress.md",
+      "kb": "docs/kb/components/data_display/loading-progress.md",
       "spec_domain": "specs/05-ui-components/10-information-display-components/03-loading-progress",
       "func_id": "05-10-03",
       "spec_status": "active",
@@ -10361,7 +10360,7 @@
         "图案锁",
         "手势锁"
       ],
-      "kb": "docs/kb/components/data_display/pattern_lock.md",
+      "kb": "docs/kb/components/data_display/pattern-lock.md",
       "spec_domain": "specs/05-ui-components/10-information-display-components/04-pattern-lock",
       "func_id": "05-10-04",
       "spec_status": "active",
@@ -10375,10 +10374,10 @@
         "modifier": "frameworks/core/components_ng/pattern/patternlock/patternlock_modifier.cpp",
         "layout_algorithm": "frameworks/core/components_ng/pattern/patternlock/patternlock_layout_algorithm.cpp",
         "controller": "frameworks/core/components_ng/pattern/patternlock/pattern_lock_controller.cpp",
-        "bridge": "frameworks/core/components_ng/pattern/patternlock/arkts_native_pattern_lock_bridge.cpp",
-        "dynamic_modifier": "frameworks/core/components_ng/pattern/patternlock/patternlock_dynamic_modifier.cpp",
-        "static_modifier": "frameworks/core/components_ng/pattern/patternlock/patternlock_static_modifier.cpp",
-        "dynamic_module": "frameworks/core/components_ng/pattern/patternlock/patternlock_dynamic_module.cpp"
+        "bridge": "frameworks/core/components_ng/pattern/patternlock/bridge/arkts_native_pattern_lock_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/patternlock/bridge/patternlock_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/patternlock/bridge/patternlock_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/patternlock/bridge/patternlock_dynamic_module.cpp"
       },
       "api_paths": {
         "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/pattern_lock.d.ts",
@@ -10452,7 +10451,7 @@
       "id": "NestedScrollOffsetNoResponse",
       "name": "Nested Scroll Offset No Response",
       "name_cn": "嵌套滚动偏移量不响应",
-      "kind": "common_capability",
+      "kind": "issue",
       "category": "interaction",
       "keywords": [
         "NestedScrollOffsetNoResponse",
@@ -10480,7 +10479,11 @@
       "func_id": "05-03-05",
       "spec_status": "pending",
       "status": "active",
-      "last_verified": "2026-07-31"
+      "last_verified": "2026-07-31",
+      "func_ids": [
+        "05-03-05",
+        "05-03-07"
+      ]
     },
     {
       "id": "CustomSpanControllerLifecycle",
@@ -10996,7 +10999,7 @@
         "插件组件",
         "PluginComponentPattern"
       ],
-      "kb": "docs/kb/components/container/plugin_component.md",
+      "kb": "docs/kb/components/container/plugin-component.md",
       "spec_domain": "specs/05-ui-components/12-embedded-display-components/01-plugin-component",
       "func_id": "05-12-01",
       "spec_status": "active",
@@ -11050,7 +11053,7 @@
         "UIExtension组件",
         "UIExtensionPattern"
       ],
-      "kb": "docs/kb/components/container/ui_extension_component.md",
+      "kb": "docs/kb/components/container/ui-extension-component.md",
       "spec_domain": "specs/05-ui-components/12-embedded-display-components/03-ui-extension-component",
       "func_id": "05-12-03",
       "spec_status": "active",
@@ -11104,7 +11107,7 @@
         "Embedded组件",
         "EmbeddedUIExtension"
       ],
-      "kb": "docs/kb/components/container/embedded_component.md",
+      "kb": "docs/kb/components/container/embedded-component.md",
       "spec_domain": "specs/05-ui-components/12-embedded-display-components/04-embedded-component",
       "func_id": "05-12-04",
       "spec_status": "active",
@@ -11157,7 +11160,7 @@
         "隔离组件",
         "IsolatedPattern"
       ],
-      "kb": "docs/kb/components/container/isolated_component.md",
+      "kb": "docs/kb/components/container/isolated-component.md",
       "spec_domain": "specs/05-ui-components/12-embedded-display-components/05-isolated-component",
       "func_id": "05-12-05",
       "spec_status": "active",
@@ -11207,7 +11210,7 @@
         "安全嵌入组件",
         "SecurityUIExtensionPattern"
       ],
-      "kb": "docs/kb/components/container/security_ui_extension_component.md",
+      "kb": "docs/kb/components/container/security-ui-extension-component.md",
       "spec_domain": "specs/05-ui-components/12-embedded-display-components/06-security-ui-extension-component",
       "func_id": "05-12-06",
       "spec_status": "active",
@@ -11256,7 +11259,7 @@
         "DynamicPattern",
         "ArktsDynamicPattern"
       ],
-      "kb": "docs/kb/components/container/dynamic_component.md",
+      "kb": "docs/kb/components/container/dynamic-component.md",
       "spec_domain": "specs/05-ui-components/12-embedded-display-components/07-dynamic-component",
       "func_id": "05-12-07",
       "spec_status": "active",
@@ -11310,7 +11313,7 @@
         "NativeXComponent",
         "XComponentPattern"
       ],
-      "kb": "docs/kb/components/platform/x_component.md",
+      "kb": "docs/kb/components/platform/x-component.md",
       "spec_domain": "specs/05-ui-components/13-platform-components/01-xcomponent",
       "func_id": "05-13-01",
       "spec_status": "active",
@@ -11571,7 +11574,7 @@
       "id": "ScrollerNaNOffsetValidation",
       "name": "Scroller NaN Offset Validation",
       "name_cn": "Scroller 非法数值偏移校验",
-      "kind": "common_capability",
+      "kind": "issue",
       "category": "compatibility",
       "keywords": [
         "ScrollerNaNOffsetValidation",
@@ -11595,7 +11598,10 @@
       "func_id": "05-03-01",
       "spec_status": "pending",
       "status": "active",
-      "last_verified": "2026-07-31"
+      "last_verified": "2026-07-31",
+      "func_ids": [
+        "05-03-01"
+      ]
     },
     {
       "id": "TouchEvents",

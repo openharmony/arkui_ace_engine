@@ -31,7 +31,7 @@ Router 是 ArkUI 早期提供的页面路由管理 NAPI 模块（`@ohos.router`�
 | ArkTS 静态版 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/router/router_impl.ets` | ArkTS 静态版 Router 实现 |
 | ArkTS 静态版索引 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/router/index.ets` | 静态版 Router 模块导出 |
 | ArkTS 静态版 IDL | `frameworks/bridge/arkts_frontend/arkoala_generator/arkui_extra_idl/router_extender.idl` | Router Extender IDL 定义 |
-| ArkTS 静态版声明 | `frameworks/bridge/arkts_frontend/koala_projects/inner_api/@ohos.router.d.ets` | 静态版 Router API 声明 |
+| ArkTS 静态版声明 | `frameworks/bridge/arkts_frontend/koala_projects/inner_api/@ohos/router.d.ets` | 静态版 Router API 声明 |
 | UIContext | `frameworks/core/interfaces/native/implementation/iui_context_accessor.cpp` | UIContext accessor — API 18 推荐的 Router 实例谬用法入口 |
 
 ### API 入口
@@ -53,8 +53,8 @@ Router 为 NAPI kit，无独立单元测试目录。测试通过系统级 XTS �
 | 路由跳转与替换 | `specs/04-common-capability/15-router-mechanism/01-router-management/Feat-01-router-push-replace-back-spec.md` | Func-04-15-01-Feat-01 |
 | 路由栈查询与弹窗拦截 | `specs/04-common-capability/15-router-mechanism/01-router-management/Feat-02-router-stack-query-alert-spec.md` | Func-04-15-01-Feat-02 |
 | 路由管理 Design | `specs/04-common-capability/15-router-mechanism/01-router-management/design.md` | 路由管理架构设计 |
-| 命名路由 | `specs/04-common-capability/15-router-mechanism/03-named-router/Feat-01-named-router-push-replace-spec.md` | Func-04-15-03-Feat-01 |
-| 命名路由 Design | `specs/04-common-capability/15-router-mechanism/03-named-router/design.md` | 命名路由架构设计 |
+| 命名路由 | `specs/04-common-capability/15-router-mechanism/02-named-router/Feat-01-named-router-push-replace-spec.md` | Func-04-15-03-Feat-01 |
+| 命名路由 Design | `specs/04-common-capability/15-router-mechanism/02-named-router/design.md` | 命名路由架构设计 |
 | 分布式路由迁移 | `specs/04-common-capability/07-migration-recovery/01-distributed-router-migration/` | Func-04-07-01 |
 | 路由栈恢复 | `specs/04-common-capability/07-migration-recovery/02-router-stack-recovery/` | Func-04-07-02 |
 

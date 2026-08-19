@@ -84,4 +84,3 @@ API 检索建议：在 SDK 与 Native 头文件中搜索 `backgroundImage`、`ba
 - `ImageLoading`：`docs/kb/capabilities/image-loading.md`
 - `Image`：`docs/kb/components/media/image.md`
 - `LayoutAttributes`：`docs/kb/capabilities/layout-attributes.md`
-

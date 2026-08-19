@@ -59,7 +59,6 @@ List 当前未完成组件化改造（无 `bridge/` 子目录、JSView 文件仍
 | C API（NDK） | `interfaces/native/native_node.h` | `ARKUI_NODE_LIST/ITEM/ITEM_GROUP` + 事件/属性枚举 |
 | 前端 Modifier（ArkTS 侧） | `frameworks/bridge/declarative_frontend/ark_modifier/src/list_modifier.ts` + `list_item_modifier.ts` | ArkTS Modifier 类 |
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后 JSView 和 Bridge 双路径将统一到 `pattern/list/bridge/`，并输出独立 so。
 
 ### 测试入口
 
@@ -112,6 +111,6 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/05-list-l
 
 ## 相关主题
 
-- Scroll：List 继承 `SelectableContainerPattern`（含滚动基础设施），复用 `ScrollablePattern`，详见 Scroll KB
-- ScrollBar：列表内建滚动条经 `ScrollBarProxy`，详见 ScrollBar KB
-- LazyForEach/Repeat：列表常配懒加载渲染控制，详见前端 KB
+- [Scroll：List 继承 `SelectableContainerPattern`（含滚动基础设施），复用 `ScrollablePattern`，详见 Scroll KB](scroll.md)
+- [ScrollBar：列表内建滚动条经 `ScrollBarProxy`，详见 ScrollBar KB](scroll-bar.md)
+- [LazyForEach/Repeat：列表常配懒加载渲染控制，详见前端 KB](../../syntax/lazy-for-each.md)

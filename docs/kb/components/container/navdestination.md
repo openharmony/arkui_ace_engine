@@ -39,6 +39,8 @@ NavDestination 是 Navigation 导航体系中的目标页组件，负责承载�
 
 ### API 解析实现路径
 
+NavDestination **已组件化**（有 `bridge/` 子目录、统一 Bridge），输出独立 SO。
+
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
 | JSView（声明式组件） | `frameworks/bridge/declarative_frontend/jsview/js_navdestination.cpp` | `JSNavDestination::Create()` → `NavDestinationModelNG::GetInstance()->Create()` |
@@ -93,4 +95,4 @@ Spec 功能域：`specs/05-ui-components/02-navigation-components/02-nav-router/
 - NavRouter（已废弃） — `frameworks/core/components_ng/pattern/navrouter/navrouter_pattern.*`（API 13 deprecated，推荐 NavPathStack 替代）
 - Navigator 组件 — `frameworks/core/components_ng/pattern/navigator/`
 - 页面生命周期 — NavPathStack 与 NavDestination 生命周期联动
-- 转场动画 — Navigation 路由转场与 NavDestination 自定义动画
+- [转场动画 — Navigation 路由转场与 NavDestination 自定义动画](../../capabilities/transition-animation.md)

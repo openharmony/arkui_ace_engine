@@ -131,7 +131,6 @@ Sheet 已完成组件化改造，`bridge/` 目录存在动态模块入口。JSVi
 
 ## 相关主题
 
-- Dialog 组件（自定义弹窗，同属弹窗类组件）
-- Menu 组件（菜单组件，同属弹窗类组件）
+- [Dialog 组件（自定义弹窗，同属弹窗类组件）](dialog.md)
+- [Menu 组件（菜单组件，同属弹窗类组件）](menu.md)
 - Overlay 管理器（Sheet / Toast / Dialog / Popup 共享的 overlay 基础设施）
-- 组件化改造通用方案

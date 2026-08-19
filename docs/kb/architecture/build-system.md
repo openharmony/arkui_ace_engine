@@ -105,7 +105,7 @@
 
 ## 相关主题
 
-- 布局框架：`docs/kb/architecture/layout-framework.md`（同层级架构主题）
-- 状态管理：`docs/kb/frontend/state_management/`（frontend 主题，总览页 `docs/kb/frontend/state_management.md`）
-- 窗口机制：`docs/kb/architecture/window-mechanism.md`（同层级架构主题）
+- [布局框架：`docs/kb/architecture/layout-framework.md`（同层级架构主题）](layout-framework.md)
+- 状态管理：[`docs/kb/frontend/state-management.md`](../frontend/state-management.md)（frontend 主题总览页）
+- [窗口机制：`docs/kb/architecture/window-mechanism.md`（同层级架构主题）](window-mechanism.md)
 - IDLize 生成链路：`docs/common/idlize/idlize_Knowledge_Base.md`（idlize_gen 是构建图依赖节点；旧 KB 位置，尚未迁移）

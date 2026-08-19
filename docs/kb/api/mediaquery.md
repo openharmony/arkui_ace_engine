@@ -72,6 +72,6 @@ MediaQuery 功能 ID 为 `04-20-01`，规划功能域为 `specs/04-common-capabi
 
 ## 相关主题
 
-- UIContext：`docs/kb/capabilities/ui-context.md`
-- Layout Attributes：`docs/kb/capabilities/layout-attributes.md`
-- Router：`docs/kb/api/router.md`
+- [UIContext：`docs/kb/capabilities/ui-context.md`](../capabilities/ui-context.md)
+- [Layout Attributes：`docs/kb/capabilities/layout-attributes.md`](../capabilities/layout-attributes.md)
+- [Router：`docs/kb/api/router.md`](router.md)

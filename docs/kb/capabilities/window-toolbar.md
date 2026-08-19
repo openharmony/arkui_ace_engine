@@ -87,6 +87,6 @@
 
 ## 相关主题
 
-- 窗口机制：`docs/kb/architecture/window-mechanism.md`（ContainerModal pattern 与窗口框架）
-- 元服务 AppBar：`docs/kb/capabilities/atomic-service-appbar.md`（同属 08-root-view）
-- UI 上下文：`docs/kb/capabilities/ui-context.md`（容器相关访问器）
+- [窗口机制：`docs/kb/architecture/window-mechanism.md`（ContainerModal pattern 与窗口框架）](../architecture/window-mechanism.md)
+- [元服务 AppBar：`docs/kb/capabilities/atomic-service-appbar.md`（同属 08-root-view）](atomic-service-appbar.md)
+- [UI 上下文：`docs/kb/capabilities/ui-context.md`（容器相关访问器）](ui-context.md)

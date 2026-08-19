@@ -1993,7 +1993,7 @@ ArcScrollBar({ scroller: this.scroller })
 
 ### C. 相关文档
 
-- [ScrollBar Context](../../kb/components/container/scroll_bar.md)
+- [ScrollBar Context](../../kb/components/container/scroll-bar.md)
 - [Scroll Context](../../kb/components/container/scroll.md)
 - [滚动公共能力知识库](../../kb/capabilities/scroll-common-capability.md)
 - [ArcRound 几何类](../../../base/geometry/arc_round.h)

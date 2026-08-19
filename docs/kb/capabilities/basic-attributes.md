@@ -110,10 +110,10 @@
 
 ## 相关主题
 
-- 布局属性：`docs/kb/capabilities/layout-attributes.md`
-- 视效属性：`docs/kb/capabilities/visual-effect-attributes.md`
-- 背景图片通用属性：`docs/kb/capabilities/background-image.md`
+- [布局属性：`docs/kb/capabilities/layout-attributes.md`](layout-attributes.md)
+- [视效属性：`docs/kb/capabilities/visual-effect-attributes.md`](visual-effect-attributes.md)
+- [背景图片通用属性：`docs/kb/capabilities/background-image.md`](background-image.md)
 - 样式属性：`docs/kb/capabilities/style-attributes.md`
 - 图片加载：`docs/kb/capabilities/image-loading.md`
-- DrawableDescriptor：`docs/kb/capabilities/drawable_descriptor.md`
+- [DrawableDescriptor：`docs/kb/capabilities/drawable-descriptor.md`](drawable-descriptor.md)
 - 渲染管线：`docs/kb/architecture/basic-render-pipeline.md`

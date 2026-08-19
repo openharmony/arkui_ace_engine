@@ -71,6 +71,6 @@ Component Shortcuts 是 ArkUI 组件通过 `keyboardShortcut` 注册并响应组
 
 ## 相关主题
 
-- 按键事件：`docs/kb/capabilities/key-events.md`
-- 事件基础框架：`docs/kb/architecture/event-base-framework.md`
+- [按键事件：`docs/kb/capabilities/key-events.md`](key-events.md)
+- [事件基础框架：`docs/kb/architecture/event-base-framework.md`](../architecture/event-base-framework.md)
 - 组件组合键 Spec：`specs/04-common-capability/04-common-events/04-component-shortcuts/`

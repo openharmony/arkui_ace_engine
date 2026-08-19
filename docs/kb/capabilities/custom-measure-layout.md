@@ -61,7 +61,7 @@ Custom Measure/Layout 是 ArkUI 自定义组件的布局扩展能力。应用侧
 | Dynamic `onMeasureSize` / `onPlaceChildren` | 现行 Dynamic 自定义组件路径 | `common.d.ts`、`JSMeasureLayoutParamNG` 与 `ViewFunctions::ExecuteMeasureSize/ExecutePlaceChildren` | 新增或排查 Dynamic 自定义组件时优先使用。 |
 | Static `LayoutCallbacks` / `@Layoutable` | 现行 Static 路径 | `customComponent.static.d.ets`、`custom_node_module.cpp`、`ani_measure_layout.*` | 使用 ANI 与 Static native modifier 接入，不经 Dynamic JSView。 |
 | `CustomLayoutRoot` modifier | Static 前端内部接入 | `custom_layout_root_modifier.cpp` | 不是应用侧 Native Node C API。 |
-| `DynamicLayout.CustomLayoutAlgorithm` | 相邻但不同的公共能力 | `docs/kb/components/container/dynamic_layout.md`、`<OH_ROOT>/interface/sdk-js/api/arkui/LayoutAlgorithm.d.ts` | 以 `onMeasure` / `onLayout` 和 `FrameNode` 为载体，不能与本主题的两个自定义组件回调混用。 |
+| `DynamicLayout.CustomLayoutAlgorithm` | 相邻但不同的公共能力 | `docs/kb/components/container/dynamic-layout.md`、`<OH_ROOT>/interface/sdk-js/api/arkui/LayoutAlgorithm.d.ts` | 以 `onMeasure` / `onLayout` 和 `FrameNode` 为载体，不能与本主题的两个自定义组件回调混用。 |
 
 源码历史显示自定义测量节点及早期 `onMeasure` / `onLayout` 路径先存在，随后增加 `onMeasureSize` / `onPlaceChildren`，并继续补充复用、懒加载与 Static ANI 支持。历史提交仅用于解释保留边界；实际删除决策仍需以当前 SDK 兼容承诺、引用关系和测试为准。
 
@@ -86,7 +86,7 @@ Custom Measure/Layout 是 ArkUI 自定义组件的布局扩展能力。应用侧
 
 ## 相关主题
 
-- DynamicLayout：`docs/kb/components/container/dynamic_layout.md`
-- 布局框架：`docs/kb/architecture/layout-framework.md`
+- [DynamicLayout：`docs/kb/components/container/dynamic-layout.md`](../components/container/dynamic-layout.md)
+- [布局框架：`docs/kb/architecture/layout-framework.md`](../architecture/layout-framework.md)
 - 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
 - 自定义测量/布局 Spec：`specs/07-frontend/03-custom-components/05-custom-measure-layout/`

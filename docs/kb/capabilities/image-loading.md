@@ -91,4 +91,4 @@ API 检索建议：
 - `Image`：`docs/kb/components/media/image.md`
 - `SVG`：`docs/kb/capabilities/svg.md`
 - `BackgroundImage`：`docs/kb/capabilities/background-image.md`
-- `DrawableDescriptor`：`docs/kb/capabilities/drawable_descriptor.md`
+- `DrawableDescriptor`：`docs/kb/capabilities/drawable-descriptor.md`

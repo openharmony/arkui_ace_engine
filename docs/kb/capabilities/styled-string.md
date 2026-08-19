@@ -54,7 +54,7 @@
 | 单测（数据模型） | `test/unittest/core/pattern/text/span_string_test_ng.cpp`、`span_string_test_two_ng.cpp`、`span_string_test_three_ng.cpp` | SpanString/MutableSpanString/SpanObject 核心 |
 | 单测（Span） | `test/unittest/core/pattern/text/span_test_ng.cpp`、`span_node_test_ng.cpp`、`span_sub_test_ng.cpp` | Span 类型与节点 |
 | 单测（宿主集成） | `test/unittest/core/pattern/rich_editor/rich_editor_styled_string_*_test_ng.cpp` | RichEditor styled-string 集成 |
-| C-API 单测（drawing） | `test/unittest/native_styled_string_test.cpp` | drawing-typography C-API |
+| C-API 单测（drawing） | `test/unittest/interfaces/native_styled_string_test.cpp` | drawing-typography C-API |
 | C-API 单测（accessor） | `test/unittest/capi/accessors/styled_string_accessor_test.cpp`、`mutable_styled_string_accessor_test.cpp` | 对象模型 accessor |
 
 ### 相关 Spec

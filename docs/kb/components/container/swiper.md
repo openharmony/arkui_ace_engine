@@ -112,5 +112,5 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/08-swiper
 
 ## 相关主题
 
-- Tabs：Tabs 使用 Swiper 作为底层滑动引擎，详见 Tabs KB
+- [Tabs：Tabs 使用 Swiper 作为底层滑动引擎，详见 Tabs KB](tabs.md)
 - ArcSwiper：`frameworks/core/components_ng/pattern/swiper/arc_swiper_pattern.cpp`

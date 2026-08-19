@@ -61,7 +61,6 @@ Text 组件**尚未进行组件化改造**，属性解析仍采用双路径架�
 | **C API（NDK）** | `interfaces/native/node/text_native_impl.cpp` | Text 专属 C API 实现（`NODE_TEXT_*`/`NODE_FONT_*` 枚举分发） |
 | **前端 Modifier（ArkTS 侧）** | `frameworks/bridge/declarative_frontend/ark_modifier/src/text_modifier.ts` | ArkTS `TextModifier` 类定义 |
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后上述 JSView 和 Bridge 双路径将统一到 `pattern/text/bridge/arkts_native_text_bridge.cpp`，并输出独立 so。
 
 ### 外部依赖入口
 
@@ -73,7 +72,7 @@ Text 组件**尚未进行组件化改造**，属性解析仍采用双路径架�
 | Rosen / RenderService | `frameworks/core/components_ng/render/adapter/rosen_render_context.*`、`frameworks/core/components_ng/components.gni` | `foundation/graphic/graphic_2d` | `rosen/modules/render_service_client/core/*`、`rosen/modules/render_service_base/include/*`、`rosen/modules/render_service_client:librender_service_client_static` | 渲染上下文、RenderService 客户端和后端渲染依赖入口 |
 | 排版抽象 | `frameworks/core/components_ng/render/paragraph.h` | `foundation/graphic/graphic_2d` | `frameworks/text/interface/export/rosen_text/export/rosen_text/typography*.h` | ArkUI 对段落构建、测量、绘制、命中测试的抽象接口 |
 | Rosen Text / Typography 适配 | `frameworks/core/components_ng/render/adapter/txt_paragraph.*`、`frameworks/core/components_ng/render/adapter/txt_font_collection.*` | `foundation/graphic/graphic_2d` | `frameworks/text/interface/export/rosen_text/export/rosen_text/typography*.h`、`frameworks/text/interface/export/rosen_text/export/rosen_text/text_style.h`、`frameworks/text/interface/export/rosen_text/export/rosen_text/font_collection.h` | Text 到 Rosen Text、Typography 和 FontCollection 的适配层 |
-| 段落管理 | `frameworks/core/components_ng/pattern/rich_editor/paragraph_manager.h`、`frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.*` | `foundation/graphic/graphic_2d` | `frameworks/text/interface/export/rosen_text/export/rosen_text/typography*.h` | 多段落布局、选区矩形、命中检测等段落管理能力入口 |
+| 段落管理 | `frameworks/core/components_ng/pattern/text/paragraph_manager.h`、`frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.*` | `foundation/graphic/graphic_2d` | `frameworks/text/interface/export/rosen_text/export/rosen_text/typography*.h` | 多段落布局、选区矩形、命中检测等段落管理能力入口 |
 | 字体管理 | `frameworks/core/common/font_manager.h`、`frameworks/core/components_ng/render/font_collection.h` | `foundation/graphic/graphic_2d` | `frameworks/text/interface/export/rosen_text/export/rosen_text/font_collection.h` | 字体注册、字体集合、字体变化通知和字体加载相关入口 |
 | 图片 / PixelMap Span | `frameworks/core/components_ng/render/adapter/pixelmap_image.*`、`frameworks/core/components_ng/render/adapter/animated_image.*` | `foundation/multimedia/image_framework` | `interfaces/innerkits/include/pixel_map.h`、`interfaces/kits/js/common/include/pixel_map_napi.h` | ImageSpan、拖拽预览、leading margin 图片等图像内容入口 |
 | 剪贴板 | `frameworks/core/common/clipboard/`、`adapter/ohos/capability/clipboard/`、`adapter/preview/entrance/clipboard/` | `foundation/distributeddatamgr/pasteboard` | `framework/innerkits/include/pasteboard_client.h` | 选择复制、富文本复制和平台剪贴板适配入口 |
@@ -131,7 +130,7 @@ Text 功能域：`specs/05-ui-components/09-text-components/04-text/`
 ## 相关主题
 
 - `TextDrag`：`docs/pattern/text_drag/TextDrag_Knowledge_Base_CN.md`
-- `RichEditor`：`docs/kb/components/basic/rich_editor.md`
-- `TextInput`：`docs/pattern/text_input/TextInput_Knowledge_Base_CN.md`
-- `TextArea`：`docs/pattern/text_area/TextArea_Knowledge_Base_CN.md`
+- `RichEditor`：`docs/kb/components/basic/rich-editor.md`
+- `TextInput`：`docs/kb/components/basic/text-input.md`
+- `TextArea`：`docs/kb/components/basic/text-area.md`
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

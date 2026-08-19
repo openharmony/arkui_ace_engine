@@ -75,6 +75,8 @@ API 检索建议：
 
 ### API 解析实现路径
 
+**已组件化**（有 `bridge/` 子目录、统一 Bridge，旧 JSView 已移除），输出独立 SO。
+
 Video 组件已完成组件动态模块化：`adapter/ohos/osal/dynamic_module_helper.cpp` 中存在 `Video` → `video` 映射，组件桥接目录包含 `video_dynamic_module.*`，运行时通过 `libarkui_video.z.so` 形态加载动态模块。公开 NDK `interfaces/native/native_node.h` 仍没有 `ARKUI_NODE_VIDEO`；需要区分“公开 Native 节点枚举”与“生成态 arkoala/CAPI modifier/accessor”。
 
 | 路径 | 入口文件 | 说明 |
@@ -96,7 +98,6 @@ Video 组件已完成组件动态模块化：`adapter/ohos/osal/dynamic_module_h
 | **公开 C API / NDK 节点** | `interfaces/native/native_node.h` | 无 `ARKUI_NODE_VIDEO`，无 `interfaces/native/node/video_native_impl.*` |
 | **生成态 arkoala/CAPI** | `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h` | 存在 `GENERATED_ARKUI_VIDEO` 和 Video modifier/controller accessor，测试位于 `test/unittest/capi/` |
 
-组件化改造参考：`./组件化重构通用方案.md`。Video 当前已具备 `pattern/video/bridge/` 动态模块入口，后续确认产物或符号时优先检查 `libarkui_video.z.so`、`OHOS_ACE_DynamicModule_Create_Video` 与 `DynamicModuleHelper` 映射。
 
 ### 外部依赖入口
 
@@ -169,6 +170,5 @@ Video 功能域：`specs/05-ui-components/13-platform-components/02-video/`
 
 ## 相关主题
 
-- 图片组件（Poster 关联）：`docs/kb/components/media/image.md`
+- [图片组件（Poster 关联）：`docs/kb/components/media/image.md`](image.md)
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`
-- 组件化重构通用方案：`docs/组件化重构通用方案.md`

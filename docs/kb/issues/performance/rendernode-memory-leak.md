@@ -18,6 +18,18 @@ C API RenderNode 采用双层内存模型（外层 `ArkUI_RenderNode` + 内层 `
 - 通过 `GetChild`/`GetFirstChild`/`GetNextSibling` 等方法获取子节点后调用 `DisposeNode`，内存不回收
 - 长时间运行的 C API 应用中，RenderNode 相关内存占用量单调递增
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | symptom_surface | render_node | interfaces/native/node/render_node.cpp | verified |
+| capability | root_cause_owner | node_render_node_modifier | frameworks/core/interfaces/native/node/node_render_node_modifier.cpp | verified |
+| capability | root_cause_owner | render_node | interfaces/native/node/render_node.h | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -108,4 +120,4 @@ int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
 ## 相关主题
 
 - [基础渲染管线](../../architecture/basic-render-pipeline.md)：基础渲染管线 KB
-- [RenderNode](../../capabilities/render_node.md)：RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制
+- [RenderNode](../../capabilities/render-node.md)：RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制

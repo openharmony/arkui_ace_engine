@@ -29,7 +29,7 @@ AutoFill 是跨组件通用能力，覆盖 TextInput（主载体）、TextArea�
 | Search Pattern（覆写禁用 AutoFill） | `frameworks/core/components_ng/pattern/search/search_text_field.h`、`search_text_field.cpp` | `IsNeedProcessAutoFill()` 返回 false |
 | JS Bridge | `frameworks/bridge/declarative_frontend/jsview/js_textinput.cpp`、`js_textarea.cpp`、`js_textfield.cpp` | `SetEnableAutoFill`/`SetEnableAutoFillAnimation`/`SetContentType`/`SetPasswordRules` |
 | 静态 ArkTS TextArea 桥 | `frameworks/core/components_ng/pattern/text_area/bridge/arkts_native_text_area_bridge.cpp` | 静态前端 TextArea 桥 |
-| TextFieldManager（触发管线 + MSDP，Feat-03/04） | `frameworks/core/components_ng/pattern/text_field/text_field_manager.h`、`text_field_manager.cpp` | `ParseMSDPAutoFillJsonValue` 等 + TextFieldInfo 结构 |
+| TextFieldManager（触发管线 + MSDP，Feat-03/04） | `frameworks/core/common/text_field_manager.h`、`text_field_manager.cpp` | `ParseMSDPAutoFillJsonValue` 等 + TextFieldInfo 结构 |
 
 ### API 入口
 

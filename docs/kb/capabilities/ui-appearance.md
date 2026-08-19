@@ -61,6 +61,6 @@ ArkUI UIAppearance 管理深色/浅色模式切换。ColorMode 枚举定义在 A
 
 ## 相关主题
 
-- 资源动态切换
-- 主题分层访问
-- WithTheme 组件
+- [资源动态切换](../architecture/resource-dynamic-switching.md)
+- [主题分层访问](../architecture/theme-layered-access.md)
+- [WithTheme 组件](../components/container/with-theme.md)

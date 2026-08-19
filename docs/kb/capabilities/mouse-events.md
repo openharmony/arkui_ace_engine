@@ -85,6 +85,6 @@ Mouse Events 是 ArkUI 鼠标输入的数据建模、组件鼠标/悬停回调�
 
 ## 相关主题
 
-- 事件分发和拦截：`docs/kb/capabilities/event-dispatch-intercept.md`
-- 事件基础框架：`docs/kb/architecture/event-base-framework.md`
-- 触摸事件：`docs/kb/capabilities/touch-events.md`
+- [事件分发和拦截：`docs/kb/capabilities/event-dispatch-intercept.md`](event-dispatch-intercept.md)
+- [事件基础框架：`docs/kb/architecture/event-base-framework.md`](../architecture/event-base-framework.md)
+- [触摸事件：`docs/kb/capabilities/touch-events.md`](touch-events.md)

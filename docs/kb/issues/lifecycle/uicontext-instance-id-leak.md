@@ -14,6 +14,17 @@ UIContext 动态前端（jsUIContext.js）曾使用手动 `syncInstanceId`/`rest
 - 参数校验失败后，后续 UIContext 方法调用全部指向错误实例
 - UIContext 方法抛出异常后，实例 ID 栈永久错位，整个线程实例管理失效
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | fix_location | common_ani_modifier | frameworks/core/interfaces/native/ani/common_ani_modifier.cpp | verified |
+| capability | fix_location | system_ops_accessor | frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |

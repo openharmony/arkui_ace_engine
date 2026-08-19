@@ -105,4 +105,4 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesByIdWithCleanup(std::unordered
 
 - `docs/kb/capabilities/visible-area-mechanism.md`：可见区域机制代码型 KB（FuncID 04-04-10，含 onVisibleAreaChange/onVisibleAreaApproximateChange）
 - `docs/kb/capabilities/component-related-events.md`：组件相关事件代码型 KB（FuncID 04-04-09，含 onAreaChange）
-- `docs/kb/capabilities/frame_node.md`：FrameNode 节点代码型 KB（含 GetNodesById/ElementRegister 交互）
+- `docs/kb/capabilities/frame-node.md`：FrameNode 节点代码型 KB（含 GetNodesById/ElementRegister 交互）
