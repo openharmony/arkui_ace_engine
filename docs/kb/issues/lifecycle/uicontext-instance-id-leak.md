@@ -58,8 +58,8 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 - `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`restoreInstanceIds_` 为 `static thread_local std::vector<int32_t>`，非类成员，全线程共享同一栈
 - `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`SyncInstanceId` 将当前实例 ID 压入 `restoreInstanceIds_` 栈
 - `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`RestoreInstanceId` 空栈时将实例 ID 设为 `INSTANCE_ID_UNDEFINED`（非宏路径）或调用 `CURRENT_ID_POP(0, INSTANCE_ID_UNDEFINED)`（宏路径）
-- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp,179-209`：ANI 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceId`/`RestoreInstanceId`，模式相同
-- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp,49-78`：C API 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceIdImpl`/`RestoreInstanceIdImpl`，模式相同
+- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp`：ANI 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceId`/`RestoreInstanceId`，模式相同
+- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp`：C API 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceIdImpl`/`RestoreInstanceIdImpl`，模式相同
 
 #### 栈错位 排查
 

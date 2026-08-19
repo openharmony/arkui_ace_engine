@@ -94,7 +94,7 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 关键代码定位：
 - `frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp`：BuilderNode 创建，设置 `SetIsBuilderNode(true)` 和 `SetIsRootBuilderNode(true)`
 - `frameworks/core/interfaces/native/node/frame_node_modifier.cpp`：`AddBuilderNodeInFrameNode` / `RemoveBuilderNodeInFrameNode` / `ClearBuilderNodeInFrameNode`
-- `frameworks/core/common/builder_util.cpp,56-118`：`GetBuilderNodes` / `BuilderNodeFunc` 遍历和增删
+- `frameworks/core/common/builder_util.cpp`：`GetBuilderNodes` / `BuilderNodeFunc` 遍历和增删
 
 ## 修复方案
 

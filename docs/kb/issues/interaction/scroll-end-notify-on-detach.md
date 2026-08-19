@@ -20,7 +20,7 @@
 |------|------|------|----------|------------|
 | component | symptom_surface | ScrollablePattern 子类（List/Scroll/Grid/WaterFlow） | `scrollable_pattern.cpp` `OnDetachFromMainTree` | verified |
 | capability | trigger | 嵌套滚动协调（NestableScrollContainer） | `nestable_scroll_container.h` `GetNestedScrollParent` | verified |
-| architecture | root_cause_owner | 滚动会话状态机（`scrollStop_`/`isScrolling_`） | `scrollable_pattern.h`（`scrollStop_=false` 默认值）、`:1316`（`isScrolling_=false`） | verified |
+| architecture | root_cause_owner | 滚动会话状态机（`scrollStop_`/`isScrolling_`） | `scrollable_pattern.h`（`scrollStop_=false`、`isScrolling_=false` 默认值） | verified |
 | component | fix_location | ScrollablePattern（`OnDetachFromMainTree`）+ RefreshPattern 白名单 | PR #87925 diff | verified |
 
 ## 根因分类
@@ -56,8 +56,8 @@
 - `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `OnDetachFromMainTree()`（函数入口 :1294）：拟修复后条件 `if (!isScrolling_ || scrollStop_) return;` + 父组件白名单过滤（注：PR #87925 修复尚未合入，当前基线代码仍为 `if (!scrollStop_)`）
 - `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h`：`bool scrollStop_ = false;` 默认值——旧逻辑 `!scrollStop_` 误判的根源
 - `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h`：`bool isScrolling_ = false;`——滚动会话显式标志
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `FireOnScrollStart()`：滚动会话开始，`:3451` 置 `isScrolling_ = true`
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `OnScrollStop()`：滚动会话结束，`:3697` 置 `isScrolling_ = false`、`:3722` 复位 `scrollStop_ = false`
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `FireOnScrollStart()`：滚动会话开始，置 `isScrolling_ = true`
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `OnScrollStop()`：滚动会话结束，置 `isScrolling_ = false`、复位 `scrollStop_ = false`
 - `frameworks/core/components_ng/pattern/list/list_pattern.cpp`（同 `scroll_pattern.cpp`、`grid_pattern.cpp`、`water_flow_pattern.cpp`）：`OnScrollEndCallback` 中动画停止后 `scrollStop_ = true`
 
 #### 类别 B 排查：白名单收窄的遗留风险识别

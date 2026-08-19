@@ -10,7 +10,7 @@ ArkUI KB 质量评分脚本（docs/kb_quality.py）。
 评分维度（满分 100）：
   A 结构完整性 30分  必填章节齐全（知识型/issue型/component型各有必填集）
   B 元数据头部 10分  文档版本/更新时间/来源、标题格式
-  C 路径规范   25分  无绝对路径/无行号引用(知识型)/无旧OpenHarmony前缀/相关主题链接可达
+  C 路径规范   25分  无绝对路径/无行号引用/无旧OpenHarmony前缀/相关主题链接可达
   D 内容质量   20分  定位段充实/表格说明列非空/常见问题≥3行/组件化结论/issue模块取值
   E 索引一致性 10分  registry有对应条目/仓内源码路径存在(智能豁免通配符/外部仓/外部依赖入口章节)
   F 命名规范    5分  文件名 kebab-case
@@ -229,9 +229,9 @@ def score_kb(rel_path: str, text: str, kind: str | None, reg_entry: dict | None)
     if re.search(r"/home/\S+|/Users/\S+|/root/\S+", text):
         sc.deductions.append(("C 路径", 5, "含本机绝对路径"))
         c_got -= 5
-    # 行号引用（issue 豁免）
-    line_refs = re.findall(r"\.(?:cpp|h|ts|ets|js):\d+", text)
-    if line_refs and not is_issue:
+    # 行号引用（含冒号/逗号/同文件三种格式，issue 不豁免）
+    line_refs = re.findall(r"\.(?:cpp|h|ts|ets|js)[:,]\d+|`:\d+(?:-\d+)?", text)
+    if line_refs:
         sc.deductions.append(("C 路径", 8, f"正文带行号引用({len(line_refs)}处)，违反 README 规范"))
         c_got -= 8
     if re.search(r"`OpenHarmony/", text):
