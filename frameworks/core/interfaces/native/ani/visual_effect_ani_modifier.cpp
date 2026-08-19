@@ -140,6 +140,17 @@ bool IsImmersiveMaterialSupported()
 {
     return SystemProperties::IsDeviceSystemMaterialSupported();
 }
+
+int32_t GetMaterialState()
+{
+    return static_cast<int32_t>(MaterialUtils::GetConfiguredMaterialState());
+}
+
+int32_t GetMaterialType()
+{
+    return static_cast<int32_t>(MaterialUtils::GetConfiguredMaterialType());
+}
+
 } // namespace
 
 const ArkUIAniVisualEffectModifier* GetVisualEffectAniModifier()
@@ -151,6 +162,8 @@ const ArkUIAniVisualEffectModifier* GetVisualEffectAniModifier()
         .convertToECSubMaterial = OHOS::Ace::NG::ConvertToECSubMaterial,
         .getGlobalMaterialLevel = OHOS::Ace::NG::GetGlobalMaterialLevel,
         .isImmersiveMaterialSupported = OHOS::Ace::NG::IsImmersiveMaterialSupported,
+        .getMaterialState = OHOS::Ace::NG::GetMaterialState,
+        .getMaterialType = OHOS::Ace::NG::GetMaterialType,
     };
     return &impl;
 }

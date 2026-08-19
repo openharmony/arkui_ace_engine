@@ -1022,6 +1022,8 @@ struct ArkUIAniVisualEffectModifier {
     OHOS::Ace::UiMaterial* (*convertToECSubMaterial)(OHOS::Ace::UiMaterial* ptr);
     int32_t (*getGlobalMaterialLevel)();
     bool (*isImmersiveMaterialSupported)();
+    int32_t (*getMaterialState)();
+    int32_t (*getMaterialType)();
 };
 
 struct ArkUIAniDetachedFreeRootModifier {
