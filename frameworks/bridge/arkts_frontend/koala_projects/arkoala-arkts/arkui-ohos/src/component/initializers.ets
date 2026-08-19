@@ -17,6 +17,7 @@ import { RectResult, TouchTestStrategy } from "./common"
 import { ColorSpace, GestureEvent, GestureRecognizer, EventTarget, SourceType, SourceTool, TouchType, TouchObject } from '#generated'
 import { GestureActionPhase } from '@ohos.arkui.UIContext'
 import { nullptr, KPointer } from '@koalaui/interop'
+import { LengthUnit } from "arkui.Graphics"
 
 export namespace initializers {
     export namespace arkui.component {
@@ -69,7 +70,7 @@ export namespace initializers {
                 export const value = 0
             }
             export namespace LengthMetricsProxyNS {
-                export const unit = 0
+                export const unit = LengthUnit.PX
                 export const value = 0
             }
             export namespace ColorMetricsExtNS {

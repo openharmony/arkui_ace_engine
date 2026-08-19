@@ -1001,7 +1001,7 @@ export namespace extractors {
   }
 
   export function transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(proxy: LengthMetricsProxy): LengthMetrics {
-    const unit = proxy.unit === LengthMetricsUnit.PX ? LengthUnit.PX : LengthUnit.VP
+    const unit = proxy.unit.valueOf() === LengthMetricsUnit.PX.valueOf() ? LengthUnit.PX : LengthUnit.VP
     return new LengthMetrics(proxy.value, unit)
   }
 }
