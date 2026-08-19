@@ -3323,10 +3323,10 @@ void NavigationPattern::UpdateContextRect(
     auto navBarOrHomeDestProperty = navBarOrHomeDestNode->GetLayoutProperty();
     navBarOrHomeDestProperty->UpdateVisibility(VisibleType::VISIBLE);
     navBarOrHomeDestNode->SetJSViewActive(true);
+    navBarOrHomeDestNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
     if (!curDestination->IsOnAnimation()) {
         curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
         curDestination->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
-        navBarOrHomeDestNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto titleBarNode = DynamicCast<TitleBarNode>(navBarOrHomeDestNode->GetTitleBarNode());
         CHECK_NULL_VOID(titleBarNode);
         auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
