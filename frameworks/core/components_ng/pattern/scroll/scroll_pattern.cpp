@@ -224,9 +224,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 bool ScrollPattern::IsScrollReachEdge() const
 {
     if (scrollEdgeType_ == ScrollEdgeType::SCROLL_BOTTOM || scrollEdgeType_ == ScrollEdgeType::SCROLL_RIGHT) {
-        return LessOrEqual(currentOffset_, -scrollableDistance_ - contentEndOffset_);
+        return IsAtBottom();
     } else {
-        return LessOrEqual(currentOffset_, contentStartOffset_);
+        return IsAtTop();
     }
 }
 
