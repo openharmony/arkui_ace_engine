@@ -16,6 +16,7 @@
 #include "base/log/dump_recorder.h"
 
 #include <fstream>
+#include <shared_mutex>
 
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
@@ -34,36 +35,46 @@ SINGLETON_INSTANCE_IMPL(DumpRecorder);
 DumpRecorder::DumpRecorder() = default;
 DumpRecorder::~DumpRecorder() = default;
 
-void DumpRecorder::Init()
+void DumpRecorder::InitLocked()
 {
-    Clear();
+    ClearLocked();
     recordTree_ = JsonUtil::Create(true);
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     recordTree_->PutRef("infos", std::move(jsonNodeArray));
 }
 
-void DumpRecorder::Clear()
+void DumpRecorder::ClearLocked()
 {
     fileSize_ = 0;
     records_.clear();
     recordTree_.reset();
 }
 
+void DumpRecorder::AppendInfoLocked(std::unique_ptr<JsonValue> info)
+{
+    std::string infoContent = info->ToString();
+    fileSize_ += static_cast<uint32_t>(infoContent.size());
+    auto infos = recordTree_->GetValue("infos");
+    infos->PutRef(std::move(info));
+}
+
 void DumpRecorder::Start(std::function<bool()>&& func)
 {
-    if (frameDumpFunc_) {
-        Stop();
-    }
-    Init();
-    frameDumpFunc_ = func;
+    Stop();
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    InitLocked();
+    frameDumpFunc_ = std::move(func);
 }
 
 void DumpRecorder::Stop()
 {
-    if (!frameDumpFunc_) {
-        return;
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        if (!frameDumpFunc_) {
+            return;
+        }
+        frameDumpFunc_ = nullptr;
     }
-    frameDumpFunc_ = nullptr;
     auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -72,13 +83,27 @@ void DumpRecorder::Stop()
 
 void DumpRecorder::StopInner()
 {
-    CHECK_NULL_VOID(recordTree_);
-    Output(recordTree_->ToString());
-    Clear();
+    std::string content;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        if (!recordTree_) {
+            return;
+        }
+        content = recordTree_->ToString();
+    }
+    Output(content);
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        ClearLocked();
+    }
 }
 
 void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json)
 {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    if (!recordTree_) {
+        return;
+    }
     records_[timestamp] = std::move(json);
     if (static_cast<int32_t>(records_.size()) > 1) {
         auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
@@ -90,43 +115,47 @@ void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json)
         info->Put("startTime", timestamp);
         auto& infoJson = records_.at(timestamp);
         info->Put("info", infoJson);
-        std::string infoContent = info->ToString();
-        fileSize_ += static_cast<uint32_t>(infoContent.size());
-        auto infos = recordTree_->GetValue("infos");
-        infos->PutRef(std::move(info));
+        AppendInfoLocked(std::move(info));
     }
 }
 
 void DumpRecorder::Diff(int64_t timestamp)
 {
-    if (timestamp <= records_.begin()->first) {
-        return;
-    }
-    auto iter = records_.find(timestamp);
-    if (iter == records_.end()) {
-        return;
-    }
-    auto& curNode = iter->second;
-    auto& prevNode = records_.begin()->second;
-
     std::string diff;
-    Compare(curNode, prevNode, diff);
-    auto info = JsonUtil::Create();
-    info->Put("startTime", timestamp);
-    if (diff.empty()) {
-        info->Put("info", "");
-    } else {
-        auto infoJson = JsonUtil::ParseJsonString(diff);
-        info->PutRef("info", std::move(infoJson));
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        if (records_.empty() || timestamp <= records_.begin()->first) {
+            return;
+        }
+        auto iter = records_.find(timestamp);
+        if (iter == records_.end()) {
+            return;
+        }
+        auto& curNode = iter->second;
+        auto& prevNode = records_.begin()->second;
+        Compare(curNode, prevNode, diff);
     }
-    auto infoContent = info->ToString();
-    fileSize_ += static_cast<uint32_t>(infoContent.size());
-    auto infos = recordTree_->GetValue("infos");
-    infos->PutRef(std::move(info));
-    if (fileSize_ > MAX_FILE_SIZE) {
+    bool needStop = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        if (!recordTree_) {
+            return;
+        }
+        auto info = JsonUtil::Create();
+        info->Put("startTime", timestamp);
+        if (diff.empty()) {
+            info->Put("info", "");
+        } else {
+            auto infoJson = JsonUtil::ParseJsonString(diff);
+            info->PutRef("info", std::move(infoJson));
+        }
+        AppendInfoLocked(std::move(info));
+        needStop = fileSize_ > MAX_FILE_SIZE;
+        records_.erase(timestamp);
+    }
+    if (needStop) {
         Stop();
     }
-    records_.erase(timestamp);
 }
 
 bool DumpRecorder::CompareDumpParam(std::unique_ptr<JsonValue>& curParams, std::unique_ptr<JsonValue>& prevParams)
@@ -180,7 +209,7 @@ bool DumpRecorder::Compare(std::unique_ptr<JsonValue>& curNode, std::unique_ptr<
         auto prevChild = prevNodeChildren->GetArrayItem(i);
         if (!Compare(curChild, prevChild, diff)) {
             if (diff.empty()) {
-                diff = curNode->ToString().c_str();
+                diff = curNode->ToString();
             }
             return false;
         }
