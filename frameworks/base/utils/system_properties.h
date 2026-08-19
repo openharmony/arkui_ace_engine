@@ -629,6 +629,8 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool GetSmartLayoutEnabled();
+
     static std::optional<bool> GetArkUIHookEnabled();
 
     static bool WaterFlowUseSegmentedLayout();
@@ -893,6 +895,7 @@ private:
     static std::optional<bool> arkUIHookEnabled_;
     static bool gridCacheEnabled_;
     static bool gridIrregularLayoutEnable_;
+    static bool smartLayoutEnabled_;
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
