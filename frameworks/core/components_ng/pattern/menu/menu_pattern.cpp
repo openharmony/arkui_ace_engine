@@ -26,6 +26,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
@@ -1851,6 +1852,21 @@ bool MenuPattern::IsUseEdgeLightAnimation() const
         return true;
     }
     return false;
+}
+
+void MenuPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto menuParam = GetMenuParam();
+    json->PutExtAttr("distortionMode",
+        DistortionModeToString(menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)).c_str(), filter);
+    json->PutExtAttr("edgeLightMode",
+        EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str(), filter);
+    json->PutExtAttr("distortionEnabled", IsUseDistortionAnimation() ? "true" : "false", filter);
+    json->PutExtAttr("edgeLightEnabled", IsUseEdgeLightAnimation() ? "true" : "false", filter);
 }
 
 OffsetF MenuPattern::GetDistortionMenuOffset(Placement placement) const

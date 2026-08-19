@@ -27,6 +27,7 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_container_info.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.h"
@@ -484,6 +485,74 @@ HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level0)
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetKey(), "");
+}
+
+/**
+ * @tc.name: DialogToJsonValueDistortion001
+ * @tc.desc: Test DialogPattern::ToJsonValue dumps distortion/edgeLight modes and enabled state
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogToJsonValueDistortion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dialogNode with DialogPattern.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set distortion/edgeLight modes and cached enabled flags.
+     */
+    pattern->dialogProperties_.distortionMode = DistortionMode::DISTORTION_ENABLED;
+    pattern->dialogProperties_.edgeLightMode = EdgeLightMode::EDGELIGHT_DISABLED;
+    pattern->needDistortion_ = true;
+    pattern->needFlowLight_ = false;
+
+    /**
+     * @tc.steps: step3. call ToJsonValue and verify the dumped fields.
+     * @tc.expected: configured modes and enabled flags are dumped as expected.
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("distortionMode"), "DistortionMode.ENABLED");
+    EXPECT_EQ(json->GetString("edgeLightMode"), "EdgeLightMode.DISABLED");
+    EXPECT_EQ(json->GetString("distortionEnabled"), "true");
+    EXPECT_EQ(json->GetString("edgeLightEnabled"), "false");
+}
+
+/**
+ * @tc.name: DialogToJsonValueDistortion002
+ * @tc.desc: Test DialogPattern::ToJsonValue defaults (AUTO mode, enabled=false) when nothing is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogToJsonValueDistortion002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dialogNode with DialogPattern, leave distortion/edgeLight unset.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue without setting distortion/edgeLight.
+     * @tc.expected: mode defaults to AUTO, enabled defaults to false.
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("distortionMode"), "DistortionMode.AUTO");
+    EXPECT_EQ(json->GetString("edgeLightMode"), "EdgeLightMode.AUTO");
+    EXPECT_EQ(json->GetString("distortionEnabled"), "false");
+    EXPECT_EQ(json->GetString("edgeLightEnabled"), "false");
 }
 
 /**

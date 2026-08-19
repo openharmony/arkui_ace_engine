@@ -20,6 +20,7 @@
 #define private public
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/properties/ui_material.h"
+#include "core/components/common/properties/ui_material.h"
 
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
@@ -529,6 +530,11 @@ HWTEST_F(RenderContextTestNg, RenderContextTest014, TestSize.Level1)
     options.materialColor = Color::RED;
     options.colorInvert = true;
     options.applyShadow = false;
+    options.disableLightEffect = false;
+    LightEffectOptions lightEffect;
+    lightEffect.color = Color(0xff00ff00);
+    options.lightEffectOptions = lightEffect;
+    options.interactive = true;
     material->SetImmersiveOptions(options);
     renderContext.SetSystemMaterial(material);
 
@@ -547,6 +553,72 @@ HWTEST_F(RenderContextTestNg, RenderContextTest014, TestSize.Level1)
     EXPECT_EQ(optionsJson->GetString("materialColor"), "#FFFF0000");
     EXPECT_EQ(optionsJson->GetString("colorInvert"), "true");
     EXPECT_EQ(optionsJson->GetString("applyShadow"), "false");
+    EXPECT_EQ(optionsJson->GetString("disableLightEffect"), "false");
+    EXPECT_EQ(optionsJson->GetString("lightEffectColor"), "#FF00FF00");
+    EXPECT_EQ(optionsJson->GetString("interactive"), "true");
+}
+
+/**
+ * @tc.name: RenderContextTest015
+ * @tc.desc: Test ToJsonValuePart1 immersiveOptions omits optional fields (lightEffect/interactive) when unset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RenderContextTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a renderContext with IMMERSIVE material, lightEffect/interactive left unset.
+     */
+    NG::RenderContext renderContext;
+    auto json = JsonUtil::Create(true);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.style = UiMaterialStyle::THICK;
+    options.disableLightEffect = true;
+    material->SetImmersiveOptions(options);
+    renderContext.SetSystemMaterial(material);
+
+    /**
+     * @tc.steps: step2. callback ToJsonValue.
+     */
+    renderContext.ToJsonValue(json, filter);
+
+    /**
+     * @tc.expected: disableLightEffect printed; lightEffectColor/interactive omitted as they are unset.
+     */
+    auto optionsJson = json->GetValue("systemMaterial")->GetValue("material")->GetValue("immersiveOptions");
+    EXPECT_EQ(optionsJson->GetString("disableLightEffect"), "true");
+    EXPECT_FALSE(optionsJson->Contains("lightEffectColor"));
+    EXPECT_FALSE(optionsJson->Contains("interactive"));
+}
+
+/**
+ * @tc.name: DistortionModeToString001
+ * @tc.desc: Test DistortionModeToString converts DistortionMode values to expected strings
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, DistortionModeToString001, TestSize.Level1)
+{
+    EXPECT_EQ(DistortionModeToString(DistortionMode::DISTORTION_AUTO), "DistortionMode.AUTO");
+    EXPECT_EQ(DistortionModeToString(DistortionMode::DISTORTION_ENABLED), "DistortionMode.ENABLED");
+    EXPECT_EQ(DistortionModeToString(DistortionMode::DISTORTION_DISABLED), "DistortionMode.DISABLED");
+    // Out-of-range value falls back to AUTO.
+    EXPECT_EQ(DistortionModeToString(static_cast<DistortionMode>(99)), "DistortionMode.AUTO");
+}
+
+/**
+ * @tc.name: EdgeLightModeToString001
+ * @tc.desc: Test EdgeLightModeToString converts EdgeLightMode values to expected strings
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, EdgeLightModeToString001, TestSize.Level1)
+{
+    EXPECT_EQ(EdgeLightModeToString(EdgeLightMode::EDGELIGHT_AUTO), "EdgeLightMode.AUTO");
+    EXPECT_EQ(EdgeLightModeToString(EdgeLightMode::EDGELIGHT_ENABLED), "EdgeLightMode.ENABLED");
+    EXPECT_EQ(EdgeLightModeToString(EdgeLightMode::EDGELIGHT_DISABLED), "EdgeLightMode.DISABLED");
+    // Out-of-range value falls back to AUTO.
+    EXPECT_EQ(EdgeLightModeToString(static_cast<EdgeLightMode>(99)), "EdgeLightMode.AUTO");
 }
 
 /**
