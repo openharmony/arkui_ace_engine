@@ -194,7 +194,6 @@ struct WaterFlowDemo {
             .height(item * 11)
           }
           .width('100%')
-          //.aspectRatio(this.itemHeightArray[item % 100] / this.itemWidthArray[item%100])
           .backgroundColor(this.colors[item % this.colors.length])
         }, (item: string) => item)
       }

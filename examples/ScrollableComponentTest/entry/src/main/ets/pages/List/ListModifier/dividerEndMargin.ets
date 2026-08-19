@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
 import { ListItemGroupModifier, ListItemModifier, ListModifier } from '@kit.ArkUI';
 
 class CustomModifier1 implements AttributeModifier<ListAttribute> {
@@ -105,7 +104,6 @@ struct ListItemGroupExample11 {
   }
 
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State modifier1: CustomModifier1 = new CustomModifier1();
 

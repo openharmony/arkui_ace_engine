@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
+// Keeps this page an ES module so its top-level declarations stay file-scoped.
+export {};
+
 @Entry
 @Component
-export struct GridCalculator {
+struct GridCalculator {
   private buttonArray: string[] =
     ['CE', 'C', '/', 'X', '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '=', '0', '.'];
   @State res: string = '0';

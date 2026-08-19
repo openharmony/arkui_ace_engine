@@ -22,9 +22,7 @@ struct GridScrollNoToIndexSample {
   aboutToAppear(): void {
     let list: string[] = [];
     for (let i = 0; i < 11; i++) {
-      // for (let j = 0; j < 10; j++) {
         list.push((i * 5   + 1).toString());
-      // }
     }
     this.numbers =  new GridDataSource(list);
   }
@@ -74,7 +72,6 @@ struct GridScrollNoToIndexSample {
         }, (index: number) => index.toString())
       }
       .columnsTemplate('1fr 1fr 1fr 1fr 1fr')
-      // .rowsTemplate('1fr 1fr 1fr 1fr 1fr')
       .columnsGap(10)
       .rowsGap(10)
       .friction(0.6)

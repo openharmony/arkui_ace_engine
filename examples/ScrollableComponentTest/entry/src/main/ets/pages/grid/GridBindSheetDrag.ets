@@ -49,13 +49,16 @@ struct Index {
     .overlay()
     .onItemDragStart((event: ItemDragInfo, itemIndex: number) => { // 第一次拖拽此事件绑定的组件时，触发回调。
       console.log('SheetGridDemo: onItemDragStart');
-      vibrator.startVibration({
-        type: 'preset',
-        effectId: 'haptic.common.success',
-        count: 1
-      }, {
-        usage: 'physicalFeedback'
-      });
+      // Not every device ships the vibrator hardware, so gate the call on the capability.
+      if (canIUse('SystemCapability.Sensors.MiscDevice')) {
+        vibrator.startVibration({
+          type: 'preset',
+          effectId: 'haptic.common.success',
+          count: 1
+        }, {
+          usage: 'physicalFeedback'
+        });
+      }
       return this.DraggingItem(this.items[itemIndex]);
     })
     // 绑定此事件的组件可作为拖拽释放目标，当在本组件范围内停止拖拽行为时，触发回调。

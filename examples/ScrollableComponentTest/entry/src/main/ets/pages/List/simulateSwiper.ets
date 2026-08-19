@@ -14,11 +14,11 @@
  */
 
 
-const TAG = 'entry_index2'
+export const TAG = 'entry_index2'
 
 @Entry
 @Component
-export struct Index {
+struct Index {
   @State message: string = 'Hello World';
   private arr: number[] = []
   private scrollerForList: Scroller = new Scroller()
@@ -59,13 +59,13 @@ export struct Index {
                 if (event.angle < 0) {
                   let aimPage = (this.currentIndex + 1) >= this.maxPageIndex ? this.maxPageIndex : this.currentIndex + 1
                   this.currentIndex = aimPage
-                  animateTo({ duration: 200, }, () => {
+                  this.getUIContext().animateTo({ duration: 200, }, () => {
                     this.scrollerForList.scrollToIndex(aimPage)
                   })
                 } else {
                   let aimPage = this.currentIndex - 1 > 0 ? this.currentIndex - 1 : 0
                   this.currentIndex = aimPage
-                  animateTo({ duration: 200, }, () => {
+                  this.getUIContext().animateTo({ duration: 200, }, () => {
                     this.scrollerForList.scrollToIndex(aimPage)
                   })
                 }

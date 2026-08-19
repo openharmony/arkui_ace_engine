@@ -15,7 +15,6 @@
 
 //index.ets
 import { WaterFlowDataSource } from './WaterFlowDataSource';
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
 
 @Entry
 @Component
@@ -31,7 +30,6 @@ struct WaterFlowDemo {
     99, 11, 0.9, 99, undefined, 99, null, 11, 0.1, 99, -99
   ];
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
 
   // 计算FlowItem宽/高
   getSize() {

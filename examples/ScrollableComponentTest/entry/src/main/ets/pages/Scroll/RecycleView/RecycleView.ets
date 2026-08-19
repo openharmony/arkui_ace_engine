@@ -57,7 +57,11 @@ export abstract class RecycleAdapter {
       buildNode.build(this.builder, this.getData(index), { nestingBuilderSupported: true });
     }
     let frameNode = buildNode.getFrameNode();
-    this.frameNode?.appendChild(frameNode);
+    try {
+      this.frameNode?.appendChild(frameNode);
+    } catch (e) {
+      console.error(`appendChild failed: code=${e.code}, msg=${e.message}`);
+    }
     this.childrenMap.set(index, buildNode);
     return frameNode;
   }
@@ -65,7 +69,11 @@ export abstract class RecycleAdapter {
   recycleChild(index: number): void {
     let node = this.childrenMap.get(index);
     if (node) {
-      this.frameNode?.removeChild(node.getFrameNode());
+      try {
+        this.frameNode?.removeChild(node.getFrameNode());
+      } catch (e) {
+        console.error(`removeChild failed: code=${e.code}, msg=${e.message}`);
+      }
       if (this.recyclePool.length < this.recyclePoolSize) {
         this.recyclePool.push(node);
       }
@@ -97,8 +105,8 @@ export class FixedHeightLayoutManager extends LayoutManager {
 
   onWillScroll(recycleNode: RecycleNode, currOffset: OffsetResult, delta: OffsetResult,
     scrollState: ScrollState, scrollSource: ScrollSource): OffsetResult | void {
-    this.currentOffset = vp2px(currOffset.yOffset);
-    this.currentDelta = vp2px(delta.yOffset);
+    this.currentOffset = recycleNode.adapter.uiContext.vp2px(currOffset.yOffset);
+    this.currentDelta = recycleNode.adapter.uiContext.vp2px(delta.yOffset);
     recycleNode.setNeedsLayout();
   }
 
@@ -471,8 +479,8 @@ export class ColumnLayoutManager extends LayoutManager {
 
   onWillScroll(recycleNode: RecycleNode, currOffset: OffsetResult, delta: OffsetResult,
     scrollState: ScrollState, scrollSource: ScrollSource): OffsetResult | void {
-    this.currentOffset = vp2px(currOffset.yOffset);
-    this.currentDelta = vp2px(delta.yOffset);
+    this.currentOffset = recycleNode.adapter.uiContext.vp2px(currOffset.yOffset);
+    this.currentDelta = recycleNode.adapter.uiContext.vp2px(delta.yOffset);
     recycleNode.setNeedsLayout();
   }
   onMeasure(recycleNode: RecycleNode, constraint: LayoutConstraint): void {

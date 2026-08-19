@@ -39,7 +39,6 @@ struct GridExample1 {
   }
 
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
 
   build() {

@@ -67,6 +67,16 @@ class WaterFlowCommandController extends NodeController {
     this.refreshOffsetText();
   }
 
+  // FrameNode.appendChild() throws when the node tree rejects the child, so keep the failure local
+  // instead of letting it escape makeNode().
+  private appendChildSafely(parent: FrameNode, child: FrameNode): void {
+    try {
+      parent.appendChild(child);
+    } catch (e) {
+      console.error(`WaterFlowCommand appendChild failed: code=${e.code}, msg=${e.message}`);
+    }
+  }
+
   makeNode(uiContext: UIContext): FrameNode | null {
     const root = typeNode.createNode(uiContext, 'Column');
     root.initialize().width('100%').height('100%').padding(16);
@@ -97,8 +107,8 @@ class WaterFlowCommandController extends NodeController {
       this.refreshOffsetText();
     });
 
-    actionRow.appendChild(bindBtn);
-    actionRow.appendChild(readBtn);
+    this.appendChildSafely(actionRow, bindBtn);
+    this.appendChildSafely(actionRow, readBtn);
 
     const defaultTitle = typeNode.createNode(uiContext, 'Text');
     defaultTitle.initialize('Default Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
@@ -121,9 +131,9 @@ class WaterFlowCommandController extends NodeController {
       this.scrollBottom(this.defaultScroller);
     });
 
-    defaultRow.appendChild(defaultByBtn);
-    defaultRow.appendChild(defaultTopBtn);
-    defaultRow.appendChild(defaultBottomBtn);
+    this.appendChildSafely(defaultRow, defaultByBtn);
+    this.appendChildSafely(defaultRow, defaultTopBtn);
+    this.appendChildSafely(defaultRow, defaultBottomBtn);
 
     const dynamicTitle = typeNode.createNode(uiContext, 'Text');
     dynamicTitle.initialize('Dynamic Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
@@ -146,14 +156,18 @@ class WaterFlowCommandController extends NodeController {
       this.scrollBottom(this.dynamicScroller);
     });
 
-    dynamicRow.appendChild(dynamicByBtn);
-    dynamicRow.appendChild(dynamicTopBtn);
-    dynamicRow.appendChild(dynamicBottomBtn);
+    this.appendChildSafely(dynamicRow, dynamicByBtn);
+    this.appendChildSafely(dynamicRow, dynamicTopBtn);
+    this.appendChildSafely(dynamicRow, dynamicBottomBtn);
 
     const waterFlow = typeNode.createNode(uiContext, 'WaterFlow');
     waterFlow.initialize().height('70%').width('100%').borderWidth(1).borderColor('#d0d7de');
     this.waterFlowNode = waterFlow;
-    typeNode.bindController(waterFlow, this.defaultScroller, 'WaterFlow');
+    try {
+      typeNode.bindController(waterFlow, this.defaultScroller, 'WaterFlow');
+    } catch (e) {
+      console.error(`WaterFlowCommand bindController failed: code=${e.code}, msg=${e.message}`);
+    }
 
     for (let i = 0; i < 40; i++) {
       const flowItem = typeNode.createNode(uiContext, 'FlowItem');
@@ -166,20 +180,20 @@ class WaterFlowCommandController extends NodeController {
         .textAlign(TextAlign.Center)
         .backgroundColor(i % 2 === 0 ? '#f1f3f5' : '#e9ecef');
 
-      flowItem.appendChild(item);
-      waterFlow.appendChild(flowItem);
+      this.appendChildSafely(flowItem, item);
+      this.appendChildSafely(waterFlow, flowItem);
     }
 
-    root.appendChild(title);
-    root.appendChild(this.bindResultNode);
-    root.appendChild(this.defaultOffsetNode);
-    root.appendChild(this.dynamicOffsetNode);
-    root.appendChild(actionRow);
-    root.appendChild(defaultTitle);
-    root.appendChild(defaultRow);
-    root.appendChild(dynamicTitle);
-    root.appendChild(dynamicRow);
-    root.appendChild(waterFlow);
+    this.appendChildSafely(root, title);
+    this.appendChildSafely(root, this.bindResultNode);
+    this.appendChildSafely(root, this.defaultOffsetNode);
+    this.appendChildSafely(root, this.dynamicOffsetNode);
+    this.appendChildSafely(root, actionRow);
+    this.appendChildSafely(root, defaultTitle);
+    this.appendChildSafely(root, defaultRow);
+    this.appendChildSafely(root, dynamicTitle);
+    this.appendChildSafely(root, dynamicRow);
+    this.appendChildSafely(root, waterFlow);
 
     return root;
   }

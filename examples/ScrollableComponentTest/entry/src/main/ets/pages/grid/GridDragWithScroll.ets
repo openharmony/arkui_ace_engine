@@ -68,10 +68,10 @@ struct GridDragWithScroll {
       .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number,
         isSuccess: boolean) => {
         let deleteArea = this.getUIContext().getComponentUtils().getRectangleById('deleteArea')
-        if (vp2px(event.x) > deleteArea.screenOffset.x &&
-          vp2px(event.x) < deleteArea.screenOffset.x + deleteArea.size.width &&
-          vp2px(event.y) > deleteArea.screenOffset.y &&
-          vp2px(event.y) < deleteArea.screenOffset.y + deleteArea.size.height) {
+        if (this.getUIContext().vp2px(event.x) > deleteArea.screenOffset.x &&
+          this.getUIContext().vp2px(event.x) < deleteArea.screenOffset.x + deleteArea.size.width &&
+          this.getUIContext().vp2px(event.y) > deleteArea.screenOffset.y &&
+          this.getUIContext().vp2px(event.y) < deleteArea.screenOffset.y + deleteArea.size.height) {
           return;
         }
 

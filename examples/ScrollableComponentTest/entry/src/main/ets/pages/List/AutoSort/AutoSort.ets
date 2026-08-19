@@ -20,6 +20,7 @@
 
 import curves from '@ohos.curves';
 import animator, { AnimatorResult } from '@ohos.animator';
+import { UIContext } from '@kit.ArkUI';
 
 
 class ListItemModify implements AttributeModifier<ListItemAttribute> {
@@ -51,6 +52,7 @@ class DragSortCtrl {
   private offsetY: number = 0
   private state:DragSortState = DragSortState.IDLE
   private ITEM_INTV: number = 120
+  private uiContext: UIContext | undefined = undefined
   constructor(arr:Array<number>, intv:number) {
     this.arr = arr;
     this.modify = []
@@ -58,6 +60,18 @@ class DragSortCtrl {
     arr.forEach(()=>{
       this.modify.push(new ListItemModify())
     })
+  }
+  setUIContext(uiContext: UIContext): void {
+    this.uiContext = uiContext
+  }
+  // Until the owning page hands over its UIContext, run the closure unanimated rather than
+  // dropping the state updates it carries.
+  private animate(param: AnimateParam, event: () => void): void {
+    if (this.uiContext) {
+      this.uiContext.animateTo(param, event)
+    } else {
+      event()
+    }
   }
   itemMove(index: number, newIndex: number): void {
     let tmp = this.arr.splice(index, 1)
@@ -68,7 +82,7 @@ class DragSortCtrl {
   onLongPress(item: number): void {
     let index = this.arr.indexOf(item)
     this.dragRefOffset = 0
-    animateTo({ curve: Curve.Friction, duration: 300 }, () => {
+    this.animate({ curve: Curve.Friction, duration: 300 }, () => {
       this.state = DragSortState.PRESSING
       this.modify[index].hasShadow = true
       this.modify[index].color ='#15000000'
@@ -77,7 +91,7 @@ class DragSortCtrl {
   }
   onDrop(item: number):void {
     let index = this.arr.indexOf(item)
-    animateTo({ duration: 300, curve: Curve.Sharp }, () => {
+    this.animate({ duration: 300, curve: Curve.Sharp }, () => {
       this.modify[index].color = '#00000000'
       this.modify[index].hasShadow = false
       if (index < this.modify.length - 1) {
@@ -87,7 +101,7 @@ class DragSortCtrl {
         this.modify[index - 1].scale = 1;
       }
     })
-    animateTo({curve: curves.interpolatingSpring(14, 1, 170, 17)}, ()=>{
+    this.animate({curve: curves.interpolatingSpring(14, 1, 170, 17)}, ()=>{
       this.state = DragSortState.IDLE
       this.modify[index].scale = 1
     })
@@ -116,14 +130,14 @@ class DragSortCtrl {
       }
     }
     if (this.offsetY > this.ITEM_INTV / 2) {
-      animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+      this.animate({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
         this.offsetY -= this.ITEM_INTV
         this.dragRefOffset += this.ITEM_INTV
         this.modify[index].offsetY = this.offsetY
         this.itemMove(index, index + 1)
       })
     } else if (this.offsetY < -this.ITEM_INTV / 2) {
-      animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+      this.animate({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
         this.offsetY += this.ITEM_INTV
         this.dragRefOffset -= this.ITEM_INTV
         this.modify[index].offsetY = this.offsetY
@@ -146,10 +160,17 @@ struct ListAutoSortExample {
   private listScroll: ListScroller = new ListScroller()
   private backAnimator: AnimatorResult | null= null
   private dropFlag: Boolean = true
+
+  aboutToAppear(): void {
+    this.dragSortCtrl.setUIContext(this.getUIContext())
+  }
+
   @Builder
   itemEnd(item: number) {
     Row () {
       Button('To TOP').margin('4vp').onClick(()=>{
+        // Grab the UIContext while the page is still attached - the animator is created a tick later.
+        const uiContext = this.getUIContext()
         this.listScroll.closeAllSwipeActions({
           onFinish: ()=>{
             setTimeout(()=>{
@@ -157,7 +178,7 @@ struct ListAutoSortExample {
               this.dropFlag = true
               this.dragSortCtrl.onLongPress(item)
               let length = 120 * this.arr.indexOf(item)
-              this.backAnimator = animator.create({
+              this.backAnimator = uiContext.createAnimator({
                 duration: 0,
                 easing: 'interpolating-spring(0, 1, 150, 24)',
                 delay: 0,

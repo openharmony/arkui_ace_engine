@@ -81,7 +81,6 @@ struct TabBarDemo {
         // 使用ForEach创建TabContent时可以根据index确定TabConentGestureModifier参数
         .gestureModifier(new TabConentGestureModifier(TabContentPosition.START))
         // 也可以直接设置，TabConentGestureModifier主要用于ForEach生成TabContent的场景
-        // .gesture(PanGesture(this.panOptionStart))
 
         TabContent() {
           Column().width('100%').height('100%').backgroundColor(Color.Yellow)
@@ -102,7 +101,6 @@ struct TabBarDemo {
           })
         }.tabBar(this.tabBuilder(2, 'Tab3'))
         .gestureModifier(new TabConentGestureModifier(TabContentPosition.END))
-        // .gesture(PanGesture(this.panOptionEnd))
       }
       .onChange((index: number) => {
         this.currentIndex = index

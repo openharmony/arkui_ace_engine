@@ -119,7 +119,7 @@ export struct FreeScroll {
       let damping = 4 * Math.PI / response;
       let end = start + velocity / (friction * -FRICTION_SCALE)
       let v = velocity / (end - start)
-      return animator.create({
+      return this.getUIContext().createAnimator({
         duration: 2000,
         easing: 'interpolating-spring(' + v + ',1,' + stiffness + ',' + damping + ')',
         delay: 0,
@@ -132,7 +132,7 @@ export struct FreeScroll {
     } else {
       let end = start > limit ? limit : - limit
       let v = velocity / (end - start)
-      return animator.create({
+      return this.getUIContext().createAnimator({
         duration: 2000,
         easing: 'interpolating-spring(' + v + ',1,228,30)',
         delay: 0,
@@ -146,7 +146,7 @@ export struct FreeScroll {
   }
 
   createScaleAnimator(start:number, end:number):AnimatorResult {
-    return animator.create({
+    return this.getUIContext().createAnimator({
       duration: 2000,
       easing: 'interpolating-spring(0,1,228,30)',
       delay: 0,
@@ -280,7 +280,7 @@ export struct FreeScroll {
           }
           if ((this.overScrollX || Math.abs(event.velocityX) > 10) && Math.abs(event.velocityX) != Infinity) {
             this.scrollXAnimator = this.createScrollAnimator(this.xOffset, this.xLimit, event.velocityX)
-            this.scrollXAnimator.onframe = (value: number) => {
+            this.scrollXAnimator.onFrame = (value: number) => {
               if (this.overScrollX) {
                 this.xOffset = value
               } else {
@@ -294,7 +294,7 @@ export struct FreeScroll {
           }
           if ((this.overScrollY || Math.abs(event.velocityY) > 10) && Math.abs(event.velocityY) != Infinity) {
             this.scrollYAnimator = this.createScrollAnimator(this.yOffset, this.yLimit, event.velocityY)
-            this.scrollYAnimator.onframe = (value: number) => {
+            this.scrollYAnimator.onFrame = (value: number) => {
               if (this.overScrollY) {
                 this.yOffset = value
               } else {
@@ -358,7 +358,7 @@ export struct FreeScroll {
           } else {
             return;
           }
-          this.scaleAnimator.onframe = (value:number)=>{
+          this.scaleAnimator.onFrame = (value:number)=>{
             this.contentScale = value;
             this.xLimit = Math.max(0, (this.contentSize.width * this.contentScale - this.selfWidth) / 2);
             this.yLimit = Math.max(0, (this.contentSize.height * this.contentScale - this.selfHeight) / 2);

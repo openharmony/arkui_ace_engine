@@ -14,7 +14,7 @@
  */
 
 import { LengthMetrics, ScrollModifier } from '@kit.ArkUI';
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
+import { ConfigurationConstant } from '@kit.AbilityKit';
 
 class CustomModifier1 implements AttributeModifier<ScrollAttribute> {
   public changeIndex: number = 0;
@@ -35,7 +35,6 @@ struct NestedScroll11 {
   private scrollerForScroll: Scroller = new Scroller();
   private scrollerForList: Scroller = new Scroller();
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State modifier1: CustomModifier1 = new CustomModifier1();
   scroller: Scroller = new Scroller();
@@ -47,12 +46,13 @@ struct NestedScroll11 {
         Column() {
           Button('深浅色')
             .onClick(() => {
+              const appContext = this.getUIContext().getHostContext()?.getApplicationContext();
               if (this.isDark) {
                 this.isDark = false;
-                this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
+                appContext?.setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
               } else {
                 this.isDark = true;
-                this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
+                appContext?.setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
               }
             })
           Button('切换数值')

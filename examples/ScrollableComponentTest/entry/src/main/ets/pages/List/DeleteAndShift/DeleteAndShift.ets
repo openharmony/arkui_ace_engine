@@ -109,7 +109,7 @@ export struct CardItem {
 }
 @Entry
 @Component
-export struct ListPinAnimation {
+struct ListPinAnimation {
   @State dataSource: LazyDataSource<Item> = new LazyDataSource()
   @State currentIndex: string = 'undefined'
   private scrollerForList: Scroller = new Scroller()
@@ -126,7 +126,7 @@ export struct ListPinAnimation {
         this.currentIndex = item.data
         const index = this.dataSource.indexOf(item)
         this.endOffset = 0
-        animateTo({ duration: 0 }, () => {
+        this.getUIContext().animateTo({ duration: 0 }, () => {
           this.dataSource.deleteItem(item)
         })
         for (let i = 0; i < this.dataSource.totalCount(); ++i) {
@@ -139,7 +139,7 @@ export struct ListPinAnimation {
         }
         for (let i = 0; i < this.dataSource.totalCount(); ++i) {
           const element = this.dataSource.getData(i)
-          animateTo({
+          this.getUIContext().animateTo({
             curve: Curve.Friction,
             duration: 350,
             delay: Math.abs(index - i) * 16.67,

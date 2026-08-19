@@ -60,6 +60,7 @@ struct WaterFlowDemo {
   @State pixmap: image.PixelMap | undefined = undefined
   private columnChanged: boolean = false
   private oldColumn: number = this.columns
+  private snapshotRequestId: number = 0
 
   // 计算FlowItem宽/高
   getSize() {
@@ -82,6 +83,19 @@ struct WaterFlowDemo {
       this.columns = lastCount
     }
     this.setItemSizeArray()
+  }
+
+  aboutToDisappear() {
+    this.snapshotRequestId++
+    this.releasePixmap()
+  }
+
+  private releasePixmap() {
+    if (this.pixmap) {
+      const pixmap = this.pixmap
+      this.pixmap = undefined
+      pixmap.release()
+    }
   }
 
   changeColumns(scale: number) {
@@ -145,11 +159,18 @@ struct WaterFlowDemo {
               this.pinchTime = event.timestamp
               this.columnChanged = false
               // 图片组件显示缩放前截图
+              const snapshotRequestId = ++this.snapshotRequestId
+              this.releasePixmap()
               this.getUIContext().getComponentSnapshot().get('waterflow', (error: Error, pixmap: image.PixelMap) => {
                 if (error) {
                   console.log('error: ' + JSON.stringify(error))
                   return;
                 }
+                if (snapshotRequestId !== this.snapshotRequestId) {
+                  pixmap.release()
+                  return
+                }
+                this.releasePixmap()
                 this.pixmap = pixmap
               })
             })
@@ -182,7 +203,7 @@ struct WaterFlowDemo {
             .onActionEnd((event: GestureEvent) => {
               this.gestureEnd = true
               // 离手回到正常布局
-              animateTo({ duration: 300 }, () => {
+              this.getUIContext().animateTo({ duration: 300 }, () => {
                 this.itemScale = 1
                 this.itemOpacity = 1
               })

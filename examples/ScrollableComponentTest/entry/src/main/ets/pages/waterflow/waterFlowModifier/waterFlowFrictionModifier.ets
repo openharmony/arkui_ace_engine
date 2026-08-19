@@ -15,7 +15,6 @@
 
 //index.ets
 import { WaterFlowDataSource } from './WaterFlowDataSource';
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
 
 class MyTabContentModifier1 implements AttributeModifier<WaterFlowAttribute> {
   public isDark: boolean = false;
@@ -40,7 +39,6 @@ struct WaterFlowDemo {
   private itemHeightArray: number[] = [];
   @State modifier1: MyTabContentModifier1 = new MyTabContentModifier1();
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
 
   // 计算FlowItem宽/高
   getSize() {

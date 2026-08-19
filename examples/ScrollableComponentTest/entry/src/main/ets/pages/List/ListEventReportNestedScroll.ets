@@ -59,7 +59,7 @@ struct ScrollExample_nestedScroll2 {
                 }, (item: number) => item.toString())
               }
               .width('100%')
-              .id('List')
+              .id('listEventReportNestedList')
               .cachedCount(1000, true)
               .edgeEffect(EdgeEffect.Spring)
               .nestedScroll({
@@ -135,7 +135,7 @@ struct ScrollExample_nestedScroll2 {
         .height('5%')
         .onClick(() => { //
 
-          NodeIdUtils.getNodeInternalId(this.getUIContext(), 'List', 'text', 100)
+          NodeIdUtils.getNodeInternalId(this.getUIContext(), 'listEventReportNestedList', 'text', 100)
         })
         .margin({ top: 360, left: 20 })
     }.width('100%').height('100%').backgroundColor(0xDCDCDC)

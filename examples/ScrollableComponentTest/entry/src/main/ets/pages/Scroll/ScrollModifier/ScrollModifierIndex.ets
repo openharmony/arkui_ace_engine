@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import router from '@ohos.router';
-
-interface routerInfo {
+export interface routerInfo {
   url: string;
   info: string;
 }
@@ -44,7 +42,7 @@ struct Index {
               .borderRadius(10)
               .textAlign(TextAlign.Center)
               .onClick(() => {
-                router.pushUrl({
+                this.getUIContext().getRouter().pushUrl({
                   url: item.url
                 })
               })

@@ -52,7 +52,6 @@ export struct ProductCardWidget {
       }
       .width('100%')
       .height(100)
-      //.aspectRatio(1 / this.componentRatio) //真机上测试时使用这个
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
       .backgroundColor(this.item.color)

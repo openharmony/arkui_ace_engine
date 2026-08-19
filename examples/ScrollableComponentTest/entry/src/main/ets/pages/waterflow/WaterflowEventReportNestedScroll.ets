@@ -115,7 +115,7 @@ struct WaterFlowDemo_nestedScroll {
               }, (item: string, index?: number) => item)
 
             }
-            .id('WaterFlow')
+            .id('waterflowEventReportNestedFlow')
             .nestedScroll({
               scrollForward: NestedScrollMode.PARENT_FIRST,
               scrollBackward: NestedScrollMode.SELF_FIRST
@@ -201,7 +201,7 @@ struct WaterFlowDemo_nestedScroll {
         Button('id')
           .height('5%')
           .onClick(() => {
-            NodeIdUtils.getNodeInternalId(this.getUIContext(), 'WaterFlow', 'text', 100)
+            NodeIdUtils.getNodeInternalId(this.getUIContext(), 'waterflowEventReportNestedFlow', 'text', 100)
           })
           .margin({ top: 360, left: 20 })
       }
