@@ -98,7 +98,6 @@ struct WaterFlowDemo33 {
         .width(50)
         .height(100)
         .align(Alignment.Center)
-      // .margin({ top: 20,bottom:5 })
     }
   }
   // 计算FlowItem宽/高
@@ -203,7 +202,7 @@ struct WaterFlowDemo33 {
           }, (item: string) => item)
         }
         .syncLoad(true)
-        .id('waterflow') // 设置id用于截图
+        .id('speakWaterFlow') // 设置id用于截图
         .columnsTemplate('1fr '.repeat(this.columns))  // 动态生成列模板，如：'1fr 1fr 1fr'表示3列等宽
         .backgroundColor(0xFAEEE0)
         .width('100%')
@@ -229,7 +228,7 @@ struct WaterFlowDemo33 {
               this.pinchTime = event.timestamp;
               this.columnChanged = false;
               this.oldColumn = this.columns;
-              this.getUIContext().getComponentSnapshot().get('waterflow', (error: Error, pixmap: image.PixelMap) => {
+              this.getUIContext().getComponentSnapshot().get('speakWaterFlow', (error: Error, pixmap: image.PixelMap) => {
                 if (error) {
                   console.info('error:' + JSON.stringify(error));
                   return;

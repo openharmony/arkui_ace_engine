@@ -43,19 +43,22 @@ struct TestDrag {
             }
             // 长按振动
             try {
-              vibrator.startVibration({
-                type: 'preset',
-                effectId: 'haptic.notice.success',
-                count: 1,
-              }, {
-                usage: 'notification' // 根据实际选择类型归属不同的开关管控
-              }, (error: BusinessError) => {
-                if (error) {
-                  console.error(`Failed to start vibration. Code: ${error.code}, message: ${error.message}`);
-                  return;
-                }
-                console.info('Succeed in starting vibration');
-              });
+              // Not every device ships the vibrator hardware, so gate the call on the capability.
+              if (canIUse('SystemCapability.Sensors.MiscDevice')) {
+                vibrator.startVibration({
+                  type: 'preset',
+                  effectId: 'haptic.notice.success',
+                  count: 1,
+                }, {
+                  usage: 'notification' // 根据实际选择类型归属不同的开关管控
+                }, (error: BusinessError) => {
+                  if (error) {
+                    console.error(`Failed to start vibration. Code: ${error.code}, message: ${error.message}`);
+                    return;
+                  }
+                  console.info('Succeed in starting vibration');
+                });
+              }
             } catch (err) {
               let e: BusinessError = err as BusinessError;
               console.error(`An unexpected error occurred. Code: ${e.code}, message: ${e.message}`);

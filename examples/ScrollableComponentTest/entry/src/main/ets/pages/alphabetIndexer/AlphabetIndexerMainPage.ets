@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import router from '@ohos.router';
-
-class TextList {
+export class TextList {
   public id: number;
   public text: string;
   public url: string;
@@ -49,7 +47,7 @@ struct AlphabetIndexerMainPage {
               .margin(10)
               .padding({ top: 5, bottom: 5 })
               .onClick(() => {
-                router.pushUrl({ url: item.url })
+                this.getUIContext().getRouter().pushUrl({ url: item.url })
               })
           }, (item: TextList) => JSON.stringify(item.id))
         }

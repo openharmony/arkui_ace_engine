@@ -90,15 +90,19 @@ class DragCtrl<T> {
 
   onLongPress(event: GestureEvent): void {
     let pos = event.fingerList[0];
-    let info: VisibleListContentInfo = this.scroller.getVisibleListContentInfo(pos.localX, pos.localY);
-    if (info.itemIndexInGroup !== undefined) {
-      this.item = this.getData(info.index, info.itemIndexInGroup);
-      this.groupIndex = info.index;
-      this.itemIndex = info.itemIndexInGroup;
-      this.dragState = DragState.LONG_PRESS;
-      this.rect = this.scroller.getItemRectInGroup(info.index, info.itemIndexInGroup);
-      this.posX0 = this.rect.x;
-      this.posY0 = this.rect.y;
+    try {
+      let info: VisibleListContentInfo = this.scroller.getVisibleListContentInfo(pos.localX, pos.localY);
+      if (info.itemIndexInGroup !== undefined) {
+        this.item = this.getData(info.index, info.itemIndexInGroup);
+        this.groupIndex = info.index;
+        this.itemIndex = info.itemIndexInGroup;
+        this.dragState = DragState.LONG_PRESS;
+        this.rect = this.scroller.getItemRectInGroup(info.index, info.itemIndexInGroup);
+        this.posX0 = this.rect.x;
+        this.posY0 = this.rect.y;
+      }
+    } catch (e) {
+      console.error(`onLongPress query failed: code=${e.code}, msg=${e.message}`);
     }
   }
 
@@ -119,9 +123,13 @@ class DragCtrl<T> {
       height: this.rect.height
     };
     let pos = event.fingerList[0];
-    let info = this.scroller.getVisibleListContentInfo(pos.localX, pos.localY);
-    if (info.itemIndexInGroup !== undefined) {
-      this.swapTo(info.index, info.itemIndexInGroup);
+    try {
+      let info = this.scroller.getVisibleListContentInfo(pos.localX, pos.localY);
+      if (info.itemIndexInGroup !== undefined) {
+        this.swapTo(info.index, info.itemIndexInGroup);
+      }
+    } catch (e) {
+      console.error(`onDragUpdate query failed: code=${e.code}, msg=${e.message}`);
     }
     if (pos.localY < 56) {
       if (!this.scrolling) {
@@ -142,15 +150,20 @@ class DragCtrl<T> {
     if (this.dragState !== DragState.DRAGGING) {
       return;
     }
-    let rect = this.scroller.getItemRectInGroup(this.groupIndex, this.itemIndex);
-    this.context.animateTo({
-      duration: 300,
-      onFinish: () => {
-        this.reset();
-      }
-    }, () => {
-      this.rect = rect;
-    });
+    try {
+      let rect = this.scroller.getItemRectInGroup(this.groupIndex, this.itemIndex);
+      this.context.animateTo({
+        duration: 300,
+        onFinish: () => {
+          this.reset();
+        }
+      }, () => {
+        this.rect = rect;
+      });
+    } catch (e) {
+      console.error(`onDrop getItemRectInGroup failed: code=${e.code}, msg=${e.message}`);
+      this.reset();
+    }
   }
 }
 

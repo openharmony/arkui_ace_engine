@@ -45,7 +45,7 @@ export class WaterFlowDataSource implements IDataSource {
   // 通知控制器数据位置变化
   notifyDataMove(from: number, to: number): void {
     this.listeners.forEach(listener => {
-      listener.onDataMoved(from, to)
+      listener.onDatasetChange([{ type: DataOperationType.MOVE, index: { from: from, to: to } }])
     })
   }
 

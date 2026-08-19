@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
-
 // xxx.ets
 @Entry
 @Component
@@ -85,7 +83,6 @@ struct ListItemGroupExample {
   }
 
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State changeIndex: number = 0;
   @State changeList: (number | Resource | undefined | null)[] = [
@@ -138,7 +135,7 @@ struct ListItemGroupExample {
   }
 }
 
-interface TimeTable {
+export interface TimeTable {
   title: string;
   projects: string[];
 }

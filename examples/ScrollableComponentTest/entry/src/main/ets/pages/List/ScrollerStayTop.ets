@@ -80,7 +80,7 @@ export class LazyDataSource<T> extends BasicDataSource<T> {
 
 @Entry
 @ComponentV2
-export struct Index {
+struct Index {
   @Local isRefreshing: boolean = false;
   @Local refreshText: string = '';
   @Local lazyDataModel: LazyDataSource<string> = new LazyDataSource();

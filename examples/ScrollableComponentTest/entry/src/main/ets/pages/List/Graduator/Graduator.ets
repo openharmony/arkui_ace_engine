@@ -103,8 +103,12 @@ struct RollBar {
   private centerIndex: number = 0;
 
   aboutToAppear(): void {
-    const displayInfo = display.getDefaultDisplaySync()
-    this.centerWidth = px2vp(displayInfo.width) / 2
+    try {
+      const displayInfo = display.getDefaultDisplaySync()
+      this.centerWidth = this.getUIContext().px2vp(displayInfo.width) / 2
+    } catch (e) {
+      console.error(`getDefaultDisplaySync failed: code=${e.code}, msg=${e.message}`)
+    }
   }
 
   // 计算黄色条宽度的方法
@@ -119,9 +123,9 @@ struct RollBar {
 
   //指示浮标
   onGetCursor() {
-    const centerX = vp2px(this.cursorWidth / 2)
-    const endX = vp2px(this.cursorWidth)
-    const centerY = vp2px(this.cursorHeight)
+    const centerX = this.getUIContext().vp2px(this.cursorWidth / 2)
+    const endX = this.getUIContext().vp2px(this.cursorWidth)
+    const centerY = this.getUIContext().vp2px(this.cursorHeight)
     return `M0 0 L${centerX} ${centerY} L${endX} 0 Z`
   }
 
@@ -154,8 +158,13 @@ struct RollBar {
   }
 
   getCurrentOffset(offset: number): number {
-    let rect = this.listScroller.getItemRect(this.centerIndex);
-    let totalOffset = this.centerWidth + this.intervalTime * (this.centerIndex - 1) - rect.x + offset;
+    let rectX = 0;
+    try {
+      rectX = this.listScroller.getItemRect(this.centerIndex).x;
+    } catch (e) {
+      console.error(`getItemRect failed: code=${e.code}, msg=${e.message}`)
+    }
+    let totalOffset = this.centerWidth + this.intervalTime * (this.centerIndex - 1) - rectX + offset;
     totalOffset = Math.min(10624320, totalOffset)
     totalOffset = Math.max(0, totalOffset)
     return totalOffset

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import router from '@ohos.router';
 import { typeNode } from '@kit.ArkUI';
 import { WaterFlowControllerStore } from './WaterFlowControllerStore';
 
@@ -100,12 +99,13 @@ struct WaterFlowDestroyDeclare {
     this.bindResult = `WaterFlow removed, entering child page by ${mode}`;
     WaterFlowControllerStore.setNavigationMode(mode);
     WaterFlowControllerStore.setResult(`WaterFlow host page left by ${mode}. Call methods on the bound controller below.`);
+    const pageRouter = this.getUIContext().getRouter();
     setTimeout(() => {
       try {
         if (mode === 'replace') {
-          router.replaceUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
+          pageRouter.replaceUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
         } else {
-          router.pushUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
+          pageRouter.pushUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
         }
       } catch (error) {
         console.error(`Failed to navigate by ${mode}:`, error);

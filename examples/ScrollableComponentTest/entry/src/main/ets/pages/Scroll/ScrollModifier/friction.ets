@@ -14,7 +14,6 @@
  */
 
 import { LengthMetrics, ScrollModifier } from '@kit.ArkUI';
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
 
 class CustomModifier1 implements AttributeModifier<ScrollAttribute> {
   public changeIndex: number = 0;
@@ -36,7 +35,6 @@ struct NestedScroll1 {
   private scrollerForScroll: Scroller = new Scroller();
   private scrollerForList: Scroller = new Scroller();
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State changeIndex: number = 0;
   @State modifier1: CustomModifier1 = new CustomModifier1();

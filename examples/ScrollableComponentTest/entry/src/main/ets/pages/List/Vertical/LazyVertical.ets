@@ -229,7 +229,6 @@ struct ListExample1 {
             }, (item: string) => item)
           }
 
-          //.divider({ strokeWidth: 1, color: Color.Blue }) // 每行之间的分界线
         })
       }
       .id('List')

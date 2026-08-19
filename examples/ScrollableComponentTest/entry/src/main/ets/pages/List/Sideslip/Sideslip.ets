@@ -235,7 +235,7 @@ struct ListItemExample2 {
   onDelete(item: Item) {
     this.endOffset = 0
     let index = this.dataSource.indexOf(item)
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 0,
     }, () => {
       this.scaleItem = 0.75
@@ -251,7 +251,7 @@ struct ListItemExample2 {
     }
     for (let i = 0; i < this.dataSource.totalCount(); ++i) {
       const element = this.dataSource.getData(i)
-      animateTo({
+      this.getUIContext().animateTo({
         curve: Curve.Friction,
         duration: 350,
         delay: Math.abs(index - i) * 16.67,
@@ -275,7 +275,6 @@ struct ListItemExample2 {
           ListItem() {
             CardItem({ item: item })
           }
-          // .clip(true)
           .zIndex(Number(item.data))
           .transition(TransitionEffect.asymmetric(
             TransitionEffect.IDENTITY,
@@ -291,12 +290,12 @@ struct ListItemExample2 {
               },
               actionAreaDistance: 56,
               onEnterActionArea: () => {
-                animateTo({ duration: 200, curve: Curve.Friction }, () => {
+                this.getUIContext().animateTo({ duration: 200, curve: Curve.Friction }, () => {
                   item.inDeleteArea = true;
                 })
               },
               onExitActionArea: () => {
-                animateTo({ duration: 200, curve: Curve.Friction }, () => {
+                this.getUIContext().animateTo({ duration: 200, curve: Curve.Friction }, () => {
                   item.inDeleteArea = false;
                 })
               }
@@ -309,7 +308,6 @@ struct ListItemExample2 {
         this.endOffset = scrollOffset
       })
     }
-    // .padding(10)
     .backgroundColor('#0D182431')
     .width('100%')
     .height('100%')

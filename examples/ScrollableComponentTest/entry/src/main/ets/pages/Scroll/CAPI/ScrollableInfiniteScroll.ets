@@ -18,7 +18,7 @@ import { NodeContent } from '@kit.ArkUI';
 
 @Entry
 @Component
-export struct ScrollableInfiniteScroll {
+struct ScrollableInfiniteScroll {
   private rootSlot: NodeContent = new NodeContent();
 
   build() {

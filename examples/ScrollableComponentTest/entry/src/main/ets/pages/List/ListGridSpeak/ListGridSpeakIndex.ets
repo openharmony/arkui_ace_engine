@@ -47,7 +47,7 @@ struct Index {
               .borderRadius(10)
               .textAlign(TextAlign.Center)
               .onClick(() => {
-                router.pushUrl({
+                this.getUIContext().getRouter().pushUrl({
                   url: item.url
                 })
               })

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
+// Keeps this page an ES module so its top-level declarations stay file-scoped.
+export {};
 
 @Entry
 @Component
@@ -23,7 +24,6 @@ struct NestedScroll1 {
   private scrollerForScroll: Scroller = new Scroller();
   private scrollerForList: Scroller = new Scroller();
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State changeIndex: number = 0;
   @State changeList: (number | Resource | undefined | null)[] = [
