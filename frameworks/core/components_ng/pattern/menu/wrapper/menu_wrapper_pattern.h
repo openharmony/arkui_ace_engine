@@ -654,6 +654,8 @@ private:
         return false;
     }
     void OnModifyDone() override;
+    void DumpRootNodeDirtyMarkInfo();
+    void DumpRootNodeDirtyMarkInfo(std::unique_ptr<JsonValue>& json);
     void InitFocusEvent();
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();

@@ -1270,6 +1270,31 @@ void MenuManager::ShowMenu(const RefPtr<OverlayManager>& overlayManager,
     }
 }
 
+void MenuManager::ClearResidualLayoutDirtyMark(
+    const RefPtr<FrameNode>& frameRoot, const RefPtr<PipelineContext>& pipeline)
+{
+    if (!frameRoot || !frameRoot->IsLayoutDirtyMarked()) {
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_OVERLAY, "root node has residual layout dirty mark");
+    CHECK_NULL_VOID(pipeline);
+    const auto& dirtyLayoutNodes = pipeline->GetDirtyLayoutNodes();
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "rootNode pipeline dirtyLayoutNodes size: %{public}zu",
+        dirtyLayoutNodes.size());
+    for (const auto& dirtyNode : dirtyLayoutNodes) {
+        if (!dirtyNode) {
+            continue;
+        }
+        if (dirtyNode->GetTag() != ROOT_ETS_TAG) {
+            continue;
+        }
+        TAG_LOGI(AceLogTag::ACE_OVERLAY,
+            "dirtyLayoutNode tag: %{public}s, id: %{public}d, depth: %{public}d, pageId: %{public}d",
+            dirtyNode->GetTag().c_str(), dirtyNode->GetId(), dirtyNode->GetDepth(), dirtyNode->GetPageId());
+    }
+    frameRoot->SetLayoutDirtyMarked(false);
+}
+
 // subwindow only contains one menu instance.
 void MenuManager::ShowMenuInSubWindow(const RefPtr<OverlayManager>& overlayManager,
     int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
@@ -1287,13 +1312,9 @@ void MenuManager::ShowMenuInSubWindow(const RefPtr<OverlayManager>& overlayManag
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto frameRoot = AceType::DynamicCast<FrameNode>(rootNode);
-    // If the root node has a residual layout dirty mark, subsequent dirty marking will be skipped.
-    if (frameRoot && frameRoot->IsLayoutDirtyMarked()) {
-        TAG_LOGW(AceLogTag::ACE_OVERLAY, "root node has residual layout dirty mark");
-        frameRoot->SetLayoutDirtyMarked(false);
-    }
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
+    ClearResidualLayoutDirtyMark(frameRoot, pipeline);
     RemoveMenuWrapperNode(rootNode, pipeline);
 
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();

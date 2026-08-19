@@ -172,6 +172,7 @@ private:
         const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak);
     void SendToAccessibility(const WeakPtr<FrameNode> node, const WeakPtr<OverlayManager> overlayWeak, bool isShow);
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline);
+    void ClearResidualLayoutDirtyMark(const RefPtr<FrameNode>& frameRoot, const RefPtr<PipelineContext>& pipeline);
     void CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode);
     void CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode);
