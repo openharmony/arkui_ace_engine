@@ -720,6 +720,11 @@ export class NavPathStack implements MaterializedBase {
         this.setPathStack_serialize(pathStack_casted, animated_casted)
         return
     }
+    public preloadPath(info: NavPathInfo, options?: PreloadOptions): Promise<void> {
+        const info_casted = info as (NavPathInfo)
+        const options_casted = options as (PreloadOptions | undefined)
+        return this.preloadPath_serialize(info_casted, options_casted)
+    }
     private pushPath0_serialize(info: NavPathInfo, animated?: boolean): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (animated !== undefined) {
@@ -1140,6 +1145,20 @@ export class NavPathStack implements MaterializedBase {
         }
         ArkUIGeneratedNativeModule._NavPathStack_setPathStack(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private preloadPath_serialize(info: NavPathInfo, options?: PreloadOptions): Promise<void> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            PreloadOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._NavPathStack_preloadPath(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
     }
 }
 export class ArkNavigationPeer extends ArkCommonMethodPeer {
@@ -1798,6 +1817,9 @@ export enum LaunchMode {
 export interface NavigationOptions {
     launchMode?: LaunchMode;
     animated?: boolean;
+}
+export interface PreloadOptions {
+    onDestroy?: VoidCallback;
 }
 export type NavBar = string;
 export type InterceptionShowCallback = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean) => void;
@@ -2968,6 +2990,43 @@ export class NavigationMenuItem_serializer {
         }
         const actionTmpResult: (() => void) | undefined = actionTmpBuf
         let value: NavigationMenuItem = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, isEnabled: isEnabledTmpResult, action: actionTmpResult} as NavigationMenuItem)
+        return value
+    }
+}
+export class PreloadOptions_serializer {
+    public static write(buffer: SerializerBase, value: PreloadOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOnDestroy = value.onDestroy
+        if (valueHolderForOnDestroy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDestroyTmpValue = valueHolderForOnDestroy!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDestroyTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): PreloadOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const onDestroyTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onDestroyTmpBuf: VoidCallback | undefined = undefined
+        if ((onDestroyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDestroyTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDestroyTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onDestroyTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onDestroyTmpBufOptClosure = ():void => {
+                const onDestroyTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onDestroyTmpBufOptBufArgsSerializer.writeInt32(onDestroyTmpBufOptBufResource.resourceId);
+                onDestroyTmpBufOptBufArgsSerializer.writePointer(onDestroyTmpBufOptBufCall);
+                onDestroyTmpBufOptBufArgsSerializer.writePointer(onDestroyTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 553494831, onDestroyTmpBufOptBufArgsSerializer.asBuffer(), onDestroyTmpBufOptBufArgsSerializer.length());
+                onDestroyTmpBufOptBufArgsSerializer.release();
+                return;
+            }
+            resourceFinalizerRegister(onDestroyTmpBufOptClosure, onDestroyTmpBufOptBufResource)
+            onDestroyTmpBuf = onDestroyTmpBufOptClosure
+        }
+        const onDestroyTmpResult: VoidCallback | undefined = onDestroyTmpBuf
+        let value: PreloadOptions = ({onDestroy: onDestroyTmpResult} as PreloadOptions)
         return value
     }
 }
