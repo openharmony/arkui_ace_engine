@@ -1123,6 +1123,7 @@ void UIExtensionPattern::InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& f
         auto pattern = weak.Upgrade();
         if (pattern) {
             TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
+            pattern->SetForceProcessOnKeyEventInternal(false);
             pattern->DispatchFocusActiveEvent(false);
         }
     });
