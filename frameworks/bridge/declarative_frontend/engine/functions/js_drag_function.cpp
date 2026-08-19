@@ -880,7 +880,7 @@ void JsDragFunction::PreDragExecute(const PreDragStatus preDragStatus)
 JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)
 {
     JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
-    auto dragEvent = Referenced::Claim(dragObj->Unwrap<JsDragEvent>());
+    auto* dragEvent = dragObj->Unwrap<JsDragEvent>();
     CHECK_NULL_RETURN(dragEvent, dragObj);
     dragEvent->SetDragEvent(info);
     auto pasteDataInfo = dragEvent->GetDragEvent()->GetPasteData();
@@ -892,7 +892,7 @@ JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)
 JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
 {
     JSRef<JSObject> pasteObj = JSClass<JsPasteData>::NewInstance();
-    auto pasteData = Referenced::Claim(pasteObj->Unwrap<JsPasteData>());
+    auto* pasteData = pasteObj->Unwrap<JsPasteData>();
     CHECK_NULL_RETURN(pasteData, pasteObj);
     pasteData->SetPasteData(info);
     return pasteObj;
@@ -901,7 +901,7 @@ JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
 JSRef<JSObject> JsDragFunction::CreateSpringLoadingContext(const RefPtr<DragSpringLoadingContext>& info)
 {
     JSRef<JSObject> contextObj = JSClass<JsDragSpringLoadingContext>::NewInstance();
-    auto springLoadingContext = Referenced::Claim(contextObj->Unwrap<JsDragSpringLoadingContext>());
+    auto* springLoadingContext = contextObj->Unwrap<JsDragSpringLoadingContext>();
     CHECK_NULL_RETURN(springLoadingContext, contextObj);
     springLoadingContext->SetContext(info);
     return contextObj;
@@ -929,7 +929,7 @@ JSRef<JSObject> JsDragEvent::CreateDragEvent(void* dragEventPtr)
     auto dragInfoPtr = reinterpret_cast<DragEvent*>(dragEventPtr);
     auto dragEvent = AceType::Claim(dragInfoPtr);
     CHECK_NULL_RETURN(dragEvent, dragObj);
-    auto jsDragEvent = Referenced::Claim(dragObj->Unwrap<JsDragEvent>());
+    auto* jsDragEvent = dragObj->Unwrap<JsDragEvent>();
     CHECK_NULL_RETURN(jsDragEvent, dragObj);
     jsDragEvent->SetDragEvent(dragEvent);
     return dragObj;

@@ -53,6 +53,7 @@ void JsiClass<C>::Declare(const char* name)
     JsiClassBase::RegisterUnDeclare(&JsiClass<C>::UnDeclare);
     JsiClassBase::DeclareImpl(name, className_, staticFunctions_, customFunctions_, customGetFunctions_,
         customSetFunctions_, classFunction_);
+    constructor_ = nullptr;
 }
 template<typename C>
 void JsiClass<C>::UnDeclare()
