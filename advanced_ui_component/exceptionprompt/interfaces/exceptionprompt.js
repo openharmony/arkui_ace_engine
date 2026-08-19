@@ -59,8 +59,15 @@ export class ExceptionPrompt extends ViewPU {
         this.callbackId = undefined;
         this.callbacks = {
             onConfigurationUpdated: (config) => {
-                this.fontSizeScale = Math.min(this.updateFontScale(), o14);
-                this.fontSizeScale = Math.max(this.fontSizeScale, p14);
+                try {
+                    this.fontSizeScale = Math.min(this.updateFontScale(), o14);
+                    this.fontSizeScale = Math.max(this.fontSizeScale, p14);
+                }
+                catch (err) {
+                    let code = err.code;
+                    let message = err.message;
+                    hilog.error(0x3900, 'Ace', `Failed to update fontsizescale info, cause, code: ${code}, message: ${message}`);
+                }
             },
             onMemoryLevel() {
             }
@@ -460,8 +467,17 @@ export class ExceptionPrompt extends ViewPU {
 
     aboutToDisappear() {
         if (this.callbackId) {
-            this.getUIContext().getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
-            this.callbackId = void (0);
+            try {
+                this.getUIContext().getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
+            }
+            catch (err) {
+                let code = err.code;
+                let message = err.message;
+                hilog.error(0x3900, 'Ace', `Failed to unregister environment callback, cause, code: ${code}, message: ${message}`);
+            }
+            finally {
+                this.callbackId = void (0);
+            }
         }
     }
 
