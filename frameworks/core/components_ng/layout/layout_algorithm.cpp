@@ -17,6 +17,7 @@
 
 #include "ui/view/layout/layout_algorithm.h"
 #include "base/utils/feature_param.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
@@ -466,6 +467,9 @@ std::string LayoutAlgorithm::ComputeCurrentPathHash(FrameNode* hostNode)
 bool LayoutAlgorithm::IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode)
 {
     CHECK_NULL_RETURN(hostNode, false);
+    if (!SystemProperties::GetSmartLayoutEnabled()) {
+        return false;
+    }
     if (!IsComponentSupportSmartLayout(hostNode)) {
         return false;
     }

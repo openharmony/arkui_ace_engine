@@ -65,6 +65,7 @@ constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engi
 constexpr char IS_OPINC_ENABLE[] = "persist.ddgr.opinctype";
 constexpr char LAYOUT_BREAKPOINT[] = "const.arkui.layoutbreakpoint";
 constexpr char LAYOUT_BREAKPOINT_DEFAULT[] = "320,600,1000,1440;0.8,1.2;";
+constexpr char ENABLE_SMART_LAYOUT_KEY[] = "persist.ace.layout.smartlayout.enabled";
 enum class LayoutBreakPointPart : uint32_t { WIDTH_PART = 0, HEIGHT_PART };
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -357,6 +358,11 @@ bool IsMultiInstanceEnabled()
 bool IsLayoutDetectEnabled()
 {
     return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
+}
+
+bool IsSmartLayoutEnabled()
+{
+    return system::GetBoolParameter(ENABLE_SMART_LAYOUT_KEY, true);
 }
 
 bool IsConfigChangePerform()
@@ -828,6 +834,7 @@ bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
+bool SystemProperties::smartLayoutEnabled_ = IsSmartLayoutEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -1043,6 +1050,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         arkUIHookEnabled_ = IsArkUIHookEnabled();
         gridCacheEnabled_ = IsGridCacheEnabled();
         gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
+        smartLayoutEnabled_ = IsSmartLayoutEnabled();
         sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
         faultInjectEnabled_  = IsFaultInjectEnabled();
         windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
@@ -1121,6 +1129,11 @@ ACE_WEAK_SYM bool SystemProperties::GetDebugEnabled()
 ACE_WEAK_SYM bool SystemProperties::GetLayoutDetectEnabled()
 {
     return layoutDetectEnabled_;
+}
+
+bool SystemProperties::GetSmartLayoutEnabled()
+{
+    return smartLayoutEnabled_;
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetMultiInstanceEnabled()
