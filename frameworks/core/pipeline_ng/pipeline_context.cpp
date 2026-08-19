@@ -2840,6 +2840,7 @@ void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, 
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
+    auto prevLogicScale = GetLogicScale();
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootNode_);
     ACE_SCOPED_TRACE("SetRootRect: origin:%s,set width:%f, height:%f, offset:%f",
@@ -2882,8 +2883,11 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         FlushVsync(GetTimeFromExternalTimer(), 0);
     }
 #endif
-    FireLpxUpdateCallbacks();
-    MarkLpxDirtyNodes();
+    bool isLpxChanged = !NearEqual(GetLogicScale(), prevLogicScale);
+    if (isLpxChanged) {
+        FireLpxUpdateCallbacks();
+        MarkLpxDirtyNodes();
+    }
 }
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
