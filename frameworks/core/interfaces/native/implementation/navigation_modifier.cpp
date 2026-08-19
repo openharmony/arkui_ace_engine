@@ -25,6 +25,7 @@
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -116,6 +117,14 @@ void SetNavigationOptions1Impl(Ark_VMContext vmContext,
     navigationStack->RegisterOnResultCallback();
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto weakStack = AceType::WeakClaim(AceType::RawPtr(navigationStack));
+    context->AddBuildFinishCallBack([weakStack]() {
+        auto stack = weakStack.Upgrade();
+        CHECK_NULL_VOID(stack);
+        stack->PreloadNodeBefore();
+    });
 }
 void SetNavigationOptions0Impl(Ark_VMContext vmContext,
                                Ark_NativePointer node,
@@ -147,6 +156,14 @@ void SetNavigationOptions0Impl(Ark_VMContext vmContext,
     navigationStack->RegisterOnResultCallback();
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto weakStack = AceType::WeakClaim(AceType::RawPtr(navigationStack));
+    context->AddBuildFinishCallBack([weakStack]() {
+        auto stack = weakStack.Upgrade();
+        CHECK_NULL_VOID(stack);
+        stack->PreloadNodeBefore();
+    });
 }
 } // namespace NavigationInterfaceModifier
 

@@ -404,6 +404,22 @@ public:
 
     void RemoveByIndexes(const std::vector<int32_t>& indexes) override;
 
+    // Preload methods - override base class virtuals (shared with dynamic frontend via 1.1)
+    void AddPreloadItem(const std::string& name, const std::string& paramString,
+        const RefPtr<NG::UINode>& uiNode) override;
+    RefPtr<NG::UINode> GetFromPreloadItem(const std::string& name,
+        const std::string& paramString) override;
+    void RemovePreloadItem() override;
+    void PreloadItemOnDestroy() override;
+    void InitPreloadInfoByIndex(int32_t index, const RefPtr<NG::UINode>& node) override;
+
+    // Preload entry called by NavPathStackAccessor
+    void PreloadPath(const std::string& name, const ParamType& param,
+        std::function<void(int32_t errorCode, std::string errorMessage)>&& promise,
+        const std::function<void()>& onDestroy);
+    // Called from navigation_modifier BuildFinish callback to flush pending preload
+    void PreloadNodeBefore();
+
 protected:
     RefPtr<PathStack> dataSourceObj_;
     std::function<void()> onStateChangedCallback_;
@@ -434,7 +450,17 @@ private:
     bool ExecutePopCallbackInStack(Opt_Object param);
     bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, Opt_Object param);
     void ExecutePopCallbackForHomeNavDestination(Opt_Object param);
+    bool CreateNodeByPreloadItem(const std::string& name, const ParamType& param,
+        const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node);
+    void ClearPendingPreload();
     void* staticStackPtr_ = nullptr;
+    std::optional<NG::PreloadItem> preloadItem_;
+    std::function<void()> preloadOnDestroy_;
+    std::string pendingPreloadName_;
+    ParamType pendingPreloadParam_ = nullptr;
+    std::string pendingPreloadParamString_;
+    std::function<void(int32_t errorCode, std::string errorMessage)> pendingPromise_;
+    std::function<void()> pendingOnDestroy_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 

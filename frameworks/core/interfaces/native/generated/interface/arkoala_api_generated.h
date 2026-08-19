@@ -3173,6 +3173,8 @@ typedef struct Ark_PluginComponentOptions Ark_PluginComponentOptions;
 typedef struct Opt_PluginComponentOptions Opt_PluginComponentOptions;
 typedef struct Ark_PopupMaskType Ark_PopupMaskType;
 typedef struct Opt_PopupMaskType Opt_PopupMaskType;
+typedef struct Ark_PreloadOptions Ark_PreloadOptions;
+typedef struct Opt_PreloadOptions Opt_PreloadOptions;
 typedef struct Ark_RadioStyle Ark_RadioStyle;
 typedef struct Opt_RadioStyle Opt_RadioStyle;
 typedef struct Ark_RadiusItem Ark_RadiusItem;
@@ -20533,6 +20535,14 @@ typedef struct Opt_PopupMaskType {
     Ark_Tag tag;
     Ark_PopupMaskType value;
 } Opt_PopupMaskType;
+typedef struct Ark_PreloadOptions {
+    /* kind: Interface */
+    Opt_VoidCallback onDestroy;
+} Ark_PreloadOptions;
+typedef struct Opt_PreloadOptions {
+    Ark_Tag tag;
+    Ark_PreloadOptions value;
+} Opt_PreloadOptions;
 typedef struct Ark_RadioStyle {
     /* kind: Interface */
     Opt_ResourceColor checkedBackgroundColor;
@@ -31302,6 +31312,12 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*setPathStack)(Ark_NavPathStack peer,
                          const Array_NavPathInfo* pathStack,
                          const Opt_Boolean* animated);
+    void (*preloadPath)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_NavPathStack peer,
+                        Ark_NavPathInfo info,
+                        const Opt_PreloadOptions* options,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
 } GENERATED_ArkUINavPathStackAccessor;
 
 typedef struct GENERATED_ArkUINodeContainerOpsAccessor {

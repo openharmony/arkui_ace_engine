@@ -5970,6 +5970,7 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_getPathStack(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _NavPathStack_setPathStack(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _NavPathStack_preloadPath(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NodeContainerOps_nodeContainerOpsConstruct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
