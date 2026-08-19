@@ -26,7 +26,7 @@ import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimatePa
 import { extractors, TouchEvent, ContentModifier, XComponentController, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, DrawingCanvas, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
-import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
+import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, LengthUnit, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
 import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, WidthBreakpoint, HeightBreakpoint, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, CopyOptions, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
@@ -9287,7 +9287,7 @@ export class InnerGestureObserverConfigs_serializer {
 }
 export class LengthMetricsProxy {
     value: double = initializers.arkui.component.idlize.LengthMetricsProxyNS.value;
-    unit: number = initializers.arkui.component.idlize.LengthMetricsProxyNS.unit;
+    unit: LengthUnit = initializers.arkui.component.idlize.LengthMetricsProxyNS.unit;
 }
 
 export class LengthMetricsProxy_serializer {
@@ -9296,12 +9296,12 @@ export class LengthMetricsProxy_serializer {
         const valueHolderForValue = value.value
         valueSerializer.writeFloat64(valueHolderForValue)
         const valueHolderForUnit = value.unit
-        valueSerializer.writeNumber(valueHolderForUnit)
+        valueSerializer.writeInt32(valueHolderForUnit.valueOf())
     }
     public static read(buffer: DeserializerBase): LengthMetricsProxy {
         let valueDeserializer: DeserializerBase = buffer
         const valueTmpResult: double = valueDeserializer.readFloat64()
-        const unitTmpResult: number = (valueDeserializer.readNumber() as number)
+        const unitTmpResult: LengthUnit = LengthUnit.fromValue(valueDeserializer.readInt32())
         let value: LengthMetricsProxy = ({value: valueTmpResult, unit: unitTmpResult} as LengthMetricsProxy)
         return value
     }
