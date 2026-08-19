@@ -40,7 +40,7 @@ ArkTS `AttributeModifier<T>` 的实现在 ark_component TS 层（`ArkComponent.t
 | 动态装配 | `ArkComponent.ts` peer | `.attributeModifier(m)` 绑定到 peer |
 | 动态状态注册 | `ArkComponent.ts` | applyUIAttributesInit 按方法存在性 OR UI_STATE_* → setSupportedUIState |
 | 动态分发 | `ArkComponent.ts` | getUIState → applyNormalAttribute 始终 + 5 状态态按位条件 |
-| 静态分发 | `ArkCommonModifier.ets/55` | applyUIAttributes(state=monitoredStates) + applyUIAttributesUpdate 状态变化重应用 |
+| 静态分发 | `ArkCommonModifier.ets` | applyUIAttributes(state=monitoredStates) + applyUIAttributesUpdate 状态变化重应用 |
 | C-API 落地 | `implementation/*_modifier.cpp` | *AttributeModifier::SetXxxImpl → ModelStatic::SetXxx |
 
 **关键版本**（详见 Feat 规格风险表）：动态 @since 11/@atomicservice 12、静态 @since 23；`applyHoveredAttribute` 动态/静态 @since 26.0.0（后增）；`ModifierUpdateStage` 不存在（实际为 `AttributeModifierState`，风险 R-2）；动态 attributeModifier 无 undefined 重载（风险 R-3）。

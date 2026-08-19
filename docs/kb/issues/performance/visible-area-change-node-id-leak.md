@@ -52,12 +52,12 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 4 | 压测后 dump 集合 size 与实际存活节点数 | size 应趋于稳定 | size 持续增长即命中此根因 |
 
 关键代码定位：
-- `frameworks/core/components_ng/base/frame_node.cpp:5721-5736`：`FrameNode::GetNodesById`（const 引用，仅 `continue`，问题实现）
-- `frameworks/core/components_ng/base/frame_node.cpp:5738-5754`：`FrameNode::GetNodesByIdWithCleanup`（非 const 引用，`set.erase(nodeId)` 清理，修复实现）
-- `frameworks/core/components_ng/base/frame_node.h:1025`：`GetNodesByIdWithCleanup` 静态方法声明
-- `frameworks/core/pipeline_ng/pipeline_context.cpp:5682`：`HandleVisibleAreaChangeEvent` 调用 `GetNodesByIdWithCleanup(onVisibleAreaChangeNodeIds_)`
-- `frameworks/core/pipeline_ng/pipeline_context.cpp:5722`：`HandleOnAreaChangeEvent` 调用 `GetNodesByIdWithCleanup(onAreaChangeNodeIds_)`
-- `frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp:38`：`HandleFormVisibleChangeEvent` 调用 `GetNodesByIdWithCleanup(onFormVisibleChangeNodeIds_)`
+- `frameworks/core/components_ng/base/frame_node.cpp`：`FrameNode::GetNodesById`（const 引用，仅 `continue`，问题实现）
+- `frameworks/core/components_ng/base/frame_node.cpp`：`FrameNode::GetNodesByIdWithCleanup`（非 const 引用，`set.erase(nodeId)` 清理，修复实现）
+- `frameworks/core/components_ng/base/frame_node.h`：`GetNodesByIdWithCleanup` 静态方法声明
+- `frameworks/core/pipeline_ng/pipeline_context.cpp`：`HandleVisibleAreaChangeEvent` 调用 `GetNodesByIdWithCleanup(onVisibleAreaChangeNodeIds_)`
+- `frameworks/core/pipeline_ng/pipeline_context.cpp`：`HandleOnAreaChangeEvent` 调用 `GetNodesByIdWithCleanup(onAreaChangeNodeIds_)`
+- `frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp`：`HandleFormVisibleChangeEvent` 调用 `GetNodesByIdWithCleanup(onFormVisibleChangeNodeIds_)`
 
 ## 修复方案
 
@@ -65,7 +65,7 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 |----------|----------|---------------|---------------|----------|
 | 事件注册集合未随节点销毁自动清理 | 新增 `GetNodesByIdWithCleanup`（入参改为非 const 引用），对 `GetUINodeById` 返回 null 的 ID 执行 `set.erase`；三处事件分发调用替换为 cleanup 版本 | `frame_node.cpp/.h` 新增方法；`pipeline_context.cpp`、`form_visible_manager.cpp` 替换调用 | 454d1c2e6a584e823cb0b2e3be48c17f9db2160e (fixed) | commit diff：新增 GetNodesByIdWithCleanup；三处 `GetNodesById(...)` 替换为 `GetNodesByIdWithCleanup(...)` |
 
-核心修复代码（`frame_node.cpp:5738-5754`）：
+核心修复代码（`frame_node.cpp`）：
 ```cpp
 std::vector<RefPtr<FrameNode>> FrameNode::GetNodesByIdWithCleanup(std::unordered_set<int32_t>& set)
 {

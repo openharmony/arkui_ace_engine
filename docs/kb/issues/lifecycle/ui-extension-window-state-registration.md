@@ -106,7 +106,3 @@ UIExtensionComponent 的窗口状态回调若在 Model 创建节点时注册，�
 - `docs/kb/components/container/embedded-component.md` — EmbeddedComponent，FuncID `05-12-04`
 - `docs/kb/components/container/ui-extension-component.md` — UIExtension 机制，FuncID `04-17-01`
 - `docs/kb/architecture/window-mechanism.md` — Pipeline 窗口显示/隐藏与状态分发，FuncID `03-05-01`
-- `specs/05-ui-components/12-embedded-display-components/03-ui-extension-component/`
-- `specs/05-ui-components/12-embedded-display-components/04-embedded-component/`
-- `specs/04-common-capability/17-embedded-display/01-ui-extension/`
-- `specs/03-engine-framework/05-window-mechanism/01-window-mechanism/`

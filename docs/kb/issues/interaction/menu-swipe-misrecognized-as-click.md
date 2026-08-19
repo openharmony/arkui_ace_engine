@@ -54,10 +54,10 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 3 | 确认 `DEFAULT_CLICK_DISTANCE` 常量是否存在于 `menu_pattern.h` | PR #86305 删除了该常量；若不存在则说明采用了新逻辑 | — |
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp:677` `MenuPattern::OnTouchEvent`：TouchType::UP 分支使用 `IsOffsetInNodeBounds` + `!movedOutOfRegion_` 判定点击
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp:669` `MenuPattern::IsOffsetInNodeBounds`：仅判断坐标是否在 frameSize 范围内，无距离阈值
-- `frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp:1555` `CustomMenuItemPattern::OnTouch`：同样的边界判定逻辑
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.h:973` / `menu_item_pattern.h:736`：`movedOutOfRegion_` 成员声明
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp` `MenuPattern::OnTouchEvent`：TouchType::UP 分支使用 `IsOffsetInNodeBounds` + `!movedOutOfRegion_` 判定点击
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp` `MenuPattern::IsOffsetInNodeBounds`：仅判断坐标是否在 frameSize 范围内，无距离阈值
+- `frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp` `CustomMenuItemPattern::OnTouch`：同样的边界判定逻辑
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.h` / `menu_item_pattern.h`：`movedOutOfRegion_` 成员声明
 
 #### Menu 自定义触摸处理与 ClickRecognizer 判定不一致 排查
 
@@ -68,8 +68,8 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 3 | 确认 Menu 注释中是否声明"mirroring ClickRecognizer::IsPointInRegion" | 源码注释明确声明镜像 ClickRecognizer，但实际实现仅做了边界判定子集 | — |
 
 关键代码定位：
-- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp:67` `ClickRecognizer::IsPointInRegion`：含 distanceThreshold_ 距离校验 + responseRegionBuffer_ 响应区域校验
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp:695` 注释声明"mirroring ClickRecognizer::IsPointInRegion"
+- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp` `ClickRecognizer::IsPointInRegion`：含 distanceThreshold_ 距离校验 + responseRegionBuffer_ 响应区域校验
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp` 注释声明"mirroring ClickRecognizer::IsPointInRegion"
 
 ## 修复方案
 

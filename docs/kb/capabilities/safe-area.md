@@ -97,4 +97,3 @@ Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安
 
 - [布局框架：`docs/kb/architecture/layout-framework.md`](../architecture/layout-framework.md)
 - [布局属性：`docs/kb/capabilities/layout-attributes.md`](layout-attributes.md)
-- 安全区功能域（待补）：`specs/04-common-capability/02-safe-area/01-safe-area-mechanism/`

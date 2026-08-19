@@ -85,4 +85,3 @@ Preview Platform Adaptation 没有独立的应用侧 ArkTS、Modifier 或 Native
 - [窗口机制：`docs/kb/architecture/window-mechanism.md`](window-mechanism.md)
 - [UI 上下文：`docs/kb/capabilities/ui-context.md`](../capabilities/ui-context.md)
 - [布局框架：`docs/kb/architecture/layout-framework.md`](layout-framework.md)
-- 预览器平台适配 Spec：`specs/02-cross-platform/01-platform-adapter/04-previewer-platform-adapter/`

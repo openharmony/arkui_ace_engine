@@ -19,8 +19,8 @@
 | kind | role | name | evidence | confidence |
 |------|------|------|----------|------------|
 | component | symptom_surface | ScrollablePattern 子类（List/Scroll/Grid/WaterFlow） | `scrollable_pattern.cpp` `OnDetachFromMainTree` | verified |
-| capability | trigger | 嵌套滚动协调（NestableScrollContainer） | `nestable_scroll_container.h:92` `GetNestedScrollParent` | verified |
-| architecture | root_cause_owner | 滚动会话状态机（`scrollStop_`/`isScrolling_`） | `scrollable_pattern.h:1097`（`scrollStop_=false` 默认值）、`:1316`（`isScrolling_=false`） | verified |
+| capability | trigger | 嵌套滚动协调（NestableScrollContainer） | `nestable_scroll_container.h` `GetNestedScrollParent` | verified |
+| architecture | root_cause_owner | 滚动会话状态机（`scrollStop_`/`isScrolling_`） | `scrollable_pattern.h`（`scrollStop_=false` 默认值）、`:1316`（`isScrolling_=false`） | verified |
 | component | fix_location | ScrollablePattern（`OnDetachFromMainTree`）+ RefreshPattern 白名单 | PR #87925 diff | verified |
 
 ## 根因分类
@@ -47,18 +47,18 @@
 
 | 步骤 | 操作 | 预期结果 | 失败则 |
 |------|------|----------|--------|
-| 1 | 在 `ScrollablePattern::OnDetachFromMainTree` 下断点（`scrollable_pattern.cpp:1294`） | 下树时命中，且组件从未滚动 | 若组件滚动过，属正常通知场景 |
+| 1 | 在 `ScrollablePattern::OnDetachFromMainTree` 下断点（`scrollable_pattern.cpp`） | 下树时命中，且组件从未滚动 | 若组件滚动过，属正常通知场景 |
 | 2 | 检查 `scrollStop_` 值 | 默认 `false`（组件从未滚动，`OnScrollEndCallback` 未把 `scrollStop_` 置 true） | 若为 true，旧逻辑本就不会通知 |
 | 3 | 检查 `isScrolling_` 值 | `false`（从未进入 `FireOnScrollStart` 的 `isScrolling_ = true` 分支） | 若为 true，属滚动中下树，通知合理 |
 | 4 | 复现到父组件回调 | 父组件 `onScrollEnd` 被触发，速度参数为默认值 | 确认命中根因 A |
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp:1301-1307` `OnDetachFromMainTree()`（函数入口 :1294）：拟修复后条件 `if (!isScrolling_ || scrollStop_) return;` + 父组件白名单过滤（注：PR #87925 修复尚未合入，当前基线代码仍为 `if (!scrollStop_)`）
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h:1097`：`bool scrollStop_ = false;` 默认值——旧逻辑 `!scrollStop_` 误判的根源
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h:1316`：`bool isScrolling_ = false;`——滚动会话显式标志
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp:3415` `FireOnScrollStart()`：滚动会话开始，`:3451` 置 `isScrolling_ = true`
-- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp:3681` `OnScrollStop()`：滚动会话结束，`:3697` 置 `isScrolling_ = false`、`:3722` 复位 `scrollStop_ = false`
-- `frameworks/core/components_ng/pattern/list/list_pattern.cpp:1420`（同 `scroll_pattern.cpp:345`、`grid_pattern.cpp:874`、`water_flow_pattern.cpp:800`）：`OnScrollEndCallback` 中动画停止后 `scrollStop_ = true`
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `OnDetachFromMainTree()`（函数入口 :1294）：拟修复后条件 `if (!isScrolling_ || scrollStop_) return;` + 父组件白名单过滤（注：PR #87925 修复尚未合入，当前基线代码仍为 `if (!scrollStop_)`）
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h`：`bool scrollStop_ = false;` 默认值——旧逻辑 `!scrollStop_` 误判的根源
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h`：`bool isScrolling_ = false;`——滚动会话显式标志
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `FireOnScrollStart()`：滚动会话开始，`:3451` 置 `isScrolling_ = true`
+- `frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp` `OnScrollStop()`：滚动会话结束，`:3697` 置 `isScrolling_ = false`、`:3722` 复位 `scrollStop_ = false`
+- `frameworks/core/components_ng/pattern/list/list_pattern.cpp`（同 `scroll_pattern.cpp`、`grid_pattern.cpp`、`water_flow_pattern.cpp`）：`OnScrollEndCallback` 中动画停止后 `scrollStop_ = true`
 
 #### 类别 B 排查：白名单收窄的遗留风险识别
 
@@ -69,15 +69,15 @@
 | 3 | 检查嵌套滚动状态是否残留 | 如 Swiper 的 `childScrolling_`、`isNestedInterrupt_` 等收尾状态 | 残留则确认命中类别 B 风险 |
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp:6492` `OnScrollEndRecursive()`：重置 `childScrolling_ = false`、`SetIsNestedInterrupt(false)`、`HandleDragEnd`
-- `frameworks/core/components_ng/pattern/web/web_pattern.cpp:8138`、`container_picker_pattern.cpp:1194`、`sheet_presentation_pattern.cpp:3289`：同类收尾实现，均被白名单排除
-- `frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp:1391` `OnScrollEndRecursive()`：`HandleDragEnd` 复位 `refreshStatus_` 至 INACTIVE（白名单内，正常收尾）
+- `frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp` `OnScrollEndRecursive()`：重置 `childScrolling_ = false`、`SetIsNestedInterrupt(false)`、`HandleDragEnd`
+- `frameworks/core/components_ng/pattern/web/web_pattern.cpp`、`container_picker_pattern.cpp`、`sheet_presentation_pattern.cpp`：同类收尾实现，均被白名单排除
+- `frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp` `OnScrollEndRecursive()`：`HandleDragEnd` 复位 `refreshStatus_` 至 INACTIVE（白名单内，正常收尾）
 
 ## 修复方案
 
 | 根因类别 | 修复策略 | 关键代码改动点 | 修复/缓解变更 | 关系证据 |
 |----------|----------|---------------|---------------|----------|
-| A（#80047） | 将"滚动进行中"判定从 `!scrollStop_` 收紧为显式会话标志：`isScrolling_==true && scrollStop_==false`，并将父组件通知范围限制为 Scrollable/Refresh 白名单 | `scrollable_pattern.cpp` `OnDetachFromMainTree`：`if (!isScrolling_ || scrollStop_) return;` + `InstanceOf<ScrollablePattern> \|\| InstanceOf<RefreshPattern>`；新增 `#include "refresh_pattern.h"` | [PR #87925](https://gitcode.com/openharmony/arkui_ace_engine/pull/87925) (fixed) | PR diff + Issue [#80047](https://gitcode.com/openharmony/arkui_ace_engine/issues/80047)，测试 OnDetachFromMainTree003-008（`scrollable_pattern_test_ng.cpp:2191-2324`）Host x86_64 实测通过 |
+| A（#80047） | 将"滚动进行中"判定从 `!scrollStop_` 收紧为显式会话标志：`isScrolling_==true && scrollStop_==false`，并将父组件通知范围限制为 Scrollable/Refresh 白名单 | `scrollable_pattern.cpp` `OnDetachFromMainTree`：`if (!isScrolling_ || scrollStop_) return;` + `InstanceOf<ScrollablePattern> \|\| InstanceOf<RefreshPattern>`；新增 `#include "refresh_pattern.h"` | [PR #87925](https://gitcode.com/openharmony/arkui_ace_engine/pull/87925) (fixed) | PR diff + Issue [#80047](https://gitcode.com/openharmony/arkui_ace_engine/issues/80047)，测试 OnDetachFromMainTree003-008（`scrollable_pattern_test_ng.cpp`）Host x86_64 实测通过 |
 | B（遗留风险） | 需产品确认 Swiper/Web/Picker/Sheet 作为父组件是否也需要下树收尾通知；若需要，白名单需扩展或改为反向排除 | 待定（当前未闭环） | 无（检视意见未落地） | PR #87925 diff 评论（guozejun，blocking，resolved: false） |
 
 ## 关联变更
@@ -86,7 +86,7 @@
 |----------|----------|----------|----------|------|--------|
 | CHG-01 | 引入下树通知：`OnDetachFromMainTree` 中 `if (!scrollStop_) { parent->OnScrollEndRecursive(GetVelocity()); }`，意图是嵌套滚动中子组件下树时正确结束父组件滚动 | A（引入） | introduced | commit `0519aa6c9`（"嵌套滚动过程中子组件下树，会正确触发父组件onScrollEnd"）diff：`!scrollStop_` 条件 + 无父组件类型过滤；`scrollStop_` 默认 false 导致从未滚动误通知 | verified |
 | CHG-02 | 修复：收紧判定为 `isScrolling_ && !scrollStop_`，父组件限定 ScrollablePattern/RefreshPattern 白名单；新增 Refresh 场景测试 6 例 | A（修复） | fixed | [PR #87925](https://gitcode.com/openharmony/arkui_ace_engine/pull/87925) diff + Issue [#80047](https://gitcode.com/openharmony/arkui_ace_engine/issues/80047)；测试 OnDetachFromMainTree003-008 | verified |
-| CHG-03 | 白名单范围争议：排除 SwiperPattern/WebPattern/ContainerPickerPattern/SheetPresentationPattern 的检视意见（blocking），未解决即合入 | B（遗留） | related | [PR #87925](https://gitcode.com/openharmony/arkui_ace_engine/pull/87925) diff 评论（guozejun，resolved: false）；`swiper_pattern.cpp:6492` 等收尾实现被排除 | verified |
+| CHG-03 | 白名单范围争议：排除 SwiperPattern/WebPattern/ContainerPickerPattern/SheetPresentationPattern 的检视意见（blocking），未解决即合入 | B（遗留） | related | [PR #87925](https://gitcode.com/openharmony/arkui_ace_engine/pull/87925) diff 评论（guozejun，resolved: false）；`swiper_pattern.cpp` 等收尾实现被排除 | verified |
 
 ## 预防措施
 
@@ -101,5 +101,3 @@
 - `docs/kb/components/container/scroll.md` — Scroll 组件 KB（含嵌套滚动基类）
 - `docs/kb/components/container/refresh.md` — Refresh 组件 KB（下拉刷新状态机）
 - `docs/kb/issues/interaction/nested-scroll-offset-no-response.md` — 嵌套滚动偏移量不响应问题 KB（同类嵌套滚动协调主题）
-- `specs/05-ui-components/03-scroll-container-components/01-scroll-common-capability` — 滚动公共能力 Spec 域
-- `specs/05-ui-components/03-scroll-container-components/06-refresh` — Refresh Spec 域

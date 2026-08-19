@@ -54,19 +54,19 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 4 | 检查子节点最终 isPendingState_ 值与实际渲染树状态 | 节点实际在渲染树上，但 isPendingState_ 为 false | 确认根因 |
 
 关键代码定位：
-- `frameworks/core/components_ng/base/frame_node.cpp:3358`（ProcessRenderTreeDiff → AttachToRenderTree 调用点）
-- `frameworks/core/components_ng/base/frame_node.cpp:3365`（ProcessRenderTreeDiff → DetachFromRenderTree 调用点）
-- `frameworks/core/components_ng/base/frame_node.cpp:3396`（AttachToRenderTree 中 isPendingState_ 早退守卫）
-- `frameworks/core/components_ng/base/frame_node.cpp:3379`（DetachFromRenderTree 中 isPendingState_ 清除点）
-- `frameworks/core/components_ng/pattern/image/image_pattern.cpp:1759`（ImagePattern::OnWindowHide 中依赖 IsPendingOnMainRenderTree() 的回收判断）
+- `frameworks/core/components_ng/base/frame_node.cpp`（ProcessRenderTreeDiff → AttachToRenderTree 调用点）
+- `frameworks/core/components_ng/base/frame_node.cpp`（ProcessRenderTreeDiff → DetachFromRenderTree 调用点）
+- `frameworks/core/components_ng/base/frame_node.cpp`（AttachToRenderTree 中 isPendingState_ 早退守卫）
+- `frameworks/core/components_ng/base/frame_node.cpp`（DetachFromRenderTree 中 isPendingState_ 清除点）
+- `frameworks/core/components_ng/pattern/image/image_pattern.cpp`（ImagePattern::OnWindowHide 中依赖 IsPendingOnMainRenderTree() 的回收判断）
 
 ## 修复方案
 
 | 根因类别 | 修复策略 | 关键代码改动点 | 修复/缓解变更 | 关系证据 |
 |----------|----------|---------------|---------------|----------|
-| 父节点 isPendingState_ 作为 isOnMainTree 传递 | ProcessRenderTreeDiff 中恢复使用 renderContext_->IsOnRenderTree() 或使用子节点自身的渲染树状态判断 | frame_node.cpp:3358,3365 | 待修复 | 7e9278af335 将 renderContext_->IsOnRenderTree() 改为 isPendingState_，引入了此问题 |
-| AttachToRenderTree early return 逻辑 | 当节点从旧父节点移到新父节点时，应先 Detach 再 Attach，或允许 Attach 在 isPendingState_=true 时仍执行 | frame_node.cpp:3394-3409 | 待修复 | 03889ac01dc 引入 isPendingState_ 替代 renderContext_->IsOnRenderTree() 检查 |
-| DetachFromRenderTree 错误清除 | DetachFromRenderTree 应检查节点是否仍在渲染树上（如仍在新父节点的 frameChildren_ 中），避免错误清除 | frame_node.cpp:3377-3392 | 待修复 | 03889ac01dc 引入 isPendingState_ 作为唯一状态标记 |
+| 父节点 isPendingState_ 作为 isOnMainTree 传递 | ProcessRenderTreeDiff 中恢复使用 renderContext_->IsOnRenderTree() 或使用子节点自身的渲染树状态判断 | frame_node.cpp,3365 | 待修复 | 7e9278af335 将 renderContext_->IsOnRenderTree() 改为 isPendingState_，引入了此问题 |
+| AttachToRenderTree early return 逻辑 | 当节点从旧父节点移到新父节点时，应先 Detach 再 Attach，或允许 Attach 在 isPendingState_=true 时仍执行 | frame_node.cpp | 待修复 | 03889ac01dc 引入 isPendingState_ 替代 renderContext_->IsOnRenderTree() 检查 |
+| DetachFromRenderTree 错误清除 | DetachFromRenderTree 应检查节点是否仍在渲染树上（如仍在新父节点的 frameChildren_ 中），避免错误清除 | frame_node.cpp | 待修复 | 03889ac01dc 引入 isPendingState_ 作为唯一状态标记 |
 
 ## 关联变更
 

@@ -32,10 +32,10 @@
 
 | kind | role | name | evidence | confidence |
 |------|------|------|----------|------------|
-| architecture | trigger | AppSpawn Runtime Preload | `<OH_ROOT>/base/startup/appspawn/modules/ace_adapter/ace_adapter.cpp:93-127` 设置 `loadAce=true`、`preload=true` 并保存预加载 Runtime | verified |
-| architecture | symptom_surface | ArkUI Declarative Frontend Preload | `8f63bcc36fa:frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp:276-279,791-802` | verified |
-| architecture | dependency | AbilityRuntime 预加载 Runtime 复用 | `<OH_ROOT>/foundation/ability/ability_runtime/frameworks/native/runtime/js_runtime.cpp:146-160,695-782` | verified |
-| architecture | root_cause_owner | ArkTS Runtime SharedGC 与 JSPandaFile 管理 | `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/runtime.cpp:662-729`、`ecmascript/jspandafile/js_pandafile_manager.cpp:72-122` | verified |
+| architecture | trigger | AppSpawn Runtime Preload | `<OH_ROOT>/base/startup/appspawn/modules/ace_adapter/ace_adapter.cpp` 设置 `loadAce=true`、`preload=true` 并保存预加载 Runtime | verified |
+| architecture | symptom_surface | ArkUI Declarative Frontend Preload | `8f63bcc36fa:frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp,791-802` | verified |
+| architecture | dependency | AbilityRuntime 预加载 Runtime 复用 | `<OH_ROOT>/foundation/ability/ability_runtime/frameworks/native/runtime/js_runtime.cpp,695-782` | verified |
+| architecture | root_cause_owner | ArkTS Runtime SharedGC 与 JSPandaFile 管理 | `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/runtime.cpp`、`ecmascript/jspandafile/js_pandafile_manager.cpp` | verified |
 | capability | fix_location | ArkUI `EvaluateAbcFile` | `e6c594f0c29` 将 `EvaluateAbcFile` 恢复为读取文件后调用 `EvaluateJsCode` | verified |
 
 ## 根因分类
@@ -70,11 +70,11 @@
 
 关键代码定位：
 
-- `8f63bcc36fa:frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp:226-254`：
+- `8f63bcc36fa:frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp`：
   `EvaluateAbcFile` 的 AOT 分支
 - 同文件 `:276-279`：`PreloadUIContent` 加载 `jsPreload.abc`
 - 同文件 `:791-802`：`PreloadAceModule` 在 appspawn 阶段调用 `PreloadUIContent`
-- `frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp:304-312`：
+- `frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp`：
   `ExecuteJsBinForAOT` 转入 `JSNApi::ExecuteForAbsolutePath`
 
 #### B. appspawn 预加载 JSPandaFile 被 SharedGC 移除排查
@@ -89,14 +89,14 @@
 
 关键代码定位：
 
-- `<OH_ROOT>/base/startup/appspawn/modules/ace_adapter/ace_adapter.cpp:93-127`：
+- `<OH_ROOT>/base/startup/appspawn/modules/ace_adapter/ace_adapter.cpp`：
   appspawn 创建并保存预加载 Runtime
-- `<OH_ROOT>/foundation/ability/ability_runtime/frameworks/native/runtime/js_runtime.cpp:146-160`：
+- `<OH_ROOT>/foundation/ability/ability_runtime/frameworks/native/runtime/js_runtime.cpp`：
   Stage 应用获取预加载 Runtime
 - 同文件 `:695-782`：应用初始化执行 `PostPreload` 并配置 Bundle、Buffer Tracker 等运行时状态
-- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/runtime.cpp:662-729`：
+- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/runtime.cpp`：
   SharedGC 清理共享常量池并移除 JSPandaFile
-- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/abc_buffer_cache.h:40-43`：
+- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/abc_buffer_cache.h`：
   源码明确记录 SharedGC 删除加载表缓存后，后续加载可能因无法取得 Buffer 而失败
 
 #### C. 缓存未命中后进入 HSP 路径校验排查
@@ -111,12 +111,12 @@
 
 关键代码定位：
 
-- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/js_pandafile_manager.cpp:72-93`：
+- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/js_pandafile_manager.cpp`：
   加载表与 AbcBufferCache 查询顺序
 - 同文件 `:96-122`：进入 HSP 分支的条件及 `Invalid input hsp path`
-- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/js_pandafile_executor.cpp:83-92`：
+- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/js_pandafile_executor.cpp`：
   `JSPandaFileExecutor::ExecuteFromAbsolutePathAbcFile` 调用 `ExecuteFromFile`
-- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/abc_buffer_cache.h:40-75`：
+- `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/abc_buffer_cache.h`：
   `AbcBufferCache` 回退缓存的用途和查询接口
 
 ## 修复方案
@@ -142,7 +142,7 @@
 | CHG-01 | `EvaluateAbcFile` 在 `STATE_MGMT_USE_AOT` 下统一改用绝对路径执行，并让标准系统的 `PreloadUIContent` 加载 `jsPreload.abc` | A | introduced | `8f63bcc36fa` diff 及回归区间 | verified |
 | CHG-02A | 撤销 `EvaluateAbcFile` 的 AOT 绝对路径分支，恢复文件读取和 `EvaluateJsCode` 调用 | A | fixed | `e6c594f0c29` 与类别 A 的引入变更构成直接反向 diff | verified |
 | CHG-02B | `EvaluateAbcFile` 加载 `jsPreload.abc` 时不再调用 `JSNApi::ExecuteForAbsolutePath`，规避 SharedGC 移除 `JSPandaFile` 后的绝对路径重新加载和 HSP 路径校验链路 | B+C | mitigated | `e6c594f0c29` 只修改 `EvaluateAbcFile`；`RemoveJSPandaFile` 与 HSP 路径校验仍保留 | verified |
-| CHG-03 | SharedGC 在共享常量池无存活项后从全局加载表移除对应 JSPandaFile | B | related | `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/runtime.cpp:662-729` | verified |
+| CHG-03 | SharedGC 在共享常量池无存活项后从全局加载表移除对应 JSPandaFile | B | related | `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/runtime.cpp` | verified |
 
 ## 预防措施
 

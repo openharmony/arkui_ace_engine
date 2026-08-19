@@ -53,7 +53,7 @@ This file defines working rules for agents in `ace_engine`.
 ### Build Outputs
 
 - Main output dir: `out/rk3568/arkui/ace_engine/`
-- Detailed library listing: `docs/architecture/build-outputs.md`
+- Detailed library listing: [docs/architecture/build-outputs.md](docs/architecture/build-outputs.md)
 
 ### Frontend Support
 
@@ -63,7 +63,7 @@ This file defines working rules for agents in `ace_engine`.
 | **ArkTS Frontend** | ArkTS static version | Incremental engine-based frontend |
 | **JavaScript Frontend** | JavaScript | Legacy web-style development |
 
-- Frontend architecture details: `docs/architecture/frontend-overview.md`
+- Frontend architecture details: [docs/architecture/frontend-overview.md](docs/architecture/frontend-overview.md)
 
 ## 3. Knowledge Base
 

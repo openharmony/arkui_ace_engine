@@ -60,11 +60,11 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 4 | 检查 `OnRemoveFromParent` 返回值及后续路径 | 返回 false，走 `AddDisappearingChild` | 若返回 true，说明组件已正常下树 |
 
 关键代码定位：
-- `frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register_impl_ng.cpp:185-201`：`CleanPageNode`，`Reset()`（清空 `destroyFunc_`）在 `Clean()` 之前调用；`FireOnDisappear` 仅在 `PLUGIN_COMPONENT_SUPPORTED` 分支（line 193-197）对 plugin 子容器生效
-- `frameworks/core/components_ng/base/frame_node.cpp:5710-5716`：`RemoveImmediately`，`HasTransitionOutAnimation()` 为 true 时返回 false
-- `frameworks/core/components_ng/base/ui_node.cpp:623-637`：`OnRemoveFromParent`，`RemoveImmediately` 返回 false 时返回 false
-- `frameworks/core/components_ng/base/ui_node.cpp:514-548`：`Clean`，`OnRemoveFromParent` 返回 false 时走 `AddDisappearingChild` 屏蔽下树
-- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp:55-61`：`FireOnDisappear`，调用 `destroyFunc_()` 触发 JS `aboutToDisappear`（仅在插件子容器路径生效）
+- `frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register_impl_ng.cpp`：`CleanPageNode`，`Reset()`（清空 `destroyFunc_`）在 `Clean()` 之前调用；`FireOnDisappear` 仅在 `PLUGIN_COMPONENT_SUPPORTED` 分支（line 193-197）对 plugin 子容器生效
+- `frameworks/core/components_ng/base/frame_node.cpp`：`RemoveImmediately`，`HasTransitionOutAnimation()` 为 true 时返回 false
+- `frameworks/core/components_ng/base/ui_node.cpp`：`OnRemoveFromParent`，`RemoveImmediately` 返回 false 时返回 false
+- `frameworks/core/components_ng/base/ui_node.cpp`：`Clean`，`OnRemoveFromParent` 返回 false 时走 `AddDisappearingChild` 屏蔽下树
+- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp`：`FireOnDisappear`，调用 `destroyFunc_()` 触发 JS `aboutToDisappear`（仅在插件子容器路径生效）
 
 #### 动画屏蔽下树与复用缓存池冲突排查
 
@@ -76,11 +76,11 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 4 | 确认复用后状态变量（如 `flg = true`）是否触发新子组件上树 | 新子组件 mount 到 `children_`，旧子组件仍在 `disappearingChildren_` | 若两者都在 `children_`，说明屏蔽未生效 |
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp:347-362`：`MarkNeedUpdate`，触发 `AddDirtyCustomNode` 进入脏节点队列
-- `frameworks/core/pipeline_ng/pipeline_context.cpp:2030-2041`：`FlushBuild`，重建脏自定义节点，处理 `flg = false`
-- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp:364-373`：`FireRecycleSelf`，回收至缓存池（`RecycleManager::Push`）
-- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp:375-389`：`FireRecycleRenderFunc`，从缓存池复用（`RecycleManager::Pop`）
-- `frameworks/core/components_ng/base/ui_node.cpp:2317-2334`：`AddDisappearingChild`，将子节点设为 `isDisappearing_ = true` 并保留
+- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp`：`MarkNeedUpdate`，触发 `AddDirtyCustomNode` 进入脏节点队列
+- `frameworks/core/pipeline_ng/pipeline_context.cpp`：`FlushBuild`，重建脏自定义节点，处理 `flg = false`
+- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp`：`FireRecycleSelf`，回收至缓存池（`RecycleManager::Push`）
+- `frameworks/core/components_ng/pattern/custom/custom_node_base.cpp`：`FireRecycleRenderFunc`，从缓存池复用（`RecycleManager::Pop`）
+- `frameworks/core/components_ng/base/ui_node.cpp`：`AddDisappearingChild`，将子节点设为 `isDisappearing_ = true` 并保留
 
 #### BuilderNode 内节点结构异常排查
 
@@ -92,9 +92,9 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 4 | 确认复用后 BuilderNode 内是否同时存在新旧子组件 | `children_` 有新组件，`disappearingChildren_` 有旧组件 | 若仅有一个，说明问题已缓解 |
 
 关键代码定位：
-- `frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp:67-96`：BuilderNode 创建，设置 `SetIsBuilderNode(true)` 和 `SetIsRootBuilderNode(true)`
-- `frameworks/core/interfaces/native/node/frame_node_modifier.cpp:122-195`：`AddBuilderNodeInFrameNode` / `RemoveBuilderNodeInFrameNode` / `ClearBuilderNodeInFrameNode`
-- `frameworks/core/common/builder_util.cpp:28,56-118`：`GetBuilderNodes` / `BuilderNodeFunc` 遍历和增删
+- `frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp`：BuilderNode 创建，设置 `SetIsBuilderNode(true)` 和 `SetIsRootBuilderNode(true)`
+- `frameworks/core/interfaces/native/node/frame_node_modifier.cpp`：`AddBuilderNodeInFrameNode` / `RemoveBuilderNodeInFrameNode` / `ClearBuilderNodeInFrameNode`
+- `frameworks/core/common/builder_util.cpp,56-118`：`GetBuilderNodes` / `BuilderNodeFunc` 遍历和增删
 
 ## 修复方案
 

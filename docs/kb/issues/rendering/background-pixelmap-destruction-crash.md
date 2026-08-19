@@ -52,10 +52,10 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 4 | 复现时确认节点是否在 task 投递后、执行前被下树 | task 不应延长节点生命周期 | 命中即此根因 |
 
 关键代码定位：
-- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp:3991-4013`：`RosenRenderContext::CreateBackgroundPixelMap`，外层 JsCallback + 内层 task
-- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp:4000`：修复后 task 捕获 `weak`（WeakPtr），原修复前捕获 `frameNode`（强 RefPtr）
-- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp:4002-4003`：修复后将 `weak.Upgrade()` + `CHECK_NULL_VOID` 移入 task 内部
-- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp:4012`：task 经 `TaskExecutor::TaskType::UI` 投递，标签 `ArkUICreateBackgroundPixelMap`
+- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp`：`RosenRenderContext::CreateBackgroundPixelMap`，外层 JsCallback + 内层 task
+- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp`：修复后 task 捕获 `weak`（WeakPtr），原修复前捕获 `frameNode`（强 RefPtr）
+- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp`：修复后将 `weak.Upgrade()` + `CHECK_NULL_VOID` 移入 task 内部
+- `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp`：task 经 `TaskExecutor::TaskType::UI` 投递，标签 `ArkUICreateBackgroundPixelMap`
 
 ## 修复方案
 

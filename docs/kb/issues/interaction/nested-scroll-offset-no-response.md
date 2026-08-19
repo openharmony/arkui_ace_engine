@@ -143,5 +143,3 @@ while (itemPosition_.size() > 1 && !targetIndex_) {
 - `docs/kb/components/container/list.md` — List 组件 KB（源码/SDK/Spec 路由）
 - `docs/kb/components/container/scroll.md` — Scroll 组件 KB（含嵌套滚动基类 ScrollablePattern 路由）
 - `docs/kb/architecture/layout-framework.md` — 布局框架 KB（`NeedAdditionalLayout`、`FlushTask` 布局回溯调度）
-- `specs/05-ui-components/03-scroll-container-components/05-list-list-item-list-item-group` — List Spec 域
-- `specs/05-ui-components/03-scroll-container-components/07-scroll` — Scroll Spec 域（嵌套滚动）

@@ -111,4 +111,3 @@
 - 安全区域机制功能域：`04-02-01`
 - [Navigation 功能域：`05-02-01`](../../components/container/navigation.md)
 - [Swiper 功能域：`05-03-08`](../../components/container/swiper.md)
-- 安全区域机制 Spec：`specs/04-common-capability/02-safe-area/01-safe-area-mechanism/`（当前目录尚未建立，行为以源码和测试为准）
