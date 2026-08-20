@@ -387,7 +387,7 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     auto rsNode = GetRsNode(node);
 
     if (node->GetIsLayoutNode()) {
-        std::list<RefPtr<FrameNode>> children;
+        std::vector<RefPtr<FrameNode>> children;
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
             callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
@@ -433,7 +433,7 @@ void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, c
     auto rsNode = GetRsNode(node);
 
     if (node->GetIsLayoutNode()) {
-        std::list<RefPtr<FrameNode>> children;
+        std::vector<RefPtr<FrameNode>> children;
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
             callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
@@ -606,7 +606,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     auto rsNode = GetRsNode(node);
 
     if (node->GetIsLayoutNode()) {
-        std::list<RefPtr<FrameNode>> children;
+        std::vector<RefPtr<FrameNode>> children;
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
@@ -700,7 +700,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
     auto rsNode = GetRsNode(node);
 
     if (node->GetIsLayoutNode()) {
-        std::list<RefPtr<FrameNode>> children;
+        std::vector<RefPtr<FrameNode>> children;
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,

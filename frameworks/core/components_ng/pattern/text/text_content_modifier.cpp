@@ -531,7 +531,7 @@ void TextContentModifier::ReportFaultEvent(RSCanvas& canvas, const RefPtr<Paragr
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto lineCount = pManager->GetLineCount();
-    auto paragraphs = pManager->GetParagraphs();
+    const auto& paragraphs = pManager->GetParagraphs();
     auto paragraphsSize = paragraphs.size();
     std::u16string reportParagraph = paragraphContent;
     RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
@@ -558,7 +558,7 @@ bool TextContentModifier::HandleDrawCallback(
     CHECK_NULL_RETURN(textPattern, false);
     auto drawCallback = textPattern->GetExternalDrawCallback();
     CHECK_NULL_RETURN(drawCallback, false);
-    auto paragraphs = pManager->GetParagraphs();
+    const auto& paragraphs = pManager->GetParagraphs();
     if (paragraphs.size() == 1) {
         auto paintOffsetY = paintOffset_.GetY();
         SetTextContentAlingOffsetY(paintOffsetY);
@@ -593,7 +593,7 @@ void TextContentModifier::DrawText(
     }
     auto paintOffsetY = paintOffset_.GetY();
     SetTextContentAlingOffsetY(paintOffsetY);
-    auto paragraphs = pManager->GetParagraphs();
+    const auto& paragraphs = pManager->GetParagraphs();
     std::u16string paragraphContent;
     for (auto&& info : paragraphs) {
         auto paragraph = info.paragraph;
@@ -700,7 +700,7 @@ void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragrap
 {
     CHECK_NULL_VOID(paragraph);
     if (onlyTextColorAnimation_) {
-        auto length = paragraph->GetParagraphText().length();
+        auto length = paragraph->GetParagraphTextLength();
         if (animatableTextColor_) {
             Color c { animatableTextColor_->Get().GetValue() };
             if (textColor_.has_value()) {

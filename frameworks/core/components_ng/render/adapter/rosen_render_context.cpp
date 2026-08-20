@@ -4105,8 +4105,8 @@ RectF RosenRenderContext::AdjustPaintRectInner(RefPtr<FrameNode>& frameNode)
     }
     if (HasOffset()) {
         auto offset = GetOffsetValue({});
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline && pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
             offset += OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
@@ -5003,7 +5003,7 @@ const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
     return rsNode_;
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RebuildFrame(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children)
 {
     if (self && self->GetMountPolicy() == MountPolicy::MIXED) {
         ReCreateMixedRsNodeTree(children);
@@ -5014,7 +5014,7 @@ void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<Fr
 }
 
 std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes(
-    const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap)
+    const std::vector<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap)
 {
     std::vector<std::shared_ptr<Rosen::RSNode>> rsNodes;
     for (const auto& child : frameChildren) {
@@ -5093,7 +5093,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::ResolveMixedFrameChildRSNode(
     if (frameNode) {
         return GetRsNodeByFrame(frameNode);
     }
-    std::list<RefPtr<FrameNode>> frameNodes;
+    std::vector<RefPtr<FrameNode>> frameNodes;
     child->GenerateSelfVisibleFrameWithTransition(frameNodes);
     if (frameNodes.empty()) {
         return nullptr;
@@ -5215,7 +5215,7 @@ bool RosenRenderContext::AddNodeToRsTree()
     if (node->GetRenderContext()) {
         node->GetRenderContext()->SetRSUIContext(node->GetContext());
     }
-    std::list<RefPtr<FrameNode>> childNodes;
+    std::vector<RefPtr<FrameNode>> childNodes;
     // get not be deleted children of node
     GetLiveChildren(node, childNodes);
 
@@ -5255,7 +5255,7 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     CHECK_NULL_RETURN(node, false);
     auto rsNode = GetRsNodeByFrame(node);
     CHECK_NULL_RETURN(rsNode, false);
-    std::list <RefPtr<FrameNode>> childChildrenList;
+    std::vector <RefPtr<FrameNode>> childChildrenList;
     node->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
     // A NodeContainer node exist mounted to multiple parent nodes.
     // If NodeContainers are deleted in this scenario, compatibility issues may occur.
@@ -5268,7 +5268,7 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
 }
 
 void RosenRenderContext::AddCornerMarkNodeToChildren(
-    const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
+    const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes)
 {
     auto cornerMarkNode = node->GetCornerMarkNode();
     CHECK_NULL_VOID(cornerMarkNode);
@@ -5292,10 +5292,10 @@ void RosenRenderContext::AddCornerMarkNodeToChildren(
     }
 }
 
-void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
+void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes)
 {
     CHECK_NULL_VOID(node);
-    std::list<RefPtr<FrameNode>> childrenList;
+    std::vector<RefPtr<FrameNode>> childrenList;
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     node->GenerateOneDepthVisibleFrameWithTransition(childrenList);
@@ -5355,7 +5355,7 @@ void RosenRenderContext::RemoveFromTree()
     rsNode_->RemoveFromTree();
 }
 
-void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::ReCreateRsNodeTree(const std::vector<RefPtr<FrameNode>>& children)
 {
     if (!rsNode_ || !isNeedRebuildRSTree_) {
         return;
@@ -5375,7 +5375,7 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     ReCreateRsNodeTreeByTargetList(nowRSNodes, childNodeMap);
 }
 
-void RosenRenderContext::ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& /*children*/)
+void RosenRenderContext::ReCreateMixedRsNodeTree(const std::vector<RefPtr<FrameNode>>& /*children*/)
 {
     if (!rsNode_ || !isNeedRebuildRSTree_) {
         return;
@@ -5450,7 +5450,7 @@ void RosenRenderContext::ReCreateRsNodeTreeByTargetList(
     }
 }
 
-void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::vector<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
     for (const auto& child : children) {
@@ -5468,7 +5468,7 @@ void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<R
     }
 }
 
-void RosenRenderContext::RemoveFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RemoveFrameChildren(FrameNode* /*self*/, const std::vector<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
     for (const auto& child : children) {

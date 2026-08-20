@@ -356,6 +356,7 @@ public:
     virtual void SetIndents(const std::vector<float>& indents) = 0;
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
     virtual std::u16string GetParagraphText() = 0;
+    virtual size_t GetParagraphTextLength() const = 0;
     virtual const ParagraphStyle& GetParagraphStyle() const = 0;
     // interfaces for pass on Symbol Animation interface
     virtual void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) = 0;

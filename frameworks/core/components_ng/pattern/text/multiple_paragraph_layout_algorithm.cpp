@@ -743,7 +743,7 @@ bool MultipleParagraphLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* la
             paraStyle = ParagraphUtil::GetParagraphStyle(spanTextStyle);
         }
         reLayout |= spanTextStyle.NeedReLayout();
-        textStyles.emplace_back(spanTextStyle);
+        textStyles.emplace_back(std::move(spanTextStyle));
         child->ResetReCreateAndReLayout();
         index++;
     }

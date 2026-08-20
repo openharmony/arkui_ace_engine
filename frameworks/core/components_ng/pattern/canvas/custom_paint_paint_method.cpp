@@ -1897,15 +1897,19 @@ bool CustomPaintPaintMethod::GetFilterType(const std::string& filterStr, std::ve
     }
 
     std::string filter;
-    for (auto ch : paramData) {
-        if (ch == ')') {
-            if (!ParseFilter(filter, filters)) {
-                return false;
-            }
-            filter.clear();
-        } else {
-            filter.push_back(ch);
+    size_t pos = 0;
+    while (pos < paramData.size()) {
+        size_t nextParen = paramData.find(')', pos);
+        if (nextParen == std::string::npos) {
+            filter.append(paramData, pos);
+            break;
         }
+        filter.append(paramData, pos, nextParen - pos);
+        if (!ParseFilter(filter, filters)) {
+            return false;
+        }
+        filter.clear();
+        pos = nextParen + 1;
     }
     if (!filter.empty()) {
         if (!ParseFilter(filter, filters)) {

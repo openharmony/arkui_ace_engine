@@ -673,7 +673,7 @@ private:
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
     if (isRoot) {
@@ -795,7 +795,7 @@ bool FrameNode::HasVirtualNodeAccessibilityProperty()
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
     auto newChild = CreateFrameNode(tag, nodeId, pattern, true);
     newChild->SetDepth(1);
@@ -803,7 +803,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
 }
 
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
-    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    std::string_view tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
     if (frameNode) {
@@ -813,7 +813,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     return CreateFrameNode(tag, nodeId, pattern);
 }
 
-RefPtr<FrameNode> FrameNode::GetOrCreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+RefPtr<FrameNode> FrameNode::GetOrCreateCommonNode(std::string_view tag, int32_t nodeId, bool isLayoutNode,
     const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto commonNode = GetFrameNode(tag, nodeId);
@@ -825,7 +825,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateCommonNode(const std::string& tag, int32
     return CreateCommonNode(tag, nodeId, isLayoutNode, pattern);
 }
 
-RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
+RefPtr<FrameNode> FrameNode::GetFrameNode(std::string_view tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -840,7 +840,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
     return frameNode;
 }
 
-RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(const std::string& tag, int32_t nodeId)
+RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(std::string_view tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -851,7 +851,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(const std::string& tag, int32_t no
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
@@ -861,7 +861,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 }
 
 RefPtr<FrameNode> FrameNode::CreateCommonNode(
-    const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
+    std::string_view tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
@@ -885,7 +885,7 @@ void FrameNode::SetIsFind(bool isFind)
     isFind_ = isFind;
 }
 
-void FrameNode::GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children)
+void FrameNode::GetOneDepthVisibleFrame(std::vector<RefPtr<FrameNode>>& children)
 {
     GenerateOneDepthVisibleFrameWithTransition(children);
     if (overlayNode_) {
@@ -3237,7 +3237,7 @@ void FrameNode::RebuildRenderContextTree()
     }
     auto oldFrameChildren = std::move(frameChildren_);
     frameChildren_.clear();
-    std::list<RefPtr<FrameNode>> children;
+    std::vector<RefPtr<FrameNode>> children;
     GenerateRenderTreeFrameChildren(children);
     for (const auto& child : children) {
         frameChildren_.emplace(child);
@@ -3259,7 +3259,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& children)
+void FrameNode::GenerateRenderTreeFrameChildren(std::vector<RefPtr<FrameNode>>& children)
 {
     // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
@@ -3274,7 +3274,7 @@ void FrameNode::GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& ch
     }
 }
 
-void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+void FrameNode::ProcessRenderTreeDiff(const std::vector<RefPtr<FrameNode>>& newChildren,
     const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren)
 {
     if (!renderContext_) {
@@ -3638,12 +3638,12 @@ void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList
     allList.emplace_back(Claim(this));
 }
 
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
 {
     if (isLayoutNode_) {
-        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
+        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleNode);
         if (overlayNode_) {
-            visibleList.emplace_back(overlayNode_);
+            visibleNode.emplace_back(overlayNode_);
         }
         return;
     }
@@ -3654,7 +3654,7 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
     if (!isActive_ || (!IsVisible() && !context->HasTransitionOutAnimation())) {
         return;
     }
-    visibleList.emplace_back(Claim(this));
+    visibleNode.emplace_back(Claim(this));
 }
 
 void FrameNode::OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)

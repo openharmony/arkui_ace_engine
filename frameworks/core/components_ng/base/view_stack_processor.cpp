@@ -33,10 +33,12 @@ thread_local std::unique_ptr<ScopedViewStackProcessor> ViewStackModelNG::scopeSt
 
 ViewStackProcessor* ViewStackProcessor::GetInstance()
 {
-    if (!instance) {
+    ViewStackProcessor* ptr = instance.get();
+    if (!ptr) {
         instance.reset(new ViewStackProcessor);
+        ptr = instance.get();
     }
-    return instance.get();
+    return ptr;
 }
 
 ViewStackProcessor::ViewStackProcessor() = default;

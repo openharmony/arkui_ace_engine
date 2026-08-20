@@ -63,7 +63,7 @@ const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Col
     "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 std::atomic_int32_t UINode::count_;
 
-UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
+UINode::UINode(std::string_view tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
     ++count_;
@@ -117,16 +117,17 @@ UINode::~UINode()
     } while (false);
 #endif
 
+    auto* elementReg = ElementRegister::GetInstance();
     if (!removeSilently_) {
-        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+        elementReg->RemoveItem(nodeId_);
     } else {
-        ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
+        elementReg->RemoveItemSilently(nodeId_);
     }
     if (isThreadSafeNode_) {
         ElementRegisterMultiThread::GetInstance()->RemoveThreadSafeNode(nodeId_);
     }
     if (propInspectorId_.has_value()) {
-        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
+        elementReg->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
     }
     if (!onMainTree_) {
         return;
@@ -717,7 +718,7 @@ void UINode::AllowForceDark(bool forceDarkAllowed)
 void UINode::UpdateForceDarkAllowedNode(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (ACE_UNLIKELY(!SystemProperties::ConfigChangePerform())) {
         return;
     }
 
@@ -1843,18 +1844,18 @@ std::list<RefPtr<UINode>> UINode::MergeChildrenWithDisappearingChildren()
     return allChildren;
 }
 
-void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void UINode::GenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
 {
     if (disappearingChildren_.empty()) {
         // normal child
         for (const auto& child : GetChildren()) {
-            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleNode);
         }
         return;
     }
     auto allChildren = MergeChildrenWithDisappearingChildren();
     for (const auto& child : allChildren) {
-        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleNode);
     }
 }
 
@@ -2341,9 +2342,9 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     return true;
 }
 
-void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
 {
-    GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    GenerateOneDepthVisibleFrameWithTransition(visibleNode);
 }
 
 void UINode::OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)

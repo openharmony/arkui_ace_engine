@@ -20,6 +20,7 @@
 #include <functional>
 #include <list>
 #include <mutex>
+#include <string_view>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -340,30 +341,30 @@ private:
 public:
     // create a new child element with new element tree.
     static RefPtr<FrameNode> CreateFrameNodeWithTree(
-        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
+        std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
 
     static RefPtr<FrameNode> GetOrCreateFrameNode(
-        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+        std::string_view tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    static RefPtr<FrameNode> GetOrCreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+    static RefPtr<FrameNode> GetOrCreateCommonNode(std::string_view tag, int32_t nodeId, bool isLayoutNode,
         const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     // create a new element with new pattern.
     static RefPtr<FrameNode> CreateFrameNode(
-        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+        std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     static RefPtr<FrameNode> CreateCommonNode(
-        const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot = false);
+        std::string_view tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     // get element with nodeId from node map.
-    static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
+    static RefPtr<FrameNode> GetFrameNode(std::string_view tag, int32_t nodeId);
 
-    static RefPtr<FrameNode> GetFrameNodeOnly(const std::string& tag, int32_t nodeId);
+    static RefPtr<FrameNode> GetFrameNodeOnly(std::string_view tag, int32_t nodeId);
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false,
+    FrameNode(std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false,
         bool isLayoutNode = false);
 
     ~FrameNode() override;
@@ -472,7 +473,7 @@ public:
 
     void SetIsFind(bool isFind);
 
-    void GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children);
+    void GetOneDepthVisibleFrame(std::vector<RefPtr<FrameNode>>& children);
 
     void GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& children, OffsetF& offset);
 
@@ -685,7 +686,7 @@ public:
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
     void ClearNeedSyncRenderTree();
 
-    void GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& children);
+    void GenerateRenderTreeFrameChildren(std::vector<RefPtr<FrameNode>>& children);
 
     void RebuildRenderContextTree() override;
 
@@ -1764,7 +1765,7 @@ private:
     void LayoutOverlay();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
-    void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode) override;
     void OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
@@ -1774,7 +1775,7 @@ private:
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
-    void ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+    void ProcessRenderTreeDiff(const std::vector<RefPtr<FrameNode>>& newChildren,
         const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren);
     void CleanRenderTreeLifeCycle();
     void DetachFromRenderTree(bool isOnMainTree, bool recursive = true);

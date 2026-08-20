@@ -25,7 +25,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
+UINode::UINode(std::string_view tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(nodeId), isRoot_(isRoot)
 {}
 
@@ -235,7 +235,7 @@ int32_t UINode::FrameCount() const
     return {};
 }
 
-void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) {}
+void UINode::GenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode) {}
 
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
@@ -430,7 +430,7 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
 
 void UINode::OnAttachToMainTree(bool recursive) {}
 
-void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) {}
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode) {}
 
 void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) {}
 

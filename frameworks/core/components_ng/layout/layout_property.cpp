@@ -979,7 +979,7 @@ void LayoutProperty::ConstraintContentBySafeAreaPadding()
 PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPadding(bool forceReCreate)
 {
     auto host = GetHost();
-    return GetOrCreateSafeAreaPaddingInner(host);
+    return GetOrCreateSafeAreaPaddingInner(host, forceReCreate);
 }
 
 PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPaddingInner(RefPtr<FrameNode>& host, bool forceReCreate)

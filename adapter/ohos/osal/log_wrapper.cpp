@@ -161,8 +161,15 @@ const std::string LogWrapper::GetIdWithReason()
 {
     int32_t currentId = ContainerScope::CurrentId();
     std::pair<int32_t, InstanceIdGenReason> idWithReason = ContainerScope::CurrentIdWithReason();
-    return std::to_string(currentId) + ":" + std::to_string(idWithReason.first) + ":" +
-           INSTANCE_ID_GEN_REASONS[static_cast<uint32_t>(idWithReason.second)];
+    std::string result;
+    // reserve space for maximum possible result string, e.g. 2147483647:2147483647:foreground
+    result.reserve(32);
+    result.append(std::to_string(currentId));
+    result.append(":");
+    result.append(std::to_string(idWithReason.first));
+    result.append(":");
+    result.append(INSTANCE_ID_GEN_REASONS[static_cast<uint32_t>(idWithReason.second)]);
+    return result;
 }
 #endif
 
