@@ -703,15 +703,15 @@ void GetLayoutSize(ArkUINodeHandle node, ArkUI_Int32 (*size)[2])
     (*size)[1] = rectSize.Height();
 }
 
-ArkUI_Float32* GetLayoutPositionWithoutMargin(ArkUINodeHandle node)
+void GetLayoutPositionWithoutMargin(ArkUINodeHandle node, ArkUI_Float32 (*position)[2])
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_VOID(currentNode);
+    CHECK_NULL_VOID(position);
+
     auto rect = currentNode->GetPaintRectWithTransform();
-    ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = rect.GetX();
-    ret[1] = rect.GetY();
-    return ret;
+    (*position)[0] = rect.GetX();
+    (*position)[1] = rect.GetY();
 }
 
 ArkUI_Int32 SetSystemColorModeChangeEvent(ArkUINodeHandle node, void* userData, void* onColorModeChange)

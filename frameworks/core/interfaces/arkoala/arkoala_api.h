@@ -9762,7 +9762,7 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);
     void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32 (*size)[2]);
     ArkUI_Int32 (*setUiDvsyncSwitch)(ArkUIContext* context, bool enable);
-    ArkUI_Float32* (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node);
+    void (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node, ArkUI_Float32 (*position)[2]);
     ArkUI_Int32 (*setSystemColorModeChangeEvent)(ArkUINodeHandle node, void* userData, void* onColorModeChange);
     void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setSystemFontStyleChangeEvent)(ArkUINodeHandle node, void* userData, void* onFontStyleChange);
