@@ -39,7 +39,7 @@ State Management（状态管理）是 ArkUI 声明式前端的引擎内部子系
 | | 静态 V2 核心逻辑 | `docs/kb/frontend/state_management/static_v2_core.md` | `DecoratedV2VariableBase`、`StateUpdateLoop`、`autoProxyObject`、`DecoratorBackingValue` |
 | | 静态 V2 装饰器与数据对象 | `docs/kb/frontend/state_management/static_v2_decorators.md` | `@Local`/`@Param`/`@Provider`/`@Consumer`/`@Monitor`/`@SyncMonitor`/`@Computed` + `@ObservedV2`/`@Trace`（经 UIPlugin 转换 `MutableStateMeta`） |
 | | 静态存储体系 | `docs/kb/frontend/state_management/static_storage.md` | `LocalStorage`/`AppStorage`/`PersistentStorage`/`Environment` + `AppStorageV2`/`PersistenceV2`/`V2CollectionCoder` + ANI 原生桥 |
-| | 静态 Interop 桥接 | `docs/kb/frontend/state_management/static_interop_bridge.md` | `InteropState`/`openInterop`/13 个 register 回调、`CompatiblePeerNode`、`getCompatibleState`、`enableCompatibleObservedV2ForStatic`、Builder 互操作 |
+| | 静态 Interop 桥接 | `docs/kb/frontend/state_management/static_interop_bridge.md` | `InteropState`/`openInterop`/14 个 register 回调、`CompatiblePeerNode`、`getCompatibleState`、`enableCompatibleObservedV2ForStatic`、Builder 互操作 |
 | | 静态自定义组件状态相关 | `docs/kb/frontend/state_management/static_custom_component.md` | `BaseCustomComponent`/`CustomComponentV2`、`GlobalReusePool`/`GlobalReusePoolRegistry`、`@ReusableV2` 复用 |
 
 ### 源码入口

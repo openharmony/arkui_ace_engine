@@ -30,9 +30,9 @@
 
 | 关注点 | 稳定路径 | 说明 |
 |--------|----------|------|
-| UIPlugin 转换入口 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` | `enableCompatibleObservedV2ForStatic<T>`/`enableCompatibleObservedV2ForStaticMeta<T>` — 将静态侧 `@ObservedV2` 对象转换为 `MutableStateMeta` 通道 |
+| UIPlugin 转换入口 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` | `enableCompatibleObservedV2ForStatic<T>`/`enableCompatibleObservedV2ForStaticMeta<T>` — 将静态侧 `@ObservedV2` 对象转换为 `MutableStateMeta` 通道 |
 | Backing Value（V2 类） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBackingValue.ts` | `InteropV2DecoratorBackingValue<T>` — 调 `enableCompatibleObservedV2ForStaticMeta(value)` 为 V2 对象绑定静态侧元数据 |
-| 元数据安装 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` `staticStateBindObservedObject` | 为 V2 对象的每个 `@Trace` 属性创建 `IMutableStateMeta`，绑定 addRef/fireChange 通道 |
+| 元数据安装 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` `staticStateBindObservedObject` | 为 V2 对象的每个 `@Trace` 属性创建 `IMutableStateMeta`，绑定 addRef/fireChange 通道 |
 | Backing Value 基类 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBackingValue.ts` `DecoratorBackingValue<T>`/`IBackingValue<T>` | `InteropDecoratorBackingValue`（V1）/`InteropV2DecoratorBackingValue`（V2）的共享基类 |
 
 ### 关键机制锚点
@@ -43,8 +43,8 @@
 | `@Param` 延迟更新 | `decoratorImpl/decoratorParam.ts` `StateUpdateLoop.add` — `update` 入队，受 `__getCanUpdateStateVars__Internal()` 门控 |
 | `@Consumer` 复用重绑 | `decoratorImpl/decoratorConsumer.ts` `rebindProviderOnReparent()` — 跨父组件复用时重新查找 provider 并刷新 |
 | `@Monitor` 通配符 | `decoratorImpl/decoratorMonitor.ts` `enableWildcard` — 仅路径末尾支持通配符匹配 |
-| `@ObservedV2`/`@Trace` UIPlugin 路径 | `component/interop.ts` `enableCompatibleObservedV2ForStatic` — 不直接实现 V2 类观测运行时，通过 UIPlugin 转换为 `MutableStateMeta` |
-| V2 对象属性元数据 | `component/interop.ts` `staticStateBindObservedObject(value, fireChange, onTrackPropertyRead, onTrackPropertyChange)` — 为 `@Trace` 属性安装 read/change 回调，转发到静态侧 `MutableStateMeta.addRef`/`fireChange` |
+| `@ObservedV2`/`@Trace` UIPlugin 路径 | `component/interop.ets` `enableCompatibleObservedV2ForStatic` — 不直接实现 V2 类观测运行时，通过 UIPlugin 转换为 `MutableStateMeta` |
+| V2 对象属性元数据 | `component/interop.ets` `staticStateBindObservedObject(value, fireChange, onTrackPropertyRead, onTrackPropertyChange)` — 为 `@Trace` 属性安装 read/change 回调，转发到静态侧 `MutableStateMeta.addRef`/`fireChange` |
 
 ### API 入口
 
@@ -73,7 +73,7 @@
 
 | 问题 | 优先查看 |
 |------|----------|
-| `@ObservedV2`/`@Trace` 对象修改不触发更新 | `component/interop.ts` `enableCompatibleObservedV2ForStatic` — 确认 UIPlugin 转换是否成功为 `@Trace` 属性创建 `MutableStateMeta` |
+| `@ObservedV2`/`@Trace` 对象修改不触发更新 | `component/interop.ets` `enableCompatibleObservedV2ForStatic` — 确认 UIPlugin 转换是否成功为 `@Trace` 属性创建 `MutableStateMeta` |
 | `@Local` 收到 V2 对象后不观测 | `decoratorLocal.ts` `isDynamicObject`/`getV2ObservedObject` — V2 对象需经 `mkInteropV2DecoratorValue` 桥接 |
 | `@Consumer` 复用后状态错误 | `decoratorConsumer.ts` `rebindProviderOnReparent` — 跨父组件复用时是否重新绑定了 provider |
 | `@Monitor` 同步回调时序异常 | `decoratorMonitor.ts` `isSynchronous` — `@SyncMonitor` 走同步路径，`@Monitor` 走异步 |
@@ -82,7 +82,7 @@
 ## 调试入口
 
 - **日志关键字**：`LocalDecoratedVariable`、`ParamDecoratedVariable`、`ProviderDecoratedVariable`、`ConsumerDecoratedVariable`、`MonitorFunctionDecorator`、`ComputedDecoratedVariable`、`enableCompatibleObservedV2ForStatic`。
-- **UIPlugin 转换排查**：断点 `component/interop.ts` `staticStateBindObservedObject`，确认 `@Trace` 属性的 `IMutableStateMeta` 是否正确创建。
+- **UIPlugin 转换排查**：断点 `component/interop.ets` `staticStateBindObservedObject`，确认 `@Trace` 属性的 `IMutableStateMeta` 是否正确创建。
 - **V2 对象互操作排查**：`isDynamicObject(value)`/`getV2ObservedObject(value)` 用于确认对象在静态/动态侧的归属。
 - **`@Monitor` 依赖排查**：`MonitorValueInternal.recordDependenciesForMonitorValue` 记录路径依赖，可用于检查通配符匹配。
 

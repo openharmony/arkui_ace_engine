@@ -19,7 +19,7 @@
 | L0 源码根（规范实现） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/` | ES/ARKTS 预处理源码，所有装饰变量类、工厂、存储、观测元系统的规范实现 |
 | L1 OHOS 适配 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/` | TS 镜像，与 L0 文件名 1:1 对应，供 TS 侧 host 工具使用 |
 | 装饰变量基类 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorBase.ts` | `DecoratedV1VariableBase<T>` — 所有 V1 装饰变量实现的基类 |
-| 工厂实现 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/stateMgmtFactory.ts` | `__StateMgmtFactoryImpl implements IStateMgmtFactory` — `STATE_MGMT_FACTORY` 单例，`makeLink` 按 10 种源类型分发 |
+| 工厂实现 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/stateMgmtFactory.ts` | `__StateMgmtFactoryImpl implements IStateMgmtFactory` — `STATE_MGMT_FACTORY` 单例，`makeLink` 按 11 种源类型分发 |
 | 工厂内部辅助 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/factoryInternal.ts` | `FactoryInternalImpl` — `mkDecoratorValue`/`mkInteropDecoratorValue`/`mkMutableStateMeta` |
 | 观测单例 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/observeSingleton.ts` | `ObserveSingleton implements IObserve` — `OBSERVE` 单例，`renderingComponent`/`renderingId` 协调渲染期依赖 |
 | 属性元数据 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/mutableStateMeta.ts` | `MutableStateMeta`/`MutableKeyedStateMeta` — `addRef`/`fireChange` per-property 通道 |
@@ -31,7 +31,7 @@
 
 | 机制 | 源码位置 |
 |------|----------|
-| 工厂分发入口 | `base/stateMgmtFactory.ts` `makeLink` — 按源类型（State/Prop/PropRef/Link/Provide/Consume/ObjectLink/StorageLink/LocalStorageLink/StoragePropRef/LocalStoragePropRef）分发到 10 个 typed helper |
+| 工厂分发入口 | `base/stateMgmtFactory.ts` `makeLink` — 按源类型（State/Prop/PropRef/Link/Provide/Consume/ObjectLink/StorageLink/LocalStorageLink/StoragePropRef/LocalStoragePropRef）分发到 11 个 typed helper |
 | 渲染期依赖记录 | `base/observeSingleton.ts` `renderingComponent`/`renderingId` — 渲染期 `get()` 调用 `addRef` 记录依赖 |
 | 变更通知 | `base/mutableStateMeta.ts` `fireChange()` — 触发所有 `bindingRefs_` 中注册的 binding 刷新 |
 | Keyed 批量变更 | `base/mutableStateMeta.ts` `MutableKeyedStateMeta.fireChangeBatch` — Array/Map/Set 单次多 key 变更扇出一次 |
