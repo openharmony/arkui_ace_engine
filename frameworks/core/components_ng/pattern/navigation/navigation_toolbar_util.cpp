@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -332,22 +333,21 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     CHECK_NULL_RETURN(theme, nullptr);
     auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
     CHECK_NULL_RETURN(buttonModifier, nullptr);
-    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
-    CHECK_NULL_RETURN(rawPattern, nullptr);
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
+        buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
+    }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(buttonPattern));
     CHECK_NULL_RETURN(toolBarItemNode, nullptr);
     auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(toolBarItemNode));
-    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
-    buttonModifier->setFocusBorderColor(nodeHandle, theme->GetToolBarItemFocusColor());
-    buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
-        buttonModifier->setBlendColorWithOptional(nodeHandle, Color::TRANSPARENT, std::nullopt);
-    }
     auto layoutProperty = toolBarItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
     buttonModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::NORMAL);
     buttonModifier->updateBorderRadiusToLayoutProp(
         nodeHandle, BorderRadiusProperty(theme->GetToolBarItemBorderRadius()));
@@ -408,19 +408,18 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     CHECK_NULL_RETURN(theme, nullptr);
     auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
     CHECK_NULL_RETURN(buttonModifier, nullptr);
-    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
-    CHECK_NULL_RETURN(rawPattern, nullptr);
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
+        buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
+    }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(buttonPattern));
     CHECK_NULL_RETURN(toolBarItemNode, nullptr);
     auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(toolBarItemNode));
-    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
-    buttonModifier->setFocusBorderColor(nodeHandle, theme->GetToolBarItemFocusColor());
-    buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
-        buttonModifier->setBlendColorWithOptional(
-            nodeHandle, Color::TRANSPARENT, std::nullopt);
-    }
     auto layoutProperty = toolBarItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateUserDefinedIdealSize(

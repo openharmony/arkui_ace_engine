@@ -233,9 +233,15 @@ public:
 
     std::vector<std::string> StringToVector(const std::string& str, char delimiter = ' ');
 
-    void SetNavigationFocusBlendBgColor(const Color& navigationFocusBgColor);
+    void SetNavigationFocusBlendBgColor(const Color& navigationFocusBlendBgColor)
+    {
+        navigationFocusBlendBgColor_ = navigationFocusBlendBgColor;
+    }
 
-    void SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus);
+    void SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus)
+    {
+        navMenuItemNeedFocus_ = navMenuItemNeedFocus;
+    }
 
     int32_t OnInjectionEvent(const std::string& command) override;
 

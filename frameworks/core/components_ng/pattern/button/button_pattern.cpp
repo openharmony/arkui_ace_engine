@@ -1913,14 +1913,4 @@ void ButtonPattern::HandleFocusStatusStyle()
     };
     focusHub->SetOnBlurInternal(blurTask);
 }
-
-void ButtonPattern::SetNavigationFocusBlendBgColor(const Color& navigationFocusBlendBgColor)
-{
-    navigationFocusBlendBgColor_ = navigationFocusBlendBgColor;
-}
-
-void ButtonPattern::SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus)
-{
-    navMenuItemNeedFocus_ = navMenuItemNeedFocus;
-}
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -4022,6 +4023,10 @@ HWTEST_F(NavigationModelTestNg, StaticCreateBackButtonNode001, TestSize.Level1)
     bool result = NavigationModelStatic::CreateBackButtonNode(backButtonNode);
     EXPECT_TRUE(result);
     EXPECT_NE(backButtonNode, nullptr);
+
+    auto focusHub = backButtonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->GetFocusStyleType(), FocusStyleType::INNER_BORDER);
 }
 
 /**
