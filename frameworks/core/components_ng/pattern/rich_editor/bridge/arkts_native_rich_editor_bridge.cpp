@@ -29,6 +29,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::NG {
@@ -889,6 +890,10 @@ ArkUINativeModuleValue RichEditorBridge::SetOnIMEInputComplete(ArkUIRuntimeCallI
         panda::Local<panda::JSValueRef> params[NUM_1] = { onIMEInputCompleteObj };
         auto result = func->Call(vm, func.ToLocal(), params, NUM_1);
         if (isJsView) {
+#ifndef CROSS_PLATFORM
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onIMEInputComplete",
+                ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
     };
@@ -2262,6 +2267,10 @@ ArkUINativeModuleValue RichEditorBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtim
         CreateCommonEvent(vm, event, params);
         auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
         if (isJsView) {
+#ifndef CROSS_PLATFORM
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste",
+                ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
         }
     };
@@ -2860,6 +2869,10 @@ ArkUINativeModuleValue RichEditorBridge::SetOnDidIMEInput(ArkUIRuntimeCallInfo* 
         panda::Local<panda::JSValueRef> params[NUM_1] = {textRangeObj};
         auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
         if (isJsView) {
+#ifndef CROSS_PLATFORM
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDidIMEInput",
+                ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
         }
     };

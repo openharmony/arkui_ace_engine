@@ -28,12 +28,15 @@ using namespace OHOS::Ace;
 extern "C" {
 NG::SymbolModelNG* GetSymbolModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("SymbolGlyph");
-    if (module == nullptr) {
-        LOGF("Can't find symbol dynamic module");
-        abort();
+    static NG::SymbolModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("SymbolGlyph");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find symbol dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::SymbolModelNG*>(module->GetModel());
     }
-    return reinterpret_cast<NG::SymbolModelNG *>(module->GetModel());
+    return cachedModel;
 }
 void FfiOHOSAceFrameworkSymbolGlyphCreate(uint32_t symbolId)
 {

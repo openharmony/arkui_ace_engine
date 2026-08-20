@@ -8506,7 +8506,7 @@ struct ArkUIContainerReaderModifier {
 
 struct ArkUISymbolGlyphModifier {
     void (*create)(ArkUI_Uint32 symbolId);
-    void (*setSymbolFontFamilies)(std::vector<std::string>& value);
+    void (*setSymbolFontFamilies)(const ArkUI_CharPtr* values, ArkUI_Int32 size);
     void (*setSymbolGlyphType)(ArkUI_Uint32 value);
     void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size);
     void (*resetFontColor)(ArkUINodeHandle node);
@@ -8547,6 +8547,7 @@ struct ArkUISymbolGlyphModifier {
     void (*setFontColorJs)(ArkUINodeHandle node, const ArkUI_InnerColor* color, ArkUI_Int32 size,
         ArkUI_Int32* resIndexes, void** resObjects, ArkUI_Int32 resSize);
     bool (*getIsFontColorResource)(ArkUINodeHandle node);
+    void (*unRegisterJsFontColor)(ArkUINodeHandle node);
 };
 
 struct ArkUISymbolSpanModifier {

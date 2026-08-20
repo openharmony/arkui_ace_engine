@@ -154,7 +154,6 @@ void SetRichEditorBindSelectionMenuJS(ArkUINodeHandle node, ArkUI_Uint32 editorT
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(buildFunc);
     CHECK_NULL_VOID(menuParam);
     SelectMenuParam selectMenuParam;
@@ -2088,7 +2087,7 @@ void* GetEventSetHandler(uint32_t kind)
 
 void* GetEventResetHandler(uint32_t kind)
 {
-    const ResetComponentAsyncEventHandler richEditorNodeResetAsyncEventHandlers[] = {
+    static const ResetComponentAsyncEventHandler richEditorNodeResetAsyncEventHandlers[] = {
         NG::ResetRichEditorOnSelectionChange,
         NG::ResetRichEditorOnReady,
         NG::ResetRichEditorOnPaste,

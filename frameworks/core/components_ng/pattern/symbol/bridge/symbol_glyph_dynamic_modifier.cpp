@@ -45,8 +45,17 @@ void SetSymbolType(ArkUI_Uint32 value)
 {
     SymbolModelNG::SetSymbolGlyphType(static_cast<::OHOS::Ace::SymbolType>(value));
 }
-void SetSymbolFontFamilies(std::vector<std::string>& familyNames)
+void SetSymbolFontFamilies(const ArkUI_CharPtr* values, ArkUI_Int32 size)
 {
+    std::vector<std::string> familyNames;
+    if (values != nullptr && size > 0) {
+        familyNames.reserve(size);
+        for (ArkUI_Int32 i = 0; i < size; ++i) {
+            if (values[i] != nullptr) {
+                familyNames.emplace_back(values[i]);
+            }
+        }
+    }
     SymbolModelNG::SetSymbolFontFamilies(familyNames);
 }
 void JsClip(ArkUINodeHandle node)
@@ -162,6 +171,17 @@ void ResetFontColor(ArkUINodeHandle node)
     Color fontColor = theme->GetTextStyle().GetTextColor();
     std::vector<Color> colorArray = { fontColor };
     SymbolModelNG::SetFontColor(frameNode, colorArray);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("symbolColor");
+    }
+}
+
+void UnRegisterJsFontColor(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -512,6 +532,7 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphDynamicModifier()
         .resetShaderStyle = ResetShaderStyle,
         .setFontColorJs = SetFontColorJs,
         .getIsFontColorResource = GetIsFontColorResource,
+        .unRegisterJsFontColor = UnRegisterJsFontColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

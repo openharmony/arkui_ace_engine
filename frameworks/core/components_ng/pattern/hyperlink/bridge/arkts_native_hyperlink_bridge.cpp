@@ -33,10 +33,6 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 
-bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
-}
 } // namespace
 
 void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
@@ -135,8 +131,10 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
 
     ArkUINodeHandle nativeNode;
 
-    if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
-        nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    if (ArkTSUtils::IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        nativeNode = nodePtr(frameNode);
     } else {
         Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
         CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -179,7 +177,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetDraggable(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
-    if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
+    if (ArkTSUtils::IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
         auto nativeNode = nodePtr(frameNode);
@@ -220,7 +218,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetResponseRegion(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
-    if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
+    if (ArkTSUtils::IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
         auto nativeNode = nodePtr(frameNode);

@@ -71,10 +71,6 @@
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
-#include "frameworks/compatible/components/canvas/rosen_render_custom_paint.h"
-#endif
-
 #include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material_enums.h"
 #include "ui/base/utils/utils.h"
 
