@@ -677,6 +677,8 @@ public:
             int32_t eventType)>&& callback) {};
     virtual void UnregisterTouchTimingCallback() {};
 
+    virtual void SetFormDisplayId(const uint64_t displayId) {}
+
 private:
     static std::atomic<bool> successFlag_;
     static std::mutex mtx_;

@@ -4941,10 +4941,30 @@ void UIContentImpl::SetFormViewScale(float width, float height, float formViewSc
     CHECK_NULL_VOID(pipelineContext);
 
     float viewScale = LessOrEqual(formViewScale, 0.0f) ? DEFAULT_VIEW_SCALE : formViewScale;
-    auto density = SystemProperties::GetResolution() / viewScale;
-    TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f, density: %{public}f.", viewScale, density);
+    float density = 0.0f;
+    if (formDisplayId_ != DISPLAY_ID_INVALID) {
+        auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(formDisplayId_);
+        if (display) {
+            auto displayInfo = display->GetDisplayInfo();
+            if (displayInfo) {
+                density = displayInfo->GetDensityInCurResolution();
+            }
+        }
+    }
+    if (!GreatNotEqual(density, 0.0f)) {
+        density = static_cast<float>(SystemProperties::GetResolution());
+    }
+    density = density / viewScale;
+    TAG_LOGD(AceLogTag::ACE_FORM,
+        "SetFormViewScale viewScale: %{public}f, density: %{public}f, displayId: %{public}" PRIu64 ".",
+        viewScale, density, formDisplayId_);
     pipelineContext->OnSurfaceDensityChanged(density);
     pipelineContext->SetRootSize(density, width, height);
+}
+
+void UIContentImpl::SetFormDisplayId(const uint64_t displayId)
+{
+    formDisplayId_ = displayId;
 }
 
 void UIContentImpl::SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback)
