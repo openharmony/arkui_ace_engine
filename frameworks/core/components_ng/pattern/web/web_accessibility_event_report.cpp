@@ -78,13 +78,19 @@ void WebAccessibilityEventReport::RegisterAllReportEventCallback()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::RegisterAllReportEventCallback");
     auto focusCallback = [](int64_t accessibilityId, const std::string& data) {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportWebInputEvent(accessibilityId, data, FOCUS_SYMBOL);
+#endif
     };
     auto blurCallback = [](int64_t accessibilityId, const std::string& data) {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportWebInputEvent(accessibilityId, data, BLUR_SYMBOL);
+#endif
     };
     auto textChangeCallback = [](int64_t accessibilityId, const std::string& data) {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportWebInputEvent(accessibilityId, data, TEXT_CHANGE_SYMBOL);
+#endif
     };
     RegisterCallback(std::move(focusCallback), AccessibilityEventType::FOCUS);
     RegisterCallback(std::move(blurCallback), AccessibilityEventType::BLUR);

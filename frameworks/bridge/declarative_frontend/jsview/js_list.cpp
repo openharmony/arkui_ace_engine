@@ -752,8 +752,10 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachStart",
                 ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
             return;
         };
         ListModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -771,8 +773,10 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachEnd",
                 ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
             return;
         };
         ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
@@ -807,8 +811,10 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollStop",
                 ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
             return;
         };
         ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
@@ -1002,8 +1008,10 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "List.onItemDrop",
             ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
     };
     ListModel::GetInstance()->SetOnItemDrop(onItemDrop);
 }

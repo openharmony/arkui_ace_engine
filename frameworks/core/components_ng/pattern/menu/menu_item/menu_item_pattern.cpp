@@ -19,7 +19,9 @@
 
 #include "menu_item_model.h"
 
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
@@ -603,11 +605,14 @@ void MenuItemPattern::OnAfterModifyDone()
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
+#endif
 }
 
 void MenuItemPattern::RecordChangeEvent() const
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
     }
@@ -626,6 +631,7 @@ void MenuItemPattern::RecordChangeEvent() const
         .SetHost(host);
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
+#endif
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -3932,6 +3938,7 @@ void MenuItemPattern::ApplyOptionThemeStyles(const RefPtr<SelectPaintProperty>& 
 
 void MenuItemPattern::ReportEvent()
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
@@ -3950,5 +3957,6 @@ void MenuItemPattern::ReportEvent()
     TAG_LOGD(AceLogTag::ACE_MENU, "[menuitem ReportComponentChangeEvent] result %{public}s", jsString.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", jsString.c_str(),
         ComponentEventType::COMPONENT_EVENT_MENU);
+#endif
 }
 } // namespace OHOS::Ace::NG

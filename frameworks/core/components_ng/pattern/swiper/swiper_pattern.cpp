@@ -32,8 +32,6 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/ressched/ressched_report.h"
-#include "base/ressched/taihang_optimizer.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
@@ -41,7 +39,11 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container_scope.h"
 #include "core/common/premake_scope.h"
+#ifndef CROSS_PLATFORM
+#include "base/ressched/ressched_report.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
@@ -647,7 +649,9 @@ void SwiperPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutInt(host, inspectorId, CurrentIndex());
+#endif
     }
 }
 
@@ -1394,7 +1398,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             pipeline->AddAfterRenderTask([weak = WeakClaim(this), needSwiperChangeEnd]() {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
+#ifndef CROSS_PLATFORM
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
+#endif
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
                 swiper->ContentChangeReport(swiper->GetHost(), needSwiperChangeEnd);
@@ -1779,6 +1785,7 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
         return;
     }
 
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
     auto pageInfo = pipeline->GetLastPageInfo();
     CHECK_NULL_VOID(pageInfo);
@@ -1795,6 +1802,7 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
         payload["componentType"] = std::to_string(COMPONENT_SWIPER);
         ResSchedReport::GetInstance().HandleSwiperChange(payload);
     }
+#endif
 }
 
 void SwiperPattern::FireAnimationStartEvent(
@@ -1868,6 +1876,7 @@ void SwiperPattern::FireUnselectedEvent(int32_t currentIndex, int32_t targetInde
 
 void SwiperPattern::NotifyScrollStateEvent(ScrollState scrollState)
 {
+#ifndef CROSS_PLATFORM
     if (scrollState_ == scrollState) {
         return;
     }
@@ -1885,6 +1894,7 @@ void SwiperPattern::NotifyScrollStateEvent(ScrollState scrollState)
     if (scrollState == ScrollState::IDLE) {
         mgr->OnSwiperScrollEnd(host);
     }
+#endif
 }
 
 void SwiperPattern::FireScrollStateEvent(ScrollState scrollState)
@@ -3754,8 +3764,10 @@ void SwiperPattern::HandleTouchUp()
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     if (!hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_SWIPER_SCROLL,
             PerfActionType::FIRST_MOVE, "");
+#endif
     } else {
         AceAsyncTraceBeginCommercial(0, APP_TABS_SCROLL);
     }
@@ -3845,7 +3857,9 @@ void SwiperPattern::TriggerAddTabBarEvent() const
 void SwiperPattern::ReportTraceOnDragEnd() const
 {
     if (!hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_SCROLL, false);
+#endif
     } else {
         AceAsyncTraceEndCommercial(0, APP_TABS_SCROLL);
     }
@@ -4201,7 +4215,7 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
 void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
 {
     if (isBeginPerf) {
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
         if (isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
         }
@@ -4210,14 +4224,18 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
             AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
         } else if (isInAutoPlay_) {
             isAutoPlayAnimationRunning_ = true;
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->StartCommercial(
                 PerfConstants::AUTO_APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+#endif
         } else {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->StartCommercial(
                 PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+#endif
         }
     } else {
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
         if (isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         } else {
@@ -4230,10 +4248,14 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
             ContentChangeReport(GetHost(), true);
         } else if (isAutoPlayAnimationRunning_) {
             isAutoPlayAnimationRunning_ = false;
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::AUTO_APP_SWIPER_FLING, true);
+#endif
             ContentChangeReport(GetHost(), true);
-    } else {
+        } else {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_FLING, true);
+#endif
             ContentChangeReport(GetHost(), true);
         }
     }
@@ -4827,7 +4849,9 @@ void SwiperPattern::OnSpringAnimationFinish()
     if (!springAnimationIsRunning_) {
         return;
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+#endif
     AceAsyncTraceEndCommercial(0, TRAILING_ANIMATION);
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f, id: %{public}d",
         currentIndexOffset_, swiperId_);
@@ -5022,8 +5046,10 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), delta]() {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING,
                 PerfActionType::FIRST_MOVE, "");
+#endif
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f, id:%{public}d",
@@ -8321,37 +8347,45 @@ void SwiperPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool n
     if (targetIndex_.has_value() && targetIndex_.value() == currentIndex_) {
         return;
     }
+#ifndef CROSS_PLATFORM
     mgr->OnSwiperChangeEnd(keyNode, hasTabsAncestor_);
+#endif
 }
 
 void SwiperPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode) const
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
     mgr->OnTransitionAdded(keyNode->GetId());
+#endif
 }
 
 void SwiperPattern::ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
     mgr->OnTransitionRemoved(keyNode->GetId());
+#endif
 }
 
 void SwiperPattern::ContentChangeByDetaching(PipelineContext* pipeline)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     mgr->OnTransitionRemoved(host->GetId());
+#endif
 }
 
 bool SwiperPattern::StartFakeDrag()

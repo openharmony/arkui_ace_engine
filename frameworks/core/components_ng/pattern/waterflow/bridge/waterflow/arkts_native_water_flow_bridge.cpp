@@ -1484,8 +1484,10 @@ ArkUINativeModuleValue WaterFlowBridge::SetOnScrollIndex(ArkUIRuntimeCallInfo* r
             if (isJSView) {
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
             }
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollIndex",
                 ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
             return;
         };
     GetArkUINodeModifiers()->getWaterFlowModifier()->setOnScrollIndex(
@@ -1513,8 +1515,10 @@ ArkUINativeModuleValue WaterFlowBridge::SetOnReachStart(ArkUIRuntimeCallInfo* ru
         if (isJSView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachStart",
             ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
         return;
     };
     GetArkUINodeModifiers()->getWaterFlowModifier()->setOnReachStart(
@@ -1542,8 +1546,10 @@ ArkUINativeModuleValue WaterFlowBridge::SetOnReachEnd(ArkUIRuntimeCallInfo* runt
         if (isJSView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachEnd",
             ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
         return;
     };
     GetArkUINodeModifiers()->getWaterFlowModifier()->setOnReachEnd(nativeNode, reinterpret_cast<void*>(&onReachEnd));

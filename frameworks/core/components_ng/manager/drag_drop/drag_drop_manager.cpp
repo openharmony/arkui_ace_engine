@@ -2144,12 +2144,16 @@ bool DragDropManager::FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, Dr
     if (dragType == DragType::GRID) {
         auto eventHub = frameNode->GetEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+#ifndef CROSS_PLATFORM
         ReportOnItemDropEvent(dragType, frameNode, dropPositionX, dropPositionY);
         return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
+#endif
     } else if (dragType == DragType::LIST) {
         auto eventHub = frameNode->GetEventHub<ListEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+#ifndef CROSS_PLATFORM
         ReportOnItemDropEvent(dragType, frameNode, dropPositionX, dropPositionY);
+#endif
         return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
     }
     return false;
@@ -3675,6 +3679,7 @@ std::shared_ptr<Rosen::RSTransaction> DragDropManager::GetRSTransaction()
 }
 #endif
 
+#ifndef CROSS_PLATFORM
 void DragDropManager::ReportOnItemDropEvent(
     DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY)
 {
@@ -3718,4 +3723,5 @@ void DragDropManager::ReportOnItemDropEvent(
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
+#endif
 } // namespace OHOS::Ace::NG

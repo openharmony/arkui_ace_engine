@@ -283,7 +283,9 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+#ifndef CROSS_PLATFORM
         JankFrameReport::GetInstance().RecordAnimateEnd();
+#endif
     } else {
         pipelineContext->RequestFrame();
     }
@@ -314,7 +316,9 @@ void StartAnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, Animat
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+#ifndef CROSS_PLATFORM
         JankFrameReport::GetInstance().RecordAnimateEnd();
+#endif
     } else {
         pipelineContext->RequestFrame();
     }
@@ -691,7 +695,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         option.GetCurve()->ToString().c_str(), option.GetIteration());
     option.SetAnimationInterface(AnimationInterface::ANIMATION);
     ViewContextModel::GetInstance()->openAnimation(option);
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().ReportJSAnimation();
+#endif
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
@@ -708,6 +714,7 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void RecordAnimationFinished(int32_t count)
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_ANIMATION)) {
         Recorder::EventParamsBuilder builder;
         builder.SetEventCategory(Recorder::EventCategory::CATEGORY_ANIMATION)
@@ -715,6 +722,7 @@ void RecordAnimationFinished(int32_t count)
             .SetExtra(Recorder::KEY_COUNT, std::to_string(count));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 }
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)

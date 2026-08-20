@@ -567,13 +567,17 @@ void ViewFunctions::ExecuteRender()
 void ViewFunctions::ExecuteAppear()
 {
     ExecuteFunction(jsAppearFunc_, "aboutToAppear");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("aboutToAppear");
+#endif
 }
 
 void ViewFunctions::ExecuteDisappear()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("aboutToDisappear");
+#endif
 
     if (jsDisappearFunc_.IsEmpty()) {
         return;
@@ -592,7 +596,9 @@ void ViewFunctions::ExecuteDisappear()
 void ViewFunctions::ExecuteDidBuild()
 {
     ExecuteFunction(jsDidBuildFunc_, "onDidBuild");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onDidBuild");
+#endif
 }
 
 void ViewFunctions::ExecuteAboutToRecycle()
@@ -692,7 +698,9 @@ void ViewFunctions::ExecuteOnRenderDone()
     ExecuteFunction(jsRenderDoneFunc_, "onRenderDone");
     // for developer callback.
     ExecuteFunction(jsBuildDoneFunc_, "onBuildDone");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onBuildDone");
+#endif
 }
 
 void ViewFunctions::ExecuteTransition()
@@ -708,13 +716,17 @@ bool ViewFunctions::HasPageTransition() const
 void ViewFunctions::ExecuteShow()
 {
     ExecuteFunction(jsOnShowFunc_, "onPageShow");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onPageShow");
+#endif
 }
 
 void ViewFunctions::ExecuteHide()
 {
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onPageHide");
+#endif
 }
 
 void ViewFunctions::ExecuteInitiallyProvidedValue(const std::string& jsonData)

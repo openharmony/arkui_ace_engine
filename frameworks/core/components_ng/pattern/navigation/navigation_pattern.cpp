@@ -2488,8 +2488,12 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
             }
             auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
+#ifndef CROSS_PLATFORM
             auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ?
                 navigationPattern->navigationStack_->GetRouteParam() : "";
+#else
+            auto param = "";
+#endif
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param, visibilityReason);
             navDestinationPattern->SetIsOnShow(true);
             NavigationPattern::FireNavigationChange(curDestination, true, false, isFromWindow);
@@ -2588,9 +2592,11 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     auto pageUrlChecker = container->GetPageUrlChecker();
     CHECK_NULL_VOID(pageUrlChecker);
     pageUrlChecker->NotifyPageShow(pageName);
+#ifndef CROSS_PLATFORM
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(pageName);
     }
+#endif
 }
 
 void NavigationPattern::ProcessPageShowEvent()
@@ -2638,7 +2644,9 @@ bool NavigationPattern::ReplaceTransition(const RefPtr<NavDestinationGroupNode>&
     auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
     navigationNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
+#endif
     navigationStack_->UpdateReplaceValue(0);
 
     auto context = navigationNode->GetContext();
@@ -2712,7 +2720,9 @@ bool NavigationPattern::HandleForceSplitTransitionWithoutAnimation(
     auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
     navigationNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
+#endif
     return true;
 }
 
@@ -2787,7 +2797,9 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
         auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
         navigationNode->OnAccessibilityEvent(
             AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
+#endif
         return;
     }
 
@@ -2831,7 +2843,9 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
     auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
     navigationNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
+#endif
 }
 
 void NavigationPattern::TransitionWithAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
@@ -4034,8 +4048,10 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
     if (navigationTransition.interactive) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE,
             PerfActionType::FIRST_MOVE, "");
+#endif
         std::function<void()> onFinish = [weakNavigation = WeakClaim(this),
                                   weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                   weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
@@ -4063,7 +4079,9 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             proxy->SetIsFinished(true);
             // this flag will be update in cancelTransition or finishTransition
             ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE, true);
+#endif
             bool isSuccess = proxy->GetIsSuccess();
             if (isSuccess) {
                 pattern->ClearRecoveryList();
@@ -4101,7 +4119,9 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         OnStartOneTransitionAnimation();
         proxy->StartAnimation();
     } else {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
         ClearRecoveryList();
         OnStartOneTransitionAnimation();
         navigationTransition.transition(proxy);
@@ -4163,7 +4183,9 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(hostNode->GetNavigationPathInfo(), "onPageChange");
+#endif
     do {
         if (replaceValue != 0) {
             if (preTopNavDestination) {
@@ -4941,11 +4963,15 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         toNavDestinationName = "navBar";
     }
     ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
+#ifndef CROSS_PLATFORM
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(toNavDestinationName);
     }
+#endif
     PageTransitionReport(fromNavDestinationName, toNavDestinationName, fromComponentName, toComponentName);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(toPathInfo.c_str(), "navigationPathChange");
+#endif
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
         // NavBar/HomeNavDestination will be covered in STACK mode
@@ -5134,7 +5160,11 @@ void NavigationPattern::FireOnShowLifecycle(
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parentDestinationNode is onhide");
         return;
     }
+#ifndef CROSS_PLATFORM
     auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
+#else
+    auto param = "";
+#endif
     auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
@@ -5318,7 +5348,9 @@ void NavigationPattern::PageTransitionReport(const std::string& fromNavDestinati
     if (context) {
         windowId = context->GetWindowId();
     }
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, windowId);
+#endif
 }
 
 bool NavigationPattern::IsTopPrimaryNode(const RefPtr<NavDestinationGroupNode>& node)
@@ -5455,11 +5487,13 @@ void NavigationPattern::OnWindowHide()
 
 void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)
 {
+#ifndef CROSS_PLATFORM
     auto container = Container::Current();
     if (container != nullptr && PerfMonitor::GetPerfMonitor() != nullptr) {
         std::string bundleName = container->GetBundleName();
         PerfMonitor::GetPerfMonitor()->ReportPageShowMsg("", bundleName, pageName);
     }
+#endif
 }
 
 void NavigationPattern::RefreshFocusToDestination()
@@ -5543,7 +5577,9 @@ void NavigationPattern::RecoveryToLastStack(
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(hostNode->GetNavigationPathInfo(), "onPageChange");
+#endif
 }
 
 bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
@@ -8225,31 +8261,37 @@ void NavigationPattern::UpdateCanForceSplitLayout()
 
 void NavigationPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(keyNode);
+#endif
 }
 
 void NavigationPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode)
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
     mgr->OnTransitionAdded(keyNode->GetId());
+#endif
 }
 
 void NavigationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     mgr->OnTransitionRemoved(host->GetId());
+#endif
 }
 
 void NavigationPattern::FireNavigateChangeCallback()
@@ -8485,8 +8527,12 @@ void NavigationPattern::FireRelatedDestinationLifecycleInner(bool isOnShow, bool
     auto eventHub = relatedDest->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (isOnShow) {
+#ifndef CROSS_PLATFORM
         auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ?
             navigationStack_->GetRouteParam() : "";
+#else
+        auto param = "";
+#endif
         eventHub->FireOnShownEvent(relatedPattern->GetName(), param,
             isFromWindow ? NavDestVisibilityChangeReason::APP_STATE : NavDestVisibilityChangeReason::TRANSITION);
         relatedPattern->SetIsOnShow(true);

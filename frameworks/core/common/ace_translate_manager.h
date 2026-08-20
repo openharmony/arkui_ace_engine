@@ -34,9 +34,7 @@ public:
     void SendTranslateResult(int32_t nodeId, std::string res) override;
     void ClearMap() override;
     void SendPixelMap();
-    void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
     void TravelFindPixelMap(RefPtr<NG::UINode> currentNode);
-    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
     void GetMultiImagesById(uint32_t windowId, const std::vector<int32_t>& arkUIIds,
         const std::map<int32_t, std::vector<int32_t>>& arkWebs);
     void GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request);
@@ -51,6 +49,8 @@ public:
     void MarkCurrentWebImageQueryDone(int32_t currentWebId);
     void AddArkWebImageMap(int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap);
     void PostToUI(const std::function<void()>& task) override;
+    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
+    void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
 
 private:
     void TraverseAddArkUIComponentImages(const size_t componentQueryCnt, const std::vector<int32_t>& arkUIIds);

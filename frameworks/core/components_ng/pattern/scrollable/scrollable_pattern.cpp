@@ -157,7 +157,9 @@ void ScrollablePattern::CreateRefreshCoordination()
 ScrollablePattern::~ScrollablePattern()
 {
     if (AnimateRunning()) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+#endif
         auto scrollable = GetScrollable();
         if (scrollable) {
             auto nodeId = scrollable->GetNodeId();
@@ -2164,8 +2166,10 @@ void ScrollablePattern::SmartGesturePerformScroll(float position)
     if (!GetIsDragging()) {
         FireOnScrollStart(false);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+#endif
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
@@ -2200,8 +2204,10 @@ void ScrollablePattern::AnimateTo(
     if (!GetIsDragging()) {
         FireOnScrollStart(false);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+#endif
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
@@ -2213,7 +2219,9 @@ void ScrollablePattern::OnAnimateFinish()
     CHECK_NULL_VOID(host);
     if (isAnimationStop_) {
         SetUiDvsyncSwitch(false);
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+#endif
     }
     if (animateToTraceFlag_) {
         animateToTraceFlag_ = false;
@@ -3353,12 +3361,16 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop(), hub->GetJSFrameNodeOnScrollStop());
     }
+#ifndef CROSS_PLATFORM
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UiSessionManager::GetInstance()->ReportScrollEvent("onScrollStart");
+#endif
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     if (withPerfMonitor) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+#endif
     }
     auto pipeline = host->GetContext();
     if (pipeline) {
@@ -3555,7 +3567,9 @@ void ScrollablePattern::OnScrollStop(
         return;
     }
     auto pipeline = host->GetContext();
+#ifndef CROSS_PLATFORM
     RecordScrollEvent(Recorder::EventType::SCROLL_STOP);
+#endif
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     if (!GetScrollAbort()) {
@@ -3582,7 +3596,9 @@ void ScrollablePattern::OnScrollStop(
     if (pipeline) {
         pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+#endif
     AceAsyncTraceEndCommercial(host->GetAccessibilityId(),
         (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
@@ -3612,9 +3628,12 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
     pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportScrollEvent("onScrollStop");
+#endif
 }
 
+#ifndef CROSS_PLATFORM
 void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
 {
     if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_SCROLL)) {
@@ -3639,6 +3658,7 @@ void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
     }
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
+#endif
 
 float ScrollablePattern::FireOnWillScroll(float offset) const
 {
@@ -4412,7 +4432,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateStop();
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+#endif
         });
     }
 
@@ -4441,7 +4463,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->Init();
         fixedVelocityMotion_->SetVelocity(velocity);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+#endif
     animator_->PlayMotion(fixedVelocityMotion_);
     FireOnScrollStart(false);
 }
@@ -5059,32 +5083,38 @@ void ScrollablePattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 
 void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, uint32_t type)
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_EQUAL_VOID(mgr->IsIgnoringEventType(type), true);
     mgr->OnScrollChangeEnd(keyNode);
+#endif
 }
 
 void ScrollablePattern::ContentChangeByDetaching(PipelineContext* pipeline)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     mgr->OnScrollRemoved(host->GetId());
+#endif
 }
 
 void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(keyNode);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeStart(keyNode);
+#endif
 }
 
 std::string ScrollablePattern::ParseCommand(const std::string& command, ScrollOnInjectionEventInfo& info)
@@ -5111,6 +5141,7 @@ std::string ScrollablePattern::ParseCommand(const std::string& command, ScrollOn
 
 void ScrollablePattern::ReportScroll(bool isJump, ScrollError error, int32_t reportEventId)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5134,10 +5165,12 @@ void ScrollablePattern::ReportScroll(bool isJump, ScrollError error, int32_t rep
     result->Put("result", json);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void ScrollablePattern::ReportOnItemStopEvent()
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5155,10 +5188,12 @@ void ScrollablePattern::ReportOnItemStopEvent()
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void ScrollablePattern::ReportOnItemScrollStop(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5185,6 +5220,7 @@ void ScrollablePattern::ReportOnItemScrollStop(const std::string& event)
     result->Put("result", json);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
     lastScrollFromInjection_ = false;
 }
 

@@ -63,9 +63,11 @@ namespace OHOS::Ace::NG {
 namespace OHOS::Ace {
 class AIWriteAdapter;
 class RRect;
+#ifndef CROSS_PLATFORM
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
 class TaihangOptimizer;
+#endif
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -1272,7 +1274,9 @@ public:
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
+#ifndef CROSS_PLATFORM
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+#endif
     }
 
     ACE_FORCE_EXPORT WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter();
@@ -1326,9 +1330,11 @@ public:
         return window_->GetIsRequestFrame();
     }
 
+#ifndef CROSS_PLATFORM
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
     const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
     const std::shared_ptr<TaihangOptimizer>& GetTaihangOptimizer() const;
+#endif
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1420,8 +1426,10 @@ protected:
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
+#ifndef CROSS_PLATFORM
     void OnDumpRecorderStart(const std::vector<std::string>& params) const;
     void TriggerFrameDumpFuncIfExist() const;
+#endif
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
@@ -1792,9 +1800,11 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
+#ifndef CROSS_PLATFORM
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
     std::shared_ptr<TaihangOptimizer> taihangOptimizer_;
+#endif
     RefPtr<ContentChangeManager> contentChangeMgr_;
     std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;

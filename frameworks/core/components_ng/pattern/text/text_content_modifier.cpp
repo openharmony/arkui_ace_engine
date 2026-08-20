@@ -649,6 +649,7 @@ void TextContentModifier::SetTextContentAlingOffsetY(float& paintOffsetY)
 
 void TextContentModifier::ContentChangeReport()
 {
+#ifndef CROSS_PLATFORM
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
     auto host = textPattern->GetHost();
@@ -664,6 +665,7 @@ void TextContentModifier::ContentChangeReport()
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     mgr->OnTextChangeEnd(textRect, rootNode->GetRectWithRender());
+#endif
 }
 
 void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,

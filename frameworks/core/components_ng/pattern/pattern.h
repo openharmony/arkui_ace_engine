@@ -23,7 +23,9 @@
 #include "base/utils/noncopyable.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/container_consts.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"

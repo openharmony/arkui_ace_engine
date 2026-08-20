@@ -185,7 +185,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
 
     isLayouting_ = false;
-#ifndef IS_RELEASE_VERSION
+#if !defined(IS_RELEASE_VERSION) && !defined(CROSS_PLATFORM)
     if (duration > SINGLE_FRAME_TIME_NANOSEC) {
         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushLayoutTask", duration / NANO_TO_MICRO);
     }
@@ -230,9 +230,11 @@ void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
+#endif
 
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation

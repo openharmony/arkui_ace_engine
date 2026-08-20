@@ -23,7 +23,9 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/search/search_gesture_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 
 namespace OHOS::Ace::NG {
 using ChangeAndSubmitEvent = std::function<void(const std::u16string)>;
@@ -46,6 +48,7 @@ public:
             event.SetText(value);
             onSubmit_(value, event);
         }
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             auto host = GetFrameNode();
@@ -58,6 +61,7 @@ public:
             builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(UtfUtils::Str16DebugToStr8(value));
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
+#endif
     }
 
     void SetOnChange(ChangeAndSubmitEvent&& changeEvent)

@@ -216,16 +216,20 @@ void PipelineContext::FlushBuild()
         vsyncListener_();
     }
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
+#endif
 
     isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
         isRebuildFinished_ = true;
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushBuild();
         }
+#endif
         return;
     }
     decltype(dirtyElements_) dirtyElements(std::move(dirtyElements_));
@@ -250,9 +254,11 @@ void PipelineContext::FlushBuild()
     }
     buildingFirstPage_ = false;
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
+#endif
 #if !defined(PREVIEW)
     LayoutInspector::SupportInspector();
 #endif
@@ -507,15 +513,19 @@ void PipelineContext::FlushLayout()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushLayout();
     }
+#endif
 
     if (dirtyLayoutNodes_.empty()) {
         FlushGeometryProperties();
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushLayout();
         }
+#endif
         return;
     }
     decltype(dirtyLayoutNodes_) dirtyNodes(std::move(dirtyLayoutNodes_));
@@ -536,9 +546,11 @@ void PipelineContext::FlushLayout()
     CreateGeometryTransition();
     FlushGeometryProperties();
     TryCallNextFrameLayoutCallback();
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushLayout();
     }
+#endif
 }
 
 void PipelineContext::FlushGeometryProperties()
@@ -581,14 +593,18 @@ void PipelineContext::FlushRender()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
+#endif
 
     if (dirtyRenderNodes_.empty() && dirtyRenderNodesInOverlay_.empty() && !needForcedRefresh_) {
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushRender();
         }
+#endif
         return;
     }
 
@@ -651,9 +667,11 @@ void PipelineContext::FlushRender()
     }
     needForcedRefresh_ = false;
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRender();
     }
+#endif
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -662,18 +680,22 @@ void PipelineContext::FlushRenderFinish()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRenderFinish();
     }
+#endif
     if (!needPaintFinishNodes_.empty()) {
         decltype(needPaintFinishNodes_) Nodes(std::move(needPaintFinishNodes_));
         for (const auto& node : Nodes) {
             node->OnPaintFinish();
         }
     }
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRenderFinish();
     }
+#endif
 }
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
@@ -684,18 +706,22 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
+#endif
     flushAnimationTimestamp_ = nanoTimestamp;
     isFlushingAnimation_ = true;
 
     ProcessPreFlush();
     if (scheduleTasks_.empty()) {
         isFlushingAnimation_ = false;
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushAnimation();
         }
+#endif
         return;
     }
     decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
@@ -704,9 +730,11 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     }
     isFlushingAnimation_ = false;
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushAnimation();
     }
+#endif
 }
 
 void PipelineContext::FlushReloadTransition()
@@ -800,9 +828,11 @@ void PipelineContext::ProcessPostFlush()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginProcessPostFlush();
     }
+#endif
 
     if (postFlushListeners_.empty()) {
         return;
@@ -1082,7 +1112,9 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
     std::unordered_map<std::string, std::string> params { { "pageUrl", pageComponent->GetPageUrl() } };
+#ifndef CROSS_PLATFORM
     ResSchedReportScope report("push_page", params);
+#endif
     auto stageElement = stage;
     if (!stageElement) {
         // if not target stage, use root stage
@@ -1207,7 +1239,9 @@ void PipelineContext::PopPage()
         auto topElement = stageElement->GetTopPage();
         if (topElement != nullptr) {
             std::unordered_map<std::string, std::string> params { { "pageUrl", topElement->GetPageUrl() } };
+#ifndef CROSS_PLATFORM
             ResSchedReport::GetInstance().ResSchedDataReport("pop_page", params);
+#endif
         }
         stageElement->Pop();
     }
@@ -1585,7 +1619,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
     ReportConfig config;
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+#endif
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallbacks(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType });
@@ -2719,7 +2755,9 @@ void PipelineContext::OnShow()
 {
     onShow_ = true;
     SetWindowOnShow();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
+#endif
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Resume();
@@ -2758,7 +2796,9 @@ void PipelineContext::OnHide()
 {
     onShow_ = false;
     SetWindowOnHide();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppForeground(false);
+#endif
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();

@@ -94,6 +94,7 @@ public:
 
     bool ReportInjectionResult(bool isSuccess, const std::string& reason)
     {
+#ifndef CROSS_PLATFORM
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto nodeId = host->GetId();
@@ -106,6 +107,7 @@ public:
         result->Put("reason", reason.c_str());
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(
             "ToggleResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
         return true;
     }
 

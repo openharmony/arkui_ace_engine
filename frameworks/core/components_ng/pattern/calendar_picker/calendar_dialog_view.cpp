@@ -1443,6 +1443,7 @@ bool CalendarDialogView::ReportChangeEvent(const RefPtr<FrameNode>& frameNode, c
 bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const PickerDate& pickerDate)
 {
+#ifndef CROSS_PLATFORM
     auto params = InspectorJsonUtil::CreateObject();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(pickerDate.GetYear()));
@@ -1454,6 +1455,7 @@ bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& co
     value->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 

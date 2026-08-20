@@ -18,8 +18,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 
@@ -47,6 +49,7 @@ public:
         if (changeEvent_) {
             changeEvent_(select);
         }
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             auto host = GetFrameNode();
@@ -63,6 +66,7 @@ public:
             builder.SetChecked(select);
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
+#endif
     }
 
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent)

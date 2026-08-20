@@ -29,8 +29,12 @@
 #include "base/utils/multi_thread.h"
 #include "core/animation/curves.h"
 #include "core/common/ace_engine.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/ui_material.h"
@@ -108,6 +112,7 @@ static std::string ConvertControlSizeToString(ControlSize controlSize)
 
 void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& value)
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto inspectorId = host->GetInspectorId().value_or("");
         Recorder::EventParamsBuilder builder;
@@ -122,6 +127,7 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
             Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, value, index);
         }
     }
+#endif
 }
 
 static std::string ConvertVectorToString(std::vector<std::string> vec)
@@ -281,7 +287,9 @@ void SelectPattern::OnAfterModifyDone()
     if (inspectorId.empty()) {
         return;
     }
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, selectValue_, selected_);
+#endif
 }
 
 void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
@@ -2621,6 +2629,7 @@ void SelectPattern::GetSelectedValue(int32_t index, std::string& value)
 
 void SelectPattern::ReportInjectResult(const std::string& event, bool success, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int nodeId = host->GetId();
@@ -2630,10 +2639,12 @@ void SelectPattern::ReportInjectResult(const std::string& event, bool success, c
     CHECK_NULL_VOID(manager);
     manager->ReportComponentChangeEvent(nodeId, "inject_result",
         std::move(jsonResult), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
@@ -2647,6 +2658,7 @@ bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
         result->ToString().c_str(), nodeId);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result),
         ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     return true;
 }
 

@@ -1502,15 +1502,18 @@ int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
 
 void RichEditorPattern::ReportCommandExecution(int32_t nodeId, const std::string& command)
 {
+#ifndef CROSS_PLATFORM
     auto eventObj = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(eventObj);
     eventObj->Put("event", command.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, int32_t start, int32_t end)
 {
+#ifndef CROSS_PLATFORM
     auto eventObj = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(eventObj);
     std::string value = selectOverlay_->GetSelectedText();
@@ -1522,25 +1525,30 @@ void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::st
     eventObj->Put("end", end);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 void RichEditorPattern::ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position)
 {
+#ifndef CROSS_PLATFORM
     auto eventObj = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(eventObj);
     eventObj->Put("event", "caretPositionChange");
     eventObj->Put("position", position);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 void RichEditorPattern::ReportRichEditorRequestKeyboardEvent(int32_t nodeId)
 {
+#ifndef CROSS_PLATFORM
     auto eventObj = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(eventObj);
     eventObj->Put("event", "RichEditor.requestKeyboard");
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 void RichEditorPattern::HandleAddTextCommand(const std::unique_ptr<JsonValue>& params, int32_t hostId)
@@ -10969,7 +10977,9 @@ void RichEditorPattern::HandleScrollStart()
         selectOverlay_->HideMenu(true);
     }
     CloseAIMenu();
+#ifndef CROSS_PLATFORM
     ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
+#endif
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
 }
@@ -11234,7 +11244,9 @@ void RichEditorPattern::OnScrollEndCallback()
         }
     }
     if (AnimateStoped()) {
+#ifndef CROSS_PLATFORM
         ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_STOP);
+#endif
         UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
             AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     }
@@ -14288,9 +14300,11 @@ RectF RichEditorPattern::GetCaretRelativeRect()
 
 void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     std::string value = std::string(RICHEDITOR) + event;
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(std::string(EVENT), value,
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
         event.c_str());
 }
@@ -14352,11 +14366,13 @@ void RichEditorPattern::ReportComponentChangeEvent() {
         GetContentBySpans(u16Str);
         str = UtfUtils::Str16DebugToStr8(u16Str);
     }
+#ifndef CROSS_PLATFORM
     auto value = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(value);
     value->Put("text", str.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value,
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}d",
         frameId_, static_cast<int32_t>(str.length()));
 #endif

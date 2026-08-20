@@ -34,7 +34,9 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/container.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1150,6 +1152,7 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
 
     sideBarContainerEventHub->FireChangeEvent(isShow);
 
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         auto host = GetHost();
@@ -1162,6 +1165,7 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
+#endif
 }
 
 void SideBarContainerPattern::UpdateControlButtonIcon()

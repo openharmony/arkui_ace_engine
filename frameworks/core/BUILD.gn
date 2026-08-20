@@ -275,14 +275,6 @@ template("ace_core_source_set") {
       "common/ime/text_input_proxy.cpp",
       "common/ime/text_input_type.cpp",
 
-      # recorder
-      "common/recorder/event_config.cpp",
-      "common/recorder/event_controller.cpp",
-      "common/recorder/event_recorder.cpp",
-      "common/recorder/exposure_processor.cpp",
-      "common/recorder/inspector_tree_collector.cpp",
-      "common/recorder/node_data_cache.cpp",
-
       # text
       "text/text_emoji_processor.cpp",
 
@@ -308,6 +300,17 @@ template("ace_core_source_set") {
     if (defined(config.enable_inspector_event_reporting) &&
         config.enable_inspector_event_reporting) {
       sources += [ "common/event_dump.cpp", ]
+    }
+
+    if (!is_arkui_x) {
+      sources += [
+        "common/recorder/event_config.cpp",
+        "common/recorder/event_controller.cpp",
+        "common/recorder/event_recorder.cpp",
+        "common/recorder/exposure_processor.cpp",
+        "common/recorder/inspector_tree_collector.cpp",
+        "common/recorder/node_data_cache.cpp",
+      ]
     }
 
     if (defined(config.relaxed_interaction_support) &&
@@ -954,14 +957,6 @@ template("ace_core_ng_source_set") {
       #declaration
       "components/declaration/common/declaration.cpp",
 
-      # recorder
-      "common/recorder/event_config.cpp",
-      "common/recorder/event_controller.cpp",
-      "common/recorder/event_recorder.cpp",
-      "common/recorder/exposure_processor.cpp",
-      "common/recorder/inspector_tree_collector.cpp",
-      "common/recorder/node_data_cache.cpp",
-
       # text
       "text/text_emoji_processor.cpp",
 
@@ -981,6 +976,17 @@ template("ace_core_ng_source_set") {
     if (defined(config.enable_inspector_event_reporting) &&
         config.enable_inspector_event_reporting) {
       sources += [ "common/event_dump.cpp", ]
+    }
+
+    if (!is_arkui_x) {
+      sources += [
+        "common/recorder/event_config.cpp",
+        "common/recorder/event_controller.cpp",
+        "common/recorder/event_recorder.cpp",
+        "common/recorder/exposure_processor.cpp",
+        "common/recorder/inspector_tree_collector.cpp",
+        "common/recorder/node_data_cache.cpp",
+      ]
     }
 
     if (defined(config.relaxed_interaction_support) &&

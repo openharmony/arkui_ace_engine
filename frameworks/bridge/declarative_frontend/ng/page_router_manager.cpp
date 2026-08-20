@@ -14,17 +14,18 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
-
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "base/i18n/localization.h"
-#include "base/ressched/ressched_report.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/common/event_manager.h"
+#ifndef CROSS_PLATFORM
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "base/ressched/ressched_report.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -93,7 +94,9 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+#endif
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info;
@@ -1656,7 +1659,9 @@ RefPtr<FrameNode> PageRouterManager::CreateDynamicPage(int32_t pageId, const Rou
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     CHECK_NULL_RETURN(pagePattern, nullptr);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
+#ifndef CROSS_PLATFORM
     ResSchedReportScope reportScope("push_page", reportData);
+#endif
     auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     if (!target.componentInfo.empty()) {
         pagePattern->SetRestoreInfo(target.componentInfo);
@@ -1759,7 +1764,9 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     CHECK_NULL_RETURN(pagePattern, nullptr);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
+#ifndef CROSS_PLATFORM
     ResSchedReportScope reportScope("push_page", reportData);
+#endif
     auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
     if (!target.componentInfo.empty()) {
@@ -2230,7 +2237,9 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
 bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
     bool isCardRouter, int64_t cardId)
 {
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().OnPageReady();
+#endif
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     RefPtr<PipelineBase> pipeline;
@@ -2279,7 +2288,9 @@ bool PageRouterManager::OnPopPage(bool needShowNext, bool needTransition)
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().OnBeforePagePop();
+#endif
         return stageManager->PopPage(GetCurrentPageNode(), needShowNext, needTransition);
     }
     return false;
@@ -2294,7 +2305,9 @@ bool PageRouterManager::OnPopPageToIndex(int32_t index, bool needShowNext, bool 
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().OnBeforePagePop();
+#endif
         return stageManager->PopPageToIndex(index, needShowNext, needTransition);
     }
     return false;
@@ -2336,7 +2349,9 @@ void PageRouterManager::CleanPageOverlay()
 
 void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(info.url, "routerReplacePage");
+#endif
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ReplacePageInNewLifecycle(info);
         return;
@@ -2883,11 +2898,13 @@ std::string PageRouterManager::GetBackTargetName()
 
 void PageRouterManager::NotifyPageTransitionEnd(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& page)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(page);
     auto mgr = context->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(page);
+#endif
 }
 
 bool PageRouterManager::IsPageInStack(const RefPtr<NG::FrameNode>& page) const

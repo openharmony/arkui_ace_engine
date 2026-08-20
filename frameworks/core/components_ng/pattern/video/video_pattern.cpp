@@ -2726,6 +2726,7 @@ int32_t VideoPattern::OnInjectionEvent(const std::string& command)
 
 void VideoPattern::ReportChangeEvent(PlaybackStatus status, double playbackSpeed, uint32_t currentPos)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -2763,10 +2764,12 @@ void VideoPattern::ReportChangeEvent(PlaybackStatus status, double playbackSpeed
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoPattern::ReportCommandResult(const std::string& event, const std::string& result, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -2791,6 +2794,7 @@ void VideoPattern::ReportCommandResult(const std::string& event, const std::stri
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", videoResult->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)

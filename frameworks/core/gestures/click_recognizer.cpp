@@ -65,7 +65,9 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
 void ClickRecognizer::OnAccepted()
 {
     LOGI("Click gesture has been accepted!");
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+#endif
     if (onClick_) {
         TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {

@@ -283,8 +283,10 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onComplete",
                 ComponentEventType::COMPONENT_EVENT_IMAGE);
+#endif
         };
         ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
     }
@@ -300,8 +302,10 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onError",
                 ComponentEventType::COMPONENT_EVENT_IMAGE);
+#endif
         };
 
         ImageModel::GetInstance()->SetOnError(onError);
