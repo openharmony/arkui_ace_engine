@@ -89,6 +89,7 @@ std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::cacheNavigationNodeEnable_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::gridIrregularLayoutEnable_ = true;
+bool SystemProperties::smartLayoutEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::smartGestureEnabled_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
@@ -248,6 +249,11 @@ bool SystemProperties::GetGridCacheEnabled()
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
     return gridIrregularLayoutEnable_;
+}
+
+bool SystemProperties::GetSmartLayoutEnabled()
+{
+    return smartLayoutEnabled_;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()
