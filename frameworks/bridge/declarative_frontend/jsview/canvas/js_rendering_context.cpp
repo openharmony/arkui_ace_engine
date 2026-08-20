@@ -467,11 +467,6 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
     napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
     void* nativeObj = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, napiValue, &nativeObj));
-    bool isTypeMatch = false;
-    napi_status tagStatus = napi_check_object_type_tag(env, napiValue, &JS_RENDER_IMAGE_TYPE_TAG, &isTypeMatch);
-    if (tagStatus != napi_ok || !isTypeMatch) {
-        return;
-    }
     auto jsImage = static_cast<JSRenderImage*>(nativeObj);
     CHECK_NULL_VOID(jsImage);
 #ifdef PIXEL_MAP_SUPPORTED

@@ -79,7 +79,6 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
 
     napi_coerce_to_native_binding_object(env, imageBitmap, DetachImageBitmap, AttachImageBitmap, value, nullptr);
     napi_wrap_with_size(env, imageBitmap, value, JSRenderImage::Finalizer, nullptr, nullptr, wrapper->GetBindingSize());
-    napi_type_tag_object(env, imageBitmap, &JS_RENDER_IMAGE_TYPE_TAG);
     return imageBitmap;
 }
 
@@ -148,7 +147,6 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     napi_coerce_to_native_binding_object(
         env, thisVar, DetachImageBitmap, AttachImageBitmap, AceType::RawPtr(wrapper), nullptr);
     napi_wrap_with_size(env, thisVar, AceType::RawPtr(wrapper), Finalizer, nullptr, nullptr, wrapper->GetBindingSize());
-    napi_type_tag_object(env, thisVar, &JS_RENDER_IMAGE_TYPE_TAG);
     wrapper->IncRefCount();
     return thisVar;
 }
