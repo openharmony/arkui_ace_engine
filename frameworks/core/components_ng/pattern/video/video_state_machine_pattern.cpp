@@ -2812,6 +2812,11 @@ void VideoStateMachinePattern::RecoverState(const RefPtr<VideoStateMachinePatter
     CHECK_NULL_VOID(videoNode);
     // change event hub to the origin video node
     videoPattern->GetEventHub<VideoEventHub>()->AttachHost(videoNode);
+    // Sync the play/pause button of this pattern's control bar. While fullscreen, state
+    // entries only refreshed the fullscreen pattern's button, so the inline button could
+    // be stale when exiting fullscreen. The state manager is shared, so IsPlaying() here
+    // reflects the latest playback state.
+    ChangePlayButtonTag();
     videoNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
