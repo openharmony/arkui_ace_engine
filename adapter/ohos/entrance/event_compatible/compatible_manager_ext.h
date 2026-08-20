@@ -48,6 +48,7 @@ private:
     std::string GetSettingsModeStringValue();
     bool ParseSettingJsonToMap(const std::string& jsonStr, std::map<std::string, int32_t>& compatibleMap);
     bool isSettingsDataLoaded_ = false;
+    bool isSettingModeDataLoaded_ = false;
     std::mutex compatibleInfoMapMutex_;
     std::map<std::string, CompatibleInfo> compatibleInfoMap_;
     std::map<std::string, int32_t> compatibleSettingInfoMap_;
