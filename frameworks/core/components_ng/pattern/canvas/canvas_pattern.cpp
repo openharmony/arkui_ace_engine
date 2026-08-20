@@ -99,16 +99,16 @@ void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
 
 void CanvasPattern::FireOnContext2DAttach()
 {
-    if (onContext2DAttach_) {
-        onContext2DAttach_();
-    }
+    auto onContext2DAttach = onContext2DAttach_;
+    CHECK_NULL_VOID(onContext2DAttach);
+    onContext2DAttach();
 }
 
 void CanvasPattern::FireOnContext2DDetach()
 {
-    if (onContext2DDetach_) {
-        onContext2DDetach_();
-    }
+    auto onContext2DDetach = onContext2DDetach_;
+    CHECK_NULL_VOID(onContext2DDetach);
+    onContext2DDetach();
 }
 
 void CanvasPattern::OnAttachToFrameNode()
