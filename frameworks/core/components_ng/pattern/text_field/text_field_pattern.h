@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <queue>
 #include <string>
@@ -65,6 +66,7 @@
 #ifdef ENABLE_AUTO_FILL_CONTROLLER
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #endif
+#include "core/components_ng/pattern/text_field/clean_node_host.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -318,9 +320,10 @@ class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public Magnifier,
                          public TextGestureSelector,
                          public LayoutInfoInterface,
-                         public ICounterHost, public IPasswordIconHost {
+                         public ICounterHost, public IPasswordIconHost,
+                         public CleanNodeHostBase<TextFieldPattern, TextFieldLayoutProperty> {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient,
-        TextBase, Magnifier, TextGestureSelector, IPasswordIconHost);
+        TextBase, Magnifier, TextGestureSelector, IPasswordIconHost, ICleanNodeHost);
 
 public:
     TextFieldPattern();
@@ -1066,7 +1069,7 @@ public:
         return dragContents_;
     }
 
-    bool IsDragging() const
+    bool IsDragging() const override
     {
         return dragStatus_ == DragStatus::DRAGGING;
     }
@@ -1487,8 +1490,12 @@ public:
     std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const override;
     bool IsOneTimeCodeType() const;
-    bool IsShowCancelButtonMode() const;
+    bool IsShowCancelButtonMode() const override;
     bool IsShowVoiceButtonMode() const;
+    // ICleanNodeHost implementations with pattern-specific logic.
+    // Layout-property bridge methods are provided by CleanNodeHostBase CRTP.
+    void HandleCleanNodeClicked() override;
+    bool IsContentEmpty() const override;
     void CheckPasswordAreaState();
 
     bool GetShowSelect() const
@@ -2059,7 +2066,7 @@ public:
         hasUserAccessibilityText_ = true;
     }
 
-    bool HasUserAccessibilityText() const
+    bool HasUserAccessibilityText() const override
     {
         return hasUserAccessibilityText_;
     }
