@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "pointer_event.h" // MMI PointerEvent (complete type for HasFlag)
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
@@ -772,6 +773,23 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     ACE_BENCH_MARK_TRACE("OnDragStart_start");
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
+    // Abort the drag when the triggering touch down arrived while the screen was
+    // unlocked but the drag-trigger event was dispatched while the screen was locked.
+    // Both states are read purely from the MMI PointerEvent flag
+    // (MMI_FLAG_SCREEN_LOCKED): the down state is captured by the drag actuator, the
+    // trigger state is read from the event carried by the triggering GestureEvent.
+    // On hit, drive the drag state machine back to IDLE instead of starting the drag.
+    if (dragEventActuator_ && dragEventActuator_->GetIsNewFwk()) {
+        bool downScreenLocked = dragEventActuator_->GetIsDownScreenLocked();
+        const auto& pointerEvent = info.GetPointerEvent();
+        bool triggerScreenLocked = pointerEvent ? pointerEvent->HasFlag(MMI_FLAG_SCREEN_LOCKED) : false;
+        if (!downScreenLocked && triggerScreenLocked) {
+            TAG_LOGW(AceLogTag::ACE_DRAG,
+                "Drag start aborted: screen was unlocked at down but locked at trigger, drag fails");
+            dragEventActuator_->NotifyDragEnd();
+            return;
+        }
+    }
     DragStartContext ctx;
     if (!InitDragStartTargets(info, ctx)) {
         return;

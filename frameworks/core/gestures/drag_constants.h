@@ -19,6 +19,12 @@
 
 namespace OHOS::Ace {
 
+// Mirrors MMI InputEvent::EVENT_FLAG_SCREEN_LOCKED (0x01000000), set by the input
+// service on events dispatched while the screen is locked. Defined locally in ace so
+// it does not depend on the MMI header exposing the constant yet; the value must stay
+// in sync with the MMI definition once it lands.
+inline constexpr uint32_t MMI_FLAG_SCREEN_LOCKED = 0x01000000;
+
 // Drag and drop result status
 enum class DragRet {
     DRAG_DEFAULT = -1,

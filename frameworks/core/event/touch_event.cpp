@@ -235,6 +235,17 @@ TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetIsScreenLocked(bool isScreenLocked)
+{
+    this->isScreenLocked = isScreenLocked;
+    return *this;
+}
+
+bool TouchEvent::GetIsScreenLocked() const
+{
+    return isScreenLocked;
+}
+
 TouchEvent& TouchEvent::SetPressedTime(TimeStamp pressedTime)
 {
     this->pressedTime = pressedTime;
@@ -320,6 +331,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.processTime = processTime;
     event.eventHandleId = eventHandleId;
     event.isNewReferee = isNewReferee;
+    event.isScreenLocked = isScreenLocked;
     if (passThrough) {
         event.postEventNodeId = postEventNodeId;
     }

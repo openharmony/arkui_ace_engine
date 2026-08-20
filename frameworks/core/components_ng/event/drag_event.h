@@ -246,6 +246,10 @@ public:
     virtual void NotifyDragEnd() {};
     virtual void NotifyPreDragStatus(const PreDragStatus preDragStatus) {};
 
+    // Whether the screen was locked when the drag's triggering touch down arrived.
+    // The down state is captured from the MMI PointerEvent flag (MMI_FLAG_SCREEN_LOCKED).
+    virtual bool GetIsDownScreenLocked() const { return false; }
+
 
     void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered);
 
