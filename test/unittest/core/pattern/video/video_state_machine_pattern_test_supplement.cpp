@@ -580,7 +580,9 @@ HWTEST_F(VideoStateMachinePatternTestNg, OnPlayerStatus_DefaultBranch001, TestSi
 
 /**
  * @tc.name: OnCreatedStateEntered_PrepareAsyncFail001
- * @tc.desc: Test OnCreatedStateEntered clears pending command when PrepareAsync fails.
+ * @tc.desc: Test OnCreatedStateEntered posts PrepareAsync to the serial background queue.
+ *           The pending command stays PREPARE until the queued task executes; the failure
+ *           clear-pending continuation is posted to the UI executor asynchronously.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoStateMachinePatternTestNg, OnCreatedStateEntered_PrepareAsyncFail001, TestSize.Level0)
@@ -597,7 +599,19 @@ HWTEST_F(VideoStateMachinePatternTestNg, OnCreatedStateEntered_PrepareAsyncFail0
 
     pattern->stateManager_->ClearPendingCommand();
     pattern->OnCreatedStateEntered();
-    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::NONE);
+    // The mocked task executor in this fixture does not run posted tasks, so the pending
+    // command remains PREPARE until the queued prepare task is executed.
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PREPARE);
+
+    // Execute the queued prepare task manually: PrepareAsync fails and posts the
+    // clear-pending continuation to the UI executor (not run in this fixture either).
+    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
+    ASSERT_EQ(queue.size(), 1u);
+    auto task = std::move(queue.front());
+    queue.pop();
+    ASSERT_TRUE(task.task);
+    task.task();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PREPARE);
 }
 
 
@@ -1420,7 +1434,9 @@ HWTEST_F(VideoStateMachinePatternTestNg, Start_FromStopped001, TestSize.Level0)
 
 /**
  * @tc.name: Start_PrepareAsyncFail001
- * @tc.desc: Test Start from STOPPED clears pending when PrepareAsync fails.
+ * @tc.desc: Test Start from STOPPED posts PrepareAsync to the serial background queue.
+ *           The pending command stays PREPARE until the queued task executes; the failure
+ *           clear-pending continuation is posted to the UI executor asynchronously.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoStateMachinePatternTestNg, Start_PrepareAsyncFail001, TestSize.Level0)
@@ -1439,7 +1455,19 @@ HWTEST_F(VideoStateMachinePatternTestNg, Start_PrepareAsyncFail001, TestSize.Lev
     pattern->stateManager_->ClearPendingCommand();
 
     pattern->Start();
-    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::NONE);
+    // The mocked task executor in this fixture does not run posted tasks, so the pending
+    // command remains PREPARE until the queued prepare task is executed.
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PREPARE);
+
+    // Execute the queued prepare task manually: PrepareAsync fails and posts the
+    // clear-pending continuation to the UI executor (not run in this fixture either).
+    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
+    ASSERT_EQ(queue.size(), 1u);
+    auto task = std::move(queue.front());
+    queue.pop();
+    ASSERT_TRUE(task.task);
+    task.task();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PREPARE);
 }
 
 
@@ -2047,6 +2075,304 @@ HWTEST_F(VideoStateMachinePatternTestNg, OnDirtyLayoutWrapperSwap_NoVideoSize001
 
     auto result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RecoverState_PreservesPendingCommand001
+ * @tc.desc: Test RecoverState does not clear the pending command nor invoke its callback.
+ *           Fullscreen transitions must not interrupt in-flight async commands.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, RecoverState_PreservesPendingCommand001, TestSize.Level0)
+{
+    auto frameNode1 = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode1);
+    auto pattern1 = frameNode1->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern1);
+    auto frameNode2 = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode2);
+    auto pattern2 = frameNode2->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern2);
+
+    // Simulate the shared state manager between the inline and fullscreen patterns.
+    pattern2->stateManager_ = pattern1->stateManager_;
+
+    bool callbackInvoked = false;
+    pattern1->stateManager_->SetPendingCommand(VideoPlaybackCommand::PLAY,
+        [&callbackInvoked](bool /*success*/, const std::string& /*reason*/) { callbackInvoked = true; });
+
+    pattern2->RecoverState(pattern1);
+
+    EXPECT_EQ(pattern1->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PLAY);
+    EXPECT_FALSE(callbackInvoked);
+}
+
+/**
+ * @tc.name: RecoverState_SyncsPlayButtonTag001
+ * @tc.desc: Test RecoverState refreshes the play/pause button icon from the shared state
+ *           manager, so exiting fullscreen shows the latest playback state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, RecoverState_SyncsPlayButtonTag001, TestSize.Level0)
+{
+    auto frameNode1 = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode1);
+    auto pattern1 = frameNode1->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern1);
+    auto frameNode2 = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode2);
+    auto pattern2 = frameNode2->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern2);
+
+    // Ensure pattern2's host has a control bar with a play button at index 0.
+    RefPtr<UINode> controlBar = nullptr;
+    for (const auto& child : frameNode2->GetChildren()) {
+        if (child->GetTag() == V2::ROW_ETS_TAG) {
+            controlBar = child;
+            break;
+        }
+    }
+    if (!controlBar) {
+        controlBar = pattern2->CreateControlBar();
+        ASSERT_TRUE(controlBar);
+        frameNode2->AddChild(controlBar);
+    }
+    auto playBtn = AceType::DynamicCast<FrameNode>(controlBar->GetChildAtIndex(0));
+    ASSERT_TRUE(playBtn);
+    auto svgLayoutProperty = playBtn->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_TRUE(svgLayoutProperty);
+
+    // Share the state manager like a fullscreen transition does.
+    pattern2->stateManager_ = pattern1->stateManager_;
+
+    // PLAYING -> RecoverState must refresh the button to the PAUSE icon.
+    pattern2->stateManager_->state_ = VideoPlaybackState::PLAYING;
+    pattern2->RecoverState(pattern1);
+    auto sourceInfo = svgLayoutProperty->GetImageSourceInfoValue(ImageSourceInfo());
+    EXPECT_EQ(sourceInfo.GetResourceId(), InternalResource::ResourceId::PAUSE_SVG);
+
+    // PAUSED -> RecoverState must refresh the button to the PLAY icon.
+    pattern2->stateManager_->state_ = VideoPlaybackState::PAUSED;
+    pattern2->RecoverState(pattern1);
+    sourceInfo = svgLayoutProperty->GetImageSourceInfoValue(ImageSourceInfo());
+    EXPECT_EQ(sourceInfo.GetResourceId(), InternalResource::ResourceId::PLAY_SVG);
+}
+
+/**
+ * @tc.name: StateManager_UpdateContextRouting001
+ * @tc.desc: Test UpdateContext/GetCurrentPattern/IsCurrentContext route to the active pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, StateManager_UpdateContextRouting001, TestSize.Level0)
+{
+    auto frameNode1 = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode1);
+    auto pattern1 = frameNode1->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern1);
+    auto frameNode2 = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode2);
+    auto pattern2 = frameNode2->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern2);
+
+    auto stateManager = pattern1->stateManager_;
+    ASSERT_TRUE(stateManager);
+    EXPECT_EQ(stateManager->GetCurrentPattern().GetRawPtr(), pattern1.GetRawPtr());
+    EXPECT_TRUE(stateManager->IsCurrentContext(AceType::RawPtr(pattern1)));
+    EXPECT_FALSE(stateManager->IsCurrentContext(AceType::RawPtr(pattern2)));
+
+    stateManager->UpdateContext(WeakClaim(AceType::RawPtr(pattern2)));
+    EXPECT_EQ(stateManager->GetCurrentPattern().GetRawPtr(), pattern2.GetRawPtr());
+    EXPECT_FALSE(stateManager->IsCurrentContext(AceType::RawPtr(pattern1)));
+    EXPECT_TRUE(stateManager->IsCurrentContext(AceType::RawPtr(pattern2)));
+}
+
+/**
+ * @tc.name: StateManager_PostSerialBgTaskFifo001
+ * @tc.desc: Test tasks posted via the pattern forwarder are enqueued into the shared state
+ *           manager queue in FIFO order and execute in that order.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, StateManager_PostSerialBgTaskFifo001, TestSize.Level0)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    // The mocked task executor in this fixture does not run posted drain tasks, so tasks
+    // accumulate in the queue.
+    std::vector<int32_t> execOrder;
+    pattern->PostSerialBgTask([&execOrder]() { execOrder.push_back(1); }, "Task1");
+    pattern->PostSerialBgTask([&execOrder]() { execOrder.push_back(2); }, "Task2");
+    pattern->PostSerialBgTask([&execOrder]() { execOrder.push_back(3); }, "Task3");
+
+    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
+    ASSERT_EQ(queue.size(), 3u);
+    while (!queue.empty()) {
+        auto task = std::move(queue.front());
+        queue.pop();
+        ASSERT_TRUE(task.task);
+        task.task();
+    }
+    EXPECT_EQ(execOrder, std::vector<int32_t>({ 1, 2, 3 }));
+}
+
+/**
+ * @tc.name: StateManager_QueueSurvivesPatternDeath001
+ * @tc.desc: Test the serial background task queue lives in the state manager and is NOT
+ *           cleared when a pattern (e.g. the fullscreen pattern) is destroyed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, StateManager_QueueSurvivesPatternDeath001, TestSize.Level0)
+{
+    RefPtr<VideoStateManager> stateManager;
+    {
+        auto pattern = AceType::MakeRefPtr<VideoStateMachinePattern>(nullptr);
+        ASSERT_TRUE(pattern);
+        stateManager = pattern->stateManager_;
+        ASSERT_TRUE(stateManager);
+        stateManager->serialBgTaskQueue_.push({ "Task1", []() {} });
+        // Pattern destroyed here (e.g. exit fullscreen) while a task is still queued.
+    }
+    EXPECT_EQ(stateManager->serialBgTaskQueue_.size(), 1u);
+}
+
+/**
+ * @tc.name: Start_PlayFailTaskBody001
+ * @tc.desc: Test Start() queues the play task with pending PLAY; executing the queued task
+ *           invokes mediaPlayer Play() and posts the clear-pending continuation on failure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, Start_PlayFailTaskBody001, TestSize.Level0)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, Play()).WillOnce(Return(-1));
+    pattern->mediaPlayer_ = mockMediaPlayer;
+
+    pattern->stateManager_->state_ = VideoPlaybackState::PREPARED;
+    pattern->stateManager_->ClearPendingCommand();
+
+    pattern->Start();
+    // The play task is queued on the shared state manager; the mocked task executor in
+    // this fixture does not run posted tasks, so pending remains PLAY.
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PLAY);
+
+    // Execute the queued play task manually: Play() fails (verified by WillOnce) and the
+    // failure continuation is posted to the UI executor (not run in this fixture).
+    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
+    ASSERT_EQ(queue.size(), 1u);
+    auto task = std::move(queue.front());
+    queue.pop();
+    ASSERT_TRUE(task.task);
+    task.task();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PLAY);
+}
+
+/**
+ * @tc.name: Start_PlaySuccessTaskBody001
+ * @tc.desc: Test the queued play task's success path reports via the current pattern
+ *           resolved through the shared state manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, Start_PlaySuccessTaskBody001, TestSize.Level0)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, Play()).WillOnce(Return(0));
+    pattern->mediaPlayer_ = mockMediaPlayer;
+
+    pattern->stateManager_->state_ = VideoPlaybackState::PREPARED;
+    pattern->stateManager_->ClearPendingCommand();
+
+    pattern->Start();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PLAY);
+
+    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
+    ASSERT_EQ(queue.size(), 1u);
+    auto task = std::move(queue.front());
+    queue.pop();
+    ASSERT_TRUE(task.task);
+    task.task();
+    // Play() succeeded (verified by WillOnce); completion of the pending command is driven
+    // by the player STARTED callback in production, so pending remains PLAY here.
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PLAY);
+}
+
+/**
+ * @tc.name: Pause_FailTaskBody001
+ * @tc.desc: Test Pause() queues the pause task with pending PAUSE; executing the queued
+ *           task invokes mediaPlayer Pause() and posts the clear-pending continuation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, Pause_FailTaskBody001, TestSize.Level0)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, Pause()).WillOnce(Return(-1));
+    pattern->mediaPlayer_ = mockMediaPlayer;
+
+    pattern->stateManager_->state_ = VideoPlaybackState::PLAYING;
+    pattern->stateManager_->ClearPendingCommand();
+
+    pattern->Pause();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PAUSE);
+
+    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
+    ASSERT_EQ(queue.size(), 1u);
+    auto task = std::move(queue.front());
+    queue.pop();
+    ASSERT_TRUE(task.task);
+    task.task();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PAUSE);
+}
+
+/**
+ * @tc.name: Stop_FailTaskBody001
+ * @tc.desc: Test Stop() queues the stop task with pending STOP; executing the queued task
+ *           invokes mediaPlayer Stop() and posts the clear-pending continuation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, Stop_FailTaskBody001, TestSize.Level0)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, Stop()).WillOnce(Return(-1));
+    pattern->mediaPlayer_ = mockMediaPlayer;
+
+    pattern->stateManager_->state_ = VideoPlaybackState::PLAYING;
+    pattern->stateManager_->ClearPendingCommand();
+
+    pattern->Stop();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::STOP);
+
+    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
+    ASSERT_EQ(queue.size(), 1u);
+    auto task = std::move(queue.front());
+    queue.pop();
+    ASSERT_TRUE(task.task);
+    task.task();
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::STOP);
 }
 
 } // namespace OHOS::Ace::NG
