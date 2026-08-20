@@ -596,6 +596,30 @@ HWTEST_F(FrameNodeTestNg, TriggerOnTouchInterceptTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsHoverEventTypeTest
+ * @tc.desc: Test the function IsHoverEventType
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, IsHoverEventTypeTest, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::HOVER_ENTER));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::HOVER_MOVE));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::HOVER_EXIT));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::HOVER_CANCEL));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::LEVITATE_IN_WINDOW));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::LEVITATE_MOVE));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::LEVITATE_OUT_WINDOW));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::PROXIMITY_IN));
+    EXPECT_TRUE(frameNode->IsHoverEventType(TouchType::PROXIMITY_OUT));
+    EXPECT_FALSE(frameNode->IsHoverEventType(TouchType::DOWN));
+    EXPECT_FALSE(frameNode->IsHoverEventType(TouchType::UP));
+    EXPECT_FALSE(frameNode->IsHoverEventType(TouchType::MOVE));
+    EXPECT_FALSE(frameNode->IsHoverEventType(TouchType::CANCEL));
+    EXPECT_FALSE(frameNode->IsHoverEventType(TouchType::UNKNOWN));
+}
+
+/**
  * @tc.name: ApplyGestureCollectInterventionTest001
  * @tc.desc: Indirectly test the function ApplyGestureCollectIntervention via HandleGestureCollectIntervention.
  * @tc.type: FUNC
