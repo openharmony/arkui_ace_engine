@@ -31,6 +31,9 @@ void ArcListTestNg::SetUpTestSuite()
     auto listTheme = AceType::MakeRefPtr<ArcListTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ArcListTheme::TypeId())).WillRepeatedly(Return(listTheme));
 
+    auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(ScrollBarTheme::TypeId())).WillRepeatedly(Return(scrollBarTheme));
+
     auto listItemTheme = AceType::MakeRefPtr<ArcListItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ArcListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
     EXPECT_CALL(*themeManager, GetTheme(ArcListItemTheme::TypeId(), _)).WillRepeatedly(Return(listItemTheme));
