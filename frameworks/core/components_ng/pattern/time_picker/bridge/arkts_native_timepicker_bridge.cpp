@@ -1104,11 +1104,12 @@ ArkUINativeModuleValue TimePickerBridge::SetTimepickerOnChange(ArkUIRuntimeCallI
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const BaseEventInfo*)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                              const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         auto dateObj = CreateTimePickerOnChange(vm, info);
         panda::Local<panda::JSValueRef> params[] = { dateObj };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1165,13 +1166,14 @@ ArkUINativeModuleValue TimePickerBridge::SetOnEnterSelectedArea(ArkUIRuntimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const BaseEventInfo*)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                              const BaseEventInfo* index) {
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("datePicker.onEnterSelectedArea");
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
         CHECK_NULL_VOID(eventInfo);
         panda::Local<panda::JSValueRef> params[] = { DatePickerChangeEventToJSValue(vm, *eventInfo) };
