@@ -320,7 +320,7 @@ public:
     {
         isUpdateDisplayArea_ = isUpdate;
     }
-
+    void AddWindowStateChangedCallback();
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
