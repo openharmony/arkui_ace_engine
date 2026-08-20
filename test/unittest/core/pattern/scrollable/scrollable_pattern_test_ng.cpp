@@ -1680,7 +1680,7 @@ HWTEST_F(ScrollablePatternTestNg, HandleDragEnd005, TestSize.Level1)
 
 /**
  * @tc.name: HandleDragEnd006
- * @tc.desc: Test Scrollable retains the previous drag update delta at drag start.
+ * @tc.desc: Test Scrollable doesn't retain the previous drag update delta at drag start.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollablePatternTestNg, HandleDragEnd006, TestSize.Level1)
@@ -1692,7 +1692,7 @@ HWTEST_F(ScrollablePatternTestNg, HandleDragEnd006, TestSize.Level1)
     GestureEvent info;
     scrollable->HandleDragStart(info);
 
-    EXPECT_TRUE(scrollable->dragUpdateDelta_.has_value());
+    EXPECT_FALSE(scrollable->dragUpdateDelta_.has_value());
 }
 
 /**

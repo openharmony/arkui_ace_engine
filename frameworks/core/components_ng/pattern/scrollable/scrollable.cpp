@@ -722,6 +722,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     if (onScrollStartRec_) {
         onScrollStartRec_(static_cast<float>(dragPositionInMainAxis));
     }
+    ResetDragUpdateDelta();
 }
 
 void Scrollable::HandleExtScroll()
@@ -746,6 +747,7 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
 
 void Scrollable::HandleDragUpdate(const GestureEvent& info)
 {
+    // Keep the update delta until the layout pass consumes this frame's drag.
     dragUpdateDelta_ = dragUpdateDelta_.value_or(0.0) + info.GetMainDelta();
     currentVelocity_ = info.GetMainVelocity();
     ReportToDragFRCScene(currentVelocity_, NG::SceneStatus::RUNNING);
@@ -906,7 +908,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     }
     // avoid no render frame when drag end
     if (!isFromPanEnd) {
-        if (!dragUpdateDelta_.has_value() && NearZero(info.GetMainDelta())) {
+        // For a frame containing only an up event with zero offset, replay the last delta to trigger rendering.
+        // Avoid synthesizing a second update when this frame already had one.
+        if ((!dragUpdateDelta_.has_value() || NearZero(dragUpdateDelta_.value())) && NearZero(info.GetMainDelta())) {
             auto tempInfo = info;
             tempInfo.SetMainDelta(lastMainDelta_);
             HandleDragUpdate(tempInfo);
