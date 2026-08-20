@@ -10814,22 +10814,17 @@ void TextFieldPattern::UpdateCancelNode()
 {
     auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
     CHECK_NULL_VOID(cleanNodeResponseArea);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
-    if (cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-        (cleanNodeStyle == CleanNodeStyle::INPUT && !contentController_->IsEmpty())) {
-        if (!cleanNodeResponseArea->IsShow() || cleanNodeResponseArea->CheckUpdateCleanNode()) {
-            cleanNodeResponseArea->UpdateCleanNode(true);
-        }
-    } else if (cleanNodeStyle == CleanNodeStyle::INVISIBLE ||
-               (cleanNodeStyle == CleanNodeStyle::INPUT && contentController_->IsEmpty())) {
-        if (cleanNodeResponseArea->IsShow()) {
-            cleanNodeResponseArea->UpdateCleanNode(false);
-        }
-    }
+    cleanNodeResponseArea->UpdateShowState();
+}
+
+void TextFieldPattern::HandleCleanNodeClicked()
+{
+    CleanNodeResponseKeyEvent();
+}
+
+bool TextFieldPattern::IsContentEmpty() const
+{
+    return contentController_ ? contentController_->IsEmpty() : true;
 }
 
 bool TextFieldPattern::HasInputOperation()

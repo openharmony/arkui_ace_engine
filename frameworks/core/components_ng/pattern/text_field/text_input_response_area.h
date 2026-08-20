@@ -209,6 +209,7 @@ public:
     void ClearArea() override;
 
     void Refresh() override;
+    void UpdateShowState();
 
     float GetIconSize();
 
