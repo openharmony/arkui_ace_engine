@@ -150,8 +150,7 @@ const GENERATED_ArkUITextClockContentModifier* GetTextClockContentModifier()
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextClock");
         if (module == nullptr) {
-            LOGF("Can't find textclock dynamic module");
-            abort();
+            LOGF_ABORT("Can't find textclock dynamic module");
         }
         cachedModifier = reinterpret_cast<const GENERATED_ArkUITextClockContentModifier*>(
             module->GetCustomModifier("contentModifier"));

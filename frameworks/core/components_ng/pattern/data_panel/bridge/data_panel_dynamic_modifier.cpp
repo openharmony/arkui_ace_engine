@@ -517,7 +517,7 @@ void SetCloseEffectImpl(ArkUINodeHandle node, ArkUI_Bool value)
 
 void ResetCloseEffectImpl(ArkUINodeHandle node)
 {
-    GetDataPanelModelImpl()->SetEffect(node);
+    GetDataPanelModelImpl()->SetEffect(IS_CLOSE_EFFECT);
 }
 
 void SetDataPanelTrackBackgroundColorImpl(ArkUINodeHandle node, uint32_t value)
