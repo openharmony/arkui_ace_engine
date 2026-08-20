@@ -2180,7 +2180,7 @@ HWTEST_F(VideoStateMachinePatternTestNg, StateManager_UpdateContextRouting001, T
     EXPECT_TRUE(stateManager->IsCurrentContext(AceType::RawPtr(pattern1)));
     EXPECT_FALSE(stateManager->IsCurrentContext(AceType::RawPtr(pattern2)));
 
-    stateManager->UpdateContext(WeakClaim(AceType::RawPtr(pattern2)));
+    stateManager->UpdateContext(AceType::WeakClaim(AceType::RawPtr(pattern2)));
     EXPECT_EQ(stateManager->GetCurrentPattern().GetRawPtr(), pattern2.GetRawPtr());
     EXPECT_FALSE(stateManager->IsCurrentContext(AceType::RawPtr(pattern1)));
     EXPECT_TRUE(stateManager->IsCurrentContext(AceType::RawPtr(pattern2)));
