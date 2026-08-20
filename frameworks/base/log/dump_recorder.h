@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_DUMP_RECORDER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_DUMP_RECORDER_H
 
+#include <mutex>
+#include <shared_mutex>
+
 #include "base/json/json_util.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/singleton.h"
@@ -32,18 +35,10 @@ public:
 
     void StopInner();
 
-    void Init();
-
-    void Clear();
-
     std::function<bool()> GetFrameDumpFunc() const
     {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
         return frameDumpFunc_;
-    }
-
-    bool IsRecording() const
-    {
-        return frameDumpFunc_ != nullptr;
     }
 
     void Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json);
@@ -57,9 +52,14 @@ public:
     void Output(const std::string& content);
 
 private:
+    void InitLocked();
+    void ClearLocked();
+    void AppendInfoLocked(std::unique_ptr<JsonValue> info);
+
+    mutable std::shared_mutex mutex_;
     uint32_t fileSize_ = 0;
-    std::function<bool()> frameDumpFunc_;
     std::unique_ptr<JsonValue> recordTree_;
+    std::function<bool()> frameDumpFunc_;
     std::map<int64_t, std::unique_ptr<JsonValue>> records_;
 };
 } // namespace OHOS::Ace
