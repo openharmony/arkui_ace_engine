@@ -398,7 +398,9 @@ bool SrcAddResIfNeed(JSRef<JSVal>& srcJsValue,
     int32_t resId = 0;
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
-        if (!JSParticle::ParseJsMediaWithBundleName(srcJsValue, src, bundleName, moduleName, resId, resObj)) {
+        if (srcJsValue->IsString()) {
+            src = srcJsValue->ToString();
+        } else if (!JSParticle::ParseJsMediaWithBundleName(srcJsValue, src, bundleName, moduleName, resId, resObj)) {
             return false;
         }
         if (resObj) {
@@ -413,7 +415,9 @@ bool SrcAddResIfNeed(JSRef<JSVal>& srcJsValue,
             imageParameter.RemoveResource("ImageParticleParameter.src");
         }
     } else {
-        if (!JSParticle::ParseJsMediaWithBundleName(srcJsValue, src, bundleName, moduleName, resId)) {
+        if (srcJsValue->IsString()) {
+            src = srcJsValue->ToString();
+        } else if (!JSParticle::ParseJsMediaWithBundleName(srcJsValue, src, bundleName, moduleName, resId)) {
             return false;
         }
     }
