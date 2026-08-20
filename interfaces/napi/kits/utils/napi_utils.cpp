@@ -1425,11 +1425,19 @@ bool GetVoidCallbackProperty(napi_env env, napi_value object, const char* name, 
         return false;
     }
     result = [env, ref]() {
+        napi_handle_scope scope = nullptr;
+        auto status = napi_open_handle_scope(env, &scope);
+        if ((status != napi_ok) || (scope == nullptr)) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG,
+                     "callback of dialog failed to open the scope of the handle.");
+            return;
+        }
         napi_value fn = nullptr;
         napi_get_reference_value(env, ref, &fn);
         napi_value retVal = nullptr;
         napi_call_function(env, nullptr, fn, 0, nullptr, &retVal);
         napi_delete_reference(env, ref);
+        napi_close_handle_scope(env, scope);
     };
     return true;
 }
