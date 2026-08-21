@@ -3140,7 +3140,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     auto navNode2 = FrameNode::GetOrCreateFrameNode("navNode2", navNodeId2, nullptr);
     navNode2->SetActive(true);
 
-    std::list<RefPtr<FrameNode>> navNodeList;
+    std::vector<RefPtr<FrameNode>> navNodeList;
     navNodeList.push_back(navNode1);
     navNodeList.push_back(navNode2);
 
@@ -3151,7 +3151,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     auto root = JsonUtil::CreateSharedPtrJson(true);
     ParamConfig config = { true, true, true, true };
 
-    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+    context_->DumpSimplifyTreeJsonFromTopNavNode(root, navNodeList, config);
 
     // Verify that root has $children array
     auto childrenJson = root->GetValue("$children");
@@ -3182,7 +3182,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     ASSERT_NE(context_, nullptr);
 
     // Create a list with null nodes
-    std::list<RefPtr<FrameNode>> navNodeList;
+    std::vector<RefPtr<FrameNode>> navNodeList;
     navNodeList.push_back(nullptr);
     navNodeList.push_back(nullptr);
 
@@ -3193,7 +3193,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     auto root = JsonUtil::CreateSharedPtrJson(true);
     ParamConfig config = { true, true, true, true };
 
-    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+    context_->DumpSimplifyTreeJsonFromTopNavNode(root, navNodeList, config);
 
     // Verify that root has $children array (created even though list is empty/null)
     auto childrenJson = root->GetValue("$children");
@@ -3221,7 +3221,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
     navNode->SetActive(true);
 
-    std::list<RefPtr<FrameNode>> navNodeList;
+    std::vector<RefPtr<FrameNode>> navNodeList;
     navNodeList.push_back(nullptr);
     navNodeList.push_back(navNode);
     navNodeList.push_back(nullptr);
@@ -3233,7 +3233,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     auto root = JsonUtil::CreateSharedPtrJson(true);
     ParamConfig config = { true, true, true, true };
 
-    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+    context_->DumpSimplifyTreeJsonFromTopNavNode(root, navNodeList, config);
 
     // Verify that root has $children array
     auto childrenJson = root->GetValue("$children");
@@ -3266,7 +3266,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     auto navNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
 
-    std::list<RefPtr<FrameNode>> navNodeList;
+    std::vector<RefPtr<FrameNode>> navNodeList;
     navNodeList.push_back(navNode);
     navNode->SetActive(true);
 
@@ -3279,7 +3279,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     EXPECT_FALSE(root->Contains("$children"));
 
     ParamConfig config = { true, true, true, true };
-    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+    context_->DumpSimplifyTreeJsonFromTopNavNode(root, navNodeList, config);
 
     // Verify that $children was created
     EXPECT_TRUE(root->Contains("$children"));
@@ -3314,7 +3314,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
     navNode->SetActive(true);
 
-    std::list<RefPtr<FrameNode>> navNodeList;
+    std::vector<RefPtr<FrameNode>> navNodeList;
     navNodeList.push_back(navNode);
 
     /**
@@ -3329,7 +3329,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     EXPECT_TRUE(root->Contains("$children"));
 
     ParamConfig config = { true, true, true, true };
-    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+    context_->DumpSimplifyTreeJsonFromTopNavNode(root, navNodeList, config);
 
     // Verify that navNode was added to existing $children
     auto childrenJson = root->GetValue("$children");

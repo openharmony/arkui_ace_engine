@@ -28,6 +28,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/dump_utils/dump_util.h"
 
 namespace OHOS::Ace {
 class JsonValue;
@@ -104,7 +105,11 @@ struct PageSceneReportState {
 
 class PageSceneInputCountTracker {
 public:
-    void Initialize(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const RefPtr<FrameNode>& pageRoot);
+    // startNodes carries Inspector-style page and overlay traversal roots
+    // resolved by DumpUtil. AtomicService structure markers are not
+    // traversal roots.
+    void Initialize(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule,
+        const DumpStartNodeSet& startNodes);
     void Reset();
     const std::vector<PageSceneNodeInfo>& GetVisibleInputNodes() const;
 
@@ -126,9 +131,8 @@ public:
     void ClearProcess(int32_t processId);
 
     std::vector<std::pair<int32_t, std::string>> GetActiveRuleJsons() const;
-    std::optional<PageSceneMatchResult> MatchPageScene(
-        int32_t processId, const std::string& ruleJson, const RefPtr<FrameNode>& pageRoot,
-        const std::string& pageName, bool forceReportUnmatched);
+    std::optional<PageSceneMatchResult> MatchPageScene(int32_t processId, const std::string& ruleJson,
+        const DumpStartNodeSet& startNodes, const std::string& pageName, bool forceReportUnmatched);
     bool ShouldReport(int32_t processId, const PageSceneMatchResult& result);
     bool IsTextInputNodeType(const std::string& nodeType) const;
 

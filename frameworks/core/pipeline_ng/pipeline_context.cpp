@@ -319,31 +319,6 @@ void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonVal
     childrenJson->Put(childJson);
 }
 
-RefPtr<NG::FrameNode> GetContainerModalDumpRootNode(const RefPtr<NG::FrameNode>& containerModalNode)
-{
-    RefPtr<NG::FrameNode> result = nullptr;
-    if (!containerModalNode) {
-        return nullptr;
-    }
-    auto containerModalPattern = containerModalNode->GetPattern<NG::ContainerModalPattern>();
-    if (containerModalPattern) {
-        result = containerModalPattern->GetStackNode();
-    }
-    return result;
-}
-
-RefPtr<NG::UINode> GetAtomicServiceDumpNode(const RefPtr<NG::FrameNode>& dumpBeginNode)
-{
-    CHECK_NULL_RETURN(dumpBeginNode, nullptr);
-    auto rootChildren = dumpBeginNode->GetChildren();
-    for (const auto& rootChild : rootChildren) {
-        if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-            return rootChild;
-        }
-    }
-    return nullptr;
-}
-
 constexpr uint32_t AI_CALL_NODE_INVALID = 3;
 constexpr uint32_t AI_CALL_NODE_AMBIGUOUS = 5;
 
@@ -7325,18 +7300,10 @@ void PipelineContext::GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>
     }
 }
 
-bool PipelineContext::IsTagInOverlay(const std::string& tag) const
+DumpStartNodeSet PipelineContext::GetDumpStartNodes() const
 {
-    static const std::unordered_set<std::string> targetTags = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
-        V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
-        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG, V2::OVERLAY_ETS_TAG,
-        V2::ORDER_OVERLAY_ETS_TAG
-    };
-
-    if (targetTags.find(tag) != targetTags.end()) {
-        return true;
-    }
-    return false;
+    return DumpUtil::CollectInspectorStartNodes(
+        rootNode_, GetContainerModalNode(), stageManager_ ? stageManager_->GetLastPage() : rootNode_, overlayManager_);
 }
 
 bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
@@ -7347,7 +7314,7 @@ bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& ro
     bool hasOverlay = false;
     for (const auto& child : childNodes) {
         auto tag = child->GetTag();
-        if (IsTagInOverlay(tag)) {
+        if (DumpUtil::IsTagInOverlay(tag)) {
             if (!NearZero(config.minOpacity) &&
                 LessNotEqual(rootNodeFinalOpacity * GetNodeOpacityValue(child), config.minOpacity)) {
                 continue;
@@ -7433,15 +7400,15 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefP
     }
 }
 
-void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode,
-    std::shared_ptr<JsonValue>& root, std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const
+void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(std::shared_ptr<JsonValue>& root,
+    const std::vector<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const
 {
     if (!root->Contains("$children")) {
         auto array = JsonUtil::CreateArray();
         root->PutRef("$children", std::move(array));
     }
     auto childrenJson = root->GetValue("$children");
-    for (auto& navNode : navNodeList) {
+    for (const auto& navNode : navNodeList) {
         if (navNode == nullptr) {
             continue;
         }
@@ -7463,26 +7430,17 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> s
     }
 }
 
-void PipelineContext::DumpSimplifyTreeJsonEntrance(
-    std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
+void PipelineContext::DumpSimplifyTreeJsonEntrance(std::shared_ptr<JsonValue> root,
+    RefPtr<NG::FrameNode> startNode, const std::vector<RefPtr<NG::FrameNode>>& navNodes, ParamConfig config) const
 {
+    CHECK_NULL_VOID(startNode);
     auto startNodeRect = startNode->GetTransformRectRelativeToWindow();
     if (NearEqual(startNodeRect.Width(), 0) && NearEqual(startNodeRect.Height(), 0)) {
         return;
     }
-    // step1: Get the topPageNode if onlyNeedVisible, avoid fetching hidden page.
-    auto lastPageNode = stageManager_->GetLastPage();
-    CHECK_NULL_VOID(lastPageNode);
-    /*
-     * step2: Get topNavNode from topPageNode. If top Page doesn't has a navigation child,
-     * following dump will start at root node, inactive and hidden node will be ignored.
-     */
-    std::list<RefPtr<NG::FrameNode>> navNodes;
-    lastPageNode->FindTopNavDestination(navNodes);
-    if (navNodes.empty()) {
-        navNodes.emplace_back(lastPageNode);
-    }
-    DumpSimplifyTreeJsonFromTopNavNode(startNode, root, navNodes, config);
+    // navNodes are pre-narrowed by DumpUtil::CollectInspectorStartNodes
+    // (lastPage + FindTopNavDestination). Only the per-branch JSON dump remains here.
+    DumpSimplifyTreeJsonFromTopNavNode(root, navNodes, config);
 }
 
 void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const
@@ -7492,81 +7450,82 @@ void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJ
     if (!NearZero(config.minOpacity) && LessNotEqual(GetNodeOpacityValue(rootNode_), config.minOpacity)) {
         return;
     }
-    auto containerModalNode = GetContainerModalNode();
-    auto containerModalDumpNode = GetContainerModalDumpRootNode(containerModalNode);
-    auto dumpBeginNode = containerModalDumpNode ? containerModalDumpNode : rootNode_;
-    auto atomicServiceDumpNode = GetAtomicServiceDumpNode(dumpBeginNode);
+    auto startNodes = GetDumpStartNodes();
+    auto dumpBeginNode = startNodes.dumpBeginNode ? startNodes.dumpBeginNode : rootNode_;
     // pseudoRootJson deals with containerModal case, containerModalStack will be the actual root.
     std::shared_ptr<JsonValue> pseudoRootJson = rootJson;
     std::shared_ptr<JsonValue> containerModalTitleJson = nullptr;
-    bool addContainerModalTitleJson = true;
     if (dumpBeginNode != rootNode_) {
         // ContainerModal case
         containerModalTitleJson = JsonUtil::CreateSharedPtrJson();
-        // In this case, ContainerModalPattern can not be nullptr
-        auto titleRow = GetContainerModalNode()->GetPattern<NG::ContainerModalPattern>()->GetCustomTitleRow();
+        auto titleRow = startNodes.containerModalTitleRow;
+        auto titleRowParentFinalOpacity = DEFAULT_NODE_OPACITY;
         auto titleRowBelowMinOpacity = false;
         if (titleRow && !NearZero(config.minOpacity)) {
-            auto titleRowParentFinalOpacity = GetAncestorOpacityBeforeNode(titleRow);
+            titleRowParentFinalOpacity = GetAncestorOpacityBeforeNode(titleRow);
             titleRowBelowMinOpacity =
                 LessNotEqual(titleRowParentFinalOpacity * GetNodeOpacityValue(titleRow), config.minOpacity);
         }
-        addContainerModalTitleJson = !titleRowBelowMinOpacity;
         if (titleRow && !titleRowBelowMinOpacity) {
-            DumpSimplifyTreeJsonEntrance(containerModalTitleJson, titleRow, config);
+#ifndef CROSS_PLATFORM
+            titleRow->DumpSimplifyTreeWithParamConfig(
+                0, containerModalTitleJson, true, config, nullptr, titleRowParentFinalOpacity);
+#endif
         }
         pseudoRootJson = JsonUtil::CreateSharedPtrJson();
-        // ContainerModal root doesn't has an actual root wrapper, so we need wrap it up
-        rootNode_->DumpSimplifyTreeBase(rootJson);
-        rootNode_->DumpSimplifyInfoWithParamConfig(rootJson, config);
+        // ContainerModal uses the inner stack as its main dump root. Keep the
+        // pipeline root wrapper and collect any overlay attached directly to
+        // that root as a separate branch.
+        GetComponentOverlayInspector(rootJson, rootNode_, config, false);
     }
     auto dumpBeginParentFinalOpacity = DEFAULT_NODE_OPACITY;
     if (!NearZero(config.minOpacity)) {
         dumpBeginParentFinalOpacity = GetAncestorOpacityBeforeNode(dumpBeginNode);
     }
     GetOverlayInspector(pseudoRootJson, dumpBeginNode, config, dumpBeginParentFinalOpacity);
-    if (atomicServiceDumpNode) {
+    if (startNodes.atomicServiceRoot) {
         auto atomicRootJson = JsonUtil::CreateSharedPtrJson(true);
         auto atomicMenuBarJson = JsonUtil::CreateSharedPtrJson(true);
-        auto atomicServiceRoot = AceType::DynamicCast<FrameNode>(
-            overlayManager_->FindChildNodeByKey(atomicServiceDumpNode, "AtomicServiceContainerId"));
+        auto atomicServiceRoot = startNodes.atomicServiceRoot;
         auto atomicServiceRootParentFinalOpacity = DEFAULT_NODE_OPACITY;
         auto atomicServiceRootBelowMinOpacity = false;
-        if (atomicServiceRoot && !NearZero(config.minOpacity)) {
+        if (!NearZero(config.minOpacity)) {
             atomicServiceRootParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceRoot);
             atomicServiceRootBelowMinOpacity = LessNotEqual(
                 atomicServiceRootParentFinalOpacity * GetNodeOpacityValue(atomicServiceRoot), config.minOpacity);
         }
-        if (atomicServiceRoot && !atomicServiceRootBelowMinOpacity) {
+        if (!atomicServiceRootBelowMinOpacity) {
             // dump component-overlay only, sub-window overlay has been dumped in rootJson
             GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false,
                 atomicServiceRootParentFinalOpacity);
-            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
-            if (!config.rectCulling || HasDumpedJsonContent(atomicRootJson)) {
-                AddJsonChild(pseudoRootJson, atomicRootJson);
-            }
-            auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
-                overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
+            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, startNodes.pageStartNodes, config);
+            auto atomicServiceMenuBar = startNodes.atomicServiceMenuBar;
+            auto menuBarParentFinalOpacity = DEFAULT_NODE_OPACITY;
             auto atomicServiceMenuBarBelowMinOpacity = false;
             if (atomicServiceMenuBar && !NearZero(config.minOpacity)) {
-                auto menuBarParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceMenuBar);
+                menuBarParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceMenuBar);
                 atomicServiceMenuBarBelowMinOpacity =
                     LessNotEqual(menuBarParentFinalOpacity * GetNodeOpacityValue(atomicServiceMenuBar),
                         config.minOpacity);
             }
             if (atomicServiceMenuBar && !atomicServiceMenuBarBelowMinOpacity) {
-                DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
-                if (!config.rectCulling || HasDumpedJsonContent(atomicMenuBarJson)) {
+#ifndef CROSS_PLATFORM
+                atomicServiceMenuBar->DumpSimplifyTreeWithParamConfig(
+                    0, atomicMenuBarJson, true, config, nullptr, menuBarParentFinalOpacity);
+#endif
+                if (HasDumpedJsonContent(atomicMenuBarJson)) {
                     AddJsonChild(atomicRootJson, atomicMenuBarJson);
                 }
             }
+            if (!config.rectCulling || HasDumpedJsonContent(atomicRootJson)) {
+                AddJsonChild(pseudoRootJson, atomicRootJson);
+            }
         }
     } else {
-        DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, config);
+        DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, startNodes.pageStartNodes, config);
     }
     if (pseudoRootJson != rootJson) {
-        if (addContainerModalTitleJson &&
-            (!config.rectCulling || HasDumpedJsonContent(containerModalTitleJson))) {
+        if (HasDumpedJsonContent(containerModalTitleJson)) {
             AddJsonChild(rootJson, containerModalTitleJson);
         }
         if (!config.rectCulling || HasDumpedJsonContent(pseudoRootJson)) {

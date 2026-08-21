@@ -164,13 +164,20 @@ std::string BuildPageSceneEventName(const std::string& sceneType, bool matched, 
 } // namespace
 
 void PageSceneInputCountTracker::Initialize(
-    const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const RefPtr<FrameNode>& pageRoot)
+    const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const DumpStartNodeSet& startNodes)
 {
     Reset();
-    if (pageRoot) {
-        pageViewportRect_ = pageRoot->GetTransformRectRelativeToWindowOnlyVisible(true);
+    // Viewport is used only by the visible-node filter. It comes from
+    // dumpBeginNode (rootNode_ normally, or the ContainerModal stack).
+    if (rule.onlyVisible && startNodes.dumpBeginNode) {
+        pageViewportRect_ = startNodes.dumpBeginNode->GetTransformRectRelativeToWindowOnlyVisible(true);
     }
-    CollectInputNodes(ruleSet, rule, pageRoot);
+    for (const auto& node : startNodes.pageStartNodes) {
+        CollectInputNodes(ruleSet, rule, node);
+    }
+    for (const auto& node : startNodes.overlayNodes) {
+        CollectInputNodes(ruleSet, rule, node);
+    }
     std::sort(visibleInputNodes_.begin(), visibleInputNodes_.end(), [](const auto& left, const auto& right) {
         return left.nodeId < right.nodeId;
     });
@@ -219,12 +226,16 @@ std::optional<PageSceneNodeInfo> PageSceneInputCountTracker::BuildNodeInfo(
         return std::nullopt;
     }
 
-    RectF rect = rule.onlyVisible ? node->GetTransformRectRelativeToWindowOnlyVisible(true)
-                                  : node->GetTransformRectRelativeToWindow(true);
-    bool visible = !rule.onlyVisible || (node->IsVisibleAndActive() && rect.Width() > 0.0f && rect.Height() > 0.0f &&
-        pageViewportRect_.IsInnerIntersectWith(rect));
-    if (!visible) {
-        return std::nullopt;
+    RectF rect;
+    if (rule.onlyVisible) {
+        rect = node->GetTransformRectRelativeToWindowOnlyVisible(true);
+        bool visible = node->IsVisibleAndActive() && rect.Width() > 0.0f && rect.Height() > 0.0f &&
+            pageViewportRect_.IsInnerIntersectWith(rect);
+        if (!visible) {
+            return std::nullopt;
+        }
+    } else if (rule.includeRect) {
+        rect = node->GetTransformRectRelativeToWindow(true);
     }
 
     auto focusHub = node->GetFocusHub();
@@ -338,11 +349,18 @@ std::vector<std::pair<int32_t, std::string>> PageSceneRuleManager::GetActiveRule
 }
 
 std::optional<PageSceneMatchResult> PageSceneRuleManager::MatchPageScene(
-    int32_t processId, const std::string& ruleJson, const RefPtr<FrameNode>& pageRoot,
+    int32_t processId, const std::string& ruleJson, const DumpStartNodeSet& startNodes,
     const std::string& pageName, bool forceReportUnmatched)
 {
     auto ruleSet = ParseRuleSet(ruleJson);
-    if (!ruleSet.has_value() || !ruleSet->arkuiEnabled || !pageRoot) {
+    // dumpBeginNode is only a viewport source. AtomicService roots are branch
+    // markers used to discover overlays, not PageScene traversal roots.
+    const bool hasPageRoot = std::any_of(startNodes.pageStartNodes.begin(), startNodes.pageStartNodes.end(),
+        [](const auto& node) { return node != nullptr; });
+    const bool hasOverlayRoot = std::any_of(startNodes.overlayNodes.begin(), startNodes.overlayNodes.end(),
+        [](const auto& node) { return node != nullptr; });
+    const bool hasTraversalRoot = hasPageRoot || hasOverlayRoot;
+    if (!ruleSet.has_value() || !ruleSet->arkuiEnabled || !hasTraversalRoot) {
         return std::nullopt;
     }
     std::optional<PageSceneMatchResult> unmatchedResult;
@@ -351,7 +369,7 @@ std::optional<PageSceneMatchResult> PageSceneRuleManager::MatchPageScene(
             continue;
         }
         PageSceneInputCountTracker tracker;
-        tracker.Initialize(ruleSet.value(), rule, pageRoot);
+        tracker.Initialize(ruleSet.value(), rule, startNodes);
         const auto& nodes = tracker.GetVisibleInputNodes();
         bool matched = static_cast<int32_t>(nodes.size()) >= rule.threshold;
         PageSceneMatchResult result;

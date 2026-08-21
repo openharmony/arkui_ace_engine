@@ -2391,6 +2391,7 @@ frameworks/core/text/ @huawei_g_five
 
 [Frameworks Core NG Abilities]
 frameworks/core/components_ng/animation/ @arkuicodepulse
+frameworks/core/components_ng/dump_utils/ @arkui_framework_xnode
 frameworks/core/components_ng/base/BUILD.gn @arkui_framework_xnode
 frameworks/core/components_ng/base/common_configuration.h @arkui_framework_resource
 frameworks/core/components_ng/base/distributed_ui.cpp @arkui_framework_xnode
