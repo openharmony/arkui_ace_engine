@@ -48,6 +48,7 @@
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -320,10 +321,12 @@ class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public Magnifier,
                          public TextGestureSelector,
                          public LayoutInfoInterface,
-                         public ICounterHost, public IPasswordIconHost,
+                         public ICounterHost,
+                         public IPasswordIconHost,
+                         public PageTranslateNode,
                          public CleanNodeHostBase<TextFieldPattern, TextFieldLayoutProperty> {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient,
-        TextBase, Magnifier, TextGestureSelector, IPasswordIconHost, ICleanNodeHost);
+        TextBase, Magnifier, TextGestureSelector, IPasswordIconHost, PageTranslateNode, ICleanNodeHost);
 
 public:
     TextFieldPattern();
@@ -2006,6 +2009,12 @@ public:
         contentScroller_.scrollingCallback = std::move(callback);
     }
     void SetPlaceholderStyledString(const RefPtr<SpanString>& value);
+
+    // PageTranslate helpers for placeholder
+    const std::optional<std::u16string>& GetPageTranslatedPlaceholder() const;
+    void ReportPageTranslatePlaceholderDrawn();
+    void OnPlaceholderSourceTextChanged();
+
     bool IsShowAIMenuOption() const
     {
         return isShowAIMenuOption_;
@@ -2200,6 +2209,12 @@ private:
     std::function<void(Offset)> GetThumbnailCallback();
     bool HasStateStyle(UIState state) const;
     bool IsStyledPlaceholder() const;
+
+    // PageTranslateNode override
+    int32_t GetPageTranslateNodeId() const override;
+    std::string GetPageTranslateTextForReport() const override;
+    bool ApplyPageTranslateResult(const std::string& result, int64_t version) override;
+    void ResetPageTranslate() override;
 
     void OnTextInputScroll(float offset);
     void OnTextAreaScroll(float offset);
@@ -2644,6 +2659,7 @@ private:
     RefPtr<TextInputResponseArea> voiceResponseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
     RefPtr<TextInputResponseArea> placeholderResponseArea_;
+
     int32_t sessionId_ = 0;
     std::optional<Rect> baseScrollBarRect_;
     std::string lastAutoFillTextValue_;

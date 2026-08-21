@@ -400,6 +400,11 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    auto pageTranslatedText = pattern->GetPageTranslatedText();
+    bool hasPageTranslatedText = pageTranslatedText.has_value();
+    if (hasPageTranslatedText) {
+        content = pageTranslatedText.value();
+    }
     pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnable()) {
         UpdateSensitiveContent(content);
@@ -424,7 +429,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
         paragraphManager_->Reset();
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
-    if (spans_.empty() || useExternalParagraph) {
+    if (hasPageTranslatedText || spans_.empty() || useExternalParagraph) {
         // only use for text.
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
     } else {

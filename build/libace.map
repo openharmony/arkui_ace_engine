@@ -2458,6 +2458,8 @@
       "OHOS::Ace::NG::TextPattern::~TextPattern()";
       "OHOS::Ace::NG::TextPattern::AddUdmfData(OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> const&)";
       "OHOS::Ace::NG::TextPattern::AllowVisibleAreaCheck() const";
+      "OHOS::Ace::NG::TextPattern::ApplyPageTranslateResult(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long)";
+      "OHOS::Ace::NG::TextPattern::ApplyPageTranslateResult(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long long)";
       "OHOS::Ace::NG::TextPattern::BeforeCreateLayoutWrapper()";
       "OHOS::Ace::NG::TextPattern::BeforeCreatePaintWrapper()";
       "OHOS::Ace::NG::TextPattern::BeforeSyncGeometryProperties(OHOS::Ace::NG::DirtySwapConfig const&)";
@@ -2525,6 +2527,8 @@
       "OHOS::Ace::NG::TextPattern::GetLineHeight() const";
       "OHOS::Ace::NG::TextPattern::GetLineMetrics(int)";
       "OHOS::Ace::NG::TextPattern::GetMenuParams(OHOS::Ace::NG::TextSpanType, OHOS::Ace::NG::TextResponseType)";
+      "OHOS::Ace::NG::TextPattern::GetPageTranslateNodeId() const";
+      "OHOS::Ace::NG::TextPattern::GetPageTranslateTextForReport() const";
       "OHOS::Ace::NG::TextPattern::GetParentGlobalOffset() const";
       "OHOS::Ace::NG::TextPattern::GetParagraphManager() const";
       "OHOS::Ace::NG::TextPattern::GetParagraphs() const";
@@ -2624,6 +2628,7 @@
       "OHOS::Ace::NG::TextPattern::ReportSelectedText(bool)";
       "OHOS::Ace::NG::TextPattern::ResetAfterTextChange()";
       "OHOS::Ace::NG::TextPattern::ResetAISelected(OHOS::Ace::NG::AIResetSelectionReason)";
+      "OHOS::Ace::NG::TextPattern::ResetPageTranslate()";
       "OHOS::Ace::NG::TextPattern::ResetSelectDetectEnable()";
       "OHOS::Ace::NG::TextPattern::ResetSelection()";
       "OHOS::Ace::NG::TextPattern::SelectAIDetect()";
@@ -3989,6 +3994,8 @@
       "OHOS::Ace::NG::ContentChangeManager::OnSwiperScrollStart(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::ContentChangeManager::OnTransitionAdded(int)";
       "OHOS::Ace::NG::ContentChangeManager::OnTransitionRemoved(int)";
+      "OHOS::Ace::NG::ContentChangeManager::ReportTranslateTextNode(OHOS::Ace::WeakPtr<OHOS::Ace::NG::PageTranslateNode> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::ContentChangeManager::ResetTranslateTextNode(int)";
       "OHOS::Ace::IconStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::IconStyle, Ark_TabBarIconStyle>(Ark_TabBarIconStyle const&)";
       "OHOS::Ace::NG::TargetComponent::SetOnGestureRecognizerJudgeBegin(std::__h::function<OHOS::Ace::GestureJudgeResult (std::__h::shared_ptr<OHOS::Ace::BaseGestureEvent> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer> const&, std::__h::list<OHOS::Ace::WeakPtr<OHOS::Ace::NG::NGGestureRecognizer>, std::__h::allocator<OHOS::Ace::WeakPtr<OHOS::Ace::NG::NGGestureRecognizer>>> const&)>&&)";
       "OHOS::Ace::PreMakeScope::SetPreMake(bool)";
@@ -4718,6 +4725,7 @@
       "OHOS::Ace::NG::PipelineContext::RegisterFoldDisplayModeChangedCallback(std::__h::function<void (OHOS::Ace::FoldDisplayMode)>&&)";
       "OHOS::Ace::NG::PipelineContext::RegisterFoldStatusChangedCallback(std::__h::function<void (OHOS::Ace::FoldStatus)>&&)";
       "OHOS::Ace::NG::PipelineContext::RegisterHalfFoldHoverChangedCallback(std::__h::function<void (bool)>&&)";
+      "OHOS::Ace::NG::PipelineContext::RegisterListenerForTranslate(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)";
       "OHOS::Ace::NG::PipelineContext::RegisterSurfaceChangedCallback(std::__h::function<void (int, int, int, int, OHOS::Ace::WindowSizeChangeReason)>&&)";
       "OHOS::Ace::NG::PipelineContext::RegisterSurfacePositionChangedCallback(std::__h::function<void (int, int)>&&)";
       "OHOS::Ace::NG::PipelineContext::RegisterTransformHintChangeCallback(std::__h::function<void (unsigned int)>&&)";
@@ -4729,6 +4737,7 @@
       "OHOS::Ace::NG::PipelineContext::UnRegisterFoldDisplayModeChangedCallback(int)";
       "OHOS::Ace::NG::PipelineContext::UnRegisterFoldStatusChangedCallback(int)";
       "OHOS::Ace::NG::PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int)";
+      "OHOS::Ace::NG::PipelineContext::UnRegisterListenerForTranslate(int)";
       "OHOS::Ace::NG::PipelineContext::UnregisterSurfaceChangedCallback(int)";
       "OHOS::Ace::NG::PipelineContext::UnregisterSurfacePositionChangedCallback(int)";
       "OHOS::Ace::NG::PipelineContext::UnregisterTransformHintChangedCallback(int)";
@@ -5742,6 +5751,10 @@
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnTextGestureSelectionEnd*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnTextGestureSelectionUpdate*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::StartGestureSelection*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::ApplyPageTranslateResult*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetPageTranslateNodeId*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetPageTranslateTextForReport*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::ResetPageTranslate*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextSelectOverlay::OnCloseOverlay*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextSelectOverlay::OnHandleGlobalTouchEvent*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextSelectOverlay::OnHandleLevelModeChanged*;

@@ -781,6 +781,19 @@ public:
     void MountPlaceholderImageNode(const std::list<RefPtr<NG::SpanItem>>& spans);
     bool SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
     bool SetStringPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    void UpdatePlaceholderByTheme(RefPtr<SpanNode> placeholderNode);
+    void UpdatePlaceholderStyle(RefPtr<SpanNode> placeholderNode);
+    
+    // add for PageTranslate
+    int32_t GetPageTranslateNodeId() const override;
+    std::string GetPageTranslateTextForReport() const override;
+    bool ApplyPageTranslateResult(const std::string& result, int64_t version) override;
+    void ResetPageTranslate() override;
+    std::u16string GetCurrentPlaceholderText() const;
+    void ReportPageTranslatePlaceholderDrawn();
+    void OnPlaceholderSourceTextChanged();
+    bool SetTranslatedStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+
     void SetCaretColor(const Color& caretColor);
     void ResetCaretColor(const std::optional<Color>& caretColor);
     Color GetCaretColor() const;

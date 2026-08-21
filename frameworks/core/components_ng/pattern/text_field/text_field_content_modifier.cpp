@@ -42,6 +42,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->ReportPageTranslatePlaceholderDrawn();
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
 #ifdef ENABLE_AUTO_FILL_CONTROLLER

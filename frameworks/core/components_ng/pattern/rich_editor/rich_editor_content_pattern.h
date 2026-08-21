@@ -117,6 +117,13 @@ public:
         return richEditorPattern->GetCustomSpanPlaceholderInfo();
     }
 
+    void ReportPageTranslatePlaceholderDrawn()
+    {
+        auto richEditorPattern = GetParentPattern();
+        CHECK_NULL_VOID(richEditorPattern);
+        richEditorPattern->ReportPageTranslatePlaceholderDrawn();
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
         ACE_SCOPED_TRACE("RichEditorContentPattern::OnDirtyLayoutWrapperSwap");

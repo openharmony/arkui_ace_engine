@@ -92,6 +92,7 @@
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/text/html_utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 
 #ifndef ACE_UNITTEST
 #include "drawing/engine_adapter/skia_adapter/skia_path.h"
@@ -753,6 +754,7 @@ void RichEditorPattern::OnModifyDone()
     if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         dataDetectorAdapter_->GetAIEntityMenu();
     }
+    context->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -1326,6 +1328,7 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     ClearOnFocusTextField(node);
     auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
+    IF_PRESENT(context, UnRegisterListenerForTranslate(node->GetId()));
     CHECK_NULL_VOID(keyboardOverlay_);
     keyboardOverlay_->CloseKeyboard(node->GetId());
 }
@@ -11841,6 +11844,7 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
         isShowPlaceholder_ = false;
         hasPlaceholderLpxUnitStyle_ = false;
         IF_TRUE(placeholderWithLpx, UpdateLpxUnitFlag());
+        OnPlaceholderSourceTextChanged();
         return false;
     }
     bool setSuccess = styledPlaceholder_ ? SetStyledPlaceholder(spanItemList) : SetStringPlaceholder(spanItemList);
@@ -11850,6 +11854,9 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
 
 bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
 {
+    if (pageTranslatedContent_.has_value()) {
+        return SetTranslatedStyledPlaceholder(spanItemList);
+    }
     CHECK_NULL_RETURN(styledPlaceholder_, false);
     auto spans = styledPlaceholder_->GetSpanItems();
     MountPlaceholderImageNode(spans);
@@ -11874,27 +11881,10 @@ bool RichEditorPattern::SetStringPlaceholder(std::vector<std::list<RefPtr<SpanIt
         hasPlaceholderLpxUnitStyle_ = false;
         return false;
     }
-    auto placeholderValue = layoutProperty->GetPlaceholder().value();
+    auto placeholderValue = pageTranslatedContent_.value_or(layoutProperty->GetPlaceholder().value());
     auto placeholderNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(placeholderNode, false);
-    if (layoutProperty->HasPlaceholderFontSize()) {
-        placeholderNode->UpdateFontSize(layoutProperty->GetPlaceholderFontSize().value());
-    }
-    if (layoutProperty->HasPlaceholderFontWeight()) {
-        placeholderNode->UpdateFontWeight(layoutProperty->GetPlaceholderFontWeight().value());
-    }
-    if (layoutProperty->HasPlaceholderFontFamily()) {
-        placeholderNode->UpdateFontFamily(layoutProperty->GetPlaceholderFontFamily().value());
-    }
-    if (layoutProperty->HasPlaceholderItalicFontStyle()) {
-        placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
-    }
-    if (layoutProperty->HasPlaceholderTextColor()) {
-        placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
-    } else {
-        auto theme = GetTheme<RichEditorTheme>();
-        placeholderNode->UpdateTextColor(theme ? theme->GetPlaceholderColor() : Color());
-    }
+    UpdatePlaceholderStyle(placeholderNode);
 
     auto spanItem = placeholderNode->GetSpanItem();
     CHECK_NULL_RETURN(spanItem, false);
@@ -15180,6 +15170,140 @@ void RichEditorPattern::ClearParagraphCache()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "paragraph cache cleared");
     paragraphCache_.Clear();
+}
+
+int32_t RichEditorPattern::GetPageTranslateNodeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
+std::u16string RichEditorPattern::GetCurrentPlaceholderText() const
+{
+    if (styledPlaceholder_) {
+        return styledPlaceholder_->GetU16string();
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, u"");
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, u"");
+    return layoutProperty->GetPlaceholderValue(u"");
+}
+
+std::string RichEditorPattern::GetPageTranslateTextForReport() const
+{
+    if (!isShowPlaceholder_) {
+        return "";
+    }
+    if (lastDrawnPageTranslateContent_.empty() ||
+        lastDrawnPageTranslateContent_ != GetCurrentPlaceholderText()) {
+        return "";
+    }
+    return UtfUtils::Str16DebugToStr8(GetCurrentPlaceholderText());
+}
+
+bool RichEditorPattern::ApplyPageTranslateResult(const std::string& result, int64_t version)
+{
+    if (!ApplyTranslateResultCommon(result, version)) {
+        return true;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    return true;
+}
+
+void RichEditorPattern::ResetPageTranslate()
+{
+    if (!ResetTranslateCommon()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void RichEditorPattern::ReportPageTranslatePlaceholderDrawn()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    lastDrawnPageTranslateContent_ = GetCurrentPlaceholderText();
+    auto text = GetPageTranslateTextForReport();
+    CHECK_NULL_VOID(!text.empty());
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->ReportTranslateTextNode(AceType::WeakClaim<PageTranslateNode>(this), text);
+}
+
+void RichEditorPattern::OnPlaceholderSourceTextChanged()
+{
+    bool hasTranslateState = pageTranslatedContent_.has_value() ||
+        !lastDrawnPageTranslateContent_.empty();
+    lastDrawnPageTranslateContent_.clear();
+    ResetPageTranslate();
+    CHECK_NULL_VOID(hasTranslateState);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->ResetTranslateTextNode(host->GetId());
+}
+
+void RichEditorPattern::UpdatePlaceholderByTheme(RefPtr<SpanNode> placeholderNode)
+{
+    CHECK_NULL_VOID(placeholderNode);
+    auto theme = GetTheme<RichEditorTheme>();
+    placeholderNode->UpdateTextColor(theme ? theme->GetPlaceholderColor() : Color());
+}
+
+void RichEditorPattern::UpdatePlaceholderStyle(RefPtr<SpanNode> placeholderNode)
+{
+    CHECK_NULL_VOID(placeholderNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasPlaceholderFontSize()) {
+        placeholderNode->UpdateFontSize(layoutProperty->GetPlaceholderFontSize().value());
+    }
+    if (layoutProperty->HasPlaceholderFontWeight()) {
+        placeholderNode->UpdateFontWeight(layoutProperty->GetPlaceholderFontWeight().value());
+    }
+    if (layoutProperty->HasPlaceholderFontFamily()) {
+        placeholderNode->UpdateFontFamily(layoutProperty->GetPlaceholderFontFamily().value());
+    }
+    if (layoutProperty->HasPlaceholderItalicFontStyle()) {
+        placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
+    }
+    if (layoutProperty->HasPlaceholderTextColor()) {
+        placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
+    } else {
+        UpdatePlaceholderByTheme(placeholderNode);
+    }
+}
+
+bool RichEditorPattern::SetTranslatedStyledPlaceholder(
+    std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto placeholderNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
+    CHECK_NULL_RETURN(placeholderNode, false);
+    UpdatePlaceholderByTheme(placeholderNode);
+
+    auto spanItem = placeholderNode->GetSpanItem();
+    CHECK_NULL_RETURN(spanItem, false);
+    spanItem->content = pageTranslatedContent_.value();
+    spanItemList.clear();
+    spanItemList.push_back({ { {spanItem} } });
+    isShowPlaceholder_ = true;
+    hasPlaceholderLpxUnitStyle_ = spanItem->HasLpxUnitStyle();
+    return true;
 }
 
 } // namespace OHOS::Ace::NG
