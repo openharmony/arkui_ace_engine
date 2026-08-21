@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+import("$native_root/generated/interface/node_interface.gni")
 
 build_component_ng("symbol_pattern_ng") {
   sources = [
@@ -24,7 +25,7 @@ build_component_ng("symbol_pattern_ng") {
     "bridge/symbol_glyph_dynamic_module.cpp",
   ]
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
+    if (include_generated_sources) {
       ark_sources += [
         "bridge/symbol_glyph_static_modifier.cpp",
       ]
