@@ -55,8 +55,14 @@ export struct ExceptionPrompt {
   private callbackId: number | undefined = undefined;
   private callbacks: EnvironmentCallback = {
     onConfigurationUpdated: (config) => {
-      this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
-      this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
+      try {
+        this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
+        this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
+      } catch (err) {
+        let code: number = (err as BusinessError).code;
+        let message: string = (err as BusinessError).message;
+        hilog.error(0x3900, 'Ace', `Failed to update fontsizescale info, cause, code: ${code}, message: ${message}`);
+      }
     }, onMemoryLevel() {
     }
   };
@@ -193,8 +199,15 @@ export struct ExceptionPrompt {
 
   aboutToDisappear(): void {
     if (this.callbackId) {
-      this.getUIContext().getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
-      this.callbackId = void (0);
+      try {
+        this.getUIContext().getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
+      } catch (err) {
+        let code: number = (err as BusinessError).code;
+        let message: string = (err as BusinessError).message;
+        hilog.error(0x3900, 'Ace', `Failed to unregister environment callback, cause, code: ${code}, message: ${message}`);
+      } finally {
+        this.callbackId = void (0);
+      }
     }
   }
 
