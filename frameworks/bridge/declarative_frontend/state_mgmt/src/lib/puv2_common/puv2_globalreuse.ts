@@ -73,7 +73,7 @@ class __ReusePool__Internal implements IReusePool {
     private accepts_: Set<abstract new (...args: PUV2ViewBase[]) => PUV2ViewBase> | undefined;
     private maxCounts_: Map<string, number> = new Map();
     // The component that called getReusePool(); used by preRender() to bind the builder.
-    private callerContext_: PUV2ViewBase | undefined;
+    private callerContext_: WeakRef<PUV2ViewBase> | undefined;
     // Completion promises for pre-render builds deferred by queuePreRenderCreation.
     preRenderTasks_: Array<Promise<void>> = [];
 
@@ -155,6 +155,12 @@ class __ReusePool__Internal implements IReusePool {
         this.purgeAllCachedRecycleNode();
         this.recycleIdMapping_.clear();
         this.activeReuseIds_.clear();
+        __ReusePool__Internal.sharedPools_.forEach((pool, key) => {
+            if (pool === this) {
+                __ReusePool__Internal.sharedPools_.delete(key);
+            }
+        });
+        this.callerContext_ = undefined;
     }
 
     /**
@@ -396,7 +402,7 @@ class __ReusePool__Internal implements IReusePool {
     // Sets the component that called getReusePool(). preRender() uses it to
     // bind the builder so the app doesn't need .bind(this).
     public setCallerContext(context: PUV2ViewBase): void {
-        this.callerContext_ = context;
+        this.callerContext_ = new WeakRef(context);
     }
 
     async preRender(builder: WrappedBuilder<[]>, n: number): Promise<void> {
@@ -404,7 +410,7 @@ class __ReusePool__Internal implements IReusePool {
         // The caller context (the component that called getReusePool) is set via
         // setCallerContext() just before this call. Bind the builder to it so the
         // builder's `this` resolves correctly without the app using .bind(this).
-        const context = this.callerContext_;
+        const context = this.callerContext_?.deref();
         const rawFn = builder.builder;
         const builderFn = (context && rawFn) ? rawFn.bind(context) : rawFn;
         try {
