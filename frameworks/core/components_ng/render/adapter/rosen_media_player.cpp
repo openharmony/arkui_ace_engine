@@ -355,13 +355,13 @@ bool RosenMediaPlayer::GetResourceId(const std::string& path, uint32_t& resId)
 {
     std::smatch matches;
     if (std::regex_match(path, matches, MEDIA_RES_ID_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
-        resId = static_cast<uint32_t>(std::stoul(matches[1].str()));
+        resId = StringUtils::StringToUint(matches[1].str());
         return true;
     }
 
     std::smatch appMatches;
     if (std::regex_match(path, appMatches, MEDIA_APP_RES_ID_REGEX) && appMatches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
-        resId = static_cast<uint32_t>(std::stoul(appMatches[1].str()));
+        resId = StringUtils::StringToUint(appMatches[1].str());
         return true;
     }
 
