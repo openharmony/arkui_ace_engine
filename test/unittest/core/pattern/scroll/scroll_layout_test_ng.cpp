@@ -884,6 +884,8 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_BOTTOM;
     EXPECT_TRUE(pattern_->IsScrollReachEdge());
 }
 
@@ -938,15 +940,13 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge004, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
-    MockAnimationManager::GetInstance().SetTicks(TICK);
 
     CreateContent();
     CreateScrollDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
-    MockAnimationManager::GetInstance().Tick();
-    MockAnimationManager::GetInstance().Tick();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_BOTTOM;
     EXPECT_TRUE(pattern_->IsScrollReachEdge());
 }
 
@@ -1001,7 +1001,33 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge006, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_RIGHT;
     EXPECT_TRUE(pattern_->IsScrollReachEdge());
+}
+
+/**
+ * @tc.name: IsScrollReachEdge007
+ * @tc.desc: Test IsScrollReachEdge with contentStartOffset at middle position
+ *           (bug fix: old impl returned true for any position when contentStartOffset > 0)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge007, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    CreateContent();
+    CreateScrollDone();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsAtTop());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_TOP;
+    EXPECT_FALSE(pattern_->IsScrollReachEdge());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
 }
 
 /**
