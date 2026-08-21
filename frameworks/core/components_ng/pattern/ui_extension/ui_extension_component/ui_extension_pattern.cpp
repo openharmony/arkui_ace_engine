@@ -252,6 +252,15 @@ void UIExtensionPattern::OnDetachFromMainTree()
     UIEXT_LOGI("OnDetachFromMainTree, isMoving: %{public}d", IsMoving());
 }
 
+void UIExtensionPattern::AddWindowStateChangedCallback()
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->AddWindowStateChangedCallback(host->GetId());
+}
+
 void UIExtensionPattern::OnAttachContext(PipelineContext *context)
 {
     CHECK_NULL_VOID(context);
@@ -269,7 +278,7 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
     } else if (detachContextHappened) {
         RegisterEvent(instanceId_);
     }
-
+    AddWindowStateChangedCallback();
     RegisterAvoidInfoChangeListener(instanceId_);
 
     /* only for 1.2 begin */
