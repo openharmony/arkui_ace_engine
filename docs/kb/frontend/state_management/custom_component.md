@@ -22,7 +22,7 @@
 | 生命周期状态机 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/pu_lifecycle.ts` | `CustomComponentLifecycle`（5 态 FSM）+ 新生命周期装饰器（`@ComponentInit` 等） |
 | V1 复用池 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_recycle_manager.ts` | `RecycleManager` + `BidirectionalMap` — V1 按父节点的复用池 |
 | V2 复用池 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_recycle_pool.ts` | `RecyclePoolV2` + `RecycledIdRegistry` |
-| 全局跨父复用池 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_globalreuse.ts` | `__ReusePool__Internal__` — shared/perInstance 两种模式 |
+| 全局跨父复用池 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_globalreuse.ts` | `__ReusePool__Internal` — shared/perInstance 两种模式 |
 | update-function 记录 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_updatefunc.ts` | `UpdateFuncsByElmtId`、`UpdateFuncRecord`（含 If/Else `isPending`/`isChanged`） |
 | `@Builder` 参数代理 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_builder_proxy.ts` | `makeBuilderParameterProxy` — `$$` Proxy |
 | BuildNode 视图基类 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_buildnode_base.ts` | `ViewBuildNodeBase`（抽象） |

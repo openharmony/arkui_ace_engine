@@ -17,14 +17,14 @@
 | 关注点 | 稳定路径 | 说明 |
 |--------|----------|------|
 | 互操作源码根（存储/Backing） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/` | `interopStorage.ts`/`interopStorageV2.ts`/`interopBackingValue.ts`/`interopBinding.ts` |
-| 组件互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` | 核心互操作文件（约 1400 行）：`CompatiblePeerNode`/`compatibleComponent`/`getCompatibleState`/`enableCompatibleObservedV2ForStatic*`/`staticStateBindObservedObject`/`createCompatibleStaticState`/14 个 `register*` 回调 |
+| 组件互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` | 核心互操作文件（约 1400 行）：`CompatiblePeerNode`/`compatibleComponent`/`getCompatibleState`/`enableCompatibleObservedV2ForStatic*`/`staticStateBindObservedObject`/`createCompatibleStaticState`/14 个 `register*` 回调 |
 | 扩展组件互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interopExtendableComponent.ets` | `InteropExtendableComponent extends ExtendableComponent` — 静态侧适配器，代理 `findProvide`/`findProvider`/`addProvide`/`setActive`/`localStorage` 到动态侧 |
-| 互操作全局开关 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` `class InteropState` | 进程级互操作启用/禁用标志 |
-| Builder 互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` | `compatibleWrappedBuilder`/`compatibleWrappedBuilderInternal`/`transferCompatibleBuilder`/`transferCompatibleUpdatableBuilder`/`unwrapTransferCompatibleUpdatableBuilder` |
-| 状态代理（V1→动态） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` `getCompatibleState<T>` | 为静态 `StateDecoratedVariable`/`ProvideDecoratedVariable`/`PropDecoratedVariable`/`PropRefDecoratedVariable` 创建动态 `ObservedPropertyPU` 代理 |
-| 状态代理（动态→静态） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` `createCompatibleStaticState<T>` | 为动态 `ObservedProperty` 包装为静态 `ProvideDecoratedVariable` 代理 |
-| V2 类观测桥 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` | `enableCompatibleObservedV2ForStatic`/`enableCompatibleObservedV2ForStaticMeta`/`enableCompatibleObservedV2ForDynamic` — V2 类级观测跨前端桥接（调用方经 `ESValue.getGlobal().getProperty(...)`） |
-| 对象判别工具 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ts` | `isDynamicObject(value)`/`getRawObject(value)`/`getObservedObject(value)`（V1）/`getV2ObservedObject(value)`（V2） |
+| 互操作全局开关 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` `class InteropState` | 进程级互操作启用/禁用标志 |
+| Builder 互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` | `compatibleWrappedBuilder`/`compatibleWrappedBuilderInternal`/`transferCompatibleBuilder`/`transferCompatibleUpdatableBuilder`/`unwrapTransferCompatibleUpdatableBuilder` |
+| 状态代理（V1→动态） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` `getCompatibleState<T>` | 为静态 `StateDecoratedVariable`/`ProvideDecoratedVariable`/`PropDecoratedVariable`/`PropRefDecoratedVariable` 创建动态 `ObservedPropertyPU` 代理 |
+| 状态代理（动态→静态） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` `createCompatibleStaticState<T>` | 为动态 `ObservedProperty` 包装为静态 `ProvideDecoratedVariable` 代理 |
+| V2 类观测桥 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` | `enableCompatibleObservedV2ForStatic`/`enableCompatibleObservedV2ForStaticMeta`/`enableCompatibleObservedV2ForDynamic` — V2 类级观测跨前端桥接（调用方经 `ESValue.getGlobal().getProperty(...)`） |
+| 对象判别工具 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` | `isDynamicObject(value)`/`getRawObject(value)`/`getObservedObject(value)`（V1）/`getV2ObservedObject(value)`（V2） |
 | Binding 互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBinding.ts` | `InteropTransferMutableBinding<T>`/`InteropTransferBinding<T>` — 经 `dynamicBinding: ESValue` 代理 `value` get/set |
 | Backing Value 互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBackingValue.ts` | `InteropDecoratorBackingValue`（V1）/`InteropV2DecoratorBackingValue`（V2）— 绑定 observed 对象到静态侧元数据 |
 | `@Watch` 互操作 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorInteropWatch.ts` | `InteropWatchFunc extends WatchFunc` — 包装 `@Watch` 回调，加 `UIContext.checkThread(instanceId)` 线程亲和性检查 |
@@ -34,13 +34,13 @@
 
 | 机制 | 源码位置 |
 |------|----------|
-| 互操作启动入口 | `component/interop.ts` `openInterop()` — 调用 14 个 `register*` 回调注册静态侧访问器到动态侧 |
-| 14 个 register 回调 | `component/interop.ts` — `registerCreateWatchFuncCallback`/`registerCreateStaticObservedCallback`/`registerCompatibleStaticComponentCallback`/`registerMakeBuilderParameterStaticProxy`/`registerUpdateInteropExtendableComponent`/`registerResetInteropExtendableComponent`/`registerTransferCompatibleBuilderCallback`/`registertransferCompatibleDynamicBuilderCallback`/`registerCreateCompatibleStaticState`/`registerTransferCompatibleUpdatableBuilderCallback`/`registerNavPathStackCallback`/`registerLocalStorageSetProxy`/`registerIsCloneableObjectFunc`/`registerCloneCloneableObjectFunc` |
-| 动态组件→静态 peer | `component/interop.ts` `compatibleComponent(init, update, component?)` — `@memo` 工厂，经 `ArkUIAniModule._CreateViewStackProcessor`/`_PopViewStackProcessor`/`_DeleteViewStackProcessor` 创建静态 peer 包装动态组件 |
-| 静态组件→动态可见 | `component/interop.ts` `compatibleStaticComponent<T>(factory, options?, content?)` — 包装静态 `BaseCustomComponent` 供动态侧渲染 |
+| 互操作启动入口 | `component/interop.ets` `openInterop()` — 调用 14 个 `register*` 回调注册静态侧访问器到动态侧 |
+| 14 个 register 回调 | `component/interop.ets` — `registerCreateWatchFuncCallback`/`registerCreateStaticObservedCallback`/`registerCompatibleStaticComponentCallback`/`registerMakeBuilderParameterStaticProxy`/`registerUpdateInteropExtendableComponent`/`registerResetInteropExtendableComponent`/`registerTransferCompatibleBuilderCallback`/`registertransferCompatibleDynamicBuilderCallback`/`registerCreateCompatibleStaticState`/`registerTransferCompatibleUpdatableBuilderCallback`/`registerNavPathStackCallback`/`registerLocalStorageSetProxy`/`registerIsCloneableObjectFunc`/`registerCloneCloneableObjectFunc` |
+| 动态组件→静态 peer | `component/interop.ets` `compatibleComponent(init, update, component?)` — `@memo` 工厂，经 `ArkUIAniModule._CreateViewStackProcessor`/`_PopViewStackProcessor`/`_DeleteViewStackProcessor` 创建静态 peer 包装动态组件 |
+| 静态组件→动态可见 | `component/interop.ets` `compatibleStaticComponent<T>(factory, options?, content?)` — 包装静态 `BaseCustomComponent` 供动态侧渲染 |
 | 动态组件创建入口 | `component/interopExtendableComponent.ets` `createInteropView(staticComponent)` — 经 `ESValue.getGlobal().getProperty('createViewInterop')` 创建动态侧 `ViewInterop` |
-| V2 类观测反向桥 | `component/interop.ts` `enableCompatibleObservedV2ForDynamic<T>(value)` — 反向：为静态 observed 对象添加动态 watch funcs |
-| `@Track` 双路径 | `component/interop.ts` `staticStateBindObservedObject` — `onTrackPropertyRead`/`onTrackPropertyChange` 回调转发到静态侧 `MutableStateMeta` |
+| V2 类观测反向桥 | `component/interop.ets` `enableCompatibleObservedV2ForDynamic<T>(value)` — 反向：为静态 observed 对象添加动态 watch funcs |
+| `@Track` 双路径 | `component/interop.ets` `staticStateBindObservedObject` — `onTrackPropertyRead`/`onTrackPropertyChange` 回调转发到静态侧 `MutableStateMeta` |
 | `isStaticProxy` 检测 | （动态侧实现）— 互操作中检测对象是否为静态代理，决定是否需要 `deepCopyStaticProxy` |
 | Binding 线程检查 | `decoratorImpl/decoratorInteropWatch.ts` `InteropWatchFunc` — `UIContext.checkThread(instanceId)` 确保回调在正确实例线程执行 |
 
@@ -66,13 +66,13 @@
 
 | 问题 | 优先查看 |
 |------|----------|
-| 跨前端状态传递丢失 | `component/interop.ts` `getCompatibleState`/`createCompatibleStaticState` — 确认代理是否成功创建并 `setProxy`/`setProxyValue` 绑定 |
-| `@ObservedV2`/`@Trace` 跨前端不工作 | `component/interop.ts` `enableCompatibleObservedV2ForStatic` — UIPlugin 转换是否调用了动态侧 `ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStatic')` |
-| 互操作未启用 | `component/interop.ts` `class InteropState` — 进程级开关；`openInterop()` 是否在启动时调用并注册了 14 个回调 |
-| 动态组件在静态侧渲染异常 | `component/interop.ts` `compatibleComponent` — `ViewStackProcessor` 是否正确 push/pop；`CompatiblePeerNode` 是否正确代理了属性/事件 |
-| 静态组件在动态侧渲染异常 | `component/interop.ts` `compatibleStaticComponent` — `BaseCustomComponent` 包装是否正确；`createInteropView` 是否调用了动态侧 `createViewInterop` |
+| 跨前端状态传递丢失 | `component/interop.ets` `getCompatibleState`/`createCompatibleStaticState` — 确认代理是否成功创建并 `setProxy`/`setProxyValue` 绑定 |
+| `@ObservedV2`/`@Trace` 跨前端不工作 | `component/interop.ets` `enableCompatibleObservedV2ForStatic` — UIPlugin 转换是否调用了动态侧 `ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStatic')` |
+| 互操作未启用 | `component/interop.ets` `class InteropState` — 进程级开关；`openInterop()` 是否在启动时调用并注册了 14 个回调 |
+| 动态组件在静态侧渲染异常 | `component/interop.ets` `compatibleComponent` — `ViewStackProcessor` 是否正确 push/pop；`CompatiblePeerNode` 是否正确代理了属性/事件 |
+| 静态组件在动态侧渲染异常 | `component/interop.ets` `compatibleStaticComponent` — `BaseCustomComponent` 包装是否正确；`createInteropView` 是否调用了动态侧 `createViewInterop` |
 | `@Watch` 跨前端线程异常 | `decoratorInteropWatch.ts` `InteropWatchFunc` — `UIContext.checkThread(instanceId)` 是否抛出线程亲和性错误 |
-| Builder 跨前端传递失败 | `component/interop.ts` `transferCompatibleBuilder`/`transferCompatibleUpdatableBuilder` — 确认 Builder 包装/解包是否配对 |
+| Builder 跨前端传递失败 | `component/interop.ets` `transferCompatibleBuilder`/`transferCompatibleUpdatableBuilder` — 确认 Builder 包装/解包是否配对 |
 
 ## 调试入口
 
