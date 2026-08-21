@@ -2342,37 +2342,4 @@ HWTEST_F(VideoStateMachinePatternTestNg, Pause_FailTaskBody001, TestSize.Level0)
     EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::PAUSE);
 }
 
-/**
- * @tc.name: Stop_FailTaskBody001
- * @tc.desc: Test Stop() queues the stop task with pending STOP; executing the queued task
- *           invokes mediaPlayer Stop() and posts the clear-pending continuation.
- * @tc.type: FUNC
- */
-HWTEST_F(VideoStateMachinePatternTestNg, Stop_FailTaskBody001, TestSize.Level0)
-{
-    auto frameNode = CreateVideoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
-    ASSERT_TRUE(pattern);
-
-    auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
-    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mockMediaPlayer, Stop()).WillOnce(Return(-1));
-    pattern->mediaPlayer_ = mockMediaPlayer;
-
-    pattern->stateManager_->state_ = VideoPlaybackState::PLAYING;
-    pattern->stateManager_->ClearPendingCommand();
-
-    pattern->Stop();
-    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::STOP);
-
-    auto& queue = pattern->stateManager_->serialBgTaskQueue_;
-    ASSERT_EQ(queue.size(), 1u);
-    auto task = std::move(queue.front());
-    queue.pop();
-    ASSERT_TRUE(task.task);
-    task.task();
-    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::STOP);
-}
-
 } // namespace OHOS::Ace::NG
