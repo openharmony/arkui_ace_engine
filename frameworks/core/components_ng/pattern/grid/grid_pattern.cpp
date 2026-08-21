@@ -135,6 +135,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
                                   (info_.repeatDifference_ == 0);
     if (userDefined_) {
         auto algo = MakeRefPtr<GridCustomLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
+        algo->SetScrollSource(GetScrollSource());
         SetLayoutAlgorithmContentClip(algo);
         return algo;
     }
