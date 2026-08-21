@@ -146,9 +146,6 @@ void DataPanelModifier::UpdateDate()
 
 void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) const
 {
-    RSCanvas& canvas = context.canvas;
-    canvas.Save();
-
     auto defaultThickness = strokeWidth_->Get();
     ArcData arcData;
     Offset center = Offset(contentSize_.Width() * PERCENT_HALF + offset.GetX(),
@@ -156,11 +153,16 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
     arcData.center = center;
     // Here radius will minus defaultThickness, when there will be new api to set padding, use the new padding.
     arcData.radius = std::min(contentSize_.Width(), contentSize_.Height()) * PERCENT_HALF - defaultThickness;
+    if (LessOrEqual(arcData.radius, 0.f)) {
+        return;
+    }
     if (defaultThickness >= arcData.radius) {
         arcData.thickness = arcData.radius * DIAMETER_TO_THICKNESS_RATIO;
     } else {
         arcData.thickness = defaultThickness;
     }
+    RSCanvas& canvas = context.canvas;
+    canvas.Save();
     PaintTrackBackground(canvas, arcData, trackBackgroundColor_->Get().ToColor());
     arcData.maxValue = max_->Get();
     for (size_t i = 0; i < valuesLastLength_; ++i) {
@@ -168,6 +170,7 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
     }
     if (NonPositive(arcData.totalAllValue)) {
         // all values are invalid
+        canvas.Restore();
         return;
     }
 
