@@ -566,4 +566,5 @@ export class ArkUIAniModule {
     native static _GestureEventUIObserver_AddGlobalGestureListener(resourceId: KInt, type: KInt, callback: GestureListenerCallback): void
     native static _GestureEventUIObserver_RemoveGlobalGestureListener(type: KInt, callback?: GestureListenerCallback): void
     native static __BuilderNode_GetParentViewId(ptr: KPointer): KInt;
+    native static _ArkTSFrameNode_GetId(peer: KPointer): string
 }
