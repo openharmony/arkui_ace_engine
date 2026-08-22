@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "ui/properties/gradient_property.h"
+#include "ui/properties/ui_material.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -1015,6 +1016,8 @@ protected:
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;
     void ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void LightEffectOptionsToJsonValue(const std::unique_ptr<JsonValue>& json,
+        const std::optional<LightEffectOptions>& lightEffectOptions) const;
     friend class ViewAbstract;
     friend class ViewAbstractModelStatic;
     std::function<void(bool)> requestFrame_;

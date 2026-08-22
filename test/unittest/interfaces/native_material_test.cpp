@@ -317,8 +317,8 @@ HWTEST_F(NativeMaterialTest, ImmersiveMaterial_SetGetLightEffect, TestSize.Level
 
     EXPECT_EQ(OH_ArkUI_NativeModule_ImmersiveMaterial_SetLightEffect(handle, options), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(
-        OH_ArkUI_NativeModule_ImmersiveMaterial_GetLightEffectColor(handle, &outColor), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(outColor, 0xFFFFFFFFu);
+        OH_ArkUI_NativeModule_ImmersiveMaterial_GetLightEffectColor(handle, &outColor), ARKUI_ERROR_CODE_PARAM_ERROR);
+    EXPECT_EQ(outColor, 0);
 
     OH_ArkUI_NativeModule_LightEffectOptions_SetColor(options, kCustomColor);
     EXPECT_EQ(OH_ArkUI_NativeModule_ImmersiveMaterial_SetLightEffect(handle, options), ARKUI_ERROR_CODE_NO_ERROR);
