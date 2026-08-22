@@ -1113,33 +1113,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg156, TestSize.Level
 }
 
 // ==========================================================================
-// Batch 7: IsTagInOverlay, AddFrameNodeChangeListener, RemoveFrameNodeChangeListener,
+// Batch 7: AddFrameNodeChangeListener, RemoveFrameNodeChangeListener,
 //          AddChangedFrameNode, RemoveChangedFrameNode, CleanNodeChangeFlag,
 //          OnHalfFoldHoverChangedCallback, OnRawKeyboardChangedCallback
 // ==========================================================================
-
-/**
- * @tc.name: PipelineContextFourTestNg157
- * @tc.desc: Test IsTagInOverlay returns true for overlay tags and false otherwise.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg157, TestSize.Level1)
-{
-    AssertValidContext();
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::TOAST_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::POPUP_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::DIALOG_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::MENU_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::SHEET_PAGE_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::OVERLAY_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::ORDER_OVERLAY_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::ACTION_SHEET_DIALOG_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::ALERT_DIALOG_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::MENU_WRAPPER_ETS_TAG));
-    EXPECT_FALSE(context_->IsTagInOverlay("unknown_tag"));
-    EXPECT_FALSE(context_->IsTagInOverlay(V2::ROOT_ETS_TAG));
-    EXPECT_FALSE(context_->IsTagInOverlay(""));
-}
 
 /**
  * @tc.name: PipelineContextFourTestNg158

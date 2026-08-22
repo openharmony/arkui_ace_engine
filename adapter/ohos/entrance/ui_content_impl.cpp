@@ -6338,10 +6338,9 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
                     }
                     return;
                 }
-                auto stageManager = pipeline->GetStageManager();
-                auto pageRoot = stageManager ? stageManager->GetLastPage() : pipeline->GetRootElement();
+                auto startNodes = pipeline->GetDumpStartNodes();
                 auto result = pageSceneMatcher->MatchPageScene(
-                    processId, ruleJson, pageRoot, pipeline->GetCurrentPageName(), isGetResult);
+                    processId, ruleJson, startNodes, pipeline->GetCurrentPageName(), isGetResult);
                 if (!result.has_value()) {
                     if (isGetResult) {
                         UiSessionManager::GetInstance()->CompleteGetPageScene(processId);

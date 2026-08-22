@@ -34,6 +34,8 @@ template("ace_core_pipeline_ng_source_set") {
 
     # add common source file needed by all product platform here
     sources = [
+      "$ace_root/frameworks/core/components_ng/dump_utils/dump_util.cpp",
+
       # context
       "environment_manager.cpp",
       "pipeline_context.cpp",

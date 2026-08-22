@@ -35,6 +35,7 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/dump_utils/dump_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
@@ -1015,7 +1016,11 @@ public:
     void GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>& root, std::shared_ptr<JsonValue>& overlayContent,
         std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& overlayArray) const;
 
-    bool IsTagInOverlay(const std::string& tag) const;
+    // Collect Inspector-style visible starting nodes. Delegates the pure
+    // algorithm to DumpUtil so both Inspector dump and PageScene
+    // share one starting-node resolution path (eliminating the redundant
+    // full-tree traversal that previously started from rootNode_).
+    DumpStartNodeSet GetDumpStartNodes() const;
 
     void GetComponentOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
         ParamConfig config, bool isInSubWindow, double parentFinalOpacity = 1.0) const;
@@ -1340,8 +1345,8 @@ private:
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
-    void DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode, std::shared_ptr<JsonValue>& root,
-        std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const;
+    void DumpSimplifyTreeJsonFromTopNavNode(std::shared_ptr<JsonValue>& root,
+        const std::vector<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const;
 
     bool ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
         std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
@@ -1350,8 +1355,8 @@ private:
     void GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config,
         double parentFinalOpacity = 1.0) const;
 
-    void DumpSimplifyTreeJsonEntrance(
-        std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
+    void DumpSimplifyTreeJsonEntrance(std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode,
+        const std::vector<RefPtr<NG::FrameNode>>& navNodes, ParamConfig config) const;
 
     void DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const;
 
