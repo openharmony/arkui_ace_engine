@@ -43,7 +43,15 @@ void ViewAbstractTestNg::SetUpTestSuite()
 
 void ViewAbstractTestNg::TearDownTestSuite()
 {
-    MockContainer::Current()->pipelineContext_ = nullptr;
+    auto& pctx = MockContainer::Current()->pipelineContext_;
+    auto currentPipeline = MockPipelineContext::GetCurrent();
+    if (pctx && pctx.GetRawPtr() != currentPipeline.GetRawPtr()) {
+        auto oldPipeline = AceType::DynamicCast<PipelineContext>(pctx);
+        if (oldPipeline) {
+            oldPipeline->Destroy();
+        }
+    }
+    pctx = nullptr;
     MockPipelineContext::TearDown();
 }
 /**
