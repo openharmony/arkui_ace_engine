@@ -660,6 +660,7 @@
       "OHOS::Ace::Framework::JSTextEditableController::ClearPlaceholderStyledString()";
       "OHOS::Ace::Framework::JSTextEditableController::GetPlaceholderStyledString() const";
       "OHOS::Ace::Framework::JSThemeScope::jsCurrentTheme";
+      "OHOS::Ace::Framework::JSThemeUtils::GetThemeColors()";
       "OHOS::Ace::Framework::JSWaterFlowSections::NewInstance()";
       "OHOS::Ace::Framework::ParseBackgroundImagePosition(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::BackgroundImagePosition&)";
       "OHOS::Ace::Framework::ScopedViewStackProcessor::~ScopedViewStackProcessor()";

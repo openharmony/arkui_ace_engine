@@ -26,6 +26,9 @@
 
 namespace OHOS::Ace::NG {
 
+RefPtr<TokenTheme> TokenThemeStorage::defaultLightTheme_ = nullptr;
+RefPtr<TokenTheme> TokenThemeStorage::defaultDarkTheme_ = nullptr;
+
 namespace {
 const RefPtr<TokenTheme>& GetEmptyTokenTheme()
 {

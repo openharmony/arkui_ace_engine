@@ -82,8 +82,8 @@ private:
 
     std::unordered_map<int32_t, std::map<bool, std::vector<bool>>> themeColorSetByUser_;
 
-    inline static RefPtr<TokenTheme> defaultLightTheme_ = nullptr;
-    inline static RefPtr<TokenTheme> defaultDarkTheme_ = nullptr;
+    static RefPtr<TokenTheme> defaultLightTheme_;
+    static RefPtr<TokenTheme> defaultDarkTheme_;
 };
 
 } // namespace

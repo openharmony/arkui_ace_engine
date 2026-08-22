@@ -19,6 +19,7 @@ test_sources = [
   "data_panel_test_core.cpp",
   "data_panel_test_ng.cpp",
   "data_panel_withtheme_test_ng.cpp",
+  "$ace_root/frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.cpp",
 ]
 
 if (is_host_product) {
