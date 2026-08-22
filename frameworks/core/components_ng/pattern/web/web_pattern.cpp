@@ -336,6 +336,7 @@ std::string ParseTextJsonValue(const std::string& textJson)
 }
 
 constexpr std::string_view NWEB_AUTOFILL_TYPE_OFF = "off";
+constexpr std::string_view NWEB_VIEW_DATA_KEY_NODE_ID = "nodeId";
 const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
     {OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS, AceAutoFillType::ACE_FULL_STREET_ADDRESS},
     {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_3, AceAutoFillType::ACE_DISTRICT_ADDRESS},
@@ -6038,10 +6039,12 @@ void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
 }
 
 void ParseViewDataString(const std::string& key,
-    const std::string& value, RefPtr<PageNodeInfoWrap> node)
+    const std::string& value, RefPtr<PageNodeInfoWrap> node, std::string& renderNodeId)
 {
     CHECK_NULL_VOID(node);
-    if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE) {
+    if (key == NWEB_VIEW_DATA_KEY_NODE_ID) {
+        renderNodeId = value;
+    } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE) {
         node->SetValue(value);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_PLACEHOLDER) {
         node->SetPlaceholder(value);
@@ -6093,6 +6096,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
 
     RefPtr<PageNodeInfoWrap> node = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     std::string attribute = child->GetKey();
+    std::string renderNodeId;
 
     RectT<float> rect;
     int32_t len = child->GetArraySize();
@@ -6109,26 +6113,26 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
                         child->GetArraySize());
                 node->SetMetadata(object->ToString());
             } else if (child->IsString()) {
-                ParseViewDataString(child->GetKey(), child->GetString(), node);
+                ParseViewDataString(child->GetKey(), child->GetString(), node, renderNodeId);
             } else if (child->IsNumber()) {
                 ParseViewDataNumber(child->GetKey(), child->GetInt(), node, rect, viewScale);
             }
         }
     }
 
-    HintToTypeWrap hintToTypeWrap = GetHintTypeAndMetadata(attribute, node);
-    auto type = hintToTypeWrap.autoFillType;
-    if (type != AceAutoFillType::ACE_UNSPECIFIED) {
-        node->SetAutoFillType(type);
+    auto hintToTypeWrap = GetHintTypeAndMetadata(attribute, node);
+    if (hintToTypeWrap.autoFillType != AceAutoFillType::ACE_UNSPECIFIED) {
+        node->SetAutoFillType(hintToTypeWrap.autoFillType);
         node->SetMetadata(hintToTypeWrap.metadata);
     }
 
-    NG::RectF rectF;
-    rectF.SetRect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    node->SetPageNodeRect(rectF);
+    node->SetPageNodeRect(NG::RectF(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()));
     node->SetId(nodeId);
     node->SetDepth(-1);
-    node->SetKeyAttribute(attribute);
+    node->SetKeyAttribute(renderNodeId.empty() ? attribute : renderNodeId);
+    if (renderNodeId.empty()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The renderNodeId of view data node is empty, use attribute as key attribute");
+    }
     nodeInfos.emplace_back(node);
 }
 
