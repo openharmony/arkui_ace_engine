@@ -46,7 +46,7 @@ Ark_PanGestureOptionsProxy GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
 }
 Ark_PanDirection GetDirectionImpl(Ark_PanRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer, INVALID_ENUM_VAL<Ark_PanDirection>);
+    CHECK_NULL_RETURN(peer, ARK_PAN_DIRECTION_NONE);
     auto direction = peer->GetDirection();
     return ArkValue<Ark_PanDirection>(direction, FC);
 }
