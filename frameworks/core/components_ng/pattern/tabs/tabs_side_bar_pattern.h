@@ -22,7 +22,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/manager/recoverable/recoverable_view.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
@@ -93,6 +92,11 @@ public:
     }
 
     void CreateChildNodeIfNeeded(const RefPtr<FrameNode>& tabsNode);
+
+    bool IsScrollEffectEnabled() const
+    {
+        return isScrollEffectEnabled_;
+    }
 
 private:
     void OnModifyDone() override;

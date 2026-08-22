@@ -862,6 +862,26 @@ void CreateWithResourceObjImpl(ArkUINodeHandle node, void* paramRawPtr)
     CHECK_NULL_VOID(param);
     tabsModelImpl->CreateWithResourceObj(param->jsResourceType, AceType::Claim(param->resourceObj));
 }
+
+void SetBarStyleImpl(ArkUINodeHandle node, ArkUI_Int32 barStyle) {}
+
+void ResetBarStyleImpl(ArkUINodeHandle node) {}
+
+void SetSidebarPositionImpl(ArkUINodeHandle node, ArkUI_Int32 position) {}
+
+void ResetSidebarPositionImpl(ArkUINodeHandle node) {}
+
+void SetSidebarHeaderImpl(ArkUINodeHandle node, ArkUINodeHandle headerNode) {}
+
+void ResetSidebarHeaderImpl(ArkUINodeHandle node) {}
+
+void SetSidebarSearchableImpl(ArkUINodeHandle node, struct ArkUITabsSidebarSearchableOptions* options) {}
+
+void ResetSidebarSearchableImpl(ArkUINodeHandle node) {}
+
+void SetBarDisplayModeBreakpointImpl(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint) {}
+
+void ResetBarDisplayModeBreakpointImpl(ArkUINodeHandle node) {}
 #endif
 
 void CreateTabs(
@@ -1763,6 +1783,125 @@ void CreateWithResourceObj(ArkUINodeHandle node, void* paramRawPtr)
     TabsModelNG::CreateWithResourceObj(frameNode, param->jsResourceType, resObj);
 }
 
+void SetBarStyle(ArkUINodeHandle node, ArkUI_Int32 barLayoutStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarLayoutStyle(frameNode, static_cast<TabBarLayoutStyle>(barLayoutStyle));
+}
+
+void ResetBarStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarLayoutStyle(frameNode, TabBarLayoutStyle::BOTTOM);
+}
+
+void SetSidebarPosition(ArkUINodeHandle node, ArkUI_Int32 position)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarPosition(frameNode, static_cast<BarPosition>(position));
+}
+
+void ResetSidebarPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarPosition(frameNode, BarPosition::START);
+}
+
+void SetSidebarHeader(ArkUINodeHandle node, ArkUINodeHandle headerNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (headerNode) {
+        TabsModelNG::SetSidebarHeader(frameNode, AceType::Claim(reinterpret_cast<AceType*>(headerNode)));
+    } else {
+        TabsModelNG::SetSidebarHeader(frameNode, nullptr);
+    }
+}
+
+void ResetSidebarHeader(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarHeader(frameNode, nullptr);
+}
+
+void SetSidebarSearchable(ArkUINodeHandle node, struct ArkUITabsSidebarSearchableOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    TabsSidebarSearchableOptions searchableOptions;
+    searchableOptions.isNull = false;
+    if (options->searchText) {
+        searchableOptions.searchText = std::string(options->searchText);
+    }
+    if (options->placeholder) {
+        searchableOptions.placeholder = std::string(options->placeholder);
+    }
+    if (options->searchCallback) {
+        auto* callback = reinterpret_cast<std::function<void(const std::string&)>*>(options->searchCallback);
+        searchableOptions.searchCallback = std::move(*callback);
+    }
+    if (options->searchFilter) {
+        auto* filter = reinterpret_cast<std::function<bool(int32_t, const std::string&)>*>(options->searchFilter);
+        searchableOptions.searchFilter = std::move(*filter);
+    }
+    if (options->searchTextRawPtr) {
+        searchableOptions.searchTextResObj =
+            AceType::Claim(reinterpret_cast<ResourceObject*>(options->searchTextRawPtr));
+    }
+    if (options->placeholderRawPtr) {
+        searchableOptions.placeholderResObj =
+            AceType::Claim(reinterpret_cast<ResourceObject*>(options->placeholderRawPtr));
+    }
+    TabsModelNG::SetSidebarSearchableOptions(frameNode, searchableOptions);
+}
+
+void ResetSidebarSearchable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsSidebarSearchableOptions options;
+    options.isNull = true;
+    TabsModelNG::SetSidebarSearchableOptions(frameNode, options);
+}
+
+void SetBarDisplayModeBreakpoint(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(breakpoint);
+    static const std::vector<TabBarDisplayMode> BAR_DISPLAY_MODES =
+        { TabBarDisplayMode::BOTTOMTABBAR, TabBarDisplayMode::SIDEBAR };
+    TabBarDisplayModeBreakpoint bp;
+    bp.isNull = breakpoint->isNull;
+    if (!breakpoint->isNull) {
+        if (breakpoint->sm >= 0 && breakpoint->sm < static_cast<ArkUI_Int32>(BAR_DISPLAY_MODES.size())) {
+            bp.sm = BAR_DISPLAY_MODES[breakpoint->sm];
+        }
+        if (breakpoint->md >= 0 && breakpoint->md < static_cast<ArkUI_Int32>(BAR_DISPLAY_MODES.size())) {
+            bp.md = BAR_DISPLAY_MODES[breakpoint->md];
+        }
+        if (breakpoint->lg >= 0 && breakpoint->lg < static_cast<ArkUI_Int32>(BAR_DISPLAY_MODES.size())) {
+            bp.lg = BAR_DISPLAY_MODES[breakpoint->lg];
+        }
+    }
+    TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, bp);
+}
+
+void ResetBarDisplayModeBreakpoint(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabBarDisplayModeBreakpoint breakpoint;
+    breakpoint.isNull = true;
+    TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, breakpoint);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -1865,6 +2004,16 @@ const ArkUITabsModifier* GetTabsModifier()
             .setTabsBarFloatingStyle = SetTabsBarFloatingStyle,
             .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyle,
             .createWithResourceObj = CreateWithResourceObj,
+            .setBarStyle = SetBarStyle,
+            .resetBarStyle = ResetBarStyle,
+            .setSidebarPosition = SetSidebarPosition,
+            .resetSidebarPosition = ResetSidebarPosition,
+            .setSidebarHeader = SetSidebarHeader,
+            .resetSidebarHeader = ResetSidebarHeader,
+            .setSidebarSearchable = SetSidebarSearchable,
+            .resetSidebarSearchable = ResetSidebarSearchable,
+            .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpoint,
+            .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpoint,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -1967,6 +2116,16 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabsBarFloatingStyle = SetTabsBarFloatingStyleImpl,
         .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyleImpl,
         .createWithResourceObj = CreateWithResourceObjImpl,
+        .setBarStyle = SetBarStyleImpl,
+        .resetBarStyle = ResetBarStyleImpl,
+        .setSidebarPosition = SetSidebarPositionImpl,
+        .resetSidebarPosition = ResetSidebarPositionImpl,
+        .setSidebarHeader = SetSidebarHeaderImpl,
+        .resetSidebarHeader = ResetSidebarHeaderImpl,
+        .setSidebarSearchable = SetSidebarSearchableImpl,
+        .resetSidebarSearchable = ResetSidebarSearchableImpl,
+        .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpointImpl,
+        .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpointImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

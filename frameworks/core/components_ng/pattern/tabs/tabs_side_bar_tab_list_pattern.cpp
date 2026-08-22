@@ -178,17 +178,16 @@ void TabsSideBarTabListPattern::AddOrUpdateTabItemWithContent(
         builderNode->MountToParent(tabItemNode);
     }
     auto oldTabItemNode = GetBuilderByContentId(tabContentId, tabItemNode);
-    if (oldTabItemNode != tabItemNode) {
-        if (!oldTabItemNode) {
-            auto index =
-                std::clamp(myIndex, 0, static_cast<int32_t>(tabItemContainerNode->GetChildren().size()));
-            tabItemNode->MountToParent(tabItemContainerNode, index);
-        } else if (oldTabItemNode != tabItemNode) {
-            tabItemContainerNode->ReplaceChild(oldTabItemNode, tabItemNode);
-        }
+    if (!oldTabItemNode) {
+        auto index =
+            std::clamp(myIndex, 0, static_cast<int32_t>(tabItemContainerNode->GetChildren().size()));
+        tabItemNode->MountToParent(tabItemContainerNode, index);
+    } else if (oldTabItemNode != tabItemNode) {
+        tabItemContainerNode->ReplaceChild(oldTabItemNode, tabItemNode);
     }
     auto tabBarItemPadding = Dimension(0);
     auto layoutProperty = tabItemNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
         CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
     tabItemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -512,12 +511,19 @@ void TabsSideBarTabListPattern::AddOrUpdateTabListItem(
         AddOrUpdateTabItemWithIconAndText(tabBarParam, tabItemNode, swiperNode, tabContentPattern, position, myIndex);
     }
 
-    // Bind click event: only on first creation to avoid duplicate handlers on update
+    // Bind click event: only on first creation to avoid duplicate handlers on update.
+    // Capture tabContentId instead of index to handle Tab insertion/deletion/reordering dynamically.
     if (!update) {
-        auto clickEvent = [weakPattern = WeakClaim(this), index = myIndex](const GestureEvent& info) {
+        auto clickEvent = [weakTabsNode = WeakPtr(tabsNode), weakPattern = WeakClaim(this),
+                          capturedTabContentId = tabContentId](const GestureEvent& info) {
+            auto tabsNode = weakTabsNode.Upgrade();
             auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(tabsNode);
             CHECK_NULL_VOID(pattern);
-            pattern->SetCurrentIndex(index);
+            auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+            CHECK_NULL_VOID(swiperNode);
+            auto currentIndex = swiperNode->GetChildFlatIndex(capturedTabContentId).second;
+            pattern->SetCurrentIndex(currentIndex);
         };
         auto gestureHub = tabItemNode->GetOrCreateGestureEventHub();
         if (gestureHub) {

@@ -1706,6 +1706,7 @@
       "OHOS::Ace::NG::LayoutProperty::CheckOffsetLocalizedEdges(OHOS::Ace::TextDirection)";
       "OHOS::Ace::NG::LayoutProperty::CheckPositionLocalizedEdges(OHOS::Ace::TextDirection)";
       "OHOS::Ace::NG::LayoutProperty::ClearUserDefinedIdealSize(bool, bool)";
+      "OHOS::Ace::NG::LayoutProperty::MarkUserDefinedHeightConfigured()";
       "OHOS::Ace::NG::LayoutProperty::Clone() const";
       "OHOS::Ace::NG::LayoutProperty::Clone(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutProperty>) const";
       "OHOS::Ace::NG::LayoutProperty::CreateBorder(bool)";
@@ -1853,6 +1854,7 @@
       "OHOS::Ace::NG::NodeModifier::GetMenuItemModel()";
       "OHOS::Ace::NG::NodeModifier::GetMenuModel()";
       "OHOS::Ace::NG::NodeModifier::GetMenuViewInnerModifier()";
+      "OHOS::Ace::NG::NodeModifier::GetSearchCustomModifier()";
       "OHOS::Ace::NG::NodeModifier::GetSelectCustomModifier()";
       "OHOS::Ace::NG::NodeModifier::GetSheetPatternInnerModifier()";
       "OHOS::Ace::NG::NodeModifier::GetTextPickerCustomModifier()";
@@ -2137,6 +2139,7 @@
       "OHOS::Ace::NG::ScrollableModelNG::SetScrollBarColor(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ScrollableModelNG::SetScrollBarMode(OHOS::Ace::DisplayMode)";
       "OHOS::Ace::NG::ScrollableModelNG::SetScrollBarMode(OHOS::Ace::NG::FrameNode*, int)";
+      "OHOS::Ace::NG::ScrollableModelNG::SetScrollBarMode(OHOS::Ace::NG::FrameNode*, std::__h::optional<OHOS::Ace::DisplayMode> const&)";
       "OHOS::Ace::NG::ScrollableModelNG::SetScrollBarWidth(OHOS::Ace::NG::FrameNode*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ScrollableModelNG::SetScrollBarWidth(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ScrollableModelStatic::SetEdgeEffect(OHOS::Ace::NG::FrameNode*, std::__h::optional<OHOS::Ace::EdgeEffect> const&, std::__h::optional<bool> const&, OHOS::Ace::EffectEdge)";
@@ -3754,6 +3757,8 @@
       "OHOS::Ace::V2::SPAN_ETS_TAG";
       "OHOS::Ace::V2::STACK_ETS_TAG";
       "OHOS::Ace::V2::SWIPER_ETS_TAG";
+      "OHOS::Ace::V2::TABS_SIDE_BAR_TAG";
+      "OHOS::Ace::V2::TABS_SIDE_BAR_TAB_LIST_TAG";
       "OHOS::Ace::V2::ARC_SWIPER_ETS_TAG";
       "OHOS::Ace::V2::ARC_INDEXER_ETS_TAG";
       "OHOS::Ace::V2::SYMBOL_ETS_TAG";
@@ -4789,6 +4794,7 @@
       "OHOS::Ace::NG::SaveButtonModelNG::GetInstance()";
       "OHOS::Ace::NG::ScrollableModelNG::CreateWithResourceObjScrollBarWidth(OHOS::Ace::NG::FrameNode*, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)";
       "OHOS::Ace::NG::ScrollableModelNG::SetContentClip(OHOS::Ace::NG::ContentClipMode, OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect> const&)";
+      "OHOS::Ace::NG::ScrollableModelNG::SetContentClip(OHOS::Ace::NG::FrameNode*, OHOS::Ace::NG::ContentClipMode, OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect> const&)";
       "OHOS::Ace::NG::ScrollableModelNG::SetFadingEdge(bool, OHOS::Ace::Dimension const&)";
       "OHOS::Ace::NG::ScrollableModelNG::SetMaxFlingSpeed(double)";
       "OHOS::Ace::NG::ScrollableModelNG::SetOnDidScroll(std::__h::function<void (OHOS::Ace::Dimension, OHOS::Ace::ScrollState)>&&)";

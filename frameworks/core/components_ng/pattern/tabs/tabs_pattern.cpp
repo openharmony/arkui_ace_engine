@@ -56,6 +56,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
+#include "core/interfaces/native/node/divider_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 namespace OHOS::Ace::NG {
@@ -593,6 +594,9 @@ TabBarDisplayMode TabsPattern::CalculateTabBarDisplayMode(float width)
 
 void TabsPattern::SetCurrentBarDisplayMode(TabBarDisplayMode mode)
 {
+    if (currentBarDisplayMode_.has_value() && currentBarDisplayMode_.value() == mode) {
+        return;
+    }
     currentBarDisplayMode_ = mode;
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
@@ -1703,14 +1707,17 @@ RefPtr<FrameNode> TabsPattern::CreateSideBarNode()
 
 RefPtr<FrameNode> TabsPattern::CreateSideBarDividerNode()
 {
-    auto dividerNode = FrameNode::GetOrCreateFrameNode("TabsSideBarDivider",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    CHECK_NULL_RETURN(dividerNode, nullptr);
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_RETURN(dividerLayoutProperty, nullptr);
-    dividerLayoutProperty->UpdateStrokeWidth(DEFAULT_DIVIDER_STROKE_WIDTH);
-    dividerLayoutProperty->UpdateVertical(true);
-    return dividerNode;
+    auto nodeModifiers = NG::NodeModifier::GetDividerModifier();
+    CHECK_NULL_RETURN(nodeModifiers && nodeModifiers->createFrameNode, nullptr);
+    auto arkUINodeHandle = nodeModifiers->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    CHECK_NULL_RETURN(nodeModifiers->setDividerStrokeWidth, nullptr);
+    nodeModifiers->setDividerStrokeWidth(arkUINodeHandle,
+        static_cast<float>(DEFAULT_DIVIDER_STROKE_WIDTH.Value()),
+        static_cast<int32_t>(DEFAULT_DIVIDER_STROKE_WIDTH.Unit()));
+    CHECK_NULL_RETURN(nodeModifiers->setDividerVertical, nullptr);
+    nodeModifiers->setDividerVertical(arkUINodeHandle, true);
+    return Referenced::Claim<FrameNode>(reinterpret_cast<FrameNode*>(arkUINodeHandle));
 }
 
 void TabsPattern::UpdateSideBarIfNeeded()
@@ -1802,13 +1809,14 @@ void TabsPattern::ResetSideBarTabListItemIds()
 
 void TabsPattern::SyncPropertiesToSideBar()
 {
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
     CHECK_NULL_VOID(sideBarNode_);
     auto sideBarPattern = sideBarNode_->GetPattern<TabsSideBarPattern>();
     CHECK_NULL_VOID(sideBarPattern);
 
     // 1. Sync SwiperController
-    auto swiperNode = AceType::DynamicCast<FrameNode>(
-        AceType::DynamicCast<TabsNode>(GetHost())->GetTabs());
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     if (swiperNode) {
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         if (swiperPattern) {

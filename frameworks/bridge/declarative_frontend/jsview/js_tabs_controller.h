@@ -58,8 +58,6 @@ public:
 
     void UpdateTabBarHiddenOffset(float offset);
 
-    void GetBarDisplayMode(const JSCallbackInfo& args);
-
 private:
     friend class JSTabsControllerBinding;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;

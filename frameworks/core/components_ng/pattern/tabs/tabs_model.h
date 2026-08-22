@@ -198,7 +198,7 @@ public:
     virtual void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) {}
     virtual void ResetBarFloatingStyle() {}
     virtual void SetBarLayoutStyle(NG::TabBarLayoutStyle barLayoutStyle) {}
-    virtual void SetSidebarPosition(SideBarPosition position) {}
+    virtual void SetSidebarPosition(BarPosition position) {}
     virtual void SetSidebarHeader(const RefPtr<AceType>& header) {}
     virtual void SetSidebarSearchableOptions(const NG::TabsSidebarSearchableOptions& options) {}
     virtual void SetBarDisplayModeBreakpoint(const NG::TabBarDisplayModeBreakpoint& breakpoint) {}

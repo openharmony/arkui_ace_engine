@@ -120,6 +120,13 @@ void SetOnChangeImplImpl(const RefPtr<AceType>& controller,
     ctl->SetOnChangeImpl(callback);
 }
 
+int32_t GetBarDisplayModeImpl(const RefPtr<AceType>& controller)
+{
+    auto tabsController = ToController(controller);
+    CHECK_NULL_RETURN(tabsController, static_cast<int32_t>(OHOS::Ace::NG::TabBarDisplayMode::BOTTOMTABBAR));
+    return static_cast<int32_t>(tabsController->GetBarDisplayMode());
+}
+
 int32_t TransitionGetFromIndexImpl(const RefPtr<AceType>& proxy)
 {
     auto p = AceType::DynamicCast<TabContentTransitionProxy>(proxy);
@@ -156,6 +163,7 @@ const ArkUITabsControllerModifier* GetTabsControllerModifier()
         .cancelShowTabBar = CancelShowTabBarImpl,
         .updateTabBarHiddenOffset = UpdateTabBarHiddenOffsetImpl,
         .setOnChangeImpl = SetOnChangeImplImpl,
+        .getBarDisplayMode = GetBarDisplayModeImpl,
     };
     return &modifier;
 }

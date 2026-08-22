@@ -110,7 +110,10 @@ void TabsSideBarLayoutAlgorithm::MeasureHeaderContainerMaskNode(
             property->UpdateVisibility(VisibleType::INVISIBLE);
             continue;
         }
-        if (property->GetVisibilityValue(VisibleType::INVISIBLE) != VisibleType::VISIBLE) {
+        // Restore visibility based on isScrollEffectEnabled_ when header height becomes non-zero
+        bool shouldVisible = sideBarPattern->IsScrollEffectEnabled();
+        property->UpdateVisibility(shouldVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        if (!shouldVisible) {
             continue;
         }
         auto maskIndex = hostNode->GetChildIndexById(effectNode->GetId());

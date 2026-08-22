@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISearchModifier* GetSearchModifier();
 const CJUISearchModifier* GetCJUISearchModifier();
-const ArkUISearchCustomModifier* GetSearchCustomModifier();
+ACE_FORCE_EXPORT const ArkUISearchCustomModifier* GetSearchCustomModifier();
 void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam);
 void SetOnSearchChange(ArkUINodeHandle node, void* extraParam);
 void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam);

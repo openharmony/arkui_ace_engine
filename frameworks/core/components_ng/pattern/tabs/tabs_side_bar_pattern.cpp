@@ -35,13 +35,11 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"
-#include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
@@ -303,9 +301,7 @@ void TabsSideBarPattern::UpdateSearchNodeIfNeeded()
         searchableOptions_ = newOptions;
         return;
     }
-    bool needRecreateSearchNode =
-        searchableOptions_.isNull != newOptions.isNull ||
-        searchableOptions_.placeholder != newOptions.placeholder;
+    bool needRecreateSearchNode = searchableOptions_ != newOptions;
     searchableOptions_ = newOptions;
     if (!needRecreateSearchNode) {
         return;
@@ -319,13 +315,18 @@ void TabsSideBarPattern::UpdateSearchNodeIfNeeded()
     if (newOptions.placeholder.has_value()) {
         placeholder = UtfUtils::Str8DebugToStr16(newOptions.placeholder.value());
     }
+    ArkUISearchCreateResourceParams searchResParams;
+    searchResParams.stringValueRawPtr = AceType::RawPtr(newOptions.searchTextResObj);
+    searchResParams.placeholderRawPtr = AceType::RawPtr(newOptions.placeholderResObj);
+    searchResParams.parseValueResult = newOptions.searchTextResObj != nullptr;
+    searchResParams.parsePlaceholderResult = newOptions.placeholderResObj != nullptr;
     auto customModifier = NodeModifier::GetSearchCustomModifier();
     CHECK_NULL_VOID(customModifier);
     RefPtr<FrameNode> searchNode = nullptr;
     {
         std::optional<std::string> icon;
         ScopedViewStackProcessor scopedViewStackProcessor;
-        customModifier->createNormalSearch(text, placeholder, icon, nullptr);
+        customModifier->createNormalSearch(text, placeholder, icon, &searchResParams);
         searchNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         CHECK_NULL_VOID(searchNode);
     }
@@ -335,6 +336,12 @@ void TabsSideBarPattern::UpdateSearchNodeIfNeeded()
             CHECK_NULL_VOID(pattern);
             pattern->OnSearchChange(newStr);
         });
+    // Remove old search container before creating new one
+    if (searchContainerNode_) {
+        headerContainerNode_->RemoveChild(searchContainerNode_);
+        searchContainerNode_ = nullptr;
+        headerContainerNode_->MarkNeedSyncRenderTree();
+    }
     auto searchContainerNode = CreateSearchContainer();
     CHECK_NULL_VOID(searchContainerNode);
     searchNode->MountToParent(searchContainerNode);
@@ -392,7 +399,10 @@ RefPtr<FrameNode> TabsSideBarPattern::CreateEffectNode(const std::string& tag)
     auto node = FrameNode::CreateFrameNode(
         tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     // Effect nodes don't participate in hit test
-    ViewAbstract::SetHitTestMode(AceType::RawPtr(node), HitTestMode::HTMNONE);
+    CHECK_NULL_RETURN(node, nullptr);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
     return node;
 }
 

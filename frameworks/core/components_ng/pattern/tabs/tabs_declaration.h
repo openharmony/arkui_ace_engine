@@ -20,6 +20,7 @@
 #include <string>
 #include <functional>
 #include <optional>
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -62,6 +63,8 @@ struct TabsSidebarSearchableOptions {
     std::optional<std::string> placeholder;
     std::function<void(const std::string& text)> searchCallback;
     std::function<bool(int32_t tabIndex, const std::string& text)> searchFilter;
+    RefPtr<ResourceObject> searchTextResObj;
+    RefPtr<ResourceObject> placeholderResObj;
     bool isNull = true;
 
     bool operator==(const TabsSidebarSearchableOptions& other) const
@@ -72,7 +75,8 @@ struct TabsSidebarSearchableOptions {
         if (isNull) {
             return true;
         }
-        return searchText == other.searchText && placeholder == other.placeholder;
+        return searchText == other.searchText && placeholder == other.placeholder &&
+            searchTextResObj == other.searchTextResObj && placeholderResObj == other.placeholderResObj;
     }
 
     bool operator!=(const TabsSidebarSearchableOptions& other) const

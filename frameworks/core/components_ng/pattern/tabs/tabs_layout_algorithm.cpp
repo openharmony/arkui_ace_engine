@@ -249,7 +249,13 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(tabsPattern);
     auto preDisplayMode = tabsPattern->GetCurrentBarDisplayMode();
     auto curDisplayMode = tabsPattern->CalculateTabBarDisplayMode(idealSize.Width());
+    // When first layout, if sideBar exists (using new displayMode feature), need to initialize visibility.
+    // Otherwise, keep original behavior to avoid affecting developers who don't use new features.
+    bool firstLayout = !preDisplayMode.has_value();
     bool displayModeChanged = preDisplayMode.has_value() && preDisplayMode.value() != curDisplayMode;
+    if (firstLayout) {
+        displayModeChanged = tabsPattern->GetSideBarNode() != nullptr;
+    }
     bool preIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
     tabsPattern->SetCurrentBarDisplayMode(curDisplayMode);
     bool curIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
@@ -547,10 +553,10 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(
     auto dividerStrokeWidth = SIDE_BAR_DIVIDER_DEFAULT_WIDTH.ConvertToPx();
     auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, offsetList);
-    auto sideBarPosition = layoutProperty->GetSidebarPositionValue(SideBarPosition::START);
+    auto sideBarPosition = layoutProperty->GetSidebarPositionValue(BarPosition::START);
     auto paddingOffset = layoutProperty->CreatePaddingAndBorder().Offset();
     bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if ((!isRTL && sideBarPosition == SideBarPosition::START) || (isRTL && sideBarPosition == SideBarPosition::END)) {
+    if ((!isRTL && sideBarPosition == BarPosition::START) || (isRTL && sideBarPosition == BarPosition::END)) {
         sideBarOffset = paddingOffset;
         sideBarDividerOffset = OffsetF(sideBarFrameSize.Width() + paddingOffset.GetX(), paddingOffset.GetY());
         swiperOffset = OffsetF(paddingOffset.GetX() + sideBarFrameSize.Width() + dividerStrokeWidth,

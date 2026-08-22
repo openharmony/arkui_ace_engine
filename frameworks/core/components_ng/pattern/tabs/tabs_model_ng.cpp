@@ -2008,14 +2008,14 @@ void TabsModelNG::SetBarLayoutStyle(FrameNode* frameNode, TabBarLayoutStyle barL
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarLayoutStyle, barLayoutStyle, frameNode);
 }
 
-void TabsModelNG::SetSidebarPosition(SideBarPosition position)
+void TabsModelNG::SetSidebarPosition(BarPosition position)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     SetSidebarPosition(frameNode, position);
 }
 
-void TabsModelNG::SetSidebarPosition(FrameNode* frameNode, SideBarPosition position)
+void TabsModelNG::SetSidebarPosition(FrameNode* frameNode, BarPosition position)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarPosition, position, frameNode);
 }
