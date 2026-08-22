@@ -1488,9 +1488,9 @@ void PlaceholderResponseArea::PlaceholderMountToParent()
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(!placeholderNode_->GetParent());
+    placeholderNode_->MountToParent(host);
     placeholderNode_->MarkModifyDone();
     placeholderNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    placeholderNode_->MountToParent(host);
 }
 
 void PlaceholderResponseArea::PlaceholderRemoveFromParent()

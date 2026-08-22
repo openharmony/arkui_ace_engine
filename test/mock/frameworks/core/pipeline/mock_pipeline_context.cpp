@@ -2123,6 +2123,8 @@ int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& cal
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density) {}
+void PipelineContext::RegisterListenerForTranslate(const WeakPtr<FrameNode> node) {}
+void PipelineContext::UnRegisterListenerForTranslate(int32_t nodeId) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

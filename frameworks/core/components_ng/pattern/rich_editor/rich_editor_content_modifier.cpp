@@ -80,6 +80,7 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
     }
 
     PaintCustomSpan(drawingContext);
+    contentPattern->ReportPageTranslatePlaceholderDrawn();
 }
 
 float RichEditorContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect)

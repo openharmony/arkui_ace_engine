@@ -23,6 +23,7 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -549,5 +550,137 @@ HWTEST_F(TextThirteenTestNg, CollectTextSpanNodes_onLongPress2, TestSize.Level1)
      */
     pattern->CollectTextSpanNodes(spanNode, isSpanHasClick, isSpanHasLongPress);
     EXPECT_TRUE(isSpanHasLongPress);
+}
+
+/**
+ * @tc.name: PageTranslate_ApplyTranslateResultCommon
+ * @tc.desc: Test ApplyTranslateResultCommon all branches via ApplyPageTranslateResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, PageTranslate_ApplyTranslateResultCommon, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // version < 0: no translation set
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("text", -1));
+    EXPECT_FALSE(pattern->GetPageTranslatedText().has_value());
+
+    // existingVersion > 0 and version < existingVersion: no update
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("translated", 2));
+    ASSERT_TRUE(pattern->GetPageTranslatedText().has_value());
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("text", 1));
+    EXPECT_EQ(pattern->GetPageTranslatedText().value(), u"translated");
+
+    // empty result: no update
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("", 3));
+    EXPECT_EQ(pattern->GetPageTranslatedText().value(), u"translated");
+
+    // same value and same version: no update
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("translated", 2));
+    EXPECT_EQ(pattern->GetPageTranslatedText().value(), u"translated");
+
+    // new valid result: translation updated
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("hello", 3));
+    EXPECT_EQ(pattern->GetPageTranslatedText().value(), u"hello");
+}
+
+/**
+ * @tc.name: PageTranslate_ApplyAndReset
+ * @tc.desc: Test TextPattern ApplyPageTranslateResult and ResetPageTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, PageTranslate_ApplyAndReset, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // ApplyPageTranslateResult with negative version returns true but does not set translated text
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("result", -1));
+    EXPECT_FALSE(pattern->GetPageTranslatedText().has_value());
+
+    // ApplyPageTranslateResult with valid result sets translated text and version
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("translated", 1));
+    ASSERT_TRUE(pattern->GetPageTranslatedText().has_value());
+    EXPECT_EQ(pattern->GetPageTranslatedText().value(), u"translated");
+
+    // ApplyPageTranslateResult with same result and version returns true without change
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("translated", 1));
+
+    // ResetPageTranslate clears translated text and version
+    pattern->ResetPageTranslate();
+    EXPECT_FALSE(pattern->GetPageTranslatedText().has_value());
+
+    // ResetPageTranslate again when already clean is a no-op
+    pattern->ResetPageTranslate();
+    EXPECT_FALSE(pattern->GetPageTranslatedText().has_value());
+}
+
+/**
+ * @tc.name: PageTranslate_GetPageTranslateTextForReport
+ * @tc.desc: Test TextPattern GetPageTranslateTextForReport all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, PageTranslate_GetPageTranslateTextForReport, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // textForDisplay_ is empty returns empty string
+    pattern->textForDisplay_ = u"";
+    EXPECT_TRUE(pattern->GetPageTranslateTextForReport().empty());
+
+    // textForDisplay_ not empty but lastDrawn != textForDisplay_ returns empty string
+    pattern->textForDisplay_ = u"hello";
+    pattern->lastDrawnPageTranslateContent_ = u"world";
+    EXPECT_TRUE(pattern->GetPageTranslateTextForReport().empty());
+
+    // lastDrawn == textForDisplay_ returns the text
+    pattern->MarkPageTranslateTextDrawn();
+    EXPECT_EQ(pattern->GetPageTranslateTextForReport(), "hello");
+}
+
+/**
+ * @tc.name: PageTranslate_OnPageTranslateSourceTextChanged
+ * @tc.desc: Test TextPattern OnPageTranslateSourceTextChanged clears state
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, PageTranslate_OnPageTranslateSourceTextChanged, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set translated state and drawn text
+    pattern->ApplyPageTranslateResult("translated", 1);
+    pattern->textForDisplay_ = u"translated";
+    pattern->MarkPageTranslateTextDrawn();
+    ASSERT_TRUE(pattern->GetPageTranslatedText().has_value());
+
+    // OnPageTranslateSourceTextChanged clears lastDrawn and resets translate
+    pattern->OnPageTranslateSourceTextChanged();
+    EXPECT_FALSE(pattern->GetPageTranslatedText().has_value());
+    EXPECT_TRUE(pattern->lastDrawnPageTranslateContent_.empty());
+}
+
+/**
+ * @tc.name: PageTranslate_GetPageTranslateNodeId
+ * @tc.desc: Test TextPattern GetPageTranslateNodeId returns host id
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, PageTranslate_GetPageTranslateNodeId, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 100, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetPageTranslateNodeId(), 100);
 }
 } // namespace OHOS::Ace::NG

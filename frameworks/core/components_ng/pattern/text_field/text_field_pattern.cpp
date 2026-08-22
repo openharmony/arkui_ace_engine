@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
@@ -4554,6 +4555,7 @@ void TextFieldPattern::OnModifyDone()
     if (selectDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         selectDetectorAdapter_->GetAIEntityMenu();
     }
+    context->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
 }
 
 void TextFieldPattern::TriggerAvoidWhenCaretGoesDown()
@@ -5211,6 +5213,7 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowFocusChangedCallback(node->GetId());
+    pipeline->UnRegisterListenerForTranslate(node->GetId());
     CHECK_NULL_VOID(keyboardOverlay_);
     keyboardOverlay_->CloseKeyboard(node->GetId());
 }
@@ -15010,5 +15013,86 @@ void TextFieldPattern::OnUiMaterialParamUpdate(const UiMaterialParam& params)
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, params.backgroundColor, host);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderWidthFlagByUser, params.borderWidth, host);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderColorFlagByUser, params.borderColor, host);
+}
+
+int32_t TextFieldPattern::GetPageTranslateNodeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
+const std::optional<std::u16string>& TextFieldPattern::GetPageTranslatedPlaceholder() const
+{
+    return pageTranslatedContent_;
+}
+
+std::string TextFieldPattern::GetPageTranslateTextForReport() const
+{
+    if (!GetTextUtf16Value().empty()) {
+        return "";
+    }
+    const auto currentPlaceholder = GetPlaceHolder();
+    if (lastDrawnPageTranslateContent_.empty() ||
+        lastDrawnPageTranslateContent_ != currentPlaceholder) {
+        return "";
+    }
+    return UtfUtils::Str16DebugToStr8(currentPlaceholder);
+}
+
+bool TextFieldPattern::ApplyPageTranslateResult(const std::string& result, int64_t version)
+{
+    if (!ApplyTranslateResultCommon(result, version)) {
+        return true;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    return true;
+}
+
+void TextFieldPattern::ResetPageTranslate()
+{
+    if (!ResetTranslateCommon()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::ReportPageTranslatePlaceholderDrawn()
+{
+    if (!GetTextUtf16Value().empty()) {
+        return;
+    }
+    lastDrawnPageTranslateContent_ = GetPlaceHolder();
+    auto text = GetPageTranslateTextForReport();
+    if (text.empty()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->ReportTranslateTextNode(AceType::WeakClaim<PageTranslateNode>(this), text);
+}
+
+void TextFieldPattern::OnPlaceholderSourceTextChanged()
+{
+    bool hasTranslateState = pageTranslatedContent_.has_value() ||
+        !lastDrawnPageTranslateContent_.empty();
+    lastDrawnPageTranslateContent_.clear();
+    ResetPageTranslate();
+    CHECK_NULL_VOID(hasTranslateState);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->ResetTranslateTextNode(host->GetId());
 }
 } // namespace OHOS::Ace::NG

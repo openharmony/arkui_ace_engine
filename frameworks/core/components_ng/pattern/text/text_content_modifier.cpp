@@ -660,6 +660,9 @@ void TextContentModifier::ContentChangeReport()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
+    if (host->GetTag() != "SymbolGlyph") {
+        textPattern->ReportPageTranslateTextDrawn();
+    }
     if (!mgr->IsTextAABBCollecting() || host->GetTag() == "SymbolGlyph") {
         return;
     }

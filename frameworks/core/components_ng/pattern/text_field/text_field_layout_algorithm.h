@@ -126,6 +126,9 @@ protected:
         LayoutWrapper* layoutWrapper, TextStyle& textStyle, std::u16string& textContent, bool& showPlaceHolder);
     void ConstructTextStylesAppend(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle,
         const RefPtr<TextFieldPattern>& pattern, bool showPlaceHolder);
+    void ConstructTranslatedPlaceholder(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldPattern>& pattern, const RefPtr<TextFieldTheme>& textFieldTheme,
+        TextStyle& textStyle);
     LayoutConstraintF CalculateContentMaxSizeWithCalculateConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 

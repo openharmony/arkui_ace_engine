@@ -18,11 +18,13 @@
 
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/utf_helper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -63,6 +65,40 @@ public:
     virtual void SendTranslateResult(std::string /* results */) {}
 
     virtual void EndTranslate() {}
+
+protected:
+    std::optional<std::u16string> pageTranslatedContent_;
+    int64_t pageTranslateVersion_ = 0;
+    std::u16string lastDrawnPageTranslateContent_;
+
+    bool ApplyTranslateResultCommon(const std::string& result, int64_t version)
+    {
+        if (version < 0 || (pageTranslateVersion_ > 0 && version < pageTranslateVersion_)) {
+            return false;
+        }
+        auto translatedText = UtfUtils::Str8ToStr16(result);
+        if (translatedText.empty()) {
+            return false;
+        }
+        if (pageTranslatedContent_.has_value() &&
+            pageTranslatedContent_.value() == translatedText &&
+            pageTranslateVersion_ == version) {
+            return false;
+        }
+        pageTranslatedContent_ = std::move(translatedText);
+        pageTranslateVersion_ = version;
+        return true;
+    }
+
+    bool ResetTranslateCommon()
+    {
+        if (!pageTranslatedContent_.has_value() && pageTranslateVersion_ == 0) {
+            return false;
+        }
+        pageTranslatedContent_.reset();
+        pageTranslateVersion_ = 0;
+        return true;
+    }
 };
 
 } // namespace OHOS::Ace::NG
