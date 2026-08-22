@@ -238,6 +238,26 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabsOnContentWillChange.identity, TabsOnContentWillChange, handler);
         return this;
       }
+      barStyle(value: TabBarStyle): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsBarStyleModifier.identity, TabsBarStyleModifier, value);
+        return this;
+      }
+      sidebarPosition(value: BarPosition): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsSidebarPositionModifier.identity, TabsSidebarPositionModifier, value);
+        return this;
+      }
+      sidebarHeader(value: ComponentContent): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsSidebarHeaderModifier.identity, TabsSidebarHeaderModifier, value);
+        return this;
+      }
+      sidebarSearchable(value: TabsSidebarSearchableOptions): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsSidebarSearchableModifier.identity, TabsSidebarSearchableModifier, value);
+        return this;
+      }
+      barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsBarDisplayModeBreakpointModifier.identity, TabsBarDisplayModeBreakpointModifier, value);
+        return this;
+      }
     }
 
     class TabBarFloatingStyleModifier extends ModifierWithKey<barFloatingStyleOptions> {
@@ -962,6 +982,89 @@ function loadComponent(): ComponentObj | undefined {
       }
     } 
     
+    class TabsBarStyleModifier extends ModifierWithKey<TabBarStyle> {
+      constructor(value: TabBarStyle) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabsBarStyle');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetBarStyle(node);
+        } else {
+          getUINativeModule().tabs.setBarStyle(node, this.value);
+        }
+      }
+
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabsSidebarPositionModifier extends ModifierWithKey<BarPosition> {
+      constructor(value: BarPosition) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabsSidebarPosition');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetSidebarPosition(node);
+        } else {
+          getUINativeModule().tabs.setSidebarPosition(node, this.value);
+        }
+      }
+
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabsSidebarHeaderModifier extends ModifierWithKey<ComponentContent> {
+      constructor(value: ComponentContent) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabsSidebarHeader');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetSidebarHeader(node);
+        } else {
+          getUINativeModule().tabs.setSidebarHeader(node, this.value);
+        }
+      }
+    }
+
+    class TabsSidebarSearchableModifier extends ModifierWithKey<TabsSidebarSearchableOptions> {
+      constructor(value: TabsSidebarSearchableOptions) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabsSidebarSearchable');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetSidebarSearchable(node);
+        } else {
+          getUINativeModule().tabs.setSidebarSearchable(node, this.value);
+        }
+      }
+    }
+
+    class TabsBarDisplayModeBreakpointModifier extends ModifierWithKey<TabsBreakpointType<TabBarDisplayMode>> {
+      constructor(value: TabsBreakpointType<TabBarDisplayMode>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabsBarDisplayModeBreakpoint');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetBarDisplayModeBreakpoint(node);
+        } else {
+          getUINativeModule().tabs.setBarDisplayModeBreakpoint(node, this.value);
+        }
+      }
+    }
+
         loadComponent.componentObj = { 'component': ArkTabsComponent };
   }
   return loadComponent.componentObj;
@@ -1132,6 +1235,26 @@ class JSTabs extends JSContainerBase {
 
   static barFloatingStyle(value: any): void {
     getUINativeModule().tabs.setTabsBarFloatingStyle(true, value);
+  }
+
+  static barStyle(value: any): void {
+    getUINativeModule().tabs.setBarStyle(true, value);
+  }
+
+  static sidebarPosition(value: any): void {
+    getUINativeModule().tabs.setSidebarPosition(true, value);
+  }
+
+  static sidebarHeader(value: any): void {
+    getUINativeModule().tabs.setSidebarHeader(true, value);
+  }
+
+  static sidebarSearchable(value: any): void {
+    getUINativeModule().tabs.setSidebarSearchable(true, value);
+  }
+
+  static barDisplayModeBreakpoint(value: any): void {
+    getUINativeModule().tabs.setBarDisplayModeBreakpoint(true, value);
   }
 
   static attributeModifier(modifier: any): void {

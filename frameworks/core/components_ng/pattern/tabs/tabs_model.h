@@ -27,6 +27,7 @@
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
@@ -196,6 +197,11 @@ public:
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) {}
     virtual void ResetBarFloatingStyle() {}
+    virtual void SetBarLayoutStyle(NG::TabBarLayoutStyle barLayoutStyle) {}
+    virtual void SetSidebarPosition(BarPosition position) {}
+    virtual void SetSidebarHeader(const RefPtr<AceType>& header) {}
+    virtual void SetSidebarSearchableOptions(const NG::TabsSidebarSearchableOptions& options) {}
+    virtual void SetBarDisplayModeBreakpoint(const NG::TabBarDisplayModeBreakpoint& breakpoint) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

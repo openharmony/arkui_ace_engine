@@ -92,6 +92,11 @@ public:
         lastFloatingBar_ = lastFloatingBar;
     }
 
+    void SetBarDisplayMode(std::optional<TabBarDisplayMode> mode)
+    {
+        currentBarDisplayMode_ = mode;
+    }
+
 private:
     BarPosition GetBarPosition(LayoutWrapper* layoutWrapper) const;
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
@@ -112,6 +117,23 @@ private:
     void UpdateBarMargin(LayoutWrapper* layoutWrapper, OffsetF& barOffset) const;
     void LayoutBackgroundMask(LayoutWrapper* layoutWrapper);
 
+    void UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
+    void UpdateTabBarAndDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
+    void MeasureInSideBarMode(
+        LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize);
+    float MeasureSideBar(
+        LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize);
+    float MeasureSideBarDivider(
+        LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize);
+    SizeF MeasureSwiperInSideBarMode(
+        const RefPtr<TabsLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& swiperWrapper,
+        const SizeF& idealSize, const float sideBarWidth, const float dividerWidth);
+
+    std::vector<OffsetF> LayoutOffsetListInSideBarMode(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarWrapper,
+        const SizeF& frameSize) const;
+    void LayoutInSideBarMode(LayoutWrapper* layoutWrapper);
+
     LayoutCalPolicy widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
     LayoutCalPolicy heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
 
@@ -120,6 +142,7 @@ private:
     bool isFloatingBar_ = false;
     bool lastFloatingBar_ = false;
     std::optional<float> floatingBarMargin_;
+    std::optional<TabBarDisplayMode> currentBarDisplayMode_;
 };
 
 } // namespace OHOS::Ace::NG

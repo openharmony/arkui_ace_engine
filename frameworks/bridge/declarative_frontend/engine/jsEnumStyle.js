@@ -1079,6 +1079,19 @@ let BarPosition;
   BarPosition[BarPosition.End = 1] = 'End';
 })(BarPosition || (BarPosition = {}));
 
+let TabBarStyle;
+(function (TabBarStyle) {
+  TabBarStyle[TabBarStyle.BOTTOM = 0] = 'BOTTOM';
+  TabBarStyle[TabBarStyle.SIDEBAR = 1] = 'SIDEBAR';
+  TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 2] = 'SIDEBAR_ADAPTABLE';
+})(TabBarStyle || (TabBarStyle = {}));
+
+let TabBarDisplayMode;
+(function (TabBarDisplayMode) {
+  TabBarDisplayMode[TabBarDisplayMode.BOTTOM_TABBAR = 0] = 'BOTTOM_TABBAR';
+  TabBarDisplayMode[TabBarDisplayMode.SIDEBAR = 1] = 'SIDEBAR';
+})(TabBarDisplayMode || (TabBarDisplayMode = {}));
+
 let SharedTransitionEffectType;
 (function (SharedTransitionEffectType) {
   SharedTransitionEffectType[SharedTransitionEffectType.Static = 0] = 'Static';

@@ -18,6 +18,7 @@
 
 #include "core/components/swiper/swiper_controller.h"
 #include "ui/properties/ng/transition_property.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -94,12 +95,23 @@ public:
         }
     }
 
+    TabBarDisplayMode GetBarDisplayMode() const
+    {
+        return barDisplayMode_;
+    }
+
+    void SetBarDisplayMode(TabBarDisplayMode displayMode)
+    {
+        barDisplayMode_ = displayMode;
+    }
+
 private:
     StartShowTabBarFunc startShowTabBarImpl_;
     CancelShowTabBarFunc cancelShowTabBarImpl_;
     UpdateTabBarHiddenOffsetFunc updateTabBarHiddenOffsetImpl_;
     SetTabBarTranslateFunc setTabBarTranslateImpl_;
     SetTabBarOpacityFunc setTabBarOpacityImpl_;
+    TabBarDisplayMode barDisplayMode_ = TabBarDisplayMode::BOTTOMTABBAR;
 };
 
 } // namespace OHOS::ACE

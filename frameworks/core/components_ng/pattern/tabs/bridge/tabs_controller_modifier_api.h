@@ -37,6 +37,7 @@ struct ArkUITabsControllerModifier {
     void (*updateTabBarHiddenOffset)(const RefPtr<AceType>& controller, double offset);
     void (*setOnChangeImpl)(const RefPtr<AceType>& controller,
                             const std::function<void(int32_t)>& callback);
+    int32_t (*getBarDisplayMode)(const RefPtr<AceType>& controller);
 };
 extern const ArkUITabsControllerModifier* GetTabsControllerModifier();
 }

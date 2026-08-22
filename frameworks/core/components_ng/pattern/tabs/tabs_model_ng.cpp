@@ -1995,4 +1995,71 @@ void TabsModelNG::ProcessColorWithResourceObj(
         pattern->RemoveResObj("tabs." + name);
     }
 }
+
+void TabsModelNG::SetBarLayoutStyle(TabBarLayoutStyle barLayoutStyle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarLayoutStyle(frameNode, barLayoutStyle);
+}
+
+void TabsModelNG::SetBarLayoutStyle(FrameNode* frameNode, TabBarLayoutStyle barLayoutStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarLayoutStyle, barLayoutStyle, frameNode);
+}
+
+void TabsModelNG::SetSidebarPosition(BarPosition position)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarPosition(frameNode, position);
+}
+
+void TabsModelNG::SetSidebarPosition(FrameNode* frameNode, BarPosition position)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarPosition, position, frameNode);
+}
+
+void TabsModelNG::SetSidebarHeader(const RefPtr<AceType>& header)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarHeader(frameNode, header);
+}
+
+void TabsModelNG::SetSidebarHeader(FrameNode* frameNode, const RefPtr<AceType>& header)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto customHeader = AceType::DynamicCast<NG::UINode>(header);
+    pattern->SetSidebarHeaderNode(customHeader);
+}
+
+void TabsModelNG::SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarSearchableOptions(frameNode, options);
+}
+
+void TabsModelNG::SetSidebarSearchableOptions(FrameNode* frameNode, const TabsSidebarSearchableOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetTabsSidebarSearchableOptions(options);
+}
+
+void TabsModelNG::SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint& breakpoint)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarDisplayModeBreakpoint(frameNode, breakpoint);
+}
+
+void TabsModelNG::SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarDisplayModeBreakpoint, breakpoint, frameNode);
+}
 } // namespace OHOS::Ace::NG

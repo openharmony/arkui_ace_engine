@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,7 +50,174 @@ const Dimension COUNT_5_MAXIMUM = Dimension(360, Ace::DimensionUnit::VP);
 
 const Dimension FLOATING_BAR_PADDING_4 = Dimension(4, Ace::DimensionUnit::VP);
 const Dimension FLOATING_BAR_PADDING_12 = Dimension(12, Ace::DimensionUnit::VP);
+
+const Dimension SIDE_BAR_DEFAULT_WIDTH = 240.0_vp;
+const Dimension SIDE_BAR_DIVIDER_DEFAULT_WIDTH = 1.0_vp;
 } // namespace
+
+void TabsLayoutAlgorithm::UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto tabsPattern = host->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto sideBar = tabsPattern->GetSideBarNode();
+    if (sideBar) {
+        auto property = sideBar->GetLayoutProperty();
+        if (property) {
+            property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+        }
+    }
+    auto sideBarDivider = tabsPattern->GetSideBarDividerNode();
+    if (sideBarDivider) {
+        auto property = sideBarDivider->GetLayoutProperty();
+        if (property) {
+            property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+        }
+    }
+}
+
+void TabsLayoutAlgorithm::UpdateTabBarAndDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(host);
+    auto divider = AceType::DynamicCast<FrameNode>(host->GetDivider());
+    if (divider) {
+        auto property = divider->GetLayoutProperty();
+        if (property) {
+            property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+        }
+    }
+    auto tabBar = AceType::DynamicCast<FrameNode>(host->GetTabBar());
+    if (tabBar) {
+        auto property = tabBar->GetLayoutProperty();
+        if (property) {
+            property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+        }
+    }
+}
+
+float TabsLayoutAlgorithm::MeasureSideBar(
+    LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto host = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto tabsPattern = host->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, 0.0f);
+    auto sideBar = tabsPattern->GetSideBarNode();
+    CHECK_NULL_RETURN(sideBar, 0.0f);
+    auto index = host->GetChildIndexById(sideBar->GetId());
+    if (index < 0) {
+        return 0.0f;
+    }
+    auto sideBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(sideBarWrapper, 0.0f);
+    auto geometryNode = sideBarWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize.SetWidth(SIDE_BAR_DEFAULT_WIDTH.ConvertToPx());
+    childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+    sideBarWrapper->Measure(childLayoutConstraint);
+    return geometryNode->GetFrameSize().Width();
+}
+
+float TabsLayoutAlgorithm::MeasureSideBarDivider(
+    LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto host = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto tabsPattern = host->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, 0.0f);
+    auto sideBarDivider = tabsPattern->GetSideBarDividerNode();
+    CHECK_NULL_RETURN(sideBarDivider, 0.0f);
+    auto index = host->GetChildIndexById(sideBarDivider->GetId());
+    if (index < 0) {
+        return 0.0f;
+    }
+    auto sideBarDividerWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(sideBarDividerWrapper, 0.0f);
+    auto geometryNode = sideBarDividerWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize.SetWidth(SIDE_BAR_DIVIDER_DEFAULT_WIDTH.ConvertToPx());
+    childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+    sideBarDividerWrapper->Measure(childLayoutConstraint);
+    return geometryNode->GetFrameSize().Width();
+}
+
+SizeF TabsLayoutAlgorithm::MeasureSwiperInSideBarMode(
+    const RefPtr<TabsLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& swiperWrapper,
+    const SizeF& idealSize, const float sideBarWidth, const float dividerWidth)
+{
+    /*
+     * When the width or height of tabs are set to auto, WRAP_CONTENT, FIX_AT_IDEAL_SIZE,
+     * the size of the tabs adaptive child nodes is required, but the constraints are different.
+     *
+     * 1. When set to auto, the maxSize of tabcontent is the idealsize of the tabs,
+     *    and the maxSize of tabs will exceed the parent node size.
+     *
+     * 2. When set to WRAP_CONTENT,
+     *    the maxSize of tabcontent should be tabs size minus the rest of the tabs node size,
+     *    the maxSize of tabs is equal to the size of the parent node;
+     *
+     * 3. When set to FIX_AT_IDEAL_SIZE, there is no limit to the maxSize of tabcontent/tabs.
+     */
+    bool autoWidth = layoutProperty->GetWidthAutoValue(false) || IsWidthFixOrWrap();
+    SizeF parentIdealSize = idealSize;
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
+
+    // If the width or height is set to FIX_AT_IDEAL_SIZE, the maxSize should be set to infinite.
+    SetFixAtIdealSizeMaxSize(childLayoutConstraint);
+
+    /*
+     * If the width or height is set to WRAP_CONTENT,
+     * the maxSize of tabs should be idealsize,
+     * and the maxSize of tabcontent should be tabs size minus the rest of the tabs node size.
+     */
+    auto paddingWidth = layoutProperty->CreatePaddingAndBorder().Width();
+
+    // vertical & not overlap
+    auto idealWidth = idealSize.Width() - sideBarWidth - dividerWidth;
+    SetWrapContentMaxWidth(childLayoutConstraint, (idealWidth - paddingWidth));
+    if (!autoWidth) {
+        childLayoutConstraint.selfIdealSize.SetWidth(idealWidth);
+    }
+    childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+    parentIdealSize.SetWidth(idealWidth);
+
+    childLayoutConstraint.parentIdealSize = OptionalSizeF(parentIdealSize);
+    swiperWrapper->Measure(childLayoutConstraint);
+
+    return swiperWrapper->GetGeometryNode()->GetMarginFrameSize();
+}
+
+void TabsLayoutAlgorithm::MeasureInSideBarMode(
+    LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    float sideBarWidth = MeasureSideBar(layoutWrapper, layoutProperty, idealSize);
+    float dividerStrokeWidth = MeasureSideBarDivider(layoutWrapper, layoutProperty, idealSize);
+
+    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.swiperIndex);
+    if (swiperWrapper) {
+        swiperWrapper->GetLayoutProperty()->UpdateLayoutDirection(layoutProperty->GetNonAutoLayoutDirection());
+    }
+    if (swiperWrapper && swiperWrapper->GetHostNode() && swiperWrapper->GetHostNode()->TotalChildCount() > 0) {
+        MeasureSwiperInSideBarMode(
+            layoutProperty, swiperWrapper, idealSize, sideBarWidth, dividerStrokeWidth);
+    } else if (swiperWrapper && swiperWrapper->GetGeometryNode()) {
+        swiperWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+    }
+}
 
 void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -74,6 +242,45 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     geometryNode->SetFrameSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto preDisplayMode = tabsPattern->GetCurrentBarDisplayMode();
+    auto curDisplayMode = tabsPattern->CalculateTabBarDisplayMode(idealSize.Width());
+    // When first layout, if sideBar exists (using new displayMode feature), need to initialize visibility.
+    // Otherwise, keep original behavior to avoid affecting developers who don't use new features.
+    bool firstLayout = !preDisplayMode.has_value();
+    bool displayModeChanged = preDisplayMode.has_value() && preDisplayMode.value() != curDisplayMode;
+    if (firstLayout) {
+        displayModeChanged = tabsPattern->GetSideBarNode() != nullptr;
+    }
+    bool preIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
+    tabsPattern->SetCurrentBarDisplayMode(curDisplayMode);
+    bool curIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
+
+    if (displayModeChanged) {
+        UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::SIDEBAR);
+        UpdateTabBarAndDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+    }
+
+    if (preIsDisableSwipe != curIsDisableSwipe) {
+        auto context = tabsNode->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterLayoutTask([weakTabsNode = WeakPtr(tabsNode)]() {
+            auto tabsNode = weakTabsNode.Upgrade();
+            CHECK_NULL_VOID(tabsNode);
+            // for invoke TabsPattern::UpdateSwiperDisableSwipe again.
+            tabsNode->MarkModifyDone();
+            tabsNode->MarkDirtyNode();
+        });
+    }
+    if (curDisplayMode == TabBarDisplayMode::SIDEBAR) {
+        MeasureInSideBarMode(layoutWrapper, layoutProperty, idealSize);
+        return;
+    }
+
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
     float dividerStrokeWidth = 0.0f;
@@ -136,12 +343,76 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
+void TabsLayoutAlgorithm::LayoutInSideBarMode(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto sideBar = tabsPattern->GetSideBarNode();
+    CHECK_NULL_VOID(sideBar);
+    auto sideBarIndex = tabsNode->GetChildIndexById(sideBar->GetId());
+    auto sideBarWrapper = layoutWrapper->GetOrCreateChildByIndex(sideBarIndex);
+    CHECK_NULL_VOID(sideBarWrapper);
+    auto sideBarDivider = tabsPattern->GetSideBarDividerNode();
+    CHECK_NULL_VOID(sideBarDivider);
+    auto sideBarDividerIndex = tabsNode->GetChildIndexById(sideBarDivider->GetId());
+    auto sideBarDividerWrapper = layoutWrapper->GetOrCreateChildByIndex(sideBarDividerIndex);
+    CHECK_NULL_VOID(sideBarDividerWrapper);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.swiperIndex);
+    if (!swiperWrapper || !sideBarDividerWrapper || !sideBarWrapper) {
+        return;
+    }
+
+    // swiper sideBarDivider sideBar
+    std::vector<OffsetF> offsetList = { OffsetF(), OffsetF(), OffsetF() };
+    if (frameSize.IsPositive()) {
+        MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), frameSize);
+        offsetList = LayoutOffsetListInSideBarMode(layoutWrapper, sideBarWrapper, frameSize);
+    }
+
+    constexpr int32_t SWIPER_INDEX = 0;
+    constexpr int32_t SIDEBAR_DIVIDER_INDEX = 1;
+    constexpr int32_t SIDEBAR_INDEX = 2;
+    auto swiperGeo = swiperWrapper->GetGeometryNode();
+    if (swiperGeo) {
+        swiperGeo->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
+        swiperWrapper->Layout();
+    }
+    auto sideBarDividerGeo = sideBarDividerWrapper->GetGeometryNode();
+    if (sideBarDividerGeo) {
+        sideBarDividerGeo->SetMarginFrameOffset(offsetList[SIDEBAR_DIVIDER_INDEX]);
+        sideBarDividerWrapper->Layout();
+    }
+    auto sideBarGeo = sideBarWrapper->GetGeometryNode();
+    if (sideBarGeo) {
+        sideBarGeo->SetMarginFrameOffset(offsetList[SIDEBAR_INDEX]);
+        sideBarWrapper->Layout();
+    }
+}
+
 void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto curDisplayMode = tabsPattern->GetCurrentBarDisplayMode().value_or(TabBarDisplayMode::BOTTOMTABBAR);
+    if (curDisplayMode == TabBarDisplayMode::SIDEBAR) {
+        LayoutInSideBarMode(layoutWrapper);
+        return;
+    }
 
     auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -266,6 +537,42 @@ void TabsLayoutAlgorithm::LayoutBackgroundMask(LayoutWrapper* layoutWrapper)
         backgroundMaskGeometryNode->SetMarginFrameOffset(offset);
     }
     backgroundMaskWrapper->Layout();
+}
+
+std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarWrapper,
+    const SizeF& frameSize) const
+{
+    std::vector<OffsetF> offsetList;
+    OffsetF swiperOffset;
+    OffsetF sideBarDividerOffset;
+    OffsetF sideBarOffset;
+    auto sideBarGeometryNode = sideBarWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(sideBarGeometryNode, offsetList);
+    auto sideBarFrameSize = sideBarGeometryNode->GetMarginFrameSize();
+    auto dividerStrokeWidth = SIDE_BAR_DIVIDER_DEFAULT_WIDTH.ConvertToPx();
+    auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, offsetList);
+    auto sideBarPosition = layoutProperty->GetSidebarPositionValue(BarPosition::START);
+    auto paddingOffset = layoutProperty->CreatePaddingAndBorder().Offset();
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if ((!isRTL && sideBarPosition == BarPosition::START) || (isRTL && sideBarPosition == BarPosition::END)) {
+        sideBarOffset = paddingOffset;
+        sideBarDividerOffset = OffsetF(sideBarFrameSize.Width() + paddingOffset.GetX(), paddingOffset.GetY());
+        swiperOffset = OffsetF(paddingOffset.GetX() + sideBarFrameSize.Width() + dividerStrokeWidth,
+            paddingOffset.GetY());
+    } else {
+        swiperOffset = paddingOffset;
+        sideBarOffset = OffsetF(frameSize.Width() - sideBarFrameSize.Width() + paddingOffset.GetX(),
+            paddingOffset.GetY());
+        sideBarDividerOffset = OffsetF(frameSize.Width() - sideBarFrameSize.Width() - dividerStrokeWidth +
+            paddingOffset.GetX(), paddingOffset.GetY());
+    }
+
+    offsetList.emplace_back(swiperOffset);
+    offsetList.emplace_back(sideBarDividerOffset);
+    offsetList.emplace_back(sideBarOffset);
+    return offsetList;
 }
 
 std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(

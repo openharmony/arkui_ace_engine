@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 
+#include <algorithm>
+
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/axis.h"
@@ -31,7 +33,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -39,11 +43,20 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
+#include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/tabs/tabs_side_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_side_bar_tab_list_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/gestures/gesture_info.h"
+#include "core/interfaces/native/node/divider_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 namespace OHOS::Ace::NG {
@@ -68,6 +81,8 @@ constexpr int32_t FOLLOW_HAND_ANIMATION_PART2_DELAY = 150;
 const char TAB_BAR_ETS_TAG[] = "TabBar";
 const char TABS_BACKGROUND_MASK_ETS_TAG[] = "BackgroundMask";
 const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
+constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
+constexpr Dimension MIN_SIDEBAR_ADAPTABLE_WIDTH = 600.0_vp;
 } // namespace
 
 void TabsPattern::OnAttachToFrameNode()
@@ -148,6 +163,9 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         CHECK_NULL_VOID(tabsLayoutProperty);
         tabsLayoutProperty->UpdateIndex(currentIndex);
         tabBarPattern->OnTabBarIndexChange(currentIndex);
+
+        pattern->SyncSideBarTabListIndicator(currentIndex);
+
         pattern->FireTabContentStateCallback(preIndex, currentIndex);
         /* TabChange callback */
         pattern->FireTabChangeCallback(preIndex, currentIndex);
@@ -502,10 +520,19 @@ void TabsPattern::SetSwiperPaddingAndBorder()
     swiperPattern->SetTabsPaddingAndBorder(layoutProperty->CreatePaddingAndBorder());
 }
 
+bool TabsPattern::GetIsRealDisableSwipe() const
+{
+    if (currentBarDisplayMode_.has_value() && currentBarDisplayMode_.value() == TabBarDisplayMode::SIDEBAR) {
+        return true;
+    }
+    return isCustomAnimation_ ? true : isDisableSwipe_;
+}
+
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
+
+    UpdateSwiperDisableSwipe(GetIsRealDisableSwipe());
     SetSwiperPaddingAndBorder();
     InitFocusEvent();
     InitAccessibilityZIndex();
@@ -513,10 +540,74 @@ void TabsPattern::OnModifyDone()
     InitFloatingBar();
     OnUpdateShowDivider();
 
+    UpdateSideBarIfNeeded();
+
     if (onChangeEvent_) {
         return;
     }
     SetOnChangeEvent(nullptr);
+}
+
+TabBarDisplayMode TabsPattern::CalculateTabBarDisplayMode(float width)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, TabBarDisplayMode::BOTTOMTABBAR);
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, TabBarDisplayMode::BOTTOMTABBAR);
+    auto barLayoutStyle = property->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    if (barLayoutStyle == TabBarLayoutStyle::SIDEBAR) {
+        return TabBarDisplayMode::SIDEBAR;
+    }
+    if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
+        return TabBarDisplayMode::BOTTOMTABBAR;
+    }
+    // adaptable
+    if (width < MIN_SIDEBAR_ADAPTABLE_WIDTH.ConvertToPx()) {
+        return TabBarDisplayMode::BOTTOMTABBAR;
+    }
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, TabBarDisplayMode::BOTTOMTABBAR);
+    auto density = context->GetDensity();
+    auto currentBreakpoint = GetCommonWidthBreakpoint(width, density);
+    if (property->HasBarDisplayModeBreakpoint()) {
+        auto customBreakpoint = property->GetBarDisplayModeBreakpointValue();
+        if (!customBreakpoint.isNull) {
+            switch (currentBreakpoint) {
+                case WidthBreakpoint::WIDTH_SM:
+                    return customBreakpoint.sm;
+                case WidthBreakpoint::WIDTH_MD:
+                    return customBreakpoint.md;
+                case WidthBreakpoint::WIDTH_LG:
+                case WidthBreakpoint::WIDTH_XL:
+                case WidthBreakpoint::WIDTH_XXL:
+                    return customBreakpoint.lg;
+                default:
+                    return TabBarDisplayMode::BOTTOMTABBAR;
+            }
+        }
+    }
+    if (currentBreakpoint >= WidthBreakpoint::WIDTH_LG) {
+        return TabBarDisplayMode::SIDEBAR;
+    }
+    return TabBarDisplayMode::BOTTOMTABBAR;
+}
+
+void TabsPattern::SetCurrentBarDisplayMode(TabBarDisplayMode mode)
+{
+    if (currentBarDisplayMode_.has_value() && currentBarDisplayMode_.value() == mode) {
+        return;
+    }
+    currentBarDisplayMode_ = mode;
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto controller = AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
+    if (controller) {
+        controller->SetBarDisplayMode(mode);
+    }
 }
 
 void TabsPattern::OnAfterModifyDone()
@@ -1203,6 +1294,7 @@ RefPtr<LayoutAlgorithm> TabsPattern::CreateLayoutAlgorithm()
     algo->SetItemIndex(tabsNode->GetItemIndex());
     algo->SetIsFloatingBar(isFloatingBar_);
     algo->SetLastFloatingBar(lastFloatingBar_);
+    algo->SetBarDisplayMode(currentBarDisplayMode_);
     return algo;
 }
 
@@ -1598,5 +1690,212 @@ void TabsPattern::SetFloatingScaleEnabled(bool isFloatingScaleEnabled)
         return;
     }
     renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
+}
+
+RefPtr<FrameNode> TabsPattern::CreateSideBarNode()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto sideBarNode = FrameNode::GetOrCreateFrameNode(V2::TABS_SIDE_BAR_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TabsSideBarPattern>(); });
+    CHECK_NULL_RETURN(sideBarNode, nullptr);
+    auto sideBarPattern = sideBarNode->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_RETURN(sideBarPattern, nullptr);
+    sideBarPattern->CreateChildNodeIfNeeded(tabsNode);
+    return sideBarNode;
+}
+
+RefPtr<FrameNode> TabsPattern::CreateSideBarDividerNode()
+{
+    auto nodeModifiers = NG::NodeModifier::GetDividerModifier();
+    CHECK_NULL_RETURN(nodeModifiers && nodeModifiers->createFrameNode, nullptr);
+    auto arkUINodeHandle = nodeModifiers->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    CHECK_NULL_RETURN(nodeModifiers->setDividerStrokeWidth, nullptr);
+    nodeModifiers->setDividerStrokeWidth(arkUINodeHandle,
+        static_cast<float>(DEFAULT_DIVIDER_STROKE_WIDTH.Value()),
+        static_cast<int32_t>(DEFAULT_DIVIDER_STROKE_WIDTH.Unit()));
+    CHECK_NULL_RETURN(nodeModifiers->setDividerVertical, nullptr);
+    nodeModifiers->setDividerVertical(arkUINodeHandle, true);
+    return Referenced::Claim<FrameNode>(reinterpret_cast<FrameNode*>(arkUINodeHandle));
+}
+
+void TabsPattern::UpdateSideBarIfNeeded()
+{
+    auto host = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto property = host->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto preStyle = layoutStyle_.value_or(TabBarLayoutStyle::BOTTOM);
+    layoutStyle_ = property->GetBarLayoutStyle();
+    auto newStyle = layoutStyle_.value_or(TabBarLayoutStyle::BOTTOM);
+    if (preStyle == TabBarLayoutStyle::BOTTOM && newStyle == TabBarLayoutStyle::BOTTOM) {
+        return;
+    }
+    if ((preStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE || preStyle == TabBarLayoutStyle::SIDEBAR) &&
+        (newStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE || newStyle == TabBarLayoutStyle::SIDEBAR)) {
+        // barStyle unchanged, but sidebar properties (header/searchable) may have changed
+        if (sideBarNode_) {
+            SyncPropertiesToSideBar();
+        }
+        return;
+    }
+    // adaptable/sidebar -> bottom
+    if (newStyle == TabBarLayoutStyle::BOTTOM) {
+        // Remove SideBar and SideBarDivider
+        if (sideBarNode_) {
+            host->RemoveChild(sideBarNode_);
+            host->MarkNeedSyncRenderTree();
+            sideBarNode_ = nullptr;
+        }
+        if (sideBarDividerNode_) {
+            host->RemoveChild(sideBarDividerNode_);
+            host->MarkNeedSyncRenderTree();
+            sideBarDividerNode_ = nullptr;
+        }
+        // Reset sideBarTabBarItemId on all TabContentNodes so next sidebar
+        // creation can register fresh tab items without stale ID conflicts
+        ResetSideBarTabListItemIds();
+        return;
+    }
+    // bottom -> adaptable/sidebar
+    sideBarDividerNode_ = CreateSideBarDividerNode();
+    host->AddChild(sideBarDividerNode_);
+    sideBarNode_ = CreateSideBarNode();
+    host->AddChild(sideBarNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    // Sync properties to SideBarPattern, then trigger its OnModifyDone
+    SyncPropertiesToSideBar();
+    // Register all existing TabContent tab items (only when SideBar is first created/recreated)
+    RegisterSideBarTabItems();
+}
+
+void TabsPattern::AddTabContentNode(const RefPtr<TabContentNode>& tabContentNode)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    // Check if already recorded
+    for (auto& weakNode : tabContentNodes_) {
+        if (weakNode.Upgrade() == tabContentNode) {
+            return;
+        }
+    }
+    // Always append; ordering is determined in RegisterSideBarTabItems by Swiper index
+    tabContentNodes_.emplace_back(tabContentNode);
+}
+
+void TabsPattern::RemoveTabContentNode(const RefPtr<TabContentNode>& tabContentNode)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    tabContentNodes_.erase(
+        std::remove_if(tabContentNodes_.begin(), tabContentNodes_.end(),
+            [&tabContentNode](const WeakPtr<TabContentNode>& weakNode) {
+                auto node = weakNode.Upgrade();
+                return !node || node == tabContentNode;
+            }),
+        tabContentNodes_.end());
+}
+
+void TabsPattern::ResetSideBarTabListItemIds()
+{
+    // Iterate recorded TabContentNodes directly (no tree traversal needed)
+    for (auto& weakNode : tabContentNodes_) {
+        auto tabContentNode = weakNode.Upgrade();
+        if (!tabContentNode) {
+            continue;
+        }
+        tabContentNode->ResetSideBarTabBarItemId();
+    }
+}
+
+void TabsPattern::SyncPropertiesToSideBar()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    CHECK_NULL_VOID(sideBarNode_);
+    auto sideBarPattern = sideBarNode_->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sideBarPattern);
+
+    // 1. Sync SwiperController
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    if (swiperNode) {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        if (swiperPattern) {
+            sideBarPattern->SetSwiperController(swiperPattern->GetSwiperController());
+        }
+    }
+
+    // 2. Sync header
+    sideBarPattern->SetHeaderNode(sidebarHeaderNode_);
+
+    // 3. Sync searchable
+    sideBarPattern->SetSideBarSearchableOptions(searchableOptions_);
+
+    // After all properties are synced, explicitly trigger SideBar Pattern's OnModifyDone
+    sideBarNode_->MarkModifyDone();
+    sideBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TabsPattern::RegisterSideBarTabItems()
+{
+    auto host = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(host->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    // Clean up expired entries first
+    tabContentNodes_.erase(
+        std::remove_if(tabContentNodes_.begin(), tabContentNodes_.end(),
+            [](const WeakPtr<TabContentNode>& weakNode) { return weakNode.Upgrade() == nullptr; }),
+        tabContentNodes_.end());
+    // Sort by Swiper index to ensure correct display order,
+    // since tabContentNodes_ is append-only and may not reflect actual Swiper order after dynamic add/remove
+    auto swiperRef = RawPtr(swiperNode);
+    std::sort(tabContentNodes_.begin(), tabContentNodes_.end(),
+        [swiperRef](const WeakPtr<TabContentNode>& a, const WeakPtr<TabContentNode>& b) {
+            auto nodeA = a.Upgrade();
+            auto nodeB = b.Upgrade();
+            if (!nodeA || !nodeB) {
+                return false;
+            }
+            auto indexA = swiperRef->GetChildFlatIndex(nodeA->GetId()).second;
+            auto indexB = swiperRef->GetChildFlatIndex(nodeB->GetId()).second;
+            return indexA < indexB;
+        });
+    // Iterate recorded TabContentNodes in Swiper order
+    int32_t position = 0;
+    for (auto& weakNode : tabContentNodes_) {
+        auto tabContentNode = weakNode.Upgrade();
+        if (!tabContentNode) {
+            continue;
+        }
+        TabContentModelNG::AddSideBarTabListItem(host, tabContentNode, position, false);
+        position++;
+    }
+
+    // Set initial selected index on SideBar TabBar (without triggering Swiper animation)
+    CHECK_NULL_VOID(sideBarNode_);
+    auto sideBarPattern = sideBarNode_->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sideBarPattern);
+    auto tabListNode = sideBarPattern->GetTabListNode();
+    CHECK_NULL_VOID(tabListNode);
+    auto tabListPattern = tabListNode->GetPattern<TabsSideBarTabListPattern>();
+    CHECK_NULL_VOID(tabListPattern);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    if (swiperPattern) {
+        auto currentIndex = swiperPattern->GetCurrentIndex();
+        tabListPattern->InitCurrentIndex(currentIndex);
+    }
+}
+
+void TabsPattern::SyncSideBarTabListIndicator(int32_t currentIndex)
+{
+    CHECK_NULL_VOID(sideBarNode_);
+    auto sideBarPattern = sideBarNode_->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sideBarPattern);
+    auto tabListNode = AceType::DynamicCast<FrameNode>(sideBarPattern->GetTabListNode());
+    CHECK_NULL_VOID(tabListNode);
+    // Use TabsSideBarTabListPattern::SetCurrentIndex instead of TabBarPattern::OnTabBarIndexChange
+    auto tabListPattern = tabListNode->GetPattern<TabsSideBarTabListPattern>();
+    CHECK_NULL_VOID(tabListPattern);
+    tabListPattern->SetCurrentIndex(currentIndex);
 }
 } // namespace OHOS::Ace::NG

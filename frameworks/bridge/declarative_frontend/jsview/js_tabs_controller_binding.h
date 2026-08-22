@@ -31,6 +31,7 @@ public:
     void PreloadItems(const JSCallbackInfo& args);
     void SetTabBarTranslate(const JSCallbackInfo& args);
     void SetTabBarOpacity(const JSCallbackInfo& args);
+    void GetBarDisplayMode(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 

@@ -2799,6 +2799,23 @@ struct ArkUITabBarBackgroundEffect {
     ArkUI_Uint32 inactiveColor;
 };
 
+struct ArkUITabsSidebarSearchableOptions {
+    ArkUI_CharPtr searchText;
+    ArkUI_CharPtr placeholder;
+    void* searchCallback;
+    void* searchFilter;
+    void* searchTextRawPtr;
+    void* placeholderRawPtr;
+    ArkUI_Bool isNull;
+};
+
+struct ArkUITabBarDisplayModeBreakpoint {
+    ArkUI_Int32 sm;
+    ArkUI_Int32 md;
+    ArkUI_Int32 lg;
+    ArkUI_Bool isNull;
+};
+
 struct ArkUIDrawingContext {
     ArkUI_Float32 width;
     ArkUI_Float32 height;
@@ -5705,6 +5722,16 @@ struct ArkUITabsModifier {
     void (*setTabsBarFloatingStyle)(ArkUINodeHandle node, void* paramRawPtr);
     void (*resetTabsBarFloatingStyle)(ArkUINodeHandle node);
     void (*createWithResourceObj)(ArkUINodeHandle node, void* paramRawPtr);
+    void (*setBarStyle)(ArkUINodeHandle node, ArkUI_Int32 barStyle);
+    void (*resetBarStyle)(ArkUINodeHandle node);
+    void (*setSidebarPosition)(ArkUINodeHandle node, ArkUI_Int32 position);
+    void (*resetSidebarPosition)(ArkUINodeHandle node);
+    void (*setSidebarHeader)(ArkUINodeHandle node, ArkUINodeHandle headerNode);
+    void (*resetSidebarHeader)(ArkUINodeHandle node);
+    void (*setSidebarSearchable)(ArkUINodeHandle node, struct ArkUITabsSidebarSearchableOptions* options);
+    void (*resetSidebarSearchable)(ArkUINodeHandle node);
+    void (*setBarDisplayModeBreakpoint)(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint);
+    void (*resetBarDisplayModeBreakpoint)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {
