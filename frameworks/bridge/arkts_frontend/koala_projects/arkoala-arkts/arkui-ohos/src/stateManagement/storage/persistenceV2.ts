@@ -1083,7 +1083,7 @@ export class PersistenceV2Impl {
             return returnSet;
         }
 
-        const arrayForTypeDetection: FixedArray<StringOrUndefinedType> = new FixedArray<StringOrUndefinedType>(2);
+        const arrayForTypeDetection: FixedArray<StringOrUndefinedType> = new FixedArray<StringOrUndefinedType>(2, undefined);
         let keysArray = JSON.parse<FixedStringArrayType>(jsonKeysArr, Class.of(arrayForTypeDetection));
         if (keysArray === undefined) {
             return returnSet;
@@ -1095,7 +1095,7 @@ export class PersistenceV2Impl {
     }
 
     private storeKeysToStorage(keysSet: Set<string>, areaMode?: AreaMode | undefined): void {
-        let keysArray: FixedStringArrayType = new FixedArray<StringOrUndefinedType>(keysSet.size);
+        let keysArray: FixedStringArrayType = new FixedArray<StringOrUndefinedType>(keysSet.size, undefined);
         let idx: int = 0;
         keysSet.forEach((key) => { keysArray[idx++] = key; })
         this.storageBackend_!.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(keysArray), areaMode);
