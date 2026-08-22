@@ -18,9 +18,9 @@ ArkTS 侧 `.customProperty()` 经 `JsCustomProperty` 下沉到 `FrameNode::SetJS
 
 | 关注点 | 稳定路径 | 说明 |
 |--------|----------|------|
-| **JS Bridge（设置入口）** | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | `JsCustomProperty`(:10502/:13137) + ParseJsFunc(:13096)/ParseJsGetFunc(:13045)/JsGetCustomMapFunc(:13071) 回调工厂 |
-| JS 存储 | `frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts` | `__elementIdToCustomProperties__`(:6678) Map + `__set/get/removeCustomProperty__` 全局(:6680-6758) |
-| **FrameNode 双存储（主角底层）** | `frameworks/core/components_ng/base/frame_node.h/cpp` | `customPropertyMap_`(:1960) [strValue,flag] + `extraCustomPropertyMap_`(:1962) void* + 3 回调(:1861-1863)；SetJSCustomProperty(:8371)/GetJSCustomProperty(:8386)/GetCapiCustomProperty(:8403)/AddCustomProperty(:8413) |
+| **JS Bridge（设置入口）** | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | `JsCustomProperty` + ParseJsFunc/ParseJsGetFunc/JsGetCustomMapFunc 回调工厂 |
+| JS 存储 | `frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts` | `__elementIdToCustomProperties__` Map + `__set/get/removeCustomProperty__` 全局 |
+| **FrameNode 双存储（主角底层）** | `frameworks/core/components_ng/base/frame_node.h/cpp` | `customPropertyMap_` [strValue,flag] + `extraCustomPropertyMap_` void* + 3 回调；SetJSCustomProperty/GetJSCustomProperty/GetCapiCustomProperty/AddCustomProperty |
 | 读取入口 | `frameworks/bridge/declarative_frontend/ark_node/src/frame_node.ts` | getCustomProperty JS 优先回退 getCustomPropertyCapiByKey |
 | 边界 | `frameworks/bridge/declarative_frontend/ark_node/src/trans_frame_node.ts` | transferDynamic FrameNode getCustomProperty 抛 100031 |
 | C-API 声明 | `interfaces/native/native_node.h/13754/13767` + `native_type.h/3515/3524` | Add/Remove(@since 13) + Get+handle(@since 14) |
@@ -33,7 +33,7 @@ ArkTS 侧 `.customProperty()` 经 `JsCustomProperty` 下沉到 `FrameNode::SetJS
 |------|----------|------|
 | **SDK 设置（主角）** | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | `customProperty(name, value: Optional<Object>)` @since 12 dynamic |
 | **SDK 读取（主角）** | `<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.d.ts` | `getCustomProperty(name): Object \| undefined` @since 12 dynamic |
-| SDK 静态 | `arkui/component/common.static.d.ets`（设置）+ `arkui/FrameNode.static.d.ets`（读取） | @since 23 static；`CustomProperty` 类型(:11431) |
+| SDK 静态 | `arkui/component/common.static.d.ets`（设置）+ `arkui/FrameNode.static.d.ets`（读取） | @since 23 static；`CustomProperty` 类型 |
 | C-API | `interfaces/native/native_node.h` + `native_type.h` | Add/Remove @since 13、Get+Destroy/GetStringValue @since 14 |
 
 ### API 解析实现路径

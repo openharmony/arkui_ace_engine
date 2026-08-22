@@ -98,7 +98,7 @@ GridCol 功能域：`specs/05-ui-components/01-layout-components/06-grid-col/`�
 
 ## 相关主题
 
-- [GridRow：`docs/kb/components/container/grid-row.md`](grid-row.md)
-- [Layout Framework：`docs/kb/architecture/layout-framework.md`](../../architecture/layout-framework.md)
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
+- [GridRow：[docs/kb/components/container/grid-row.md](grid-row.md)](grid-row.md)
+- [Layout Framework：[docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)](../../architecture/layout-framework.md)
+- 基础布局属性：[docs/kb/capabilities/layout-attributes.md](../../capabilities/layout-attributes.md)
 - 滚动型 Grid：`frameworks/core/components_ng/pattern/grid/`

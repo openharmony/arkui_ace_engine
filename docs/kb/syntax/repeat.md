@@ -81,6 +81,6 @@ Repeat 功能域：
 
 ## 相关主题
 
-- [LazyForEach：`docs/kb/syntax/lazy-for-each.md`](lazy-for-each.md)
-- [渲染控制语法（ForEach / if-else / 共享基类）：`docs/kb/syntax/render-control.md`](render-control.md)
-- [组件复用框架（`SetAllowReusableV2Descendant` / `DisableRecycle`）：`docs/kb/architecture/component-reuse-framework.md`](../architecture/component-reuse-framework.md)
+- [LazyForEach：[docs/kb/syntax/lazy-for-each.md](lazy-for-each.md)](lazy-for-each.md)
+- [渲染控制语法（ForEach / if-else / 共享基类）：[docs/kb/syntax/render-control.md](render-control.md)](render-control.md)
+- [组件复用框架（`SetAllowReusableV2Descendant` / `DisableRecycle`）：[docs/kb/architecture/component-reuse-framework.md](../architecture/component-reuse-framework.md)](../architecture/component-reuse-framework.md)

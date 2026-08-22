@@ -75,5 +75,5 @@
 
 ## 相关主题
 
-- [组件相关事件：`docs/kb/capabilities/component-related-events.md`。](component-related-events.md)
-- [布局框架：`docs/kb/architecture/layout-framework.md`。](../architecture/layout-framework.md)
+- [组件相关事件：[docs/kb/capabilities/component-related-events.md](component-related-events.md)。](component-related-events.md)
+- [布局框架：[docs/kb/architecture/layout-framework.md](../architecture/layout-framework.md)。](../architecture/layout-framework.md)

@@ -106,8 +106,8 @@
 
 ## 相关主题
 
-- `docs/kb/capabilities/safe-area.md`
-- `docs/kb/architecture/layout-framework.md`
+- [docs/kb/capabilities/safe-area.md](../../capabilities/safe-area.md)
+- [docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)
 - 安全区域机制功能域：`04-02-01`
 - [Navigation 功能域：`05-02-01`](../../components/container/navigation.md)
 - [Swiper 功能域：`05-03-08`](../../components/container/swiper.md)

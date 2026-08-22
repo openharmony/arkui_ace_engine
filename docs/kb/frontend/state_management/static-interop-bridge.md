@@ -84,9 +84,9 @@
 
 ## 相关主题
 
-- 总览：`docs/kb/frontend/state-management.md`
-- 动态侧 Interop 桥接（对照参考）：`docs/kb/frontend/state_management/interop-bridge.md`
-- 静态 V1 核心：`docs/kb/frontend/state_management/static-v1-core.md`
-- 静态 V2 装饰器与数据对象（UIPlugin 转换的入口）：`docs/kb/frontend/state_management/static-v2-decorators.md`
-- [静态存储体系（跨前端存储桥）：`docs/kb/frontend/state_management/static-storage.md`](static-storage.md)
-- 静态自定义组件机制：`docs/kb/frontend/state_management/static-custom-component.md`
+- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
+- 动态侧 Interop 桥接（对照参考）：[docs/kb/frontend/state_management/interop-bridge.md](interop-bridge.md)
+- 静态 V1 核心：[docs/kb/frontend/state_management/static-v1-core.md](static-v1-core.md)
+- 静态 V2 装饰器与数据对象（UIPlugin 转换的入口）：[docs/kb/frontend/state_management/static-v2-decorators.md](static-v2-decorators.md)
+- [静态存储体系（跨前端存储桥）：[docs/kb/frontend/state_management/static-storage.md](static-storage.md)](static-storage.md)
+- 静态自定义组件机制：[docs/kb/frontend/state_management/static-custom-component.md](static-custom-component.md)

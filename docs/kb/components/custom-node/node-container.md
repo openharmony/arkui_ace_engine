@@ -97,7 +97,7 @@ NodeContainer 功能域：
 
 ## 相关主题
 
-- [ContentSlot：`docs/kb/components/custom-node/content-slot.md`](content-slot.md)
-- [NodeAdapter：`docs/kb/capabilities/node-adapter.md`](../../capabilities/node-adapter.md)
-- [组件复用框架：`docs/kb/architecture/component-reuse-framework.md`](../../architecture/component-reuse-framework.md)
-- 占位组件概念入口：`docs/kb/capabilities/placeholder-component.md`
+- [ContentSlot：[docs/kb/components/custom-node/content-slot.md](content-slot.md)](content-slot.md)
+- [NodeAdapter：[docs/kb/capabilities/node-adapter.md](../../capabilities/node-adapter.md)](../../capabilities/node-adapter.md)
+- [组件复用框架：[docs/kb/architecture/component-reuse-framework.md](../../architecture/component-reuse-framework.md)](../../architecture/component-reuse-framework.md)
+- 占位组件概念入口：[docs/kb/capabilities/placeholder-component.md](../../capabilities/placeholder-component.md)

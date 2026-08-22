@@ -87,5 +87,5 @@ CalendarPickerDialog 已组件化，`adapter/ohos/osal/dynamic_module_helper.cpp
 ## 相关主题
 
 - CalendarPicker：`docs/pattern/calendar_picker/Calendar_Picker_Knowledge_Base.md`
-- `DatePickerDialog`：`docs/kb/components/selector/date-picker-dialog.md`
-- `DatePicker`：`docs/kb/components/selector/date-picker.md`
+- `DatePickerDialog`：[docs/kb/components/selector/date-picker-dialog.md](date-picker-dialog.md)
+- `DatePicker`：[docs/kb/components/selector/date-picker.md](date-picker.md)

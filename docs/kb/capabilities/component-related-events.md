@@ -73,5 +73,5 @@
 
 ## 相关主题
 
-- [可见区域机制：`docs/kb/capabilities/visible-area-mechanism.md`。](visible-area-mechanism.md)
-- [布局框架：`docs/kb/architecture/layout-framework.md`。](../architecture/layout-framework.md)
+- [可见区域机制：[docs/kb/capabilities/visible-area-mechanism.md](visible-area-mechanism.md)。](visible-area-mechanism.md)
+- [布局框架：[docs/kb/architecture/layout-framework.md](../architecture/layout-framework.md)。](../architecture/layout-framework.md)

@@ -76,6 +76,6 @@
 
 ## 相关主题
 
-- `docs/kb/capabilities/ui-context.md`
-- `docs/kb/capabilities/image-loading.md`
-- `docs/kb/architecture/basic-render-pipeline.md`
+- [docs/kb/capabilities/ui-context.md](ui-context.md)
+- [docs/kb/capabilities/image-loading.md](image-loading.md)
+- [docs/kb/architecture/basic-render-pipeline.md](../architecture/basic-render-pipeline.md)

@@ -230,7 +230,7 @@ def score_kb(rel_path: str, text: str, kind: str | None, reg_entry: dict | None)
         sc.deductions.append(("C 路径", 5, "含本机绝对路径"))
         c_got -= 5
     # 行号引用（含冒号/逗号/同文件三种格式，issue 不豁免）
-    line_refs = re.findall(r"\.(?:cpp|h|ts|ets|js)[:,]\d+|`:\d+(?:-\d+)?", text)
+    line_refs = re.findall(r"\.(?:cpp|h|ts|ets|js|yaml|gn|gni|json|py)[:,]\d+|`:\d+(?:-\d+)?|\(:\d+[^)]*\)", text)
     if line_refs:
         sc.deductions.append(("C 路径", 8, f"正文带行号引用({len(line_refs)}处)，违反 README 规范"))
         c_got -= 8

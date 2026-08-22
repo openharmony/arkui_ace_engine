@@ -128,7 +128,7 @@ Design 文档：`specs/05-ui-components/02-navigation-components/01-navigation/d
 
 ## 相关主题
 
-- [NavDestination：`docs/kb/components/container/navdestination.md`](navdestination.md)
+- [NavDestination：[docs/kb/components/container/navdestination.md](navdestination.md)](navdestination.md)
 - NavRouter（已废弃）：`frameworks/core/components_ng/pattern/navrouter/navrouter_pattern.*`（API 13 deprecated，推荐 Navigation(NavPathStack) + NavDestination）
 - Navigator：`frameworks/core/components_ng/pattern/navigator/`（已组件化，有 `bridge/` 子目录）
 - NavigationStack：`frameworks/core/components_ng/pattern/navigation/navigation_stack.cpp`

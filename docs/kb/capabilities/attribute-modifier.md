@@ -18,10 +18,10 @@ ArkTS `AttributeModifier<T>` 的实现在 ark_component TS 层（`ArkComponent.t
 
 | 关注点 | 稳定路径 | 说明 |
 |--------|----------|------|
-| **动态分发（主角）** | `frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts` | `applyUIAttributesInit`(:40-56) 按方法存在性 OR 状态位→`setSupportedUIState`；`applyUIAttributes`(:59-81) getUIState→按位调 6 个 apply |
-| 静态分发 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkCommonModifier.ets` | `applyUIAttributes`(:36)/`applyUIAttributesUpdate`(:55)，UI_STATE_* 常量(:29-34) |
+| **动态分发（主角）** | `frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts` | `applyUIAttributesInit` 按方法存在性 OR 状态位→`setSupportedUIState`；`applyUIAttributes` getUIState→按位调 6 个 apply |
+| 静态分发 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkCommonModifier.ets` | `applyUIAttributes`/`applyUIAttributesUpdate`，UI_STATE_* 常量 |
 | 原生状态机 | `getUINativeModule().setSupportedUIState/getUIState` | 注册/查询 UI 状态位掩码 |
-| C-API 类型 | `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h` | `Ark_AttributeModifier` peer(:307)、`Ark_AttributeModifierState` 枚举(:4106) |
+| C-API 类型 | `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h` | `Ark_AttributeModifier` peer、`Ark_AttributeModifierState` 枚举 |
 | C-API 实现 | `frameworks/core/interfaces/native/implementation/*_modifier.cpp` | GeneratedModifier `*AttributeModifier::SetXxxImpl` 每属性 setter |
 | 命令式类(边界) | `frameworks/bridge/declarative_frontend/ark_modifier/src/*_modifier.ts` | 命令式 Modifier 实现 AttributeModifier（属 04-05-06） |
 
@@ -29,9 +29,9 @@ ArkTS `AttributeModifier<T>` 的实现在 ark_component TS 层（`ArkComponent.t
 
 | 范式 | 稳定路径 | 说明 |
 |------|----------|------|
-| **SDK 动态（主角）** | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | `AttributeModifier<T>` 接口(:18450，@since 11/@atomicservice 12) + `attributeModifier()` 方法(:25179) |
-| **SDK 静态（主角）** | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态 `AttributeModifier<T>`(:10787，@since 23) + `monitoredStates()`(:10858，staticonly) |
-| 状态枚举 | `<OH_ROOT>/interface/sdk-js/api/arkui/component/enums.static.d.ets` | `AttributeModifierState` 位掩码(:4781，@since 23；HOVERED @since 26.0.0) |
+| **SDK 动态（主角）** | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | `AttributeModifier<T>` 接口 + `attributeModifier()` 方法 |
+| **SDK 静态（主角）** | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态 `AttributeModifier<T>` + `monitoredStates()` |
+| 状态枚举 | `<OH_ROOT>/interface/sdk-js/api/arkui/component/enums.static.d.ets` | `AttributeModifierState` 位掩码 |
 
 ### API 解析实现路径
 

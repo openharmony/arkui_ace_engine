@@ -71,6 +71,6 @@ NodeAdapter 功能域：
 
 ## 相关主题
 
-- [LazyForEach：`docs/kb/syntax/lazy-for-each.md`](../syntax/lazy-for-each.md)
-- [NodeContainer：`docs/kb/components/custom-node/node-container.md`](../components/custom-node/node-container.md)
-- 占位组件概念入口：`docs/kb/capabilities/placeholder-component.md`
+- [LazyForEach：[docs/kb/syntax/lazy-for-each.md](../syntax/lazy-for-each.md)](../syntax/lazy-for-each.md)
+- [NodeContainer：[docs/kb/components/custom-node/node-container.md](../components/custom-node/node-container.md)](../components/custom-node/node-container.md)
+- 占位组件概念入口：[docs/kb/capabilities/placeholder-component.md](placeholder-component.md)

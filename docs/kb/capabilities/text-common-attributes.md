@@ -87,5 +87,5 @@
 
 ## 相关主题
 
-- `Text` 组件（`docs/kb/components/basic/text.md`）— 核心字体属性 API（fontSize/fontColor 等）属组件级规格
+- `Text` 组件（[docs/kb/components/basic/text.md](../components/basic/text.md)）— 核心字体属性 API（fontSize/fontColor 等）属组件级规格
 - `FontRegistration`（字体注册）— fontFamily 注册与加载管线

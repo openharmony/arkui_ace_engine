@@ -86,6 +86,6 @@ Custom Measure/Layout 是 ArkUI 自定义组件的布局扩展能力。应用侧
 
 ## 相关主题
 
-- [DynamicLayout：`docs/kb/components/container/dynamic-layout.md`](../components/container/dynamic-layout.md)
-- [布局框架：`docs/kb/architecture/layout-framework.md`](../architecture/layout-framework.md)
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
+- [DynamicLayout：[docs/kb/components/container/dynamic-layout.md](../components/container/dynamic-layout.md)](../components/container/dynamic-layout.md)
+- [布局框架：[docs/kb/architecture/layout-framework.md](../architecture/layout-framework.md)](../architecture/layout-framework.md)
+- 基础布局属性：[docs/kb/capabilities/layout-attributes.md](layout-attributes.md)

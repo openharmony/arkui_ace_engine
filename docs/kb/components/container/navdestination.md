@@ -90,7 +90,7 @@ Spec 功能域：`specs/05-ui-components/02-navigation-components/02-nav-router/
 
 ## 相关主题
 
-- Navigation 容器组件 — `docs/kb/components/container/navigation.md`
+- Navigation 容器组件 — [docs/kb/components/container/navigation.md](navigation.md)
 - NavPathStack — `frameworks/core/components_ng/pattern/navigation/navigation_stack.cpp`（推荐路由管理方式）
 - NavRouter（已废弃） — `frameworks/core/components_ng/pattern/navrouter/navrouter_pattern.*`（API 13 deprecated，推荐 NavPathStack 替代）
 - Navigator 组件 — `frameworks/core/components_ng/pattern/navigator/`

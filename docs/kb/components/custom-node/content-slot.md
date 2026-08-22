@@ -86,6 +86,6 @@ ContentSlot 功能域：
 
 ## 相关主题
 
-- [NodeContainer：`docs/kb/components/custom-node/node-container.md`](node-container.md)
-- [NodeAdapter：`docs/kb/capabilities/node-adapter.md`](../../capabilities/node-adapter.md)
-- 占位组件概念入口：`docs/kb/capabilities/placeholder-component.md`
+- [NodeContainer：[docs/kb/components/custom-node/node-container.md](node-container.md)](node-container.md)
+- [NodeAdapter：[docs/kb/capabilities/node-adapter.md](../../capabilities/node-adapter.md)](../../capabilities/node-adapter.md)
+- 占位组件概念入口：[docs/kb/capabilities/placeholder-component.md](../../capabilities/placeholder-component.md)

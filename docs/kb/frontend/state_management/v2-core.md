@@ -102,11 +102,11 @@ V2 装饰器的 SDK 声明位于 `interface/sdk-js` 仓（不在本仓）：
 
 ## 相关主题
 
-- 总览：`docs/kb/frontend/state-management.md`
-- V1 对应核心：`docs/kb/frontend/state_management/v1-core.md`
-- V2 装饰器具体语义：`docs/kb/frontend/state_management/v2-decorators.md`
-- 基础设施（`WeakRefPool`、`UINodeRegisterProxy`）：`docs/kb/frontend/state_management/infrastructure.md`
-- 存储体系（`AppStorageV2`/`PersistenceV2`）：`docs/kb/frontend/state_management/storage.md`
-- [自定义组件机制（`ViewV2`）：`docs/kb/frontend/state_management/custom-component.md`](custom-component.md)
-- Interop 桥接（V2 builder/storage 跨前端）：`docs/kb/frontend/state_management/interop-bridge.md`
-- 静态 V2 核心（arkoala 侧）：`docs/kb/frontend/state_management/static-v2-core.md`
+- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
+- V1 对应核心：[docs/kb/frontend/state_management/v1-core.md](v1-core.md)
+- V2 装饰器具体语义：[docs/kb/frontend/state_management/v2-decorators.md](v2-decorators.md)
+- 基础设施（`WeakRefPool`、`UINodeRegisterProxy`）：[docs/kb/frontend/state_management/infrastructure.md](infrastructure.md)
+- 存储体系（`AppStorageV2`/`PersistenceV2`）：[docs/kb/frontend/state_management/storage.md](storage.md)
+- [自定义组件机制（`ViewV2`）：[docs/kb/frontend/state_management/custom-component.md](custom-component.md)](custom-component.md)
+- Interop 桥接（V2 builder/storage 跨前端）：[docs/kb/frontend/state_management/interop-bridge.md](interop-bridge.md)
+- 静态 V2 核心（arkoala 侧）：[docs/kb/frontend/state_management/static-v2-core.md](static-v2-core.md)

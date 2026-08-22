@@ -75,6 +75,6 @@ Trace 功能域：`specs/03-engine-framework/08-dfx-foundation/03-trace/`（功�
 
 ## 相关主题
 
-- 日志：`docs/kb/architecture/dfx/logging.md`
-- 内存管理：`docs/kb/architecture/dfx/memory-management.md`
-- Dump 机制：`docs/kb/architecture/dfx/dump-mechanism.md`
+- 日志：[docs/kb/architecture/dfx/logging.md](logging.md)
+- 内存管理：[docs/kb/architecture/dfx/memory-management.md](memory-management.md)
+- Dump 机制：[docs/kb/architecture/dfx/dump-mechanism.md](dump-mechanism.md)

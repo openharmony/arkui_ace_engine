@@ -112,9 +112,9 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 
 ## 相关主题
 
-- `docs/kb/architecture/resource-access.md` — 资源访问（FuncID 03-03-01）
-- `docs/kb/architecture/resource-dynamic-switching.md` — 资源动态切换（FuncID 03-03-04）
-- `docs/kb/architecture/theme-layered-access.md` — 主题分层访问（FuncID 03-03-02）
-- `docs/kb/capabilities/ui-appearance.md` — 色彩模式管理（FuncID 04-16-01）
-- `docs/kb/architecture/subwindow-mechanism.md` — 子窗机制
-- `docs/kb/architecture/multi-instance-management.md` — 多实例管理
+- [docs/kb/architecture/resource-access.md](../../architecture/resource-access.md) — 资源访问（FuncID 03-03-01）
+- [docs/kb/architecture/resource-dynamic-switching.md](../../architecture/resource-dynamic-switching.md) — 资源动态切换（FuncID 03-03-04）
+- [docs/kb/architecture/theme-layered-access.md](../../architecture/theme-layered-access.md) — 主题分层访问（FuncID 03-03-02）
+- [docs/kb/capabilities/ui-appearance.md](../../capabilities/ui-appearance.md) — 色彩模式管理（FuncID 04-16-01）
+- [docs/kb/architecture/subwindow-mechanism.md](../../architecture/subwindow-mechanism.md) — 子窗机制
+- [docs/kb/architecture/multi-instance-management.md](../../architecture/multi-instance-management.md) — 多实例管理

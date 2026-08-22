@@ -121,8 +121,8 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 
 ## 相关主题
 
-- `docs/kb/frontend/state_management/custom-component.md` — 自定义组件机制（FuncID 07-03-01）
-- `docs/kb/frontend/state_management/static-custom-component.md` — 静态自定义组件状态相关（FuncID 07-03-07）
-- `docs/kb/architecture/component-reuse-framework.md` — 组件复用框架（FuncID 04-19-01）
-- `docs/kb/capabilities/transition-animation.md` — 转场动画（FuncID 03-02-05）
-- `docs/kb/capabilities/geometry-transition.md` — 组件共享元素动画（FuncID 03-02-07）
+- [docs/kb/frontend/state_management/custom-component.md](../../frontend/state_management/custom-component.md) — 自定义组件机制（FuncID 07-03-01）
+- [docs/kb/frontend/state_management/static-custom-component.md](../../frontend/state_management/static-custom-component.md) — 静态自定义组件状态相关（FuncID 07-03-07）
+- [docs/kb/architecture/component-reuse-framework.md](../../architecture/component-reuse-framework.md) — 组件复用框架（FuncID 04-19-01）
+- [docs/kb/capabilities/transition-animation.md](../../capabilities/transition-animation.md) — 转场动画（FuncID 03-02-05）
+- [docs/kb/capabilities/geometry-transition.md](../../capabilities/geometry-transition.md) — 组件共享元素动画（FuncID 03-02-07）

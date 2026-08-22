@@ -87,4 +87,4 @@
 - `frameworks/bridge/declarative_frontend/jsview/js_scroller.cpp`
 - `frameworks/bridge/declarative_frontend/jsview/js_view_common_def.inl`
 - `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp`
-- `docs/kb/capabilities/scroll-common-capability.md`（滚动通用能力，FuncID `05-03-01`）
+- [docs/kb/capabilities/scroll-common-capability.md](../../capabilities/scroll-common-capability.md)（滚动通用能力，FuncID `05-03-01`）

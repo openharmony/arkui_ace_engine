@@ -85,8 +85,8 @@ LazyForEach 功能域：
 
 ## 相关主题
 
-- [Repeat：`docs/kb/syntax/repeat.md`](repeat.md)
-- [渲染控制语法（ForEach / if-else / 共享基类）：`docs/kb/syntax/render-control.md`](render-control.md)
-- [NodeAdapter（复用 LazyForEach 管线）：`docs/kb/capabilities/node-adapter.md`](../capabilities/node-adapter.md)
-- [组件复用框架：`docs/kb/architecture/component-reuse-framework.md`](../architecture/component-reuse-framework.md)
+- [Repeat：[docs/kb/syntax/repeat.md](repeat.md)](repeat.md)
+- [渲染控制语法（ForEach / if-else / 共享基类）：[docs/kb/syntax/render-control.md](render-control.md)](render-control.md)
+- [NodeAdapter（复用 LazyForEach 管线）：[docs/kb/capabilities/node-adapter.md](../capabilities/node-adapter.md)](../capabilities/node-adapter.md)
+- [组件复用框架：[docs/kb/architecture/component-reuse-framework.md](../architecture/component-reuse-framework.md)](../architecture/component-reuse-framework.md)
 - [渲染树同步](../architecture/render-tree-sync.md) — LazyForEach 数据变更后 MarkNeedSyncRenderTree 触发渲染树同步

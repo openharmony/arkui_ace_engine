@@ -107,6 +107,6 @@
 
 ## 相关主题
 
-- `docs/kb/architecture/accessibility.md` — 通用无障碍属性，FuncID `04-03-09`
-- `docs/kb/architecture/accessibility.md` — 无障碍能力与事件桥接，FuncID `03-07-01`
-- `docs/kb/capabilities/attribute-modifier.md` — 动态属性 Modifier 通路
+- [docs/kb/architecture/accessibility.md](../../architecture/accessibility.md) — 通用无障碍属性，FuncID `04-03-09`
+- [docs/kb/architecture/accessibility.md](../../architecture/accessibility.md) — 无障碍能力与事件桥接，FuncID `03-07-01`
+- [docs/kb/capabilities/attribute-modifier.md](../../capabilities/attribute-modifier.md) — 动态属性 Modifier 通路

@@ -106,7 +106,7 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 - `frameworks/core/common/watch_dog.cpp`：WatchDog 使用 3 秒、2 秒和 1 秒的分阶段检查周期。
 - `frameworks/core/common/watch_dog.cpp`：线程持续无响应时由 WARNING 进入 FREEZE 状态。
 - `adapter/ohos/osal/event_report.cpp`：FREEZE 状态映射为 `UI_BLOCK_6S`。
-- `adapter/ohos/build/hisysevent.yaml:145-151`：`UI_BLOCK_6S` 定义为线程阻塞 6 秒。
+- `adapter/ohos/build/hisysevent.yaml`：`UI_BLOCK_6S` 定义为线程阻塞 6 秒。
 
 ## 修复方案
 
@@ -153,6 +153,6 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 
 ## 相关主题
 
-- `docs/kb/components/shape/canvas.md`
+- [docs/kb/components/shape/canvas.md](../../components/shape/canvas.md)
 - [Canvas 功能域：`05-14-02`](../../components/shape/canvas.md)
 - [CanvasRenderingContext2D onDetach/off(onDetach)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-canvasrenderingcontext2d#offondetach13)

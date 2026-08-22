@@ -98,6 +98,6 @@ TimePickerDialog 已组件化，`adapter/ohos/osal/dynamic_module_helper.cpp` �
 
 ## 相关主题
 
-- `TimePicker`：`docs/kb/components/selector/time-picker.md`
-- `DatePickerDialog`：`docs/kb/components/selector/date-picker-dialog.md`
-- `TextPickerDialog`：`docs/kb/components/selector/text-picker-dialog.md`
+- `TimePicker`：[docs/kb/components/selector/time-picker.md](time-picker.md)
+- `DatePickerDialog`：[docs/kb/components/selector/date-picker-dialog.md](date-picker-dialog.md)
+- `TextPickerDialog`：[docs/kb/components/selector/text-picker-dialog.md](text-picker-dialog.md)

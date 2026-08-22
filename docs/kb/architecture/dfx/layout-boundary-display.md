@@ -74,5 +74,5 @@ DFX Layout Boundary Display 是引擎内部调试能力，没有独立 SDK API�
 
 ## 相关主题
 
-- Dump 机制：`docs/kb/architecture/dfx/dump-mechanism.md`
-- 渲染管线：`docs/kb/architecture/layout-framework.md`
+- Dump 机制：[docs/kb/architecture/dfx/dump-mechanism.md](dump-mechanism.md)
+- 渲染管线：[docs/kb/architecture/layout-framework.md](../layout-framework.md)

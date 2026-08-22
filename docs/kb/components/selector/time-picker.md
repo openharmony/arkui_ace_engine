@@ -108,7 +108,7 @@ TimePicker 已完成组件化改造，Bridge 和动态属性路径统一到 `pat
 
 ## 相关主题
 
-- `TimePickerDialog`：`docs/kb/components/selector/time-picker-dialog.md`
-- `DatePicker`：`docs/kb/components/selector/date-picker.md`
-- `TextPicker`：`docs/kb/components/selector/text-picker.md`
-- `UIPickerComponent`：`docs/kb/components/selector/ui-picker-component.md`
+- `TimePickerDialog`：[docs/kb/components/selector/time-picker-dialog.md](time-picker-dialog.md)
+- `DatePicker`：[docs/kb/components/selector/date-picker.md](date-picker.md)
+- `TextPicker`：[docs/kb/components/selector/text-picker.md](text-picker.md)
+- `UIPickerComponent`：[docs/kb/components/selector/ui-picker-component.md](ui-picker-component.md)

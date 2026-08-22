@@ -61,6 +61,6 @@
 
 ## 相关主题
 
-- `docs/kb/capabilities/safe-area.md`
-- `docs/kb/architecture/window-mechanism.md`
-- `docs/kb/architecture/layout-framework.md`
+- [docs/kb/capabilities/safe-area.md](../../capabilities/safe-area.md)
+- [docs/kb/architecture/window-mechanism.md](../../architecture/window-mechanism.md)
+- [docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)

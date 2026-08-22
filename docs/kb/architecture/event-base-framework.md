@@ -97,9 +97,9 @@ Event Base Framework 是内部机制，没有单一独立 SDK API。公共事件
 
 ## 相关主题
 
-- [触摸事件：`docs/kb/capabilities/touch-events.md`](../capabilities/touch-events.md)
-- [按键事件：`docs/kb/capabilities/key-events.md`](../capabilities/key-events.md)
-- [事件分发和拦截：`docs/kb/capabilities/event-dispatch-intercept.md`](../capabilities/event-dispatch-intercept.md)
-- [组件组合键：`docs/kb/capabilities/component-shortcuts.md`](../capabilities/component-shortcuts.md)
-- [鼠标事件：`docs/kb/capabilities/mouse-events.md`](../capabilities/mouse-events.md)
-- [手势能力：`docs/kb/capabilities/gesture-capability.md`](../capabilities/gesture-capability.md)
+- [触摸事件：[docs/kb/capabilities/touch-events.md](../capabilities/touch-events.md)](../capabilities/touch-events.md)
+- [按键事件：[docs/kb/capabilities/key-events.md](../capabilities/key-events.md)](../capabilities/key-events.md)
+- [事件分发和拦截：[docs/kb/capabilities/event-dispatch-intercept.md](../capabilities/event-dispatch-intercept.md)](../capabilities/event-dispatch-intercept.md)
+- [组件组合键：[docs/kb/capabilities/component-shortcuts.md](../capabilities/component-shortcuts.md)](../capabilities/component-shortcuts.md)
+- [鼠标事件：[docs/kb/capabilities/mouse-events.md](../capabilities/mouse-events.md)](../capabilities/mouse-events.md)
+- [手势能力：[docs/kb/capabilities/gesture-capability.md](../capabilities/gesture-capability.md)](../capabilities/gesture-capability.md)

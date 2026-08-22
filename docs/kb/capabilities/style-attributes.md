@@ -95,6 +95,6 @@
 
 ## 相关主题
 
-- [基础属性：`docs/kb/capabilities/basic-attributes.md`](basic-attributes.md)
-- [布局属性：`docs/kb/capabilities/layout-attributes.md`](layout-attributes.md)
-- [视效属性：`docs/kb/capabilities/visual-effect-attributes.md`](visual-effect-attributes.md)
+- [基础属性：[docs/kb/capabilities/basic-attributes.md](basic-attributes.md)](basic-attributes.md)
+- [布局属性：[docs/kb/capabilities/layout-attributes.md](layout-attributes.md)](layout-attributes.md)
+- [视效属性：[docs/kb/capabilities/visual-effect-attributes.md](visual-effect-attributes.md)](visual-effect-attributes.md)

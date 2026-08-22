@@ -67,6 +67,6 @@
 
 ## 相关主题
 
-- `docs/kb/capabilities/styled-string.md`
-- `docs/kb/components/basic/text.md`
-- `docs/kb/architecture/dfx/memory-management.md`
+- [docs/kb/capabilities/styled-string.md](../../capabilities/styled-string.md)
+- [docs/kb/components/basic/text.md](../../components/basic/text.md)
+- [docs/kb/architecture/dfx/memory-management.md](../../architecture/dfx/memory-management.md)

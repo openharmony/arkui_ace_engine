@@ -106,9 +106,9 @@ Column 功能域：`specs/05-ui-components/01-layout-components/03-column/`（�
 
 ## 相关主题
 
-- ColumnSplit 纵向分割布局：`docs/kb/components/container/column-split.md`
-- Row 横向线性布局：`docs/kb/components/container/row.md`
-- Flex 弹性布局与 Wrap：`docs/kb/components/container/flex.md`
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
-- [布局框架：`docs/kb/architecture/layout-framework.md`](../../architecture/layout-framework.md)
-- 安全区机制：`docs/kb/capabilities/safe-area.md`
+- ColumnSplit 纵向分割布局：[docs/kb/components/container/column-split.md](column-split.md)
+- Row 横向线性布局：[docs/kb/components/container/row.md](row.md)
+- Flex 弹性布局与 Wrap：[docs/kb/components/container/flex.md](flex.md)
+- 基础布局属性：[docs/kb/capabilities/layout-attributes.md](../../capabilities/layout-attributes.md)
+- [布局框架：[docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)](../../architecture/layout-framework.md)
+- 安全区机制：[docs/kb/capabilities/safe-area.md](../../capabilities/safe-area.md)

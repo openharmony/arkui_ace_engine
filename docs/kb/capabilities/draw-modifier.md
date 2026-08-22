@@ -18,10 +18,10 @@ ArkTS `DrawModifier` 是一层回调容器：底层 `NG::DrawModifier`（C++，`
 
 | 关注点 | 稳定路径 | 说明 |
 |--------|----------|------|
-| **JS Bridge（主角入口）** | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | `JsDrawModifier`(:10582) 装配入口、`AddInvalidateFunc`(:10536) 挂 invalidate、`GetDrawCallback`(:12935)/`GetDrawOverlayCallback`(:12990) 构造 DrawContext（ClipCanvas 裁剪） |
-| C++ 回调容器 | `frameworks/core/components_ng/base/modifier.h` | `NG::DrawModifier`：5 个 `DrawModifierFunc` 成员（drawBehind/Content/Front/Foreground/OverlayFunc）；`DrawingContext`(:82-86)={canvas,width,height} |
-| C++ 分发核心 | `frameworks/core/components_ng/base/extension_handler.h/cpp` | `ExtensionHandler`：Draw/ForegroundDraw/OverlayDraw 三段式(:48-68)、OnDraw 五层顺序(:125-140)、InvalidateRender/ForegroundRender(:151-178)、NeedRender API20 门控(:181-187) |
-| 挂载载体 | `frameworks/core/components_ng/base/frame_node.cpp` | `FrameNode::SetDrawModifier`：无 ExtensionHandler 则新建+AttachFrameNode；`IsSupportDrawModifier`(:967) Pattern 门控 |
+| **JS Bridge（主角入口）** | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | `JsDrawModifier` 装配入口、`AddInvalidateFunc` 挂 invalidate、`GetDrawCallback`/`GetDrawOverlayCallback` 构造 DrawContext（ClipCanvas 裁剪） |
+| C++ 回调容器 | `frameworks/core/components_ng/base/modifier.h` | `NG::DrawModifier`：5 个 `DrawModifierFunc` 成员（drawBehind/Content/Front/Foreground/OverlayFunc）；`DrawingContext`={canvas,width,height} |
+| C++ 分发核心 | `frameworks/core/components_ng/base/extension_handler.h/cpp` | `ExtensionHandler`：Draw/ForegroundDraw/OverlayDraw 三段式、OnDraw 五层顺序、InvalidateRender/ForegroundRender、NeedRender API20 门控 |
+| 挂载载体 | `frameworks/core/components_ng/base/frame_node.cpp` | `FrameNode::SetDrawModifier`：无 ExtensionHandler 则新建+AttachFrameNode；`IsSupportDrawModifier` Pattern 门控 |
 | 管线衔接 | `frameworks/core/components_ng/render/paint_wrapper.cpp` | extensionHandler 存在时替换 Flush*DrawFunction 回调为 ExtensionHandler 调用 + 注入原生 draw 为 InnerImpl |
 | Pattern 门控 | `frameworks/core/components_ng/pattern/pattern.h` | `IsSupportDrawModifier` 默认 true（opt-out）；6 组件重写 false（canvas/effect/distortion/video/video_state_machine/union_effect_container） |
 | C-API(Arkoala) | `frameworks/core/interfaces/native/implementation/draw_modifier_accessor.cpp` | 仅暴露 drawBehind/drawContent/invalidate |
@@ -31,8 +31,8 @@ ArkTS `DrawModifier` 是一层回调容器：底层 `NG::DrawModifier`（C++，`
 
 | 范式 | 稳定路径 | 说明 |
 |------|----------|------|
-| **SDK 动态（主角）** | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | `DrawModifier` 类(:6249，@since 12) + `drawModifier()` 方法(:19562)；DrawContext 在 `arkui/Graphics.d.ts`(@since 11) |
-| **SDK 静态（主角）** | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态 `DrawModifier`(:2754，@since 23) + `drawModifier()`(:11479)；DrawContext 在 `Graphics.static.d.ets` |
+| **SDK 动态（主角）** | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | `DrawModifier` 类 + `drawModifier()` 方法；DrawContext 在 `arkui/Graphics.d.ts`(@since 11) |
+| **SDK 静态（主角）** | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态 `DrawModifier` + `drawModifier()`；DrawContext 在 `Graphics.static.d.ets` |
 | 五层顺序文档 | `common.static.d.ets` / `common.d.ts` | Behind→Content→Front→Foreground→Overlay；Overlay 可越界 |
 
 ### API 解析实现路径

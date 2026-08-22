@@ -156,7 +156,7 @@
 
 ## 相关主题
 
-- `docs/kb/frontend/state_management/cpp-bindings.md`
+- [docs/kb/frontend/state_management/cpp-bindings.md](../../frontend/state_management/cpp-bindings.md)
 - `frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp`
 - `frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp`
 - `interfaces/inner_api/ace/declarative_module_preloader.cpp`

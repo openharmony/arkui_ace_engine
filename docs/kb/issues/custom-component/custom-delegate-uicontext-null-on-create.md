@@ -91,6 +91,6 @@
 
 ## 相关主题
 
-- `docs/kb/issues/lifecycle/uicontext-instance-id-leak.md`：UIContext 实例 ID 泄漏（同属 UIContext 域）
-- `docs/kb/capabilities/ui-context.md`：UIContext 代码型 KB
+- [docs/kb/issues/lifecycle/uicontext-instance-id-leak.md](../lifecycle/uicontext-instance-id-leak.md)：UIContext 实例 ID 泄漏（同属 UIContext 域）
+- [docs/kb/capabilities/ui-context.md](../../capabilities/ui-context.md)：UIContext 代码型 KB
 - 功能域 `04-12-01`（UIContext 接口）、`07-03-01`（自定义组件生命周期）

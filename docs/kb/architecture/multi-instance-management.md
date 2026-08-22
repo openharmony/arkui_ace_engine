@@ -185,9 +185,9 @@
 
 ## 相关主题
 
-- 渲染管线：`docs/kb/architecture/layout-framework.md`
-- [基础渲染管线：`docs/kb/architecture/basic-render-pipeline.md`](basic-render-pipeline.md)
-- UIContext 接口：`docs/kb/capabilities/ui-context.md`
-- [窗口机制：`docs/kb/architecture/window-mechanism.md`](window-mechanism.md)
+- 渲染管线：[docs/kb/architecture/layout-framework.md](layout-framework.md)
+- [基础渲染管线：[docs/kb/architecture/basic-render-pipeline.md](basic-render-pipeline.md)](basic-render-pipeline.md)
+- UIContext 接口：[docs/kb/capabilities/ui-context.md](../capabilities/ui-context.md)
+- [窗口机制：[docs/kb/architecture/window-mechanism.md](window-mechanism.md)](window-mechanism.md)
 - [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — 动态前端历史配对问题（已修复）与多路径实例栈排查
-- UISession：`docs/kb/architecture/uisession-service.md`（跨进程 UI 会话通道）
+- UISession：[docs/kb/architecture/uisession-service.md](uisession-service.md)（跨进程 UI 会话通道）

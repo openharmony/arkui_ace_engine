@@ -110,8 +110,8 @@ Flex 功能域：`specs/05-ui-components/01-layout-components/05-flex/`（功能
 
 ## 相关主题
 
-- Column 纵向线性布局：`docs/kb/components/container/column.md`
-- Row 横向线性布局：`docs/kb/components/container/row.md`
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
-- [布局框架：`docs/kb/architecture/layout-framework.md`](../../architecture/layout-framework.md)
-- Blank 及其在弹性布局中的路由：`docs/kb/components/basic/blank.md`
+- Column 纵向线性布局：[docs/kb/components/container/column.md](column.md)
+- Row 横向线性布局：[docs/kb/components/container/row.md](row.md)
+- 基础布局属性：[docs/kb/capabilities/layout-attributes.md](../../capabilities/layout-attributes.md)
+- [布局框架：[docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)](../../architecture/layout-framework.md)
+- Blank 及其在弹性布局中的路由：[docs/kb/components/basic/blank.md](../basic/blank.md)

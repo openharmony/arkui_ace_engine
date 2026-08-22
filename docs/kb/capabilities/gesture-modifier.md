@@ -115,8 +115,8 @@ Dynamic 能力从 API 12 开始，后续 Handler 能力按 SDK `@since` 演进�
 
 ## 相关主题
 
-- 手势识别、组合、裁决和拦截：`docs/kb/capabilities/gesture-capability.md`
-- 事件分发和命中测试：`docs/kb/capabilities/event-dispatch-intercept.md`
-- 事件框架：`docs/kb/architecture/event-base-framework.md`
+- 手势识别、组合、裁决和拦截：[docs/kb/capabilities/gesture-capability.md](gesture-capability.md)
+- 事件分发和命中测试：[docs/kb/capabilities/event-dispatch-intercept.md](event-dispatch-intercept.md)
+- 事件框架：[docs/kb/architecture/event-base-framework.md](../architecture/event-base-framework.md)
 - ArkUI SDK/API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`
 - Common Modifier SDK：`<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts`

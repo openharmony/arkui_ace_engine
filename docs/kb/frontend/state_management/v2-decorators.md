@@ -121,10 +121,10 @@ V2 装饰器是 API 12+ 的下一代状态管理 API，全部定义在 `v2/v2_de
 
 ## 相关主题
 
-- 总览：`docs/kb/frontend/state-management.md`
-- V2 核心逻辑（`ObserveV2`、ID 分段、惰性 Proxy、调度）：`docs/kb/frontend/state_management/v2-core.md`
-- V1 装饰器（V2 的上一代对应）：`docs/kb/frontend/state_management/v1-decorators.md`
-- 存储体系（`@Type`/PersistenceV2/AppStorageV2）：`docs/kb/frontend/state_management/storage.md`
-- [自定义组件机制（`@ComponentV2`/`ViewV2`）：`docs/kb/frontend/state_management/custom-component.md`](custom-component.md)
-- 基础设施（`UIUtils`/`WeakRefPool`）：`docs/kb/frontend/state_management/infrastructure.md`
-- 静态 V2 装饰器与数据对象（arkoala 侧）：`docs/kb/frontend/state_management/static-v2-decorators.md`
+- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
+- V2 核心逻辑（`ObserveV2`、ID 分段、惰性 Proxy、调度）：[docs/kb/frontend/state_management/v2-core.md](v2-core.md)
+- V1 装饰器（V2 的上一代对应）：[docs/kb/frontend/state_management/v1-decorators.md](v1-decorators.md)
+- 存储体系（`@Type`/PersistenceV2/AppStorageV2）：[docs/kb/frontend/state_management/storage.md](storage.md)
+- [自定义组件机制（`@ComponentV2`/`ViewV2`）：[docs/kb/frontend/state_management/custom-component.md](custom-component.md)](custom-component.md)
+- 基础设施（`UIUtils`/`WeakRefPool`）：[docs/kb/frontend/state_management/infrastructure.md](infrastructure.md)
+- 静态 V2 装饰器与数据对象（arkoala 侧）：[docs/kb/frontend/state_management/static-v2-decorators.md](static-v2-decorators.md)

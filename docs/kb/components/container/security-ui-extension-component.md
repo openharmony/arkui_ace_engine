@@ -92,8 +92,8 @@ SecurityUIExtensionComponent 功能域：`specs/05-ui-components/12-embedded-dis
 
 ## 相关主题
 
-- [UIExtensionComponent：`docs/kb/components/container/ui-extension-component.md`](ui-extension-component.md)
-- [EmbeddedComponent：`docs/kb/components/container/embedded-component.md`](embedded-component.md)
-- [IsolatedComponent：`docs/kb/components/container/isolated-component.md`](isolated-component.md)
-- [PluginComponent：`docs/kb/components/container/plugin-component.md`](plugin-component.md)
-- [DynamicComponent：`docs/kb/components/container/dynamic-component.md`](dynamic-component.md)
+- [UIExtensionComponent：[docs/kb/components/container/ui-extension-component.md](ui-extension-component.md)](ui-extension-component.md)
+- [EmbeddedComponent：[docs/kb/components/container/embedded-component.md](embedded-component.md)](embedded-component.md)
+- [IsolatedComponent：[docs/kb/components/container/isolated-component.md](isolated-component.md)](isolated-component.md)
+- [PluginComponent：[docs/kb/components/container/plugin-component.md](plugin-component.md)](plugin-component.md)
+- [DynamicComponent：[docs/kb/components/container/dynamic-component.md](dynamic-component.md)](dynamic-component.md)

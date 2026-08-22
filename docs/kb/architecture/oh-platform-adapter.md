@@ -100,8 +100,8 @@ OH 平台适配功能域：`specs/02-cross-platform/01-platform-adapter/01-oh-pl
 
 ## 相关主题
 
-- [编译构建：`docs/kb/architecture/build-system.md`（适配宏体系与构建变体）](build-system.md)
-- [窗口机制：`docs/kb/architecture/window-mechanism.md`（Rosen Window 窗口管理）](window-mechanism.md)
-- [DFX 日志：`docs/kb/architecture/dfx/logging.md`（HiLog/HiSysEvent OSAL 桥接）](dfx/logging.md)
-- [DFX Trace：`docs/kb/architecture/dfx/trace.md`（HiTrace/PerfMonitor OSAL 桥接）](dfx/trace.md)
-- UISession：`docs/kb/architecture/uisession-service.md`（UIContentImpl 回调注册与 IPC 通道）
+- [编译构建：[docs/kb/architecture/build-system.md](build-system.md)（适配宏体系与构建变体）](build-system.md)
+- [窗口机制：[docs/kb/architecture/window-mechanism.md](window-mechanism.md)（Rosen Window 窗口管理）](window-mechanism.md)
+- [DFX 日志：[docs/kb/architecture/dfx/logging.md](dfx/logging.md)（HiLog/HiSysEvent OSAL 桥接）](dfx/logging.md)
+- [DFX Trace：[docs/kb/architecture/dfx/trace.md](dfx/trace.md)（HiTrace/PerfMonitor OSAL 桥接）](dfx/trace.md)
+- UISession：[docs/kb/architecture/uisession-service.md](uisession-service.md)（UIContentImpl 回调注册与 IPC 通道）

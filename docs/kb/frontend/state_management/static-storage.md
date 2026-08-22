@@ -88,8 +88,8 @@
 
 ## 相关主题
 
-- 总览：`docs/kb/frontend/state-management.md`
-- 静态 V1 核心（`StateDecoratedVariable` 是存储 `link()` 返回基础）：`docs/kb/frontend/state_management/static-v1-core.md`
-- 静态 V1 装饰器（存储联动装饰器 `@StorageLink`/`@StoragePropRef` 等）：`docs/kb/frontend/state_management/static-v1-decorators.md`
-- 跨前端互操作（存储桥完整机制）：`docs/kb/frontend/state_management/static-interop-bridge.md`
-- 动态侧存储体系（对照参考）：`docs/kb/frontend/state_management/storage.md`
+- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
+- 静态 V1 核心（`StateDecoratedVariable` 是存储 `link()` 返回基础）：[docs/kb/frontend/state_management/static-v1-core.md](static-v1-core.md)
+- 静态 V1 装饰器（存储联动装饰器 `@StorageLink`/`@StoragePropRef` 等）：[docs/kb/frontend/state_management/static-v1-decorators.md](static-v1-decorators.md)
+- 跨前端互操作（存储桥完整机制）：[docs/kb/frontend/state_management/static-interop-bridge.md](static-interop-bridge.md)
+- 动态侧存储体系（对照参考）：[docs/kb/frontend/state_management/storage.md](storage.md)

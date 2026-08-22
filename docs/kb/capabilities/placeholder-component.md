@@ -66,7 +66,7 @@
 
 ## 相关主题
 
-- [NodeContainer：`docs/kb/components/custom-node/node-container.md`](../components/custom-node/node-container.md)
-- [ContentSlot：`docs/kb/components/custom-node/content-slot.md`](../components/custom-node/content-slot.md)
-- [NodeAdapter：`docs/kb/capabilities/node-adapter.md`](node-adapter.md)
-- [组件复用框架：`docs/kb/architecture/component-reuse-framework.md`](../architecture/component-reuse-framework.md)
+- [NodeContainer：[docs/kb/components/custom-node/node-container.md](../components/custom-node/node-container.md)](../components/custom-node/node-container.md)
+- [ContentSlot：[docs/kb/components/custom-node/content-slot.md](../components/custom-node/content-slot.md)](../components/custom-node/content-slot.md)
+- [NodeAdapter：[docs/kb/capabilities/node-adapter.md](node-adapter.md)](node-adapter.md)
+- [组件复用框架：[docs/kb/architecture/component-reuse-framework.md](../architecture/component-reuse-framework.md)](../architecture/component-reuse-framework.md)

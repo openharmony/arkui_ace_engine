@@ -239,10 +239,10 @@ UIContext 功能域：`specs/04-common-capability/12-ui-context/`
 
 ## 相关主题
 
-- [路由管理：`docs/kb/api/router.md`](../api/router.md)
-- [MediaQuery：`docs/kb/api/mediaquery.md`](../api/mediaquery.md)
-- Ability 上下文与窗口信息：`docs/kb/capabilities/ability-context.md`
-- Frame 帧回调：`docs/kb/capabilities/frame-callback.md`
-- [窗口机制：`docs/kb/architecture/window-mechanism.md`](../architecture/window-mechanism.md)
-- [布局框架：`docs/kb/architecture/layout-framework.md`](../architecture/layout-framework.md)
+- [路由管理：[docs/kb/api/router.md](../api/router.md)](../api/router.md)
+- [MediaQuery：[docs/kb/api/mediaquery.md](../api/mediaquery.md)](../api/mediaquery.md)
+- Ability 上下文与窗口信息：[docs/kb/capabilities/ability-context.md](ability-context.md)
+- Frame 帧回调：[docs/kb/capabilities/frame-callback.md](frame-callback.md)
+- [窗口机制：[docs/kb/architecture/window-mechanism.md](../architecture/window-mechanism.md)](../architecture/window-mechanism.md)
+- [布局框架：[docs/kb/architecture/layout-framework.md](../architecture/layout-framework.md)](../architecture/layout-framework.md)
 - [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — JS 前端历史配对问题（已修复）与 ANI/C API 路径排查要点

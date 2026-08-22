@@ -74,6 +74,6 @@ Touch Events 是 ArkUI 面向触摸输入的数据建模、组件回调和多点
 
 ## 相关主题
 
-- [事件基础框架：`docs/kb/architecture/event-base-framework.md`](../architecture/event-base-framework.md)
-- [事件分发和拦截：`docs/kb/capabilities/event-dispatch-intercept.md`](event-dispatch-intercept.md)
-- [手势能力：`docs/kb/capabilities/gesture-capability.md`](gesture-capability.md)
+- [事件基础框架：[docs/kb/architecture/event-base-framework.md](../architecture/event-base-framework.md)](../architecture/event-base-framework.md)
+- [事件分发和拦截：[docs/kb/capabilities/event-dispatch-intercept.md](event-dispatch-intercept.md)](event-dispatch-intercept.md)
+- [手势能力：[docs/kb/capabilities/gesture-capability.md](gesture-capability.md)](gesture-capability.md)
