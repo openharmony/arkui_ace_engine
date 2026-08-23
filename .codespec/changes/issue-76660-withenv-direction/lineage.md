@@ -3,7 +3,7 @@
 | 字段 | 值 |
 |------|----|
 | Lineage | new-on-legacy |
-| Target Release | TBD |
+| Target Release | 未规划版本 |
 | Source | existing code + new requirement |
 | Original Docs | 32825.diff (API 定义) |
 | Source Code Evidence | frameworks/core/components_ng/syntax/with_env_node.h/cpp, frameworks/core/pipeline_ng/environment_manager.h/cpp |

@@ -51,6 +51,7 @@ public:
     RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
     void OnAttachToMainTree(bool) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
 
     bool IsAtomicNode() const override
     {
@@ -256,6 +257,21 @@ public:
         }
     }
 
+    void SetOnEnvTreeStateChangeFunc(std::function<void(bool)>&& onEnvTreeStateChange)
+    {
+        onEnvTreeStateChangeFunc_ = std::move(onEnvTreeStateChange);
+    }
+
+    bool HasOnEnvTreeStateChangeFunc() const
+    {
+        return static_cast<bool>(onEnvTreeStateChangeFunc_);
+    }
+
+    void ResetOnEnvTreeStateChangeFunc()
+    {
+        onEnvTreeStateChangeFunc_ = nullptr;
+    }
+
     bool FireOnCleanup();
 
     ReusableMemOptStrategy GetMemOptStrategy();
@@ -315,6 +331,7 @@ private:
     std::function<void()> onCleanupFunc_ = nullptr;
     std::function<void(const std::string&, const std::optional<std::any>&)> onCustomEnvUpdateFunc_ = nullptr;
     std::function<void(const std::string&, const std::optional<SystemEnvValue>&)> onSystemEnvUpdateFunc_ = nullptr;
+    std::function<void(bool)> onEnvTreeStateChangeFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

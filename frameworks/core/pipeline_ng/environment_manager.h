@@ -87,6 +87,7 @@ public:
     bool FindCustomEnvValueByKey(const RefPtr<UINode>& consumer, const std::string& key, std::any& outValue);
     bool ResolveSystemEnvValueForImplicitReader(
         const RefPtr<UINode>& reader, const std::string& key, SystemEnvValue& outValue) const;
+    void UnregisterExplicitReader(UINode* readerNode);
 
 private:
     enum class EnvironmentValueChangeType : uint8_t {

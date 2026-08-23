@@ -74,6 +74,7 @@ class ObserveV2 {
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly ENV_PREFIX = '__env_'; // ENV_PREFIX + attrName => backing store attribute name
   public static readonly IS_CUSTOM_ENV_INIT = '_isCustomEnvConstructionFinalized__Internal';
+  public static readonly CUSTOM_ENV_LOCAL_PREFIX = '__custom_env_local_';
   public static readonly OB_PREFIX_LEN = 5;
   public static readonly NO_REUSE = -1; // mark no reuse on-going
   // used by array Handler to create dependency on artificial 'length'
