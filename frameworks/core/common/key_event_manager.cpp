@@ -25,6 +25,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #ifdef SMART_GESTURE_SUPPORTED
+#include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -72,6 +73,19 @@ RefPtr<DragDropManager> GetDragDropManager(int32_t instanceId)
 }
 
 #ifdef SMART_GESTURE_SUPPORTED
+std::string BuildSmartGestureErrorTag(const KeyEvent& event, const std::string& branch)
+{
+    return "SmartGesture:" + branch + ", keyCode=" + std::to_string(static_cast<int32_t>(event.code)) + ", action=" +
+           std::to_string(static_cast<int32_t>(event.action));
+}
+
+void ReportSmartGestureError(const KeyEvent& event, int32_t instanceId, const std::string& branch)
+{
+    GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::SMART_GESTURE_ERROR, -1, -1,
+        BuildSmartGestureErrorTag(event, branch) };
+    GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId);
+}
+
 std::optional<SmartGestureTrigger> ResolveSmartGestureTrigger(
     const KeyEvent& event, const RefPtr<SmartGestureManager>& manager)
 {
@@ -103,19 +117,29 @@ std::optional<SmartGestureTrigger> ResolveSmartGestureTrigger(
 bool DispatchSmartGesture(const KeyEvent& event, int32_t instanceId, std::optional<SmartGestureTrigger> trigger)
 {
     auto pipeline = GetPipelineContext(instanceId);
-    CHECK_NULL_RETURN(pipeline, false);
+    if (!pipeline) {
+        ReportSmartGestureError(event, instanceId, "pipeline null");
+        return false;
+    }
     auto eventManager = pipeline->GetEventManager();
-    CHECK_NULL_RETURN(eventManager, false);
+    if (!eventManager) {
+        ReportSmartGestureError(event, instanceId, "event manager null");
+        return false;
+    }
     auto manager = eventManager->GetOrCreateSmartGestureManager();
-    CHECK_NULL_RETURN(manager, false);
+    if (!manager) {
+        ReportSmartGestureError(event, instanceId, "smart gesture manager null");
+        return false;
+    }
     if (!trigger.has_value()) {
+        ReportSmartGestureError(event, instanceId, "trigger empty");
         return false;
     }
     // Return value semantics: true only when the smart-gesture pipeline finishes with a
     // successfully executed action; false means the recognized trigger remains unconsumed
     // and should return the normal unhandled key-event result.
     if (!manager->HandleTrigger(trigger.value(), event)) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
             "smart gesture recognized but not handled, return unconsumed result. OperateIntention = %{public}d",
             static_cast<int32_t>(trigger.value()));
         return false;
