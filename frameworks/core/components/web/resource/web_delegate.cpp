@@ -10719,6 +10719,40 @@ void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::st
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonString");
 }
 
+void WebDelegate::RequestWebDomJsonStringWithOptions(
+    const std::function<void(const std::string)>&& callback, int32_t mode)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), callback, mode]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (delegate->nweb_) {
+                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(weak);
+                if (callbackImpl && callback) {
+                    callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
+                        auto delegate = weak.Upgrade();
+                        CHECK_NULL_VOID(delegate);
+                        auto context = delegate->context_.Upgrade();
+                        CHECK_NULL_VOID(context);
+                        context->GetTaskExecutor()->PostTask(
+                            [callback = std::move(func), result]() { callback(result); },
+                            TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonStringWithOptionsCallback");
+                    });
+                }
+                auto agentManager = delegate->GetNWebAgentManager();
+                if (!agentManager) {
+                    TAG_LOGE(AceLogTag::ACE_WEB, "GetNWebAgentManager failed, WebId: %{public}d",
+                        delegate->GetWebId());
+                    return;
+                }
+                agentManager->RequestWebDomJsonStringWithOptions(callbackImpl, mode);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonStringWithOptions");
+}
+
 void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode)
 {
     auto context = context_.Upgrade();

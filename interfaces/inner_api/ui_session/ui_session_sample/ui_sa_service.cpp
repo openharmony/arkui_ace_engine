@@ -43,6 +43,7 @@ namespace {
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&UiSaService::GetInstance());
 const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
 constexpr char WEB_INTERFACE_REQUEST_DOM_TREE[] = "RequestArkWebDomTree";
+constexpr char WEB_INTERFACE_REQUEST_DOM_TREE_VIEWPORT[] = "RequestArkWebDomTreeViewport";
 constexpr size_t BITS_UINT32 = sizeof(uint32_t) * 8;
 constexpr int32_t PARAMS_OFFSET = 1;
 constexpr size_t GET_VISIBLE_INTERACTION_INFO_INDEX = 1;
@@ -616,6 +617,17 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
             LOGI("[GetWebInfoByRequest] finishCallback code=%{public}d", code);
             if (request == WEB_INTERFACE_REQUEST_DOM_TREE) {
                 auto filePath = UI_SA_PATH + "arkweb_tree_" + GetCurrentTimestampStr() + ".json";
+                std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
+                CHECK_NULL_VOID(ostream);
+                if (!ostream->is_open()) {
+                    LOGW("[GetWebInfoByRequest] filePath is invalid");
+                    return;
+                }
+                ostream->write(result.c_str(), result.length());
+                LOGI("[GetWebInfoByRequest] arkWeb tree is saved to %{public}s", filePath.c_str());
+            }
+            if (request == WEB_INTERFACE_REQUEST_DOM_TREE_VIEWPORT) {
+                auto filePath = UI_SA_PATH + "arkweb_tree_viewport_" + GetCurrentTimestampStr() + ".json";
                 std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
                 CHECK_NULL_VOID(ostream);
                 if (!ostream->is_open()) {

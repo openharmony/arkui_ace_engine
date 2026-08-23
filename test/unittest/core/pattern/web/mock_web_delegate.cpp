@@ -1548,6 +1548,8 @@ void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
 void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
+void WebDelegate::RequestWebDomJsonStringWithOptions(
+    const std::function<void(const std::string)>&& callback, int32_t mode) {}
 void WebDelegate::UpdateFullScreenVideoOverlayEnable(bool) {}
 void WebDelegate::OnFullScreenVideoOverlayEnter(const char*) {}
 void WebDelegate::OnVideoStatusChanged(const int action, const std::map<std::string, std::string>& param) {}
