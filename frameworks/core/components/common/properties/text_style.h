@@ -441,8 +441,8 @@ public:                                                                         
         }                                                                               \
         advancedTextStyle_->Set##name(newValue);                                        \
         auto flag = static_cast<int32_t>(changeflag);                                   \
-        if (GreatOrEqual(flag, 0)) {                                                    \
-            reLayoutParagraphStyleBitmap_.set(flag);                                    \
+        if (flag >= 0) {                                                                \
+            reLayoutParagraphStyleBitmap_.set(static_cast<size_t>(flag));               \
         } else {                                                                        \
             needReCreateParagraph_ = true;                                              \
         }                                                                               \
@@ -466,8 +466,8 @@ public:                                                                         
         }                                                                               \
         advancedTextStyle_->Set##name(newValue);                                        \
         auto flag = static_cast<int32_t>(changeflag);                                   \
-        if (GreatOrEqual(flag, 0)) {                                                    \
-            reLayoutParagraphStyleBitmap_.set(flag);                                    \
+        if (flag >= 0) {                                                                \
+            reLayoutParagraphStyleBitmap_.set(static_cast<size_t>(flag));               \
         } else {                                                                        \
             needReCreateParagraph_ = true;                                              \
         }                                                                               \
