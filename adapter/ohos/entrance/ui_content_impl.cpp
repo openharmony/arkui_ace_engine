@@ -6304,6 +6304,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
     SaveArkUIPageTranslateFunctions(taskExecutor);
+    SaveGetCurrentAbilityLanguageInfoFunction(taskExecutor);
     SaveTraverseWebForPageSceneCallback(taskExecutor);
     auto pageSceneMatcher = std::make_shared<NG::PageSceneRuleManager>();
     auto pageSceneDetectCallback = [weakTaskExecutor = taskExecutor, pageSceneMatcher](
@@ -6428,6 +6429,57 @@ void UIContentImpl::SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>&
     UiSessionManager::GetInstance()->SaveArkUIPageTranslateFunctions(
         std::move(getTextFunction), std::move(startFunction), std::move(endFunction),
         std::move(resetFunction), std::move(resultFunction));
+}
+
+void UIContentImpl::SaveGetCurrentAbilityLanguageInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    const int32_t instanceId = instanceId_;
+    auto getAbilityLanguageInfo = [weakTaskExecutor = taskExecutor, instanceId](
+                                      std::string& language, std::string& region) -> int32_t {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            LOGW("GetCurrentAbilityLanguageInfo task executor is null");
+            return FAILED;
+        }
+
+        int32_t result = FAILED;
+        std::string resultLanguage;
+        std::string resultRegion;
+        constexpr uint32_t GET_ABILITY_LANGUAGE_INFO_TIMEOUT_TIME = 1500;
+        auto task = [instanceId, &result, &resultLanguage, &resultRegion]() {
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            if (!container) {
+                LOGW("GetCurrentAbilityLanguageInfo container is null");
+                return;
+            }
+            auto languageTag = container->GetResourceInfo().GetResourceConfiguration().GetLanguage();
+            if (languageTag.empty()) {
+                LOGW("GetCurrentAbilityLanguageInfo language tag is empty");
+                return;
+            }
+            std::string script;
+            Localization::ParseLocaleTag(languageTag, resultLanguage, script, resultRegion, false);
+            if (resultLanguage.empty() || resultRegion.empty()) {
+                LOGW("GetCurrentAbilityLanguageInfo locale is empty, languageEmpty=%{public}d, "
+                     "regionEmpty=%{public}d",
+                    resultLanguage.empty(), resultRegion.empty());
+                return;
+            }
+            result = NO_ERROR;
+        };
+        if (!taskExecutor->PostSyncTaskTimeout(task, TaskExecutor::TaskType::UI,
+                GET_ABILITY_LANGUAGE_INFO_TIMEOUT_TIME, "UiSessionGetCurrentAbilityLanguageInfo")) {
+            LOGW("GetCurrentAbilityLanguageInfo post UI task failed");
+            return FAILED;
+        }
+        if (result != NO_ERROR) {
+            return result;
+        }
+        language = std::move(resultLanguage);
+        region = std::move(resultRegion);
+        return NO_ERROR;
+    };
+    UiSessionManager::GetInstance()->SaveGetCurrentAbilityLanguageInfoFunction(std::move(getAbilityLanguageInfo));
 }
 
 void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
