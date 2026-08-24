@@ -22,7 +22,6 @@
 #include "adapter/ohos/entrance/tsa_advanced_feature.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/key_event.h"
-#include "core/gestures/drag_constants.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -463,7 +462,6 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     event.sensorTime = TimeStamp(std::chrono::microseconds(GetDumpSensorTime(pointerEvent)));
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
-    event.SetIsScreenLocked(pointerEvent->HasFlag(MMI_FLAG_SCREEN_LOCKED));
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();

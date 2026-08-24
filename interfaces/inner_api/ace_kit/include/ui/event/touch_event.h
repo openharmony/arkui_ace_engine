@@ -117,8 +117,6 @@ struct TouchEvent final : public PointerEvent {
     bool isPrivacyMode = false;
     bool isPassThroughMode = false;
     bool isGenerate = false;
-    // Whether the screen was locked when this touch event was dispatched.
-    bool isScreenLocked = false;
     int32_t xReverse = 0;
     int32_t yReverse = 0;
     int32_t eventHandleId = 0;
@@ -159,8 +157,6 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetInputYDeltaSlope(float inputYDeltaSlope);
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
     TouchEvent& SetIsPassThroughMode(bool isPassThroughMode);
-    TouchEvent& SetIsScreenLocked(bool isScreenLocked);
-    bool GetIsScreenLocked() const;
     TouchEvent& SetPressedTime(TimeStamp pressedTime);
     TouchEvent& SetWidth(int32_t width);
     TouchEvent& SetHeight(int32_t height);

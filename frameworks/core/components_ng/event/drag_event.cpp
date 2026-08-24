@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/drag_event.h"
 
+#include "pointer_event.h" // complete MMI type for HasFlag
 #include "base/log/ace_trace.h"
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -244,6 +245,14 @@ void DragEventActuator::RecordTouchDownPoint(const TouchEvent& downTouchEvent)
     touchDownPoint_ = downTouchEvent;
 }
 
+void DragEventActuator::CaptureDownScreenLocked(const TouchEvent& touchEvent)
+{
+    if (touchEvent.type == TouchType::DOWN && touchEvent.pointerEvent) {
+        isDownScreenLocked_ = (touchEvent.pointerEvent->GetFlag() &
+            MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED) != 0;
+    }
+}
+
 const TouchEvent& DragEventActuator::GetTouchDownPoint()
 {
     return touchDownPoint_;
@@ -451,6 +460,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     }
     RecordTouchDownPoint(touchRestrict.touchEvent);
     lastTouchFingerId_ = touchRestrict.touchEvent.id;
+    CaptureDownScreenLocked(touchRestrict.touchEvent);
     dragDropManager->SetIsDisableDefaultDropAnimation(false);
     dragDropManager->SetIsDragNodeNeedClean(false);
     auto focusHub = frameNode->GetFocusHub();
@@ -864,6 +874,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        if (actuator->IsDragStartedAcrossScreenLock(info)) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Drag crossed screen lock, skip drag preview lift.");
+            return;
+        }
         auto panRecognizer = actuator->panRecognizer_;
         if (panRecognizer && panRecognizer->GetGestureDisposal() == GestureDisposal::REJECT) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because drag action reject");
@@ -2600,5 +2614,14 @@ void DragEventActuator::HandleTextDragCallback(Offset offset)
     } else if (!gestureHub->GetIsTextDraggable()) {
         gestureHub->SetPixelMap(nullptr);
     }
+}
+
+bool DragEventActuator::IsDragStartedAcrossScreenLock(const GestureEvent& info) const
+{
+    if (GetIsDownScreenLocked()) {
+        return false;
+    }
+    const auto& pointerEvent = info.GetPointerEvent();
+    return pointerEvent && pointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED);
 }
 } // namespace OHOS::Ace::NG

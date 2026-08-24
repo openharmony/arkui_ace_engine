@@ -1090,6 +1090,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
+    std::map<int32_t, bool> downScreenLockedMap_;
     friend class WindowFreeContainer;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();

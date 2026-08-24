@@ -364,7 +364,10 @@ ohos_static_library("ace_components_event") {
   configs = [ ":ace_unittest_config" ]
   deps = []
   if (current_os == "ohos") {
-    external_deps = [ "c_utils:utils" ]
+    external_deps = [
+      "c_utils:utils",
+      "input:libmmi-client",
+    ]
   }
 }
 

@@ -50,11 +50,6 @@ public:
     void NotifyDragEnd() override;
     void NotifyPreDragStatus(const PreDragStatus preDragStatus) override;
 
-    bool GetIsDownScreenLocked() const override
-    {
-        return isDownScreenLocked_;
-    }
-
 private:
     void InitPanAction(bool isStylusMouseMode);
     void InitPanMouseDistance(bool isStylusMouseMode);
@@ -65,8 +60,6 @@ private:
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragDropInitiatingHandler> dragDropInitiatingHandler_;
-    // Whether the screen was locked when the triggering touch down arrived.
-    bool isDownScreenLocked_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_DRAG_DROP_EVENT_H

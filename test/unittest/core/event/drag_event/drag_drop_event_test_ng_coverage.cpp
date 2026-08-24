@@ -495,4 +495,44 @@ HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorHandleTouchEventAndNo
     context.actuator->NotifyTransDragWindowToFwk();
     EXPECT_EQ(handler->GetDragDropInitiatingStatus(), DragDropInitiatingStatus::IDLE);
 }
+
+/**
+ * @tc.name: DragDropEventActuatorGetIsDownScreenLocked001
+ * @tc.desc: OnCollectTouchTarget reads the down screen-locked state from the touch
+ *           event's MMI PointerEvent flag. When no MMI PointerEvent is carried (the
+ *           test environment does not populate touchEvent.pointerEvent), the capture is
+ *           skipped and GetIsDownScreenLocked() stays false, without crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorGetIsDownScreenLocked001, TestSize.Level1)
+{
+    auto context = CreateDragDropContext(V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(context.actuator, nullptr);
+    EXPECT_FALSE(context.actuator->GetIsDownScreenLocked());
+
+    TouchTestResult result;
+    CollectTouchTarget(context, CreateTouchRestrict(SourceType::TOUCH, TEST_TOUCH_ID), result);
+    EXPECT_FALSE(context.actuator->GetIsDownScreenLocked());
+}
+
+/**
+ * @tc.name: DragDropEventActuatorIsDragStartedAcrossScreenLock001
+ * @tc.desc: IsDragStartedAcrossScreenLock returns false when the trigger GestureEvent
+ *           carries no MMI PointerEvent (info.GetPointerEvent() is null): the trigger-time
+ *           lock flag cannot be read, so no cross-lock verdict. Guards the
+ *           null-pointerEvent path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorIsDragStartedAcrossScreenLock001, TestSize.Level1)
+{
+    auto context = CreateDragDropContext(V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(context.actuator, nullptr);
+
+    TouchTestResult result;
+    CollectTouchTarget(context, CreateTouchRestrict(SourceType::TOUCH, TEST_TOUCH_ID), result);
+
+    GestureEvent info;
+    EXPECT_FALSE(info.GetPointerEvent());
+    EXPECT_FALSE(context.actuator->IsDragStartedAcrossScreenLock(info));
+}
 } // namespace OHOS::Ace::NG

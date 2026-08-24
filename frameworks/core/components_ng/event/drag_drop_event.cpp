@@ -229,12 +229,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     }
     CHECK_NULL_VOID(dragDropInitiatingHandler_);
     auto touchEvent = touchRestrict.touchEvent;
-    // Capture the screen-locked state at the triggering touch down (read from the MMI
-    // PointerEvent flag filled in ConvertTouchEvent) so it can be compared against the
-    // state at drag trigger time. Later move/up events must not overwrite it.
-    if (touchEvent.type == TouchType::DOWN) {
-        isDownScreenLocked_ = touchEvent.isScreenLocked;
-    }
+    CaptureDownScreenLocked(touchEvent);
     RecordTouchDownPoint(touchEvent);
     dragDropInitiatingHandler_->NotifyHitTesting(touchEvent);
     InitPanAction(touchEvent.isStylusMouseMode);
