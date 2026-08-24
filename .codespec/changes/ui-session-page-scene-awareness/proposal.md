@@ -83,7 +83,8 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 
 - AC-4: WHEN 规则 `policy.reportOnRegister=true` THEN 宿主在注册后扫描当前页面顶部控件树。
 - AC-5: WHEN 当前页面文本输入类控件数量大于等于 `condition.threshold` THEN 宿主通过 UISession 上报 `TEXT_EDITOR`。
-- AC-6: WHEN `scope.onlyVisible=true` THEN 不可见或与当前页面窗口范围无交集的控件不参与计数；本阶段不逐层计算滚动容器裁剪。
+- AC-6: WHEN `scope.onlyVisible=true` THEN visible/active 不通过、transform 后宽高为 0、或自身/祖先最终 opacity 为 0 的控件不参与计数；屏幕范围过滤由可选的 `scope.rectCulling` 独立控制。
+- AC-6A: WHEN `scope.rectCulling=true` THEN 仅与当前页面 viewport 存在交集的控件参与计数；缺省为 `false` 时不执行 rect 相交判断。
 - AC-7: WHEN `globalConfig.includeUnfocusableTextInput=false` THEN 不可获焦文本输入类控件不参与计数。
 
 #### US-3: 文本输入类控件上下树后稳定检测

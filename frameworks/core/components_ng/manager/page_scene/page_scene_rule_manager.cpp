@@ -79,7 +79,7 @@ std::string NormalizeNodeType(const std::string& tag)
     if (tag == V2::TEXTAREA_ETS_TAG) {
         return "TextArea";
     }
-    if (tag == V2::SEARCH_ETS_TAG || tag == SEARCH_FIELD_TAG) {
+    if (tag == V2::SEARCH_ETS_TAG) {
         return "Search";
     }
     if (tag == V2::RICH_EDITOR_ETS_TAG) {
@@ -167,10 +167,8 @@ void PageSceneInputCountTracker::Initialize(
     const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const DumpStartNodeSet& startNodes)
 {
     Reset();
-    // Viewport is used only by the visible-node filter. It comes from
-    // dumpBeginNode (rootNode_ normally, or the ContainerModal stack).
-    if (rule.onlyVisible && startNodes.dumpBeginNode) {
-        pageViewportRect_ = startNodes.dumpBeginNode->GetTransformRectRelativeToWindowOnlyVisible(true);
+    if (rule.rectCulling && startNodes.dumpBeginNode) {
+        pageViewportRect_ = startNodes.dumpBeginNode->GetTransformRectRelativeToWindow(true);
     }
     for (const auto& node : startNodes.pageStartNodes) {
         CollectInputNodes(ruleSet, rule, node);
@@ -192,6 +190,23 @@ void PageSceneInputCountTracker::Reset()
 const std::vector<PageSceneNodeInfo>& PageSceneInputCountTracker::GetVisibleInputNodes() const
 {
     return visibleInputNodes_;
+}
+
+bool PageSceneInputCountTracker::IsOpacityVisible(const RefPtr<FrameNode>& node) const
+{
+    double finalOpacity = 1.0;
+    auto current = node;
+    while (current) {
+        auto renderContext = current->GetRenderContext();
+        if (renderContext) {
+            finalOpacity *= renderContext->GetOpacityValue(1.0);
+            if (NearZero(finalOpacity)) {
+                return false;
+            }
+        }
+        current = current->GetAncestorNodeOfFrame(true);
+    }
+    return !NearZero(finalOpacity);
 }
 
 void PageSceneInputCountTracker::CollectInputNodes(
@@ -226,16 +241,21 @@ std::optional<PageSceneNodeInfo> PageSceneInputCountTracker::BuildNodeInfo(
         return std::nullopt;
     }
 
+    const bool needRect = rule.onlyVisible || rule.rectCulling || rule.includeRect;
     RectF rect;
+    if (needRect) {
+        rect = rule.onlyVisible ? node->GetTransformRectRelativeToWindowOnlyVisible(true)
+                                : node->GetTransformRectRelativeToWindow(true);
+    }
     if (rule.onlyVisible) {
-        rect = node->GetTransformRectRelativeToWindowOnlyVisible(true);
-        bool visible = node->IsVisibleAndActive() && rect.Width() > 0.0f && rect.Height() > 0.0f &&
-            pageViewportRect_.IsInnerIntersectWith(rect);
+        const bool visible = node->IsVisibleAndActive() && IsOpacityVisible(node) &&
+            rect.Width() > 0.0f && rect.Height() > 0.0f;
         if (!visible) {
             return std::nullopt;
         }
-    } else if (rule.includeRect) {
-        rect = node->GetTransformRectRelativeToWindow(true);
+    }
+    if (rule.rectCulling && !pageViewportRect_.IsInnerIntersectWith(rect)) {
+        return std::nullopt;
     }
 
     auto focusHub = node->GetFocusHub();
@@ -502,6 +522,7 @@ std::optional<PageSceneRule> PageSceneRuleManager::ParseRule(const std::unique_p
     auto scope = GetObjectValue(ruleJson, "scope");
     if (scope) {
         rule.onlyVisible = scope->GetBool("onlyVisible", true);
+        rule.rectCulling = scope->GetBool("rectCulling", false);
         rule.includeWeb = scope->GetBool("includeWeb", false);
         rule.includeUIExtension = scope->GetBool("includeUIExtension", false);
     }

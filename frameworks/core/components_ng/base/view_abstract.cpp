@@ -3942,8 +3942,17 @@ void ViewAbstract::SetOpacity(double opacity)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    const auto oldOpacity = renderContext->GetOpacityValue(1.0);
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+    if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+        frameNode->NotifyPageSceneOpacityChanged();
+    }
 }
+
 void ViewAbstract::SetAllowDrop(const std::set<std::string>& allowDrop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -8222,7 +8231,14 @@ void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
 
 void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity)
 {
+    CHECK_NULL_VOID(frameNode);
+    const auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    const auto oldOpacity = renderContext->GetOpacityValue(1.0);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
+    if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+        frameNode->NotifyPageSceneOpacityChanged();
+    }
 }
 
 void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity, const RefPtr<ResourceObject>& resObj)
@@ -8244,10 +8260,22 @@ void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity, const RefPtr
         if (viewAbstractOpacity.empty()) {
             pattern->AddResCache("viewAbstract.opacity", std::to_string(result));
         }
+        const auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        const auto oldOpacity = renderContext->GetOpacityValue(1.0);
         ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, result, frameNode);
+        if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+            frameNode->NotifyPageSceneOpacityChanged();
+        }
     };
     pattern->AddResObj("viewAbstract.opacity", resObj, std::move(updateFunc));
+    const auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    const auto oldOpacity = renderContext->GetOpacityValue(1.0);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
+    if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+        frameNode->NotifyPageSceneOpacityChanged();
+    }
 }
 
 void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resObj)
