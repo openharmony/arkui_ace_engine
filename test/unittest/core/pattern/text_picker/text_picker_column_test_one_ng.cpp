@@ -716,7 +716,257 @@ HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClick002, TestSize.Level1)
 }
 
 /**
- * @tc.name: InnerHandleScroll001
+ * @tc.name: OnAroundButtonClick003
+ * @tc.desc: Test OnAroundButtonClick with non-adjacent item below center (step=2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClick003, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" }
+    };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto childSize = static_cast<int32_t>(child->GetChildren().size());
+    auto middleIndex = columnPattern->GetShowOptionCount() / HALF_NUMBER;
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    param->itemIndex = middleIndex + 2;
+    param->itemTotalCounts = childSize;
+    columnPattern->OnAroundButtonClick(param);
+    EXPECT_EQ(columnPattern->clickScrollSteps_, -1);
+    EXPECT_EQ(columnPattern->aroundClickProperty_->Get(), 0.0f);
+}
+
+/**
+ * @tc.name: OnAroundButtonClick004
+ * @tc.desc: Test OnAroundButtonClick with non-adjacent item above center (step=-2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClick004, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" }
+    };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto childSize = static_cast<int32_t>(child->GetChildren().size());
+    auto middleIndex = columnPattern->GetShowOptionCount() / HALF_NUMBER;
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
+    param->itemIndex = middleIndex - 2;
+    param->itemTotalCounts = childSize;
+    columnPattern->OnAroundButtonClick(param);
+    EXPECT_EQ(columnPattern->clickScrollSteps_, -1);
+    EXPECT_EQ(columnPattern->aroundClickProperty_->Get(), 0.0f);
+}
+
+/**
+ * @tc.name: OnAroundButtonClickFinish001
+ * @tc.desc: Test OnAroundButtonClickFinish with completedSteps=0, absStep=2, should call InnerHandleScroll twice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClickFinish001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" }
+    };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->clickScrollSteps_ = 0;
+    uint32_t prevIndex = columnPattern->GetCurrentIndex();
+    columnPattern->OnAroundButtonClickFinish(true, 2);
+    EXPECT_EQ(columnPattern->clickScrollSteps_, -1);
+    EXPECT_EQ(columnPattern->yOffset_, 0.0);
+    EXPECT_EQ(columnPattern->yLast_, 0.0);
+    EXPECT_NE(columnPattern->GetCurrentIndex(), prevIndex);
+}
+
+/**
+ * @tc.name: OnAroundButtonClickFinish002
+ * @tc.desc: Test OnAroundButtonClickFinish with completedSteps=1, absStep=2, should call InnerHandleScroll once.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClickFinish002, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" }
+    };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->clickScrollSteps_ = 1;
+    columnPattern->OnAroundButtonClickFinish(true, 2);
+    EXPECT_EQ(columnPattern->clickScrollSteps_, -1);
+    EXPECT_EQ(columnPattern->yOffset_, 0.0);
+    EXPECT_EQ(columnPattern->yLast_, 0.0);
+}
+
+/**
+ * @tc.name: OnAroundButtonClickFinish003
+ * @tc.desc: Test OnAroundButtonClickFinish with completedSteps=2, absStep=2, should not call InnerHandleScroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClickFinish003, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" }
+    };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->clickScrollSteps_ = 2;
+    uint32_t prevIndex = columnPattern->GetCurrentIndex();
+    columnPattern->OnAroundButtonClickFinish(true, 2);
+    EXPECT_EQ(columnPattern->clickScrollSteps_, -1);
+    EXPECT_EQ(columnPattern->GetCurrentIndex(), prevIndex);
+}
+
+/**
+ * @tc.name: OnAroundButtonClickFinish004
+ * @tc.desc: Test OnAroundButtonClickFinish with InnerHandleScroll returning false at boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClickFinish004, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" }
+    };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(4);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->clickScrollSteps_ = 0;
+    columnPattern->SetCurrentIndex(4);
+    columnPattern->OnAroundButtonClickFinish(true, 3);
+    EXPECT_EQ(columnPattern->clickScrollSteps_, -1);
+    EXPECT_EQ(columnPattern->GetCurrentIndex(), 4);
+}
+
+/**
+ * @tc.name: GetDragDeltaLessThanJumpInterval001
+ * @tc.desc: Test clickScrollSteps_ increment in GetDragDeltaLessThanJumpInterval during click scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, GetDragDeltaLessThanJumpInterval001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = {
+        { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" }
+    };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    auto midIndex = columnPattern->GetShowOptionCount() / HALF_NUMBER;
+    float shiftDistance = columnPattern->optionProperties_[midIndex].nextDistance;
+    ASSERT_GT(std::abs(shiftDistance), 0.0f);
+
+    columnPattern->clickScrollSteps_ = 0;
+    columnPattern->yOffset_ = 0.0;
+    float originalDragDelta = shiftDistance * 2.0f;
+    columnPattern->GetDragDeltaLessThanJumpInterval(0.0, originalDragDelta, false, shiftDistance);
+    EXPECT_EQ(columnPattern->clickScrollSteps_, 2);
+}
+
+/**
  * @tc.desc: Test TextPickerColumnPattern InnerHandleScroll001
  * @tc.type: FUNC
  */
