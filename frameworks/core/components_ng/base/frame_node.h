@@ -840,6 +840,7 @@ public:
     void NotifyPageSceneVisibilityChanged();
     void NotifyPageSceneActiveChanged();
     void NotifyPageSceneFocusabilityChanged();
+    void NotifyPageSceneOpacityChanged();
 
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, const std::string& tag)
     {
@@ -1646,6 +1647,8 @@ protected:
     void OnCollectRemoved() override;
 
 private:
+    void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility, bool notifyPageScene);
+
     static bool ShouldDetectAceObjTypeConvertion();
     void DispatchAreaChangeWithThrottle(const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
     void GetCurrentAreaChangeInfo(

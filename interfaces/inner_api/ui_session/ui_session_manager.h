@@ -81,6 +81,7 @@ public:
         VISIBILITY,
         ACTIVE,
         FOCUSABILITY,
+        OPACITY,
     };
     /**
      * @description: Get ui_manager instance,this object process singleton

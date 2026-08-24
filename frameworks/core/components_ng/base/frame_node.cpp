@@ -2114,6 +2114,12 @@ void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChan
 
 void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
 {
+    NotifyVisibleChange(preVisibility, currentVisibility, true);
+}
+
+void FrameNode::NotifyVisibleChange(
+    VisibleType preVisibility, VisibleType currentVisibility, bool notifyPageScene)
+{
     if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
         if (preVisibility == VisibleType::VISIBLE && currentVisibility != VisibleType::VISIBLE) {
             auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
@@ -2140,7 +2146,7 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
     }
     pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
     UpdateChildrenVisible(preVisibility, currentVisibility);
-    if (preVisibility != currentVisibility) {
+    if (notifyPageScene && preVisibility != currentVisibility) {
         NotifyPageSceneVisibilityChanged();
     }
     auto pipeline = GetContext();
@@ -2189,13 +2195,24 @@ void FrameNode::NotifyPageSceneFocusabilityChanged()
 #endif
 }
 
+void FrameNode::NotifyPageSceneOpacityChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::OPACITY);
+#endif
+}
+
 void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
     auto layoutProperty = GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;
     }
-    NotifyVisibleChange(preVisibility, currentVisibility);
+    NotifyVisibleChange(preVisibility, currentVisibility, false);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)

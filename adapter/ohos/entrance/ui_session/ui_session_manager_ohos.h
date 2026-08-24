@@ -192,6 +192,7 @@ private:
         bool enabled = true;
         bool reportOnRegister = true;
         bool onlyVisible = true;
+        bool rectCulling = false;
     };
 
     struct PageSceneRuleSetInfo {

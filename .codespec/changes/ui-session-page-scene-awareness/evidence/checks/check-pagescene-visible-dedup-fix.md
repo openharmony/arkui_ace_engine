@@ -1,6 +1,6 @@
 # PageScene Visible/Dedup Scope Verification
 
-## 2026-07-21
+## 2026-08-22
 
 | 检查项 | 结果 | 证据 |
 |--------|------|------|
@@ -10,14 +10,17 @@
 | ContentChangeManager 回归 | 通过 | `content_change_manager_test_ng` 共 45 个用例，45/45 通过。 |
 | 完整 ace_engine 构建 | 通过 | 从 OpenHarmony 根目录执行 `./build.sh --product-name rk3568 --build-target ace_engine --ccache`，Ninja 完成 5888/5888，输出 `rk3568 build success` 和 `build successful`。 |
 | 差异格式检查 | 通过 | `git diff --check` 退出码 0。 |
-| 回退项残留检查 | 通过 | 生产代码和测试中不存在候选索引、`PageSceneOperation`、`forceFullScan`、节点变化独立回调等已退出范围的标识；CodeSpec 仅保留范围收缩和历史说明。 |
+| 过滤与通知规格检查 | 通过 | `onlyVisible`、`rectCulling`、opacity 过滤、父子树 dirty、按需 rect 计算和 nodeId 去重均已同步到规格与测试设计。 |
 
 ## 覆盖说明
 
-- `onlyVisible=true`：不可见或与当前页面窗口范围无交集的输入框不计数；不覆盖滚动容器逐层裁剪。
-- `onlyVisible=false`：屏幕外输入框仍参与规则匹配。
+- `onlyVisible=true`：过滤 visible/active 不通过、transform 后宽高为 0、或自身/祖先最终 opacity 为 0 的输入框；不因屏外而排除。
+- `rectCulling=true`：仅统计与 pageRoot viewport 有交集的输入框；缺省为 false。
+- `onlyVisible=false && rectCulling=true`：透明、隐藏或零尺寸属性不作为过滤条件，仅执行 rect 相交过滤。
+- `includeRect=true` 时无论过滤开关如何均需计算并输出 rect。
 - 同一命中节点 ID 列表仅发生坐标变化时，由 `deduplicate` 抑制重复上报。
-- 输入框上下树或移出屏幕导致命中节点 ID 列表变化时，重新应用规则并形成新的命中/退出状态。
+- 输入框上下树、可见属性/opacity 变化或 rectCulling 结果导致命中节点 ID 列表变化时，重新应用规则并形成新的命中/退出状态。
+- 父节点 visibility 变化只产生一次 PageScene dirty，稳定点从 pageRoot 重算父子树；pending 规则层去重保证同一规则不重复匹配。
 - 候选索引、增量计数、多 UIContext 路由和延迟 JSON 构造等性能优化已退出本阶段范围；规则检测允许全量扫描当前页面树。
 
 ## Fresh 验证命令

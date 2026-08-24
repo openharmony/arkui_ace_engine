@@ -43,6 +43,7 @@ constexpr char PAGE_SCENE_SELECTOR[] = "selector";
 constexpr char PAGE_SCENE_NODE_TYPES[] = "nodeTypes";
 constexpr char PAGE_SCENE_SCOPE[] = "scope";
 constexpr char PAGE_SCENE_ONLY_VISIBLE[] = "onlyVisible";
+constexpr char PAGE_SCENE_RECT_CULLING[] = "rectCulling";
 constexpr char PAGE_SCENE_INCLUDE_UNFOCUSABLE_TEXT_INPUT[] = "includeUnfocusableTextInput";
 constexpr char PAGE_SCENE_CONDITION[] = "condition";
 constexpr char PAGE_SCENE_OPERATOR[] = "operator";
@@ -54,7 +55,6 @@ constexpr char PAGE_SCENE_COUNT_GTE_OPERATOR[] = "COUNT_GTE";
 constexpr char PAGE_SCENE_TEXT_INPUT_TAG[] = "TextInput";
 constexpr char PAGE_SCENE_TEXT_AREA_TAG[] = "TextArea";
 constexpr char PAGE_SCENE_SEARCH_TAG[] = "Search";
-constexpr char PAGE_SCENE_SEARCH_FIELD_TAG[] = "SearchField";
 constexpr char PAGE_SCENE_RICH_EDITOR_TAG[] = "RichEditor";
 constexpr char GESTURE_TYPE_KEY[] = "GestureType";
 constexpr char CLICK_GESTURE_TYPE[] = "Click";
@@ -72,19 +72,13 @@ bool IsValidPageSceneId(const std::string& id)
 bool IsPageSceneTextInputNode(const std::string& nodeTag)
 {
     return nodeTag == PAGE_SCENE_TEXT_INPUT_TAG || nodeTag == PAGE_SCENE_TEXT_AREA_TAG ||
-           nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_SEARCH_FIELD_TAG ||
-           nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
+           nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
 }
 
 bool IsPageSceneInputControlNode(const std::string& nodeTag)
 {
     return nodeTag == PAGE_SCENE_TEXT_INPUT_TAG || nodeTag == PAGE_SCENE_TEXT_AREA_TAG ||
            nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
-}
-
-std::string NormalizePageSceneNodeType(const std::string& nodeTag)
-{
-    return nodeTag == PAGE_SCENE_SEARCH_FIELD_TAG ? PAGE_SCENE_SEARCH_TAG : nodeTag;
 }
 
 std::string GetJsonString(const JsonObject* object, const char* key)
@@ -136,9 +130,9 @@ std::set<std::string> ExtractTextInputNodeTypes(const JsonObject* ruleJsonValue)
         if (!cJSON_IsString(nodeType) || nodeType->valuestring == nullptr) {
             continue;
         }
-        auto normalizedType = NormalizePageSceneNodeType(nodeType->valuestring);
-        if (IsPageSceneTextInputNode(normalizedType)) {
-            nodeTypeSet.emplace(normalizedType);
+        std::string nodeTypeValue = nodeType->valuestring;
+        if (IsPageSceneTextInputNode(nodeTypeValue)) {
+            nodeTypeSet.emplace(nodeTypeValue);
         }
     }
     return nodeTypeSet;
@@ -708,7 +702,8 @@ void UiSessionManagerOhos::NotifyPageSceneNodeChanged(const std::string& nodeTag
 void UiSessionManagerOhos::NotifyPageSceneNodeStateChanged(
     const std::string& nodeTag, PageSceneNodeStateChange stateChange)
 {
-    if (!IsPageSceneInputControlNode(nodeTag) || pageSceneRuleRegisterProcesses_.load() <= 0) {
+    if ((stateChange == PageSceneNodeStateChange::FOCUSABILITY &&
+            !IsPageSceneInputControlNode(nodeTag)) || pageSceneRuleRegisterProcesses_.load() <= 0) {
         return;
     }
     auto ruleJsons = GetPageSceneRuleJsonsForNodeStateChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE, stateChange);
@@ -873,6 +868,7 @@ UiSessionManagerOhos::PageSceneRuleSetInfo UiSessionManagerOhos::ExtractPageScen
         auto scope = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_SCOPE);
         if (cJSON_IsObject(scope)) {
             ruleInfo.onlyVisible = GetJsonBool(scope, PAGE_SCENE_ONLY_VISIBLE, true);
+            ruleInfo.rectCulling = GetJsonBool(scope, PAGE_SCENE_RECT_CULLING, false);
         }
         auto policy = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_POLICY);
         if (cJSON_IsObject(policy)) {
@@ -955,7 +951,7 @@ std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneR
     const std::string& nodeTag, const std::string& sceneType)
 {
     std::vector<std::pair<int32_t, std::string>> ruleJsons;
-    auto nodeType = NormalizePageSceneNodeType(nodeTag);
+    auto nodeType = nodeTag;
     std::lock_guard<std::mutex> lock(pageSceneMutex_);
     for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
         auto scopedRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, sceneType, false, nodeType);
@@ -976,6 +972,7 @@ bool UiSessionManagerOhos::IsPageSceneRuleAffectedByNodeStateChange(
             // unfocusable text inputs, so both dimensions must be re-evaluated.
             return rule.onlyVisible || !ruleSetInfo.includeUnfocusableTextInput;
         case PageSceneNodeStateChange::ACTIVE:
+        case PageSceneNodeStateChange::OPACITY:
             return rule.onlyVisible;
         case PageSceneNodeStateChange::FOCUSABILITY:
             return !ruleSetInfo.includeUnfocusableTextInput;
@@ -988,7 +985,7 @@ std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneR
     const std::string& nodeTag, const std::string& sceneType, PageSceneNodeStateChange stateChange)
 {
     std::vector<std::pair<int32_t, std::string>> ruleJsons;
-    auto nodeType = NormalizePageSceneNodeType(nodeTag);
+    auto nodeType = IsPageSceneInputControlNode(nodeTag) ? nodeTag : "";
     std::lock_guard<std::mutex> lock(pageSceneMutex_);
     for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
         if (!ruleSetInfo.arkuiEnabled) {
