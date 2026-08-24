@@ -1,0 +1,13 @@
+# Build folders
+build/
+**/build/
+.hvigor/
+.idea/
+oh_modules/
+**/oh_modules/
+node_modules/
+**/node_modules/
+.preview/
+**/.preview/
+oh-package-lock.json5
+**/oh-package-lock.json5
