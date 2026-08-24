@@ -10,7 +10,7 @@ ArkUI KB 质量评分脚本（docs/kb_quality.py）。
 评分维度（满分 100）：
   A 结构完整性 30分  必填章节齐全（知识型/issue型/component型各有必填集）
   B 元数据头部 10分  文档版本/更新时间/来源、标题格式
-  C 路径规范   25分  无绝对路径/无行号引用/无旧OpenHarmony前缀/相关主题链接可达
+  C 路径规范   25分  无绝对路径/无行号引用/无旧OpenHarmony前缀/相关主题链接可达/失效.md引用扣分
   D 内容质量   20分  定位段充实/表格说明列非空/常见问题≥3行/组件化结论/issue模块取值
   E 索引一致性 10分  registry有对应条目/仓内源码路径存在(智能豁免通配符/外部仓/外部依赖入口章节)
   F 命名规范    5分  文件名 kebab-case
@@ -183,7 +183,8 @@ def section_text(text: str, section: str) -> str:
     return parts[0] if len(parts) >= 1 else ""
 
 
-def score_kb(rel_path: str, text: str, kind: str | None, reg_entry: dict | None) -> Score:
+def score_kb(rel_path: str, text: str, kind: str | None, reg_entry: dict | None,
+             links: list[tuple[str, str]] | None = None) -> Score:
     sc = Score(kb_path=rel_path, kind=kind or "unknown")
     is_issue = kind == "issue"
     is_component = kind == "component"
@@ -260,6 +261,11 @@ def score_kb(rel_path: str, text: str, kind: str | None, reg_entry: dict | None)
             if any(sep in item for sep in ["：", " — ", " - ", "（", "(", "功能域", "见上方", "子系统"]) or item.startswith("**"):
                 continue
             sc.deductions.append(("C 路径", 1, f"相关主题项无路径: {s[:40]}"))
+            c_got -= 1
+    # 失效链接扣分（每处 -1，上限 5）
+    if links:
+        for ref, cat in links[:5]:
+            sc.deductions.append(("C 路径", 1, f"失效链接[{cat}]: {ref[:40]}"))
             c_got -= 1
     sc.got += max(0, c_got)
 
@@ -382,6 +388,11 @@ def run(min_score: float = 0, detail: bool = False, report: str | None = None,
     reg = load_registry()
     kmap = kb_to_registry_map(reg)
     kb_files = [f for f in sorted(KB_DIR.rglob("*.md")) if f.name != "README.md"]
+    # 预计算失效链接（按 KB 分组），供 score_kb 扣分
+    broken = find_broken_links()
+    links_by_kb: dict[str, list[tuple[str, str]]] = {}
+    for kb, ref, cat in broken:
+        links_by_kb.setdefault(kb, []).append((ref, cat))
     scores: list[Score] = []
     for f in kb_files:
         rel = str(f.relative_to(REPO))
@@ -392,7 +403,7 @@ def run(min_score: float = 0, detail: bool = False, report: str | None = None,
             continue
         entry = kmap.get(rel)
         kind = entry.get("kind") if entry else None
-        scores.append(score_kb(rel, text, kind, entry))
+        scores.append(score_kb(rel, text, kind, entry, links_by_kb.get(rel)))
 
     scores.sort(key=lambda s: s.score)
     total = len(scores)
