@@ -10621,6 +10621,21 @@ void WebPattern::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std
             });
         return;
     }
+    if (request == WEB_INTERFACE_REQUEST_DOM_TREE_VIEWPORT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTreeViewport WebId:%{public}d", webId);
+        delegate_->RequestWebDomJsonStringWithOptions(
+            [weak = AceType::WeakClaim(this), windowId, webId, request, finishCallback](std::string result){
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTreeViewport callback");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
+                pattern->webDomDocument_->UpdateOffset(offset);
+                auto jsonValue = pattern->webDomDocument_->CreateTempFromJsonString(result);
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTreeViewport WebId:%{public}d success", webId);
+                finishCallback(windowId, webId, request, jsonValue->ToString(), WebRequestErrorCode::OK);
+            }, static_cast<int32_t>(OHOS::NWeb::NWebDomExtractionMode::VIEWPORT_ONLY));
+        return;
+    }
     return;
 }
 

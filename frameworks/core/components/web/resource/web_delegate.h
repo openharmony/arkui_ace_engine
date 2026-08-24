@@ -1784,6 +1784,8 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void RequestWebDomJsonStringWithOptions(
+        const std::function<void(const std::string)>&& callback, int32_t mode);
     void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
     void SetIsSystemRtlEnable(bool enable);
     void FetchCloudControlWebAutoLayoutConfig();
