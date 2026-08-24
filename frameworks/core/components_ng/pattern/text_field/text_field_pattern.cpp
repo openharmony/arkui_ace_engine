@@ -15063,6 +15063,7 @@ void TextFieldPattern::ResetPageTranslate()
 
 void TextFieldPattern::ReportPageTranslatePlaceholderDrawn()
 {
+#ifndef CROSS_PLATFORM
     if (!GetTextUtf16Value().empty()) {
         return;
     }
@@ -15078,10 +15079,12 @@ void TextFieldPattern::ReportPageTranslatePlaceholderDrawn()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->ReportTranslateTextNode(AceType::WeakClaim<PageTranslateNode>(this), text);
+#endif
 }
 
 void TextFieldPattern::OnPlaceholderSourceTextChanged()
 {
+#ifndef CROSS_PLATFORM
     bool hasTranslateState = pageTranslatedContent_.has_value() ||
         !lastDrawnPageTranslateContent_.empty();
     lastDrawnPageTranslateContent_.clear();
@@ -15094,5 +15097,6 @@ void TextFieldPattern::OnPlaceholderSourceTextChanged()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->ResetTranslateTextNode(host->GetId());
+#endif
 }
 } // namespace OHOS::Ace::NG
