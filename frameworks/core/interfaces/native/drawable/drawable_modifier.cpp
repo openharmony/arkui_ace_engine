@@ -521,6 +521,15 @@ void Invalidate(void* object)
     drawable->Invalidate();
 }
 
+void SetSVGResourceLimitLevel(void* object, int32_t id)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
+    drawable->SetSVGResourceLimitLevel(id);
+}
+
 } // namespace OHOS::Ace
 
 extern "C" {
@@ -567,7 +576,8 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
         .getAnimatedStopMode = OHOS::Ace::GetAnimatedStopMode,
         .setPicture = OHOS::Ace::SetPicture,
         .setHdrComposition = OHOS::Ace::SetHdrComposition,
-        .invalidate = OHOS::Ace::Invalidate
+        .invalidate = OHOS::Ace::Invalidate,
+        .setSVGResourceLimitLevel = OHOS::Ace::SetSVGResourceLimitLevel
     };
     return &impl;
 }

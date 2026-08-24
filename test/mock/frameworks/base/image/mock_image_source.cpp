@@ -21,12 +21,12 @@ RefPtr<ImageSource> ImageSource::Create(int32_t fd)
     return MockImageSource::mockImageSource_;
 }
 
-RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode)
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode, int32_t svgLimitsId)
 {
     return MockImageSource::mockImageSource_;
 }
 
-RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
+RefPtr<ImageSource> ImageSource::Create(const std::string& filePath, int32_t svgLimitsId)
 {
     return MockImageSource::mockImageSource_;
 }
@@ -41,7 +41,7 @@ ImageSource::Size ImageSource::GetASTCInfo(const uint8_t* data, size_t size)
     return { 0, 0 };
 }
 
-RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, int32_t svgLimitsId)
 {
     return MockImageSource::mockImageSource_;
 }
