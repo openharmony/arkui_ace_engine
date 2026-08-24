@@ -66,6 +66,7 @@ struct ArkUIDrawableDescriptor {
     void (*setPicture)(void* object, void* picture);
     void (*setHdrComposition)(void* object, int32_t x, int32_t y, int32_t width, int32_t height);
     void (*invalidate)(void* object);
+    void (*setSVGResourceLimitLevel)(void* object, int32_t id);
 };
 
 __attribute__((visibility("default"))) const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor(void);

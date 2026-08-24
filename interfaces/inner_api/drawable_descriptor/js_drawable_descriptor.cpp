@@ -1394,6 +1394,45 @@ napi_value JsDrawableDescriptor::DrawableConstructor(napi_env env, napi_callback
     return thisVar;
 }
 
+napi_value JsDrawableDescriptor::SetSVGResourceLimitLevel(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    size_t argc = PARAMS_NUM_ONE;
+    napi_value argv[PARAMS_NUM_ONE] = { nullptr };
+    napi_value thisVar = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    void* native = nullptr;
+    napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
+    int32_t id = 0;
+    napi_get_value_int32(env, argv[0], &id);
+    napi_value typeName;
+    napi_get_named_property(env, thisVar, "typeName", &typeName);
+    std::string type;
+    GetStringFromNapiValue(env, typeName, type);
+    if (type == LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
+        auto* drawable = reinterpret_cast<DrawableDescriptor*>(native);
+        if (drawable) {
+            drawable->SetSVGResourceLimitLevel(id);
+        }
+    } else {
+        auto modifier = GetArkUIDrawableModifier();
+        if (modifier != nullptr) {
+            modifier->setSVGResourceLimitLevel(native, id);
+        }
+    }
+    napi_close_escapable_handle_scope(env, scope);
+    return nullptr;
+}
+
 std::vector<napi_property_descriptor> JsDrawableDescriptor::GetBaseDrawableDescriptor(napi_env env)
 {
     napi_value typeName = CreateString(env, std::string(PIXELMAP_DRAWABLE_DESCRIPTOR_NAME));
@@ -1404,6 +1443,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetBaseDrawableDescr
         DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
+        DECLARE_NAPI_FUNCTION("setSVGResourceLimitLevel", SetSVGResourceLimitLevel),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1418,6 +1458,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPixelMapDrawableD
         DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
+        DECLARE_NAPI_FUNCTION("setSVGResourceLimitLevel", SetSVGResourceLimitLevel),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1437,6 +1478,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetLayeredDrawableDe
         DECLARE_NAPI_FUNCTION("setBlendMode", SetBlendMode),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
+        DECLARE_NAPI_FUNCTION("setSVGResourceLimitLevel", SetSVGResourceLimitLevel),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1452,6 +1494,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetAnimatedDrawableD
         DECLARE_NAPI_FUNCTION("getAnimationController", GetAnimationController),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
+        DECLARE_NAPI_FUNCTION("setSVGResourceLimitLevel", SetSVGResourceLimitLevel),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1467,6 +1510,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPictureDrawableDe
         DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
+        DECLARE_NAPI_FUNCTION("setSVGResourceLimitLevel", SetSVGResourceLimitLevel),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }

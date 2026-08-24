@@ -59,12 +59,13 @@ RefPtr<ImageSource> ImageSource::Create(int32_t /* fd */)
     return nullptr;
 }
 
-RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, int32_t /* svgLimitsId */)
 {
     return nullptr;
 }
 
-RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode)
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode,
+                                        int32_t /* svgLimitsId */)
 {
     auto skData = SkData::MakeWithCopy(data, size);
     if (!skData) {
@@ -81,7 +82,7 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint
     return MakeRefPtr<ImageSourcePreview>(std::move(codec));
 }
 
-RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
+RefPtr<ImageSource> ImageSource::Create(const std::string& filePath, int32_t /* svgLimitsId */)
 {
     return nullptr;
 }

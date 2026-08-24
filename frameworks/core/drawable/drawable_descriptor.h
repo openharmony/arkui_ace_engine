@@ -93,6 +93,8 @@ public:
 
     virtual void Invalidate() {}
 
+    virtual void SetSVGResourceLimitLevel(const int32_t id) { svgLimitsId_ = id; }
+
     void SetDrawableDescriptorInfo(const RefPtr<DrawableDescriptorInfo>& info)
     {
         info_ = info;
@@ -108,6 +110,7 @@ protected:
     MediaData rawData_;
     RefPtr<DrawableDescriptorInfo> info_;
     ImageSize imageSize_;
+    int32_t svgLimitsId_ = 0;
 
 private:
     virtual void CreatePixelMap() {}

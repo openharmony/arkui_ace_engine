@@ -329,7 +329,7 @@ void LayeredDrawableDescriptor::CreateForeground()
         return;
     }
     uint32_t errorCode = 0;
-    auto imageSource = ImageSource::Create(foregroundData_.data.get(), foregroundData_.len, errorCode);
+    auto imageSource = ImageSource::Create(foregroundData_.data.get(), foregroundData_.len, errorCode, svgLimitsId_);
     if (!imageSource) {
         return;
     }
@@ -345,7 +345,7 @@ void LayeredDrawableDescriptor::CreateBackground()
         return;
     }
     uint32_t errorCode = 0;
-    auto imageSource = ImageSource::Create(backgroundData_.data.get(), backgroundData_.len, errorCode);
+    auto imageSource = ImageSource::Create(backgroundData_.data.get(), backgroundData_.len, errorCode, svgLimitsId_);
     if (!imageSource) {
         return;
     }
@@ -368,7 +368,7 @@ bool LayeredDrawableDescriptor::CreateMaskByPath()
     if (maskPath_.empty()) {
         return false;
     }
-    auto imageSource = ImageSource::Create(maskPath_);
+    auto imageSource = ImageSource::Create(maskPath_, svgLimitsId_);
     if (!imageSource) {
         return false;
     }
@@ -385,7 +385,7 @@ bool LayeredDrawableDescriptor::CreateMaskByData()
         return false;
     }
     uint32_t errorCode = 0;
-    auto imageSource = ImageSource::Create(maskData_.data.get(), maskData_.len, errorCode);
+    auto imageSource = ImageSource::Create(maskData_.data.get(), maskData_.len, errorCode, svgLimitsId_);
     if (!imageSource) {
         return false;
     }

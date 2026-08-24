@@ -236,7 +236,7 @@ void BlendForeground(RSCanvas& bitmapCanvas, RSBrush& brush, RSImage& image, con
 }
 
 #ifndef PREVIEW
-UniqueImageSource CreateImageSource(DrawableItem& drawableItem, uint32_t& errorCode)
+UniqueImageSource CreateImageSource(DrawableItem& drawableItem, uint32_t& errorCode, int32_t svgLimitsId)
 {
     if (drawableItem.state_ != Global::Resource::SUCCESS) {
         HILOGE("GetDrawableInfoById failed");
@@ -244,6 +244,7 @@ UniqueImageSource CreateImageSource(DrawableItem& drawableItem, uint32_t& errorC
     }
 
     Media::SourceOptions opts;
+    opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId);
     return Media::ImageSource::CreateImageSource(drawableItem.data_.get(), drawableItem.len_, opts, errorCode);
 }
 #endif
@@ -252,6 +253,7 @@ UniqueImageSource CreateImageSource(DrawableItem& drawableItem, uint32_t& errorC
 bool DrawableDescriptor::GetPixelMapFromBuffer()
 {
     Media::SourceOptions opts;
+    opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId_);
     uint32_t errorCode = 0;
     UniqueImageSource imageSource = Media::ImageSource::CreateImageSource(mediaData_.get(), len_, opts, errorCode);
     if (errorCode != 0) {
@@ -370,6 +372,11 @@ void LayeredDrawableDescriptor::InitialMask(const SharedResourceManager& resourc
     resourceMgr->GetMediaDataByName(DEFAULT_MASK.c_str(), defaultMaskDataLength_, defaultMaskData_);
 }
 
+void DrawableDescriptor::SetSVGResourceLimitLevel(const int32_t id)
+{
+    svgLimitsId_ = id;
+}
+
 void DrawableDescriptor::SetDecodeSize(int32_t width, int32_t height)
 {
     decodeSize_ = { width, height };
@@ -389,7 +396,8 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
     if ((isBackground && backgroundItem_.state_ == Global::Resource::SUCCESS) ||
         (!isBackground && foregroundItem_.state_ == Global::Resource::SUCCESS)) {
         uint32_t errorCode = 0;
-        UniqueImageSource imageSource = CreateImageSource(isBackground ? backgroundItem_ : foregroundItem_, errorCode);
+        UniqueImageSource imageSource =
+            CreateImageSource(isBackground ? backgroundItem_ : foregroundItem_, errorCode, svgLimitsId_);
         if (errorCode != 0) {
             HILOGE("CreateImageSource from json buffer failed");
             return false;
@@ -431,6 +439,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
 bool LayeredDrawableDescriptor::GetDefaultMask()
 {
     Media::SourceOptions opts;
+    opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId_);
     uint32_t errorCode = 0;
     UniqueImageSource imageSource =
         Media::ImageSource::CreateImageSource(defaultMaskData_.get(), defaultMaskDataLength_, opts, errorCode);
@@ -448,9 +457,10 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
 }
 
 void LayeredDrawableDescriptor::InitLayeredParam(
-    std::pair<UINT8, size_t>& foregroundInfo, std::pair<UINT8, size_t>& backgroundInfo)
+    std::pair<UINT8, size_t>& foregroundInfo, std::pair<UINT8, size_t>& backgroundInfo, int32_t svgLimitsId)
 {
     Media::SourceOptions opts;
+    opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId);
     uint32_t errorCode = 0;
     auto foreground =
         Media::ImageSource::CreateImageSource(foregroundInfo.first.get(), foregroundInfo.second, opts, errorCode);
@@ -507,6 +517,7 @@ bool LayeredDrawableDescriptor::GetMaskByPath()
         return false;
     }
     Media::SourceOptions opts;
+    opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId_);
     uint32_t errorCode = 0;
     UniqueImageSource imageSource = Media::ImageSource::CreateImageSource(maskPath_, opts, errorCode);
     Media::DecodeOptions decodeOpts;
@@ -528,6 +539,7 @@ bool LayeredDrawableDescriptor::GetMaskByName(SharedResourceManager& resourceMgr
     UINT8 data;
     resourceMgr->GetMediaDataByName(name.c_str(), len, data);
     Media::SourceOptions opts;
+    opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId_);
     uint32_t errorCode = 0;
     UniqueImageSource imageSource = Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
     Media::DecodeOptions decodeOpts;
@@ -953,12 +965,13 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(const char
 
 std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(DataInfo& foregroundInfo,
     DataInfo& backgroundInfo, std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr,
-    bool foregroundOverBackground)
+    bool foregroundOverBackground, int32_t svgLimitsId)
 {
     UINT8 jsonBuf;
     drawableType = DrawableDescriptor::DrawableType::LAYERED;
     auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
-        std::move(jsonBuf), 0, resourceMgr, path, 1, foregroundInfo, backgroundInfo, foregroundOverBackground);
+        std::move(jsonBuf), 0, resourceMgr, path, 1, foregroundInfo, backgroundInfo, foregroundOverBackground,
+        svgLimitsId);
     return layeredDrawableDescriptor;
 }
 
