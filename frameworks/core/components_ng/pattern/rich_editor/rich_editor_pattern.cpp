@@ -15226,6 +15226,7 @@ void RichEditorPattern::ResetPageTranslate()
 
 void RichEditorPattern::ReportPageTranslatePlaceholderDrawn()
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     lastDrawnPageTranslateContent_ = GetCurrentPlaceholderText();
@@ -15236,10 +15237,12 @@ void RichEditorPattern::ReportPageTranslatePlaceholderDrawn()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->ReportTranslateTextNode(AceType::WeakClaim<PageTranslateNode>(this), text);
+#endif
 }
 
 void RichEditorPattern::OnPlaceholderSourceTextChanged()
 {
+#ifndef CROSS_PLATFORM
     bool hasTranslateState = pageTranslatedContent_.has_value() ||
         !lastDrawnPageTranslateContent_.empty();
     lastDrawnPageTranslateContent_.clear();
@@ -15252,6 +15255,7 @@ void RichEditorPattern::OnPlaceholderSourceTextChanged()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->ResetTranslateTextNode(host->GetId());
+#endif
 }
 
 void RichEditorPattern::UpdatePlaceholderByTheme(RefPtr<SpanNode> placeholderNode)
