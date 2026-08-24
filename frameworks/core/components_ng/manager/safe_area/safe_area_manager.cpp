@@ -125,7 +125,7 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
     } else {
         bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
     }
-    SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
+    SafeAreaInsets::Inset inset = { .start = std::max(bottom - keyboardHeight, 0.0f), .end = bottom };
     if (inset == keyboardInset_) {
         return false;
     }
