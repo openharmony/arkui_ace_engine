@@ -119,6 +119,16 @@ ohos_shared_library("ace_uicontent") {
   part_name = ace_engine_part
 }
 
+ohos_shared_headers("service_collaboration_header") {
+  include_dirs = [
+    "${ace_root}/interfaces/inner_api/ace",
+    "${ace_root}/interfaces/inner_api/ace_kit/include",
+    "${ace_root}/frameworks",
+  ]
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_shared_library("ace_forward_compatibility") {
   include_dirs = [ "${ace_root}/frameworks" ]
 

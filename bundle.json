@@ -284,6 +284,15 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable:drawable_inner_ani"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
+                        "header_files": [
+                            "service_collaboration_header.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:service_collaboration_header"
                 }
             ],
             "test": [
