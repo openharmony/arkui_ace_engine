@@ -7642,6 +7642,24 @@ void FrameNode::GetVisibleRectWithClip(
     }
 }
 
+void FrameNode::LogCacheVisibleRect(const CacheVisibleRectResult& result, bool logFlag) const
+{
+    if (!logFlag) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_UIEVENT,
+        "Node(%{public}s/%{public}d/%{public}s/%{public}s) wo:%{public}s iwo:%{public}s vr:%{public}s ivr:%{public}s "
+        "cs:[%{public}f,%{public}f] ics:[%{public}f,%{public}f] fr:%{public}s ifr:%{public}s ibr:%{public}s",
+        tag_.c_str(), nodeId_, std::to_string(GetAccessibilityId()).c_str(),
+        GetInspectorId().value_or("").c_str(), result.windowOffset.ToString().c_str(),
+        result.innerWindowOffset.ToString().c_str(), result.visibleRect.ToString().c_str(),
+        result.innerVisibleRect.ToString().c_str(),
+        result.cumulativeScale.x, result.cumulativeScale.y,
+        result.innerCumulativeScale.x, result.innerCumulativeScale.y,
+        result.frameRect.ToString().c_str(), result.innerFrameRect.ToString().c_str(),
+        result.innerBoundaryRect.ToString().c_str());
+}
+
 const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
 {
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
@@ -7658,6 +7676,7 @@ const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp,
         cachedVisibleRectResult_ = { timestamp,
             { rectToParent.GetOffset(), rectToParent.GetOffset(), rectToParent, rectToParent, scale, innerScale,
                 rectToParent, rectToParent, rectToParent } };
+        LogCacheVisibleRect(cachedVisibleRectResult_.second, logFlag);
         return cachedVisibleRectResult_.second;
     }
 
@@ -7671,14 +7690,7 @@ const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp,
         result = &CalculateCacheVisibleRect(
             parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
-    if (logFlag) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT,
-            "OnVisibleAreaChange Node(%{public}s/%{public}d) windowOffset:%{public}s visibleRect:%{public}s "
-            "innerVisibleRect:%{public}s frameRect:%{public}s innerBoundaryRect:%{public}s",
-            tag_.c_str(), nodeId_, result->windowOffset.ToString().c_str(), result->visibleRect.ToString().c_str(),
-            result->innerVisibleRect.ToString().c_str(), result->frameRect.ToString().c_str(),
-            result->innerBoundaryRect.ToString().c_str());
-    }
+    LogCacheVisibleRect(*result, logFlag);
     return *result;
 }
 
@@ -8513,11 +8525,18 @@ void FrameNode::ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json,
 
 bool FrameNode::IsDebugInspectorId()
 {
+    static constexpr size_t TAG_PREFIX_LEN = 2;
     if (!SystemProperties::GetDebugEnabled()) {
         return false;
     }
     auto debugInspectorId = SystemProperties::GetDebugInspectorId();
-    return debugInspectorId == GetInspectorId().value_or("");
+    if (debugInspectorId == GetInspectorId().value_or("")) {
+        return true;
+    }
+    if (debugInspectorId.find("T:") == 0) {
+        return GetTag() == debugInspectorId.substr(TAG_PREFIX_LEN);
+    }
+    return false;
 }
 
 RefPtr<UINode> FrameNode::GetCurrentPageRootNode()

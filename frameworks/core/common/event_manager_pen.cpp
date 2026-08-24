@@ -28,6 +28,9 @@ void EventManager::PenHoverTest(
     const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     CHECK_NULL_VOID(frameNode);
+    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "PenHoverTest type:%{public}d id:%{public}d x:%{public}f y:%{public}f "
+        "deviceId:%{public}d sourceTool:%{public}d", static_cast<int32_t>(event.type), event.id, event.x, event.y,
+        static_cast<int32_t>(event.deviceId), static_cast<int32_t>(event.sourceTool));
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
     ResponseLinkResult responseLinkResult;
@@ -58,6 +61,8 @@ void EventManager::UpdatePenHoverNode(const TouchEvent& event, const TouchTestRe
         lastPenHoverResultsMap_[eventIdentity] = std::move(curPenHoverResultsMap_[eventIdentity]);
         curPenHoverResultsMap_[eventIdentity].clear();
     } else {
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "pen hover move event, result size:%{public}zu.",
+            penHoverTestResult.size());
         lastPenHoverResultsMap_[eventIdentity] = std::move(curPenHoverResultsMap_[eventIdentity]);
         curPenHoverResultsMap_[eventIdentity] = std::move(penHoverTestResult);
     }
@@ -88,6 +93,9 @@ void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
     }
     auto lastHoverEndNode = lastPenHoverResults.begin();
     auto currHoverEndNode = curPenHoverResults.begin();
+    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "DispatchPenHoverEventNG type:%{public}d id:%{public}d "
+        "last size:%{public}zu cur size:%{public}zu", static_cast<int32_t>(event.type), event.id,
+        lastPenHoverResults.size(), curPenHoverResults.size());
     RefPtr<HoverEventTarget> lastHoverEndNodeTarget;
     uint32_t iterCountLast = 0;
     uint32_t iterCountCurr = 0;
@@ -100,6 +108,8 @@ void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
         }
         if (std::find(curPenHoverResults.begin(), curPenHoverResults.end(), hoverResult) ==
             curPenHoverResults.end()) {
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "PenHover exit: %{public}s/" SEC_PLD(%{public}d),
+                hoverResult->GetNodeName().c_str(), SEC_PARAM(hoverResult->GetNodeId()));
             hoverResult->HandlePenHoverEvent(false, event);
         }
         if ((iterCountLast >= lastPenHoverDispatchLength_) && (lastPenHoverDispatchLength_ != 0)) {
@@ -116,6 +126,8 @@ void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
             currHoverEndNode++;
         }
         if (std::find(lastPenHoverResults.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "PenHover enter: %{public}s/" SEC_PLD(%{public}d),
+                hoverResult->GetNodeName().c_str(), SEC_PARAM(hoverResult->GetNodeId()));
             if (!hoverResult->HandlePenHoverEvent(true, event)) {
                 lastPenHoverDispatchLength_ = iterCountCurr;
                 break;
@@ -129,6 +141,8 @@ void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
     for (auto hoverResultIt = lastPenHoverResults.begin(); hoverResultIt != lastHoverEndNode; ++hoverResultIt) {
         // there may have previous hover nodes in the invalid part of current hover nodes. Those nodes exit hover also
         if (std::find(currHoverEndNode, curPenHoverResults.end(), *hoverResultIt) != curPenHoverResults.end()) {
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "PenHover exit(invalid part): %{public}s/" SEC_PLD(%{public}d),
+                (*hoverResultIt)->GetNodeName().c_str(), SEC_PARAM((*hoverResultIt)->GetNodeId()));
             (*hoverResultIt)->HandlePenHoverEvent(false, event);
         }
     }
@@ -141,7 +155,11 @@ void EventManager::DispatchPenHoverMoveEventNG(const TouchEvent& event)
         return;
     }
 
+    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "DispatchPenHoverMoveEventNG id:%{public}d result size:%{public}zu",
+        event.id, item->second.size());
     for (const auto& hoverMoveResult : item->second) {
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "PenHoverMove dispatch: %{public}s/" SEC_PLD(%{public}d),
+            hoverMoveResult->GetNodeName().c_str(), SEC_PARAM(hoverMoveResult->GetNodeId()));
         if (!hoverMoveResult->HandlePenHoverMoveEvent(event)) {
             break;
         }
