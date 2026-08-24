@@ -146,6 +146,7 @@ public:
     void SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SaveGetCurrentAbilityLanguageInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void ChangeSensitiveNodes(bool isSensitive) override;
 
     // Window color

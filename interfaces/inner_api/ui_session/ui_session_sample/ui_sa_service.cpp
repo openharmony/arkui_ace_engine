@@ -827,22 +827,24 @@ void UiSaService::HandleGetPageTranslateText(sptr<IUiContentService> service, st
 {
     std::string request = BuildPageTranslateRequest(params);
     auto callback = [](int32_t nodeId, const std::string& text, int64_t version) {
-        LOGI("[GetPageTranslateText] nodeId=%{public}d, textLen=%{public}zu, version=%{public}" PRId64,
-            nodeId, text.size(), version);
+        LOGI("[GetPageTranslateText] nodeId=%{public}d, textLen=%{public}zu, text=%{public}s, version=%{public}" PRId64,
+            nodeId, text.size(), text.substr(0, 200).c_str(), version);
     };
     auto result = service->GetPageTranslateText(request, callback);
-    LOGI("[GetPageTranslateText] result=%{public}d, requestLen=%{public}zu", result, request.size());
+    LOGI("[GetPageTranslateText] result=%{public}d, requestLen=%{public}zu, request=%{public}s",
+        result, request.size(), request.substr(0, 200).c_str());
 }
 
 void UiSaService::HandleStartPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params)
 {
     std::string request = BuildPageTranslateRequest(params);
     auto callback = [](int32_t nodeId, const std::string& text, int64_t version) {
-        LOGI("[StartPageTranslate] nodeId=%{public}d, textLen=%{public}zu, version=%{public}" PRId64,
-            nodeId, text.size(), version);
+        LOGI("[StartPageTranslate] nodeId=%{public}d, textLen=%{public}zu, text=%{public}s, version=%{public}" PRId64,
+            nodeId, text.size(), text.substr(0, 200).c_str(), version);
     };
     auto result = service->StartPageTranslate(request, callback);
-    LOGI("[StartPageTranslate] result=%{public}d, requestLen=%{public}zu", result, request.size());
+    LOGI("[StartPageTranslate] result=%{public}d, requestLen=%{public}zu, request=%{public}s",
+        result, request.size(), request.substr(0, 200).c_str());
 }
 
 void UiSaService::HandleEndPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params)
@@ -867,7 +869,8 @@ void UiSaService::HandleSendPageTranslateResult(sptr<IUiContentService> service,
     if (params.size() >= PAGE_TRANSLATE_REQUEST_PARAMS) {
         std::string result = params[1];
         auto ret = service->SendPageTranslateResult(result);
-        LOGI("[SendPageTranslateResult] result=%{public}d, resultLen=%{public}zu", ret, result.size());
+        LOGI("[SendPageTranslateResult] result=%{public}d, resultLen=%{public}zu, result=%{public}s",
+            ret, result.size(), result.substr(0, 200).c_str());
     }
 }
 
