@@ -16,8 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_STATE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_STATE_MANAGER_H
 
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
 #include "core/components_ng/pattern/video/video_controller_async.h"
 
 namespace OHOS::Ace::NG {
@@ -156,11 +162,20 @@ class VideoStateManager : public AceType {
 
 public:
     explicit VideoStateManager(WeakPtr<VideoStateMachinePattern> ctx) : ctx_(std::move(ctx)) {}
-    ~VideoStateManager() override = default;
+    ~VideoStateManager() override;
 
-    void UpdateContext(const WeakPtr<VideoStateMachinePattern>& ctx) { ctx_ = ctx; }
+    void UpdateContext(const WeakPtr<VideoStateMachinePattern>& ctx)
+    {
+        std::lock_guard<std::mutex> lock(ctxMutex_);
+        ctx_ = ctx;
+    }
 
     bool IsCurrentContext(const VideoStateMachinePattern* pattern) const;
+
+    // Returns the currently active pattern (inline or fullscreen). Thread-safe: serial
+    // background tasks resolve the current pattern through this while the UI thread may
+    // concurrently switch the fullscreen state via UpdateContext.
+    RefPtr<VideoStateMachinePattern> GetCurrentPattern() const;
 
     VideoPlaybackState GetCurrentState() const { return state_; }
     VideoPlaybackState GetPreviousState() const { return previousState_; }
@@ -243,6 +258,16 @@ void HandleStateTransition(VideoPlaybackCommand command,
      */
     bool CanOverridePendingCommand(VideoPlaybackCommand newCommand) const;
 
+    // Serial background task queue to ensure media operations execute in order.
+    // The queue lives in the state manager (shared between the inline and fullscreen
+    // patterns) so that media operations keep FIFO order across fullscreen transitions
+    // and are not dropped when either pattern is destroyed.
+    struct SerialBgTask {
+        std::string name;
+        std::function<void()> task;
+    };
+    void PostSerialBgTask(std::function<void()> task, const std::string& name = "");
+
 private:
     bool ValidateStateTransition(VideoPlaybackCommand command) const;
     bool ValidatePendingCommand(VideoPlaybackCommand command) const;
@@ -257,12 +282,18 @@ private:
     void HandleCommandByCompletedState(VideoPlaybackCommand command);
     void HandleCommandByErrorState(VideoPlaybackCommand command);
 
+    void DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor);
+
+    mutable std::mutex ctxMutex_;
     WeakPtr<VideoStateMachinePattern> ctx_;
     VideoPlaybackState state_ = VideoPlaybackState::CREATED;
     VideoPlaybackState previousState_ = VideoPlaybackState::CREATED;
     VideoPlaybackCommand pendingCommand_ = VideoPlaybackCommand::NONE;
     VideoPlaybackCommand originalIntent_ = VideoPlaybackCommand::NONE;
     VideoControllerAsync::AsyncCommandCallback pendingCallback_ = nullptr;
+    std::mutex serialBgQueueMutex_;
+    std::queue<SerialBgTask> serialBgTaskQueue_;
+    bool isDrainingSerialBgQueue_ = false;
 };
 
 } // namespace OHOS::Ace::NG

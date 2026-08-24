@@ -16,18 +16,40 @@
 #include "core/components_ng/pattern/video/video_state_manager.h"
 
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
+VideoStateManager::~VideoStateManager()
+{
+    // The serial background task queue is destroyed together with the state manager.
+    // Tasks still queued here can never execute (both the inline and the fullscreen pattern
+    // are gone at this point), so log and let std::queue destroy the pending lambdas,
+    // which releases their captured weak/value members without executing anything.
+    // No lock is strictly needed: a drain in flight holds a strong RefPtr to this manager,
+    // so destruction cannot race with DrainNextSerialBgTaskOnBg/PostSerialBgTask.
+    if (!serialBgTaskQueue_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "~VideoStateManager: dropping %{public}zu unexecuted serial tasks",
+            serialBgTaskQueue_.size());
+    }
+}
+
 bool VideoStateManager::IsCurrentContext(const VideoStateMachinePattern* pattern) const
 {
-    auto current = ctx_.Upgrade();
+    auto current = GetCurrentPattern();
     return AceType::RawPtr(current) == pattern;
+}
+
+RefPtr<VideoStateMachinePattern> VideoStateManager::GetCurrentPattern() const
+{
+    std::lock_guard<std::mutex> lock(ctxMutex_);
+    return ctx_.Upgrade();
 }
 
 std::string VideoStateManager::GetStateInfo() const
 {
-    auto ctx = ctx_.Upgrade();
+    auto ctx = GetCurrentPattern();
     bool isFullScreen = false;
     if (ctx) {
         isFullScreen = ctx->IsFullScreen();
@@ -411,7 +433,7 @@ bool VideoStateManager::TransitionTo(VideoPlaybackState newState,
     TAG_LOGI(AceLogTag::ACE_VIDEO, "[SM] TransitionTo: %{public}s -> %{public}s",
         VideoStateMachine::StateToString(oldState), GetStateInfo().c_str());
     
-    auto ctx = ctx_.Upgrade();
+    auto ctx = GetCurrentPattern();
     if (!ctx) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "[SM] TransitionTo: ctx is null, skipping callback");
         if (callback) {
@@ -584,6 +606,122 @@ bool VideoStateManager::CanOverridePendingCommand(VideoPlaybackCommand newComman
 
     // PLAY and PAUSE cannot override each other or any other command.
     return false;
+}
+
+void VideoStateManager::PostSerialBgTask(std::function<void()> task, const std::string& name)
+{
+    // Always check host/context validity before enqueuing. The current context pattern
+    // (inline or fullscreen, whoever owns the media player now) provides the pipeline.
+    auto ctx = GetCurrentPattern();
+    auto host = ctx ? ctx->GetHost() : nullptr;
+    auto context = host ? host->GetContext() : nullptr;
+    int32_t hostId = host ? host->GetId() : -1;
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] PostSerialBgTask: component detached, dropping task name=%{public}s",
+            hostId, name.c_str());
+        return;
+    }
+
+    bool needStartDrain = false;
+    {
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        auto queueSizeBeforePush = serialBgTaskQueue_.size();
+        serialBgTaskQueue_.push({name, std::move(task)});
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] PostSerialBgTask: name=%{public}s, queueSizeBefore=%{public}zu, isDraining=%{public}d",
+            hostId, name.c_str(), queueSizeBeforePush, isDrainingSerialBgQueue_);
+        if (!isDrainingSerialBgQueue_) {
+            isDrainingSerialBgQueue_ = true;
+            needStartDrain = true;
+        }
+    }
+
+    if (!needStartDrain) {
+        return;
+    }
+
+    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    TAG_LOGI(AceLogTag::ACE_VIDEO,
+        "Video[%{public}d] PostSerialBgTask: posting first drain task",
+        hostId);
+    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor] {
+        auto manager = weak.Upgrade();
+        if (manager) {
+            manager->DrainNextSerialBgTaskOnBg(bgTaskExecutor);
+        }
+    }, "ArkUIVideoSerialDrain");
+    if (!posted) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] PostSerialBgTask: first drain PostTask failed, resetting flag",
+            hostId);
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        isDrainingSerialBgQueue_ = false;
+    }
+}
+
+void VideoStateManager::DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor)
+{
+    auto ctx = GetCurrentPattern();
+    auto host = ctx ? ctx->GetHost() : nullptr;
+    int32_t hostId = host ? host->GetId() : -1;
+    TAG_LOGI(AceLogTag::ACE_VIDEO,
+        "Video[%{public}d] DrainNextSerialBgTaskOnBg: enter", hostId);
+    SerialBgTask current;
+    {
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        if (serialBgTaskQueue_.empty()) {
+            TAG_LOGI(AceLogTag::ACE_VIDEO,
+                "Video[%{public}d] DrainNextSerialBgTaskOnBg: queue empty, stop draining", hostId);
+            isDrainingSerialBgQueue_ = false;
+            return;
+        }
+        current = std::move(serialBgTaskQueue_.front());
+        serialBgTaskQueue_.pop();
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: dequeued name=%{public}s, remaining=%{public}zu",
+            hostId, current.name.c_str(), serialBgTaskQueue_.size());
+    }
+
+    if (current.task) {
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: executing name=%{public}s", hostId, current.name.c_str());
+        current.task();
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: executed name=%{public}s", hostId, current.name.c_str());
+    } else {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: empty task name=%{public}s", hostId, current.name.c_str());
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        if (serialBgTaskQueue_.empty()) {
+            TAG_LOGI(AceLogTag::ACE_VIDEO,
+                "Video[%{public}d] DrainNextSerialBgTaskOnBg: no more tasks, stop draining", hostId);
+            isDrainingSerialBgQueue_ = false;
+            return;
+        }
+    }
+
+    TAG_LOGI(AceLogTag::ACE_VIDEO,
+        "Video[%{public}d] DrainNextSerialBgTaskOnBg: posting next drain", hostId);
+    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor] {
+        auto manager = weak.Upgrade();
+        if (manager) {
+            manager->DrainNextSerialBgTaskOnBg(bgTaskExecutor);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_VIDEO,
+                "Video state manager destroyed, skip serial drain");
+        }
+    }, "ArkUIVideoSerialDrain");
+    if (!posted) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: next drain PostTask failed, resetting flag",
+            hostId);
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        isDrainingSerialBgQueue_ = false;
+    }
 }
 
 } // namespace OHOS::Ace::NG
