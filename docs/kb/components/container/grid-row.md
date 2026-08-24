@@ -114,4 +114,4 @@ GridRow 功能域：`specs/05-ui-components/01-layout-components/07-grid-row/`�
 - [GridCol](grid-col.md)
 - [Layout Framework](../../architecture/layout-framework.md)
 - [基础布局属性](../../capabilities/layout-attributes.md)
-- 滚动型 Grid：`frameworks/core/components_ng/pattern/grid/`
+- 滚动型 Grid：见对应 KB

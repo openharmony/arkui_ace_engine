@@ -136,5 +136,3 @@ Accessibility 是 ACE Engine 中的**无障碍桥接层**，负责把 ArkUI 组�
 ## 相关主题
 
 - [Inspector](../capabilities/inspector.md)
-- 组件无障碍属性实现：`frameworks/core/components_ng/pattern/<component>/*_accessibility_property.h`
-- 焦点导航（通用能力）：`frameworks/core/components_ng/manager/focus/focus_view.h`、`adapter/ohos/osal/accessibility/focus_move/`

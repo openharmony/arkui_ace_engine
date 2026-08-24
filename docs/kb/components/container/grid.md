@@ -125,6 +125,5 @@ Grid 功能域：`specs/05-ui-components/03-scroll-container-components/04-grid-
 - [GridItem](grid-item.md)
 - [GridRow](grid-row.md)
 - [GridCol](grid-col.md)
-- LazyGrid：`docs/pattern/lazy_layout/LazyGrid_Knowledge_Base.md`
-- ScrollablePattern：`frameworks/core/components_ng/pattern/scrollable/`
+- ScrollablePattern：见对应 KB
 - [布局属性](../../capabilities/layout-attributes.md)

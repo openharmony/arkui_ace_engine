@@ -112,4 +112,3 @@ DatePicker 已完成组件化改造，Bridge 和动态属性路径统一到 `pat
 - [TextPicker](text-picker.md)
 - [TimePicker](time-picker.md)
 - [UIPickerComponent](ui-picker-component.md)
-- CalendarPicker：`docs/pattern/calendar_picker/Calendar_Picker_Knowledge_Base.md`

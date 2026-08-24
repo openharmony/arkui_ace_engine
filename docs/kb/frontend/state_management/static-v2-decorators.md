@@ -30,9 +30,9 @@
 
 | 关注点 | 稳定路径 | 说明 |
 |--------|----------|------|
-| UIPlugin 转换入口 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/mock/interop.ts` | `enableCompatibleObservedV2ForStatic<T>`/`enableCompatibleObservedV2ForStaticMeta<T>` — 将静态侧 `@ObservedV2` 对象转换为 `MutableStateMeta` 通道 |
+| UIPlugin 转换入口 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` | `enableCompatibleObservedV2ForStatic<T>`/`enableCompatibleObservedV2ForStaticMeta<T>` — 将静态侧 `@ObservedV2` 对象转换为 `MutableStateMeta` 通道 |
 | Backing Value（V2 类） | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBackingValue.ts` | `InteropV2DecoratorBackingValue<T>` — 调 `enableCompatibleObservedV2ForStaticMeta(value)` 为 V2 对象绑定静态侧元数据 |
-| 元数据安装 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/mock/interop.ts` `staticStateBindObservedObject` | 为 V2 对象的每个 `@Trace` 属性创建 `IMutableStateMeta`，绑定 addRef/fireChange 通道 |
+| 元数据安装 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` `staticStateBindObservedObject` | 为 V2 对象的每个 `@Trace` 属性创建 `IMutableStateMeta`，绑定 addRef/fireChange 通道 |
 | Backing Value 基类 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBackingValue.ts` `DecoratorBackingValue<T>`/`IBackingValue<T>` | `InteropDecoratorBackingValue`（V1）/`InteropV2DecoratorBackingValue`（V2）的共享基类 |
 
 ### 关键机制锚点

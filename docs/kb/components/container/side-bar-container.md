@@ -94,4 +94,3 @@ Design 文档：`specs/05-ui-components/02-navigation-components/06-sidebar-cont
 ## 相关主题
 
 - [Navigation：SideBarContainer 归属导航组件族，详见 Navigation KB](navigation.md)
-- 主题：`frameworks/core/components_ng/pattern/side_bar/side_bar_theme.h`

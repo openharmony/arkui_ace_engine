@@ -20,7 +20,7 @@
 | 生命周期回调 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/customComponent.ets` | `aboutToAppear`/`aboutToDisappear`/`aboutToReuse`/`aboutToRecycle`/`onAttach`/`onDetach` 等回调接入 |
 | 复用池装饰变量 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorGlobalReusePool.ts` | `GlobalReusePoolDecoratedVariable implements IGlobalReusePoolVariable` — 框架生成的 `__backing_reusePool` 字段实现 |
 | 复用池实现 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/tools/globalReusePool.ts` | `GlobalReusePool`/`GlobalReusePoolRegistry`/`ReusableInfo` — 实际回收池，含 `preRender` 预渲染 |
-| Builder 参数代理 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/mock/interop.ts` `registerMakeBuilderParameterStaticProxy` | Builder 参数在静态侧的状态变量绑定代理 |
+| Builder 参数代理 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets` `registerMakeBuilderParameterStaticProxy` | Builder 参数在静态侧的状态变量绑定代理 |
 | 组件生命周期 SDK 类型 | `<OH_ROOT>/interface/sdk-js/api/arkui/component/customComponent.static.d.ets` | `CustomComponentLifecycle` 接口（`UIUtils.getLifecycle()` 返回类型） |
 | 复用池 SDK 类型 | `<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/utils.static.d.ets` | `IReusePool`（`getReusableInfo`/`preRender`）/`IReusableInfo`（`count`/`maxCount`/`reuseId`）/`CustomComponentContext`（`getReusePool`/`registerActiveAndInactiveCallback`） |
 

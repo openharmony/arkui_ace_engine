@@ -94,5 +94,3 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 ## 相关主题
 
 - [menu](../../components/overlay/menu.md) — Menu 菜单组件代码型 KB
-- `frameworks/core/components_ng/pattern/menu/` — Menu 模式源码目录
-- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp` — ClickRecognizer 点击识别器（判定口径参考）

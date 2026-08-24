@@ -102,6 +102,6 @@
 ## 相关主题
 
 - [WaterFlow/FlowItem](../components/container/waterflow.md)。
-- Scroll 组件实现：`frameworks/core/components_ng/pattern/scroll/`。
-- List 组件实现：`frameworks/core/components_ng/pattern/list/`。
-- Grid 组件实现：`frameworks/core/components_ng/pattern/grid/`。
+- Scroll 组件实现：见对应 KB
+- List 组件实现：见对应 KB
+- Grid 组件实现：见对应 KB

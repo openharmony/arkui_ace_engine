@@ -111,4 +111,3 @@ Layout Framework 本身是引擎内部机制，没有独立 SDK API。应用侧�
 - [分割布局](../components/container/column-split.md)、[row-split](../components/container/row-split.md)
 - [相对布局](../components/container/relative-container.md)
 - [动态布局](../components/container/dynamic-layout.md)
-- 组件布局算法：`frameworks/core/components_ng/pattern/<component>/`

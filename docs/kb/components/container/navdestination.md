@@ -91,8 +91,7 @@ Spec 功能域：`specs/05-ui-components/02-navigation-components/02-nav-router/
 ## 相关主题
 
 - Navigation 容器组件 — [navigation](navigation.md)
-- NavPathStack — `frameworks/core/components_ng/pattern/navigation/navigation_stack.cpp`（推荐路由管理方式）
-- NavRouter（已废弃） — `frameworks/core/components_ng/pattern/navrouter/navrouter_pattern.*`（API 13 deprecated，推荐 NavPathStack 替代）
-- Navigator 组件 — `frameworks/core/components_ng/pattern/navigator/`
+- NavPathStack：见对应 KB
+- NavRouter（已废弃）：见对应 KB
 - 页面生命周期 — NavPathStack 与 NavDestination 生命周期联动
 - [转场动画 — Navigation 路由转场与 NavDestination 自定义动画](../../capabilities/transition-animation.md)

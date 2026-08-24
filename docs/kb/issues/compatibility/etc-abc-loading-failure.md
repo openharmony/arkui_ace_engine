@@ -157,10 +157,7 @@
 ## 相关主题
 
 - [cpp-bindings](../../frontend/state_management/cpp-bindings.md)
-- `frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp`
-- `frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp`
 - `interfaces/inner_api/ace/declarative_module_preloader.cpp`
 - `<OH_ROOT>/base/startup/appspawn/modules/ace_adapter/ace_adapter.cpp`
-- `<OH_ROOT>/foundation/ability/ability_runtime/frameworks/native/runtime/js_runtime.cpp`
 - `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/runtime.cpp`
 - `<OH_ROOT>/arkcompiler/ets_runtime/ecmascript/jspandafile/js_pandafile_manager.cpp`

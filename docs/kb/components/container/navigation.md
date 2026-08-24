@@ -129,8 +129,6 @@ Design 文档：`specs/05-ui-components/02-navigation-components/01-navigation/d
 ## 相关主题
 
 - [NavDestination](navdestination.md)
-- NavRouter（已废弃）：`frameworks/core/components_ng/pattern/navrouter/navrouter_pattern.*`（API 13 deprecated，推荐 Navigation(NavPathStack) + NavDestination）
-- Navigator：`frameworks/core/components_ng/pattern/navigator/`（已组件化，有 `bridge/` 子目录）
-- NavigationStack：`frameworks/core/components_ng/pattern/navigation/navigation_stack.cpp`
-- NavBar / TitleBar / Toolbar：`frameworks/core/components_ng/pattern/navigation/` 内同名 Pattern 文件
-- Stage/Page：`frameworks/core/components_ng/pattern/stage/`（Navigation 与 Stage 联动）
+- NavRouter（已废弃）：见对应 KB
+- NavigationStack：见对应 KB
+- Stage/Page：见对应 KB

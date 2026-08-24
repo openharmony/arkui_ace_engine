@@ -109,7 +109,5 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/09-tabs-t
 
 ## 相关主题
 
-- TabContent：`frameworks/core/components_ng/pattern/tabs/tab_content_pattern.cpp`
-- TabBar：`frameworks/core/components_ng/pattern/tabs/tab_bar_pattern.cpp`
 - [Swiper：Tabs 内嵌 Swiper 实现标签页滑动切换，详见 Swiper KB](swiper.md)
 - [Divider：TabBar 使用 Divider 布局属性](../basic/divider.md)

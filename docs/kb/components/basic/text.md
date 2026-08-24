@@ -129,7 +129,6 @@ Text 功能域：`specs/05-ui-components/09-text-components/04-text/`
 
 ## 相关主题
 
-- `TextDrag`：`docs/pattern/text_drag/TextDrag_Knowledge_Base_CN.md`
 - [RichEditor](rich-editor.md)
 - [TextInput](text-input.md)
 - [TextArea](text-area.md)

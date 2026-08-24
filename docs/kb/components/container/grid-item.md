@@ -94,4 +94,4 @@ GridItem 与 Grid 共享同一功能域：`specs/05-ui-components/03-scroll-cont
 - [Grid](grid.md)
 - [GridRow](grid-row.md)
 - [GridCol](grid-col.md)
-- SelectableItemPattern：`frameworks/core/components_ng/pattern/scrollable/selectable_item_pattern.h`
+- SelectableItemPattern：见对应 KB
