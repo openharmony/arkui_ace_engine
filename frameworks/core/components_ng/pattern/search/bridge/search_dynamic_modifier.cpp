@@ -395,7 +395,9 @@ void ResetSearchEnableKeyboardOnFocus(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::RequestKeyboardOnFocus(frameNode, true);
+    auto theme = frameNode->GetTheme<TextFieldTheme>();
+    SearchModelNG::RequestKeyboardOnFocus(frameNode,
+        theme ? !theme->GetIndependentControlKeyboard() : true);
 }
 
 void SetSearchPlaceholderFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr, bool isJsView)
