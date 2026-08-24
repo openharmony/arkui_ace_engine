@@ -545,6 +545,7 @@ public:
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
     virtual void UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) {}
     virtual void OnExcludeFromRenderGroupUpdate(bool exclude) {}
+    virtual void OnMarkLayeredRenderUpdate(bool isLayeredRender) {}
     virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
     virtual void OnDynamicDimDegreeUpdate(const float degree) {}
@@ -630,6 +631,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ExcludeFromRenderGroup, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MarkLayeredRender, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);

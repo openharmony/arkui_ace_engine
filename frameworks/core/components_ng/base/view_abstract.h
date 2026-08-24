@@ -423,6 +423,8 @@ public:
     static void SetAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter);
     // exclude self and children from renderGroup
     static void SetExcludeFromRenderGroup(bool exclude);
+    // mark node for layered render
+    static void SetMarkLayeredRender(bool isLayeredRender);
     // renderFit, i.e. gravity
     static void SetRenderFit(RenderFit renderFit);
     // renderStrategy
@@ -848,6 +850,7 @@ public:
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
     static void SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude);
+    static void SetMarkLayeredRender(FrameNode* frameNode, bool isLayeredRender);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseUnion(FrameNode* frameNode, bool useUnion);

@@ -3358,6 +3358,8 @@ struct ArkUICommonModifier {
     void (*resetRenderGroup)(ArkUINodeHandle node);
     void (*setExcludeFromRenderGroup)(ArkUINodeHandle node, ArkUI_Bool exclude);
     void (*resetExcludeFromRenderGroup)(ArkUINodeHandle node);
+    void (*setMarkLayeredRender)(ArkUINodeHandle node, ArkUI_Bool isLayeredRender);
+    void (*resetMarkLayeredRender)(ArkUINodeHandle node);
     void (*setRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetRenderFit)(ArkUINodeHandle node);
     void (*setUseEffect)(ArkUINodeHandle node, ArkUI_Bool useEffect, ArkUI_Int32 effectType);

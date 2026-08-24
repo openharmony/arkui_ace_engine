@@ -215,6 +215,9 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     if (GetExcludeFromRenderGroup().has_value()) {
         json->PutExtAttr("excludeFromRenderGroup", GetExcludeFromRenderGroupValue() ? "true" : "false", filter);
     }
+    if (GetMarkLayeredRender().has_value()) {
+        json->PutExtAttr("markLayeredRender", GetMarkLayeredRenderValue() ? "true" : "false", filter);
+    }
     ToJsonValuePart1(json, filter);
 }
 
