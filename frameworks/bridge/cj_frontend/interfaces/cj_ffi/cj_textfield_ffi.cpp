@@ -20,7 +20,9 @@
 
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -53,6 +55,22 @@ constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULTMAXLINES = 3;
 } // namespace
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::TextFieldModelNG* GetTextFieldModel()
+{
+    static NG::TextFieldModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextInput");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find textfield dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::TextFieldModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace OHOS::Ace
+
 extern "C" {
 void FfiOHOSAceFrameworkTextFieldSetHeight(double height, uint32_t unit)
 {
@@ -72,25 +90,25 @@ void FfiOHOSAceFrameworkTextFieldSetBorder(CJBorder params)
     }
 
     FfiOHOSAceFrameworkViewAbstractSetBorder(params);
-    TextFieldModel::GetInstance()->SetBackBorder();
+    GetTextFieldModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderWidth(double value, uint32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderWidth(value, unit);
-    TextFieldModel::GetInstance()->SetBackBorder();
+    GetTextFieldModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderColor(uint32_t color)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderColor(color);
-    TextFieldModel::GetInstance()->SetBackBorder();
+    GetTextFieldModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderWidthWithCJEdge(CJEdge params)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderWidthWithCJEdge(params);
-    TextFieldModel::GetInstance()->SetBackBorder();
+    GetTextFieldModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
@@ -101,24 +119,24 @@ void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
     }
 
     FfiOHOSAceFrameworkViewAbstractSetBorderStyle(style);
-    TextFieldModel::GetInstance()->SetBackBorder();
+    GetTextFieldModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderRadius(double value, uint32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderRadius(value, unit);
-    TextFieldModel::GetInstance()->SetBackBorder();
+    GetTextFieldModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetAllBorderRadius(CJBorderRadius value)
 {
     FfiOHOSAceFrameworkViewAbstractSetAllBorderRadius(value);
-    TextFieldModel::GetInstance()->SetBackBorder();
+    GetTextFieldModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBackgroundColor(uint32_t value)
 {
-    TextFieldModel::GetInstance()->SetBackgroundColor(Color(value), false);
+    GetTextFieldModel()->SetBackgroundColor(Color(value), false);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetPadding(double value, int32_t unit)
@@ -142,29 +160,29 @@ void FfiOHOSAceFrameworkTextFieldSetPaddings(CJEdge params)
     paddings.right = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
     paddings.bottom = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
     paddings.left = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
-    TextFieldModel::GetInstance()->SetPadding(paddings, Edge(), false);
+    GetTextFieldModel()->SetPadding(paddings, Edge(), false);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetMargin(double value, int32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetMargin(value, unit);
-    TextFieldModel::GetInstance()->SetMargin();
+    GetTextFieldModel()->SetMargin();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetMargins(CJEdge params)
 {
     FfiOHOSAceFrameworkViewAbstractSetMargins(params);
-    TextFieldModel::GetInstance()->SetMargin();
+    GetTextFieldModel()->SetMargin();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetPlaceholderColor(uint32_t value)
 {
-    TextFieldModel::GetInstance()->SetPlaceholderColor(Color(value));
+    GetTextFieldModel()->SetPlaceholderColor(Color(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldResetPlaceholderColor()
 {
-    TextFieldModel::GetInstance()->ResetPlaceholderColor();
+    GetTextFieldModel()->ResetPlaceholderColor();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetPlaceholderFont(
@@ -194,7 +212,7 @@ void FfiOHOSAceFrameworkTextFieldSetPlaceholderFont(
     font.fontStyle = FONT_STYLES[style];
     font.fontFamilies = ConvertStrToFontFamilies(family);
 
-    TextFieldModel::GetInstance()->SetPlaceholderFont(font);
+    GetTextFieldModel()->SetPlaceholderFont(font);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetEnterKeyType(int32_t type)
@@ -204,7 +222,7 @@ void FfiOHOSAceFrameworkTextFieldSetEnterKeyType(int32_t type)
         return;
     }
 
-    TextFieldModel::GetInstance()->SetEnterKeyType(TEXT_INPUT_ACTIONS[type]);
+    GetTextFieldModel()->SetEnterKeyType(TEXT_INPUT_ACTIONS[type]);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetType(int32_t value)
@@ -214,7 +232,7 @@ void FfiOHOSAceFrameworkTextFieldSetType(int32_t value)
         return;
     }
 
-    TextFieldModel::GetInstance()->SetType(TEXT_INPUT_TYPES[value]);
+    GetTextFieldModel()->SetType(TEXT_INPUT_TYPES[value]);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetTextAlign(int32_t value)
@@ -224,22 +242,22 @@ void FfiOHOSAceFrameworkTextFieldSetTextAlign(int32_t value)
         return;
     }
 
-    TextFieldModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
+    GetTextFieldModel()->SetTextAlign(TEXT_ALIGNS[value]);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetCaretColor(uint32_t value)
 {
-    TextFieldModel::GetInstance()->SetCaretColor(Color(value));
+    GetTextFieldModel()->SetCaretColor(Color(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetMaxLength(uint32_t value)
 {
-    TextFieldModel::GetInstance()->SetMaxLength(value);
+    GetTextFieldModel()->SetMaxLength(value);
 }
 
 void FfiOHOSAceFrameworkTextFieldResetMaxLength()
 {
-    TextFieldModel::GetInstance()->ResetMaxLength();
+    GetTextFieldModel()->ResetMaxLength();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetFontSize(double value, int32_t unit)
@@ -252,7 +270,7 @@ void FfiOHOSAceFrameworkTextFieldSetFontSize(double value, int32_t unit)
         }
     }
 
-    TextFieldModel::GetInstance()->SetFontSize(size);
+    GetTextFieldModel()->SetFontSize(size);
 }
 
 void FfiOHOSAceFrameworkTextFieldResetFontSize()
@@ -262,22 +280,22 @@ void FfiOHOSAceFrameworkTextFieldResetFontSize()
     CHECK_NULL_VOID(theme);
     fontSize = theme->GetFontSize();
 
-    TextFieldModel::GetInstance()->SetFontSize(fontSize);
+    GetTextFieldModel()->SetFontSize(fontSize);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetFontColor(uint32_t value)
 {
-    TextFieldModel::GetInstance()->SetTextColor(Color(value));
+    GetTextFieldModel()->SetTextColor(Color(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldResetFontColor()
 {
-    TextFieldModel::GetInstance()->ResetTextColor();
+    GetTextFieldModel()->ResetTextColor();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetFontWeight(const char* value)
 {
-    TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    GetTextFieldModel()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetFontStyle(int32_t value)
@@ -287,31 +305,31 @@ void FfiOHOSAceFrameworkTextFieldSetFontStyle(int32_t value)
         return;
     }
 
-    TextFieldModel::GetInstance()->SetFontStyle(FONT_STYLES[value]);
+    GetTextFieldModel()->SetFontStyle(FONT_STYLES[value]);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetFontFamily(const char* value)
 {
-    TextFieldModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(value));
+    GetTextFieldModel()->SetFontFamily(ConvertStrToFontFamilies(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetInputFilter(const char* value, void (*callback)(const char* value))
 {
-    TextFieldModel::GetInstance()->SetInputFilter(value, FormatCharFunction(callback));
+    GetTextFieldModel()->SetInputFilter(value, FormatCharFunction(callback));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetFontFeature(const char* value)
 {
-    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(value));
+    GetTextFieldModel()->SetFontFeature(ParseFontFeatureSettings(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetWidth(double value, uint32_t unit)
 {
-    TextFieldModel::GetInstance()->SetWidthAuto(false);
+    GetTextFieldModel()->SetWidthAuto(false);
     Dimension width(value, static_cast<DimensionUnit>(unit));
     if (width.Unit() == DimensionUnit::AUTO) {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        TextFieldModel::GetInstance()->SetWidthAuto(true);
+        GetTextFieldModel()->SetWidthAuto(true);
         ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         return;
     }
@@ -329,7 +347,7 @@ void FfiOHOSAceFrameworkTextFieldSetLineHeight(double value, int32_t unit)
         size.SetValue(0.0);
     }
 
-    TextFieldModel::GetInstance()->SetLineHeight(size);
+    GetTextFieldModel()->SetLineHeight(size);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetLineSpacing(double value, int32_t unit)
@@ -339,7 +357,7 @@ void FfiOHOSAceFrameworkTextFieldSetLineSpacing(double value, int32_t unit)
         size.SetValue(0.0);
     }
 
-    TextFieldModel::GetInstance()->SetLineSpacing(size);
+    GetTextFieldModel()->SetLineSpacing(size);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetLetterSpacing(double value, int32_t unit)
@@ -349,14 +367,14 @@ void FfiOHOSAceFrameworkTextFieldSetLetterSpacing(double value, int32_t unit)
         size.SetValue(0.0);
     }
 
-    TextFieldModel::GetInstance()->SetLetterSpacing(size);
+    GetTextFieldModel()->SetLetterSpacing(size);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetDecoration(int32_t value, uint32_t color, int32_t style)
 {
-    TextFieldModel::GetInstance()->SetTextDecoration(static_cast<TextDecoration>(value));
-    TextFieldModel::GetInstance()->SetTextDecorationColor(Color(color));
-    TextFieldModel::GetInstance()->SetTextDecorationStyle(static_cast<TextDecorationStyle>(style));
+    GetTextFieldModel()->SetTextDecoration(static_cast<TextDecoration>(value));
+    GetTextFieldModel()->SetTextDecorationColor(Color(color));
+    GetTextFieldModel()->SetTextDecorationStyle(static_cast<TextDecorationStyle>(style));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetLineBreakStrategy(int32_t value)
@@ -364,7 +382,7 @@ void FfiOHOSAceFrameworkTextFieldSetLineBreakStrategy(int32_t value)
     if (value < 0 || value > static_cast<int32_t>(LineBreakStrategy::BALANCED)) {
         value = 0;
     }
-    TextFieldModel::GetInstance()->SetLineBreakStrategy(static_cast<LineBreakStrategy>(value));
+    GetTextFieldModel()->SetLineBreakStrategy(static_cast<LineBreakStrategy>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetWordBreak(int32_t value)
@@ -372,7 +390,7 @@ void FfiOHOSAceFrameworkTextFieldSetWordBreak(int32_t value)
     if (value < 0 || value > static_cast<int32_t>(WordBreak::BREAK_WORD)) {
         value = static_cast<int32_t>(WordBreak::BREAK_WORD);
     }
-    TextFieldModel::GetInstance()->SetWordBreak(static_cast<WordBreak>(value));
+    GetTextFieldModel()->SetWordBreak(static_cast<WordBreak>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetHeightAdaptivePolicy(int32_t value)
@@ -380,7 +398,7 @@ void FfiOHOSAceFrameworkTextFieldSetHeightAdaptivePolicy(int32_t value)
     if (value < 0 || value > static_cast<int32_t>(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
         value = 0;
     }
-    TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(static_cast<TextHeightAdaptivePolicy>(value));
+    GetTextFieldModel()->SetHeightAdaptivePolicy(static_cast<TextHeightAdaptivePolicy>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetMaxFontSize(double value, int32_t unit)
@@ -390,7 +408,7 @@ void FfiOHOSAceFrameworkTextFieldSetMaxFontSize(double value, int32_t unit)
         size.SetValue(0.0);
     }
 
-    TextFieldModel::GetInstance()->SetAdaptMaxFontSize(size);
+    GetTextFieldModel()->SetAdaptMaxFontSize(size);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetMinFontSize(double value, int32_t unit)
@@ -400,12 +418,12 @@ void FfiOHOSAceFrameworkTextFieldSetMinFontSize(double value, int32_t unit)
         size = Dimension();
     }
 
-    TextFieldModel::GetInstance()->SetAdaptMinFontSize(size);
+    GetTextFieldModel()->SetAdaptMinFontSize(size);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetSelectedBackgroundColor(uint32_t value)
 {
-    TextFieldModel::GetInstance()->SetSelectedBackgroundColor(Color(value));
+    GetTextFieldModel()->SetSelectedBackgroundColor(Color(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetCaretStyle(double value, int32_t unit, uint32_t color)
@@ -413,8 +431,8 @@ void FfiOHOSAceFrameworkTextFieldSetCaretStyle(double value, int32_t unit, uint3
     CaretStyle caretStyle;
     caretStyle.caretWidth = Dimension(value, (DimensionUnit)unit);
 
-    TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
-    TextFieldModel::GetInstance()->SetCaretColor(Color(color));
+    GetTextFieldModel()->SetCaretStyle(caretStyle);
+    GetTextFieldModel()->SetCaretColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetTextIndent(double value, int32_t unit)
@@ -424,7 +442,7 @@ void FfiOHOSAceFrameworkTextFieldSetTextIndent(double value, int32_t unit)
         size.SetValue(0.0);
     }
 
-    TextFieldModel::GetInstance()->SetTextIndent(size);
+    GetTextFieldModel()->SetTextIndent(size);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetTextOverflow(int32_t value)
@@ -432,12 +450,12 @@ void FfiOHOSAceFrameworkTextFieldSetTextOverflow(int32_t value)
     if (value < 0 || value >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
         value = 0;
     }
-    TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[value]);
+    GetTextFieldModel()->SetTextOverflow(TEXT_OVERFLOWS[value]);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetEnablePreviewText(bool value)
 {
-    TextFieldModel::GetInstance()->SetEnablePreviewText(value);
+    GetTextFieldModel()->SetEnablePreviewText(value);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetStyle(int32_t value)
@@ -445,28 +463,28 @@ void FfiOHOSAceFrameworkTextFieldSetStyle(int32_t value)
     if (value < 0 || value > static_cast<int32_t>(InputStyle::INLINE)) {
         value = static_cast<int32_t>(InputStyle::DEFAULT);
     }
-    TextFieldModel::GetInstance()->SetInputStyle(static_cast<InputStyle>(value));
+    GetTextFieldModel()->SetInputStyle(static_cast<InputStyle>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBarState(int32_t value)
 {
-    TextFieldModel::GetInstance()->SetBarState(static_cast<DisplayMode>(value));
+    GetTextFieldModel()->SetBarState(static_cast<DisplayMode>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetSelectionMenuHidden(bool value)
 {
-    TextFieldModel::GetInstance()->SetSelectionMenuHidden(value);
+    GetTextFieldModel()->SetSelectionMenuHidden(value);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetShowCounter(bool value, int32_t threshold, bool showBorder)
 {
-    TextFieldModel::GetInstance()->SetShowCounterBorder(showBorder);
+    GetTextFieldModel()->SetShowCounterBorder(showBorder);
     if (threshold >= static_cast<int32_t>(MINI_VAILD_VALUE) && threshold <= static_cast<int32_t>(MAX_VAILD_VALUE)) {
-        TextFieldModel::GetInstance()->SetShowCounter(value);
-        TextFieldModel::GetInstance()->SetCounterType(threshold);
+        GetTextFieldModel()->SetShowCounter(value);
+        GetTextFieldModel()->SetCounterType(threshold);
     } else {
-        TextFieldModel::GetInstance()->SetShowCounter(false);
-        TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
+        GetTextFieldModel()->SetShowCounter(false);
+        GetTextFieldModel()->SetCounterType(ILLEGAL_VALUE);
     }
 }
 
@@ -475,12 +493,12 @@ void FfiOHOSAceFrameworkTextFieldSetMaxLines(int32_t value)
     if (value <= 0) {
         value = DEFAULTMAXLINES;
     }
-    TextFieldModel::GetInstance()->SetMaxViewLines(static_cast<uint32_t>(value));
+    GetTextFieldModel()->SetMaxViewLines(static_cast<uint32_t>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetEnableKeyboardOnFocus(bool value)
 {
-    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(value);
+    GetTextFieldModel()->RequestKeyboardOnFocus(value);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetContentType(int32_t value)
@@ -488,12 +506,12 @@ void FfiOHOSAceFrameworkTextFieldSetContentType(int32_t value)
     if (value < 0 || value > static_cast<int32_t>(NG::TextContentType::END)) {
         value = static_cast<int32_t>(NG::TextContentType::UNSPECIFIED);
     }
-    TextFieldModel::GetInstance()->SetContentType(static_cast<NG::TextContentType>(value));
+    GetTextFieldModel()->SetContentType(static_cast<NG::TextContentType>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetEnableAutoFill(bool value)
 {
-    TextFieldModel::GetInstance()->SetEnableAutoFill(value);
+    GetTextFieldModel()->SetEnableAutoFill(value);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetTextAreaType(int32_t value)
@@ -501,29 +519,29 @@ void FfiOHOSAceFrameworkTextFieldSetTextAreaType(int32_t value)
     if (value < 0 || value > static_cast<int32_t>(TextInputType::END)) {
         value = static_cast<int32_t>(TextInputType::UNSPECIFIED);
     }
-    TextFieldModel::GetInstance()->SetType(static_cast<TextInputType>(value));
+    GetTextFieldModel()->SetType(static_cast<TextInputType>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetCopyOption(int32_t value)
 {
-    TextFieldModel::GetInstance()->SetCopyOption(static_cast<CopyOptions>(value));
+    GetTextFieldModel()->SetCopyOption(static_cast<CopyOptions>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetCustomKeyboard(void (*callback)(), bool options)
 {
     auto builderFunc = CJLambda::Create(callback);
-    TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc), options);
+    GetTextFieldModel()->SetCustomKeyboard(std::move(builderFunc), options);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnSecurityStateChange(void (*callback)(bool value))
 {
-    TextFieldModel::GetInstance()->SetOnSecurityStateChange(CJLambda::Create(callback));
+    GetTextFieldModel()->SetOnSecurityStateChange(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkTextFieldShowUnit(void (*callback)())
 {
     auto unitFunc = CJLambda::Create(callback);
-    TextFieldModel::GetInstance()->SetShowUnit(std::move(unitFunc));
+    GetTextFieldModel()->SetShowUnit(std::move(unitFunc));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetPasswordRules(const char* rules)
@@ -531,7 +549,7 @@ void FfiOHOSAceFrameworkTextFieldSetPasswordRules(const char* rules)
     if (rules == nullptr) {
         return;
     }
-    TextFieldModel::GetInstance()->SetPasswordRules(rules);
+    GetTextFieldModel()->SetPasswordRules(rules);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetShowError(const char* errorText)
@@ -548,17 +566,17 @@ void FfiOHOSAceFrameworkTextFieldSetShowError(const char* errorText)
         isVisible = true;
     }
 
-    TextFieldModel::GetInstance()->SetShowError(UtfUtils::Str8DebugToStr16(error), isVisible);
+    GetTextFieldModel()->SetShowError(UtfUtils::Str8DebugToStr16(error), isVisible);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetShowPasswordIcon(bool isShow)
 {
-    TextFieldModel::GetInstance()->SetShowPasswordIcon(isShow);
+    GetTextFieldModel()->SetShowPasswordIcon(isShow);
 }
 
 void FfiOHOSAceFrameworkTextFieldShowPasswordText(bool show)
 {
-    TextFieldModel::GetInstance()->SetShowPasswordText(show);
+    GetTextFieldModel()->SetShowPasswordText(show);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetPasswordIcon(const char* onIconSrc, const char* offIconSrc)
@@ -576,7 +594,7 @@ void FfiOHOSAceFrameworkTextFieldSetPasswordIcon(const char* onIconSrc, const ch
         passwordIcon.hideResult = offIconSrc;
     }
 
-    TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
+    GetTextFieldModel()->SetPasswordIcon(passwordIcon);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetCaretPosition(int32_t position)
@@ -592,22 +610,22 @@ void FfiOHOSAceFrameworkTextFieldSetCaretPosition(int32_t position)
         caretPosition = position;
     }
 
-    TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
+    GetTextFieldModel()->SetCaretPosition(caretPosition);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetSelectAllValue(bool value)
 {
-    TextFieldModel::GetInstance()->SetSelectAllValue(value);
+    GetTextFieldModel()->SetSelectAllValue(value);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetShowUnderline(bool show)
 {
-    TextFieldModel::GetInstance()->SetShowUnderline(show);
+    GetTextFieldModel()->SetShowUnderline(show);
 }
 
 void FfiOHOSAceFrameworkTextFieldNormalUnderlineColor(uint32_t color)
 {
-    TextFieldModel::GetInstance()->SetNormalUnderlineColor(Color(color));
+    GetTextFieldModel()->SetNormalUnderlineColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkTextFieldUserUnderlineColor(uint32_t typing, uint32_t normal, uint32_t error, uint32_t disable)
@@ -617,29 +635,29 @@ void FfiOHOSAceFrameworkTextFieldUserUnderlineColor(uint32_t typing, uint32_t no
     userColor.normal = Color(normal);
     userColor.error = Color(error);
     userColor.disable = Color(disable);
-    TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
+    GetTextFieldModel()->SetUserUnderlineColor(userColor);
 }
 
 void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_t unit, uint32_t color, const char* src)
 {
     // set style
     if (style < 0) {
-        TextFieldModel::GetInstance()->SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        GetTextFieldModel()->SetCleanNodeStyle(CleanNodeStyle::INPUT);
     } else {
-        TextFieldModel::GetInstance()->SetCleanNodeStyle(static_cast<CleanNodeStyle>(style));
+        GetTextFieldModel()->SetCleanNodeStyle(static_cast<CleanNodeStyle>(style));
     }
-    TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
+    GetTextFieldModel()->SetIsShowCancelButton(true);
     // set normal
     if (src == nullptr) {
         auto theme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         if (Container::CurrentColorMode() == ColorMode::DARK) {
-            TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+            GetTextFieldModel()->SetCancelIconColor(theme->GetCancelButtonIconColor());
         } else {
-            TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+            GetTextFieldModel()->SetCancelIconColor(Color());
         }
-        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetCancelIconSize());
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+        GetTextFieldModel()->SetCancelIconSize(theme->GetCancelIconSize());
+        GetTextFieldModel()->SetCanacelIconSrc(std::string(), std::string(), std::string());
         return;
     }
     // set size
@@ -649,19 +667,19 @@ void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_
         CHECK_NULL_VOID(theme);
         iconSize = theme->GetCancelIconSize();
     }
-    TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    GetTextFieldModel()->SetCancelIconSize(iconSize);
     // set color
     Color iconColor(color);
     if (Container::CurrentColorMode() == ColorMode::DARK) {
         auto theme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
-        TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+        GetTextFieldModel()->SetCancelIconColor(theme->GetCancelButtonIconColor());
     } else {
-        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+        GetTextFieldModel()->SetCancelIconColor(iconColor);
     }
     // set src
     std::string iconSrc(src);
-    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, std::string(), std::string());
+    GetTextFieldModel()->SetCanacelIconSrc(iconSrc, std::string(), std::string());
 }
 
 void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
@@ -671,50 +689,50 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
         PipelineContext::SetCallBackNode(node);
         func(key);
     };
-    TextFieldModel::GetInstance()->SetOnSubmit(task);
+    GetTextFieldModel()->SetOnSubmit(task);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
     auto onChange = [func = FormatCharFunction(callback)](
         const ChangeValueInfo& info) { func(info.value); };
-    TextFieldModel::GetInstance()->SetOnChange(onChange);
+    GetTextFieldModel()->SetOnChange(onChange);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnCopy(void (*callback)(const char* value))
 {
-    TextFieldModel::GetInstance()->SetOnCopy(FormatCharFunction(callback));
+    GetTextFieldModel()->SetOnCopy(FormatCharFunction(callback));
 }
 
 void FfiOHOSAceFrameworkTextFieldOnCut(void (*callback)(const char* value))
 {
-    TextFieldModel::GetInstance()->SetOnCut(FormatCharFunction(callback));
+    GetTextFieldModel()->SetOnCut(FormatCharFunction(callback));
 }
 
 void FfiOHOSAceFrameworkTextFieldOnPaste(void (*callback)(const char* value))
 {
     auto onPaste = [func = FormatCharFunction(callback)](
         const std::u16string& val, NG::TextCommonEvent& info) { func(val); };
-    TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
+    GetTextFieldModel()->SetOnPasteWithEvent(std::move(onPaste));
 }
 
 void FfiOHOSAceFrameworkTextFieldOnEditChanged(void (*callback)(bool value))
 {
-    TextFieldModel::GetInstance()->SetOnEditChanged(CJLambda::Create(callback));
+    GetTextFieldModel()->SetOnEditChanged(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkTextFieldOnContentScroll(void (*callback)(float totalOffsetX, float totalOffsetY))
 {
     auto onScroll = [lambda = CJLambda::Create(callback)](
                         float totalOffsetX, float totalOffsetY) -> void { lambda(totalOffsetX, totalOffsetY); };
-    TextFieldModel::GetInstance()->SetOnContentScroll(onScroll);
+    GetTextFieldModel()->SetOnContentScroll(onScroll);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnTextSelectionChange(void (*callback)(int32_t selectionStart, int32_t selectionEnd))
 {
     auto onTextSelectionChange = [lambda = CJLambda::Create(callback)](int32_t selectionStart,
                                      int32_t selectionEnd) -> void { lambda(selectionStart, selectionEnd); };
-    TextFieldModel::GetInstance()->SetOnTextSelectionChange(onTextSelectionChange);
+    GetTextFieldModel()->SetOnTextSelectionChange(onTextSelectionChange);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnDidDelete(
@@ -727,7 +745,7 @@ void FfiOHOSAceFrameworkTextFieldOnDidDelete(
         const char* deleteValue = deleteStr.c_str();
         lambda(deleteOffset, direction, deleteValue);
     };
-    TextFieldModel::GetInstance()->SetOnDidDeleteEvent(onDidDelete);
+    GetTextFieldModel()->SetOnDidDeleteEvent(onDidDelete);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnWillDelete(
@@ -740,7 +758,7 @@ void FfiOHOSAceFrameworkTextFieldOnWillDelete(
         const char* deleteValue = deleteStr.c_str();
         return lambda(deleteOffset, direction, deleteValue);
     };
-    TextFieldModel::GetInstance()->SetOnWillDeleteEvent(onWillDelete);
+    GetTextFieldModel()->SetOnWillDeleteEvent(onWillDelete);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnDidInsert(void (*callback)(double insertOffset, const char* insertValue))
@@ -751,7 +769,7 @@ void FfiOHOSAceFrameworkTextFieldOnDidInsert(void (*callback)(double insertOffse
         const char* insertValue = insertStr.c_str();
         lambda(insertOffset, insertValue);
     };
-    TextFieldModel::GetInstance()->SetOnDidInsertValueEvent(onDidInsert);
+    GetTextFieldModel()->SetOnDidInsertValueEvent(onDidInsert);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnWillInsert(bool (*callback)(double insertOffset, const char* insertValue))
@@ -762,7 +780,7 @@ void FfiOHOSAceFrameworkTextFieldOnWillInsert(bool (*callback)(double insertOffs
         const char* insertValue = insertStr.c_str();
         return lambda(insertOffset, insertValue);
     };
-    TextFieldModel::GetInstance()->SetOnWillInsertValueEvent(onWillInsert);
+    GetTextFieldModel()->SetOnWillInsertValueEvent(onWillInsert);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
@@ -773,7 +791,7 @@ void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
         const std::string previewTextStr = UtfUtils::Str16ToStr8(info.previewText.value);
         func(valStr.c_str(), info.previewText.offset, previewTextStr.c_str());
     };
-    TextFieldModel::GetInstance()->SetOnChange(onChange);
+    GetTextFieldModel()->SetOnChange(onChange);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent))
@@ -799,7 +817,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t valu
             event.SetKeepEditable(func(key, *submitEvent));
         }
     };
-    TextFieldModel::GetInstance()->SetOnSubmit(task);
+    GetTextFieldModel()->SetOnSubmit(task);
 }
 
 void FfiOHOSAceFrameworkTextFieldEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
@@ -807,7 +825,7 @@ void FfiOHOSAceFrameworkTextFieldEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, 
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
-    TextFieldModel::GetInstance()->SetSelectionMenuOptions(
+    GetTextFieldModel()->SetSelectionMenuOptions(
         std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 }

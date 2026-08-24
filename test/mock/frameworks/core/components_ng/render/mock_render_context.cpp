@@ -201,6 +201,17 @@ void RenderContext::ResetBorderImage()
     }
 }
 
+void RenderContext::UpdateParticleOptionArray(const std::list<ParticleOption>& value) {}
+
+const std::optional<std::list<ParticleOption>>& RenderContext::GetParticleOptionArray() const
+{
+    static const std::optional<std::list<ParticleOption>> empty;
+    return empty;
+}
+
+
+void RenderContext::ResetParticleOptionArray() {}
+
 
 #ifdef ENHANCED_ANIMATION
 namespace {

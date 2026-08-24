@@ -1067,7 +1067,7 @@ ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Number& src)
 }
 
 template<>
-CalcDimension Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Float64& src)
 {
     return Convert<Dimension>(src);
 }
@@ -2454,7 +2454,8 @@ template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Op
     const Opt_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(
     const Opt_Union_F64_String&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
+template ACE_FORCE_EXPORT std::optional<Dimension>
+OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
     const Opt_Union_F64_String_Resource&, DimensionUnit);
 
 ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
@@ -3821,13 +3822,13 @@ TextRange Convert(const Ark_TextRange& src)
     return dst;
 }
 template<>
-bool Convert(const Ark_LineSpacingOptions& src)
+ACE_FORCE_EXPORT bool Convert(const Ark_LineSpacingOptions& src)
 {
     return Converter::OptConvert<bool>(src.onlyBetweenLines).value_or(false);
 }
 
 template<>
-OverflowMode Convert(const Ark_MaxLinesOptions& src)
+ACE_FORCE_EXPORT OverflowMode Convert(const Ark_MaxLinesOptions& src)
 {
     auto overflowMode = Converter::OptConvert<OverflowMode>(src.overflowMode);
     return overflowMode.value();

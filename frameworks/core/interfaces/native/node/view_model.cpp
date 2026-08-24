@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
@@ -22,6 +23,7 @@
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -30,6 +32,11 @@
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
+#include "core/interfaces/native/node/progress_modifier.h"
+#include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -61,7 +68,7 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
@@ -126,10 +133,11 @@ void* createSpanNode(ArkUI_Int32 nodeId)
 
 void* createImageSpanNode(ArkUI_Int32 nodeId)
 {
-    auto imageSpanNode = ImageSpanView::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(imageSpanNode, nullptr);
-    imageSpanNode->IncRefCount();
-    return AceType::RawPtr(imageSpanNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto imageSpanModifier = nodeModifier->getImageSpanModifier();
+    CHECK_NULL_RETURN(imageSpanModifier, nullptr);
+    return imageSpanModifier->createImageSpanFrameNode(nodeId);
 }
 
 void* createImageNode(ArkUI_Int32 nodeId)
@@ -161,23 +169,23 @@ void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 
 void* createLoadingProgress(ArkUI_Int32 nodeId)
 {
-    auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetLoadingProgressModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createLoadingProgressFrameNode(nodeId);
 }
 
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, u"", u"");
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createTextInputNode(nodeId);
 }
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)
 {
-    RefPtr<FrameNode> frameNode = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    RefPtr<FrameNode> frameNode = modifier->createRichEditorStyledStringNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -234,7 +242,9 @@ void* createArcSwiperNode(ArkUI_Int32 nodeId)
 
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, u"", u"");
+    auto* modifier = NG::NodeModifier::GetTextAreaCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = modifier->createTextAreaNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -249,10 +259,14 @@ void* createButtonNode(ArkUI_Int32 nodeId)
 
 void* createProgressNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ProgressModelNG::CreateFrameNode(nodeId, 0, 100, NG::ProgressType::LINEAR);
+    auto arkUIProgressModifier = NG::NodeModifier::GetProgressModifier();
+    CHECK_NULL_RETURN(arkUIProgressModifier && arkUIProgressModifier->createProgressFrameNode, nullptr);
+    auto arkUINodeHandle = arkUIProgressModifier->createProgressFrameNode(
+        nodeId, 0, 100, static_cast<ArkUI_Int32>(NG::ProgressType::LINEAR));
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createCheckBoxNode(ArkUI_Int32 nodeId)
@@ -626,10 +640,9 @@ void* createQRcodeNode(ArkUI_Int32 nodeId)
 
 void* createBadgeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = BadgeModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetBadgeModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createBadgeFrameNode(nodeId);
 }
 
 void* createTextClockNode(ArkUI_Int32 nodeId)
@@ -641,10 +654,13 @@ void* createTextClockNode(ArkUI_Int32 nodeId)
 
 void* createTextTimerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextTimerModelNG::CreateFrameNode(nodeId);
+    auto arkUITextTimerModifier = NG::NodeModifier::GetTextTimerModifier();
+    CHECK_NULL_RETURN(arkUITextTimerModifier, nullptr);
+    auto arkUINodeHandle = arkUITextTimerModifier->createTextTimerFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createMarqueeNode(ArkUI_Int32 nodeId)

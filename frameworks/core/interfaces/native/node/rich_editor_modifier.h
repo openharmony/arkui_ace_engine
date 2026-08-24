@@ -17,11 +17,13 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RICH_EDITOR_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/rich_editor/bridge/rich_editor_custom_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier();
 const CJUIRichEditorModifier* GetCJUIRichEditorModifier();
+const ArkUIRichEditorCustomModifier* GetRichEditorCustomModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RichEditor_MODIFIER_H

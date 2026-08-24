@@ -24,7 +24,7 @@
 #include "core/components_ng/base/linear_vector.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/paragraph.h"

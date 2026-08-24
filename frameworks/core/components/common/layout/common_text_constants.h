@@ -39,7 +39,7 @@ extern const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES;
 
 extern const std::vector<TextDirection> TEXT_DIRECTIONS;
 
-extern const std::vector<FontStyle> FONT_STYLES;
+ACE_FORCE_EXPORT extern const std::vector<FontStyle> FONT_STYLES;
 
 extern const std::vector<std::string> INPUT_FONT_FAMILY_VALUE;
 

@@ -39,7 +39,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 
 using namespace testing;

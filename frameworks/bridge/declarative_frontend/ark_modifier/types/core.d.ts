@@ -300,6 +300,7 @@ type SelectionOptions = object;
 type TextDataDetectorType = 'phoneNumber' | 'url' | 'email' | 'address' | 'dateTime' | 'currency';
 type TextDataDetectorConfig = object;
 type LineSpacingOptions = object;
+type FontWeightConfigs = object;
 
 type VoidCallback = () => void;
 type Callback<T = object, R = void> = (value: T) => R;
@@ -369,6 +370,9 @@ type SliderInteraction = object;
 type SlideRange = object;
 type SliderPrefixOptions = object;
 type SliderSuffixOptions = object;
+type TextBackgroundStyle = object;
+type ColorFilter = object;
+type DrawingColorFilter = object;
 
 type ToggleType = 'checkbox' | 'switch' | 'button';
 type SwitchStyle = object;
@@ -494,6 +498,7 @@ type SelectOption = object;
 type DataPanelConfiguration = object;
 type DataPanelShadowOptions = object;
 type GaugeConfiguration = object;
+type LoadingProgressConfiguration = object;
 type GaugeIndicatorOptions = object;
 type StarStyleOptions = object;
 type ShaderStyle = object;

@@ -18,10 +18,11 @@
 #pragma once
 
 #include "core/interfaces/native/node/node_api.h"
-
+#include "core/components_ng/pattern/text_area/bridge/text_area_custom_modifier.h"
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextAreaModifier* GetTextAreaModifier();
     const CJUITextAreaModifier* GetCJUITextAreaModifier();
+    ACE_FORCE_EXPORT const ArkUITextAreaCustomModifier* GetTextAreaCustomModifier();
     void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam);

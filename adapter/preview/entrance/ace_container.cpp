@@ -59,7 +59,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"

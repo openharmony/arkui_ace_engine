@@ -54,13 +54,13 @@ public:
     static bool IsIndexInEmoji(int32_t index, const std::u16string& content, int32_t& startIndex, int32_t& endIndex);
     ACE_FORCE_EXPORT static EmojiRelation GetIndexRelationToEmoji(int32_t index,
         const std::u16string& content, int32_t& startIndex, int32_t& endIndex);
-    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content);
+    ACE_FORCE_EXPORT static bool IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content);
     static bool IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content);
-    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content,
+    ACE_FORCE_EXPORT static bool IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content,
         int32_t& startIndex, int32_t& endIndex);
     static bool IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content,
         int32_t& startIndex, int32_t& endIndex);
-    static std::u16string SubU16string(int32_t index, int32_t length,
+    ACE_FORCE_EXPORT static std::u16string SubU16string(int32_t index, int32_t length,
         const std::u16string& content, bool includeStartHalf = false, bool includeEndHalf = false);
     ACE_FORCE_EXPORT static TextEmojiSubStringRange CalSubU16stringRange(int32_t index, int32_t length,
         const std::u16string& content, bool includeStartHalf, bool includeEndHalf);

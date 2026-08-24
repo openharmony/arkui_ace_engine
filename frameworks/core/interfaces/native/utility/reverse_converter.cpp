@@ -22,7 +22,7 @@
 #include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/date_picker/picker_date.h"
 #include "core/components_ng/pattern/date_picker/picker_time.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
@@ -101,7 +101,7 @@ void ConvContext::Clear()
     storage_.clear();
 }
 
-void AssignArkValue(Ark_Int32& dst, const uint32_t& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_Int32& dst, const uint32_t& src)
 {
     dst = static_cast<Ark_Int32>(src);
 }

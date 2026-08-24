@@ -59,7 +59,7 @@ std::u32string ACE_FORCE_EXPORT Str16ToStr32(const std::u16string& str);
 
 std::u16string ACE_FORCE_EXPORT Str32ToStr16(const std::u32string& str);
 
-void HandleInvalidUTF16(uint16_t* utf16In, size_t utf16Len, size_t start);
+void ACE_FORCE_EXPORT HandleInvalidUTF16(uint16_t* utf16In, size_t utf16Len, size_t start);
 
 bool IsIndexInPairedSurrogates(int32_t index, const std::u16string& utf16);
 

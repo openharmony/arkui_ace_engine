@@ -108,6 +108,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/unittest:ace_components_gestures",
     "$ace_root/test/unittest:ace_components_layout",
     "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
     "$ace_root/test/unittest:ace_components_pattern",
     "$ace_root/test/unittest:ace_components_property",
     "$ace_root/test/unittest:ace_components_render",

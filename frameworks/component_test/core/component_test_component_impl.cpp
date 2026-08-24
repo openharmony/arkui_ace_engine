@@ -25,6 +25,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
@@ -46,7 +47,6 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -247,24 +247,9 @@ std::string ComponentTestComponentImpl::GetIdImpl(ErrInfo& errInfo) const
 
 bool GetTextByPattern(const RefPtr<NG::FrameNode>& frameNode, std::string& text)
 {
-    const RefPtr<NG::Pattern>& pattern = frameNode->GetPattern();
-    CHECK_NULL_RETURN(pattern, false);
-    if (AceType::InstanceOf<NG::TextFieldPattern>(pattern)) {
-        auto textFieldPattern = AceType::DynamicCast<NG::TextFieldPattern>(pattern);
-        CHECK_NULL_RETURN(textFieldPattern, false);
-        text = textFieldPattern->GetTextValue();
-        return true;
-    } else if (AceType::InstanceOf<NG::SearchPattern>(pattern)) {
-        auto searchPattern = AceType::DynamicCast<NG::SearchPattern>(pattern);
-        if (searchPattern) {
-            auto textFieldFrameNode = AceType::DynamicCast<NG::FrameNode>(frameNode->GetChildAtIndex(0));
-            auto textFieldPattern = textFieldFrameNode->GetPattern<NG::TextFieldPattern>();
-            CHECK_NULL_RETURN(textFieldPattern, false);
-            text = textFieldPattern->GetTextValue();
-            return true;
-        }
-    }
-    return false;
+    auto* modifier = NG::NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->getTextByPattern(frameNode, text);
 }
 bool GetTextByEventHub(const RefPtr<NG::FrameNode>& frameNode, std::string& text)
 {

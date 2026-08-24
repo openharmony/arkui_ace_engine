@@ -17,10 +17,14 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_static.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/components_ng/pattern/text/image_span_view_static.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/text/span/bridge/image_span/image_span_custom_modifier.h"
+#include "core/interfaces/native/node/node_image_span_modifier.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseSpanModifier {
@@ -47,7 +51,12 @@ void SetTextBackgroundStyleImpl(Ark_NativePointer node,
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
         SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, *convValue);
     } else {
-        ImageSpanView::SetPlaceHolderStyle(frameNode, *convValue);
+        auto nodeModifier = GetArkUINodeModifiers();
+        CHECK_NULL_VOID(nodeModifier);
+        auto imageSpanModifier = nodeModifier->getImageSpanModifier();
+        CHECK_NULL_VOID(imageSpanModifier);
+        imageSpanModifier->setImageSpanPlaceHolderStyle(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), static_cast<void*>(&(convValue.value())));
     }
 }
 void SetBaselineOffsetImpl(Ark_NativePointer node,
@@ -60,7 +69,9 @@ void SetBaselineOffsetImpl(Ark_NativePointer node,
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
         SpanModelStatic::SetBaselineOffset(frameNode, convValue);
     } else {
-        ImageSpanViewStatic::SetBaselineOffset(frameNode, convValue);
+        auto customModifier = NodeModifier::GetImageSpanCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->setStaticBaselineOffset(node, value);
     }
 }
 } // BaseSpanModifier

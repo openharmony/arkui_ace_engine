@@ -6688,7 +6688,7 @@ int32_t SetInputCustomKeyboard(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         supportAvoidance = static_cast<bool>(item->value[0].i32);
     }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCustomKeyboard(
-        node->uiNodeHandle, customKeyboard->uiNodeHandle, supportAvoidance);
+        node->uiNodeHandle, customKeyboard->uiNodeHandle, supportAvoidance, false);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10253,7 +10253,7 @@ void ResetLoadingProgressColor(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->resetColor(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->resetColor(node->uiNodeHandle, false);
 }
 
 const ArkUI_AttributeItem* GetLoadingProgressEnableLoading(ArkUI_NodeHandle node)
@@ -15284,7 +15284,7 @@ int32_t SetImageSpanBaselineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeI
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanBaselineOffset(
-        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), false, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

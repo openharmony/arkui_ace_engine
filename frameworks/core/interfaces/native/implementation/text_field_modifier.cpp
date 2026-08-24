@@ -15,12 +15,74 @@
 
 // SORTED_SECTION
 #include "core/components_ng/base/view_abstract_model_static.h"
-#include "core/components_ng/pattern/text_field/text_field_model_static.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+const ArkUITextInputCustomModifier* GetTextFieldCustomModifier()
+{
+    return NodeModifier::GetTextInputCustomModifier();
+}
+
+void SetTextFieldWidthAuto(FrameNode* frameNode, bool value)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldWidthAuto(frameNode, value);
+}
+
+void SetTextFieldPadding(FrameNode* frameNode, const PaddingProperty& newPadding, bool tmp)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldPadding(frameNode, newPadding, tmp);
+}
+
+void SetTextFieldMargin(FrameNode* frameNode)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldMargin(frameNode);
+}
+
+void SetTextFieldBackBorder(FrameNode* frameNode)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldBackBorder(frameNode);
+}
+
+void SetTextFieldBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldBackgroundColor(frameNode, color);
+}
+
+void SetTextFieldTextColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTextFieldTextColor(frameNode, color);
+}
+
+void UpdateTextFieldTextColor(FrameNode* frameNode, const Color& color)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->updateTextFieldTextColor(frameNode, color);
+}
+
+std::optional<BorderRadiusProperty> GetTextFieldThemeBorderRadius(FrameNode* frameNode)
+{
+    auto* modifier = GetTextFieldCustomModifier();
+    CHECK_NULL_RETURN(modifier, std::nullopt);
+    return modifier->getTextFieldThemeBorderRadius(frameNode);
+}
+} // namespace
+
 namespace TextFieldModifier {
 void SetWidthImpl(Ark_NativePointer node, const Opt_Union_Length_LayoutPolicy* value)
 {
@@ -29,7 +91,7 @@ void SetWidthImpl(Ark_NativePointer node, const Opt_Union_Length_LayoutPolicy* v
     Converter::VisitUnion(*value,
         [frameNode](const Ark_Length& value) {
             auto result = Converter::OptConvert<CalcDimension>(value);
-            TextFieldModelStatic::SetWidthAuto(frameNode, false);
+            SetTextFieldWidthAuto(frameNode, false);
             Validator::ValidateNonNegative(result);
             if (!result) {
                 ViewAbstract::ClearWidthOrHeight(frameNode, true);
@@ -70,9 +132,9 @@ void SetPaddingImpl(Ark_NativePointer node, const Opt_Union_Padding_Length_Local
     auto padding = Converter::OptConvertPtr<PaddingProperty>(value);
     ViewAbstractModelStatic::SetPadding(frameNode, padding);
     if (padding) {
-        TextFieldModelStatic::SetPadding(frameNode, padding.value(), false);
+        SetTextFieldPadding(frameNode, padding.value(), false);
     } else {
-        TextFieldModelStatic::SetPadding(frameNode, NG::PaddingProperty(), true);
+        SetTextFieldPadding(frameNode, NG::PaddingProperty(), true);
     }
 }
 void SetMarginImpl(Ark_NativePointer node, const Opt_Union_Padding_Length_LocalizedPadding* value)
@@ -80,7 +142,7 @@ void SetMarginImpl(Ark_NativePointer node, const Opt_Union_Padding_Length_Locali
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
-    TextFieldModelStatic::SetMargin(frameNode);
+    SetTextFieldMargin(frameNode);
 }
 void SetBorderImpl(Ark_NativePointer node, const Opt_BorderOptions* value)
 {
@@ -112,7 +174,7 @@ void SetBorderImpl(Ark_NativePointer node, const Opt_BorderOptions* value)
     if (dashWidth) {
         ViewAbstractModelStatic::SetDashWidth(frameNode, dashWidth.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
 }
 void SetBorderWidthImpl(Ark_NativePointer node, const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
 {
@@ -122,7 +184,7 @@ void SetBorderWidthImpl(Ark_NativePointer node, const Opt_Union_Length_EdgeWidth
     if (width) {
         ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
 }
 void SetBorderColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
 {
@@ -132,7 +194,7 @@ void SetBorderColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_Ed
     if (color) {
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
 }
 void SetBorderStyleImpl(Ark_NativePointer node, const Opt_Union_BorderStyle_EdgeStyles* value)
 {
@@ -142,7 +204,7 @@ void SetBorderStyleImpl(Ark_NativePointer node, const Opt_Union_BorderStyle_Edge
     if (style) {
         ViewAbstractModelStatic::SetBorderStyle(frameNode, style.value());
     }
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
 }
 void SetBorderRadiusImpl(Ark_NativePointer node, const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
 {
@@ -150,20 +212,15 @@ void SetBorderRadiusImpl(Ark_NativePointer node, const Opt_Union_Length_BorderRa
     CHECK_NULL_VOID(frameNode);
     auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
     if (!radiuses) {
-        auto pattern = frameNode->GetPattern<TextFieldPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto textFieldTheme = pattern->GetTheme();
-        CHECK_NULL_VOID(textFieldTheme);
-        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
-        NG::BorderRadiusProperty defaultBorderRadius {
-            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
-            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
-        };
-        ViewAbstractModelStatic::SetBorderRadius(frameNode, defaultBorderRadius);
+        auto defaultBorderRadius = GetTextFieldThemeBorderRadius(frameNode);
+        if (!defaultBorderRadius) {
+            return;
+        }
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, defaultBorderRadius.value());
         return;
     }
     ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
-    TextFieldModelStatic::SetBackBorder(frameNode);
+    SetTextFieldBackBorder(frameNode);
 }
 void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColorMetricsExt* value)
 {
@@ -171,7 +228,7 @@ void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColo
     CHECK_NULL_VOID(frameNode);
     auto color = Converter::OptConvertPtr<Color>(value);
     ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
-    TextFieldModelStatic::SetBackgroundColor(frameNode, color);
+    SetTextFieldBackgroundColor(frameNode, color);
 }
 void SetForegroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColoringStrategy* value)
 {
@@ -180,15 +237,15 @@ void SetForegroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColo
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_ResourceColor& resourceColor) {
             auto colorOpt = Converter::OptConvertColorForMaterial(resourceColor);
-            TextFieldModelStatic::SetTextColor(frameNode, colorOpt);
+            SetTextFieldTextColor(frameNode, colorOpt);
         },
         [frameNode](const Ark_ColoringStrategy& colorStrategy) {
             auto colorStrategyOpt = Converter::OptConvert<ForegroundColorStrategy>(colorStrategy);
             if (colorStrategyOpt.has_value()) {
                 ViewAbstractModelStatic::SetForegroundColorStrategy(frameNode, colorStrategyOpt.value());
-                TextFieldModelStatic::UpdateTextColor(frameNode, Color::FOREGROUND);
+                UpdateTextFieldTextColor(frameNode, Color::FOREGROUND);
             } else {
-                TextFieldModelStatic::SetTextColor(frameNode, std::nullopt);
+                SetTextFieldTextColor(frameNode, std::nullopt);
             }
         },
         []() {}

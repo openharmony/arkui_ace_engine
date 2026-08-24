@@ -36,12 +36,12 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/components_ng/syntax/with_theme_node.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -536,8 +536,11 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                 } },
             { V2::TEXTINPUT_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
-                    return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+                    return FrameNode::GetOrCreateFrameNode(type, nodeId, []() -> RefPtr<Pattern> {
+                        auto customModifier = NodeModifier::GetTextInputCustomModifier();
+                        CHECK_NULL_RETURN(customModifier, RefPtr<Pattern>());
+                        return customModifier->createTextFieldPattern();
+                    });
                 } },
             { V2::DIVIDER_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
