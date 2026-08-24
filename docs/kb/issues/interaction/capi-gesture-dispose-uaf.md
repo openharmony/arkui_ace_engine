@@ -119,6 +119,6 @@ void dispose(ArkUIGesture* recognizer)
 
 ## 相关主题
 
-- [docs/kb/capabilities/gesture-modifier.md](../../capabilities/gesture-modifier.md)：手势 Modifier 代码型 KB（FuncID 04-05-07，含 node_gesture_modifier dispose）
-- [docs/kb/capabilities/gesture-capability.md](../../capabilities/gesture-capability.md)：手势能力代码型 KB（FuncID 04-04-06，含各识别器与 GestureReferee）
-- [docs/kb/capabilities/interaction-normalization.md](../../capabilities/interaction-normalization.md)：交互归一化代码型 KB（FuncID 04-04-11）
+- [gesture-modifier](../../capabilities/gesture-modifier.md)：手势 Modifier 代码型 KB（FuncID 04-05-07，含 node_gesture_modifier dispose）
+- [gesture-capability](../../capabilities/gesture-capability.md)：手势能力代码型 KB（FuncID 04-04-06，含各识别器与 GestureReferee）
+- [interaction-normalization](../../capabilities/interaction-normalization.md)：交互归一化代码型 KB（FuncID 04-04-11）

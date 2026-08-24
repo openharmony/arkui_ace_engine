@@ -105,6 +105,6 @@ OffscreenCanvas 已在功能 registry 中登记为 `05-14-03`，目标功能域�
 
 ## 相关主题
 
-- [Canvas：[docs/kb/components/shape/canvas.md](canvas.md)](canvas.md)
-- Shape 组件族：[docs/kb/components/shape/shape.md](shape.md)
-- [Image：[docs/kb/components/media/image.md](../media/image.md)](../media/image.md)
+- [Canvas](canvas.md)
+- [Shape 组件族](shape.md)
+- [Image](../media/image.md)

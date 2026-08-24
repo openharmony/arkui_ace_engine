@@ -83,8 +83,8 @@ UIContext 动态接口覆盖 ~20 个 getXxx 工厂方法（返回绑定 instance
 | API 声明 | `<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts` | 动态版 UIContext 类和 ~20 个子对象接口定义 |
 | JS 主类 + 所有 Impl | `frameworks/bridge/declarative_frontend/engine/jsUIContext.js` | 2140 行；UIContext 类 + ~20 个子对象 Impl 类（Router/PromptAction/OverlayManager/ComponentUtils/FocusController/DragController 等）全部内联定义；工厂方法 + 直接方法 |
 | getUINativeModule 工具 | `frameworks/bridge/declarative_frontend/engine/arkCommon.js` | getUINativeModule() 返回 arkUINativeModule 全局对象；UIContext 直接方法（getWindowWidthBreakpoint/getFrameNodeById 等）通过此模块调用 |
-| withInstanceId 守卫 | `frameworks/bridge/declarative_frontend/engine/jsUIContext.js`（行 2036） | `function withInstanceId(instanceId, callback)` → `__JSScopeUtil__.syncInstanceId(instanceId)` + try/callback + `__JSScopeUtil__.restoreInstanceId()` |
-| __availableInstanceIds__ | `frameworks/bridge/declarative_frontend/engine/jsUIContext.js`（行 2081） | `const __availableInstanceIds__ = new Set()`；isAvailable() 校验实例可用性；`__addAvailableInstanceId__/__removeAvailableInstanceId__` 由 C++ 侧回调 |
+| withInstanceId 守卫 | `frameworks/bridge/declarative_frontend/engine/jsUIContext.js` | `function withInstanceId(instanceId, callback)` → `__JSScopeUtil__.syncInstanceId(instanceId)` + try/callback + `__JSScopeUtil__.restoreInstanceId()` |
+| __availableInstanceIds__ | `frameworks/bridge/declarative_frontend/engine/jsUIContext.js` | `const __availableInstanceIds__ = new Set()`；isAvailable() 校验实例可用性；`__addAvailableInstanceId__/__removeAvailableInstanceId__` 由 C++ 侧回调 |
 | NAPI 子模块挂载 | `interfaces/napi/kits/`（~32 个子模块） | 各 Impl 构造时 `globalThis.requireNapi('moduleName')` 按需加载 NAPI 子模块（router/animator/promptAction/mediaquery/measure/arkui.inspector/arkui.dragController 等） |
 | UIContextHelper 缓存 | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h` | instanceId→JSValue 全局缓存（uiContextMap_）；线程安全读写锁 |
 | UIContextHelper 实现 | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.cpp` | AddUIContext（注册实例）/RemoveUIContext（容器销毁时移除）/GetUIContext（先查缓存再通过 ArkTSUtils::GetContext 回填）/HasUIContext |
@@ -239,10 +239,10 @@ UIContext 功能域：`specs/04-common-capability/12-ui-context/`
 
 ## 相关主题
 
-- [路由管理：[docs/kb/api/router.md](../api/router.md)](../api/router.md)
-- [MediaQuery：[docs/kb/api/mediaquery.md](../api/mediaquery.md)](../api/mediaquery.md)
-- Ability 上下文与窗口信息：[docs/kb/capabilities/ability-context.md](ability-context.md)
-- Frame 帧回调：[docs/kb/capabilities/frame-callback.md](frame-callback.md)
-- [窗口机制：[docs/kb/architecture/window-mechanism.md](../architecture/window-mechanism.md)](../architecture/window-mechanism.md)
-- [布局框架：[docs/kb/architecture/layout-framework.md](../architecture/layout-framework.md)](../architecture/layout-framework.md)
+- [路由管理](../api/router.md)
+- [MediaQuery](../api/mediaquery.md)
+- [Ability 上下文与窗口信息](ability-context.md)
+- [Frame 帧回调](frame-callback.md)
+- [窗口机制](../architecture/window-mechanism.md)
+- [布局框架](../architecture/layout-framework.md)
 - [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — JS 前端历史配对问题（已修复）与 ANI/C API 路径排查要点

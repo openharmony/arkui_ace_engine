@@ -88,7 +88,7 @@
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- 静态 V2 核心（`DecoratedV2VariableBase`/`StateUpdateLoop`）：[docs/kb/frontend/state_management/static-v2-core.md](static-v2-core.md)
-- 动态侧 V2 装饰器（对照参考）：[docs/kb/frontend/state_management/v2-decorators.md](v2-decorators.md)
-- 跨前端互操作（`enableCompatibleObservedV2ForStatic` 完整机制）：[docs/kb/frontend/state_management/static-interop-bridge.md](static-interop-bridge.md)
+- [总览](../state-management.md)
+- 静态 V2 核心（`DecoratedV2VariableBase`/`StateUpdateLoop`）：[static-v2-core](static-v2-core.md)
+- [动态侧 V2 装饰器（对照参考）](v2-decorators.md)
+- 跨前端互操作（`enableCompatibleObservedV2ForStatic` 完整机制）：[static-interop-bridge](static-interop-bridge.md)

@@ -96,7 +96,7 @@ UIObserver（无感监听）是 ArkUI 引擎的 UI 生命周期和状态变化�
 
 ## 相关主题
 
-- UI 上下文：[docs/kb/capabilities/ui-context.md](ui-context.md)（UIContext.getUIObserver() 入口）
-- 日志：[docs/kb/architecture/dfx/logging.md](../architecture/dfx/logging.md)（HiLog 条件编译依赖）
-- Trace 打点：[docs/kb/architecture/dfx/trace.md](../architecture/dfx/trace.md)（UIEventObserver 与 EventRecorder 交叉）
+- [UI 上下文](ui-context.md)（UIContext.getUIObserver() 入口）
+- [日志](../architecture/dfx/logging.md)（HiLog 条件编译依赖）
+- [Trace 打点](../architecture/dfx/trace.md)（UIEventObserver 与 EventRecorder 交叉）
 - [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — JS 前端历史配对问题（已修复）与 UIObserver 实例路由排查

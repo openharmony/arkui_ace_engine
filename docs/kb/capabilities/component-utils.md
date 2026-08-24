@@ -85,6 +85,6 @@ ComponentUtils 提供组件几何信息查询，以及形状区域图像项筛�
 
 ## 相关主题
 
-- [UIContext：[docs/kb/capabilities/ui-context.md](ui-context.md)。](ui-context.md)
-- [FrameNode：[docs/kb/capabilities/frame-node.md](frame-node.md)。](frame-node.md)
-- [RenderNode：[docs/kb/capabilities/render-node.md](render-node.md)。](render-node.md)
+- [UIContext。](ui-context.md)
+- [FrameNode。](frame-node.md)
+- [RenderNode。](render-node.md)

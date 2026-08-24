@@ -81,6 +81,6 @@ API 检索建议：在 SDK 与 Native 头文件中搜索 `backgroundImage`、`ba
 
 ## 相关主题
 
-- `ImageLoading`：[docs/kb/capabilities/image-loading.md](image-loading.md)
-- `Image`：[docs/kb/components/media/image.md](../components/media/image.md)
-- `LayoutAttributes`：[docs/kb/capabilities/layout-attributes.md](layout-attributes.md)
+- [ImageLoading](image-loading.md)
+- [Image](../components/media/image.md)
+- [LayoutAttributes](layout-attributes.md)

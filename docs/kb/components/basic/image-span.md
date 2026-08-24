@@ -107,8 +107,8 @@ Span 类功能域：`specs/05-ui-components/09-text-components/06-span-component
 
 ## 相关主题
 
-- `Text`：[docs/kb/components/basic/text.md](text.md)
-- `Span`：[docs/kb/components/basic/span.md](span.md)
-- `SymbolSpan`：[docs/kb/components/basic/symbol-span.md](symbol-span.md)
-- `ContainerSpan`：[docs/kb/components/basic/container-span.md](container-span.md)
+- [Text](text.md)
+- [Span](span.md)
+- [SymbolSpan](symbol-span.md)
+- [ContainerSpan](container-span.md)
 - `Image`（ImagePattern 复用源）：`docs/kb/components/media/`

@@ -116,9 +116,9 @@ V1 装饰器是 ArkUI 声明式前端的初代状态管理 API，全部编译为
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- V1 核心逻辑（依赖收集、变更通知、冻结、`@Observed` Proxy 体系）：[docs/kb/frontend/state_management/v1-core.md](v1-core.md)
-- V2 装饰器（V1 的下一代对应）：[docs/kb/frontend/state_management/v2-decorators.md](v2-decorators.md)
-- 存储体系（`@StorageLink`/`@StorageProp`/`@LocalStorageLink`/`@LocalStorageProp`）：[docs/kb/frontend/state_management/storage.md](storage.md)
-- [自定义组件机制（`ViewPU`、`@Provide`/`@Consume` 注册、BuildNode 复用）：[docs/kb/frontend/state_management/custom-component.md](custom-component.md)](custom-component.md)
-- 静态 V1 装饰器与数据对象（arkoala 侧）：[docs/kb/frontend/state_management/static-v1-decorators.md](static-v1-decorators.md)
+- [总览](../state-management.md)
+- V1 核心逻辑（依赖收集、变更通知、冻结、`@Observed` Proxy 体系）：[v1-core](v1-core.md)
+- [V2 装饰器（V1 的下一代对应）](v2-decorators.md)
+- 存储体系（`@StorageLink`/`@StorageProp`/`@LocalStorageLink`/`@LocalStorageProp`）：[storage](storage.md)
+- [自定义组件机制（`ViewPU`、`@Provide`/`@Consume` 注册、BuildNode 复用）：custom-component](custom-component.md)
+- [静态 V1 装饰器与数据对象（arkoala 侧）](static-v1-decorators.md)

@@ -83,5 +83,5 @@ AbilityComponent 功能域（废弃，存量补录）：
 
 ## 相关主题
 
-- [NodeContainer：[docs/kb/components/custom-node/node-container.md](../custom-node/node-container.md)](../custom-node/node-container.md)
-- 占位组件概念入口：[docs/kb/capabilities/placeholder-component.md](../../capabilities/placeholder-component.md)
+- [NodeContainer](../custom-node/node-container.md)
+- [占位组件概念入口](../../capabilities/placeholder-component.md)

@@ -85,6 +85,6 @@ API 检索建议：在 SDK 与源码中搜索 `enableAnalyzer`、`analyzerConfig
 
 ## 相关主题
 
-- `Image`：[docs/kb/components/media/image.md](../components/media/image.md)
-- `ImageLoading`：[docs/kb/capabilities/image-loading.md](image-loading.md)
-- `Video`：[docs/kb/components/media/video.md](../components/media/video.md)
+- [Image](../components/media/image.md)
+- [ImageLoading](image-loading.md)
+- [Video](../components/media/video.md)

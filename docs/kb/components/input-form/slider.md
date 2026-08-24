@@ -134,6 +134,6 @@ Slider 功能域：`specs/05-ui-components/04-input-form-components/05-slider/`
 
 ## 相关主题
 
-- [Toggle 组件：[docs/kb/components/selector/toggle.md](../selector/toggle.md)](../selector/toggle.md)
-- [Text 组件：[docs/kb/components/basic/text.md](../basic/text.md)](../basic/text.md)
-- [Image 组件：[docs/kb/components/media/image.md](../media/image.md)](../media/image.md)
+- [Toggle 组件](../selector/toggle.md)
+- [Text 组件](../basic/text.md)
+- [Image 组件](../media/image.md)

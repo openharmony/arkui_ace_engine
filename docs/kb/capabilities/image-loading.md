@@ -88,7 +88,7 @@ API 检索建议：
 
 ## 相关主题
 
-- `Image`：[docs/kb/components/media/image.md](../components/media/image.md)
-- `SVG`：[docs/kb/capabilities/svg.md](svg.md)
-- `BackgroundImage`：[docs/kb/capabilities/background-image.md](background-image.md)
-- `DrawableDescriptor`：[docs/kb/capabilities/drawable-descriptor.md](drawable-descriptor.md)
+- [Image](../components/media/image.md)
+- [SVG](svg.md)
+- [BackgroundImage](background-image.md)
+- [DrawableDescriptor](drawable-descriptor.md)

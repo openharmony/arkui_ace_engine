@@ -77,8 +77,8 @@
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- 静态 V2 核心（`DecoratedV2VariableBase` 基类）：[docs/kb/frontend/state_management/static-v2-core.md](static-v2-core.md)
-- 静态 V2 装饰器（`@Local`/`@Param` 等组件状态装饰器）：[docs/kb/frontend/state_management/static-v2-decorators.md](static-v2-decorators.md)
-- 跨前端组件互操作：[docs/kb/frontend/state_management/static-interop-bridge.md](static-interop-bridge.md)
-- 动态侧自定义组件机制（对照参考）：[docs/kb/frontend/state_management/custom-component.md](custom-component.md)
+- [总览](../state-management.md)
+- 静态 V2 核心（`DecoratedV2VariableBase` 基类）：[static-v2-core](static-v2-core.md)
+- 静态 V2 装饰器（`@Local`/`@Param` 等组件状态装饰器）：[static-v2-decorators](static-v2-decorators.md)
+- [跨前端组件互操作](static-interop-bridge.md)
+- [动态侧自定义组件机制（对照参考）](custom-component.md)

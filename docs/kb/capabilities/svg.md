@@ -87,6 +87,6 @@ SVG 规格目录：`specs/04-common-capability/01-image-loading/02-svg-parsing/`
 
 ## 相关主题
 
-- `ImageLoading`：[docs/kb/capabilities/image-loading.md](image-loading.md)
-- `Image`：[docs/kb/components/media/image.md](../components/media/image.md)
-- `DrawableDescriptor`：[docs/kb/capabilities/drawable-descriptor.md](drawable-descriptor.md)
+- [ImageLoading](image-loading.md)
+- [Image](../components/media/image.md)
+- [DrawableDescriptor](drawable-descriptor.md)

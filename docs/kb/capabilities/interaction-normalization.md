@@ -99,6 +99,6 @@
 
 ## 相关主题
 
-- [滚动公共能力：[docs/kb/capabilities/scroll-common-capability.md](scroll-common-capability.md)。滚动容器的摩擦、惯性、回弹和嵌套滚动不属于本主题。](scroll-common-capability.md)
-- [预览器平台适配：[docs/kb/architecture/preview-platform-adaptation.md](../architecture/preview-platform-adaptation.md)。用于定位 Previewer 与 OHOS 输入接入差异。](../architecture/preview-platform-adaptation.md)
+- [滚动公共能力。滚动容器的摩擦、惯性、回弹和嵌套滚动不属于本主题。](scroll-common-capability.md)
+- [预览器平台适配。用于定位 Previewer 与 OHOS 输入接入差异。](../architecture/preview-platform-adaptation.md)
 - 历史手势知识库：`docs/common/interaction/Gesture_Knowledge_Base_CN.md`。仅作为旧入口线索，行为事实仍以当前实现和 Spec 为准。

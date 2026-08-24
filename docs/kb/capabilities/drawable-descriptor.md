@@ -107,8 +107,8 @@ DrawableDescriptor 功能域：`specs/04-common-capability/01-image-loading/03-d
 
 ## 相关主题
 
-- `Image`：[docs/kb/components/media/image.md](../components/media/image.md)
-- `ImageAnimator`：[docs/kb/components/media/image-animator.md](../components/media/image-animator.md)
-- `ImageLoading`：[docs/kb/capabilities/image-loading.md](image-loading.md)
-- `SVG`：[docs/kb/capabilities/svg.md](svg.md)
+- [Image](../components/media/image.md)
+- [ImageAnimator](../components/media/image-animator.md)
+- [ImageLoading](image-loading.md)
+- [SVG](svg.md)
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

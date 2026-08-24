@@ -119,8 +119,8 @@ UIExtensionComponent 功能域：`specs/05-ui-components/12-embedded-display-com
 
 ## 相关主题
 
-- [EmbeddedComponent：[docs/kb/components/container/embedded-component.md](embedded-component.md)](embedded-component.md)
-- [IsolatedComponent：[docs/kb/components/container/isolated-component.md](isolated-component.md)](isolated-component.md)
-- [SecurityUIExtensionComponent：[docs/kb/components/container/security-ui-extension-component.md](security-ui-extension-component.md)](security-ui-extension-component.md)
-- [PluginComponent：[docs/kb/components/container/plugin-component.md](plugin-component.md)](plugin-component.md)
-- [DynamicComponent：[docs/kb/components/container/dynamic-component.md](dynamic-component.md)](dynamic-component.md)
+- [EmbeddedComponent](embedded-component.md)
+- [IsolatedComponent](isolated-component.md)
+- [SecurityUIExtensionComponent](security-ui-extension-component.md)
+- [PluginComponent](plugin-component.md)
+- [DynamicComponent](dynamic-component.md)

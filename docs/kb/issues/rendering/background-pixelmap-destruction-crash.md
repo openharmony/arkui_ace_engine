@@ -112,6 +112,6 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 
 ## 相关主题
 
-- [docs/kb/capabilities/component-screenshot.md](../../capabilities/component-screenshot.md)：组件截图代码型 KB（FuncID 04-10-01，含 ComponentSnapshot）
-- [docs/kb/capabilities/background-image.md](../../capabilities/background-image.md)：背景图片通用属性代码型 KB（FuncID 04-03-10，含 background pixelmap/render context）
-- [docs/kb/architecture/render-tree-sync.md](../../architecture/render-tree-sync.md)：渲染树同步架构 KB（FrameNode 生命周期与上下树）
+- [component-screenshot](../../capabilities/component-screenshot.md)：组件截图代码型 KB（FuncID 04-10-01，含 ComponentSnapshot）
+- [background-image](../../capabilities/background-image.md)：背景图片通用属性代码型 KB（FuncID 04-03-10，含 background pixelmap/render context）
+- [render-tree-sync](../../architecture/render-tree-sync.md)：渲染树同步架构 KB（FrameNode 生命周期与上下树）

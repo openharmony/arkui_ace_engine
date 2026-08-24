@@ -74,6 +74,6 @@
 ## 相关主题
 
 - [通用拖拽能力](../capabilities/drag-capability.md)
-- [docs/kb/architecture/window-mechanism.md](window-mechanism.md)
-- [docs/kb/capabilities/ui-context.md](../capabilities/ui-context.md)
-- [docs/kb/components/basic/text.md](../components/basic/text.md)（仅在排查文本专用拖拽时）
+- [window-mechanism](window-mechanism.md)
+- [ui-context](../capabilities/ui-context.md)
+- [text](../components/basic/text.md)（仅在排查文本专用拖拽时）

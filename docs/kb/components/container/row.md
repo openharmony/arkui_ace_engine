@@ -107,9 +107,9 @@ Row 功能域：`specs/05-ui-components/01-layout-components/09-row/`（功能 I
 
 ## 相关主题
 
-- RowSplit 横向分割布局：[docs/kb/components/container/row-split.md](row-split.md)
-- Column 纵向线性布局：[docs/kb/components/container/column.md](column.md)
-- Flex 弹性布局与 Wrap：[docs/kb/components/container/flex.md](flex.md)
-- 基础布局属性：[docs/kb/capabilities/layout-attributes.md](../../capabilities/layout-attributes.md)
-- [布局框架：[docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)](../../architecture/layout-framework.md)
-- 安全区机制：[docs/kb/capabilities/safe-area.md](../../capabilities/safe-area.md)
+- [RowSplit 横向分割布局](row-split.md)
+- [Column 纵向线性布局](column.md)
+- [Flex 弹性布局与 Wrap](flex.md)
+- [基础布局属性](../../capabilities/layout-attributes.md)
+- [布局框架](../../architecture/layout-framework.md)
+- [安全区机制](../../capabilities/safe-area.md)

@@ -97,7 +97,7 @@
 
 ## 相关主题
 
-- [docs/kb/capabilities/scroll-common-capability.md](../../capabilities/scroll-common-capability.md) — 滚动公共能力 KB（ScrollablePattern/嵌套滚动源码路由，Spec 05-03-01）
-- [docs/kb/components/container/scroll.md](../../components/container/scroll.md) — Scroll 组件 KB（含嵌套滚动基类）
-- [docs/kb/components/container/refresh.md](../../components/container/refresh.md) — Refresh 组件 KB（下拉刷新状态机）
-- [docs/kb/issues/interaction/nested-scroll-offset-no-response.md](nested-scroll-offset-no-response.md) — 嵌套滚动偏移量不响应问题 KB（同类嵌套滚动协调主题）
+- [scroll-common-capability](../../capabilities/scroll-common-capability.md) — 滚动公共能力 KB（ScrollablePattern/嵌套滚动源码路由，Spec 05-03-01）
+- [scroll](../../components/container/scroll.md) — Scroll 组件 KB（含嵌套滚动基类）
+- [refresh](../../components/container/refresh.md) — Refresh 组件 KB（下拉刷新状态机）
+- [nested-scroll-offset-no-response](nested-scroll-offset-no-response.md) — 嵌套滚动偏移量不响应问题 KB（同类嵌套滚动协调主题）

@@ -105,7 +105,7 @@ TextPicker 已完成组件化改造，声明式组件和动态属性统一进入
 
 ## 相关主题
 
-- `TextPickerDialog`：[docs/kb/components/selector/text-picker-dialog.md](text-picker-dialog.md)
-- `DatePicker`：[docs/kb/components/selector/date-picker.md](date-picker.md)
-- `TimePicker`：[docs/kb/components/selector/time-picker.md](time-picker.md)
-- `UIPickerComponent`：[docs/kb/components/selector/ui-picker-component.md](ui-picker-component.md)
+- [TextPickerDialog](text-picker-dialog.md)
+- [DatePicker](date-picker.md)
+- [TimePicker](time-picker.md)
+- [UIPickerComponent](ui-picker-component.md)

@@ -110,9 +110,9 @@
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- V1/V2 核心：[docs/kb/frontend/state_management/v1-core.md](v1-core.md)、`v2-core.md`
-- V1/V2 装饰器：[docs/kb/frontend/state_management/v1-decorators.md](v1-decorators.md)、`v2-decorators.md`
-- C++ 绑定（`CustomNode`/`ViewFunctions` 生命周期）：[docs/kb/frontend/state_management/cpp-bindings.md](cpp-bindings.md)
-- 基础设施（`UpdateFuncRecord`/`UINodeRegisterProxy`/生命周期 FSM）：[docs/kb/frontend/state_management/infrastructure.md](infrastructure.md)
-- [静态自定义组件状态相关（arkoala 侧）：[docs/kb/frontend/state_management/static-custom-component.md](static-custom-component.md)](static-custom-component.md)
+- [总览](../state-management.md)
+- [V1/V2 核心](v1-core.md)、`v2-core.md`
+- [V1/V2 装饰器](v1-decorators.md)、`v2-decorators.md`
+- C++ 绑定（`CustomNode`/`ViewFunctions` 生命周期）：[cpp-bindings](cpp-bindings.md)
+- 基础设施（`UpdateFuncRecord`/`UINodeRegisterProxy`/生命周期 FSM）：[infrastructure](infrastructure.md)
+- [静态自定义组件状态相关（arkoala 侧）](static-custom-component.md)

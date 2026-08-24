@@ -108,8 +108,8 @@ RowSplit 已在功能 registry 登记为功能 ID `05-01-10`，目标功能域�
 
 ## 相关主题
 
-- [ColumnSplit：[docs/kb/components/container/column-split.md](column-split.md)](column-split.md)
-- [Row：[docs/kb/components/container/row.md](row.md)](row.md)
-- [Divider：[docs/kb/components/basic/divider.md](../basic/divider.md)](../basic/divider.md)
-- [Layout Framework：[docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)](../../architecture/layout-framework.md)
-- [Layout Attributes：[docs/kb/capabilities/layout-attributes.md](../../capabilities/layout-attributes.md)](../../capabilities/layout-attributes.md)
+- [ColumnSplit](column-split.md)
+- [Row](row.md)
+- [Divider](../basic/divider.md)
+- [Layout Framework](../../architecture/layout-framework.md)
+- [Layout Attributes](../../capabilities/layout-attributes.md)

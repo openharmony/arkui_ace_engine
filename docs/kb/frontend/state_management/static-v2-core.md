@@ -73,8 +73,8 @@
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- 静态 V2 装饰器具体语义：[docs/kb/frontend/state_management/static-v2-decorators.md](static-v2-decorators.md)
-- 静态 V2 数据对象（`@ObservedV2`/`@Trace` UIPlugin 转换）：[docs/kb/frontend/state_management/static-v2-decorators.md](static-v2-decorators.md)（数据对象段）
-- 动态侧 V2 核心（对照参考）：[docs/kb/frontend/state_management/v2-core.md](v2-core.md)
-- 静态 V1 核心：[docs/kb/frontend/state_management/static-v1-core.md](static-v1-core.md)
+- [总览](../state-management.md)
+- [静态 V2 装饰器具体语义](static-v2-decorators.md)
+- 静态 V2 数据对象（`@ObservedV2`/`@Trace` UIPlugin 转换）：[static-v2-decorators](static-v2-decorators.md)（数据对象段）
+- [动态侧 V2 核心（对照参考）](v2-core.md)
+- [静态 V1 核心](static-v1-core.md)

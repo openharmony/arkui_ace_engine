@@ -101,7 +101,7 @@ Blank 功能域：`specs/05-ui-components/01-layout-components/01-blank/`（功�
 
 ## 相关主题
 
-- [Divider：[docs/kb/components/basic/divider.md](divider.md)](divider.md)
-- [Layout Framework：[docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md)](../../architecture/layout-framework.md)
-- 基础布局属性：[docs/kb/capabilities/layout-attributes.md](../../capabilities/layout-attributes.md)
-- 线性布局组件：[docs/kb/components/container/flex.md](../container/flex.md)
+- [Divider](divider.md)
+- [Layout Framework](../../architecture/layout-framework.md)
+- [基础布局属性](../../capabilities/layout-attributes.md)
+- [线性布局组件](../container/flex.md)

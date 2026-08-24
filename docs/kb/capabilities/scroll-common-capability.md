@@ -101,7 +101,7 @@
 
 ## 相关主题
 
-- WaterFlow/FlowItem：[docs/kb/components/container/waterflow.md](../components/container/waterflow.md)。
+- [WaterFlow/FlowItem](../components/container/waterflow.md)。
 - Scroll 组件实现：`frameworks/core/components_ng/pattern/scroll/`。
 - List 组件实现：`frameworks/core/components_ng/pattern/list/`。
 - Grid 组件实现：`frameworks/core/components_ng/pattern/grid/`。

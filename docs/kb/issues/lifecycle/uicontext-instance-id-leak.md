@@ -129,5 +129,5 @@ function withInstanceId(instanceId, callback) {
 
 ## 相关主题
 
-- [docs/kb/capabilities/ui-context.md](../../capabilities/ui-context.md)：UIContext 代码型 KB
-- [docs/kb/architecture/multi-instance-management.md](../../architecture/multi-instance-management.md)：多实例管理架构 KB
+- [ui-context](../../capabilities/ui-context.md)：UIContext 代码型 KB
+- [multi-instance-management](../../architecture/multi-instance-management.md)：多实例管理架构 KB

@@ -133,9 +133,9 @@
 
 ## 相关主题
 
-- [docs/kb/architecture/multi-instance-management.md](../../architecture/multi-instance-management.md)
-- [docs/kb/frontend/state_management/cpp-bindings.md](../../frontend/state_management/cpp-bindings.md)
-- [docs/kb/capabilities/frame-node.md](../../capabilities/frame-node.md)
+- [multi-instance-management](../../architecture/multi-instance-management.md)
+- [cpp-bindings](../../frontend/state_management/cpp-bindings.md)
+- [frame-node](../../capabilities/frame-node.md)
 - `frameworks/core/pipeline/base/element_register.cpp`
 - `frameworks/core/common/frontend.h`
 - `frameworks/core/pipeline_ng/pipeline_context.cpp`

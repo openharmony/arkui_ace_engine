@@ -114,6 +114,6 @@ NDK 侧独立功能域：`specs/08-ndk/02-xcomponent-c-api/01-native-xcomponent/
 
 ## 相关主题
 
-- [Image：[docs/kb/components/media/image.md](../media/image.md)](../media/image.md)
-- [ImageAnimator：[docs/kb/components/media/image-animator.md](../media/image-animator.md)](../media/image-animator.md)
+- [Image](../media/image.md)
+- [ImageAnimator](../media/image-animator.md)
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

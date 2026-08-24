@@ -97,10 +97,10 @@ V1 装饰器的 SDK 声明位于 `interface/sdk-js` 仓（不在本仓），按�
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- V1 装饰器具体语义：[docs/kb/frontend/state_management/v1-decorators.md](v1-decorators.md)
-- C++ 后端集成（`stateMgmt.abc` 载入、`JSStateMgmtProfiler`、`PipelineContext`）：[docs/kb/frontend/state_management/cpp-bindings.md](cpp-bindings.md)
-- 基础设施（`SubscriberManager`、`UINodeRegisterProxy`）：[docs/kb/frontend/state_management/infrastructure.md](infrastructure.md)
-- V2 对应核心：[docs/kb/frontend/state_management/v2-core.md](v2-core.md)
-- [自定义组件机制（`ViewPU` 创建/复用/冻结/生命周期）：[docs/kb/frontend/state_management/custom-component.md](custom-component.md)](custom-component.md)
-- 静态 V1 核心（arkoala 侧）：[docs/kb/frontend/state_management/static-v1-core.md](static-v1-core.md)
+- [总览](../state-management.md)
+- [V1 装饰器具体语义](v1-decorators.md)
+- C++ 后端集成（`stateMgmt.abc` 载入、`JSStateMgmtProfiler`、`PipelineContext`）：[cpp-bindings](cpp-bindings.md)
+- 基础设施（`SubscriberManager`、`UINodeRegisterProxy`）：[infrastructure](infrastructure.md)
+- [V2 对应核心](v2-core.md)
+- [自定义组件机制（`ViewPU` 创建/复用/冻结/生命周期）：custom-component](custom-component.md)
+- [静态 V1 核心（arkoala 侧）](static-v1-core.md)

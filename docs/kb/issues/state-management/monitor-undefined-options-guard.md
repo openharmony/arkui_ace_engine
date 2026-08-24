@@ -93,6 +93,6 @@
 
 ## 相关主题
 
-- [docs/kb/frontend/state_management/v2-decorators.md](../../frontend/state_management/v2-decorators.md)：V2 装饰器总览，`@Monitor` 行映射表与源码入口
-- [docs/kb/frontend/state_management/v2-core.md](../../frontend/state_management/v2-core.md)：V2 核心逻辑，`ObserveV2` 单例与依赖图
+- [v2-decorators](../../frontend/state_management/v2-decorators.md)：V2 装饰器总览，`@Monitor` 行映射表与源码入口
+- [v2-core](../../frontend/state_management/v2-core.md)：V2 核心逻辑，`ObserveV2` 单例与依赖图
 - 功能域 `07-02-04`（状态管理 V2 组件内状态管理）

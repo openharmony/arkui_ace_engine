@@ -117,9 +117,9 @@ Ability Context 是 UIContext 的子能力域，为 ArkTS 和 C API 提宿主 Ab
 
 ## 相关主题
 
-- UIContext 入口架构：[docs/kb/capabilities/ui-context.md](ui-context.md)
-- Frame 帧回调：[docs/kb/capabilities/frame-callback.md](frame-callback.md)
-- [路由管理：[docs/kb/api/router.md](../api/router.md)](../api/router.md)
-- [窗口机制：[docs/kb/architecture/window-mechanism.md](../architecture/window-mechanism.md)](../architecture/window-mechanism.md)
-- [UIObserver：[docs/kb/capabilities/ui-observer.md](ui-observer.md)](ui-observer.md)
+- [UIContext 入口架构](ui-context.md)
+- [Frame 帧回调](frame-callback.md)
+- [路由管理](../api/router.md)
+- [窗口机制](../architecture/window-mechanism.md)
+- [UIObserver](ui-observer.md)
 - [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — JS 前端历史配对问题（已修复）与 AbilityContext 实例路由排查

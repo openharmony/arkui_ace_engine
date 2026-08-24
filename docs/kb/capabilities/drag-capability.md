@@ -73,5 +73,5 @@
 ## 相关主题
 
 - [拖拽框架](../architecture/drag-framework.md)
-- [docs/kb/capabilities/ui-context.md](ui-context.md)
-- [docs/kb/architecture/window-mechanism.md](../architecture/window-mechanism.md)
+- [ui-context](ui-context.md)
+- [window-mechanism](../architecture/window-mechanism.md)

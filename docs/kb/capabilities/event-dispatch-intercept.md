@@ -78,7 +78,7 @@ Event Dispatch and Intercept 是 ArkUI 通用输入事件从命中测试、事�
 
 ## 相关主题
 
-- [事件基础框架：[docs/kb/architecture/event-base-framework.md](../architecture/event-base-framework.md)](../architecture/event-base-framework.md)
-- [触摸事件：[docs/kb/capabilities/touch-events.md](touch-events.md)](touch-events.md)
-- [鼠标事件：[docs/kb/capabilities/mouse-events.md](mouse-events.md)](mouse-events.md)
-- [手势能力：[docs/kb/capabilities/gesture-capability.md](gesture-capability.md)](gesture-capability.md)
+- [事件基础框架](../architecture/event-base-framework.md)
+- [触摸事件](touch-events.md)
+- [鼠标事件](mouse-events.md)
+- [手势能力](gesture-capability.md)

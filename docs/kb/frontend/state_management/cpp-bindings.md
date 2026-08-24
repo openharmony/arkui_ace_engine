@@ -99,9 +99,9 @@ C++ 绑定层为引擎内部接口，不对外暴露 SDK 声明。状态管理�
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- 基础设施（TS 侧 `UINodeRegisterProxy`/`stateMgmtProfiler`）：[docs/kb/frontend/state_management/infrastructure.md](infrastructure.md)
-- [自定义组件机制（`CustomNode` 生命周期/复用）：[docs/kb/frontend/state_management/custom-component.md](custom-component.md)](custom-component.md)
-- V1/V2 核心：[docs/kb/frontend/state_management/v1-core.md](v1-core.md)、`v2-core.md`
-- 存储体系（`JSLocalStorage`/`JSPersistent`/`JSEnvironment`）：[docs/kb/frontend/state_management/storage.md](storage.md)
-- Interop 桥接（动态/静态前端互操作）：[docs/kb/frontend/state_management/interop-bridge.md](interop-bridge.md)
+- [总览](../state-management.md)
+- 基础设施（TS 侧 `UINodeRegisterProxy`/`stateMgmtProfiler`）：[infrastructure](infrastructure.md)
+- [自定义组件机制（`CustomNode` 生命周期/复用）：custom-component](custom-component.md)
+- [V1/V2 核心](v1-core.md)、`v2-core.md`
+- 存储体系（`JSLocalStorage`/`JSPersistent`/`JSEnvironment`）：[storage](storage.md)
+- [Interop 桥接（动态/静态前端互操作）](interop-bridge.md)

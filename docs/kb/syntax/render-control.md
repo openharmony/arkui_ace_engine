@@ -76,6 +76,6 @@ API 检索建议：在 SDK 中搜索 `ForEach`、`ForEachAttribute`、`If`、`If
 
 ## 相关主题
 
-- [LazyForEach：[docs/kb/syntax/lazy-for-each.md](lazy-for-each.md)](lazy-for-each.md)
-- [Repeat：[docs/kb/syntax/repeat.md](repeat.md)](repeat.md)
-- [组件复用框架（`ForEachBaseNode::DisableRecycle`）：[docs/kb/architecture/component-reuse-framework.md](../architecture/component-reuse-framework.md)](../architecture/component-reuse-framework.md)
+- [LazyForEach](lazy-for-each.md)
+- [Repeat](repeat.md)
+- [组件复用框架（`ForEachBaseNode::DisableRecycle`）：component-reuse-framework](../architecture/component-reuse-framework.md)

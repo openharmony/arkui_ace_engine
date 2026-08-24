@@ -91,10 +91,10 @@ Interop 是引擎内部桥接层，不对外暴露 SDK 声明。其上层消费�
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- V1/V2 核心（Interop 消费 `needsInterop` 分支）：[docs/kb/frontend/state_management/v1-core.md](v1-core.md)、`v2-core.md`
-- 存储体系（`InteropStorage`/`InteropStorageV2` 桥接对象）：[docs/kb/frontend/state_management/storage.md](storage.md)
-- [自定义组件机制（`BuilderViewV2`/Builder 桥）：[docs/kb/frontend/state_management/custom-component.md](custom-component.md)](custom-component.md)
-- C++ 绑定（`OpenStateMgmtInterop` 入口）：[docs/kb/frontend/state_management/cpp-bindings.md](cpp-bindings.md)
+- [总览](../state-management.md)
+- V1/V2 核心（Interop 消费 `needsInterop` 分支）：[v1-core](v1-core.md)、`v2-core.md`
+- 存储体系（`InteropStorage`/`InteropStorageV2` 桥接对象）：[storage](storage.md)
+- [自定义组件机制（`BuilderViewV2`/Builder 桥）：custom-component](custom-component.md)
+- C++ 绑定（`OpenStateMgmtInterop` 入口）：[cpp-bindings](cpp-bindings.md)
 - 静态前端总体架构：`frameworks/bridge/arkts_frontend/`（`AGENTS.md` 的「Frontend Support」）
-- 静态 Interop 桥（arkoala 侧另一半）：[docs/kb/frontend/state_management/static-interop-bridge.md](static-interop-bridge.md)
+- [静态 Interop 桥（arkoala 侧另一半）](static-interop-bridge.md)

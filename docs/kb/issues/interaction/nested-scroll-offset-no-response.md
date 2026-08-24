@@ -140,6 +140,6 @@ while (itemPosition_.size() > 1 && !targetIndex_) {
 
 ## 相关主题
 
-- [docs/kb/components/container/list.md](../../components/container/list.md) — List 组件 KB（源码/SDK/Spec 路由）
-- [docs/kb/components/container/scroll.md](../../components/container/scroll.md) — Scroll 组件 KB（含嵌套滚动基类 ScrollablePattern 路由）
-- [docs/kb/architecture/layout-framework.md](../../architecture/layout-framework.md) — 布局框架 KB（`NeedAdditionalLayout`、`FlushTask` 布局回溯调度）
+- [list](../../components/container/list.md) — List 组件 KB（源码/SDK/Spec 路由）
+- [scroll](../../components/container/scroll.md) — Scroll 组件 KB（含嵌套滚动基类 ScrollablePattern 路由）
+- [layout-framework](../../architecture/layout-framework.md) — 布局框架 KB（`NeedAdditionalLayout`、`FlushTask` 布局回溯调度）

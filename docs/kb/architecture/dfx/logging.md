@@ -78,6 +78,6 @@ DFX Logging 是引擎内部能力，没有独立 SDK API。应用侧通过 `cons
 
 ## 相关主题
 
-- Trace 打点：[docs/kb/architecture/dfx/trace.md](trace.md)
-- Dump 机制：[docs/kb/architecture/dfx/dump-mechanism.md](dump-mechanism.md)
-- 内存管理：[docs/kb/architecture/dfx/memory-management.md](memory-management.md)
+- [Trace 打点](trace.md)
+- [Dump 机制](dump-mechanism.md)
+- [内存管理](memory-management.md)

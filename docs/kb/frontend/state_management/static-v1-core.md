@@ -78,9 +78,9 @@
 
 ## 相关主题
 
-- 总览：[docs/kb/frontend/state-management.md](../state-management.md)
-- 静态 V1 装饰器具体语义：[docs/kb/frontend/state_management/static-v1-decorators.md](static-v1-decorators.md)
-- 动态侧 V1 核心（对照参考）：[docs/kb/frontend/state_management/v1-core.md](v1-core.md)
-- 静态 V2 核心：[docs/kb/frontend/state_management/static-v2-core.md](static-v2-core.md)
-- 跨前端互操作：[docs/kb/frontend/state_management/static-interop-bridge.md](static-interop-bridge.md)
-- [静态存储体系：[docs/kb/frontend/state_management/static-storage.md](static-storage.md)](static-storage.md)
+- [总览](../state-management.md)
+- [静态 V1 装饰器具体语义](static-v1-decorators.md)
+- [动态侧 V1 核心（对照参考）](v1-core.md)
+- [静态 V2 核心](static-v2-core.md)
+- [跨前端互操作](static-interop-bridge.md)
+- [静态存储体系](static-storage.md)

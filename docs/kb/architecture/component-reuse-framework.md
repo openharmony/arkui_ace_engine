@@ -77,7 +77,7 @@ API 检索建议：在 SDK 中搜索 `ReusePoolOwnership`、`IReusePool`、`preR
 
 ## 相关主题
 
-- [NodeContainer（复用覆写不调基类）：[docs/kb/components/custom-node/node-container.md](../components/custom-node/node-container.md)](../components/custom-node/node-container.md)
-- [LazyForEach：[docs/kb/syntax/lazy-for-each.md](../syntax/lazy-for-each.md)](../syntax/lazy-for-each.md)
-- [Repeat：[docs/kb/syntax/repeat.md](../syntax/repeat.md)](../syntax/repeat.md)
-- 渲染控制语法共享框架：[docs/kb/syntax/render-control.md](../syntax/render-control.md)
+- [NodeContainer（复用覆写不调基类）](../components/custom-node/node-container.md)
+- [LazyForEach](../syntax/lazy-for-each.md)
+- [Repeat](../syntax/repeat.md)
+- [渲染控制语法共享框架](../syntax/render-control.md)

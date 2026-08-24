@@ -80,6 +80,6 @@ DFX Memory Management 是引擎内部能力，没有独立 SDK API。AceType/Ref
 
 ## 相关主题
 
-- 日志：[docs/kb/architecture/dfx/logging.md](logging.md)
-- Trace 打点：[docs/kb/architecture/dfx/trace.md](trace.md)
-- Dump 机制：[docs/kb/architecture/dfx/dump-mechanism.md](dump-mechanism.md)
+- [日志](logging.md)
+- [Trace 打点](trace.md)
+- [Dump 机制](dump-mechanism.md)
