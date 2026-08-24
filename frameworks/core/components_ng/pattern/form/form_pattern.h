@@ -238,6 +238,7 @@ private:
     void EnableDrag();
     void UpdateConfiguration();
     void HandleFormComponent(RequestFormInfo& info);
+    bool IsCardIdentityChanged(const RequestFormInfo& info) const;
     void SetParamForWantTask(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
     void AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline);

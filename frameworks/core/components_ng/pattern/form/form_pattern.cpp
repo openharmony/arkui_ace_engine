@@ -842,7 +842,9 @@ void FormPattern::OnModifyDone()
     }
     info.colorMode = formColorMode_;
     GetWantParam(info);
-    HandleFormComponent(info);
+    if (IsCardIdentityChanged(info)) {
+        AddFormComponent(info);
+    }
 
     SetFormAccessibilityAction();
 }
@@ -884,12 +886,17 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return true;
 }
 
+bool FormPattern::IsCardIdentityChanged(const RequestFormInfo& info) const
+{
+    return info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
+        info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
+        info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode;
+}
+
 void FormPattern::HandleFormComponent(RequestFormInfo& info)
 {
     ACE_FUNCTION_TRACE();
-    if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
-        info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
-        info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
+    if (IsCardIdentityChanged(info)) {
         AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
