@@ -110,7 +110,7 @@ private:
     bool isTpFlushFrameDisplayPeriod_ = false;
     bool isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     bool vsyncFlushed_ = false;
-    bool rvsSignalEnable_ = true;
+    bool rvsSignalEnable_ = false;
 
     // touch down report with clickable frameNode info
     bool touchDownNotifiedToClick_ = false;
