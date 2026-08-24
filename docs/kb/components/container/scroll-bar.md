@@ -95,5 +95,8 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/03-scroll
 
 ## 相关主题
 
-- [Scroll/List/Grid/WaterFlow：可滚动宿主，内建滚动条经 `ScrollableCommonMethod`，独立 ScrollBar 经 `ScrollBarProxy` 与之配对，详见各自 KB](scroll.md)
+- [Scroll](scroll.md)
+- [List](list.md)
+- [Grid](grid.md)
+- [WaterFlow](waterflow.md)
 - [Scroll：Scroller 类型共享，详见 Scroll KB](scroll.md)

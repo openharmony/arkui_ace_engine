@@ -124,4 +124,4 @@ WaterFlow/FlowItem 已完成组件化改造：动态模块映射包含 `WaterFlo
 ## 相关主题
 
 - [滚动公共能力。](../../capabilities/scroll-common-capability.md)
-- LazyWaterFlowLayout：见对应 KB
+- LazyWaterFlowLayout（KB 待构建）

@@ -91,7 +91,7 @@ Spec 功能域：`specs/05-ui-components/02-navigation-components/02-nav-router/
 ## 相关主题
 
 - Navigation 容器组件 — [navigation](navigation.md)
-- NavPathStack：见对应 KB
-- NavRouter（已废弃）：见对应 KB
+- NavPathStack（KB 待构建）
+- NavRouter（已废弃）（KB 待构建）
 - 页面生命周期 — NavPathStack 与 NavDestination 生命周期联动
 - [转场动画 — Navigation 路由转场与 NavDestination 自定义动画](../../capabilities/transition-animation.md)

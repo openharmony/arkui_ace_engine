@@ -98,5 +98,8 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/06-refres
 
 ## 相关主题
 
-- [Scroll/List/Grid/WaterFlow：Refresh 包裹的可滚动子节点，复用 `NestableScrollContainer`，详见各自 KB](scroll.md)
+- [Scroll](scroll.md)
+- [List](list.md)
+- [Grid](grid.md)
+- [WaterFlow](waterflow.md)
 - [LoadingProgress：Refresh 默认指示器委托 LoadingProgress 绘制](../data_display/loading-progress.md)

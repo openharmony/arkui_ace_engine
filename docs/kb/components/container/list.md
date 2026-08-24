@@ -114,3 +114,4 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/05-list-l
 - [Scroll：List 继承 `SelectableContainerPattern`（含滚动基础设施），复用 `ScrollablePattern`，详见 Scroll KB](scroll.md)
 - [ScrollBar：列表内建滚动条经 `ScrollBarProxy`，详见 ScrollBar KB](scroll-bar.md)
 - [LazyForEach/Repeat：列表常配懒加载渲染控制，详见前端 KB](../../syntax/lazy-for-each.md)
+- [LazyForEach/Repeat：列表常配懒加载渲染控制，详见前端 KB](../../syntax/lazy-for-each.md)

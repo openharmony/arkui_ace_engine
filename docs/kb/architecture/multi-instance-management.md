@@ -190,4 +190,4 @@
 - [UIContext 接口](../capabilities/ui-context.md)
 - [窗口机制](window-mechanism.md)
 - [[UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — 动态前端历史配对问题（已修复）与多路径实例栈排查
-- UISession](uisession-service.md)（跨进程 UI 会话通道）
+- [UISession](uisession-service.md)（跨进程 UI 会话通道）

@@ -108,5 +108,8 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/07-scroll
 ## 相关主题
 
 - [ScrollBar：独立滚动条经 `Scroller`/`ScrollBarProxy` 与 Scroll 配对，详见 ScrollBar KB](scroll-bar.md)
-- [List/Grid/WaterFlow：均继承 `ScrollablePattern`，复用同一滚动/嵌套基础设施](list.md)
-- [Tabs/Swiper：可滚动容器族，见各自 KB](tabs.md)
+- [List](list.md)
+- [Grid](grid.md)
+- [WaterFlow](waterflow.md)
+- [Tabs](tabs.md)
+- [Swiper](swiper.md)
