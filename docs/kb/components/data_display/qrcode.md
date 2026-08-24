@@ -79,4 +79,3 @@ QRCode 组件已组件化（`is_component_model = true`），具备完整的多�
 
 - LayoutFramework（布局框架）
 - ThemeManager（主题管理器）
-- ArkUI_API_Paradigm（API 范式，动态/静态管线选择）

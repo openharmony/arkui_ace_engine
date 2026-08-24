@@ -125,5 +125,5 @@ Grid 功能域：`specs/05-ui-components/03-scroll-container-components/04-grid-
 - [GridItem](grid-item.md)
 - [GridRow](grid-row.md)
 - [GridCol](grid-col.md)
-- ScrollablePattern（KB 待构建）
+- [ScrollablePattern](../../capabilities/scroll-common-capability.md)
 - [布局属性](../../capabilities/layout-attributes.md)

@@ -129,6 +129,3 @@ Design 文档：`specs/05-ui-components/02-navigation-components/01-navigation/d
 ## 相关主题
 
 - [NavDestination](navdestination.md)
-- NavRouter（已废弃）（KB 待构建）
-- NavigationStack（KB 待构建）
-- Stage/Page（KB 待构建）

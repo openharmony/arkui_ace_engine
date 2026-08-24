@@ -171,4 +171,3 @@ Video 功能域：`specs/05-ui-components/13-platform-components/02-video/`
 ## 相关主题
 
 - [图片组件（Poster 关联）](image.md)
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

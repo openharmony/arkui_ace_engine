@@ -120,4 +120,3 @@ ImageAnimator 功能域：`specs/05-ui-components/08-image-components/02-image-a
 - [Image](image.md)
 - [DrawableDescriptor](../../capabilities/drawable-descriptor.md)
 - [图片加载机制（通用能力）](../../capabilities/image-loading.md)
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

@@ -136,4 +136,3 @@ Search 功能域：`specs/05-ui-components/09-text-components/03-search/`
 - [Marquee](marquee.md)
 - [TextInput](text-input.md)（未迁移）
 - [RichEditor](rich-editor.md)（未迁移）
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

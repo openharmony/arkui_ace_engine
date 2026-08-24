@@ -124,4 +124,3 @@ Marquee 功能域：`specs/05-ui-components/09-text-components/01-marquee/`
 ## 相关主题
 
 - [Text](text.md)（Marquee 的文本渲染、字体默认值、跑马灯溢出模式均依赖 Text 组件）
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

@@ -111,4 +111,3 @@ DrawableDescriptor 功能域：`specs/04-common-capability/01-image-loading/03-d
 - [ImageAnimator](../components/media/image-animator.md)
 - [ImageLoading](image-loading.md)
 - [SVG](svg.md)
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

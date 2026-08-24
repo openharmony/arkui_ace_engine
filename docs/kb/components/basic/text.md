@@ -132,4 +132,3 @@ Text 功能域：`specs/05-ui-components/09-text-components/04-text/`
 - [RichEditor](rich-editor.md)
 - [TextInput](text-input.md)
 - [TextArea](text-area.md)
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`
