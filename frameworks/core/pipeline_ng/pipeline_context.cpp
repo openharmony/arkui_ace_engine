@@ -99,6 +99,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
@@ -8437,6 +8438,36 @@ void PipelineContext::FlushAsyncLoadTask()
     for (auto& task : asyncLoadTasks) {
         task();
     }
+    // FEAT-005: drain the scroll-placeholder real-build queue on the UI thread
+    // with the remaining frame budget, so placeholders mounted in the previous
+    // layout are replaced by real items within the current frame.
+    if (scrollPlaceholderManager_) {
+        double refreshRate = GetRefreshRateValue();
+        if (refreshRate <= 0.0) {
+            refreshRate = 60.0;
+        }
+        const int64_t frameBudget = static_cast<int64_t>(1e9 / refreshRate);
+        scrollPlaceholderManager_->OnFrameStart();
+        scrollPlaceholderManager_->FlushRealBuildTasks(GetSysTimestamp() + frameBudget / 2);
+    }
+}
+
+const RefPtr<ScrollPlaceholderManager>& PipelineContext::GetScrollPlaceholderManager()
+{
+    if (!scrollPlaceholderManager_) {
+        scrollPlaceholderManager_ = MakeRefPtr<ScrollPlaceholderManager>(WeakClaim(this));
+    }
+    return scrollPlaceholderManager_;
+}
+
+int64_t PipelineContext::GetFrameRecvTime() const
+{
+    return currRecvTime_;
+}
+
+float PipelineContext::GetRefreshRateValue() const
+{
+    return window_ ? window_->GetRefreshRate() : 0.0f;
 }
 
 void PipelineContext::RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)

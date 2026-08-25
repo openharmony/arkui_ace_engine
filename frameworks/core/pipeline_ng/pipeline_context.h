@@ -105,6 +105,7 @@ class BackPressHandlerManager;
 class DragDropManager;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
+class ScrollPlaceholderManager;
 enum class FocusActiveReason : int32_t;
 
 enum class MockFlushEventType : int32_t {
@@ -1274,6 +1275,14 @@ public:
     void AddAsyncLoadTask(std::function<void()>&& task);
     void FlushAsyncLoadTask() override;
 
+    // FEAT-005 scroll placeholder: per-pipeline coordinator, created on first use.
+    const RefPtr<ScrollPlaceholderManager>& GetScrollPlaceholderManager();
+    // Frame timing inputs for the scroll placeholder predictor. recvTime is the
+    // vsync receive timestamp (ns, GetSysTimestamp domain); -1 when no vsync
+    // arrived yet.
+    int64_t GetFrameRecvTime() const;
+    float GetRefreshRateValue() const;
+
     void RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void FireLpxUpdateCallbacks();
@@ -1612,6 +1621,7 @@ private:
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
     std::list<std::function<void()>> asyncLoadTasks_;
+    RefPtr<ScrollPlaceholderManager> scrollPlaceholderManager_;
 
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
