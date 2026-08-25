@@ -103,18 +103,30 @@ void WaterFlowLayoutInfo::SyncReportRange(float mainSize)
     reportEndIndex_ = reportRange.endIndex;
 }
 
+bool WaterFlowLayoutInfo::IsReportStartIndexCandidate(
+    float itemEnd, float itemSize, float reportStartBound)
+{
+    if (GreatNotEqual(itemEnd, reportStartBound)) {
+        return true;
+    }
+    // An empty LazyForEach branch is laid out as a zero-size dummy FlowItem. Keep its data index when the
+    // dummy lies exactly on the leading report boundary, otherwise onScrollIndex would skip that branch.
+    return NearZero(itemSize) && NearEqual(itemEnd, reportStartBound);
+}
+
 void WaterFlowLayoutInfo::UpdateReportRangeWithItems(
     const ItemMap::mapped_type& crossItems, ReportRangeContext& reportRange) const
 {
-    for (const auto& iter : crossItems) {
-        const float itemStart = iter.second.first + currentOffset_;
-        const float itemEnd = itemStart + iter.second.second;
-        if (GreatNotEqual(itemEnd, reportRange.startBound)) {
+    for (const auto& [itemIndex, itemPosition] : crossItems) {
+        const auto& [mainOffset, mainSize] = itemPosition;
+        const float itemStart = mainOffset + currentOffset_;
+        const float itemEnd = itemStart + mainSize;
+        if (IsReportStartIndexCandidate(itemEnd, mainSize, reportRange.startBound)) {
             reportRange.startIndex = reportRange.startIndex != -1 ?
-                std::min(reportRange.startIndex, iter.first) : iter.first;
+                std::min(reportRange.startIndex, itemIndex) : itemIndex;
         }
         if (LessNotEqual(itemStart, reportRange.endBound)) {
-            reportRange.endIndex = std::max(reportRange.endIndex, iter.first);
+            reportRange.endIndex = std::max(reportRange.endIndex, itemIndex);
         }
     }
 }

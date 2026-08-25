@@ -299,6 +299,35 @@ HWTEST_F(WaterFlowContentClipTest, ContentClipDefault001, TestSize.Level1)
 
 #if !defined(TEST_WATER_FLOW_SW) && !defined(TEST_SEGMENTED_WATER_FLOW)
 /**
+ * @tc.name: ContentClipDefaultZeroHeightHead001
+ * @tc.desc: Default CONTENT_ONLY keeps a zero-height item on the leading boundary in the reported visible range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowContentClipTest, ContentClipDefaultZeroHeightHead001, TestSize.Level1)
+{
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetOnScrollIndex([&startIndex, &endIndex](int32_t start, int32_t end) {
+        startIndex = start;
+        endIndex = end;
+    });
+    // Empty LazyForEach branches reach report-range calculation as zero-size items.
+    CreateItemWithHeight(0.0f);
+    for (int32_t i = 0; i < 6; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateDone();
+
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->reportStartIndex_, 0);
+    EXPECT_EQ(info->reportEndIndex_, 6);
+    EXPECT_EQ(startIndex, info->reportStartIndex_);
+    EXPECT_EQ(endIndex, info->reportEndIndex_);
+}
+
+/**
  * @tc.name: ContentClipDefaultZeroHeightTail001
  * @tc.desc: Default CONTENT_ONLY keeps trailing zero-height items in report range at end.
  * @tc.type: FUNC
