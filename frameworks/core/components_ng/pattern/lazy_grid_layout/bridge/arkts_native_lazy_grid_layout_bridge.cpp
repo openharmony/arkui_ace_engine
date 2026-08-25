@@ -572,7 +572,7 @@ ArkUINativeModuleValue LazyVGridLayoutBridge::SetItemFillPolicy(ArkUIRuntimeCall
     auto* modifier = GetArkUINodeModifiers()->getLazyGridLayoutModifier();
     CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
 
-    if (arg_policy.IsEmpty() || !arg_policy->IsNumber(vm)) {
+    if (arg_policy.IsEmpty() || !arg_policy->IsNumber()) {
         modifier->resetItemFillPolicy(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
