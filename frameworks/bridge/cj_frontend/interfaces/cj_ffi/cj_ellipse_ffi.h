@@ -18,10 +18,12 @@
 
 #include <cstdint>
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkEllipseCreate(double width, int32_t widthUnit, double height, int32_t heightUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkEllipseCreateEx(NativeOptionLength width, NativeOptionLength height);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkEllipseInsCreate(
     double width, int32_t widthUnit, double height, int32_t heightUnit);
 };

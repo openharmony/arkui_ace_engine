@@ -61,6 +61,17 @@ int64_t FfiOHOSAceFrameworkRectInsCreate(double width, int32_t widthUnit, double
     return ret_->GetID();
 }
 
+void FfiOHOSAceFrameworkRectCreateEx(NativeOptionLength width, NativeOptionLength height)
+{
+    GetRectModel()->Create();
+    if (width.hasValue) {
+        FfiOHOSAceFrameworkShapeSetWidth(width.value.value, width.value.unitType);
+    }
+    if (height.hasValue) {
+        FfiOHOSAceFrameworkShapeSetHeight(height.value.value, height.value.unitType);
+    }
+}
+
 void FfiOHOSAceFrameworkRectSetRadiusWidth(double radiusWidth, int32_t radiusWidthUnit)
 {
     Dimension value(radiusWidth, static_cast<DimensionUnit>(radiusWidthUnit));
