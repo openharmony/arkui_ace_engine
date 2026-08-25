@@ -24,6 +24,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
@@ -162,6 +163,13 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     }
     wrapper_->SetActiveChildRange(info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount,
         cacheCount, props_->GetShowCachedItemsValue(false));
+    // FEAT-028: only narrow the cached image decode window, FlowItem cache range stays
+    // unchanged; indexes are child indexes (NodeIdx) like the call above and the walk is
+    // bounded to FlowItem children so the footer is never toggled.
+    int32_t itemTotalCnt = static_cast<int32_t>(info_->itemInfos_.size());
+    ScrollableUtils::UpdateCachedImageDecodeRange(wrapper_->GetHostNode(), info_->NodeIdx(info_->startIndex_),
+        info_->NodeIdx(info_->endIndex_), cacheCount, cacheCount, info_->NodeIdx(0),
+        info_->NodeIdx(std::max(itemTotalCnt - 1, 0)));
 
     UpdateOverlay(wrapper_);
 

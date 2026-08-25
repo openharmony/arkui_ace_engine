@@ -416,6 +416,11 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         }
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
+        // FEAT-028: keep the full item cache range above, only narrow the cached image decode
+        // window of already-built items (AC-1.1/AC-1.4); cacheStart/cacheEnd are in items here,
+        // mapped from cached lines by CalculateCachedCount.
+        ScrollableUtils::UpdateCachedImageDecodeRange(
+            layoutWrapper->GetHostNode(), startIndex, endIndex, cacheStart, cacheEnd);
         info_.times_ = (info_.times_ + 1) % GRID_CHECK_INTERVAL;
         if (info_.times_ == 0 && !info_.CheckGridMatrix(cacheCount)) {
             // TODO: this is a fallback workaround. When CheckGridMatrix detects matrix inconsistency,

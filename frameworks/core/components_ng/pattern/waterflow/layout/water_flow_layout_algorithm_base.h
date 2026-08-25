@@ -89,6 +89,16 @@ protected:
      * need sync load to display cache items on screen.
      */
     void SyncPreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
+
+    /**
+     * @brief FEAT-028: apply the cached image decode window eligibility to one preloaded item
+     *        right after it is created, before its offscreen resource processing starts new
+     *        image decodes (design ADR-6).
+     *
+     * @param host the WaterFlow frame node.
+     * @param itemIdx item index of the preloaded FlowItem.
+     */
+    void UpdatePreloadedItemDecodeActive(const RefPtr<FrameNode>& host, int32_t itemIdx);
     
     bool canOverScrollStart_ = false;
     bool canOverScrollEnd_ = false;

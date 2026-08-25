@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -65,6 +66,22 @@ void GridLayoutUtils::PreloadGridItems(
     PreloadGridItemsHelper(pattern, buildCb);
 }
 
+void GridLayoutUtils::SetPrebuiltItemImageDecodeActive(const RefPtr<FrameNode>& host, int32_t itemIdx)
+{
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    const auto& info = pattern->GetGridLayoutInfo();
+    auto props = AceType::DynamicCast<GridLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    // Approximate the regular layout mapping cachedLines -> cached item counts per side; the
+    // next normal layout re-applies the exact range (idempotent update).
+    int32_t cacheCount = props->GetCachedCountValue(info.defCachedCount_);
+    int32_t cacheItemCount = std::max(cacheCount, 0) * std::max(info.crossCount_, 1);
+    ScrollableUtils::UpdateCachedImageDecodeActiveForItem(
+        host, itemIdx, info.startIndex_, info.endIndex_, cacheItemCount, cacheItemCount);
+}
+
 void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb)
 {
     CHECK_NULL_VOID(pattern);
@@ -94,10 +111,15 @@ void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern,
             }
             if (it->buildOnly) {
                 host->GetOrCreateChildByIndex(it->idx, false, true);
+                // FEAT-028: build-only preload shouldn't start decoding for far-cache items.
+                GridLayoutUtils::SetPrebuiltItemImageDecodeActive(host, it->idx);
                 continue;
             }
             if (buildCb) {
                 needMarkDirty = buildCb(host, it->idx) || needMarkDirty;
+                // FEAT-028: apply image decode eligibility to the prebuilt item before its
+                // offscreen resource processing keeps decoded images (design ADR-6).
+                GridLayoutUtils::SetPrebuiltItemImageDecodeActive(host, it->idx);
             }
         }
         if (needMarkDirty) {

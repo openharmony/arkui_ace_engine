@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
@@ -141,6 +142,11 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     wrapper->SetCacheCount(cacheCount);
     wrapper->SetActiveChildRange(
         nodeIdx(activeStartIndex), nodeIdx(activeEndIndex), cacheCount, cacheCount, showCache);
+    // FEAT-028: only narrow the cached image decode window, FlowItem cache range stays
+    // unchanged; indexes are child indexes (nodeIdx) like the call above and the walk is
+    // bounded to FlowItem children so the footer is never toggled.
+    ScrollableUtils::UpdateCachedImageDecodeRange(wrapper->GetHostNode(), nodeIdx(activeStartIndex),
+        nodeIdx(activeEndIndex), cacheCount, cacheCount, nodeIdx(0), nodeIdx(std::max(itemCnt_ - 1, 0)));
 
     if (info_->itemEnd_) {
         LayoutFooter(paddingOffset, reverse);
@@ -377,6 +383,10 @@ void WaterFlowLayoutSW::MeasureBeforeAnimation(int32_t targetIdx)
     const int32_t cacheCount = props_->GetCachedCountValue(1);
     wrapper_->SetActiveChildRange(nodeIdx(prevRange.first), nodeIdx(prevRange.second), cacheCount, cacheCount,
         props_->GetShowCachedItemsValue(false));
+    // FEAT-028: measure-only path keeps the image decode window consistent with the previous
+    // layout (sliding-window layout cache recovery, TASK-028-02).
+    ScrollableUtils::UpdateCachedImageDecodeRange(wrapper_->GetHostNode(), nodeIdx(prevRange.first),
+        nodeIdx(prevRange.second), cacheCount, cacheCount, nodeIdx(0), nodeIdx(std::max(itemCnt_ - 1, 0)));
 }
 
 void WaterFlowLayoutSW::MeasureToTarget(int32_t targetIdx)

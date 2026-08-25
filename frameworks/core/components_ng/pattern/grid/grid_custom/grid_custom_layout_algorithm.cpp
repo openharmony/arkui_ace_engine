@@ -135,6 +135,9 @@ void GridCustomLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     wrapper_->SetActiveChildRange(
         startIndex, endIndex, cachedItemCnt.first, cachedItemCnt.second, props->GetShowCachedItemsValue(false));
+    // FEAT-028: only narrow the cached image decode window, custom-scrolled item cache stays.
+    ScrollableUtils::UpdateCachedImageDecodeRange(
+        wrapper_->GetHostNode(), startIndex, endIndex, cachedItemCnt.first, cachedItemCnt.second);
     wrapper_->SetCacheCount(cachedItemCnt.first);
     UpdateOverlay(wrapper_);
 }

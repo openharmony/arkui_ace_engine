@@ -45,6 +45,16 @@ public:
      */
     static void PreloadGridItems(
         const RefPtr<GridPattern>& pattern, std::list<GridPreloadItem>&& items, const BuildGridItemCallback& buildCb);
+
+    /**
+     * @brief FEAT-028: apply the cached image decode window eligibility to one prebuilt item
+     *        right after it is created by the preload/predict path, before its offscreen
+     *        resource processing starts new image decodes (design ADR-6).
+     *
+     * @param host the Grid frame node.
+     * @param itemIdx child index of the prebuilt item.
+     */
+    static void SetPrebuiltItemImageDecodeActive(const RefPtr<FrameNode>& host, int32_t itemIdx);
 private:
     // helper to add the GridItem build task to Pipeline
     static void PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb);

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
 #include "base/utils/feature_param.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -341,6 +342,13 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     layoutInfo_->firstIndex_ = firstIndex;
     layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->startIndex_),
         layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount, showCache);
+    // FEAT-028: only narrow the cached image decode window, FlowItem cache range stays
+    // unchanged (AC-1.1/AC-1.4); indexes are child indexes (NodeIdx) like the call above and
+    // the walk is bounded to FlowItem children so the footer is never toggled.
+    int32_t itemTotalCnt = layoutInfo_->ItemCnt(layoutInfo_->GetChildrenCount());
+    ScrollableUtils::UpdateCachedImageDecodeRange(layoutWrapper->GetHostNode(),
+        layoutInfo_->NodeIdx(layoutInfo_->startIndex_), layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount,
+        cachedCount, layoutInfo_->NodeIdx(0), layoutInfo_->NodeIdx(std::max(itemTotalCnt - 1, 0)));
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
     UpdateOverlay(layoutWrapper);

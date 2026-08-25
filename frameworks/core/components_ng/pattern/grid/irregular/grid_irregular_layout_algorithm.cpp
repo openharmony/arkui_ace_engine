@@ -135,6 +135,11 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     wrapper_->SetActiveChildRange(startIndex, endIndex, cachedItemCnt.first,
         cachedItemCnt.second, props->GetShowCachedItemsValue(false));
+    // FEAT-028: only narrow the cached image decode window, item cache range stays unchanged.
+    // cacheStart/cacheEnd are in items (irregular rows already mapped to item counts); a
+    // multi-line item activated by any decode window item keeps eligibility via item indexes.
+    ScrollableUtils::UpdateCachedImageDecodeRange(
+        wrapper_->GetHostNode(), startIndex, endIndex, cachedItemCnt.first, cachedItemCnt.second);
     wrapper_->SetCacheCount(cachedItemCnt.first);
     UpdateOverlay(wrapper_);
 }

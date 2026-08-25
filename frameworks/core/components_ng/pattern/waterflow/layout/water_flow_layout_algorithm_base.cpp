@@ -161,6 +161,8 @@ void WaterFlowLayoutBase::SyncPreloadItems(
     StartCacheLayout();
     for (auto&& item : list) {
         SyncPreloadItem(host, item);
+        // FEAT-028: keep sync-preloaded items consistent with the decode window (ADR-6).
+        UpdatePreloadedItemDecodeActive(host->GetHostNode(), item);
     }
     EndCacheLayout();
 }
@@ -214,12 +216,29 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
             ACE_SCOPED_TRACE("Preload FlowItem %d", *it);
             ScopedLayout scope(host->GetContext());
             needMarkDirty |= algo->PreloadItem(RawPtr(host), *it, deadline);
+            // FEAT-028: apply image decode eligibility to the newly preloaded item so far-cache
+            // items do not keep decoded images (design ADR-6).
+            algo->UpdatePreloadedItemDecodeActive(host, *it);
         }
         if (needMarkDirty) {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
         algo->EndCacheLayout();
     });
+}
+
+void WaterFlowLayoutBase::UpdatePreloadedItemDecodeActive(const RefPtr<FrameNode>& host, int32_t itemIdx)
+{
+    // FEAT-028: decode window for preloaded items uses the same FlowItem cache units as the
+    // normal layout; child indexes (NodeIdx) keep the footer shift consistent.
+    CHECK_NULL_VOID(host);
+    auto info = LayoutInfo();
+    CHECK_NULL_VOID(info);
+    auto props = AceType::DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    int32_t cacheCount = props->GetCachedCountValue(info->defCachedCount_);
+    ScrollableUtils::UpdateCachedImageDecodeActiveForItem(host, info->NodeIdx(itemIdx),
+        info->NodeIdx(info->startIndex_), info->NodeIdx(info->endIndex_), cacheCount, cacheCount);
 }
 
 int32_t WaterFlowLayoutBase::GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx)
