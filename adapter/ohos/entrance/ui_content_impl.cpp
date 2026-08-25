@@ -65,6 +65,7 @@
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/page_scene/page_scene_rule_manager.h"
+#include "core/components_ng/manager/uisession_query/component_tree_query.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
@@ -6297,6 +6298,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     SaveGetCurrentInstanceId();
     RegisterExeAppAIFunction(taskExecutor);
     SaveGetHitTestInfoCallback(taskExecutor);
+    SaveComponentTreeQueryFunction(taskExecutor);
     SetContentChangeDetectCallback(taskExecutor);
     RegisterGetSpecifiedContentOffsetsCallback(taskExecutor);
     RegisterHighlightSpecifiedContentCallback(taskExecutor);
@@ -6522,6 +6524,30 @@ void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& task
             TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
     };
     UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
+}
+
+void UIContentImpl::SaveComponentTreeQueryFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    // FEAT-031: run component tree spatial/context queries on the UI thread,
+    // then deliver the result JSON (structured errorCode included) back to the
+    // requesting SA process through the UISession report channel.
+    auto componentTreeQueryCallback = [weakTaskExecutor = taskExecutor](
+        const ComponentTreeQueryRequest& request) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [request]() {
+                std::string resultJson;
+                NG::ComponentTreeQuery::Execute(request, resultJson);
+                if (resultJson.empty()) {
+                    // 7 is ComponentTreeQueryError::INTERNAL_ERROR.
+                    resultJson = "{\"errorCode\":7,\"type\":\"componentTreeQuery\"}";
+                }
+                UiSessionManager::GetInstance()->ReportComponentTreeQueryResult(resultJson);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionComponentTreeQuery");
+    };
+    UiSessionManager::GetInstance()->SaveComponentTreeQueryFunction(componentTreeQueryCallback);
 }
 
 void UIContentImpl::SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& taskExecutor)

@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include "ui/base/macros.h"
+#include "component_tree_query_type.h"
 #include "param_config.h"
 #include "ui_content_errors.h"
 #include "ui_content_proxy_error_code.h"
@@ -102,6 +103,10 @@ public:
         REGISTER_PAGE_SCENE_RULES,
         UNREGISTER_PAGE_SCENE_RULES,
         GET_PAGE_SCENE,
+        GET_LAZY_FOREACH_DATA_BY_POINT,
+        GET_NAVIGATION_CONTENT_BY_POINT,
+        GET_NODES_IN_CIRCLE,
+        GET_NODES_IN_RECT,
     };
 
     /**
@@ -437,6 +442,49 @@ public:
     {
         return FAILED;
     }
+
+    /**
+     * @description: FEAT-031 FR-1: extract LazyForEach current data of the
+     * item hit by the window point (x, y). Result JSON (with structured
+     * errorCode inside) is reported through eventCallback. Only dynamic ArkTS
+     * frontend is supported; static/CJ reports UNSUPPORTED_FRONTEND.
+     * @return result number of the IPC request itself.
+     */
+    virtual int32_t GetLazyForEachDataByPoint(float x, float y,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+    {
+        return FAILED;
+    }
+
+    /**
+     * @description: FEAT-031 FR-2: extract the Navigation content subtree hit
+     * by the window point (x, y) plus NavBar nodes matching pattern (regex).
+     */
+    virtual int32_t GetNavigationContentByPoint(float x, float y, const std::string& pattern,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+    {
+        return FAILED;
+    }
+
+    /**
+     * @description: FEAT-031 FR-3: collect visible nodes whose transform rect
+     * intersects the circle (centerX, centerY, radius) with positive area.
+     */
+    virtual int32_t GetNodesInCircle(float centerX, float centerY, float radius,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+    {
+        return FAILED;
+    }
+
+    /**
+     * @description: FEAT-031 FR-4: collect visible nodes whose transform rect
+     * intersects the normalized rect (x1, y1)-(x2, y2) with positive area.
+     */
+    virtual int32_t GetNodesInRect(float x1, float y1, float x2, float y2,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+    {
+        return FAILED;
+    }
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -470,6 +518,7 @@ public:
         SEND_WEB_INFO_BY_REQUEST,
         SEND_PAGE_TEXT,
         REPORT_PAGE_SCENE_EVENT,
+        REPORT_COMPONENT_TREE_QUERY_RESULT,
     };
 
     /**
@@ -592,6 +641,12 @@ public:
         const std::string& result, WebRequestErrorCode errorCode) = 0;
     virtual void SendPageText(int32_t nodeId, const std::string& text, int64_t version) {}
     virtual void ReportPageSceneEvent(const std::string& sceneJson, bool isGetResult = false) {}
+
+    /**
+     * @description: FEAT-031: reports one (partial) component tree query
+     * result to the requesting SA process.
+     */
+    virtual void ReportComponentTreeQueryResult(const std::string& data, int32_t partNum, bool isLastPart) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

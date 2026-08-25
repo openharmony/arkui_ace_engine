@@ -363,4 +363,52 @@ int32_t UIContentServiceStubImpl::GetPageScene(
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     return UiSessionManager::GetInstance()->GetPageScene(processId, ruleJsonOrRuleSetId);
 }
+
+int32_t UIContentServiceStubImpl::GetLazyForEachDataByPoint(float x, float y,
+    [[maybe_unused]] const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    ComponentTreeQueryRequest request;
+    request.type = ComponentTreeQueryType::LAZY_FOREACH_DATA_BY_POINT;
+    request.x = x;
+    request.y = y;
+    UiSessionManager::GetInstance()->ComponentTreeQuery(request);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetNavigationContentByPoint(float x, float y, const std::string& pattern,
+    [[maybe_unused]] const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    ComponentTreeQueryRequest request;
+    request.type = ComponentTreeQueryType::NAVIGATION_CONTENT_BY_POINT;
+    request.x = x;
+    request.y = y;
+    request.pattern = pattern;
+    UiSessionManager::GetInstance()->ComponentTreeQuery(request);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetNodesInCircle(float centerX, float centerY, float radius,
+    [[maybe_unused]] const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    ComponentTreeQueryRequest request;
+    request.type = ComponentTreeQueryType::NODES_IN_CIRCLE;
+    request.x = centerX;
+    request.y = centerY;
+    request.radius = radius;
+    UiSessionManager::GetInstance()->ComponentTreeQuery(request);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetNodesInRect(float x1, float y1, float x2, float y2,
+    [[maybe_unused]] const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    ComponentTreeQueryRequest request;
+    request.type = ComponentTreeQueryType::NODES_IN_RECT;
+    request.x = x1;
+    request.y = y1;
+    request.extraX = x2;
+    request.extraY = y2;
+    UiSessionManager::GetInstance()->ComponentTreeQuery(request);
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

@@ -252,6 +252,75 @@ int32_t UIContentServiceProxy::GetPageScene(
     return result;
 }
 
+// Sends one FEAT-031 component tree query request; the result JSON comes back
+// asynchronously through the ReportService callback registered on report_.
+// writeParams fills the parcel after the interface token.
+int32_t UIContentServiceProxy::SendComponentTreeQueryRequest(uint32_t code, const char* caller,
+    const std::function<void(const std::string&, int32_t, bool)>& eventCallback,
+    const std::function<bool(MessageParcel&)>& writeParams)
+{
+    if (eventCallback == nullptr) {
+        LOGW("%{public}s invalid callback", caller);
+        return PARAM_INVALID;
+    }
+    if (report_ == nullptr) {
+        LOGW("%{public}s reportStub is nullptr", caller);
+        return FAILED;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("%{public}s write interface token failed", caller);
+        return FAILED;
+    }
+    if (!writeParams(data)) {
+        LOGW("%{public}s write parcel failed", caller);
+        return FAILED;
+    }
+    report_->RegisterComponentTreeQueryCallback(eventCallback);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t sendRequestErrorCode = Remote()->SendRequest(code, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("%{public}s send request failed, errorCode is %{public}d", caller, sendRequestErrorCode);
+        return REPLY_ERROR;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t UIContentServiceProxy::GetLazyForEachDataByPoint(float x, float y,
+    const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    return SendComponentTreeQueryRequest(GET_LAZY_FOREACH_DATA_BY_POINT, "GetLazyForEachDataByPoint",
+        eventCallback, [x, y](MessageParcel& data) { return data.WriteFloat(x) && data.WriteFloat(y); });
+}
+
+int32_t UIContentServiceProxy::GetNavigationContentByPoint(float x, float y, const std::string& pattern,
+    const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    return SendComponentTreeQueryRequest(GET_NAVIGATION_CONTENT_BY_POINT, "GetNavigationContentByPoint",
+        eventCallback, [x, y, pattern](MessageParcel& data) {
+            return data.WriteFloat(x) && data.WriteFloat(y) && data.WriteString(pattern);
+        });
+}
+
+int32_t UIContentServiceProxy::GetNodesInCircle(float centerX, float centerY, float radius,
+    const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    return SendComponentTreeQueryRequest(GET_NODES_IN_CIRCLE, "GetNodesInCircle", eventCallback,
+        [centerX, centerY, radius](MessageParcel& data) {
+            return data.WriteFloat(centerX) && data.WriteFloat(centerY) && data.WriteFloat(radius);
+        });
+}
+
+int32_t UIContentServiceProxy::GetNodesInRect(float x1, float y1, float x2, float y2,
+    const std::function<void(const std::string&, int32_t, bool)>& eventCallback)
+{
+    return SendComponentTreeQueryRequest(GET_NODES_IN_RECT, "GetNodesInRect", eventCallback,
+        [x1, y1, x2, y2](MessageParcel& data) {
+            return data.WriteFloat(x1) && data.WriteFloat(y1) && data.WriteFloat(x2) && data.WriteFloat(y2);
+        });
+}
+
 int32_t UIContentServiceProxy::RegisterClickEventCallback(const EventCallback& eventCallback)
 {
     MessageParcel data;

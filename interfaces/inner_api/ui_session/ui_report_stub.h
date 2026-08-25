@@ -220,6 +220,18 @@ public:
     void RegisterGetHitTestNodeInfoCallback(const std::function<void(std::string, int32_t, bool)>& eventCallback);
 
     /**
+     * @description: report one (partial) FEAT-031 component tree query result
+     */
+    void ReportComponentTreeQueryResult(const std::string& data, int32_t partNum, bool isLastPart) override;
+
+    /**
+     * @description: register a callback for FEAT-031 component tree query results
+     * @param eventCallback callback to be performed (data, partNum, isLastPart)
+     */
+    void RegisterComponentTreeQueryCallback(
+        const std::function<void(std::string, int32_t, bool)>& eventCallback);
+
+    /**
      * @description: report web unfocus value for SA
      */
     void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
@@ -315,6 +327,8 @@ private:
     std::mutex inspectorTreeCallbackMutex_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(std::string, int32_t, bool)> getHitTestNodeInfoCallback_;
+    std::mutex componentTreeQueryCallbackMutex_;
+    std::function<void(std::string, int32_t, bool)> componentTreeQueryCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
     std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)> getShowingImageCallback_;
     std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,

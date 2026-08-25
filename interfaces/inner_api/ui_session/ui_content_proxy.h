@@ -116,11 +116,22 @@ public:
     virtual int32_t UnregisterPageSceneRules(const std::string& ruleSetId) override;
     virtual int32_t GetPageScene(
         const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback) override;
+    virtual int32_t GetLazyForEachDataByPoint(float x, float y,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback) override;
+    virtual int32_t GetNavigationContentByPoint(float x, float y, const std::string& pattern,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback) override;
+    virtual int32_t GetNodesInCircle(float centerX, float centerY, float radius,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback) override;
+    virtual int32_t GetNodesInRect(float x1, float y1, float x2, float y2,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback) override;
 
 private:
     int32_t SendPageTranslateRequest(uint32_t code, const char* caller, const std::string& request,
         const PageTranslateTextCallback* eventCallback, bool isContinuous);
     int32_t SendPageTranslateControlRequest(uint32_t code, const char* caller, int32_t nodeId = -1);
+    int32_t SendComponentTreeQueryRequest(uint32_t code, const char* caller,
+        const std::function<void(const std::string&, int32_t, bool)>& eventCallback,
+        const std::function<bool(MessageParcel&)>& writeParams);
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;
     bool isConnected_ = false;

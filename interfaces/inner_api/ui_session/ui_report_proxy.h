@@ -111,6 +111,7 @@ public:
         const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) override;
     void SendPageText(int32_t nodeId, const std::string& text, int64_t version) override;
+    void ReportComponentTreeQueryResult(const std::string& data, int32_t partNum, bool isLastPart) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;
