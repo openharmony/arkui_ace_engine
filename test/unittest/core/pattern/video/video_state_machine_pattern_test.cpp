@@ -1361,17 +1361,18 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternPostSerialBgTas
 {
     auto pattern = AceType::MakeRefPtr<VideoStateMachinePattern>(nullptr);
     ASSERT_TRUE(pattern);
-    EXPECT_TRUE(pattern->serialBgTaskQueue_.empty());
+    EXPECT_TRUE(pattern->stateManager_->serialBgTaskQueue_.empty());
 
     bool taskExecuted = false;
     pattern->PostSerialBgTask([&taskExecuted]() { taskExecuted = true; }, "NoHostTest");
-    EXPECT_TRUE(pattern->serialBgTaskQueue_.empty());
+    EXPECT_TRUE(pattern->stateManager_->serialBgTaskQueue_.empty());
     EXPECT_FALSE(taskExecuted);
 }
 
 /**
  * @tc.name: VideoStateMachinePatternSerialQueueDestructor001
- * @tc.desc: Test destructor clears serial background task queue without crash.
+ * @tc.desc: Test destruction with pending serial background tasks does not crash.
+ *           The queue lives in the shared state manager and is destroyed with it.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternSerialQueueDestructor001, TestSize.Level1)
@@ -1379,13 +1380,13 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternSerialQueueDest
     {
         auto pattern = AceType::MakeRefPtr<VideoStateMachinePattern>(nullptr);
         ASSERT_TRUE(pattern);
-        pattern->serialBgTaskQueue_.push({"Task1", []() {}});
-        pattern->serialBgTaskQueue_.push({"Task2", []() {}});
-        pattern->isDrainingSerialBgQueue_ = true;
-        EXPECT_EQ(pattern->serialBgTaskQueue_.size(), 2u);
-        // Destructor should clear the queue and reset the flag without crashing.
+        pattern->stateManager_->serialBgTaskQueue_.push({"Task1", []() {}});
+        pattern->stateManager_->serialBgTaskQueue_.push({"Task2", []() {}});
+        pattern->stateManager_->isDrainingSerialBgQueue_ = true;
+        EXPECT_EQ(pattern->stateManager_->serialBgTaskQueue_.size(), 2u);
+        // Destroying the pattern (and its state manager) with pending tasks must not crash.
     }
-    // Reaching here without crash means the destructor works correctly.
+    // Reaching here without crash means the destruction works correctly.
     EXPECT_TRUE(true);
 }
 

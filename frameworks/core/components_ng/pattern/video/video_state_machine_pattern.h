@@ -505,16 +505,9 @@ private:
     int32_t lastErrorCode_ = 0;
     std::string lastErrorMessage_;
 
-    // Serial background task queue to ensure media operations execute in order
-    struct SerialBgTask {
-        std::string name;
-        std::function<void()> task;
-    };
+    // Serial background task queue lives in the shared VideoStateManager so that media
+    // operations keep FIFO order across fullscreen transitions; this is a thin forwarder.
     void PostSerialBgTask(std::function<void()> task, const std::string& name = "");
-    void DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor);
-    std::mutex serialBgQueueMutex_;
-    std::queue<SerialBgTask> serialBgTaskQueue_;
-    bool isDrainingSerialBgQueue_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoStateMachinePattern);
 };
