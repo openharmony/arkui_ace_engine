@@ -73,7 +73,7 @@ const void* TextAreaDynamicModule::GetCjModifier()
 void* TextAreaDynamicModule::GetModel()
 {
     static NG::TextFieldModelNG model;
-    return &model;
+    return static_cast<TextFieldModel*>(&model);
 }
 
 const void* TextAreaDynamicModule::GetCustomModifier(const std::string& name)
