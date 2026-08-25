@@ -106,6 +106,25 @@ void ResetLazyGridLayoutColumnsTemplate(ArkUINodeHandle node)
     LazyVGridLayoutModel::SetColumnsTemplate(frameNode, DEFAULT_COLUMNS_TEMPLATE);
 }
 
+void SetLazyGridLayoutItemFillPolicy(ArkUINodeHandle node, ArkUI_Int32 policy)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t normalized = policy;
+    if (normalized < static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT) ||
+        normalized > static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5)) {
+        normalized = static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT);
+    }
+    LazyVGridLayoutModel::SetItemFillPolicy(frameNode, static_cast<PresetFillType>(normalized));
+}
+
+void ResetLazyGridLayoutItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyVGridLayoutModel::ResetItemFillPolicy(frameNode);
+}
+
 void SetLazyGridLayoutSticky(ArkUINodeHandle node, ArkUI_Int32 stickyStyle)
 {
     auto* frameNode = GetFrameNode(node);
@@ -201,7 +220,9 @@ const ArkUILazyGridLayoutModifier* GetLazyGridLayoutDynamicModifier()
         .setFooter = SetLazyGridLayoutFooter,
         .resetFooter = ResetLazyGridLayoutFooter,
         .setOnVisibleIndexesChange = SetLazyGridLayoutOnVisibleIndexesChange,
-        .resetOnVisibleIndexesChange = ResetLazyGridLayoutOnVisibleIndexesChange
+        .resetOnVisibleIndexesChange = ResetLazyGridLayoutOnVisibleIndexesChange,
+        .setItemFillPolicy = SetLazyGridLayoutItemFillPolicy,
+        .resetItemFillPolicy = ResetLazyGridLayoutItemFillPolicy
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

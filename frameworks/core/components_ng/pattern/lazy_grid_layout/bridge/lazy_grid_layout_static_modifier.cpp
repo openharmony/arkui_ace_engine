@@ -149,6 +149,28 @@ void SetColumnsTemplateImpl(Ark_NativePointer node, const Opt_String* value)
     auto convValue = Converter::OptConvert<std::string>(*value).value_or("");
     LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, convValue);
 }
+
+// ItemFillPolicy form of columnsTemplate (breakpoint-adaptive columns, last-set-wins over the string form).
+// Implementation is ready to be registered into GENERATED_ArkUILazyVGridLayoutModifier once
+// arkoala_api_generated.h is regenerated from the SDK declaration columnsTemplate(value: string |
+// ItemFillPolicy) (interface_sdk-js PR #35365); the generated struct currently exposes
+// setColumnsTemplate(const Opt_String*) only and must not be hand-edited.
+void SetItemFillPolicyImpl(Ark_NativePointer node, const Opt_ItemFillPolicy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<PresetFillType>(value);
+    if (convValue) {
+        auto result = convValue.value();
+        if (static_cast<int32_t>(result) < static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT) ||
+            static_cast<int32_t>(result) > static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5)) {
+            result = PresetFillType::BREAKPOINT_DEFAULT;
+        }
+        LazyVGridLayoutModelStatic::SetItemFillPolicy(frameNode, result);
+    } else {
+        LazyVGridLayoutModelStatic::SetItemFillPolicy(frameNode, std::nullopt);
+    }
+}
 } // namespace LazyVGridLayoutAttributeModifier
 
 const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttributeStaticModifier()

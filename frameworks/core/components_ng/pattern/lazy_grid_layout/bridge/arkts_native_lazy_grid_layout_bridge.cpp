@@ -32,6 +32,8 @@ constexpr int32_t STICKY_STYLE_NONE = 0;
 constexpr int32_t STICKY_STYLE_BOTH = 3;
 constexpr int32_t VISIBLE_INDEX_PARAM_COUNT = 2;
 constexpr int32_t SCROLL_INDEX_PARAM_COUNT = 2;
+constexpr int32_t FILL_TYPE_MIN = static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT);
+constexpr int32_t FILL_TYPE_MAX = static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5);
 
 CalcDimension ParseLengthMetricsOrDefault(EcmaVM* vm, const Local<JSValueRef>& value)
 {
@@ -489,11 +491,15 @@ void LazyVGridLayoutBridge::RegisterLazyVGridLayoutAttributes(Local<panda::Objec
         "create",
         "setColumnsTemplate",
         "resetColumnsTemplate",
+        "setItemFillPolicy",
+        "resetItemFillPolicy",
     };
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(vm, LazyVGridLayoutBridge::Create),
         panda::FunctionRef::New(vm, LazyVGridLayoutBridge::SetColumnsTemplate),
         panda::FunctionRef::New(vm, LazyVGridLayoutBridge::ResetColumnsTemplate),
+        panda::FunctionRef::New(vm, LazyVGridLayoutBridge::SetItemFillPolicy),
+        panda::FunctionRef::New(vm, LazyVGridLayoutBridge::ResetItemFillPolicy),
     };
     auto lazyVGridLayout =
         panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
@@ -516,12 +522,28 @@ ArkUINativeModuleValue LazyVGridLayoutBridge::SetColumnsTemplate(ArkUIRuntimeCal
     Local<JSValueRef> arg_columnsTemplate = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, node, nativeNode), true, panda::JSValueRef::Undefined(vm));
+    auto* modifier = GetArkUINodeModifiers()->getLazyGridLayoutModifier();
+    CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
 
+    // ItemFillPolicy form of columnsTemplate: breakpoint-adaptive columns, last-set-wins over the string form
+    // (same dispatch as Grid.columnsTemplate(value: string | ItemFillPolicy)).
+    if (!arg_columnsTemplate.IsEmpty() && arg_columnsTemplate->IsObject(vm)) {
+        auto value = static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT);
+        modifier->resetColumnsTemplate(nativeNode);
+        modifier->setItemFillPolicy(nativeNode, value);
+        auto fillTypeArg = GetProperty(vm, arg_columnsTemplate, "fillType");
+        if (!fillTypeArg.IsEmpty() && !fillTypeArg->IsNull() && ArkTSUtils::ParseJsInt32(vm, fillTypeArg, value)) {
+            if (value >= FILL_TYPE_MIN && value <= FILL_TYPE_MAX) {
+                modifier->setItemFillPolicy(nativeNode, value);
+            }
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (ArkTSUtils::IsJsView(vm, node) || arg_columnsTemplate->IsString(vm)) {
         std::string columnsTemplate = arg_columnsTemplate->ToString(vm)->ToString(vm);
-        GetArkUINodeModifiers()->getLazyGridLayoutModifier()->setColumnsTemplate(nativeNode, columnsTemplate.c_str());
+        modifier->setColumnsTemplate(nativeNode, columnsTemplate.c_str());
     } else {
-        GetArkUINodeModifiers()->getLazyGridLayoutModifier()->resetColumnsTemplate(nativeNode);
+        modifier->resetColumnsTemplate(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -533,7 +555,45 @@ ArkUINativeModuleValue LazyVGridLayoutBridge::ResetColumnsTemplate(ArkUIRuntimeC
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getLazyGridLayoutModifier()->resetColumnsTemplate(nativeNode);
+    auto* modifier = GetArkUINodeModifiers()->getLazyGridLayoutModifier();
+    CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
+    modifier->resetColumnsTemplate(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyVGridLayoutBridge::SetItemFillPolicy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    Local<JSValueRef> arg_policy = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, node, nativeNode), true, panda::JSValueRef::Undefined(vm));
+    auto* modifier = GetArkUINodeModifiers()->getLazyGridLayoutModifier();
+    CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
+
+    if (arg_policy.IsEmpty() || !arg_policy->IsNumber(vm)) {
+        modifier->resetItemFillPolicy(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto policy = arg_policy->Int32Value(vm);
+    if (policy < FILL_TYPE_MIN || policy > FILL_TYPE_MAX) {
+        policy = static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT);
+    }
+    modifier->setItemFillPolicy(nativeNode, policy);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyVGridLayoutBridge::ResetItemFillPolicy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    auto* modifier = GetArkUINodeModifiers()->getLazyGridLayoutModifier();
+    CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
+    modifier->resetItemFillPolicy(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
