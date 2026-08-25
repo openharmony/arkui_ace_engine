@@ -854,6 +854,30 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
     return jsonRoot->ToString();
 }
 
+std::string Inspector::GetInspectorOfNodeSubtree(RefPtr<NG::UINode> node)
+{
+    auto jsonRoot = JsonUtil::Create(true);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, jsonRoot->ToString());
+    GetContextInfo(context, jsonRoot);
+    CHECK_NULL_RETURN(node, jsonRoot->ToString());
+    RefPtr<UINode> lastPage = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, jsonRoot->ToString());
+    auto pageId = lastPage->GetPageId();
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    InspectorChildrenParameters inspectorParameters;
+    GenerateParameters(inspectorParameters, pageId, true);
+    // Depth UINT32_MAX keeps the recursive "children" arrays (FEAT-031 NavContent subtree).
+    GetInspectorChildren(node, jsonNodeArray, inspectorParameters, InspectorFilter(), UINT32_MAX);
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot = jsonNodeArray->GetArrayItem(0);
+        GetContextInfo(context, jsonRoot);
+    }
+
+    return jsonRoot->ToString();
+}
+
 RefPtr<UINode> Inspector::GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach)
 {
     bool keyIsNull = key == "";

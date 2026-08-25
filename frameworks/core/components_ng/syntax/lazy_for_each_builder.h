@@ -241,6 +241,35 @@ public:
         return expiringItem_;
     }
 
+    /**
+     * @brief FEAT-031: whether this builder frontend supports LazyForEach data
+     * extraction (getData(index) serialization).
+     *
+     * Only the dynamic ArkTS builder (JSLazyForEachBuilder, which holds the raw
+     * JS getData function) overrides this to true. Static ArkTS (Arkoala) and
+     * CJ builders keep the default; the UISession query then reports
+     * UNSUPPORTED_FRONTEND instead of fabricating data.
+     */
+    virtual bool IsDataExtractionSupported() const
+    {
+        return false;
+    }
+
+    /**
+     * @brief FEAT-031: serialize getData(index) of the instantiated item into a
+     * JSON string. Must not build uninstantiated items.
+     *
+     * @param index item index inside the LazyForEach data source.
+     * @param errorCode out param, ComponentTreeQueryError value (4 data source
+     *        error / 5 serialization error / 3 unsupported frontend).
+     * @return serialized JSON string; empty string on failure (see errorCode).
+     */
+    virtual std::string GetDataByIndexAsJson(int32_t index, int32_t& errorCode)
+    {
+        errorCode = static_cast<int32_t>(3); // UNSUPPORTED_FRONTEND
+        return "";
+    }
+
     const std::map<int32_t, LazyForEachChild>& GetAllChildren();
 
     void SetJSViewActive(bool active);

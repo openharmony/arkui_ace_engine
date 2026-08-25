@@ -249,6 +249,16 @@ public:
         return static_cast<NG::LazyForEachMemOptStrategy>(options_.memOptStrategy);
     }
 
+    // FEAT-031 (FR-1): dynamic ArkTS frontend holds the raw JS getData
+    // function, so data extraction is supported. Static ArkTS / CJ builders
+    // keep the LazyForEachBuilder default (false -> UNSUPPORTED_FRONTEND).
+    bool IsDataExtractionSupported() const override
+    {
+        return !getDataFunc_.IsEmpty();
+    }
+
+    std::string GetDataByIndexAsJson(int32_t index, int32_t& errorCode) override;
+
     void ReleaseChildGroupById(const std::string& id) override
     {
         JSLazyForEachActuator::ReleaseChildGroupByComposedId(id);

@@ -16,15 +16,18 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 
 #include <functional>
+#include <memory>
 #include <set>
 #include <string>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_lazy_foreach_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_callback_state.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h"
@@ -60,6 +63,88 @@ LazyForEachModel* LazyForEachModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+// FEAT-031 error codes, keep in sync with ComponentTreeQueryError.
+constexpr int32_t QUERY_ERR_OK = 0;
+constexpr int32_t QUERY_ERR_DATA_SOURCE = 4;
+constexpr int32_t QUERY_ERR_SERIALIZATION = 5;
+
+napi_env GetNapiEnvForDataExtraction()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
+
+// JSON.stringify(value) via the current native engine; empty string on failure.
+std::string StringifyJsValue(const JSRef<JSVal>& value)
+{
+    auto env = GetNapiEnvForDataExtraction();
+    if (env == nullptr || value.IsEmpty()) {
+        return "";
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return "";
+    }
+    std::string result;
+    do {
+        napi_value napiValue = JsConverter::ConvertJsValToNapiValue(value);
+        napi_value globalValue = nullptr;
+        napi_get_global(env, &globalValue);
+        napi_value jsonClass = nullptr;
+        napi_get_named_property(env, globalValue, "JSON", &jsonClass);
+        napi_value stringifyFunc = nullptr;
+        napi_get_named_property(env, jsonClass, "stringify", &stringifyFunc);
+        if (napiValue == nullptr || globalValue == nullptr || jsonClass == nullptr || stringifyFunc == nullptr) {
+            break;
+        }
+        napi_value stringifyResult = nullptr;
+        if (napi_call_function(env, jsonClass, stringifyFunc, 1, &napiValue, &stringifyResult) != napi_ok) {
+            napi_get_and_clear_last_exception(env, &stringifyResult);
+            break;
+        }
+        size_t len = 0;
+        if (napi_get_value_string_utf8(env, stringifyResult, nullptr, 0, &len) != napi_ok) {
+            break;
+        }
+        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(len + 1);
+        if (napi_get_value_string_utf8(env, stringifyResult, buffer.get(), len + 1, &len) != napi_ok) {
+            break;
+        }
+        result = buffer.get();
+    } while (false);
+    napi_close_handle_scope(env, scope);
+    return result;
+}
+} // namespace
+
+std::string JSLazyForEachBuilder::GetDataByIndexAsJson(int32_t index, int32_t& errorCode)
+{
+    errorCode = QUERY_ERR_DATA_SOURCE;
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
+    if (getDataFunc_.IsEmpty()) {
+        return "";
+    }
+    if (index < 0) {
+        return "";
+    }
+    // Only call getData(index) for the already instantiated item; never build.
+    auto data = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+    if (data.IsEmpty() || data->IsNull() || data->IsUndefined()) {
+        return "";
+    }
+    auto dataJson = StringifyJsValue(data);
+    if (dataJson.empty()) {
+        errorCode = QUERY_ERR_SERIALIZATION;
+        return "";
+    }
+    errorCode = QUERY_ERR_OK;
+    return dataJson;
+}
 
 void JSDataChangeListener::JSBind(BindingTarget globalObj)
 {

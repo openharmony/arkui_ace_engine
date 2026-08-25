@@ -69,6 +69,7 @@ build_component_ng("manager_ng") {
     "shared_overlay/shared_overlay_manager.cpp",
     "shared_overlay/shared_transition_effect.cpp",
     "toolbar/toolbar_manager.cpp",
+    "uisession_query/component_tree_query.cpp",
   ]
 
   inspector_event_reporting_sources = [

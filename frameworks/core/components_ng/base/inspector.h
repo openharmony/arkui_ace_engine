@@ -64,6 +64,8 @@ public:
     static std::string GetInspector(bool isLayoutInspector = false);
     static std::string GetInspector(bool isLayoutInspector, const InspectorFilter& filter, bool& needThrow);
     static std::string GetInspectorOfNode(RefPtr<NG::UINode> node);
+    // FEAT-031: full subtree Inspector JSON (recursive children) rooted at node.
+    static std::string GetInspectorOfNodeSubtree(RefPtr<NG::UINode> node);
     static std::string GetSubWindowInspector(bool isLayoutInspector = false);
     static void HideAllMenus();
     static void AddOffscreenNode(RefPtr<FrameNode> node);
