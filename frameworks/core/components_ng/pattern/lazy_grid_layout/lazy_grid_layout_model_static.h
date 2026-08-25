@@ -53,6 +53,8 @@ public:
 class ACE_EXPORT LazyVGridLayoutModelStatic : public LazyGridLayoutModelStatic {
 public:
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
+    // Set the breakpoint-adaptive column policy; nullopt resets it (last-set-wins over ColumnsTemplate, same as Grid).
+    static void SetItemFillPolicy(FrameNode* frameNode, const std::optional<PresetFillType>& policy);
 };
 
 } // namespace OHOS::Ace::NG

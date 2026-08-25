@@ -57,11 +57,20 @@ void LazyGridLayoutModel::SetOnVisibleIndexesChange(VisibleIndexesChangeEvent&& 
 
 void LazyVGridLayoutModel::SetColumnsTemplate(const std::string& value)
 {
+    // columnsTemplate(string) and itemFillPolicy are two forms of the same attribute: last-set-wins (same as Grid).
+    ACE_RESET_LAYOUT_PROPERTY(LazyGridLayoutProperty, ItemFillPolicy);
     if (value.empty()) {
         ACE_UPDATE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, "1fr");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, value);
+}
+
+void LazyVGridLayoutModel::SetItemFillPolicy(PresetFillType policy)
+{
+    // itemFillPolicy resets the fixed string template so only one form is effective at a time (same as Grid).
+    ACE_RESET_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate);
+    ACE_UPDATE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ItemFillPolicy, policy);
 }
 
 void LazyGridLayoutModel::SetRowGap(FrameNode* frameNode, const Dimension& rowGap)
@@ -87,11 +96,25 @@ void LazyGridLayoutModel::SetOnVisibleIndexesChange(
 
 void LazyVGridLayoutModel::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)
 {
+    // columnsTemplate(string) and itemFillPolicy are two forms of the same attribute: last-set-wins (same as Grid).
+    ACE_RESET_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ItemFillPolicy, frameNode);
     if (value.empty()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, "1fr", frameNode);
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, value, frameNode);
+}
+
+void LazyVGridLayoutModel::SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy)
+{
+    // itemFillPolicy resets the fixed string template so only one form is effective at a time (same as Grid).
+    ACE_RESET_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ItemFillPolicy, policy, frameNode);
+}
+
+void LazyVGridLayoutModel::ResetItemFillPolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(LazyGridLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
 void LazyGridLayoutModel::SetSticky(StickyStyle stickyStyle)
