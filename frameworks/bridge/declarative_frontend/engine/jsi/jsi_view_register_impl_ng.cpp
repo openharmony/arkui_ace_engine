@@ -50,6 +50,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scroll_place_holder_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
@@ -448,6 +449,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPath2D::JSBind(globalObj);
     JSDrawingRenderingContext::JSBind(globalObj);
     JSDumpLog::JSBind(globalObj);
+    JSScrollPlaceHolderRegister::JSBind(globalObj);
     JSDumpRegister::JSBind(globalObj);
     JSKeyboardAvoid::JSBind(globalObj);
     JSContainerSpan::JSBind(globalObj);

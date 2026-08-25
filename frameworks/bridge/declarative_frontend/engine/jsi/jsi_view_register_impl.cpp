@@ -133,6 +133,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scroll_place_holder_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_richeditor_binding.h"
@@ -901,6 +902,7 @@ void JsBindFormViews(
         JSShapeAbstract::JSBind(globalObj);
         JSView::JSBind(globalObj);
         JSDumpLog::JSBind(globalObj);
+        JSScrollPlaceHolderRegister::JSBind(globalObj);
         JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
         JSStateMgmtProfiler::JSBind(globalObj);
