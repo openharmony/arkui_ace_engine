@@ -1263,6 +1263,31 @@ void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrol
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
 }
 
+void ListModelNG::SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetLastSnapTargetIndex();
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy);
+}
+
+void ListModelNG::ResetScrollSnapStrategy()
+{
+    ACE_RESET_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapStrategy);
+}
+
+void ListModelNG::SetScrollSnapStrategy(FrameNode* frameNode, const ScrollSnapStrategy& scrollSnapStrategy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy, frameNode);
+}
+
+void ListModelNG::ResetScrollSnapStrategy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapStrategy, frameNode);
+}
+
 int32_t ListModelNG::GetScrollSnapAlign(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);

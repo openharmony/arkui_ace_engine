@@ -45,6 +45,8 @@ public:
 
     void SetLayoutDirection(FlexDirection value) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy) override;
+    void ResetScrollSnapStrategy() override;
     void SetScrollEnabled(bool scrollEnabled) override;
 
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
@@ -87,6 +89,8 @@ public:
     static void SetItemMaxHeight(FrameNode* frameNode, const std::optional<Dimension>& maxHeight);
     static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetScrollSnapStrategy(FrameNode* frameNode, const ScrollSnapStrategy& scrollSnapStrategy);
+    static void ResetScrollSnapStrategy(FrameNode* frameNode);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static FlexDirection GetLayoutDirection(FrameNode* frameNode);
     static std::string GetColumnsTemplate(FrameNode* frameNode);

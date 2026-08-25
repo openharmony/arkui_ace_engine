@@ -27,10 +27,13 @@
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include <limits>
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double FRICTION_DEFAULT = -1.0;
 constexpr double DIMENSION_DEFAULT = 0.0;
+
 constexpr int32_t DISPLAY_MODE_SIZE = 3;
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
@@ -583,6 +586,8 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
         "setLayoutDirection",
         "resetNestedScroll",
         "setNestedScroll",
+        "resetScrollSnapStrategy",
+        "setScrollSnapStrategy",
         "resetFriction",
         "setFriction",
         "resetScrollBar",
@@ -634,6 +639,8 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(vm, WaterFlowBridge::SetLayoutDirection),
         panda::FunctionRef::New(vm, WaterFlowBridge::ResetNestedScroll),
         panda::FunctionRef::New(vm, WaterFlowBridge::SetNestedScroll),
+        panda::FunctionRef::New(vm, WaterFlowBridge::ResetScrollSnapStrategy),
+        panda::FunctionRef::New(vm, WaterFlowBridge::SetScrollSnapStrategy),
         panda::FunctionRef::New(vm, WaterFlowBridge::ResetFriction),
         panda::FunctionRef::New(vm, WaterFlowBridge::SetFriction),
         panda::FunctionRef::New(vm, WaterFlowBridge::ResetScrollBar),
@@ -986,6 +993,109 @@ ArkUINativeModuleValue WaterFlowBridge::ResetLayoutDirection(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(IsNativePointerArg(vm, nodeArg), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetLayoutDirection(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+
+ArkUINativeModuleValue WaterFlowBridge::SetScrollSnapStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    ArkUINodeHandle nativeNode = nullptr;
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, node, vm), false, panda::JSValueRef::Undefined(vm));
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    // undefined / null / invalid value clears the strategy (last-set-wins falls back to default).
+    if (valueArg->IsUndefined() || valueArg->IsNull()) {
+        NG::WaterFlowModelNG::ResetScrollSnapStrategy(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (valueArg->IsNumber()) {
+        int32_t align = valueArg->Int32Value(vm);
+        if (align <= static_cast<int32_t>(ScrollSnapAlign::NONE) ||
+            align > static_cast<int32_t>(ScrollSnapAlign::END)) {
+            NG::WaterFlowModelNG::ResetScrollSnapStrategy(frameNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        ScrollSnapStrategy strategy;
+        strategy.align = static_cast<ScrollSnapAlign>(align);
+        NG::WaterFlowModelNG::SetScrollSnapStrategy(frameNode, strategy);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (valueArg->IsObject(vm)) {
+        auto obj = valueArg->ToObject(vm);
+        auto snapFuncValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "calculateSnapOffset"));
+        auto approachFuncValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "calculateApproachOffset"));
+        // A custom provider requires calculateSnapOffset to be a function.
+        if (!snapFuncValue->IsFunction(vm)) {
+            NG::WaterFlowModelNG::ResetScrollSnapStrategy(frameNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        ScrollSnapStrategy strategy;
+        strategy.hasProvider = true;
+        bool isJSView = ArkTSUtils::IsJsView(vm, node);
+        auto weakNode = AceType::WeakClaim(frameNode);
+        Local<panda::FunctionRef> snapFuncRef = snapFuncValue->ToObject(vm);
+        strategy.calculateSnapOffset =
+            [func = panda::CopyableGlobal(vm, snapFuncRef), weakNode, isJSView](double velocity) -> double {
+            auto vm = func.GetEcmaVM();
+            CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false,
+                std::numeric_limits<double>::quiet_NaN());
+            panda::LocalScope scope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(weakNode);
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, velocity) };
+            auto result = func->Call(vm, func.ToLocal(), params, 1); // 1: array length
+            if (isJSView) {
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            }
+            if (!result->IsNumber()) {
+                return std::numeric_limits<double>::quiet_NaN();
+            }
+            return result->ToNumber(vm)->Value();
+        };
+        if (approachFuncValue->IsFunction(vm)) {
+            Local<panda::FunctionRef> approachFuncRef = approachFuncValue->ToObject(vm);
+            strategy.calculateApproachOffset =
+                [func = panda::CopyableGlobal(vm, approachFuncRef), weakNode, isJSView](
+                    double velocity, double decayOffset) -> double {
+                auto vm = func.GetEcmaVM();
+                CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false,
+                    std::numeric_limits<double>::quiet_NaN());
+                panda::LocalScope scope(vm);
+                panda::TryCatch trycatch(vm);
+                PipelineContext::SetCallBackNode(weakNode);
+                panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, velocity),
+                    panda::NumberRef::New(vm, decayOffset) };
+                auto result = func->Call(vm, func.ToLocal(), params, 2); // 2: array length
+                if (isJSView) {
+                    ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+                }
+                if (!result->IsNumber()) {
+                    return std::numeric_limits<double>::quiet_NaN();
+                }
+                return result->ToNumber(vm)->Value();
+            };
+        }
+        NG::WaterFlowModelNG::SetScrollSnapStrategy(frameNode, strategy);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    NG::WaterFlowModelNG::ResetScrollSnapStrategy(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WaterFlowBridge::ResetScrollSnapStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    ArkUINodeHandle nativeNode = nullptr;
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, node, vm), false, panda::JSValueRef::Undefined(vm));
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NG::WaterFlowModelNG::ResetScrollSnapStrategy(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

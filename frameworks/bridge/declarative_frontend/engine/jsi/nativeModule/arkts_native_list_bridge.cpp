@@ -25,6 +25,8 @@
 #include "frameworks/core/components_ng/pattern/list/list_model_ng.h"
 #include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "frameworks/core/components_ng/base/view_stack_model.h"
+#include <limits>
+
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -856,6 +858,109 @@ ArkUINativeModuleValue ListBridge::ResetScrollSnapAlign(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetScrollSnapAlign(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+
+ArkUINativeModuleValue ListBridge::SetScrollSnapStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    ArkUINodeHandle nativeNode = nullptr;
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, node, vm), false, panda::JSValueRef::Undefined(vm));
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    // undefined / null / invalid value clears the strategy (last-set-wins falls back to default).
+    if (valueArg->IsUndefined() || valueArg->IsNull()) {
+        ListModelNG::ResetScrollSnapStrategy(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (valueArg->IsNumber()) {
+        int32_t align = valueArg->Int32Value(vm);
+        if (align <= static_cast<int32_t>(ScrollSnapAlign::NONE) ||
+            align > static_cast<int32_t>(ScrollSnapAlign::END)) {
+            ListModelNG::ResetScrollSnapStrategy(frameNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        ScrollSnapStrategy strategy;
+        strategy.align = static_cast<ScrollSnapAlign>(align);
+        ListModelNG::SetScrollSnapStrategy(frameNode, strategy);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (valueArg->IsObject(vm)) {
+        auto obj = valueArg->ToObject(vm);
+        auto snapFuncValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "calculateSnapOffset"));
+        auto approachFuncValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "calculateApproachOffset"));
+        // A custom provider requires calculateSnapOffset to be a function.
+        if (!snapFuncValue->IsFunction(vm)) {
+            ListModelNG::ResetScrollSnapStrategy(frameNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        ScrollSnapStrategy strategy;
+        strategy.hasProvider = true;
+        bool isJSView = ArkTSUtils::IsJsView(vm, node);
+        auto weakNode = AceType::WeakClaim(frameNode);
+        Local<panda::FunctionRef> snapFuncRef = snapFuncValue->ToObject(vm);
+        strategy.calculateSnapOffset =
+            [func = panda::CopyableGlobal(vm, snapFuncRef), weakNode, isJSView](double velocity) -> double {
+            auto vm = func.GetEcmaVM();
+            CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false,
+                std::numeric_limits<double>::quiet_NaN());
+            panda::LocalScope scope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(weakNode);
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, velocity) };
+            auto result = func->Call(vm, func.ToLocal(), params, 1); // 1: array length
+            if (isJSView) {
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            }
+            if (!result->IsNumber()) {
+                return std::numeric_limits<double>::quiet_NaN();
+            }
+            return result->ToNumber(vm)->Value();
+        };
+        if (approachFuncValue->IsFunction(vm)) {
+            Local<panda::FunctionRef> approachFuncRef = approachFuncValue->ToObject(vm);
+            strategy.calculateApproachOffset =
+                [func = panda::CopyableGlobal(vm, approachFuncRef), weakNode, isJSView](
+                    double velocity, double decayOffset) -> double {
+                auto vm = func.GetEcmaVM();
+                CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false,
+                    std::numeric_limits<double>::quiet_NaN());
+                panda::LocalScope scope(vm);
+                panda::TryCatch trycatch(vm);
+                PipelineContext::SetCallBackNode(weakNode);
+                panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, velocity),
+                    panda::NumberRef::New(vm, decayOffset) };
+                auto result = func->Call(vm, func.ToLocal(), params, 2); // 2: array length
+                if (isJSView) {
+                    ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+                }
+                if (!result->IsNumber()) {
+                    return std::numeric_limits<double>::quiet_NaN();
+                }
+                return result->ToNumber(vm)->Value();
+            };
+        }
+        ListModelNG::SetScrollSnapStrategy(frameNode, strategy);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ListModelNG::ResetScrollSnapStrategy(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetScrollSnapStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    ArkUINodeHandle nativeNode = nullptr;
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, node, vm), false, panda::JSValueRef::Undefined(vm));
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ListModelNG::ResetScrollSnapStrategy(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

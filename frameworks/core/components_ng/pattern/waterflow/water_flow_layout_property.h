@@ -151,6 +151,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
     std::optional<std::string> GetFinalColumnsTemplate(double width);
+    // FEAT-029: item scroll snap strategy (built-in align or custom offset provider).
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapStrategy, ScrollSnapStrategy, PROPERTY_UPDATE_MEASURE);
 
     void UpdateContentClip(std::optional<ContentClip> contentClip) override
     {

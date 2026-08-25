@@ -50,6 +50,8 @@ public:
     void SetSupportDragAnimation(bool value) override;
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy) override;
+    void ResetScrollSnapStrategy() override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
     void SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrapMode) override;
@@ -123,6 +125,8 @@ public:
         FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
         EffectEdge edge = EffectEdge::ALL);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetScrollSnapStrategy(FrameNode* frameNode, const ScrollSnapStrategy& scrollSnapStrategy);
+    static void ResetScrollSnapStrategy(FrameNode* frameNode);
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static bool GetScrollEnabled(FrameNode* frameNode);

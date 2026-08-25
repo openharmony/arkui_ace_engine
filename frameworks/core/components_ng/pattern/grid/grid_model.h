@@ -73,6 +73,9 @@ public:
     virtual void SetSupportDragAnimation(bool value) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
+    // FEAT-029: two-stage item scroll snap strategy (built-in align or custom offset provider).
+    virtual void SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy) {}
+    virtual void ResetScrollSnapStrategy() {}
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetFriction(double friction) = 0;
     virtual void SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrapMode) {}

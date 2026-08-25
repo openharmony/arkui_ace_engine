@@ -37,6 +37,7 @@ public:
     static void SetItemMaxHeight(FrameNode* frameNode, const std::optional<CalcLength>& maxHeight);
     static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetScrollSnapStrategy(FrameNode* frameNode, const std::optional<ScrollSnapStrategy>& scrollSnapStrategy);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static void SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& value);
     static RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections(FrameNode* frameNode);

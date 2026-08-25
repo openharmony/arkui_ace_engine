@@ -159,6 +159,13 @@ public:
         return info_.reachStart_;
     }
 
+    // FEAT-029: item scroll snap (scrollSnapStrategy) integration.
+    SnapType GetSnapType() override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
+    ScrollSnapStrategy GetScrollSnapStrategy() const override;
+    std::vector<ScrollSnapUtils::SnapCandidate> BuildItemSnapCandidates(ScrollSnapAlign align) override;
+    float GetItemSnapMaxOffset() const override;
+
     bool IsAtBottom(bool considerRepeat = false) const override
     {
         return considerRepeat ? (info_.offsetEnd_ && info_.repeatDifference_ == 0) : info_.offsetEnd_;

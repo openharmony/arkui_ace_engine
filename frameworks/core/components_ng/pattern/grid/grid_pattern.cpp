@@ -1755,6 +1755,71 @@ void GridPattern::OnRestoreInfo(const std::string& restoreInfo)
     info_.scrollAlign_ = ScrollAlign::START;
 }
 
+SnapType GridPattern::GetSnapType()
+{
+    auto strategy = GetScrollSnapStrategy();
+    return strategy.IsEnabled() ? SnapType::LIST_SNAP : SnapType::NONE_SNAP;
+}
+
+ScrollSnapStrategy GridPattern::GetScrollSnapStrategy() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ScrollSnapStrategy());
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ScrollSnapStrategy());
+    return layoutProperty->GetScrollSnapStrategy().value_or(ScrollSnapStrategy());
+}
+
+bool GridPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
+{
+    return StartItemSnapAnimation(snapAnimationOptions);
+}
+
+std::vector<ScrollSnapUtils::SnapCandidate> GridPattern::BuildItemSnapCandidates(ScrollSnapAlign align)
+{
+    std::vector<ScrollSnapUtils::SnapCandidate> candidates;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, candidates);
+    if (align == ScrollSnapAlign::NONE || !isConfigScrollable_) {
+        return candidates;
+    }
+    auto axis = GetAxis();
+    auto currentOffset = static_cast<float>(GetTotalOffset());
+    auto viewportMainSize = GetMainContentSize();
+    // Only visible + cached items are materialized; never scan the whole data set (R-12).
+    for (int32_t index = info_.startIndex_; index <= info_.endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        CHECK_NULL_CONTINUE(item);
+        auto itemGeometry = item->GetGeometryNode();
+        CHECK_NULL_CONTINUE(itemGeometry);
+        const auto& rect = itemGeometry->GetFrameRect();
+        auto itemStartView = axis == Axis::VERTICAL ? rect.GetY() : rect.GetX();
+        auto itemMainSize = axis == Axis::VERTICAL ? rect.Height() : rect.Width();
+        if (LessOrEqual(itemMainSize, 0.0f)) {
+            continue;
+        }
+        // Content coordinate: geometry frame offsets are viewport relative; add back the scroll.
+        auto itemStartContent = itemStartView + currentOffset;
+        float snapOffset = itemStartContent;
+        if (align == ScrollSnapAlign::CENTER) {
+            snapOffset = itemStartContent + itemMainSize / 2.0f - viewportMainSize / 2.0f;
+        } else if (align == ScrollSnapAlign::END) {
+            snapOffset = itemStartContent + itemMainSize - viewportMainSize;
+        }
+        candidates.push_back({ snapOffset, index });
+    }
+    ScrollSnapUtils::NormalizeCandidates(candidates);
+    return candidates;
+}
+
+float GridPattern::GetItemSnapMaxOffset() const
+{
+    auto maxOffset = GetTotalHeight() - GetMainContentSize();
+    // Lazy content height can be underestimated before the end is reached; never clamp below the
+    // current position so that snap targets stay reachable.
+    return std::max(maxOffset, static_cast<float>(GetTotalOffset()));
+}
+
 Rect GridPattern::GetItemRect(int32_t index) const
 {
     if (index < 0 || index < info_.startIndex_ || index > info_.endIndex_) {

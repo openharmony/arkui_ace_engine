@@ -99,6 +99,10 @@ public:
     virtual void ResetListSpace() {};
     virtual void ResetListSpaceWidth() {};
     virtual void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) {};
+
+    // FEAT-029: two-stage item scroll snap strategy (built-in align or custom offset provider).
+    virtual void SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy) {};
+    virtual void ResetScrollSnapStrategy() {};
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize(NG::FrameNode* node = nullptr)
     {
         return nullptr;

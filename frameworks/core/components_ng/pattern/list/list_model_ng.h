@@ -56,6 +56,8 @@ public:
     void SetContentStartOffset(float startOffset) override;
     void SetContentEndOffset(float endOffset) override;
     void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) override;
+    void SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy) override;
+    void ResetScrollSnapStrategy() override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
@@ -156,6 +158,8 @@ public:
     static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static void SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign);
     static int32_t GetScrollSnapAlign(FrameNode* frameNode);
+    static void SetScrollSnapStrategy(FrameNode* frameNode, const ScrollSnapStrategy& scrollSnapStrategy);
+    static void ResetScrollSnapStrategy(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static float GetContentStartOffset(FrameNode* frameNode);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);

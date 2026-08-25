@@ -243,6 +243,16 @@ void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
+void WaterFlowModelNG::SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy);
+}
+
+void WaterFlowModelNG::ResetScrollSnapStrategy()
+{
+    ACE_RESET_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollSnapStrategy);
+}
+
 void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
@@ -662,6 +672,16 @@ void WaterFlowModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollO
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
+}
+
+void WaterFlowModelNG::SetScrollSnapStrategy(FrameNode* frameNode, const ScrollSnapStrategy& scrollSnapStrategy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy, frameNode);
+}
+
+void WaterFlowModelNG::ResetScrollSnapStrategy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollSnapStrategy, frameNode);
 }
 
 void WaterFlowModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>& friction)

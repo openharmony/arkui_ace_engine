@@ -252,6 +252,17 @@ void GridModelStatic::SetNestedScroll(FrameNode* frameNode, const NestedScrollOp
     pattern->SetNestedScroll(nestedOpt);
 }
 
+void GridModelStatic::SetScrollSnapStrategy(
+    FrameNode* frameNode, const std::optional<ScrollSnapStrategy>& scrollSnapStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (scrollSnapStrategy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollSnapStrategy, frameNode);
+    }
+}
+
 void GridModelStatic::SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& scrollEnabled)
 {
     if (scrollEnabled) {

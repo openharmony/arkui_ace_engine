@@ -51,6 +51,7 @@ public:
         FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
         EffectEdge edge = EffectEdge::ALL);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetScrollSnapStrategy(FrameNode* frameNode, const std::optional<ScrollSnapStrategy>& scrollSnapStrategy);
     static void SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& scrollEnabled);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);

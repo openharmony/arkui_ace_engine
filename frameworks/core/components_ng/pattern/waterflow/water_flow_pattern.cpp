@@ -636,6 +636,73 @@ void WaterFlowPattern::OnRestoreInfo(const std::string& restoreInfo)
     SetScrollAlign(ScrollAlign::START);
 }
 
+SnapType WaterFlowPattern::GetSnapType()
+{
+    auto strategy = GetScrollSnapStrategy();
+    return strategy.IsEnabled() ? SnapType::LIST_SNAP : SnapType::NONE_SNAP;
+}
+
+ScrollSnapStrategy WaterFlowPattern::GetScrollSnapStrategy() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ScrollSnapStrategy());
+    auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ScrollSnapStrategy());
+    return layoutProperty->GetScrollSnapStrategy().value_or(ScrollSnapStrategy());
+}
+
+bool WaterFlowPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
+{
+    return StartItemSnapAnimation(snapAnimationOptions);
+}
+
+std::vector<ScrollSnapUtils::SnapCandidate> WaterFlowPattern::BuildItemSnapCandidates(ScrollSnapAlign align)
+{
+    std::vector<ScrollSnapUtils::SnapCandidate> candidates;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, candidates);
+    if (align == ScrollSnapAlign::NONE || !IsScrollable()) {
+        return candidates;
+    }
+    auto axis = GetAxis();
+    auto currentOffset = static_cast<float>(GetTotalOffset());
+    auto viewportMainSize = GetMainContentSize();
+    // When a footer is loaded the child index is shifted by (footerIndex_ + 1).
+    auto footerOffset = layoutInfo_->footerIndex_ + 1;
+    // Only visible + cached items are materialized; never scan the whole data set (R-12). Works for
+    // all three layout modes (top-down / segmented / sliding window) through the child geometry.
+    for (int32_t index = layoutInfo_->startIndex_; index <= layoutInfo_->endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index + footerOffset);
+        CHECK_NULL_CONTINUE(item);
+        auto itemGeometry = item->GetGeometryNode();
+        CHECK_NULL_CONTINUE(itemGeometry);
+        const auto& rect = itemGeometry->GetFrameRect();
+        auto itemStartView = axis == Axis::VERTICAL ? rect.GetY() : rect.GetX();
+        auto itemMainSize = axis == Axis::VERTICAL ? rect.Height() : rect.Width();
+        if (LessOrEqual(itemMainSize, 0.0f)) {
+            continue;
+        }
+        auto itemStartContent = itemStartView + currentOffset;
+        float snapOffset = itemStartContent;
+        if (align == ScrollSnapAlign::CENTER) {
+            snapOffset = itemStartContent + itemMainSize / 2.0f - viewportMainSize / 2.0f;
+        } else if (align == ScrollSnapAlign::END) {
+            snapOffset = itemStartContent + itemMainSize - viewportMainSize;
+        }
+        candidates.push_back({ snapOffset, index });
+    }
+    ScrollSnapUtils::NormalizeCandidates(candidates);
+    return candidates;
+}
+
+float WaterFlowPattern::GetItemSnapMaxOffset() const
+{
+    auto maxOffset = layoutInfo_->GetContentHeight() + layoutInfo_->contentEndOffset_ - GetMainContentSize();
+    // Estimated content height can be underestimated before the end is reached; never clamp below
+    // the current position so that snap targets stay reachable.
+    return std::max(maxOffset, static_cast<float>(GetTotalOffset()));
+}
+
 Rect WaterFlowPattern::GetItemRect(int32_t index) const
 {
     if (index < 0 || index < layoutInfo_->startIndex_ || index > layoutInfo_->endIndex_) {

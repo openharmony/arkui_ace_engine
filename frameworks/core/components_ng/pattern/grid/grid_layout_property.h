@@ -148,6 +148,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AlignItems, GridItemAlignment);
+    // FEAT-029: item scroll snap strategy (built-in align or custom offset provider).
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapStrategy, ScrollSnapStrategy, PROPERTY_UPDATE_MEASURE);
     void OnAlignItemsUpdate(GridItemAlignment /* alignItems */) const
     {
         ResetGridLayoutInfoAndMeasure();

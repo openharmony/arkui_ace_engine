@@ -66,6 +66,9 @@ public:
 
     virtual void SetLayoutDirection(FlexDirection value) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
+    // FEAT-029: two-stage item scroll snap strategy (built-in align or custom offset provider).
+    virtual void SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy) {}
+    virtual void ResetScrollSnapStrategy() {}
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
 
     virtual void SetOnReachStart(OnReachEvent&& onReachStart) = 0;

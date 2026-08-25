@@ -1125,7 +1125,21 @@ ScrollSnapAlign ListPattern::GetScrollSnapAlign() const
     CHECK_NULL_RETURN(host, ScrollSnapAlign::NONE);
     auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, ScrollSnapAlign::NONE);
+    // FEAT-029: a built-in scrollSnapStrategy align overrides the legacy attribute.
+    auto strategy = listProperty->GetScrollSnapStrategy();
+    if (strategy.has_value() && strategy.value().align != ScrollSnapAlign::NONE) {
+        return strategy.value().align;
+    }
     return listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
+}
+
+ScrollSnapStrategy ListPattern::GetScrollSnapStrategy() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ScrollSnapStrategy());
+    auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, ScrollSnapStrategy());
+    return listProperty->GetScrollSnapStrategy().value_or(ScrollSnapStrategy());
 }
 
 bool ListPattern::IsAtTop() const
@@ -1472,7 +1486,13 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     auto snapDirection = snapAnimationOptions.snapDirection;
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
-    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
+    // FEAT-029: provider-only scrollSnapStrategy uses the shared two-stage flow; a built-in strategy
+    // align is folded into GetScrollSnapAlign() and keeps the legacy List snap pipeline.
+    auto strategy = listProperty->GetScrollSnapStrategy().value_or(ScrollSnapStrategy());
+    if (strategy.hasProvider && strategy.align == ScrollSnapAlign::NONE) {
+        return StartItemSnapAnimation(snapAnimationOptions);
+    }
+    auto scrollSnapAlign = GetScrollSnapAlign();
     CHECK_NULL_RETURN(scrollSnapAlign != ScrollSnapAlign::NONE, false);
     if (snapDirection != SnapDirection::NONE) {
         return ScrollToSnapIndex(snapDirection, scrollSnapAlign);

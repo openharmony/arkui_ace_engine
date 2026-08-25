@@ -155,6 +155,16 @@ void ListModelStatic::SetScrollSnapAlign(FrameNode* frameNode, const std::option
     }
 }
 
+void ListModelStatic::SetScrollSnapStrategy(
+    FrameNode* frameNode, const std::optional<ScrollSnapStrategy>& scrollSnapStrategy)
+{
+    if (scrollSnapStrategy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapStrategy, frameNode);
+    }
+}
+
 void ListModelStatic::SetListFriction(FrameNode* frameNode, const std::optional<double>& friction)
 {
     CHECK_NULL_VOID(frameNode);

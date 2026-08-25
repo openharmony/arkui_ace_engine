@@ -311,6 +311,16 @@ void GridModelNG::SetScrollEnabled(bool scrollEnabled)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
+void GridModelNG::SetScrollSnapStrategy(const ScrollSnapStrategy& scrollSnapStrategy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy);
+}
+
+void GridModelNG::ResetScrollSnapStrategy()
+{
+    ACE_RESET_LAYOUT_PROPERTY(GridLayoutProperty, ScrollSnapStrategy);
+}
+
 void GridModelNG::SetFriction(double friction)
 {
     ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetFriction", 1);
@@ -766,6 +776,16 @@ void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOption
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
+}
+
+void GridModelNG::SetScrollSnapStrategy(FrameNode* frameNode, const ScrollSnapStrategy& scrollSnapStrategy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollSnapStrategy, scrollSnapStrategy, frameNode);
+}
+
+void GridModelNG::ResetScrollSnapStrategy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollSnapStrategy, frameNode);
 }
 
 NestedScrollOptions GridModelNG::GetNestedScroll(FrameNode* frameNode)

@@ -36,6 +36,13 @@ public:
 
     bool UpdateCurrentOffset(float delta, int32_t source) override;
     bool IsScrollable() const override;
+
+    // FEAT-029: item scroll snap (scrollSnapStrategy) integration.
+    SnapType GetSnapType() override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
+    ScrollSnapStrategy GetScrollSnapStrategy() const override;
+    std::vector<ScrollSnapUtils::SnapCandidate> BuildItemSnapCandidates(ScrollSnapAlign align) override;
+    float GetItemSnapMaxOffset() const override;
     bool IsAtTop() const override;
     bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTopWithDelta() const override;

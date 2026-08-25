@@ -301,10 +301,18 @@ public:
     SnapType GetSnapType() override
     {
         auto snapAlign = GetScrollSnapAlign();
-        return snapAlign != ScrollSnapAlign::NONE ? SnapType::LIST_SNAP : SnapType::NONE_SNAP;
+        if (snapAlign != ScrollSnapAlign::NONE) {
+            return SnapType::LIST_SNAP;
+        }
+        // FEAT-029: a provider-only scrollSnapStrategy still enables the snap pipeline.
+        return GetScrollSnapStrategy().hasProvider ? SnapType::LIST_SNAP : SnapType::NONE_SNAP;
     }
 
     ScrollSnapAlign GetScrollSnapAlign() const;
+
+    // FEAT-029: item scroll snap strategy stored on ListLayoutProperty. When set it takes precedence
+    // over the legacy scrollSnapAlign attribute (last-set-wins semantics).
+    ScrollSnapStrategy GetScrollSnapStrategy() const override;
 
     void SetLastSnapTargetIndex(int32_t lastSnapTargetIndex) override
     {
