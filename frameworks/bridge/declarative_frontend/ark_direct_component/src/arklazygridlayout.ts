@@ -53,7 +53,7 @@ function loadComponent(): ComponentObj | undefined {
       constructor(nativePtr: any, classType: any) {
         super(nativePtr, classType);
       }
-      columnsTemplate(value: string): this {
+      columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         modifierWithKey(this._modifiersWithKeys, LazyGridColumnsTemplateModifier.identity, LazyGridColumnsTemplateModifier, value);
         return this;
       }
@@ -149,14 +149,16 @@ function loadComponent(): ComponentObj | undefined {
     }
     (LazyGridOnVisibleIndexesChangeModifier as any).identity = Symbol('lazyGridOnVisibleIndexesChange');
 
-    class LazyGridColumnsTemplateModifier extends ModifierWithKey<string> {
-      constructor(value: string) {
+    class LazyGridColumnsTemplateModifier extends ModifierWithKey<string | ItemFillPolicy> {
+      constructor(value: string | ItemFillPolicy) {
         super(value);
       }
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
           getUINativeModule().lazyVGridLayout.resetColumnsTemplate(node);
         } else {
+          // The native bridge dispatches by argument type: string sets the fixed template,
+          // ItemFillPolicy sets the breakpoint-adaptive columns (last-set-wins, same as Grid).
           getUINativeModule().lazyVGridLayout.setColumnsTemplate(node, this.value);
         }
       }
