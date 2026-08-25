@@ -371,9 +371,19 @@ HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
     richEditorPattern->SetPlaceholder(spans);
     EXPECT_EQ(spans.size(), 1);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(50.0f, 50.0f));
+    // Branch: contentRect offset == (0,0) -> UpdateRichTextRectOffsetWithPadding
     richEditorPattern->isShowPlaceholder_ = false;
+    PaddingProperty padding;
+    padding.left = CalcLength(Dimension(20.0f, DimensionUnit::PX));
+    padding.top = CalcLength(Dimension(30.0f, DimensionUnit::PX));
+    richEditorNode_->GetLayoutProperty<RichEditorLayoutProperty>()->UpdatePadding(padding);
     richEditorPattern->SetPlaceholder(spans);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(0, 0));
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(20.0f, 30.0f));
+    // Branch: contentRect offset != (0,0) -> richTextRect_.SetOffset(contentRect_.GetOffset())
+    richEditorPattern->isShowPlaceholder_ = false;
+    richEditorPattern->contentRect_ = RectF(10.0f, 20.0f, 100, 100);
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(10.0f, 20.0f));
 }
 
 /**
