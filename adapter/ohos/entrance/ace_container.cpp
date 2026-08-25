@@ -4388,7 +4388,6 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
     }
     dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
     dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
-    dragPointerEvent.rawPointerEvent = currentPointerEvent;
     bool downLocked = false;
     auto downIter = downScreenLockedMap_.find(dragPointerEvent.originId);
     if (downIter != downScreenLockedMap_.end()) {

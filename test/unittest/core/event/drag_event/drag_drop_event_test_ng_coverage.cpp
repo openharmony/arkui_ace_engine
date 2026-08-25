@@ -498,10 +498,9 @@ HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorHandleTouchEventAndNo
 
 /**
  * @tc.name: DragDropEventActuatorGetIsDownScreenLocked001
- * @tc.desc: OnCollectTouchTarget reads the down screen-locked state from the touch
- *           event's MMI PointerEvent flag. When no MMI PointerEvent is carried (the
- *           test environment does not populate touchEvent.pointerEvent), the capture is
- *           skipped and GetIsDownScreenLocked() stays false, without crashing.
+ * @tc.desc: OnCollectTouchTarget reads the down screen-locked state from
+ *           touchEvent.isScreenLocked. When the down event is not screen-locked,
+ *           GetIsDownScreenLocked() stays false.
  * @tc.type: FUNC
  */
 HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorGetIsDownScreenLocked001, TestSize.Level1)
@@ -510,17 +509,17 @@ HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorGetIsDownScreenLocked
     ASSERT_NE(context.actuator, nullptr);
     EXPECT_FALSE(context.actuator->GetIsDownScreenLocked());
 
+    auto touchRestrict = CreateTouchRestrict(SourceType::TOUCH, TEST_TOUCH_ID);
+    touchRestrict.touchEvent.isScreenLocked = false;
     TouchTestResult result;
-    CollectTouchTarget(context, CreateTouchRestrict(SourceType::TOUCH, TEST_TOUCH_ID), result);
+    CollectTouchTarget(context, touchRestrict, result);
     EXPECT_FALSE(context.actuator->GetIsDownScreenLocked());
 }
 
 /**
  * @tc.name: DragDropEventActuatorIsDragStartedAcrossScreenLock001
- * @tc.desc: IsDragStartedAcrossScreenLock returns false when the trigger GestureEvent
- *           carries no MMI PointerEvent (info.GetPointerEvent() is null): the trigger-time
- *           lock flag cannot be read, so no cross-lock verdict. Guards the
- *           null-pointerEvent path.
+ * @tc.desc: IsDragStartedAcrossScreenLock returns false when both down and trigger
+ *           are unlocked (no cross-lock).
  * @tc.type: FUNC
  */
 HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorIsDragStartedAcrossScreenLock001, TestSize.Level1)
@@ -528,11 +527,43 @@ HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorIsDragStartedAcrossSc
     auto context = CreateDragDropContext(V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
     ASSERT_NE(context.actuator, nullptr);
 
+    auto touchRestrict = CreateTouchRestrict(SourceType::TOUCH, TEST_TOUCH_ID);
+    touchRestrict.touchEvent.isScreenLocked = false;
     TouchTestResult result;
-    CollectTouchTarget(context, CreateTouchRestrict(SourceType::TOUCH, TEST_TOUCH_ID), result);
+    CollectTouchTarget(context, touchRestrict, result);
 
     GestureEvent info;
-    EXPECT_FALSE(info.GetPointerEvent());
     EXPECT_FALSE(context.actuator->IsDragStartedAcrossScreenLock(info));
+}
+
+/**
+ * @tc.name: DragDropEventActuatorIsDragStartedAcrossScreenLock002
+ * @tc.desc: Cross-lock drag: down unlocked, trigger locked. CaptureDownScreenLocked
+ *           sets isDownScreenLocked_=false (down) and isTriggerScreenLocked_=true
+ *           (trigger), so IsDragStartedAcrossScreenLock returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestCoverageNg, DragDropEventActuatorIsDragStartedAcrossScreenLock002, TestSize.Level1)
+{
+    auto context = CreateDragDropContext(V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(context.actuator, nullptr);
+
+    // Down event: screen unlocked
+    auto touchRestrict = CreateTouchRestrict(SourceType::TOUCH, TEST_TOUCH_ID);
+    touchRestrict.touchEvent.isScreenLocked = false;
+    TouchTestResult result;
+    CollectTouchTarget(context, touchRestrict, result);
+    EXPECT_FALSE(context.actuator->GetIsDownScreenLocked());
+
+    // Trigger event: screen locked (simulates lock between down and trigger)
+    context.actuator->CaptureDownScreenLocked(touchRestrict.touchEvent);
+    // Simulate the trigger event arriving while locked
+    TouchEvent triggerEvent;
+    triggerEvent.type = TouchType::MOVE;
+    triggerEvent.isScreenLocked = true;
+    context.actuator->CaptureDownScreenLocked(triggerEvent);
+
+    GestureEvent info;
+    EXPECT_TRUE(context.actuator->IsDragStartedAcrossScreenLock(info));
 }
 } // namespace OHOS::Ace::NG

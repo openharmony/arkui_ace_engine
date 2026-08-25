@@ -467,6 +467,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     int32_t orgAction = pointerEvent->GetPointerAction();
     SetTouchEventType(orgAction, event);
     event.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
+    event.isScreenLocked = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED);
     UpdateTouchEvent(pointerEvent, event);
     if (event.sourceType == SourceType::TOUCH && event.sourceTool == SourceTool::PEN) {
         // Pen use type double XY position.
@@ -591,6 +592,7 @@ void ConvertMouseEvent(
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
+    events.isScreenLocked = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED);
     events.isStylusMouseMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_STYLUS_MOUSE_MODE);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();

@@ -16,7 +16,6 @@
 #include "gesture_event_hub.h"
 
 #include <algorithm>
-#include "pointer_event.h" // MMI PointerEvent (complete type for HasFlag)
 
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"

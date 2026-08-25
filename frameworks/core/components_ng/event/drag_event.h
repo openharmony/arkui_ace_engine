@@ -247,7 +247,6 @@ public:
     virtual void NotifyPreDragStatus(const PreDragStatus preDragStatus) {};
 
     // Whether the screen was locked when the drag's triggering touch down arrived.
-    // The down state is captured from the MMI PointerEvent flag (EVENT_FLAG_SCREEN_LOCKED).
     virtual bool GetIsDownScreenLocked() const { return isDownScreenLocked_; }
 
     // True only for a cross-lock drag: down unlocked, trigger locked. A drag that
@@ -263,8 +262,8 @@ public:
 
     void RecordTouchDownPoint(const TouchEvent& downTouchEvent);
 
-    // Capture the screen-locked state from the down event's MMI PointerEvent flag
-    // into isDownScreenLocked_. Implemented in drag_event.cpp (has MMI complete type).
+    // Capture screen-locked state from the touch event: isDownScreenLocked_ on DOWN,
+    // isTriggerScreenLocked_ on every event.
     void CaptureDownScreenLocked(const TouchEvent& touchEvent);
 
     const TouchEvent& GetTouchDownPoint();
@@ -337,6 +336,7 @@ private:
 
 protected:
     bool isDownScreenLocked_ = false;
+    bool isTriggerScreenLocked_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -71,6 +71,7 @@ struct MouseEvent final : public PointerEvent {
     bool isInjected = false;
     bool isPrivacyMode = false;
     bool isStylusMouseMode = false;
+    bool isScreenLocked = false;
     bool isMockWindowTransFlag = false;
     TimeStamp pressedTime;
     bool isRightButtonEventFromDoulbeTap = false;

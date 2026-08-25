@@ -15,7 +15,6 @@
 
 #include "core/components_ng/event/drag_event.h"
 
-#include "pointer_event.h" // complete MMI type for HasFlag
 #include "base/log/ace_trace.h"
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -247,10 +246,10 @@ void DragEventActuator::RecordTouchDownPoint(const TouchEvent& downTouchEvent)
 
 void DragEventActuator::CaptureDownScreenLocked(const TouchEvent& touchEvent)
 {
-    if (touchEvent.type == TouchType::DOWN && touchEvent.pointerEvent) {
-        isDownScreenLocked_ = (touchEvent.pointerEvent->GetFlag() &
-            MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED) != 0;
+    if (touchEvent.type == TouchType::DOWN) {
+        isDownScreenLocked_ = touchEvent.isScreenLocked;
     }
+    isTriggerScreenLocked_ = touchEvent.isScreenLocked;
 }
 
 const TouchEvent& DragEventActuator::GetTouchDownPoint()
@@ -2618,10 +2617,7 @@ void DragEventActuator::HandleTextDragCallback(Offset offset)
 
 bool DragEventActuator::IsDragStartedAcrossScreenLock(const GestureEvent& info) const
 {
-    if (GetIsDownScreenLocked()) {
-        return false;
-    }
-    const auto& pointerEvent = info.GetPointerEvent();
-    return pointerEvent && pointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED);
+    (void)info;
+    return !isDownScreenLocked_ && isTriggerScreenLocked_;
 }
 } // namespace OHOS::Ace::NG
