@@ -8857,7 +8857,10 @@ bool RosenRenderContext::SetKeyFrameNodeOpacityAnimation(int32_t duration, int32
         },
         [weak = WeakClaim(this), isDragEnd]() {
             auto rosenRender = weak.Upgrade();
-            CHECK_NULL_VOID(rosenRender);
+            if (!rosenRender) {
+                animationFlag = false;
+                return;
+            }
             if (rosenRender->keyFrameNode_) {
                 rosenRender->keyFrameNode_->SetAlpha(1.0f);
             }
