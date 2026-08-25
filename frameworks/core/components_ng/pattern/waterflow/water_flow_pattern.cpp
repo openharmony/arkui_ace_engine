@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
@@ -46,7 +50,45 @@
 
 namespace OHOS::Ace::NG {
 
-WaterFlowPattern::~WaterFlowPattern() = default;
+WaterFlowPattern::~WaterFlowPattern()
+{
+    UnregisterScrollPlaceHolder();
+}
+
+void WaterFlowPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+{
+    scrollPlaceholderProvider_ = provider;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto manager = ScrollPlaceholderUtils::GetManager(host);
+    CHECK_NULL_VOID(manager);
+    if (!scrollPlaceholderProvider_) {
+        manager->UnregisterContainer(host->GetId());
+        return;
+    }
+    manager->RegisterContainer(
+        WeakClaim(RawPtr(host)), std::move(provider),
+        [](const ScrollPlaceHolderOptions& options) -> RefPtr<FrameNode> {
+            // Placeholder item shell: a plain FlowItem.
+            return FrameNode::CreateFrameNode(V2::FLOW_ITEM_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<WaterFlowItemPattern>());
+        });
+}
+
+void WaterFlowPattern::UnregisterScrollPlaceHolder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto manager = ScrollPlaceholderUtils::GetManager(host);
+    CHECK_NULL_VOID(manager);
+    manager->UnregisterContainer(host->GetId());
+}
+
+void WaterFlowPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    UnregisterScrollPlaceHolder();
+}
 
 RefPtr<LayoutProperty> WaterFlowPattern::CreateLayoutProperty()
 {

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
 #include "base/utils/feature_param.h"
@@ -463,7 +464,8 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         }
         position = GetItemPosition(++currentIndex);
         fill = true;
-        if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (!syncLoad_ && layoutWrapper->ReachResponseDeadline() &&
+            !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(layoutWrapper)) {
             layoutInfo_->measureInNextFrame_ = true;
             break;
         }

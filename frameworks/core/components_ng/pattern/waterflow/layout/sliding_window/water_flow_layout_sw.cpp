@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 
 #include <algorithm>
@@ -483,7 +484,8 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, laneIdx });
         }
-        if (!cacheDeadline_ && !syncLoad_ && wrapper_->ReachResponseDeadline()) {
+        if (!cacheDeadline_ && !syncLoad_ && wrapper_->ReachResponseDeadline() &&
+            !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(wrapper_)) {
             info_->measureInNextFrame_ = true;
             return true;
         }

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/grid/grid_properties.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_types.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace {
@@ -95,6 +96,8 @@ public:
     virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
     virtual void SetSyncLoad(bool syncLoad) {}
+    // FEAT-005: opt-in scroll placeholder provider for this Grid.
+    virtual void SetScrollPlaceHolder(NG::ScrollPlaceHolderProvider&& provider) {}
     virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {};
     virtual void SetEnableEditMode(bool enableEditMode) {};
     virtual void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) {};

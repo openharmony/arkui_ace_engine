@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 
 #include "base/geometry/dimension.h"
@@ -571,7 +572,8 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             Fill(i);
             break;
         }
-        if (!syncLoad_ && wrapper_->ReachResponseDeadline()) {
+        if (!syncLoad_ && wrapper_->ReachResponseDeadline() &&
+            !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(wrapper_)) {
             info_->measureInNextFrame_ = true;
             break;
         }

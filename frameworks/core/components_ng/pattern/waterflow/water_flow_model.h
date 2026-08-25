@@ -25,6 +25,7 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_types.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_mode.h"
 
 namespace OHOS::Ace {
@@ -111,6 +112,8 @@ public:
     virtual void ParseResObjItemMaxHeight(const RefPtr<ResourceObject>& resObj) {};
 
     virtual void SetSyncLoad(bool syncLoad) {}
+    // FEAT-005: opt-in scroll placeholder provider for this WaterFlow.
+    virtual void SetScrollPlaceHolder(NG::ScrollPlaceHolderProvider&& provider) {}
     virtual void ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetSupportLazyLoadingEmptyBranch(bool enable) {};
 private:

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
@@ -816,7 +817,8 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         if (GreatOrEqual(lineHeight, 0.0)) {
             mainLength += (lineHeight + mainGap_);
-            if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+            if (!syncLoad_ && layoutWrapper->ReachResponseDeadline() &&
+                !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(layoutWrapper)) {
                 measureInNextFrame_ = true;
                 break;
             }
@@ -864,7 +866,8 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
             info_.endIndex_ = currentIndex;
             currentIndex++;
             doneFillCurrentLine = true;
-            if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+            if (!syncLoad_ && layoutWrapper->ReachResponseDeadline() &&
+                !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(layoutWrapper)) {
                 measureInNextFrame_ = true;
                 break;
             }
@@ -1620,7 +1623,8 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
             break;
         }
         addLine = true;
-        if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (!syncLoad_ && layoutWrapper->ReachResponseDeadline() &&
+                !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(layoutWrapper)) {
             measureInNextFrame_ = true;
             break;
         }

@@ -23,6 +23,11 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
@@ -58,7 +63,45 @@ const int32_t MAX_NUM_SIZE = 4;
 
 GridPattern::GridPattern() = default;
 
-GridPattern::~GridPattern() = default;
+GridPattern::~GridPattern()
+{
+    UnregisterScrollPlaceHolder();
+}
+
+void GridPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+{
+    scrollPlaceholderProvider_ = provider;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto manager = ScrollPlaceholderUtils::GetManager(host);
+    CHECK_NULL_VOID(manager);
+    if (!scrollPlaceholderProvider_) {
+        manager->UnregisterContainer(host->GetId());
+        return;
+    }
+    manager->RegisterContainer(
+        WeakClaim(RawPtr(host)), std::move(provider),
+        [](const ScrollPlaceHolderOptions& options) -> RefPtr<FrameNode> {
+            // Placeholder item shell: a plain GridItem with no drag/edit logic.
+            return FrameNode::CreateFrameNode(V2::GRID_ITEM_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<GridItemPattern>(nullptr, GridItemStyle::NONE));
+        });
+}
+
+void GridPattern::UnregisterScrollPlaceHolder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto manager = ScrollPlaceholderUtils::GetManager(host);
+    CHECK_NULL_VOID(manager);
+    manager->UnregisterContainer(host->GetId());
+}
+
+void GridPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    UnregisterScrollPlaceHolder();
+}
 
 RefPtr<LayoutProperty> GridPattern::CreateLayoutProperty()
 {

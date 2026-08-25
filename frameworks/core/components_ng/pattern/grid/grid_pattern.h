@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_types.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +39,11 @@ class ACE_EXPORT GridPattern : public SelectableContainerPattern {
 public:
     GridPattern();
     ~GridPattern() override;
+
+    // FEAT-005 scroll placeholder (see ListPattern::SetScrollPlaceHolder).
+    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider);
+    void UnregisterScrollPlaceHolder();
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
@@ -320,6 +326,8 @@ public:
     int32_t GetFirstIndex() const override;
 
     void ApplyEditModeToCachedItems(bool enabled) override;
+
+    ScrollPlaceHolderProvider scrollPlaceholderProvider_;
 
 private:
     /**

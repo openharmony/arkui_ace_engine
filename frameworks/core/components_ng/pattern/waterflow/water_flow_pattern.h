@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_types.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +34,11 @@ class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
 
 public:
     ~WaterFlowPattern() override;
+
+    // FEAT-005 scroll placeholder (see ListPattern::SetScrollPlaceHolder).
+    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider);
+    void UnregisterScrollPlaceHolder();
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     bool UpdateCurrentOffset(float delta, int32_t source) override;
     bool IsScrollable() const override;
@@ -244,6 +250,8 @@ public:
     }
 
     int32_t GetFirstIndex() const override;
+    ScrollPlaceHolderProvider scrollPlaceholderProvider_;
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
