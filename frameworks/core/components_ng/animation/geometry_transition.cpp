@@ -689,6 +689,7 @@ bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
     if (IsNodeInAndActive(frameNode)) {
         auto parentNode = node->GetAncestorNodeOfFrame(false);
         if (parentNode) {
+            node->SetGeometryTransitionNeedLayout(true);
             MarkLayoutDirty(node);
             MarkLayoutDirty(parentNode);
             ret = true;

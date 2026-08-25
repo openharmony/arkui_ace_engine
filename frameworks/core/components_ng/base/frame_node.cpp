@@ -3045,7 +3045,7 @@ void FrameNode::SetNodeFreeze(bool isFreeze)
 
 void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskType)
 {
-    if (!isLayoutDirtyMarked_ && (layoutTaskType == LayoutType::NONE)) {
+    if (!isLayoutDirtyMarked_ && layoutTaskType == LayoutType::NONE && !geometryTransitionNeedLayout_) {
         return;
     }
 
@@ -3087,6 +3087,7 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
         }
     }
     SetRootMeasureNode(false);
+    geometryTransitionNeedLayout_ = false;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
