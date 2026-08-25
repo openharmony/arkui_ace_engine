@@ -15,6 +15,7 @@
 #include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -225,24 +226,14 @@ void WaterFlowLayoutUtils::UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item
 AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& item)
 {
     AdjustOffset pos {};
-    RefPtr<UINode> child = AceType::DynamicCast<FrameNode>(item);
-    do {
-        CHECK_NULL_RETURN(child, pos);
-        auto frameNode = AceType::DynamicCast<FrameNode>(child);
-        if (!frameNode) {
-            child = child->GetFirstChild();
-            continue;
-        }
-        if (!frameNode->GetLayoutProperty()->GetNeedLazyLayout()) {
-            return pos;
-        }
-        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
-        if (pattern) {
-            return pattern->GetAndResetAdjustOffset();
-        }
-        child = child->GetFirstChild();
-    } while (child);
-    return pos;
+    CHECK_NULL_RETURN(item, pos);
+    // FEAT-027: resolve the lazy host through the needLazyLayout-marked path so adjust offsets keep flowing
+    // when ordinary intermediate containers sit between the WaterFlow item and the lazy host.
+    auto hostNode = item->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, pos);
+    auto pattern = LazyLayoutUtils::GetLazyLayoutPattern(hostNode);
+    CHECK_NULL_RETURN(pattern, pos);
+    return pattern->GetAndResetAdjustOffset();
 }
 
 RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItem(

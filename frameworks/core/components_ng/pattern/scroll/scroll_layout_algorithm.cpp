@@ -48,7 +48,9 @@ AdjustOffset GetLazyChildAdjustOffset(const RefPtr<LayoutWrapper>& itemWrapper)
     CHECK_NULL_RETURN(itemWrapper, offset);
     auto frameNode = itemWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, offset);
-    auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+    // FEAT-027: the lazy host may sit below ordinary intermediate containers, so resolve it through the
+    // needLazyLayout-marked path instead of assuming the direct child is the lazy host itself.
+    auto pattern = LazyLayoutUtils::GetLazyLayoutPattern(frameNode);
     CHECK_NULL_RETURN(pattern, offset);
     return pattern->GetAndResetAdjustOffset();
 }

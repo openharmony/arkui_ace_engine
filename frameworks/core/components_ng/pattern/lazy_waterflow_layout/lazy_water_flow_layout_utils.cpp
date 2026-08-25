@@ -194,24 +194,14 @@ bool LazyWaterFlowLayoutUtils::NeedFullRangeForDirectWaterFlow(const RefPtr<Fram
 AdjustOffset LazyWaterFlowLayoutUtils::GetLazyChildAdjustOffset(const RefPtr<LayoutWrapper>& item)
 {
     AdjustOffset pos;
-    RefPtr<UINode> child = AceType::DynamicCast<FrameNode>(item);
-    while (child) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(child);
-        if (!frameNode) {
-            child = child->GetFirstChild();
-            continue;
-        }
-        auto layoutProperty = frameNode->GetLayoutProperty();
-        if (!layoutProperty || !layoutProperty->GetNeedLazyLayout()) {
-            return pos;
-        }
-        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
-        if (pattern) {
-            return pattern->GetAndResetAdjustOffset();
-        }
-        child = child->GetFirstChild();
-    }
-    return pos;
+    CHECK_NULL_RETURN(item, pos);
+    // FEAT-027: resolve the lazy host through the needLazyLayout-marked path so adjust offsets keep flowing
+    // when ordinary intermediate containers sit between the measured child and the nested lazy host.
+    auto hostNode = item->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, pos);
+    auto pattern = LazyLayoutUtils::GetLazyLayoutPattern(hostNode);
+    CHECK_NULL_RETURN(pattern, pos);
+    return pattern->GetAndResetAdjustOffset();
 }
 
 } // namespace OHOS::Ace::NG
