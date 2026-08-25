@@ -7458,8 +7458,10 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     if (isTransitionIn) {
         // Isolate the animation callback function, to avoid changing the callback timing of current implicit animation.
         AnimationUtils::AnimateWithCurrentOptions(
-            [this]() {
-                transitionEffect_->Appear();
+            // Executing `Appear` may trigger a frontend callback, which could overwrite `transitionEffect_`;
+            // therefore, `transitionEffect_` should be copied before use.
+            [this, effect = transitionEffect_]() {
+                effect->Appear();
                 ++appearingTransitionCount_;
             },
             [weakThis = WeakClaim(this)]() {
@@ -7491,8 +7493,8 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
         //    is accomplished by setting the last param (timing sensitive) to false, which avoids creating an empty
         //    'timer' animation.
         AnimationUtils::AnimateWithCurrentOptions(
-            [this]() {
-                transitionEffect_->Disappear();
+            [this, effect = transitionEffect_]() {
+                effect->Disappear();
                 // update transition out count
                 ++disappearingTransitionCount_;
             },
