@@ -27,11 +27,11 @@
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/pattern/mock_pattern.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
