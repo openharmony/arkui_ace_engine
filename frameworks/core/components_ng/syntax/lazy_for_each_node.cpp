@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/pipeline/base/element_register.h"
@@ -174,6 +175,8 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
 void LazyForEachNode::OnDataReloaded(bool reuseImmediately)
 {
     ACE_SCOPED_TRACE("LazyForEach OnDataReloaded parendId[%d]", GetParentId());
+    // FEAT-005: dataset reload invalidates pending placeholder real-builds.
+    ScrollPlaceholderUtils::NotifyPlaceholderDataChanged(AceType::Claim(this));
     if (!children_.empty()) {
         tempChildren_.clear();
         tempChildren_.swap(children_);
@@ -197,6 +200,7 @@ void LazyForEachNode::OnDataReloaded(bool reuseImmediately)
 void LazyForEachNode::OnDataAdded(size_t index)
 {
     ACE_SCOPED_TRACE("LazyForEach OnDataAdded parentId[%d]", GetParentId());
+    ScrollPlaceholderUtils::NotifyPlaceholderDataChanged(AceType::Claim(this));
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -231,6 +235,7 @@ void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
 void LazyForEachNode::OnDataDeleted(size_t index)
 {
     ACE_SCOPED_TRACE("LazyForEach OnDataDeleted parentId[%d]", GetParentId());
+    ScrollPlaceholderUtils::NotifyPlaceholderDataChanged(AceType::Claim(this));
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -293,6 +298,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
 
 void LazyForEachNode::OnDataChanged(size_t index)
 {
+    ScrollPlaceholderUtils::NotifyPlaceholderDataChanged(AceType::Claim(this));
     auto changedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -373,6 +379,7 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperations)
 {
     ACE_SCOPED_TRACE("LazyForEach OnDatasetChange parentId[%d]", GetParentId());
+    ScrollPlaceholderUtils::NotifyPlaceholderDataChanged(AceType::Claim(this));
     int32_t initialChangedIndex = 0;
     if (builder_) {
         builder_->SetUseNewInterface(true);

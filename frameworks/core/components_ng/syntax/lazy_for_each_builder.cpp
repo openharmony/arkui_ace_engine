@@ -17,7 +17,9 @@
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "base/log/dump_log.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/animation/geometry_transition.h"
 #include <random>
@@ -26,6 +28,7 @@ namespace {
 constexpr int32_t MAX_RANDOM_KEY = 10000;
 constexpr int32_t LOW_MEMORY_DDR_THRESHOLD_GB = 6;
 constexpr int32_t MAX_CACHED_COUNT_FOR_MEMORY_OPTIMIZATION = 2;
+constexpr char SCROLL_PLACEHOLDER_KEY_PREFIX[] = "__scroll_placeholder__";
 }
 
 namespace OHOS::Ace::NG {
@@ -52,11 +55,25 @@ namespace OHOS::Ace::NG {
         if (needBuild) {
             ACE_SCOPED_TRACE("Builder:BuildLazyItem index[%d], needBuild[%d], isCache[%d]",
                 index, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache));
+            // FEAT-005 scroll placeholder: resolve before the real builder.
+            // Visible (non-cache) builds only; cache preloading keeps its
+            // existing predict-task path.
+            if (!isCache) {
+                auto placeholder = ResolveScrollPlaceholderItem(index);
+                if (placeholder.has_value()) {
+                    return placeholder.value();
+                }
+            }
+            const int64_t buildStartTs = GetSysTimestamp();
             std::pair<std::string, RefPtr<UINode>> itemInfo;
             if (useNewInterface_) {
                 itemInfo = OnGetChildByIndexNew(ConvertFromToIndex(index), cachedItems_, expiringItem_);
             } else {
                 itemInfo = OnGetChildByIndex(ConvertFromToIndex(index), expiringItem_);
+            }
+            const int64_t buildDuration = GetSysTimestamp() - buildStartTs;
+            if (!isCache) {
+                RecordScrollPlaceholderBuildCostForIndex(index, buildDuration);
             }
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             if (isCache) {
@@ -1665,6 +1682,143 @@ namespace OHOS::Ace::NG {
     RefPtr<LazyForEachNode> LazyForEachBuilder::GetLazyForEachNode() const
     {
         return lazyForEachNode_.Upgrade();
+    }
+
+    std::optional<LazyForEachChild> LazyForEachBuilder::ResolveScrollPlaceholderItem(int32_t index)
+    {
+        // Fast bail-out: the resolver runs inside every visible item build.
+        auto lazyNode = GetLazyForEachNode();
+        CHECK_NULL_RETURN(lazyNode, std::nullopt);
+        auto manager = ScrollPlaceholderUtils::GetManager(lazyNode);
+        CHECK_NULL_RETURN(manager, std::nullopt);
+        // Already deferred for this index: the placeholder sits in cachedItems_
+        // and is returned by the cache-hit path of GetChildByIndex.
+        if (pendingPlaceholderItems_.find(index) != pendingPlaceholderItems_.end()) {
+            return std::nullopt;
+        }
+        auto host = ScrollPlaceholderUtils::FindEnabledHost(lazyNode);
+        CHECK_NULL_RETURN(host, std::nullopt);
+        const int32_t hostId = host->GetId();
+        auto decision = manager->DecideItemBuild(hostId, index);
+        CHECK_NULL_RETURN(decision.has_value(), std::nullopt);
+        if (decision.value() == ScrollPlaceholderDecision::SYNC_BUILD) {
+            return std::nullopt;
+        }
+
+        // Deferred: create the placeholder item and queue the real build.
+        auto placeholder = manager->CreatePlaceholderItem(hostId, index);
+        CHECK_NULL_RETURN(placeholder.node, std::nullopt);
+        ACE_SCOPED_TRACE("ScrollPlaceholder::Defer hostId:%d index:%d", hostId, index);
+        PlaceholderPendingRecord record;
+        record.hostId = hostId;
+        record.templateId = placeholder.templateId;
+        record.templateKey = placeholder.templateKey;
+        record.gen = manager->GetContainerGeneration(hostId);
+        record.templateGen = manager->GetTemplateGeneration(placeholder.templateId);
+        record.placeholderNode = WeakClaim(RawPtr(placeholder.node));
+        record.placeholderKey = SCROLL_PLACEHOLDER_KEY_PREFIX + std::to_string(hostId) + "_" +
+            std::to_string(index) + "_" + std::to_string(placeholderKeySeq_++);
+        pendingPlaceholderItems_[index] = record;
+        cachedItems_[index] = LazyForEachChild(record.placeholderKey, placeholder.node);
+
+        auto weak = WeakClaim(this);
+        manager->EnqueueRealBuild(hostId, index, record.gen,
+            [weak, index, record](int64_t& buildDurationNs) -> ScrollPlaceholderCommitResult {
+                auto builder = weak.Upgrade();
+                CHECK_NULL_RETURN(builder, ScrollPlaceholderCommitResult::CANCELLED);
+                return builder->CommitScrollPlaceholderRealBuild(index, record, buildDurationNs);
+            });
+        return LazyForEachChild(record.placeholderKey, placeholder.node);
+    }
+
+    void LazyForEachBuilder::RecordScrollPlaceholderBuildCostForIndex(int32_t index, int64_t durationNs)
+    {
+        auto iter = pendingPlaceholderItems_.find(index);
+        if (iter != pendingPlaceholderItems_.end()) {
+            // Should not happen: deferred indexes are served from the cache.
+            return;
+        }
+        auto lazyNode = GetLazyForEachNode();
+        CHECK_NULL_VOID(lazyNode);
+        auto host = ScrollPlaceholderUtils::FindEnabledHost(lazyNode);
+        CHECK_NULL_VOID(host);
+        auto manager = ScrollPlaceholderUtils::GetManager(lazyNode);
+        CHECK_NULL_VOID(manager);
+        // Cost key without a placeholder: per-container default bucket.
+        const std::string templateKey = "default#" + std::to_string(host->GetId());
+        manager->RecordBuildCost(host->GetId(), templateKey, durationNs);
+    }
+
+    ScrollPlaceholderCommitResult LazyForEachBuilder::CommitScrollPlaceholderRealBuild(
+        int32_t index, const PlaceholderPendingRecord& record, int64_t& buildDurationNs)
+    {
+        auto pendingIter = pendingPlaceholderItems_.find(index);
+        if (pendingIter == pendingPlaceholderItems_.end()) {
+            return ScrollPlaceholderCommitResult::CANCELLED;
+        }
+        // Item generation check: the cached entry must still be our placeholder.
+        auto cacheIter = cachedItems_.find(index);
+        if (cacheIter == cachedItems_.end() || cacheIter->second.first != record.placeholderKey) {
+            // Recycled or rebuilt elsewhere: drop the result, never mount it.
+            pendingPlaceholderItems_.erase(pendingIter);
+            return ScrollPlaceholderCommitResult::STALE_DROPPED;
+        }
+        auto lazyNode = GetLazyForEachNode();
+        if (!lazyNode) {
+            pendingPlaceholderItems_.erase(pendingIter);
+            return ScrollPlaceholderCommitResult::CANCELLED;
+        }
+        auto manager = ScrollPlaceholderUtils::GetManager(lazyNode);
+        if (!manager || !manager->IsContainerRegistered(record.hostId)) {
+            pendingPlaceholderItems_.erase(pendingIter);
+            return ScrollPlaceholderCommitResult::CANCELLED;
+        }
+        // Container/data generation check.
+        if (!manager->GetContainerGeneration(record.hostId).Matches(record.gen)) {
+            pendingPlaceholderItems_.erase(pendingIter);
+            return ScrollPlaceholderCommitResult::STALE_DROPPED;
+        }
+        // Template generation check (custom templates only).
+        if (!record.templateId.empty() &&
+            manager->GetTemplateGeneration(record.templateId) != record.templateGen) {
+            pendingPlaceholderItems_.erase(pendingIter);
+            return ScrollPlaceholderCommitResult::STALE_DROPPED;
+        }
+
+        // Real business builders execute on the UI thread only (hard rule).
+        ACE_SCOPED_TRACE("ScrollPlaceholder::BuildReal hostId:%d index:%d", record.hostId, index);
+        const int64_t buildStartTs = GetSysTimestamp();
+        LazyForEachChild itemInfo;
+        if (useNewInterface_) {
+            itemInfo = OnGetChildByIndexNew(ConvertFromToIndex(index), cachedItems_, expiringItem_);
+        } else {
+            itemInfo = OnGetChildByIndex(ConvertFromToIndex(index), expiringItem_);
+        }
+        buildDurationNs = GetSysTimestamp() - buildStartTs;
+        manager->RecordBuildCost(record.hostId, record.templateKey, buildDurationNs);
+        if (!itemInfo.second) {
+            // Keep the placeholder; the item will be rebuilt on the next layout.
+            return ScrollPlaceholderCommitResult::FAILED;
+        }
+
+        // Swap placeholder -> real node in the item cache; children list and
+        // render tree are refreshed by the container re-layout below.
+        cachedItems_[index] = itemInfo;
+        pendingPlaceholderItems_.erase(pendingIter);
+        auto placeholderNode = record.placeholderNode.Upgrade();
+        if (placeholderNode) {
+            placeholderNode->DetachFromMainTree();
+        }
+        // Attach the real node (parent/depth/render-tree bookkeeping) via the
+        // standard lazy child path; the call hits the cache updated above.
+        lazyNode->GetFrameChildByIndex(index, true);
+        auto host = record.hostId == -1 ? nullptr : manager->GetRegisteredHost(record.hostId).Upgrade();
+        if (host) {
+            // Re-layout replaces the placeholder wrapper with the real node
+            // while keeping the index-based scroll anchor.
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+        return ScrollPlaceholderCommitResult::COMMITTED;
     }
 
 }

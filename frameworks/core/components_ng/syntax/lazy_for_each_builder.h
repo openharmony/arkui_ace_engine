@@ -29,6 +29,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_types.h"
 #include "ui/properties/dirty_flag.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
@@ -348,6 +349,33 @@ private:
     void RecycleItemsOutOfBoundary();
     void RecycleChildByIndex(int32_t index);
     void CollectNodesForDelayedRelease(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
+
+    // ---- FEAT-005 scroll placeholder (pre-builder child resolver) ----
+    // When the enclosing List/Grid/WaterFlow opted into `scrollPlaceHolder`
+    // and the remaining frame budget cannot absorb the estimated build cost,
+    // GetChildByIndex returns a placeholder item here and the real build is
+    // queued as a UI-thread frame task (see ScrollPlaceholderManager).
+    struct PlaceholderPendingRecord {
+        int32_t hostId = -1;
+        std::string placeholderKey;
+        std::string templateId;
+        std::string templateKey;
+        uint64_t templateGen = 0;
+        ScrollPlaceholderGeneration gen;
+        WeakPtr<UINode> placeholderNode;
+    };
+    // Returns the placeholder item when the real build is deferred.
+    std::optional<LazyForEachChild> ResolveScrollPlaceholderItem(int32_t index);
+    // Feeds the per-template EWMA of the shared predictor (derives the
+    // enclosing placeholder-enabled container, no-op when not enabled).
+    void RecordScrollPlaceholderBuildCostForIndex(int32_t index, int64_t durationNs);
+    // Runs inside the manager's frame flush on the UI thread: builds the real
+    // item, validates generations, swaps the placeholder, returns the outcome.
+    ScrollPlaceholderCommitResult CommitScrollPlaceholderRealBuild(
+        int32_t index, const PlaceholderPendingRecord& record, int64_t& buildDurationNs);
+
+    uint64_t placeholderKeySeq_ = 0;
+    std::map<int32_t, PlaceholderPendingRecord> pendingPlaceholderItems_;
 
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
