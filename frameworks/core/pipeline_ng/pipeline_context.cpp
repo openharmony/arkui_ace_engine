@@ -146,6 +146,7 @@ constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
+constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
 constexpr int32_t PARAM_NUM = 2;
 constexpr int64_t MAX_MISS_COUNT = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
@@ -3813,7 +3814,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     HandlePenHoverOut(point);
-    if (CheckSourceTypeChange(point.sourceType)) {
+    bool isMappedMouseTouch = point.sourceTool == SourceTool::MOUSE && point.sourceType == SourceType::TOUCH;
+    if (!isMappedMouseTouch && CheckSourceTypeChange(point.sourceType)) {
         HandleTouchHoverOut(point);
     }
 
@@ -5749,6 +5751,9 @@ void PipelineContext::OnHide()
     CHECK_RUN_ON(UI);
     NotifyDragOnHide();
     NotifyCoastingAxisEventOnHide();
+    if (isRightMouseMappingActive_ && onRightMouseMappingCancel_) {
+        onRightMouseMappingCancel_();
+    }
     onShow_ = false;
     isNeedCallbackAreaChange_ = true;
     window_->OnHide();
@@ -5776,6 +5781,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         RestoreDefault(0, MouseStyleChangeReason::WINDOW_LOST_FOCUS_RESET_MOUSESTYLE);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
+        if (isRightMouseMappingActive_ && onRightMouseMappingCancel_) {
+            onRightMouseMappingCancel_();
+        }
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window: %{public}d get focus.", windowId_);
 
@@ -8812,6 +8820,19 @@ int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& cal
         return callbackId_;
     }
     return 0;
+}
+
+bool PipelineContext::HitTestMouseTargetForMapping(const MouseEvent& event, const RefPtr<NG::FrameNode>& node,
+    const std::vector<std::string>& tagWhitelist, int32_t& longPressDuration) const
+{
+    auto frameNode = node ? node : GetRootElement();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto scaleEvent = event.CreateScaleEvent(GetViewScale());
+    const NG::PointF p { scaleEvent.x, scaleEvent.y };
+    const std::vector<std::string>* whitelistPtr = tagWhitelist.empty() ? nullptr : &tagWhitelist;
+    longPressDuration = LONG_PRESS_DEFAULT_DURATION;
+    bool result = frameNode->HitTestMouseTarget(event, p, p, p, whitelistPtr, &longPressDuration);
+    return result;
 }
 
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/common/platform_res_register.h"
@@ -41,8 +42,9 @@ using ReleaseCallback = std::function<void()>;
 class ACE_FORCE_EXPORT AceViewOhos : public AceView {
     DECLARE_ACE_TYPE(AceViewOhos, AceView);
 public:
+    static constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
     explicit AceViewOhos(int32_t id, std::unique_ptr<ThreadModelImpl> threadModelImpl);
-    ~AceViewOhos() override = default;
+    ~AceViewOhos() override;
     static RefPtr<AceViewOhos> CreateView(
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
     static void SurfaceCreated(const RefPtr<AceViewOhos>& view, OHOS::sptr<OHOS::Rosen::Window> window);
@@ -81,6 +83,10 @@ public:
     void RegisterCrownEventCallback(CrownEventCallback&& callback) override;
     void RegisterTouchpadInteractionBeginCallback(TouchpadInteractionBeginCallback&& callback) override;
     void Launch() override;
+    void RegisterMouseTargetHitCallback(MouseTargetHitCallback&& callback);
+    void RegisterRightMouseMappingActiveCallback(std::function<void(bool)>&& callback);
+    void CancelMouseMapping();
+    void SetRightMouseMappingActive(bool active);
 
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr,
@@ -241,9 +247,19 @@ private:
     }
 
     bool ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const MouseEvent& event,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess, bool leftPressEnabled);
     bool ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected);
+    bool ShouldConvertRightMouseToTouch(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node);
+    bool CheckMouseMappingWhitelist(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node);
+    bool HandleMappedButtonRelease(const MouseEvent& event, const TouchEvent& touchEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess);
+    bool DispatchRightMouseTouch(const MouseEvent& event, TouchEvent& touchEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node,
+        const std::function<void()>& markProcess);
+    void ResetMouseMappingState();
+    void ScheduleDelayedUp(const TouchEvent& touchEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
+        const std::function<void()>& markProcess, int32_t delayMs);
 
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
@@ -263,6 +279,15 @@ private:
     CrownEventCallback crownEventCallback_;
     TouchpadInteractionBeginCallback touchpadInteractionBeginCallback_;
     KeyEventRecognizer keyEventRecognizer_;
+    MouseTargetHitCallback mouseTargetHitCallback_;
+    std::function<void(bool)> rightMouseMappingActiveCallback_;
+    bool mousePressedConverted_ = false;
+    MouseButton mouseConvertedButton_ = MouseButton::NONE_BUTTON;
+    bool mouseTouchSessionActive_ = false;
+    int32_t mouseLongPressDuration_ = LONG_PRESS_DEFAULT_DURATION;
+    TimeStamp mousePressTime_;
+    CancelableCallback<void()> mouseDelayedUpTask_;
+    TouchEvent mouseLastTouchEvent_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };
 

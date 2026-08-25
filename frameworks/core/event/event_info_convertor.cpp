@@ -46,4 +46,15 @@ bool EventInfoConvertor::IsAppDevelopedForPC()
 {
     return false;
 }
+
+EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::GetRightMouse2LongPressConfig(
+    bool& outEnabled, std::vector<std::string>& outComponents)
+{
+    return Mouse2TouchEventModeResult::NOT_FOUND;
+}
+
+bool EventInfoConvertor::IsRightMouseMappingEnabled(bool& outEnabled, std::vector<std::string>& outComponents)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

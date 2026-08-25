@@ -44,6 +44,7 @@
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -87,6 +88,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
@@ -203,6 +205,7 @@ constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
 void ClearAccessibilityFocus(
     const RefPtr<AccessibilityProperty>& accessibilityProperty, const RefPtr<RenderContext>& renderContext)
 {
@@ -3940,6 +3943,89 @@ RectF FrameNode::CheckResponseRegionForStylus(RectF& rect, const TouchEvent& tou
         return rect;
     }
     return pattern_->ExpandDefaultResponseRegion(rect);
+}
+
+bool FrameNode::IsMouseTargetHit(const MouseEvent& event, const PointF& parentRevertPoint,
+    const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion, int32_t& longPressDuration)
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceTool = event.sourceTool;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    auto checkedResponseRegion = CheckResponseRegionForStylus(origRect, touchRestrict.touchEvent);
+    auto responseRegionList = GetResponseRegionList(checkedResponseRegion,
+        static_cast<int32_t>(touchRestrict.sourceType), static_cast<int32_t>(touchRestrict.sourceTool));
+    isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent, &responseRegionList);
+
+    bool hasWhitelist = tagWhitelist && !tagWhitelist->empty();
+    bool tagAllowed = !hasWhitelist;
+    if (hasWhitelist) {
+        for (const auto& allowedTag : *tagWhitelist) {
+            if (GetTag() == allowedTag) {
+                tagAllowed = true;
+                break;
+            }
+        }
+    }
+
+    bool ret = tagAllowed && !isOutOfRegion;
+    if (ret) {
+        auto gestureHub = GetOrCreateGestureEventHub();
+        if (gestureHub) {
+            auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+            if (longPressRecognizer) {
+                longPressDuration = longPressRecognizer->GetDuration();
+            }
+        }
+    }
+    return ret;
+}
+
+bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist,
+    int32_t* longPressDuration)
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    if (!isActive_) {
+        return false;
+    }
+    auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
+    auto paintRect = cacheMatrixInfo.paintRectWithTransform;
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    localMat_ = cacheMatrixInfo.localMatrix;
+
+    bool isOutOfRegion = false;
+    int32_t curDuration = LONG_PRESS_DEFAULT_DURATION;
+    bool ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion, curDuration);
+    if (ret && longPressDuration) {
+        *longPressDuration = curDuration;
+    }
+
+    auto localPoint = parentLocalPoint - paintRect.GetOffset();
+    renderContext_->GetPointWithTransform(localPoint);
+    auto revertPoint = parentRevertPoint;
+    MapPointTo(revertPoint, cacheMatrixInfo.revertMatrix);
+    auto subRevertPoint = revertPoint - origRect.GetOffset();
+
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        auto child = iter->Upgrade();
+        if (!child) {
+            continue;
+        }
+        int32_t childDuration = LONG_PRESS_DEFAULT_DURATION;
+        if (child->HitTestMouseTarget(event, globalPoint, localPoint, subRevertPoint,
+            tagWhitelist, &childDuration)) {
+            ret = true;
+            if (longPressDuration) {
+                *longPressDuration = childDuration;
+            }
+            break;
+        }
+    }
+    return ret;
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
