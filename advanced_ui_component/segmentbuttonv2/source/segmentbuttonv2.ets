@@ -749,7 +749,7 @@ struct SimpleSegmentButtonV2 {
           }
           this.isPressing = false;
         }),
-      PanGesture()
+      PanGesture({ direction: PanDirection.Horizontal })
         .onActionStart((event) => {
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
@@ -1885,22 +1885,27 @@ function normalize(value: number, min: number, max: number): number {
 
 function generateUniqueKye(groupId: string) {
   return (item: SegmentButtonV2Item, index: number): string => {
-    let key = groupId;
+    let key = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
+        key += '_';
         key += item.text;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.text);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
+        key += '_';
         key += item.icon;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.icon);
       }
     }
     if (item.symbol) {
+      key += '_';
       key += getResourceUniqueId(item.symbol);
     }
     return key;

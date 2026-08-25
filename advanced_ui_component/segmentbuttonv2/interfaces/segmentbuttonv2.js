@@ -1385,7 +1385,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           this.isPressing = false;
         });
         LongPressGesture.pop();
-        PanGesture.create();
+        PanGesture.create({ direction: PanDirection.Horizontal });
         PanGesture.onActionStart(event => {
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
@@ -3576,22 +3576,27 @@ function normalize(value, min, max) {
 }
 function generateUniqueKye(groupId) {
   return (item, index) => {
-    let key = groupId;
+    let key = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
+        key += '_';
         key += item.text;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.text);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
+        key += '_';
         key += item.icon;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.icon);
       }
     }
     if (item.symbol) {
+      key += '_';
       key += getResourceUniqueId(item.symbol);
     }
     return key;
