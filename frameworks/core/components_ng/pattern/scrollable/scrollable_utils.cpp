@@ -14,6 +14,12 @@
  */
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 
+#include <algorithm>
+#include <stack>
+
+#include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
@@ -23,6 +29,11 @@
 namespace OHOS::Ace::NG {
 namespace {
 Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
+
+// FEAT-028: cached image decode window covers ceil(cacheCount * 20%) cached units per side,
+// implemented with integer math as (cacheCount + 4) / 5 (see design ADR-2).
+constexpr int32_t CACHE_IMAGE_DECODE_WINDOW_DENOMINATOR = 5;
+constexpr int32_t CACHE_IMAGE_DECODE_WINDOW_ROUNDUP = 4;
 
 std::optional<float> GetAccessibilityCenterLimitMoveOffset(
     const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, const MoveOffsetParam& param,
@@ -124,6 +135,35 @@ struct NodeRange {
     RefPtr<UINode> node;
     int32_t start = 0;
 };
+
+// FEAT-028: apply decode eligibility to every ImagePattern in the subtree of a cached item.
+// Walks only already-built children; images of a cached item (direct or nested) share the
+// item's eligibility (spec AC-1.5 / R-5, design ADR-3). The item node is borrowed (owned by
+// its parent's child list during the call on UI thread), so a raw pointer is used to avoid
+// touching the reference count.
+void SetSubtreeImagesDecodeActive(UINode* itemRoot, bool decodeActive)
+{
+    CHECK_NULL_VOID(itemRoot);
+    std::stack<UINode*> nodesStack;
+    nodesStack.push(itemRoot);
+    while (!nodesStack.empty()) {
+        auto* current = nodesStack.top();
+        nodesStack.pop();
+        if (current == nullptr) {
+            continue;
+        }
+        auto* frameNode = AceType::DynamicCast<FrameNode>(current);
+        if (frameNode) {
+            auto imagePattern = frameNode->GetPattern<ImagePattern>();
+            if (imagePattern) {
+                imagePattern->SetCachedImageDecodeActive(decodeActive);
+            }
+        }
+        for (const auto& child : current->GetChildren()) {
+            nodesStack.push(AceType::RawPtr(child));
+        }
+    }
+}
 } // namespace
 
 void ScrollableUtils::DisableLazyForEachBuildCache(const RefPtr<UINode>& node)
@@ -281,5 +321,103 @@ bool ScrollableUtils::IsChildLazy(const RefPtr<FrameNode>& frameNode, int32_t in
         }
     }
     return false;
+}
+
+bool ScrollableUtils::IsLowMemoryDeviceForImageDecode(int32_t deviceDdrSizeGiB)
+{
+    // An invalid DDR size (<= 0, parameter read failure) keeps the existing strategy (high memory).
+    return deviceDdrSizeGiB > 0 && deviceDdrSizeGiB <= LOW_MEMORY_DEVICE_DDR_SIZE_GIB;
+}
+
+bool ScrollableUtils::IsCachedImageDecodeWindowEnabled()
+{
+    return IsLowMemoryDeviceForImageDecode(SystemProperties::GetBootVendorDdrSize());
+}
+
+int32_t ScrollableUtils::CalcCachedImageDecodeWindowCount(int32_t cacheCount)
+{
+    if (cacheCount <= 0) {
+        // cacheCount == 0 keeps the existing behavior: no extra image decode window (AC-1.3 / R-3).
+        return 0;
+    }
+    // max(1, ceil(cacheCount * 20%)) in the component's existing cache units, clamped to
+    // [1, cacheCount] so the window never exceeds the full cache range (AC-1.1/AC-1.2 / R-2).
+    int32_t windowCount = (cacheCount + CACHE_IMAGE_DECODE_WINDOW_ROUNDUP) / CACHE_IMAGE_DECODE_WINDOW_DENOMINATOR;
+    return std::clamp(windowCount, 1, cacheCount);
+}
+
+bool ScrollableUtils::CalcCachedImageDecodeIndexRange(int32_t startIndex, int32_t endIndex, int32_t cacheStartCount,
+    int32_t cacheEndCount, int32_t& decodeStartIndex, int32_t& decodeEndIndex)
+{
+    if (endIndex < 0 || startIndex > endIndex) {
+        return false;
+    }
+    int32_t windowStart = CalcCachedImageDecodeWindowCount(cacheStartCount);
+    int32_t windowEnd = CalcCachedImageDecodeWindowCount(cacheEndCount);
+    if (windowStart <= 0 && windowEnd <= 0) {
+        // No side has a positive cache count: no image decode window for this range.
+        return false;
+    }
+    decodeStartIndex = startIndex - windowStart;
+    decodeEndIndex = endIndex + windowEnd;
+    return true;
+}
+
+void ScrollableUtils::SetCachedItemImagesDecodeActive(const RefPtr<UINode>& itemRoot, bool decodeActive)
+{
+    SetSubtreeImagesDecodeActive(AceType::RawPtr(itemRoot), decodeActive);
+}
+
+void ScrollableUtils::UpdateCachedImageDecodeActiveForItem(const RefPtr<FrameNode>& host, int32_t childIndex,
+    int32_t startIndex, int32_t endIndex, int32_t cacheStartCount, int32_t cacheEndCount)
+{
+    // High memory devices keep the existing strategy (AC-2.1 / R-6).
+    if (!IsCachedImageDecodeWindowEnabled()) {
+        return;
+    }
+    int32_t decodeStartIndex = 0;
+    int32_t decodeEndIndex = 0;
+    if (!CalcCachedImageDecodeIndexRange(
+            startIndex, endIndex, cacheStartCount, cacheEndCount, decodeStartIndex, decodeEndIndex)) {
+        return;
+    }
+    if (childIndex < 0) {
+        return;
+    }
+    CHECK_NULL_VOID(host);
+    // Never force building: only already-created cached items are updated.
+    auto* itemNode = host->GetFrameNodeChildByIndexWithoutBuild(childIndex);
+    CHECK_NULL_VOID(itemNode);
+    bool decodeActive = childIndex >= decodeStartIndex && childIndex <= decodeEndIndex;
+    SetSubtreeImagesDecodeActive(itemNode, decodeActive);
+}
+
+void ScrollableUtils::UpdateCachedImageDecodeRange(const RefPtr<FrameNode>& host, int32_t startIndex, int32_t endIndex,
+    int32_t cacheStartCount, int32_t cacheEndCount, int32_t minItemIndex, int32_t maxItemIndex)
+{
+    // High memory devices keep the existing strategy (AC-2.1 / R-6).
+    if (!IsCachedImageDecodeWindowEnabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(host);
+    int32_t decodeStartIndex = 0;
+    int32_t decodeEndIndex = 0;
+    if (!CalcCachedImageDecodeIndexRange(
+            startIndex, endIndex, cacheStartCount, cacheEndCount, decodeStartIndex, decodeEndIndex)) {
+        return;
+    }
+    // The node cache range itself is NOT narrowed (AC-1.4: only image decode eligibility changes).
+    int32_t cacheStart = std::max(cacheStartCount, 0);
+    int32_t cacheEnd = std::max(cacheEndCount, 0);
+    int32_t totalStart = std::max(std::max(startIndex - cacheStart, 0), minItemIndex);
+    int32_t totalEnd = std::min(endIndex + cacheEnd, maxItemIndex);
+    for (int32_t index = totalStart; index <= totalEnd; ++index) {
+        auto* itemNode = host->GetFrameNodeChildByIndexWithoutBuild(index);
+        if (!itemNode) {
+            continue;
+        }
+        bool decodeActive = index >= decodeStartIndex && index <= decodeEndIndex;
+        SetSubtreeImagesDecodeActive(itemNode, decodeActive);
+    }
 }
 } // namespace OHOS::Ace::NG

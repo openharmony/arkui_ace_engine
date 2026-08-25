@@ -251,6 +251,22 @@ public:
     void OnOffscreenProcessResource() override;
     bool GetIsRecycleInvisibleImageMemory() const;
 
+    /**
+     * @brief FEAT-028: set whether this Image keeps decode eligibility as a cached item of a
+     *        scroll container (List/Grid/WaterFlow) on a low memory device. When set to false,
+     *        all decoded resources (main image, alt/error images and paint modifiers) are
+     *        released immediately while the image source configuration is preserved; when set
+     *        back to true, the image is reloaded from the preserved source. Idempotent.
+     *
+     * @param decodeActive true when the cached item is inside the image decode window.
+     */
+    void SetCachedImageDecodeActive(bool decodeActive);
+
+    bool IsCachedImageDecodeActive() const
+    {
+        return cachedImageDecodeActive_;
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -381,6 +397,10 @@ private:
     void CancelNavDestRecycleTask();
     void ExecuteNavDestRecycle();
 
+    // FEAT-028: release every decoded resource for the cached image decode window without the
+    // global recycle switch / network-image-safe gates (see RecycleImageData). Source config is kept.
+    void ReleaseCachedDecodeResource();
+
 private:
     RefPtr<DrawableDescriptor> drawable_;
     SizeF imageSize_;
@@ -451,6 +471,9 @@ private:
     bool isMeasured_ = false;
     bool loadFailed_ = false;
     bool isLoadAlt_ = false;
+    // FEAT-028: decode eligibility as a cached item of a scroll container on a low memory device.
+    // Default true so that Images outside List/Grid/WaterFlow caches are never affected.
+    bool cachedImageDecodeActive_ = true;
     ImageType imageType_ = ImageType::BASE;
     ContentTransitionType contentTransitionType_ = ContentTransitionType::IDENTITY;
     std::shared_ptr<CancelableCallback<void()>> navDestRecycleCallback_;

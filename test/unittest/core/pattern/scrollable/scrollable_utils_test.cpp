@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -706,5 +707,151 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy006, TestSize.Level1)
      */
     bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
     EXPECT_EQ(isLazy, false);
+}
+
+/**
+ * @tc.name: CachedImageDecodeWindowCount001
+ * @tc.desc: FEAT-028 per-side image decode window formula max(1, ceil(cacheCount * 20%))
+ *           clamped to [1, cacheCount]; cacheCount <= 0 keeps 0 (existing behavior).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, CachedImageDecodeWindowCount001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. cacheCount <= 0 keeps existing behavior, window is 0.
+     * @tc.expected: return 0 (AC-1.3 / R-3).
+     */
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(0), 0);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(-1), 0);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(-100), 0);
+
+    /**
+     * @tc.steps: step2. positive cacheCount uses max(1, ceil(cacheCount * 20%)).
+     * @tc.expected: 1->1, 5->1 (AC-1.1), 6->2, 10->2, 100->20 (AC-1.2 / R-2).
+     */
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(1), 1);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(2), 1);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(4), 1);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(5), 1);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(6), 2);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(9), 2);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(10), 2);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(11), 3);
+    EXPECT_EQ(ScrollableUtils::CalcCachedImageDecodeWindowCount(100), 20);
+}
+
+/**
+ * @tc.name: LowMemoryDeviceForImageDecode001
+ * @tc.desc: FEAT-028 device tier: total physical memory <= 8 GiB enables the optimization.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, LowMemoryDeviceForImageDecode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ddr size within (0, 8].
+     * @tc.expected: low memory tier, optimization enabled.
+     */
+    EXPECT_TRUE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(1));
+    EXPECT_TRUE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(4));
+    EXPECT_TRUE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(8));
+
+    /**
+     * @tc.steps: step2. ddr size greater than 8 GiB or invalid.
+     * @tc.expected: existing strategy kept (AC-2.1 / R-6).
+     */
+    EXPECT_FALSE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(9));
+    EXPECT_FALSE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(12));
+    EXPECT_FALSE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(16));
+    EXPECT_FALSE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(0));
+    EXPECT_FALSE(ScrollableUtils::IsLowMemoryDeviceForImageDecode(-1));
+}
+
+/**
+ * @tc.name: CachedImageDecodeIndexRange001
+ * @tc.desc: FEAT-028 decode eligibility index range derivation from visible range and cache counts.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, CachedImageDecodeIndexRange001, TestSize.Level1)
+{
+    int32_t decodeStart = 0;
+    int32_t decodeEnd = 0;
+    /**
+     * @tc.steps: step1. visible range [5, 9], 5 cached children on each side.
+     * @tc.expected: decode window is 1 on each side: [4, 10] (AC-1.1).
+     */
+    EXPECT_TRUE(ScrollableUtils::CalcCachedImageDecodeIndexRange(5, 9, 5, 5, decodeStart, decodeEnd));
+    EXPECT_EQ(decodeStart, 4);
+    EXPECT_EQ(decodeEnd, 10);
+
+    /**
+     * @tc.steps: step2. one side has no cache (list edge).
+     * @tc.expected: no decode window on that side, range starts/ends at the visible edge.
+     */
+    EXPECT_TRUE(ScrollableUtils::CalcCachedImageDecodeIndexRange(0, 4, 0, 5, decodeStart, decodeEnd));
+    EXPECT_EQ(decodeStart, 0);
+    EXPECT_EQ(decodeEnd, 5);
+    EXPECT_TRUE(ScrollableUtils::CalcCachedImageDecodeIndexRange(5, 9, 5, 0, decodeStart, decodeEnd));
+    EXPECT_EQ(decodeStart, 4);
+    EXPECT_EQ(decodeEnd, 9);
+
+    /**
+     * @tc.steps: step3. both sides have no cache or invalid visible range.
+     * @tc.expected: disabled, keeps existing behavior (AC-1.3).
+     */
+    EXPECT_FALSE(ScrollableUtils::CalcCachedImageDecodeIndexRange(5, 9, 0, 0, decodeStart, decodeEnd));
+    EXPECT_FALSE(ScrollableUtils::CalcCachedImageDecodeIndexRange(-1, -1, 5, 5, decodeStart, decodeEnd));
+    EXPECT_FALSE(ScrollableUtils::CalcCachedImageDecodeIndexRange(9, 5, 5, 5, decodeStart, decodeEnd));
+
+    /**
+     * @tc.steps: step4. start = -1 sentinel with valid end (cached-only group case).
+     * @tc.expected: window applies after the sentinel end.
+     */
+    EXPECT_TRUE(ScrollableUtils::CalcCachedImageDecodeIndexRange(-1, 3, 0, 5, decodeStart, decodeEnd));
+    EXPECT_EQ(decodeStart, -1);
+    EXPECT_EQ(decodeEnd, 4);
+}
+
+/**
+ * @tc.name: SetCachedItemImagesDecodeActive001
+ * @tc.desc: FEAT-028 all direct and nested Images of a cached item share the item eligibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, SetCachedItemImagesDecodeActive001, TestSize.Level1)
+{
+    auto item = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(item, nullptr);
+    auto directImage = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    auto wrapper = FrameNode::CreateFrameNode("Wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    auto nestedImage = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    wrapper->AddChild(nestedImage);
+    item->AddChild(directImage);
+    item->AddChild(wrapper);
+    auto directPattern = directImage->GetPattern<ImagePattern>();
+    auto nestedPattern = nestedImage->GetPattern<ImagePattern>();
+    ASSERT_NE(directPattern, nullptr);
+    ASSERT_NE(nestedPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. default state is decode active.
+     * @tc.expected: both images active.
+     */
+    EXPECT_TRUE(directPattern->IsCachedImageDecodeActive());
+    EXPECT_TRUE(nestedPattern->IsCachedImageDecodeActive());
+
+    /**
+     * @tc.steps: step2. item leaves the decode window.
+     * @tc.expected: direct and nested images lose eligibility together (AC-2.2 / R-5).
+     */
+    ScrollableUtils::SetCachedItemImagesDecodeActive(item, false);
+    EXPECT_FALSE(directPattern->IsCachedImageDecodeActive());
+    EXPECT_FALSE(nestedPattern->IsCachedImageDecodeActive());
+
+    /**
+     * @tc.steps: step3. item stays outside the window, repeated notification.
+     * @tc.expected: idempotent, state keeps false.
+     */
+    ScrollableUtils::SetCachedItemImagesDecodeActive(item, false);
+    EXPECT_FALSE(directPattern->IsCachedImageDecodeActive());
+    EXPECT_FALSE(nestedPattern->IsCachedImageDecodeActive());
 }
 } // namespace OHOS::Ace::NG

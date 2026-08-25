@@ -2264,6 +2264,8 @@
       "OHOS::Ace::NG::ScrollablePattern::GetGestureHub()";
       "OHOS::Ace::NG::ScrollablePattern::ReportBackToTop()";
       "OHOS::Ace::NG::ScrollableUtils::CheckHeightExpansion(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutProperty> const&, OHOS::Ace::Axis)";
+      "OHOS::Ace::NG::ScrollableUtils::UpdateCachedImageDecodeActiveForItem(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, int, int, int, int, int)";
+      "OHOS::Ace::NG::ScrollableUtils::UpdateCachedImageDecodeRange(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, int, int, int, int, int, int)";
       "OHOS::Ace::NG::ScrollableUtils::RecycleItemsOutOfBoundary(OHOS::Ace::Axis, float, int, int, OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::ScrollAdjustmanager::AdjustCachedCount(int)";
       "OHOS::Ace::NG::ScrollAdjustmanager::AdjustEndIndex(int)";

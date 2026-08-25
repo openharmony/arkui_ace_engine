@@ -181,6 +181,14 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // FEAT-028: async load success arriving after the cached item left the image decode
+        // window is discarded to prevent decoded resources flowing back (AC-2.3 / ADR-5).
+        if (!pattern->cachedImageDecodeActive_) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s decode inactive, discard load success.",
+                pattern->imageDfxConfig_.ToStringWithoutSrc().c_str(),
+                pattern->imageDfxConfig_.GetImageSrc().c_str());
+            return;
+        }
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -492,6 +500,10 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
 
 void ImagePattern::OnImageLoadSuccess()
 {
+    // FEAT-028: never commit decoded resources while decode eligibility is revoked (AC-2.3 / ADR-5).
+    if (!cachedImageDecodeActive_) {
+        return;
+    }
     CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1216,6 +1228,12 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
 
 void ImagePattern::LoadImageDataIfNeed()
 {
+    // FEAT-028: the cached item owning this Image is outside the image decode window of its
+    // scroll container: keep the source configuration but start no load (AC-1.4 / R-4). The
+    // container restores eligibility and reloads once the item re-enters the window.
+    if (!cachedImageDecodeActive_) {
+        return;
+    }
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto host = GetHost();
@@ -1592,6 +1610,10 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // FEAT-028: discard alt load success while the cached item has no decode eligibility (ADR-5).
+        if (!pattern->cachedImageDecodeActive_) {
+            return;
+        }
         CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
@@ -1729,6 +1751,50 @@ void ImagePattern::SetIsBackground(bool isBackground)
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->SetIsBackground(isBackground);
+}
+
+void ImagePattern::SetCachedImageDecodeActive(bool decodeActive)
+{
+    // FEAT-028: state switch is idempotent; identical values do nothing (design ADR-5).
+    if (decodeActive == cachedImageDecodeActive_) {
+        return;
+    }
+    cachedImageDecodeActive_ = decodeActive;
+    if (!decodeActive) {
+        // Leaving the image decode window: release all decoded resources immediately while the
+        // node keeps its cache and the image source configuration (AC-1.4 / R-4).
+        ReleaseCachedDecodeResource();
+        return;
+    }
+    // Re-entering the image decode window or the visible area: regain decode eligibility and
+    // reload from the preserved source configuration (AC-1.5 / R-5).
+    LoadImageDataIfNeed();
+}
+
+void ImagePattern::ReleaseCachedDecodeResource()
+{
+    // FEAT-028: unlike RecycleImageData(), this release path is NOT gated by the app/system
+    // recycle switch or the network-image-safe check: the spec requires every Image inside a
+    // cached item to release its decoded resources when the item leaves the decode window
+    // (design ADR-4/ADR-7). The image source in LayoutProperty is preserved for reload.
+    loadingCtx_ = nullptr;
+    image_ = nullptr;
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    altErrorCtx_ = nullptr;
+    altErrorImage_ = nullptr;
+    imagePaintMethod_ = nullptr;
+    isRecycledImage_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s release cached decode resource.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
+    frameNode->MarkNeedRenderOnly();
+    ACE_SCOPED_TRACE("ReleaseCachedDecodeResource imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
 }
 
 // when recycle image component, release the pixelmap resource
@@ -3255,6 +3321,10 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAltError()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // FEAT-028: discard alt-error load success while the cached item has no decode eligibility (ADR-5).
+        if (!pattern->cachedImageDecodeActive_) {
+            return;
+        }
         CHECK_NULL_VOID(pattern->altErrorCtx_);
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
