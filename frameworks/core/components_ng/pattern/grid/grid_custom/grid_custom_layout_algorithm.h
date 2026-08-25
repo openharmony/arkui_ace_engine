@@ -36,6 +36,11 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void SetScrollSource(int32_t scrollSource)
+    {
+        scrollSource_ = scrollSource;
+    }
+
 private:
     /**
      * @brief Measures the size of Grid based on the given GridLayoutProperty.
@@ -122,6 +127,11 @@ private:
      */
     std::pair<int32_t, int32_t> LayoutChildren(float mainOffset, int32_t cacheLine);
 
+    bool IsScrollBarDrag() const
+    {
+        return scrollSource_ == SCROLL_FROM_BAR || scrollSource_ == SCROLL_FROM_BAR_OVER_DRAG;
+    }
+
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
@@ -136,6 +146,7 @@ private:
 
     SizeF frameSize_;
     double originalWidth_ = 0.0;
+    int32_t scrollSource_ = SCROLL_FROM_NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridCustomLayoutAlgorithm);
 };
