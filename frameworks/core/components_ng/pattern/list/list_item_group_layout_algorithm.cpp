@@ -345,6 +345,11 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
             cachedCountForward += 1;
         }
         layoutWrapper->SetActiveChildRange(start, end, cachedCountBackward, cachedCountForward, show);
+        // FEAT-028: propagate the image decode window into a partially cached group by group
+        // inner rows, not by the whole group node (design risk: ListItemGroup fine-grained
+        // eligibility, TASK-028-03).
+        ScrollableUtils::UpdateCachedImageDecodeRange(
+            layoutWrapper->GetHostNode(), start, end, cachedCountBackward, cachedCountForward);
         return;
     } else if (show && (!cachedItemPosition_.empty() || pauseMeasureCacheItem_ != -1)) {
         int32_t start = cachedItemPosition_.empty() ? pauseMeasureCacheItem_ : cachedItemPosition_.begin()->first;
@@ -352,9 +357,14 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
         int32_t count = end - start + 1;
         if (start == 0) {
             layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, count, show);
+            // FEAT-028: cached-only group, all cached items sit after the sentinel visible end.
+            ScrollableUtils::UpdateCachedImageDecodeRange(
+                layoutWrapper->GetHostNode(), -1, itemStartIndex_ - 1, 0, count);
         } else if (end == totalItemCount_ - 1) {
             int32_t endLimit = end + itemStartIndex_ + 1;
             layoutWrapper->SetActiveChildRange(endLimit, endLimit, count, 0, show);
+            // FEAT-028: cached-only group, all cached items sit before the sentinel visible start.
+            ScrollableUtils::UpdateCachedImageDecodeRange(layoutWrapper->GetHostNode(), endLimit, endLimit, count, 0);
         }
         return;
     }
@@ -363,8 +373,14 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
     if (LessNotEqual(GetMainAxisOffset(offset, axis_), GetMainAxisOffset(listPadding, axis_))) {
         int32_t index = totalItemCount_ + itemStartIndex_;
         layoutWrapper->SetActiveChildRange(index, index, cacheCount * lanes_, 0);
+        // FEAT-028: group before the list padding, cached items sit before the sentinel anchor.
+        ScrollableUtils::UpdateCachedImageDecodeRange(
+            layoutWrapper->GetHostNode(), index, index, cacheCount * lanes_, 0);
     } else {
         layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount * lanes_);
+        // FEAT-028: group after the content, cached items sit after the sentinel visible end.
+        ScrollableUtils::UpdateCachedImageDecodeRange(
+            layoutWrapper->GetHostNode(), -1, itemStartIndex_ - 1, 0, cacheCount * lanes_);
     }
 }
 

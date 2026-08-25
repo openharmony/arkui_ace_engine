@@ -76,6 +76,13 @@ struct ListPredictLayoutParamV2 {
     LayoutConstraintF groupLayoutConstraint;
     ListMainSizeValues listMainSizeValues;
     bool show = false;
+    // FEAT-028: visible child index range and per-side cached child counts captured at layout
+    // time, used by the predict-build path to apply image decode eligibility to newly built
+    // cached items before their offscreen resource processing (design ADR-6).
+    int32_t visibleStartIndex = -1;
+    int32_t visibleEndIndex = -1;
+    int32_t cacheStartCount = 0;
+    int32_t cacheEndCount = 0;
 };
 
 enum class ScrollAutoType {
@@ -692,6 +699,13 @@ protected:
     PositionMap recycledItemPosition_;
     PositionMap cachedItemPosition_;
     PositionMap noLayoutedItems_;
+    // FEAT-028: inputs of the last applied cached image decode window (child indexes and
+    // per-side cached child counts), captured in SetActiveChildRange and copied into the
+    // predict-build param of the same layout pass.
+    int32_t lastDecodeRangeStartIndex_ = -1;
+    int32_t lastDecodeRangeEndIndex_ = -1;
+    int32_t lastDecodeRangeCacheStart_ = 0;
+    int32_t lastDecodeRangeCacheEnd_ = 0;
     int32_t preStartIndex_ = 0;
     double currentOffset_ = 0.0;
     double adjustOffset_ = 0.0;

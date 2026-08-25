@@ -597,9 +597,13 @@ void ListItemGroupPattern::UpdateActiveChildRange(bool forward, int32_t cacheCou
     CHECK_NULL_VOID(host);
     if (forward) {
         host->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount, show);
+        // FEAT-028: predict-layout path of a cached-only group, apply the image decode window
+        // to newly built cached items (TASK-028-03).
+        ScrollableUtils::UpdateCachedImageDecodeRange(host, -1, itemStartIndex_ - 1, 0, cacheCount);
     } else {
         int32_t index = itemTotalCount_ + itemStartIndex_;
         host->SetActiveChildRange(index, index, cacheCount, 0, show);
+        ScrollableUtils::UpdateCachedImageDecodeRange(host, index, index, cacheCount, 0);
     }
     if (show && headerIndex_ >= 0) {
         host->GetOrCreateChildByIndex(headerIndex_);
