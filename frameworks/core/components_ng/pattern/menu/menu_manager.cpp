@@ -1506,6 +1506,9 @@ void MenuManager::DeleteMenu(int32_t targetId, const RefPtr<OverlayManager>& ove
     auto node = AceType::DynamicCast<FrameNode>(it->second);
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(overlayManager);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
+    ContainerScope scope(context->GetInstanceId());
     if (node->GetParent()) {
         auto id = Container::CurrentId();
         SubwindowManager::GetInstance()->ClearMenu();
