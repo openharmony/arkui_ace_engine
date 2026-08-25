@@ -22,6 +22,9 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "frameworks/core/components_ng/pattern/text/span/span_string.h"
 
+namespace OHOS::Ace {
+enum class ColorMode;
+}
 namespace OHOS::Ace::Framework {
 class JSRichEditorBaseController : public Referenced {
 public:
@@ -30,6 +33,7 @@ public:
     void CloseSelectionMenu();
     void StopEditing();
     bool FontSizeRangeIsNegative(const CalcDimension& size);
+    ColorMode GetColorMode() const;
 
     void SetInstanceId(int32_t id)
     {

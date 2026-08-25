@@ -19,6 +19,8 @@
 
 #include "base/error/error_code.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -26,6 +28,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -239,8 +242,9 @@ void DialogInnerManager::CallOnHideDialogCallback()
 
 bool DialogInnerManager::FireBackPressEvent() const
 {
-    if (backPressEvent_) {
-        return backPressEvent_();
+    auto backPressEvent = backPressEvent_;
+    if (backPressEvent) {
+        return backPressEvent();
     }
     return false;
 }
@@ -495,6 +499,7 @@ void DialogInnerManager::OpenDialogAnimationInner(const RefPtr<OverlayManager>& 
             auto dialogPattern = node->GetPattern<DialogPattern>();
             dialogPattern->CallDialogDidAppearCallback();
             overlayManager->ContentChangeReport(node, true);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::DIALOG_LIGHT_SENSE_ANIMATION, false);
         };
         dialogPattern->RegisterOnFinishEvent(onFinishEvent);
         if (isTopOrder && isReadFirstNode) {
@@ -629,6 +634,7 @@ RefPtr<UINode> DialogInnerManager::RebuildCustomBuilder(RefPtr<UINode>& contentN
 
 void DialogInnerManager::CustomDialogRecordEvent(const DialogProperties& dialogProps)
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -637,6 +643,7 @@ void DialogInnerManager::CustomDialogRecordEvent(const DialogProperties& dialogP
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 }
 
 void DialogInnerManager::OpenCustomDialogInner(const RefPtr<OverlayManager>& overlayManager,
@@ -1124,6 +1131,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialog(const RefPtr<OverlayManager>& o
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1132,6 +1140,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialog(const RefPtr<OverlayManager>& o
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     return dialog;
 }
 
@@ -1172,6 +1181,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithErrorCallback(const RefPtr<O
 
     dialogCount_++;
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1180,6 +1190,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithErrorCallback(const RefPtr<O
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     return dialog;
 }
 
@@ -1200,6 +1211,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNode(const RefPtr<OverlayMan
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1208,6 +1220,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNode(const RefPtr<OverlayMan
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     return dialog;
 }
 
@@ -1234,6 +1247,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNodeAndErrorCallback(const R
 
     dialogCount_++;
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1242,6 +1256,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNodeAndErrorCallback(const R
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     return dialog;
 }
 
@@ -1527,11 +1542,13 @@ void DialogInnerManager::ShowTextDialog(const RefPtr<OverlayManager>& overlayMan
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_SHOW);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 #endif
 }
 
@@ -1647,5 +1664,29 @@ bool DialogInnerManager::RemoveDialogWithContent(const RefPtr<OverlayManager>& o
         SetBackPressEvent(nullptr);
     }
     return true;
+}
+
+bool DialogInnerManager::RemoveDialogWithPressBack(const RefPtr<OverlayManager>& overlayManager,
+    const RefPtr<FrameNode>& overlay, const RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter,
+    int32_t subWindowId)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
+        return false;
+    }
+    auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+    CHECK_NULL_RETURN(dialogPattern, false);
+    int32_t reason = static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK);
+    if (dialogPattern->CallDismissInNDK(reason)) {
+        return true;
+    } else if (dialogPattern->ShouldDismiss()) {
+        overlayManager->SetDismissDialogId(overlay->GetId());
+        DialogManager::GetInstance().SetDismissDialogInfo(overlay->GetId(), overlay->GetTag());
+        auto currentId = Container::CurrentId();
+        dialogPattern->CallOnWillDismiss(reason, currentId);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss, currentId: %{public}d", currentId);
+        return true;
+    }
+    return RemoveDialogWithContent(
+        overlayManager, overlay, dialogPattern->GetDialogProperties(), isBackPressed, isPageRouter, subWindowId);
 }
 } // namespace OHOS::Ace::NG

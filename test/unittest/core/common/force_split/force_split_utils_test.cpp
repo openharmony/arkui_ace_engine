@@ -103,12 +103,12 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam003, TestSize.Level1)
 
 /**
  * @tc.name: ParseForceSplitParam004
- * @tc.desc: Branch: config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, false)
+ * @tc.desc: Branch: config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, true)
  * @tc.type: FUNC
  */
 HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam004, TestSize.Level1)
 {
-    std::string configStr = "{ \"enableReducedContainerSize\": true }";
+    std::string configStr = "{ \"enableHook\": true }";
     bool isRouterSplit = NAVIGATION_SPLIT;
     NG::ForceSplitParam config;
     config.isArkUIHookEnabled = false;
@@ -155,7 +155,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam006, TestSize.Level1)
 HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam007, TestSize.Level1)
 {
     std::string configStr =
-        "{ \"enableReducedContainerSize\": true, \"homePage\": \"HomePage\", \"relatedPage\": \"RelatedPage\", "
+        "{ \"enableHook\": true, \"homePage\": \"HomePage\", \"relatedPage\": \"RelatedPage\", "
         "\"dialogSupportSplit\": false, \"homeNavigationId\": true, \"homeNavigationDepth\": \"3\", "
         "\"navigationDisablePlaceholder\": true, \"navigationDisableDivider\": true }";
     bool isRouterSplit = ROUTER_SPLIT;
@@ -514,7 +514,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam028, TestSize.Level1)
 HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam029, TestSize.Level1)
 {
     std::string configStr =
-        "{ \"enableReducedContainerSize\": true, \"homePage\": \"HomePage\", \"relatedPage\": \"RelatedPage\", "
+        "{ \"enableHook\": true, \"homePage\": \"HomePage\", \"relatedPage\": \"RelatedPage\", "
         "\"homeNavigationId\": \"mainNav\", \"homeNavigationDepth\": 3, "
         "\"navigationDisablePlaceholder\": true, \"navigationDisableDivider\": true }";
     bool isRouterSplit = NAVIGATION_SPLIT;

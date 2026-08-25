@@ -42,13 +42,14 @@ public:
     }
     void SyncData() override {}
     void CreateChildrenFromInfos(const std::vector<ChildLayoutInfo>& infos) override {}
-    const std::vector<std::shared_ptr<ISmartLayoutNode>>& GetChildren() const override
+    std::vector<std::shared_ptr<ISmartLayoutNode>> GetChildren() const override
     {
         return children_;
     }
     void ApplyColumnConstraints() override {}
     void ApplyRowConstraints() override {}
     void ApplyGeneralConstraints() override {}
+    void ApplyScaleUpConstraints(double emptyRatioThreshold) override {}
     void SetBoundingBox(const SmartLayoutRect& box) override
     {
         boundingBox_ = box;

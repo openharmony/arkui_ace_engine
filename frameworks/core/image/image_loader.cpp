@@ -632,14 +632,30 @@ std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)
 
 bool ResourceImageLoader::GetResourceId(const std::string& uri, uint32_t& resId) const
 {
+    // Validate digit length before parsing to prevent std::out_of_range exceptions
+    // On 32-bit platforms unsigned long is 32-bit (max 4294967295), 10+ digits may overflow
+    constexpr size_t MAX_UINT32_DIGITS = 10;
+    constexpr const char* MAX_UINT32_STR = "4294967295";
     std::smatch matches;
     if (std::regex_match(uri, matches, MEDIA_RES_ID_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
+        if (matches[1].length() > MAX_UINT32_DIGITS ||
+            (matches[1].length() == MAX_UINT32_DIGITS && matches[1].str() > MAX_UINT32_STR)) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "GetResourceId rejected, digits too long: %{public}zu, uri: %{private}s",
+                matches[1].length(), uri.c_str());
+            return false;
+        }
         resId = static_cast<uint32_t>(std::stoul(matches[1].str()));
         return true;
     }
 
     std::smatch appMatches;
     if (std::regex_match(uri, appMatches, MEDIA_APP_RES_ID_REGEX) && appMatches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
+        if (appMatches[1].length() > MAX_UINT32_DIGITS ||
+            (appMatches[1].length() == MAX_UINT32_DIGITS && appMatches[1].str() > MAX_UINT32_STR)) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "GetResourceId rejected, digits too long: %{public}zu, uri: %{private}s",
+                appMatches[1].length(), uri.c_str());
+            return false;
+        }
         resId = static_cast<uint32_t>(std::stoul(appMatches[1].str()));
         return true;
     }

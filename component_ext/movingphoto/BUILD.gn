@@ -78,6 +78,7 @@ ohos_shared_library("movingphotoview") {
     "image_framework:image",
     "image_framework:image_native",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (defined(global_parts_info) &&

@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
-void SetLazyWaterFlowCallbackNode(FrameNode* frameNode);
+void SetLazyWaterFlowCallbackNode(const WeakPtr<FrameNode>& weakNode);
 
 namespace {
 constexpr int32_t NODE_ARG_INDEX = 0;
@@ -638,10 +638,11 @@ ArkUINativeModuleValue LazyWaterFlowLayoutBridge::SetOnVisibleIndexesChange(ArkU
     // The pattern owns this callback after the C ABI transfer; resetOnVisibleIndexesChange replaces it before a new one
     // is installed, and the captured node is only used as the callback owner while that pattern callback is alive.
     auto callback = std::make_unique<std::function<void(int32_t, int32_t)>>(
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const int32_t start, const int32_t end) {
+        [vm, weakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+            const int32_t start, const int32_t end) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        SetLazyWaterFlowCallbackNode(frameNode);
+        SetLazyWaterFlowCallbackNode(weakNode);
 
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, start);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, end);

@@ -30,11 +30,14 @@ class MyNodeController extends NodeController {
 
     let column = typeNode.createNode(uiContext, 'Column');
     column.attribute.width(100).height(500).backgroundColor(Color.Yellow);
-    rootNode.appendChild(column);
-
-    rootNode.setCrossLanguageOptions({
-      attributeSetting: true
-    });
+    try {
+      rootNode.appendChild(column);
+      rootNode.setCrossLanguageOptions({
+        attributeSetting: true
+      });
+    } catch (e) {
+      console.error(`ScrollNode makeNode failed: code=${e.code}, msg=${e.message}`);
+    }
     return rootNode;
   }
 }

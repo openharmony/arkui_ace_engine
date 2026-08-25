@@ -62,8 +62,19 @@ protected:
     void NotifyDataAdded(size_t index) override {};
     void KeepRemovedItemInCache(NG::LazyForEachChild node,
         std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override {};
+
+    void SetLazyForEachMemOptStrategy(NG::LazyForEachMemOptStrategy strategy)
+    {
+        memOptStrategy_ = strategy;
+    }
+    NG::LazyForEachMemOptStrategy GetLazyForEachMemOptStrategy() const override
+    {
+        return memOptStrategy_;
+    }
+
 private:
     bool deleteExpiringItemImmediately_;
+    NG::LazyForEachMemOptStrategy memOptStrategy_ = NG::LazyForEachMemOptStrategy::DEFAULT;
 };
 } // namespace OHOS::Ace::Framework
 

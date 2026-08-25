@@ -13,25 +13,31 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("patternlock_test_ng") {
-  type = "new"
-  module_name = "DrawingSet-Circle"
+test_sources = [
+  "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_layout_algorithm.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_model_ng.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_modifier.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_paint_method.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_pattern.cpp",
+  "patternlock_modifier_test_ng.cpp",
+  "patternlock_pattern_test_ng.cpp",
+  "patternlock_test_core.cpp",
+  "patternlock_test_ng.cpp",
+]
 
-  sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_modifier.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_pattern.cpp",
-    "patternlock_modifier_test_ng.cpp",
-    "patternlock_pattern_test_ng.cpp",
-    "patternlock_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "patternlock_test_core.cpp" ]
-  } else {
-    sources += [ "patternlock_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("patternlock_test_ng") {
+    type = "host_components"
+    module_name = "DrawingSet-Circle"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("patternlock_test_ng") {
+    type = "new"
+    module_name = "DrawingSet-Circle"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "patternlock_test_core.cpp" ]
+    }
   }
 }

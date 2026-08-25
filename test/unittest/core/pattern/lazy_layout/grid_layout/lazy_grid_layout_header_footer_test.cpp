@@ -252,4 +252,35 @@ HWTEST_F(LazyGridLayoutHeaderFooterTest, AdjustOffsetExcludesEdgesAcrossHeaderRe
     EXPECT_FLOAT_EQ(layoutInfo.adjustOffset_.start, 0.0f);
     EXPECT_FLOAT_EQ(layoutInfo.adjustOffset_.end, 0.0f);
 }
+
+/**
+ * @tc.name: StableBodyExtentDoesNotAccumulateEdges001
+ * @tc.desc: A regular lazy pass with no item-position update must reuse the previous BODY extent. The published
+ *           SECTION extent must not be treated as body and have header/footer appended again on alternating frames.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutHeaderFooterTest, StableBodyExtentDoesNotAccumulateEdges001, TestSize.Level1)
+{
+    auto info = AceType::MakeRefPtr<LazyGridLayoutInfo>();
+    info->headerMainSize_ = 60.0f;
+    info->footerMainSize_ = 40.0f;
+    info->totalMainSize_ = 420.0f; // published SECTION: 60 header + 320 body + 40 footer
+
+    LazyGridLayoutAlgorithm algorithm(info);
+    algorithm.CaptureFrameBaseline();
+
+    EXPECT_FLOAT_EQ(algorithm.totalMainSize_, 420.0f); // retained for reference-position conversion
+    EXPECT_FLOAT_EQ(algorithm.prevBodyMainSize_, 320.0f);
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 320.0f); // working model is body-local
+
+    info->UpdatePosMap(algorithm.prevBodyMainSize_); // no updated item positions
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 320.0f);
+    EXPECT_FLOAT_EQ(info->adjustOffset_.start, 0.0f);
+    EXPECT_FLOAT_EQ(info->adjustOffset_.end, 0.0f);
+
+    info->totalMainSize_ += info->headerMainSize_ + info->footerMainSize_;
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 420.0f);
+    algorithm.CaptureFrameBaseline();
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 320.0f);
+}
 } // namespace OHOS::Ace::NG

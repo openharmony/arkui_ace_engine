@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cctype>
 #include <cfloat>
 #include <iomanip>
+#include <mutex>
 #include <optional>
 #include <sstream>
 #include <queue>
@@ -45,6 +46,8 @@
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
+#include "core/components/web/resource/web_page_scene_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -1182,7 +1185,17 @@ WebDelegate::~WebDelegate()
     }
     UnRegisterDisplayInfoChange();
     if (nweb_) {
-        nweb_->OnDestroy();
+        auto context = context_.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostSyncTask(
+            [nweb = nweb_]() {
+                if (nweb) {
+                    nweb->OnDestroy();
+                }
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIWebDelegateDestructor");
     }
     UnregisterSurfacePositionChangedCallback();
     UnregisterAvoidAreaChangeListener(instanceId_);
@@ -2098,6 +2111,18 @@ int WebDelegate::GetWebId()
 {
     if (nweb_) {
         return nweb_->GetWebId();
+    }
+    return -1;
+}
+
+int32_t WebDelegate::GetHostNodeId()
+{
+    auto webPattern = webPattern_.Upgrade();
+    if (webPattern) {
+        auto host = webPattern->GetHost();
+        if (host) {
+            return host->GetId();
+        }
     }
     return -1;
 }
@@ -5058,6 +5083,10 @@ void WebDelegate::OnInactive()
     if (!context) {
         return;
     }
+    int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+    if (processId > 0) {
+        WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, GetWebId());
+    }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
@@ -5091,6 +5120,14 @@ void WebDelegate::OnActive()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebOnActive");
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteAllRuleSetMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneNavMatch");
 }
 
 void WebDelegate::GestureBackBlur()
@@ -5556,6 +5593,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
 
 void WebDelegate::OnPageStarted(const std::string& param)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnPageStarted:Start. webId:%{public}d", GetWebId());
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), param]() {
@@ -5571,6 +5609,25 @@ void WebDelegate::OnPageStarted(const std::string& param)
             webPattern->InitDataDetector();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageStarted");
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+                if (processId > 0) {
+                    WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, delegate->GetWebId());
+                }
+                // Clear per-rule observer map from previous page so new page's
+                // query script won't find stale observers
+                delegate->ExecuteTypeScript(
+                    "if(window.__pageSceneObservers){"
+                    "for(var k in window.__pageSceneObservers){"
+                    "window.__pageSceneObservers[k].disconnect();}"
+                    "window.__pageSceneObservers=null;}",
+                    [](std::string) {});
+            }
+        },
+        TaskExecutor::TaskType::UI, "PageSceneResetObserver");
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->DestroyAnalyzerOverlay();
@@ -5599,7 +5656,17 @@ void WebDelegate::OnPageFinished(const std::string& param)
             delegate->RunDataDetectorJS();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
-    
+    auto context = context_.Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteAllRuleSetMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneNavMatch");
+    }
     AccessibilitySendPageChange();
 }
 
@@ -5646,6 +5713,18 @@ void WebDelegate::OnLoadFinished(const std::string& param)
             delegate->RecordWebEvent(Recorder::EventType::LOAD_FINISHED, param);
         },
         TaskExecutor::TaskType::JS, "ArkUIWebLoadFinished");
+    // Trigger page scene rule matching after navigation
+    auto context = context_.Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteAllRuleSetMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneNavMatch");
+    }
 }
 
 void WebDelegate::OnProgressChanged(int param)
@@ -5816,8 +5895,8 @@ void WebDelegate::OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebS
 
 bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
 {
-    CHECK_NULL_RETURN(taskExecutor_, false);
-    bool result = false;
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    bool result = true;
     auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
     jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), message, &result]() {
         auto delegate = weak.Upgrade();
@@ -5828,6 +5907,7 @@ bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> messa
             CHECK_NULL_VOID(webPattern);
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
+            result = false;
             auto propOnConsoleEvent = webEventHub->GetOnConsoleEvent();
             CHECK_NULL_VOID(propOnConsoleEvent);
             result = propOnConsoleEvent(param);
@@ -6257,12 +6337,14 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
             webEventHub->FireOnErrorReceiveEvent(std::make_shared<ReceivedErrorEvent>(
                     AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
                         request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
-                    AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
+                    AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode(), error->CustomErrorCode()),
+                    error->CustomErrorCode()));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
 
     if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED ||
-        error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_NAME_NOT_RESOLVED) {
+        error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_NAME_NOT_RESOLVED ||
+        error->CustomErrorCode() != 0) {
         AccessibilityReleasePageEvent();
     }
 }
@@ -6509,7 +6591,8 @@ std::string WebDelegate::OnOverrideErrorPage(
         webResourceRequest->Method(), webResourceRequest->Url(),
         webResourceRequest->FromGesture(), webResourceRequest->IsAboutMainFrame(),
         webResourceRequest->IsRequestRedirect()),
-        AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode()));
+        AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode(), error->CustomErrorCode()),
+        error->CustomErrorCode());
     auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
     jsTaskExecutor.PostSyncTask(
         [weak = WeakClaim(this), info, &result]() {
@@ -8483,6 +8566,10 @@ void WebDelegate::OnNativeEmbedAllDestory()
 
 std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
 {
+    if (htmlElementId.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetSurfaceIdByHtmlElementId html element id is empty");
+        return "";
+    }
     std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
     for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
@@ -8521,6 +8608,10 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
         return -1;
     }
     std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
+    if (htmlElementId.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetWebAccessibilityIdBySurfaceId html element id is empty");
+        return -1;
+    }
     int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
     return webAccessibilityId;
 }
@@ -10155,6 +10246,8 @@ std::string WebDelegate::GetLastSelectionText() const
 
 void WebDelegate::OnTextSelectionChange(const std::string& selectionText)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnTextSelectionChange webId=%{public}d selLen=%{public}zu",
+        GetWebId(), selectionText.size());
     CHECK_NULL_VOID(taskExecutor_);
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
@@ -10183,6 +10276,17 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText)
             webEventHub->FireOnTextSelectionChangeEvent(std::make_shared<TextSelectionChangedEvent>(selectionText));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebTextSelectionChanged");
+    auto context = context_.Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteAllRuleSetMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneTextSelMatch");
+    }
 }
 
 void WebDelegate::OnDetectedBlankScreen(
@@ -10615,6 +10719,40 @@ void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::st
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonString");
 }
 
+void WebDelegate::RequestWebDomJsonStringWithOptions(
+    const std::function<void(const std::string)>&& callback, int32_t mode)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), callback, mode]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (delegate->nweb_) {
+                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(weak);
+                if (callbackImpl && callback) {
+                    callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
+                        auto delegate = weak.Upgrade();
+                        CHECK_NULL_VOID(delegate);
+                        auto context = delegate->context_.Upgrade();
+                        CHECK_NULL_VOID(context);
+                        context->GetTaskExecutor()->PostTask(
+                            [callback = std::move(func), result]() { callback(result); },
+                            TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonStringWithOptionsCallback");
+                    });
+                }
+                auto agentManager = delegate->GetNWebAgentManager();
+                if (!agentManager) {
+                    TAG_LOGE(AceLogTag::ACE_WEB, "GetNWebAgentManager failed, WebId: %{public}d",
+                        delegate->GetWebId());
+                    return;
+                }
+                agentManager->RequestWebDomJsonStringWithOptions(callbackImpl, mode);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonStringWithOptions");
+}
+
 void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode)
 {
     auto context = context_.Upgrade();
@@ -10672,5 +10810,168 @@ void WebDelegate::UpdateTouchEventFeatureDetectionEnabled()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateTouchEventFeatureDetectionEnabled");
+}
+
+// ===== PageScene Rule-Based Perception Methods =====
+
+void WebDelegate::QueryPageControls(const std::string& selectorJson,
+    const std::string& ruleId, const std::vector<std::string>& nodeTypes,
+    std::function<void(const std::string& resultJson)>&& callback)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), selectorJson, ruleId, nodeTypes, callback = std::move(callback)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto agentManager = delegate->GetNWebAgentManager();
+            if (!agentManager) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "WebDelegate::QueryPageControls: GetNWebAgentManager failed, WebId: %{public}d",
+                    delegate->GetWebId());
+                if (callback) {
+                    callback("{\"errorCode\":" + std::to_string(PAGE_SCENE_QUERY_EMPTY_SCRIPT) +
+                        ",\"controls\":[]}");
+                }
+                return;
+            }
+            auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(weak);
+            if (callbackImpl && callback) {
+                callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
+                    auto delegate = weak.Upgrade();
+                    CHECK_NULL_VOID(delegate);
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::QueryPageControls: JS result received, webId=%{public}d result len=%{public}zu "
+                        "content=%{public}s",
+                        delegate->GetWebId(), result.size(), result.c_str());
+                    auto context = delegate->context_.Upgrade();
+                    CHECK_NULL_VOID(context);
+                    context->GetTaskExecutor()->PostTask(
+                        [callback = std::move(func), result]() { callback(result); },
+                        TaskExecutor::TaskType::PLATFORM, "ArkUIWebPageSceneQueryCallback");
+                });
+            }
+            agentManager->RequestPageSceneQuery(selectorJson, ruleId, nodeTypes, callbackImpl);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebPageSceneQuery");
+}
+
+void WebDelegate::ExecuteReportOnRegisterMatch(int32_t processId)
+{
+    // Rules are registered in WebPageSceneManager singleton by UiSessionManagerOhos directly.
+    // This method handles reportOnRegister initial match for the first Web component.
+    auto ruleSetsOpt = WebPageSceneManager::GetInstance().GetPageSceneRules(processId);
+    if (!ruleSetsOpt) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "WebDelegate::ExecuteReportOnRegisterMatch: no ruleSet for processId=%{public}d", processId);
+        return;
+    }
+    // Trigger match for each enabled rule with reportOnRegister, report per-rule
+    for (const auto& rule : ruleSetsOpt->rules) {
+        if (!rule.enabled || !rule.policy.reportOnRegister) continue;
+        std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
+            rule, ruleSetsOpt->globalConfig);
+        QueryPageControls(selectorJson, rule.ruleId, rule.selector.nodeTypes,
+            [processId, webId = GetWebId(), selectorJson, ruleId = rule.ruleId](
+                const std::string& resultJson) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "WebDelegate::ExecuteReportOnRegisterMatch: query result for ruleId=%{public}s "
+                    "resultLen=%{public}zu", ruleId.c_str(), resultJson.size());
+                WebPageSceneManager::GetInstance().ProcessQueryResult(
+                    processId, webId, selectorJson, resultJson, false);
+            });
+    }
+}
+
+void WebDelegate::ExecuteGetPageSceneMatch(int32_t processId,
+    const WebPageSceneRuleSet& ruleSet, bool isTemporary)
+{
+    int32_t enabledCount = 0;
+    for (const auto& rule : ruleSet.rules) {
+        if (rule.enabled) enabledCount++;
+    }
+    if (enabledCount == 0) {
+        WebPageSceneManager::GetInstance().OnMatchResult(processId, "", true);
+        if (isTemporary) {
+            WebPageSceneManager::GetInstance().CompleteGetPageScene(processId);
+        }
+        return;
+    }
+    auto remaining = std::make_shared<std::atomic<int32_t>>(enabledCount);
+    for (const auto& rule : ruleSet.rules) {
+        if (!rule.enabled) continue;
+        std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
+            rule, ruleSet.globalConfig);
+        QueryPageControls(selectorJson, rule.ruleId, {},
+            [processId, webId = GetWebId(), isTemporary, remaining, selectorJson](
+                const std::string& resultJson) {
+                WebPageSceneManager::GetInstance().ProcessQueryResult(
+                    processId, webId, selectorJson, resultJson, true);
+                int32_t rem = remaining->fetch_sub(1, std::memory_order_acq_rel) - 1;
+                if (rem == 0 && isTemporary) {
+                    WebPageSceneManager::GetInstance().CompleteGetPageScene(processId);
+                }
+            });
+    }
+}
+
+void WebDelegate::GetPageSceneForWeb(int32_t processId, const std::string& ruleJsonOrRuleSetId)
+{
+    std::optional<WebPageSceneRuleSet> ruleSet;
+    int32_t ret = WebPageSceneManager::GetInstance().BeginGetPageScene(processId, ruleJsonOrRuleSetId, ruleSet);
+    if (ret != PAGE_SCENE_ERR_OK) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "GetPageSceneForWeb: BeginGetPageScene failed, ret=%{public}d processId=%{public}d",
+            ret, processId);
+        WebPageSceneManager::GetInstance().OnMatchResult(processId, "", true);
+        return;
+    }
+    bool isTemporary = !WebPageSceneManager::GetInstance().GetPageSceneRules(processId).has_value();
+    if (!ruleSet) {
+        WebPageSceneManager::GetInstance().OnMatchResult(processId, "", true);
+        if (isTemporary) {
+            WebPageSceneManager::GetInstance().CompleteGetPageScene(processId);
+        }
+        return;
+    }
+    ExecuteGetPageSceneMatch(processId, ruleSet.value(), isTemporary);
+}
+
+void WebDelegate::ProcessPageSceneDomReadyResult(const std::string& resultJson,
+    const std::string& selectorJson)
+{
+    int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+    if (processId > 0) {
+        WebPageSceneManager::GetInstance().ProcessQueryResult(
+            processId, GetWebId(), selectorJson, resultJson, false);
+    }
+}
+
+void WebDelegate::ExecuteAllRuleSetMatch()
+{
+    int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+    if (processId <= 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::ExecuteAllRuleSetMatch: no registered processId");
+        return;
+    }
+    auto ruleSet = WebPageSceneManager::GetInstance().GetPageSceneRules(processId);
+    if (!ruleSet) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::ExecuteAllRuleSetMatch: no ruleSet for processId=%{public}d",
+            processId);
+        return;
+    }
+    for (const auto& rule : ruleSet->rules) {
+        if (!rule.enabled) continue;
+        std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
+            rule, ruleSet->globalConfig);
+        QueryPageControls(selectorJson, rule.ruleId, rule.selector.nodeTypes,
+            [processId, webId = GetWebId(), selectorJson, ruleId = rule.ruleId](
+                const std::string& resultJson) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::ExecuteAllRuleSetMatch: query result for ruleId=%{public}s "
+                    "resultLen=%{public}zu", ruleId.c_str(), resultJson.size());
+                WebPageSceneManager::GetInstance().ProcessQueryResult(
+                    processId, webId, selectorJson, resultJson, false);
+            });
+    }
 }
 } // namespace OHOS::Ace

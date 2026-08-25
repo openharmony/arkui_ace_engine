@@ -153,11 +153,11 @@ public:
 
     void SetFrameWithoutAnimation(const RectF& paintRect) override;
 
-    void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+    void RebuildFrame(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) override;
 
-    void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+    void AddFrameChildren(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) override;
 
-    void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+    void RemoveFrameChildren(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) override;
 
     void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
 
@@ -275,6 +275,8 @@ public:
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
+    bool HasMaterialFilter() const;
+    bool IsSelfDrawingNode() const override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
     void ResetBlender() override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
@@ -282,7 +284,7 @@ public:
     void ResetShadowPath() override;
     void ClearClipBounds() override;
 
-    void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
+    void SetOverlayNGShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -327,7 +329,8 @@ public:
     void ResetSharedTranslate() override;
 
     static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
-        const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap);
+        const std::vector<RefPtr<FrameNode>>& frameChildren,
+        std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap);
 
     bool IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode);
     void RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode);
@@ -565,8 +568,8 @@ public:
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     bool CanNodeBeDeleted(const RefPtr<FrameNode>& node) const;
-    void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
-    void AddCornerMarkNodeToChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
+    void GetLiveChildren(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes);
+    void AddCornerMarkNodeToChildren(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
     static bool initDrawNodeChangeCallback_;
     static bool initPropertyNodeChangeCallback_;
@@ -581,12 +584,18 @@ public:
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
     {
-        callbackAnimateEnd_ =  callback;
+        if (!callbackAnimateEnd_) {
+            callbackAnimateEnd_ = std::make_unique<std::function<void()>>();
+        }
+        *callbackAnimateEnd_ = callback;
     }
 
     void AddKeyFrameCachedAnimateActionCallback(const std::function<void()>& callback)
     {
-        callbackCachedAnimateAction_ = callback;
+        if (!callbackCachedAnimateAction_) {
+            callbackCachedAnimateAction_ = std::make_unique<std::function<void()>>();
+        }
+        *callbackCachedAnimateAction_ = callback;
     }
 
     bool GetIsDraggingFlag() const
@@ -640,6 +649,7 @@ public:
 
     void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) override;
     void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) override;
+    void SetMaterialShaderECSubOverlay(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilterOverlay) override;
 
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
@@ -661,8 +671,11 @@ public:
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
-    void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
+    ACE_FORCE_EXPORT void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
 #endif
+
+    void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier) override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -755,8 +768,8 @@ protected:
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
     void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
-    void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
-    void ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+    void ReCreateRsNodeTree(const std::vector<RefPtr<FrameNode>>& children);
+    void ReCreateMixedRsNodeTree(const std::vector<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void SetChildBounds(const RectF& paintRect) const;
@@ -774,6 +787,7 @@ protected:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     RefPtr<UINode> GetModalNode(const RefPtr<UINode>& breakPointParent);
+    void PopModalPageLevelOrder(const RefPtr<UINode>& modalNode);
     void RemoveDefaultTransition();
     void FireTransitionUserCallback(bool isTransitionIn);
     void PostTransitionUserOutCallback();
@@ -782,6 +796,7 @@ protected:
     void SetPositionToRSNode();
     void SetPositionToRSNodeMultiThread();
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(PipelineContext* pipeline);
+    std::shared_ptr<Rosen::RSUIContext> GetOrCreateRSUIContext(PipelineContext* pipeline);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
@@ -809,7 +824,8 @@ protected:
     Rosen::ParticleParaType<float> ConvertParticleFloatOption(const ParticleFloatPropertyOption& floatOption);
     Rosen::ParticleParaType<float> ConvertParticleDefaultFloatOption(OHOS::Rosen::Range<float>& rsInitRange);
     bool NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect);
-    void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height);
+    void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height,
+        const std::string& bundleName = "", const std::string& moduleName = "");
     void OnParticleImageLoaded(const std::string& src, const RefPtr<CanvasImage> canvas);
     void SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource);
     void PaintRSBgImage();
@@ -889,6 +905,7 @@ protected:
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
+    void UpdateAppendOverlayShader();
     void NotifyHostTransformUpdated(bool changed = true);
     void NotifyHostTransformUpdatedMultiThread(bool changed = true);
     void SetFrontBlurFilterMultiThread();
@@ -938,15 +955,17 @@ protected:
     uint32_t colorGamut_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 8;
+    static constexpr uint32_t APPEND_OVERLAY_SHADER_COUNT = 2;
+    static constexpr uint32_t APPEND_OVERLAY_SHADER_INDEX_ONE = 1;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
     RefPtr<RosenTransitionEffect> transitionEffect_;
-    std::function<void()> transitionOutCallback_;
-    std::function<void()> transitionInCallback_;
-    TransitionFinishCallback transitionUserCallback_;
+    std::unique_ptr<std::function<void()>> transitionOutCallback_;
+    std::unique_ptr<std::function<void()>> transitionInCallback_;
+    std::unique_ptr<TransitionFinishCallback> transitionUserCallback_;
 
     std::optional<OffsetF> frameOffset_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
@@ -1023,8 +1042,8 @@ protected:
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
     std::shared_ptr<Rosen::RSWindowKeyFrameNode> keyFrameNode_;
-    std::function<void()> callbackAnimateEnd_ = nullptr;
-    std::function<void()> callbackCachedAnimateAction_ = nullptr;
+    std::unique_ptr<std::function<void()>> callbackAnimateEnd_;
+    std::unique_ptr<std::function<void()>> callbackCachedAnimateAction_;
     bool isDraggingFlag_ = false;
     bool hasKeyFrameCache_ = false;
 
@@ -1052,6 +1071,7 @@ private:
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
     std::shared_ptr<OHOS::Rosen::RSNGShapeBase> sdfShape_;
+    std::shared_ptr<Rosen::RSNGShaderBase> appendOverlayShader_[APPEND_OVERLAY_SHADER_COUNT] = { nullptr };
 };
 } // namespace OHOS::Ace::NG
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -238,6 +239,17 @@ void CustomNodeBase::SetIsV2(bool isV2)
 
 ReusableMemOptStrategy CustomNodeBase::GetReusableMemOptStrategy()
 {
+    if (reusableMemOptStrategy_ != ReusableMemOptStrategy::UNDEFINED) {
+        return reusableMemOptStrategy_;
+    }
+    auto applicationStrategy = LazyForEachUtils::GetReusableMemOptStrategy();
+    if (applicationStrategy != ReusableMemOptStrategy::UNDEFINED) {
+        reusableMemOptStrategy_ = applicationStrategy;
+        return reusableMemOptStrategy_;
+    }
+    auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
+    reusableMemOptStrategy_ = systemStrategy == 1 ?
+        ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : ReusableMemOptStrategy::DEFAULT;
     return reusableMemOptStrategy_;
 }
 
@@ -259,7 +271,9 @@ void CustomNodeBase::SetEnableReleaseExpiringNodesFunction(
 
 void CustomNodeBase::TryEnableParentCustomNodeMemOpt()
 {
-    CHECK_EQUAL_VOID(reusableMemOptStrategy_, ReusableMemOptStrategy::DEFAULT);
+    if (GetReusableMemOptStrategy() == ReusableMemOptStrategy::DEFAULT) {
+        return;
+    }
     auto uiNode = AceType::DynamicCast<UINode>(Claim(this));
     CHECK_NULL_VOID(uiNode);
     auto parentCustomNode = uiNode->GetParentCustomNode();

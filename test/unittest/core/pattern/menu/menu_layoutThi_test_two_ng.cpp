@@ -1182,7 +1182,7 @@ HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection001, TestSize.Level1
     bottomInset.start = 700;
     bottomInset.end = 800;
     safeAreaInsets.bottom_ = bottomInset;
-    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, nullptr, nullptr, nullptr);
     float expectedWidth = menuAlgorithm->width_ - menuAlgorithm->left_ - menuAlgorithm->right_;
     float expectedHeight = menuAlgorithm->height_ - menuAlgorithm->top_ - menuAlgorithm->bottom_;
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), expectedWidth);
@@ -1211,7 +1211,7 @@ HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection002, TestSize.Level1
     bottomInset.start = 900;
     bottomInset.end = 1000;
     safeAreaInsets.bottom_ = bottomInset;
-    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, nullptr, nullptr, nullptr);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 100.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 700.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
@@ -1238,7 +1238,7 @@ HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection003, TestSize.Level1
     bottomInset.start = 900;
     bottomInset.end = 1000;
     safeAreaInsets.bottom_ = bottomInset;
-    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, nullptr, nullptr, nullptr);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 0.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 200.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
@@ -1264,7 +1264,7 @@ HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection004, TestSize.Level1
     bottomInset.start = 950;
     bottomInset.end = 1050;
     safeAreaInsets.bottom_ = bottomInset;
-    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, nullptr, nullptr, nullptr);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 50.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 900.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
@@ -1290,7 +1290,7 @@ HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection005, TestSize.Level1
     bottomInset.start = 700;
     bottomInset.end = 800;
     safeAreaInsets.bottom_ = bottomInset;
-    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, nullptr, nullptr, nullptr);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 0.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 400.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
@@ -1317,8 +1317,113 @@ HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection006, TestSize.Level1
     bottomInset.start = 600;
     bottomInset.end = 700;
     safeAreaInsets.bottom_ = bottomInset;
-    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, nullptr, nullptr, nullptr);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 0.0f);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 400.0f);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection007
+ * @tc.desc: Verify CalculateSafeAreaIntersection in UEC when keyboard exists and has intersection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection007, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, 500.0f, 1000.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 950;
+    bottomInset.end = 1000;
+    safeAreaInsets.bottom_ = bottomInset;
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->keyboardInset_.start = 800;
+    safeAreaManager->keyboardInset_.end = 1000;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, safeAreaManager, nullptr, nullptr);
+    // 软键盘与窗口有交集:减去键盘高度 200,不再减去底部安全区高度 50
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 100.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 700.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Left(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection008
+ * @tc.desc: Verify CalculateSafeAreaIntersection in UEC when keyboard has no intersection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection008, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, 500.0f, 800.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 700;
+    bottomInset.end = 800;
+    safeAreaInsets.bottom_ = bottomInset;
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    // 软键盘在窗口下方,与窗口无交集
+    safeAreaManager->keyboardInset_.start = 900;
+    safeAreaManager->keyboardInset_.end = 1000;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, safeAreaManager, nullptr, nullptr);
+    // 软键盘无交集:走原逻辑,减去底部安全区交集 100
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 100.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 600.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Left(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection009
+ * @tc.desc: Verify CalculateSafeAreaIntersection in UEC for AI menu using keyboard height from UIExtension.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection009, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 0, AceType::MakeRefPtr<MenuPattern>(NODE_ID, "targetTag", MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateIsRectInTarget(true);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, 500.0f, 1000.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 950;
+    bottomInset.end = 1000;
+    safeAreaInsets.bottom_ = bottomInset;
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    // GetKeyboardInsetImpl returns empty; AI menu uses GetRawKeyboardHeight
+    safeAreaManager->rawKeyboardHeight_ = 200.0f;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets, safeAreaManager, property, menuPattern);
+    // keyboard considered in UEC safe area: wrapper bounded by bottom safe area (start 950), not raw keyboard height
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 100.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 850.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Left(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -80,13 +80,14 @@ void SendStatisticEvent(StatisticEventType type)
     statisticEventReporter->SendEvent(type);
 }
 
-
 void SetControllerOnCreatedCallback(EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& createdFunc)
 {
     if (createdFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = createdFunc;
-        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
-                                    const std::string& surfaceId, const std::string& /* xcomponentId */) {
+        SurfaceCreatedEvent onSurfaceCreated = [func = panda::CopyableGlobal(vm, func),
+                                                   node = AceType::WeakClaim(frameNode)](const std::string& surfaceId,
+                                                   const std::string& /* xcomponentId */) {
+            auto vm = func.GetEcmaVM();
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(node);
@@ -102,8 +103,10 @@ void SetControllerOnChangedCallback(EcmaVM* vm, FrameNode* frameNode, const Loca
 {
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
-                                    const std::string& surfaceId, const NG::RectF& rect) {
+        SurfaceChangedEvent onSurfaceChanged = [func = panda::CopyableGlobal(vm, func),
+                                                   node = AceType::WeakClaim(frameNode)](
+                                                   const std::string& surfaceId, const NG::RectF& rect) {
+            auto vm = func.GetEcmaVM();
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(node);
@@ -124,14 +127,16 @@ void SetControllerOnDestroyedCallback(EcmaVM* vm, FrameNode* frameNode, const Lo
 {
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto onSurfaceDestroyed = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
-                                      const std::string& surfaceId, const std::string& /* xcomponentId */) {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(node);
-            panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
-            func->Call(vm, func.ToLocal(), para, 1);
-        };
+        SurfaceDestroyedEvent onSurfaceDestroyed =
+            [func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
+                const std::string& surfaceId, const std::string& /* xcomponentId */) {
+                auto vm = func.GetEcmaVM();
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                PipelineContext::SetCallBackNode(node);
+                panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
+                func->Call(vm, func.ToLocal(), para, 1);
+            };
         GetArkUINodeModifiers()->getXComponentModifier()->setXComponentControllerOnDestroyed(
             reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&onSurfaceDestroyed));
     }
@@ -143,8 +148,9 @@ void SetControllerOnCreated(
     if (createdFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = createdFunc;
         SurfaceCreatedEvent onSurfaceCreated =
-            [vm, func = panda::CopyableGlobal(vm, func), thisObj = panda::CopyableGlobal(vm, thisObj),
+            [func = panda::CopyableGlobal(vm, func), thisObj = panda::CopyableGlobal(vm, thisObj),
                 node = AceType::WeakClaim(frameNode)](const std::string& surfaceId, const std::string& xcomponentId) {
+                auto vm = func.GetEcmaVM();
                 panda::LocalScope pandaScope(vm);
                 panda::TryCatch trycatch(vm);
                 PipelineContext::SetCallBackNode(node);
@@ -164,9 +170,11 @@ void SetControllerOnChanged(
 {
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func),
-                                    thisObj = panda::CopyableGlobal(vm, thisObj), node = AceType::WeakClaim(frameNode)](
-                                    const std::string& surfaceId, const NG::RectF& rect) {
+        SurfaceChangedEvent onSurfaceChanged = [func = panda::CopyableGlobal(vm, func),
+                                                   thisObj = panda::CopyableGlobal(vm, thisObj),
+                                                   node = AceType::WeakClaim(frameNode)](
+                                                   const std::string& surfaceId, const NG::RectF& rect) {
+            auto vm = func.GetEcmaVM();
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(node);
@@ -189,9 +197,10 @@ void SetControllerOnDestroyed(
 {
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto onSurfaceDestroyed =
-            [vm, func = panda::CopyableGlobal(vm, func), thisObj = panda::CopyableGlobal(vm, thisObj),
+        SurfaceDestroyedEvent onSurfaceDestroyed =
+            [func = panda::CopyableGlobal(vm, func), thisObj = panda::CopyableGlobal(vm, thisObj),
                 node = AceType::WeakClaim(frameNode)](const std::string& surfaceId, const std::string& xcomponentId) {
+                auto vm = func.GetEcmaVM();
                 panda::LocalScope pandaScope(vm);
                 panda::TryCatch trycatch(vm);
                 PipelineContext::SetCallBackNode(node);
@@ -473,7 +482,7 @@ void ParseImageAIOptions(const EcmaVM* vm, ArkUINodeHandle nativeNode, const Loc
 }
 
 void XComponentBridge::ExtractInfoToXComponentOptions(XComponentOptions& options,
-    panda::Local<panda::ObjectRef> controllerObj, Local<panda::ObjectRef>& paramObject,
+    panda::Local<panda::ObjectRef>& controllerObj, Local<panda::ObjectRef>& paramObject,
     ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -494,6 +503,7 @@ void XComponentBridge::ExtractInfoToXComponentOptions(XComponentOptions& options
 
     auto controllerArg = ArkTSUtils::GetProperty(vm, paramObject, "controller");
     if (!controllerArg.IsNull() && controllerArg->IsObject(vm)) {
+        controllerObj = controllerArg->ToObject(vm);
         auto* jsController = static_cast<Framework::JSXComponentController*>(
             Local<panda::ObjectRef>(controllerArg)->GetNativePointerField(vm, 0));
         if (jsController) {
@@ -607,9 +617,11 @@ void XComponentBridge::SetControllerOnCreated(ArkUIRuntimeCallInfo* runtimeCallI
     auto createdFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceCreated"));
     if (createdFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = createdFunc;
-        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func),
-                                    thisObj = panda::CopyableGlobal(vm, object), node = AceType::WeakClaim(frameNode)](
-                                    const std::string& surfaceId, const std::string& xcomponentId) {
+        SurfaceCreatedEvent onSurfaceCreated = [func = panda::CopyableGlobal(vm, func),
+                                                   thisObj = panda::CopyableGlobal(vm, object),
+                                                   node = AceType::WeakClaim(frameNode)](
+                                                   const std::string& surfaceId, const std::string& xcomponentId) {
+            auto vm = func.GetEcmaVM();
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(node);
@@ -636,9 +648,11 @@ void XComponentBridge::SetControllerOnChanged(ArkUIRuntimeCallInfo* runtimeCallI
     auto changedFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceChanged"));
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func),
-                                    thisObj = panda::CopyableGlobal(vm, object), node = AceType::WeakClaim(frameNode)](
-                                    const std::string& surfaceId, const NG::RectF& rect) {
+        SurfaceChangedEvent onSurfaceChanged = [func = panda::CopyableGlobal(vm, func),
+                                                   thisObj = panda::CopyableGlobal(vm, object),
+                                                   node = AceType::WeakClaim(frameNode)](
+                                                   const std::string& surfaceId, const NG::RectF& rect) {
+            auto vm = func.GetEcmaVM();
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(node);
@@ -668,9 +682,11 @@ void XComponentBridge::SetControllerOnDestroyed(ArkUIRuntimeCallInfo* runtimeCal
     auto destroyedFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceDestroyed"));
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto onDestroyed = [vm, func = panda::CopyableGlobal(vm, func), thisObj = panda::CopyableGlobal(vm, object),
-                               node = AceType::WeakClaim(frameNode)](
-                               const std::string& surfaceId, const std::string& xcomponentId) {
+        SurfaceDestroyedEvent onDestroyed = [func = panda::CopyableGlobal(vm, func),
+                                                thisObj = panda::CopyableGlobal(vm, object),
+                                                node = AceType::WeakClaim(frameNode)](
+                                                const std::string& surfaceId, const std::string& xcomponentId) {
+            auto vm = func.GetEcmaVM();
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(node);
@@ -808,7 +824,7 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
-    if (secondArg.IsNull() || secondArg->IsUndefined()) {
+    if (secondArg.IsNull()) {
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUINodeHandle nativeNode = nullptr;
@@ -817,6 +833,7 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (isJsView && secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode, isJsView);
         return panda::JSValueRef::Undefined(vm);
     }
     Color color;

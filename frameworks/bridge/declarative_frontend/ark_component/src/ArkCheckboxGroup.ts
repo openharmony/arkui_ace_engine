@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class CheckboxGroupSelectAllModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);

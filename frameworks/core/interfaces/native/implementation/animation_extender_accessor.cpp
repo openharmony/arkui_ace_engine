@@ -387,8 +387,16 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
     bool isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
     bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
     while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
             TAG_LOGD(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
+                "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
+                animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
+                isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            pipelineContext->SetInfiniteAnimationFlushExceeded(true);
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
                 "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
                 animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
                 isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
@@ -442,6 +450,7 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
 
     // close KeyframeAnimation.
     AnimationUtils::CloseImplicitAnimation();
+    pipelineContext->PopInfiniteAnimationFlushExceeded();
 }
 
 void AnimationTranslateImpl(Ark_NativePointer node,

@@ -141,6 +141,7 @@ public:
     static bool SetUICorrectionConfig(const std::string& configStr);
     virtual ~UIContent() = default;
     virtual OHOS::Rosen::Window* GetUIContentWindow() { return nullptr; };
+    virtual void ForceRequestFrame() {};
 
     // UI content life-cycles
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
@@ -593,6 +594,16 @@ public:
 
     virtual void EnableContainerModalCustomGesture(bool enable) {};
 
+    /**
+     * @description: Enable background force flush vsync.
+     * @param enable True to enable, false to disable. Default is false, reset to false on foreground.
+     * @param count Max number of vsync frames to flush (0-10, clamped to 10).
+     * When enabled and app is in background, RequestFrame will succeed for up to count vsync cycles.
+     * After count reaches 0, the feature auto-disables.
+     * Should be called on the UI thread. Variables are atomic for safety if called from other threads.
+     */
+    virtual void SetBackgroundForceFlushVsync(bool enable, size_t count) {};
+
     virtual void AddKeyFrameAnimateEndCallback(const std::function<void()> &callback) {};
     virtual void AddKeyFrameNodeCallback(const std::function<
         void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
@@ -665,6 +676,8 @@ public:
         const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
             int32_t eventType)>&& callback) {};
     virtual void UnregisterTouchTimingCallback() {};
+
+    virtual void SetFormDisplayId(const uint64_t displayId) {}
 
 private:
     static std::atomic<bool> successFlag_;

@@ -34,6 +34,11 @@ public:
     {
         return false;
     }
+
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
 };
 
 } // namespace OHOS::Ace::NG

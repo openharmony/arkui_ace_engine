@@ -67,11 +67,13 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mo
              * 1 -> 2 or 1 -> 3, but mode did not change
              */
             OnForceSplitEnableChange();
+            NotifyMediaQueryUpdate();
             return;
         }
         // 1 -> 2 or 1 -> 3, and mode did change
         ChangeForceSplitModeTo(mode);
         OnForceSplitEnableChange();
+        NotifyMediaQueryUpdate();
         return;
     }
     if (!isForceSplitEnable_) {
@@ -80,7 +82,11 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mo
         return;
     }
     // only mode change
+    ForceSplitMode preMode = mode_;
     ChangeForceSplitModeTo(mode);
+    if (preMode != mode) {
+        NotifyMediaQueryUpdate();
+    }
 }
 
 bool ForceSplitManager::IsDraggable(ForceSplitMode mode)
@@ -92,6 +98,21 @@ bool ForceSplitManager::IsDraggable(ForceSplitMode mode)
     } else {
         return squareSplitIsDraggable_;
     }
+}
+
+void ForceSplitManager::NotifyMediaQueryUpdate()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto frontend = context->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    // OnSurfaceChanged on the declarative frontend only triggers the media query update
+    // path (it forwards to delegate_->OnSurfaceChanged() -> OnMediaQueryUpdate()); the
+    // width/height arguments are ignored there. Pass the current root size for semantic
+    // consistency and safety for any frontend that does consume them.
+    auto width = static_cast<int32_t>(context->GetRootWidth());
+    auto height = static_cast<int32_t>(context->GetRootHeight());
+    frontend->OnSurfaceChanged(width, height);
 }
 
 void ForceSplitManager::ChangeForceSplitModeTo(ForceSplitMode mode)

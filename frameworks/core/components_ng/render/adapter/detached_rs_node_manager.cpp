@@ -155,7 +155,6 @@ void DetachedRsNodeManager::TryRegisterExternalClearCallback(int32_t instanceId)
 void DetachedRsNodeManager::RegisterPreFreezeInstance(int32_t instanceId)
 {
     std::lock_guard<std::mutex> lock(registeredMutex_);
-    TryRegisterExternalClearCallback(instanceId);
     registeredInstances_.insert(instanceId);
 }
 

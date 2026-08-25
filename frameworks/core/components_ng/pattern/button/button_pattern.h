@@ -233,9 +233,15 @@ public:
 
     std::vector<std::string> StringToVector(const std::string& str, char delimiter = ' ');
 
-    void SetNavigationFocusBlendBgColor(const Color& navigationFocusBgColor);
+    void SetNavigationFocusBlendBgColor(const Color& navigationFocusBlendBgColor)
+    {
+        navigationFocusBlendBgColor_ = navigationFocusBlendBgColor;
+    }
 
-    void SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus);
+    void SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus)
+    {
+        navMenuItemNeedFocus_ = navMenuItemNeedFocus;
+    }
 
     int32_t OnInjectionEvent(const std::string& command) override;
 
@@ -329,6 +335,10 @@ private:
     void HandleShadowStyle(ButtonStyleMode buttonStyle, ShadowStyle shadowStyle,
         RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
+    bool IsSystemMaterialLightEffectActive(const RefPtr<RenderContext>& renderContext);
+    void ProcessImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options);
+    void ReapplyImmersiveMaterial();
+    Color GetDefaultThemeBgColor();
     void HandleFocusActiveStyle();
     void SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
     void SetNavBarMenuFocusStyle(RefPtr<RenderContext>& renderContext, bool isFocus);

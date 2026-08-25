@@ -26,8 +26,14 @@ class SliderTipModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SliderTipModifier, OverlayModifier);
 
 public:
-    explicit SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc);
+    explicit SliderTipModifier(
+        const RefPtr<FrameNode>& host, std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc);
     ~SliderTipModifier() override;
+
+    RefPtr<FrameNode> GetHost() const
+    {
+        return host_.Upgrade();
+    }
 
     void PaintTip(DrawingContext& context);
     void PaintBubble(DrawingContext& context);
@@ -73,7 +79,7 @@ public:
         tipColor_ = color;
     }
 
-    void SetTipFlag(bool flag, const RefPtr<FrameNode>& host);
+    void SetTipFlag(bool flag);
 
     void SetContentOffset(const OffsetF& contentOffset)
     {
@@ -127,13 +133,14 @@ public:
     void UpdateThemeParams(const RefPtr<SliderTheme>& theme);
 
 private:
+    WeakPtr<FrameNode> host_;
     void PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path);
     void PaintVerticalBubble(float vertexOffsetFromBlock, RSPath& path);
     void PaintHorizontalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path);
     void PaintVerticalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path);
     void PaintText(DrawingContext& context);
-    void SetBubbleDisplayAnimation(const RefPtr<FrameNode>& host);
-    void SetBubbleDisappearAnimation(const RefPtr<FrameNode>& host);
+    void SetBubbleDisplayAnimation();
+    void SetBubbleDisappearAnimation();
     void CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content);
     bool CreateParagraph(const TextStyle& textStyle, std::string content);

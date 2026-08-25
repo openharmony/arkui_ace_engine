@@ -13,21 +13,29 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("animator_test_ng") {
-  module_name = "ImageSet-ImageAnimator"
-  type = "new"
-  sources = [ "animator_test_ng.cpp" ]
+test_sources = [ "animator_test_ng.cpp" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "animator_test_min.cpp",
-      "animator_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "animator_test_min.cpp",
-      "animator_test_core.cpp",
-    ]
+core_min_sources = [
+  "animator_test_min.cpp",
+  "animator_test_core.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("animator_test_ng") {
+    type = "host_components"
+    module_name = "ImageSet-ImageAnimator"
+    sources = test_sources + core_min_sources
+  }
+} else {
+  ace_unittest("animator_test_ng") {
+    module_name = "ImageSet-ImageAnimator"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = core_min_sources
+    } else {
+      sources += core_min_sources
+    }
   }
 }

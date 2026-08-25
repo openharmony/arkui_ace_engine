@@ -36,9 +36,6 @@ void DumpRecorder::StopInner()
     frameDumpFunc_ = nullptr;
 }
 
-void DumpRecorder::Init() {}
-void DumpRecorder::Clear() { records_.clear(); }
-
 void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json)
 {
     (void)timestamp;

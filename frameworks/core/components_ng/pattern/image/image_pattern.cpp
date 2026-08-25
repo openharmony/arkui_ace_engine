@@ -43,6 +43,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -51,6 +52,7 @@
 #include "core/drawable/picture_drawable_descriptor.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -511,12 +513,11 @@ void ImagePattern::OnImageLoadSuccess()
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
-    auto frameCount = loadingCtx_->GetFrameCount();
     imageDfxConfig_.SetFrameSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
 
     image_->SetImageDfxConfig(imageDfxConfig_);
 
-    SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
+    SetImagePaintConfig(image_, loadingCtx_);
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
     }
@@ -612,14 +613,12 @@ std::string ImagePattern::MaskUrl(std::string url)
     // 2. middle: replace with stars
     const size_t middleLength = urlLength - URL_KEEP_TOTAL_LENGTH;
     result.append(middleLength, '*');
-    // 3. suffix: apply masked pattern on the last URL_SAVE_LENGTH chars
+    // 3. suffix: bulk-append then overwrite masked positions
     size_t suffixStart = urlLength - URL_SAVE_LENGTH;
-    for (size_t i = 0; i < URL_SAVE_LENGTH; ++i) {
-        if (i % NEED_MASK_INDEX == NEED_MASK_START_OFFSET) {
-            result += '*';
-        } else {
-            result += url[suffixStart + i];
-        }
+    size_t suffixPos = result.size();
+    result.append(url, suffixStart, URL_SAVE_LENGTH);
+    for (size_t i = NEED_MASK_START_OFFSET; i < URL_SAVE_LENGTH; i += NEED_MASK_INDEX) {
+        result[suffixPos + i] = '*';
     }
     return result;
 }
@@ -938,17 +937,40 @@ void ImagePattern::UpdateSvgSmoothEdgeValue()
     renderProp->UpdateSmoothEdge(std::max(smoothEdge_, renderProp->GetSmoothEdge().value_or(0.0f)));
 }
 
-void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-    const RectF& dstRect, const ImageSourceInfo& sourceInfo, int32_t frameCount)
+void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage,
+    const RefPtr<ImageLoadingContext>& ctx)
 {
+    CHECK_NULL_VOID(canvasImage);
+    CHECK_NULL_VOID(ctx);
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    ImageFit imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    std::optional<SizeF> sourceSize = layoutProps->GetSourceSize();
+    int32_t frameCount = ctx->GetFrameCount();
+    auto sourceInfo = ctx->GetSourceInfo();
+
+    // Compute srcRect/dstRect from the live component content size instead of trusting
+    // loadingCtx->GetDstRect(), which can lag behind the latest resize when MakeCanvasImageIfNeed
+    // skips re-decode (sizeLevel unchanged). Resizable drawing (DrawImageNine / DrawImageLattice)
+    // uses dstRect_ directly, so it must match the current component size to render correctly.
+    RectF srcRect;
+    RectF dstRect;
+    auto rawSize = ctx->GetImageSize();
+    if (rawSize.IsPositive() && geometryNode->GetContent()) {
+        ImagePainter::ApplyImageFit(imageFit, sourceSize.value_or(rawSize),
+            geometryNode->GetContentSize(), srcRect, dstRect);
+    }
 
     ImagePaintConfig config {
         .srcRect_ = srcRect,
         .dstRect_ = dstRect,
     };
-    config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    config.imageFit_ = imageFit;
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
     if (GreatNotEqual(frameCount, 1)) {
@@ -982,6 +1004,8 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         CHECK_NULL_VOID(pattern);
         // Mark the rendering as successful on the instance.
         pattern->SetRenderedImageInfo(std::move(renderedImageInfo));
+        pattern->lastDrawTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
     };
     if (image_ && !loadFailed_) {
         image_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
@@ -1068,8 +1092,7 @@ void ImagePattern::LoadingContext()
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
-                loadingCtx_->GetFrameCount());
+            SetImagePaintConfig(image_, loadingCtx_);
         }
     }
     if (altErrorCtx_ && altErrorCtx_->GetImageObject() != nullptr) {
@@ -1077,8 +1100,7 @@ void ImagePattern::LoadingContext()
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altErrorImage_) {
             altErrorCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(altErrorImage_, altErrorCtx_->GetSrcRect(), altErrorCtx_->GetDstRect(),
-                altErrorCtx_->GetSrc(), altErrorCtx_->GetFrameCount());
+            SetImagePaintConfig(altErrorImage_, altErrorCtx_);
         }
     }
     if (altLoadingCtx_ && altLoadingCtx_->GetImageObject() != nullptr) {
@@ -1086,8 +1108,7 @@ void ImagePattern::LoadingContext()
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
-                altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
+            SetImagePaintConfig(altImage_, altLoadingCtx_);
         }
     }
 }
@@ -1106,7 +1127,9 @@ void ImagePattern::CreateObscuredImage()
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {
             obscuredImage_ = MakeRefPtr<ObscuredImage>();
-            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo);
+            if (loadingCtx_) {
+                SetImagePaintConfig(obscuredImage_, loadingCtx_);
+            }
         }
     }
 }
@@ -1589,8 +1612,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->altImage_->SetImageDfxConfig(pattern->altImageDfxConfig_);
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
-            pattern->altLoadingCtx_->GetSourceInfo(), pattern->altLoadingCtx_->GetFrameCount());
+        pattern->SetImagePaintConfig(pattern->altImage_, pattern->altLoadingCtx_);
 
         pattern->PrepareAnimation(pattern->altImage_);
 
@@ -1659,6 +1681,37 @@ bool ImagePattern::RecycleImageData()
     altErrorImage_ = nullptr;
     isRecycledImage_ = true;
     ACE_SCOPED_TRACE("OnRecycleImageData imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+    return true;
+}
+
+bool ImagePattern::RecycleImageDataForNav()
+{
+    auto frameNode = GetHost();
+    if (!frameNode) {
+        return false;
+    }
+    // For network images, only recycle image data when cache is available to avoid re-download.
+    if (loadingCtx_ && !loadingCtx_->IsNetworkImageSafeToRecycle()) {
+        return false;
+    }
+    loadingCtx_ = nullptr;
+    auto rsRenderContext = frameNode->GetRenderContext();
+    if (!rsRenderContext) {
+        return false;
+    }
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData for Nav.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
+    imagePaintMethod_ = nullptr;
+    imagePaintMethod_ = nullptr;
+    image_ = nullptr;
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    altErrorCtx_ = nullptr;
+    altErrorImage_ = nullptr;
+    isRecycledImage_ = true;
+    ACE_SCOPED_TRACE("OnRecycleImageDataForNav imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
     return true;
 }
 
@@ -1735,7 +1788,8 @@ void ImagePattern::OnWindowHide()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!isRecycledImage_ && !host->IsPendingOnMainRenderTree()) {
+    auto renderContext = host->GetRenderContext();
+    if (!isRecycledImage_ && renderContext && !renderContext->IsOnRenderTree()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowHide recycle ImageData: %{public}s-%{private}s",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         RecycleImageData();
@@ -1835,6 +1889,7 @@ void ImagePattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    RegisterNavDestinationHiddenChange();
 }
 
 void ImagePattern::OnDetachFromMainTree()
@@ -1845,11 +1900,108 @@ void ImagePattern::OnDetachFromMainTree()
     if (pipeline) {
         ImagePerf::GetPerfMonitor()->DeleteLoadComponent(host->GetId());
     }
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+    CancelNavDestRecycleTask();
+    UnregisterNavDestinationHiddenChange();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
     if (isNeedReset_) {
         ResetImageAndAlt();
         isNeedReset_ = false;
     }
+}
+
+void ImagePattern::RegisterNavDestinationHiddenChange()
+{
+    if (!SystemProperties::GetNavigationImageRecycleEnabled()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto memoryManager = pipeline->GetMemoryManager();
+    CHECK_NULL_VOID(memoryManager);
+    auto weakPattern = WeakPtr<ImagePattern>(Claim(this));
+    auto callback = [weakPattern](bool isShown) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnNavDestinationHiddenChange(isShown);
+    };
+    memoryManager->RegisterNavDestinationHiddenChange(host, std::move(callback));
+}
+
+void ImagePattern::UnregisterNavDestinationHiddenChange()
+{
+    if (!SystemProperties::GetNavigationImageRecycleEnabled()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto memoryManager = pipeline->GetMemoryManager();
+    CHECK_NULL_VOID(memoryManager);
+    memoryManager->UnregisterNavDestinationHiddenChange(host->GetId());
+}
+
+void ImagePattern::OnNavDestinationHiddenChange(bool isShown)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    if (isShown) {
+        CancelNavDestRecycleTask();
+        if (isRecycledImage_) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE,
+                "OnNavDestinationHiddenChange shown, reload ImageData. imageNodeId:%{public}d %{public}s", nodeId,
+                imageDfxConfig_.ToStringWithoutSrc().c_str());
+            LoadImageDataIfNeed();
+        }
+    } else {
+        if (isRecycledImage_) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "already recycled, skip. imageNodeId:%{public}d", nodeId);
+            return;
+        }
+        PostNavDestRecycleTask();
+    }
+}
+
+void ImagePattern::PostNavDestRecycleTask()
+{
+    CancelNavDestRecycleTask();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto weakPattern = WeakPtr<ImagePattern>(Claim(this));
+    auto callback = [weakPattern]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ExecuteNavDestRecycle();
+    };
+
+    navDestRecycleCallback_ = std::make_shared<CancelableCallback<void()>>(std::move(callback));
+    auto scheduledTask = navDestRecycleCallback_;
+    taskExecutor->PostDelayedTask(
+        [scheduledTask]() { (*scheduledTask)(); },
+        TaskExecutor::TaskType::UI, NAV_DEST_RECYCLE_DELAY_MS, "NavDestImageRecycle");
+}
+
+void ImagePattern::CancelNavDestRecycleTask()
+{
+    if (navDestRecycleCallback_) {
+        navDestRecycleCallback_->Cancel();
+        navDestRecycleCallback_.reset();
+    }
+}
+
+void ImagePattern::ExecuteNavDestRecycle()
+{
+    navDestRecycleCallback_.reset();
+    RecycleImageDataForNav();
 }
 
 void ImagePattern::EnableDrag()
@@ -2081,15 +2233,41 @@ void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutPr
     DumpLog::GetInstance().AddDesc(
         std::string("SrcType: ").append(std::to_string(static_cast<int32_t>(src.GetSrcType()))));
     DumpLog::GetInstance().AddDesc(
-        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
+        std::string("AbilityName: ").append(AceApplicationInfo::GetInstance().GetAbilityName()));
     DumpLog::GetInstance().AddDesc(std::string("BundleName: ").append(src.GetBundleName()));
     DumpLog::GetInstance().AddDesc(std::string("ModuleName: ").append(src.GetModuleName()));
     DumpLog::GetInstance().AddDesc(
-        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
+        std::string("cacheKey: ").append(src.GetKey()));
     DumpLog::GetInstance().AddDesc(
-        std::string("LocalColorMode: ").append(std::to_string(static_cast<int32_t>(src.GetLocalColorMode()))));
+        std::string("containerId: ").append(std::to_string(src.GetContainerId())));
+    auto timePoint = std::chrono::system_clock::time_point(std::chrono::milliseconds(lastDrawTime_));
+    auto timeT = std::chrono::system_clock::to_time_t(timePoint);
+    std::tm tm {};
+#ifdef WINDOWS_PLATFORM
+    errno_t err = localtime_s(&tm, &timeT);
+    if (err != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("lastDrawTime: N/A"));
+    } else {
+        char timeBuf[32];
+        std::strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", &tm);
+        DumpLog::GetInstance().AddDesc(std::string("lastDrawTime: ").append(timeBuf));
+    }
+#else
+    localtime_r(&timeT, &tm);
+    char timeBuf[32];
+    std::strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", &tm);
+    DumpLog::GetInstance().AddDesc(std::string("lastDrawTime: ").append(timeBuf));
+#endif
+    auto containerColorMode = static_cast<int32_t>(Container::CurrentColorMode());
+    auto localColorMode = static_cast<int32_t>(src.GetLocalColorMode());
+    DumpLog::GetInstance().AddDesc(std::string("ColorMode: ").append(std::to_string(containerColorMode)));
+    DumpLog::GetInstance().AddDesc(std::string("LocalColorMode: ").append(std::to_string(localColorMode)));
+    auto effectiveColorMode = (src.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED)
+                                  ? src.GetLocalColorMode()
+                                  : Container::CurrentColorMode();
     DumpLog::GetInstance().AddDesc(
-        std::string("reloadKey: ").append(src.GetReloadKey().value_or("N/A")));
+        std::string("effectiveColorMode: ").append(std::to_string(static_cast<int32_t>(effectiveColorMode))));
+    DumpLog::GetInstance().AddDesc(std::string("reloadKey: ").append(src.GetReloadKey().value_or("N/A")));
 }
 
 inline void ImagePattern::DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
@@ -3096,8 +3274,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAltError()
         pattern->altErrorImage_->SetImageDfxConfig(pattern->altErrorImageDfxConfig_);
         pattern->altErrorSrcRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetSrcRect());
         pattern->altErrorDstRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->altErrorImage_, *pattern->altErrorSrcRect_, *pattern->altErrorDstRect_,
-            pattern->altErrorCtx_->GetSourceInfo(), pattern->altErrorCtx_->GetFrameCount());
+        pattern->SetImagePaintConfig(pattern->altErrorImage_, pattern->altErrorCtx_);
 
         pattern->PrepareAnimation(pattern->altErrorImage_);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

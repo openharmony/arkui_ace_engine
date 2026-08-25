@@ -24,30 +24,19 @@
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
 
 namespace OHOS::Ace::Framework {
-class JSThemeUtils {
+class ACE_FORCE_EXPORT JSThemeUtils {
 public:
     static constexpr int32_t DEFAULT_ALPHA = 255;
     static constexpr double DEFAULT_OPACITY = 0.2;
-    inline static std::shared_mutex themeMutex_;
     
-    static std::optional<JSTheme> GetTheme()
-    {
-        std::shared_lock<std::shared_mutex> lock(themeMutex_);
-        return JSThemeScope::jsCurrentTheme;
-    }
-
-    static std::optional<JSThemeColors> GetThemeColors()
-    {
-        std::shared_lock<std::shared_mutex> lock(themeMutex_);
-        return (JSThemeScope::jsCurrentTheme) ?
-            std::make_optional(JSThemeScope::jsCurrentTheme->Colors()) : std::nullopt;
-    }
-
-    static void SwapCurrentTheme(std::optional<JSTheme>& themeOpt)
-    {
-        std::unique_lock<std::shared_mutex> lock(themeMutex_);
-        JSThemeScope::jsCurrentTheme.swap(themeOpt);
-    }
+    static std::optional<JSTheme> GetTheme();
+    static std::optional<JSThemeColors> GetThemeColors();
+    static void SwapCurrentTheme(std::optional<JSTheme>& themeOpt);
+    static void SaveTheme(int32_t themeScopeId, const JSThemeColors& colors, const JSThemeColors& darkColors);
+    static void SetCurrentThemeByScopeId(int32_t themeScopeId);
+    static void RemoveTheme(int32_t themeScopeId);
+private:
+    static std::shared_mutex themeMutex_;
 };
 }
 #endif //FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_UTILS_H

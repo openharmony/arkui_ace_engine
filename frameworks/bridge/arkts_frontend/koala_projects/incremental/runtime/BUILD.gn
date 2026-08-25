@@ -16,13 +16,14 @@ import("//build/ohos.gni")
 import("./runtime.gni")
 
 action("runtime_annotate") {
-  outputs = [ "$target_out_dir/ets" ]
+  outputs = [ "$target_out_dir/runtime_annotate.stamp" ] # Stamp file for GN incremental build tracking
 
   script = "../../tools/annotate.py"
 
   args = [
     rebase_path("."),
     rebase_path("annotate-config.json"),
+    rebase_path("$target_out_dir/runtime_annotate.stamp", root_build_dir),
   ]
 }
 

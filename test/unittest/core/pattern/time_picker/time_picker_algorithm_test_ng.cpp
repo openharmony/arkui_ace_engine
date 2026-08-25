@@ -32,6 +32,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components/button/button_theme.h"
 #undef private

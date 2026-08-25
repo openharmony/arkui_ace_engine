@@ -67,6 +67,18 @@
 | ADR-4 | GetInstanceId 实现方式 | 通过 UIContextImpl 持有的 `context_->GetInstanceId()` 获取 | A. 通过 Container::CurrentIdSafely()：可用但不直接，且与 UIContext 已有通过 context_ 获取信息的惯例不一致 | UIContextImpl 持有 PipelineContext* 指针，直接获取 instanceId 最自然 | 新增 1 个虚方法 |
 | ADR-5 | Tabs ResourceObject 重载实现方式 | 每个 TabJsResType 枚举值映射到对应重载方法，内部委托 `TabsModelNG::CreateWithResourceObj` | A. 在 Tabs 层直接操作 pattern 的 AddResObj：跳过 Model 层，不符合分层。B. 通过 ViewStackProcessor 注入：与现有 Tabs 实现模式不一致 | 沿用现有 Tabs::Create → TabsModelNG 委托模式，保持一致性 | 8 个重载方法实现模式统一 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| UIContextImpl | 使用中的对象非法销毁检查 | 可能导致cpp_crash | RefPtr智能指针在被使用时，如果被重新赋值将可能导致所管理的对象被析构失效，进而造成UAF问题 | 严重 | 识别是不是有对象使用中被销毁的问题，避免程序带着问题继续运行进而出现难以定位的问题现场 | "this object is still in use" | 不涉及 |
+| Tabs | 使用中的对象非法销毁检查 | 可能导致cpp_crash | RefPtr智能指针在被使用时，如果被重新赋值将可能导致所管理的对象被析构失效，进而造成UAF问题 | 严重 | 识别是不是有对象使用中被销毁的问题，避免程序带着问题继续运行进而出现难以定位的问题现场 | "this object is still in use" | 不涉及 |
+| Tabs | UI对象类型转换错误 | 类型转换时C++编译器不能在编译期进行检查，需要开发者在运行期使用IsXxx方法检查JS对象类型，确保类型转换的安全 | 类型转换错误 | 严重 | 通过开关开启主动检查，提前拦截问题 | "bad type conversion" | 不涉及 |
+
 ## 设计骨架
 
 ### 骨架范围

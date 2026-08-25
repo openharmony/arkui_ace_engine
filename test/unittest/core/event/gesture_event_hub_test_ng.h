@@ -30,6 +30,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/pan_event.h"

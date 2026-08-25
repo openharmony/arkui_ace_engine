@@ -230,7 +230,9 @@ void MutableSpanString::ProcessSpanBaseList(std::list<RefPtr<SpanBase>>& spans, 
             auto newSpan = (*it)->GetSubSpan(end, spanEnd);
             (*it)->UpdateEndIndex(start);
             ++it;
-            spans.insert(it, newSpan);
+            if (newSpan) {
+                spans.insert(it, newSpan);
+            }
             continue;
         }
         auto newEnd = (op != SpanStringOperation::REMOVE) ? std::max(end, spanEnd) : start;
@@ -469,9 +471,14 @@ void MutableSpanString::ApplyInsertSpanStringToSpanBase(int32_t start, const Ref
             if (spanItemStart >= start) {
                 (*it)->UpdateStartIndex(spanItemStart + offset);
                 (*it)->UpdateEndIndex(spanItemEnd + offset);
-            } else if (spanItemStart < start && start < spanItemEnd) {
-                auto newSpanItem = (*it)->GetSubSpan(start + offset, spanItemEnd + offset);
-                (*it)->UpdateEndIndex(start);
+                continue;
+            }
+            if (spanItemStart >= start || start >= spanItemEnd) {
+                continue;
+            }
+            auto newSpanItem = (*it)->GetSubSpan(start + offset, spanItemEnd + offset);
+            (*it)->UpdateEndIndex(start);
+            if (newSpanItem) {
                 ++it;
                 it = spans.insert(it, newSpanItem);
             }
@@ -483,8 +490,13 @@ void MutableSpanString::ApplyInsertSpanStringToSpanBase(int32_t start, const Ref
         auto spans = spansMap_[iter.first];
         auto otherSpans = otherSpansMap[iter.first];
         for (auto& spanBase : otherSpans) {
+            if (!spanBase) {
+                continue;
+            }
             auto newSpanItem = spanBase->GetSubSpan(spanBase->GetStartIndex() + start, spanBase->GetEndIndex() + start);
-            spans.emplace_back(newSpanItem);
+            if (newSpanItem) {
+                spans.emplace_back(newSpanItem);
+            }
         }
         spansMap_[iter.first] = spans;
     }

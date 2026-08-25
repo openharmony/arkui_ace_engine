@@ -83,8 +83,6 @@ constexpr float OFFSET_X = 10;
 constexpr float OFFSET_Y = 10;
 constexpr float TEST_HDR_BRIGHTNESS_VALUE = 0.65f;
 constexpr float RESET_HDR_BRIGHTNESS_VALUE = 1.0f;
-constexpr int32_t INVALID_HDR_TYPE_VALUE = -1;
-constexpr int32_t AIHDR_TYPE_VALUE = static_cast<int32_t>(HdrType::AIHDR);
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 const RectF MAX_SURFACE_RECT(0, 0, MAX_WIDTH, MAX_HEIGHT);
 ArkUI_XComponent_Params g_params;
@@ -756,17 +754,11 @@ HWTEST_F(XComponentTestTwoNg, SetXComponentHdrBrightnessWithoutHdrTypeTest, Test
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    auto xComponentModifier = NodeModifier::GetXComponentModifier();
-    ASSERT_NE(xComponentModifier, nullptr);
-    ASSERT_NE(xComponentModifier->setXComponentHdrBrightness, nullptr);
-
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_);
     ASSERT_NE(mockRenderContext, nullptr);
     EXPECT_CALL(*mockRenderContext, SetHDRBrightness(TEST_HDR_BRIGHTNESS_VALUE)).WillOnce(Return());
 
-    xComponentModifier->setXComponentHdrBrightness(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)),
-        TEST_HDR_BRIGHTNESS_VALUE, INVALID_HDR_TYPE_VALUE);
+    XComponentModelNG::HdrBrightness(AceType::RawPtr(frameNode), TEST_HDR_BRIGHTNESS_VALUE);
 
     EXPECT_FLOAT_EQ(pattern->hdrBrightness_, TEST_HDR_BRIGHTNESS_VALUE);
 }
@@ -785,13 +777,7 @@ HWTEST_F(XComponentTestTwoNg, SetXComponentHdrBrightnessWithHdrTypeTest, TestSiz
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    auto xComponentModifier = NodeModifier::GetXComponentModifier();
-    ASSERT_NE(xComponentModifier, nullptr);
-    ASSERT_NE(xComponentModifier->setXComponentHdrBrightness, nullptr);
-
-    xComponentModifier->setXComponentHdrBrightness(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)),
-        TEST_HDR_BRIGHTNESS_VALUE, AIHDR_TYPE_VALUE);
+    XComponentModelNG::HdrBrightness(AceType::RawPtr(frameNode), TEST_HDR_BRIGHTNESS_VALUE, HdrType::AIHDR);
 
     EXPECT_FLOAT_EQ(pattern->hdrBrightness_, TEST_HDR_BRIGHTNESS_VALUE);
     EXPECT_EQ(pattern->hdrType_, HdrType::AIHDR);
@@ -812,15 +798,11 @@ HWTEST_F(XComponentTestTwoNg, ResetXComponentHdrBrightnessTest, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->hdrType_ = HdrType::AIHDR;
 
-    auto xComponentModifier = NodeModifier::GetXComponentModifier();
-    ASSERT_NE(xComponentModifier, nullptr);
-    ASSERT_NE(xComponentModifier->resetXComponentHdrBrightness, nullptr);
-
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_);
     ASSERT_NE(mockRenderContext, nullptr);
     EXPECT_CALL(*mockRenderContext, SetHDRBrightness(RESET_HDR_BRIGHTNESS_VALUE)).WillOnce(Return());
 
-    xComponentModifier->resetXComponentHdrBrightness(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    XComponentModelNG::HdrBrightness(AceType::RawPtr(frameNode), RESET_HDR_BRIGHTNESS_VALUE);
 
     EXPECT_FLOAT_EQ(pattern->hdrBrightness_, RESET_HDR_BRIGHTNESS_VALUE);
     EXPECT_EQ(pattern->hdrType_, HdrType::AIHDR);

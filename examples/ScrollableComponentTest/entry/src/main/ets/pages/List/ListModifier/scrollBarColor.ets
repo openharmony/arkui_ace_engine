@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
+import { ConfigurationConstant } from '@kit.AbilityKit';
 import { ListItemGroupModifier, ListItemModifier, ListModifier } from '@kit.ArkUI';
 
 class CustomModifier1 implements AttributeModifier<ListAttribute> {
@@ -101,7 +101,6 @@ struct ListItemGroupExample11 {
   }
 
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State modifier1: CustomModifier1 = new CustomModifier1();
 
@@ -110,12 +109,13 @@ struct ListItemGroupExample11 {
 
       Button('深浅色')
         .onClick(() => {
+          const appContext = this.getUIContext().getHostContext()?.getApplicationContext();
           if (this.isDark) {
             this.isDark = false;
-            this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
+            appContext?.setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
           } else {
             this.isDark = true;
-            this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
+            appContext?.setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
           }
         })
       Button('切换数值')

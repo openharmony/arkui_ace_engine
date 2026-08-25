@@ -13,30 +13,53 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("resource_manager_test") {
-  module_name = "StateManagement-InApp"
-  type = "new"
-  sources = [ "resource_manager_test.cpp" ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
+if (is_host_product) {
+  ace_unittest("resource_manager_test") {
+    type = "host_components"
+    module_name = "StateManagement-InApp"
     sources = [
-      "resource_test_min.cpp",
-      "resource_test_core.cpp",
-    ]
-  } else {
-    sources += [
+      "resource_manager_test.cpp",
       "resource_test_min.cpp",
       "resource_test_core.cpp",
     ]
   }
+} else {
+  ace_unittest("resource_manager_test") {
+    module_name = "StateManagement-InApp"
+    type = "new"
+    sources = [ "resource_manager_test.cpp" ]
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "resource_test_min.cpp",
+        "resource_test_core.cpp",
+      ]
+    } else {
+      sources += [
+        "resource_test_min.cpp",
+        "resource_test_core.cpp",
+      ]
+    }
+  }
 }
 
-ace_unittest("resource_parse_utils_test_ng") {
-  module_name = "Resource-ResourceParse"
-  type = "new"
-  sources = [
-    "resource_parse_utils_test_ng.cpp",
-    "resource_parse_utils_test.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("resource_parse_utils_test_ng") {
+    type = "host_components"
+    module_name = "Resource-ResourceParse"
+    sources = [
+      "resource_parse_utils_test_ng.cpp",
+      "resource_parse_utils_test.cpp",
+    ]
+  }
+} else {
+  ace_unittest("resource_parse_utils_test_ng") {
+    module_name = "Resource-ResourceParse"
+    type = "new"
+    sources = [
+      "resource_parse_utils_test_ng.cpp",
+      "resource_parse_utils_test.cpp",
+    ]
+  }
 }

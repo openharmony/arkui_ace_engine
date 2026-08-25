@@ -31,7 +31,6 @@ void TaihangOptimizer::Init()
 {
     CHECK_EQUAL_VOID(isInited_, true);
     isInited_ = true;
-#ifndef CROSS_PLATFORM
     std::weak_ptr<TaihangOptimizer> weakThis = shared_from_this();
     auto task = [weakThis]() {
         auto optimizerRef = weakThis.lock();
@@ -48,7 +47,6 @@ void TaihangOptimizer::Init()
             static_cast<int32_t>(optimizerRef->enable_));
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
-#endif
 }
 
 bool TaihangOptimizer::IsInited()
@@ -87,17 +85,15 @@ void TaihangOptimizer::ParseReplyPages(const std::unordered_map<std::string, std
     }
 }
 
-bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageName)
+bool TaihangOptimizer::CheckSwiperPageValid(const std::string& fullPath,
+    const std::string& pageName, const std::string& jsViewName)
 {
-    TAG_LOGD(AceLogTag::ACE_SWIPER, "TaihangOptimizer::CheckSwiperPageValid pageName: %{public}s", pageName.c_str());
     CHECK_EQUAL_RETURN(isInited_, false, false);
     CHECK_EQUAL_RETURN(enable_, false, false);
     std::shared_lock<std::shared_mutex> lock(processWhiteListMutex_);
     CHECK_EQUAL_RETURN(pageNameSet_.empty(), true, false);
-    std::vector<std::string> pageNames;
-    StringUtils::StringSplitter(pageName, ',', pageNames);
-    for (auto pageName : pageNames) {
-        if (pageNameSet_.find(pageName) != pageNameSet_.end()) {
+    for (const auto& name : pageNameSet_) {
+        if (name == fullPath || name == pageName || name == jsViewName) {
             return true;
         }
     }

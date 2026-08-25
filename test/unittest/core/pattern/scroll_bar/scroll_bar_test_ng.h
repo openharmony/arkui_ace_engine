@@ -26,6 +26,10 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
+#undef private
+#undef protected
+
+
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;

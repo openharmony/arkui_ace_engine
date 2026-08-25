@@ -14,6 +14,8 @@
 */
 
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.h"
+#include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_virtual_node_utils.h"
+#include "adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
@@ -80,7 +82,12 @@ bool FrameNodeRulesCheckNode::GetPropAccessibilityText(Accessibility::PropValue&
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     value.valueType = Accessibility::ValueType::STRING;
-    value.valueStr = NG::AccessibilityPropertyUtils::GetAccessibilityText(accessibilityProperty);
+    auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+    if (customProperty && !customProperty->GetAccessibilityText().empty()) {
+        value.valueStr = customProperty->GetAccessibilityText();
+    } else {
+        value.valueStr = NG::AccessibilityPropertyUtils::GetAccessibilityText(accessibilityProperty);
+    }
     return true;
 }
 
@@ -91,7 +98,12 @@ bool FrameNodeRulesCheckNode::GetPropType(Accessibility::PropValue& value)
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     value.valueType = Accessibility::ValueType::STRING;
-    value.valueStr = NG::AccessibilityPropertyUtils::GetComponentType(node, accessibilityProperty);
+    auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+    if (customProperty && !customProperty->GetRole().empty()) {
+        value.valueStr = customProperty->GetRole();
+    } else {
+        value.valueStr = NG::AccessibilityPropertyUtils::GetComponentType(node, accessibilityProperty);
+    }
     return true;
 }
 
@@ -102,7 +114,12 @@ bool FrameNodeRulesCheckNode::GetPropAccessibilityLevel(Accessibility::PropValue
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     value.valueType = Accessibility::ValueType::STRING;
-    value.valueStr = accessibilityProperty->GetAccessibilityLevel();
+    auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+    if (customProperty && !customProperty->GetAccessibilityLevel().empty()) {
+        value.valueStr = customProperty->GetAccessibilityLevel();
+    } else {
+        value.valueStr = accessibilityProperty->GetAccessibilityLevel();
+    }
     return true;
 }
 
@@ -113,7 +130,12 @@ bool FrameNodeRulesCheckNode::GetPropAccessibilityGroup(Accessibility::PropValue
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     value.valueType = Accessibility::ValueType::BOOL;
-    value.valueBool = accessibilityProperty->IsAccessibilityGroup();
+    auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+    if (customProperty) {
+        value.valueBool = customProperty->GetAccessibilityGroup();
+    } else {
+        value.valueBool = accessibilityProperty->IsAccessibilityGroup();
+    }
     return true;
 }
 
@@ -121,7 +143,15 @@ bool FrameNodeRulesCheckNode::GetPropIsEnable(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     value.valueType = Accessibility::ValueType::BOOL;
+    if (accessibilityProperty) {
+        auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+        if (customProperty) {
+            value.valueBool = customProperty->GetEnabled();
+            return true;
+        }
+    }
     value.valueBool = NG::AccessibilityFrameNodeUtils::IsNodeEnabled(node);
     return true;
 }
@@ -207,12 +237,42 @@ std::vector<std::shared_ptr<T>> FrameNodeRulesCheckNode::GetChildrenTemplate()
 
 std::vector<std::shared_ptr<FocusRulesCheckNode>> FrameNodeRulesCheckNode::GetAceChildren()
 {
-    return GetChildrenTemplate<FocusRulesCheckNode>();
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, GetChildrenTemplate<FocusRulesCheckNode>());
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, GetChildrenTemplate<FocusRulesCheckNode>());
+    CHECK_NE_RETURN(accessibilityProperty->HasVirtualNodeTreeRoot(), true, GetChildrenTemplate<FocusRulesCheckNode>());
+    auto virtualNodeTreeRoot = accessibilityProperty->GetVirtualNodeTreeRoot();
+    CHECK_NULL_RETURN(virtualNodeTreeRoot, GetChildrenTemplate<FocusRulesCheckNode>());
+    auto virtualNode = AceType::DynamicCast<NG::VirtualAccessibilityNode>(virtualNodeTreeRoot);
+    CHECK_NULL_RETURN(virtualNode, GetChildrenTemplate<FocusRulesCheckNode>());
+
+    std::vector<std::shared_ptr<FocusRulesCheckNode>> checkNodeChildren;
+    auto virtualNodeId = NG::VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(
+        NG::VirtualNodeContainerIdManager::GetInstance().GetContainerId(node), virtualNode->GetNodeId());
+    checkNodeChildren.push_back(
+        std::make_shared<VirtualAccessibilityNodeRulesCheckNode>(virtualNode, virtualNodeId, node));
+    return checkNodeChildren;
 }
 
 std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> FrameNodeRulesCheckNode::GetChildren()
 {
-    return GetChildrenTemplate<Accessibility::ReadableRulesNode>();
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, GetChildrenTemplate<Accessibility::ReadableRulesNode>());
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, GetChildrenTemplate<Accessibility::ReadableRulesNode>());
+    CHECK_NE_RETURN(accessibilityProperty->HasVirtualNodeTreeRoot(), true,
+        GetChildrenTemplate<Accessibility::ReadableRulesNode>());
+    auto virtualNodeTreeRoot = accessibilityProperty->GetVirtualNodeTreeRoot();
+    CHECK_NULL_RETURN(virtualNodeTreeRoot, GetChildrenTemplate<Accessibility::ReadableRulesNode>());
+    auto virtualNode = AceType::DynamicCast<NG::VirtualAccessibilityNode>(virtualNodeTreeRoot);
+    CHECK_NULL_RETURN(virtualNode, GetChildrenTemplate<Accessibility::ReadableRulesNode>());
+    std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> checkNodeChildren;
+    auto virtualNodeId = NG::VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(
+        NG::VirtualNodeContainerIdManager::GetInstance().GetContainerId(node), virtualNode->GetNodeId());
+    checkNodeChildren.push_back(
+        std::make_shared<VirtualAccessibilityNodeRulesCheckNode>(virtualNode, virtualNodeId, node));
+    return checkNodeChildren;
 }
 
 std::shared_ptr<FocusRulesCheckNode> FrameNodeRulesCheckNode::GetAceParent()

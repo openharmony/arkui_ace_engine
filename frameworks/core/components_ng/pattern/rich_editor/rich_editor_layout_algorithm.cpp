@@ -285,7 +285,8 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContentSize(
     CHECK_NULL_RETURN(layoutProperty, {});
     TextStyle textStyle;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
-    MeasureChildren(contentConstraint, layoutWrapper, textStyle);
+    bool childrenSizeChange = MeasureChildren(contentConstraint, layoutWrapper, textStyle);
+    IF_TRUE(childrenSizeChange, HandleParagraphCache());
     CHECK_NULL_RETURN(BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper), {});
     pManager_->SetParagraphs(GetParagraphs());
     auto textWidth = pManager_->GetTextWidth();

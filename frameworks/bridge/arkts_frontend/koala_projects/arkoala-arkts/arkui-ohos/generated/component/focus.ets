@@ -20,10 +20,9 @@ import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
-import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
-import { extractors } from '#handwritten'
+import { LengthMetrics as arkui_Graphics_LengthMetrics, extractors } from '#handwritten'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
 import { CallbackTransformer } from './../CallbackTransformer'
 export interface FocusBoxStyle {
     margin?: arkui_Graphics_LengthMetrics;
@@ -46,7 +45,8 @@ export class FocusBoxStyle_serializer {
         if (valueHolderForMargin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMarginTmpValue = valueHolderForMargin!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValue)
+            const valueHolderForMarginTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForMarginTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForMarginTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -63,7 +63,8 @@ export class FocusBoxStyle_serializer {
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue = valueHolderForStrokeWidth!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+            const valueHolderForStrokeWidthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForStrokeWidthTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -73,7 +74,8 @@ export class FocusBoxStyle_serializer {
         const marginTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let marginTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            marginTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const marginTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            marginTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(marginTmpBufOptDeserialized)
         }
         const marginTmpResult: arkui_Graphics_LengthMetrics | undefined = marginTmpBuf
         const strokeColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -86,7 +88,8 @@ export class FocusBoxStyle_serializer {
         const strokeWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let strokeWidthTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const strokeWidthTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            strokeWidthTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(strokeWidthTmpBufOptDeserialized)
         }
         const strokeWidthTmpResult: arkui_Graphics_LengthMetrics | undefined = strokeWidthTmpBuf
         let value: FocusBoxStyle = ({margin: marginTmpResult, strokeColor: strokeColorTmpResult, strokeWidth: strokeWidthTmpResult} as FocusBoxStyle)

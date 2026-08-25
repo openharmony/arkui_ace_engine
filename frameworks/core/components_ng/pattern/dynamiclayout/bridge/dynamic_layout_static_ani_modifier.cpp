@@ -143,6 +143,33 @@ bool SetDynamicLayoutColumnOptions(ArkUINodeHandle node, ArkUIColumnLayoutAlgori
     return true;
 }
 
+PresetFillType ConvertItemFillPolicy(ArkUI_Int32 ordinal)
+{
+    switch (ordinal) {
+        case 0: return PresetFillType::BREAKPOINT_DEFAULT;
+        case 1: return PresetFillType::BREAKPOINT_SM1MD2LG3;
+        case 2: return PresetFillType::BREAKPOINT_SM2MD3LG5;
+        default: return PresetFillType::BREAKPOINT_DEFAULT;
+    }
+}
+
+bool SetDynamicLayoutGridOptions(ArkUINodeHandle node, ArkUIGridLayoutAlgorithm algorithm)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto gridParams = AceType::MakeRefPtr<GridLayoutAlgorithmParam>();
+    if (algorithm.columnsTemplate != nullptr && algorithm.columnsTemplate[0] != '\0') {
+        gridParams->SetColumnsTemplate(algorithm.columnsTemplate);
+    }
+    if (algorithm.itemFillPolicy >= 0) {
+        gridParams->SetItemFillPolicy(ConvertItemFillPolicy(algorithm.itemFillPolicy));
+    }
+    gridParams->SetRowsGap(ConvertLengthMetricsToDimension(algorithm.rowsGap));
+    gridParams->SetColumnsGap(ConvertLengthMetricsToDimension(algorithm.columnsGap));
+    DynamicLayoutModelNG::SetParams(AceType::Claim(frameNode), gridParams, DynamicLayoutType::GRID_LAYOUT);
+    return true;
+}
+
 bool SetDynamicLayoutCustomOptions(ArkUINodeHandle node, const ArkUICustomLayoutAlgorithm& algorithm)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
@@ -181,33 +208,6 @@ ArkUINodeHandle DynamicLayoutConstructImpl(ArkUI_Int32 id, ArkUI_Int32 flags)
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
-}
-
-PresetFillType ConvertItemFillPolicy(ArkUI_Int32 ordinal)
-{
-    switch (ordinal) {
-        case 0: return PresetFillType::BREAKPOINT_DEFAULT;
-        case 1: return PresetFillType::BREAKPOINT_SM1MD2LG3;
-        case 2: return PresetFillType::BREAKPOINT_SM2MD3LG5;
-        default: return PresetFillType::BREAKPOINT_DEFAULT;
-    }
-}
-
-bool SetDynamicLayoutGridOptions(ArkUINodeHandle node, ArkUIGridLayoutAlgorithm algorithm)
-{
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    auto gridParams = AceType::MakeRefPtr<GridLayoutAlgorithmParam>();
-    if (algorithm.columnsTemplate != nullptr && algorithm.columnsTemplate[0] != '\0') {
-        gridParams->SetColumnsTemplate(algorithm.columnsTemplate);
-    }
-    if (algorithm.itemFillPolicy >= 0) {
-        gridParams->SetItemFillPolicy(ConvertItemFillPolicy(algorithm.itemFillPolicy));
-    }
-    gridParams->SetRowsGap(ConvertLengthMetricsToDimension(algorithm.rowsGap));
-    gridParams->SetColumnsGap(ConvertLengthMetricsToDimension(algorithm.columnsGap));
-    DynamicLayoutModelNG::SetParams(AceType::Claim(frameNode), gridParams, DynamicLayoutType::GRID_LAYOUT);
-    return true;
 }
 
 const ArkUIAniDynamicLayoutModifier* GetArkUIAniDynamicLayoutModifier()

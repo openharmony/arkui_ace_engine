@@ -42,4 +42,15 @@ bool Base64Util::Decode(const std::string& src, std::string& dst)
     return true;
 }
 
+std::string Base64Util::Encode(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return "";
+    }
+    size_t encodeLen = SkBase64::Encode(data, size, nullptr);
+    std::string result(encodeLen, 0);
+    SkBase64::Encode(data, size, reinterpret_cast<void*>(&result[0]));
+    return result;
+}
+
 } // namespace OHOS::Ace

@@ -19,9 +19,16 @@ ace_unittest("os_content_test") {
   sources = [ "./common/properties/os_content_test.cpp" ]
 }
 
+ace_unittest("ui_material_theme_test_ng") {
+  module_name = "CommonVisualEffects"
+  type = "new"
+  sources = [ "./theme/ui_material_theme_test_ng.cpp" ]
+}
+
 group("core_components_unittest") {
   testonly = true
   deps = [
     ":os_content_test",
+    ":ui_material_theme_test_ng",
   ]
 }

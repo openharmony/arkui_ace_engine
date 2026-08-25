@@ -39,6 +39,9 @@ ani_long UiMaterialConvertToECMaterial(ani_env* env, ani_object aniClass, ani_lo
 ani_long UiMaterialConvertToECSubMaterial(ani_env* env, ani_object aniClass, ani_long ptr);
 ani_int UiMaterialGetGlobalMaterialLevel(ani_env* env, ani_object aniClass);
 ani_boolean UiMaterialIsImmersiveMaterialSupported(ani_env* env, ani_object aniClass);
+ani_int UiMaterialGetMaterialState(ani_env* env, ani_object aniClass);
+ani_int UiMaterialGetMaterialType(ani_env* env, ani_object aniClass);
+ani_long UiMaterialGetEmpty(ani_env* env, ani_object aniClass, ani_object obj);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_VISUAL_EFFECT_VISUAL_EFFECT_MODULE_H

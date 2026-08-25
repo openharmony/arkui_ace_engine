@@ -49,6 +49,7 @@ import {
   Row,
   ScaleOptions,
   ShadowStyle,
+  SizeChangeCallback,
   SizeOptions,
   SymbolEffect,
   SymbolEffectStrategy,
@@ -685,6 +686,7 @@ export struct ChipV2 {
   @Local breakPoint: BreakPointsType = BreakPointsType.SM;
   @Local fontSizeScale: number = 1;
   @Local useAdaptiveLineHeight: boolean = false;
+  @Local actualChipHeight: number = 0;
 
   private smListener: mediaquery.MediaQueryListener =
     this.getUIContext().getMediaQuery().matchMediaSync('(0vp<width) and (width<600vp)');
@@ -943,6 +945,9 @@ export struct ChipV2 {
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
     .responseRegion(this.getChipResponseRegion())
+    .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+      this.actualChipHeight = (newValue.height ?? 0) as number;
+    } as SizeChangeCallback)
     .scale(this.chipScale)
     .opacity(this.chipOpacity)
     .accessibilityGroup(true)
@@ -1293,7 +1298,9 @@ export struct ChipV2 {
   }
 
   private getChipResponseRegion(): Rectangle | undefined {
-    const chipHeight = this.getChipHeight();
+    // Large-font scaling (e.g. care mode) can stretch the chip beyond the themed or
+    // user-specified height, so prefer the measured height once layout has happened.
+    const chipHeight = this.actualChipHeight > 0 ? this.actualChipHeight : this.getChipHeight();
     if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
       return {
         x: 0,

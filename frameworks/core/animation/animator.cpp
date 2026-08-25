@@ -449,9 +449,11 @@ void Animator::Pause()
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
+#ifndef CROSS_PLATFORM
     if (needFrameJankReport_) {
         JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
+#endif
     status_ = Status::PAUSED;
     asyncTrace_ = nullptr;
     StatusListenable::NotifyPauseListener();
@@ -473,9 +475,11 @@ void Animator::Resume()
     if (scheduler_ && !scheduler_->IsActive()) {
         scheduler_->Start();
     }
+#ifndef CROSS_PLATFORM
     if (needFrameJankReport_) {
         JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
+#endif
     status_ = Status::RUNNING;
     if (!motion_) {
         asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());
@@ -504,9 +508,11 @@ void Animator::Stop()
     if (status_ == Status::STOPPED) {
         return;
     }
+#ifndef CROSS_PLATFORM
     if (needFrameJankReport_) {
         JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
+#endif
 
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
@@ -611,7 +617,9 @@ void Animator::OnFrame(int64_t duration)
         }
         return;
     }
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().RecordFrameUpdate();
+#endif
     NotifyPrepareListener();
     // get playedTime
     auto playedTime = elapsedTime_ - scaledStartDelay_;
@@ -717,9 +725,11 @@ void Animator::StartInner(bool alwaysNotify)
         }
     }
     StatusListenable::NotifyStartListener();
+#ifndef CROSS_PLATFORM
     if (needFrameJankReport_) {
         JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
+#endif
     status_ = Status::RUNNING;
     if (!motion_) {
         asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());

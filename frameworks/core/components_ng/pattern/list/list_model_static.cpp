@@ -300,7 +300,7 @@ void ListModelStatic::SetListSpace(FrameNode* frameNode, const std::optional<Dim
     } else {
         CHECK_NULL_VOID(frameNode);
         frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE);
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, Space, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -462,7 +462,8 @@ void ListModelStatic::SetChainAnimation(FrameNode* frameNode, const std::optiona
     if (chainAnimation.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, chainAnimation.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ListLayoutProperty, ChainAnimation, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -481,7 +482,8 @@ void ListModelStatic::SetScrollEnabled(FrameNode* frameNode, const std::optional
     if (enableScrollInteraction.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ListLayoutProperty, ScrollEnabled, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

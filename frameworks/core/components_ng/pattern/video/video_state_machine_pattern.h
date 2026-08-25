@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_STATE_MACHINE_PATTERN_H
 #include <mutex>
 #include <queue>
-
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -29,9 +29,7 @@
 #include "frameworks/base/geometry/rect.h"
 
 namespace OHOS::Ace {
-#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
-#endif
 }
 namespace OHOS::Ace::NG {
 class VideoAccessibilityProperty;
@@ -175,6 +173,7 @@ public:
     }
 
     void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
 
     void OnAreaChangedInner() override;
 
@@ -394,6 +393,8 @@ private:
 
     void RegisterRenderContextCallBack();
     void ChangePlayerStatus(const PlaybackStatus& status);
+    void RegisterVisibleAreaChange();
+    void UnregisterVisibleAreaChange(FrameNode* frameNode = nullptr);
 
     bool IsSupportImageAnalyzer();
     bool ShouldUpdateImageAnalyzer();
@@ -479,9 +480,7 @@ private:
 
     Rect lastBoundsRect_;
     Rect contentRect_;
-#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-#endif
 
     ContentTransitionType contentTransition_ = ContentTransitionType::IDENTITY;
     Color surfaceBgColor_ = Color::BLACK;
@@ -491,21 +490,16 @@ private:
     bool isProgressInjectCmd_ = false;
     double lastProgressRate_ = 0.0;
     double lastSetProgressRate_ = 1.0;
+    bool hasVisibleChangeRegistered_ = false;
+    RectF lastMediaPlayerBounds_;
 
     // Error info for OnErrorStateEntered callback
     int32_t lastErrorCode_ = 0;
     std::string lastErrorMessage_;
 
-    // Serial background task queue to ensure media operations execute in order
-    struct SerialBgTask {
-        std::string name;
-        std::function<void()> task;
-    };
+    // Serial background task queue lives in the shared VideoStateManager so that media
+    // operations keep FIFO order across fullscreen transitions; this is a thin forwarder.
     void PostSerialBgTask(std::function<void()> task, const std::string& name = "");
-    void DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor);
-    std::mutex serialBgQueueMutex_;
-    std::queue<SerialBgTask> serialBgTaskQueue_;
-    bool isDrainingSerialBgQueue_ = false;
     bool ownsControllerAsyncBinding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoStateMachinePattern);

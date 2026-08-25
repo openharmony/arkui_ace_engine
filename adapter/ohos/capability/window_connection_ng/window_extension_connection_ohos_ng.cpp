@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "frameworks/base/json/json_util.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/extension_session.h"
 
 #ifdef OS_ACCOUNT_EXISTS
@@ -163,10 +162,6 @@ void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::F
         static_cast<uint32_t>(size.Height()),
     };
     auto renderProperty = node->GetPaintProperty<NG::AbilityComponentRenderProperty>();
-    if (!renderProperty->HasWant()) {
-        LOGE("fail to get want value");
-        return;
-    }
     std::string want = renderProperty->GetWantValue();
     AppExecFwk::ElementName element;
     WantConverterNG(want, element);

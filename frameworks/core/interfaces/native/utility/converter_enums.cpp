@@ -1619,6 +1619,16 @@ void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src)
 }
 
 template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextEncoding>& dst, const Ark_TextEncoding& src)
+{
+    switch (src) {
+        case ARK_TEXT_ENCODING_TEXT_ENCODING_UTF8: dst = TextEncoding::UTF8; break;
+        case ARK_TEXT_ENCODING_TEXT_ENCODING_UTF16: dst = TextEncoding::UTF16; break;
+        default: LOGE("Unexpected enum value in Ark_TextEncoding: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<SelectionMenuType>& dst, const Ark_MenuType& src)
 {
     switch (src) {

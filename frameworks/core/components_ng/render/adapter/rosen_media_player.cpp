@@ -177,17 +177,8 @@ bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
         LOGE("Video media player get stat failed.");
         return false;
     }
-    int64_t current = static_cast<int64_t>(lseek(fd, 0, SEEK_CUR));
-    if (current == -1) {
-        LOGE("Video media player lseek failed.");
-        return false;
-    }
-    int64_t size = static_cast<int64_t>(statBuf.st_size) - current;
-    if (size <= 0) {
-        LOGE("Video media player check size failed.");
-        return false;
-    }
-    if (mediaPlayer_ && mediaPlayer_->SetSource(fd, current, size) != 0) {
+    auto size = statBuf.st_size;
+    if (mediaPlayer_ && mediaPlayer_->SetSource(fd, 0, size) != 0) {
         LOGE("Video media player SetSource failed");
         return false;
     }
@@ -364,13 +355,13 @@ bool RosenMediaPlayer::GetResourceId(const std::string& path, uint32_t& resId)
 {
     std::smatch matches;
     if (std::regex_match(path, matches, MEDIA_RES_ID_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
-        resId = static_cast<uint32_t>(std::stoul(matches[1].str()));
+        resId = StringUtils::StringToUint(matches[1].str());
         return true;
     }
 
     std::smatch appMatches;
     if (std::regex_match(path, appMatches, MEDIA_APP_RES_ID_REGEX) && appMatches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
-        resId = static_cast<uint32_t>(std::stoul(appMatches[1].str()));
+        resId = StringUtils::StringToUint(appMatches[1].str());
         return true;
     }
 

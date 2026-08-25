@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_nav_param_flat_serializer.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace::Framework {
@@ -197,37 +198,6 @@ void JSNavPathInfo::UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
 
 std::string JSNavPathInfo::GetInitParamString() const
 {
-    std::string undefinedVal = "undefined";
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, undefinedVal);
-    auto env = reinterpret_cast<napi_env>(engine->GetNativeEngine());
-    if (!env) {
-        return undefinedVal;
-    }
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        return undefinedVal;
-    }
-    napi_value param = JsConverter::ConvertJsValToNapiValue(initParam_);
-    napi_value globalValue;
-    napi_get_global(env, &globalValue);
-    napi_value jsonClass;
-    napi_get_named_property(env, globalValue, "JSON", &jsonClass);
-    napi_value stringifyFunc;
-    napi_get_named_property(env, jsonClass, "stringify", &stringifyFunc);
-    napi_value stringifyParam;
-    if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
-        napi_get_and_clear_last_exception(env, &stringifyParam);
-        napi_close_handle_scope(env, scope);
-        return undefinedVal;
-    }
-    size_t len = 0;
-    napi_get_value_string_utf8(env, stringifyParam, nullptr, 0, &len);
-    std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
-    napi_get_value_string_utf8(env, stringifyParam, paramChar.get(), len + 1, &len);
-    napi_close_handle_scope(env, scope);
-    return paramChar.get();
+    return JsNavParamFlatSerializer::Serialize(initParam_);
 }
 } // namespace OHOS::Ace::Framework

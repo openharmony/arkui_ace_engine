@@ -19,6 +19,7 @@
 #include "core/accessibility/accessibility_manager_ng.h"
 
 #include <cmath>
+#include <unistd.h>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/draw_delegate.h"
@@ -48,9 +49,6 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
-#ifndef CROSS_PLATFORM
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -58,22 +56,19 @@
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
-#ifndef CROSS_PLATFORM
-#include "base/log/dump_recorder.h"
-#endif
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
-#ifndef CROSS_PLATFORM
-#include "base/perfmonitor/perf_monitor.h"
-#endif
 #include "base/resource/shared_image_manager.h"
-#include "base/ressched/ressched_click_optimizer.h"
 #ifndef CROSS_PLATFORM
+#include "base/log/dump_recorder.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
-#endif
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/ressched/taihang_optimizer.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "base/utils/feature_manager.h"
@@ -116,7 +111,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
@@ -324,31 +319,6 @@ void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonVal
     childrenJson->Put(childJson);
 }
 
-RefPtr<NG::FrameNode> GetContainerModalDumpRootNode(const RefPtr<NG::FrameNode>& containerModalNode)
-{
-    RefPtr<NG::FrameNode> result = nullptr;
-    if (!containerModalNode) {
-        return nullptr;
-    }
-    auto containerModalPattern = containerModalNode->GetPattern<NG::ContainerModalPattern>();
-    if (containerModalPattern) {
-        result = containerModalPattern->GetStackNode();
-    }
-    return result;
-}
-
-RefPtr<NG::UINode> GetAtomicServiceDumpNode(const RefPtr<NG::FrameNode>& dumpBeginNode)
-{
-    CHECK_NULL_RETURN(dumpBeginNode, nullptr);
-    auto rootChildren = dumpBeginNode->GetChildren();
-    for (const auto& rootChild : rootChildren) {
-        if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-            return rootChild;
-        }
-    }
-    return nullptr;
-}
-
 constexpr uint32_t AI_CALL_NODE_INVALID = 3;
 constexpr uint32_t AI_CALL_NODE_AMBIGUOUS = 5;
 
@@ -431,16 +401,16 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         uiExtensionManager_->SetInstanceId(instanceId);
     }
 #endif
+    recycleManager_ = std::make_unique<RecycleManager>();
+#ifndef CROSS_PLATFORM
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
-    recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
-#endif
-    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+#endif
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     // Snapshot the thread's isolated state at pipeline creation time.
     // This determines the pipeline's IsolatedThread identity for its entire lifecycle.
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
@@ -473,16 +443,17 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         uiExtensionManager_->SetInstanceId(instanceId);
     }
 #endif
+
+    recycleManager_ = std::make_unique<RecycleManager>();
+#ifndef CROSS_PLATFORM
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
-    recycleManager_ = std::make_unique<RecycleManager>();
-    clickOptimizer_->Init();
-#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
-#endif
-    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    clickOptimizer_->Init();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+#endif
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     // Snapshot the thread's isolated state at pipeline creation time.
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
@@ -509,16 +480,16 @@ PipelineContext::PipelineContext()
         uiExtensionManager_->SetPipelineContext(WeakClaim(this));
     }
 #endif
+    recycleManager_ = std::make_unique<RecycleManager>();
+#ifndef CROSS_PLATFORM
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
-    recycleManager_ = std::make_unique<RecycleManager>();
-    clickOptimizer_->Init();
-#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
-#endif
-    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    clickOptimizer_->Init();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+#endif
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     // Snapshot the thread's isolated state at pipeline creation time.
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
@@ -578,6 +549,41 @@ std::string PipelineContext::GetNavDestinationPageName(const RefPtr<PageInfo>& p
     auto pageNameObj = navDestinationNodes.back();
     std::string pageName = std::get<0>(pageNameObj);
     return pageName;
+}
+
+std::string PipelineContext::GetNavDestinationJSViewName(const RefPtr<PageInfo>& pageInfo) const
+{
+    CHECK_NULL_RETURN(pageInfo, "");
+    int32_t pageId = pageInfo->GetPageId();
+    RefPtr<NavigationGroupNode> navigationNode = nullptr;
+    CHECK_RUN_ON(UI);
+    auto it = pageToNavigationNodes_.find(pageId);
+    if (it == pageToNavigationNodes_.end() || it->second.empty()) {
+        return "";
+    }
+
+    for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+    }
+
+    CHECK_NULL_RETURN(navigationNode, "");
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    CHECK_NULL_RETURN(navigationPattern, "");
+
+    const auto& navDestinationNodes = navigationPattern->GetAllNavDestinationNodes();
+    int32_t size = static_cast<int32_t>(navDestinationNodes.size());
+    if (size == 0) {
+        return "";
+    }
+    auto lastPage = navDestinationNodes.back();
+    auto lastUiNode = lastPage.second;
+    CHECK_NULL_RETURN(lastUiNode, "");
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(lastUiNode));
+    CHECK_NULL_RETURN(navDestinationNode, "");
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, "");
+    return navDestinationPattern->GetJSViewName();
 }
 
 std::string PipelineContext::GetCurrentPageName()
@@ -681,9 +687,9 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
     if (!CheckThreadSafe()) {
         LOGW("AddDirtyPropertyNode doesn't run on UI thread!");
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (dirtyNode && isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
-        LOGW("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
     }
@@ -699,9 +705,9 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
         LOGW("dirtyNode invalid");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
-        LOGW("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
     }
@@ -729,9 +735,9 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty layout node as the pipeline context is destroyed.");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
-        LOGW("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
     }
@@ -794,9 +800,9 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty render node as the pipeline context is destroyed.");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
-        LOGW("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
     }
@@ -827,9 +833,9 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
 {
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (node && isIsolatedThread_ != node->IsIsolatedThread()) {
-        LOGW("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, node->GetId(), node->IsIsolatedThread());
     }
@@ -904,9 +910,11 @@ void PipelineContext::FlushDirtyNodeUpdate()
 #endif
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
+#endif
 
     // freeze node unlock before build begin.
     FlushFreezeNode();
@@ -939,14 +947,16 @@ void PipelineContext::FlushDirtyNodeUpdate()
 
     FlushTSUpdates();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
-#if !defined(IS_RELEASE_VERSION) && !defined(CROSS_PLATFORM)
+#if !defined(IS_RELEASE_VERSION)
     int64_t duration = GetCurrentTimestampMicroSecond() - startTime;
     if (duration > SINGLE_FRAME_TIME_MICROSEC) {
         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushDirtyNodeUpdate", duration);
     }
+#endif
 #endif
 }
 
@@ -1191,10 +1201,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
+#ifndef CROSS_PLATFORM
     if (touchOptimizer_) {
         touchOptimizer_->SetLastVsyncTimeStamp(nanoTimestamp);
         touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
     }
+#endif
     uint64_t timeStamp = (nanoTimestamp > vsyncPeriod) ? (nanoTimestamp - vsyncPeriod + ONE_MS_IN_NS) : ONE_MS_IN_NS;
     resampleTimeStamp_ = (timeStamp > compensationValue_) ? (timeStamp - compensationValue_) : 0;
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -1210,7 +1222,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     if (frameCount != UINT64_MAX) {
         DispatchDisplaySync(nanoTimestamp);
     }
-    FlushZindexUpdate();
+    FlushRebuildRenderTree();
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
@@ -1366,11 +1378,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
+#ifndef CROSS_PLATFORM
     if (touchOptimizer_ && (touchOptimizer_->GetIsTpFlushFrameDisplayPeriod() ||
                                touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod())) {
         ACE_SCOPED_TRACE("TpFlush RequestFrame");
         RequestFrame();
     }
+#endif
     FireFrameMetricsCallBack(frameMetrics);
     // First vsync may come before rootNode_ is created.
 #ifndef CROSS_PLATFORM
@@ -1549,16 +1563,20 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     displaySyncManager->SetRefreshRateMode(window_->GetCurrentRefreshRateMode());
     displaySyncManager->SetVsyncPeriod(window_->GetVSyncPeriod());
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
+#endif
 
     scheduleTasks_.clear();
     displaySyncManager->DispatchFunc(nanoTimestamp);
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushAnimation();
     }
+#endif
 
     int32_t displaySyncRate = displaySyncManager->GetDisplaySyncRate();
     uint32_t displaySyncType = displaySyncManager->GetDisplaySyncType();
@@ -1606,6 +1624,7 @@ void PipelineContext::HandleSpecialContainerNode()
         parentToChildrenMap[parentId].push_back(positionZNodeId);
     }
     // Process each unique parent node only once
+    std::vector<RefPtr<FrameNode>> childrenList;
     for (const auto& [parentId, childIds] : parentToChildrenMap) {
         auto parentNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(parentId));
         if (!parentNode) {
@@ -1614,7 +1633,7 @@ void PipelineContext::HandleSpecialContainerNode()
         if (parentNode->GetRenderContext()) {
             parentNode->GetRenderContext()->SetDrawNode();
         }
-        std::list<RefPtr<FrameNode>> childrenList;
+        childrenList.clear();
         parentNode->GenerateOneDepthVisibleFrameWithTransition(childrenList);
         for (auto& node : childrenList) {
             if (node && node->GetRenderContext()) {
@@ -1879,28 +1898,28 @@ void PipelineContext::FlushFocusScroll()
     }
 }
 
-void PipelineContext::SetAfterRenderZindexRebuild(int32_t nodeId)
+bool PipelineContext::ThrottleRenderTreeRebuild(int32_t nodeId, const RefPtr<RenderContext>& renderContext)
 {
-    // need to create vector with frameNode update order.
-    idUpdateZOrder_[nodeId] = idUpdateZOrderIndex_++;
+    // Per-parent throttle. Allow up to MAX eager synchronous rebuilds per vsync for this parent;
+    // beyond that, record it (dedup by id, monotonic order) and coalesce into one rebuild flushed
+    // by FlushRebuildRenderTree(). The count map is cleared every vsync. RequestNextFrame is kept on
+    // the node's RenderContext to preserve its FREE_NODE_CHECK / requestFrame_ behavior.
+    if (++rebuildRenderTreeCount_[nodeId] > MAX_RENDER_TREE_REBUILD_PER_VSYNC) {
+        deferredRebuildRenderTree_[nodeId] = rebuildRenderTreeOrder_++;
+        if (renderContext) {
+            renderContext->RequestNextFrame();
+        }
+        return true;
+    }
+    return false;
 }
 
-void PipelineContext::UpdateIdUpdateZOrderIndex()
-{
-    idUpdateZOrderIndex_++;
-}
-
-size_t PipelineContext::GetIdUpdateZOrderIndex() const
-{
-    return idUpdateZOrderIndex_;
-}
-
-void PipelineContext::FlushZindexUpdate()
+void PipelineContext::FlushRebuildRenderTree()
 {
     std::vector<std::pair<int32_t, size_t>> pairs;
-    pairs.reserve(idUpdateZOrder_.size());
+    pairs.reserve(deferredRebuildRenderTree_.size());
     // create with [nodeA, 1], [nodeA, 2], [nodeB, 3], [nodeC, 4], [nodeA, 5], then update with order B C A.
-    for (const auto& pair : idUpdateZOrder_) {
+    for (const auto& pair : deferredRebuildRenderTree_) {
         pairs.push_back(pair);
     }
     std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
@@ -1917,8 +1936,9 @@ void PipelineContext::FlushZindexUpdate()
             }
         }
     }
-    idUpdateZOrderIndex_ = 0;
-    idUpdateZOrder_.clear();
+    rebuildRenderTreeOrder_ = 0;
+    rebuildRenderTreeCount_.clear();
+    deferredRebuildRenderTree_.clear();
 }
 
 void PipelineContext::FlushPipelineImmediately()
@@ -2795,6 +2815,7 @@ void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, 
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
+    auto prevLogicScale = GetLogicScale();
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootNode_);
     ACE_SCOPED_TRACE("SetRootRect: origin:%s,set width:%f, height:%f, offset:%f",
@@ -2837,8 +2858,11 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         FlushVsync(GetTimeFromExternalTimer(), 0);
     }
 #endif
-    FireLpxUpdateCallbacks();
-    MarkLpxDirtyNodes();
+    bool isLpxChanged = !NearEqual(GetLogicScale(), prevLogicScale);
+    if (isLpxChanged) {
+        FireLpxUpdateCallbacks();
+        MarkLpxDirtyNodes();
+    }
 }
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
@@ -3567,6 +3591,7 @@ bool PipelineContext::OnBackPressed()
         auto hasContainerModal = windowModal_ == WindowModal::CONTAINER_MODAL;
         if (lastRequestKeyboardNode &&
             (lastRequestKeyboardNode->GetPageId() == -1 ||
+                OverlayManager::IsDescendantOfOverlay(lastRequestKeyboardNode) ||
                 (hasContainerModal && lastRequestKeyboardNode->GetPageId() == 0)) &&
             textfieldMgr->OnBackPressed()) {
             LOGI("textfield consumed backpressed event");
@@ -3833,7 +3858,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         config.isReportTid = container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     }
     if (config.isReportTid) {
-        config.tid = static_cast<uint64_t>(pthread_self());
+        config.tid = static_cast<uint64_t>(gettid());
     }
 #endif
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
@@ -4003,6 +4028,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         NotifyDragTouchEvent(scalePoint, node);
         hasIdleTasks_ = true;
+#ifndef CROSS_PLATFORM
         if (touchOptimizer_) {
             TouchEvent pointWithReverseSignal = touchOptimizer_->SetPointReverseSignal(point);
             touchEvents.get().push_back(pointWithReverseSignal);
@@ -4019,16 +4045,21 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                 RequestFrame();
             }
         } else {
+#endif
             touchEvents.get().push_back(point);
             RequestFrame();
+#ifndef CROSS_PLATFORM
         }
+#endif
         return;
     }
 
     if (scalePoint.type == TouchType::UP) {
+#ifndef CROSS_PLATFORM
         if (touchOptimizer_) {
             touchOptimizer_->EndTpFlushVsyncPeriod();
         }
+#endif
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);
         PostTaskResponseRegion(DEFAULT_DELAY_THP);
@@ -4826,11 +4857,15 @@ void PipelineContext::ConsumeTouchEventsInterpolation(const std::unordered_set<i
         auto stamp =
             std::chrono::duration_cast<std::chrono::nanoseconds>(touchIter->second.time.time_since_epoch()).count();
         if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
+#ifndef CROSS_PLATFORM
             if (touchOptimizer_ && touchOptimizer_->GetIsTpFlushFrameDisplayPeriod()) {
                 targetTimeStamp = static_cast<uint64_t>(stamp) - ONE_MS_IN_NS;
             } else {
                 continue;
             }
+#else
+            continue;
+#endif
         }
         TouchEvent newTouchEvent;
         if (eventManager_->GetResampleTouchEvent(
@@ -4876,6 +4911,7 @@ void PipelineContext::ConsumeTouchEvents(
         }
         lastDispatchTime[touchId] = GetVsyncTime() - compensationValue_;
         auto it = newIdTouchPoints.find(touchId);
+#ifndef CROSS_PLATFORM
         if (touchOptimizer_ && touchOptimizer_->RVSEnableCheck()) {
             TouchEvent resultPoint;
             TouchEvent resamplePoint;
@@ -4887,12 +4923,15 @@ void PipelineContext::ConsumeTouchEvents(
             }
             touchEvents.emplace_back(resultPoint);
         } else {
+#endif
             if (it != newIdTouchPoints.end()) {
                 touchEvents.emplace_back(it->second);
             } else {
                 touchEvents.emplace_back(idToTouchPoints[touchId]);
             }
+#ifndef CROSS_PLATFORM
         }
+#endif
         ids.erase(touchId);
     }
     eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
@@ -6791,8 +6830,14 @@ void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& optio
     int32_t flushCount = 0;
     bool isDirtyLayoutNodesEmpty = IsDirtyLayoutNodesEmpty();
     while (!isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+                option.ToString().c_str(), isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            infiniteAnimationFlushExceeded_ = true;
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
                 option.ToString().c_str(), isDirtyLayoutNodesEmpty);
             break;
         }
@@ -6820,6 +6865,7 @@ void PipelineContext::OpenFrontendAnimation(
         }
     }
     FlushAnimationDirtysWhenExist(option);
+    PushInfiniteAnimationFlushExceeded();
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback, Claim(this));
 }
 
@@ -6829,6 +6875,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         if (forceClose) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION, "force close animation");
             AnimationUtils::CloseImplicitAnimation();
+            PopInfiniteAnimationFlushExceeded();
         }
         return;
     }
@@ -6845,6 +6892,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         pendingFrontendAnimation_.pop();
     }
     AnimationUtils::CloseImplicitAnimation(Claim(this));
+    PopInfiniteAnimationFlushExceeded();
 }
 
 bool PipelineContext::IsDragging() const
@@ -7256,18 +7304,10 @@ void PipelineContext::GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>
     }
 }
 
-bool PipelineContext::IsTagInOverlay(const std::string& tag) const
+DumpStartNodeSet PipelineContext::GetDumpStartNodes() const
 {
-    static const std::unordered_set<std::string> targetTags = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
-        V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
-        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG, V2::OVERLAY_ETS_TAG,
-        V2::ORDER_OVERLAY_ETS_TAG
-    };
-
-    if (targetTags.find(tag) != targetTags.end()) {
-        return true;
-    }
-    return false;
+    return DumpUtil::CollectInspectorStartNodes(
+        rootNode_, GetContainerModalNode(), stageManager_ ? stageManager_->GetLastPage() : rootNode_, overlayManager_);
 }
 
 bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
@@ -7278,7 +7318,7 @@ bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& ro
     bool hasOverlay = false;
     for (const auto& child : childNodes) {
         auto tag = child->GetTag();
-        if (IsTagInOverlay(tag)) {
+        if (DumpUtil::IsTagInOverlay(tag)) {
             if (!NearZero(config.minOpacity) &&
                 LessNotEqual(rootNodeFinalOpacity * GetNodeOpacityValue(child), config.minOpacity)) {
                 continue;
@@ -7364,15 +7404,15 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefP
     }
 }
 
-void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode,
-    std::shared_ptr<JsonValue>& root, std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const
+void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(std::shared_ptr<JsonValue>& root,
+    const std::vector<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const
 {
     if (!root->Contains("$children")) {
         auto array = JsonUtil::CreateArray();
         root->PutRef("$children", std::move(array));
     }
     auto childrenJson = root->GetValue("$children");
-    for (auto& navNode : navNodeList) {
+    for (const auto& navNode : navNodeList) {
         if (navNode == nullptr) {
             continue;
         }
@@ -7394,26 +7434,17 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> s
     }
 }
 
-void PipelineContext::DumpSimplifyTreeJsonEntrance(
-    std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
+void PipelineContext::DumpSimplifyTreeJsonEntrance(std::shared_ptr<JsonValue> root,
+    RefPtr<NG::FrameNode> startNode, const std::vector<RefPtr<NG::FrameNode>>& navNodes, ParamConfig config) const
 {
+    CHECK_NULL_VOID(startNode);
     auto startNodeRect = startNode->GetTransformRectRelativeToWindow();
     if (NearEqual(startNodeRect.Width(), 0) && NearEqual(startNodeRect.Height(), 0)) {
         return;
     }
-    // step1: Get the topPageNode if onlyNeedVisible, avoid fetching hidden page.
-    auto lastPageNode = stageManager_->GetLastPage();
-    CHECK_NULL_VOID(lastPageNode);
-    /*
-     * step2: Get topNavNode from topPageNode. If top Page doesn't has a navigation child,
-     * following dump will start at root node, inactive and hidden node will be ignored.
-     */
-    std::list<RefPtr<NG::FrameNode>> navNodes;
-    lastPageNode->FindTopNavDestination(navNodes);
-    if (navNodes.empty()) {
-        navNodes.emplace_back(lastPageNode);
-    }
-    DumpSimplifyTreeJsonFromTopNavNode(startNode, root, navNodes, config);
+    // navNodes are pre-narrowed by DumpUtil::CollectInspectorStartNodes
+    // (lastPage + FindTopNavDestination). Only the per-branch JSON dump remains here.
+    DumpSimplifyTreeJsonFromTopNavNode(root, navNodes, config);
 }
 
 void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const
@@ -7423,81 +7454,82 @@ void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJ
     if (!NearZero(config.minOpacity) && LessNotEqual(GetNodeOpacityValue(rootNode_), config.minOpacity)) {
         return;
     }
-    auto containerModalNode = GetContainerModalNode();
-    auto containerModalDumpNode = GetContainerModalDumpRootNode(containerModalNode);
-    auto dumpBeginNode = containerModalDumpNode ? containerModalDumpNode : rootNode_;
-    auto atomicServiceDumpNode = GetAtomicServiceDumpNode(dumpBeginNode);
+    auto startNodes = GetDumpStartNodes();
+    auto dumpBeginNode = startNodes.dumpBeginNode ? startNodes.dumpBeginNode : rootNode_;
     // pseudoRootJson deals with containerModal case, containerModalStack will be the actual root.
     std::shared_ptr<JsonValue> pseudoRootJson = rootJson;
     std::shared_ptr<JsonValue> containerModalTitleJson = nullptr;
-    bool addContainerModalTitleJson = true;
     if (dumpBeginNode != rootNode_) {
         // ContainerModal case
         containerModalTitleJson = JsonUtil::CreateSharedPtrJson();
-        // In this case, ContainerModalPattern can not be nullptr
-        auto titleRow = GetContainerModalNode()->GetPattern<NG::ContainerModalPattern>()->GetCustomTitleRow();
+        auto titleRow = startNodes.containerModalTitleRow;
+        auto titleRowParentFinalOpacity = DEFAULT_NODE_OPACITY;
         auto titleRowBelowMinOpacity = false;
         if (titleRow && !NearZero(config.minOpacity)) {
-            auto titleRowParentFinalOpacity = GetAncestorOpacityBeforeNode(titleRow);
+            titleRowParentFinalOpacity = GetAncestorOpacityBeforeNode(titleRow);
             titleRowBelowMinOpacity =
                 LessNotEqual(titleRowParentFinalOpacity * GetNodeOpacityValue(titleRow), config.minOpacity);
         }
-        addContainerModalTitleJson = !titleRowBelowMinOpacity;
         if (titleRow && !titleRowBelowMinOpacity) {
-            DumpSimplifyTreeJsonEntrance(containerModalTitleJson, titleRow, config);
+#ifndef CROSS_PLATFORM
+            titleRow->DumpSimplifyTreeWithParamConfig(
+                0, containerModalTitleJson, true, config, nullptr, titleRowParentFinalOpacity);
+#endif
         }
         pseudoRootJson = JsonUtil::CreateSharedPtrJson();
-        // ContainerModal root doesn't has an actual root wrapper, so we need wrap it up
-        rootNode_->DumpSimplifyTreeBase(rootJson);
-        rootNode_->DumpSimplifyInfoWithParamConfig(rootJson, config);
+        // ContainerModal uses the inner stack as its main dump root. Keep the
+        // pipeline root wrapper and collect any overlay attached directly to
+        // that root as a separate branch.
+        GetComponentOverlayInspector(rootJson, rootNode_, config, false);
     }
     auto dumpBeginParentFinalOpacity = DEFAULT_NODE_OPACITY;
     if (!NearZero(config.minOpacity)) {
         dumpBeginParentFinalOpacity = GetAncestorOpacityBeforeNode(dumpBeginNode);
     }
     GetOverlayInspector(pseudoRootJson, dumpBeginNode, config, dumpBeginParentFinalOpacity);
-    if (atomicServiceDumpNode) {
+    if (startNodes.atomicServiceRoot) {
         auto atomicRootJson = JsonUtil::CreateSharedPtrJson(true);
         auto atomicMenuBarJson = JsonUtil::CreateSharedPtrJson(true);
-        auto atomicServiceRoot = AceType::DynamicCast<FrameNode>(
-            overlayManager_->FindChildNodeByKey(atomicServiceDumpNode, "AtomicServiceContainerId"));
+        auto atomicServiceRoot = startNodes.atomicServiceRoot;
         auto atomicServiceRootParentFinalOpacity = DEFAULT_NODE_OPACITY;
         auto atomicServiceRootBelowMinOpacity = false;
-        if (atomicServiceRoot && !NearZero(config.minOpacity)) {
+        if (!NearZero(config.minOpacity)) {
             atomicServiceRootParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceRoot);
             atomicServiceRootBelowMinOpacity = LessNotEqual(
                 atomicServiceRootParentFinalOpacity * GetNodeOpacityValue(atomicServiceRoot), config.minOpacity);
         }
-        if (atomicServiceRoot && !atomicServiceRootBelowMinOpacity) {
+        if (!atomicServiceRootBelowMinOpacity) {
             // dump component-overlay only, sub-window overlay has been dumped in rootJson
             GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false,
                 atomicServiceRootParentFinalOpacity);
-            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
-            if (!config.rectCulling || HasDumpedJsonContent(atomicRootJson)) {
-                AddJsonChild(pseudoRootJson, atomicRootJson);
-            }
-            auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
-                overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
+            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, startNodes.pageStartNodes, config);
+            auto atomicServiceMenuBar = startNodes.atomicServiceMenuBar;
+            auto menuBarParentFinalOpacity = DEFAULT_NODE_OPACITY;
             auto atomicServiceMenuBarBelowMinOpacity = false;
             if (atomicServiceMenuBar && !NearZero(config.minOpacity)) {
-                auto menuBarParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceMenuBar);
+                menuBarParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceMenuBar);
                 atomicServiceMenuBarBelowMinOpacity =
                     LessNotEqual(menuBarParentFinalOpacity * GetNodeOpacityValue(atomicServiceMenuBar),
                         config.minOpacity);
             }
             if (atomicServiceMenuBar && !atomicServiceMenuBarBelowMinOpacity) {
-                DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
-                if (!config.rectCulling || HasDumpedJsonContent(atomicMenuBarJson)) {
+#ifndef CROSS_PLATFORM
+                atomicServiceMenuBar->DumpSimplifyTreeWithParamConfig(
+                    0, atomicMenuBarJson, true, config, nullptr, menuBarParentFinalOpacity);
+#endif
+                if (HasDumpedJsonContent(atomicMenuBarJson)) {
                     AddJsonChild(atomicRootJson, atomicMenuBarJson);
                 }
             }
+            if (!config.rectCulling || HasDumpedJsonContent(atomicRootJson)) {
+                AddJsonChild(pseudoRootJson, atomicRootJson);
+            }
         }
     } else {
-        DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, config);
+        DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, startNodes.pageStartNodes, config);
     }
     if (pseudoRootJson != rootJson) {
-        if (addContainerModalTitleJson &&
-            (!config.rectCulling || HasDumpedJsonContent(containerModalTitleJson))) {
+        if (HasDumpedJsonContent(containerModalTitleJson)) {
             AddJsonChild(rootJson, containerModalTitleJson);
         }
         if (!config.rectCulling || HasDumpedJsonContent(pseudoRootJson)) {
@@ -8283,6 +8315,7 @@ void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
 #endif
 }
 
+#ifndef CROSS_PLATFORM
 const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
 {
     return touchOptimizer_;
@@ -8297,6 +8330,7 @@ const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() 
 {
     return taihangOptimizer_;
 }
+#endif
 
 void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline)
 {
@@ -8597,7 +8631,8 @@ std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<Frame
     }
 
     if (auto fontScale = envValue.GetDouble()) {
-        return static_cast<float>(*fontScale);
+        auto scale = static_cast<float>(*fontScale);
+        return LessNotEqual(scale, 0.0f) ? 1.0f : scale;
     }
     return std::nullopt;
 }

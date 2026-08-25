@@ -55,7 +55,7 @@ struct ScrollExample {
         }.width('100%')
       }
       .id('scroll')
-      .key('my_scroll')
+      .id('my_scroll')
       .scrollable(ScrollDirection.Vertical) // 滚动方向纵向
       .scrollable(this.scrollDirectionArr[this.scrollDirectionArrIndex])
       .edgeEffect(this.edgeEffectArr[this.edgeEffectArrIndex])

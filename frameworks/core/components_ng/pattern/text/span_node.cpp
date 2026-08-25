@@ -1864,6 +1864,9 @@ bool ImageSpanItem::UpdatePlaceholderRun(PlaceholderStyle placeholderStyle)
         run.alignment = GetPlaceHolderAlignmentFromVerticalAlign(placeholderStyle.verticalAlign);
     }
     auto needReCreate = run_ != run;
+    if (needReCreate) {
+        MarkDirty();
+    }
     run_ = run;
     return needReCreate;
 }
@@ -2093,6 +2096,9 @@ bool PlaceholderSpanItem::UpdatePlaceholderRun(PlaceholderStyle placeholderStyle
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
     auto needReCreate = run_ !=run;
+    if (needReCreate) {
+        MarkDirty();
+    }
     run_ = run;
     return needReCreate;
 }

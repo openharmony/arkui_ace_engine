@@ -30,6 +30,7 @@ export struct DialogIndex {
     { name: 'ActionSheet', path: 'ActionSheet' },
     { name: 'ActionSheetAdvanced', path: 'ActionSheetAdvanced' },
     { name: 'CustomDialog', path: 'CustomDialog' },
+    { name: 'CustomDialogSystemMaterial', path: 'CustomDialogSystemMaterial' },
     { name: 'PromptAction', path: 'PromptAction' },
     { name: 'DialogController', path: 'DialogController' },
     { name: 'DialogLevelOrder', path: 'DialogLevelOrder' },

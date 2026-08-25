@@ -26,6 +26,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -798,6 +799,22 @@ public:
         };
     }
 
+    // Configure the host node's ListLayoutProperty so that the (non-virtual)
+    // ListPattern::GetScrollSnapAlign() returns the requested alignment.
+    void SetScrollSnapAlignOnHost(ScrollSnapAlign align)
+    {
+        auto host = GetHost();
+        if (!host) {
+            return;
+        }
+        auto layoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+        if (!layoutProperty) {
+            layoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+            host->layoutProperty_ = layoutProperty;
+        }
+        layoutProperty->UpdateScrollSnapAlign(align);
+    }
+
     bool startSnapAnimationCalled_ = false;
     float capturedSnapDelta_ = 999.0f;
     bool startSnapAnimationResult_ = true;
@@ -809,7 +826,7 @@ public:
 
 /**
  * @tc.name: ProcessFocusScroll013
- * @tc.desc: ListPattern parent triggers StartSnapAnimation after scrolling when child is out of view
+ * @tc.desc: ListPattern parent with ScrollSnapAlign::CENTER triggers StartSnapAnimation after scrolling
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll013, TestSize.Level1)
@@ -821,6 +838,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll013, TestSize.Level1
     auto parentNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), listPattern, true);
     ASSERT_NE(parentNode, nullptr);
+    listPattern->SetScrollSnapAlignOnHost(ScrollSnapAlign::CENTER);
     parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
     parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
     auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
@@ -850,7 +868,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll013, TestSize.Level1
 
 /**
  * @tc.name: ProcessFocusScroll014
- * @tc.desc: ListPattern parent triggers StartSnapAnimation even when child is already visible (zero moveOffset)
+ * @tc.desc: ListPattern parent with ScrollSnapAlign::CENTER triggers StartSnapAnimation even when child is visible
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll014, TestSize.Level1)
@@ -862,6 +880,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll014, TestSize.Level1
     auto parentNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), listPattern, true);
     ASSERT_NE(parentNode, nullptr);
+    listPattern->SetScrollSnapAlignOnHost(ScrollSnapAlign::CENTER);
     parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
     parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
     auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
@@ -892,7 +911,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll014, TestSize.Level1
 
 /**
  * @tc.name: ProcessFocusScroll015
- * @tc.desc: StartSnapAnimation is invoked with default SnapAnimationOptions (snapDelta == 0)
+ * @tc.desc: ListPattern with ScrollSnapAlign::CENTER invokes StartSnapAnimation with default SnapAnimationOptions
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll015, TestSize.Level1)
@@ -904,6 +923,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll015, TestSize.Level1
     auto parentNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), listPattern, true);
     ASSERT_NE(parentNode, nullptr);
+    listPattern->SetScrollSnapAlignOnHost(ScrollSnapAlign::CENTER);
     parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
     parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
     auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
@@ -974,7 +994,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll016, TestSize.Level1
 
 /**
  * @tc.name: ProcessFocusScroll017
- * @tc.desc: StartSnapAnimation return value does not affect ScrollByOffsetToParent ret (current behavior)
+ * @tc.desc: With ScrollSnapAlign::CENTER, StartSnapAnimation return value does not affect ret
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll017, TestSize.Level1)
@@ -991,6 +1011,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll017, TestSize.Level1
     auto parentNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), listPattern, true);
     ASSERT_NE(parentNode, nullptr);
+    listPattern->SetScrollSnapAlignOnHost(ScrollSnapAlign::CENTER);
     parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
     parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
     auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
@@ -1017,5 +1038,133 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll017, TestSize.Level1
     // return value when computing ScrollByOffsetToParent's ret.
     ASSERT_TRUE(listPattern->scrollFuncCalled_);
     ASSERT_TRUE(listPattern->startSnapAnimationCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll018
+ * @tc.desc: ListPattern with ScrollSnapAlign::START does NOT trigger StartSnapAnimation (bug fix scenario:
+ *           right-swipe over-aligns to 2nd page, left-swipe cannot return to previous page)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll018, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto listPattern = AceType::MakeRefPtr<MockListPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), listPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    listPattern->SetScrollSnapAlignOnHost(ScrollSnapAlign::START);
+    parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    parentNode->renderContext_ = mockParentRenderContext;
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_BELOW_VISIBLE));
+    parentNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_BELOW_VISIBLE, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    // Scroll still happens (child below visible area) but snap is NOT triggered for START alignment.
+    EXPECT_TRUE(listPattern->scrollFuncCalled_);
+    EXPECT_FALSE(listPattern->startSnapAnimationCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll019
+ * @tc.desc: ListPattern with ScrollSnapAlign::END does NOT trigger StartSnapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll019, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto listPattern = AceType::MakeRefPtr<MockListPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), listPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    listPattern->SetScrollSnapAlignOnHost(ScrollSnapAlign::END);
+    parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    parentNode->renderContext_ = mockParentRenderContext;
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_BELOW_VISIBLE));
+    parentNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_BELOW_VISIBLE, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    // Scroll still happens but snap is NOT triggered for END alignment.
+    EXPECT_TRUE(listPattern->scrollFuncCalled_);
+    EXPECT_FALSE(listPattern->startSnapAnimationCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll020
+ * @tc.desc: ListPattern with ScrollSnapAlign::NONE (default) does NOT trigger StartSnapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll020, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto listPattern = AceType::MakeRefPtr<MockListPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), listPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    // Explicitly set NONE (also the default when no alignment is configured)
+    listPattern->SetScrollSnapAlignOnHost(ScrollSnapAlign::NONE);
+    parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    parentNode->renderContext_ = mockParentRenderContext;
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_BELOW_VISIBLE));
+    parentNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_BELOW_VISIBLE, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    // Scroll still happens but snap is NOT triggered for NONE alignment.
+    EXPECT_TRUE(listPattern->scrollFuncCalled_);
+    EXPECT_FALSE(listPattern->startSnapAnimationCalled_);
 }
 } // namespace OHOS::Ace::NG

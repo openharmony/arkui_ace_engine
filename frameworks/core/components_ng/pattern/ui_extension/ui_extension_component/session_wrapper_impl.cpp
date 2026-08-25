@@ -723,7 +723,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
     extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
     extensionSessionInfo.config_ = ConvertToRosenSessionViewportConfig(sessionViewportConfig);
-    setConnectToRenderInner(pipeline, extensionSessionInfo);
+    SetConnectToRenderInner(pipeline, extensionSessionInfo);
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     UpdateSessionConfig();
@@ -732,8 +732,8 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     InitAllCallback();
     RegisterDataConsumer();
 }
-void SessionWrapperImpl::setConnectToRenderInner(
-    RefPtr<PipelineBase> pipeline, Rosen::SessionInfo& extensionSessionInfo)
+void SessionWrapperImpl::SetConnectToRenderInner(
+    const RefPtr<PipelineBase>& pipeline, Rosen::SessionInfo& extensionSessionInfo)
 {
     auto window = pipeline->GetWindow();
     CHECK_NULL_VOID(window);
@@ -741,7 +741,8 @@ void SessionWrapperImpl::setConnectToRenderInner(
     CHECK_NULL_VOID(rsUIDirector);
     auto rsUIContext = rsUIDirector->GetRSUIContext();
     CHECK_NULL_VOID(rsUIContext);
-    extensionSessionInfo.connectToRenderToken_  = rsUIContext->GetConnectToRender();
+    extensionSessionInfo.connectToRenderToken_ = rsUIContext->GetConnectToRender();
+    UIEXT_LOGI("SessionWrapperImpl get connectToRenderToken success.");
 }
 
 void SessionWrapperImpl::UpdateSessionConfig()

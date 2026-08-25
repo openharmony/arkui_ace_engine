@@ -27,6 +27,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t HANDLE_RING_DEGREE = 360;
@@ -63,10 +64,11 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
         textEffect->NoEffect(canvas, offset.GetX(), offset.GetY());
     } else {
         auto relativeOffset = pattern->GetTextRect().GetOffset();
+        auto* richEditorModifier = hostPattern ? NG::NodeModifier::GetRichEditorCustomModifier() : nullptr;
         for (auto&& info : hostPattern->GetParagraphs()) {
             info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
-            IF_TRUE(richEditor,
-                richEditor->GetRichEditorParagraphManager().PaintLeadingMarginSpan(info, relativeOffset, context));
+            IF_TRUE(richEditorModifier,
+                richEditorModifier->paintLeadingMarginSpan(hostPattern, &info, relativeOffset, context));
             offset.AddY(info.paragraph->GetHeight());
         }
         IF_TRUE(!richEditor && textPattern && textPattern->GetParagraphManager(),
@@ -399,11 +401,13 @@ Color RichEditorDragOverlayModifier::GetDragBackgroundColor(const Color& default
     CHECK_NULL_RETURN(host, defaultColor);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, defaultColor);
+    auto* modifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(modifier, defaultColor);
     if (pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>(hostPattern->GetThemeScopeId());
+        auto richEditorTheme = modifier->getRichEditorThemeByScopeId(pipeline, hostPattern->GetThemeScopeId());
         CHECK_NULL_RETURN(richEditorTheme, defaultColor);
     }
-    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    auto richEditorTheme = modifier->getRichEditorTheme(pipeline);
     CHECK_NULL_RETURN(richEditorTheme, defaultColor);
     return richEditorTheme->GetDragBackgroundColor();
 }

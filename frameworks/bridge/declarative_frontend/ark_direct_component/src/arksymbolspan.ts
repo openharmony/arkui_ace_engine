@@ -146,7 +146,7 @@ function loadComponent(): ComponentObj | undefined {
   return loadComponent.componentObj;
 }
 
-class JSSymbolSpan extends JSViewAbstract {
+class JSSymbolSpan extends JSContainerBase {
   static create(params: any): void {
     getUINativeModule().symbolSpan.jsCreate(params);
   }

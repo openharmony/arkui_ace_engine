@@ -22,7 +22,7 @@
 #include "core/components/dialog/dialog_properties.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT ActionSheetModel {
+class ActionSheetModel {
 public:
     static ActionSheetModel* GetInstance();
     virtual ~ActionSheetModel() = default;

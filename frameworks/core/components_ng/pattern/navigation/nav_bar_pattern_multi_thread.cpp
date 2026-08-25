@@ -57,6 +57,6 @@ void NavBarPattern::OnDetachFromMainTreeMultiThread()
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(host->GetId());
-    NavDestinationPatternBase::RemoveOnTouchEvent(AceType::RawPtr(host));
+    NavDestinationPatternBase::RemoveOnTouchEvent(host);
 }
 } // namespace OHOS::Ace::NG

@@ -25,7 +25,7 @@ import {
     MarqueeUpdateStrategy,
     VoidCallback
 } from "../framework";
-import { ArkMarqueePeer, MarqueeOptions } from "../framework";
+import { ArkMarqueePeer, MarqueeOptions, ResourceStr } from "../framework";
 import { Resource } from "global.resource";
 
 export class ArkMarqueeNode extends ArkBaseNode  implements MarqueeAttribute  {
@@ -70,8 +70,8 @@ export class ArkMarqueeNode extends ArkBaseNode  implements MarqueeAttribute  {
         this.markDirty();
         return this;
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
-        const value_casted = value as (int32 | FontWeight | string | undefined)
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
+        const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
         this.getPeer()?.setFontWeightAttribute(value_casted)
         this.markDirty();
         return this;

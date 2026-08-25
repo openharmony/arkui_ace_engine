@@ -27,6 +27,8 @@ using namespace OHOS::AccessibilityConfig;
 namespace OHOS::Ace::Framework {
 constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 constexpr int64_t INVALID_NODE_ID = -1;
+constexpr int32_t NUM_POINT_DIMENSION = 2;
+constexpr int32_t NUM_PARAMETERS_DIMENSION = 1;
 
 namespace {
 bool IsTouchExplorationEnabled(const RefPtr<NG::PipelineContext>& context)
@@ -352,6 +354,84 @@ void AccessibilityHoverManagerForThirdNG::DeregisterJsThirdProviderInteractionOp
 }
 
 namespace {
+bool IsNumParametersBelowDimension(int32_t argToEndNum, const std::string& arg)
+{
+    if (argToEndNum > NUM_PARAMETERS_DIMENSION) {
+        return false;
+    }
+
+    std::string belowPrintStr = "Error: ";
+    belowPrintStr.append(arg).append(" needs value");
+    DumpLog::GetInstance().Print(belowPrintStr.c_str());
+    return true;
+}
+
+bool ParseSetCustomPropertyParamsTest(std::vector<std::string>::const_iterator& arg,
+    const std::vector<std::string>& params, DumpInfoArgument& argument)
+{
+    using Setter = void (*)(DumpInfoArgument&, const std::string&);
+    struct Entry {
+        const char* opt;
+        Setter setter;
+    };
+    static const Entry entries[] = {
+        { "--node-id", [](DumpInfoArgument& a, const std::string& v) { a.nodeId = StringUtils::StringToLongInt(v); } },
+        { "--accessibility-text",
+            [](DumpInfoArgument& a, const std::string& v) { a.customAccessibilityText = v; } },
+        { "--accessibility-level",
+            [](DumpInfoArgument& a, const std::string& v) { a.customAccessibilityLevel = v; } },
+        { "--role", [](DumpInfoArgument& a, const std::string& v) { a.customRole = v; } },
+        { "--group",
+            [](DumpInfoArgument& a, const std::string& v) { a.customGroup = StringUtils::StringToInt(v) != 0; } },
+        { "--checkable",
+            [](DumpInfoArgument& a, const std::string& v) { a.customCheckable = StringUtils::StringToInt(v) != 0; } },
+        { "--checked",
+            [](DumpInfoArgument& a, const std::string& v) { a.customChecked = StringUtils::StringToInt(v) != 0; } },
+        { "--enabled",
+            [](DumpInfoArgument& a, const std::string& v) { a.customEnabled = StringUtils::StringToInt(v) != 0; } },
+        { "--selected",
+            [](DumpInfoArgument& a, const std::string& v) { a.customSelected = StringUtils::StringToInt(v) != 0; } },
+    };
+    while (arg != params.end()) {
+        ++arg;
+        if (arg == params.end()) {
+            break;
+        }
+        const Entry* matched = nullptr;
+        for (const auto& entry : entries) {
+            if (*arg == entry.opt) {
+                matched = &entry;
+                break;
+            }
+        }
+        if (matched == nullptr) {
+            continue;
+        }
+        CHECK_EQUAL_RETURN(IsNumParametersBelowDimension(
+            static_cast<int32_t>(std::distance(arg, params.end())), *arg), true, false);
+        ++arg;
+        matched->setter(argument, *arg);
+    }
+    return true;
+}
+
+bool ParseGetCustomPropertyParamsTest(std::vector<std::string>::const_iterator& arg,
+    const std::vector<std::string>& params, DumpInfoArgument& argument)
+{
+    while (arg != params.end()) {
+        ++arg;
+        if (arg == params.end()) {
+            break;
+        }
+        if (*arg == "--node-id") {
+            CHECK_EQUAL_RETURN(IsNumParametersBelowDimension(
+                static_cast<int32_t>(std::distance(arg, params.end())), *arg), true, false);
+            ++arg;
+            argument.nodeId = StringUtils::StringToLongInt(*arg);
+        }
+    }
+    return true;
+}
 
 bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
@@ -372,7 +452,6 @@ bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgumen
             argument.rootId = StringUtils::StringToLongInt(*arg);
         } else if (*arg == "--hover-test") {
             argument.mode = DumpMode::HOVER_TEST;
-            static constexpr int32_t NUM_POINT_DIMENSION = 2;
             if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
                 DumpLog::GetInstance().Print(std::string("Error: --hover-test is used to get nodes at a point ") +
                     "relative to the root node, e.g. '--hover-test ${x} ${y}'!");
@@ -386,6 +465,12 @@ bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgumen
             argument.verbose = true;
         } else if (*arg == "-json") {
             argument.mode = DumpMode::TREE;
+        } else if (*arg == "--set-custom-property") {
+            argument.mode = DumpMode::SET_CUSTOM_PROPERTY;
+            return ParseSetCustomPropertyParamsTest(arg, params, argument);
+        } else if (*arg == "--get-custom-property") {
+            argument.mode = DumpMode::GET_CUSTOM_PROPERTY;
+            return ParseGetCustomPropertyParamsTest(arg, params, argument);
         } else {
             if (argument.mode == DumpMode::NODE) {
                 argument.mode = DumpMode::HANDLE_EVENT;
@@ -624,6 +709,12 @@ bool AccessibilityHoverManagerForThirdNG::OnDumpChildInfoForThirdRecursive(
         case DumpMode::HANDLE_EVENT:
             DumpHandleAction(params, jsAccessibilityManager, jsThirdProviderOperator);
             break;
+        case DumpMode::SET_CUSTOM_PROPERTY:
+            DumpSetThirdCustomProperty(argument, params, jsThirdProviderOperator);
+            break;
+        case DumpMode::GET_CUSTOM_PROPERTY:
+            DumpGetThirdCustomProperty(static_cast<int64_t>(argument.nodeId), jsThirdProviderOperator);
+            break;
         case DumpMode::HOVER_TEST:
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -648,17 +739,21 @@ void AccessibilityHoverManagerForThirdNG::DumpSetThirdCustomProperty(const DumpI
     accessibilityVirtualNode.SetEnabled(argument.customEnabled);
     accessibilityVirtualNode.SetSelected(argument.customSelected);
     accessibilityVirtualNode.SetAccessibilityGroup(argument.customGroup);
+    accessibilityVirtualNode.SetClickable(argument.customClickable);
 
     MockDumpOperatorCallBack callback;
     jsThirdProviderOperator->UpdateCustomAccessibilityProperty(argument.nodeId, accessibilityVirtualNode, 0, callback);
 
     DumpLog::GetInstance().Print("accessibilityText: " + argument.customAccessibilityText);
     DumpLog::GetInstance().Print("accessibilityLevel: " + argument.customAccessibilityLevel);
+    DumpLog::GetInstance().Print("accessibilityRole: " + argument.customAccessibilityRole);
     DumpLog::GetInstance().Print("role: " + argument.customRole);
+    DumpLog::GetInstance().Print("clickable: " + std::to_string(argument.customClickable));
     DumpLog::GetInstance().Print("checkable: " + std::to_string(argument.customCheckable));
     DumpLog::GetInstance().Print("checked: " + std::to_string(argument.customChecked));
     DumpLog::GetInstance().Print("enabled: " + std::to_string(argument.customEnabled));
     DumpLog::GetInstance().Print("selected: " + std::to_string(argument.customSelected));
+    DumpLog::GetInstance().Print("accessibilityGroup: " + std::to_string(argument.customGroup));
     DumpLog::GetInstance().Print("Result: Set thirdCustomProperty Done");
 }
 
@@ -672,7 +767,9 @@ void AccessibilityHoverManagerForThirdNG::DumpGetThirdCustomProperty(
     if (customProperty) {
         DumpLog::GetInstance().Print("accessibilityText: " + customProperty->GetAccessibilityText());
         DumpLog::GetInstance().Print("accessibilityLevel: " + customProperty->GetAccessibilityLevel());
+        DumpLog::GetInstance().Print("accessibilityRole: " + customProperty->GetAccessibilityRole());
         DumpLog::GetInstance().Print("role: " + customProperty->GetRole());
+        DumpLog::GetInstance().Print("clickable: " + std::to_string(customProperty->GetClickable()));
         DumpLog::GetInstance().Print("checkable: " + std::to_string(customProperty->GetCheckable()));
         DumpLog::GetInstance().Print("checked: " + std::to_string(customProperty->GetChecked()));
         DumpLog::GetInstance().Print("enabled: " + std::to_string(customProperty->GetEnabled()));

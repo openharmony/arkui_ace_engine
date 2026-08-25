@@ -65,11 +65,13 @@ void DialogTheme::Builder::ParsePattern(
     theme->buttonDefaultBgColor_ = dialogPattern->GetAttr<Color>("button_default_bg_color", Color::TRANSPARENT);
     theme->buttonDefaultFontColor_ = dialogPattern->GetAttr<Color>("button_default_font_color", Color(0xff007dff));
     theme->buttonPaddingBottom_ = dialogPattern->GetAttr<Dimension>("button_padding_bottom", 16.0_vp);
+    theme->buttonPaddingBottomVertical_ =
+        dialogPattern->GetAttr<Dimension>("alert_button_bottom_padding_vertical", 8.0_vp);
     theme->singleButtonPaddingStart_ = dialogPattern->GetAttr<Dimension>("single_button_padding_start", 16.0_vp);
     theme->singleButtonPaddingEnd_ = dialogPattern->GetAttr<Dimension>("single_button_padding_end", 16.0_vp);
     theme->mutiButtonPaddingStart_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_start", 16.0_vp);
     theme->mutiButtonPaddingEnd_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_end", 16.0_vp);
-    theme->mutiButtonPaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_horizontal", 8.0_vp);
+    theme->mutiButtonPaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("alert_button_horizontal_space", 8.0_vp);
     theme->mutiButtonPaddingVertical_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_vertical", 4.0_vp);
     theme->multipleDialogDisplay_ = dialogPattern->GetAttr<std::string>("multiple_dialog_display", "stack");
     theme->actionsPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_actions_left", 16.0_vp),
@@ -139,6 +141,10 @@ void DialogTheme::Builder::ParseNewPattern(
     theme->colorBgWithBlur_ = dialogPattern->GetAttr<Color>("color_bg_with_blur", Color::TRANSPARENT);
     theme->paddingTopTitle_ = dialogPattern->GetAttr<Dimension>("padding_top_title", 16.0_vp);
     theme->paddingSingleTitle_ = dialogPattern->GetAttr<Dimension>("padding_single_title", 0.0_vp);
+    theme->titlePrimaryMinHeight_ = dialogPattern->GetAttr<Dimension>("alert_title_primary_height", 56.0_vp);
+    theme->titleSecondaryMinHeight_ = dialogPattern->GetAttr<Dimension>("alert_title_secondary_height", 72.0_vp);
+    theme->titlePaddingTop_ = dialogPattern->GetAttr<Dimension>("alert_title_padding_top", 12.0_vp);
+    theme->titlePaddingBottom_ = dialogPattern->GetAttr<Dimension>("alert_title_padding_bottom", 12.0_vp);
     theme->backgroundBorderColor_ = dialogPattern->GetAttr<Color>("border_color", Color::TRANSPARENT);
     theme->backgroundBorderWidth_ = dialogPattern->GetAttr<Dimension>("border_width", 0.0_vp);
     theme->normalButtonFontSize_ = dialogPattern->GetAttr<Dimension>("normal_button_text_font_size", 16.0_fp);

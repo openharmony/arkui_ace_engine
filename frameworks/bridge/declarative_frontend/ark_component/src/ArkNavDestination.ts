@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 const NAVDES_SAFE_AREA_TYPE_LIMIT = 3;
 const NAVDES_SAFE_AREA_EDGE_LIMIT = 4;
@@ -97,14 +96,14 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
       NavDestinationToolBarConfigurationModifier, configuration);
     return this;
   }
-  backButtonIcon(value: any, text?: ResourceStr): this {
+  backButtonIcon(value: ResourceStr | undefined, text?: ResourceStr): this {
     let config: ArkNavBackButton = new ArkNavBackButton();
     config.text = value;
     if (!isNull(text)) {
       config.text = text;
     }
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
-      NavDestinationBackButtonIconModifier, value);
+      NavDestinationBackButtonIconModifier, config);
     return this;
   }
   mode(value: number): this {
@@ -156,7 +155,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     return this;
   }
   onInactive(callback: (reason: NavDestinationInactiveReason) => void): this {
-    modifierWithKey(this._modifiersWithKeys, NavDestinationonInactiveModifier.identity, NavDestinationonInactiveModifier, callback);
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnInactiveModifier.identity, NavDestinationOnInactiveModifier, callback);
     return this;
   }
   onBackPressed(callback: () => boolean): this {
@@ -228,7 +227,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, PreferredOrientationModifier.identity, PreferredOrientationModifier, orientation);
     return this;
   }
-  enableStatusBar(enable: Optional<boolean>, animated? boolean): this {
+  enableStatusBar(enable: Optional<boolean>, animated?: boolean): this {
     let statusBar = new ArkEnableStatusBar();
     statusBar.enable = enable;
     statusBar.animated = animated;
@@ -516,7 +515,7 @@ class NavDestinationSystemBarStyleModifier extends ModifierWithKey<Optional<Syst
   }
   static identity: Symbol = Symbol('systemBarStyle');
   applyPeer(node: KNode, reset: boolean): void {
-    if(reset || !this.value) {
+    if (reset || !this.value) {
       getUINativeModule().navDestination.resetSystemBarStyle(node);
     } else {
       getUINativeModule().navDestination.setSystemBarStyle(node, this.value.statusBarContentColor);
@@ -527,8 +526,8 @@ class NavDestinationSystemBarStyleModifier extends ModifierWithKey<Optional<Syst
   }
 }
 
-class NavDestinationOnShownModifier extends ModifierWithKey<() => void> {
-  constructor(value: () => void) {
+class NavDestinationOnShownModifier extends ModifierWithKey<(reason: VisibilityChangeReason) => void> {
+  constructor(value: (reason: VisibilityChangeReason) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('onShown');
@@ -541,8 +540,8 @@ class NavDestinationOnShownModifier extends ModifierWithKey<() => void> {
   }
 }
 
-class NavDestinationOnHiddenModifier extends ModifierWithKey<() => void> {
-  constructor(value: () => void) {
+class NavDestinationOnHiddenModifier extends ModifierWithKey<(reason: VisibilityChangeReason) => void> {
+  constructor(value: (reason: VisibilityChangeReason) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('onHidden');

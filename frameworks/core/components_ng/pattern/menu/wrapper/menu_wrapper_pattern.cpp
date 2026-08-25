@@ -1079,6 +1079,9 @@ void MenuWrapperPattern::StartShowAnimation()
     CHECK_NULL_VOID(pipeline);
     auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
+
+    SetMenuStatus(MenuStatus::ON_START_ANIMATION);
+
     if (GetPreviewMode() == MenuPreviewMode::NONE) {
         context->UpdateOffset(GetAnimationOffset());
         context->UpdateOpacity(0.0);
@@ -1094,7 +1097,6 @@ void MenuWrapperPattern::StartShowAnimation()
         context->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
         context->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
     }
-    CallMenuOnWillAppearCallback();
     AnimationUtils::Animate(
         animationOption_,
         [context, weak = WeakClaim(this), theme]() {
@@ -1294,6 +1296,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("EnableArrow: " + std::to_string(dumpInfo_.enableArrow));
     DumpLog::GetInstance().AddDesc("Offset: " + dumpInfo_.offset.ToString());
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
+    DumpLog::GetInstance().AddDesc("TargetId: " + std::to_string(targetId_));
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());
     DumpLog::GetInstance().AddDesc("ShowInSubWindow: " + std::to_string(dumpInfo_.showInSubWindow));
@@ -1314,6 +1317,39 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("AnchorPosition: " + dumpInfo_.anchorPosition.ToString());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     DumpLog::GetInstance().AddDesc("ModalMode: " + modalMode);
+    DumpRootNodeDirtyMarkInfo();
+}
+
+void MenuWrapperPattern::DumpRootNodeDirtyMarkInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto frameRoot = AceType::DynamicCast<FrameNode>(rootNode);
+    CHECK_NULL_VOID(frameRoot);
+    bool isLayoutDirtyMarked = frameRoot->IsLayoutDirtyMarked();
+    DumpLog::GetInstance().AddDesc("RootNodeIsLayoutDirtyMarked: " + std::to_string(isLayoutDirtyMarked));
+    if (!isLayoutDirtyMarked) {
+        return;
+    }
+    auto dirtyLayoutNodes = pipeline->GetDirtyLayoutNodes();
+    DumpLog::GetInstance().AddDesc("DirtyLayoutNodesSize: " + std::to_string(dirtyLayoutNodes.size()));
+    for (const auto& dirtyNode : dirtyLayoutNodes) {
+        if (!dirtyNode) {
+            continue;
+        }
+        if (dirtyNode->GetTag() != ROOT_ETS_TAG) {
+            continue;
+        }
+        DumpLog::GetInstance().AddDesc("DirtyRootNode id: " + std::to_string(dirtyNode->GetId()) +
+            ", depth: " + std::to_string(dirtyNode->GetDepth()) +
+            ", pageId: " + std::to_string(dirtyNode->GetPageId()));
+    }
 }
 
 void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1343,6 +1379,44 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("AnchorPosition", dumpInfo_.anchorPosition.ToString().c_str());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     json->Put("ModalMode", modalMode.c_str());
+    DumpRootNodeDirtyMarkInfo(json);
+}
+
+void MenuWrapperPattern::DumpRootNodeDirtyMarkInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto frameRoot = AceType::DynamicCast<FrameNode>(rootNode);
+    CHECK_NULL_VOID(frameRoot);
+    bool isLayoutDirtyMarked = frameRoot->IsLayoutDirtyMarked();
+    json->Put("RootNodeIsLayoutDirtyMarked", std::to_string(isLayoutDirtyMarked).c_str());
+    if (!isLayoutDirtyMarked) {
+        return;
+    }
+    auto dirtyLayoutNodes = pipeline->GetDirtyLayoutNodes();
+    json->Put("DirtyLayoutNodesSize", std::to_string(dirtyLayoutNodes.size()).c_str());
+    std::string dirtyRootNodes;
+    for (const auto& dirtyNode : dirtyLayoutNodes) {
+        if (!dirtyNode) {
+            continue;
+        }
+        if (dirtyNode->GetTag() != ROOT_ETS_TAG) {
+            continue;
+        }
+        if (!dirtyRootNodes.empty()) {
+            dirtyRootNodes += "; ";
+        }
+        dirtyRootNodes += "id:" + std::to_string(dirtyNode->GetId()) +
+            ",depth:" + std::to_string(dirtyNode->GetDepth()) +
+            ",pageId:" + std::to_string(dirtyNode->GetPageId());
+    }
+    json->Put("DirtyRootNodes", dirtyRootNodes.c_str());
 }
 
 bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point)
@@ -1420,5 +1494,79 @@ bool MenuWrapperPattern::IsSelectMenu() const
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, false);
     return menuModifier->isSelectMenu(menu);
+}
+
+void MenuWrapperPattern::ResetMenuStatus()
+{
+    previewMenuStatus_ = MenuStatus::INIT;
+    menuStatus_ = MenuStatus::INIT;
+    RequestPathRender();
+}
+
+void MenuWrapperPattern::SetMenuStatus(MenuStatus newStatus, bool onlyNewLifeCycle)
+{
+    if (menuStatus_ >= newStatus) {
+        return;
+    }
+
+    MenuStatus currentStatus = menuStatus_;
+    CallLifeCycleCallbacksForTransition(currentStatus, newStatus, onlyNewLifeCycle);
+
+    if (menuStatus_ < newStatus) {
+        previewMenuStatus_ = menuStatus_;
+        menuStatus_ = newStatus;
+    }
+
+    RequestPathRender();
+}
+
+void MenuWrapperPattern::CallLifeCycleCallbacksForTransition(MenuStatus fromStatus, MenuStatus toStatus,
+    bool onlyNewLifeCycle)
+{
+    MenuStatus stepStatus = fromStatus;
+    while (stepStatus < toStatus) {
+        MenuStatus nextStepStatus = static_cast<MenuStatus>(static_cast<int>(stepStatus) + 1);
+
+        previewMenuStatus_ = stepStatus;
+        menuStatus_ = nextStepStatus;
+
+        switch (nextStepStatus) {
+            case MenuStatus::ON_HOVER_SCALE:
+                break;
+            case MenuStatus::ON_SHOW_ANIMATION:
+                if (!onlyNewLifeCycle) {
+                    CallMenuAboutToAppearCallback();
+                }
+                break;
+            case MenuStatus::ON_START_ANIMATION:
+                CallMenuOnWillAppearCallback();
+                break;
+            case MenuStatus::SHOW:
+                if (!onlyNewLifeCycle) {
+                    CallMenuAppearCallback();
+                }
+                CallMenuOnDidAppearCallback();
+                break;
+            case MenuStatus::ON_HIDE_ANIMATION:
+                if (!onlyNewLifeCycle) {
+                    CallMenuAboutToDisappearCallback();
+                }
+                CallMenuOnWillDisappearCallback();
+                break;
+            case MenuStatus::HIDE:
+                if (!onlyNewLifeCycle) {
+                    CallMenuDisappearCallback();
+                }
+                CallMenuOnDidDisappearCallback();
+                break;
+            default:
+                break;
+        }
+
+        if (menuStatus_ != nextStepStatus) {
+            break;
+        }
+        stepStatus = nextStepStatus;
+    }
 }
 } // namespace OHOS::Ace::NG

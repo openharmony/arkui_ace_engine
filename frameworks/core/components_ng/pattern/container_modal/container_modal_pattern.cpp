@@ -438,7 +438,7 @@ bool ContainerModalPattern::CanShowFloatingTitle()
     CHECK_NULL_RETURN(floatingLayoutProperty, false);
 
     if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN && windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && windowMode_ != WindowMode::WINDOW_MODE_SPLIT) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "Window is not full screen or split screen, can not show floating title.");
         return false;
     }

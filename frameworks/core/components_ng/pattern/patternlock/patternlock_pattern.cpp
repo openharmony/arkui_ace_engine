@@ -131,6 +131,7 @@ void PatternLockPattern::HandleAccessibilityHoverEvent(bool isHover, Accessibili
     if (isHover && (accessibilityHoverAction == AccessibilityHoverAction::HOVER_ENTER ||
                      accessibilityHoverAction == AccessibilityHoverAction::HOVER_MOVE)) {
         for (const auto& accessibilityProperty : accessibilityPropertyVec_) {
+            CHECK_NULL_CONTINUE(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
         }
         if (!CheckAutoReset()) {
@@ -139,11 +140,16 @@ void PatternLockPattern::HandleAccessibilityHoverEvent(bool isHover, Accessibili
         HandleReset();
     } else if (!isHover) {
         for (const auto& accessibilityProperty : accessibilityPropertyVec_) {
+            CHECK_NULL_CONTINUE(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         }
-        AddPointEnd();
+        if (!choosePoint_.empty()) {
+            AddPointEnd();
+        }
         auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     }
 }

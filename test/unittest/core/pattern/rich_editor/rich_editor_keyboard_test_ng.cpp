@@ -22,8 +22,9 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
- 
+#include "core/common/ime/input_method_manager.h"
+#include "core/common/text_field_manager_ng.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -96,6 +97,46 @@ HWTEST_F(RichEditorKeyboardTestNg, NeedSoftKeyboard001, TestSize.Level0)
      * @tc.steps: step2. Test whether rich editor need soft keyboard.
      */
     EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
+}
+
+/**
+ * @tc.name: RequestKeyboardCloseWhenNotNeeded001
+ * @tc.desc: test RequestKeyboard returns false when NeedSoftKeyboard returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboardCloseWhenNotNeeded001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and pattern.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set onNeedSoftkeyboardCallback_ to return false so NeedSoftKeyboard() returns false.
+     */
+    richEditorPattern->onNeedSoftkeyboardCallback_ = []() { return false; };
+    EXPECT_FALSE(richEditorPattern->NeedSoftKeyboard());
+
+    /**
+     * @tc.steps: step3. Call RequestKeyboard. Verify it returns false
+     *               and CloseKeyboardInProcess is called.
+     */
+    InputMethodManager::GetInstance()->lastKeep_ = false;
+    auto result = richEditorPattern->RequestKeyboard(true, true, true);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(InputMethodManager::GetInstance()->lastKeep_);
+
+    /**
+     * @tc.steps: step4. Restore callback. Verify NeedSoftKeyboard returns true
+     *               and CloseKeyboardInProcess is not called.
+     */
+    richEditorPattern->onNeedSoftkeyboardCallback_ = nullptr;
+    EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
+    InputMethodManager::GetInstance()->lastKeep_ = false;
+    richEditorPattern->RequestKeyboard(true, true, true);
+    EXPECT_FALSE(InputMethodManager::GetInstance()->lastKeep_);
 }
 
 /**

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ColumnSplitDividerModifier extends ModifierWithKey<ColumnSplitDividerStyle | null> {
   constructor(value: ColumnSplitDividerStyle | null) {
     super(value);
@@ -32,7 +31,7 @@ class ColumnSplitDividerModifier extends ModifierWithKey<ColumnSplitDividerStyle
   }
 }
 class ColumnSplitResizeableModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+  constructor(value: ColumnSplitDividerStyle | null) {
     super(value);
   }
   static identity: Symbol = Symbol('columnSplitResizeable');
@@ -63,7 +62,7 @@ class ColumnSplitClipModifier extends ModifierWithKey<boolean | CircleAttribute 
     return true;
   }
 }
-class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<ColumnSplitAttribute> {
+class ArkColumnSplitComponent extends ArkComponent implements ColumnSplitAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }

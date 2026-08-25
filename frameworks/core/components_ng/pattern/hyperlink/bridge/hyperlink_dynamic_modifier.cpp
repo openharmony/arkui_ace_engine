@@ -144,7 +144,7 @@ void SetHyperlinkResponseRegion(
 
 void ResetHyperlinkResponseRegion(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<DimensionRect> region;
     CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);

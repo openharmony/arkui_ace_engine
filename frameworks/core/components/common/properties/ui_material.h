@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_UI_MATERIAL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_UI_MATERIAL_H
 
+#include <memory>
 #include <optional>
 
 #include "ui/properties/color.h"
@@ -54,6 +55,31 @@ enum class EdgeLightMode: int32_t {
     EDGELIGHT_DISABLED = 2,
 };
 
+// Convert DistortionMode / EdgeLightMode values to inspector-friendly strings.
+inline std::string DistortionModeToString(DistortionMode mode)
+{
+    static const std::string modes[] = { "DistortionMode.AUTO", "DistortionMode.ENABLED",
+        "DistortionMode.DISABLED" };
+    auto index = static_cast<int32_t>(mode);
+    if (index >= static_cast<int32_t>(DistortionMode::DISTORTION_AUTO) &&
+        index <= static_cast<int32_t>(DistortionMode::DISTORTION_DISABLED)) {
+        return modes[index];
+    }
+    return modes[static_cast<int32_t>(DistortionMode::DISTORTION_AUTO)];
+}
+
+inline std::string EdgeLightModeToString(EdgeLightMode mode)
+{
+    static const std::string modes[] = { "EdgeLightMode.AUTO", "EdgeLightMode.ENABLED",
+        "EdgeLightMode.DISABLED" };
+    auto index = static_cast<int32_t>(mode);
+    if (index >= static_cast<int32_t>(EdgeLightMode::EDGELIGHT_AUTO) &&
+        index <= static_cast<int32_t>(EdgeLightMode::EDGELIGHT_DISABLED)) {
+        return modes[index];
+    }
+    return modes[static_cast<int32_t>(EdgeLightMode::EDGELIGHT_AUTO)];
+}
+
 struct UiMaterialParam {
     Shadow shadow;
     Color backgroundColor;
@@ -63,25 +89,35 @@ struct UiMaterialParam {
 
 struct ImmersiveMaterialConfig {
     UiMaterialMapKey key {};
-    Color materialColor;
+    std::optional<Color> materialColor = std::nullopt;
     bool colorInvert = false;
     bool applyShadow = true;
     float dipScale = 1.0f;
     // the result of interactive after the calculation of component.
     bool interactive = false;
-    // the result of lightEffectOptions after the calculation of component. std::nullopt means no lightEffect.
-    std::optional<LightEffectOptions> lightEffectOptions;
+    // Store the lightEffectOptions (color and colorResObj). nullptr means no lightEffect.
+    std::shared_ptr<LightEffectOptions> lightEffectOptions;
+    // when needSplitOverlayShader is true, split material shader into base and overlay layers
+    bool needSplitOverlayShader = false;
+
+    // return true if same, return false if different.
+    bool CompareLightEffectOptions(const ImmersiveMaterialConfig& other) const
+    {
+        return (lightEffectOptions == nullptr && other.lightEffectOptions == nullptr) ||
+               (lightEffectOptions && other.lightEffectOptions && *lightEffectOptions == *other.lightEffectOptions);
+    }
 
     bool operator==(const ImmersiveMaterialConfig& other) const
     {
         return key == other.key && materialColor == other.materialColor && colorInvert == other.colorInvert &&
                applyShadow == other.applyShadow && interactive == other.interactive &&
-               NearEqual(dipScale, other.dipScale) && lightEffectOptions == other.lightEffectOptions;
+               NearEqual(dipScale, other.dipScale) && CompareLightEffectOptions(other) &&
+               needSplitOverlayShader == other.needSplitOverlayShader;
     }
 
     bool HasLightEffect() const
     {
-        return lightEffectOptions.has_value();
+        return lightEffectOptions != nullptr;
     }
 };
 
@@ -96,6 +132,7 @@ class ACE_FORCE_EXPORT MaterialUtils {
 public:
     // get type of material to MaterialType enum, return MaterialType::NONE if invalid number,
     // return std::nullopt if material is nullptr.
+    static bool IsImmersiveMaterialSupported(const UiMaterial* material);
     static std::optional<MaterialType> GetTypeFromMaterial(const UiMaterial* material);
     static ColorMode GetResourceColorMode(NG::PipelineContext* pipeline);
     static bool CallSetMaterial(NG::FrameNode* node, const UiMaterial* material);
@@ -115,6 +152,8 @@ public:
     static bool GetUiMaterialFilterEC(
         const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter);
     static bool GetUiMaterialShaderECSub(
+        const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader);
+    static bool GetUiMaterialECSubShaderOverlay(
         const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader);
     static Shadow GetImmersiveShadow(float dipScale);
     static Shadow GetImmersiveEmptyShadow();

@@ -83,15 +83,15 @@ void* DialogDynamicModule::GetModel(const std::string& name)
 {
     if (name == ACTION_SHEET_MODEL_NG) {
         static NG::ActionSheetModelNG actionSheetModel;
-        return &actionSheetModel;
+        return static_cast<ActionSheetModel*>(&actionSheetModel);
     }
     if (name == ALERT_DIALOG_MODEL_NG) {
         static NG::AlertDialogModelNG alertDialogModel;
-        return &alertDialogModel;
+        return static_cast<AlertDialogModel*>(&alertDialogModel);
     }
     if (name == CUSTOM_DIALOG_CONTROLLER_MODEL_NG) {
         static NG::CustomDialogControllerModelNG customDialogControllerModel;
-        return &customDialogControllerModel;
+        return static_cast<CustomDialogControllerModel*>(&customDialogControllerModel);
     }
     return nullptr;
 }

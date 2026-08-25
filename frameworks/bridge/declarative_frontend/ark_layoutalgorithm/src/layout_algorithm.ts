@@ -183,8 +183,6 @@ class CustomLayoutAlgorithm extends BaseLayoutAlgorithm {
     super()
     this.layoutType = LayoutType.CUSTOM_LAYOUT;
   }
-  onMeasure(self: FrameNode, constraint: LayoutConstraint): void {}
-  onLayout(self: FrameNode, position: Position): void {}
 }
 
 export default {

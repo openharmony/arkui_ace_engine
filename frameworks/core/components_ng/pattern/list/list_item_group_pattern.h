@@ -33,7 +33,6 @@
 namespace OHOS::Ace::NG {
 
 class ListItemGroupLayoutAlgorithm;
-class LazyContainerItemHelper;
 
 struct ListItemGroupPaintInfo {
     TextDirection layoutDirection = TextDirection::LTR;
@@ -266,10 +265,9 @@ public:
         return itemPosition_;
     }
 
-    // Forwarded to LazyContainerItemHelper (base Pattern member), shared storage with generic children.
     void SetIndexInList(int32_t index)
     {
-        GetOrCreateLazyContainerItemHelper()->SetIndexInList(index);
+        indexInList_ = index;
     }
 
     void SetHeaderComponentContentExist(bool isHeaderComponentContentExist)
@@ -284,8 +282,7 @@ public:
 
     int32_t GetIndexInList() const
     {
-        const auto& helper = GetLazyContainerItemHelper();
-        return helper ? helper->GetIndexInList() : 0;
+        return indexInList_;
     }
 
     int32_t GetDisplayEndIndexInGroup() const
@@ -549,7 +546,7 @@ private:
     V2::ListItemGroupHeaderFooterStyle headerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;
     V2::ListItemGroupHeaderFooterStyle footerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;
 
-    // indexInList_ moved to LazyContainerItemHelper (base Pattern member).
+    int32_t indexInList_ = 0;
 
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;

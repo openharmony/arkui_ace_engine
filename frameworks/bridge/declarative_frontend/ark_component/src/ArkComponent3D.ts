@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ShaderInputBufferModifier extends ModifierWithKey<object> {
   constructor(value: object) {

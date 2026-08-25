@@ -40,6 +40,6 @@ declare namespace uiObserver {
 declare class WindowSizeLayoutBreakpoint implements IEnvironmentValue<uiObserver.WindowSizeLayoutBreakpointInfo> {
     constructor(context: UIContext);
     value: uiObserver.WindowSizeLayoutBreakpointInfo;
-    update(newValue: uiObserver.WindowSizeLayoutBreakpointInfo);
+    update(newValue: uiObserver.WindowSizeLayoutBreakpointInfo): void;
     destroy(): void;
 }

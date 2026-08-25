@@ -71,7 +71,7 @@ class TestDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
         return this.__refsCount;
     }
 
-    public reset() {
+    public reset(): void {
         this.__fireChangeCount = 0;
         this.__refsCount = 0;
         StateTracker.reset();
@@ -105,7 +105,7 @@ export class TestMutableStateMeta extends MutableStateMeta {
         return this.__refsCount;
     }
 
-    public reset() {
+    public reset(): void {
         this.__fireChangeCount = 0;
         this.__refsCount = 0;
     }

@@ -927,7 +927,7 @@ bool ListModelNG::GetListMaintainVisibleContentPosition(FrameNode* frameNode)
 
 void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
-    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetListNestedScroll",
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetNestedScroll",
         static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
         static_cast<int32_t>(nestedOpt.backward) +
         static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),

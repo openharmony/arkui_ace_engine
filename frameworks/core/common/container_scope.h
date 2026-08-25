@@ -139,7 +139,7 @@ public:
     static void ReportScopeError();
 #endif
 private:
-    int32_t restoreId_ = CurrentId();
+    int32_t restoreId_ = 0;
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
     uint64_t pushedUid_ = 0;
     bool pushed_ = false;

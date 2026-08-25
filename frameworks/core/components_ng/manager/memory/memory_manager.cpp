@@ -15,6 +15,8 @@
 #include "core/components_ng/manager/memory/memory_manager.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
 
@@ -163,5 +165,60 @@ void MemoryManager::Reset()
         return;
     }
     pageNodes_.clear();
+}
+
+bool MemoryManager::RegisterNavDestinationHiddenChange(
+    const RefPtr<FrameNode>& imageNode, OnNavDestinationHiddenChangeCallback&& callback)
+{
+    CHECK_NULL_RETURN(imageNode, false);
+    int32_t imageNodeId = imageNode->GetId();
+    auto iter = imageNavDestMap_.find(imageNodeId);
+    if (iter != imageNavDestMap_.end() && iter->second.Upgrade()) {
+        return true;
+    }
+    auto parent = imageNode->GetAncestorNodeOfFrame(false);
+    while (parent) {
+        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            auto navDestPattern = parent->GetPattern<NavDestinationPattern>();
+            CHECK_NULL_RETURN(navDestPattern, false);
+            if (!navDestPattern->GetNavigationNode()) {
+                TAG_LOGD(AceLogTag::ACE_IMAGE, "not transition navDestination imageNodeId:%{public}d navId:%{public}d",
+                    imageNodeId, parent->GetId());
+                parent = parent->GetAncestorNodeOfFrame(false);
+                continue;
+            }
+            auto eventHub = navDestPattern->GetEventHub<NavDestinationEventHub>();
+            CHECK_NULL_RETURN(eventHub, false);
+            eventHub->AddOnHiddenChange(imageNodeId, std::move(callback));
+            imageNavDestMap_[imageNodeId] = WeakPtr<FrameNode>(parent);
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "RegisterNavDestinationHiddenChange imageNodeId:%{public}d navId:%{public}d",
+                imageNodeId, parent->GetId());
+            return true;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+    }
+    return false;
+}
+
+void MemoryManager::UnregisterNavDestinationHiddenChange(int32_t imageNodeId)
+{
+    auto iter = imageNavDestMap_.find(imageNodeId);
+    if (iter == imageNavDestMap_.end()) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
+            "UnregisterNavDestinationHiddenChange not registered, imageNodeId:%{public}d", imageNodeId);
+        return;
+    }
+    auto navDestNode = iter->second.Upgrade();
+    if (navDestNode) {
+        auto navDestPattern = navDestNode->GetPattern<NavDestinationPattern>();
+        if (navDestPattern) {
+            auto eventHub = navDestPattern->GetEventHub<NavDestinationEventHub>();
+            if (eventHub) {
+                eventHub->RemoveOnHiddenChange(imageNodeId);
+            }
+        }
+    }
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "UnregisterNavDestinationHiddenChange imageNodeId:%{public}d", imageNodeId);
+    imageNavDestMap_.erase(iter);
 }
 } // namespace OHOS::Ace::NG

@@ -120,7 +120,6 @@ class User implements IObservedObject, IWatchSubscriberRegister, TestJsonSeriali
     }
 
     public fromJson(json: jsonx.JsonElement): void {
-        //this.username = json.getElement("username").asString();
         this.username = json.asString();
     }
 

@@ -46,8 +46,6 @@
 #include "core/components_ng/pattern/texttimer/bridge/text_timer_content_modifier_helper.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/toggle/bridge/toggle_content_modifier_helper.h"
-#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components_ng/pattern/toggle/toggle_model_static.h"
 #include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
@@ -152,8 +150,7 @@ const GENERATED_ArkUITextClockContentModifier* GetTextClockContentModifier()
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextClock");
         if (module == nullptr) {
-            LOGF("Can't find textclock dynamic module");
-            abort();
+            LOGF_ABORT("Can't find textclock dynamic module");
         }
         cachedModifier = reinterpret_cast<const GENERATED_ArkUITextClockContentModifier*>(
             module->GetCustomModifier("contentModifier"));

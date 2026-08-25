@@ -16,6 +16,7 @@
 #include "text_input_base.h"
 
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 
@@ -26,6 +27,21 @@ constexpr float DEFAULT_RECT_X = 10.0f;
 constexpr float DEFAULT_RECT_Y = 10.0f;
 constexpr float MIN_RECT_WIDTH = 0.0f;
 constexpr float MIN_RECT_HEIGHT = 0.0f;
+constexpr float PREVIEW_TEXT_RECT_X = 200.0f;
+constexpr float PREVIEW_TEXT_RECT_Y = 30.0f;
+constexpr float PREVIEW_TEXT_RECT_W = 300.0f;
+constexpr float PREVIEW_TEXT_RECT_H = 60.0f;
+constexpr float PREVIEW_DRAW_LEFT = 10.0f;
+constexpr float PREVIEW_DRAW_TOP = 20.0f;
+constexpr float PREVIEW_DRAW_WIDTH = 100.0f;
+constexpr float PREVIEW_DRAW_HEIGHT = 30.0f;
+constexpr float PREVIEW_CONTENT_OFFSET_X = 50.0f;
+constexpr float PREVIEW_CONTENT_OFFSET_Y = 40.0f;
+constexpr float PREVIEW_CONTENT_WIDTH = 200.0f;
+constexpr float PREVIEW_CONTENT_HEIGHT = 100.0f;
+constexpr int32_t PREVIEW_TEXT_START_INDEX = 0;
+constexpr int32_t PREVIEW_TEXT_END_INDEX = 5;
+constexpr size_t RECTS_FOR_RANGE_OUT_ARG_INDEX = 2;
 } // namespace
 
 class TextFieldOverlayModifierTest : public TextInputBases {
@@ -259,5 +275,108 @@ HWTEST_F(TextFieldOverlayModifierTest, TextFieldOverlayModifierTest004, TestSize
      */
 
     layoutProperty->UpdateShowCounter(false);
+}
+
+static void SetupPreviewTextPattern(const RefPtr<TextFieldPattern>& pattern)
+{
+    pattern->hasPreviewText_ = true;
+    pattern->previewTextStart_ = PREVIEW_TEXT_START_INDEX;
+    pattern->previewTextEnd_ = PREVIEW_TEXT_END_INDEX;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->paragraph_ = paragraph;
+    pattern->SetTextRect(
+        RectF(PREVIEW_TEXT_RECT_X, PREVIEW_TEXT_RECT_Y, PREVIEW_TEXT_RECT_W, PREVIEW_TEXT_RECT_H));
+    std::vector<RectF> rects {
+        RectF(PREVIEW_DRAW_LEFT, PREVIEW_DRAW_TOP, PREVIEW_DRAW_WIDTH, PREVIEW_DRAW_HEIGHT)
+    };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(SetArgReferee<RECTS_FOR_RANGE_OUT_ARG_INDEX>(rects));
+}
+
+static RefPtr<TextFieldOverlayModifier> CreatePreviewModifier(const RefPtr<TextFieldPattern>& pattern)
+{
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    auto modifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
+    modifier->SetPreviewTextStyle(PreviewTextStyle::UNDERLINE);
+    modifier->SetShowPreviewTextDecoration(true);
+    modifier->SetPreviewTextRects(true);
+    modifier->SetPreviewTextDecorationColor(Color::RED);
+    OffsetF contentOffset(PREVIEW_CONTENT_OFFSET_X, PREVIEW_CONTENT_OFFSET_Y);
+    SizeF contentSize(PREVIEW_CONTENT_WIDTH, PREVIEW_CONTENT_HEIGHT);
+    modifier->SetContentOffset(contentOffset);
+    modifier->SetContentSize(contentSize);
+    return modifier;
+}
+
+static Testing::TestingRoundRect CaptureDrawnRoundRect(Testing::MockCanvas& rsCanvas)
+{
+    EXPECT_CALL(rsCanvas, Save()).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, Restore()).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, ClipRect(_, _, _)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    Testing::TestingRoundRect capturedRoundRect;
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).WillOnce(SaveArg<0>(&capturedRoundRect));
+    return capturedRoundRect;
+}
+
+/**
+ * @tc.name: TextFieldOverlayModifierTest005
+ * @tc.desc: Test PaintPreviewTextDecoration when isNotAllowScrollX is true
+ *           (TextArea + horizontal scroll disabled). offsetX uses contentOffset.GetX().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldOverlayModifierTest, TextFieldOverlayModifierTest005, TestSize.Level1)
+{
+    CreateTextField();
+    GetFocus();
+    layoutProperty_->UpdateMaxLines(2);
+    EXPECT_TRUE(pattern_->IsTextArea());
+
+    SetupPreviewTextPattern(pattern_);
+    auto textFieldOverlayModifier = CreatePreviewModifier(pattern_);
+
+    EXPECT_FALSE(pattern_->IsHorizontalScrollEnabled());
+    EXPECT_TRUE(pattern_->IsTextArea() && !pattern_->IsHorizontalScrollEnabled());
+
+    Testing::MockCanvas rsCanvas;
+    auto capturedRoundRect = CaptureDrawnRoundRect(rsCanvas);
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldOverlayModifier->PaintPreviewTextDecoration(context);
+
+    auto capturedRect = capturedRoundRect.GetRect();
+    EXPECT_FLOAT_EQ(capturedRect.GetLeft(), PREVIEW_DRAW_LEFT + PREVIEW_CONTENT_OFFSET_X);
+    EXPECT_FLOAT_EQ(capturedRect.GetRight(), PREVIEW_DRAW_LEFT + PREVIEW_DRAW_WIDTH + PREVIEW_CONTENT_OFFSET_X);
+}
+
+/**
+ * @tc.name: TextFieldOverlayModifierTest006
+ * @tc.desc: Test PaintPreviewTextDecoration when isNotAllowScrollX is false
+ *           (TextArea + horizontal scroll enabled). offsetX uses textRect.GetX().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldOverlayModifierTest, TextFieldOverlayModifierTest006, TestSize.Level1)
+{
+    CreateTextField();
+    GetFocus();
+    layoutProperty_->UpdateMaxLines(2);
+    pattern_->SetHorizontalScrolling(true);
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->IsHorizontalScrollEnabled());
+
+    SetupPreviewTextPattern(pattern_);
+    auto textFieldOverlayModifier = CreatePreviewModifier(pattern_);
+
+    EXPECT_FALSE(pattern_->IsTextArea() && !pattern_->IsHorizontalScrollEnabled());
+
+    Testing::MockCanvas rsCanvas;
+    auto capturedRoundRect = CaptureDrawnRoundRect(rsCanvas);
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldOverlayModifier->PaintPreviewTextDecoration(context);
+
+    auto capturedRect = capturedRoundRect.GetRect();
+    EXPECT_FLOAT_EQ(capturedRect.GetLeft(), PREVIEW_DRAW_LEFT + PREVIEW_TEXT_RECT_X);
+    EXPECT_FLOAT_EQ(capturedRect.GetRight(), PREVIEW_DRAW_LEFT + PREVIEW_DRAW_WIDTH + PREVIEW_TEXT_RECT_X);
 }
 } // namespace OHOS::Ace::NG

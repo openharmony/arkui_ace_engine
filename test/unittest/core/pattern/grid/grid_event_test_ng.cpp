@@ -229,6 +229,43 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragOverScroll007
+ * @tc.desc: Handle drag up with single row and AlwaysEnabled, currentOffset should stay continuous
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, HandleDragOverScroll007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Single row (content shorter than viewport) and AlwaysEnabled
+     * @tc.expected: Can drag over
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(1);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
+
+    /**
+     * @tc.steps: step2. Drag up until the row is about to slide out of the top
+     * @tc.expected: currentOffset keeps growing, does not snap back to 0
+     */
+    DragStart(frameNode_, Offset());
+    const float dragDelta = -ITEM_MAIN_SIZE;
+    DragUpdate(dragDelta);
+    EXPECT_EQ(-(pattern_->GetTotalOffset()), dragDelta);
+    EXPECT_GT(GetCurrentOffset().GetY(), 0);
+
+    /**
+     * @tc.steps: step3. DragEnd
+     * @tc.expected: Offset restores toward 0 with animation, does not stay corrupted
+     */
+    DragEnd(0);
+    EXPECT_TRUE(TickPosition(dragDelta / TICK));
+    EXPECT_TRUE(TickPosition(0));
+}
+
+/**
  * @tc.name: HandleDragOverScroll005
  * @tc.desc: Handle drag over edge in EdgeEffect::FADE, can not drag over
  * @tc.type: FUNC

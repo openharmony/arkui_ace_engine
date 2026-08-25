@@ -43,6 +43,7 @@ enum class LazyForEachCustomComponentFreezeMode {
 };
 
 enum class LazyForEachMemOptStrategy {
+    UNDEFINED = -1,
     DEFAULT = 0,
     ENABLE_AUTO_CACHE_OPTIMIZATION = 1,
 };
@@ -50,7 +51,7 @@ enum class LazyForEachMemOptStrategy {
 struct LazyForEachOptions {
     LazyForEachCustomComponentFreezeMode enableCustomComponentFreeze = LazyForEachCustomComponentFreezeMode::AUTO;
     LazyForEachReleaseStrategy releaseStrategy = LazyForEachReleaseStrategy::BATCH;
-    LazyForEachMemOptStrategy memOptStrategy = LazyForEachMemOptStrategy::DEFAULT;
+    LazyForEachMemOptStrategy memOptStrategy = LazyForEachMemOptStrategy::UNDEFINED;
 };
 
 using ItemKeyGenerator = std::function<std::string(const JSRef<JSVal>&, size_t)>;

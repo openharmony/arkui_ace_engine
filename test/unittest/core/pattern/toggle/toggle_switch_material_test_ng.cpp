@@ -62,6 +62,11 @@ constexpr float CONTENT_OFFSET_X = 0.0f;
 constexpr float CONTENT_OFFSET_Y = 0.0f;
 constexpr float CONTENT_WIDTH_NORMAL = 100.0f;
 constexpr float CONTENT_HEIGHT_NORMAL = 50.0f;
+constexpr bool IS_OFF = false;
+// Expected point-light intensities, mirroring switch_pattern.cpp's LIGHT_INTENSITY_ON/OFF.
+constexpr float EXPECTED_INTENSITY_ON = 4.0f;
+constexpr float EXPECTED_INTENSITY_OFF = 1.0f;
+const Color CUSTOM_POINT_COLOR = Color(0xFF0000FF);
 } // namespace
 
 class ToggleSwitchMaterialTestNg : public testing::Test {
@@ -222,7 +227,7 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleLongPress_NoSystemMate
 
 /**
  * @tc.name: SwitchMaterial_HandleLongPress_HighGrade
- * @tc.desc: Test HandleLongPress delegates to HandleHighGradeLongPress for EXQUISITE
+ * @tc.desc: Test HandleLongPress delegates to ShowMaterialNode for EXQUISITE
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleLongPress_HighGrade, TestSize.Level1)
@@ -251,7 +256,7 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleLongPress_HighGrade, T
     renderContext->SetSystemMaterial(material);
 
     pattern->HandleLongPress();
-    // After HandleHighGradeLongPress, dragFrameNode should be created and visible
+    // After ShowMaterialNode, dragFrameNode should be created and visible
     EXPECT_NE(pattern->dragFrameNode_, nullptr);
     EXPECT_TRUE(pattern->isFrameNodeVisible_);
 
@@ -1097,11 +1102,11 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_CreateNodePaintMethod_WithSy
 // ============================================================
 
 /**
- * @tc.name: SwitchMaterial_OnTouchDown_CreatesMaterialNodes
- * @tc.desc: Test OnTouchDown creates drag nodes via ShowMaterialNode when high grade
+ * @tc.name: SwitchMaterial_OnTouchDown_DoesNotCreateMaterialNodes
+ * @tc.desc: Test OnTouchDown does NOT create drag nodes (deferred to long press/drag/touchUp)
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchDown_CreatesMaterialNodes, TestSize.Level1)
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchDown_DoesNotCreateMaterialNodes, TestSize.Level1)
 {
     g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
     auto switchNode = CreateSwitchNode(IS_ON);
@@ -1127,8 +1132,10 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchDown_CreatesMaterialN
 
     pattern->OnTouchDown();
     EXPECT_TRUE(pattern->isTouch_);
-    // High grade with system material: ShowMaterialNode creates drag nodes
-    EXPECT_NE(pattern->dragFrameNode_, nullptr);
+    // OnTouchDown no longer creates material nodes - deferred to long press/drag/touchUp
+    EXPECT_EQ(pattern->dragFrameNode_, nullptr);
+    EXPECT_EQ(pattern->dragPointNode_, nullptr);
+    EXPECT_EQ(pattern->blurCoverNode_, nullptr);
 
     g_uiMaterialLevel = savedMaterialLevel_;
 }
@@ -1559,7 +1566,7 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchDown_ResetsPendingHid
 
 /**
  * @tc.name: SwitchMaterial_OnTouchUp_HighGrade_SetsPendingHide
- * @tc.desc: Test OnTouchUp sets pendingHide_ for high grade with material nodes
+ * @tc.desc: Test OnTouchUp sets pendingHide_ for high grade when material nodes are visible
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchUp_HighGrade_SetsPendingHide, TestSize.Level1)
@@ -1589,9 +1596,8 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchUp_HighGrade_SetsPend
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     pattern->paintMethod_->GetContentModifier(paintWrapper);
 
-    // Create nodes so the high-grade pending hide path is taken
-    pattern->CreateDragPointNode();
-    ASSERT_NE(pattern->dragPointNode_, nullptr);
+    // Simulate material nodes visible (from long press or drag)
+    pattern->isFrameNodeVisible_ = true;
 
     pattern->isTouch_ = true;
     pattern->OnTouchUp();
@@ -1763,5 +1769,515 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HideMaterialNode_ResetsPendi
     EXPECT_FALSE(pattern->pendingHide_);
 
     g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+// ============================================================
+// ShowMaterialNode shows all three nodes simultaneously
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_ShowMaterialNode_ShowsAllNodes
+ * @tc.desc: Test ShowMaterialNode creates and shows dragPointNode_, blurCoverNode_, dragFrameNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_ShowMaterialNode_ShowsAllNodes, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    pattern->ShowMaterialNode();
+    // All nodes should be created simultaneously
+    EXPECT_NE(pattern->dragFrameNode_, nullptr);
+    EXPECT_NE(pattern->dragPointNode_, nullptr);
+    EXPECT_NE(pattern->blurCoverNode_, nullptr);
+    EXPECT_TRUE(pattern->isFrameNodeVisible_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+/**
+ * @tc.name: SwitchMaterial_ShowMaterialNode_RestartsWhenAlreadyVisible
+ * @tc.desc: Test ShowMaterialNode re-shows (restarts) instead of bailing when isFrameNodeVisible_
+ *   is true, so a re-touch during the hide window replays a fresh round.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_ShowMaterialNode_RestartsWhenAlreadyVisible, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    // Simulate already visible: ShowMaterialNode must restart, not bail.
+    pattern->isFrameNodeVisible_ = true;
+    pattern->ShowMaterialNode();
+    EXPECT_NE(pattern->dragFrameNode_, nullptr);
+    EXPECT_TRUE(pattern->isFrameNodeVisible_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+// ============================================================
+// TriggerPointLightBrightening tests (tap scenario)
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_TriggerPointLightBrightening_Tap
+ * @tc.desc: Test TriggerPointLightBrightening creates only dragPointNode_ for tap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_TriggerPointLightBrightening_Tap, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    pattern->TriggerPointLightBrightening();
+    // Tap: dragPointNode_ and blurCoverNode_ created together, no dragFrameNode_
+    EXPECT_NE(pattern->dragPointNode_, nullptr);
+    EXPECT_EQ(pattern->dragFrameNode_, nullptr);
+    EXPECT_NE(pattern->blurCoverNode_, nullptr);
+    EXPECT_FALSE(pattern->isFrameNodeVisible_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+/**
+ * @tc.name: SwitchMaterial_TriggerPointLightBrightening_NoSystemMaterial
+ * @tc.desc: Test TriggerPointLightBrightening returns early when no system material
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_TriggerPointLightBrightening_NoSystemMaterial, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    // No system material - should return early
+    pattern->TriggerPointLightBrightening();
+    EXPECT_EQ(pattern->dragPointNode_, nullptr);
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+// ============================================================
+// OnTouchUp tap scenario triggers point light
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_OnTouchUp_TapTriggersPointLight
+ * @tc.desc: Test OnTouchUp triggers TriggerPointLightBrightening for tap scenario
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchUp_TapTriggersPointLight, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    // Touch down - no nodes created
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->dragFrameNode_, nullptr);
+    EXPECT_EQ(pattern->dragPointNode_, nullptr);
+
+    // Touch up (tap) - triggers point light brightening
+    pattern->OnTouchUp();
+    EXPECT_FALSE(pattern->isTouch_);
+    // Tap creates dragPointNode_ and blurCoverNode_ for brightening effect, no material circle
+    EXPECT_NE(pattern->dragPointNode_, nullptr);
+    EXPECT_NE(pattern->blurCoverNode_, nullptr);
+    EXPECT_FALSE(pattern->isFrameNodeVisible_);
+    EXPECT_FALSE(pattern->pendingHide_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+// ============================================================
+// HandleDragStart shows material if not visible
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_HandleDragStart_ShowsMaterialIfNotVisible
+ * @tc.desc: Test HandleDragStart shows all nodes when material not yet visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleDragStart_ShowsMaterialIfNotVisible, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    EXPECT_FALSE(pattern->isFrameNodeVisible_);
+    pattern->HandleDragStart();
+    EXPECT_TRUE(pattern->isDragEvent_);
+    // Drag should have shown all nodes
+    EXPECT_NE(pattern->dragFrameNode_, nullptr);
+    EXPECT_NE(pattern->dragPointNode_, nullptr);
+    EXPECT_NE(pattern->blurCoverNode_, nullptr);
+    EXPECT_TRUE(pattern->isFrameNodeVisible_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+/**
+ * @tc.name: SwitchMaterial_HandleDragStart_SkipsIfAlreadyVisible
+ * @tc.desc: Test HandleDragStart skips ShowMaterialNodes if already visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleDragStart_SkipsIfAlreadyVisible, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+
+    // Simulate material already visible from long press
+    pattern->isFrameNodeVisible_ = true;
+    pattern->isDragEvent_ = false;
+
+    pattern->HandleDragStart();
+    EXPECT_TRUE(pattern->isDragEvent_);
+    // No new nodes created since isFrameNodeVisible_ was already true
+    EXPECT_EQ(pattern->dragFrameNode_, nullptr);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+/**
+ * @tc.name: SwitchMaterial_HandleDragStart_LowGrade
+ * @tc.desc: Low-grade HandleDragStart enlarges the thumb via the long-press enlarge effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleDragStart_LowGrade, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto renderContext = switchNode->GetRenderContext();
+    auto geometryNode = switchNode->GetGeometryNode();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    auto modifier = pattern->paintMethod_->GetContentModifier(paintWrapper);
+    ASSERT_NE(modifier, nullptr);
+    auto switchModifier = AceType::DynamicCast<SwitchModifier>(modifier);
+    ASSERT_NE(switchModifier, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    pattern->HandleDragStart();
+    EXPECT_TRUE(pattern->isDragEvent_);
+    // Low-grade path creates no high-grade material nodes...
+    EXPECT_EQ(pattern->dragFrameNode_, nullptr);
+    // ...and enlarges the thumb (point scale -> expand), reusing the long-press enlarge effect.
+    EXPECT_FLOAT_EQ(switchModifier->GetPointScale(), LOW_GRADE_EXPAND_SCALE);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+// ============================================================
+// Point-light intensity and color tests
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_UpdatePointLightIntensity_On
+ * @tc.desc: UpdatePointLightIntensity(true) sets the ON (high) intensity on dragPointNode_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_UpdatePointLightIntensity_On, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+
+    pattern->CreateDragPointNode();
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+    // Seed the opposite value, then apply the ON state.
+    pattern->UpdatePointLightIntensity(false);
+    pattern->UpdatePointLightIntensity(true);
+
+    auto rc = pattern->dragPointNode_->GetRenderContext();
+    ASSERT_NE(rc, nullptr);
+    ASSERT_TRUE(rc->HasLightIntensity());
+    EXPECT_FLOAT_EQ(rc->GetLightIntensity().value(), EXPECTED_INTENSITY_ON);
+}
+
+/**
+ * @tc.name: SwitchMaterial_UpdatePointLightIntensity_Off
+ * @tc.desc: UpdatePointLightIntensity(false) sets the OFF (low) intensity on dragPointNode_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_UpdatePointLightIntensity_Off, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+
+    pattern->CreateDragPointNode();
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+    // Seed the opposite value, then apply the OFF state.
+    pattern->UpdatePointLightIntensity(true);
+    pattern->UpdatePointLightIntensity(false);
+
+    auto rc = pattern->dragPointNode_->GetRenderContext();
+    ASSERT_NE(rc, nullptr);
+    ASSERT_TRUE(rc->HasLightIntensity());
+    EXPECT_FLOAT_EQ(rc->GetLightIntensity().value(), EXPECTED_INTENSITY_OFF);
+}
+
+/**
+ * @tc.name: SwitchMaterial_UpdatePointLightIntensity_NullNodeNoCrash
+ * @tc.desc: UpdatePointLightIntensity is a no-op (no crash) when dragPointNode_ is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_UpdatePointLightIntensity_NullNodeNoCrash, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->dragPointNode_, nullptr);
+    // No drag point node created; should return early without crashing.
+    pattern->UpdatePointLightIntensity(true);
+    EXPECT_EQ(pattern->dragPointNode_, nullptr);
+}
+
+/**
+ * @tc.name: SwitchMaterial_CreateDragPointNode_DefaultLightColorWhite
+ * @tc.desc: CreateDragPointNode defaults the light color to white and applies the ON intensity
+ *   when no point color is set and the switch is on.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_CreateDragPointNode_DefaultLightColorWhite, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+
+    pattern->CreateDragPointNode();
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+
+    auto rc = pattern->dragPointNode_->GetRenderContext();
+    ASSERT_NE(rc, nullptr);
+    ASSERT_TRUE(rc->HasLightColor());
+    EXPECT_EQ(rc->GetLightColor().value(), Color::WHITE);
+    ASSERT_TRUE(rc->HasLightIntensity());
+    EXPECT_FLOAT_EQ(rc->GetLightIntensity().value(), EXPECTED_INTENSITY_ON);
+}
+
+/**
+ * @tc.name: SwitchMaterial_CreateDragPointNode_CustomLightColor
+ * @tc.desc: CreateDragPointNode uses the user-set point color when switchPointColor is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_CreateDragPointNode_CustomLightColor, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateSwitchPointColor(CUSTOM_POINT_COLOR);
+
+    pattern->CreateDragPointNode();
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+
+    auto rc = pattern->dragPointNode_->GetRenderContext();
+    ASSERT_NE(rc, nullptr);
+    ASSERT_TRUE(rc->HasLightColor());
+    EXPECT_EQ(rc->GetLightColor().value(), CUSTOM_POINT_COLOR);
+}
+
+/**
+ * @tc.name: SwitchMaterial_CreateDragPointNode_OffStateLowIntensity
+ * @tc.desc: CreateDragPointNode applies the OFF (low) intensity when the switch is off.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_CreateDragPointNode_OffStateLowIntensity, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_OFF);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+
+    pattern->CreateDragPointNode();
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+
+    auto rc = pattern->dragPointNode_->GetRenderContext();
+    ASSERT_NE(rc, nullptr);
+    ASSERT_TRUE(rc->HasLightIntensity());
+    EXPECT_FLOAT_EQ(rc->GetLightIntensity().value(), EXPECTED_INTENSITY_OFF);
+}
+
+/**
+ * @tc.name: SwitchMaterial_BoardColorCallback_DrivesPointLightIntensity
+ * @tc.desc: The board-color animation callback registered by RegisterMaterialNodePositionCallback
+ *   drives the point-light intensity to match the track state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_BoardColorCallback_DrivesPointLightIntensity, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto renderContext = switchNode->GetRenderContext();
+    auto geometryNode = switchNode->GetGeometryNode();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    auto modifier = pattern->paintMethod_->GetContentModifier(paintWrapper);
+    ASSERT_NE(modifier, nullptr);
+    auto switchModifier = AceType::DynamicCast<SwitchModifier>(modifier);
+    ASSERT_NE(switchModifier, nullptr);
+
+    pattern->CreateDragPointNode();
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+    pattern->RegisterMaterialNodePositionCallback();
+    ASSERT_TRUE(switchModifier->boardColorAnimateCallback_);
+
+    auto pointRC = pattern->dragPointNode_->GetRenderContext();
+    ASSERT_NE(pointRC, nullptr);
+
+    // ON track state -> high intensity.
+    switchModifier->boardColorAnimateCallback_(true);
+    ASSERT_TRUE(pointRC->HasLightIntensity());
+    EXPECT_FLOAT_EQ(pointRC->GetLightIntensity().value(), EXPECTED_INTENSITY_ON);
+    // OFF track state -> low intensity.
+    switchModifier->boardColorAnimateCallback_(false);
+    EXPECT_FLOAT_EQ(pointRC->GetLightIntensity().value(), EXPECTED_INTENSITY_OFF);
 }
 } // namespace OHOS::Ace::NG

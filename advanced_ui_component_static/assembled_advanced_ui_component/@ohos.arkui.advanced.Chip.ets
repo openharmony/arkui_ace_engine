@@ -49,6 +49,7 @@ import {
   Row,
   ScaleOptions,
   ShadowStyle,
+  SizeChangeCallback,
   SizeOptions,
   SymbolEffect,
   SymbolEffectStrategy,
@@ -526,6 +527,7 @@ export struct ChipComponent {
   @State breakPoint: BreakPointsType = BreakPointsType.SM;
   @State fontSizeScale: number = 1;
   @State useAdaptiveLineHeight: boolean = false;
+  @State actualChipHeight: number = 0;
   private isSuffixIconFocusStyleCustomized: boolean =
     this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
   private isSuffixIconFocusable: boolean = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
@@ -768,6 +770,9 @@ export struct ChipComponent {
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
     .responseRegion(this.getChipResponseRegion())
+    .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+      this.actualChipHeight = (newValue.height ?? 0) as number;
+    } as SizeChangeCallback)
     .accessibilityGroup(true)
     .accessibilityDescription(this.getAccessibilityDescription())
     .accessibilityLevel(this.getAccessibilityLevel())
@@ -1452,7 +1457,9 @@ export struct ChipComponent {
   }
 
   private getChipResponseRegion(): Rectangle | undefined {
-    const chipHeight = this.getChipHeight();
+    // Large-font scaling (e.g. care mode) can stretch the chip beyond the themed or
+    // user-specified height, so prefer the measured height once layout has happened.
+    const chipHeight = this.actualChipHeight > 0 ? this.actualChipHeight : this.getChipHeight();
     if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
       return {
         x: 0,

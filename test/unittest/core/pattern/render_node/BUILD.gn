@@ -13,25 +13,29 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+test_sources = [
+  "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_algorithm.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_pattern.cpp",
+  "render_node_test_ng.cpp",
+  "render_node_test_two_ng.cpp",
+]
+
+core_sources = [
+  "render_node_test_min.cpp",
+  "render_node_test_core.cpp",
+]
+
 ace_unittest("render_node_test_ng") {
   module_name = "ImperativeFramework-RenderNode"
   type = "new"
-  sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_pattern.cpp",
-    "render_node_test_ng.cpp",
-    "render_node_test_two_ng.cpp"
-  ]
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "render_node_test_min.cpp",
-      "render_node_test_core.cpp",
-    ]
+  sources = test_sources
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+    sources += core_sources
+  } else if (!ace_enable_full_test_suite) {
+    sources = core_sources
   } else {
-    sources += [
-      "render_node_test_min.cpp",
-      "render_node_test_core.cpp",
-    ]
+    sources += core_sources
   }
 }

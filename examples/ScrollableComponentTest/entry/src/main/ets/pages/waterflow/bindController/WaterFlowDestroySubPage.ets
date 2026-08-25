@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import router from '@ohos.router';
 import { WaterFlowControllerStore } from './WaterFlowControllerStore';
 
 @Entry
@@ -63,7 +62,7 @@ struct WaterFlowDestroySubPage {
       }
 
       Button('Back').onClick(() => {
-        router.back();
+        this.getUIContext().getRouter().back();
       })
     }
     .padding(16)

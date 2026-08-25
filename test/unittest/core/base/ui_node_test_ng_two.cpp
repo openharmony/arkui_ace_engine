@@ -1000,12 +1000,13 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo069, TestSize.Level1)
     testNode1->AddChild(testNode4, 1, false);
     OffsetT<float> offset;
     std::list<RefPtr<FrameNode>> visibleList;
+    std::vector<RefPtr<FrameNode>> visibleVector;
     testNode1->GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
     testNode1->AddDisappearingChild(testNode2, 1);
     testNode1->AddDisappearingChild(testNode3, 2);
     testNode1->AddDisappearingChild(testNode4, 3);
     testNode1->AddDisappearingChild(testNode5, 4);
-    testNode1->GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    testNode1->GenerateOneDepthVisibleFrameWithTransition(visibleVector);
     testNode1->GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
     EXPECT_EQ(testNode1->GetChildren().size(), 3);
 }
@@ -1185,6 +1186,37 @@ HWTEST_F(UINodeTestNgTwo, GetPerformanceCheckData004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetPerformanceCheckData005
+ * @tc.desc: Test collecting child data when parent nodeInfo is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNgTwo, GetPerformanceCheckData005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a parent without nodeInfo and a child with nodeInfo
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+    parent->nodeInfo_.reset();
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    child->SetBuildByJs(true);
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2. collect performance check data from the parent
+     * @tc.expected: skip the parent and continue collecting the child
+     */
+    PerformanceCheckNodeMap nodeMap;
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+
+    EXPECT_EQ(nodeMap.count(parentId), 0);
+    ASSERT_EQ(nodeMap.count(childId), 1);
+    EXPECT_EQ(nodeMap.at(childId).nodeTag, "child");
+}
+
+/**
  * @tc.name: CollectCleanedChildren
  * @tc.desc: Test ui node method CollectCleanedChildren
  * @tc.type: FUNC
@@ -1196,6 +1228,8 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: step2. create FrameNode with child
@@ -1210,6 +1244,8 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
     const RefPtr<FrameNode> testNode5 =
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+    testNode1->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    testNode2->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
 
     /**
      * @tc.steps: step3. add child
@@ -1233,6 +1269,7 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
     /**
      * @tc.steps: step5. revert to the origin API.
      */
+    pipeline->SetApiTargetVersion(originApiVersion);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 
@@ -1299,6 +1336,8 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: step2. create FrameNode with child
@@ -1313,6 +1352,8 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
     const RefPtr<FrameNode> testNode5 =
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+    testNode1->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    testNode2->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
 
     /**
      * @tc.steps: step3. add child
@@ -1335,6 +1376,7 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
     /**
      * @tc.steps: step5. revert to the origin API.
      */
+    pipeline->SetApiTargetVersion(originApiVersion);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 
@@ -1503,6 +1545,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo075, TestSize.Level1)
      * @tc.steps: step2. verify nodeId string matching and invalid input branch
      * @tc.expected: node id string finds target frame node; empty id returns nullptr
      */
+    targetFrameNode->UpdateInspectorId(std::to_string(targetFrameNode->GetId()));
     auto byNodeId = root->GetFrameNodeByIdInSubTree(std::to_string(targetFrameNode->GetId()));
     ASSERT_NE(byNodeId, nullptr);
     EXPECT_EQ(byNodeId->GetId(), targetFrameNode->GetId());

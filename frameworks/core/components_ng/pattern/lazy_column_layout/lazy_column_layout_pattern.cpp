@@ -51,6 +51,11 @@ StickyStyle LazyColumnLayoutPattern::GetStickyStyle() const
     return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
 }
 
+bool LazyColumnLayoutPattern::HasStickyHeader() const
+{
+    return GetHeaderNode() && HeaderFooterUtils::IsHeaderSticky(GetStickyStyle());
+}
+
 FocusPattern LazyColumnLayoutPattern::GetFocusPattern() const
 {
     return { FocusType::SCOPE, true };
@@ -142,7 +147,8 @@ void LazyColumnLayoutPattern::FireOnVisibleIndexesChange()
     if (hasVisibleIndexesFired_ && currentRange == lastVisibleIndexesRange_) {
         return;
     }
-    onVisibleIndexesChange_(currentRange.first, currentRange.second);
+    auto onVisibleIndexesChange = onVisibleIndexesChange_;
+    onVisibleIndexesChange(currentRange.first, currentRange.second);
     lastVisibleIndexesRange_ = currentRange;
     hasVisibleIndexesFired_ = true;
 }
@@ -302,11 +308,13 @@ void LazyColumnLayoutPattern::DumpAdvanceInfo()
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo();
+    DumpStickyHeaderHandoffInfo();
 }
 
 void LazyColumnLayoutPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo(json);
+    DumpStickyHeaderHandoffInfo(json);
 }
 } // namespace OHOS::Ace::NG

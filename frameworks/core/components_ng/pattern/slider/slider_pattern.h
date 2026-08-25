@@ -33,6 +33,10 @@ namespace OHOS::Ace {
 class AccessibilitySAObserverCallback;
 }
 
+namespace OHOS::Rosen {
+class BrightnessBlender;
+}
+
 namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
     DECLARE_ACE_TYPE(SliderPattern, Pattern);
@@ -441,6 +445,8 @@ private:
     void AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
         const RefPtr<RenderContext>& blurRC);
     void ApplyDragFrameNodeSystemMaterial();
+    void ApplyBlendMode(const RefPtr<FrameNode>& frameNode);
+    std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender();
     void ResetHostMaterialEffects();
     AnimationOption CreateDragAnimationOption() const;
     AnimationOption CreateLowGradeSpringOption() const;

@@ -30,12 +30,6 @@ namespace {
 
 class TestableLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(TestableLayoutProperty, LayoutProperty);
-
-public:
-    bool NeedReadFontScaleFromEnv() const override
-    {
-        return true;
-    }
 };
 
 class TestablePattern : public Pattern {

@@ -25,6 +25,7 @@ struct ArkUI_LightEffectOptions {
 struct ArkUI_ImmersiveMaterial {
     ArkUI_ImmersiveStyle style = ARKUI_IMMERSIVE_STYLE_REGULAR;
     uint32_t materialColor = 0x00000000;
+    bool materialColorByUser = false;
     bool applyShadow = true;
     bool hasInteractive = false;
     bool interactive = false;

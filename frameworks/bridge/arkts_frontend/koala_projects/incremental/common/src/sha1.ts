@@ -118,7 +118,7 @@ export class SHA1Hash {
         }
 
         // no more bytes
-        if (offset === length) return this
+        if (offset === length) { return this }
 
         return this._uint8(new Uint8Array(buffer!), offset)
     }
@@ -303,7 +303,7 @@ type NN = (num: int32) => int32
 
 const W = new Int32Array(workWords)
 
-let sharedBuffer: ArrayBuffer = new ArrayBuffer(allocTotal)
+let sharedBuffer: ArrayBuffer
 let sharedOffset: int32 = 0
 
 const swapLE: NN = ((c:int32):int32 => ((((c << 24) & 0xff000000) | ((c << 8) & 0xff0000) | ((c >> 8) & 0xff00) | ((c >> 24) & 0xff)).toInt()))
@@ -322,8 +322,8 @@ function isBE(): boolean {
 
 
 function ft(s: int32, b: int32, c: int32, d: int32) {
-    if (s === 0) return (b & c) | ((~b) & d)
-    if (s === 2) return (b & c) | (b & d) | (c & d)
+    if (s === 0) { return (b & c) | ((~b) & d) }
+    if (s === 2) { return (b & c) | (b & d) | (c & d) }
     return b ^ c ^ d
 }
 

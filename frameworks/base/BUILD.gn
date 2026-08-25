@@ -49,6 +49,7 @@ template("ace_base_source_set") {
 
     # add base source file here
     sources = [
+      "external_instance_id_mapper.cpp",
       "geometry/animatable_dimension.cpp",
       "geometry/animatable_matrix4.cpp",
       "geometry/arc_round.cpp",
@@ -75,14 +76,11 @@ template("ace_base_source_set") {
       "log/ace_tracker.cpp",
       "log/dump_log.cpp",
       "log/dump_recorder.cpp",
-      "log/jank_frame_report.cpp",
       "log/log_wrapper.cpp",
       "memory/memory_monitor.cpp",
       "mousestyle/mouse_style.cpp",
-      "ressched/ressched_click_optimizer.cpp",
       "perfmonitor/perf_monitor.cpp",
-      "ressched/ressched_touch_optimizer.cpp",
-      "ressched/taihang_optimizer.cpp",
+      "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
       "subwindow/subwindow_manager_static.cpp",
       "thread/background_task_executor.cpp",
@@ -101,9 +99,13 @@ template("ace_base_source_set") {
       "utils/utf_helper.cpp",
       "utils/utils.cpp",
     ]
+
     if (!is_arkui_x) {
       sources += [
-        "ressched/ressched_report.cpp",
+        "ressched/ressched_click_optimizer.cpp",
+        "ressched/ressched_touch_optimizer.cpp",
+        "ressched/taihang_optimizer.cpp",
+        "log/jank_frame_report.cpp",
       ]
     }
 
@@ -218,6 +220,18 @@ foreach(item, ace_platforms) {
 
       if (defined(config.hichecker_exists) && config.hichecker_exists) {
         external_deps += [ "hichecker:libhichecker" ]
+      }
+
+      sources += [
+        "$ace_root/frameworks/base/thread/background_task_executor.cpp",
+        "$ace_root/adapter/ohos/osal/thread_priority.cpp",
+      ]
+      if (frame_trace_support) {
+        sources += [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp" ]
+        external_deps += [ "frame_aware_sched:frame_trace_intf" ]
+        defines += [ "FRAME_TRACE_ENABLE" ]
+      } else {
+        sources += [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp" ]
       }
     }
   }

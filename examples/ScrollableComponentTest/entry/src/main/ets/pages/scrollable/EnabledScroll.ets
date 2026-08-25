@@ -77,7 +77,7 @@ struct EnabledScroll {
                     .textAlign(TextAlign.Center)
                     .margin({ top: 10 })
                     .onClick(() => {
-                      promptAction.showToast({
+                      this.getUIContext().getPromptAction().showToast({
                         message: '点击内部Item：' + item // 测试点：抛滑内部
                       })
                     })

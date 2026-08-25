@@ -1120,9 +1120,13 @@ void SetToggleBackgroundColorForCustom(ArkUINodeHandle node, const Color& color)
 
 void SetToggleBackgroundColorWithFlagForCustom(ArkUINodeHandle node, const Color& color, bool flag)
 {
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    ToggleButtonModelNG::SetBackgroundColor(frameNode, color, flag);
+    if (node) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        ToggleButtonModelNG::SetBackgroundColor(frameNode, color, flag);
+    } else {
+        ToggleButtonModelNG::SetBackgroundColor(color, flag);
+    }
 }
 
 void SetButtonBorderRadiusForCustom(ArkUINodeHandle node, const std::optional<Dimension>& topLeft,
@@ -1281,6 +1285,7 @@ void UpdateButtonStyleToLayoutPropForCustom(ArkUINodeHandle node, ButtonStyleMod
     auto layoutProperty = GetButtonLayoutProperty(node);
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateButtonStyle(buttonStyle);
+    layoutProperty->UpdateButtonStyleSetByUser(true);
 }
 
 void UpdateButtonRoleToLayoutPropForCustom(ArkUINodeHandle node, ButtonRole buttonRole)

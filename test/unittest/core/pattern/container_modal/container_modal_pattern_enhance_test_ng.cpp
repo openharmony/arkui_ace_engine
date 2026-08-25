@@ -562,6 +562,59 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest021
 }
 
 /**
+ * @tc.name: UpdateTitleInTargetPos_ShowInterruptsHiding
+ * @tc.desc: Test that a show request interrupts a pending floating title hide request.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, UpdateTitleInTargetPos_ShowInterruptsHiding, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto column =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto floatingTitleRow =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto controlButtonsRow =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerModalNode->AddChild(column);
+    containerModalNode->AddChild(floatingTitleRow);
+    containerModalNode->AddChild(controlButtonsRow);
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    containerModalNode->AttachContext(AceType::RawPtr(pipeline));
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    ASSERT_NE(containerPattern, nullptr);
+    containerPattern->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+
+    auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
+    auto controlButtonsLayoutProperty = controlButtonsRow->GetLayoutProperty();
+    ASSERT_NE(floatingLayoutProperty, nullptr);
+    ASSERT_NE(controlButtonsLayoutProperty, nullptr);
+    floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    controlButtonsLayoutProperty->UpdateVisibility(VisibleType::GONE);
+
+    // AnimationUtils can synchronously run the finish callback in unit-test backends. Construct the state left by
+    // a started, but not yet completed, hide animation so this test is independent of that scheduling detail.
+    containerPattern->isFloatingTitleHiding_ = true;
+    containerPattern->hasControlButtonVisibleBeforeAnim_ = true;
+    containerPattern->controlButtonVisibleBeforeAnim_ = VisibleType::GONE;
+    containerPattern->floatingTitleAnimationToken_ = 1;
+    EXPECT_TRUE(containerPattern->isFloatingTitleHiding_);
+    EXPECT_TRUE(containerPattern->hasControlButtonVisibleBeforeAnim_);
+    EXPECT_EQ(containerPattern->controlButtonVisibleBeforeAnim_, VisibleType::GONE);
+    const auto hideAnimationToken = containerPattern->floatingTitleAnimationToken_;
+
+    // The simulated hide completion has not run, so show must take the interruption path.
+    containerPattern->UpdateTitleInTargetPos(true, 100);
+    EXPECT_FALSE(containerPattern->isFloatingTitleHiding_);
+    EXPECT_EQ(containerPattern->floatingTitleAnimationToken_, hideAnimationToken + 1);
+    EXPECT_EQ(floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE), VisibleType::VISIBLE);
+    EXPECT_EQ(controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::GONE), VisibleType::VISIBLE);
+    EXPECT_EQ(containerPattern->controlButtonVisibleBeforeAnim_, VisibleType::GONE);
+}
+
+/**
  * @tc.name: ContainerModalPatternEnhanceTest022
  * @tc.desc: Test GetContainerModalComponentRect
  * @tc.type: FUNC

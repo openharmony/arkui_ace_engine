@@ -60,6 +60,11 @@ public:                                                                     \
         propNeedReCreateParagraph_ = true;                                  \
     }
 
+#define ACE_CLONE_TEXT_OPTIONAL_PROPERTY(name) \
+    if (prop##name##_.has_value()) {          \
+        value->prop##name##_ = Clone##name(); \
+    }
+
 class InspectorFilter;
 
 struct TextMarqueeOptions {
@@ -81,11 +86,6 @@ public:
     TextLayoutProperty() = default;
 
     ~TextLayoutProperty() override = default;
-
-    bool NeedReadFontScaleFromEnv() const override
-    {
-        return true;
-    }
 
     RefPtr<LayoutProperty> Clone() const override
     {
@@ -111,6 +111,26 @@ public:
         ResetTextColorFlagByUser();
         ResetClipEdge();
         ResetIncrementalUpdatePolicy();
+        ResetFontForegroudGradiantColor();
+        ResetSelectedDragPreviewStyle();
+        ResetEnableAutoSpacing();
+        ResetColorShaderStyle();
+        ResetTextEffectStrategy();
+        ResetMinLines();
+        ResetTextFlipDirection();
+        ResetTextFlipEnableBlur();
+        ResetLineHeightMultiply();
+        ResetMinimumLineHeight();
+        ResetMaximumLineHeight();
+        ResetIncludeFontPadding();
+        ResetFallbackLineSpacing();
+        ResetCopyOption();
+        ResetTextSelectableMode();
+        ResetIsAnimationNeeded();
+        ResetIsTextMaxlinesFirst();
+        ResetEnableSmallLanguageTruncation();
+        ResetEnablePunctuationOverflowOptimize();
+        ResetGradientShaderStyle();
         propNeedReCreateParagraph_ = true;
     }
 
@@ -337,7 +357,33 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(SelectedBackgroundColorFlagByUser);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(CopyOptionFlagByUser);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextColorFlagByUser);
         value->propClipEdge_ = CloneClipEdge();
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(FontForegroudGradiantColor);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(SelectedDragPreviewStyle);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(EnableAutoSpacing);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(ColorShaderStyle);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextEffectStrategy);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IncrementalUpdatePolicy);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(MinLines);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextFlipDirection);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextFlipEnableBlur);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(LineHeightMultiply);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(MinimumLineHeight);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(MaximumLineHeight);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IncludeFontPadding);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(FallbackLineSpacing);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(CopyOption);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(TextSelectableMode);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IsAnimationNeeded);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(IsTextMaxlinesFirst);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(EnableSmallLanguageTruncation);
+        ACE_CLONE_TEXT_OPTIONAL_PROPERTY(EnablePunctuationOverflowOptimize);
+        if (advancedTextLayoutProperty_) {
+            value->advancedTextLayoutProperty_ = advancedTextLayoutProperty_->Clone();
+        }
         value->propNeedReCreateParagraph_ = true;
     }
 

@@ -16,6 +16,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("lazy_for_each_syntax_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "lazy_for_each_model_test_ng.cpp",
     "lazy_for_each_syntax_test_ng.cpp",
@@ -27,6 +31,10 @@ ace_unittest("lazy_for_each_syntax_test_ng") {
 ace_unittest("lazy_for_each_builder_syntax_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "lazy_for_each_builder_syntax_test_ng.cpp",
     "lazy_for_each_builder_syntax_test_ng_2.cpp",
@@ -36,6 +44,10 @@ ace_unittest("lazy_for_each_builder_syntax_test_ng") {
 ace_unittest("for_each_syntax_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "for_each_syntax_test_ng.cpp",
     "for_each_test_ng_ai.cpp",
@@ -45,6 +57,10 @@ ace_unittest("for_each_syntax_test_ng") {
 ace_unittest("if_else_syntax_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "if_else_model_test_ng.cpp",
     "if_else_syntax_test_ng.cpp",
@@ -55,6 +71,10 @@ ace_unittest("if_else_syntax_test_ng") {
 ace_unittest("content_slot_syntax_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/node_content_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
@@ -65,10 +85,12 @@ ace_unittest("content_slot_syntax_test_ng") {
 ace_unittest("with_env_syntax_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/with_env_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/syntax/with_env_node.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/environment_manager.cpp",
     "with_env_syntax_test_ng.cpp",
   ]
 }
@@ -76,6 +98,10 @@ ace_unittest("with_env_syntax_test_ng") {
 ace_unittest("repeat_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/repeat_node.cpp",
@@ -87,6 +113,10 @@ ace_unittest("repeat_test_ng") {
 ace_unittest("repeat_virtual_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/repeat_node.cpp",
@@ -100,6 +130,10 @@ ace_unittest("repeat_virtual_test_ng") {
 ace_unittest("repeat_virtual_2_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "repeat_virtual_2_caches_test_ng.cpp",
     "repeat_virtual_2_model_test_ng.cpp",
@@ -112,15 +146,19 @@ ace_unittest("repeat_virtual_2_test_ng") {
 ace_unittest("syntax_arkoala_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [
     "arkoala_condition_scope_test_ng_ai.cpp",
     "arkoala_for_each_test_ng.cpp",
     "arkoala_for_each_test_ng_ai.cpp",
     "arkoala_if_else_test_ng.cpp",
     "arkoala_lazy_test_ng.cpp",
+    "arkoala_lazy_test_ng_advanced.cpp",
     "arkoala_lazy_test_ng_ai.cpp",
     "arkoala_lazy_two_test_ng.cpp",
-    "arkoala_lazy_test_ng_advanced.cpp",
     "arkoala_mixed_test_ng_ai.cpp",
   ]
 }
@@ -128,6 +166,9 @@ ace_unittest("syntax_arkoala_test_ng") {
 ace_unittest("parallelize_ui_adapter_node_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.cpp",
     "parallelize_ui_adapter_node_test_ng.cpp",

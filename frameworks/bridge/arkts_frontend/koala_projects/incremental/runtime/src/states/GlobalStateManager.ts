@@ -20,25 +20,32 @@ import { ArrayState, Equivalent, MutableState, StateManager, StateManagerLocal, 
  * @internal
  */
 export class GlobalStateManager {
+    private static sharedManager: StateManager | undefined = undefined
+
+    private static get current(): StateManager | undefined {
+        return StateManagerLocal.get() ?? GlobalStateManager.sharedManager
+    }
+
     /**
-     * Returns the state manager for the current worker.
-     * If it is undefined, it is automatically created.
+     * The current instance of a global state manager.
+     * Note that it will be recreated after reset.
      */
     static get instance(): StateManager {
-        let current = StateManagerLocal.get()
+        let current = GlobalStateManager.GetLocalManager()
         if (current === undefined) {
-            current = createStateManager()
-            StateManagerLocal.set(current)
+            const manager = createStateManager()
+            GlobalStateManager.SetLocalManager(manager)
+            return manager
         }
         return current
     }
 
     /**
-     * Resets the state manager for the current worker.
+     * Drops the current instance to recreate a global state manager.
      * @internal
      */
     static reset(): void {
-        StateManagerLocal.get()?.reset()
+        GlobalStateManager.current?.reset()
     }
 
     /**

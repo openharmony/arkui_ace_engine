@@ -75,9 +75,11 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
         auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
             ArkUIPerfMonitor::GetInstance().StartPerf();
+#ifndef CROSS_PLATFORM
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
             }
+#endif
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
@@ -100,10 +102,12 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
                     timeStampNanos, ts, refreshPeriod, frameBufferCount, deadline);
             }
             pipeline->OnIdle(deadline);
+#ifndef CROSS_PLATFORM
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
+#endif
             window->SetLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
@@ -206,7 +210,7 @@ void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate
     rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
-void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
     if (!rsWindow_) {
         return;
@@ -215,12 +219,14 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
         dvsyncOn_ = dvsyncSwitch;
         lastDVsyncInbihitPredictTs_ = 0;
     }
-    if (dvsyncSwitch) {
-        ACE_SCOPED_TRACE("enable dvsync");
-    } else {
-        ACE_SCOPED_TRACE("disable dvsync");
-    }
+    ACE_SCOPED_TRACE("SetUiDvsyncSwitch switch:%d fromWhom:%s", dvsyncSwitch,
+        fromWhom == FromWhom::API ? "API" : "INNER");
+#ifdef VIRTUAL_RS_WINDOW
     rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
+#else
+    auto externalFromWhom = fromWhom == FromWhom::API ? OHOS::FromWhom::API : OHOS::FromWhom::INNER;
+    rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch, externalFromWhom);
+#endif
 }
 
 bool RosenWindow::GetIsRequestFrame()
@@ -266,10 +272,10 @@ void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecut
 
 void RosenWindow::RequestFrame()
 {
-    // Hidden window skips vsync; forceVsync_ overrides for animations.
-    if (!forceVsync_ && !onShow_) {
+    if (!(forceVsync_ || onShow_ || HasBackgroundForceFlushQuota())) {
         return;
     }
+    bool wasForceVsync = forceVsync_;
     SetForceVsyncRequests(false);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
@@ -283,6 +289,9 @@ void RosenWindow::RequestFrame()
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
         PostVsyncTimeoutDFXTask(taskExecutor);
+        if (!wasForceVsync && !onShow_) {
+            ConsumeBackgroundForceFlushCount();
+        }
     }
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(
@@ -402,7 +411,9 @@ void RosenWindow::FlushTasks(std::function<void()> callback)
     } else {
         rsUIDirector_->SendMessages(callback);
     }
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().JsAnimationToRsRecord();
+#endif
 }
 
 void RosenWindow::FlushLayoutSize(int32_t width, int32_t height)

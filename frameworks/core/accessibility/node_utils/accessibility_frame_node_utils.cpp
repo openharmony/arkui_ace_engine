@@ -253,7 +253,7 @@ bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const Ref
     }
 
     auto listPattern = AceType::DynamicCast<NG::ListPattern>(parentPattern);
-    if (listPattern) {
+    if (listPattern && listPattern->GetScrollSnapAlign() == ScrollSnapAlign::CENTER) {
         listPattern->StartSnapAnimation(SnapAnimationOptions {});
     }
     return ret;

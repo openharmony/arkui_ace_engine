@@ -26,10 +26,25 @@
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_render_context_deferred.h"
 #include "core/components_ng/pattern/canvas/canvas_render_context_immediate.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
+bool RefreshPrevious(SizeF& previous, const SizeF& current)
+{
+    bool changed = current != previous;
+    previous = current;
+    return changed;
+}
+bool RefreshPrevious(OffsetF& previous, const OffsetF& current)
+{
+    bool changed = current != previous;
+    previous = current;
+    return changed;
+}
 }
 
 CanvasPattern::~CanvasPattern()
@@ -84,16 +99,16 @@ void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
 
 void CanvasPattern::FireOnContext2DAttach()
 {
-    if (onContext2DAttach_) {
-        onContext2DAttach_();
-    }
+    auto onContext2DAttach = onContext2DAttach_;
+    CHECK_NULL_VOID(onContext2DAttach);
+    onContext2DAttach();
 }
 
 void CanvasPattern::FireOnContext2DDetach()
 {
-    if (onContext2DDetach_) {
-        onContext2DDetach_();
-    }
+    auto onContext2DDetach = onContext2DDetach_;
+    CHECK_NULL_VOID(onContext2DDetach);
+    onContext2DDetach();
 }
 
 void CanvasPattern::OnAttachToFrameNode()
@@ -123,33 +138,41 @@ RefPtr<NodePaintMethod> CanvasPattern::CreateNodePaintMethod()
 bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDirtyLayoutWrapperSwap", GetId());
-    bool needReset = !(config.skipMeasure || dirty->SkipMeasureContent());
+    recordNeedReset_ = recordNeedReset_ || !(config.skipMeasure || dirty->SkipMeasureContent());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
-    context->AddAfterLayoutTask([weak = WeakClaim(this), config, needReset]() {
+    context->AddAfterLayoutTask([weak = WeakClaim(this), gen = ++onSizeChangedGen_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnSizeChanged(config, needReset);
+        if (gen != pattern->onSizeChangedGen_) {
+            return;
+        }
+        pattern->OnSizeChanged(pattern->recordNeedReset_);
+        pattern->recordNeedReset_ = false;
+        pattern->onSizeChangedGen_ = 0;
     });
     return true;
 }
 
-void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
+void CanvasPattern::OnSizeChanged(bool needReset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-    bool pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
-    lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
-    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+    SizeF lastDirtyPixelGridRoundSize = dirtyPixelGridRoundSize_;
+    bool pixelGridRoundSizeChange = RefreshPrevious(dirtyPixelGridRoundSize_, currentPixelGridRoundSize);
+    bool frameSizeChange = RefreshPrevious(dirtyFrameSize_, geometryNode->GetFrameSize());
+    bool contentSizeChange = RefreshPrevious(dirtyContentSize_, geometryNode->GetContentSize());
+    bool frameOffsetChange = RefreshPrevious(dirtyFrameOffset_, geometryNode->GetFrameOffset());
+    bool contentOffsetChange = RefreshPrevious(dirtyContentOffset_, geometryNode->GetContentOffset());
 
     // Canvas is first time onReady && Visibility is None
     if (!needReset && (currentPixelGridRoundSize == SizeF { 0, 0 }) &&
-        (lastDirtyPixelGridRoundSize_ == SizeF { -1, -1 })) {
+        (lastDirtyPixelGridRoundSize == SizeF { -1, -1 })) {
         return;
     }
     // Visibility is None
@@ -163,11 +186,10 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
         return;
     }
 
-    needReset = config.frameSizeChange || config.contentSizeChange;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
-        needReset = needReset && pixelGridRoundSizeChange;
+        needReset = pixelGridRoundSizeChange && (frameSizeChange || contentSizeChange);
     } else {
-        needReset = needReset || config.frameOffsetChange || config.contentOffsetChange;
+        needReset = frameSizeChange || contentSizeChange || frameOffsetChange || contentOffsetChange;
     }
 
     if (needReset) {
@@ -176,15 +198,30 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
             imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
         }
 #endif
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        CHECK_NULL_VOID(contentModifier_);
-        contentModifier_->SetNeedResetSurface();
-        contentModifier_->SetRenderContext(renderContext);
-        CHECK_NULL_VOID(paintMethod_);
-        paintMethod_->UpdateRecordingCanvas(currentPixelGridRoundSize.Width(), currentPixelGridRoundSize.Height());
-        FireReadyEvent();
+        ResetSurfaceAndFireReady(currentPixelGridRoundSize);
     }
+}
+
+void CanvasPattern::ResetSurfaceAndFireReady(const SizeF& canvasSize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(contentModifier_);
+    contentModifier_->SetRenderContext(renderContext);
+    bool hybridRenderEnabled = false;
+#ifdef ENABLE_ROSEN_BACKEND
+    hybridRenderEnabled = Rosen::RSUIDirector::GetHybridRenderCanvasEnabled();
+#endif
+    if (hybridRenderEnabled) {
+        contentModifier_->ResetSurface(static_cast<int>(canvasSize.Width()), static_cast<int>(canvasSize.Height()));
+    } else {
+        contentModifier_->SetNeedResetSurface();
+    }
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->UpdateRecordingCanvas(canvasSize.Width(), canvasSize.Height());
+    FireReadyEvent();
 }
 
 void CanvasPattern::FireReadyEvent() const
@@ -535,8 +572,20 @@ void CanvasPattern::NotifyColorHDRColorHeadRoom(const Color& color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto headRoomColor = color.GetHeadRoomColor();
-    renderContext->SetHDRColorHeadRoom(
-        headRoomColor.has_value() ? headRoomColor.value().headRoom : DEFAULT_SDR_HEADROOM);
+    if (!headRoomColor.has_value()) {
+        if (lastHdrColorHeadRoom_.has_value() &&
+            !NearEqual(lastHdrColorHeadRoom_.value(), DEFAULT_SDR_HEADROOM)) {
+            lastHdrColorHeadRoom_ = DEFAULT_SDR_HEADROOM;
+            renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+        }
+        return;
+    }
+    float headRoom = headRoomColor.value().headRoom;
+    if (lastHdrColorHeadRoom_.has_value() && NearEqual(lastHdrColorHeadRoom_.value(), headRoom)) {
+        return;
+    }
+    lastHdrColorHeadRoom_ = headRoom;
+    renderContext->SetHDRColorHeadRoom(headRoom);
 }
 
 void CanvasPattern::UpdateStrokeColor(const Color& color)
@@ -562,11 +611,19 @@ void CanvasPattern::NotifyGradientHDRColorHeadRoom(const std::shared_ptr<Ace::Gr
             maxHeadRoom = std::max(maxHeadRoom, headRoomColor.value().headRoom);
         }
     }
-    if (hasHdrColor) {
-        renderContext->SetHDRColorHeadRoom(maxHeadRoom);
+    if (!hasHdrColor) {
+        if (lastHdrColorHeadRoom_.has_value() &&
+            !NearEqual(lastHdrColorHeadRoom_.value(), DEFAULT_SDR_HEADROOM)) {
+            lastHdrColorHeadRoom_ = DEFAULT_SDR_HEADROOM;
+            renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+        }
         return;
     }
-    renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+    if (lastHdrColorHeadRoom_.has_value() && NearEqual(lastHdrColorHeadRoom_.value(), maxHeadRoom)) {
+        return;
+    }
+    lastHdrColorHeadRoom_ = maxHeadRoom;
+    renderContext->SetHDRColorHeadRoom(maxHeadRoom);
 }
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)

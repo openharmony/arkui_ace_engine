@@ -16,7 +16,7 @@
 #include "core/components_ng/render/resource/ext_texture.h"
 
 #include "base/log/log.h"
-#include "base/subwindow/subwindow_manager.h"
+#include "base/external_instance_id_mapper.h"
 #include "base/utils/utils.h"
 #ifdef RS_ENABLE_VK
 #include "render_service_base/include/platform/common/rs_system_properties.h"
@@ -51,6 +51,20 @@ const char TEXTURE_IS_VIDEO[] = "textureIsVideo";
 const char USE_IMAGE_READER[] = "useImageReader";
 const char BOOL_TRUE[] = "true";
 #endif
+
+static int32_t ResolveExternalToInstanceId(int32_t externalId)
+{
+    auto instanceId = ExternalInstanceIdMapper::GetInstance().GetInstanceIdByExternalResourceId(externalId);
+    if (instanceId >= 0) {
+        return instanceId;
+    }
+#if !defined(IOS_PLATFORM)
+    instanceId = ExternalInstanceIdMapper::GetInstance().GetInstanceId(static_cast<uint32_t>(externalId));
+    return (instanceId >= 0) ? instanceId : externalId;
+#else
+    return externalId;
+#endif
+}
 
 ExtTexture::~ExtTexture()
 {
@@ -152,10 +166,7 @@ void ExtTexture::OnRefresh(const std::string& param)
     instanceId_ = GetIntParam(param, INSTANCE_ID);
     textureId_ = GetIntParam(param, TEXTURE_ID);
     if (onTextureRefresh_) {
-        int32_t containerId = SubwindowManager::GetInstance()->GetContainerId(
-            static_cast<uint32_t>(instanceId_));
-        int32_t resolvedInstanceId = (containerId >= 0) ? containerId : instanceId_;
-        onTextureRefresh_(resolvedInstanceId, textureId_);
+        onTextureRefresh_(ResolveExternalToInstanceId(instanceId_), textureId_);
     }
 }
 

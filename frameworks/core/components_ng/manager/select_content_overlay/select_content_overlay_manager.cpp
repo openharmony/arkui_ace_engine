@@ -31,6 +31,7 @@
 #include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -74,6 +75,24 @@ RefPtr<UINode> FindAccessibleFocusNode(const RefPtr<UINode>& node)
     }
     CHECK_NULL_RETURN(child, nullptr);
     return FindAccessibleFocusNode(child);
+}
+
+bool IsMenuAccessibilityFocused(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (frameNode) {
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty && accessibilityProperty->GetAccessibilityFocusState()) {
+            return true;
+        }
+    }
+    for (const auto& child : node->GetChildren()) {
+        if (IsMenuAccessibilityFocused(child)) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace
 
@@ -813,7 +832,7 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
     auto owner = selectOverlayHolder_->GetOwner();
-    if (owner && IsMenuShow()) {
+    if (owner && IsMenuShow() && IsMenuAccessibilityFocused(AceType::DynamicCast<UINode>(menuNode))) {
         auto ownerTag = owner->GetTag();
         if (ownerTag != V2::RICH_EDITOR_ETS_TAG ||
             (reason != CloseReason::CLOSE_REASON_SELECT_ALL && reason != CloseReason::CLOSE_REASON_BY_RECREATE)) {

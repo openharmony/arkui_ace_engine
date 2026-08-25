@@ -49,8 +49,9 @@ constexpr Dimension SUITABLEAGING_LEVEL_2_TEXT_FONT_SIZE = 28.0_vp;
 
 } // namespace
 
-SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc)
-    : tipFlag_(AceType::MakeRefPtr<PropertyBool>(false)),
+SliderTipModifier::SliderTipModifier(
+    const RefPtr<FrameNode>& host, std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc)
+    : host_(AceType::WeakClaim(AceType::RawPtr(host))), tipFlag_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_SIZE_MIN_SCALE)),
@@ -85,9 +86,11 @@ void SliderTipModifier::PaintTip(DrawingContext& context)
 
 void SliderTipModifier::PaintText(DrawingContext& context)
 {
-    auto pipeLine = PipelineBase::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeLine = host->GetContext();
     CHECK_NULL_VOID(pipeLine);
-    auto fontScale = pipeLine->GetFontScale();
+    auto fontScale = pipeLine->GetFontScaleFromEnv(host);
     SizeF textSize = { 0, 0 };
     if (paragraph_) {
         auto theme = pipeLine->GetTheme<SliderTheme>();
@@ -338,9 +341,11 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
     auto vertexPair = GetBubbleVertex();
     vertex_ = vertexPair.first;
     auto vertexOffsetFromBlock = vertexPair.second;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     if (axis_ == Axis::HORIZONTAL) {
         if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE)) {
             PaintHorizontalBubbleSuitableAging(vertexOffsetFromBlock, path);
@@ -381,8 +386,9 @@ void SliderTipModifier::onDraw(DrawingContext& context)
     }
 }
 
-void SliderTipModifier::SetBubbleDisplayAnimation(const RefPtr<FrameNode>& host)
+void SliderTipModifier::SetBubbleDisplayAnimation()
 {
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
     AnimationOption option = AnimationOption();
@@ -403,8 +409,9 @@ void SliderTipModifier::SetBubbleDisplayAnimation(const RefPtr<FrameNode>& host)
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void SliderTipModifier::SetBubbleDisappearAnimation(const RefPtr<FrameNode>& host)
+void SliderTipModifier::SetBubbleDisappearAnimation()
 {
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
     AnimationOption option = AnimationOption();
@@ -425,7 +432,7 @@ void SliderTipModifier::SetBubbleDisappearAnimation(const RefPtr<FrameNode>& hos
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void SliderTipModifier::SetTipFlag(bool flag, const RefPtr<FrameNode>& host)
+void SliderTipModifier::SetTipFlag(bool flag)
 {
     CHECK_NULL_VOID(tipFlag_);
     if (tipFlag_->Get() == flag) {
@@ -433,41 +440,45 @@ void SliderTipModifier::SetTipFlag(bool flag, const RefPtr<FrameNode>& host)
     }
     taskId_++;
     if (flag) {
-        SetBubbleDisplayAnimation(host);
+        SetBubbleDisplayAnimation();
     } else if (tipDelayTime_ > 0) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostDelayedTask(
-            [weak = WeakClaim(this), taskId = taskId_, weakHost = AceType::WeakClaim(AceType::RawPtr(host))]() {
+            [weak = WeakClaim(this), taskId = taskId_]() {
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
-                auto host = weakHost.Upgrade();
-                CHECK_NULL_VOID(host);
                 if (modifier->taskId_ != taskId) {
                     return;
                 }
-                modifier->SetBubbleDisappearAnimation(host);
+                modifier->SetBubbleDisappearAnimation();
+                auto host = modifier->GetHost();
+                CHECK_NULL_VOID(host);
                 auto pipeline = host->GetContextRefPtr();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->RequestFrame();
             },
             TaskExecutor::TaskType::UI, tipDelayTime_, "ArkUISliderSetBubbleDisappearAnimation");
     } else {
-        SetBubbleDisappearAnimation(host);
+        SetBubbleDisappearAnimation();
     }
     tipFlag_->Set(flag);
 }
 
 void SliderTipModifier::BuildParagraph()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontStyle = std::make_unique<NG::FontStyle>();
     CHECK_NULL_VOID(fontStyle);
     fontStyle->UpdateTextColor(textColor_.ChangeAlpha(std::round(textColor_.GetAlpha() * opacityScale_->Get())));
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE) && LessNotEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE)) {
         textFontSize_ = SUITABLEAGING_LEVEL_1_TEXT_FONT_SIZE;
     } else if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE)) {
@@ -498,9 +509,11 @@ void SliderTipModifier::CreateParagraphAndLayout(const TextStyle& textStyle, con
         parent->BuildColumnWidth();
     }
 
-    auto pipeLine = PipelineBase::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeLine = host->GetContext();
     CHECK_NULL_VOID(pipeLine);
-    auto fontScale = pipeLine->GetFontScale();
+    auto fontScale = pipeLine->GetFontScaleFromEnv(host);
     auto theme = pipeLine->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto width = static_cast<float>(theme->GetBubbleTextMax().ConvertToPx());
@@ -540,7 +553,9 @@ std::pair<OffsetF, float> SliderTipModifier::GetBubbleVertex()
 
 void SliderTipModifier::UpdateBubbleSize()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -557,7 +572,7 @@ void SliderTipModifier::UpdateBubbleSize()
         bubbleSizeWidth = static_cast<float>(theme->GetBubbleVerticalHeight().ConvertToPx());
     }
 
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE) && LessNotEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE)) {
         bubbleSizeHeight = static_cast<float>(theme->GetBubbleLevel1HorizontalWidth().ConvertToPx());
         bubbleSizeWidth = static_cast<float>(theme->GetBubbleLevel1HorizontalHeight().ConvertToPx());
@@ -579,9 +594,9 @@ void SliderTipModifier::UpdateBubbleSize()
 bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
 {
     auto contentSize = contentSize_->Get();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<SliderTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto theme = host->GetTheme<SliderTheme>(true);
     CHECK_NULL_RETURN(theme, false);
     auto vertexPair = GetBubbleVertex();
     auto vertex = vertexPair.first;

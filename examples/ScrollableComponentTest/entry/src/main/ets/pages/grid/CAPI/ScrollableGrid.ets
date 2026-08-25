@@ -18,7 +18,7 @@ import { NodeContent } from '@kit.ArkUI';
 
 @Entry
 @Component
-export struct ScrollableGrid {
+struct ScrollableGrid {
   private root = new NodeContent();
 
   build() {

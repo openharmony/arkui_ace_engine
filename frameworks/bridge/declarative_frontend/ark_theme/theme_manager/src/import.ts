@@ -50,6 +50,10 @@ declare interface ViewPuInternal {
 declare class ViewBuildNodeBase {
     static setArkThemeScopeManager(mgr: ArkThemeScopeManager): void;
 }
+declare class WeakRef<T extends Object> {
+    constructor(o: T);
+    deref(): T;
+}
 type PrebuildFunc = () => void;
 
 declare abstract class PUV2ViewBase extends ViewBuildNodeBase {

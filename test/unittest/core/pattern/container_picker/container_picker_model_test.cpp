@@ -3208,4 +3208,174 @@ HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight008, TestSize.Level1)
     EXPECT_NEAR(result.ConvertToVp(), PICKER_ITEM_HEIGHT.ConvertToVp(), FLOAT_COMPARE_EPSILON);
 }
 
+/**
+ * @tc.name: ResetIndicatorStyle001
+ * @tc.desc: Test ResetIndicatorStyle resets all layout properties and pattern after DIVIDER type set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ResetIndicatorStyle001, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+
+    PickerIndicatorStyle dividerStyle;
+    dividerStyle.type = INDICATOR_TYPE_DIVIDER;
+    dividerStyle.strokeWidth = TEST_STROKE_WIDTH;
+    dividerStyle.dividerColor = Color::RED;
+    dividerStyle.startMargin = TEST_START_MARGIN;
+    dividerStyle.endMargin = TEST_END_MARGIN;
+
+    ContainerPickerModel::SetIndicatorStyle(dividerStyle);
+    EXPECT_EQ(layoutProperty_->GetIndicatorType().value_or(-1), INDICATOR_TYPE_DIVIDER);
+    EXPECT_TRUE(layoutProperty_->HasIndicatorDividerWidth());
+    EXPECT_TRUE(layoutProperty_->HasIndicatorDividerColor());
+    EXPECT_TRUE(layoutProperty_->HasIndicatorStartMargin());
+    EXPECT_TRUE(layoutProperty_->HasIndicatorEndMargin());
+
+    ContainerPickerModel::ResetIndicatorStyle();
+
+    EXPECT_FALSE(layoutProperty_->HasIndicatorType());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorDividerWidth());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorDividerColor());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorStartMargin());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorEndMargin());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorBackgroundColor());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorBorderRadius());
+
+    auto retrievedStyle = pickerPattern_->GetIndicatorStyleVal();
+    EXPECT_EQ(retrievedStyle.type, INDICATOR_TYPE_BACKGROUND);
+    EXPECT_FALSE(retrievedStyle.strokeWidth.has_value());
+    EXPECT_FALSE(retrievedStyle.dividerColor.has_value());
+    EXPECT_FALSE(retrievedStyle.backgroundColor.has_value());
+    EXPECT_TRUE(retrievedStyle.isDefaultDividerWidth);
+    EXPECT_TRUE(retrievedStyle.isDefaultBackgroundColor);
+}
+
+/**
+ * @tc.name: ResetIndicatorStyle002
+ * @tc.desc: Test ResetIndicatorStyle resets all layout properties and pattern after BACKGROUND type set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ResetIndicatorStyle002, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+
+    PickerIndicatorStyle backgroundStyle;
+    backgroundStyle.type = INDICATOR_TYPE_BACKGROUND;
+    backgroundStyle.backgroundColor = Color::BLUE;
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(8.0_vp));
+    backgroundStyle.borderRadius = borderRadius;
+
+    ContainerPickerModel::SetIndicatorStyle(backgroundStyle);
+    EXPECT_EQ(layoutProperty_->GetIndicatorType().value_or(-1), INDICATOR_TYPE_BACKGROUND);
+    EXPECT_TRUE(layoutProperty_->HasIndicatorBackgroundColor());
+    EXPECT_TRUE(layoutProperty_->HasIndicatorBorderRadius());
+
+    ContainerPickerModel::ResetIndicatorStyle();
+
+    EXPECT_FALSE(layoutProperty_->HasIndicatorType());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorBackgroundColor());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorBorderRadius());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorDividerWidth());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorDividerColor());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorStartMargin());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorEndMargin());
+
+    auto retrievedStyle = pickerPattern_->GetIndicatorStyleVal();
+    EXPECT_EQ(retrievedStyle.type, INDICATOR_TYPE_BACKGROUND);
+    EXPECT_TRUE(retrievedStyle.isDefaultBackgroundColor);
+    EXPECT_TRUE(retrievedStyle.isDefaultBorderRadius);
+}
+
+/**
+ * @tc.name: ResetIndicatorStyle003
+ * @tc.desc: Test ResetIndicatorStyle with FrameNode parameter after DIVIDER type set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ResetIndicatorStyle003, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    PickerIndicatorStyle dividerStyle;
+    dividerStyle.type = INDICATOR_TYPE_DIVIDER;
+    dividerStyle.strokeWidth = TEST_STROKE_WIDTH;
+    dividerStyle.dividerColor = Color::RED;
+    dividerStyle.startMargin = TEST_START_MARGIN;
+    dividerStyle.endMargin = TEST_END_MARGIN;
+
+    ContainerPickerModel::SetIndicatorStyle(AceType::RawPtr(frameNode_), dividerStyle);
+    EXPECT_EQ(layoutProperty_->GetIndicatorType().value_or(-1), INDICATOR_TYPE_DIVIDER);
+    EXPECT_TRUE(layoutProperty_->HasIndicatorDividerWidth());
+
+    ContainerPickerModel::ResetIndicatorStyle(AceType::RawPtr(frameNode_));
+
+    EXPECT_FALSE(layoutProperty_->HasIndicatorType());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorDividerWidth());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorDividerColor());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorStartMargin());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorEndMargin());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorBackgroundColor());
+    EXPECT_FALSE(layoutProperty_->HasIndicatorBorderRadius());
+
+    auto retrievedStyle = pickerPattern_->GetIndicatorStyleVal();
+    EXPECT_EQ(retrievedStyle.type, INDICATOR_TYPE_BACKGROUND);
+    EXPECT_TRUE(retrievedStyle.isDefaultDividerWidth);
+}
+
+/**
+ * @tc.name: ResetIndicatorStyle004
+ * @tc.desc: Test ResetIndicatorStyle with null FrameNode does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ResetIndicatorStyle004, TestSize.Level1)
+{
+    ContainerPickerModel::ResetIndicatorStyle(static_cast<FrameNode*>(nullptr));
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ResetIndicatorStyle005
+ * @tc.desc: Test ResetIndicatorStyle when ViewStackProcessor has no main frame node does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ResetIndicatorStyle005, TestSize.Level1)
+{
+    ClearOldNodes();
+    ContainerPickerModel::ResetIndicatorStyle();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ResetIndicatorStyle006
+ * @tc.desc: Test ResetIndicatorStyle resets pattern isDefault flags to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ResetIndicatorStyle006, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    style.strokeWidth = TEST_STROKE_WIDTH;
+    style.isDefaultDividerWidth = false;
+    style.dividerColor = Color::RED;
+    style.isDefaultDividerColor = false;
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    auto beforeStyle = pickerPattern_->GetIndicatorStyleVal();
+    EXPECT_FALSE(beforeStyle.isDefaultDividerWidth);
+    EXPECT_FALSE(beforeStyle.isDefaultDividerColor);
+
+    ContainerPickerModel::ResetIndicatorStyle();
+
+    auto afterStyle = pickerPattern_->GetIndicatorStyleVal();
+    EXPECT_TRUE(afterStyle.isDefaultDividerWidth);
+    EXPECT_TRUE(afterStyle.isDefaultDividerColor);
+    EXPECT_TRUE(afterStyle.isDefaultStartMargin);
+    EXPECT_TRUE(afterStyle.isDefaultEndMargin);
+    EXPECT_TRUE(afterStyle.isDefaultBackgroundColor);
+    EXPECT_TRUE(afterStyle.isDefaultBorderRadius);
+}
+
 } // namespace OHOS::Ace::NG

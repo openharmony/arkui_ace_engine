@@ -13,13 +13,21 @@
  * limitations under the License.
  */
 
+#include "base/utils/device_config.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+
 namespace OHOS::Ace::NG {
 void RichEditorBaseController::SetPattern(const WeakPtr<RichEditorPattern>& pattern)
 {
     pattern_ = pattern;
+}
+
+std::optional<float> RichEditorBaseController::GetEnvFontScale() const
+{
+    auto pattern = pattern_.Upgrade();
+    return pattern ? pattern->GetEnvFontScaleFromLayout() : std::nullopt;
 }
 
 void RichEditorBaseController::SetHost(const WeakPtr<FrameNode>& host)
@@ -146,5 +154,12 @@ const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, PreviewTextInfo());
     return richEditorPattern->GetPreviewTextInfo();
+}
+
+ColorMode RichEditorBaseController::GetColorMode() const
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, ColorMode::COLOR_MODE_UNDEFINED);
+    return richEditorPattern->GetColorMode();
 }
 } // namespace OHOS::Ace::NG

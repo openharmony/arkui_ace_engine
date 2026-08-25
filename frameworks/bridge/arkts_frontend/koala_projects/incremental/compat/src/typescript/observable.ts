@@ -265,7 +265,7 @@ function proxyObject(value: any, observable: ObservableHandler) {
     ObservableHandler.installOn(value, observable)
     return new Proxy(value, {
         get(target, property, receiver) {
-            if (property === OBSERVABLE_TARGET) return target
+            if (property === OBSERVABLE_TARGET) { return target }
             const value: any = Reflect.get(target, property, receiver)
             ObservableHandler.find(target)?.onAccess()
             return typeof value === 'function'
@@ -445,7 +445,7 @@ function proxyMapOrSet(value: any, observable: ObservableHandler) {
     ObservableHandler.installOn(value, observable)
     return new Proxy(value, {
         get(target, property, receiver) {
-            if (property === OBSERVABLE_TARGET) return target
+            if (property === OBSERVABLE_TARGET) { return target }
             if (property === 'size') {
                 ObservableHandler.find(target)?.onAccess()
                 return target.size

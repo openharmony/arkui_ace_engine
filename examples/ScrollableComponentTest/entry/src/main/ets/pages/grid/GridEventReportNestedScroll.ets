@@ -72,7 +72,7 @@ struct GridExample_nestedScroll {
                 .translate({ x: 0, y: 0 })
               }, (item: string) => item)
             }
-            .id('Grid')
+            .id('gridEventReportNestedGrid')
             .nestedScroll({
               scrollForward: NestedScrollMode.PARENT_FIRST,
               scrollBackward: NestedScrollMode.SELF_FIRST
@@ -129,7 +129,7 @@ struct GridExample_nestedScroll {
           .height('5%')
           .onClick(() => {
 
-            NodeIdUtils.getNodeInternalId(this.getUIContext(), 'Grid', 'text', 100)
+            NodeIdUtils.getNodeInternalId(this.getUIContext(), 'gridEventReportNestedGrid', 'text', 100)
           })
           .margin({ top: 360, left: 20 })
       }

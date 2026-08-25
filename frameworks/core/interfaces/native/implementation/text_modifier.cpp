@@ -497,7 +497,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
 void SetTailIndentsImpl(Ark_NativePointer node,
-                        const Opt_Union_LengthMetrics_Array_LengthMetrics* value)
+                        const Opt_Union_LengthMetricsProxy_Array_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -509,7 +509,7 @@ void SetTailIndentsImpl(Ark_NativePointer node,
     NG::TailIndents tailIndents;
     NG::TailIndentsArray indentsArray;
 
-    auto convertDimensionWithPrecision = [](const Ark_LengthMetrics& metrics) -> Dimension {
+    auto convertDimensionWithPrecision = [](const Ark_LengthMetricsProxy& metrics) -> Dimension {
         double doubleValue = static_cast<double>(metrics.value);
         auto unit = Converter::OptConvert<DimensionUnit>(metrics.unit)
             .value_or(DimensionUnit::VP);
@@ -877,7 +877,7 @@ void SetMinLinesImpl(Ark_NativePointer node,
     TextModelStatic::SetMinLines(frameNode, convValue);
 }
 void SetMinLineHeightImpl(Ark_NativePointer node,
-                          const Opt_LengthMetrics* value)
+                          const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -885,7 +885,7 @@ void SetMinLineHeightImpl(Ark_NativePointer node,
     TextModelStatic::SetMinimumLineHeight(frameNode, convValue);
 }
 void SetMaxLineHeightImpl(Ark_NativePointer node,
-                          const Opt_LengthMetrics* value)
+                          const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -996,7 +996,7 @@ void SetFontWeightImpl(Ark_NativePointer node,
     TextModelStatic::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
 }
 void SetLineSpacingImpl(Ark_NativePointer node,
-                        const Opt_LengthMetrics* value,
+                        const Opt_LengthMetricsProxy* value,
                         const Opt_LineSpacingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

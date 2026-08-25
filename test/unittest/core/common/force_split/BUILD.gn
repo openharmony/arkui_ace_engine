@@ -13,21 +13,23 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("force_split_utils_test") {
-  module_name = "NavigationSet-NavigationAndNavDestination"
-  type = "new"
-  sources = [ "force_split_utils_test.cpp" ]
+if (!is_host_product) {
+  ace_unittest("force_split_utils_test") {
+    module_name = "NavigationSet-NavigationAndNavDestination"
+    type = "new"
+    sources = [ "force_split_utils_test.cpp" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "force_split_test_min.cpp",
-      "force_split_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "force_split_test_min.cpp",
-      "force_split_test_core.cpp",
-    ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "force_split_test_min.cpp",
+        "force_split_test_core.cpp",
+      ]
+    } else {
+      sources += [
+        "force_split_test_min.cpp",
+        "force_split_test_core.cpp",
+      ]
+    }
   }
 }

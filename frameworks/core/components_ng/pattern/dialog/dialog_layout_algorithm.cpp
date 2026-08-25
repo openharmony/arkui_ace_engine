@@ -25,12 +25,15 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/container_window_manager.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,6 +47,7 @@ constexpr double DIALOG_VIEWPORT_HEIGHT_RATIO = 0.9;
 constexpr Dimension DIALOG_MIN_HEIGHT = 70.0_vp;
 constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
+constexpr Dimension INNER_SCROLL_MIN_HEIGHT = 100.0_vp;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
 constexpr Dimension SUBWINDOW_DIALOG_DEFAULT_WIDTH = 400.0_vp;
 constexpr Dimension AVOID_LIMIT_PADDING = 8.0_vp;
@@ -55,8 +59,9 @@ constexpr Dimension SCROLL_MIN_HEIGHT_SUITOLD = 100.0_vp;
 constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t ROW_CHILD_INDEX = 0;
-constexpr int32_t ONE_PX = 1;
+constexpr double ONE_PX = 1.0;
 constexpr char LIST_ETS_TAG[] = "List";
+constexpr char SCROLL_ETS_TAG[] = "Scroll";
 constexpr char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 } // namespace
 
@@ -188,7 +193,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             std::min(childLayoutConstraint.percentReference.Height(), maxHeightWithoutFloatButton));
     }
 
-    if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    if (NeedAdaptToAgingWidth(hostNode)) {
         float widthRatio = needAdaptForceSplitMode_ ?
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() * forceSplitRatio_) :
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
@@ -197,6 +202,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             childLayoutConstraint.percentReference.SetWidth(widthRatio);
         }
     }
+    PreMeasureForFixedStyleDialog(hostNode, childLayoutConstraint, child);
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
     if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
@@ -282,30 +288,9 @@ void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayou
     if (NonNegative(dialogWidth.Value())) {
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
     }
-    UpdateDistortionNodeSize(childNode->GetParentFrameNode(), dialogWidth, dialogHeight);
     childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(
         dialogWidth.ConvertToPxWithSize(childLayoutConstraint.maxSize.Width()),
         dialogHeight.ConvertToPxWithSize(childLayoutConstraint.maxSize.Height())));
-}
-
-void DialogLayoutAlgorithm::UpdateDistortionNodeSize(
-    const RefPtr<FrameNode>& hostNode, const Dimension& dialogWidth, const Dimension& dialogHeight)
-{
-    CHECK_NULL_VOID(hostNode);
-    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
-    CHECK_NULL_VOID(dialogPattern && dialogPattern->GetHasExtraNodeForDistortion());
-    auto contentColumn = hostNode->GetFirstChild();
-    CHECK_NULL_VOID(contentColumn);
-    auto distortionColumn = AceType::DynamicCast<FrameNode>(contentColumn->GetFirstChild());
-    CHECK_NULL_VOID(distortionColumn);
-    auto distortionNodeLayoutProperty = distortionColumn->GetLayoutProperty();
-    CHECK_NULL_VOID(distortionNodeLayoutProperty);
-    if (NonNegative(dialogHeight.Value())) {
-        distortionNodeLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
-    }
-    if (NonNegative(dialogWidth.Value())) {
-        distortionNodeLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
-    }
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, bool isTitleCenter)
@@ -316,20 +301,17 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, 
     float restWidth = 0.0f;
     RefPtr<LayoutWrapper> scroll;
     RefPtr<LayoutWrapper> list;
-    auto child = layoutWrapper->GetAllChildrenWithBuild().front();
 
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
-    if (dialogPattern->GetHasExtraNodeForDistortion()) {
-        child = child->GetAllChildrenWithBuild().front();
-    }
+    auto child = dialogPattern->GetContentColumn();
     CHECK_NULL_VOID(child);
     restWidth = child->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Width();
     restHeight = child->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Height();
     for (const auto& grandson : child->GetAllChildrenWithBuild()) {
-        if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
+        if (grandson->GetHostTag() == SCROLL_ETS_TAG) {
             scroll = grandson;
             scrollHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
         } else if (grandson->GetHostTag() == LIST_ETS_TAG) {
@@ -363,6 +345,35 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, 
                 CreateDialogChildConstraint(layoutWrapper, std::min(restHeight, listHeight), restWidth);
             list->Measure(childConstraint);
         }
+    }
+    UpdateInnerScrollAndListMaxHeight(scroll, list, scrollHeight, listHeight, restHeight);
+}
+
+void DialogLayoutAlgorithm::UpdateInnerScrollAndListMaxHeight(const RefPtr<LayoutWrapper>& scroll,
+    const RefPtr<LayoutWrapper>& list, float scrollHeight, float listHeight, float restHeight)
+{
+    // When both scroll and list exist, set their max heights independently
+    if (scroll && list) {
+        auto scrollLayoutProperty = scroll->GetLayoutProperty();
+        CHECK_NULL_VOID(scrollLayoutProperty);
+        scrollLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
+        auto listLayoutProperty = list->GetLayoutProperty();
+        CHECK_NULL_VOID(listLayoutProperty);
+        listLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, CalcLength(listHeight)));
+        return;
+    }
+    // When only one of them exists, limit its max height to the remaining space
+    if (scroll) {
+        auto scrollLayoutProperty = scroll->GetLayoutProperty();
+        CHECK_NULL_VOID(scrollLayoutProperty);
+        scrollLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(std::nullopt, CalcLength(std::min(restHeight, scrollHeight))));
+    }
+    if (list) {
+        auto listLayoutProperty = list->GetLayoutProperty();
+        CHECK_NULL_VOID(listLayoutProperty);
+        listLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(std::nullopt, CalcLength(std::min(restHeight, listHeight))));
     }
 }
 
@@ -531,14 +542,12 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, height);
     }
-    if (isSuitableForElderly_) {
-        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-            innerLayout.minSize = SizeF(width, 0.0);
-            float widthRatio = needAdaptForceSplitMode_ ?
-                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
-                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
-            innerLayout.maxSize.SetWidth(widthRatio);
-        }
+    if (NeedAdaptToAgingWidth(dialogProp->GetHost())) {
+        innerLayout.minSize = SizeF(width, 0.0);
+        float widthRatio = needAdaptForceSplitMode_ ?
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+        innerLayout.maxSize.SetWidth(widthRatio);
     }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
@@ -612,11 +621,9 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
         innerLayout.minSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), 0.0);
         innerLayout.maxSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), maxHeight);
     }
-    if (isSuitableForElderly_) {
-        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-            innerLayout.minSize = SizeF(width, 0.0);
-            innerLayout.maxSize.SetWidth(pipelineContext->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
-        }
+    if (NeedAdaptToAgingWidth(dialogProp->GetHost())) {
+        innerLayout.minSize = SizeF(width, 0.0);
+        innerLayout.maxSize.SetWidth(pipelineContext->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
     }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
@@ -906,9 +913,6 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
     }
     if (!customSize_ && dialogProp->GetHeight().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
-    }
-    if (!customSize_) {
-        UpdateDistortionNodeSize(hostNode, dialogWidth, dialogHeight);
     }
     child->Measure(childConstraint);
     child->GetGeometryNode()->SetFrameSize(dialogChildSize_);
@@ -1335,6 +1339,23 @@ void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWr
     }
 }
 
+bool DialogLayoutAlgorithm::IsSplitModeEmbeddedDialog(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto parent = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(parent, false);
+    if (parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationPattern = parent->GetPattern<NavDestinationPatternBase>();
+        CHECK_NULL_RETURN(navDestinationPattern, false);
+        auto navigation = AceType::DynamicCast<FrameNode>(navDestinationPattern->GetNavigationNode());
+        CHECK_NULL_RETURN(navigation, false);
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(navigationPattern, false);
+        return navigationPattern->GetNavigationMode() == NavigationMode::SPLIT;
+    }
+    return false;
+}
+
 bool DialogLayoutAlgorithm::IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode)
 {
     auto parent = frameNode->GetParent();
@@ -1372,5 +1393,115 @@ RefPtr<PipelineContext> DialogLayoutAlgorithm::GetPipelineContext() const
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, PipelineContext::GetCurrentContextSafelyWithCheck());
     return context;
+}
+
+bool DialogLayoutAlgorithm::NeedAdaptToAgingWidth(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+           !IsSplitModeEmbeddedDialog(frameNode);
+}
+
+void DialogLayoutAlgorithm::PreMeasureForFixedStyleDialog(const RefPtr<FrameNode>& dialog,
+    const LayoutConstraintF childLayoutConstraint, RefPtr<LayoutWrapper> childLayoutWrapper)
+{
+    CHECK_NULL_VOID(dialog);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    auto contentColumn = dialogPattern->GetContentColumn();
+    CHECK_NULL_VOID(contentColumn);
+    auto contentLayoutProp = contentColumn->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProp);
+
+    // Reset scroll/list max size constraints before pre-measure
+    ResetConstraint(contentColumn);
+    CHECK_NULL_VOID(childLayoutWrapper);
+    auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    childLayoutProperty->UpdateLayoutConstraint(childLayoutConstraint);
+    childLayoutProperty->UpdateContentConstraint();
+    auto constraint = childLayoutProperty->GetContentLayoutConstraint();
+    if (!constraint.has_value()) {
+        return;
+    }
+
+    ApplyDialogSizeToContent(dialog, contentLayoutProp, constraint.value());
+    float contentHeightWithoutScroll = MeasureFixedContentHeight(contentColumn, constraint);
+    // Rebuild buttons based on available width (may switch horizontal/vertical layout)
+    dialogPattern->RebuildButtons(constraint.value());
+    UpdateContentMaxSizeForScroll(contentLayoutProp, constraint.value(), contentHeightWithoutScroll);
+    childLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+}
+
+void DialogLayoutAlgorithm::ApplyDialogSizeToContent(const RefPtr<FrameNode>& dialog,
+    const RefPtr<LayoutProperty>& contentLayoutProp, const LayoutConstraintF& constraint)
+{
+    CHECK_NULL_VOID(dialog);
+    CHECK_NULL_VOID(contentLayoutProp);
+    // Apply dialog width/height constraints to contentColumn
+    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogProp);
+    auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
+    auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
+    if (NonNegative(dialogHeight.Value())) {
+        contentLayoutProp->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(constraint.maxSize.Height())));
+        contentLayoutProp->UpdateCalcMaxSize(
+            CalcSize(std::nullopt, CalcLength(constraint.maxSize.Height())));
+    }
+    if (NonNegative(dialogWidth.Value())) {
+        contentLayoutProp->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(constraint.maxSize.Width()), std::nullopt));
+        contentLayoutProp->UpdateCalcMaxSize(
+            CalcSize(CalcLength(constraint.maxSize.Width()), std::nullopt));
+    }
+}
+
+float DialogLayoutAlgorithm::MeasureFixedContentHeight(const RefPtr<FrameNode>& contentColumn,
+    const std::optional<LayoutConstraintF>& constraint)
+{
+    CHECK_NULL_RETURN(contentColumn, 0.0f);
+    // Measure non-scrollable children to calculate total fixed content height
+    float contentHeightWithoutScroll = 0.0f;
+    for (const auto& child : contentColumn->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(frameNode);
+        if (frameNode->GetTag() != SCROLL_ETS_TAG && frameNode->GetTag() != LIST_ETS_TAG) {
+            frameNode->Measure(constraint);
+            auto childGeometryNode = frameNode->GetGeometryNode();
+            CHECK_NULL_CONTINUE(childGeometryNode);
+            contentHeightWithoutScroll += childGeometryNode->GetMarginFrameSize().Height();
+        }
+    }
+    return contentHeightWithoutScroll;
+}
+
+void DialogLayoutAlgorithm::UpdateContentMaxSizeForScroll(const RefPtr<LayoutProperty>& contentLayoutProp,
+    const LayoutConstraintF& constraint, float contentHeightWithoutScroll)
+{
+    CHECK_NULL_VOID(contentLayoutProp);
+    // If inner scroll minimum height exceeds remaining space, skip setting max size
+    float remainingHeightForScroll = constraint.maxSize.Height() - contentHeightWithoutScroll;
+    if (GreatNotEqual(remainingHeightForScroll, INNER_SCROLL_MIN_HEIGHT.ConvertToPx())) {
+        contentLayoutProp->UpdateCalcMaxSize(
+            CalcSize(CalcLength(constraint.maxSize.Width()), CalcLength(constraint.maxSize.Height())));
+    }
+}
+
+void DialogLayoutAlgorithm::ResetConstraint(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto contentLayoutProp = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProp);
+    contentLayoutProp->ResetCalcMaxSize();
+    // Reset max size constraint for scroll and list children
+    for (const auto& child : frameNode->GetAllChildrenWithBuild()) {
+        CHECK_NULL_CONTINUE(child);
+        if (child->GetHostTag() == SCROLL_ETS_TAG || child->GetHostTag() == LIST_ETS_TAG) {
+            auto childLayoutProperty = child->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(childLayoutProperty);
+            childLayoutProperty->ResetCalcMaxSize();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

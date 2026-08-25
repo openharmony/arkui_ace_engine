@@ -46,9 +46,7 @@
 #include "core/gestures/velocity.h"
 
 namespace OHOS::Ace {
-#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
-#endif
 class AccessibilityChildTreeCallback;
 enum class StatisticEventType;
 }
@@ -561,9 +559,7 @@ private:
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
-#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-#endif
     bool isEnableAnalyzer_ = false;
     uint32_t rotation_ = 0;
     bool hasLoadNativeDone_ = false;

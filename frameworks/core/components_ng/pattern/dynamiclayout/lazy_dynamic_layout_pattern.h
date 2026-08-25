@@ -64,6 +64,12 @@ public:
     }
 
 private:
+    bool IsLazyLayoutEnabled() const override
+    {
+        // LazyDynamicLayout consumes ViewPosReference in its custom lazy measure and active-range update paths.
+        return true;
+    }
+
     void FireOnVisibleIndexesChange(const std::vector<int32_t>& indexes);
 
     RefPtr<LazyCustomLayoutAlgorithmParam> customParams_;

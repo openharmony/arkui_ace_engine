@@ -1190,11 +1190,12 @@ ArkUINativeModuleValue DatePickerBridge::SetDatePickerOnChange(ArkUIRuntimeCallI
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const BaseEventInfo*)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                              const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         auto dateObj = CreateOnChange(vm, info);
         panda::Local<panda::JSValueRef> params[] = { dateObj };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1237,13 +1238,14 @@ ArkUINativeModuleValue DatePickerBridge::SetDatePickerOnDateChange(ArkUIRuntimeC
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const BaseEventInfo*)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                              const BaseEventInfo* info) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
         CHECK_NULL_VOID(eventInfo);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::DateRef> dateObj =
             panda::DateRef::New(vm, GetMSByDateToDouble(eventInfo->GetSelectedStr()));
         panda::Local<panda::JSValueRef> params[] = { dateObj };

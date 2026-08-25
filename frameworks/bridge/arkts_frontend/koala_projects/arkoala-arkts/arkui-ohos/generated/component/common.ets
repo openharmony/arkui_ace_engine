@@ -16,22 +16,21 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { hookBaseEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, hookKeyEventGetModifierKeyState, TouchEvent, DrawModifier, GestureModifier, GestureType, WrappedBuilder, CustomSpan, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
+import { hookBaseEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, LengthMetrics as arkui_component_units_LengthMetrics, hookKeyEventGetModifierKeyState, TouchEvent, DrawModifier, GestureModifier, GestureType, WrappedBuilder, CustomSpan, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
-import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityNextFocusParams, AccessibilityNextFocusParams_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer, AccessibilityCustomAction, AccessibilityCustomAction_serializer } from './units'
+import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityNextFocusParams, AccessibilityNextFocusParams_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer, AccessibilityCustomAction, AccessibilityCustomAction_serializer } from './units'
 import { KeyType, KeySource, Color as arkui_component_enums_Color, TouchType, InteractionHand, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, UIMaterialAnimationMode, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, GestureCollectIntervention, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, GestureShortcut, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, EdgeLightPosition } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { TouchEventProxy, TouchEventProxy_serializer, ColorMetricsExt, ColorMetricsExt_serializer, CustomNodeBuilderT } from './idlize'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, TouchEventProxy, TouchEventProxy_serializer, ColorMetricsExt, ColorMetricsExt_serializer, CustomNodeBuilderT } from './idlize'
 import { TextRange_serializer, TextRange } from './textCommon'
 import { StyledString, StyledStringInternal, StyledString_serializer, ImageAttachment, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, StyledStringMarshallingValue, UserDataSpan, StyledStringUnmarshallCallback } from './styledString'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 import { ResizableOptions_serializer, ResizableOptions } from './image'
 import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_HdrBrightnessBlender_serializer, uiEffect_BrightnessBlender_serializer } from './../framework/ohos.graphics.uiEffect'
@@ -3597,7 +3596,8 @@ export class ArkCommonMethodPeer extends PeerNode {
             } else if (valueTmpValue instanceof arkui_Graphics_LengthMetrics) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as arkui_Graphics_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValueForIdx1)
+                LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueForIdx1Transformed)
             } else if (valueTmpValue instanceof LocalizedPadding) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2 = valueTmpValue as LocalizedPadding
@@ -5952,7 +5952,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
@@ -6444,7 +6444,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (preview !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const previewTmpValue = preview!
-            if (previewTmpValue instanceof CustomBuilder) {
+            if (previewTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const previewTmpValueForIdx0 = previewTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(previewTmpValueForIdx0))
@@ -6479,7 +6479,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof CustomBuilder) {
+            } else if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
@@ -6641,7 +6641,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const contentTmpValueForIdx1 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx1))
@@ -6695,7 +6695,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const contentTmpValueForIdx1 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx1))
@@ -6760,7 +6760,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
@@ -6818,7 +6818,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContextMenuWithResponse1Attribute(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): void {
@@ -6826,7 +6826,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilderT<ResponseType>) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any, p0: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilderT<ResponseType>
                 const contentTmpValueForIdx0Transformed: CustomNodeBuilderT<ResponseType> = extractors.transform_CustomBuilderT_ResponseType_to_CustomNodeBuilderT_ResponseType(contentTmpValueForIdx0)
@@ -6858,7 +6858,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponseArray(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContextMenu1Attribute(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
@@ -6915,7 +6915,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
@@ -7845,7 +7845,8 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -8578,6 +8579,9 @@ export type TripleLengthDetents = [
     SheetSize | Length | undefined,
     SheetSize | Length | undefined
 ]
+export interface BlurSnapshotOptions {
+    enableFreeze?: boolean;
+}
 export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
@@ -8618,7 +8622,7 @@ export interface SheetOptions extends BindOptions {
     placement?: Placement;
     placementOnTarget?: boolean;
     edgeLightMode?: EdgeLightMode;
-    enableBlurSnapshot?: boolean;
+    blurSnapshot?: BlurSnapshotOptions;
 }
 export interface StateStyles {
     normal?: CustomStyles;
@@ -8902,11 +8906,16 @@ export interface DepthColorRGB {
     green: int32;
     blue: int32;
 }
+export enum SpatialPositionMode {
+    WORLD_XYZ = 0,
+    NDC_XY_WORLD_Z = 1
+}
 export interface SpatialPosition {
     leftTop: DepthVector3;
     rightTop: DepthVector3;
     leftBottom: DepthVector3;
     rightBottom: DepthVector3;
+    positionMode?: SpatialPositionMode;
 }
 export interface SpatialEffectParams {
     position: SpatialPosition;
@@ -9776,13 +9785,40 @@ export interface CommonMethod {
     }
     // instructive change start
     animationStart(value: AnimateParam | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.animationStart(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'animationStart' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method animationStart")
     }
     animationStop(value: AnimateParam | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.animationStop(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'animationStop' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method animationStop")
     }
     __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.__createOrSetAnimatableProperty(functionName, value, callback));
+            return;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method '__createOrSetAnimatableProperty' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method __createOrSetAnimatableProperty")
     }
     // instructive change end
@@ -12746,16 +12782,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         callback: (value: number | AnimatableArithmetic<T>) => void): void {
         if (this.getPeer()) {
             const peer = this.getPeer();
-            let isFirst = true;
             const newCallback = (value: number | AnimatableArithmetic<T>): void => {
-                if (isFirst) {
-                    isFirst = false;
+                const lastPeer = this.peer;
+                if (lastPeer) {
                     callback(value);
                     return;
                 }
                 this.setPeer(peer);
                 callback(value);
-                this.setPeer(undefined);
+                this.setPeer(lastPeer);
             }
             ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.getPeer().getPeerPtr(), functionName, value, newCallback);
         }
@@ -14943,6 +14978,30 @@ export class BlurOptions_serializer {
         return value
     }
 }
+export class BlurSnapshotOptions_serializer {
+    public static write(buffer: SerializerBase, value: BlurSnapshotOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEnableFreeze = value.enableFreeze
+        if (valueHolderForEnableFreeze !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableFreezeTmpValue = valueHolderForEnableFreeze!
+            valueSerializer.writeBoolean(valueHolderForEnableFreezeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): BlurSnapshotOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const enableFreezeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableFreezeTmpBuf: boolean | undefined = undefined
+        if ((enableFreezeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableFreezeTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableFreezeTmpResult: boolean | undefined = enableFreezeTmpBuf
+        let value: BlurSnapshotOptions = ({enableFreeze: enableFreezeTmpResult} as BlurSnapshotOptions)
+        return value
+    }
+}
 export class CaretOffset_serializer {
     public static write(buffer: SerializerBase, value: CaretOffset): void {
         let valueSerializer: SerializerBase = buffer
@@ -16898,6 +16957,14 @@ export class SpatialPosition_serializer {
         DepthVector3_serializer.write(valueSerializer, valueHolderForLeftBottom)
         const valueHolderForRightBottom = value.rightBottom
         DepthVector3_serializer.write(valueSerializer, valueHolderForRightBottom)
+        const valueHolderForPositionMode = value.positionMode
+        if (valueHolderForPositionMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionModeTmpValue = (valueHolderForPositionMode as SpatialPositionMode)
+            valueSerializer.writeInt32(valueHolderForPositionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): SpatialPosition {
         let valueDeserializer: DeserializerBase = buffer
@@ -16905,7 +16972,13 @@ export class SpatialPosition_serializer {
         const rightTopTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
         const leftBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
         const rightBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
-        let value: SpatialPosition = ({leftTop: leftTopTmpResult, rightTop: rightTopTmpResult, leftBottom: leftBottomTmpResult, rightBottom: rightBottomTmpResult} as SpatialPosition)
+        const positionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let positionModeTmpBuf: SpatialPositionMode | undefined = undefined
+        if ((positionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionModeTmpBuf = SpatialPositionMode.fromValue(valueDeserializer.readInt32())
+        }
+        const positionModeTmpResult: SpatialPositionMode | undefined = positionModeTmpBuf
+        let value: SpatialPosition = ({leftTop: leftTopTmpResult, rightTop: rightTopTmpResult, leftBottom: leftBottomTmpResult, rightBottom: rightBottomTmpResult, positionMode: positionModeTmpResult} as SpatialPosition)
         return value
     }
 }
@@ -18145,7 +18218,8 @@ export class FadingEdgeOptions_serializer {
         if (valueHolderForFadingEdgeLength !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFadingEdgeLengthTmpValue = valueHolderForFadingEdgeLength!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForFadingEdgeLengthTmpValue)
+            const valueHolderForFadingEdgeLengthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForFadingEdgeLengthTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForFadingEdgeLengthTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -18155,7 +18229,8 @@ export class FadingEdgeOptions_serializer {
         const fadingEdgeLengthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let fadingEdgeLengthTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((fadingEdgeLengthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fadingEdgeLengthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const fadingEdgeLengthTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            fadingEdgeLengthTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(fadingEdgeLengthTmpBufOptDeserialized)
         }
         const fadingEdgeLengthTmpResult: arkui_Graphics_LengthMetrics | undefined = fadingEdgeLengthTmpBuf
         let value: FadingEdgeOptions = ({fadingEdgeLength: fadingEdgeLengthTmpResult} as FadingEdgeOptions)
@@ -18924,7 +18999,8 @@ export class ResponseRegion_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue = valueHolderForX!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForXTmpValue)
+            const valueHolderForXTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForXTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForXTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -18932,7 +19008,8 @@ export class ResponseRegion_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue = valueHolderForY!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForYTmpValue)
+            const valueHolderForYTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForYTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForYTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -18943,7 +19020,8 @@ export class ResponseRegion_serializer {
             if (valueHolderForWidthTmpValue instanceof arkui_Graphics_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0 = valueHolderForWidthTmpValue as arkui_Graphics_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0)
+                const valueHolderForWidthTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForWidthTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0Transformed)
             } else if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1 = valueHolderForWidthTmpValue as string
@@ -18959,7 +19037,8 @@ export class ResponseRegion_serializer {
             if (valueHolderForHeightTmpValue instanceof arkui_Graphics_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0 = valueHolderForHeightTmpValue as arkui_Graphics_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx0)
+                const valueHolderForHeightTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForHeightTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx0Transformed)
             } else if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1 = valueHolderForHeightTmpValue as string
@@ -18980,13 +19059,15 @@ export class ResponseRegion_serializer {
         const xTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let xTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const xTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            xTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(xTmpBufOptDeserialized)
         }
         const xTmpResult: arkui_Graphics_LengthMetrics | undefined = xTmpBuf
         const yTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let yTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            yTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const yTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            yTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(yTmpBufOptDeserialized)
         }
         const yTmpResult: arkui_Graphics_LengthMetrics | undefined = yTmpBuf
         const widthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -18995,7 +19076,8 @@ export class ResponseRegion_serializer {
             const widthTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let widthTmpBufOpt: arkui_Graphics_LengthMetrics | string | undefined
             if (widthTmpBufOptUnionSelector == (0).toByte()) {
-                widthTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const widthTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                widthTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(widthTmpBufOptBufUDeserialized)
             } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
                 widthTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
@@ -19010,7 +19092,8 @@ export class ResponseRegion_serializer {
             const heightTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let heightTmpBufOpt: arkui_Graphics_LengthMetrics | string | undefined
             if (heightTmpBufOptUnionSelector == (0).toByte()) {
-                heightTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const heightTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                heightTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(heightTmpBufOptBufUDeserialized)
             } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
                 heightTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
@@ -21169,7 +21252,7 @@ export class ContextMenuOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewTmpValueForIdx0 = valueHolderForPreviewTmpValue as MenuPreviewMode
                 valueSerializer.writeInt32(valueHolderForPreviewTmpValueForIdx0.valueOf())
-            } else if (valueHolderForPreviewTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForPreviewTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewTmpValueForIdx1 = valueHolderForPreviewTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValueForIdx1))
@@ -21521,7 +21604,8 @@ export class ContextMenuOptions_serializer {
         if (valueHolderForMinKeyboardAvoidDistance !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinKeyboardAvoidDistanceTmpValue = valueHolderForMinKeyboardAvoidDistance!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValue)
+            const valueHolderForMinKeyboardAvoidDistanceTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForMinKeyboardAvoidDistanceTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -21529,7 +21613,8 @@ export class ContextMenuOptions_serializer {
         if (valueHolderForTargetSpace !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTargetSpaceTmpValue = valueHolderForTargetSpace!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTargetSpaceTmpValue)
+            const valueHolderForTargetSpaceTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForTargetSpaceTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForTargetSpaceTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -21553,7 +21638,8 @@ export class ContextMenuOptions_serializer {
         if (valueHolderForMaxHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxHeightTmpValue = valueHolderForMaxHeight!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMaxHeightTmpValue)
+            const valueHolderForMaxHeightTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForMaxHeightTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForMaxHeightTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -22030,13 +22116,15 @@ export class ContextMenuOptions_serializer {
         const minKeyboardAvoidDistanceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let minKeyboardAvoidDistanceTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((minKeyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            minKeyboardAvoidDistanceTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const minKeyboardAvoidDistanceTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            minKeyboardAvoidDistanceTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(minKeyboardAvoidDistanceTmpBufOptDeserialized)
         }
         const minKeyboardAvoidDistanceTmpResult: arkui_Graphics_LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
         const targetSpaceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let targetSpaceTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((targetSpaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            targetSpaceTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const targetSpaceTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            targetSpaceTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(targetSpaceTmpBufOptDeserialized)
         }
         const targetSpaceTmpResult: arkui_Graphics_LengthMetrics | undefined = targetSpaceTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -22054,7 +22142,8 @@ export class ContextMenuOptions_serializer {
         const maxHeightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let maxHeightTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((maxHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxHeightTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const maxHeightTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            maxHeightTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(maxHeightTmpBufOptDeserialized)
         }
         const maxHeightTmpResult: arkui_Graphics_LengthMetrics | undefined = maxHeightTmpBuf
         const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -22348,7 +22437,7 @@ export class CustomPopupOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0 = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
-            } else if (valueHolderForOnWillDismissTmpValue instanceof Callback<DismissPopupAction, void>) {
+            } else if (valueHolderForOnWillDismissTmpValue instanceof ((p0: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1 = valueHolderForOnWillDismissTmpValue as Callback<DismissPopupAction, void>
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
@@ -23074,7 +23163,7 @@ export class MenuOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewTmpValueForIdx0 = valueHolderForPreviewTmpValue as MenuPreviewMode
                 valueSerializer.writeInt32(valueHolderForPreviewTmpValueForIdx0.valueOf())
-            } else if (valueHolderForPreviewTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForPreviewTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewTmpValueForIdx1 = valueHolderForPreviewTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValueForIdx1))
@@ -23426,7 +23515,8 @@ export class MenuOptions_serializer {
         if (valueHolderForMinKeyboardAvoidDistance !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinKeyboardAvoidDistanceTmpValue = valueHolderForMinKeyboardAvoidDistance!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValue)
+            const valueHolderForMinKeyboardAvoidDistanceTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForMinKeyboardAvoidDistanceTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -23434,7 +23524,8 @@ export class MenuOptions_serializer {
         if (valueHolderForTargetSpace !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTargetSpaceTmpValue = valueHolderForTargetSpace!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTargetSpaceTmpValue)
+            const valueHolderForTargetSpaceTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForTargetSpaceTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForTargetSpaceTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -23458,7 +23549,8 @@ export class MenuOptions_serializer {
         if (valueHolderForMaxHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxHeightTmpValue = valueHolderForMaxHeight!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMaxHeightTmpValue)
+            const valueHolderForMaxHeightTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForMaxHeightTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForMaxHeightTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -23959,13 +24051,15 @@ export class MenuOptions_serializer {
         const minKeyboardAvoidDistanceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let minKeyboardAvoidDistanceTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((minKeyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            minKeyboardAvoidDistanceTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const minKeyboardAvoidDistanceTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            minKeyboardAvoidDistanceTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(minKeyboardAvoidDistanceTmpBufOptDeserialized)
         }
         const minKeyboardAvoidDistanceTmpResult: arkui_Graphics_LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
         const targetSpaceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let targetSpaceTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((targetSpaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            targetSpaceTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const targetSpaceTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            targetSpaceTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(targetSpaceTmpBufOptDeserialized)
         }
         const targetSpaceTmpResult: arkui_Graphics_LengthMetrics | undefined = targetSpaceTmpBuf
         const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -23983,7 +24077,8 @@ export class MenuOptions_serializer {
         const maxHeightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let maxHeightTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((maxHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxHeightTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const maxHeightTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            maxHeightTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(maxHeightTmpBufOptDeserialized)
         }
         const maxHeightTmpResult: arkui_Graphics_LengthMetrics | undefined = maxHeightTmpBuf
         const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -24688,7 +24783,7 @@ export class PopupCommonOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0 = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
-            } else if (valueHolderForOnWillDismissTmpValue instanceof Callback<DismissPopupAction, void>) {
+            } else if (valueHolderForOnWillDismissTmpValue instanceof ((p0: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1 = valueHolderForOnWillDismissTmpValue as Callback<DismissPopupAction, void>
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
@@ -25501,7 +25596,7 @@ export class SheetOptions_serializer {
         if (valueHolderForDetents !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDetentsTmpValue = valueHolderForDetents!
-            if ((valueHolderForDetentsTmpValue instanceof SingleLengthDetent) && ((valueHolderForDetentsTmpValue.length) == (1))) {
+            if ((valueHolderForDetentsTmpValue instanceof Tuple1) && ((valueHolderForDetentsTmpValue.length) == (1))) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDetentsTmpValueForIdx0 = valueHolderForDetentsTmpValue as SingleLengthDetent
                 const valueHolderForDetentsTmpValueForIdx0_0 = valueHolderForDetentsTmpValueForIdx0[0]
@@ -25526,7 +25621,7 @@ export class SheetOptions_serializer {
                         global_resource_Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2)
                     }
                 }
-            } else if ((valueHolderForDetentsTmpValue instanceof DoubleLengthDetents) && ((valueHolderForDetentsTmpValue.length) == (2))) {
+            } else if ((valueHolderForDetentsTmpValue instanceof Tuple2) && ((valueHolderForDetentsTmpValue.length) == (2))) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForDetentsTmpValueForIdx1 = valueHolderForDetentsTmpValue as DoubleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx1_0 = valueHolderForDetentsTmpValueForIdx1[0]
@@ -25579,7 +25674,7 @@ export class SheetOptions_serializer {
                 } else {
                     valueSerializer.writeInt8(RuntimeType.UNDEFINED)
                 }
-            } else if ((valueHolderForDetentsTmpValue instanceof TripleLengthDetents) && ((valueHolderForDetentsTmpValue.length) == (3))) {
+            } else if ((valueHolderForDetentsTmpValue instanceof Tuple3) && ((valueHolderForDetentsTmpValue.length) == (3))) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForDetentsTmpValueForIdx2 = valueHolderForDetentsTmpValue as TripleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx2_0 = valueHolderForDetentsTmpValueForIdx2[0]
@@ -25704,7 +25799,7 @@ export class SheetOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTitleTmpValueForIdx0 = valueHolderForTitleTmpValue as SheetTitleOptions
                 SheetTitleOptions_serializer.write(valueSerializer, valueHolderForTitleTmpValueForIdx0)
-            } else if (valueHolderForTitleTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForTitleTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTitleTmpValueForIdx1 = valueHolderForTitleTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForTitleTmpValueForIdx1))
@@ -25967,7 +26062,8 @@ export class SheetOptions_serializer {
             if (valueHolderForRadiusTmpValue instanceof arkui_Graphics_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRadiusTmpValueForIdx0 = valueHolderForRadiusTmpValue as arkui_Graphics_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx0)
+                const valueHolderForRadiusTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForRadiusTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx0Transformed)
             } else if (valueHolderForRadiusTmpValue instanceof BorderRadiuses) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRadiusTmpValueForIdx1 = valueHolderForRadiusTmpValue as BorderRadiuses
@@ -26040,11 +26136,11 @@ export class SheetOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForEnableBlurSnapshot = value.enableBlurSnapshot
-        if (valueHolderForEnableBlurSnapshot !== undefined) {
+        const valueHolderForBlurSnapshot = value.blurSnapshot
+        if (valueHolderForBlurSnapshot !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEnableBlurSnapshotTmpValue = valueHolderForEnableBlurSnapshot!
-            valueSerializer.writeBoolean(valueHolderForEnableBlurSnapshotTmpValue)
+            const valueHolderForBlurSnapshotTmpValue = valueHolderForBlurSnapshot!
+            BlurSnapshotOptions_serializer.write(valueSerializer, valueHolderForBlurSnapshotTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -26739,7 +26835,8 @@ export class SheetOptions_serializer {
             const radiusTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let radiusTmpBufOpt: arkui_Graphics_LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined
             if (radiusTmpBufOptUnionSelector == (0).toByte()) {
-                radiusTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const radiusTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                radiusTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(radiusTmpBufOptBufUDeserialized)
             } else if (radiusTmpBufOptUnionSelector == (1).toByte()) {
                 radiusTmpBufOpt = BorderRadiuses_serializer.read(valueDeserializer)
             } else if (radiusTmpBufOptUnionSelector == (2).toByte()) {
@@ -26800,13 +26897,13 @@ export class SheetOptions_serializer {
             edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
         }
         const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
-        const enableBlurSnapshotTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let enableBlurSnapshotTmpBuf: boolean | undefined = undefined
-        if ((enableBlurSnapshotTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            enableBlurSnapshotTmpBuf = valueDeserializer.readBoolean()
+        const blurSnapshotTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let blurSnapshotTmpBuf: BlurSnapshotOptions | undefined = undefined
+        if ((blurSnapshotTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            blurSnapshotTmpBuf = BlurSnapshotOptions_serializer.read(valueDeserializer)
         }
-        const enableBlurSnapshotTmpResult: boolean | undefined = enableBlurSnapshotTmpBuf
-        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult, edgeLightMode: edgeLightModeTmpResult, enableBlurSnapshot: enableBlurSnapshotTmpResult} as SheetOptions)
+        const blurSnapshotTmpResult: BlurSnapshotOptions | undefined = blurSnapshotTmpBuf
+        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult, edgeLightMode: edgeLightModeTmpResult, blurSnapshot: blurSnapshotTmpResult} as SheetOptions)
         return value
     }
 }
@@ -27095,7 +27192,7 @@ export class PopupOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0 = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
-            } else if (valueHolderForOnWillDismissTmpValue instanceof Callback<DismissPopupAction, void>) {
+            } else if (valueHolderForOnWillDismissTmpValue instanceof ((p0: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1 = valueHolderForOnWillDismissTmpValue as Callback<DismissPopupAction, void>
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)

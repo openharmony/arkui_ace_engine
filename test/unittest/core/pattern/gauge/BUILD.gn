@@ -13,23 +13,30 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("gauge_test_ng") {
-  type = "new"
-  module_name = "InfoShowSet-Gauge"
-  sources = [
-    "$ace_root/frameworks/core/common/font_loader.cpp",
-    "gauge_builder_test_ng.cpp",
-    "gauge_modifier_test_ng.cpp",
-    "gauge_pattern_test_ng.cpp",
-    "gauge_pattern_test_two_ng.cpp",
-    "gauge_test_ng.cpp",
-    "gauge_withtheme_test_ng.cpp",
-  ]
+test_sources = [
+  "$ace_root/frameworks/core/common/font_loader.cpp",
+  "gauge_builder_test_ng.cpp",
+  "gauge_modifier_test_ng.cpp",
+  "gauge_pattern_test_ng.cpp",
+  "gauge_pattern_test_two_ng.cpp",
+  "gauge_test_core.cpp",
+  "gauge_test_ng.cpp",
+  "gauge_withtheme_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "gauge_test_core.cpp" ]
-  } else {
-    sources += [ "gauge_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("gauge_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-Gauge"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("gauge_test_ng") {
+    type = "new"
+    module_name = "InfoShowSet-Gauge"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "gauge_test_core.cpp" ]
+    }
   }
 }

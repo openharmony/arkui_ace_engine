@@ -426,7 +426,7 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
     CHECK_NULL_VOID(textFieldPattern);
     if (textFieldPattern->GetScrollBarVisible() && textFieldPattern->IsTextArea()) {
         if (textFieldPattern->IsFreeScrollEnabled()) {
-            textFieldPattern->GetFreeScroller()->OnDrawScrollBar(context);
+            textFieldPattern->GetFreeScroller()->OnDrawScrollBar(context, Claim(this));
         } else {
             ScrollBarOverlayModifier::onDraw(context);
         }
@@ -444,18 +444,12 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
     canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<TextFieldTheme>();
 
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
 
-    float offsetX = isTextArea ? contentOffset_->Get().GetX() : textRect.GetX();
+    bool isNotAllowScrollX = isTextArea && !textFieldPattern->IsHorizontalScrollEnabled();
+    float offsetX = isNotAllowScrollX ? contentOffset_->Get().GetX() : textRect.GetX();
     float offsetY = isTextArea ? textRect.GetY() : contentOffset_->Get().GetY();
     auto previewTextRect = textFieldPattern->GetPreviewTextRects();
     if (previewTextRect.empty()) {
@@ -469,12 +463,11 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
     if (defaultStyle) {
         clipInnerRect = RSRect(paintOffset.GetX(), paintOffset.GetY(),
             paintOffset.GetX() + contentSize_->Get().Width() + textFieldPattern->GetInlinePadding(), clipRectHeight);
-        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     } else {
         clipInnerRect = RSRect(paintOffset.GetX(), 0.0f, paintOffset.GetX() + contentSize_->Get().Width(),
             textFieldPattern->GetFrameRect().Height());
-        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
 
     auto underlineWidth = textFieldPattern->GetPreviewUnderlineWidth();
     RSBrush brush;

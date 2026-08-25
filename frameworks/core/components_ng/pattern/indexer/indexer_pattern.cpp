@@ -1006,9 +1006,11 @@ void IndexerPattern::UpdateTextLayoutProperty(
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
+    if (index >= 0 && index < static_cast<int32_t>(arrayValue_.size())) {
+        auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
             StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
-    textLayoutProperty->UpdateContent(nodeStr);
+        textLayoutProperty->UpdateContent(nodeStr);
+    }
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     textLayoutProperty->UpdateMinFontScale(1.0f);

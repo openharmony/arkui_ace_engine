@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-
-import { ArkScrollable } from "./ArkScrollable";
 
 class ScrollNestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptions> {
   static identity: symbol = Symbol('nestedScroll');

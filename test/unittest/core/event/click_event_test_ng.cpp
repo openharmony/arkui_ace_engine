@@ -22,6 +22,7 @@
 #define private public
 #define protected public
 
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -363,6 +364,59 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest006, TestSize.Level1)
     EXPECT_NE(clickEventActuator.clickAfterEvents_, nullptr);
     clickEventActuator.ClearClickAfterEvent();
     EXPECT_EQ(clickEventActuator.clickAfterEvents_, nullptr);
+}
+
+/**
+ * @tc.name: TouchDownNotifiedToClickTest001
+ * @tc.desc: test IsTouchDownNotifiedToClick covers both branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, TouchDownNotifiedToClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub and ClickEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    clickEventActuator.AddClickEvent(clickEvent);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!pipeline->touchOptimizer_) {
+        pipeline->touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    }
+    const auto& touchOptimizer = pipeline->GetTouchOptimizer();
+    CHECK_NULL_VOID(touchOptimizer);
+
+    /**
+     * @tc.steps: step2. Test false branch: IsTouchDownNotifiedToClick() returns false
+     * @tc.expected: clickRecognizer_->SetShouldReportTouchDown(true) is called
+     */
+    touchOptimizer->touchDownNotifiedToClick_ = false;
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    EXPECT_TRUE(touchOptimizer->IsTouchDownNotifiedToClick());
+
+    /**
+     * @tc.steps: step3. Test true branch: IsTouchDownNotifiedToClick() returns true
+     * @tc.expected: clickRecognizer_->SetShouldReportTouchDown(true) is NOT called
+     */
+    touchOptimizer->touchDownNotifiedToClick_ = true;
+    clickEventActuator.clickRecognizer_->SetShouldReportTouchDown(false);
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    EXPECT_FALSE(clickEventActuator.clickRecognizer_->shouldReportTouchDown_);
+    touchOptimizer->touchDownNotifiedToClick_ = false;
 }
 
 /**

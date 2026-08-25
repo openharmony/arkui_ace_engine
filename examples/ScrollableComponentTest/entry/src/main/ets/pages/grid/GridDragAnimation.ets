@@ -185,12 +185,12 @@ struct GridItemExample {
             GestureGroup(GestureMode.Sequence,
               LongPressGesture({ repeat: true })
                 .onAction((event?: GestureEvent) => {
-                  animateTo({ curve: Curve.Friction, duration: 300 }, () => {
+                  this.getUIContext().animateTo({ curve: Curve.Friction, duration: 300 }, () => {
                     this.scaleItem = item
                   })
                 })
                 .onActionEnd(() => {
-                  animateTo({ curve: Curve.Friction, duration: 300 }, () => {
+                  this.getUIContext().animateTo({ curve: Curve.Friction, duration: 300 }, () => {
                     this.scaleItem = -1
                   })
                 }),
@@ -203,7 +203,7 @@ struct GridItemExample {
                 .onActionUpdate((event: GestureEvent) => {
                   this.offsetY = event.offsetY - this.dragRefOffsety
                   this.offsetX = event.offsetX - this.dragRefOffsetx
-                  animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+                  this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
                     let index = this.numbers.indexOf(this.dragItem)
                     if (this.offsetY >= this.FIX_VP_Y / 2 && (this.offsetX <= 44 && this.offsetX >= -44) &&
                       ![8, 9, 10].includes(index)) {
@@ -245,10 +245,10 @@ struct GridItemExample {
                   })
                 })
                 .onActionEnd(() => {
-                  animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+                  this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
                     this.dragItem = -1
                   })
-                  animateTo({
+                  this.getUIContext().animateTo({
                     curve: curves.interpolatingSpring(14, 1, 170, 17), delay: 150
                   }, () => {
                     this.scaleItem = -1
@@ -256,10 +256,10 @@ struct GridItemExample {
                 })
             )
               .onCancel(() => {
-                animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+                this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
                   this.dragItem = -1
                 })
-                animateTo({
+                this.getUIContext().animateTo({
                   curve: curves.interpolatingSpring(14, 1, 170, 17)
                 }, () => {
                   this.scaleItem = -1

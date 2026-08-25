@@ -24,7 +24,7 @@ interface FinalizationRegistry {
 
 interface FinalizationRegistryConstructor {
     readonly prototype: FinalizationRegistry;
-    new (callback: (value: any) => void): FinalizationRegistry
+    new (callback: (value: unknown) => void): FinalizationRegistry
 }
 
 declare const FinalizationRegistry: FinalizationRegistryConstructor

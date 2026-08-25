@@ -510,7 +510,7 @@ class JSTextPicker extends JSViewAbstract {
   }
 }
 
-class JSTextPickerDialog extends JSViewAbstract {
+class JSTextPickerDialog {
   static show(value: any): void {
     getUINativeModule().textPickerDialog.show(value);
   }

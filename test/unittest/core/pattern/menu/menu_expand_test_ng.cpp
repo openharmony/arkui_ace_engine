@@ -695,7 +695,7 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg014, TestSize.Level1)
     EXPECT_EQ(bottom, ZERO_FLOAT);
     safeAreamanager->keyboardHeightConsideringUIExtension_ = TWO_NUMBER;
     bottom = layoutAlgorithm->GetBottomBySafeAreaManager(safeAreamanager, property, menuPattern);
-    EXPECT_EQ(bottom, TWO_FLOAT);
+    EXPECT_EQ(bottom, ZERO_FLOAT);
     safeAreamanager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     safeAreamanager->keyboardInset_.end = TEN_NUMBER;
     safeAreamanager->keyboardInset_.start = FIVE_NUMBER;

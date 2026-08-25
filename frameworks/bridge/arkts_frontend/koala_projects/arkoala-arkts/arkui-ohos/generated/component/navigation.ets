@@ -51,11 +51,10 @@ import { NavDestinationContext, NavDestinationMode, NavDestinationContext_serial
 import { NavigationModifier } from './../NavigationModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { TextModifier_serializer } from './../framework/TextModifier'
 import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 // instructive change begin
-import { NavExtender } from './idlize'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, NavExtender } from './idlize'
 // instructive change end
 export interface NavigationTransitionProxy {
     from: NavContentInfo
@@ -721,6 +720,11 @@ export class NavPathStack implements MaterializedBase {
         this.setPathStack_serialize(pathStack_casted, animated_casted)
         return
     }
+    public preloadPath(info: NavPathInfo, options?: PreloadOptions): Promise<void> {
+        const info_casted = info as (NavPathInfo)
+        const options_casted = options as (PreloadOptions | undefined)
+        return this.preloadPath_serialize(info_casted, options_casted)
+    }
     private pushPath0_serialize(info: NavPathInfo, animated?: boolean): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (animated !== undefined) {
@@ -1141,6 +1145,20 @@ export class NavPathStack implements MaterializedBase {
         }
         ArkUIGeneratedNativeModule._NavPathStack_setPathStack(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private preloadPath_serialize(info: NavPathInfo, options?: PreloadOptions): Promise<void> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            PreloadOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._NavPathStack_preloadPath(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
     }
 }
 export class ArkNavigationPeer extends ArkCommonMethodPeer {
@@ -1585,7 +1603,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
                     const valueTmpValueForIdx0ForIdx1 = valueTmpValueForIdx0 as arkui_component_units_Resource
                     global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueTmpValue instanceof CustomBuilder) {
+            } else if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
@@ -1635,7 +1653,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         if (items !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const itemsTmpValue = items!
-            if (itemsTmpValue instanceof CustomBuilder) {
+            if (itemsTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const itemsTmpValueForIdx1 = itemsTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(itemsTmpValueForIdx1))
@@ -1674,7 +1692,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof CustomBuilder) {
+            if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
@@ -1800,6 +1818,9 @@ export interface NavigationOptions {
     launchMode?: LaunchMode;
     animated?: boolean;
 }
+export interface PreloadOptions {
+    onDestroy?: VoidCallback;
+}
 export type NavBar = string;
 export type InterceptionShowCallback = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean) => void;
 export type InterceptionCallback = (from: NavPathInfo | NavBar, to: NavPathInfo | NavBar, pathStack: NavPathStack, operation: NavigationOperation, isAnimated: boolean) => void;
@@ -1885,6 +1906,8 @@ export interface NavigationModuleInfo {
 }
 export interface NavigationConfiguration {
     stackSizeLimit?: int32;
+    clearContentStackOnPrimaryNavigation?: boolean;
+    recyclePagesOnLowMemory?: boolean;
 }
 export interface NavigationAttribute extends CommonMethod {
     setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
@@ -2410,6 +2433,22 @@ export class NavigationConfiguration_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForClearContentStackOnPrimaryNavigation = value.clearContentStackOnPrimaryNavigation
+        if (valueHolderForClearContentStackOnPrimaryNavigation !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForClearContentStackOnPrimaryNavigationTmpValue = valueHolderForClearContentStackOnPrimaryNavigation!
+            valueSerializer.writeBoolean(valueHolderForClearContentStackOnPrimaryNavigationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForRecyclePagesOnLowMemory = value.recyclePagesOnLowMemory
+        if (valueHolderForRecyclePagesOnLowMemory !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRecyclePagesOnLowMemoryTmpValue = valueHolderForRecyclePagesOnLowMemory!
+            valueSerializer.writeBoolean(valueHolderForRecyclePagesOnLowMemoryTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): NavigationConfiguration {
         let valueDeserializer: DeserializerBase = buffer
@@ -2419,7 +2458,19 @@ export class NavigationConfiguration_serializer {
             stackSizeLimitTmpBuf = valueDeserializer.readInt32()
         }
         const stackSizeLimitTmpResult: int32 | undefined = stackSizeLimitTmpBuf
-        let value: NavigationConfiguration = ({stackSizeLimit: stackSizeLimitTmpResult} as NavigationConfiguration)
+        const clearContentStackOnPrimaryNavigationTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let clearContentStackOnPrimaryNavigationTmpBuf: boolean | undefined = undefined
+        if ((clearContentStackOnPrimaryNavigationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            clearContentStackOnPrimaryNavigationTmpBuf = valueDeserializer.readBoolean()
+        }
+        const clearContentStackOnPrimaryNavigationTmpResult: boolean | undefined = clearContentStackOnPrimaryNavigationTmpBuf
+        const recyclePagesOnLowMemoryTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let recyclePagesOnLowMemoryTmpBuf: boolean | undefined = undefined
+        if ((recyclePagesOnLowMemoryTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            recyclePagesOnLowMemoryTmpBuf = valueDeserializer.readBoolean()
+        }
+        const recyclePagesOnLowMemoryTmpResult: boolean | undefined = recyclePagesOnLowMemoryTmpBuf
+        let value: NavigationConfiguration = ({stackSizeLimit: stackSizeLimitTmpResult, clearContentStackOnPrimaryNavigation: clearContentStackOnPrimaryNavigationTmpResult, recyclePagesOnLowMemory: recyclePagesOnLowMemoryTmpResult} as NavigationConfiguration)
         return value
     }
 }
@@ -2942,6 +2993,43 @@ export class NavigationMenuItem_serializer {
         return value
     }
 }
+export class PreloadOptions_serializer {
+    public static write(buffer: SerializerBase, value: PreloadOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOnDestroy = value.onDestroy
+        if (valueHolderForOnDestroy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDestroyTmpValue = valueHolderForOnDestroy!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDestroyTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): PreloadOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const onDestroyTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onDestroyTmpBuf: VoidCallback | undefined = undefined
+        if ((onDestroyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDestroyTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDestroyTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onDestroyTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onDestroyTmpBufOptClosure = ():void => {
+                const onDestroyTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onDestroyTmpBufOptBufArgsSerializer.writeInt32(onDestroyTmpBufOptBufResource.resourceId);
+                onDestroyTmpBufOptBufArgsSerializer.writePointer(onDestroyTmpBufOptBufCall);
+                onDestroyTmpBufOptBufArgsSerializer.writePointer(onDestroyTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 553494831, onDestroyTmpBufOptBufArgsSerializer.asBuffer(), onDestroyTmpBufOptBufArgsSerializer.length());
+                onDestroyTmpBufOptBufArgsSerializer.release();
+                return;
+            }
+            resourceFinalizerRegister(onDestroyTmpBufOptClosure, onDestroyTmpBufOptBufResource)
+            onDestroyTmpBuf = onDestroyTmpBufOptClosure
+        }
+        const onDestroyTmpResult: VoidCallback | undefined = onDestroyTmpBuf
+        let value: PreloadOptions = ({onDestroy: onDestroyTmpResult} as PreloadOptions)
+        return value
+    }
+}
 export class ScrollEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollEffectOptions): void {
         let valueSerializer: SerializerBase = buffer
@@ -2957,7 +3045,8 @@ export class ScrollEffectOptions_serializer {
         if (valueHolderForBlurEffectiveStartOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBlurEffectiveStartOffsetTmpValue = valueHolderForBlurEffectiveStartOffset!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBlurEffectiveStartOffsetTmpValue)
+            const valueHolderForBlurEffectiveStartOffsetTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBlurEffectiveStartOffsetTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBlurEffectiveStartOffsetTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2965,7 +3054,8 @@ export class ScrollEffectOptions_serializer {
         if (valueHolderForBlurEffectiveEndOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBlurEffectiveEndOffsetTmpValue = valueHolderForBlurEffectiveEndOffset!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBlurEffectiveEndOffsetTmpValue)
+            const valueHolderForBlurEffectiveEndOffsetTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBlurEffectiveEndOffsetTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBlurEffectiveEndOffsetTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2981,13 +3071,15 @@ export class ScrollEffectOptions_serializer {
         const blurEffectiveStartOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let blurEffectiveStartOffsetTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((blurEffectiveStartOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            blurEffectiveStartOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const blurEffectiveStartOffsetTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            blurEffectiveStartOffsetTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(blurEffectiveStartOffsetTmpBufOptDeserialized)
         }
         const blurEffectiveStartOffsetTmpResult: arkui_Graphics_LengthMetrics | undefined = blurEffectiveStartOffsetTmpBuf
         const blurEffectiveEndOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let blurEffectiveEndOffsetTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((blurEffectiveEndOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            blurEffectiveEndOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const blurEffectiveEndOffsetTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            blurEffectiveEndOffsetTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(blurEffectiveEndOffsetTmpBufOptDeserialized)
         }
         const blurEffectiveEndOffsetTmpResult: arkui_Graphics_LengthMetrics | undefined = blurEffectiveEndOffsetTmpBuf
         let value: ScrollEffectOptions = ({scrollEffectType: scrollEffectTypeTmpResult, blurEffectiveStartOffset: blurEffectiveStartOffsetTmpResult, blurEffectiveEndOffset: blurEffectiveEndOffsetTmpResult} as ScrollEffectOptions)
@@ -3477,7 +3569,8 @@ export class NavigationTitleOptions_serializer {
         if (valueHolderForPaddingStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPaddingStartTmpValue = valueHolderForPaddingStart!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingStartTmpValue)
+            const valueHolderForPaddingStartTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForPaddingStartTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForPaddingStartTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3485,7 +3578,8 @@ export class NavigationTitleOptions_serializer {
         if (valueHolderForPaddingEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPaddingEndTmpValue = valueHolderForPaddingEnd!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingEndTmpValue)
+            const valueHolderForPaddingEndTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForPaddingEndTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForPaddingEndTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3578,13 +3672,15 @@ export class NavigationTitleOptions_serializer {
         const paddingStartTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let paddingStartTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((paddingStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paddingStartTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const paddingStartTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            paddingStartTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(paddingStartTmpBufOptDeserialized)
         }
         const paddingStartTmpResult: arkui_Graphics_LengthMetrics | undefined = paddingStartTmpBuf
         const paddingEndTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let paddingEndTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((paddingEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paddingEndTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const paddingEndTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            paddingEndTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(paddingEndTmpBufOptDeserialized)
         }
         const paddingEndTmpResult: arkui_Graphics_LengthMetrics | undefined = paddingEndTmpBuf
         const mainTitleModifierTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()

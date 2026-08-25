@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path='./import.ts' />
 class ArkContainerPickerComponent extends ArkComponent implements UIPickerComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);

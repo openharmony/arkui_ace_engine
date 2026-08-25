@@ -20,6 +20,29 @@
 #include "frameworks/base/geometry/ng/point_t.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 
+namespace OHOS::Ace::NG {
+using TailIndentsArray = std::vector<Dimension>;
+
+struct TailIndents {
+    std::optional<TailIndentsArray> indentsArray;
+
+    bool operator==(const TailIndents& other) const
+    {
+        return indentsArray == other.indentsArray;
+    }
+
+    bool operator!=(const TailIndents& other) const
+    {
+        return !(*this == other);
+    }
+
+    bool HasValue() const
+    {
+        return indentsArray.has_value() && !indentsArray->empty();
+    }
+};
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 struct FontForegroudGradiantColor {
     std::vector<NG::PointF> points;
@@ -80,10 +103,26 @@ public:
         fontForegroudGradiantColor_.reset();
     }
 
+    void SetTailIndent(const std::optional<NG::TailIndents>& tailIndent)
+    {
+        tailIndent_ = tailIndent;
+    }
+
+    const std::optional<NG::TailIndents>& GetTailIndent() const
+    {
+        return tailIndent_;
+    }
+
+    void ResetTailIndent()
+    {
+        tailIndent_.reset();
+    }
+
 private:
     std::optional<Gradient> gradient_;
     // for ai option's gradient color
     std::optional<FontForegroudGradiantColor> fontForegroudGradiantColor_;
+    std::optional<NG::TailIndents> tailIndent_;
 };
 
 class SymbolTextStyle : public AceType {

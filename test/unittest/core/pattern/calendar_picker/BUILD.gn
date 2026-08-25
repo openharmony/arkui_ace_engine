@@ -13,25 +13,43 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("calendar_picker_test_ng") {
-  type = "new"
-  module_name = "DFX-Logs"
-  sources = [
-    "calendar_dialog_pattern_test_ng.cpp",
-    "calendar_dialog_view_test_ng.cpp",
-    "calendar_picker_layout_algorithm_test.cpp",
-    "calendar_picker_pattern_test.cpp",
-    "calendar_picker_pattern_test_ng.cpp",
-    "calendar_picker_resource_test.cpp",
-    "calendar_picker_test_ng.cpp",
-    "calendar_picker_test_tojson.cpp",
-    "calendar_picker_test_update.cpp",
-  ]
+test_sources = [
+  "calendar_dialog_pattern_test_ng.cpp",
+  "calendar_dialog_view_test_ng.cpp",
+  "calendar_picker_layout_algorithm_test.cpp",
+  "calendar_picker_pattern_test.cpp",
+  "calendar_picker_pattern_test_ng.cpp",
+  "calendar_picker_resource_test.cpp",
+  "calendar_picker_test_ng.cpp",
+  "calendar_picker_test_tojson.cpp",
+  "calendar_picker_test_update.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "calendar_picker_test_core.cpp" ]
-  } else {
-    sources += [ "calendar_picker_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("calendar_picker_test_ng") {
+    type = "host_components"
+    module_name = "DFX-Logs"
+    sources = test_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "calendar_picker_test_core.cpp" ]
+    } else {
+      sources += [ "calendar_picker_test_core.cpp" ]
+    }
+  }
+} else {
+  ace_unittest("calendar_picker_test_ng") {
+    type = "new"
+    module_name = "DFX-Logs"
+    sources = test_sources
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "calendar_picker_test_core.cpp" ]
+    } else {
+      sources += [ "calendar_picker_test_core.cpp" ]
+    }
   }
 }

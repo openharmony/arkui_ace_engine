@@ -148,29 +148,24 @@ public:
         }
     }
 
-    // Index accessors forward to LazyContainerItemHelper (held on the base Pattern) so that the storage
-    // is shared with generic children and destroyed together with this item. Defaults match the previous
-    // bare members: indexInList = 0, indexInListItemGroup = -1.
     int32_t GetIndexInList() const
     {
-        const auto& helper = GetLazyContainerItemHelper();
-        return helper ? helper->GetIndexInList() : 0;
+        return indexInList_;
     }
 
     void SetIndexInList(int32_t index)
     {
-        GetOrCreateLazyContainerItemHelper()->SetIndexInList(index);
+        indexInList_ = index;
     }
 
     int32_t GetIndexInListItemGroup() const
     {
-        const auto& helper = GetLazyContainerItemHelper();
-        return helper ? helper->GetIndexInListItemGroup() : -1;
+        return indexInListItemGroup_;
     }
 
     void SetIndexInListItemGroup(int32_t index)
     {
-        GetOrCreateLazyContainerItemHelper()->SetIndexInListItemGroup(index);
+        indexInListItemGroup_ = index;
     }
 
     void SetNeedReserveEditModeCheckBoxSpace(bool needReserveEditModeCheckBoxSpace)
@@ -217,10 +212,7 @@ public:
 
     SwipeActionState GetSwipeActionState();
 
-    bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target)
-    {
-        return LazyContainerItemHelper::FindHeadOrTailChild(childFocus, step, target);
-    }
+    bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target);
 
     bool IsEnableChildrenMatchParent() override
     {
@@ -298,7 +290,8 @@ private:
     void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
     RefPtr<ShallowBuilder> shallowBuilder_;
 
-    // indexInList_ / indexInListItemGroup_ moved to LazyContainerItemHelper (base Pattern member).
+    int32_t indexInList_ = 0;
+    int32_t indexInListItemGroup_ = -1;
 
     // swiperAction
     int32_t startNodeIndex_ = -1;

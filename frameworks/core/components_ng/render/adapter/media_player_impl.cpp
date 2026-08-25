@@ -27,7 +27,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
 constexpr int32_t SECONDS_TO_MILLISECONDS = 1000;
+
 } // namespace
 
 MediaPlayerImpl::~MediaPlayerImpl()

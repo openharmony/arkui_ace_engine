@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
+    void SetBackgroundForceFlushVsync(bool enable, size_t count) override;
     void NotifyWindowAttachStateChange(bool status) override;
     void PostPreFreezeRegisterTask(bool isRegister);
     void Focus() override;
@@ -104,6 +105,7 @@ public:
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     static int32_t GetUIContentWindowID(int32_t instanceId);
     OHOS::Rosen::Window* GetUIContentWindow() override;
+    void ForceRequestFrame() override;
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
@@ -139,9 +141,12 @@ public:
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
     void RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor);
+    void PostTraverseWebTask(const WeakPtr<TaskExecutor>& weakTaskExecutor, std::function<void()>&& task);
+    void SaveTraverseWebForPageSceneCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SaveGetCurrentAbilityLanguageInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void ChangeSensitiveNodes(bool isSensitive) override;
 
     // Window color
@@ -183,24 +188,13 @@ public:
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
     void ReloadForm(const std::string& url) override;
 
-    void SetFormWidth(float width) override
-    {
-        formWidth_ = width;
-    }
-    void SetFormHeight(float height) override
-    {
-        formHeight_ = height;
-    }
-    float GetFormWidth() override
-    {
-        return formWidth_;
-    }
-    float GetFormHeight() override
-    {
-        return formHeight_;
-    }
+    void SetFormWidth(float width) override { formWidth_ = width; }
+    void SetFormHeight(float height) override { formHeight_ = height; }
+    float GetFormWidth() override { return formWidth_; }
+    float GetFormHeight() override { return formHeight_; }
 
     void SetFormViewScale(float width, float height, float formViewScale) override;
+    void SetFormDisplayId(const uint64_t displayId) override;
     void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;
@@ -572,6 +566,7 @@ protected:
     bool isBundle_ = false;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
+    uint64_t formDisplayId_ = static_cast<uint64_t>(-1);
     std::string formData_;
     bool fontScaleFollowSystem_ = true;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;

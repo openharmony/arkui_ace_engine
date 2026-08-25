@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ListItemGroupInitializeModifier extends ModifierWithKey<ListItemGroupParam> {
   constructor(value: ListItemGroupParam) {
     super(value);

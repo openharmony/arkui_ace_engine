@@ -25,7 +25,7 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/common/ime/text_input_connection.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -33,7 +33,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -78,6 +78,7 @@ struct SpanOptionBase;
 struct SpanPositionInfo;
 struct SymbolSpanOptions;
 struct RangeOptions;
+enum class ColorMode;
 
 namespace NG {
 class EventHub;
@@ -299,7 +300,7 @@ public:
         Color originCaretColor = Color(0x4D000000);
         const Dimension showFloatingCaretDistance = 10.0_vp;
         void Reset();
-        void UpdateOriginCaretColor();
+        void UpdateOriginCaretColor(ColorMode colorMode);
         void UpdateByTouchMove(const Offset& offset, double distance, const RectF& boundaryRect);
     };
     const FloatingCaretState& GetFloatingCaretState() const;
@@ -318,7 +319,7 @@ public:
     bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
     bool SetPreviewTextForDelete(int32_t oriLength, bool isBackward, bool isByIME);
-    const PreviewTextInfo GetPreviewTextInfo() const;
+    const Ace::PreviewTextInfo GetPreviewTextInfo() const;
     void FinishTextPreview() override;
     void ReceivePreviewTextStyle(const std::string& style) override;
     int32_t CheckPreviewTextValidate(const std::string& previewTextValue, const PreviewRange range) override;
@@ -780,6 +781,19 @@ public:
     void MountPlaceholderImageNode(const std::list<RefPtr<NG::SpanItem>>& spans);
     bool SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
     bool SetStringPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    void UpdatePlaceholderByTheme(RefPtr<SpanNode> placeholderNode);
+    void UpdatePlaceholderStyle(RefPtr<SpanNode> placeholderNode);
+    
+    // add for PageTranslate
+    int32_t GetPageTranslateNodeId() const override;
+    std::string GetPageTranslateTextForReport() const override;
+    bool ApplyPageTranslateResult(const std::string& result, int64_t version) override;
+    void ResetPageTranslate() override;
+    std::u16string GetCurrentPlaceholderText() const;
+    void ReportPageTranslatePlaceholderDrawn();
+    void OnPlaceholderSourceTextChanged();
+    bool SetTranslatedStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+
     void SetCaretColor(const Color& caretColor);
     void ResetCaretColor(const std::optional<Color>& caretColor);
     Color GetCaretColor() const;
@@ -823,9 +837,12 @@ public:
     void SetContentChange(bool onChange);
     RefPtr<Clipboard> GetClipboard() override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
-    PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y) override;
-    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
-    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(
+        int32_t x, int32_t y, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
     void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     RectF GetTextContentRect(bool isActualText = false) const override;
@@ -906,6 +923,7 @@ public:
     void UpdatePlaceholderFontColor(const Color& color);
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
+    void BindScrollBarOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const;
     RefPtr<AIWriteAdapter> GetAIWriteAdapter();
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
@@ -926,6 +944,8 @@ public:
 
     bool HasRenderTransform();
     VectorF GetHostScale() const;
+    ColorMode GetColorMode() const;
+    ColorMode GetDisplayColorMode() const;
 
     template<typename T>
     RefPtr<T> GetTheme() const

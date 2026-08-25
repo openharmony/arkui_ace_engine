@@ -44,18 +44,17 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisByFrameNodeTest, TestSize.Le
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
-    OnAxisEventFunc onAxisEventFunc;
+    OnAxisEventFunc onAxisEventFunc = [](AxisInfo& info) {};
     ViewAbstract::SetOnAxisEvent(AceType::RawPtr(node), std::move(onAxisEventFunc));
     auto eventHub = node->GetOrCreateInputEventHub();
-    auto& callback = eventHub->axisEventActuator_->userCallback_;
-    EXPECT_NE(callback, nullptr);
+    EXPECT_NE(eventHub->userAxisFunc_, nullptr);
 
     /**
      * @tc.steps: step2. Disable callback.
      * @tc.expected: callback is null.
      */
     ViewAbstract::DisableOnAxisEvent(AceType::RawPtr(node));
-    EXPECT_EQ(callback, nullptr);
+    EXPECT_EQ(eventHub->userAxisFunc_, nullptr);
 }
 
 /**
@@ -78,18 +77,17 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableHoverByFrameNodeTest, TestSize.L
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
-    OnHoverFunc onHoverEventFunc;
+    OnHoverFunc onHoverEventFunc = [](bool isHover, HoverInfo& info) {};
     ViewAbstract::SetOnHover(AceType::RawPtr(node), std::move(onHoverEventFunc));
     auto eventHub = node->GetOrCreateInputEventHub();
-    auto& callback = eventHub->hoverEventActuator_->userCallback_;
-    EXPECT_NE(callback, nullptr);
+    EXPECT_NE(eventHub->userHoverFunc_, nullptr);
 
     /**
      * @tc.steps: step2. Disable callback.
      * @tc.expected: callback is null.
      */
     ViewAbstract::DisableOnHover(AceType::RawPtr(node));
-    EXPECT_EQ(callback, nullptr);
+    EXPECT_EQ(eventHub->userHoverFunc_, nullptr);
 }
 
 /**

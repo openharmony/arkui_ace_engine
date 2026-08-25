@@ -359,6 +359,7 @@ public:
     bool NeedReserveEditModeCheckBoxSpaceForList();
     int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
     bool IsInEditModeHotZone(const PointF& point) const override;
+    bool IsPointInHotZone(const PointF& localPoint, const Rect& itemRect, float hotZoneWidth) const;
     void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
     SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const override;
     SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const override;
@@ -405,7 +406,6 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
-
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;

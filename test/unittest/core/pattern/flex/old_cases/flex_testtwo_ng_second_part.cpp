@@ -344,7 +344,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest002, TestSize.Level0)
 
 /**
  * @tc.name: FlexLayoutTest003
- * @tc.desc: Set Flex Row Layout Test direction_ is VERTICAL
+ * @tc.desc: Set Flex Wrap Layout Test direction_ is VERTICAL
  * @tc.type: FUNC
  */
 HWTEST_F(FlexTestTwoNg, FlexLayoutTest003, TestSize.Level0)
@@ -377,7 +377,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest003, TestSize.Level0)
 
 /**
  * @tc.name: FlexLayoutTest004
- * @tc.desc: Set Flex Row Layout Test direction_ is VERTICAL
+ * @tc.desc: Set Flex Wrap Layout Test direction_ is VERTICAL
  * @tc.type: FUNC
  */
 HWTEST_F(FlexTestTwoNg, FlexLayoutTest004, TestSize.Level0)
@@ -410,7 +410,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest004, TestSize.Level0)
 
 /**
  * @tc.name: FlexLayoutTest005
- * @tc.desc: Set Flex Row Layout Test direction_ is VERTICAL
+ * @tc.desc: Set Flex Wrap Layout Test direction_ is VERTICAL
  * @tc.type: FUNC
  */
 HWTEST_F(FlexTestTwoNg, FlexLayoutTest005, TestSize.Level0)
@@ -526,7 +526,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest006, TestSize.Level0)
 
 /**
  * @tc.name: FlexLayoutTest007
- * @tc.desc: Set Flex Row Layout Test WrapAlignment is change
+ * @tc.desc: Test Flex Wrap Layout with changing WrapAlignment
  * @tc.type: FUNC
  */
 HWTEST_F(FlexTestTwoNg, FlexLayoutTest007, TestSize.Level0)
@@ -561,7 +561,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest007, TestSize.Level0)
 
 /**
  * @tc.name: FlexLayoutTest008
- * @tc.desc: Set Flex Row Layout Test WrapAlignment is change
+ * @tc.desc: Test Flex Wrap Layout with changing WrapAlignment
  * @tc.type: FUNC
  */
 HWTEST_F(FlexTestTwoNg, FlexLayoutTest008, TestSize.Level0)

@@ -175,7 +175,9 @@ void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
 void ModelPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(modelAdapter_);
-    auto mainProperty = DynamicCast<ModelPaintProperty>(GetHost()->GetPaintProperty<ModelPaintProperty>());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mainProperty = DynamicCast<ModelPaintProperty>(host->GetPaintProperty<ModelPaintProperty>());
     bool repaint = modelAdapter_->HandleTouchEvent(info, mainProperty);
     if (repaint) {
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);

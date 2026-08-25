@@ -88,11 +88,6 @@ public:
 
     TextDirection GetLayoutDirection() const;
 
-    virtual bool NeedReadFontScaleFromEnv() const
-    {
-        return false;
-    }
-
     std::optional<float> GetEnvFontScale() const;
 
     TextDirection GetNonAutoLayoutDirection() const;
@@ -343,6 +338,8 @@ protected:
     std::optional<LayoutConstraintF> layoutConstraint_;
 
 private:
+    void UpdateLayoutPropertyValues(const LayoutProperty* layoutProperty);
+
     // This will call after ModifyLayoutConstraint.
     void CheckSelfIdealSize(const SizeF& originMax);
     void CheckCalcLayoutConstraint(RefPtr<FrameNode>& host, const LayoutConstraintF& parentConstraint);

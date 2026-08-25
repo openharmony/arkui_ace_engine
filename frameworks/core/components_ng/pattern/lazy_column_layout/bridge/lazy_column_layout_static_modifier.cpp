@@ -64,7 +64,7 @@ void SetLazyColumnLayoutOptionsImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
 }
 void SpaceImpl(Ark_NativePointer node,
-               const Opt_LengthMetrics* space)
+               const Opt_LengthMetricsProxy* space)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

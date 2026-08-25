@@ -69,12 +69,20 @@ function checkSingleEvent(): boolean {
         }
         case CallbackEventKind.Event_HoldManagedResource: {
             const resourceId = deserializer.readInt32()
-            ResourceHolder.instance().hold(resourceId)
+            try {
+                ResourceHolder.instance().hold(resourceId)
+            } catch (e) {
+                console.warn(`failed to hold resource while checking single event, resourceId: ${resourceId}  error: ${e}`)
+            }
             return true;
         }
         case CallbackEventKind.Event_ReleaseManagedResource: {
             const resourceId = deserializer.readInt32()
-            ResourceHolder.instance().release(resourceId)
+            try {
+                ResourceHolder.instance().release(resourceId)
+            } catch (e) {
+                console.warn(`failed to release resource while checking single event, resourceId: ${resourceId}  error: ${e}`)
+            }
             return true;
         }
         default: {

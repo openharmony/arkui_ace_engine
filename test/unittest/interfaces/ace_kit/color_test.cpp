@@ -162,6 +162,12 @@ HWTEST_F(ColorTest, ColorTest007, TestSize.Level1)
     EXPECT_EQ(lineColor.GetRed(), 127);
     EXPECT_EQ(lineColor.GetBlue(), 127);
     EXPECT_EQ(lineColor.GetGreen(), 127);
+
+    lineColor = Color::LineColorTransition(Color::FromRGB(255, 255, 255), Color::FromRGB(0, 0, 0), 0.5);
+    EXPECT_EQ(lineColor.GetAlpha(), 255);
+    EXPECT_EQ(lineColor.GetRed(), 127);
+    EXPECT_EQ(lineColor.GetBlue(), 127);
+    EXPECT_EQ(lineColor.GetGreen(), 127);
 }
 
 /**

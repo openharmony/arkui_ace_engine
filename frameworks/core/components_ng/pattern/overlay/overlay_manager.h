@@ -134,6 +134,7 @@ struct CustomKeyboardOffsetInfo {
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
     bool enableBackPressedEvent = false;
+    std::function<bool()> onBackPress = nullptr;
 };
 
 enum class MenuLifeCycleEvent;
@@ -297,8 +298,6 @@ public:
 
     void RegisterOnHideDialog(std::function<void()> callback);
     void SetBackPressEvent(std::function<bool()> event);
-
-    bool FireBackPressEvent() const;
 
     bool GetHasPixelMap();
 
@@ -592,6 +591,7 @@ public:
     void OnUIExtensionWindowSizeChange();
     bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo);
     std::optional<OverlayManagerInfo> GetOverlayManagerOptions();
+    static bool IsDescendantOfOverlay(const RefPtr<FrameNode>& node);
 
     // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
@@ -745,7 +745,6 @@ private:
 
     int32_t ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         bool isBackPressed, bool isPageRouter);
-    void OverlayDoDismiss(RefPtr<NG::FrameNode>& overlay, RefPtr<Pattern>& pattern);
     int32_t RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter);
     int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);

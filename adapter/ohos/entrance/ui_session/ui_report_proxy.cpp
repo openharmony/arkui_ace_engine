@@ -217,13 +217,11 @@ void UiReportProxy::ReportHitTestNodeInfos(const std::string& data, int32_t part
 
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
-#ifndef CROSS_PLATFORM
     if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         auto result = InspectorJsonUtil::Create(true);
         result->Put(key.c_str(), value.c_str());
         ReportComponentChangeEvent(result->ToString());
     }
-#endif
 }
 
 void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
@@ -438,10 +436,6 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
         return;
     }
     for (auto& map : maps) {
-        if (map.second == nullptr) {
-            LOGW("SendShowingImage empty pixelMap");
-            continue;
-        }
         if (!messageData.WriteInt32(map.first) || !map.second->Marshalling(messageData)) {
             LOGW("SendShowingImage write data failed");
             return;
@@ -591,7 +585,7 @@ void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
     }
 }
 
-void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson)
+void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson, bool isGetResult)
 {
     MessageParcel messageData;
     MessageParcel reply;
@@ -602,6 +596,10 @@ void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson)
     }
     if (!messageData.WriteString(sceneJson)) {
         LOGW("ReportPageSceneEvent write scene json failed");
+        return;
+    }
+    if (!messageData.WriteBool(isGetResult)) {
+        LOGW("ReportPageSceneEvent write isGetResult failed");
         return;
     }
     int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_PAGE_SCENE_EVENT, messageData, reply, option);

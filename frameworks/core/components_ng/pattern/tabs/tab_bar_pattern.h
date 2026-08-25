@@ -539,8 +539,9 @@ public:
 
     const BottomTabBarStyle& GetBottomTabBarStyle(uint32_t position) const
     {
+        static const BottomTabBarStyle defaultStyle;
         if (position >= bottomTabBarStyles_.size()) {
-            return bottomTabBarStyle_;
+            return defaultStyle;
         }
         return bottomTabBarStyles_[position];
     }
@@ -849,8 +850,6 @@ private:
     OnTabBarItemsChangeEvent onTabBarItemsChangeEvent_;
 
     float bigScale_ = 0.0f;
-    float largeScale_ = 0.0f;
-    float maxScale_ = 0.0f;
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     int32_t accessibilityFocusIndicator_ = 0;
@@ -895,7 +894,6 @@ private:
     float turnPageRate_ = 0.0f;
     int32_t swiperStartIndex_ = 0;
     std::vector<BottomTabBarStyle> bottomTabBarStyles_;
-    BottomTabBarStyle bottomTabBarStyle_;
 
     RefPtr<TabBarModifier> tabBarModifier_;
     std::vector<bool> gradientRegions_ = {false, false, false, false};

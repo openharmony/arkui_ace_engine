@@ -28,15 +28,14 @@ import { ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_C
 import { Length, Resource as arkui_component_units_Resource, ResourceColor } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { Color as arkui_component_enums_Color } from './enums'
-import { AttributeModifier, hookPatternLockAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, LengthMetrics as arkui_Graphics_LengthMetrics, hookPatternLockAttributeModifier, AttributeUpdater, extractors } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { PatternLockModifier } from './../PatternLockModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class PatternLockControllerInternal {
     public static fromPtr(ptr: KPointer): PatternLockController {
         return new PatternLockController(MaterializedBaseTag.NOP, ptr)
@@ -583,7 +582,8 @@ export class CircleStyleOptions_serializer {
         if (valueHolderForRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue = valueHolderForRadius!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForRadiusTmpValue)
+            const valueHolderForRadiusTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForRadiusTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForRadiusTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -628,7 +628,8 @@ export class CircleStyleOptions_serializer {
         const radiusTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let radiusTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            radiusTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const radiusTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            radiusTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(radiusTmpBufOptDeserialized)
         }
         const radiusTmpResult: arkui_Graphics_LengthMetrics | undefined = radiusTmpBuf
         const enableWaveEffectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()

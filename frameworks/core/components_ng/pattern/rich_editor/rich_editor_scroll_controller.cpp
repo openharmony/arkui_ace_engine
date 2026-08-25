@@ -552,10 +552,10 @@ void RichEditorScrollController::StopScrolling()
     pattern->StopScrollable();
 }
 
-void RichEditorScrollController::OnDrawScrollBar(DrawingContext& context)
+void RichEditorScrollController::OnDrawScrollBar(DrawingContext& context, const RefPtr<OverlayModifier>& modifier)
 {
     if (scrollBar_) {
-        scrollBar_->OnDraw(context);
+        scrollBar_->OnDraw(context, modifier);
     }
 }
 

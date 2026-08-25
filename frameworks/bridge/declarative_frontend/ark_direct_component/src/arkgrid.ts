@@ -225,8 +225,8 @@ class GridNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
   }
   checkObjectDiff(): boolean {
     return !(
-        (this.stageValue.scrollForward === this.value.scrollForward) &&
-        (this.stageValue.scrollBackward === this.value.scrollBackward));
+        (this.stageValue?.scrollForward === this.value?.scrollForward) &&
+        (this.stageValue?.scrollBackward === this.value?.scrollBackward));
   }
 }
 class GridEnableScrollModifier extends ModifierWithKey<boolean> {

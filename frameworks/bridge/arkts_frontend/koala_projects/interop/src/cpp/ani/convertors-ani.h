@@ -188,17 +188,17 @@ struct InteropTypeConverter<KSerializerBuffer> {
 
 template<>
 struct InteropTypeConverter<KInteropReturnBuffer> {
-    using InteropType = ani_fixedarray_byte;
+    using InteropType = ani_valuearray_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
     static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
         CHECK_RETHROW_ERROR(env, nullptr);
-        ani_fixedarray_byte result = nullptr;
+        ani_valuearray_byte result = nullptr;
         ani_boolean errorExist;
         env->ExistUnhandledError(&errorExist);
         if (!errorExist) {
-            CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
+            CHECK_ANI_FATAL(env->ValueArray_New_Byte(value.length, &result));
             CHECK_ANI_FATAL(
-                env->FixedArray_SetRegion_Byte(result, 0, value.length,
+                env->ValueArray_SetRegion_Byte(result, 0, value.length,
                   reinterpret_cast<const ani_byte*>(value.data)));
         }
         value.dispose(value.data, value.length);
@@ -1921,10 +1921,10 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
   do {                                                                                                  \
     ani_env* env = reinterpret_cast<ani_env*>(vmContext);                                               \
     ani_class errorClass {};                                                                            \
-    CHECK_ANI_FATAL(env->FindClass("std.core.Error", &errorClass));                                     \
+    CHECK_ANI_FATAL(env->FindClass("escompat.Error", &errorClass));                                     \
     ani_method errorCtor {};                                                                            \
     CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
-      "C{std.core.String}C{std.core.ErrorOptions}:", &errorCtor));                                      \
+      "C{std.core.String}C{escompat.ErrorOptions}:", &errorCtor));                                      \
     ani_string messageObject{};                                                                         \
     CHECK_ANI_FATAL(env->String_NewUTF8(message, strlen(message), &messageObject));                     \
     ani_ref undefined{};                                                                                \

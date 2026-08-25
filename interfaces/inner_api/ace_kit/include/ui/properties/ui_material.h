@@ -38,7 +38,7 @@ struct LightEffectOptions {
 
 struct ImmersiveOptions {
     UiMaterialStyle style = UiMaterialStyle::REGULAR;
-    Color materialColor = Color::TRANSPARENT;
+    std::optional<Color> materialColor = std::nullopt;
     bool colorInvert = false;
     bool applyShadow = true;
     // when disableLightEffect is true, do not add lightEffect. lightEffectOptions has no effect.
@@ -49,7 +49,9 @@ struct ImmersiveOptions {
     std::optional<LightEffectOptions> lightEffectOptions = std::nullopt;
     RefPtr<ResourceObject> colorResObj = nullptr;
     ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED; // options' colorMode will override GetNodeColorMode
-    
+    // when needSplitOverlayShader is true, split material shader into base and overlay layers
+    bool needSplitOverlayShader = false;
+
     bool HasLightEffect() const
     {
         return !disableLightEffect && lightEffectOptions.has_value();
@@ -103,6 +105,8 @@ public:
     virtual bool IsForceShadow() const;
     // return whether enabled interactive.
     virtual std::optional<bool> IsInteractived() const;
+    // return string representation of material info for dump.
+    std::string ToString() const;
     // Get material state from application configuration.
     static MaterialState GetConfiguredMaterialState();
     // Check if material is disabled (state == DISABLE).

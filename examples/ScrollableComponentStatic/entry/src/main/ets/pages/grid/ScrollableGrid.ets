@@ -31,6 +31,7 @@ import {
   ColumnOptions
 } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
+import hilog from '@ohos.hilog';
 // [Start build_scrollable_horizontally_grid_layouts]
 @Entry
 @Component
@@ -43,22 +44,62 @@ export struct ScrollableGrid {
   // [StartExclude build_scrollable_horizontally_grid_layouts]
   private bgColors: string[] = ['#3079fe', '#fea500', '#f45a43']
   aboutToAppear(): void {
-    const categories = this.context.resourceManager.getStringByNameSync('Categories')
-    this.services.push(categories)
-    const recharge = this.context.resourceManager.getStringByNameSync('Recharge')
-    this.services.push(recharge)
-    const membership = this.context.resourceManager.getStringByNameSync('Membership')
-    this.services.push(membership)
-    const claim = this.context.resourceManager.getStringByNameSync('Claim_Coupon')
-    this.services.push(claim)
-    const lottery = this.context.resourceManager.getStringByNameSync('Lottery')
-    this.services.push(lottery)
-    const favorites = this.context.resourceManager.getStringByNameSync('Favorites')
-    this.services.push(favorites)
-    const points = this.context.resourceManager.getStringByNameSync('Points')
-    this.services.push(points)
-    const more = this.context.resourceManager.getStringByNameSync('More')
-    this.services.push(more)
+    try {
+      const categories = this.context.resourceManager.getStringByNameSync('Categories')
+      this.services.push(categories)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('Categories') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
+    try {
+      const recharge = this.context.resourceManager.getStringByNameSync('Recharge')
+      this.services.push(recharge)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('Recharge') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
+    try {
+      const membership = this.context.resourceManager.getStringByNameSync('Membership')
+      this.services.push(membership)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('Membership') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
+    try {
+      const claim = this.context.resourceManager.getStringByNameSync('Claim_Coupon')
+      this.services.push(claim)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('Claim_Coupon') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
+    try {
+      const lottery = this.context.resourceManager.getStringByNameSync('Lottery')
+      this.services.push(lottery)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('Lottery') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
+    try {
+      const favorites = this.context.resourceManager.getStringByNameSync('Favorites')
+      this.services.push(favorites)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('Favorites') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
+    try {
+      const points = this.context.resourceManager.getStringByNameSync('Points')
+      this.services.push(points)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('Points') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
+    try {
+      const more = this.context.resourceManager.getStringByNameSync('More')
+      this.services.push(more)
+    } catch (e) {
+      hilog.error(0x0000, 'ScrollableGrid',
+        `getStringByNameSync('More') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
   }
   // [EndExclude build_scrollable_horizontally_grid_layouts]
   build(): void {

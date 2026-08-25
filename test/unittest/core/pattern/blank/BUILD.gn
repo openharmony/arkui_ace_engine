@@ -13,18 +13,28 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("blank_test_ng") {
-  type = "new"
-  module_name = "Layout-Blank"
-  sources = [
-    "blank_new_test_ng.cpp",
-    "blank_test_ng.cpp",
-  ]
+test_sources = [
+  "blank_new_test_ng.cpp",
+  "blank_test_ng.cpp",
+  "blank_test_core.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "blank_test_core.cpp" ]
-  } else {
-    sources += [ "blank_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("blank_test_ng") {
+    type = "host_components"
+    module_name = "Layout-Blank"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("blank_test_ng") {
+    type = "new"
+    module_name = "Layout-Blank"
+    sources = test_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "blank_test_core.cpp" ]
+    }
   }
 }

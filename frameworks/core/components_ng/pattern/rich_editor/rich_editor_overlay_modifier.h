@@ -54,6 +54,14 @@ public:
     void onDraw(DrawingContext& drawingContext) override;
     void DrawContent(DrawingContext& drawingContext);
     void UpdateScrollBar(PaintWrapper* paintWrapper);
+    void SetScrollBarOverlayModifier(const WeakPtr<ScrollBarOverlayModifier>& modifier)
+    {
+        scrollBarOverlayModifier_ = modifier;
+    }
+    bool HasScrollBarOverlayModifier() const
+    {
+        return scrollBarOverlayModifier_.Upgrade() != nullptr;
+    }
     void StartFloatingCaretLand(const OffsetF& originCaretOffset);
     void ChangeOverlay();
 private:

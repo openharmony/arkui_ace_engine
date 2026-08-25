@@ -31,7 +31,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/text_styles.h"

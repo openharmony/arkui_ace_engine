@@ -1453,12 +1453,13 @@ ArkUINativeModuleValue TextPickerBridge::SetOnChange(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    const auto weakNode = AceType::WeakClaim(frameNode);
     std::function<void(const std::vector<std::string>&, const std::vector<double>&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
             const std::vector<std::string>& value, const std::vector<double>& index) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             if (value.size() == NUM_1 && index.size() == NUM_1) {
                 panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index[NUM_0]);
                 panda::Local<panda::StringRef> paramVaule = StringToStringValueWithVM(vm, value[NUM_0].c_str());
@@ -1519,12 +1520,13 @@ ArkUINativeModuleValue TextPickerBridge::SetOnScrollStop(ArkUIRuntimeCallInfo* r
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    const auto weakNode = AceType::WeakClaim(frameNode);
     std::function<void(const std::vector<std::string>&, const std::vector<double>&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
             const std::vector<std::string>& value, const std::vector<double>& index) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             if (value.size() == NUM_1 && index.size() == NUM_1) {
                 panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index[NUM_0]);
                 panda::Local<panda::StringRef> paramVaule = StringToStringValueWithVM(vm, value[NUM_0].c_str());

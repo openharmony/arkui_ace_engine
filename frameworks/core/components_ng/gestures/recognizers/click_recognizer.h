@@ -123,9 +123,11 @@ private:
     void UpdateInfoWithDownEvent(const TouchEvent& event);
     void ResetStatusInHandleOverdueDeadline();
 
+#ifndef CROSS_PLATFORM
     // recognizer report touch down event
     void ResetTouchDownNotifiedToClickFlag();
     void ReportTouchDownToResSched();
+#endif
 
     void OnResetStatus() override
     {
@@ -151,13 +153,15 @@ private:
     GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);
+#ifndef CROSS_PLATFORM
     void HandleReportClick(const GestureEvent& info);
+    void RecordClickEventIfNeed(const GestureEvent& info) const;
+#endif
     bool CheckNeedReceiveEvent();
 
     bool IsFormRenderClickRejected(const TouchEvent& event);
     void TriggerClickAccepted(const TouchEvent& event);
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
-    void RecordClickEventIfNeed(const GestureEvent& info) const;
     void AboutToAddToPendingRecognizers(const TouchEvent& event);
     bool CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer) override;
 

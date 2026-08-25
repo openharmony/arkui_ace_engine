@@ -73,6 +73,7 @@ public:
         value->propSwipeByGroup_ = CloneSwipeByGroup();
         value->propMaintainVisibleContentPosition_ = CloneMaintainVisibleContentPosition();
         value->propFillType_ = CloneFillType();
+        value->propIgnoreHiddenItem_ = CloneIgnoreHiddenItem();
         value->ignoreItemSpace_ = ignoreItemSpace_;
         return value;
     }
@@ -112,6 +113,7 @@ public:
         ResetSwipeByGroup();
         ResetMaintainVisibleContentPosition();
         ResetFillType();
+        ResetIgnoreHiddenItem();
         ignoreItemSpace_ = false;
     }
 
@@ -166,6 +168,7 @@ public:
         json->PutExtAttr("swipeByGroup", propSwipeByGroup_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("maintainVisibleContentPosition",
             propMaintainVisibleContentPosition_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("ignoreHiddenItem", propIgnoreHiddenItem_.value_or(false) ? "true" : "false", filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -285,6 +288,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedIsShown, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaintainVisibleContentPosition, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FillType, int32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreHiddenItem, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:
     bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might

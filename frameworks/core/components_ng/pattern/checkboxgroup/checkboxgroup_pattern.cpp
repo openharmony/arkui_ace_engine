@@ -344,6 +344,9 @@ void CheckBoxGroupPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (colorConfigSkip_) {
+        colorConfigSkip_ = false;
+    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateCheckBoxStyle();
     }
@@ -366,12 +369,17 @@ void CheckBoxGroupPattern::UpdateState()
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (!paintProperty->HasCheckBoxGroupSelect()) {
+        if (skipFlag_) {
+            skipFlag_ = false;
+        }
         return;
     }
     bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
     paintProperty->ResetCheckBoxGroupSelect();
     if (eventHub->HasChangeEvent() && skipFlag_) {
         skipFlag_ = false;
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup[%{public}d] UpdateState skip due to skipFlag_",
+            host->GetId());
         return;
     }
 
@@ -753,6 +761,8 @@ void CheckBoxGroupPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    skipFlag_ = true;
+    colorConfigSkip_ = true;
     OnThemeScopeUpdate(host->GetThemeScopeId());
     host->MarkModifyDone();
     host->MarkDirtyNode();

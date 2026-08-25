@@ -42,6 +42,11 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     protected onChildRemoved: ((node: IncrementalNode) => void) | undefined = undefined
 
     /**
+     * This callback is called when an existing child node changes only its sibling position.
+     */
+    protected onChildMoved: ((node: IncrementalNode) => void) | undefined = undefined
+
+    /**
      * This kind can be used to distinguish nodes.
      * @see isKind
      */
@@ -180,6 +185,13 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     }
 
     /**
+     * @returns `true` if sibling scopes under this node may be reordered and reused later in the same pass
+     */
+    get allowSiblingReorder(): boolean {
+        return false
+    }
+
+    /**
      * @returns text representation of the node
      */
     toString(): string {
@@ -220,6 +232,43 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      */
     get previousSibling(): IncrementalNode | undefined {
         return this._prev
+    }
+
+    /**
+     * Reorders this node before the specified sibling under the same parent.
+     * @internal
+     */
+    moveBeforeSibling(next: IncrementalNode): void {
+        const parent = this._parent
+        if (!parent) {
+            throw new Error('child node is not attached')
+        }
+        if (next._parent !== parent) {
+            throw new Error('target sibling belongs to another parent')
+        }
+        if (this === next || this._next === next) {
+            return
+        }
+        const oldPrev = this._prev
+        const oldNext = this._next
+        if (oldPrev) {
+            oldPrev._next = oldNext
+        } else {
+            parent._child = oldNext
+        }
+        if (oldNext) {
+            oldNext._prev = oldPrev
+        }
+        const prev = next._prev
+        this._prev = prev
+        this._next = next
+        next._prev = this
+        if (prev) {
+            prev._next = this
+        } else {
+            parent._child = this
+        }
+        parent.onChildMoved?.(this)
     }
 
     /**

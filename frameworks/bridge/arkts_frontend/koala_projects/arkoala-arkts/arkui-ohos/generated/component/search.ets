@@ -21,11 +21,10 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { SymbolGlyphModifier_serializer } from './../framework/SymbolGlyphModifier'
 import { CaretStyle_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, IMEClient, SelectedDragPreviewStyle, TextDirection, StrokeJoinStyle } from './textCommon'
-import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Dimension, Font as arkui_component_units_Font, LengthMetrics as arkui_component_units_LengthMetrics, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Length } from './units'
+import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Dimension, Font as arkui_component_units_Font, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Length } from './units'
 import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, TextDecorationOptions, Bindable, ArkCommonMethodComponent, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
-import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
-import { extractors, AttributeModifier, ShaderStyle, hookSearchAttributeModifier, AttributeUpdater } from '#handwritten'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
+import { extractors, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, AttributeModifier, ShaderStyle, hookSearchAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from './richEditor'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
@@ -36,7 +35,7 @@ import { Color as arkui_component_enums_Color, CopyOptions, TextAlign } from './
 import { Resource as global_resource_Resource } from 'global.resource'
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier'
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from './textInput'
-import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
 import { CustomBuilder } from './builder'
 import { ComponentContentBase } from 'arkui.ComponentContent'
 import { Content } from 'arkui.Content'
@@ -769,7 +768,8 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -989,7 +989,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof CustomBuilder) {
+            if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx0))

@@ -15,6 +15,8 @@
 
 #include "lazy_grid_layout_test.h"
 
+#include "test/unittest/core/pattern/lazy_layout/lazy_layout_test_utils.h"
+
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -69,6 +71,59 @@ HWTEST_F(LazyGridLayoutTest, LazyGridLayoutPattern_SetDynamicLayoutOptions_002, 
      * @tc.expected: Should return false
      */
     EXPECT_FALSE(pattern->IsDynamicLayout());
+}
+
+/**
+ * @tc.name: LazyGridLayoutPattern_SetNeedLazyLayoutOnAttach_001
+ * @tc.desc: Test lazy layout identity is available before attaching to the main tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridLayoutPattern_SetNeedLazyLayoutOnAttach_001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(LAZY_V_GRID_LAYOUT_ETS_TAG, -1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_TRUE(frameNode->IsNeedLazyLayout());
+
+    auto dynamicPattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
+    dynamicPattern->SetDynamicLayoutOptions(true);
+    auto dynamicFrameNode = FrameNode::CreateFrameNode(LAZY_V_GRID_LAYOUT_ETS_TAG, -2, dynamicPattern);
+    ASSERT_NE(dynamicFrameNode, nullptr);
+    EXPECT_FALSE(dynamicFrameNode->IsNeedLazyLayout());
+}
+
+/**
+ * @tc.name: LazyGridLayoutPattern_CachedParentMatrix_001
+ * @tc.desc: Test cached LazyVGrid identity under List, WaterFlow and Scroll before main-tree attachment
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LazyGridLayoutPattern_CachedParentMatrix_001, TestSize.Level1)
+{
+    int32_t nodeId = -1000;
+    for (const auto& parentCase : CACHED_LAZY_PARENT_CASES) {
+        SCOPED_TRACE(parentCase.name);
+        auto context = CreateCachedLazyParentTestContext<LazyGridLayoutPattern>(
+            parentCase, V2::LAZY_V_GRID_LAYOUT_ETS_TAG, nodeId);
+        ASSERT_NE(context.parentNode, nullptr);
+        ASSERT_NE(context.intermediateNode, nullptr);
+        ASSERT_NE(context.lazyNode, nullptr);
+        ASSERT_NE(context.layoutWrapper, nullptr);
+
+        auto lazyProperty = context.lazyNode->GetLayoutProperty();
+        auto clonedProperty = context.layoutWrapper->GetLayoutProperty();
+        ASSERT_NE(lazyProperty, nullptr);
+        ASSERT_NE(clonedProperty, nullptr);
+        EXPECT_TRUE(context.lazyNode->IsNeedLazyLayout());
+        EXPECT_TRUE(lazyProperty->GetNeedLazyLayout());
+        EXPECT_TRUE(clonedProperty->GetNeedLazyLayout());
+
+        context.lazyNode->MountToParent(context.intermediateNode, DEFAULT_NODE_SLOT, true);
+        EXPECT_FALSE(context.lazyNode->IsOnMainTree());
+        EXPECT_TRUE(context.intermediateNode->IsNeedLazyLayout());
+        EXPECT_TRUE(context.intermediateNode->GetLayoutProperty()->GetNeedLazyLayout());
+        EXPECT_TRUE(LazyLayoutUtils::ValidateAndSetLazyLayoutParent(context.lazyNode, Axis::VERTICAL));
+        EXPECT_TRUE(context.lazyNode->IsNeedLazyLayout());
+    }
 }
 
 /**

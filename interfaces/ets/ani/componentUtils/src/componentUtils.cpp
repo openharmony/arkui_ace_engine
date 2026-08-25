@@ -161,12 +161,12 @@ static ani_object getTransform([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rec
         matrixArray[i] = rectangle.matrix4[i];
     }
 
-    ani_fixedarray_double doubleArray;
-    if (ANI_OK != env->FixedArray_New_Double(matrixArray.size(), &doubleArray)) {
+    ani_valuearray_double doubleArray;
+    if (ANI_OK != env->ValueArray_New_Double(matrixArray.size(), &doubleArray)) {
         return nullptr;
     }
     const auto *data = reinterpret_cast<const ani_double*>(matrixArray.data());
-    if (ANI_OK != env->FixedArray_SetRegion_Double(doubleArray, 0, matrixArray.size(), data)) {
+    if (ANI_OK != env->ValueArray_SetRegion_Double(doubleArray, 0, matrixArray.size(), data)) {
         return nullptr;
     }
     ani_array array;

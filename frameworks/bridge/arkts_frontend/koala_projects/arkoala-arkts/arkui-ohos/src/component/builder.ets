@@ -17,18 +17,17 @@ export function wrapBuilder<T>(builder: T): WrappedBuilder<T> {
     return new WrappedBuilder<T>(builder);
 }
 
-export function makeBuilderParameterProxy<T>(
+export function makeBuilderParameterProxy<T extends Object>(
     instance: T, source: Map<string, () => Any>, initializer?: (t: T) => void): T {
     if (isDynamicObject(instance)) {
         const makeBuilderParameterProxy = ESValue.getGlobal().getProperty('makeBuilderParameterProxy');
         const proxy = makeBuilderParameterProxy.invoke(ESValue.wrap('interopBuilderProxy'), ESValue.wrap(source)).unwrap() as T;
         return proxy;
     }
-    const obj = instance as Object;
-    if (StateMgmtTool.isObjectLiteral(obj)) {
-        const ifaces: FixedArray<Class> = Class.of(obj).getInterfaces();
+    if (StateMgmtTool.isObjectLiteral(instance)) {
+        const ifaces: FixedArray<Class> = Class.of(instance).getInterfaces();
         const linker = Class.current().getLinker();
-        return reflect.Proxy.create(linker, ifaces, new BuilderLiteralInterfaceProxyHandler(obj, source)) as T;
+        return reflect.Proxy.create(linker, ifaces, new BuilderLiteralInterfaceProxyHandler(instance, source)) as T;
     }
     if (initializer) {
         initializer(instance);
@@ -58,7 +57,7 @@ export class BuilderLiteralInterfaceProxyHandler implements reflect.InvocationHa
     invoke(target: Object, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
         return method.invoke(this._target, args);
     }
-    get target(): Object {
+    get target(): Object { 
         return this._target;
     }
 }

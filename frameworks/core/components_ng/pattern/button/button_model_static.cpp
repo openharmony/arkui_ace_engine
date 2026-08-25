@@ -56,6 +56,7 @@ void ButtonModelStatic::SetButtonStyle(FrameNode* frameNode, const std::optional
 {
     if (buttonStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyleSetByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, frameNode);
     }

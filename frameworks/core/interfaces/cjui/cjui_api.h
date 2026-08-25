@@ -692,6 +692,7 @@ struct CJUITextModifier {
     void (*setTextLineSpacing)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines, void* resObj);
     ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getIsOnlyBetweenLines)(ArkUINodeHandle node);
     void (*resetTextLineSpacing)(ArkUINodeHandle node);
     void (*setTextSelectedBackgroundColor)(
         ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr);
@@ -3511,7 +3512,7 @@ struct CJUIQRCodeModifier {
     void (*resetQRColor)(ArkUINodeHandle node);
     void (*setQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setQRBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetQRBackgroundColor)(ArkUINodeHandle node);
+    void (*resetQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setContentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*setContentOpacityPtr)(ArkUINodeHandle node, ArkUI_Float32 opacity, void* opacityRawPtr);
     void (*resetContentOpacity)(ArkUINodeHandle node);
@@ -3709,7 +3710,7 @@ struct CJUIFrameNodeModifier {
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);
     void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32 (*size)[2]);
-    ArkUI_Float32* (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node);
+    void (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node, ArkUI_Float32 (*position)[2]);
 };
 
 struct CJUINodeContentEvent {

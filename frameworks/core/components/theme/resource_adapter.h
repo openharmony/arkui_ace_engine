@@ -87,6 +87,11 @@ public:
 
     virtual Color GetColor(uint32_t resId) = 0;
 
+    virtual Color GetColor(uint32_t resId, ColorMode colorMode)
+    {
+        return {};
+    }
+
     virtual Color GetColorByName(const std::string& resName)
     {
         return {};

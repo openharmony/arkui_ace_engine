@@ -289,15 +289,15 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     minContentWidth_ = ConvertToPx(minContentWidth, scaleProperty, parentWidth).value_or(-1.0f);
     maxSideBarWidth_ = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
 
-    defaultRealSideBarWidth_ = ConvertToPx(DEFAULT_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
-    defaultMinSideBarWidth_ = ConvertToPx(DEFAULT_MIN_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
-    defaultMaxSideBarWidth_ = ConvertToPx(DEFAULT_MAX_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
-    defaultMinContentWidth_ = ConvertToPx(DEFAULT_MIN_CONTENT_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+    float defaultRealSideBarWidth = ConvertToPx(DEFAULT_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+    float defaultMinSideBarWidth = ConvertToPx(DEFAULT_MIN_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+    float defaultMaxSideBarWidth = ConvertToPx(DEFAULT_MAX_SIDE_BAR_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
+    float defaultMinContentWidth = ConvertToPx(DEFAULT_MIN_CONTENT_WIDTH, scaleProperty, parentWidth).value_or(-1.0f);
 
-    MeasureTypeUpdateWidth();
+    MeasureTypeUpdateWidth(defaultMinSideBarWidth, defaultMinContentWidth);
     minContentWidth_ = std::max(0.0f, minContentWidth_);
     InitSideBarWidth(parentWidth);
-    MeasureRealSideBarWidth(parentWidth);
+    MeasureRealSideBarWidth(parentWidth, defaultRealSideBarWidth, defaultMinSideBarWidth, defaultMaxSideBarWidth);
 
     auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(sideBarContainerPattern);
@@ -323,20 +323,20 @@ Dimension SideBarContainerLayoutAlgorithm::GetSideBarWidth(
     return searchTheme->GetSideBarWidth();
 }
 
-void SideBarContainerLayoutAlgorithm::MeasureTypeUpdateWidth()
+void SideBarContainerLayoutAlgorithm::MeasureTypeUpdateWidth(float defaultMinSideBarWidth, float defaultMinContentWidth)
 {
     if (minSideBarWidth_ >= 0.0f && minContentWidth_ >= 0.0f) {
         typeUpdateWidth_ = minSideBarWidth_ + minContentWidth_;
         return;
     } else if (minSideBarWidth_ >= 0.0f) {
-        typeUpdateWidth_ = minSideBarWidth_ + defaultMinContentWidth_;
+        typeUpdateWidth_ = minSideBarWidth_ + defaultMinContentWidth;
     } else if (minContentWidth_ >= 0.0f) {
-        typeUpdateWidth_ = minContentWidth_ + defaultMinSideBarWidth_;
+        typeUpdateWidth_ = minContentWidth_ + defaultMinSideBarWidth;
     } else {
-        typeUpdateWidth_ = defaultMinSideBarWidth_ + defaultMinContentWidth_;
+        typeUpdateWidth_ = defaultMinSideBarWidth + defaultMinContentWidth;
     }
-    if (typeUpdateWidth_ < defaultMinSideBarWidth_ + defaultMinContentWidth_) {
-        typeUpdateWidth_ = defaultMinSideBarWidth_ + defaultMinContentWidth_;
+    if (typeUpdateWidth_ < defaultMinSideBarWidth + defaultMinContentWidth) {
+        typeUpdateWidth_ = defaultMinSideBarWidth + defaultMinContentWidth;
     }
 }
 
@@ -381,7 +381,8 @@ void SideBarContainerLayoutAlgorithm::InitSideBarWidth(float parentWidth)
     }
 }
 
-void SideBarContainerLayoutAlgorithm::MeasureRealSideBarWidth(float parentWidth)
+void SideBarContainerLayoutAlgorithm::MeasureRealSideBarWidth(float parentWidth, float defaultRealSideBarWidth,
+    float defaultMinSideBarWidth, float defaultMaxSideBarWidth)
 {
     if (minSideBarWidth_ < 0.0f) {
         if (realSideBarWidth_ >= 0.0f) {
@@ -389,10 +390,10 @@ void SideBarContainerLayoutAlgorithm::MeasureRealSideBarWidth(float parentWidth)
         } else if (maxSideBarWidth_ >= 0.0f) {
             minSideBarWidth_ = maxSideBarWidth_;
         } else {
-            minSideBarWidth_ = defaultMinSideBarWidth_;
+            minSideBarWidth_ = defaultMinSideBarWidth;
         }
-        if (minSideBarWidth_ >= defaultMinSideBarWidth_) {
-            minSideBarWidth_ = defaultMinSideBarWidth_;
+        if (minSideBarWidth_ >= defaultMinSideBarWidth) {
+            minSideBarWidth_ = defaultMinSideBarWidth;
         }
         if (minSideBarWidth_ >= parentWidth) {
             minSideBarWidth_ = parentWidth;
@@ -403,7 +404,7 @@ void SideBarContainerLayoutAlgorithm::MeasureRealSideBarWidth(float parentWidth)
     }
 
     if (maxSideBarWidth_ < 0.0f) {
-        maxSideBarWidth_ = defaultMaxSideBarWidth_;
+        maxSideBarWidth_ = defaultMaxSideBarWidth;
         if (maxSideBarWidth_ <= realSideBarWidth_) {
             maxSideBarWidth_ = realSideBarWidth_;
         } else if (maxSideBarWidth_ <= minSideBarWidth_) {
@@ -414,7 +415,7 @@ void SideBarContainerLayoutAlgorithm::MeasureRealSideBarWidth(float parentWidth)
     }
 
     if (realSideBarWidth_ < 0.0f) {
-        realSideBarWidth_ = defaultRealSideBarWidth_;
+        realSideBarWidth_ = defaultRealSideBarWidth;
         if (realSideBarWidth_ <= minSideBarWidth_) {
             realSideBarWidth_ = minSideBarWidth_;
         } else if (realSideBarWidth_ >= maxSideBarWidth_) {

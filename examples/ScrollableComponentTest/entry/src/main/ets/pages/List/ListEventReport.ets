@@ -53,7 +53,7 @@ struct ListExample {
             }
           }, (item: string, index?: number) => item)
         }
-        .id('List')
+        .id('listEventReportList')
         .listDirection(Axis.Vertical) // 排列方向
         .scrollBar(BarState.Off)
         .friction(0.6)
@@ -130,7 +130,7 @@ struct ListExample {
           .height('5%')
           .onClick(() => { //
 
-            NodeIdUtils.getNodeInternalId(this.getUIContext(),'List','text',100)
+            NodeIdUtils.getNodeInternalId(this.getUIContext(),'listEventReportList','text',100)
           })
           .margin({ top: 360, left: 20 })
       }

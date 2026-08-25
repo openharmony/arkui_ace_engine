@@ -111,6 +111,9 @@ template("build_component_ng") {
       if (ace_engine_feature_enable_upgrade_skia) {
         defines += [ "USE_NEW_SKIA" ]
       }
+      if (ace_engine_feature_enable_material_customized) {
+        defines += [ "ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED" ]
+      }
       if (is_arkui_x) {
         include_dirs += [
           "//foundation/appframework/arkui",
@@ -226,7 +229,9 @@ template("build_component_ng") {
         } else {
           external_deps += [
             "ets_runtime:libark_jsruntime",
+            "libuv:uv",
             "napi:ace_napi",
+            "node:node_header_notice",
           ]
           if (!ace_engine_feature_wearable) {
             defines += [ "INCLUDE_GENERATED_SOURCES" ]

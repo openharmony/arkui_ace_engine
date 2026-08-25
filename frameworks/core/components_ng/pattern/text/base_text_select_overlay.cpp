@@ -28,7 +28,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -839,13 +839,15 @@ void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect
     }
 }
 
-void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed,
+    bool transformTriggersEmbed)
 {
     auto isStartScroll = IsAncestorNodeStartScroll(flag);
     auto isStartAnimation = IsAncestorNodeStartAnimation(flag);
     auto isTransformChanged = IsAncestorNodeTransformChange(flag);
     auto isStartTransition = IsAncestorNodeHasTransition(flag);
-    auto isSwitchToEmbed = isStartScroll || isStartAnimation || isTransformChanged || isStartTransition;
+    auto isSwitchToEmbed = (isStartScroll && scrollTriggersEmbed) || isStartAnimation
+        || (isTransformChanged && transformTriggersEmbed) || isStartTransition;
     // parent size changes but the child does not change.
     if (IsAncestorNodeGeometryChange(flag)) {
         isSwitchToEmbed = isSwitchToEmbed || CheckAndUpdateHostGlobalPaintRect();
@@ -856,10 +858,17 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd, flag);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
+    auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd, isStartScroll,
+                          scrollTriggersEmbed]() {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         if (isScrollEnd) {
+            overlay->SwitchToOverlayMode();
+            return;
+        }
+        // scroll-start switches to overlay when this host does not embed on scroll
+        // (e.g. cross-node: container embed does not ride an inner scroll).
+        if (isStartScroll && !scrollTriggersEmbed) {
             overlay->SwitchToOverlayMode();
             return;
         }
@@ -1529,4 +1538,94 @@ TextSelectionClearPolicy BaseTextSelectOverlay::GetClearPolicy()
     clearPolicy_ = policy ? policy.value() : SelectOverlayCallback::GetClearPolicy();
     return clearPolicy_.value();
 }
+
+// Per-field helpers for the TextInput selection-menu spec (T030). Each is the single source of
+// truth for one SelectMenuInfo field; TextFieldSelectOverlay and RichEditorSelectOverlay
+// (plain-text-input mode) call them with conditions gathered from their own pattern.
+void BaseTextSelectOverlay::FillMenuHasOnPrepareMenuCallback(SelectMenuInfo& menuInfo)
+{
+    menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
+}
+
+void BaseTextSelectOverlay::FillMenuShowCopyAll(SelectMenuInfo& menuInfo, bool hasText, bool isSelectAll)
+{
+    menuInfo.showCopyAll = hasText && !isSelectAll;
+}
+
+void BaseTextSelectOverlay::FillMenuShowCameraInput(SelectMenuInfo& menuInfo, bool isSelected,
+    bool isCameraSupported, bool isInPasswordMode, bool hasCustomKeyboard)
+{
+    bool isSupportCameraInput = isCameraSupported && !isInPasswordMode;
+    menuInfo.showCameraInput = !isSelected && isSupportCameraInput && !hasCustomKeyboard;
+}
+
+void BaseTextSelectOverlay::FillMenuVisibility(SelectMenuInfo& menuInfo, bool hasText, bool showCameraInput,
+    bool isShowAutoFill, bool isSelectionMenuHidden, SelectOverlayDirtyFlag dirtyFlag)
+{
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    if (IsUsingMouse()) {
+        menuInfo.menuIsShow = !isSelectionMenuHidden || manager->IsOpen();
+    } else {
+        menuInfo.menuIsShow = (hasText || IsShowPaste() || showCameraInput || isShowAutoFill)
+            && !isSelectionMenuHidden && IsShowMenu();
+    }
+    menuInfo.menuDisable = isSelectionMenuHidden;
+    if ((dirtyFlag & DIRTY_SELECT_AI_DETECT) == DIRTY_SELECT_AI_DETECT) {
+        menuInfo.menuIsShow = manager->IsMenuShow();
+    }
+}
+
+void BaseTextSelectOverlay::FillMenuShowPaste(SelectMenuInfo& menuInfo)
+{
+    menuInfo.showPaste = IsShowPaste();
+}
+
+void BaseTextSelectOverlay::FillMenuMenuType(SelectMenuInfo& menuInfo)
+{
+    menuInfo.menuType = IsUsingMouse() ? OptionMenuType::MOUSE_MENU : OptionMenuType::TOUCH_MENU;
+}
+
+void BaseTextSelectOverlay::FillMenuShowCopyAndCut(SelectMenuInfo& menuInfo, bool hasText, bool allowCopy,
+    bool isSelected)
+{
+    menuInfo.showCopy = hasText && allowCopy && isSelected;
+    menuInfo.showCut = menuInfo.showCopy;
+}
+
+void BaseTextSelectOverlay::FillMenuShowAutoFill(SelectMenuInfo& menuInfo, bool isShowAutoFill)
+{
+    menuInfo.showAutoFill = isShowAutoFill;
+}
+
+void BaseTextSelectOverlay::FillMenuShowTranslate(SelectMenuInfo& menuInfo, bool showCopy, bool isShowTranslate)
+{
+    menuInfo.showTranslate = showCopy && isShowTranslate && IsNeedMenuTranslate();
+}
+
+void BaseTextSelectOverlay::FillMenuShowSearch(SelectMenuInfo& menuInfo, bool showCopy, bool isShowSearch)
+{
+    menuInfo.showSearch = showCopy && isShowSearch && IsNeedMenuSearch();
+}
+
+void BaseTextSelectOverlay::FillMenuShowShare(SelectMenuInfo& menuInfo, bool showCopy)
+{
+    menuInfo.showShare = showCopy && IsSupportMenuShare() && IsNeedMenuShare();
+}
+
+void BaseTextSelectOverlay::FillMenuShowAIWrite(SelectMenuInfo& menuInfo, bool isShowAIWrite)
+{
+    menuInfo.showAIWrite = isShowAIWrite;
+}
+
+void BaseTextSelectOverlay::FillMenuAIMenuOptionType(SelectMenuInfo& menuInfo, bool isInPasswordMode,
+    bool isShowAIMenuOption, bool hasAiItem, TextDataDetectType aiType)
+{
+    if (!isInPasswordMode && isShowAIMenuOption && hasAiItem) {
+        menuInfo.aiMenuOptionType = aiType;
+    } else {
+        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+    }
+}
+
 } // namespace OHOS::Ace::NG

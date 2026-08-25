@@ -641,6 +641,12 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest009, TestSize.Level
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
     ResetScrollingNodes();
 
+    contentChangeMgr->scrollingSwiperNodes_.emplace(TEST_SCROLLING_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+    contentChangeMgr->OnTextChangeEnd(rect1, rootRect);
+    EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+
     /**
      * @tc.steps: step3. call OnTextChangeEnd under normal conditions.
      * @tc.expected: textAABB_ is not empty and combined correctly.
@@ -924,6 +930,12 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
     ResetScrollingNodes();
 
+    contentChangeMgr->scrollingSwiperNodes_.emplace(TEST_SCROLLING_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+    contentChangeMgr->StartTextAABBCollecting();
+    EXPECT_FALSE(contentChangeMgr->textCollecting_);
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
     EXPECT_FALSE(contentChangeMgr->IsScrolling());
@@ -994,6 +1006,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest016, TestSize.Level
     EXPECT_FALSE(contentChangeMgr->textAABB_.IsEmpty());
     EXPECT_TRUE(contentChangeMgr->textCollecting_);
     ResetScrollingNodes();
+
+    contentChangeMgr->scrollingSwiperNodes_.emplace(TEST_SCROLLING_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+    contentChangeMgr->StopTextAABBCollecting(rootRect);
+    EXPECT_FALSE(contentChangeMgr->textAABB_.IsEmpty());
+    EXPECT_TRUE(contentChangeMgr->textCollecting_);
+    contentChangeMgr->scrollingSwiperNodes_.clear();
 
     /**
      * @tc.steps: step3. call StopTextAABBCollecting under normal conditions.
@@ -1665,6 +1684,26 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 }
 
 /**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest015
+ * @tc.desc: Test GetIgnoreEventMask with ARKWEB ignore events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest015, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    auto mask = contentChangeMgr->GetIgnoreEventMask(R"({"ARKWEB": ["all"]})");
+    EXPECT_EQ(mask, ContentChangeManager::ARKWEB_ALL);
+
+    mask = contentChangeMgr->GetIgnoreEventMask(R"({"SCROLL": ["scrollTo"], "ARKWEB": ["all"]})");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO | ContentChangeManager::ARKWEB_ALL);
+
+    mask = contentChangeMgr->GetIgnoreEventMask(R"({"ARKWEB": ["ALL"]})");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
  * @tc.name: ContentChangeManagerTest020
  * @tc.desc: Test OnTransitionAdded
  * @tc.type: FUNC
@@ -2134,5 +2173,35 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest030, TestSize.Level
     contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
 
     Mock::VerifyAndClearExpectations(mockUiSessionManager);
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest031
+ * @tc.desc: Test IsContentChanging
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest031, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    ResetScrollingNodes();
+    ResetTransitioningNodes();
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    EXPECT_FALSE(contentChangeMgr->IsContentChanging());
+
+    SetScrollingNodes();
+    EXPECT_TRUE(contentChangeMgr->IsContentChanging());
+    ResetScrollingNodes();
+
+    SetTransitioningNodes();
+    EXPECT_TRUE(contentChangeMgr->IsContentChanging());
+    ResetTransitioningNodes();
+
+    contentChangeMgr->scrollingSwiperNodes_.emplace(TEST_SCROLLING_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->IsContentChanging());
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+
+    EXPECT_FALSE(contentChangeMgr->IsContentChanging());
 }
 } // namespace OHOS::Ace::NG

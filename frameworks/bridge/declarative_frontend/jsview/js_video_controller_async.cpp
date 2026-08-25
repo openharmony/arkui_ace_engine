@@ -45,11 +45,17 @@ napi_value CreateErrorValue(napi_env env, const std::string& reason)
 {
     napi_value code = nullptr;
     std::string codeStr = std::to_string(VIDEO_ASYNC_ERROR_CODE);
-    napi_create_string_utf8(env, codeStr.c_str(), codeStr.length(), &code);
+    if (napi_create_string_utf8(env, codeStr.c_str(), codeStr.length(), &code) != napi_ok) {
+        return nullptr;
+    }
     napi_value msg = nullptr;
-    napi_create_string_utf8(env, reason.c_str(), reason.length(), &msg);
+    if (napi_create_string_utf8(env, reason.c_str(), reason.length(), &msg) != napi_ok) {
+        return nullptr;
+    }
     napi_value error = nullptr;
-    napi_create_error(env, code, msg, &error);
+    if (napi_create_error(env, code, msg, &error) != napi_ok) {
+        return nullptr;
+    }
     return error;
 }
 
@@ -58,6 +64,8 @@ void PostAsyncPromiseResult(napi_env env, napi_deferred deferred, const RefPtr<T
 {
     taskExecutor->PostTask(
         [env, deferred, success, reason]() {
+            CHECK_NULL_VOID(env);
+            CHECK_NULL_VOID(deferred);
             napi_handle_scope scope = nullptr;
             auto status = napi_open_handle_scope(env, &scope);
             if (status != napi_ok) {
@@ -69,6 +77,9 @@ void PostAsyncPromiseResult(napi_env env, napi_deferred deferred, const RefPtr<T
                 napi_resolve_deferred(env, deferred, result);
             } else {
                 napi_value error = CreateErrorValue(env, reason);
+                if (!error) {
+                    napi_get_undefined(env, &error);
+                }
                 napi_reject_deferred(env, deferred, error);
             }
             napi_close_handle_scope(env, scope);
@@ -90,7 +101,9 @@ void ResolveAsyncPromise(const JSCallbackInfo& args, const RefPtr<VideoControlle
 
     napi_deferred deferred = nullptr;
     napi_value promise = nullptr;
-    napi_create_promise(env, &deferred, &promise);
+    if (napi_create_promise(env, &deferred, &promise) != napi_ok || !promise || !deferred) {
+        return;
+    }
 
     if (controller) {
         auto callback = [env, deferred, taskExecutor, taskName](bool success, const std::string& reason) {

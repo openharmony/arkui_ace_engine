@@ -21,9 +21,9 @@ import { global_resource_Resource_serializer } from './../framework/resource'
 import { RectResult_serializer, SizeResult_serializer, RectResult, SizeResult, Bindable_F64_serializer, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, Bindable, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { FrameNode_serializer } from './../framework/FrameNode'
 import { Edge, ScrollSource, BarState, Color as arkui_component_enums_Color, EdgeEffect, Curve } from './enums'
-import { Length, Resource as arkui_component_units_Resource, VoidCallback, LengthMetrics as arkui_component_units_LengthMetrics, Dimension } from './units'
+import { Length, Resource as arkui_component_units_Resource, VoidCallback, Dimension } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { extractors, AttributeModifier, hookScrollAttributeModifier, AttributeUpdater } from '#handwritten'
+import { extractors, AttributeModifier, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, hookScrollAttributeModifier, AttributeUpdater } from '#handwritten'
 import { FrameNode } from 'arkui.FrameNode'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -36,13 +36,12 @@ import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { default as curves } from '@ohos.curves'
 import { ScrollModifier } from './../ScrollModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { curves_ICurve_serializer } from './../framework/ohos.curves'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {
         return new Scroller(MaterializedBaseTag.NOP, ptr)
@@ -1215,7 +1214,8 @@ export class ScrollToIndexOptions_serializer {
         if (valueHolderForExtraOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForExtraOffsetTmpValue = valueHolderForExtraOffset!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForExtraOffsetTmpValue)
+            const valueHolderForExtraOffsetTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForExtraOffsetTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForExtraOffsetTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1225,7 +1225,8 @@ export class ScrollToIndexOptions_serializer {
         const extraOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let extraOffsetTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((extraOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            extraOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const extraOffsetTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            extraOffsetTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(extraOffsetTmpBufOptDeserialized)
         }
         const extraOffsetTmpResult: arkui_component_units_LengthMetrics | undefined = extraOffsetTmpBuf
         let value: ScrollToIndexOptions = ({extraOffset: extraOffsetTmpResult} as ScrollToIndexOptions)

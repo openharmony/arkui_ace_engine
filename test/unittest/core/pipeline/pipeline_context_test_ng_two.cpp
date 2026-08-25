@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 #include "test/mock/frameworks/core/common/mock_window.h"

@@ -44,7 +44,7 @@ public:
     void UpdateVerticalBar(float offset, float estimatedHeight, const Size& viewPort, Offset viewOffset);
     void UpdateHorizontalBar(float offset, float estimatedHeight, const Size& viewPort, Offset viewOffset);
     void UpdateBorderRadius(bool isVertical);
-    void OnDraw(DrawingContext& context) const;
+    void OnDraw(DrawingContext& context, const RefPtr<OverlayModifier>& modifier) const;
 
     void SetScrollBarScrollCallback(ScrollBarScrollCallback&& callback)
     {
@@ -189,6 +189,7 @@ private:
     void UpdateScrollBar(const UpdateScrollBarData& data, bool isVertical);
     bool HandleScrollPositionCallback(double offset, int32_t source, bool isMouseWheelScroll, bool isVertical);
     void HandleScrollEndCallback(bool isVertical);
+    void UpdateBoundsRect(const RefPtr<OverlayModifier>& modifier, const RectF& rect) const;
 
     DisplayMode displayMode_ = DisplayMode::AUTO;
     WeakPtr<ScrollablePattern> pattern_;

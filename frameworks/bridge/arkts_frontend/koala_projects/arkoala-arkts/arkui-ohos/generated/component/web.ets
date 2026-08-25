@@ -1181,6 +1181,9 @@ export class WebResourceError implements MaterializedBase {
     public getErrorCode(): int32 {
         return this.getErrorCode_serialize()
     }
+    public getCustomErrorCode(): int32 {
+        return this.getCustomErrorCode_serialize()
+    }
     private getErrorInfo_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._WebResourceError_getErrorInfo(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -1190,6 +1193,13 @@ export class WebResourceError implements MaterializedBase {
     }
     private getErrorCode_serialize(): int32 {
         const retval = ArkUIGeneratedNativeModule._WebResourceError_getErrorCode(this.peer!.ptr)
+        return retval
+    }
+    public getCustomErrorCode(): int32 {
+        return this.getCustomErrorCode_serialize()
+    }
+    private getCustomErrorCode_serialize(): int32 {
+        const retval = ArkUIGeneratedNativeModule._WebResourceError_getCustomErrorCode(this.peer!.ptr)
         return retval
     }
 }
@@ -3337,7 +3347,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableFullscreenVideoOverlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-	setEnableMediaNetworkProxyAttribute(value: boolean | undefined): void {
+    setEnableMediaNetworkProxyAttribute(value: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

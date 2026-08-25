@@ -2878,4 +2878,128 @@ HWTEST_F(MenuViewTestNg, BuildGridListColumn002, TestSize.Level1)
     ASSERT_NE(rowProps, nullptr);
     EXPECT_EQ(rowProps->GetCrossAxisAlign().value_or(FlexAlign::FLEX_END), static_cast<FlexAlign>(4));
 }
+
+/**
+ * @tc.name: MenuManagerClearResidualLayoutDirtyMarkTest001
+ * @tc.desc: Verify ClearResidualLayoutDirtyMark when frameRoot is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, MenuManagerClearResidualLayoutDirtyMarkTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a overlayManager and get menuManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    RefPtr<FrameNode> nullFrameRoot;
+
+    /**
+     * @tc.steps: step2. call ClearResidualLayoutDirtyMark with null frameRoot.
+     * @tc.expected: function returns early, no crash.
+     */
+    menuManager->ClearResidualLayoutDirtyMark(nullFrameRoot, pipeline);
+    EXPECT_EQ(pipeline->GetDirtyLayoutNodes().size(), 0u);
+}
+
+/**
+ * @tc.name: MenuManagerClearResidualLayoutDirtyMarkTest002
+ * @tc.desc: Verify ClearResidualLayoutDirtyMark when frameRoot is not dirty marked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, MenuManagerClearResidualLayoutDirtyMarkTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuManager and a frameRoot that is not dirty marked.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto frameRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(frameRoot, nullptr);
+    EXPECT_FALSE(frameRoot->IsLayoutDirtyMarked());
+
+    /**
+     * @tc.steps: step2. call ClearResidualLayoutDirtyMark.
+     * @tc.expected: returns early, mark stays false.
+     */
+    menuManager->ClearResidualLayoutDirtyMark(frameRoot, pipeline);
+    EXPECT_FALSE(frameRoot->IsLayoutDirtyMarked());
+}
+
+/**
+ * @tc.name: MenuManagerClearResidualLayoutDirtyMarkTest003
+ * @tc.desc: Verify ClearResidualLayoutDirtyMark when pipeline is null, mark should not be cleared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, MenuManagerClearResidualLayoutDirtyMarkTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuManager and a dirty marked frameRoot.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    auto frameRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(frameRoot, nullptr);
+    frameRoot->SetLayoutDirtyMarked(true);
+    EXPECT_TRUE(frameRoot->IsLayoutDirtyMarked());
+    RefPtr<PipelineContext> nullPipeline;
+
+    /**
+     * @tc.steps: step2. call ClearResidualLayoutDirtyMark with null pipeline.
+     * @tc.expected: returns at CHECK_NULL_VOID(pipeline), mark not cleared.
+     */
+    menuManager->ClearResidualLayoutDirtyMark(frameRoot, nullPipeline);
+    EXPECT_TRUE(frameRoot->IsLayoutDirtyMarked());
+}
+
+/**
+ * @tc.name: MenuManagerClearResidualLayoutDirtyMarkTest004
+ * @tc.desc: Verify ClearResidualLayoutDirtyMark clears mark when dirty nodes contain a root node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, MenuManagerClearResidualLayoutDirtyMarkTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuManager, a dirty marked frameRoot and add a root dirty node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto frameRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(frameRoot, nullptr);
+    frameRoot->SetLayoutDirtyMarked(true);
+    auto dirtyRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(dirtyRoot, nullptr);
+    pipeline->taskScheduler_->dirtyLayoutNodes_.push_back(dirtyRoot);
+    EXPECT_EQ(pipeline->GetDirtyLayoutNodes().size(), 1u);
+
+    /**
+     * @tc.steps: step2. call ClearResidualLayoutDirtyMark.
+     * @tc.expected: mark is cleared.
+     */
+    menuManager->ClearResidualLayoutDirtyMark(frameRoot, pipeline);
+    EXPECT_FALSE(frameRoot->IsLayoutDirtyMarked());
+    EXPECT_EQ(pipeline->GetDirtyLayoutNodes().size(), 1u);
+}
 } // namespace OHOS::Ace::NG

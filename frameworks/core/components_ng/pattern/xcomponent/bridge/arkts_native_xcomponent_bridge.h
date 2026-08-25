@@ -83,8 +83,9 @@ public:
 
 private:
     static XComponentType ConvertToXComponentType(const std::string& type);
-    static void ExtractInfoToXComponentOptions(XComponentOptions& options, panda::Local<panda::ObjectRef> controllerObj,
-        panda::Local<panda::ObjectRef>& paramObject, ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void ExtractInfoToXComponentOptions(XComponentOptions& options,
+        panda::Local<panda::ObjectRef>& controllerObj, panda::Local<panda::ObjectRef>& paramObject,
+        ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void SetControllerCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void HandleImageAIOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void HandleDetachCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);

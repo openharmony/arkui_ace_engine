@@ -830,26 +830,26 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthA
     { "\"-80%\"", Converter::ArkValue<Ark_String>("-80%", &fixCtx), "-80.00%" },
 };
 
-// Fixture 'LengthMetricsNonNeg_' for type 'Ark_LengthMetrics'
-std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixtureLengthMetricsNonNeg_ValidValues = {
-    { "123.0_vp", Converter::ArkValue<Ark_LengthMetrics>(123.0_vp, &fixCtx), "123.00vp" },
-    { "0.0_vp", Converter::ArkValue<Ark_LengthMetrics>(0.0_vp, &fixCtx), "0.00vp" },
-    { "1.23_vp", Converter::ArkValue<Ark_LengthMetrics>(1.23_vp, &fixCtx), "1.23vp" },
-    { "123.0_fp", Converter::ArkValue<Ark_LengthMetrics>(123.0_fp, &fixCtx), "123.00fp" },
-    { "0.0_fp", Converter::ArkValue<Ark_LengthMetrics>(0.0_fp, &fixCtx), "0.00fp" },
-    { "1.23_fp", Converter::ArkValue<Ark_LengthMetrics>(1.23_fp, &fixCtx), "1.23fp" },
-    { "123.0_px", Converter::ArkValue<Ark_LengthMetrics>(123.0_px, &fixCtx), "123.00px" },
-    { "0.0_px", Converter::ArkValue<Ark_LengthMetrics>(0.0_px, &fixCtx), "0.00px" },
-    { "1.23_px", Converter::ArkValue<Ark_LengthMetrics>(1.23_px, &fixCtx), "1.23px" },
-    { "0.5_pct", Converter::ArkValue<Ark_LengthMetrics>(0.5_pct, &fixCtx), "50.00%" },
-    { "0.0_pct", Converter::ArkValue<Ark_LengthMetrics>(0.0_pct, &fixCtx), "0.00%" },
+// Fixture 'LengthMetricsNonNeg_' for type 'Ark_LengthMetricsProxy'
+std::vector<std::tuple<std::string, Ark_LengthMetricsProxy, std::string>> testFixtureLengthMetricsNonNeg_ValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_LengthMetricsProxy>(123.0_vp, &fixCtx), "123.00vp" },
+    { "0.0_vp", Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_vp, &fixCtx), "0.00vp" },
+    { "1.23_vp", Converter::ArkValue<Ark_LengthMetricsProxy>(1.23_vp, &fixCtx), "1.23vp" },
+    { "123.0_fp", Converter::ArkValue<Ark_LengthMetricsProxy>(123.0_fp, &fixCtx), "123.00fp" },
+    { "0.0_fp", Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_fp, &fixCtx), "0.00fp" },
+    { "1.23_fp", Converter::ArkValue<Ark_LengthMetricsProxy>(1.23_fp, &fixCtx), "1.23fp" },
+    { "123.0_px", Converter::ArkValue<Ark_LengthMetricsProxy>(123.0_px, &fixCtx), "123.00px" },
+    { "0.0_px", Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_px, &fixCtx), "0.00px" },
+    { "1.23_px", Converter::ArkValue<Ark_LengthMetricsProxy>(1.23_px, &fixCtx), "1.23px" },
+    { "0.5_pct", Converter::ArkValue<Ark_LengthMetricsProxy>(0.5_pct, &fixCtx), "50.00%" },
+    { "0.0_pct", Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_pct, &fixCtx), "0.00%" },
 };
 
-std::vector<std::tuple<std::string, Ark_LengthMetrics>> testFixtureLengthMetricsNonNeg_InvalidValues = {
-    { "-2.3_vp", Converter::ArkValue<Ark_LengthMetrics>(-2.3_vp, &fixCtx) },
-    { "-4.5_fp", Converter::ArkValue<Ark_LengthMetrics>(-4.5_fp, &fixCtx) },
-    { "-5.6_px", Converter::ArkValue<Ark_LengthMetrics>(-5.6_px, &fixCtx) },
-    { "-0.8_pct", Converter::ArkValue<Ark_LengthMetrics>(-0.8_pct, &fixCtx) },
+std::vector<std::tuple<std::string, Ark_LengthMetricsProxy>> testFixtureLengthMetricsNonNeg_InvalidValues = {
+    { "-2.3_vp", Converter::ArkValue<Ark_LengthMetricsProxy>(-2.3_vp, &fixCtx) },
+    { "-4.5_fp", Converter::ArkValue<Ark_LengthMetricsProxy>(-4.5_fp, &fixCtx) },
+    { "-5.6_px", Converter::ArkValue<Ark_LengthMetricsProxy>(-5.6_px, &fixCtx) },
+    { "-0.8_pct", Converter::ArkValue<Ark_LengthMetricsProxy>(-0.8_pct, &fixCtx) },
 };
 
 // Fixture 'BaselineOffsetNum' for type 'Ark_Number'

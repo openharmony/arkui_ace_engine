@@ -215,6 +215,7 @@ CJ_EXPORT void FfiWebOnDownloadStart(void (*callback)(FfiOnDownloadStartEvent ev
 CJ_EXPORT void FfiWebOnErrorReceive(void (*callback)(FfiWebResourceRequest request, void* error));
 CJ_EXPORT ExternalString FfiWebGetErrorInfo(void* error);
 CJ_EXPORT int32_t FfiWebGetErrorCode(void* error);
+CJ_EXPORT int32_t FfiWebGetCustomErrorCode(void* error);
 CJ_EXPORT void FfiWebFreeResourceError(void* error);
 CJ_EXPORT VectorHeaderHandle FfiVectorHeaderCreate(int64_t size);
 CJ_EXPORT FfiHeader FfiVectorHeaderGet(int64_t index, VectorHeaderHandle handle);

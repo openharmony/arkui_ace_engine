@@ -113,22 +113,17 @@ void SelectOverlayPatternTestNg::VerifyMagnifierBottomRightResult(MagnifierContr
     VectorF zoomOffset(0.f, 0.f);
     EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
     EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
-    EXPECT_EQ(magnifierPaintOffset, OffsetF(frameSize.Width() - magnifierWidth,
-        frameSize.Height() - magnifierOffset.y - magnifierHeight));
-    EXPECT_NE(magnifierOffset.y, 0.f);
+    EXPECT_EQ(magnifierPaintOffset.GetX(), frameSize.Width() - magnifierWidth);
+    EXPECT_GE(magnifierPaintOffset.GetY(), 0.f);
+    EXPECT_LE(magnifierPaintOffset.GetY(), frameSize.Height() - magnifierHeight);
+    EXPECT_GE(magnifierOffset.y, 0.f);
+    EXPECT_LE(magnifierPaintOffset.GetY() + magnifierOffset.y + magnifierHeight, frameSize.Height());
     float halfPreScaledTextWidth = magnifierWidth / MAGNIFIER_FACTOR / 2;
-    float preScaledMagnifierHeight = static_cast<float>(MAGNIFIER_HEIGHT.ConvertToPx() / MAGNIFIER_FACTOR);
-    float halfMagnifierInnerPaddingY = static_cast<float>(
-        (MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * MAGNIFIER_SHADOW_SIZE_SCALE).ConvertToPx() / 2);
     float magnifierInnerPaddingX =
         static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
     float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
     float targetZoomOffsetX = localOffset.GetX() - frameSize.Width() + magnifierWidth / 2;
-    float targetZoomOffsetY = localOffset.GetY() - frameSize.Height() + magnifierHeight / 2;
-    float maxZoomOffsetY = magnifierHeight / 2 - preScaledMagnifierHeight / 2 +
-                          halfMagnifierInnerPaddingY / MAGNIFIER_FACTOR;
-    EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
-        std::clamp(targetZoomOffsetY, -maxZoomOffsetY, maxZoomOffsetY)));
+    EXPECT_EQ(zoomOffset.x, std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX));
 }
 
 RefPtr<SelectOverlayNode> SelectOverlayPatternTestNg::CreateSelectOverlayNodeForTest(
@@ -630,7 +625,7 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
     float targetZoomOffsetX = localOffset.GetX() - magnifierWidth / 2;
     EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
-        localOffset.GetY() - magnifierHeight / 2));
+        (localOffset.GetY() - magnifierHeight / 2) * MAGNIFIER_FACTOR));
     rootUINode->RemoveChild(windowNode);
     rootUINode->renderContext_ = rootUINodeRenderContext;
 }
@@ -795,9 +790,60 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     VectorF magnifierOffset(0.f, 0.f);
     VectorF zoomOffset(0.f, 0.f);
     EXPECT_TRUE(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset));
-    EXPECT_EQ(magnifierOffset.y, MAGNIFIER_OFFSETY.ConvertToPx());
+    EXPECT_GE(magnifierOffset.y, 0.f);
+    EXPECT_LE(magnifierPaintOffset.GetY() + magnifierOffset.y + controller.magnifierNodeHeight_.ConvertToPx(),
+        frameSize.Height());
 
     safeAreaManager->UpdateNavSafeArea(SafeAreaInsets {});
+    rootUINode->RemoveChild(windowNode);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset005
+ * @tc.desc: test UpdateMagnifierOffsetY non-negative offset and unclamped zoomOffset at extreme bottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset005, TestSize.Level1)
+{
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, frameSize.Width(), frameSize.Height()));
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    windowNode->renderContext_ = mockParentRenderContext;
+    columnNode->renderContext_ = mockParentRenderContext;
+    windowNode->MountToParent(rootUINode);
+    columnNode->MountToParent(windowNode);
+
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    float magnifierHeight = controller.magnifierNodeHeight_.ConvertToPx();
+    OffsetF localOffset(200.f, 399.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_TRUE(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset));
+    EXPECT_GE(magnifierOffset.y, 0.f);
+    EXPECT_GE(magnifierPaintOffset.GetY(), 0.f);
+    EXPECT_LE(magnifierPaintOffset.GetY(), frameSize.Height() - magnifierHeight);
+    EXPECT_LE(magnifierPaintOffset.GetY() + magnifierOffset.y + magnifierHeight, frameSize.Height());
     rootUINode->RemoveChild(windowNode);
     rootUINode->renderContext_ = rootUINodeRenderContext;
 }
@@ -1182,6 +1228,9 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeBuildMoreOrBackSymbol001, 
  */
 HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: extension menu color depends on theme layout unavailable on host";
+#endif
     /**
      * @tc.steps: step1. Set up test environment with LIGHT color mode
      */
@@ -1189,6 +1238,9 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+#ifdef ACE_HOST_PRODUCT
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+#endif
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode =
         AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));

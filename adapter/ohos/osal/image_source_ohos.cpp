@@ -85,10 +85,11 @@ RefPtr<ImageSource> ImageSource::Create(int32_t fd)
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
-RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, int32_t svgLimitsId)
 {
     uint32_t errorCode = 0;
     Media::SourceOptions options;
+    options.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId);
     auto src = Media::ImageSource::CreateImageSource(data, size, options, errorCode);
     if (errorCode != Media::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "create image source failed, errorCode = %{public}u", errorCode);
@@ -97,9 +98,10 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
-RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode)
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode, int32_t svgLimitsId)
 {
     Media::SourceOptions options;
+    options.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId);
     auto src = Media::ImageSource::CreateImageSource(data, size, options, errorCode);
     if (errorCode != Media::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "create image source failed, errorCode = %{public}u", errorCode);
@@ -108,9 +110,10 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
-RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
+RefPtr<ImageSource> ImageSource::Create(const std::string& filePath, int32_t svgLimitsId)
 {
     Media::SourceOptions opts;
+    opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId);
     uint32_t errorCode = 0;
     auto src = Media::ImageSource::CreateImageSource(filePath, opts, errorCode);
     if (errorCode != Media::SUCCESS) {

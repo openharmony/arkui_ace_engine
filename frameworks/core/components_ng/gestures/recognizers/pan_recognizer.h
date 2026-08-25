@@ -149,10 +149,6 @@ public:
     // immediately releases any of the listed fingers that we are tracking.
     void SetEscapeModeForPan(const std::unordered_set<int32_t>& existingFingers);
 
-    // Walk the arena and ask every other PanRecognizer
-    // to release the fingers we currently track.
-    void FilterCoexistingGestureFingers();
-
     void SetScrollEscapeForPan();
 
     bool IsFingerEscaped(int32_t fingerId) const override;

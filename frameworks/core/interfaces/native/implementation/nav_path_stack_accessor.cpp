@@ -362,7 +362,7 @@ Ark_Int32 RemoveByIndexesImpl(Ark_NavPathStack peer,
     auto invalidVal = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, invalidVal);
     CHECK_NULL_RETURN(indexes, invalidVal);
-    auto removeIndexes = Converter::Convert<std::vector<int>>(*indexes);
+    auto removeIndexes = Converter::Convert<std::vector<int32_t>>(*indexes);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto size = navStack->PathStack::RemoveByIndexes(removeIndexes);
@@ -737,6 +737,48 @@ void SetPathStackImpl(Ark_NavPathStack peer,
     bool convertAnimate = Converter::OptConvertPtr<bool>(animated).value_or(true);
     navPathStack->SetPathInfo(pathArray, convertAnimate);
 }
+
+void PreloadPathImpl(Ark_VMContext vmContext,
+                     Ark_AsyncWorkerPtr asyncWorker,
+                     Ark_NavPathStack peer,
+                     Ark_NavPathInfo info,
+                     const Opt_PreloadOptions* options,
+                     const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(
+        outputArgumentForReturningPromise);
+    auto finishFunc = [promise](int32_t errorCode, std::string errorMessage) {
+        if (errorCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({ std::to_string(errorCode), errorMessage });
+        }
+    };
+
+    auto execFunc = [peer, info, options, finishFunc]() {
+        CHECK_NULL_VOID(peer);
+        CHECK_NULL_VOID(info);
+        auto navStack = peer->GetNavPathStack();
+        if (!navStack) {
+            LOGE("NavPathStackAccessor::PreloadPathImpl. Navigation Stack isn't bound to a component.");
+            finishFunc(ERROR_CODE_PARAM_INVALID,
+                "Parameter error. Navigation Stack isn't bound to a component.");
+            return;
+        }
+        auto navInfo = info->data;                       // NavigationContext::PathInfo
+        auto name = navInfo.name_;
+        auto param = navInfo.param_;
+
+        std::function<void()> onDestroy;
+        if (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            // onDestroy = Converter::Convert<...>(options->value.onDestroy);
+        }
+
+        navStack->PreloadPath(name, param, std::move(finishFunc), std::move(onDestroy));
+    };
+
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
+}
 } // NavPathStackAccessor
 const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()
 {
@@ -778,6 +820,7 @@ const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()
         NavPathStackAccessor::SetInterceptionImpl,
         NavPathStackAccessor::GetPathStackImpl,
         NavPathStackAccessor::SetPathStackImpl,
+        NavPathStackAccessor::PreloadPathImpl,
     };
     return &NavPathStackAccessorImpl;
 }

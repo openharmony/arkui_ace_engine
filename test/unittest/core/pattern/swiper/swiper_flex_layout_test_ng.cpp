@@ -184,6 +184,9 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout002, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout003, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: property animation translate not tracked by mock";
+#endif
     /**
      * @tc.steps: step1. Create swiper with sibling inside flex layout
      */
@@ -400,6 +403,9 @@ HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout007, TestSize.Level1)
  */
 HWTEST_F(SwiperFlexLayoutTestNg, SwiperFlexLayout008, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: property animation translate not tracked by mock";
+#endif
     /**
      * @tc.steps: step1. Create swiper with sibling inside flex layout
      */

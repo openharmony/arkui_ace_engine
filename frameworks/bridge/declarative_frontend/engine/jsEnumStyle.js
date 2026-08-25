@@ -38,7 +38,7 @@ let ColoringStrategy;
   ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
-var CompetitionStrategy;
+let CompetitionStrategy;
 (function (CompetitionStrategy) {
     CompetitionStrategy[CompetitionStrategy["DEFAULT"] = 0] = "DEFAULT";
     CompetitionStrategy[CompetitionStrategy["COMPETITION"] = 1] = "COMPETITION";
@@ -90,6 +90,12 @@ let TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType.ADDRESS = 3] = 'ADDRESS';
   TextDataDetectorType[TextDataDetectorType.DATE_TIME = 4] = 'DATE_TIME';
 })(TextDataDetectorType || (TextDataDetectorType = {}));
+
+let TextEncoding;
+(function (TextEncoding) {
+  TextEncoding[TextEncoding.TEXT_ENCODING_UTF8 = 0] = 'TEXT_ENCODING_UTF8';
+  TextEncoding[TextEncoding.TEXT_ENCODING_UTF16 = 1] = 'TEXT_ENCODING_UTF16';
+})(TextEncoding || (TextEncoding = {}));
 
 let DataPanelType;
 (function (DataPanelType) {
@@ -1072,6 +1078,19 @@ let BarPosition;
   BarPosition[BarPosition.Start = 0] = 'Start';
   BarPosition[BarPosition.End = 1] = 'End';
 })(BarPosition || (BarPosition = {}));
+
+let TabBarStyle;
+(function (TabBarStyle) {
+  TabBarStyle[TabBarStyle.BOTTOM = 0] = 'BOTTOM';
+  TabBarStyle[TabBarStyle.SIDEBAR = 1] = 'SIDEBAR';
+  TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 2] = 'SIDEBAR_ADAPTABLE';
+})(TabBarStyle || (TabBarStyle = {}));
+
+let TabBarDisplayMode;
+(function (TabBarDisplayMode) {
+  TabBarDisplayMode[TabBarDisplayMode.BOTTOM_TABBAR = 0] = 'BOTTOM_TABBAR';
+  TabBarDisplayMode[TabBarDisplayMode.SIDEBAR = 1] = 'SIDEBAR';
+})(TabBarDisplayMode || (TabBarDisplayMode = {}));
 
 let SharedTransitionEffectType;
 (function (SharedTransitionEffectType) {
@@ -2743,6 +2762,8 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
+    // preload item (only 1 at a time)
+    this.preloadItem = undefined;
   }
   getPathStack() {
     return this.nativeStack?.getPathStack(this);
@@ -2965,6 +2986,63 @@ class NavPathStack {
     this.isReplace = 0;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
+  }
+  preloadPath(info, options) {
+    if (!this.checkPathValid(info)) {
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
+    }
+    // Destroy existing preload item if any
+    if (this.preloadItem !== undefined) {
+      if (this.preloadItem.onDestroy !== undefined) {
+        this.preloadItem.onDestroy();
+      }
+      if (this.nativeStack) {
+        this.nativeStack.destroyPreloadNode();
+      }
+      this.preloadItem = undefined;
+    }
+    // Store the preload item
+    let paramString = JSON.stringify(info.param);
+    this.preloadItem = {
+      info: info,
+      paramString: paramString,
+      onDestroy: options !== undefined ? options.onDestroy : undefined
+    };
+    
+    // Create the preloaded node via native stack
+    if (!this.nativeStack) {
+      return new Promise((resolve, reject) => {
+        this.preloadItem.promise = (errorCode, errorMessage) => {
+          if (errorCode === 0) {
+            resolve(0);
+            return;
+          }
+          reject({code: errorCode, message: errorMessage});
+        };
+      });
+    }
+    let promise = new Promise((resolve, reject) => {
+      this.preloadItem.promise = (errorCode, errorMessage) => {
+        if (errorCode === 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      };
+    });
+    let result = this.nativeStack?.preloadPath(info.name, info.param, paramString);
+    if (result === false) {
+      this.preloadItem = undefined;
+      return new Promise((resolve, reject) => {
+        reject({ code: 100001, message: 'Internal error.' });
+      });
+    }
+    return promise;
   }
   pushDestination(info, optionParam) {
     if (!this.checkPathValid(info)) {
@@ -4145,6 +4223,13 @@ let MenuKeyboardAvoidMode;
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.NONE = 0] = 'NONE';
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
 })(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
+
+let DistortionMode;
+(function (DistortionMode) {
+  DistortionMode[DistortionMode.DISTORTION_AUTO = 0] = 'DISTORTION_AUTO';
+  DistortionMode[DistortionMode.DISTORTION_ENABLED = 1] = 'DISTORTION_ENABLED';
+  DistortionMode[DistortionMode.DISTORTION_DISABLED = 2] = 'DISTORTION_DISABLED';
+})(DistortionMode || (DistortionMode = {}));
 
 let MenuGridPosition;
 (function (MenuGridPosition) {

@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/tab_content_modifier.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_static.h"
+#include "core/interfaces/native/node/tab_content_modifier.h"
 
 namespace OHOS::Ace::NG {
+
 ArkUINodeHandle CreateTabContentFrameNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
@@ -24,12 +27,25 @@ ArkUINodeHandle CreateTabContentFrameNode(ArkUI_Int32 nodeId)
     frameNode->IncRefCount();
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
 }
+
+void SetTabContentShallowBuilder(ArkUINodeHandle node, void* shallowBuilder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* builder = reinterpret_cast<ShallowBuilder*>(shallowBuilder);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(builder);
+    TabContentModelStatic::SetShallowBuilder(frameNode, AceType::Claim(builder));
+}
+
 namespace NodeModifier {
 const ArkUITabContentCustomModifier* GetTabContentCustomModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITabContentCustomModifier modifier = {
         .createFrameNode = CreateTabContentFrameNode,
+        .setShallowBuilder = SetTabContentShallowBuilder,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

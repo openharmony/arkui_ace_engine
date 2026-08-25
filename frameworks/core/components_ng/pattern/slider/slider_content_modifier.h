@@ -374,13 +374,6 @@ public:
         materialNodePositionCallback_ = std::move(callback);
     }
     
-    void SetBlockAlpha(float alpha)
-    {
-        if (blockAlpha_) {
-            blockAlpha_->Set(alpha);
-        }
-    }
-    
     void SetBlockScale(float scale)
     {
         if (blockScale_) {
@@ -388,14 +381,19 @@ public:
         }
     }
     
-    float GetBlockAlpha() const
-    {
-        return blockAlpha_ ? blockAlpha_->Get() : 1.0f;
-    }
-    
     float GetBlockScale() const
     {
         return blockScale_ ? blockScale_->Get() : 1.0f;
+    }
+
+    void SetIsShowMaterialNode(bool isShowMaterialNode)
+    {
+        isShowMaterialNode_->Set(isShowMaterialNode);
+    }
+
+    bool GetIsShowMaterialNode() const
+    {
+        return isShowMaterialNode_->Get();
     }
 
 private:
@@ -464,7 +462,6 @@ private:
     RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusX_;
     RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusY_;
     
-    RefPtr<AnimatablePropertyFloat> blockAlpha_;
     RefPtr<AnimatablePropertyFloat> blockScale_;
     
     // non-animatable property
@@ -479,6 +476,7 @@ private:
     RefPtr<PropertyBool> isHovered_;
     RefPtr<PropertyBool> isPressed_;
     RefPtr<PropertyBool> isFocused_;
+    RefPtr<PropertyBool> isShowMaterialNode_;
 
     // others
     struct MarkerPenAndPath {

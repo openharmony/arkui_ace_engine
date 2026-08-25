@@ -31,9 +31,11 @@
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -89,8 +91,10 @@ class ACE_FORCE_EXPORT TextPattern : public virtual Pattern,
                     public TextBase,
                     public TextGestureSelector,
                     public Magnifier,
-                    public LayoutInfoInterface {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
+                    public LayoutInfoInterface,
+                    public PageTranslateNode {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier,
+        PageTranslateNode);
 
 public:
     TextPattern();
@@ -110,6 +114,13 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
     RefPtr<EventHub> CreateEventHub() override;
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override
+    {
+        if (!vOverflowHandler_) {
+            vOverflowHandler_ = MakeRefPtr<VerticalOverflowHandler>(host);
+        }
+        return vOverflowHandler_;
+    }
     virtual bool IsDragging() const;
     bool IsAtomicNode() const override;
     bool IsTextNode() const;
@@ -141,6 +152,7 @@ public:
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+    void DumpPageTranslateInfo();
     void DumpParagraphsInfo();
     TextSelector GetTextSelector() const;
     const std::u16string& GetTextForDisplay() const;
@@ -208,6 +220,17 @@ public:
     // end of TextDragBase implementations
     // ===========================================================
 
+    // add page translate
+    const std::optional<std::u16string>& GetPageTranslatedText() const;
+    int32_t GetPageTranslateNodeId() const override;
+    void MarkPageTranslateTextDrawn();
+    void OnPageTranslateSourceTextChanged();
+    void ReportPageTranslateTextDrawn();
+    bool ApplyPageTranslateResult(const std::string& result, int64_t version) override;
+    void ResetPageTranslate() override;
+    void MarkPageTranslateDirty();
+    std::string GetPageTranslateTextForReport() const override;
+
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
     virtual void HandleSurfaceChanged(
@@ -238,6 +261,7 @@ public:
     std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end, bool includeStartHalf = false,
         bool includeEndHalf = true, bool getSubstrDirectly = true) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
+    std::optional<float> GetEnvFontScaleFromLayout();
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
@@ -278,6 +302,7 @@ public:
     ACE_FORCE_EXPORT void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const;
     const RefPtr<ParagraphManager>& GetParagraphManager() const;
+    bool IsContentOverflowForSmartLayout(const SizeF& allocatedSize);
     void MarkContentChange();
     void ResetContChange();
     bool GetContChange() const;
@@ -379,9 +404,12 @@ public:
     std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
-    PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y) override;
-    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
-    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(
+        int32_t x, int32_t y, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
 
     void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
@@ -574,6 +602,7 @@ protected:
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void InitKeyEvent();
     void UpdateShiftFlag(const KeyEvent& keyEvent);
+    bool IsShiftFlag() const;
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool HandleOnSelect(KeyCode code);
     void HandleSelectionUp();
@@ -754,6 +783,7 @@ private:
     void ParseOriText(const std::u16string& currentText);
     bool IsMarqueeOverflow() const;
     virtual void ResetAfterTextChange();
+    void OnTextContentChanged(const std::u16string& textCache);
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
     bool LocalOffsetInSelectedArea(const Offset& localOffset);
     bool LocalOffsetInRange(const Offset& localOffset, int32_t start, int32_t end);
@@ -890,6 +920,7 @@ private:
 
     // used to keep same life cycle with TextPattern
     std::function<void()> jsTextControllerBinder_;
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -25,6 +25,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/core/common/mock_resource_register.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
@@ -36,7 +37,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
@@ -73,6 +74,26 @@ constexpr uint8_t TEST_RENDERING_MODE_FORM = 1;
 constexpr uint8_t TEST_RENDERING_MODE_FULL = 0;
 constexpr uint64_t LARGE_TIME_THRESHOLD = static_cast<uint64_t>(INT64_MAX >> 2);
 constexpr uint64_t TEST_SMALL_TIMESTAMP = 1000;
+
+void SetInspectorNodeRect(const RefPtr<FrameNode>& node, const RectF& rect)
+{
+    ASSERT_NE(node, nullptr);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->SetPaintRectWithTransform(rect);
+    node->renderContext_ = renderContext;
+    node->SetActive(true);
+}
+
+size_t CountOccurrences(const std::string& text, const std::string& value)
+{
+    size_t count = 0;
+    size_t position = 0;
+    while ((position = text.find(value, position)) != std::string::npos) {
+        ++count;
+        position += value.length();
+    }
+    return count;
+}
 } // namespace
 
 // ==========================================================================
@@ -1809,7 +1830,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest078, TestSize.Level1
 
 /**
  * @tc.name: PipelineContextSevenTest079
- * @tc.desc: Test DumpSimplifyTreeJsonEntrance when lastPageNode is null
+ * @tc.desc: Test DumpSimplifyTreeJsonEntrance with empty navNodes (no page branch)
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest079, TestSize.Level1)
@@ -1818,20 +1839,16 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest079, TestSize.Level1
     auto startNode = FrameNode::CreateFrameNode(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(startNode, nullptr);
-    auto stageManagerBackup = context_->stageManager_;
-    auto rootNode = FrameNode::CreateFrameNode(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(rootNode);
     auto root = JsonUtil::CreateSharedPtrJson(true);
     ParamConfig config;
-    context_->DumpSimplifyTreeJsonEntrance(root, startNode, config);
+    std::vector<RefPtr<NG::FrameNode>> navNodes;
+    context_->DumpSimplifyTreeJsonEntrance(root, startNode, navNodes, config);
     EXPECT_FALSE(root->Contains("$children"));
-    context_->stageManager_ = stageManagerBackup;
 }
 
 /**
  * @tc.name: PipelineContextSevenTest080
- * @tc.desc: Test DumpSimplifyTreeJsonEntrance when lastPageNode exists but has no navigation child
+ * @tc.desc: Test DumpSimplifyTreeJsonEntrance with a pre-narrowed page navNodes
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest080, TestSize.Level1)
@@ -1840,17 +1857,13 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest080, TestSize.Level1
     auto startNode = FrameNode::CreateFrameNode(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(startNode, nullptr);
-    auto stageManagerBackup = context_->stageManager_;
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
     auto pageNode = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    stageNode->AddChild(pageNode);
-    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
     auto root = JsonUtil::CreateSharedPtrJson(true);
     ParamConfig config;
-    EXPECT_NO_FATAL_FAILURE(context_->DumpSimplifyTreeJsonEntrance(root, startNode, config));
-    context_->stageManager_ = stageManagerBackup;
+    std::vector<RefPtr<NG::FrameNode>> navNodes;
+    navNodes.push_back(pageNode);
+    EXPECT_NO_FATAL_FAILURE(context_->DumpSimplifyTreeJsonEntrance(root, startNode, navNodes, config));
 }
 
 /**
@@ -1918,6 +1931,124 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest085, TestSize.Level1
     AssertValidContext();
     std::vector<std::string> params = {"-forcecolor", "100", "#FF000000"};
     EXPECT_NO_FATAL_FAILURE(context_->DumpForceColor(params));
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest086
+ * @tc.desc: Test ContainerModal title and page branches do not duplicate the page node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest086, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto windowModalBackup = context_->windowModal_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto containerNode = FrameNode::CreateFrameNode("ContainerModal",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto titleRow = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stackNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto rootDialog = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stackDialog = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    for (const auto& node :
+        { rootNode, containerNode, columnNode, titleRow, stackNode, stageNode, pageNode, rootDialog, stackDialog }) {
+        SetInspectorNodeRect(node, RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    }
+    rootNode->AddChild(containerNode);
+    rootNode->AddChild(rootDialog);
+    containerNode->AddChild(columnNode);
+    columnNode->AddChild(titleRow);
+    columnNode->AddChild(stackNode);
+    stackNode->AddChild(stageNode);
+    stackNode->AddChild(stackDialog);
+    stageNode->AddChild(pageNode);
+    context_->rootNode_ = rootNode;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    context_->DumpVisibleInspectorTree(root, ParamConfig());
+    auto dump = root->ToString();
+    auto pageId = std::string("\"$ID\":") + std::to_string(pageNode->GetId());
+    auto titleId = std::string("\"$ID\":") + std::to_string(titleRow->GetId());
+    auto rootDialogId = std::string("\"$ID\":") + std::to_string(rootDialog->GetId());
+    auto stackDialogId = std::string("\"$ID\":") + std::to_string(stackDialog->GetId());
+    EXPECT_EQ(CountOccurrences(dump, pageId), 1u);
+    EXPECT_EQ(CountOccurrences(dump, titleId), 1u);
+    EXPECT_EQ(CountOccurrences(dump, rootDialogId), 1u);
+    EXPECT_EQ(CountOccurrences(dump, stackDialogId), 1u);
+
+    context_->rootNode_ = rootBackup;
+    context_->windowModal_ = windowModalBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest087
+ * @tc.desc: Test AtomicService menu and page branches do not duplicate the page node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest087, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto atomicNode = FrameNode::CreateFrameNode(
+        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto atomicRoot = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stageWrapper = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto menuBar = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    for (const auto& node : { rootNode, atomicNode, atomicRoot, stageWrapper, stageNode, pageNode, menuBar }) {
+        SetInspectorNodeRect(node, RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    }
+    atomicRoot->UpdateInspectorId("AtomicServiceContainerId");
+    menuBar->UpdateInspectorId("AtomicServiceMenubarRowId");
+    rootNode->AddChild(atomicNode);
+    atomicNode->AddChild(atomicRoot);
+    atomicRoot->AddChild(stageWrapper);
+    stageWrapper->AddChild(stageNode);
+    stageNode->AddChild(pageNode);
+    atomicRoot->AddChild(menuBar);
+    context_->rootNode_ = rootNode;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    context_->DumpVisibleInspectorTree(root, ParamConfig());
+    auto dump = root->ToString();
+    auto pageId = std::string("\"$ID\":") + std::to_string(pageNode->GetId());
+    auto menuId = std::string("\"$ID\":") + std::to_string(menuBar->GetId());
+    EXPECT_EQ(CountOccurrences(dump, pageId), 1u);
+    EXPECT_EQ(CountOccurrences(dump, menuId), 1u);
+
+    context_->rootNode_ = rootBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
 }
 
 } // namespace OHOS::Ace::NG

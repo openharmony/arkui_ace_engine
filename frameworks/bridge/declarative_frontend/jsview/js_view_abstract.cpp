@@ -584,11 +584,11 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     JSRef<JSVal> item = params->GetValueAt(static_cast<size_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            std::string numStr = std::to_string(item->ToNumber<int32_t>());
+            std::string numStr = std::to_string(item->ToNumber<int64_t>());
             return TryLocalizeNumberStr(numStr, 0);
         } else if (item->IsObject()) {
-            int32_t result = 0;
-            JSViewAbstract::ParseJsInteger(item, result);
+            int64_t result = 0;
+            JSViewAbstract::ParseJsInteger<int64_t>(item, result);
             std::string numStr = std::to_string(result);
             return TryLocalizeNumberStr(numStr, 0);
         }
@@ -4110,6 +4110,10 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
         auto rightBottomValue = positionObject->GetProperty("rightBottom");
         if (rightBottomValue->IsObject()) {
             position.rightBottom = ParseDepthVector3(rightBottomValue);
+        }
+        auto positionModeValue = positionObject->GetProperty("positionMode");
+        if (positionModeValue->IsNumber()) {
+            position.positionMode = static_cast<SpatialPositionMode>(positionModeValue->ToNumber<int32_t>());
         }
         params.position = position;
     }
@@ -13105,6 +13109,7 @@ std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
         auto obj = setCustomProperty->ToObject(vm);
         panda::Local<panda::FunctionRef> func = obj;
         auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+        CHECK_NULL_RETURN(frameNode, false);
         auto nodeId = frameNode->GetId();
         auto function = panda::CopyableGlobal(vm, func);
         auto customPropertyExisted = function->Call(vm, function.ToLocal(), params3, 3)->ToBoolean(vm)->Value();
@@ -13138,6 +13143,7 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
     auto* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+    CHECK_NULL_VOID(frameNode);
     auto nodeId = frameNode->GetId();
     auto getFunc = ParseJsGetFunc(info, nodeId);
     auto func = ParseJsFunc(info, nodeId);

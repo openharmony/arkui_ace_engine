@@ -240,11 +240,6 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
-    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_video"
-    subsystem_name = "arkui"
-    part_name = "ace_engine"
-  },
-  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_sidebar"
     subsystem_name = "arkui"
     part_name = "ace_engine"
@@ -295,7 +290,7 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
-    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_shape"
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_shapes"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -376,11 +371,6 @@ common_bin = [
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_progress"
-    subsystem_name = "arkui"
-    part_name = "ace_engine"
-  },
-  {
-    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_search"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -645,6 +635,7 @@ napi_modules = [
           "router",
           "animator",
           "overlay",
+          "uimaterial",
         ]
       },
     ]
@@ -775,10 +766,22 @@ napi_modules = [
         lib_names = [ "composelistitem" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/composelistitemv2/interfaces:composelistitemv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "composelistitemv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/composetitlebar/interfaces:composetitlebar"
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "composetitlebar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/composetitlebarv2/interfaces:composetitlebarv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "composetitlebarv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component:dialog"
@@ -797,6 +800,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "editabletitlebar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/editabletitlebarv2/interfaces:editabletitlebarv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "editabletitlebarv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/filter/interfaces:filter"
@@ -847,6 +856,12 @@ napi_modules = [
         lib_names = [ "swiperefresher" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/swiperefresherv2/interfaces:swiperefresherv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "swiperefresherv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/tabtitlebar/interfaces:tabtitlebar"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -871,6 +886,12 @@ napi_modules = [
         lib_names = [ "treeview" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/treeviewv2/interfaces:treeviewv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "treeviewv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/selectionmenu/interfaces:selectionmenu"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -883,6 +904,12 @@ napi_modules = [
         lib_names = [ "popup" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/popupv2/interfaces:popupv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "popupv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/gridobjectsortcomponent/interfaces:gridobjectsortcomponent"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -893,6 +920,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "exceptionprompt" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/exceptionpromptv2/interfaces:exceptionpromptv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "exceptionpromptv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent"

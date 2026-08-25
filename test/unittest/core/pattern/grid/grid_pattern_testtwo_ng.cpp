@@ -606,7 +606,12 @@ HWTEST_F(GridTestNg, BuildGridLayoutInfo001, TestSize.Level1)
     gridPattern->info_ = info;
     auto json = JsonUtil::Create(true);
     gridPattern->BuildGridLayoutInfo(json);
-    EXPECT_EQ(json->GetString("gridMatrix"), "");
+    EXPECT_TRUE(json->Contains("gridMatrix"));
+    auto matrix = json->GetObject("gridMatrix");
+    ASSERT_NE(matrix, nullptr);
+    EXPECT_EQ(matrix->GetString("0"), "[1,2] ");
+    EXPECT_EQ(matrix->GetString("1"), "[3,4] ");
+    EXPECT_FALSE(json->Contains("lineHeightMap"));
 }
 
 /**
@@ -632,7 +637,8 @@ HWTEST_F(GridTestNg, BuildGridLayoutInfo002, TestSize.Level1)
     gridPattern->info_ = info;
     auto json = JsonUtil::Create(true);
     gridPattern->BuildGridLayoutInfo(json);
-    EXPECT_EQ(json->GetString("gridMatrix"), "");
+    EXPECT_TRUE(json->Contains("lineHeightMap"));
+    EXPECT_FALSE(json->Contains("gridMatrix"));
 }
 
 /**
@@ -658,7 +664,11 @@ HWTEST_F(GridTestNg, BuildGridLayoutInfo003, TestSize.Level1)
     gridPattern->info_ = info;
     auto json = JsonUtil::Create(true);
     gridPattern->BuildGridLayoutInfo(json);
-    EXPECT_EQ(json->GetString("lineHeightMap"), "");
+    EXPECT_TRUE(json->Contains("lineHeightMap"));
+    auto heightMap = json->GetObject("lineHeightMap");
+    ASSERT_NE(heightMap, nullptr);
+    EXPECT_EQ(heightMap->GetString("0"), "1.000000");
+    EXPECT_EQ(heightMap->GetString("2"), "3.000000");
 }
 
 /**
@@ -684,7 +694,9 @@ HWTEST_F(GridTestNg, BuildGridLayoutInfo004, TestSize.Level1)
     gridPattern->info_ = info;
     auto json = JsonUtil::Create(true);
     gridPattern->BuildGridLayoutInfo(json);
-    EXPECT_EQ(json->GetString("lineHeightMap"), "");
+    EXPECT_TRUE(json->Contains("irregularItemsPosition"));
+    EXPECT_FALSE(json->Contains("lineHeightMap"));
+    EXPECT_FALSE(json->Contains("gridMatrix"));
 }
 
 /**
@@ -710,7 +722,11 @@ HWTEST_F(GridTestNg, BuildGridLayoutInfo005, TestSize.Level1)
     gridPattern->info_ = info;
     auto json = JsonUtil::Create(true);
     gridPattern->BuildGridLayoutInfo(json);
-    EXPECT_EQ(json->GetString("irregularItemsPosition_"), "");
+    EXPECT_TRUE(json->Contains("irregularItemsPosition"));
+    auto irregularMap = json->GetObject("irregularItemsPosition");
+    ASSERT_NE(irregularMap, nullptr);
+    EXPECT_EQ(irregularMap->GetString("0"), "1");
+    EXPECT_EQ(irregularMap->GetString("2"), "3");
 }
 
 /**
@@ -738,7 +754,9 @@ HWTEST_F(GridTestNg, BuildGridLayoutInfo006, TestSize.Level1)
     gridPattern->info_ = info;
     auto json = JsonUtil::Create(true);
     gridPattern->BuildGridLayoutInfo(json);
-    EXPECT_EQ(json->GetString("irregularItemsPosition_"), "");
+    EXPECT_TRUE(json->Contains("gridMatrix"));
+    EXPECT_TRUE(json->Contains("lineHeightMap"));
+    EXPECT_FALSE(json->Contains("irregularItemsPosition"));
 }
 
 /**
@@ -898,5 +916,78 @@ HWTEST_F(GridTestNg, GetNextGrid002, TestSize.Level1)
     bool reverse = true;
     auto result = layout->GetNextGrid(curMain, curCross, reverse);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo014
+ * @tc.desc: Test GridPattern DumpAdvanceInfo console output of fix offsets and ShowCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, DumpAdvanceInfo014, TestSize.Level1)
+{
+    DumpLog::GetInstance().description_.clear();
+    RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GridLayoutProperty> gridLayoutProperty = AceType::MakeRefPtr<GridLayoutProperty>();
+    frameNode->layoutProperty_ = gridLayoutProperty;
+    gridPattern->frameNode_ = frameNode;
+    GridLayoutInfo info;
+    info.startFixOffset_ = 1.5f;
+    info.endFixOffset_ = 2.5f;
+    info.contentEndPadding_ = 3.0f;
+    gridPattern->info_ = info;
+    gridPattern->DumpAdvanceInfo();
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "ShowCache:false\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
+    it = std::find(DumpLog::GetInstance().description_.begin(),
+                   DumpLog::GetInstance().description_.end(),
+                   "startFixOffset:1.500000\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
+    it = std::find(DumpLog::GetInstance().description_.begin(),
+                   DumpLog::GetInstance().description_.end(),
+                   "endFixOffset:2.500000\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
+    it = std::find(DumpLog::GetInstance().description_.begin(),
+                   DumpLog::GetInstance().description_.end(),
+                   "contentEndPadding:3.000000\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo015
+ * @tc.desc: Test GridPattern DumpAdvanceInfo json output of report range, gaps and fix offsets
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, DumpAdvanceInfo015, TestSize.Level1)
+{
+    RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, gridPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GridLayoutProperty> gridLayoutProperty = AceType::MakeRefPtr<GridLayoutProperty>();
+    frameNode->layoutProperty_ = gridLayoutProperty;
+    gridPattern->frameNode_ = frameNode;
+    GridLayoutInfo info;
+    info.reportStartIndex_ = 6;
+    info.reportEndIndex_ = 9;
+    info.startFixOffset_ = 1.5f;
+    info.endFixOffset_ = 2.5f;
+    info.contentEndPadding_ = 3.0f;
+    gridPattern->info_ = info;
+    gridLayoutProperty->UpdateRowsGap(Dimension(2.0, DimensionUnit::VP));
+    gridLayoutProperty->UpdateColumnsGap(Dimension(3.0, DimensionUnit::VP));
+    auto json = JsonUtil::Create(true);
+    gridPattern->DumpAdvanceInfo(json);
+    EXPECT_EQ(json->GetInt("reportStartIndex"), 6);
+    EXPECT_EQ(json->GetInt("reportEndIndex"), 9);
+    EXPECT_EQ(json->GetString("RowsGap"), "2.000000");
+    EXPECT_EQ(json->GetString("ColumnsGap"), "3.000000");
+    EXPECT_EQ(json->GetString("startFixOffset"), "1.500000");
+    EXPECT_EQ(json->GetString("endFixOffset"), "2.500000");
+    EXPECT_EQ(json->GetString("contentEndPadding"), "3.000000");
 }
 } // namespace OHOS::Ace::NG

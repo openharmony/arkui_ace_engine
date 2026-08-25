@@ -81,6 +81,16 @@ public:
         return indicatorId_.has_value();
     }
 
+    bool HasTabBarChildNodes() const
+    {
+        return tabBarChildNodesInitialized_;
+    }
+
+    void SetTabBarChildNodesInitialized(bool initialized)
+    {
+        tabBarChildNodesInitialized_ = initialized;
+    }
+
     int32_t GetSwiperId()
     {
         if (!swiperId_.has_value()) {
@@ -227,6 +237,7 @@ private:
     std::optional<int32_t> indicatorId_;
     std::set<int32_t> swiperChildren_;
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
+    bool tabBarChildNodesInitialized_ = false;
 
     ItemIndex itemIndex_;
 };

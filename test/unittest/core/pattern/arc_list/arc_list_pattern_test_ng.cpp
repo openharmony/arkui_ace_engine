@@ -663,7 +663,7 @@ HWTEST_F(ArcListPatternTestNg, HandleScrollBarOutBoundary001, TestSize.Level1)
      * and set isScrollable_ to false
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     std::map<int32_t, ListItemInfo> itemPosition = { { 0, info } };
     pattern_->itemPosition_ = itemPosition;
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
@@ -706,7 +706,7 @@ HWTEST_F(ArcListPatternTestNg, HandleScrollBarOutBoundary002, TestSize.Level1)
      * and set isScrollable_ to true and it's the else if branch of the function that goes in
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     std::map<int32_t, ListItemInfo> itemPosition = { { 0, info } };
     pattern_->itemPosition_ = itemPosition;
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);

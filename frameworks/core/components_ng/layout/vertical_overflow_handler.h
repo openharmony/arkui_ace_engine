@@ -117,6 +117,15 @@ public:
         cachedPathHash_ = pathHash;
     }
 
+    bool IsInFormComponent() const
+    {
+        return isInFormComponent_;
+    }
+    void SetIsInFormComponent(bool isInFormComponent)
+    {
+        isInFormComponent_ = isInFormComponent;
+    }
+
 private:
     float offsetToChildFrameBottom_ = 0.0f;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -128,6 +137,7 @@ private:
     bool hasParentAdjust_ = false;
     WeakPtr<FrameNode> frameNode_;
     std::string cachedPathHash_;
+    bool isInFormComponent_ = false;
 
 };
 } // namespace OHOS::Ace::NG

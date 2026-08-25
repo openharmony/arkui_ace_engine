@@ -223,7 +223,7 @@ function loadComponent(): ComponentObj | undefined {
   return loadComponent.componentObj;
 }
 
-class JSProgress extends JSContainerBase {
+class JSProgress extends JSViewAbstract {
     static create(value: any): void {
         getUINativeModule().progress.create(value?.value, value?.total, value?.style, value?.type);
     }

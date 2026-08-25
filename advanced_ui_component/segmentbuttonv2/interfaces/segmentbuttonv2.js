@@ -36,8 +36,8 @@ const curves = requireNativeModule('ohos.curves');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const i18n = requireNapi('i18n');
-const util = requireNapi('util');
 const uiMaterial = requireNapi('arkui.uiMaterial');
+const util = requireNapi('util');
 const deviceInfo = requireNapi('deviceInfo');
 const SMALLEST_MAX_FONT_SCALE = 1;
 const LARGEST_MAX_FONT_SCALE = 2;
@@ -1385,7 +1385,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           this.isPressing = false;
         });
         LongPressGesture.pop();
-        PanGesture.create();
+        PanGesture.create({ direction: PanDirection.Horizontal });
         PanGesture.onActionStart(event => {
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
@@ -1596,6 +1596,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
               globalThis.Gesture.create(GesturePriority.Low);
               TapGesture.create();
               TapGesture.onAction(() => {
+                this.isTapGesture = true;
                 this.onItemClicked?.(repeatItem.index);
                 this.backplatePosition = {
                   x: this.selectedItemRect?.position.x,
@@ -1882,6 +1883,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.openSelectedItemSystemMaterial = false;
     this.selectedItemScale = undefined;
     this.tempDisableAnimation = false;
+    this.isTapGesture = false;
     this.backplatePosition = { x: 0, y: 0 };
     this.finalizeConstruction();
   }
@@ -1980,6 +1982,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.openSelectedItemSystemMaterial = false;
     this.selectedItemScale = undefined;
     this.tempDisableAnimation = false;
+    this.isTapGesture = false;
     this.backplatePosition = { x: 0, y: 0 };
     this.resetComputed('normalizedSelectedIndex');
     this.resetComputed('selectedItemRect');
@@ -2237,18 +2240,23 @@ class SimpleSegmentButtonV2 extends ViewV2 {
   }
   updateSelectedIndex(selectedIndex) {
     if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex) {
+      this.isTapGesture = false;
       return;
     }
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
-      this.getUIContext().animateTo(
-        {
-          curve: curves.interpolatingSpring(0, 1, 195, 14),
-        },
-        () => {
-          this.selectedItemScale = { x: 1.01, y: 0.99 };
-          this.openSelectedItemSystemMaterial = true;
-        }
-      );
+      if (this.isTapGesture) {
+        this.openSelectedItemSystemMaterial = true;
+      } else {
+        this.getUIContext().animateTo(
+          {
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+          },
+          () => {
+            this.selectedItemScale = { x: 1.01, y: 0.99 };
+            this.openSelectedItemSystemMaterial = true;
+          }
+        );
+      }
     }
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
       this.$selectedIndex?.(selectedIndex);
@@ -2258,16 +2266,21 @@ class SimpleSegmentButtonV2 extends ViewV2 {
       };
     });
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
-      this.getUIContext().animateTo(
-        {
-          curve: curves.interpolatingSpring(0, 1, 195, 14),
-          delay: 250,
-        },
-        () => {
-          this.openSelectedItemSystemMaterial = false;
-        }
-      );
+      if (this.isTapGesture) {
+        this.openSelectedItemSystemMaterial = false;
+      } else {
+        this.getUIContext().animateTo(
+          {
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+            delay: 250,
+          },
+          () => {
+            this.openSelectedItemSystemMaterial = false;
+          }
+        );
+      }
     }
+    this.isTapGesture = false;
   }
   updateItemScale(scale) {
     if (this.itemScale === scale) {
@@ -3375,6 +3388,7 @@ class SegmentButtonV2ItemContent extends ViewV2 {
       return {
         id: resourceId,
         type: COLOR_RESOURCE_TYPE,
+        params: [],
         bundleName: context?.abilityInfo?.bundleName ?? '',
         moduleName: context?.abilityInfo?.moduleName ?? '',
       };
@@ -3575,22 +3589,27 @@ function normalize(value, min, max) {
 }
 function generateUniqueKye(groupId) {
   return (item, index) => {
-    let key = groupId;
+    let key = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
+        key += '_';
         key += item.text;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.text);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
+        key += '_';
         key += item.icon;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.icon);
       }
     }
     if (item.symbol) {
+      key += '_';
       key += getResourceUniqueId(item.symbol);
     }
     return key;

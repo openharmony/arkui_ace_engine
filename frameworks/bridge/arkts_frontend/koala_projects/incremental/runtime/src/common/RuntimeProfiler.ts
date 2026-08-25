@@ -123,6 +123,10 @@ export class RuntimeProfiler {
         this.updatableStates = 0
         this.mutableStates = 0
         this.computableValues = 0
+        this.updateTime = 0;
+        this.buildTime = 0;
+        this.layoutTime = 0;
+        this.drawTime = 0;
     }
 
     report(): void {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License") override;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,6 +158,7 @@ public:
     void GetWebInfoByRequest(int32_t webId, const std::string& request) override;
     void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) override;
+    int32_t RegisterWebPageSceneRules(int32_t processId, const std::string& ruleJson);
     int32_t RegisterPageSceneRules(int32_t processId, const std::string& ruleJson) override;
     int32_t UnregisterPageSceneRules(int32_t processId, const std::string& ruleSetId) override;
     int32_t GetPageScene(int32_t processId, const std::string& ruleJsonOrRuleSetId) override;
@@ -165,9 +166,13 @@ public:
     void ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult) override;
     void CompleteGetPageScene(int32_t processId) override;
     void NotifyPageSceneNodeChanged(const std::string& nodeTag, bool isAttach) override;
+    void NotifyPageSceneNodeStateChanged(
+        const std::string& nodeTag, PageSceneNodeStateChange stateChange) override;
     void NotifyPageSceneContentChanged() override;
     void FlushPageSceneNodeChanged() override;
     void SavePageSceneDetectFunction(PageSceneDetectFunction&& function) override;
+    void SaveWebPageSceneFunction(WebPageSceneFunction&& function) override;
+    bool IsWebSourceEnabled(const std::string& ruleJson);
 
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 
@@ -186,6 +191,8 @@ private:
         bool supported = false;
         bool enabled = true;
         bool reportOnRegister = true;
+        bool onlyVisible = true;
+        bool rectCulling = false;
     };
 
     struct PageSceneRuleSetInfo {
@@ -193,6 +200,8 @@ private:
         std::string ruleSetId;
         std::string ruleJson;
         bool arkuiEnabled = true;
+        bool webEnabled = false;
+        bool includeUnfocusableTextInput = false;
         std::vector<PageSceneRuleInfo> rules;
     };
 
@@ -209,8 +218,15 @@ private:
     bool HasRegisteredPageSceneRuleLocked(const std::string& sceneType) const;
     std::vector<std::pair<int32_t, std::string>> GetPageSceneRuleJsonsForNodeChange(
         const std::string& nodeTag, const std::string& sceneType);
+    std::vector<std::pair<int32_t, std::string>> GetPageSceneRuleJsonsForNodeStateChange(
+        const std::string& nodeTag, const std::string& sceneType, PageSceneNodeStateChange stateChange);
+    bool IsPageSceneRuleAffectedByNodeStateChange(
+        const PageSceneRuleSetInfo& ruleSetInfo, const PageSceneRuleInfo& rule,
+        PageSceneNodeStateChange stateChange) const;
     void ErasePendingPageSceneRulesLocked(int32_t processId);
     void TriggerPageSceneDetect(int32_t processId, const std::string& ruleJson, bool isGetResult);
+    int32_t ExtractRuleJsonAndWebEnabled(int32_t processId,
+        const std::string& ruleJsonOrRuleSetId, std::string& ruleJson, bool& webEnabled);
 
     int32_t pageTranslateScope_ = 0;
     int32_t pageTranslateOwnerPid_ = -1;
@@ -219,7 +235,6 @@ private:
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
     std::shared_mutex reportObjectMutex_;
     std::mutex pageSceneMutex_;
-    std::atomic<int32_t> pageSceneInputNodeCount_ = 0;
     std::unordered_map<int32_t, PageSceneRuleSetInfo> pageSceneRuleSets_;
     std::set<int32_t> pendingPageSceneGets_;
     std::set<std::pair<int32_t, std::string>> pendingPageSceneDetectRules_;

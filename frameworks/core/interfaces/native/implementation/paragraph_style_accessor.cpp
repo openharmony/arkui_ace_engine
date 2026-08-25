@@ -49,7 +49,7 @@ void ParseShaderStyle(const Opt_ShaderStyleProxy& proxy, OHOS::Ace::SpanParagrap
     }
 }
 
-void ParseTailIndents(const Opt_Union_LengthMetrics_Array_LengthMetrics& tailIndentsOpt,
+void ParseTailIndents(const Opt_Union_LengthMetricsProxy_Array_LengthMetricsProxy& tailIndentsOpt,
     OHOS::Ace::SpanParagraphStyle& paragraphStyle)
 {
     if (tailIndentsOpt.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -57,7 +57,7 @@ void ParseTailIndents(const Opt_Union_LengthMetrics_Array_LengthMetrics& tailInd
     }
     NG::TailIndents tailIndents;
     NG::TailIndentsArray indentsArray;
-    auto convertDimensionWithPrecision = [](const Ark_LengthMetrics& metrics) -> Dimension {
+    auto convertDimensionWithPrecision = [](const Ark_LengthMetricsProxy& metrics) -> Dimension {
         double doubleValue = static_cast<double>(metrics.value);
         auto unit = Converter::OptConvert<DimensionUnit>(metrics.unit)
             .value_or(DimensionUnit::VP);
@@ -113,7 +113,7 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
     }
 
     Converter::VisitUnion(src.leadingMargin,
-        [&ret](const Ark_LengthMetrics& metrics) {
+        [&ret](const Ark_LengthMetricsProxy& metrics) {
             LeadingMargin margin;
             margin.size = LeadingMarginSize(OptConvert<Dimension>(metrics).value_or(Dimension()),
                 OptConvert<Dimension>(metrics).value_or(Dimension()));

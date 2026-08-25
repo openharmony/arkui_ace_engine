@@ -29,7 +29,12 @@ template("napi_utils_static") {
     if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
     } else {
-      external_deps += [ "napi:ace_napi" ]
+      external_deps += [
+        "napi:ace_napi",
+        "node:node_header_notice",
+        "libuv:uv",
+        "ets_runtime:libark_jsruntime",
+      ]
     }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]

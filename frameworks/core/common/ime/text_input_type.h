@@ -49,6 +49,26 @@ enum class TextInputType {
 
 ACE_FORCE_EXPORT TextInputType CastToTextInputType(int32_t value);
 
+// Check if the given input type is a password type.
+inline bool IsPasswordInputType(TextInputType type)
+{
+    return type == TextInputType::VISIBLE_PASSWORD || type == TextInputType::NUMBER_PASSWORD ||
+           type == TextInputType::SCREEN_LOCK_PASSWORD || type == TextInputType::NEW_PASSWORD;
+}
+
+// Check if the given input type is an OTP (one-time code) type.
+inline bool IsOneTimeCodeInputType(TextInputType type)
+{
+    return type == TextInputType::ONE_TIME_CODE || type == TextInputType::ONE_TIME_CODE_NUMBER;
+}
+
+// Check if AI Write should be offered for the given input type
+// (only for UNSPECIFIED and TEXT types, aligning with TextFieldPattern).
+inline bool ShouldShowAIWriteForInputType(TextInputType type)
+{
+    return type == TextInputType::UNSPECIFIED || type == TextInputType::TEXT;
+}
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_IME_TEXT_INPUT_TYPE_H

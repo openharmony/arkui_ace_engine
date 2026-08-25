@@ -29,6 +29,8 @@ const size_t CUBIC_PARAMS_SIZE = 4;
 const size_t SPRING_PARAMS_SIZE = 4;
 constexpr size_t RESPONSIVE_SPRING_MOTION_PARAMS_SIZE = 3;
 constexpr size_t INTERPOLATING_SPRING_PARAMS_SIZE = 4;
+constexpr size_t TRAIL_OPTIMIZED_SPRING_MOTION_PARAMS_SIZE = 5;
+constexpr size_t TRAIL_OPTIMIZED_INTERPOLATING_SPRING_PARAMS_SIZE = 6;
 
 static const std::unordered_set<std::string> HORIZON_SET = {
     DOM_BACKGROUND_IMAGE_POSITION_LEFT,
@@ -133,6 +135,72 @@ RefPtr<Curve> ResponsiveSpringMotionCreator(const std::vector<std::string>& para
     float blendDuration = paramSize > 2 ? StringUtils::StringToFloat(params[2])
                             : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
     return AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
+}
+
+RefPtr<Curve> TrailOptimizedSpringMotionCreator(const std::vector<std::string>& params)
+{
+    if (params.size() > TRAIL_OPTIMIZED_SPRING_MOTION_PARAMS_SIZE) {
+        return nullptr;
+    }
+    size_t paramSize = params.size();
+    float response = paramSize > 0 ? StringUtils::StringToFloat(params[0]) // 0: response
+                                   : TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+    float dampingRatio = paramSize > 1 ? StringUtils::StringToFloat(params[1]) // 1: dampingRatio
+                                       : TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = paramSize > 2 ? StringUtils::StringToFloat(params[2]) // 2: blendDuration
+                                        : TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+    TrailOptimization trail;
+    if (paramSize > 3) { // 3: progressThreshold
+        trail.progressThreshold = StringUtils::StringToFloat(params[3]);
+    }
+    if (paramSize > 4) { // 4: responseDecayFactor
+        trail.responseDecayFactor = StringUtils::StringToFloat(params[4]);
+    }
+    return AceType::MakeRefPtr<TrailOptimizedResponsiveSpringMotion>(response, dampingRatio, blendDuration, trail);
+}
+
+RefPtr<Curve> TrailOptimizedResponsiveSpringMotionCreator(const std::vector<std::string>& params)
+{
+    if (params.size() > TRAIL_OPTIMIZED_SPRING_MOTION_PARAMS_SIZE) {
+        return nullptr;
+    }
+    size_t paramSize = params.size();
+    float response = paramSize > 0 ? StringUtils::StringToFloat(params[0]) // 0: response
+                                   : TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    float dampingRatio = paramSize > 1
+                             ? StringUtils::StringToFloat(params[1]) // 1: dampingRatio
+                             : TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = paramSize > 2
+                              ? StringUtils::StringToFloat(params[2]) // 2: blendDuration
+                              : TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    TrailOptimization trail;
+    if (paramSize > 3) { // 3: progressThreshold
+        trail.progressThreshold = StringUtils::StringToFloat(params[3]);
+    }
+    if (paramSize > 4) { // 4: responseDecayFactor
+        trail.responseDecayFactor = StringUtils::StringToFloat(params[4]);
+    }
+    return AceType::MakeRefPtr<TrailOptimizedResponsiveSpringMotion>(response, dampingRatio, blendDuration, trail);
+}
+
+RefPtr<Curve> TrailOptimizedInterpolatingSpringCreator(const std::vector<std::string>& params)
+{
+    size_t paramSize = params.size();
+    if (paramSize != TRAIL_OPTIMIZED_INTERPOLATING_SPRING_PARAMS_SIZE &&
+        paramSize != TRAIL_OPTIMIZED_INTERPOLATING_SPRING_PARAMS_SIZE - TrailOptimization::PARAMS_COUNT) {
+        return nullptr;
+    }
+    double velocity = StringToDouble(params.at(0));  // 0: velocity
+    double mass = StringToDouble(params.at(1));      // 1: mass
+    double stiffness = StringToDouble(params.at(2)); // 2: stiffness
+    double damping = StringToDouble(params.at(3));   // 3: damping
+    TrailOptimization trail;
+    if (paramSize == TRAIL_OPTIMIZED_INTERPOLATING_SPRING_PARAMS_SIZE) {
+        trail.progressThreshold = StringToDouble(params.at(4));   // 4: progressThreshold
+        trail.responseDecayFactor = StringToDouble(params.at(5)); // 5: responseDecayFactor
+    }
+    return AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(static_cast<float>(velocity),
+        static_cast<float>(mass), static_cast<float>(stiffness), static_cast<float>(damping), trail);
 }
 #ifndef FUZZTEST
 void SetBgImgPositionX(
@@ -339,6 +407,11 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
         { DOM_ANIMATION_TIMING_FUNCTION_SPRING, SpringCurveCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_SPRING_MOTION, SpringMotionCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_STEPS, StepsCurveCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_TRAIL_OPTIMIZED_INTERPOLATING_SPRING,
+            TrailOptimizedInterpolatingSpringCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_TRAIL_OPTIMIZED_RESPONSIVE_SPRING_MOTION,
+            TrailOptimizedResponsiveSpringMotionCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_TRAIL_OPTIMIZED_SPRING_MOTION, TrailOptimizedSpringMotionCreator },
     };
     int64_t index = BinarySearchFindIndex(customCurveMap, ArraySize(customCurveMap), aniTimFuncName.c_str());
     if (index < 0) {

@@ -1474,4 +1474,114 @@ HWTEST_F(ViewAbstractTestNg, SetOverlayNodeTest001, TestSize.Level1)
     overlayNodeWithFrameNode = frameNode->GetOverlayNode();
     EXPECT_EQ(overlayNodeWithFrameNode, nullptr);
 }
+
+/**
+ * @tc.name: ViewAbstractAddHoverEventForTipsTest003
+ * @tc.desc: Test AddHoverEventForTips with showInSubWindow=true, covering the SubwindowManager
+ *           branch and the new popupNode-ternary pattern retrieval added by the weak-capture change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create target node, popup param and a tips popup node with BubblePattern.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    popupInfo.isTips = true;
+    popupInfo.popupId = 1;
+    popupInfo.popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, -1, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    ASSERT_NE(popupInfo.popupNode, nullptr);
+    param->SetAnchorType(TipsAnchorType::CURSOR);
+
+    /**
+     * @tc.steps: step2. Register hover tips with showInSubWindow = true.
+     */
+    ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, true);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
+    auto hoverEventActuator = inputHub->hoverEventActuator_;
+    ASSERT_NE(hoverEventActuator, nullptr);
+    auto events = hoverEventActuator->inputEvents_;
+
+    /**
+     * @tc.steps: step3. Trigger hover enter and leave.
+     * @tc.expected: The SubwindowManager (mocked no-op) path runs without crash; the popupNode
+     *               ternary resolves the BubblePattern so ShowTipsNG/HideTipsNG are reached.
+     */
+    bool ishover = true;
+    for (const auto& callback : events) {
+        (*callback)(ishover);
+    }
+    ishover = false;
+    for (const auto& callback : events) {
+        (*callback)(ishover);
+    }
+    EXPECT_EQ(events.size(), 1);
+}
+
+/**
+ * @tc.name: ViewAbstractAddHoverEventForTipsTest004
+ * @tc.desc: Test AddHoverEventForTips null-safety: after the target node is destroyed, the weak
+ *           reference captured by the hover task resolves to null and the new
+ *           CHECK_NULL_VOID(targetNode) guard returns early without crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a target node with a unique id and a tips popup node.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    int32_t targetId = stack->ClaimNodeId();
+    const RefPtr<FrameNode> targetNode =
+        FrameNode::CreateFrameNode("tipsTarget", targetId, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    popupInfo.isTips = true;
+    popupInfo.popupId = 1;
+    popupInfo.popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, -1, AceType::MakeRefPtr<BubblePattern>(targetId, targetNode->GetTag()));
+    ASSERT_NE(popupInfo.popupNode, nullptr);
+    param->SetAnchorType(TipsAnchorType::CURSOR);
+    WeakPtr<FrameNode> weakCheck = AceType::WeakClaim(AceType::RawPtr(targetNode));
+
+    /**
+     * @tc.steps: step2. Register hover tips and copy the captured events so they outlive the target.
+     */
+    ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, false);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
+    auto hoverEventActuator = inputHub->hoverEventActuator_;
+    ASSERT_NE(hoverEventActuator, nullptr);
+    auto events = hoverEventActuator->inputEvents_;
+    ASSERT_EQ(events.size(), 1);
+}
 } // namespace OHOS::Ace::NG

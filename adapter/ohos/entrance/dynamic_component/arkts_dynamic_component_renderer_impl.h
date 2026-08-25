@@ -108,6 +108,8 @@ private:
         int32_t orientation, AnimationOption animationOpt, const OffsetF& offset);
     int32_t GetSCBOrientation(const RefPtr<FrameNode>& windowSceneNode);
 
+    sptr<IRemoteObject> GetConnectToRender();
+
     void CreateDynamicContent();
     void SetUIContentJsContext();
     void AttachRenderContext();

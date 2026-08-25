@@ -21,6 +21,8 @@ build_component_ng("gridlayout_pattern_ng") {
     "grid_container_utils.cpp",
   ]
 
+  ark_sources = []
+
   component_ng_deps = [
     "grid_col",
     "grid_row",

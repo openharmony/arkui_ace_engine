@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/clean_node_host.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,6 +37,42 @@ public:
 };
 
 void CustomKeyboardBuilder() {}
+
+/**
+ * @tc.name: CleanNodeResponseAreaCreateIconRect001
+ * @tc.desc: The press rect follows the cancel icon when its margin changes the frame offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeResponseAreaCreateIconRect001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_->cleanNodeResponseArea_, nullptr);
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+    auto stackNode = cleanNodeResponseArea->cleanNode_;
+    ASSERT_NE(stackNode, nullptr);
+    auto iconNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    ASSERT_NE(iconNode, nullptr);
+
+    frameNode_->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 40.0f));
+    stackNode->GetGeometryNode()->SetFrameOffset(OffsetF(100.0f, 10.0f));
+    stackNode->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 20.0f));
+    iconNode->GetGeometryNode()->SetFrameOffset(OffsetF(6.0f, 8.0f));
+    iconNode->GetGeometryNode()->SetFrameSize(SizeF(10.0f, 10.0f));
+
+    RoundRect paintRect;
+    cleanNodeResponseArea->CreateIconRect(paintRect, false);
+    auto iconRect = iconNode->GetGeometryNode()->GetFrameRect();
+    auto stackRect = stackNode->GetGeometryNode()->GetFrameRect();
+    EXPECT_FLOAT_EQ(paintRect.GetRect().Center().GetX(), stackRect.GetX() + iconRect.Center().GetX());
+    EXPECT_FLOAT_EQ(paintRect.GetRect().Center().GetY(), stackRect.GetY() + iconRect.Center().GetY());
+}
+
 /**
  * @tc.name: UpdateFocusForward001
  * @tc.desc: test testInput text UpdateFocusForward
@@ -837,5 +874,625 @@ HWTEST_F(TextFieldPatternTestThree, GetTextDirection003, TestSize.Level1)
      * @tc.expected: Return LTR layout direction when textDirection_ is INHERIT
      */
     EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest001
+ * @tc.desc: Test ICleanNodeHost exists and TextFieldPattern can DynamicCast to it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextField with cancel button enabled.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. DynamicCast pattern to ICleanNodeHost.
+     * @tc.expected: interface pointer is valid and basic methods don't crash.
+     */
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern_);
+    ASSERT_NE(hostInterface, nullptr);
+    EXPECT_NE(hostInterface->GetHost(), nullptr);
+    EXPECT_FALSE(hostInterface->IsDragging());
+    EXPECT_FALSE(hostInterface->HasUserAccessibilityText());
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest002
+ * @tc.desc: Test ICleanNodeHost getters read TextFieldLayoutProperty correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextField with explicit cancel button attributes.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. verify interface getters reflect layout property values.
+     */
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern_);
+    ASSERT_NE(hostInterface, nullptr);
+    EXPECT_EQ(hostInterface->GetCleanNodeStyle().value(), CleanNodeStyle::CONSTANT);
+    EXPECT_TRUE(hostInterface->IsShowCancelButtonMode());
+    EXPECT_FALSE(hostInterface->IsContentEmpty());
+    EXPECT_EQ(hostInterface->GetIsShowSymbol(), false);
+    auto iconSize = hostInterface->GetCancelIconSize();
+    EXPECT_FLOAT_EQ(iconSize.Value(), ICON_SIZE);
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest003
+ * @tc.desc: Test three-state display via interface: INPUT shows when content exists, hides when empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. INPUT style with text content -> button should show.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+    cleanNodeResponseArea->UpdateCleanNode(true);
+    pattern_->UpdateCancelNode();
+    EXPECT_TRUE(cleanNodeResponseArea->IsShow());
+
+    /**
+     * @tc.steps: step2. INPUT style with empty content -> button should hide.
+     */
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto emptyArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(emptyArea, nullptr);
+    emptyArea->UpdateCleanNode(true);
+    pattern_->UpdateCancelNode();
+    EXPECT_FALSE(emptyArea->IsShow());
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest004
+ * @tc.desc: Test three-state display: CONSTANT always shows, INVISIBLE always hides.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CONSTANT style with text -> button should show even after pre-hide.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto constantArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(constantArea, nullptr);
+    constantArea->UpdateCleanNode(false);
+    pattern_->UpdateCancelNode();
+    EXPECT_TRUE(constantArea->IsShow());
+
+    /**
+     * @tc.steps: step2. INVISIBLE style with text -> button should hide even after pre-show.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INVISIBLE);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto invisibleArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(invisibleArea, nullptr);
+    invisibleArea->UpdateCleanNode(true);
+    pattern_->UpdateCancelNode();
+    EXPECT_FALSE(invisibleArea->IsShow());
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest005
+ * @tc.desc: Test HandleCleanNodeClicked via interface clears text content (AC-1.6 full chain).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextField with text and cancel button enabled.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern_);
+    ASSERT_NE(hostInterface, nullptr);
+
+    /**
+     * @tc.steps: step2. verify content is non-empty before click.
+     */
+    EXPECT_FALSE(hostInterface->IsContentEmpty());
+
+    /**
+     * @tc.steps: step3. trigger HandleCleanNodeClicked via interface.
+     * @tc.expected: content is cleared (AC-1.6 full chain: clear + close select + caret + focus).
+     */
+    hostInterface->HandleCleanNodeClicked();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(hostInterface->IsContentEmpty());
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest006
+ * @tc.desc: Test remaining ICleanNodeHost getters read layout property values correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextField with cancel button and set properties via model.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelIconColor(Color::RED);
+        model.SetMaxFontScale(2.0f);
+        model.SetMinFontScale(0.5f);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. set additional properties directly on layout property.
+     */
+    ASSERT_NE(layoutProperty_, nullptr);
+    layoutProperty_->UpdateIconSrc("/test/icon.svg");
+    layoutProperty_->UpdateBundleName("com.test.bundle");
+    layoutProperty_->UpdateModuleName("test_module");
+    layoutProperty_->UpdateIsDisabled(true);
+
+    /**
+     * @tc.steps: step3. verify all interface getters return the set values.
+     */
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern_);
+    ASSERT_NE(hostInterface, nullptr);
+    EXPECT_EQ(hostInterface->GetCancelIconColor(), Color::RED);
+    EXPECT_EQ(hostInterface->GetCancelIconSrc(), "/test/icon.svg");
+    EXPECT_EQ(hostInterface->GetBundleName(), "com.test.bundle");
+    EXPECT_EQ(hostInterface->GetModuleName(), "test_module");
+    EXPECT_TRUE(hostInterface->GetIsDisabled());
+    ASSERT_TRUE(hostInterface->GetCancelMaxFontScale().has_value());
+    EXPECT_FLOAT_EQ(hostInterface->GetCancelMaxFontScale().value(), 2.0f);
+    ASSERT_TRUE(hostInterface->GetCancelMinFontScale().has_value());
+    EXPECT_FLOAT_EQ(hostInterface->GetCancelMinFontScale().value(), 0.5f);
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest007
+ * @tc.desc: Test Has* methods return true when properties are set, false when not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextField with only iconSize set, others unset.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern_);
+    ASSERT_NE(hostInterface, nullptr);
+
+    /**
+     * @tc.steps: step2. verify only iconSize Has* is true, others false.
+     */
+    EXPECT_TRUE(hostInterface->HasCancelIconSize());
+    EXPECT_FALSE(hostInterface->HasCancelIconColor());
+    EXPECT_FALSE(hostInterface->HasCancelIconSrc());
+    EXPECT_FALSE(hostInterface->HasBundleName());
+    EXPECT_FALSE(hostInterface->HasModuleName());
+    EXPECT_FALSE(hostInterface->HasCancelMaxFontScale());
+    EXPECT_FALSE(hostInterface->HasCancelMinFontScale());
+
+    /**
+     * @tc.steps: step3. create a new TextField with all properties set.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelIconColor(Color::BLUE);
+        model.SetMaxFontScale(3.0f);
+        model.SetMinFontScale(0.2f);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    layoutProperty_->UpdateIconSrc("/test/cancel.png");
+    layoutProperty_->UpdateBundleName("com.test.bn");
+    layoutProperty_->UpdateModuleName("mod");
+    hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern_);
+    ASSERT_NE(hostInterface, nullptr);
+
+    /**
+     * @tc.steps: step4. verify all Has* methods return true.
+     */
+    EXPECT_TRUE(hostInterface->HasCancelIconSize());
+    EXPECT_TRUE(hostInterface->HasCancelIconColor());
+    EXPECT_TRUE(hostInterface->HasCancelIconSrc());
+    EXPECT_TRUE(hostInterface->HasBundleName());
+    EXPECT_TRUE(hostInterface->HasModuleName());
+    EXPECT_TRUE(hostInterface->HasCancelMaxFontScale());
+    EXPECT_TRUE(hostInterface->HasCancelMinFontScale());
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest008
+ * @tc.desc: Test CleanNodeResponseArea IsShowClean() and IsShowSymbol() via ICleanNodeHost.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextField with cancel button and symbol=false.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step2. verify IsShowClean() returns true (cancel button mode is on).
+     * @tc.expected: IsShowClean reads via ICleanNodeHost::IsShowCancelButtonMode.
+     */
+    EXPECT_TRUE(cleanNodeResponseArea->IsShowClean());
+
+    /**
+     * @tc.steps: step3. verify IsShowSymbol() returns false (symbol was set to false).
+     * @tc.expected: IsShowSymbol reads via ICleanNodeHost::GetIsShowSymbol.
+     */
+    EXPECT_FALSE(cleanNodeResponseArea->IsShowSymbol());
+
+    /**
+     * @tc.steps: step4. create TextField with cancel button disabled.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(false);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto disabledArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    if (disabledArea) {
+        EXPECT_FALSE(disabledArea->IsShowClean());
+    }
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest009
+ * @tc.desc: Test OnCleanNodeClicked() through CleanNodeResponseArea interface path clears content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextField with text and cancel button enabled.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern_);
+    ASSERT_NE(hostInterface, nullptr);
+    EXPECT_FALSE(hostInterface->IsContentEmpty());
+
+    /**
+     * @tc.steps: step2. call OnCleanNodeClicked() directly on CleanNodeResponseArea.
+     * @tc.expected: content is cleared via interface path (DynamicCast + HandleCleanNodeClicked).
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+    cleanNodeResponseArea->OnCleanNodeClicked();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(hostInterface->IsContentEmpty());
+}
+
+/**
+ * @tc.name: ICleanNodeHostTest010
+ * @tc.desc: Test UpdateShowState() directly for all three CleanNodeStyle states.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, ICleanNodeHostTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CONSTANT style: should show even after pre-hide.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto constantArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(constantArea, nullptr);
+    constantArea->UpdateCleanNode(false);
+    constantArea->UpdateShowState();
+    EXPECT_TRUE(constantArea->IsShow());
+
+    /**
+     * @tc.steps: step2. INVISIBLE style: should hide even after pre-show.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INVISIBLE);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto invisibleArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(invisibleArea, nullptr);
+    invisibleArea->UpdateCleanNode(true);
+    invisibleArea->UpdateShowState();
+    EXPECT_FALSE(invisibleArea->IsShow());
+
+    /**
+     * @tc.steps: step3. INPUT style with content: should show after pre-hide.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto inputArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(inputArea, nullptr);
+    inputArea->UpdateCleanNode(false);
+    inputArea->UpdateShowState();
+    EXPECT_TRUE(inputArea->IsShow());
+
+    /**
+     * @tc.steps: step4. INPUT style with empty content: should hide after pre-show.
+     */
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto emptyArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(emptyArea, nullptr);
+    emptyArea->UpdateCleanNode(true);
+    emptyArea->UpdateShowState();
+    EXPECT_FALSE(emptyArea->IsShow());
+}
+
+/**
+ * @tc.name: CleanNodeRefreshNullHost001
+ * @tc.desc: Test Refresh() with null hostPattern_ covers the false branch of hostPattern check.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeRefreshNullHost001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeArea, nullptr);
+
+    // Reset hostPattern_ to null to cover the false branch of `if (hostPattern && cleanNode_)`
+    cleanNodeArea->hostPattern_.Reset();
+    // Refresh should not crash when hostPattern is null; IsShowSymbol returns false,
+    // and LoadingImageProperty/CreateImageSourceInfo return early via null checks
+    cleanNodeArea->Refresh();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CleanNodeRefreshSymbolUpdate001
+ * @tc.desc: Test Refresh() enters symbol update path when IsShowSymbol and IsSymbolIcon are true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeRefreshSymbolUpdate001, TestSize.Level1)
+{
+    // SetCancelButtonSymbol(true) makes IsShowSymbol() return true via layout property.
+    // CreateNode() creates a SYMBOL_ETS_TAG child, making IsSymbolIcon() return true.
+    // SystemProperties::IsNeedSymbol() returns true by default in mock environment.
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(true);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeArea, nullptr);
+
+    // Refresh should enter symbol path: IsShowSymbol && IsSymbolIcon && IsNeedSymbol
+    cleanNodeArea->Refresh();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CleanNodeRefreshReplaceNode001
+ * @tc.desc: Test Refresh() enters ReplaceNode path when IsShowSymbol != IsSymbolIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeRefreshReplaceNode001, TestSize.Level1)
+{
+    // Create with symbol=true so CreateNode() creates a symbol child (IsSymbolIcon=true)
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(true);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    // Flip IsShowSymbol to false after creation.
+    // Now: IsShowSymbol=false, IsSymbolIcon=true (symbol child still exists)
+    // Neither symbol path (false&&true) nor image path (true&&false) matches
+    // => ReplaceNode() is called
+    layoutProperty_->UpdateIsShowSymbol(false);
+
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeArea, nullptr);
+    cleanNodeArea->Refresh();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CleanNodeUpdateShowStateCheckUpdate001
+ * @tc.desc: Test UpdateShowState() when IsShow=true and CheckUpdateCleanNode returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeUpdateShowStateCheckUpdate001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeArea, nullptr);
+
+    // Set isShow_ to true so !IsShow() is false, forcing evaluation of CheckUpdateCleanNode()
+    cleanNodeArea->isShow_ = true;
+
+    // Set cleanNode height > host frame height so CheckUpdateCleanNode returns true
+    auto cleanNode = cleanNodeArea->cleanNode_;
+    ASSERT_NE(cleanNode, nullptr);
+    cleanNode->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 100.0f));
+    frameNode_->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 40.0f));
+
+    // UpdateShowState should call UpdateCleanNode(true) because CheckUpdateCleanNode returns true
+    cleanNodeArea->UpdateShowState();
+    EXPECT_TRUE(cleanNodeArea->IsShow());
+}
+
+/**
+ * @tc.name: CleanNodeLoadingImagePropertyPercent001
+ * @tc.desc: Test LoadingImageProperty() with PERCENT icon size unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeLoadingImagePropertyPercent001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelIconSize(Dimension(50, DimensionUnit::PERCENT));
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeArea, nullptr);
+
+    // LoadingImageProperty should enter PERCENT branch: iconSize_ = iconSizeValue
+    cleanNodeArea->LoadingImageProperty();
+    EXPECT_FLOAT_EQ(cleanNodeArea->iconSize_.Value(), 50);
+}
+
+/**
+ * @tc.name: CleanNodeLoadingImagePropertyAllProps001
+ * @tc.desc: Test LoadingImageProperty() with all cancel button properties set covers Has* true branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeLoadingImagePropertyAllProps001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelIconColor(Color::RED);
+        model.SetMaxFontScale(2.0f);
+        model.SetMinFontScale(0.5f);
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    // Set additional properties via layout property to trigger Has* true branches
+    layoutProperty_->UpdateIconSrc("/test/icon.svg");
+    layoutProperty_->UpdateBundleName("com.test.bundle");
+    layoutProperty_->UpdateModuleName("test_module");
+    layoutProperty_->UpdateIsDisabled(true);
+
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeArea, nullptr);
+
+    // LoadingImageProperty covers:
+    //   HasCancelMaxFontScale true, HasCancelMinFontScale true,
+    //   HasCancelIconSrc true, HasBundleName true, HasModuleName true
+    // LoadingCancelButtonColor (called inside) covers:
+    //   GetIsDisabled true branch
+    cleanNodeArea->LoadingImageProperty();
+    EXPECT_EQ(cleanNodeArea->iconSrc_, "/test/icon.svg");
+    EXPECT_EQ(cleanNodeArea->bundleName_, "com.test.bundle");
+    EXPECT_EQ(cleanNodeArea->moduleName_, "test_module");
+}
+
+/**
+ * @tc.name: CleanNodeCreateImageSourceInfoNonSvg001
+ * @tc.desc: Test CreateImageSourceInfo() with non-SVG icon source covers IsSvg false branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeCreateImageSourceInfoNonSvg001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsShowCancelButton(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    // Set non-SVG icon source so IsSvg() returns false
+    layoutProperty_->UpdateIconSrc("/test/icon.png");
+
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeArea, nullptr);
+
+    // Load properties so iconSrc_ is populated with non-SVG path
+    cleanNodeArea->LoadingImageProperty();
+    ASSERT_EQ(cleanNodeArea->iconSrc_, "/test/icon.png");
+
+    // CreateImageSourceInfo: iconSrc_ is non-empty => SetSrc("/test/icon.png")
+    // info.IsSvg() returns false => the SVG fill color branch is skipped
+    auto info = cleanNodeArea->CreateImageSourceInfo();
+    EXPECT_EQ(info.GetSrc(), "/test/icon.png");
 }
 } // namespace OHOS::Ace::NG

@@ -85,6 +85,16 @@
 | ADR-6 | 多 Chip/IconGroupSuffix 同时渲染材质的性能优化？ | ChipGroup 在 Scroll 内插入 EffectComponent 子组件，EffectComponent 上 `.systemMaterial(convertToECMaterial())` 渲染主材质，Chip 用 `convertToECSubMaterial()` 子材质共享资源。IconGroupSuffix 同样用 EffectComponent 包裹 Row(ForEach → Button)，EffectComponent 上 `.systemMaterial(convertToECMaterial(this.iconBackgroundSystemMaterial))` 渲染主材质，每个 suffix item Button 用 `convertToECSubMaterial()` 子材质共享资源 | A: 每个 Chip/suffix item 独立设置 `systemMaterial` → 多节点同时渲染材质时各自创建独立渲染资源，性能开销大 | EffectComponent + convertToECMaterial/SubMaterial 是 ArkUI 框架的材质渲染优化方案，ChipGroup Scroll 内 EffectComponent 和 IconGroupSuffix Row 内 EffectComponent 各自独立渲染主材质，子节点共享渲染资源 | ChipGroup Scroll 内 + IconGroupSuffix Row 内各自新增 EffectComponent 子组件 |
 | ADR-7 | 新材质版本隔离？ | 使用 `deviceInfo.sdkApiVersion` 做版本隔离：新材质相关功能（EffectComponent 子组件插入、`convertToECMaterial`/`convertToECSubMaterial` 转换、`.systemMaterial()` 调用）仅在 `sdkApiVersion >= 26` 时生效；低于 API 26 时忽略材质属性，保持与当前版本完全一致的行为 | A: 无版本隔离 → 低版本设备上 EffectComponent/systemMaterial 可能不可用或行为异常；B: 编译时隔离 → 高级组件为运行时组件，不支持编译时版本裁剪 | 与 `chip_v16.ets:499`（`deviceInfo.sdkApiVersion < 26`）和 `segmentbuttonv2.ets:1369`（`deviceInfo.sdkApiVersion >= 26`）的版本隔离模式一致。ChipGroup/Chip 当前未 import `deviceInfo`，需新增 import | ChipGroup/Chip 新增 `import deviceInfo from '@ohos.deviceInfo'`；build() 中材质相关逻辑包裹 `if (deviceInfo.sdkApiVersion >= 26)` 条件 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| ChipGroup/Chip | 使用中的对象非法销毁检查 | 可能导致cpp_crash | RefPtr智能指针在被使用时，如果被重新赋值将可能导致所管理的对象被析构失效，进而造成UAF问题 | 严重 | 识别是不是有对象使用中被销毁的问题，避免程序带着问题继续运行进而出现难以定位的问题现场 | "this object is still in use" | 不涉及 |
+
 ## 设计骨架
 
 ### 骨架范围

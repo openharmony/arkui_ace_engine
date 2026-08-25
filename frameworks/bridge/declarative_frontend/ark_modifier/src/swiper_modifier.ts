@@ -201,6 +201,11 @@ class LazyArkSwiperComponent extends ArkComponent {
     this.lazyComponent.onScrollStateChanged(event);
     return this;
   }
+
+  ignoreHiddenItem(value: boolean): this {
+    this.lazyComponent.ignoreHiddenItem(value);
+    return this;
+  }
 }
 
 class SwiperModifier extends LazyArkSwiperComponent implements AttributeModifier<SwiperAttribute> {

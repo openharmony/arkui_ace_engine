@@ -526,7 +526,8 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
     }
 }
 
-void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed,
+    bool transformTriggersEmbed)
 {
     auto isDragging = GetIsHandleDragging();
     if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
@@ -546,7 +547,7 @@ void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         UpdateAllHandlesOffset();
     }
     if (!isDragging) {
-        BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+        BaseTextSelectOverlay::OnAncestorNodeChanged(flag, scrollTriggersEmbed, transformTriggersEmbed);
     }
 }
 

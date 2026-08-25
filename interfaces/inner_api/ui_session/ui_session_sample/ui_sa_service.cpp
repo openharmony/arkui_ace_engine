@@ -17,10 +17,14 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <cctype>
+#include <cinttypes>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <iomanip>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <sys/time.h>
 
@@ -39,6 +43,7 @@ namespace {
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&UiSaService::GetInstance());
 const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
 constexpr char WEB_INTERFACE_REQUEST_DOM_TREE[] = "RequestArkWebDomTree";
+constexpr char WEB_INTERFACE_REQUEST_DOM_TREE_VIEWPORT[] = "RequestArkWebDomTreeViewport";
 constexpr size_t BITS_UINT32 = sizeof(uint32_t) * 8;
 constexpr int32_t PARAMS_OFFSET = 1;
 constexpr size_t GET_VISIBLE_INTERACTION_INFO_INDEX = 1;
@@ -59,11 +64,53 @@ constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
 constexpr int32_t GET_SPECIFIED_CONTENT_OFFSETS_PARAMS = 3;
 constexpr int32_t HIGHLIGHT_SPECIFIED_CONTENT_PARAMS = 3;
+constexpr int32_t PAGE_TRANSLATE_REQUEST_PARAMS = 2;
+constexpr int32_t PAGE_TRANSLATE_RESET_PARAMS = 2;
+constexpr size_t PAGE_TRANSLATE_EXTRA_DATA_INDEX = 2;
+constexpr int32_t DEFAULT_APP_USER_ID = 100;
+constexpr char DEFAULT_PAGE_TRANSLATE_REQUEST[] = R"({"scope":3})";
 constexpr size_t PAGE_SCENE_RULE_PARAM_INDEX = 1;
 constexpr size_t PAGE_SCENE_RULE_SET_ID_PARAM_INDEX = 1;
 constexpr double PERCENT_VALUE = 100.0;
 const char PAGE_SCENE_RULE_FILE[] = "page_scene_rules.json";
 const char DEFAULT_PAGE_SCENE_RULE_SET_ID[] = "default_scene_rules";
+const char NULL_CALLBACK_DUMP_OPTION[] = "-nullcb";
+const char EMPTY_ID_DUMP_OPTION[] = "-emptyid";
+const std::string REPEAT_DUMP_OPTION_PREFIX = "-repeat:";
+
+struct DumpOption {
+    bool useNullCallback = false;
+    bool useEmptyId = false;
+    int32_t repeatCount = 1;
+};
+
+DumpOption ParseDumpOption(std::vector<std::string>& params)
+{
+    DumpOption option;
+    params.erase(std::remove_if(params.begin(), params.end(), [&option](const std::string& param) {
+        if (param == NULL_CALLBACK_DUMP_OPTION) {
+            option.useNullCallback = true;
+            return true;
+        }
+        if (param == EMPTY_ID_DUMP_OPTION) {
+            option.useEmptyId = true;
+            return true;
+        }
+        if (param.rfind(REPEAT_DUMP_OPTION_PREFIX, 0) != 0) {
+            return false;
+        }
+        auto repeatValue = param.substr(REPEAT_DUMP_OPTION_PREFIX.length());
+        errno = 0;
+        char* parseEnd = nullptr;
+        long repeatCount = std::strtol(repeatValue.c_str(), &parseEnd, 10);
+        if (parseEnd != repeatValue.c_str() && *parseEnd == '\0' && errno != ERANGE && repeatCount > 0 &&
+            repeatCount <= std::numeric_limits<int32_t>::max()) {
+            option.repeatCount = static_cast<int32_t>(repeatCount);
+        }
+        return true;
+        }), params.end());
+    return option;
+}
 
 std::string GetCurrentTimestampStr()
 {
@@ -170,6 +217,31 @@ std::string UnescapeContent(const std::string& param)
     return result;
 }
 
+std::string BuildPageTranslateRequest(const std::vector<std::string>& params)
+{
+    if (params.size() < PAGE_TRANSLATE_REQUEST_PARAMS) {
+        return DEFAULT_PAGE_TRANSLATE_REQUEST;
+    }
+    const auto& firstParam = params[1];
+    if (!firstParam.empty() && firstParam.front() == '{') {
+        return firstParam;
+    }
+    std::stringstream request;
+    request << "{\"scope\":" << std::atoi(firstParam.c_str());
+    if (params.size() > PAGE_TRANSLATE_REQUEST_PARAMS) {
+        request << ",\"extraData\":\"" << params[PAGE_TRANSLATE_EXTRA_DATA_INDEX] << "\"";
+    }
+    request << "}";
+    return request.str();
+}
+
+bool IsNumberParam(const std::string& param)
+{
+    return !param.empty() && std::all_of(param.begin(), param.end(), [](unsigned char ch) {
+        return std::isdigit(ch) != 0;
+    });
+}
+
 bool HasToFileParam(const std::vector<std::string>& params)
 {
     return std::find(params.begin(), params.end(), "-tofile") != params.end();
@@ -233,6 +305,12 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "ExeAppAIFunction", &UiSaService::HandleExeAppAIFunction },
     { "GetWebViewCurrentLanguage", &UiSaService::HandleGetWebViewCurrentLanguage },
     { "StartWebViewTranslate", &UiSaService::HandleStartWebViewTranslate },
+    { "GetPageTranslateText", &UiSaService::HandleGetPageTranslateText },
+    { "StartPageTranslate", &UiSaService::HandleStartPageTranslate },
+    { "EndPageTranslate", &UiSaService::HandleEndPageTranslate },
+    { "ResetPageTranslate", &UiSaService::HandleResetPageTranslate },
+    { "SendPageTranslateResult", &UiSaService::HandleSendPageTranslateResult },
+    { "GetCurrentAbilityLanguageInfo", &UiSaService::HandleGetCurrentAbilityLanguageInfo },
     { "GetStateMgmtInfo", &UiSaService::HandleGetStateMgmtInfo },
     { "RegisterTextChangeEventCallback", &UiSaService::HandleRegisterTextChangeEventCallback },
     { "UnregisterTextChangeEventCallback", &UiSaService::HandleUnregisterTextChangeEventCallback },
@@ -257,6 +335,10 @@ void UiSaService::OnStart()
 {
     Publish(this);
     eventHandler_ = OHOS::AppExecFwk::EventHandler::Current();
+    if (eventHandler_ == nullptr) {
+        auto runner = OHOS::AppExecFwk::EventRunner::Create("UiSaService");
+        eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
 }
 
 void UiSaService::OnStop() {}
@@ -286,10 +368,17 @@ sptr<Ace::IUiContentService> UiSaService::getArkUIService(int32_t windowId)
         service = uiContentRemoteObjMap_[windowId].second;
         return service;
     }
-    auto ret = OHOS::Rosen::WindowManager::GetInstance().GetUIContentRemoteObj(windowId, tmpRemoteObj);
+    auto ret = OHOS::Rosen::WindowManager::GetInstance(DEFAULT_APP_USER_ID).GetUIContentRemoteObj(
+        windowId, tmpRemoteObj);
     LOGI("through uiSa, get UIContentRemoteObj. ret=%{public}u", static_cast<uint32_t>(ret));
     if (tmpRemoteObj == nullptr) {
-        LOGW("through uiSa, tempRemoteObj is null");
+        auto rootRet = OHOS::Rosen::WindowManager::GetInstance(DEFAULT_APP_USER_ID).GetRootUIContentRemoteObj(0,
+            tmpRemoteObj);
+        LOGW("through uiSa, tempRemoteObj is null, try root UIContent. ret=%{public}u",
+            static_cast<uint32_t>(rootRet));
+    }
+    if (tmpRemoteObj == nullptr) {
+        LOGW("through uiSa, UIContent remoteObj is null");
         return nullptr;
     }
     // add death callback
@@ -313,18 +402,23 @@ int32_t UiSaService::Dump(int32_t fd, const std::vector<std::u16string>& args)
     if (fd < 0) {
         return ERR_INVALID_DATA;
     }
-    OHOS::Rosen::FocusChangeInfo focusedWindowInfo;
-    OHOS::Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusedWindowInfo);
-    int32_t focusedWindowId = focusedWindowInfo.windowId_;
-    auto service = getArkUIService(focusedWindowId);
-    CHECK_NULL_RETURN(service, ERR_INVALID_DATA);
-    if (!service->IsConnect()) {
-        LOGW("through uiSa, not connected.");
-    }
     std::vector<std::string> params;
     for (const auto& arg : args) {
         const auto str = Str16ToStr8(arg);
         params.emplace_back(str);
+    }
+    OHOS::Rosen::FocusChangeInfo focusedWindowInfo;
+    OHOS::Rosen::WindowManager::GetInstance(DEFAULT_APP_USER_ID).GetFocusWindowInfo(focusedWindowInfo);
+    int32_t focusedWindowId = focusedWindowInfo.windowId_;
+    if (!params.empty() && IsNumberParam(params.front())) {
+        focusedWindowId = std::atoi(params.front().c_str());
+        params.erase(params.begin());
+    }
+    LOGI("through uiSa, dump focusedWindowId=%{public}d", focusedWindowId);
+    auto service = getArkUIService(focusedWindowId);
+    CHECK_NULL_RETURN(service, ERR_INVALID_DATA);
+    if (!service->IsConnect()) {
+        LOGW("through uiSa, not connected.");
     }
 
     if (!params.empty()) {
@@ -532,6 +626,17 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
                 ostream->write(result.c_str(), result.length());
                 LOGI("[GetWebInfoByRequest] arkWeb tree is saved to %{public}s", filePath.c_str());
             }
+            if (request == WEB_INTERFACE_REQUEST_DOM_TREE_VIEWPORT) {
+                auto filePath = UI_SA_PATH + "arkweb_tree_viewport_" + GetCurrentTimestampStr() + ".json";
+                std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
+                CHECK_NULL_VOID(ostream);
+                if (!ostream->is_open()) {
+                    LOGW("[GetWebInfoByRequest] filePath is invalid");
+                    return;
+                }
+                ostream->write(result.c_str(), result.length());
+                LOGI("[GetWebInfoByRequest] arkWeb tree is saved to %{public}s", filePath.c_str());
+            }
         };
         service->GetWebInfoByRequest(webId, request, finishCallback);
         LOGI("[GetWebInfoByRequest] call GetWebInfoById");
@@ -595,34 +700,46 @@ void UiSaService::HandleRegisterPageSceneRules(sptr<IUiContentService> service, 
         LOGW("[PageScene] RegisterPageSceneRules connect failed");
         return;
     }
+    auto dumpOption = ParseDumpOption(params);
     bool toFile = HasToFileParam(params);
     RemoveToFileParam(params);
-    std::string ruleJson = params.size() > PAGE_SCENE_RULE_PARAM_INDEX ? params[PAGE_SCENE_RULE_PARAM_INDEX]
-                                                                       : ReadPageSceneRuleJson();
-    if (ruleJson.empty()) {
-        LOGW("[PageScene] RegisterPageSceneRules rule json is empty");
-        return;
+    std::string ruleJson = dumpOption.useEmptyId
+                               ? ""
+                               : (params.size() > PAGE_SCENE_RULE_PARAM_INDEX ? params[PAGE_SCENE_RULE_PARAM_INDEX]
+                                                                              : ReadPageSceneRuleJson());
+    PageSceneEventCallback eventCallback = nullptr;
+    if (!dumpOption.useNullCallback) {
+        eventCallback = [toFile](const std::string& data) {
+            LOGI("[PageScene] event length=%{public}zu", data.length());
+            if (toFile && !data.empty()) {
+                WriteTextFile("[PageSceneEvent]", "page_scene_event", data);
+            }
+        };
     }
-    auto eventCallback = [toFile](const std::string& data) {
-        LOGI("[PageScene] event length=%{public}zu", data.length());
-        if (toFile && !data.empty()) {
-            WriteTextFile("[PageSceneEvent]", "page_scene_event", data);
-        }
-    };
-    int32_t result = service->RegisterPageSceneRules(ruleJson, eventCallback);
-    LOGI("[PageScene] call RegisterPageSceneRules result=%{public}d", result);
+    for (int32_t index = 0; index < dumpOption.repeatCount; index++) {
+        int32_t result = service->RegisterPageSceneRules(ruleJson, eventCallback);
+        LOGI("[PageScene] call RegisterPageSceneRules repeat=%{public}d/%{public}d, result=%{public}d", index + 1,
+            dumpOption.repeatCount, result);
+    }
 }
 
 void UiSaService::HandleUnregisterPageSceneRules(sptr<IUiContentService> service, std::vector<std::string> params)
 {
+    auto dumpOption = ParseDumpOption(params);
     bool toFile = HasToFileParam(params);
     RemoveToFileParam(params);
-    std::string ruleSetId = params.size() > PAGE_SCENE_RULE_SET_ID_PARAM_INDEX
-                                ? params[PAGE_SCENE_RULE_SET_ID_PARAM_INDEX]
-                                : DEFAULT_PAGE_SCENE_RULE_SET_ID;
-    int32_t result = service->UnregisterPageSceneRules(ruleSetId);
-    LOGI("[PageScene] call UnregisterPageSceneRules ruleSetId=%{public}s, result=%{public}d", ruleSetId.c_str(),
-        result);
+    std::string ruleSetId = dumpOption.useEmptyId
+                                ? ""
+                                : (params.size() > PAGE_SCENE_RULE_SET_ID_PARAM_INDEX
+                                          ? params[PAGE_SCENE_RULE_SET_ID_PARAM_INDEX]
+                                          : DEFAULT_PAGE_SCENE_RULE_SET_ID);
+    int32_t result = FAILED;
+    for (int32_t index = 0; index < dumpOption.repeatCount; index++) {
+        result = service->UnregisterPageSceneRules(ruleSetId);
+        LOGI("[PageScene] call UnregisterPageSceneRules repeat=%{public}d/%{public}d, ruleSetId=%{public}s, "
+             "result=%{public}d",
+            index + 1, dumpOption.repeatCount, ruleSetId.c_str(), result);
+    }
     if (toFile) {
         std::ostringstream resultJson;
         resultJson << "{\"command\":\"UnregisterPageSceneRules\",\"ruleSetId\":\"" << ruleSetId
@@ -637,23 +754,28 @@ void UiSaService::HandleGetPageScene(sptr<IUiContentService> service, std::vecto
         LOGW("[PageScene] GetPageScene connect failed");
         return;
     }
+    auto dumpOption = ParseDumpOption(params);
     bool toFile = HasToFileParam(params);
     RemoveToFileParam(params);
-    std::string ruleJsonOrRuleSetId = params.size() > PAGE_SCENE_RULE_PARAM_INDEX
-                                           ? params[PAGE_SCENE_RULE_PARAM_INDEX]
-                                           : ReadPageSceneRuleJson();
-    if (ruleJsonOrRuleSetId.empty()) {
-        LOGW("[PageScene] GetPageScene rule json or ruleSetId is empty");
-        return;
+    std::string ruleJsonOrRuleSetId =
+        dumpOption.useEmptyId
+            ? ""
+            : (params.size() > PAGE_SCENE_RULE_PARAM_INDEX ? params[PAGE_SCENE_RULE_PARAM_INDEX]
+                                                            : ReadPageSceneRuleJson());
+    PageSceneEventCallback eventCallback = nullptr;
+    if (!dumpOption.useNullCallback) {
+        eventCallback = [toFile](const std::string& data) {
+            LOGI("[PageScene] get result length=%{public}zu", data.length());
+            if (toFile && !data.empty()) {
+                WriteTextFile("[PageSceneGet]", "page_scene_get", data);
+            }
+        };
     }
-    auto eventCallback = [toFile](const std::string& data) {
-        LOGI("[PageScene] get result length=%{public}zu", data.length());
-        if (toFile && !data.empty()) {
-            WriteTextFile("[PageSceneGet]", "page_scene_get", data);
-        }
-    };
-    int32_t result = service->GetPageScene(ruleJsonOrRuleSetId, eventCallback);
-    LOGI("[PageScene] call GetPageScene result=%{public}d", result);
+    for (int32_t index = 0; index < dumpOption.repeatCount; index++) {
+        int32_t result = service->GetPageScene(ruleJsonOrRuleSetId, eventCallback);
+        LOGI("[PageScene] call GetPageScene repeat=%{public}d/%{public}d, result=%{public}d", index + 1,
+            dumpOption.repeatCount, result);
+    }
 }
 
 void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)
@@ -699,6 +821,67 @@ void UiSaService::HandleStartWebViewTranslate(sptr<IUiContentService> service, s
         service->StartWebViewTranslate(data, finishCallback);
         LOGI("[StartWebViewTranslate] call StartWebViewTranslate data=%{public}s", data.c_str());
     }
+}
+
+void UiSaService::HandleGetPageTranslateText(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    std::string request = BuildPageTranslateRequest(params);
+    auto callback = [](int32_t nodeId, const std::string& text, int64_t version) {
+        LOGI("[GetPageTranslateText] nodeId=%{public}d, textLen=%{public}zu, text=%{public}s, version=%{public}" PRId64,
+            nodeId, text.size(), text.substr(0, 200).c_str(), version);
+    };
+    auto result = service->GetPageTranslateText(request, callback);
+    LOGI("[GetPageTranslateText] result=%{public}d, requestLen=%{public}zu, request=%{public}s",
+        result, request.size(), request.substr(0, 200).c_str());
+}
+
+void UiSaService::HandleStartPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    std::string request = BuildPageTranslateRequest(params);
+    auto callback = [](int32_t nodeId, const std::string& text, int64_t version) {
+        LOGI("[StartPageTranslate] nodeId=%{public}d, textLen=%{public}zu, text=%{public}s, version=%{public}" PRId64,
+            nodeId, text.size(), text.substr(0, 200).c_str(), version);
+    };
+    auto result = service->StartPageTranslate(request, callback);
+    LOGI("[StartPageTranslate] result=%{public}d, requestLen=%{public}zu, request=%{public}s",
+        result, request.size(), request.substr(0, 200).c_str());
+}
+
+void UiSaService::HandleEndPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    (void)params;
+    auto result = service->EndPageTranslate();
+    LOGI("[EndPageTranslate] result=%{public}d", result);
+}
+
+void UiSaService::HandleResetPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    int32_t nodeId = -1;
+    if (params.size() >= PAGE_TRANSLATE_RESET_PARAMS) {
+        nodeId = std::atoi(params[1].c_str());
+    }
+    auto result = service->ResetPageTranslate(nodeId);
+    LOGI("[ResetPageTranslate] result=%{public}d, nodeId=%{public}d", result, nodeId);
+}
+
+void UiSaService::HandleSendPageTranslateResult(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= PAGE_TRANSLATE_REQUEST_PARAMS) {
+        std::string result = params[1];
+        auto ret = service->SendPageTranslateResult(result);
+        LOGI("[SendPageTranslateResult] result=%{public}d, resultLen=%{public}zu, result=%{public}s",
+            ret, result.size(), result.substr(0, 200).c_str());
+    }
+}
+
+void UiSaService::HandleGetCurrentAbilityLanguageInfo(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    (void)params;
+    std::string language;
+    std::string region;
+    int32_t result = service->GetCurrentAbilityLanguageInfo(language, region);
+    LOGI("[GetCurrentAbilityLanguageInfo] result=%{public}d, language=%{public}s, region=%{public}s",
+        result, language.c_str(), region.c_str());
 }
 
 void UiSaService::HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::vector<std::string> params)

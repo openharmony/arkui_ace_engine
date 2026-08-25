@@ -28,7 +28,7 @@ class FrameNode;
 } // namespace NG
 
 struct ArkUIImageSpanCustomModifier {
-    void (*setStaticBaselineOffset)(Ark_NativePointer node, const Opt_LengthMetrics* value);
+    void (*setStaticBaselineOffset)(Ark_NativePointer node, const Opt_LengthMetricsProxy* value);
 };
 
 } // namespace OHOS::Ace

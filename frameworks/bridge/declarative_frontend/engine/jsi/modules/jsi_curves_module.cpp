@@ -273,6 +273,131 @@ bool CreateResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, con
     return true;
 }
 
+bool CreateTrailOptimizedSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc > 4) { // 4: max argc (response + dampingRatio + blendDuration + trail)
+        return false;
+    }
+    float response = TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+    float dampingRatio = TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+    TrailOptimization trail;
+    if (argc > 0 && argv[0]->IsNumber(runtime)) { // 0: response
+        response = static_cast<float>(argv[0]->ToDouble(runtime));
+        if (LessOrEqual(response, 0)) {
+            response = TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+        }
+    }
+    if (argc > 1 && argv[1]->IsNumber(runtime)) { // 1: dampingRatio
+        dampingRatio = static_cast<float>(argv[1]->ToDouble(runtime));
+        if (LessNotEqual(dampingRatio, 0)) {
+            dampingRatio = TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+        }
+    }
+    if (argc > 2 && argv[2]->IsNumber(runtime)) { // 2: blendDuration
+        blendDuration = static_cast<float>(argv[2]->ToDouble(runtime));
+        if (LessNotEqual(blendDuration, 0)) {
+            blendDuration = TrailOptimizedResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+        }
+    }
+    if (argc > 3 && argv[3]->IsObject(runtime)) { // 3: trail object
+        auto trailObj = argv[3];
+        auto progressThresholdProp = trailObj->GetProperty(runtime, "progressThreshold");
+        if (progressThresholdProp->IsNumber(runtime)) {
+            trail.progressThreshold = static_cast<float>(progressThresholdProp->ToDouble(runtime));
+        }
+        auto responseDecayFactorProp = trailObj->GetProperty(runtime, "responseDecayFactor");
+        if (responseDecayFactorProp->IsNumber(runtime)) {
+            trail.responseDecayFactor = static_cast<float>(responseDecayFactorProp->ToDouble(runtime));
+        }
+        trail.validate();
+    }
+    curve = AceType::MakeRefPtr<TrailOptimizedResponsiveSpringMotion>(response, dampingRatio, blendDuration, trail);
+    return true;
+}
+
+bool CreateTrailOptimizedResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc,
+    RefPtr<Curve>& curve)
+{
+    if (argc > 4) { // 4: max argc (response + dampingRatio + blendDuration + trail)
+        return false;
+    }
+    float response = TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    float dampingRatio = TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    TrailOptimization trail;
+    if (argc > 0 && argv[0]->IsNumber(runtime)) { // 0: response
+        response = static_cast<float>(argv[0]->ToDouble(runtime));
+        if (LessOrEqual(response, 0)) {
+            response = TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+        }
+    }
+    if (argc > 1 && argv[1]->IsNumber(runtime)) { // 1: dampingRatio
+        dampingRatio = static_cast<float>(argv[1]->ToDouble(runtime));
+        if (LessNotEqual(dampingRatio, 0)) {
+            dampingRatio = TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+        }
+    }
+    if (argc > 2 && argv[2]->IsNumber(runtime)) { // 2: blendDuration
+        blendDuration = static_cast<float>(argv[2]->ToDouble(runtime));
+        if (LessNotEqual(blendDuration, 0)) {
+            blendDuration = TrailOptimizedResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+        }
+    }
+    if (argc > 3 && argv[3]->IsObject(runtime)) { // 3: trail object
+        auto trailObj = argv[3];
+        auto progressThresholdProp = trailObj->GetProperty(runtime, "progressThreshold");
+        if (progressThresholdProp->IsNumber(runtime)) {
+            trail.progressThreshold = static_cast<float>(progressThresholdProp->ToDouble(runtime));
+        }
+        auto responseDecayFactorProp = trailObj->GetProperty(runtime, "responseDecayFactor");
+        if (responseDecayFactorProp->IsNumber(runtime)) {
+            trail.responseDecayFactor = static_cast<float>(responseDecayFactorProp->ToDouble(runtime));
+        }
+        trail.validate();
+    }
+    curve = AceType::MakeRefPtr<TrailOptimizedResponsiveSpringMotion>(response, dampingRatio, blendDuration, trail);
+    return true;
+}
+
+bool CreateTrailOptimizedInterpolatingSpring(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc < 4 || argc > 5) { // 4: min argc (velocity + mass + stiffness + damping), 5: + trail
+        return false;
+    }
+    float velocity = static_cast<float>(argv[0]->IsNumber(runtime) ? argv[0]->ToDouble(runtime) : 0.0);  // 0: velocity
+    float mass = static_cast<float>(argv[1]->IsNumber(runtime) ? argv[1]->ToDouble(runtime) : 1.0);      // 1: mass
+    float stiffness = static_cast<float>(argv[2]->IsNumber(runtime) ? argv[2]->ToDouble(runtime) : 1.0); // 2: stiffness
+    float damping = static_cast<float>(argv[3]->IsNumber(runtime) ? argv[3]->ToDouble(runtime) : 1.0);   // 3: damping
+    TrailOptimization trail;
+    if (LessOrEqual(mass, 0)) {
+        mass = 1.0;
+    }
+    if (LessOrEqual(stiffness, 0)) {
+        stiffness = 1.0;
+    }
+    if (LessOrEqual(damping, 0)) {
+        damping = 1.0;
+    }
+    if (argc > 4 && argv[4]->IsObject(runtime)) { // 4: trail object
+        auto trailObj = argv[4];
+        auto progressThresholdProp = trailObj->GetProperty(runtime, "progressThreshold");
+        if (progressThresholdProp->IsNumber(runtime)) {
+            trail.progressThreshold = static_cast<float>(progressThresholdProp->ToDouble(runtime));
+        }
+        auto responseDecayFactorProp = trailObj->GetProperty(runtime, "responseDecayFactor");
+        if (responseDecayFactorProp->IsNumber(runtime)) {
+            trail.responseDecayFactor = static_cast<float>(responseDecayFactorProp->ToDouble(runtime));
+        }
+        trail.validate();
+    }
+    curve = AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(velocity, mass, stiffness, damping, trail);
+    return true;
+}
+
 shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, std::string& curveString)
 {
@@ -292,6 +417,12 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
         curveCreated = CreateSpringMotionCurve(runtime, thisObj, argv, argc, curve);
     } else if (curveString == RESPONSIVE_SPRING_MOTION) {
         curveCreated = CreateResponsiveSpringMotionCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == TRAIL_OPTIMIZED_SPRING_MOTION) {
+        curveCreated = CreateTrailOptimizedSpringMotionCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == TRAIL_OPTIMIZED_RESPONSIVE_SPRING_MOTION) {
+        curveCreated = CreateTrailOptimizedResponsiveSpringMotionCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == TRAIL_OPTIMIZED_INTERPOLATING_SPRING) {
+        curveCreated = CreateTrailOptimizedInterpolatingSpring(runtime, thisObj, argv, argc, curve);
     } else if (curveString == CURVES_CUSTOM) {
         curve = AceType::MakeRefPtr<CustomCurve>(nullptr);
         curveCreated = true;
@@ -389,6 +520,27 @@ shared_ptr<JsValue> ResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& run
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
 
+shared_ptr<JsValue> TrailOptimizedSpringMotionCurve(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(TRAIL_OPTIMIZED_SPRING_MOTION);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
+shared_ptr<JsValue> TrailOptimizedResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(TRAIL_OPTIMIZED_RESPONSIVE_SPRING_MOTION);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
+shared_ptr<JsValue> TrailOptimizedInterpolatingSpringCurve(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(TRAIL_OPTIMIZED_INTERPOLATING_SPRING);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
 void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
 {
     moduleObj->SetProperty(runtime, CURVES_INIT, runtime->NewFunction(CurvesInit));
@@ -402,6 +554,12 @@ void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>&
     moduleObj->SetProperty(runtime, STEPS_CURVE, runtime->NewFunction(StepsCurve));
     moduleObj->SetProperty(runtime, SPRING_MOTION, runtime->NewFunction(SpringMotionCurve));
     moduleObj->SetProperty(runtime, RESPONSIVE_SPRING_MOTION, runtime->NewFunction(ResponsiveSpringMotionCurve));
+    moduleObj->SetProperty(runtime, TRAIL_OPTIMIZED_SPRING_MOTION,
+                           runtime->NewFunction(TrailOptimizedSpringMotionCurve));
+    moduleObj->SetProperty(runtime, TRAIL_OPTIMIZED_RESPONSIVE_SPRING_MOTION,
+                           runtime->NewFunction(TrailOptimizedResponsiveSpringMotionCurve));
+    moduleObj->SetProperty(runtime, TRAIL_OPTIMIZED_INTERPOLATING_SPRING,
+                           runtime->NewFunction(TrailOptimizedInterpolatingSpringCurve));
     moduleObj->SetProperty(runtime, CURVES_CUSTOM, runtime->NewFunction(CustomCurve));
 }
 

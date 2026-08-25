@@ -174,13 +174,13 @@ const std::vector<ScaleTranslateTestStep> SCALE_TRANSLATE_TEST_PLAN = {
     { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("12.00%"), "12.00%" },
 };
 
-using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
+using LengthMetrictsTestStep = std::pair<Ark_LengthMetricsProxy, std::string>;
 const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = {
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
 };
 } // namespace
 
@@ -1306,12 +1306,12 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOffsetTestValidLocalizedEdgesValu
 
     const std::string attributeOffsetDefaultValue{};
 
-    auto lenMetUndef = Converter::ArkValue<Opt_LengthMetrics>();
+    auto lenMetUndef = Converter::ArkValue<Opt_LengthMetricsProxy>();
     auto optDirection = Converter::ArkValue<Opt_Direction>(ARK_DIRECTION_LTR);
     modifier_->setDirection(node_, &optDirection);
     Ark_LocalizedEdges inputValue { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
-        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        inputValue.start = Converter::ArkValue<Opt_LengthMetricsProxy>(lenMetrics);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
         UpdateFrameNode(); // apply localized values
@@ -1326,7 +1326,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOffsetTestValidLocalizedEdgesValu
     modifier_->setDirection(node_, &optDirection);
     inputValue = { lenMetUndef, lenMetUndef, lenMetUndef, lenMetUndef };
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
-        inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        inputValue.start = Converter::ArkValue<Opt_LengthMetricsProxy>(lenMetrics);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
         UpdateFrameNode(); // apply localized values

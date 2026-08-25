@@ -716,4 +716,93 @@ HWTEST_F(NavigationStackTestNg, NavigationStackCompat010, TestSize.Level1)
     EXPECT_TRUE(stack->GetRecoveryList().empty());
 }
 
+/**
+ * @tc.name: NavigationStackPreloadItem001
+ * @tc.desc: Verify PreloadItem struct stores name, paramString, and uiNode correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationStackTestNg, NavigationStackPreloadItem001, TestSize.Level1)
+{
+    auto node = CreateTestNode("preloadNode");
+    NG::PreloadItem item { "pageA", R"({"key":"value"})", node };
+    EXPECT_EQ(item.name, "pageA");
+    EXPECT_EQ(item.paramString, R"({"key":"value"})");
+    EXPECT_EQ(item.uiNode, node);
+}
+
+/**
+ * @tc.name: NavigationStackPreloadItem002
+ * @tc.desc: Verify PreloadItem struct default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationStackTestNg, NavigationStackPreloadItem002, TestSize.Level1)
+{
+    NG::PreloadItem item {};
+    EXPECT_EQ(item.name, "");
+    EXPECT_EQ(item.paramString, "");
+    EXPECT_EQ(item.uiNode, nullptr);
+}
+
+/**
+ * @tc.name: NavigationStackPreloadVirtual001
+ * @tc.desc: Verify base NavigationStack AddPreloadItem virtual method does nothing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationStackTestNg, NavigationStackPreloadVirtual001, TestSize.Level1)
+{
+    auto stack = AceType::MakeRefPtr<SpyNavigationStack>();
+    auto node = CreateTestNode("preloadNode");
+    stack->AddPreloadItem("pageA", "{}", node);
+    EXPECT_EQ(stack->Size(), 0);
+}
+
+/**
+ * @tc.name: NavigationStackPreloadVirtual002
+ * @tc.desc: Verify base NavigationStack GetFromPreloadItem returns nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationStackTestNg, NavigationStackPreloadVirtual002, TestSize.Level1)
+{
+    auto stack = AceType::MakeRefPtr<SpyNavigationStack>();
+    auto result = stack->GetFromPreloadItem("pageA", "{}");
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: NavigationStackPreloadVirtual003
+ * @tc.desc: Verify base NavigationStack RemovePreloadItem does nothing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationStackTestNg, NavigationStackPreloadVirtual003, TestSize.Level1)
+{
+    auto stack = AceType::MakeRefPtr<SpyNavigationStack>();
+    stack->RemovePreloadItem();
+    EXPECT_EQ(stack->Size(), 0);
+}
+
+/**
+ * @tc.name: NavigationStackPreloadVirtual004
+ * @tc.desc: Verify base NavigationStack PreloadItemOnDestroy does nothing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationStackTestNg, NavigationStackPreloadVirtual004, TestSize.Level1)
+{
+    auto stack = AceType::MakeRefPtr<SpyNavigationStack>();
+    stack->PreloadItemOnDestroy();
+    EXPECT_EQ(stack->Size(), 0);
+}
+
+/**
+ * @tc.name: NavigationStackPreloadVirtual005
+ * @tc.desc: Verify base NavigationStack InitPreloadInfoByIndex does nothing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationStackTestNg, NavigationStackPreloadVirtual005, TestSize.Level1)
+{
+    auto stack = AceType::MakeRefPtr<SpyNavigationStack>();
+    auto node = CreateTestNode("preloadNode");
+    stack->InitPreloadInfoByIndex(0, node);
+    EXPECT_EQ(stack->Size(), 0);
+}
+
 } // namespace OHOS::Ace::NG

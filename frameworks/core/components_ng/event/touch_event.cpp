@@ -203,7 +203,9 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
     auto localOffset = Offset(localX, localY);
     changedInfo.SetCurrentLocalLocationGetter(
         [frameNodeWeak, needPostEvent, postEventNodeId, globalOffset, localOffset]() {
-            CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+            if (frameNodeWeak.Upgrade() == nullptr) {
+                return localOffset;
+            }
             PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
             NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
             return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
@@ -253,7 +255,9 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     auto localOffset = Offset(localX, localY);
     info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId, currentGlobalOffset,
                                            localOffset]() {
-        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        if (frameNodeWeak.Upgrade() == nullptr) {
+            return localOffset;
+        }
         PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
         NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
         return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
@@ -302,7 +306,9 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     auto localOffset = Offset(localX, localY);
     historyInfo.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId, currentGlobalOffset,
                                                   localOffset]() {
-        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        if (frameNodeWeak.Upgrade() == nullptr) {
+            return localOffset;
+        }
         PointF currentLocalPoint(currentGlobalOffset.GetX(), currentGlobalOffset.GetY());
         NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
         return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());

@@ -22,6 +22,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -96,6 +97,44 @@ bool GetTitleOrToolBarTranslateAndHeight(const RefPtr<FrameNode>& barNode, float
     translate = options.y.ConvertToPx();
     height = renderContext->GetPaintRectWithoutTransform().Height();
     return true;
+}
+
+void CollectJsViewName(const RefPtr<UINode>& uiNode, std::string& jsViewNames)
+{
+    auto customNode = AceType::DynamicCast<CustomNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    std::string jsViewName = customNode->GetJSViewName();
+    if (jsViewName.empty()) {
+        return;
+    }
+    if (!jsViewNames.empty()) {
+        jsViewNames += "/";
+    }
+    jsViewNames += jsViewName;
+}
+
+std::string GetNavDestinationJsViewName(RefPtr<UINode> uiNode)
+{
+    std::string jsViewName{};
+    while (uiNode) {
+        if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            // this is a navDestination node
+            return jsViewName;
+        }
+        if (uiNode->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            // this is a jsView node
+            CollectJsViewName(uiNode, jsViewName);
+        }
+        // this is an UINode, go deep further for navDestination node
+        auto children = uiNode->GetChildren();
+        if (children.empty()) {
+            return "";
+        }
+        uiNode = children.front();
+    }
+    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get navDestination component name failed. no navDestination node");
+    return "";
 }
 }
 
@@ -174,7 +213,7 @@ void NavDestinationPattern::OnModifyDone()
     HandleTitleBarAndToolBarAnimation(hostNode, needRunTitleBarAnimation, needRunToolBarAnimation);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+    if (GreatOrEqual(pipeline->GetFontScaleFromEnv(hostNode), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
         CHECK_NULL_VOID(titleBarPattern);
         auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
@@ -433,7 +472,6 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    NavDestinationPatternBase::InitOnTouchEvent(host);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
             .edges = SAFE_AREA_EDGE_ALL };
@@ -465,7 +503,6 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (memoryManager) {
         memoryManager->RemoveRecyclePageNode(id);
     }
-    NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
 void NavDestinationPattern::DumpInfo()
@@ -504,7 +541,7 @@ void NavDestinationPattern::OnFontScaleConfigurationUpdate()
     CHECK_NULL_VOID(titleBarNode);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+    if (LessNotEqual(pipeline->GetFontScaleFromEnv(hostNode), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetLongPressEvent(nullptr);
@@ -527,13 +564,14 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
-    if (!backupStyle_.has_value()) {
-        backupStyle_ = windowManager->GetSystemBarStyle();
-    }
-    currStyle_ = style;
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
     CHECK_NULL_VOID(navigationNode);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    if (!backupStyle_.has_value()) {
+        backupStyle_ = windowManager->GetSystemBarStyle();
+        navigationPattern->SetBackupStyle(backupStyle_);
+    }
+    currStyle_ = style;
     if (navigationPattern->IsFullPageNavigation() && navigationPattern->IsTopNavDestination(host)) {
         if (currStyle_.value() != nullptr) {
             windowManager->SetSystemBarStyle(currStyle_.value());
@@ -569,6 +607,7 @@ void NavDestinationPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    NavDestinationPatternBase::InitOnTouchEvent(host);
 }
 
 void NavDestinationPattern::OnDetachFromMainTree()
@@ -576,6 +615,7 @@ void NavDestinationPattern::OnDetachFromMainTree()
     auto host = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    NavDestinationPatternBase::RemoveOnTouchEvent(host);
     backupStyle_.reset();
     currStyle_.reset();
     if (!host->IsHomeDestination() && host->GetNavDestinationType() != NavDestinationType::RELATED) {
@@ -589,6 +629,18 @@ void NavDestinationPattern::OnDetachFromMainTree()
     if (pendingToClean_) {
         SetPendingToClean(false);
     }
+}
+
+void NavDestinationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+#ifndef CROSS_PLATFORM
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnTransitionRemoved(host->GetId());
+#endif
 }
 
 void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1159,6 +1211,15 @@ void NavDestinationPattern::CallSavedStateToJS(const std::string& savedState)
     auto stack = navigationPattern->GetNavigationStack();
     CHECK_NULL_VOID(stack);
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    if (hostNode && hostNode->IsHomeDestination()) {
+        stack->SaveHomeDestinationState(savedState);
+        return;
+    }
     stack->SaveStateToJsCallback(hostNode->GetIndex(), GetName(), GetNavDestinationId(), savedState);
+}
+
+std::string NavDestinationPattern::GetJSViewName()
+{
+    return GetNavDestinationJsViewName(GetCustomNode());
 }
 } // namespace OHOS::Ace::NG

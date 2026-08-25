@@ -49,6 +49,10 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#undef private
+#undef protected
+
+
 namespace OHOS::Ace::NG {
 
 constexpr float ZERO = 0.0f;

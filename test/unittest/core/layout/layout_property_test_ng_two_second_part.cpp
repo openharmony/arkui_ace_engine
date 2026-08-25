@@ -445,10 +445,42 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateLocalizedAlignment001, TestSize.Level0)
     layoutProperty->UpdateLocalizedAlignment("top_start");
     auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
     EXPECT_EQ(align, "top_start");
+    auto rawAlign = layoutProperty->GetPositionProperty()->GetLocalizedAlignmentRaw().value_or("center");
+    EXPECT_EQ(rawAlign, "top_start");
 
     layoutProperty->UpdateLocalizedAlignment("bottom_end");
     auto align1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
     EXPECT_EQ(align1, "bottom_end");
+    auto rawAlign1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignmentRaw().value_or("center");
+    EXPECT_EQ(rawAlign1, "bottom_end");
+}
+
+/**
+ * @tc.name: CheckLocalizedAlignmentRepeated001
+ * @tc.desc: Repeated CheckLocalizedAlignment should always resolve from original value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedAlignmentRepeated001, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateIsMirrorable(true);
+    layoutProperty->UpdateLocalizedAlignment("top_start");
+
+    layoutProperty->CheckLocalizedAlignment(TextDirection::LTR);
+    auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_start");
+
+    layoutProperty->CheckLocalizedAlignment(TextDirection::RTL);
+    align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_end");
+
+    layoutProperty->CheckLocalizedAlignment(TextDirection::LTR);
+    align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_start");
+
+    layoutProperty->CheckLocalizedAlignment(TextDirection::RTL);
+    align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_end");
 }
 
 /**

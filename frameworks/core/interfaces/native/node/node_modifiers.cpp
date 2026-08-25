@@ -185,7 +185,6 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
         .getTextPickerModifier = NodeModifier::GetTextPickerModifier,
-        .getToolBarItemModifier = NodeModifier::GetToolbaritemModifier,
         .getRatingModifier = NodeModifier::GetRatingModifier,
         .getSliderModifier = NodeModifier::GetSliderModifier,
         .getDividerModifier = NodeModifier::GetDividerModifier,
@@ -231,6 +230,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
     #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
+        .getToolBarItemModifier = NodeModifier::GetToolbaritemModifier,
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
         .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetMarqueeModifier,

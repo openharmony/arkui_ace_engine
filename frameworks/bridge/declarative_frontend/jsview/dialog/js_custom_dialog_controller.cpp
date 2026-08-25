@@ -28,7 +28,6 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -62,13 +61,12 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND };
+const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
+    DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED };
 const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
     DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
 const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
     EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
-const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
-    DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED
-};
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 
@@ -112,6 +110,18 @@ void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> ob
     properties.focusable = focusableValue->ToBoolean();
 }
 
+void ParseCustomDialogDisplayModeInSubWindow(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    CHECK_NULL_VOID(properties.isShowInSubWindow);
+    auto displayModeInSubWindow = obj->GetProperty("displayModeInSubWindow");
+    if (displayModeInSubWindow->IsNumber()) {
+        auto displayMode = displayModeInSubWindow->ToNumber<int32_t>();
+        if (displayMode >= 0 && displayMode < static_cast<int32_t>(DIALOG_DISPLAY_MODE_IN_SUBWINDOW.size())) {
+            properties.displayModeInSubWindow = DIALOG_DISPLAY_MODE_IN_SUBWINDOW[displayMode];
+        }
+    }
+}
+
 void ParseCustomDialogDistortionMode(DialogProperties& properties, JSRef<JSObject> obj)
 {
     auto distortionMode = obj->GetProperty("distortionMode");
@@ -143,20 +153,7 @@ void ParseCustomDialogSystemMaterial(DialogProperties& properties, JSRef<JSObjec
     }
 }
 
-void ParseCustomDialogDisplayModeInSubWindow(DialogProperties& properties, JSRef<JSObject> obj)
-{
-    CHECK_NULL_VOID(properties.isShowInSubWindow);
-    auto displayModeInSubWindow = obj->GetProperty("displayModeInSubWindow");
-    if (displayModeInSubWindow->IsNumber()) {
-        auto displayMode = displayModeInSubWindow->ToNumber<int32_t>();
-        if (displayMode >= 0 && displayMode < static_cast<int32_t>(DIALOG_DISPLAY_MODE_IN_SUBWINDOW.size())) {
-            properties.displayModeInSubWindow = DIALOG_DISPLAY_MODE_IN_SUBWINDOW[displayMode];
-        }
-    }
-}
-
 static std::atomic<int32_t> controllerId = 0;
-
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
     uint32_t argc = info.Length();

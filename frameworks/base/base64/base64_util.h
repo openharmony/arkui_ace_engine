@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_BASE64_UTIL_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_BASE64_UTIL_H
 
+#include <cstdint>
 #include <string>
 
 #include "base/utils/macros.h"
@@ -26,6 +27,7 @@ public:
     Base64Util() = delete;
     ~Base64Util() = delete;
     static bool Decode(const std::string& src, std::string& dst);
+    static std::string Encode(const uint8_t* data, size_t size);
 };
 
 } // namespace OHOS::Ace

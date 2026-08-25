@@ -21,15 +21,15 @@ SmartLayoutNodeImpl::SmartLayoutNodeImpl(std::shared_ptr<SmartLayoutNode> node)
     : node_(std::move(node))
 {}
 
-const std::vector<std::shared_ptr<ISmartLayoutNode>>& SmartLayoutNodeImpl::GetChildren() const
+std::vector<std::shared_ptr<ISmartLayoutNode>> SmartLayoutNodeImpl::GetChildren() const
 {
     const auto& nodes = node_->GetChildren();
-    childrenCache_.clear();
-    childrenCache_.reserve(nodes.size());
+    std::vector<std::shared_ptr<ISmartLayoutNode>> children;
+    children.reserve(nodes.size());
     for (const auto& node : nodes) {
-        childrenCache_.push_back(std::make_shared<SmartLayoutNodeImpl>(node));
+        children.push_back(std::make_shared<SmartLayoutNodeImpl>(node));
     }
-    return childrenCache_;
+    return children;
 }
 
 std::shared_ptr<ISmartLayoutNode> SmartLayoutEngineImpl::CreateRootNode(const std::string& name)

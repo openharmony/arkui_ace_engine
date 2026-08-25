@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
@@ -323,7 +322,7 @@ class RadioResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rec
     if (reset) {
       getUINativeModule().radio.resetRadioResponseRegion(node);
     } else {
-      let responseRegion: (number | string | Resource)[] = [];
+      let responseRegion: (number | string | Resource | Length)[] = [];
       if (Array.isArray(this.value)) {
         for (let i = 0; i < this.value.length; i++) {
           responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');

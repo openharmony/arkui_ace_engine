@@ -32,7 +32,10 @@ template("napi_luminance_sampler_static") {
     if (platform != "" && is_arkui_x) {
       deps += [ "$crossplatform_plugin_root/libs/napi:napi_$platform" ]
     } else {
-      external_deps += [ "napi:ace_napi" ]
+      external_deps += [
+        "napi:ace_napi",
+        "node:node_header_notice",
+      ]
     }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]

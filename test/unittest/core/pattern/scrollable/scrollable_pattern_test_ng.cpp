@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include <gmock/gmock.h>
 
 #include "gtest/gtest.h"
@@ -1634,6 +1636,113 @@ HWTEST_F(ScrollablePatternTestNg, HandleDragEnd004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragEnd005
+ * @tc.desc: Test drag update delta is reset after Pattern layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd005, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto totalOffset = std::make_shared<double>(0.0);
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>(
+        [totalOffset](double offset, int32_t) {
+            *totalOffset += offset;
+            return true;
+        },
+        Axis::VERTICAL);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->SetUseFlushUITasks(true);
+    scrollable->context_ = context;
+
+    GestureEvent startInfo;
+    GestureEvent updateInfo;
+    updateInfo.SetMainDelta(10.0);
+    GestureEvent endInfo;
+    endInfo.SetMainDelta(10.0);
+
+    scrollable->HandleDragStart(startInfo);
+    scrollable->HandleDragUpdate(updateInfo);
+    scrollable->HandleDragEnd(endInfo);
+    EXPECT_EQ(*totalOffset, 20.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, 10.0);
+
+    *totalOffset = 0.0;
+    scrollable->HandleDragStart(startInfo);
+    scrollable->HandleDragUpdate(updateInfo);
+    scrollable->ResetDragUpdateDelta();
+    EXPECT_FALSE(scrollable->dragUpdateDelta_.has_value());
+    scrollable->HandleDragEnd(endInfo);
+    EXPECT_EQ(*totalOffset, 20.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, 10.0);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: HandleDragEnd006
+ * @tc.desc: Test Scrollable doesn't retain the previous drag update delta at drag start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd006, TestSize.Level1)
+{
+    RefPtr<Scrollable> scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    scrollable->dragUpdateDelta_ = 1.0;
+
+    GestureEvent info;
+    scrollable->HandleDragStart(info);
+
+    EXPECT_FALSE(scrollable->dragUpdateDelta_.has_value());
+}
+
+/**
+ * @tc.name: HandleDragEnd007
+ * @tc.desc: Test Scrollable retains the drag update delta until Pattern layout completes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd007, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    RefPtr<Scrollable> scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->SetUseFlushUITasks(true);
+    scrollable->context_ = context;
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    scrollable->HandleDragUpdate(info);
+
+    ASSERT_TRUE(scrollable->dragUpdateDelta_.has_value());
+    EXPECT_EQ(*scrollable->dragUpdateDelta_, 10.0);
+    context->taskScheduler_->FlushAfterLayoutTask();
+    EXPECT_TRUE(scrollable->dragUpdateDelta_.has_value());
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: HandleDragEnd008
+ * @tc.desc: Test drag end without an update processes its own delta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd008, TestSize.Level1)
+{
+    auto totalOffset = std::make_shared<double>(0.0);
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>(
+        [totalOffset](double offset, int32_t) {
+            *totalOffset += offset;
+            return true;
+        },
+        Axis::VERTICAL);
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    scrollable->HandleDragEnd(info);
+
+    EXPECT_EQ(*totalOffset, 10.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, 10.0);
+}
+
+/**
  * @tc.name: CalcNextStep001
  * @tc.desc: Test Scrollable CalcNextStep
  * @tc.type: FUNC
@@ -2191,22 +2300,132 @@ HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree002, TestSize.Level1)
 
 /**
  * @tc.name: OnDetachFromMainTree003
- * @tc.desc: Test ScrollablePattern OnDetachFromMainTree when parent exists and scrollStop_ is false
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree only notifies scrollable/Refresh parents
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree003, TestSize.Level1)
 {
     RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
     RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollable->currentVelocity_ = 5.0f;
     RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollableEvent->scrollable_ = scrollable;
     scrollablePattern->scrollableEvent_ = scrollableEvent;
     RefPtr<MockNestableScrollContainer> parent = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(1);
+    EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(0);
     scrollablePattern->parent_ = parent;
     scrollablePattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree004
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree when never scrolled does not notify Scroll parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree004, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = false;
+    RefPtr<ScrollPattern> parent = AceType::MakeRefPtr<ScrollPattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parent);
+    auto eventHub = parentNode->GetEventHub<ScrollEventHub>();
+    bool scrollEndFired = false;
+    eventHub->SetOnScrollEnd([&scrollEndFired]() { scrollEndFired = true; });
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_FALSE(scrollEndFired);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree005
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree notifies Scroll parent while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree005, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->currentVelocity_ = 5.0f;
+    RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollableEvent->scrollable_ = scrollable;
+    scrollablePattern->scrollableEvent_ = scrollableEvent;
+    RefPtr<ScrollPattern> parent = AceType::MakeRefPtr<ScrollPattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parent);
+    auto eventHub = parentNode->GetEventHub<ScrollEventHub>();
+    bool scrollEndFired = false;
+    eventHub->SetOnScrollEnd([&scrollEndFired]() { scrollEndFired = true; });
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_TRUE(scrollEndFired);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree006
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree does not notify Scroll parent when scroll has ended
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree006, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = true;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<ScrollPattern> parent = AceType::MakeRefPtr<ScrollPattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parent);
+    auto eventHub = parentNode->GetEventHub<ScrollEventHub>();
+    bool scrollEndFired = false;
+    eventHub->SetOnScrollEnd([&scrollEndFired]() { scrollEndFired = true; });
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_FALSE(scrollEndFired);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree007
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree notifies Refresh parent while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree007, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->currentVelocity_ = 5.0f;
+    RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollableEvent->scrollable_ = scrollable;
+    scrollablePattern->scrollableEvent_ = scrollableEvent;
+    RefPtr<RefreshPattern> parent = AceType::MakeRefPtr<RefreshPattern>();
+    parent->isHigherVersion_ = false;
+    parent->refreshStatus_ = RefreshStatus::DRAG;
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_EQ(parent->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree008
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree notifies any scrollable parent while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree008, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->currentVelocity_ = 5.0f;
+    RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollableEvent->scrollable_ = scrollable;
+    scrollablePattern->scrollableEvent_ = scrollableEvent;
+    RefPtr<ListPattern> parent = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_TRUE(parent->scrollStop_);
 }
 
 /**
@@ -2235,5 +2454,81 @@ HWTEST_F(ScrollablePatternTestNg, OnAttachToMainTree001, TestSize.Level1)
     EXPECT_TRUE(scrollablePattern->refreshCoordination_->InCoordination());
     EXPECT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
     EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
+}
+
+/**
+ * @tc.name: OnAttachToMainTree002
+ * @tc.desc: Test refresh coordination is cleared after removal and rebound to a replacement refresh node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnAttachToMainTree002, TestSize.Level1)
+{
+    RefPtr<ScrollPattern> scrollablePattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 3, scrollablePattern);
+    auto firstRefreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 4, AceType::MakeRefPtr<RefreshPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    ASSERT_NE(firstRefreshNode, nullptr);
+    scrollNode->MountToParent(firstRefreshNode);
+    scrollablePattern->CreateRefreshCoordination();
+
+    ASSERT_NE(scrollablePattern->refreshCoordination_, nullptr);
+    ASSERT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
+    auto firstEvent = scrollablePattern->refreshCoordination_->coordinationEvent_;
+    ASSERT_NE(firstEvent, nullptr);
+
+    firstRefreshNode->RemoveChild(scrollNode);
+    scrollablePattern->OnAttachToMainTree();
+    EXPECT_FALSE(scrollablePattern->refreshCoordination_->IsValid());
+    EXPECT_EQ(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
+
+    auto secondRefreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 5, AceType::MakeRefPtr<RefreshPattern>());
+    ASSERT_NE(secondRefreshNode, nullptr);
+    scrollNode->MountToParent(secondRefreshNode);
+    scrollablePattern->OnAttachToMainTree();
+    EXPECT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
+    EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
+    EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, firstEvent);
+
+    auto secondEvent = scrollablePattern->refreshCoordination_->coordinationEvent_;
+    scrollablePattern->OnAttachToMainTree();
+    EXPECT_EQ(scrollablePattern->refreshCoordination_->coordinationEvent_, secondEvent);
+}
+
+/**
+ * @tc.name: RefreshCoordinationNestedScroll001
+ * @tc.desc: Test nested scroll resumes normal overscroll handling after refresh coordination ends.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, RefreshCoordinationNestedScroll001, TestSize.Level1)
+{
+    auto refreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 6, AceType::MakeRefPtr<RefreshPattern>());
+    RefPtr<ScrollPattern> outerPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto outerScrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 7, outerPattern);
+    RefPtr<ScrollPattern> innerPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto innerScrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 8, innerPattern);
+    ASSERT_NE(refreshNode, nullptr);
+    ASSERT_NE(outerScrollNode, nullptr);
+    ASSERT_NE(innerScrollNode, nullptr);
+    outerScrollNode->MountToParent(refreshNode);
+    innerScrollNode->MountToParent(outerScrollNode);
+
+    innerPattern->CreateRefreshCoordination();
+    ASSERT_NE(innerPattern->refreshCoordination_, nullptr);
+    ASSERT_TRUE(innerPattern->refreshCoordination_->InCoordination());
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->canOverScroll_ = true;
+    NestableScrollCallback callback = [](float, int32_t, NestedState) { return ScrollResult { 0.0, false }; };
+    scrollable->SetHandleScrollCallback(std::move(callback));
+    innerPattern->SetIsRefreshScrollCallback(scrollable);
+
+    innerPattern->isRefreshInReactive_ = true;
+    scrollable->ProcessScrollMotion(10.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_FALSE(scrollable->scrollPause_);
+
+    innerPattern->isRefreshInReactive_ = false;
+    scrollable->state_ = Scrollable::AnimationState::FRICTION;
+    scrollable->ProcessScrollMotion(20.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_TRUE(scrollable->scrollPause_);
 }
 } // namespace OHOS::Ace::NG

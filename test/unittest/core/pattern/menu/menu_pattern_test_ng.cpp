@@ -15,6 +15,7 @@
 
 #include <type_traits>
 #include "gtest/gtest.h"
+#include "base/json/json_util.h"
 
 #define private public
 #define protected public
@@ -294,6 +295,77 @@ RefPtr<UiMaterial> BuildMaterialByTypeForShadow(MaterialType type)
     auto material = AceType::MakeRefPtr<UiMaterial>();
     material->SetType(static_cast<int32_t>(type));
     return material;
+}
+
+/**
+ * @tc.name: MenuToJsonValueDistortion001
+ * @tc.desc: Test MenuPattern::ToJsonValue dumps distortion/edgeLight modes from MenuParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuToJsonValueDistortion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a menu mounted under a wrapper carrying distortion/edgeLight modes.
+     */
+    auto wrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menu, nullptr);
+    menu->MountToParent(wrapper);
+    MenuParam menuParam;
+    menuParam.distortionMode = DistortionMode::DISTORTION_ENABLED;
+    menuParam.edgeLightMode = EdgeLightMode::EDGELIGHT_DISABLED;
+    auto wrapperPattern = wrapper ? wrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->SetMenuParam(menuParam);
+    auto pattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue and verify the dumped fields.
+     * @tc.expected: configured modes are dumped; enabled is false without a valid systemMaterial.
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("distortionMode"), "DistortionMode.ENABLED");
+    EXPECT_EQ(json->GetString("edgeLightMode"), "EdgeLightMode.DISABLED");
+    EXPECT_EQ(json->GetString("distortionEnabled"), "false");
+    EXPECT_EQ(json->GetString("edgeLightEnabled"), "false");
+}
+
+/**
+ * @tc.name: MenuToJsonValueDistortion002
+ * @tc.desc: Test MenuPattern::ToJsonValue defaults (AUTO mode, enabled=false) when nothing is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuToJsonValueDistortion002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a menu under a wrapper with a default (empty) MenuParam.
+     */
+    auto wrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menu, nullptr);
+    menu->MountToParent(wrapper);
+    auto wrapperPattern = wrapper ? wrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->SetMenuParam(MenuParam());
+    auto pattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: mode defaults to AUTO, enabled defaults to false.
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("distortionMode"), "DistortionMode.AUTO");
+    EXPECT_EQ(json->GetString("edgeLightMode"), "EdgeLightMode.AUTO");
+    EXPECT_EQ(json->GetString("distortionEnabled"), "false");
+    EXPECT_EQ(json->GetString("edgeLightEnabled"), "false");
 }
 
 /**

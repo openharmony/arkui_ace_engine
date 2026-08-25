@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class SymbolFontColorModifier extends ModifierWithKey<object> {
     constructor(value: object) {
       super(value);

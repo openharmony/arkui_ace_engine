@@ -77,7 +77,7 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
@@ -1607,54 +1607,6 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     topSheetPattern->currentOffset_ = -5;
     topSheetPattern->HandleDragUpdate(info);
     EXPECT_TRUE(NearEqual(topSheetPattern->currentOffset_, -10));
-}
-
-/**
- * @tc.name: SheetMaterial001
- * @tc.desc: Test OverlayManager::OnBindSheet set SheetMaterial.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestNg, SheetMaterial001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    auto targetNode = CreateTargetNode();
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    stageNode->MountToParent(rootNode);
-    targetNode->MountToParent(stageNode);
-    rootNode->MarkDirtyNode();
-    /**
-     * @tc.steps: step2. create sheetNode, get sheetPattern.
-     */
-    SheetStyle sheetStyle;
-    bool isShow = true;
-    CreateSheetBuilder();
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-
-    Shadow shadow = ShadowConfig::DefaultShadowL;
-    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
-    sheetStyle.borderColor = BORDER_COLOR_TEST;
-    sheetStyle.borderStyle = BORDER_STYLE_TEST;
-    sheetStyle.shadow = shadow;
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    auto type = static_cast<int32_t>(MaterialType::NONE);
-    material->SetType(type);
-    sheetStyle.systemMaterial = nullptr;
-
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    ASSERT_NE(sheetNode, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
-    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
-    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
-    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 
 /**
@@ -4551,6 +4503,54 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern4, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SheetMaterial001
+ * @tc.desc: Test OverlayManager::OnBindSheet set SheetMaterial.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
+    sheetStyle.borderColor = BORDER_COLOR_TEST;
+    sheetStyle.borderStyle = BORDER_STYLE_TEST;
+    sheetStyle.shadow = shadow;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::NONE);
+    material->SetType(type);
+    sheetStyle.systemMaterial = nullptr;
+
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
+    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
+    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
+}
+
+/**
  * @tc.name: TestSheetPage001
  * @tc.desc: Test CreateSheetPage.
  * @tc.type: FUNC
@@ -5542,5 +5542,260 @@ HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService005, Tes
     auto it = std::find_if(children.begin(), children.end(),
         [&buttonNode](const RefPtr<UINode>& child) { return child == buttonNode; });
     EXPECT_EQ(it, children.end());
+}
+
+/**
+ * @tc.name: RemoveOverlayOnBackPress001
+ * @tc.desc: Test RemoveOverlay with onBackPress callback returning true (intercepted).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayOnBackPress001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager with rootNode and stage node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. set overlayManagerOptions with enableBackPressedEvent=true and onBackPress returning true.
+     */
+    bool callbackInvoked = false;
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    info.onBackPress = [&callbackInvoked]() -> bool {
+        callbackInvoked = true;
+        return true;
+    };
+    overlayManager->SetOverlayManagerOptions(info);
+
+    /**
+     * @tc.steps: step3. add a component content node to overlayNode so GetLastChildNotRemoving finds it.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayManager->AddFrameNodeToOverlay(contentNode);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlay with isBackPressed=true.
+     * @tc.expected: onBackPress callback is invoked and RemoveOverlay returns true (intercepted).
+     */
+    auto result = overlayManager->RemoveOverlay(true);
+    EXPECT_TRUE(callbackInvoked);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: RemoveOverlayOnBackPress002
+ * @tc.desc: Test RemoveOverlay with onBackPress callback returning false (transparent to lower layer).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayOnBackPress002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager with rootNode and stage node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. set overlayManagerOptions with enableBackPressedEvent=true and onBackPress returning false.
+     */
+    bool callbackInvoked = false;
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    info.onBackPress = [&callbackInvoked]() -> bool {
+        callbackInvoked = true;
+        return false;
+    };
+    overlayManager->SetOverlayManagerOptions(info);
+
+    /**
+     * @tc.steps: step3. add a component content node to overlayNode.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayManager->AddFrameNodeToOverlay(contentNode);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlay with isBackPressed=true.
+     * @tc.expected: onBackPress callback is invoked and RemoveOverlay returns false (transparent to lower layer).
+     */
+    auto result = overlayManager->RemoveOverlay(true);
+    EXPECT_TRUE(callbackInvoked);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RemoveOverlayOnBackPress003
+ * @tc.desc: Test RemoveOverlay skips onBackPress when overlayNode has no content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayOnBackPress003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager with rootNode and stage node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. set overlayManagerOptions with enableBackPressedEvent=true and onBackPress callback.
+     */
+    bool callbackInvoked = false;
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    info.onBackPress = [&callbackInvoked]() -> bool {
+        callbackInvoked = true;
+        return true;
+    };
+    overlayManager->SetOverlayManagerOptions(info);
+
+    /**
+     * @tc.steps: step3. do NOT add any content to overlayNode.
+     * @tc.steps: step4. call RemoveOverlay with isBackPressed=true.
+     * @tc.expected: onBackPress callback is NOT invoked because overlayNode has no children.
+     */
+    overlayManager->RemoveOverlay(true);
+    EXPECT_FALSE(callbackInvoked);
+}
+
+/**
+ * @tc.name: RemoveOverlayOnBackPress004
+ * @tc.desc: Test RemoveOverlay skips onBackPress when isBackPressed is false (ESC path).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayOnBackPress004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager with rootNode and stage node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. set overlayManagerOptions with enableBackPressedEvent=true and onBackPress callback.
+     */
+    bool callbackInvoked = false;
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    info.onBackPress = [&callbackInvoked]() -> bool {
+        callbackInvoked = true;
+        return true;
+    };
+    overlayManager->SetOverlayManagerOptions(info);
+
+    /**
+     * @tc.steps: step3. add a component content node to overlayNode.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayManager->AddFrameNodeToOverlay(contentNode);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlay with isBackPressed=false.
+     * @tc.expected: onBackPress callback is NOT invoked because isBackPressed is false.
+     */
+    overlayManager->RemoveOverlay(false);
+    EXPECT_FALSE(callbackInvoked);
+}
+
+/**
+ * @tc.name: RemoveOverlayOnBackPress005
+ * @tc.desc: Test RemoveOverlay skips onBackPress when enableBackPressedEvent is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayOnBackPress005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager with rootNode and stage node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. set overlayManagerOptions with enableBackPressedEvent=false and onBackPress callback.
+     */
+    bool callbackInvoked = false;
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = false;
+    info.onBackPress = [&callbackInvoked]() -> bool {
+        callbackInvoked = true;
+        return true;
+    };
+    overlayManager->SetOverlayManagerOptions(info);
+
+    /**
+     * @tc.steps: step3. add a component content node to overlayNode.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayManager->AddFrameNodeToOverlay(contentNode);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlay with isBackPressed=true.
+     * @tc.expected: onBackPress callback is NOT invoked because enableBackPressedEvent is false.
+     */
+    overlayManager->RemoveOverlay(true);
+    EXPECT_FALSE(callbackInvoked);
+}
+
+/**
+ * @tc.name: RemoveOverlayOnBackPress006
+ * @tc.desc: Test RemoveOverlay skips onBackPress when callback is not registered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveOverlayOnBackPress006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager with rootNode and stage node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. set overlayManagerOptions with enableBackPressedEvent=true but no onBackPress.
+     */
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    overlayManager->SetOverlayManagerOptions(info);
+
+    /**
+     * @tc.steps: step3. add a component content node to overlayNode.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayManager->AddFrameNodeToOverlay(contentNode);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlay with isBackPressed=true.
+     * @tc.expected: onBackPress branch is skipped (no callback), falls through to default logic.
+     */
+    overlayManager->RemoveOverlay(true);
+    EXPECT_NE(overlayManager->overlayNode_, nullptr);
 }
 }

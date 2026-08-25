@@ -19,10 +19,10 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/recoverable/recoverable_manager.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
@@ -283,10 +283,13 @@ void NavigationManager::OnDumpInfo()
 
 void NavigationManager::FireNavigationUpdateCallback()
 {
-    for (const auto& func : updateCallbacks_) {
-        func();
+    std::vector<std::function<void()>> callbacks;
+    callbacks.swap(updateCallbacks_);
+    for (const auto& func : callbacks) {
+        if (func) {
+            func();
+        }
     }
-    updateCallbacks_.clear();
 }
 
 std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPtr<AceType>& node)
@@ -347,10 +350,11 @@ bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
     }
     std::stack<RefPtr<FrameNode>> nodeStack;
     nodeStack.push(node);
+    std::vector<RefPtr<FrameNode>> children;
     while (!nodeStack.empty()) {
         auto curNode = nodeStack.top();
         nodeStack.pop();
-        std::list<RefPtr<FrameNode>> children;
+        children.clear();
         curNode->GenerateOneDepthVisibleFrameWithTransition(children);
         for (auto& child : children) {
             if (!child) {
@@ -504,6 +508,7 @@ std::unique_ptr<JsonValue> NavigationManager::GetNavigationJsonInfo()
         auto homeDestination =
             AceType::DynamicCast<NavDestinationNodeBase>(navigation->GetNavBarOrHomeDestinationNode());
         if (homeDestination) {
+            navigationInfo->Put("state", stack->GetHomeDestinationState().c_str());
             auto context = pipeline_.Upgrade();
             CHECK_NULL_RETURN(context, nullptr);
             auto recoverableMgr = context->GetRecoverableManager();
@@ -534,6 +539,8 @@ void NavigationManager::StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue>
     for (int32_t i = 0; i < arraySize; ++ i) {
         auto navigationInfo = allNavigationInfo->GetArrayItem(i);
         auto navigationId = navigationInfo->GetString("id");
+        auto homeState = navigationInfo->GetString("state");
+        recoverableMgr->SetNavigationHomeState(navigationId, homeState);
         auto homeInfo = navigationInfo->GetString("home");
         recoverableMgr->SetNavigationHomeInfo(navigationId, homeInfo);
         auto stackInfo = navigationInfo->GetValue("stack");
@@ -723,20 +730,9 @@ bool NavigationManager::IsOverlayValid(const RefPtr<UINode>& node)
 
 bool NavigationManager::IsCustomDialogValid(const RefPtr<UINode>& node)
 {
-    auto frameNode = AceType::DynamicCast<FrameNode>(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    // if lower layer is dialog, don't need to trigger lifecycle
-    auto pattern = frameNode->GetPattern();
-    if (!InstanceOf<DialogPattern>(pattern)) {
-        return false;
-    }
-    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
-    if (!dialogPattern) {
-        return false;
-    }
-    auto dialogProperty = dialogPattern->GetDialogProperties();
-    // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
-    return dialogProperty.isUserCreatedDialog;
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, false);
+    return dialogInnerModifier->isCustomDialogValid(node);
 }
 
 void NavigationManager::AddBeforeOrientationChangeTask(const std::function<void()>&& task)

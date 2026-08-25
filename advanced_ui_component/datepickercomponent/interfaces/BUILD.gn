@@ -54,7 +54,10 @@ template("datepickercomponent_static") {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
       include_dirs = [ "//commonlibrary/c_utils/base/include" ]
     } else {
-      external_deps += [ "napi:ace_napi" ]
+      external_deps += [
+        "napi:ace_napi",
+        "node:node_header_notice",
+      ]
     }
 
     if (defined(config.libace_target)) {
@@ -106,6 +109,7 @@ ohos_shared_library("datepickercomponent") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   relative_install_dir = "module/arkui/advanced"

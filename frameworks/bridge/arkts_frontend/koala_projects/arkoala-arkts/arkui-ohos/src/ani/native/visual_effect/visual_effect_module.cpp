@@ -20,6 +20,7 @@
 #include "log/log.h"
 #include "ui/properties/ui_material_enums.h"
 #include "utils/ani_utils.h"
+#include "core/components/common/properties/ui_material.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
@@ -239,5 +240,28 @@ ani_boolean UiMaterialIsImmersiveMaterialSupported(ani_env* env, ani_object aniC
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->getVisualEffectAniModifier()->isImmersiveMaterialSupported();
+}
+
+ani_int UiMaterialGetMaterialState(ani_env* env, ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, static_cast<ani_int>(MaterialState::DEFAULT));
+    return modifier->getVisualEffectAniModifier()->getMaterialState();
+}
+
+ani_int UiMaterialGetMaterialType(ani_env* env, ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, static_cast<ani_int>(MaterialType::NONE));
+    return modifier->getVisualEffectAniModifier()->getMaterialType();
+}
+
+ani_long UiMaterialGetEmpty(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 0);
+    auto* material = modifier->getVisualEffectAniModifier()->constructMaterial(0);
+    material->SetEmpty(true);
+    return reinterpret_cast<ani_long>(material);
 }
 } // namespace OHOS::Ace::Ani

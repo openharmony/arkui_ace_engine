@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -111,6 +112,70 @@ bool LazyLayoutUtils::ValidateAndSetLazyLayoutParent(const RefPtr<FrameNode>& ho
     return false;
 }
 
+bool LazyLayoutUtils::ShouldEstimateDetachedLazyLayout(const RefPtr<FrameNode>& host, Axis axis)
+{
+    CHECK_NULL_RETURN(host, false);
+    if (host->IsOnMainTree()) {
+        return false;
+    }
+    auto parent = host->GetParentFrameNode();
+    if (parent) {
+        return ValidateAndSetLazyLayoutParent(host, axis);
+    }
+    auto layoutProperty = host->GetLayoutProperty();
+    return layoutProperty && layoutProperty->GetNeedLazyLayout();
+}
+
+LazyLayoutMeasureMode LazyLayoutUtils::ResolveMeasureMode(const RefPtr<FrameNode>& host, Axis axis,
+    const std::optional<ViewPosReference>& viewPosRef, int32_t totalItemCount, int32_t lanes,
+    bool hasMeasuredBaseline)
+{
+    if (totalItemCount <= std::max(lanes, 1)) {
+        return LazyLayoutMeasureMode::NORMAL;
+    }
+    if (viewPosRef.has_value()) {
+        if (hasMeasuredBaseline || viewPosRef->axis != axis ||
+            viewPosRef->referenceEdge != ReferenceEdge::START || !viewPosRef->deadline.has_value()) {
+            return LazyLayoutMeasureMode::NORMAL;
+        }
+        // mainSize is unknown on the first pass. For a START reference, zero is sufficient to decide whether the
+        // parent's viewport plus its 0.5-screen predictive extent still reaches this host's leading edge.
+        return GreatOrEqual(CalculateViewRange(viewPosRef.value(), 0.0f).end, 0.0f)
+            ? LazyLayoutMeasureMode::ESTIMATE : LazyLayoutMeasureMode::NORMAL;
+    }
+    if (!ShouldEstimateDetachedLazyLayout(host, axis)) {
+        return LazyLayoutMeasureMode::NORMAL;
+    }
+    return hasMeasuredBaseline ? LazyLayoutMeasureMode::SKIP : LazyLayoutMeasureMode::ESTIMATE;
+}
+
+int32_t LazyLayoutUtils::CalculateEstimateSampleCount(int32_t totalItemCount, int32_t lanes)
+{
+    if (totalItemCount <= 0) {
+        return 0;
+    }
+    const int64_t laneCount = std::max(lanes, 1);
+    const int64_t sampleCount = std::min<int64_t>(totalItemCount, laneCount * 2);
+    return static_cast<int32_t>(sampleCount);
+}
+
+float LazyLayoutUtils::EstimateTotalMainSize(float averageMainSize, int32_t itemCount, float space)
+{
+    const int32_t count = std::max(itemCount, 0);
+    return averageMainSize * static_cast<float>(count) + space * static_cast<float>(std::max(count - 1, 0));
+}
+
+ViewPosReference LazyLayoutUtils::CreateEstimateViewPosReference(Axis axis)
+{
+    return ViewPosReference {
+        .viewPosStart = 0.0f,
+        .viewPosEnd = 1.0f,
+        .referencePos = 0.0f,
+        .referenceEdge = ReferenceEdge::START,
+        .axis = axis,
+    };
+}
+
 bool IsInExtraTags(const std::string& tag, const std::vector<std::string>& extraAllowedTags)
 {
     for (const auto& allowedTag : extraAllowedTags) {
@@ -144,6 +209,26 @@ std::optional<ViewPosReference> LazyLayoutUtils::GetViewPosReference(
     CHECK_NULL_RETURN(viewPosRefOpt, std::nullopt);
     layoutProperty->ConstraintViewPosRef(viewPosRefOpt.value());
     return viewPosRefOpt;
+}
+
+RefPtr<LazyLayoutPattern> LazyLayoutUtils::GetLazyLayoutPattern(const RefPtr<UINode>& node)
+{
+    auto child = node;
+    while (child) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (frameNode) {
+            auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+            if (pattern) {
+                return pattern;
+            }
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            if (!layoutProperty || !layoutProperty->GetNeedLazyLayout()) {
+                return nullptr;
+            }
+        }
+        child = child->GetFirstChild();
+    }
+    return nullptr;
 }
 
 bool LazyLayoutUtils::HasDirectWaterFlowAncestor(const RefPtr<FrameNode>& frameNode)

@@ -15,7 +15,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("ressched_event_listener_test") {
   type = "new"
-  module_output = "adapter_test_output_path"
 
   extra_deps = []
   extra_deps += [ "$ace_root/test/mock/ohos_mock/resource_schedule_service:mock_ressched_client", ]

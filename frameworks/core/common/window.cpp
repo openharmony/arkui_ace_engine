@@ -70,13 +70,13 @@ void Window::SetForceVsyncRequests(bool forceVsyncRequests)
     forceVsync_ = forceVsyncRequests;
 }
 
-void Window::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void Window::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
     if (!onShow_) {
         return;
     }
     if (platformWindow_ != nullptr) {
-        platformWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
+        platformWindow_->SetUiDvsyncSwitch(dvsyncSwitch, fromWhom);
     }
 }
 
@@ -162,6 +162,37 @@ HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layou
         breakpoint = HeightBreakpoint::HEIGHT_LG;
     }
     return breakpoint;
+}
+
+void Window::SetBackgroundForceFlushVsync(bool enable, size_t count)
+{
+    static constexpr uint32_t MAX_FORCE_FLUSH_COUNT = 10;
+    backgroundForceFlushEnabled_.store(enable, std::memory_order_relaxed);
+    backgroundForceFlushCount_.store(
+        enable ? std::min(static_cast<uint32_t>(count), MAX_FORCE_FLUSH_COUNT) : 0, std::memory_order_relaxed);
+}
+
+bool Window::HasBackgroundForceFlushQuota() const
+{
+    return backgroundForceFlushEnabled_.load(std::memory_order_relaxed) &&
+           backgroundForceFlushCount_.load(std::memory_order_relaxed) > 0;
+}
+
+bool Window::ConsumeBackgroundForceFlushCount()
+{
+    if (!backgroundForceFlushEnabled_.load(std::memory_order_relaxed)) {
+        return false;
+    }
+    uint32_t current = backgroundForceFlushCount_.load(std::memory_order_relaxed);
+    while (current > 0) {
+        if (backgroundForceFlushCount_.compare_exchange_weak(current, current - 1, std::memory_order_relaxed)) {
+            if (current == 1) {
+                backgroundForceFlushEnabled_.store(false, std::memory_order_relaxed);
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 void Window::NotifyBreakpointChangeIfNeeded(int32_t instanceId, const WidthLayoutBreakPoint& widthLayoutBreakpoints,

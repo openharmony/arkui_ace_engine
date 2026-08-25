@@ -2047,6 +2047,7 @@ HWTEST_F(NavigationGroupNodeTestNg, InitNavigationId001, TestSize.Level1)
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigation, nullptr);
     navigation->curId_ = "";
+    navigation->recoverable_ = true;
     navigation->InitNavigationId();
     EXPECT_EQ(navigation->GetCurId(), V2::NAVIGATION_VIEW_ETS_TAG);
     NavigationGroupNodeTestNg::TearDownTestCase();
@@ -2096,6 +2097,7 @@ HWTEST_F(NavigationGroupNodeTestNg, InitNavigationId003, TestSize.Level1)
     parentFrameNode->AddChild(navDestNode);
     navDestNode->AddChild(navigation);
     navigation->curId_ = "";
+    navigation->recoverable_ = true;
     navigation->InitNavigationId();
     EXPECT_FALSE(navigation->GetCurId().empty());
     NavigationGroupNodeTestNg::TearDownTestCase();
@@ -2126,6 +2128,7 @@ HWTEST_F(NavigationGroupNodeTestNg, InitNavigationId004, TestSize.Level1)
 
     outerNavigation->AddChild(innerNavigation);
     innerNavigation->curId_ = "";
+    innerNavigation->recoverable_ = true;
     innerNavigation->InitNavigationId();
     EXPECT_FALSE(innerNavigation->GetCurId().empty());
     NavigationGroupNodeTestNg::TearDownTestCase();
@@ -2150,6 +2153,7 @@ HWTEST_F(NavigationGroupNodeTestNg, InitNavigationId005, TestSize.Level1)
     ASSERT_NE(navBarNode, nullptr);
     navBarNode->AddChild(navigation);
     navigation->curId_ = "";
+    navigation->recoverable_ = true;
     navigation->InitNavigationId();
     EXPECT_TRUE(navigation->GetCurId().find("navBar-") == 0);
     NavigationGroupNodeTestNg::TearDownTestCase();

@@ -1265,6 +1265,11 @@ void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
         auto density = pipelineContext->GetDensity();
         // 在OHOS::AppExecFwk::Constants中加类似常量
         wantCache_.SetParam("ohos.extra.param.key.form_density", density);
+        auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+        if (container) {
+            wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DISPLAY_ID_KEY,
+                static_cast<int64_t>(container->GetCurrentDisplayId()));
+        }
     }
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);

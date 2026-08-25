@@ -39,7 +39,7 @@ private:
 };
 
 class ACE_FORCE_EXPORT MeasureLayoutParam : public AceType {
-    DECLARE_ACE_TYPE(MeasureLayoutParam, AceType)
+    DECLARE_ACE_TYPE(MeasureLayoutParam, AceType);
 public:
     MeasureLayoutParam(LayoutWrapper* layoutWrapper);
     ~MeasureLayoutParam();

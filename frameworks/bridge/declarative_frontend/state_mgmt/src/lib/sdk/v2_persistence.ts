@@ -693,7 +693,7 @@ class PersistenceV2Impl extends StorageHelper {
     areaMode?: number
   ): [T | undefined, boolean] {
     let newObservedValue: T;
-    let json: string = "";
+    let json: string = '';
 
     try {
       json = PersistenceV2Impl.storage_.get(key, areaMode);

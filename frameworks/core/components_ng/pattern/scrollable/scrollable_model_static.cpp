@@ -86,12 +86,14 @@ void ScrollableModelStatic::UpdateScrollBarColorWithTheme(FrameNode* frameNode)
     CHECK_NULL_VOID(context);
     auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBarTheme);
-    auto defaultScrollBarColor = scrollBarTheme->GetForegroundColor();
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
     auto scrollBar = pattern->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
-    scrollBar->SetForegroundColor(defaultScrollBarColor);
+    auto isRoundScroll = scrollBar->GetShapeMode() == ShapeMode::ROUND;
+    auto defaultScrollBarColor =
+        isRoundScroll ? scrollBarTheme->GetArcForegroundColor() : scrollBarTheme->GetForegroundColor();
+    scrollBar->SetForegroundColor(defaultScrollBarColor, isRoundScroll);
 }
 
 void ScrollableModelStatic::UpdateScrollBarWidthWithTheme(FrameNode* frameNode)
@@ -110,6 +112,10 @@ void ScrollableModelStatic::UpdateScrollBarWidthWithTheme(FrameNode* frameNode)
     scrollBar->SetTouchWidth(defaultScrollBarWidth);
     scrollBar->SetInactiveWidth(defaultScrollBarWidth);
     scrollBar->SetNormalWidth(defaultScrollBarWidth);
+    if (scrollBar->GetShapeMode() == ShapeMode::ROUND) {
+        scrollBar->SetArcActiveBackgroundWidth(scrollBarTheme->GetArcActiveBackgroundWidth());
+        scrollBar->SetArcActiveScrollBarWidth(scrollBarTheme->GetArcActiveScrollBarWidth());
+    }
     scrollBar->SetIsUserNormalWidth(false);
 }
 

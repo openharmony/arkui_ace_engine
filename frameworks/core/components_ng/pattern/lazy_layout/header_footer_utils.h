@@ -53,12 +53,18 @@ struct HeaderFooterStickyMetrics {
     // Insets the header pins below / the footer pins above (ancestor sticky edge height or contentStart/EndOffset).
     float stickyTopInset = 0.0f;
     float stickyBottomInset = 0.0f;
+    // Spacing to the next sibling sticky header (see LazyLayoutPattern::PublishNextStickyHeaderGap). Empty keeps
+    // the standalone header/footer boundary semantics.
+    std::optional<float> nextStickyHeaderGap;
 };
 
 // Shared helper for header/footer nodes used by scrollable lazy containers. It centralizes ownership,
 // assistive traversal flags, measurement, and sticky math so each container keeps only its layout-specific logic.
 class ACE_FORCE_EXPORT HeaderFooterUtils {
 public:
+    static constexpr int32_t STICKY_FOOTER_Z_INDEX = 1;
+    static constexpr int32_t STICKY_HEADER_Z_INDEX = 2;
+
     static void ReplaceHeaderFooter(const RefPtr<FrameNode>& host, WeakPtr<UINode>& slot, const RefPtr<UINode>& edge,
         std::optional<int32_t> insertIndex = std::nullopt,
         PropertyChangeFlag dirtyFlag = PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -81,11 +87,15 @@ public:
         int32_t rawIndex, const LayoutConstraintF& constraint, Axis axis);
 
     // Position + layout one edge (header / footer) child. isRtl mirrors the cross offset against crossSize;
-    // callers decide RTL applicability themselves (e.g. LazyGrid only mirrors on the vertical axis).
+    // callers decide RTL applicability themselves. The higher sticky-header default zIndex lets a footer scroll
+    // naturally behind its header.
     static void LayoutEdge(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
-        bool isSticky, bool isRtl, float crossSize);
+        bool isSticky, bool isRtl, float crossSize, int32_t stickyZIndex = STICKY_FOOTER_Z_INDEX);
 
-    static void EnsureStickyDefaultZIndex(const RefPtr<FrameNode>& edgeNode);
+    static void EnsureStickyDefaultZIndex(const RefPtr<FrameNode>& edgeNode, int32_t stickyZIndex);
+
+    // Read the handoff gap at layout time; measure-time caching would miss parent updates between passes.
+    static std::optional<float> GetNextStickyHeaderGap(LayoutWrapper* layoutWrapper);
 
     static bool IsHeaderSticky(StickyStyle style)
     {
@@ -151,9 +161,12 @@ public:
     // Pure-math sticky-position helpers; kept inline so hot-path layout code does not pay call overhead.
     static float CalcStickyHeaderPos(const HeaderFooterStickyMetrics& metrics)
     {
+        const auto headerEndBoundary = metrics.nextStickyHeaderGap.has_value()
+            ? metrics.totalMainSize + metrics.nextStickyHeaderGap.value()
+            : metrics.totalMainSize - metrics.footerMainSize;
         // +stickyTopInset shifts the pinned header down by the inset (lands just below the ancestor inset).
         return std::max(0.0f, std::min(metrics.viewStart + metrics.stickyTopInset,
-            metrics.totalMainSize - metrics.footerMainSize - metrics.headerMainSize));
+            headerEndBoundary - metrics.headerMainSize));
     }
 
     static float CalcStickyFooterPos(const HeaderFooterStickyMetrics& metrics)

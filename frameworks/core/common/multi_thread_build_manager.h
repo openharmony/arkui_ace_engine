@@ -19,6 +19,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <string_view>
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -49,7 +50,7 @@ public:
         isParallelizeUI_ = isParallelizeUI;
     }
 
-    static void CheckTag(const std::string& tag);
+    static void CheckTag(std::string_view tag);
 
 private:
     MultiThreadBuildManager();

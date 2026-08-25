@@ -20,6 +20,7 @@
 #include "system_ability.h"
 #include "base/utils/macros.h"
 #include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS::Ace {
 class IUiContentService;
@@ -52,6 +53,12 @@ public:
     void HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetWebViewCurrentLanguage(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleStartWebViewTranslate(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetPageTranslateText(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleStartPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleEndPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleResetPageTranslate(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleSendPageTranslateResult(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetCurrentAbilityLanguageInfo(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleRegisterTextChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleUnregisterTextChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);

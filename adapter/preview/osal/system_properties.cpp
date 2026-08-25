@@ -78,6 +78,8 @@ std::string SystemProperties::manufacturer_ = UNDEFINED_PARAM;
 std::string SystemProperties::model_ = UNDEFINED_PARAM;
 std::string SystemProperties::product_ = UNDEFINED_PARAM;
 std::string SystemProperties::apiVersion_ = "9";
+std::string SystemProperties::sdkPatchApiVersion_ = "0";
+std::string SystemProperties::sdkMinorApiVersion_ = "0";
 std::string SystemProperties::releaseType_ = UNDEFINED_PARAM;
 std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
@@ -95,6 +97,7 @@ bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::recycleImageEnabled_ = false;
+bool SystemProperties::navigationImageRecycleEnabled_ = false;
 bool SystemProperties::imageReleaseManageObjectEnabled_ = true;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
@@ -115,6 +118,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::gridIrregularLayoutEnable_ = false;
+bool SystemProperties::smartLayoutEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
@@ -143,6 +147,8 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::velocityTrackerPointNumber_ = DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE;
+int32_t SystemProperties::syntaxMemOptStrategy_ = -1;
+int32_t SystemProperties::bootVendorDdrSize_ = 12;
 bool SystemProperties::isVelocityWithinTimeWindow_ = true;
 bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
@@ -363,6 +369,11 @@ bool SystemProperties::GetGridCacheEnabled()
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
     return gridIrregularLayoutEnable_;
+}
+
+bool SystemProperties::GetSmartLayoutEnabled()
+{
+    return smartLayoutEnabled_;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()

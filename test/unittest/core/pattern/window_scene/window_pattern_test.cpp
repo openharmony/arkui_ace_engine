@@ -340,6 +340,69 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateBackground, TestSize.Level1
 }
 
 /**
+ * @tc.name: OnAttachToFrameNode_StateConnect
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_CONNECT (prelaunch) with different scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateConnect, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->EditSessionInfo().isPrelaunch_ = true;
+
+    /**
+     * @tc.steps: step1. STATE_CONNECT + IsPrelaunch() + !GetShowRecent() → add appWindow and set buffer callback.
+     */
+    sceneSession_->state_ = Rosen::SessionState::STATE_CONNECT;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = false;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+
+    /**
+     * @tc.steps: step2. STATE_CONNECT + GetShowRecent() + HasPersistentSnapshot() → create snapshot window.
+     */
+    windowScene_->attachToFrameNodeFlag_ = false;
+    windowScene_->snapshotWindow_ = nullptr;
+    sceneSession_->state_ = Rosen::SessionState::STATE_CONNECT;
+    sceneSession_->SetShowRecent(true);
+    auto key = Rosen::defaultStatus;
+    sceneSession_->scenePersistence_->SetHasSnapshot(true, key);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_NE(windowScene_->snapshotWindow_, nullptr);
+
+    /**
+     * @tc.steps: step3. STATE_CONNECT + GetShowRecent() + !HasPersistentSnapshot() → no window added.
+     */
+    windowScene_->attachToFrameNodeFlag_ = false;
+    sceneSession_->state_ = Rosen::SessionState::STATE_CONNECT;
+    sceneSession_->SetShowRecent(true);
+    for (auto& has : sceneSession_->scenePersistence_->hasSnapshot_) {
+        has = false;
+    }
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = false;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, false);
+
+    /**
+     * @tc.steps: step4. STATE_CONNECT + !IsPrelaunch() → skip prelaunch branch and fall through
+     *           to AppLockControl snapshot path.
+     */
+    windowScene_->attachToFrameNodeFlag_ = false;
+    windowScene_->snapshotWindow_ = nullptr;
+    sceneSession_->state_ = Rosen::SessionState::STATE_CONNECT;
+    sceneSession_->EditSessionInfo().isPrelaunch_ = false;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->isAppLockControl_.store(true);
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_NE(windowScene_->snapshotWindow_, nullptr);
+}
+
+/**
  * @tc.name: OnAttachToFrameNode_StateActive
  * @tc.desc: Test OnAttachToFrameNode when state is STATE_ACTIVE with different scenarios
  * @tc.type: FUNC

@@ -352,6 +352,189 @@ HWTEST_F(BubbleTestFourNg, BubblePaintMethod005, TestSize.Level0)
 }
 
 /**
+ * @tc.name: BubblePaintMethod006
+ * @tc.desc: Test PaintSingleBorder skips default stroke when isUserSetMaterial is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, BubblePaintMethod006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create bubble node and configure popup theme with default border width.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto theme = AceType::MakeRefPtr<PopupTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->popupDoubleBorderEnable_ = 1;
+    theme->borderWidth_ = 1.0_vp;
+    bubblePattern->popupTheme_ = theme;
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(bubblePaintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(12);
+
+    /**
+     * @tc.steps: step2. When material is not set, default single border should be drawn.
+     */
+    BubblePaintMethod bubblePaintMethodFalse;
+    bubblePaintMethodFalse.SetChildSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    bubblePaintMethodFalse.SetIsUserSetMaterial(false);
+    Testing::MockCanvas canvasFalse;
+    EXPECT_CALL(canvasFalse, AttachPen(_)).WillRepeatedly(ReturnRef(canvasFalse));
+    EXPECT_CALL(canvasFalse, DetachPen()).WillRepeatedly(ReturnRef(canvasFalse));
+    EXPECT_CALL(canvasFalse, Save()).Times(AnyNumber());
+    EXPECT_CALL(canvasFalse, Restore()).Times(AnyNumber());
+    EXPECT_CALL(canvasFalse, DrawPath(_)).Times(AtLeast(1));
+    bubblePaintMethodFalse.PaintSingleBorder(canvasFalse, paintWrapper);
+
+    /**
+     * @tc.steps: step3. When material is set, default single border should be skipped.
+     * @tc.expected: step3. Neither AttachPen nor DrawPath is invoked.
+     */
+    BubblePaintMethod bubblePaintMethodTrue;
+    bubblePaintMethodTrue.SetChildSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    bubblePaintMethodTrue.SetIsUserSetMaterial(true);
+    Testing::MockCanvas canvasTrue;
+    EXPECT_CALL(canvasTrue, AttachPen(_)).Times(Exactly(0));
+    EXPECT_CALL(canvasTrue, DrawPath(_)).Times(Exactly(0));
+    bubblePaintMethodTrue.PaintSingleBorder(canvasTrue, paintWrapper);
+    EXPECT_TRUE(bubblePaintMethodTrue.IsUserSetMaterial());
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    delete paintWrapper;
+}
+
+/**
+ * @tc.name: BubblePaintMethod007
+ * @tc.desc: Test PaintOuterBorder skips default stroke when isUserSetMaterial is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, BubblePaintMethod007, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create bubble node and configure popup theme with double border enabled.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto theme = AceType::MakeRefPtr<PopupTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->popupDoubleBorderEnable_ = 1;
+    bubblePattern->popupTheme_ = theme;
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(bubblePaintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(12);
+
+    /**
+     * @tc.steps: step2. When material is not set, default outer border should be drawn.
+     */
+    BubblePaintMethod bubblePaintMethodFalse;
+    bubblePaintMethodFalse.SetChildSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    bubblePaintMethodFalse.SetIsUserSetMaterial(false);
+    Testing::MockCanvas canvasFalse;
+    EXPECT_CALL(canvasFalse, AttachPen(_)).WillRepeatedly(ReturnRef(canvasFalse));
+    EXPECT_CALL(canvasFalse, DetachPen()).WillRepeatedly(ReturnRef(canvasFalse));
+    EXPECT_CALL(canvasFalse, Save()).Times(AnyNumber());
+    EXPECT_CALL(canvasFalse, Restore()).Times(AnyNumber());
+    bubblePaintMethodFalse.PaintOuterBorder(canvasFalse, paintWrapper);
+
+    /**
+     * @tc.steps: step3. When material is set, default outer border should be skipped.
+     * @tc.expected: step3. Neither AttachPen nor DrawPath is invoked.
+     */
+    BubblePaintMethod bubblePaintMethodTrue;
+    bubblePaintMethodTrue.SetChildSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    bubblePaintMethodTrue.SetIsUserSetMaterial(true);
+    Testing::MockCanvas canvasTrue;
+    EXPECT_CALL(canvasTrue, AttachPen(_)).Times(Exactly(0));
+    EXPECT_CALL(canvasTrue, DrawPath(_)).Times(Exactly(0));
+    bubblePaintMethodTrue.PaintOuterBorder(canvasTrue, paintWrapper);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    delete paintWrapper;
+}
+
+/**
+ * @tc.name: BubblePaintMethod008
+ * @tc.desc: Test PaintInnerBorder skips default stroke when isUserSetMaterial is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, BubblePaintMethod008, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create bubble node and configure popup theme with double border enabled.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto theme = AceType::MakeRefPtr<PopupTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->popupDoubleBorderEnable_ = 1;
+    bubblePattern->popupTheme_ = theme;
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(bubblePaintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, bubblePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(12);
+
+    /**
+     * @tc.steps: step2. When material is not set, default inner border should be drawn.
+     */
+    BubblePaintMethod bubblePaintMethodFalse;
+    bubblePaintMethodFalse.SetChildSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    bubblePaintMethodFalse.SetIsUserSetMaterial(false);
+    Testing::MockCanvas canvasFalse;
+    EXPECT_CALL(canvasFalse, AttachPen(_)).WillRepeatedly(ReturnRef(canvasFalse));
+    EXPECT_CALL(canvasFalse, DetachPen()).WillRepeatedly(ReturnRef(canvasFalse));
+    EXPECT_CALL(canvasFalse, Save()).Times(AnyNumber());
+    EXPECT_CALL(canvasFalse, Restore()).Times(AnyNumber());
+    bubblePaintMethodFalse.PaintInnerBorder(canvasFalse, paintWrapper);
+
+    /**
+     * @tc.steps: step3. When material is set, default inner border should be skipped.
+     * @tc.expected: step3. Neither AttachPen nor DrawPath is invoked.
+     */
+    BubblePaintMethod bubblePaintMethodTrue;
+    bubblePaintMethodTrue.SetChildSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    bubblePaintMethodTrue.SetIsUserSetMaterial(true);
+    Testing::MockCanvas canvasTrue;
+    EXPECT_CALL(canvasTrue, AttachPen(_)).Times(Exactly(0));
+    EXPECT_CALL(canvasTrue, DrawPath(_)).Times(Exactly(0));
+    bubblePaintMethodTrue.PaintInnerBorder(canvasTrue, paintWrapper);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    delete paintWrapper;
+}
+
+/**
  * @tc.name: BubblePatternTest017
  * @tc.desc: Test CreateCustomBubbleNode with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC

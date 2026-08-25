@@ -186,7 +186,6 @@ struct GridExample {
         .columnsGap('10')
         .padding('4vp')
         .editMode(true)
-        // .rowsTemplate('1fr 1fr 1fr')
         .clip(true) 
         .rowsGap(20)
         .height(300)

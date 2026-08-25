@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dynamiclayout/algorithm_param_base.h"
 #include "core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/layout/utils.h"
 #include "core/components_ng/pattern/dynamiclayout/bridge/arkts_native_dynamic_layout_bridge.h"
 #include "core/components/common/layout/constants.h"
@@ -262,16 +263,10 @@ float GetMainSize(LayoutWrapper* layoutWrapper, Axis axis)
 Local<panda::ObjectRef> GenLazyLayoutInfoObj(EcmaVM* vm, LayoutWrapper* layoutWrapper,
     const ViewPosReference& viewPosRef)
 {
-    float viewStart = viewPosRef.viewPosStart - viewPosRef.viewExtStart;
-    float viewEnd = viewPosRef.viewPosEnd + viewPosRef.viewExtEnd;
-    if (viewPosRef.referenceEdge == ReferenceEdge::START) {
-        viewStart -= viewPosRef.referencePos;
-        viewEnd -= viewPosRef.referencePos;
-    } else {
-        float mainSize = GetMainSize(layoutWrapper, viewPosRef.axis);
-        viewStart -= (viewPosRef.referencePos - mainSize);
-        viewEnd -= (viewPosRef.referencePos - mainSize);
-    }
+    auto viewRange = LazyLayoutUtils::CalculateViewRange(
+        viewPosRef, GetMainSize(layoutWrapper, viewPosRef.axis));
+    float viewStart = viewRange.start;
+    float viewEnd = viewRange.end;
     Local<JSValueRef> lazyLayoutInfoValues[] = {
         panda::NumberRef::New(vm, std::floor(viewStart)),
         panda::NumberRef::New(vm, std::floor(viewEnd)),

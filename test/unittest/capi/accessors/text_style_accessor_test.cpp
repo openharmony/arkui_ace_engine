@@ -49,7 +49,7 @@ public:
         Ark_TextStyleInterface options {
             .fontColor = Converter::ArkValue<Opt_ResourceColor>(arkFontColor),
             .fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(g_fontFamily, Converter::FC),
-            .fontSize = Converter::ArkValue<Opt_LengthMetrics>(g_fontSize),
+            .fontSize = Converter::ArkValue<Opt_LengthMetricsProxy>(g_fontSize),
             .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>(
                 g_fontWeight, Converter::FC),
             .fontStyle = Converter::ArkValue<Opt_FontStyle>(g_fontStyle)

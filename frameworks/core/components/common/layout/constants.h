@@ -568,7 +568,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_PRIMARY = 100,
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
+    WINDOW_MODE_PIP,
+    WINDOW_MODE_SPLIT = 105
 };
 
 enum class WindowType : uint32_t {

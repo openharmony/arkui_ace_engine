@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
@@ -341,7 +342,7 @@ void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(stagePattern);
     if (!stagePattern->GetIsSplit()) {
-        BoxLayoutAlgorithm::Layout(layoutWrapper);
+        StageLayoutAlgorithm::Layout(layoutWrapper);
         return;
     }
 

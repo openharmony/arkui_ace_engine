@@ -13,25 +13,34 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("radio_test_ng") {
-  module_name = "FormAndSelection-Radio"
-  type = "new"
+test_sources = [
+  "radio_model_static_test_ng.cpp",
+  "radio_node_test_ng.cpp",
+  "radio_pattern_test_ng.cpp",
+  "radio_pattern_test_two_ng.cpp",
+  "radio_setbuilder_test_ng.cpp",
+  "radio_test_ng.cpp",
+  "radio_test_two_ng.cpp",
+  "radio_value_test_ng.cpp",
+  "radio_test_core.cpp",
+]
 
-  sources = [
-    "radio_model_static_test_ng.cpp",
-    "radio_node_test_ng.cpp",
-    "radio_pattern_test_ng.cpp",
-    "radio_pattern_test_two_ng.cpp",
-    "radio_setbuilder_test_ng.cpp",
-    "radio_test_ng.cpp",
-    "radio_test_two_ng.cpp",
-    "radio_value_test_ng.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("radio_test_ng") {
+    type = "host_components"
+    module_name = "FormAndSelection-Radio"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("radio_test_ng") {
+    module_name = "FormAndSelection-Radio"
+    type = "new"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "radio_test_core.cpp" ]
-  } else {
-    sources += [ "radio_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources -= [ "radio_test_core.cpp" ]
+    }
   }
 }

@@ -258,7 +258,7 @@ export function Popup(options: PopupOptions) {
     message: options.message ?? { text: '' } as PopupTextOptions,
     popupDirection: options.direction,
     showClose: options.showClose,
-    onClose: options.onClose,
+    onClose: options.onClose ?? noop,
     buttons: options.buttons,
     maxWidth: options.maxWidth
   })

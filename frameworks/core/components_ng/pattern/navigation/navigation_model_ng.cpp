@@ -26,6 +26,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -875,21 +876,20 @@ bool NavigationModelNG::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)
 {
     auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
     CHECK_NULL_RETURN(buttonModifier, false);
-    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
-    CHECK_NULL_RETURN(rawPattern, false);
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(buttonPattern, false);
+
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, false);
-    backButtonNode = FrameNode::CreateFrameNode(
-        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
-    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
-    buttonModifier->setSkipColorConfigurationUpdate(nodeHandle);
-    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+    buttonPattern->SetSkipColorConfigurationUpdate();
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonModifier->setBlendColor(
-            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
-        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
     }
+    backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(buttonPattern));
     auto focusHub = backButtonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     focusHub->SetFocusDependence(FocusDependence::SELF);
@@ -990,6 +990,7 @@ void NavigationModelNG::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlace
         }
         auto renderContext = placeholderContentNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(true);
         renderContext->SetClipToBounds(true);
         renderContext->UpdateZIndex(-1);
         navigationGroupNode->AddChild(placeholderContentNode);
@@ -2429,6 +2430,7 @@ void NavigationModelNG::SetSplitPlaceholder(FrameNode* frameNode, FrameNode* spl
         }
         auto renderContext = placeholderContentNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(true);
         renderContext->SetClipToBounds(true);
         renderContext->UpdateZIndex(-1);
         navigationGroupNode->AddChild(placeholderContentNode);
@@ -2827,6 +2829,9 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
         navBarRenderContext->UpdateClipEdge(true);
         navigationGroupNode->AddChild(navBarNode);
         navigationGroupNode->SetNavBarNode(navBarNode);
+        auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+        CHECK_NULL_RETURN(navBarPattern, nullptr);
+        navBarPattern->SetNavigationNode(navigationGroupNode);
 
         // titleBar node
         if (!navBarNode->GetTitleBarNode()) {

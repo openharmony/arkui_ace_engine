@@ -21,6 +21,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/preview_mock/preview_mock_model.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
@@ -186,6 +187,20 @@ void RegisterRenderNodeShapeClipAttributes(Local<panda::ObjectRef> renderNode, E
 ArkUINativeModuleValue ArkUINativeModule::PreviewMockComponent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ArkUINativeModule::CreatePreviewMock(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsString(vm)) {
+        LOGW("CreatePreviewMock: inspector tag is not a string");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string tag = firstArg->ToString(vm)->ToString(vm);
+    PreviewMockModel::GetInstance()->Create(tag);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -845,6 +860,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 
 #if defined(FORM_SUPPORTED) || defined(PREVIEW)
     RegisterFormAttributes(object, vm);
+#endif
+#ifdef PREVIEW
+    RegisterPreviewMockAttributes(object, vm);
 #endif
     RegisterResourceAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
@@ -1533,6 +1551,16 @@ void ArkUINativeModule::RegisterFormAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FormComponentBridge::ResetSize));
 #endif
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "formComponent"), formComponent);
+}
+#endif
+
+#ifdef PREVIEW
+void ArkUINativeModule::RegisterPreviewMockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto previewMock = panda::ObjectRef::New(vm);
+    previewMock->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::CreatePreviewMock));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewMock"), previewMock);
 }
 #endif
 

@@ -449,6 +449,8 @@ private:
 
     void RegisterCombinedCallbackToBackend();
 
+    void EnsureEnvTreeStateChangeCallback();
+
     // indicates if the JSView has ever completed initial render
     // used for code branching in lambda given to ComposedComponent
     // render callback
@@ -479,7 +481,7 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
-    int32_t reusableMemOptStrategy_ = 0;
+    int32_t reusableMemOptStrategy_ = -1;
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
@@ -489,6 +491,7 @@ private:
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void(int32_t, const std::optional<JSRef<JSVal>>&)> updateCustomEnvCallback_;
     std::function<void(const std::string&, const std::optional<JSRef<JSVal>>&)> updateEnvCallback_;
+    std::function<void(bool)> updateEnvTreeStateCallback_;
 
     int32_t latestInstanceId_ = -1;
 };

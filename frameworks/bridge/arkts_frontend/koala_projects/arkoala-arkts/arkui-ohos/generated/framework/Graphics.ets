@@ -16,12 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { extractors, initializers } from '#handwritten'
-import { DrawContext as arkui_Graphics_DrawContext, Frame, Size, Vector2, Vector3, Vector4, Circle, CommandPath, Corners, LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit, RoundRect, Rect, CornerRadius } from 'arkui.Graphics'
+import { extractors } from '#handwritten'
+import { DrawContext as arkui_Graphics_DrawContext, Frame, Size, Vector2, Vector3, Vector4, Circle, CommandPath, Corners, RoundRect, Rect, CornerRadius } from 'arkui.Graphics'
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { Resource as global_resource_Resource } from 'global.resource'
 import { common2D_Rect_serializer } from './ohos.graphics.common2D'
 import { default as common2D } from '@ohos.graphics.common2D'
 export class arkui_Graphics_DrawContext_serializer {
@@ -181,22 +180,6 @@ export class Corners_Vector2_serializer {
         const bottomLeftTmpResult: Vector2 = Vector2_serializer.read(valueDeserializer)
         const bottomRightTmpResult: Vector2 = Vector2_serializer.read(valueDeserializer)
         let value: Corners<Vector2> = ({topLeft: topLeftTmpResult, topRight: topRightTmpResult, bottomLeft: bottomLeftTmpResult, bottomRight: bottomRightTmpResult} as Corners<Vector2>)
-        return value
-    }
-}
-export class arkui_Graphics_LengthMetrics_serializer {
-    public static write(buffer: SerializerBase, value: arkui_Graphics_LengthMetrics): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForUnit = value.unit
-        valueSerializer.writeInt32(valueHolderForUnit.valueOf())
-        const valueHolderForValue = value.value
-        valueSerializer.writeFloat64(valueHolderForValue)
-    }
-    public static read(buffer: DeserializerBase): arkui_Graphics_LengthMetrics {
-        let valueDeserializer: DeserializerBase = buffer
-        const unitTmpResult: LengthUnit = LengthUnit.fromValue(valueDeserializer.readInt32())
-        const valueTmpResult: double = valueDeserializer.readFloat64()
-        let value: arkui_Graphics_LengthMetrics = ({unit: unitTmpResult, value: valueTmpResult} as arkui_Graphics_LengthMetrics)
         return value
     }
 }

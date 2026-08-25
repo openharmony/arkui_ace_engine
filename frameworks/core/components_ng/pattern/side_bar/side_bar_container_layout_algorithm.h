@@ -202,8 +202,9 @@ private:
     Dimension GetSideBarWidth(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, LayoutWrapper* layoutWrapper);
     void InitSideBarWidth(float parentWidth);
-    void MeasureRealSideBarWidth(float parentWidth);
-    void MeasureTypeUpdateWidth();
+    void MeasureRealSideBarWidth(
+        float parentWidth, float defaultRealSideBarWidth, float defaultMinSideBarWidth, float defaultMaxSideBarWidth);
+    void MeasureTypeUpdateWidth(float defaultMinSideBarWidth, float defaultMinContentWidth);
     void MeasureRealPropertyValue(bool setMinSideBarWidth, bool setMaxSideBarWidth, bool setSideBarWidth,
         bool setMinContentWidth, float paretWidth);
     void AddChildToIgnoreLayoutSafeBundle(LayoutWrapper* layoutWrapper);
@@ -221,10 +222,6 @@ private:
     float minSideBarWidth_ = -1.0f;
     float maxSideBarWidth_ = -1.0f;
 
-    float defaultRealSideBarWidth_ = 0.0f;
-    float defaultMinSideBarWidth_ = 0.0f;
-    float defaultMaxSideBarWidth_ = 0.0f;
-    float defaultMinContentWidth_ = 0.0f;
     float typeUpdateWidth_ = 0.0f;
     WeakPtr<Pattern> pattern_;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;

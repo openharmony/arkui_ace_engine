@@ -129,6 +129,7 @@ void CallOnVisibleIndexesChange(EcmaVM* vm, panda::Local<panda::FunctionRef> fun
     std::function<void(int32_t, int32_t)> callback = [func = panda::CopyableGlobal<panda::FunctionRef>(vm, func)](
                                                          const int32_t start, const int32_t end) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         panda::Local<panda::JSValueRef> params[SCROLL_INDEX_PARAM_COUNT] = {
@@ -457,6 +458,7 @@ ArkUINativeModuleValue LazyGridLayoutBridge::SetOnVisibleIndexesChange(ArkUIRunt
     auto callback = std::make_unique<std::function<void(int32_t, int32_t)>>(
         [func = panda::CopyableGlobal(vm, func)](const int32_t start, const int32_t end) {
             auto vm = func.GetEcmaVM();
+            CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, start);

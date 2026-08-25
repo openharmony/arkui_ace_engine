@@ -20,11 +20,13 @@
 #include <string>
 
 #include "ui/base/macros.h"
+#include "ui/base/referenced.h"
 
 #define NEAR_ZERO(value) ((value > 0.0) ? ((value - 0.0) <= 0.000001f) : ((0.0 - value) <= 0.000001f))
 
 namespace OHOS::Ace {
 
+class PipelineBase;
 /**
  * @brief Enumeration of dimension units supported in ArkUI.
  *
@@ -207,6 +209,8 @@ public:
      * @return The dimension value in pixels.
      */
     double ConvertToPxByCustomFontScale(float minFontScale, float maxFontScale) const;
+    double ConvertToPxByCustomFontScale(float minFontScale, float maxFontScale,
+        const RefPtr<PipelineBase>& pipeline) const;
 
     /**
      * @brief Converts the dimension to pixels using application font scale.
@@ -214,6 +218,7 @@ public:
      * @return The dimension value in pixels.
      */
     double ConvertToPxByAppFontScale(float minFontScale) const;
+    double ConvertToPxByAppFontScale(float minFontScale, const RefPtr<PipelineBase>& pipeline) const;
 
     /**
      * @brief Converts the dimension to VP using application font scale.
@@ -227,8 +232,12 @@ public:
         std::optional<float> envFontScale = std::nullopt) const;
     double ConvertToPxByCustomFontScaleWithEnv(float minFontScale, float maxFontScale,
         std::optional<float> envFontScale = std::nullopt) const;
+    double ConvertToPxByCustomFontScaleWithEnv(float minFontScale, float maxFontScale,
+        const RefPtr<PipelineBase>& pipeline, std::optional<float> envFontScale = std::nullopt) const;
     double ConvertToPxByAppFontScaleWithEnv(float minFontScale,
         std::optional<float> envFontScale = std::nullopt) const;
+    double ConvertToPxByAppFontScaleWithEnv(float minFontScale,
+        const RefPtr<PipelineBase>& pipeline, std::optional<float> envFontScale = std::nullopt) const;
     double ConvertToVpByAppFontScaleWithEnv(std::optional<float> envFontScale = std::nullopt) const;
 
     /**

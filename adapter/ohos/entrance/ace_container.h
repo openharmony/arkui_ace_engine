@@ -73,8 +73,6 @@ enum class BusinessDataSendType : uint32_t;
 }
 
 namespace OHOS::Ace::Platform {
-class HighContrastObserver;
-
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
@@ -374,11 +372,8 @@ public:
 
     bool OnDumpInfo(const std::vector<std::string>& params);
 
-#ifndef CROSS_PLATFORM
     void DumpSimplifyTreeWithParamConfig(
         std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) override;
-#endif
-
     void TriggerGarbageCollection() override;
 
     void DumpHeapSnapshot(bool isPrivate) override;
@@ -1106,9 +1101,6 @@ private:
 
     bool lastThemeHasSkin_ = false;
 
-    void SubscribeHighContrastChange();
-    void UnsubscribeHighContrastChange();
-    std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
     // for multiple frontEnd
     // valid only when type_ is STATIC_HYBRID_DYNAMIC or DYNAMIC_HYBRID_STATIC
     RefPtr<Frontend> subFrontend_ = nullptr;

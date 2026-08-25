@@ -72,7 +72,6 @@ struct ScrollNoExample2 {
         }
 
       }
-      // .scrollable(ScrollDirection.Horizontal)
       .scrollBar(BarState.On)
       .edgeEffect(EdgeEffect.Spring) // 边缘效果设置为Spring
       .padding({ top: 10,left:10 })//测试点：padding

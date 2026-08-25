@@ -13,39 +13,60 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("geometry_transition_test_ng") {
-  module_name = "Animation-GeometryTransition"
-  type = "new"
-  sources = [ "geometry_transition_test_ng.cpp" ]
+test_sources = [ "geometry_transition_test_ng.cpp" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "animation_test_min.cpp",
-      "animation_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "animation_test_min.cpp",
-      "animation_test_core.cpp",
-    ]
+core_min_sources = [
+  "animation_test_min.cpp",
+  "animation_test_core.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("geometry_transition_test_ng") {
+    type = "host_components"
+    module_name = "Animation-GeometryTransition"
+    sources = test_sources + core_min_sources
+  }
+} else {
+  ace_unittest("geometry_transition_test_ng") {
+    module_name = "Animation-GeometryTransition"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = core_min_sources
+    } else {
+      sources += core_min_sources
+    }
   }
 }
 
-ace_unittest("callback_thread_wrapper_test") {
-  module_name = "ScrollingSet-Refresh"
-  type = "new"
-  sources = [
-    "$ace_root/frameworks/core/animation/animation_pub.cpp",
-    "animation_pub_test.cpp",
-    "callback_thread_wrapper_test.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("callback_thread_wrapper_test") {
+    type = "host_components"
+    module_name = "ScrollingSet-Refresh"
+    sources = [
+      "$ace_root/frameworks/core/animation/animation_pub.cpp",
+      "animation_pub_test.cpp",
+      "callback_thread_wrapper_test.cpp",
+      "animation_test_min.cpp",
+    ]
+  }
+} else {
+  ace_unittest("callback_thread_wrapper_test") {
+    module_name = "ScrollingSet-Refresh"
+    type = "new"
+    sources = [
+      "$ace_root/frameworks/core/animation/animation_pub.cpp",
+      "animation_pub_test.cpp",
+      "callback_thread_wrapper_test.cpp",
+    ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "animation_test_min.cpp" ]
-  } else {
-    sources += [ "animation_test_min.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "animation_test_min.cpp" ]
+    } else {
+      sources += [ "animation_test_min.cpp" ]
+    }
   }
 }
 

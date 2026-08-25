@@ -1420,7 +1420,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue004, T
 {
     SecurityComponentPattern pattern;
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
-    auto frameNode = RefPtr(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     pattern.frameNode_ = frameNode;
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();

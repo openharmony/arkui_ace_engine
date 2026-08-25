@@ -33,9 +33,10 @@ std::shared_ptr<NWeb::NWebAgentManager> g_nwebAgentManager = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
-    { "existSurfaceIdOther", "existhtmlElementIdOther" } };
+    { "existSurfaceIdOther", "existhtmlElementIdOther" }, { "emptyHtmlElementSurfaceId", "" },
+    { "hoverSurfaceId", "hoverHtmlElementId" } };
 std::map<std::string, int64_t> surfaceToWebAccessibilityMap = { { "existSurfaceId", 123 },
-    { "existSurfaceIdOther", 456 } };
+    { "existSurfaceIdOther", 456 }, { "emptyHtmlElementSurfaceId", 789 } };
 constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
@@ -1077,6 +1078,9 @@ void WebDelegate::HandleAccessibilityHoverEvent(
 
 std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
 {
+    if (htmlElementId.empty()) {
+        return "";
+    }
     auto it = htmlElementToSurfaceMap.find(htmlElementId);
     if (it != htmlElementToSurfaceMap.end()) {
         return it->second;
@@ -1095,6 +1099,10 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
     if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
+    auto htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
+    if (htmlElementId.empty()) {
         return -1;
     }
     auto it = surfaceToWebAccessibilityMap.find(surfaceId);
@@ -1540,6 +1548,8 @@ void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
 void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
+void WebDelegate::RequestWebDomJsonStringWithOptions(
+    const std::function<void(const std::string)>&& callback, int32_t mode) {}
 void WebDelegate::UpdateFullScreenVideoOverlayEnable(bool) {}
 void WebDelegate::OnFullScreenVideoOverlayEnter(const char*) {}
 void WebDelegate::OnVideoStatusChanged(const int action, const std::map<std::string, std::string>& param) {}
@@ -1552,6 +1562,18 @@ std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebComman
 }
 
 void WebDelegate::UpdateTouchEventFeatureDetectionEnabled() {}
+
+// PageScene Rule-Based Perception stubs
+void WebDelegate::QueryPageControls(const std::string&,
+    const std::string&, const std::vector<std::string>&,
+    std::function<void(const std::string&)>&&) {}
+
+void WebDelegate::ExecuteGetPageSceneMatch(int32_t, const WebPageSceneRuleSet&, bool) {}
+void WebDelegate::ExecuteAllRuleSetMatch() {}
+void WebDelegate::ProcessPageSceneDomReadyResult(const std::string&, const std::string&) {}
+void WebDelegate::ExecuteReportOnRegisterMatch(int32_t) {}
+void WebDelegate::GetPageSceneForWeb(int32_t, const std::string&) {}
+int32_t WebDelegate::GetHostNodeId() { return -1; }
 
 void FullScreenVideoOverlayHandlerOhos::SetVideoSurface(std::string surfaceId) {}
 

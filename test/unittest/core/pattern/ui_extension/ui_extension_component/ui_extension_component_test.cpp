@@ -79,6 +79,23 @@ const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
 }
 #endif
 
+class FocusRecordingSessionWrapper : public SessionWrapperImpl {
+public:
+    FocusRecordingSessionWrapper(const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId)
+        : SessionWrapperImpl(hostPattern, instanceId, true, SessionType::UI_EXTENSION_ABILITY)
+    {
+    }
+    ~FocusRecordingSessionWrapper() override = default;
+
+    bool NotifyFocusEventAsync(bool isFocus) override
+    {
+        focusActiveEvents_.push_back(isFocus);
+        return true;
+    }
+
+    std::vector<bool> focusActiveEvents_;
+};
+
 class UIExtensionComponentTestNg : public testing::Test {
 public:
     void SetUp() override;
@@ -613,6 +630,143 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
     focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
     uiExtensionNode->pattern_ = AceType::MakeRefPtr<UIExtensionPattern>();
     ASSERT_NE(uiExtensionNode->pattern_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionFocusStateRepaintTest001
+ * @tc.desc: Test clear focus state callback resets force flag so paint callback re-notifies focus active
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionFocusStateRepaintTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+    auto focusHub = uiExtensionNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step2. replace sessionWrapper with a recording wrapper
+     */
+    auto recordingWrapper = AceType::MakeRefPtr<FocusRecordingSessionWrapper>(pattern, pattern->instanceId_);
+    pattern->sessionWrapper_ = recordingWrapper;
+
+    /**
+     * @tc.steps: step3. simulate a force-processed non-tab key (e.g. Enter) before window focus move
+     */
+    pattern->SetForceProcessOnKeyEventInternal(true);
+    EXPECT_TRUE(pattern->GetForceProcessOnKeyEventInternal());
+
+    /**
+     * @tc.steps: step4. simulate FocusManager::PaintFocusState sequence triggered by WindowFocusMoveEnd:
+     *                ClearAllFocusState() then PaintAllFocusState()
+     * @tc.expected: clear callback resets force flag, paint callback re-notifies focus active(true)
+     */
+    focusHub->onClearFocusStateCallback_();
+    EXPECT_FALSE(pattern->GetForceProcessOnKeyEventInternal());
+    focusHub->onPaintFocusStateCallback_();
+    ASSERT_EQ(recordingWrapper->focusActiveEvents_.size(), 2);
+    EXPECT_FALSE(recordingWrapper->focusActiveEvents_[0]);
+    EXPECT_TRUE(recordingWrapper->focusActiveEvents_[1]);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionFocusStateRepaintTest002
+ * @tc.desc: Test default repaint sequence without force flag notifies focus inactive then active
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionFocusStateRepaintTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+    auto focusHub = uiExtensionNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step2. replace sessionWrapper with a recording wrapper
+     */
+    auto recordingWrapper = AceType::MakeRefPtr<FocusRecordingSessionWrapper>(pattern, pattern->instanceId_);
+    pattern->sessionWrapper_ = recordingWrapper;
+    EXPECT_FALSE(pattern->GetForceProcessOnKeyEventInternal());
+
+    /**
+     * @tc.steps: step3. fire clear then paint callbacks with default force flag
+     * @tc.expected: focus active(false) then focus active(true) notified to uiextension
+     */
+    focusHub->onClearFocusStateCallback_();
+    focusHub->onPaintFocusStateCallback_();
+    ASSERT_EQ(recordingWrapper->focusActiveEvents_.size(), 2);
+    EXPECT_FALSE(recordingWrapper->focusActiveEvents_[0]);
+    EXPECT_TRUE(recordingWrapper->focusActiveEvents_[1]);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionFocusStateRepaintTest003
+ * @tc.desc: Test paint callback skips focus active notify when force flag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionFocusStateRepaintTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+    auto focusHub = uiExtensionNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step2. replace sessionWrapper with a recording wrapper and set force flag
+     */
+    auto recordingWrapper = AceType::MakeRefPtr<FocusRecordingSessionWrapper>(pattern, pattern->instanceId_);
+    pattern->sessionWrapper_ = recordingWrapper;
+    pattern->SetForceProcessOnKeyEventInternal(true);
+
+    /**
+     * @tc.steps: step3. fire paint callback only, without clear callback in between
+     * @tc.expected: focus active(true) is not notified while force flag is true
+     */
+    EXPECT_TRUE(focusHub->onPaintFocusStateCallback_());
+    EXPECT_TRUE(recordingWrapper->focusActiveEvents_.empty());
+
+    /**
+     * @tc.steps: step4. clear callback resets force flag, paint callback then notifies focus active
+     */
+    focusHub->onClearFocusStateCallback_();
+    EXPECT_FALSE(pattern->GetForceProcessOnKeyEventInternal());
+    EXPECT_TRUE(focusHub->onPaintFocusStateCallback_());
+    ASSERT_EQ(recordingWrapper->focusActiveEvents_.size(), 2);
+    EXPECT_FALSE(recordingWrapper->focusActiveEvents_[0]);
+    EXPECT_TRUE(recordingWrapper->focusActiveEvents_[1]);
 #endif
 }
 

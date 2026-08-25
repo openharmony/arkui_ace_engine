@@ -1340,84 +1340,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: MovingPhotoPatternTest029
- * @tc.desc: Test WherHandleImageErrorStopAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest029, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create MovingPhoto
-     * @tc.expected: step1. Create MovingPhoto
-     */
-    auto frameNode = CreateMovingPhotoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
-    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
-    ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. GetErrorImage
-     * @tc.expected: step2. StopAinmation
-     */
-    LoadImageFailEvent info(0, 0, "error");
-    pattern->HandleImageErrorEvent(info);
-    pattern->StopAnimation();
-    EXPECT_FALSE(pattern->isStopAnimation_);
-}
-
-/**
- * @tc.name: MovingPhotoPatternTest030
- * @tc.desc: Test HandleImageError
- * @tc.type: FUNC
- */
-HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest030, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create ErrorImage
-     * @tc.expected: step1. Create MovingPhoto
-     */
-    auto frameNode = CreateMovingPhotoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
-    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
-    ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. GetErrorImage
-     * @tc.expected: step2. HandleImageError
-     */
-    LoadImageFailEvent info(0, 0, "error");
-    pattern->HandleImageErrorEvent(info);
-    EXPECT_TRUE(pattern->handleImageError_);
-}
-
-/**
- * @tc.name: MovingPhotoPatternTest031
- * @tc.desc: Test Start
- * @tc.type: FUNC
- */
-HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest031, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create MovingPhoto
-     * @tc.expected: step1. Create MovingPhoto
-     */
-    auto frameNode = CreateMovingPhotoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
-    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
-    ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. Start
-     * @tc.expected: step2. handleImageError_ == false
-     */
-    pattern->Start();
-    EXPECT_FALSE(pattern->handleImageError_);
-}
-
-/**
  * @tc.name: MovingPhotoPatternTest032
  * @tc.desc: Test setMovingController
  * @tc.type: FUNC
@@ -1560,5 +1482,33 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest036, TestSize.Level1)
     ASSERT_TRUE(property->HasVideoSize());
     EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Height(), 100);
     EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Width(), 100);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest037
+ * @tc.desc: Test OnResolutionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto successfully
+     */
+    auto node = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = node->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnResolutionChange
+     * @tc.expected: step2. related functions will be called
+     */
+    pattern->OnResolutionChange();
+
+    auto property = node->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_TRUE(property->HasVideoSize());
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Height(), 100);
 }
 } //namespace OHOS::Ace::NG

@@ -459,7 +459,15 @@ export struct DatePickerComponent {
   }
   
   private formatLunarYear(gregorianYear: int): string {
-    return this.yearFormatter.format(gregorianYear) + '年';
+    // Try formatter for localization, fallback to plain string
+    if (this.yearFormatter) {
+      try {
+        return this.yearFormatter.format(gregorianYear) + '年';
+      } catch (error) {
+        return String(gregorianYear) + '年';
+      }
+    }
+    return String(gregorianYear) + '年';
   }
   
   private formatLunarMonth(month: int, isLeap: boolean): string {
@@ -473,9 +481,14 @@ export struct DatePickerComponent {
   }
   
   private formatLunarDay(day: int): string {
-    const lunarDayNames: string[] = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-                   '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
-                   '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+    const lunarDayNames: string[] = [
+      '初一', '初二', '初三', '初四', '初五',
+      '初六', '初七', '初八', '初九', '初十',
+      '十一', '十二', '十三', '十四', '十五',
+      '十六', '十七', '十八', '十九', '二十',
+      '廿一', '廿二', '廿三', '廿四', '廿五',
+      '廿六', '廿七', '廿八', '廿九', '三十'
+    ];
   
     if (day >= 1 && day <= 30) {
       const idx: int = (day - 1).toInt();
@@ -704,13 +717,42 @@ export struct DatePickerComponent {
   }
   
   private formatYear(year: int): string {
-    if (this.isChineseLocale()) {
-      return this.yearFormatter.format(year) + '年';
+    // Previewer or invalid locale: default to Chinese format
+    const localeStr: string = this.localeID;
+    if (!localeStr || localeStr.length === 0) {
+      return year + '年';
     }
-    return this.yearFormatter.format(year);
+    
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    if (this.isChineseLocale()) {
+      if (this.yearFormatter) {
+        try {
+          return this.yearFormatter.format(year) + '年';
+        } catch (error) {
+          return year + '年';
+        }
+      }
+      return year + '年';
+    }
+    
+    // Non-Chinese: try formatter for localized numbers, fallback to plain
+    if (this.yearFormatter) {
+      try {
+        return this.yearFormatter.format(year);
+      } catch (error) {
+        return String(year);
+      }
+    }
+    return String(year);
   }
   
   private formatMonth(month: int): string {
+    // Previewer or invalid locale: default to Chinese format
+    const localeStr: string = this.localeID;
+    if (!localeStr || localeStr.length === 0) {
+      return (month + 1) + '月';
+    }
+    
     if (this.isChineseLocale()) {
       return (month + 1) + '月';
     }
@@ -724,11 +766,6 @@ export struct DatePickerComponent {
                                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   
     try {
-      const localeStr: string = this.localeID;
-      if (!localeStr || localeStr.length === 0) {
-        return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
-      }
-    
       const monthFormat: string = this.displayMode === DisplayMode.DATE_TIME ? 'short' : 'long';
       const dateFormat = new intl.DateTimeFormat(localeStr, {
         month: monthFormat
@@ -742,16 +779,26 @@ export struct DatePickerComponent {
   }
   
   private formatDay(day: int): string {
-    if (this.isChineseLocale()) {
-      return this.formatter.format(day) + '日';
+    // Previewer or invalid locale: default to Chinese format
+    const localeStr: string = this.localeID;
+    if (!localeStr || localeStr.length === 0) {
+      return day + '日';
     }
-  
-    try {
-      const localeStr: string = this.localeID;
-      if (!localeStr || localeStr.length === 0) {
-        return this.formatter.format(day);
-      }
     
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    if (this.isChineseLocale()) {
+      if (this.formatter) {
+        try {
+          return this.formatter.format(day) + '日';
+        } catch (error) {
+          return day + '日';
+        }
+      }
+      return day + '日';
+    }
+    
+    // Non-Chinese: use DateTimeFormat for localized date format
+    try {
       const dateFormat = new intl.DateTimeFormat(localeStr, {
         day: 'numeric'
       });
@@ -759,28 +806,60 @@ export struct DatePickerComponent {
       const date = new Date(2026, 0, safeDay);
       return dateFormat.format(date);
     } catch (error) {
-      return this.formatter.format(day);
+      return String(day);
     }
   }
   
   private formatHour(hour24: int): string {
-    // 24-hour format: use locale-specific digits but NO suffixes like "时"
-    // Use NumberFormat instead of DateTimeFormat to avoid time unit suffixes
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
     try {
-      return this.formatter.format(hour24);
+      const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
+      if (!localeStr || localeStr.length === 0) {
+        return this.formatNumber(hour24);
+      }
+      
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(hour24);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
+      if (this.hourFormatter === null) {
+        this.hourFormatter = new intl.DateTimeFormat(localeStr, {
+          hour: '2-digit',
+          hour12: false
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, hour24, 0, 0);
+      return this.hourFormatter!.format(date);
     } catch (error) {
       return this.formatNumber(hour24);
     }
   }
   
   private formatHour12(displayHour: int): string {
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
     try {
       const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
       if (!localeStr || localeStr.length === 0) {
         return this.formatNumber(displayHour);
       }
       
-      // Use cached formatter to avoid repeated object creation
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(displayHour);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
       if (this.hourFormatter === null) {
         this.hourFormatter = new intl.DateTimeFormat(localeStr, {
           hour: '2-digit',
@@ -793,7 +872,14 @@ export struct DatePickerComponent {
       
       // Remove any non-digit characters (like AM/PM, spaces, etc.)
       // This gives us just the hour number in locale format
-      const digitPattern = new RegExp('[\\d\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u0E50-\\u0E59\\u0ED0-\\u0ED9]+');
+      // Include Unicode ranges for all localized digits:
+      // Arabic-Indic, Persian, Devanagari, Bengali, Thai, Lao, Myanmar, Khmer
+      const pattern =
+        '[\\d\\u0660-\\u0669\\u06F0-\\u06F9]' +
+        '[\\u0966-\\u096F\\u09E6-\\u09EF]' +
+        '[\\u0E50-\\u0E59\\u0ED0-\\u0ED9]' +
+        '[\\u1040-\\u1049\\u17E0-\\u17E9]+';
+      const digitPattern = new RegExp(pattern);
       const hourMatch: RegExpMatchArray | null = formatted.match(digitPattern);
       if (hourMatch !== null && hourMatch.length > 0) {
         return hourMatch[0]!;
@@ -806,13 +892,23 @@ export struct DatePickerComponent {
   }
   
   private formatMinute(minute: int): string {
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
     try {
       const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
       if (!localeStr || localeStr.length === 0) {
         return this.formatNumber(minute);
       }
       
-      // Use cached formatter to avoid repeated object creation
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(minute);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
       if (this.minuteFormatter === null) {
         this.minuteFormatter = new intl.DateTimeFormat(localeStr, {
           minute: '2-digit'
@@ -820,22 +916,30 @@ export struct DatePickerComponent {
       }
       
       const date = new Date(2026, 0, 1, 0, minute, 0);
-      const formatted: string = this.minuteFormatter!.format(date);
-      
-      return formatted;
+      return this.minuteFormatter!.format(date);
     } catch (error) {
       return this.formatNumber(minute);
     }
   }
   
   private formatSecond(second: int): string {
+    // Try to use formatter for localization on real device, fallback to plain string for previewer
+    // Use DateTimeFormat with '2-digit' to ensure leading zeros and localized digits
     try {
       const localeStr: string = this.localeID;
+      
+      // 1. Previewer or invalid locale: simple formatNumber
       if (!localeStr || localeStr.length === 0) {
         return this.formatNumber(second);
       }
       
-      // Use cached formatter to avoid repeated object creation
+      // 2. Chinese/English: simple formatNumber sufficient (no digit localization needed)
+      const lang: string = localeStr.split('-')[0];
+      if (lang === 'zh' || lang === 'en') {
+        return this.formatNumber(second);
+      }
+      
+      // 3. Arabic, Hindi, Thai etc: use DateTimeFormat for localized digits with leading zero
       if (this.secondFormatter === null) {
         this.secondFormatter = new intl.DateTimeFormat(localeStr, {
           second: '2-digit'
@@ -843,9 +947,7 @@ export struct DatePickerComponent {
       }
       
       const date = new Date(2026, 0, 1, 0, 0, second);
-      const formatted: string = this.secondFormatter!.format(date);
-      
-      return formatted;
+      return this.secondFormatter!.format(date);
     } catch (error) {
       return this.formatNumber(second);
     }
@@ -857,8 +959,10 @@ export struct DatePickerComponent {
     
     try {
       const localeStr: string = this.localeID;
+      
+      // Previewer or invalid locale: use Chinese period markers as default
       if (!localeStr || localeStr.length === 0) {
-        return isAM ? 'AM' : 'PM';
+        return isAM ? '上午' : '下午';
       }
       
       // Check language code prefix (e.g., 'zh-CN' -> 'zh')

@@ -251,7 +251,7 @@ void BubblePaintMethod::PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintW
     auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     float borderWidth = popupTheme->GetBorderWidth().ConvertToPx();
-    if (GreatNotEqual(static_cast<double>(borderWidth), 0.0)) {
+    if (GreatNotEqual(static_cast<double>(borderWidth), 0.0) && !isUserSetMaterial_) {
         IsPaintDoubleBorder(paintWrapper);
         RSPen pen;
         pen.SetAntiAlias(true);
@@ -305,6 +305,8 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
         }
         paint.SetWidth(outerBorderWidthByUser_);
         PaintOuterBorderGradient(paint);
+    } else if (isUserSetMaterial_) {
+        return; // Do not need to draw the default stroke when using new material.
     } else if (isTips_) {
         paint.SetWidth(popupTheme->GetTipsOuterBorderWidth().ConvertToPx());
         paint.SetColor(popupTheme->GetTipsOuterBorderColor().GetValue());
@@ -362,6 +364,8 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
         }
         paint.SetWidth(innerBorderWidthByUser_);
         PaintInnerBorderGradient(paint);
+    } else if (isUserSetMaterial_) {
+        return; // Do not need to draw the default stroke when using new material.
     } else if (isTips_) {
         paint.SetWidth(popupTheme->GetTipsInnerBorderWidth().ConvertToPx());
         paint.SetColor(popupTheme->GetTipsInnerBorderColor().GetValue());

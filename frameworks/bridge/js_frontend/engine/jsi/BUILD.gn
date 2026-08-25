@@ -133,7 +133,11 @@ template("js_engine_ark") {
         ]
       }
     } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
+      external_deps += [
+        "ets_runtime:libark_jsruntime",
+        "libuv:uv",
+        "node:node_header_notice",
+      ]
     }
   }
 }

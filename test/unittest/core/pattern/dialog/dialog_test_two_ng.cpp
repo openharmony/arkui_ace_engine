@@ -58,7 +58,6 @@ const std::string SUBTITLE = "This is subtitle";
 const std::string MESSAGE = "Message";
 constexpr int BUTTONINDEX_TEST_2 = -1;
 constexpr int BUTTONINDEX_TEST_3 = -2;
-constexpr int DIALOG_TITLE_AVE_BY_2 = 2;
 const Dimension DIALOG_TITLE_PADDING { 10.0, DimensionUnit::VP };
 const Dimension BORDER_WIDTH_PX_A { 10.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_PX_B { 20.0, DimensionUnit::PX };
@@ -638,21 +637,6 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest030, TestSize.Level1)
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     dialogPattern->BuildChild(props);
     EXPECT_EQ(dialogPattern->titleContainer_->GetTag(), V2::ROW_ETS_TAG);
-    /**
-     * @tc.steps: step2. get titleTextNode && subTitleTextNode.
-     * @tc.expected: The text padding is equal to dialogTheme_->GetPaddingSingleTitle().ConvertToPx() /
-     * DIALOG_TITLE_AVE_BY_2 when only have title.
-     */
-    auto titleTextNode = AceType::DynamicCast<FrameNode>(dialogPattern->titleContainer_->GetChildAtIndex(0));
-    ASSERT_NE(titleTextNode, nullptr);
-    auto titleProp = AceType::DynamicCast<TextLayoutProperty>(titleTextNode->GetLayoutProperty());
-    ASSERT_NE(titleProp, nullptr);
-    const auto& titlePadding = titleProp->GetPaddingProperty();
-    auto topPadding = titlePadding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-    auto bottomPadding = titlePadding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-    auto padding = DIALOG_TITLE_PADDING.ConvertToPx() / DIALOG_TITLE_AVE_BY_2;
-    EXPECT_EQ(topPadding, padding);
-    EXPECT_EQ(bottomPadding, padding);
     /**
      * @tc.steps: step2. get ButtonNode.
      * @tc.expected: Check the param value

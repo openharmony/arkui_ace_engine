@@ -26,6 +26,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/syntax/arkoala_for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -225,14 +226,21 @@ Ark_Int32 InsertChildBefore(Ark_NodeHandle parentNode, Ark_NodeHandle childNode,
         return result;
     }
     auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+    bool needMountDone = true;
     if (sibling) {
-        parent->AddChildBefore(AceType::Claim(child), AceType::Claim(sibling));
+        if (auto* forEachNode = AceType::DynamicCast<ArkoalaForEachNode>(parent); forEachNode) {
+            needMountDone = forEachNode->AddOrMoveChildBefore(AceType::Claim(child), AceType::Claim(sibling));
+        } else {
+            parent->AddChildBefore(AceType::Claim(child), AceType::Claim(sibling));
+        }
     } else {
         parent->AddChild(AceType::Claim(child));
     }
-    auto* frameNode = AceType::DynamicCast<FrameNode>(child);
-    if (frameNode) {
-        frameNode->OnMountToParentDone();
+    if (needMountDone) {
+        auto* frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (frameNode) {
+            frameNode->OnMountToParentDone();
+        }
     }
     return result;
 }

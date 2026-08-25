@@ -20,6 +20,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/lazy_layout/lazy_layout_test_utils.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.h"
@@ -111,6 +112,40 @@ void LazyDynamicLayoutTest::TearDown()
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
+}
+
+/**
+ * @tc.name: LazyDynamicLayoutPattern_CachedParentMatrix_001
+ * @tc.desc: Test cached LazyDynamicLayout identity under List, WaterFlow and Scroll before main-tree attachment
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutTest, LazyDynamicLayoutPattern_CachedParentMatrix_001, TestSize.Level1)
+{
+    int32_t nodeId = -1000;
+    for (const auto& parentCase : CACHED_LAZY_PARENT_CASES) {
+        SCOPED_TRACE(parentCase.name);
+        auto context = CreateCachedLazyParentTestContext<LazyDynamicLayoutPattern>(
+            parentCase, "LazyDynamicLayout", nodeId);
+        ASSERT_NE(context.parentNode, nullptr);
+        ASSERT_NE(context.intermediateNode, nullptr);
+        ASSERT_NE(context.lazyNode, nullptr);
+        ASSERT_NE(context.layoutWrapper, nullptr);
+
+        auto lazyProperty = context.lazyNode->GetLayoutProperty();
+        auto clonedProperty = context.layoutWrapper->GetLayoutProperty();
+        ASSERT_NE(lazyProperty, nullptr);
+        ASSERT_NE(clonedProperty, nullptr);
+        EXPECT_TRUE(context.lazyNode->IsNeedLazyLayout());
+        EXPECT_TRUE(lazyProperty->GetNeedLazyLayout());
+        EXPECT_TRUE(clonedProperty->GetNeedLazyLayout());
+
+        context.lazyNode->MountToParent(context.intermediateNode, DEFAULT_NODE_SLOT, true);
+        EXPECT_FALSE(context.lazyNode->IsOnMainTree());
+        EXPECT_TRUE(context.intermediateNode->IsNeedLazyLayout());
+        EXPECT_TRUE(context.intermediateNode->GetLayoutProperty()->GetNeedLazyLayout());
+        EXPECT_TRUE(LazyLayoutUtils::ValidateAndSetLazyLayoutParent(context.lazyNode, Axis::VERTICAL));
+        EXPECT_TRUE(context.lazyNode->IsNeedLazyLayout());
+    }
 }
 
 void LazyDynamicLayoutTest::CreateRepeatVirtualScrollNode(

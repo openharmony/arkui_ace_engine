@@ -113,6 +113,11 @@ enum class DialogDisplayModeInSubWindow {
     WINDOW_BASED = 1
 };
 
+enum class DialogOperation {
+    DIALOG_OPEN = 0,
+    DIALOG_CLOSE,
+};
+
 class DialogAlignmentUtils {
 public:
     ACE_FORCE_EXPORT static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment);

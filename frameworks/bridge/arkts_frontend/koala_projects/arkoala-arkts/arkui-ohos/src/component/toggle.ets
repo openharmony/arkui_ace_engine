@@ -45,3 +45,21 @@ export function ToggleImpl(
         content_?.()
     })
 }
+
+@memo
+export function Toggle(
+    @memo
+    style: ((attributes: ToggleAttribute) => void) | undefined,
+    @memo
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkToggleComponent>((): ArkToggleComponent => {
+        return new ArkToggleComponent()
+    })
+    NodeAttach<ArkTogglePeer>((): ArkTogglePeer => createTogglePeer(receiver), (peer: ArkTogglePeer): void => {
+        receiver.setPeer(peer)
+        style?.(receiver)
+        receiver.setPeer(undefined)
+        content_?.()
+    })
+}

@@ -15,7 +15,6 @@
 #include "node_toggle_modifier.h"
 
 #include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()

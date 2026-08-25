@@ -150,6 +150,17 @@ Color ThemeConstants::GetColor(uint32_t key) const
     return resAdapter_->GetColor(key);
 }
 
+Color ThemeConstants::GetColor(uint32_t key, ColorMode colorMode) const
+{
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        return GetColor(key);
+    }
+    if (!resAdapter_) {
+        return ERROR_VALUE_COLOR;
+    }
+    return resAdapter_->GetColor(key, colorMode);
+}
+
 Color ThemeConstants::GetColorByName(const std::string& resName) const
 {
     if (!resAdapter_) {

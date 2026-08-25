@@ -120,7 +120,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         }
         void* nativePtr = nullptr;
         result = napi_get_value_external(env, nodePtr, &nativePtr);
-        if (result != napi_ok) {
+        if (result != napi_ok || nativePtr == nullptr) {
             LOGE("fail to get nodePtr external value in builderNode");
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
                 "Failed to get nodePtr external value in builderNode");
@@ -301,7 +301,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arktabs",
             "arkui.components.arktabcontent",
             "arkui.components.arkswiper",
-            "arkui.components.arkswiperindicator",
+            "arkui.components.arkindicatorcomponent",
             "arkui.components.arkimageanimator",
             "arkui.components.arkprogress",
             "arkui.components.arktexttimer",

@@ -21,6 +21,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/image/image_defines.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -40,9 +41,7 @@
 // Forward declarations to reduce header dependencies
 namespace OHOS::Ace {
 class Clipboard;
-#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
-#endif
 class ImageSourceInfo;
 class PixelMap;
 struct CanvasImage;
@@ -95,6 +94,7 @@ public:
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
     bool RecycleImageData();
+    bool RecycleImageDataForNav();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnVisibleChange(bool isVisible) override;
@@ -309,8 +309,7 @@ private:
     std::string HandleSrcForMemoryName(std::string url);
     std::string MaskUrl(std::string url);
     void ApplyAIModificationsToImage();
-    void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
-        const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
+    void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RefPtr<ImageLoadingContext>& ctx);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
@@ -375,6 +374,13 @@ private:
     void ReportCompleteLoadEvent(const RefPtr<FrameNode>& host);
     void ReportImageSuccessInfo(const RefPtr<FrameNode>& host);
 
+    void RegisterNavDestinationHiddenChange();
+    void UnregisterNavDestinationHiddenChange();
+    void OnNavDestinationHiddenChange(bool isShown);
+    void PostNavDestRecycleTask();
+    void CancelNavDestRecycleTask();
+    void ExecuteNavDestRecycle();
+
 private:
     RefPtr<DrawableDescriptor> drawable_;
     SizeF imageSize_;
@@ -407,9 +413,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
-#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-#endif
     ImageDfxConfig imageDfxConfig_;
     ImageDfxConfig altImageDfxConfig_;
     ImageDfxConfig altErrorImageDfxConfig_;
@@ -449,6 +453,9 @@ private:
     bool isLoadAlt_ = false;
     ImageType imageType_ = ImageType::BASE;
     ContentTransitionType contentTransitionType_ = ContentTransitionType::IDENTITY;
+    std::shared_ptr<CancelableCallback<void()>> navDestRecycleCallback_;
+    static constexpr uint32_t NAV_DEST_RECYCLE_DELAY_MS = 500;
+    int64_t lastDrawTime_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

@@ -165,6 +165,7 @@ interface __RepeatConfig<T> {
 
 // Memory optimization strategy for virtual scroll
 enum RepeatMemOptStrategy {
+    UNDEFINED = -1,
     DEFAULT = 0,
     ENABLE_AUTO_CACHE_OPTIMIZATION = 1
 }

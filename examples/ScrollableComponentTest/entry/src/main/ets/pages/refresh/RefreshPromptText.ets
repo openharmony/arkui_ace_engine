@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
 import { RefreshModifier } from '@kit.ArkUI';
 
 class CustomModifier extends RefreshModifier {
@@ -29,7 +28,6 @@ struct RefreshExample {
   @State isRefreshing: boolean = false;
   @State arr: String[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State modifier: RefreshModifier = new CustomModifier();
   @State changeIndex: number = 0;

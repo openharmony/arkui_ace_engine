@@ -18,14 +18,13 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
+import { extractors, AttributeModifier, LengthMetrics as arkui_Graphics_LengthMetrics, hookUIPickerComponentAttributeModifier, AttributeUpdater } from '#handwritten'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
-import { AttributeModifier, hookUIPickerComponentAttributeModifier, AttributeUpdater } from '#handwritten'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
@@ -128,7 +127,8 @@ export class ArkUIPickerComponentPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -319,7 +319,8 @@ export class PickerIndicatorStyle_serializer {
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue = valueHolderForStrokeWidth!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+            const valueHolderForStrokeWidthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForStrokeWidthTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -351,7 +352,8 @@ export class PickerIndicatorStyle_serializer {
         if (valueHolderForStartMargin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartMarginTmpValue = valueHolderForStartMargin!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForStartMarginTmpValue)
+            const valueHolderForStartMarginTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForStartMarginTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForStartMarginTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -359,7 +361,8 @@ export class PickerIndicatorStyle_serializer {
         if (valueHolderForEndMargin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndMarginTmpValue = valueHolderForEndMargin!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForEndMarginTmpValue)
+            const valueHolderForEndMarginTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForEndMarginTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForEndMarginTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -394,7 +397,8 @@ export class PickerIndicatorStyle_serializer {
             if (valueHolderForBorderRadiusTmpValue instanceof arkui_Graphics_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0 = valueHolderForBorderRadiusTmpValue as arkui_Graphics_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0)
+                const valueHolderForBorderRadiusTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBorderRadiusTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0Transformed)
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1 = valueHolderForBorderRadiusTmpValue as BorderRadiuses
@@ -414,7 +418,8 @@ export class PickerIndicatorStyle_serializer {
         const strokeWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let strokeWidthTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const strokeWidthTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            strokeWidthTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(strokeWidthTmpBufOptDeserialized)
         }
         const strokeWidthTmpResult: arkui_Graphics_LengthMetrics | undefined = strokeWidthTmpBuf
         const dividerColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -439,13 +444,15 @@ export class PickerIndicatorStyle_serializer {
         const startMarginTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let startMarginTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((startMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startMarginTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const startMarginTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            startMarginTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(startMarginTmpBufOptDeserialized)
         }
         const startMarginTmpResult: arkui_Graphics_LengthMetrics | undefined = startMarginTmpBuf
         const endMarginTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let endMarginTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((endMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endMarginTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const endMarginTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            endMarginTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(endMarginTmpBufOptDeserialized)
         }
         const endMarginTmpResult: arkui_Graphics_LengthMetrics | undefined = endMarginTmpBuf
         const backgroundColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -473,7 +480,8 @@ export class PickerIndicatorStyle_serializer {
             const borderRadiusTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let borderRadiusTmpBufOpt: arkui_Graphics_LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined
             if (borderRadiusTmpBufOptUnionSelector == (0).toByte()) {
-                borderRadiusTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const borderRadiusTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                borderRadiusTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(borderRadiusTmpBufOptBufUDeserialized)
             } else if (borderRadiusTmpBufOptUnionSelector == (1).toByte()) {
                 borderRadiusTmpBufOpt = BorderRadiuses_serializer.read(valueDeserializer)
             } else if (borderRadiusTmpBufOptUnionSelector == (2).toByte()) {

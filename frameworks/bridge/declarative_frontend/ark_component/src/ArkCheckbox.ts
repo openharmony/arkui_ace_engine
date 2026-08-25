@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   checkboxNode: BuilderNode<[CheckBoxConfiguration]> | null = null;
@@ -193,7 +192,7 @@ class CheckBoxResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | 
     if (reset) {
       getUINativeModule().checkbox.resetCheckboxResponseRegion(node);
     } else {
-      let responseRegion: (number | string | Resource)[] = [];
+      let responseRegion: (number | string | Resource | Length)[] = [];
       if (Array.isArray(this.value)) {
         for (let i = 0; i < this.value.length; i++) {
           responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
@@ -420,7 +419,7 @@ class CheckboxUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class CheckBoxOnChangeModifier extends ModifierWithKey<OnCheckboxChangeCallback>{
-  constructor(value: OnCheckboxChangeCallback){
+  constructor(value: OnCheckboxChangeCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('CheckboxOnchange');

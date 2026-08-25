@@ -2,16 +2,18 @@
 
 ## 状态
 
-Stage 2 Specify/Design 已完成首版设计。Stage 3 已进入实现与验证阶段；截至 2026-07-06，PageScene 分支已完成 ArkUI 宿主 `TEXT_EDITOR` 基础链路、PageScene-only 稳定点调度和相关 host UT 补充。本文保留设计意图，并记录实现阶段确认的架构边界。
+Stage 2 Specify/Design 已完成首版设计。Stage 3 已进入实现与验证阶段；截至 2026-08-22，PageScene 分支已完成 ArkUI 宿主 `TEXT_EDITOR` 基础链路、`onlyVisible`/`rectCulling` 过滤拆分、opacity 通知和父子树 dirty 方案落地。本文保留设计意图，并记录实现阶段确认的架构边界。
 
 ## 设计输入
 
 - Stage 1 已冻结首批场景 `TEXT_EDITOR`：当前页面或子内容源内文本输入类控件数量大于等于 2 时上报。
 - 能力独立于 `ContentChange` / `ComponentChange`，不复用其事件语义；但 PageScene 检测时机复用 `ContentChangeManager` 的页面级稳定点。
-- 文本输入类控件上下树只维护页面输入控件计数并挂起待检测规则；实际场景命中检查必须等页面稳定后执行，避免频繁中间态上报。
+- 文本输入类控件上下树只挂起待检测规则；实际场景命中检查在页面稳定后全量扫描当前页面树，避免频繁中间态上报。
 - 已上报过命中的规则在后续页面稳定点检查时不再命中，需要额外上报一次 `TEXT_EDITOR_EXIT` 退出事件；退出后连续未命中不重复上报。
 - SA 通过 UISession innerAPI 下发 `ruleJson`，由宿主 ArkUI 保存规则、执行宿主树匹配、向 Web / UIExtension 下发规则，并通过宿主 UISession 统一上报 SA。
 - 默认不上报文本正文；上报结果必须包含 `currentPageName`、`source.type`、`nodes[].rect`、`nodes[].focusable`。
+- `scope.onlyVisible` 只负责组件属性可见性过滤；`scope.rectCulling` 独立负责节点 rect 与当前页面 viewport 的相交过滤，缺省为 `false`。
+- `onlyVisible=true` 时检查 visible/active、transform 后宽高和自身/祖先最终 opacity；`rectCulling=false` 时不执行 viewport 相交判断。
 
 ## 源码事实
 
@@ -58,7 +60,7 @@ sequenceDiagram
     Rule-->>Mgr: TEXT_EDITOR matched result
     Mgr->>Report: ReportPageSceneEvent(sceneJson)
     UI->>Mgr: input node attach/detach
-    Mgr->>Mgr: update input count and pending rules
+    Mgr->>Mgr: mark matching rules pending
     UI->>CCM: page stable point / OnVsyncEnd
     CCM->>Mgr: FlushPageSceneNodeChanged when stable
     Mgr->>Rule: detect pending TEXT_EDITOR rules
@@ -72,10 +74,10 @@ sequenceDiagram
 | `IUiContentService` / proxy / stub | 暴露 SA 注册、反注册、主动查询接口；完成 parcel 序列化、token 校验和参数读取。 |
 | `UIContentServiceStubImpl` | 做轻量参数非空校验，转发到 `UiSessionManager`；不访问节点树。 |
 | `UiSessionManagerOhos` | 维护 pid、`ruleSetId`、远端回调、规则状态、去重节流状态；负责向 SA 回调上报。 |
-| `UIContentImpl` | 注册 UI 线程回调；触发当前页面初始扫描、文本输入类控件上下树增量维护、Web/UIExtension 规则下发。 |
+| `UIContentImpl` | 注册 UI 线程回调；触发当前页面扫描、文本输入类控件上下树后的规则重检、Web/UIExtension 规则下发。 |
 | `ContentChangeManager` | 作为页面稳定点调度承载者。PageScene-only 注册时允许 Page/Scroll/Swiper/Dialog 稳定点和 VSync 尾部触发 PageScene 检测，但不发送 ContentChange 事件。 |
 | `PageSceneRuleManager` | 解析校验 `ruleJson`，按 `sceneType/operator/source` 分发匹配逻辑，生成规范上报 JSON。 |
-| `PageSceneInputCountTracker` | 维护当前页面内可见输入类控件集合和数量；注册/查询时初始化，上下树时按规则增量更新并挂起待检测规则，页面稳定后再触发上报。 |
+| `PageSceneInputCountTracker` | 每次检测全量遍历当前页面树，构造符合规则的输入类控件集合和数量。 |
 | ArkUI matcher | 识别文本输入类 tag，计算 rect/focusable/visible，并把节点状态交给 `PageSceneInputCountTracker`。 |
 | Web / UIExtension subsource | 接收宿主透传的规则生命周期请求。 |
 
@@ -207,10 +209,12 @@ virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
 
 | 时机 | 触发条件 | 行为 |
 |------|----------|------|
-| 首次注册后 | `policy.reportOnRegister=true` | 在 UI 线程扫描当前页面顶部控件树，初始化 `PageSceneInputCountTracker` 的可见输入控件集合和数量。 |
-| 文本输入类控件上树 | 已注册 `TEXT_EDITOR` 规则 | 若节点满足规则过滤条件，则加入 tracker 并更新可见输入控件数量；挂起待检测规则，不立即上报。 |
-| 文本输入类控件下树 | 已注册 `TEXT_EDITOR` 规则 | 从 tracker 移除该节点并更新数量，挂起待检测规则；若稳定点检查发现已上报命中的规则不再命中，则补发一次 `TEXT_EDITOR_EXIT`。 |
-| 可见性/可获焦/rect 变化 | 已注册 `TEXT_EDITOR` 规则且节点仍在树上 | 按当前规则重新判断该节点是否计入 tracker，并更新节点摘要。 |
+| 首次注册后 | `policy.reportOnRegister=true` | 在 UI 线程全量扫描当前页面顶部控件树并执行规则匹配。 |
+| 文本输入类控件上树 | 已注册 `TEXT_EDITOR` 规则 | 挂起待检测规则，不维护候选索引或增量计数；稳定点重新扫描当前页面树。 |
+| 文本输入类控件下树 | 已注册 `TEXT_EDITOR` 规则 | 挂起待检测规则；稳定点全量扫描自然排除已下树节点，必要时补发一次 `TEXT_EDITOR_EXIT`。 |
+| 可见属性变化 | 已注册 `TEXT_EDITOR` 规则且 `onlyVisible=true` | 扫描时重新计算 visible/active、transform 尺寸和自身/祖先最终 opacity；父级变化由源节点一次 dirty 标记，稳定点统一重算。 |
+| opacity 变化 | opacity 实际值变化且规则使用 `onlyVisible` | 合并相关规则的 pending；同值更新不产生 dirty；不在 setter 内同步匹配。 |
+| rect/viewport 变化 | 页面几何、滚动或 viewport 稳定事件，且规则使用 `rectCulling` 或 `includeRect` | 扫描时重新计算 rect；单纯 rect 变化不形成新的去重状态。 |
 | 页面稳定点 | 页面切换结束、滚动结束、Swiper/Tabs 切换结束、弹窗显示隐藏结束或 VSync 末尾确认稳定 | 对已挂起的待检测规则执行匹配和上报。滚动、Swiper 滚动、页面转场中必须延后。 |
 | Text/Image 具体控件 ContentChange | 仅注册 PageScene、未注册 ContentChange | 不作为 PageScene-only 检测入口；这些事件仍属于 ContentChange 具体控件能力。 |
 | 主动查询 | SA 调用 `GetPageScene` | 按传入规则或已注册规则执行一次初始化扫描，得到当前计数和命中结果；一次性规则不改变长期注册状态。 |
@@ -218,54 +222,42 @@ virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
 
 ### 场景状态维护类
 
-首版新增 `PageSceneInputCountTracker`，建议放在 `frameworks/core/components_ng/manager/page_scene/`。该类维护 ArkUI 宿主页面的 `TEXT_EDITOR` 场景状态；Web/UIExtension 接收规则生命周期透传。
+首版新增 `PageSceneInputCountTracker`，位于 `frameworks/core/components_ng/manager/page_scene/`。该类按次收集 ArkUI 宿主当前页面的 `TEXT_EDITOR` 候选结果，不维护跨检测的候选索引；Web/UIExtension 接收规则生命周期透传。
 
 职责：
 
 | 方法/能力 | 输入 | 行为 |
 |-----------|------|------|
-| `Initialize(rule, pageRoot)` | `PageSceneRule`、当前页面根节点 | 全量扫描一次当前页面，建立 `visibleInputNodes` 和 `visibleInputCount`。 |
-| `OnInputNodeAttached(frameNode)` | 文本输入类节点 | 按 `selector`、`onlyVisible`、`includeUnfocusableTextInput` 判断是否计入；计入后更新数量并挂起待检测规则。 |
-| `OnInputNodeDetached(nodeId)` | 节点 ID | 从 `visibleInputNodes` 删除该节点并更新数量。 |
-| `OnInputNodeVisibilityChanged(frameNode)` | 文本输入类节点 | 重新计算该节点是否可见、是否在屏幕范围内，决定加入、更新或删除。 |
-| `OnInputNodeFocusableChanged(frameNode)` | 文本输入类节点 | 当规则不计入不可获焦控件时，重新判断该节点是否计数。 |
-| `BuildMatchedResult()` | 当前 tracker 状态 | 当 `visibleInputCount >= threshold` 时，按 `report` 配置生成命中节点摘要。 |
-| `Reset(pageName/ruleSetId)` | 页面或规则变更 | 清空当前集合、计数、去重签名。 |
+| `Initialize(rule, pageRoot)` | `PageSceneRule`、当前页面根节点 | 每次规则检测全量扫描当前页面，建立 `visibleInputNodes`。 |
+| `NotifyPageSceneNodeChanged(nodeTag, isAttach)` | 文本输入类节点上下树事件 | 仅挂起相关规则；稳定点调用 `MatchPageScene` 重新扫描，不保存节点候选或增量计数。 |
+| `MatchPageScene(...)` | 规则、页面根和页面名 | 初始化 tracker、按阈值判断命中并构造当次结果。 |
+| `Reset()` | 每次扫描前 | 清空当次节点集合和页面可见区域。 |
 
 核心状态：
 
 ```cpp
-struct PageSceneInputNodeState {
-    int32_t nodeId = -1;
-    std::string nodeType;
-    bool visible = false;
-    bool focusable = false;
-    RectF rect;
-};
-
 class PageSceneInputCountTracker {
 public:
-    void Initialize(const PageSceneRule& rule, const RefPtr<FrameNode>& pageRoot);
-    std::optional<PageSceneMatchResult> OnInputNodeAttached(const RefPtr<FrameNode>& node);
-    void OnInputNodeDetached(int32_t nodeId);
-    std::optional<PageSceneMatchResult> OnInputNodeVisibilityChanged(const RefPtr<FrameNode>& node);
-    std::optional<PageSceneMatchResult> OnInputNodeFocusableChanged(const RefPtr<FrameNode>& node);
-    void Reset(const std::string& pageName, const std::string& ruleSetId);
+    void Initialize(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule,
+        const RefPtr<FrameNode>& pageRoot);
+    void Reset();
 
 private:
-    std::unordered_map<int32_t, PageSceneInputNodeState> visibleInputNodes_;
-    int32_t visibleInputCount_ = 0;
+    std::vector<PageSceneNodeInfo> visibleInputNodes_;
+    RectF pageViewportRect_;
+    bool IsOpacityVisible(const RefPtr<FrameNode>& node) const;
 };
 ```
 
 设计规则：
 
-- tracker 维护的是“页面内符合当前规则的可见输入类控件数量”，不是所有输入类控件数量。
-- `visibleInputNodes_` 只保存可计数节点；节点不可见、屏外、不可获焦且规则不计入时，不放入集合。
-- 上树事件只对文本输入类 tag 进入 tracker；非输入类节点忽略。
-- 下树事件必须删除节点，防止已销毁控件继续贡献计数。
-- 页面切换、规则反注册、SA 死亡或重新初始化扫描时必须 `Reset`。
-- 当数量从低于阈值变为大于等于阈值时只挂起待检测规则；命中上报必须在页面稳定点执行，并受 `deduplicate` 和 `minReportIntervalMs` 控制。
+- tracker 只保存一次扫描中“符合当前规则的输入类控件”，每次检测重新构建。
+- `onlyVisible` 过滤组件属性可见性；`rectCulling` 独立过滤 viewport 相交；`includeRect` 为 true 时即使两个过滤开关关闭也必须计算并输出 rect。
+- 仅在 `onlyVisible || rectCulling || includeRect` 时计算节点 rect，仅在 `rectCulling=true` 时计算 page viewport。
+- `visibleInputNodes_` 只保存可计数节点；节点不满足当前规则过滤、不可获焦且规则不计入时，不放入集合。
+- 上下树事件只对文本输入类 tag 挂起规则；非输入类节点忽略，不维护节点候选集合。
+- 每次检测前必须 `Reset`，随后从当前页面树重新收集节点。
+- 命中上报必须在页面稳定点执行，并受 `deduplicate` 和 `minReportIntervalMs` 控制。
 - 当已上报命中的规则在稳定点检查时从命中态变为未命中态，需要上报一次 `TEXT_EDITOR_EXIT`；退出事件清理命中态，不受命中去重和最小命中上报间隔抑制，连续未命中不重复上报。
 - 稳定判定至少包含普通滚动、Swiper 滚动和页面转场状态；任一状态未结束时不得 flush PageScene 待检测规则。
 
@@ -282,11 +274,28 @@ private:
 
 | 字段/规则 | 设计 |
 |-----------|------|
-| 可见性 | `scope.onlyVisible=true` 时过滤不可见、尺寸为空、与屏幕可见区域无交集的节点。 |
+| `onlyVisible` | `true` 时过滤节点或祖先 visible/active 不通过、transform 后宽高为 0、或自身/祖先 opacity 累乘为 0 的节点；不判断 viewport 相交。 |
+| `rectCulling` | `true` 时使用 pageRoot transform rect 作为 viewport，过滤与其无交集的节点；`false` 时不判断 rect 相交，缺省为 false。 |
 | 可获焦 | 通过节点 `FocusHub` / event hub 能力判断 `focusable`；`globalConfig.includeUnfocusableTextInput=false` 时不可获焦节点不参与计数。 |
-| rect | 使用节点相对窗口的可见区域坐标，单位与现有 Inspector /布局坐标保持一致；当前只要求 ArkUI 宿主节点 rect。 |
+| rect | 使用节点相对窗口坐标，单位与现有 Inspector /布局坐标保持一致；按需计算并由过滤和上报复用；单纯坐标变化不构成新的去重状态。 |
 | currentPageName | 复用 UISession 当前页面名回调链路；上报前由宿主补齐。 |
-| node signature | 由 `source.type + currentPageName + ruleSetId + ruleId + sorted(nodeId/nodeType/rect)` 生成，用于去重。 |
+| 上报去重 | 每条规则保存上次已上报的排序节点 ID 列表；rect、页面名和文本不参与重复状态判断。 |
+
+### 过滤与通知设计决策
+
+| 备选方案 | 选择结果 | 原因 |
+|----------|----------|------|
+| 继续由 `onlyVisible` 同时承担属性可见性和 viewport 过滤 | 不采用 | 两类职责无法独立表达四种组合，且旧规则无法显式关闭屏幕裁剪 |
+| 复用 Inspector 的 `config.rectCulling` | 不采用 | Inspector 请求配置与 PageScene 规则生命周期不同，PageScene 事件不依赖 Inspector 请求 |
+| 每个后代节点分别发送 PageScene 状态通知 | 不采用 | 父节点变化会产生重复规则查询和 pending 操作 |
+| 父/子树 dirty，稳定点从 pageRoot 统一重算 | 采用 | 父级属性变化只需一次 dirty，匹配阶段读取完整父子上下文；pending 集合和 nodeId 列表去重保持不变 |
+
+通知约束：
+
+- visible、active、opacity 变化只合并受影响规则；opacity 同值更新不产生 dirty。
+- 父节点 visibility 变化由源 FrameNode 发送一次 PageScene dirty，子树仍执行框架自身的可见性生命周期回调。
+- 稳定点 matcher 从当前 pageRoot 重新计算父子 visible/active、opacity、transform rect，避免依赖后代逐个通知。
+- active 生命周期若由框架逐个调用子节点，允许产生多个状态通知，但 `pendingPageSceneDetectRules_` 在规则层合并，稳定点同一规则只匹配一次。
 
 ### 命中逻辑
 
@@ -294,16 +303,18 @@ private:
 Register/Get:
     tracker.Initialize(rule, pageRoot)
     if tracker.visibleInputCount >= rule.threshold:
-        ReportPageSceneEvent(tracker.BuildMatchedResult())
+        ReportPageSceneEvent(MatchPageScene(rule, tracker.visibleInputNodes))
 
-Input attached/detached:
-    tracker.UpdateInputNodeCount(frameNode/nodeId)
+Input attached/detached or visible-property change:
     UiSessionManager.MarkPendingPageSceneRule(rule)
+    # parent visibility change marks once; descendants do not repeat PageScene lookup
 
 Stable point / OnVsyncEnd:
     if not scrolling and not swiperScrolling and not transitioning:
         for rule in pendingRules:
-            result = tracker.BuildMatchedResult(rule)
+            tracker.Initialize(rule, currentPageRoot)
+            # Re-read parent/child visible, active, opacity and rect at the stable point
+            result = MatchPageScene(rule, tracker.visibleInputNodes)
             if result.matched and PassDeduplicateAndThrottle:
                 ReportPageSceneEvent(result.sceneJson)
             else if not result.matched and HadReportedMatched(rule):
@@ -355,12 +366,24 @@ void GetPageSceneForSubSource(const std::string& ruleJsonOrRuleSetId);
 | Web / UIExtension 透传失败 | 记录来源级摘要错误，不影响 ArkUI 宿主来源匹配。 |
 | 节流命中 | 不上报重复事件，保留最近命中状态用于后续差异判断。 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| PageSceneInputCountTracker | 节点上树成环 | 触发遍历时成环，无限递归导致爆栈可能导致cpp_crash | 递归遍历无限循环 | 严重 | 给开发者提供开关遍历测试中检测修复；崩溃时有堆栈和Fatal日志 | "LoopDetected: child[%{public}.*s] vs current[%{public}.*s]" | 不涉及 |
+| PageSceneInputCountTracker | 遍历期间移除子节点 | 可能导致cpp_crash | 在子节点遍历过程中执行移除操作，破坏遍历状态 | 严重 | 输出LOGF_ABORT，第一现场崩溃 | "Try to remove the child([%{public}s][%{public}d]) of " | 不涉及 |
+
 ## 测试与验证设计
 
 | 类型 | 覆盖点 |
 |------|--------|
 | ruleJson 单元测试 | 合法 TEXT_EDITOR、非法 JSON、未知 sceneType、未知 operator、阈值非法、`includeText=false/true`、`includeText=true` 时输出用户输入文本或占位提示文本。 |
-| ArkUI tracker 单元测试 | `PageSceneInputCountTracker` 初始化扫描、输入类控件上树计数增加、下树计数减少、可见性/可获焦变化、阈值跨越后挂起检测、命中后跌出阈值补发一次退出事件。 |
+| ArkUI tracker 单元测试 | 全量扫描、`onlyVisible`/`rectCulling` 四象限、透明度和祖先属性过滤、includeRect 按需计算、上下树导致节点 ID 列表变化、坐标变化不重复上报、命中后跌出阈值补发一次退出事件。 |
+| 可见属性通知单元测试 | 父节点 visibility/active/opacity 变化对子孙输入框生效、父节点只产生一次 visibility dirty、opacity 同值更新不产生 dirty、稳定点重复 pending 只匹配一次。 |
 | ContentChangeManager 稳定点单元测试 | PageScene-only 注册下 VSync 尾部 flush、Page/Scroll/Dialog 稳定点触发、Swiper 延迟到 VSync、Swiper 滚动中不 flush、Text/Image 不触发 PageScene-only。 |
 | ArkUI matcher 单元测试 | 0/1/2 个文本输入控件、不可见过滤、不可获焦过滤、rect/focusable 输出、Search/RichEditor 归一。 |
 | UISession IPC 单元测试 | 注册、重复注册、反注册、主动查询、Get pending busy、非法参数、未 Connect、pid 隔离、死亡清理。 |
@@ -373,7 +396,7 @@ void GetPageSceneForSubSource(const std::string& ruleJsonOrRuleSetId);
 
 1. 补齐 IPC / ReportService / proxy / stub / sample 的骨架。
 2. 实现 `PageSceneRuleManager` 解析校验和 JSON 构造。
-3. 实现 ArkUI `TEXT_EDITOR` matcher、`PageSceneInputCountTracker` 与 UI 线程回调，输入类控件上下树仅维护计数和待检测规则。
+3. 实现 ArkUI `TEXT_EDITOR` matcher、`PageSceneInputCountTracker` 与 UI 线程回调，输入类控件上下树仅挂起待检测规则，稳定点全量扫描。
 4. 实现 `ContentChangeManager` 稳定点调度，确保 PageScene-only 注册也能在页面稳定后检测，Pipeline 不直接依赖 PageScene flush。
 5. 实现 Web / UIExtension 规则透传通路。
 6. 增加单元测试、sample 验证和隐私日志检查。

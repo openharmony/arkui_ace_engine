@@ -30,14 +30,14 @@ void DestroyPeerImpl(Ark_LineHeightStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LineHeightStyle Construct0Impl(const Ark_LengthMetrics* lineHeight)
+Ark_LineHeightStyle Construct0Impl(const Ark_LengthMetricsProxy* lineHeight)
 {
     auto peer = PeerUtils::CreatePeer<LineHeightStylePeer>();
     Dimension height = Converter::OptConvert<Dimension>(*lineHeight).value_or(Dimension());
     peer->span = AceType::MakeRefPtr<LineHeightSpan>(height);
     return peer;
 }
-Ark_LineHeightStyle Construct1Impl(const Ark_LengthMetrics* lineHeight,
+Ark_LineHeightStyle Construct1Impl(const Ark_LengthMetricsProxy* lineHeight,
                                    Ark_Float64 lineHeightMultiple)
 {
     auto peer = PeerUtils::CreatePeer<LineHeightStylePeer>();

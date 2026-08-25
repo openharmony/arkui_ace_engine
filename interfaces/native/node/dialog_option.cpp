@@ -242,9 +242,8 @@ void OH_ArkUI_CustomDialog_OpenDialogWithCallback(
     if (!impl || !options) {
         if (callback) {
             callback(ARKUI_ERROR_CODE_PARAM_INVALID, -1, userData);
-        } else {
-            return;
         }
+        return;
     }
 
     auto dialogAPI = impl->getDialogAPI();
@@ -465,6 +464,10 @@ int32_t OH_ArkUI_CustomDialog_SetCustomShadow(
         "customShadow is null");
     if (customShadow->size == 0) {
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow size is 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!customShadow->value) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow value is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -767,6 +770,10 @@ int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions(
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundBlurStyleOptions size is less than 1");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    if (!backgroundBlurStyleOptions->value) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundBlurStyleOptions value is null");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
     int32_t colorMode = ParseColorMode(backgroundBlurStyleOptions, BLURSTYLE_COLOR_MODE);
     int32_t adaptiveColor = ParseAdaptiveColor(backgroundBlurStyleOptions, BLURSTYLE_ADAPTIVE_COLOR);
     float scale = ParseScale(backgroundBlurStyleOptions, BLURSTYLE_SCALE);
@@ -808,6 +815,10 @@ int32_t OH_ArkUI_CustomDialog_SetBackgroundEffect(
     auto size = backgroundEffect->size;
     if (size < REQUIRED_ONE_PARAM) {
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundEffect size is less than 1");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!backgroundEffect->value) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundEffect value is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     float radius = ParseRadius(backgroundEffect, EFFECT_RADIUS);

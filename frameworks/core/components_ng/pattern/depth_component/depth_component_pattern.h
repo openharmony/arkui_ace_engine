@@ -148,6 +148,11 @@ public:
         return depthSpace_;
     }
 
+    void SetColorSpace(int32_t colorSpace)
+    {
+        colorSpace_ = colorSpace;
+    }
+
     void SetRender3DScale(float render3DScale)
     {
         render3DScale_ = render3DScale;
@@ -217,7 +222,7 @@ private:
     void UpdateGltfCamera();
     void UpdateGltfWindowChange(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
     void CleanupGltfResources(bool clearAdapter = false);
-    void CreateCustomNativeWindows(float width, float height);
+    void CreateNativeSurfaces(float width, float height);
     Render3D::WindowChangeInfo GetWindowChangeInfos(float width, float height) const;
     void UpdateWindowChangeSize(bool recreateWindow);
     bool NeedUpdateWindowInfo();
@@ -234,6 +239,8 @@ private:
     std::optional<OHOS::Ace::CameraBufferCrop> GetEffectiveCameraBufferCrop() const;
 
     OHOS::Ace::DepthSpaceType depthSpace_ = OHOS::Ace::DepthSpaceType::INSTANCE;
+    int32_t colorSpace_ = 0;
+    int32_t lastColorSpace_ = 0;
     float render3DScale_ = 1.0f;
     float lastRender3DScale_ = 1.0f;
     ImageSourceInfo depthMap_;
@@ -244,7 +251,6 @@ private:
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     BASE_NS::shared_ptr<Render3D::IMrtDepthAdapter> mrtDepthAdapter_;
     std::vector<Render3D::WindowChangeInfo> windowChangeInfos_;
-    std::vector<void*> nativeWindows_;
     std::vector<std::shared_ptr<OHOS::Rosen::RSSurfaceNode>> nativeSurfaceNodes_;
     std::vector<sptr<OHOS::Surface>> nativeSurfaces_;
     std::vector<RefPtr<RenderContext>> surfaceRenderContext_;
@@ -253,7 +259,7 @@ private:
     std::string lastLoadedGltfPath_;
     uint32_t rotation_ = 0;
     std::optional<int32_t> transformHintChangedCallbackId_;
-    bool nativeWindowSetUp_ = false;
+    bool nativeSurfaceSetUp_ = false;
     float offsetX_ = 0.0;
     float offsetY_ = 0.0;
     float width3d_ = 0.0;

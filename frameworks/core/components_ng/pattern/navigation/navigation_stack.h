@@ -58,6 +58,12 @@ public:
     }
 };
 
+struct PreloadItem {
+    std::string name;
+    std::string paramString;
+    RefPtr<UINode> uiNode;
+};
+
 class ACE_FORCE_EXPORT NavigationStack : public virtual AceType {
     DECLARE_ACE_TYPE(NG::NavigationStack, AceType);
 public:
@@ -167,6 +173,17 @@ public:
     int32_t RemoveInNavPathList(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     int32_t RemoveInPreNavPathList(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void RemoveAll();
+
+    // Preload methods - virtual for override in derived classes
+    virtual void AddPreloadItem(const std::string& name, const std::string& paramString,
+        const RefPtr<UINode>& uiNode) {}
+    virtual RefPtr<UINode> GetFromPreloadItem(const std::string& name, const std::string& paramString)
+    {
+        return nullptr;
+    }
+    virtual void RemovePreloadItem() {}
+    virtual void PreloadItemOnDestroy() {}
+    virtual void InitPreloadInfoByIndex(int32_t index, const RefPtr<NG::UINode>& node) {}
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
@@ -229,6 +246,7 @@ public:
 
     virtual std::string GetStringifyParamByIndex(int32_t index) const { return ""; }
     virtual std::string GetSerializedParamSafely(int32_t index) const { return ""; }
+    virtual std::string GetSerializedParamForRecovery(int32_t index) const { return ""; }
     virtual void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo) {}
     virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
     virtual bool IsFromRecovery(int32_t index) { return false; }
@@ -242,6 +260,8 @@ public:
         int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state)
     {}
     virtual void MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery = true) {}
+    virtual void SaveHomeDestinationState(const std::string& state) {}
+    virtual std::string GetHomeDestinationState() const { return ""; }
     virtual uint64_t GetNavDestinationIdInt(int32_t index) { return -1; }
     virtual bool GetIsForceSet(int32_t index) { return false; }
     virtual void ResetIsForceSetFlag(int32_t index) {}

@@ -23,12 +23,15 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/password_icon_host.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/clean_node_host.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -50,8 +53,8 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t in
     CHECK_NULL_VOID(frameNode);
     auto children = frameNode->GetChildren();
     CHECK_NULL_VOID(!children.empty());
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
+    auto hostPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(hostPattern);
     auto textInputGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textInputGeometryNode);
     auto contentRect = textInputGeometryNode->GetContentRect();
@@ -73,9 +76,9 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t in
 OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
     auto offset = Alignment::GetAlignPosition(parentSize, childSize, Alignment::CENTER);
-    auto textFieldPattern = hostPattern_.Upgrade();
-    CHECK_NULL_RETURN(textFieldPattern, offset);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, offset);
+    auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, offset);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
@@ -90,9 +93,9 @@ SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     SizeF size(0, 0);
     CHECK_NULL_RETURN(layoutWrapper, size);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textfieldLayoutProperty, size);
-    auto childLayoutConstraint = textfieldLayoutProperty->CreateChildConstraint();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, size);
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     CHECK_NULL_RETURN(childWrapper, size);
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
     childWrapper->Measure(childLayoutConstraint);
@@ -138,14 +141,12 @@ RefPtr<FrameNode> TextInputResponseArea::CreateResponseAreaImageNode(const Image
 void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
     float hoverRectHeight, bool isFocus)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    if (textFieldPattern->IsTV()) {
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    if (passwordHost->IsTV()) {
         SetHoverRectForTV(stackNode, rect, iconSize, hoverRectHeight, isFocus);
         return;
     }
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(stackNode);
     auto stackGeometryNode = stackNode->GetGeometryNode();
     CHECK_NULL_VOID(stackGeometryNode);
@@ -160,24 +161,15 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
     }
 
     auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
-    auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL) {
-        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding,
-            stackRect.GetY() - stackHoverPadding, hoverRectHeight, hoverRectHeight);
-    } else {
-        rect = RectF(stackRect.GetX() - iconHoverPadding, stackRect.GetY() - stackHoverPadding,
-            hoverRectHeight, hoverRectHeight);
-    }
+    rect = RectF(stackRect.GetX() + imageRect.GetX() - iconHoverPadding,
+        stackRect.GetY() + imageRect.GetY() - iconHoverPadding, hoverRectHeight, hoverRectHeight);
 }
 
 void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
     float hoverRectHeight, bool isFocus)
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
     CHECK_NULL_VOID(stackNode);
     auto stackGeometryNode = stackNode->GetGeometryNode();
     CHECK_NULL_VOID(stackGeometryNode);
@@ -187,7 +179,7 @@ void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, Rect
     auto imageGeometryNode = imageFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(imageGeometryNode);
     auto imageRect = imageGeometryNode->GetFrameRect();
-    auto host = textFieldPattern->GetHost();
+    auto host = passwordHost->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -202,19 +194,9 @@ void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, Rect
     }
 
     auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
-    auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL) {
-        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding - iconOffsetPadding,
-            stackRect.GetY() - stackHoverPadding - iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
-    } else {
-        rect = RectF(stackRect.GetX() - iconHoverPadding - iconOffsetPadding,
-            stackRect.GetY() - stackHoverPadding - iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
-            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
-    }
+    rect = RectF(stackRect.GetX() + imageRect.GetX() - iconHoverPadding - iconOffsetPadding,
+        stackRect.GetY() + imageRect.GetY() - iconHoverPadding - iconOffsetPadding,
+        hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding, hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
 }
 
 void TextInputResponseArea::SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight)
@@ -263,8 +245,8 @@ const RefPtr<FrameNode> PasswordResponseArea::GetFrameNode()
 
 RefPtr<FrameNode> PasswordResponseArea::CreateNode()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, nullptr);
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(passwordHost, nullptr);
     auto iconSize = GetIconSize();
     auto rightOffset = GetIconRightOffset();
     auto hotZoneSize = iconSize + rightOffset;
@@ -275,9 +257,8 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+    CHECK_NULL_RETURN(passwordHost->CheckLayoutProperty(), nullptr);
+    stackLayoutProperty->UpdateAlignment(GetStackAlignment(passwordHost->GetLayoutDirection()));
     AddEvent(stackNode);
     stackNode->MarkModifyDone();
 
@@ -393,19 +374,96 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         info.SetStopPropagation(true);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto textfield = DynamicCast<TextFieldPattern>(pattern);
-        CHECK_NULL_VOID(textfield);
-        textfield->RestoreDefaultMouseState();
+        auto passwordHost = DynamicCast<IPasswordIconHost>(pattern);
+        CHECK_NULL_VOID(passwordHost);
+        passwordHost->RestoreDefaultMouseState();
     };
     auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
         info.SetStopPropagation(true);
     };
-
     auto inputHub = node->GetOrCreateInputEventHub();
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
+}
+
+void PasswordResponseArea::InitHoverEvent()
+{
+    auto stackNode = GetFrameNode();
+    CHECK_NULL_VOID(stackNode);
+    auto inputHub = stackNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, const HoverInfo& info) {
+        auto area = weak.Upgrade();
+        CHECK_NULL_VOID(area);
+        area->HandleIconHover(isHover, info);
+    };
+    inputHub->AddOnHoverEvent(MakeRefPtr<InputEvent>(std::move(hoverTask)));
+}
+
+void PasswordResponseArea::InitTouchEvent()
+{
+    auto stackNode = GetFrameNode();
+    CHECK_NULL_VOID(stackNode);
+    auto gesture = stackNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+        auto area = weak.Upgrade();
+        CHECK_NULL_VOID(area);
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            area->HandleIconTouch(true);
+        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            area->HandleIconTouch(false);
+        }
+    };
+    gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
+}
+
+void PasswordResponseArea::HandleIconHover(bool isHover, const HoverInfo& info)
+{
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    passwordHost->OnHover(isHover, info);
+    if (isHover) {
+        RoundRect mouseRect;
+        CreateIconRect(mouseRect, false);
+        float cornerRadius = mouseRect.GetRect().Width() / 2;
+        mouseRect.SetCornerRadius(cornerRadius);
+        uint32_t hoverColor = 0;
+        if (passwordHost->GetPasswordIconHoverColor(hoverColor)) {
+            std::vector<RoundRect> roundRectVector;
+            roundRectVector.push_back(mouseRect);
+            passwordHost->SetPasswordIconHoverColor(roundRectVector, hoverColor);
+        }
+    } else {
+        passwordHost->ClearPasswordIconHoverColor();
+    }
+}
+
+void PasswordResponseArea::HandleIconTouch(bool isTouched)
+{
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    if (isTouched) {
+        RoundRect mouseRect;
+        CreateIconRect(mouseRect, false);
+        float cornerRadius = mouseRect.GetRect().Width() / 2;
+        mouseRect.SetCornerRadius(cornerRadius);
+        uint32_t pressColor = 0;
+        if (passwordHost->GetPasswordIconPressColor(pressColor)) {
+            std::vector<RoundRect> roundRectVector;
+            roundRectVector.push_back(mouseRect);
+            if (passwordHost->SetPasswordIconHoverColor(roundRectVector, pressColor)) {
+                passwordHost->SetResponseButtonTouched(true);
+            }
+        }
+    } else {
+        if (passwordHost->ClearPasswordIconHoverColor()) {
+            passwordHost->SetResponseButtonTouched(false);
+        }
+    }
 }
 
 void PasswordResponseArea::Refresh()
@@ -416,12 +474,11 @@ void PasswordResponseArea::Refresh()
         return;
     }
 
-    auto textFieldPattern = hostPattern_.Upgrade();
-    if (textFieldPattern && stackNode_) {
-        auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    if (passwordHost && stackNode_) {
         auto stackLayoutProperty = stackNode_->GetLayoutProperty<LayoutProperty>();
-        if (stackLayoutProperty && layoutProperty) {
-            stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+        if (stackLayoutProperty && passwordHost->CheckLayoutProperty()) {
+            stackLayoutProperty->UpdateAlignment(GetStackAlignment(passwordHost->GetLayoutDirection()));
         }
         if (stackLayoutProperty) {
             auto iconSize = GetIconSize();
@@ -518,14 +575,14 @@ void PasswordResponseArea::UpdatePasswordIconColor(const Color& color)
 
 void PasswordResponseArea::ChangeObscuredState()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
     if (IsSymbolIcon() && SystemProperties::IsNeedSymbol()) {
         UpdateSymbolSource();
     } else {
         UpdateImageSource();
     }
-    textFieldPattern->OnObscuredChanged(isObscured_);
+    passwordHost->OnObscuredChanged(isObscured_);
 }
 
 SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
@@ -586,14 +643,14 @@ float PasswordResponseArea::GetIconRightOffset()
 
 void PasswordResponseArea::LoadImageSourceInfo()
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    showIcon_ = layoutProperty->GetShowPasswordSourceInfoValue(GetDefaultSourceInfo(false));
-    hideIcon_ = layoutProperty->GetHidePasswordSourceInfoValue(GetDefaultSourceInfo(true));
-    auto tmpHost = textFieldPattern->GetHost();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    auto tmpHost = passwordHost->GetHost();
     CHECK_NULL_VOID(tmpHost);
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    showIcon_ = passwordHost->GetShowPasswordSourceInfo(GetDefaultSourceInfo(false));
+    hideIcon_ = passwordHost->GetHidePasswordSourceInfo(GetDefaultSourceInfo(true));
     auto pipeline = tmpHost->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
@@ -665,9 +722,9 @@ void PasswordResponseArea::UpdateImageSource()
 
 void PasswordResponseArea::UpdateSymbolSource()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    auto host = passwordHost->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -695,9 +752,9 @@ void PasswordResponseArea::UpdateSymbolSource()
 
 void PasswordResponseArea::UpdateSymbolColor()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(passwordHost);
+    auto host = passwordHost->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -709,10 +766,10 @@ void PasswordResponseArea::UpdateSymbolColor()
     CHECK_NULL_VOID(symbolNode);
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
 
     Color color = textFieldTheme->GetSymbolColor();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIsDisabledValue(false)) {
         color = textFieldTheme->GetTextColorDisable();
     }
@@ -742,9 +799,9 @@ void PasswordResponseArea::InitSymbolEffectOptions()
 
 bool PasswordResponseArea::IsShowSymbol()
 {
-    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsShowPasswordSymbol();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(passwordHost, false);
+    return passwordHost->IsShowPasswordSymbol();
 }
 
 bool PasswordResponseArea::IsSymbolIcon()
@@ -756,9 +813,9 @@ bool PasswordResponseArea::IsSymbolIcon()
 
 bool PasswordResponseArea::IsShowPasswordIcon()
 {
-    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsShowPasswordIcon();
+    auto passwordHost = DynamicCast<IPasswordIconHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(passwordHost, false);
+    return passwordHost->IsShowPasswordIcon();
 }
 
 void PasswordResponseArea::OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme)
@@ -851,7 +908,7 @@ float CleanNodeResponseArea::GetIconSize()
     auto envFontScale = std::optional<float>();
     auto pattern = hostPattern_.Upgrade();
     if (pattern) {
-        auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();
         envFontScale = layoutProperty ? layoutProperty->GetEnvFontScale() : std::nullopt;
     }
     return static_cast<float>(iconSize_.ConvertToPxDistributeWithEnv(std::optional<float>(), std::optional<float>(),
@@ -943,18 +1000,18 @@ bool CleanNodeResponseArea::IsShowClean() const
 {
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
-    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsShowCancelButtonMode();
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern);
+    CHECK_NULL_RETURN(hostInterface, false);
+    return hostInterface->IsShowCancelButtonMode();
 }
 
 bool CleanNodeResponseArea::IsShowSymbol() const
 {
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    return textFieldLayoutProperty->GetIsShowSymbolValue(true);
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern);
+    CHECK_NULL_RETURN(hostInterface, false);
+    return hostInterface->GetIsShowSymbol();
 }
 
 bool CleanNodeResponseArea::IsSymbolIcon() const
@@ -990,7 +1047,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     stackLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     auto textFieldPattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(textFieldPattern, nullptr);
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
     stackNode->MarkModifyDone();
@@ -1024,9 +1081,9 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
 
 void CleanNodeResponseArea::SetCancelSymbolIconSize()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    auto hostInterface = DynamicCast<ICleanNodeHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(hostInterface);
+    auto host = hostInterface->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -1048,9 +1105,9 @@ void CleanNodeResponseArea::SetCancelSymbolIconSize()
 
 CalcDimension CleanNodeResponseArea::GetSymbolDefaultSize()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, CalcDimension());
-    auto host = textFieldPattern->GetHost();
+    auto hostInterface = DynamicCast<ICleanNodeHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(hostInterface, CalcDimension());
+    auto host = hostInterface->GetHost();
     CHECK_NULL_RETURN(host, CalcDimension());
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, CalcDimension());
@@ -1063,11 +1120,13 @@ CalcDimension CleanNodeResponseArea::GetSymbolDefaultSize()
 
 void CleanNodeResponseArea::UpdateSymbolSource()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto host = textFieldPattern->GetHost();
+    auto hostInterface = DynamicCast<ICleanNodeHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(hostInterface);
+    auto host = hostInterface->GetHost();
     CHECK_NULL_VOID(host);
-    auto textFieldTheme = textFieldPattern->GetTheme();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldTheme = context->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     auto symbolNode = cleanNode_->GetFirstChild();
     CHECK_NULL_VOID(symbolNode);
@@ -1075,16 +1134,15 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(symbolFrameNode);
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(host->GetLayoutProperty<LayoutProperty>());
     auto lastFontSize = symbolProperty->GetFontSize().value_or(GetSymbolDefaultSize());
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textFieldTheme->GetCancelSymbolId()));
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
-    auto maxFontScale = layoutProperty->GetMaxFontScale().value_or(MAX_FONT_SCALE);
+    auto maxFontScale = hostInterface->GetCancelMaxFontScale().value_or(MAX_FONT_SCALE);
     symbolProperty->UpdateMaxFontScale(std::min(MAX_FONT_SCALE, maxFontScale));
-    symbolProperty->UpdateMinFontScale(layoutProperty->GetMinFontScale().value_or(0.0f));
+    symbolProperty->UpdateMinFontScale(hostInterface->GetCancelMinFontScale().value_or(0.0f));
 
-    auto iconSymbol = layoutProperty->GetCancelIconSymbol();
+    auto iconSymbol = hostInterface->GetCancelIconSymbol();
     if (IsEnableUserSymbol() && iconSymbol && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolFrameNode)));
         // reset symbol effect
@@ -1124,19 +1182,19 @@ void CleanNodeResponseArea::InitClickEvent(const RefPtr<FrameNode>& frameNode)
 
 void CleanNodeResponseArea::OnCleanNodeClicked()
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    CHECK_NULL_VOID(!textFieldPattern->IsDragging());
-    textFieldPattern->CleanNodeResponseKeyEvent();
-    auto host = textFieldPattern->GetHost();
+    auto hostInterface = DynamicCast<ICleanNodeHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(hostInterface);
+    CHECK_NULL_VOID(!hostInterface->IsDragging());
+    hostInterface->HandleCleanNodeClicked();
+    auto host = hostInterface->GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     if (context) {
         context->AddAfterRenderTask(
-            [weakHost = WeakPtr<FrameNode>(host), weakPattern = WeakPtr<TextFieldPattern>(textFieldPattern)] {
-                auto textFieldPattern = weakPattern.Upgrade();
-                CHECK_NULL_VOID(textFieldPattern);
-                if (textFieldPattern->HasUserAccessibilityText()) {
+            [weakHost = WeakPtr<FrameNode>(host), weakInterface = WeakPtr<ICleanNodeHost>(hostInterface)] {
+                auto hostInterface = weakInterface.Upgrade();
+                CHECK_NULL_VOID(hostInterface);
+                if (hostInterface->HasUserAccessibilityText()) {
                     return;
                 }
                 auto host = weakHost.Upgrade();
@@ -1149,8 +1207,8 @@ void CleanNodeResponseArea::OnCleanNodeClicked()
 void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
 {
     isShow_ = isShow;
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
+    auto hostInterface = DynamicCast<ICleanNodeHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(hostInterface);
     CHECK_NULL_VOID(cleanNode_);
     auto stackLayoutProperty = cleanNode_->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(stackLayoutProperty);
@@ -1161,7 +1219,7 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
     auto iconLayoutProperty = iconFrameNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(iconLayoutProperty);
     if (isShow) {
-        auto host = textFieldPattern->GetHost();
+        auto host = hostInterface->GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -1203,9 +1261,9 @@ bool CleanNodeResponseArea::CheckUpdateCleanNode()
     CHECK_NULL_RETURN(cleanNode_, false);
     auto cleanNodeGeometryNode = cleanNode_->GetGeometryNode();
     CHECK_NULL_RETURN(cleanNodeGeometryNode, false);
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    auto host = textFieldPattern->GetHost();
+    auto hostInterface = DynamicCast<ICleanNodeHost>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(hostInterface, false);
+    auto host = hostInterface->GetHost();
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
@@ -1228,9 +1286,9 @@ void CleanNodeResponseArea::ClearArea()
 
 void CleanNodeResponseArea::Refresh()
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
-    if (textFieldPattern && cleanNode_) {
-        auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto hostPattern = hostPattern_.Upgrade();
+    if (hostPattern && cleanNode_) {
+        auto layoutProperty = hostPattern->GetLayoutProperty<LayoutProperty>();
         auto stackLayoutProperty = cleanNode_->GetLayoutProperty<LayoutProperty>();
         if (layoutProperty && stackLayoutProperty) {
             stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
@@ -1261,6 +1319,28 @@ void CleanNodeResponseArea::Refresh()
     }
 
     ReplaceNode();
+}
+
+void CleanNodeResponseArea::UpdateShowState()
+{
+    auto hostInterface = DynamicCast<ICleanNodeHost>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(hostInterface);
+    auto cleanNodeStyleOpt = hostInterface->GetCleanNodeStyle();
+    if (!cleanNodeStyleOpt) {
+        return;
+    }
+    auto cleanNodeStyle = cleanNodeStyleOpt.value();
+    if (cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+        (cleanNodeStyle == CleanNodeStyle::INPUT && !hostInterface->IsContentEmpty())) {
+        if (!IsShow() || CheckUpdateCleanNode()) {
+            UpdateCleanNode(true);
+        }
+    } else if (cleanNodeStyle == CleanNodeStyle::INVISIBLE ||
+               (cleanNodeStyle == CleanNodeStyle::INPUT && hostInterface->IsContentEmpty())) {
+        if (IsShow()) {
+            UpdateCleanNode(false);
+        }
+    }
 }
 
 void CleanNodeResponseArea::ReplaceNode()
@@ -1294,38 +1374,39 @@ void CleanNodeResponseArea::LoadingImageProperty()
 {
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (textFieldLayoutProperty->HasIconSize()) {
-        auto iconSizeValue = textFieldLayoutProperty->GetIconSizeValue();
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern);
+    CHECK_NULL_VOID(hostInterface);
+    if (hostInterface->HasCancelIconSize()) {
+        auto iconSizeValue = hostInterface->GetCancelIconSize();
         if (iconSizeValue.Unit() == DimensionUnit::PERCENT) {
             iconSize_ = iconSizeValue;
         } else {
-            auto host = pattern->GetHost();
+            auto host = hostInterface->GetHost();
             CHECK_NULL_VOID(host);
             auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto maxFontScale = pipeline->GetFontScaleFromEnv(host);
             auto minFontScale = 0.0f;
-            if (textFieldLayoutProperty->HasMaxFontScale()) {
-                maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+            if (hostInterface->HasCancelMaxFontScale()) {
+                maxFontScale = std::min(hostInterface->GetCancelMaxFontScale().value(), maxFontScale);
             }
-            if (textFieldLayoutProperty->HasMinFontScale()) {
-                minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+            if (hostInterface->HasCancelMinFontScale()) {
+                minFontScale = hostInterface->GetCancelMinFontScale().value();
             }
+            auto baseLayoutProperty = pattern->GetLayoutProperty<LayoutProperty>();
             iconSize_ = Dimension(iconSizeValue).ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
-                textFieldLayoutProperty->GetEnvFontScale());
+                baseLayoutProperty ? baseLayoutProperty->GetEnvFontScale() : std::nullopt);
         }
     }
-    if (textFieldLayoutProperty->HasIconSrc()) {
-        iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
+    if (hostInterface->HasCancelIconSrc()) {
+        iconSrc_ = hostInterface->GetCancelIconSrc();
     }
     LoadingCancelButtonColor();
-    if (textFieldLayoutProperty->HasBundleName()) {
-        bundleName_ = textFieldLayoutProperty->GetBundleNameValue();
+    if (hostInterface->HasBundleName()) {
+        bundleName_ = hostInterface->GetBundleName();
     }
-    if (textFieldLayoutProperty->HasModuleName()) {
-        moduleName_ = textFieldLayoutProperty->GetModuleNameValue();
+    if (hostInterface->HasModuleName()) {
+        moduleName_ = hostInterface->GetModuleName();
     }
 }
 
@@ -1333,18 +1414,18 @@ void CleanNodeResponseArea::LoadingCancelButtonColor()
 {
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (textFieldLayoutProperty->GetIsDisabledValue(false)) {
-        auto host = pattern->GetHost();
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern);
+    CHECK_NULL_VOID(hostInterface);
+    if (hostInterface->GetIsDisabled()) {
+        auto host = hostInterface->GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         iconColor_ = theme->GetTextColorDisable();
-    } else if (textFieldLayoutProperty->HasIconColor()) {
-        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
+    } else if (hostInterface->HasCancelIconColor()) {
+        iconColor_ = hostInterface->GetCancelIconColor();
     }
 }
 
@@ -1360,9 +1441,9 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
     }
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, info);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, info);
-    if (info.IsSvg() && textFieldLayoutProperty->HasIconColor()) {
+    auto hostInterface = AceType::DynamicCast<ICleanNodeHost>(pattern);
+    CHECK_NULL_RETURN(hostInterface, info);
+    if (info.IsSvg() && hostInterface->HasCancelIconColor()) {
         info.SetFillColor(iconColor_);
         CHECK_NULL_RETURN(cleanNode_, info);
         auto imageNode = cleanNode_->GetFirstChild();
@@ -1407,9 +1488,9 @@ void PlaceholderResponseArea::PlaceholderMountToParent()
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(!placeholderNode_->GetParent());
+    placeholderNode_->MountToParent(host);
     placeholderNode_->MarkModifyDone();
     placeholderNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    placeholderNode_->MountToParent(host);
 }
 
 void PlaceholderResponseArea::PlaceholderRemoveFromParent()

@@ -13,19 +13,33 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("navigator_test_ng") {
-  module_name = "NavigationSet-ArcSwiper"
-  type = "new"
+if (is_host_product) {
+  ace_unittest("navigator_test_ng") {
+    type = "host_components"
+    module_name = "NavigationSet-ArcSwiper"
+    sources = [
+      "navigator_event_hub_test_ng.cpp",
+      "navigator_pattern_test_ng.cpp",
+    ]
+    sources += [
+      "navigator_test_core.cpp"
+    ]
+  }
+} else {
+  ace_unittest("navigator_test_ng") {
+    module_name = "NavigationSet-ArcSwiper"
+    type = "new"
 
-  sources = [
-    "navigator_event_hub_test_ng.cpp",
-    "navigator_pattern_test_ng.cpp",
-  ]
+    sources = [
+      "navigator_event_hub_test_ng.cpp",
+      "navigator_pattern_test_ng.cpp",
+    ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "navigator_test_core.cpp" ]
-  } else {
-    sources += [ "navigator_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "navigator_test_core.cpp" ]
+    } else {
+      sources += [ "navigator_test_core.cpp" ]
+    }
   }
 }

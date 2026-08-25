@@ -299,6 +299,14 @@ export class ClickEventTransfer {
         clickEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
         clickEvent.displayY = displayYValue as double;
+        const globalDisplayXValue = esValue.getProperty("globalDisplayX");
+        if (!globalDisplayXValue.isUndefined()) {
+            clickEvent.globalDisplayX = globalDisplayXValue.toNumber() as double;
+        }
+        const globalDisplayYValue = esValue.getProperty("globalDisplayY");
+        if (!globalDisplayYValue.isUndefined()) {
+            clickEvent.globalDisplayY = globalDisplayYValue.toNumber() as double;
+        }
         const windowXValue = esValue.getProperty("windowX").toNumber();
         clickEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
@@ -355,6 +363,12 @@ export class ClickEventTransfer {
         retValue.setProperty('targetDisplayId', clickEvent.targetDisplayId);
         retValue.setProperty('displayX', clickEvent.displayX);
         retValue.setProperty('displayY', clickEvent.displayY);
+        if (clickEvent.globalDisplayX !== undefined) {
+            retValue.setProperty('globalDisplayX', clickEvent.globalDisplayX);
+        }
+        if (clickEvent.globalDisplayY !== undefined) {
+            retValue.setProperty('globalDisplayY', clickEvent.globalDisplayY);
+        }
         retValue.setProperty('windowX', clickEvent.windowX);
         retValue.setProperty('windowY', clickEvent.windowY);
         retValue.setProperty('x', clickEvent.x);
@@ -429,6 +443,14 @@ export class HoverEventTransfer {
         hoverEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
         hoverEvent.displayY = displayYValue as double;
+        const globalDisplayXValue = esValue.getProperty("globalDisplayX");
+        if (!globalDisplayXValue.isUndefined()) {
+            hoverEvent.globalDisplayX = globalDisplayXValue.toNumber() as double;
+        }
+        const globalDisplayYValue = esValue.getProperty("globalDisplayY");
+        if (!globalDisplayYValue.isUndefined()) {
+            hoverEvent.globalDisplayY = globalDisplayYValue.toNumber() as double;
+        }
         const windowXValue = esValue.getProperty("windowX").toNumber();
         hoverEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
@@ -483,6 +505,12 @@ export class HoverEventTransfer {
         retValue.setProperty('targetDisplayId', hoverEvent.targetDisplayId);
         retValue.setProperty('displayX', hoverEvent.displayX);
         retValue.setProperty('displayY', hoverEvent.displayY);
+        if (hoverEvent.globalDisplayX !== undefined) {
+            retValue.setProperty('globalDisplayX', hoverEvent.globalDisplayX);
+        }
+        if (hoverEvent.globalDisplayY !== undefined) {
+            retValue.setProperty('globalDisplayY', hoverEvent.globalDisplayY);
+        }
         retValue.setProperty('windowX', hoverEvent.windowX);
         retValue.setProperty('windowY', hoverEvent.windowY);
         retValue.setProperty('x', hoverEvent.x);
@@ -514,6 +542,14 @@ export class MouseEventTransfer {
         mouseEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
         mouseEvent.displayY = displayYValue as double;
+        const globalDisplayXValue = esValue.getProperty("globalDisplayX");
+        if (!globalDisplayXValue.isUndefined()) {
+            mouseEvent.globalDisplayX = globalDisplayXValue.toNumber() as double;
+        }
+        const globalDisplayYValue = esValue.getProperty("globalDisplayY");
+        if (!globalDisplayYValue.isUndefined()) {
+            mouseEvent.globalDisplayY = globalDisplayYValue.toNumber() as double;
+        }
         const windowXValue = esValue.getProperty("windowX").toNumber();
         mouseEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
@@ -596,6 +632,12 @@ export class MouseEventTransfer {
         retValue.setProperty('action', mouseEvent.action.valueOf());
         retValue.setProperty('displayX', mouseEvent.displayX);
         retValue.setProperty('displayY', mouseEvent.displayY);
+        if (mouseEvent.globalDisplayX !== undefined) {
+            retValue.setProperty('globalDisplayX', mouseEvent.globalDisplayX);
+        }
+        if (mouseEvent.globalDisplayY !== undefined) {
+            retValue.setProperty('globalDisplayY', mouseEvent.globalDisplayY);
+        }
         retValue.setProperty('windowX', mouseEvent.windowX);
         retValue.setProperty('windowY', mouseEvent.windowY);
         retValue.setProperty('x', mouseEvent.x);
@@ -920,6 +962,14 @@ export class AxisEventTransfer {
         axisEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
         axisEvent.displayY = displayYValue as double;
+        const globalDisplayXValue = esValue.getProperty("globalDisplayX");
+        if (!globalDisplayXValue.isUndefined()) {
+            axisEvent.globalDisplayX = globalDisplayXValue.toNumber() as double;
+        }
+        const globalDisplayYValue = esValue.getProperty("globalDisplayY");
+        if (!globalDisplayYValue.isUndefined()) {
+            axisEvent.globalDisplayY = globalDisplayYValue.toNumber() as double;
+        }
         const windowXValue = esValue.getProperty("windowX").toNumber();
         axisEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
@@ -977,6 +1027,12 @@ export class AxisEventTransfer {
         retValue.setProperty('action', axisEvent.action.valueOf());
         retValue.setProperty('displayX', axisEvent.displayX);
         retValue.setProperty('displayY', axisEvent.displayY);
+        if (axisEvent.globalDisplayX !== undefined) {
+            retValue.setProperty('globalDisplayX', axisEvent.globalDisplayX);
+        }
+        if (axisEvent.globalDisplayY !== undefined) {
+            retValue.setProperty('globalDisplayY', axisEvent.globalDisplayY);
+        }
         retValue.setProperty('windowX', axisEvent.windowX);
         retValue.setProperty('windowY', axisEvent.windowY);
         retValue.setProperty('x', axisEvent.x);

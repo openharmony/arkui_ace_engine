@@ -602,7 +602,7 @@ export class SwipeActionOptions_serializer {
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue = valueHolderForStart!
-            if (valueHolderForStartTmpValue instanceof CustomBuilder) {
+            if (valueHolderForStartTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartTmpValueForIdx0 = valueHolderForStartTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForStartTmpValueForIdx0))
@@ -618,7 +618,7 @@ export class SwipeActionOptions_serializer {
         if (valueHolderForEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue = valueHolderForEnd!
-            if (valueHolderForEndTmpValue instanceof CustomBuilder) {
+            if (valueHolderForEndTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndTmpValueForIdx0 = valueHolderForEndTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForEndTmpValueForIdx0))

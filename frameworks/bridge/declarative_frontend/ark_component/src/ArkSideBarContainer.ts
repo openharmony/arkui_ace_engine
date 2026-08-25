@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class SideBarContainerPositionModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);

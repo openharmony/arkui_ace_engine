@@ -46,7 +46,7 @@ DrawableDescriptorLoadResult AnimatedDrawableDescriptor::LoadSync()
     auto mediaData = DrawableDescriptorLoader::GetInstance()->LoadData(info_);
     rawData_.len = mediaData.len;
     rawData_.data.reset(mediaData.data.release());
-    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len);
+    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len, svgLimitsId_);
     if (!imageSource) {
         LOGW("Image source create failed.");
         return { 0, 0, ERROR_CODE_DRAWABLE_LOADER_ERROR };
@@ -127,7 +127,7 @@ RefPtr<PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
     if (!pixelMapList_.empty()) {
         return pixelMapList_[0];
     }
-    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len);
+    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len, svgLimitsId_);
     CHECK_NULL_RETURN(imageSource, nullptr);
     uint32_t errorCode = 0;
     auto pixelMap = imageSource->CreatePixelMap(0, { -1, -1 }, errorCode, {});
@@ -233,7 +233,7 @@ void AnimatedDrawableDescriptor::SetPixelMapList(const std::vector<RefPtr<PixelM
 
 void AnimatedDrawableDescriptor::CreateParamsFromImageSource(int32_t nodeId)
 {
-    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len);
+    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len, svgLimitsId_);
     if (!imageSource) {
         return;
     }
@@ -287,6 +287,7 @@ FillMode AnimatedDrawableDescriptor::ToFillMode() const
 
 void AnimatedDrawableDescriptor::RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback)
 {
+    std::unique_lock<std::shared_mutex> lock(callMutx_);
     CreateParamsFromImageSource(nodeId);
     if (GetFrameCount() <= 0) {
         return;

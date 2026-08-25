@@ -26,6 +26,7 @@
 #include "base/utils/resource_configuration.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
+#include "core/common/container_consts.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/theme/resource_adapter.h"
 
@@ -171,6 +172,14 @@ void ResourceManager::RegisterMainResourceAdapter(const std::string& bundleName,
     std::unique_lock<std::shared_mutex> lock(mutex_);
     auto key = MakeCacheKey(bundleName, moduleName, instanceId);
     resourceAdapters_.emplace(key, resAdapter);
+    if (instanceId == INSTANCE_ID_UNDEFINED) {
+        auto iter = undefinedIdRefCount_.find(key);
+        if (iter != undefinedIdRefCount_.end()) {
+            iter->second++;
+        } else {
+            undefinedIdRefCount_[key] = 1;
+        }
+    }
 }
 
 void ResourceManager::UpdateResourceConfig(const std::string& /*bundleName*/, const std::string& /*moduleName*/,
@@ -212,6 +221,17 @@ void ResourceManager::RemoveResourceAdapter(
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     std::string key = MakeCacheKey(bundleName, moduleName, instanceId);
+    if (instanceId == INSTANCE_ID_UNDEFINED) {
+        auto refIt = undefinedIdRefCount_.find(key);
+        if (refIt != undefinedIdRefCount_.end()) {
+            refIt->second--;
+            if (refIt->second <= 0) {
+                resourceAdapters_.erase(key);
+                undefinedIdRefCount_.erase(refIt);
+            }
+            return;
+        }
+    }
     if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
         resourceAdapters_.erase(key);
     }

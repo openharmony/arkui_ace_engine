@@ -44,7 +44,7 @@ void JSWithTheme::RemoveThemeInNative(const JSCallbackInfo& info)
         return;
     }
     auto themeScopeId = jsThemeScopeId->ToNumber<int32_t>();
-    JSThemeScope::jsThemes.erase(themeScopeId);
+    JSThemeUtils::RemoveTheme(themeScopeId);
 }
 
 std::vector<ResourceValue> GetResourceValue(const JSRef<JSArray>& colors)
@@ -91,8 +91,6 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     auto colors = JSThemeColors();
     colors.SetColors(GetResourceValue(jsLightColorsArray));
 
-    JSThemeScope::jsThemes[themeScopeId].SetColors(colors);
-
     if (darkSetStatus) {
         auto jsDarkColors = info[1];
         if (!jsDarkColors->IsArray()) {
@@ -103,15 +101,9 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
         auto darkColors = JSThemeColors();
         darkColors.SetColors(GetResourceValue(jsDarkColorsArray));
 
-        JSThemeScope::jsThemes[themeScopeId].SetDarkColors(darkColors);
+        JSThemeUtils::SaveTheme(themeScopeId, colors, darkColors);
     } else {
-        JSThemeScope::jsThemes[themeScopeId].SetDarkColors(colors);
-    }
-
-    // save the current theme when Theme was created by WithTheme container
-    if (JSThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
-        std::optional<JSTheme> themeOpt = std::make_optional(JSThemeScope::jsThemes[themeScopeId]);
-        JSThemeUtils::SwapCurrentTheme(themeOpt);
+        JSThemeUtils::SaveTheme(themeScopeId, colors, colors);
     }
 }
 
@@ -122,11 +114,7 @@ void JSWithTheme::SetThemeScopeId(const JSCallbackInfo& info)
         return;
     }
     auto themeScopeId = jsThemeScopeId->ToNumber<int32_t>();
-    JSThemeScope::isCurrentThemeDefault = themeScopeId == 0;
-    auto theme = JSThemeScope::jsThemes.find(themeScopeId);
-    std::optional<JSTheme> themeOpt = (theme != JSThemeScope::jsThemes.end()) ?
-        std::make_optional(theme->second) : std::nullopt;
-    JSThemeUtils::SwapCurrentTheme(themeOpt);
+    JSThemeUtils::SetCurrentThemeByScopeId(themeScopeId);
 }
 
 void JSWithTheme::GetCurrentBuildingWithThemeNodeId(const JSCallbackInfo& info)

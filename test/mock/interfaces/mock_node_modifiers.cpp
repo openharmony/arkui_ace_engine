@@ -16,7 +16,7 @@
 #include <cstring>
 
 #include "core/interfaces/native/node/node_api.h"
-
+#include "mock_swiper_modifier.h"
 // Mock implementation for unit tests
 extern "C" {
 ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
@@ -96,7 +96,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCommonShapeModifier = nullptr,
         .getShapeModifier = nullptr,
         .getRectModifier = nullptr,
-        .getSwiperModifier = nullptr,
+        .getSwiperModifier = GetMockSwiperModifier,
         .getListItemModifier = nullptr,
         .getListModifier = nullptr,
         .getListItemGroupModifier = nullptr,

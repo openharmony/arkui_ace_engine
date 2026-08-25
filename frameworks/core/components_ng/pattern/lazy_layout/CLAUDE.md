@@ -14,7 +14,8 @@ This document contains specialized rules for the LazyLayout Pattern directory an
    - Manage position cache for fast scrolling
 
 2. **Parent Container Validation**
-   - Validate LazyGrid is used under WaterFlow component
+   - Publish the Lazy identity when the Pattern attaches to its FrameNode
+   - Validate LazyGrid is used under a supported vertical List / Scroll / WaterFlow hierarchy
    - Set `needLazyLayout` flag on appropriate parent chain
    - Abort with LOGF_ABORT if parent hierarchy is invalid
 
@@ -35,10 +36,10 @@ This document contains specialized rules for the LazyLayout Pattern directory an
 ### What Not to Do
 
 - ❌ **Don't handle rendering directly** - Rendering is handled by child GridItem components
-- ❌ **Don't create child nodes manually** - Child nodes are created by WaterFlow data source
-- ❌ **Don't implement scroll logic** - Scrolling is handled by parent WaterFlow
+- ❌ **Don't create child nodes manually** - Child nodes are created by the lazy data source
+- ❌ **Don't implement scroll logic** - Scrolling is handled by the parent scrollable container
 - ❌ **Don't directly manipulate layout algorithm state** - Use LayoutInfo interface
-- ❌ **Don't bypass parent validation** - Must verify WaterFlow parent in `OnAttachToMainTree()`
+- ❌ **Don't bypass parent validation** - Early identity publication does not replace `OnAttachToMainTree()` validation
 
 ## Architectural Layer Relationships
 
@@ -62,26 +63,26 @@ Pattern (Base Class)
 - Don't duplicate lazy layout logic already in base class
 - Follow lifecycle method call order defined by Pattern base class
 
-### Relationship with WaterFlow Parent
+### Relationship with Scrollable Parent
 
 **Parent-Child Structure**:
 ```
-WaterFlow FrameNode
+List / Scroll / WaterFlow FrameNode
     └─ LazyVGridLayout FrameNode
         └─ GridItem FrameNode(s) (created by data source)
             └─ GridItemPattern (handles individual item)
 ```
 
 **Separation of Responsibilities**:
-- **WaterFlowPattern**: Handle scrolling, viewport management, focus navigation
+- **Scrollable parent Pattern**: Handle scrolling, viewport management, prediction budget and focus navigation
 - **LazyGridLayoutPattern**: Lazy layout calculation, position caching, prediction
 - **GridItemPattern**: Individual item rendering and interaction
 
 **⚠️ Critical Constraints**:
-- LazyVGridLayout MUST be a descendant of WaterFlow component
+- LazyVGridLayout MUST be a descendant of a supported vertical List / Scroll / WaterFlow hierarchy
 - Can be nested through: `COMMON_VIEW_ETS_TAG`, `NODE_CONTAINER_ETS_TAG`, `BuilderProxyNode`, `FLOW_ITEM_ETS_TAG`
-- If parent is not WaterFlow or allowed intermediate nodes, `LOGF_ABORT` will be triggered
-- Don't set `needLazyLayout` on arbitrary parents - only WaterFlow and specific intermediate nodes
+- If the parent is not a supported scrollable container or allowed intermediate node, `LOGF_ABORT` will be triggered
+- Don't set `needLazyLayout` on arbitrary parents - only the Lazy host and allowed intermediate nodes
 
 ### Relationship with LazyGridLayoutAlgorithm
 
@@ -147,8 +148,30 @@ LayoutAlgorithm (Layout Calculation Layer)
 **Parent Validation** (must remain consistent):
 
 ```cpp
+void LazyLayoutPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (IsLazyLayoutEnabled()) {
+        // Publish component identity before cached LazyForEach hosts enter the main tree.
+        layoutProperty->SetNeedLazyLayout(true);
+    }
+}
+
+void LazyLayoutPattern::AfterMountToParent()
+{
+    // Cached LazyForEach hosts are not on the main tree yet. Propagate the identity through
+    // allowed intermediate FrameNodes (for example WaterFlow's FlowItem) as soon as the
+    // Lazy host is mounted to its parent.
+}
+
 void LazyGridLayoutPattern::OnAttachToMainTree()
 {
+    if (isDynamicLayout_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedLazyLayout(true);
@@ -171,19 +194,23 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             continue;
         }
 
-        // Must be WaterFlow
-        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG) {
-            LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s",
-                       parent->GetTag().c_str());
+        // Must be a supported vertical scrollable parent.
+        if (parent->GetTag() == WATERFLOW_ETS_TAG || LazyLayoutUtils::IsVerticalScrollableParent(parent)) {
+            return;
         }
-        return;
+        LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
     }
 }
 ```
 
+`needLazyLayout` is a monotonic capability marker. `OnAttachToFrameNode()` publishes the Lazy host identity;
+`AfterMountToParent()` propagates it through allowed intermediate FrameNodes for detached cached hosts;
+`OnAttachToMainTree()` still validates the actual parent hierarchy. DynamicLayout reuses
+`LazyGridLayoutPattern` and must opt out before Pattern attachment.
+
 **Prohibited**:
 - ❌ Skip parent validation
-- ❌ Allow LazyGrid under arbitrary parents
+- ❌ Allow LazyGrid under arbitrary or axis-incompatible parents
 - ❌ Remove `LOGF_ABORT` for invalid parents
 - ❌ Change the order of parent traversal
 
@@ -324,14 +351,21 @@ void LazyGridLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
 ### 3. Invalid Parent Hierarchy
 
 **⚠️ Common Mistakes**:
-- ❌ **Using LazyVGridLayout without WaterFlow parent**
-  - Scenario: Directly place LazyVGridLayout in Column
+- ❌ **Using LazyVGridLayout without a supported scrollable parent**
+  - Scenario: Directly place LazyVGridLayout in a non-scrollable Column
   - Consequence: LOGF_ABORT crashes app
 
 **Correct Approach**:
 ```typescript
-// ❌ Wrong: No WaterFlow parent
+// ❌ Wrong: No supported scrollable parent
 Column() {
+  LazyVGridLayout() {
+    // items
+  }
+}
+
+// ✅ Correct: Under a vertical List
+List() {
   LazyVGridLayout() {
     // items
   }
@@ -370,7 +404,7 @@ AdjustOffset LazyGridLayoutPattern::GetAdjustOffset() const
     return layoutInfo_->adjustOffset_;
 }
 
-// Parent WaterFlow reads and resets
+// Parent scrollable container reads and resets
 AdjustOffset LazyGridLayoutPattern::GetAndResetAdjustOffset()
 {
     AdjustOffset ret = layoutInfo_->adjustOffset_;
@@ -378,7 +412,7 @@ AdjustOffset LazyGridLayoutPattern::GetAndResetAdjustOffset()
     return ret;
 }
 
-// WaterFlow usage
+// Scrollable parent usage
 auto offset = lazyGridPattern->GetAndResetAdjustOffset();
 // Apply offset and it's automatically reset
 ```
@@ -567,7 +601,7 @@ forwardLayout_             // Layout direction flag
 **Problem: Items not visible**
 - Check if `totalItemCount_` > 0
 - Check if `startIndex_` and `endIndex_` are valid
-- Verify WaterFlow parent exists
+- Verify a supported vertical List / Scroll / WaterFlow parent exists
 - Check `columnsTemplate` is correctly set
 - Verify viewport size is valid
 
@@ -590,7 +624,7 @@ forwardLayout_             // Layout direction flag
 - Verify `ProcessOffscreenNode` is called
 
 **Problem: Parent validation fails**
-- Check parent hierarchy includes WaterFlow
+- Check parent hierarchy includes a supported vertical scrollable container
 - Verify intermediate nodes are allowed types
 - Check if parent tags match expected values
 
@@ -848,7 +882,7 @@ None currently deprecated. All public APIs are stable.
 ## Summary
 
 **Core Principles**:
-1. **Parent validation is mandatory** - LazyVGridLayout MUST be under WaterFlow
+1. **Parent validation is mandatory** - LazyVGridLayout MUST be under a supported vertical scrollable container
 2. **Lazy loading is the default** - Only measure visible + cache, not all items
 3. **Respect prediction deadline** - Never let prediction task block main thread
 4. **Position cache is critical** - Maintain accurate `posMap_` for performance
@@ -857,13 +891,13 @@ None currently deprecated. All public APIs are stable.
 
 **Remember**: This is framework core code for high-performance grid layouts. Before modifying:
 - Understand lazy loading flow thoroughly
-- Confirm won't break WaterFlow integration
+- Confirm List / Scroll / WaterFlow integration remains intact
 - Consider performance impact (memory + CPU)
 - Test with large datasets (10000+ items)
 - Verify parent validation still works
 
 **Testing Checklist**:
-- [ ] Parent validation works (WaterFlow + intermediate nodes)
+- [ ] Parent validation works (List / Scroll / WaterFlow + intermediate nodes)
 - [ ] LOGF_ABORT triggers for invalid parents
 - [ ] Lazy loading only measures visible items
 - [ ] Prediction tasks respect deadline

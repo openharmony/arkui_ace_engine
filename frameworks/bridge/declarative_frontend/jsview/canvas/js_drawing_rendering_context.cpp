@@ -107,6 +107,7 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(WeakPtr<AceType>& canvasPatt
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         ScopeRAII scope(env);
         double density = context->GetDensity();
@@ -170,7 +171,6 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
         renderContext->SetUnit(unit_);
         renderContext->SetDensity();
     }
-    // 解析info[1],把antialias给到pattern
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
     if (customPaintPattern) {
         auto frameNode = customPaintPattern->GetHost();

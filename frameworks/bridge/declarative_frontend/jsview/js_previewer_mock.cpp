@@ -185,6 +185,7 @@ public:
         JSClass<JSWebResourceError>::Declare("WebResourceError");
         JSClass<JSWebResourceError>::StaticMethod("getErrorCode", &JSWeb::Mock);
         JSClass<JSWebResourceError>::StaticMethod("getErrorInfo", &JSWeb::Mock);
+        JSClass<JSWebResourceError>::StaticMethod("getCustomErrorCode", &JSWeb::Mock);
         JSClass<JSWebResourceError>::Bind(globalObj);
     }
 };
@@ -386,122 +387,6 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
 }
-
-void JSXComponent::Create(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        return;
-    }
-    CreateMockComponent("XComponent");
-}
-
-void JSXComponent::Mock(const JSCallbackInfo& info) {}
-
-void JSXComponent::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSXComponent>::Declare("XComponent");
-    JSClass<JSXComponent>::StaticMethod("create", &JSXComponent::Create);
-    JSClass<JSXComponent>::StaticMethod("onLoad", &JSXComponent::Mock);
-    JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::Mock);
-    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
-}
-
-void JSXComponentController::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSXComponentController>::Declare("XComponentController");
-    JSClass<JSXComponentController>::StaticMethod("getXComponentSurfaceId", &JSXComponentController::Mock);
-    JSClass<JSXComponentController>::StaticMethod("getXComponentContext", &JSXComponentController::Mock);
-    JSClass<JSXComponentController>::StaticMethod("setXComponentSurfaceSize", &JSXComponentController::Mock);
-    JSClass<JSXComponentController>::Bind(globalObj);
-}
-
-void JSXComponentController::Mock(const JSCallbackInfo& info) {}
-
-void JSXComponentControllerBinding::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSXComponentControllerBinding>::Declare("XComponentController");
-    JSClass<JSXComponentControllerBinding>::StaticMethod(
-        "getXComponentSurfaceId", &JSXComponentControllerBinding::Mock);
-    JSClass<JSXComponentControllerBinding>::StaticMethod("getXComponentContext", &JSXComponentControllerBinding::Mock);
-    JSClass<JSXComponentControllerBinding>::StaticMethod(
-        "setXComponentSurfaceSize", &JSXComponentControllerBinding::Mock);
-    JSClass<JSXComponentControllerBinding>::Bind(globalObj);
-}
-
-void JSXComponentControllerBinding::Mock(const JSCallbackInfo& info) {}
-
-void JSVideo::Create(const JSCallbackInfo& info)
-{
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        return;
-    }
-    CreateMockComponent("Video");
-}
-
-void JSVideo::Mock(const JSCallbackInfo& info) {}
-
-void JSVideo::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSVideo>::Declare("Video");
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSVideo>::StaticMethod("create", &JSVideo::Create, opt);
-    JSClass<JSVideo>::StaticMethod("muted", &JSVideo::Mock, opt);
-    JSClass<JSVideo>::StaticMethod("autoPlay", &JSVideo::Mock, opt);
-    JSClass<JSVideo>::StaticMethod("controls", &JSVideo::Mock, opt);
-    JSClass<JSVideo>::StaticMethod("loop", &JSVideo::Mock, opt);
-    JSClass<JSVideo>::StaticMethod("objectFit", &JSVideo::Mock, opt);
-
-    JSClass<JSVideo>::StaticMethod("onStart", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onPause", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onFinish", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onFullscreenChange", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onPrepared", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onSeeking", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onSeeked", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onUpdate", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onError", &JSVideo::Mock);
-
-    JSClass<JSVideo>::StaticMethod("onTouch", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onHover", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onKeyEvent", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onDeleteEvent", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onClick", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onAppear", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onDisAppear", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onAttach", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("onDetach", &JSVideo::Mock);
-    JSClass<JSVideo>::StaticMethod("remoteMessage", &JSVideo::Mock);
-    JSClass<JSVideo>::InheritAndBind<JSViewAbstract>(globalObj);
-}
-
-void JSVideoController::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSVideoController>::Declare("VideoController");
-    JSClass<JSVideoController>::StaticMethod("start", &JSVideoController::Mock);
-    JSClass<JSVideoController>::StaticMethod("pause", &JSVideoController::Mock);
-    JSClass<JSVideoController>::StaticMethod("stop", &JSVideoController::Mock);
-    JSClass<JSVideoController>::StaticMethod("setCurrentTime", &JSVideoController::Mock);
-    JSClass<JSVideoController>::StaticMethod("requestFullscreen", &JSVideoController::Mock);
-    JSClass<JSVideoController>::StaticMethod("exitFullscreen", &JSVideoController::Mock);
-    JSClass<JSVideoController>::Bind(globalObj);
-}
-
-void JSVideoController::Mock(const JSCallbackInfo& info) {}
-
-void JSVideoControllerAsync::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSVideoControllerAsync>::Declare("VideoControllerAsync");
-    JSClass<JSVideoControllerAsync>::StaticMethod("start", &JSVideoControllerAsync::Mock);
-    JSClass<JSVideoControllerAsync>::StaticMethod("pause", &JSVideoControllerAsync::Mock);
-    JSClass<JSVideoControllerAsync>::StaticMethod("stop", &JSVideoControllerAsync::Mock);
-    JSClass<JSVideoControllerAsync>::StaticMethod("setCurrentTime", &JSVideoControllerAsync::Mock);
-    JSClass<JSVideoControllerAsync>::StaticMethod("requestFullscreen", &JSVideoControllerAsync::Mock);
-    JSClass<JSVideoControllerAsync>::StaticMethod("exitFullscreen", &JSVideoControllerAsync::Mock);
-    JSClass<JSVideoControllerAsync>::StaticMethod("reset", &JSVideoControllerAsync::Mock);
-    JSClass<JSVideoControllerAsync>::Bind(globalObj);
-}
-
-void JSVideoControllerAsync::Mock(const JSCallbackInfo& info) {}
 
 void JSPlugin::Create(const JSCallbackInfo& info)
 {

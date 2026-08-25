@@ -15,6 +15,10 @@
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
+
 // mock
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -1445,5 +1449,94 @@ HWTEST_F(WaterFlowSegmentCommonTest, ScrollBoundaryException001, TestSize.Level1
 
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Height(), 0.0f);
     EXPECT_TRUE(pattern_->PreloadListEmpty());
+}
+
+/**
+ * @tc.name: DirtyItemUserDefMainSize001
+ * @tc.desc: A dirty item in a section with user-defined main size is still measured during scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, DirtyItemUserDefMainSize001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    CreateDone();
+
+    auto item = GetItem(1);
+    ASSERT_TRUE(item);
+    auto stack = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    int32_t measureCount = 0;
+    stack->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->AddChild(stack);
+    stack->SetActive(false);
+    item->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    EXPECT_FALSE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));
+
+    UpdateCurrentOffset(-1.0f);
+
+    // the item is measured even though its main size is fixed by the section
+    EXPECT_GT(measureCount, 0);
+    EXPECT_TRUE(stack->IsActive());
+    EXPECT_EQ(GetChildRect(frameNode_, 1).Height(), GET_MAIN_SIZE_FUNC(1));
+}
+
+/**
+ * @tc.name: LayoutOnlyDirtyItem001
+ * @tc.desc: An item with only Layout dirty must not trigger a full re-Measure during scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, LayoutOnlyDirtyItem001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    auto item = GetItem(2);
+    ASSERT_TRUE(item);
+    int32_t measureCount = 0;
+    item->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    EXPECT_FALSE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));
+
+    UpdateCurrentOffset(-1.0f);
+
+    // Layout dirty is consumed by Layout alone; a full re-Measure would be observable to apps
+    EXPECT_EQ(measureCount, 0);
+    EXPECT_FALSE(CheckNeedLayout(item->GetLayoutProperty()->GetPropertyChangeFlag()));
+}
+
+/**
+ * @tc.name: DirtyLazyLayoutItem001
+ * @tc.desc: A dirty lazy-layout item is measured only once per pass, by the dedicated lazy path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, DirtyLazyLayoutItem001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    auto item = GetItem(2);
+    ASSERT_TRUE(item);
+    item->GetLayoutProperty()->SetNeedLazyLayout(true);
+    int32_t measureCount = 0;
+    item->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    EXPECT_FALSE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));
+
+    UpdateCurrentOffset(-1.0f);
+
+    // measured once by MeasureRemainingLazyChild; the dirty-item scan must not measure it again
+    EXPECT_EQ(measureCount, 1);
 }
 } // namespace OHOS::Ace::NG

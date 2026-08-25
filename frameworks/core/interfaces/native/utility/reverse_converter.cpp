@@ -23,7 +23,7 @@
 #include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/date_picker/picker_date.h"
 #include "core/components_ng/pattern/date_picker/picker_time.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
@@ -276,7 +276,7 @@ void AssignArkValue(Ark_Coordinate2D& dst, const Offset& src)
     dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
 }
 
-void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
+void AssignArkValue(Ark_LengthMetricsProxy& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.Value());
     auto unit = static_cast<int32_t>(src.Unit());
@@ -595,7 +595,7 @@ void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvCo
 }
 
 template<>
-Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
+Ark_LengthMetricsProxy ArkCreate(Ark_LengthUnit unit, float value)
 {
     DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
     auto duUnit = static_cast<int32_t>(du);

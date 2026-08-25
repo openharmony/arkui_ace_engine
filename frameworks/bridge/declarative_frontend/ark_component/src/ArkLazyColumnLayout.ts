@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ArkLazyColumnLayoutComponent extends ArkComponent implements LazyColumnLayoutAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -52,7 +51,7 @@ class LazyColumnLayoutSpaceModifier extends ModifierWithKey<LengthMetrics | unde
   }
   static identity: Symbol = Symbol('lazyColumnLayoutSpace');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !isObject(this.value)) {
       getUINativeModule().lazyColumnLayout.resetSpace(node);
     } else {
       getUINativeModule().lazyColumnLayout.setSpace(node, this.value!);

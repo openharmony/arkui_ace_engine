@@ -627,6 +627,61 @@ HWTEST_F(SelectionContainerChildTest, ClearSelectionContainerTest002, TestSize.L
     EXPECT_TRUE(child_->GetSelectionContainer() == nullptr);
 }
 
+/* ==================== ShiftFlag sync (container-level) ==================== */
+
+/**
+ * @tc.name: SyncShiftFlagToContainerTest001
+ * @tc.desc: SyncShiftFlagToContainer writes the shift flag into the attached container and IsContainerShiftFlagSet reflects it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerChildTest, SyncShiftFlagToContainerTest001, TestSize.Level1)
+{
+    child_->SetSelectionContainer(container_);
+    EXPECT_FALSE(container_->IsShiftFlagSet());
+    child_->SyncShiftFlagToContainer(true);
+    EXPECT_TRUE(container_->IsShiftFlagSet());
+    EXPECT_TRUE(child_->IsContainerShiftFlagSet());
+    child_->SyncShiftFlagToContainer(false);
+    EXPECT_FALSE(container_->IsShiftFlagSet());
+    EXPECT_FALSE(child_->IsContainerShiftFlagSet());
+}
+
+/**
+ * @tc.name: SyncShiftFlagToContainerTest002
+ * @tc.desc: SyncShiftFlagToContainer is a no-op (no crash) when no container is attached.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerChildTest, SyncShiftFlagToContainerTest002, TestSize.Level1)
+{
+    EXPECT_FALSE(child_->IsContainerShiftFlagSet());
+    child_->SyncShiftFlagToContainer(true);
+    EXPECT_FALSE(child_->IsContainerShiftFlagSet());
+}
+
+/**
+ * @tc.name: IsContainerShiftFlagSetTest001
+ * @tc.desc: IsContainerShiftFlagSet returns false when no container is attached.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerChildTest, IsContainerShiftFlagSetTest001, TestSize.Level1)
+{
+    EXPECT_FALSE(child_->IsContainerShiftFlagSet());
+}
+
+/**
+ * @tc.name: IsContainerShiftFlagSetTest002
+ * @tc.desc: IsContainerShiftFlagSet reflects the container flag set via SetShiftFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerChildTest, IsContainerShiftFlagSetTest002, TestSize.Level1)
+{
+    child_->SetSelectionContainer(container_);
+    container_->SetShiftFlag(true);
+    EXPECT_TRUE(child_->IsContainerShiftFlagSet());
+    container_->SetShiftFlag(false);
+    EXPECT_FALSE(child_->IsContainerShiftFlagSet());
+}
+
 /**
  * @tc.name: NotifyContainerSelectionSpanTypeChangedTest001
  * @tc.desc: Test NotifyContainerSelectionSpanTypeChanged001 notifies correctly

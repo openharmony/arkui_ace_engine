@@ -23,21 +23,20 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
-import { AttributeModifier, hookBadgeAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, hookBadgeAttributeModifier, AttributeUpdater, extractors } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { ResourceColor, Resource as arkui_component_units_Resource, ResourceStr, Length, LengthMetrics as arkui_component_units_LengthMetrics, Position, Position_serializer } from './units'
+import { ResourceColor, Resource as arkui_component_units_Resource, ResourceStr, Length, Position, Position_serializer } from './units'
 import { Color as arkui_component_enums_Color, FontWeight } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { BadgeModifier } from './../BadgeModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class ArkBadgePeer extends ArkCommonMethodPeer {
     badgeAttributeSet?: BadgeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -326,7 +325,8 @@ export class BadgeStyle_serializer {
         if (valueHolderForOuterBorderWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOuterBorderWidthTmpValue = valueHolderForOuterBorderWidth!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForOuterBorderWidthTmpValue)
+            const valueHolderForOuterBorderWidthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForOuterBorderWidthTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForOuterBorderWidthTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -511,7 +511,8 @@ export class BadgeStyle_serializer {
         const outerBorderWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let outerBorderWidthTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((outerBorderWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            outerBorderWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const outerBorderWidthTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            outerBorderWidthTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(outerBorderWidthTmpBufOptDeserialized)
         }
         const outerBorderWidthTmpResult: arkui_component_units_LengthMetrics | undefined = outerBorderWidthTmpBuf
         const enableAutoAvoidanceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()

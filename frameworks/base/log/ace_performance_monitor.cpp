@@ -37,13 +37,17 @@ void GetTimePoint(TimePoint& now)
 ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 {
     GetTimePoint(begin_);
-    ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
+    monitor_ = &ArkUIPerfMonitor::GetInstance();
+    monitor_->SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor()
 {
-    GetTimePoint(end_);
-    ArkUIPerfMonitor::GetInstance().RecordTimeSlice(tag_, duration_cast<nanoseconds>(end_ - begin_).count());
+    if (monitor_) {
+        GetTimePoint(end_);
+        monitor_->RecordTimeSlice(tag_, duration_cast<nanoseconds>(end_ - begin_).count());
+        monitor_ = nullptr;
+    }
 }
 
 ArkUIPerfMonitor& ArkUIPerfMonitor::GetInstance()

@@ -18,7 +18,7 @@ import { NodeContent } from '@kit.ArkUI';
 
 @Entry
 @Component
-export struct WaterFlowInfiniteScrollingEarly {
+struct WaterFlowInfiniteScrollingEarly {
   private rootSlot: NodeContent = new NodeContent();
 
   build() {

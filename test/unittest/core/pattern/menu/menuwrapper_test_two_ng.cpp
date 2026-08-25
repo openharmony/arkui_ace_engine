@@ -1030,23 +1030,33 @@ HWTEST_F(MenuWrapperTwoTestNg, ConvertModalModeToString001, TestSize.Level1)
         V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
+    // DumpInfo 末尾会追加 RootNodeIsLayoutDirtyMarked 条目,这里按内容查找最后一条 ModalMode。
+    auto findLastModalMode = []() -> std::string {
+        std::string result;
+        for (const auto& item : DumpLog::GetInstance().description_) {
+            if (item.find("ModalMode:") != std::string::npos) {
+                result = item;
+            }
+        }
+        return result;
+    };
     wrapperPattern->menuParam_.modalMode = std::nullopt;
     wrapperPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: undefined\n");
+    EXPECT_EQ(findLastModalMode(), "ModalMode: undefined\n");
     wrapperPattern->menuParam_.modalMode = ModalMode::AUTO;
     wrapperPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.AUTO\n");
+    EXPECT_EQ(findLastModalMode(), "ModalMode: ModalMode.AUTO\n");
     wrapperPattern->menuParam_.modalMode = ModalMode::NONE;
     wrapperPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.NONE\n");
+    EXPECT_EQ(findLastModalMode(), "ModalMode: ModalMode.NONE\n");
     wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
     wrapperPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.TARGET_WINDOW\n");
+    EXPECT_EQ(findLastModalMode(), "ModalMode: ModalMode.TARGET_WINDOW\n");
     wrapperPattern->menuParam_.modalMode = static_cast<ModalMode>(999);
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     wrapperPattern->DumpInfo();
     wrapperPattern->DumpInfo(json);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ModalMode: ModalMode.AUTO\n");
+    EXPECT_EQ(findLastModalMode(), "ModalMode: ModalMode.AUTO\n");
 }
 
 /**
@@ -1178,5 +1188,110 @@ HWTEST_F(MenuWrapperTwoTestNg, MenuTransitionEffectMultiThreadTest001, TestSize.
      */
     MultiThreadBuildManager::isUIThread_ = isUIThread;
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+}
+
+/**
+ * @tc.name: DumpRootNodeDirtyMarkInfo001
+ * @tc.desc: Verify DumpRootNodeDirtyMarkInfo when root is not dirty marked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, DumpRootNodeDirtyMarkInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create wrapper node and attach it to the mock pipeline.
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    wrapperNode->context_ = AceType::RawPtr(pipeline);
+    auto frameRoot = pipeline->GetRootElement();
+    ASSERT_NE(frameRoot, nullptr);
+    EXPECT_FALSE(frameRoot->IsLayoutDirtyMarked());
+    DumpLog::GetInstance().description_.clear();
+
+    /**
+     * @tc.steps: step2. call DumpInfo, root not dirty marked.
+     * @tc.expected: only RootNodeIsLayoutDirtyMarked status is appended at the tail.
+     */
+    wrapperPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "RootNodeIsLayoutDirtyMarked: 0\n");
+}
+
+/**
+ * @tc.name: DumpRootNodeDirtyMarkInfo002
+ * @tc.desc: Verify DumpRootNodeDirtyMarkInfo when root is dirty marked and dirty nodes contain root.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, DumpRootNodeDirtyMarkInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create wrapper node, mark root dirty and add a root dirty node.
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    wrapperNode->context_ = AceType::RawPtr(pipeline);
+    auto frameRoot = pipeline->GetRootElement();
+    ASSERT_NE(frameRoot, nullptr);
+    frameRoot->SetLayoutDirtyMarked(true);
+    auto dirtyRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(dirtyRoot, nullptr);
+    pipeline->taskScheduler_->dirtyLayoutNodes_.push_back(dirtyRoot);
+    DumpLog::GetInstance().description_.clear();
+
+    /**
+     * @tc.steps: step2. call DumpInfo.
+     * @tc.expected: dirty marked status, dirty nodes size and root node info are appended.
+     */
+    wrapperPattern->DumpInfo();
+    const auto& desc = DumpLog::GetInstance().description_;
+    ASSERT_GE(desc.size(), 3u);
+    EXPECT_EQ(desc[desc.size() - 3], "RootNodeIsLayoutDirtyMarked: 1\n");
+    EXPECT_EQ(desc[desc.size() - 2], "DirtyLayoutNodesSize: 1\n");
+    EXPECT_NE(desc.back().find("DirtyRootNode id:"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpRootNodeDirtyMarkInfo003
+ * @tc.desc: Verify DumpRootNodeDirtyMarkInfo when dirty nodes contain only non-root nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTwoTestNg, DumpRootNodeDirtyMarkInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create wrapper node, mark root dirty and add a non-root dirty node.
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    wrapperNode->context_ = AceType::RawPtr(pipeline);
+    auto frameRoot = pipeline->GetRootElement();
+    ASSERT_NE(frameRoot, nullptr);
+    frameRoot->SetLayoutDirtyMarked(true);
+    auto dirtyText = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(dirtyText, nullptr);
+    pipeline->taskScheduler_->dirtyLayoutNodes_.push_back(dirtyText);
+    DumpLog::GetInstance().description_.clear();
+
+    /**
+     * @tc.steps: step2. call DumpInfo.
+     * @tc.expected: dirty nodes size is appended, but no root node info since the only node is non-root.
+     */
+    wrapperPattern->DumpInfo();
+    const auto& desc = DumpLog::GetInstance().description_;
+    ASSERT_GE(desc.size(), 2u);
+    EXPECT_EQ(desc[desc.size() - 2], "RootNodeIsLayoutDirtyMarked: 1\n");
+    EXPECT_EQ(desc.back(), "DirtyLayoutNodesSize: 1\n");
 }
 } // namespace OHOS::Ace::NG

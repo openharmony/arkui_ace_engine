@@ -774,7 +774,7 @@ HWTEST_F(TextTestNg, TLVUtilReadPaddingProperty001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, ContentControllerRemoveErrorTextFromValue001, TestSize.Level1)
 {
-    auto result = ContentController::RemoveErrorTextFromValue(u"b", u"a");
+    auto result = TextInputFilter::RemoveErrorTextFromValue(u"b", u"a");
     EXPECT_EQ(result, u"b");
 }
 
@@ -786,7 +786,7 @@ HWTEST_F(TextTestNg, ContentControllerRemoveErrorTextFromValue001, TestSize.Leve
 HWTEST_F(TextTestNg, ContentControllerFilterWithAscii001, TestSize.Level1)
 {
     std::u16string str = u"";
-    auto result = ContentController::FilterWithAscii(str);
+    auto result = TextInputFilter::FilterWithAscii(str);
     EXPECT_FALSE(result);
 }
 

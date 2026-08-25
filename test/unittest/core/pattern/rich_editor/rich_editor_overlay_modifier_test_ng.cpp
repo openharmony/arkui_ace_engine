@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -77,6 +78,15 @@ HWTEST_F(RichEditorOverlayModifierTestNg, CreateRichEditorOverlayModifier001, Te
     EXPECT_FALSE(static_cast<bool>(richEditorPattern->overlayMod_));
     richEditorPattern->CreateRichEditorOverlayModifier();
     EXPECT_TRUE(static_cast<bool>(richEditorPattern->overlayMod_));
+
+    // Branch: hostOverlayMod_ exists - else path backfills base modifier via BindScrollBarOverlayModifier
+    auto hostOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->hostOverlayMod_);
+    ASSERT_NE(hostOverlay, nullptr);
+    hostOverlay->SetScrollBarOverlayModifier(WeakPtr<ScrollBarOverlayModifier> {});
+    EXPECT_FALSE(hostOverlay->HasScrollBarOverlayModifier());
+    richEditorPattern->SetScrollBarOverlayModifier(AceType::MakeRefPtr<ScrollBarOverlayModifier>());
+    richEditorPattern->CreateRichEditorOverlayModifier();
+    EXPECT_TRUE(hostOverlay->HasScrollBarOverlayModifier());
 }
 
 /**

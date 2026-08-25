@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import router from '@ohos.router';
-
-class TextList {
+export class TextList {
   public id: number;
   public text: string;
   public url: string;
@@ -33,36 +31,45 @@ struct IndexPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
     new TextList(1, 'Back', 'pages/Index'),
-    new TextList(2, 'CustomSnap', 'pages/Scroll/CustomSnap'),
-    new TextList(3, 'InfiniteScrolling', 'pages/Scroll/InfiniteScrolling'),
-    new TextList(4, 'NestedScrollBar', 'pages/Scroll/NestedScrollBar'),
-    new TextList(5, 'RecycleView', 'pages/Scroll/RecycleView/Index'),
-    new TextList(6, 'ScrollNode', 'pages/Scroll/ScrollNode'),
-    new TextList(7, 'ScrollWithLayoutWeight', 'pages/Scroll/ScrollWithLayoutWeight'),
-    new TextList(8, 'FreeScroll', 'pages/Scroll/FreeScroll'),
-    new TextList(9, 'OnDidScrollAndTranslate', 'pages/Scroll/OnDidScrollAndTranslate'),
-    new TextList(10, 'ParentDriveChild', 'pages/Scroll/ParentDriveChild'),
-    new TextList(11, 'NestedScrollTypeOne', 'pages/Scroll/NestedScrollTypeOne'),
-    new TextList(12, 'NestedScrollTypeTwo', 'pages/Scroll/NestedScrollTypeTwo'),
-    new TextList(13, 'friction', 'pages/Scroll/friction'),
-    new TextList(14, 'initialOffsetXOffset', 'pages/Scroll/initialOffsetXOffset'),
-    new TextList(15, 'initialOffsetYOffset', 'pages/Scroll/initialOffsetYOffset'),
-    new TextList(16, 'scrollSnap', 'pages/Scroll/scrollSnap'),
-    new TextList(17, 'friction(ScrollModifier)', 'pages/Scroll/ScrollModifier/friction'),
-    new TextList(18, 'initialOffsetXOffset(ScrollModifier)', 'pages/Scroll/ScrollModifier/initialOffsetXOffset'),
-    new TextList(19, 'initialOffsetYOffset(ScrollModifier)', 'pages/Scroll/ScrollModifier/initialOffsetYOffset'),
-    new TextList(20, 'scrollSnap(ScrollModifier)', 'pages/Scroll/ScrollModifier/scrollSnap'),
-    new TextList(21, 'ScrollIndex', 'pages/Scroll/ScrollIndex'),
-    new TextList(22, 'ScrollModifierIndex', 'pages/Scroll/ScrollModifier/ScrollModifierIndex'),
-    new TextList(23, 'scrollBarColor', 'pages/Scroll/scrollBarColor'),
-    new TextList(24, 'scrollBarColor(ScrollModifier)', 'pages/Scroll/ScrollModifier/scrollBarColor'),
-    new TextList(25, 'ScrollableInfiniteScroll', 'pages/Scroll/CAPI/ScrollableInfiniteScroll'),
-    new TextList(26, 'LayoutConstraints', 'pages/Scroll/LayoutConstraints/LayoutConstraints_MainPage'),
-    new TextList(27, 'BindControllerDeclare', 'pages/Scroll/bindController/ScrollDeclare'),
-    new TextList(28, 'BindControllerCommand', 'pages/Scroll/bindController/ScrollCommand'),
-    new TextList(29, 'ScrollerGetFrameNodeScenes', 'pages/Scroll/bindController/ScrollFrameNodeScenes'),
-    new TextList(30, 'ScrollEventReport', 'pages/Scroll/ScrollEventReport'),
-    new TextList(31, 'ScrollEventReportNestedScroll', 'pages/Scroll/ScrollEventReportNestedScroll'),
+    new TextList(2, 'BasicScrollSample', 'pages/Scroll/BasicScrollSample'),
+    new TextList(3, 'CustomSnap', 'pages/Scroll/CustomSnap'),
+    new TextList(4, 'InfiniteScrolling', 'pages/Scroll/InfiniteScrolling'),
+    new TextList(5, 'NestedScrollBar', 'pages/Scroll/NestedScrollBar'),
+    new TextList(6, 'RecycleView', 'pages/Scroll/RecycleView/Index'),
+    new TextList(7, 'ScrollNode', 'pages/Scroll/ScrollNode'),
+    new TextList(8, 'ScrollWithLayoutWeight', 'pages/Scroll/ScrollWithLayoutWeight'),
+    new TextList(9, 'FreeScroll', 'pages/Scroll/FreeScroll'),
+    new TextList(10, 'OnDidScrollAndTranslate', 'pages/Scroll/OnDidScrollAndTranslate'),
+    new TextList(11, 'ParentDriveChild', 'pages/Scroll/ParentDriveChild'),
+    new TextList(12, 'NestedScrollTypeOne', 'pages/Scroll/NestedScrollTypeOne'),
+    new TextList(13, 'NestedScrollTypeTwo', 'pages/Scroll/NestedScrollTypeTwo'),
+    new TextList(14, 'friction', 'pages/Scroll/friction'),
+    new TextList(15, 'initialOffsetXOffset', 'pages/Scroll/initialOffsetXOffset'),
+    new TextList(16, 'initialOffsetYOffset', 'pages/Scroll/initialOffsetYOffset'),
+    new TextList(17, 'scrollSnap', 'pages/Scroll/scrollSnap'),
+    new TextList(18, 'friction(ScrollModifier)', 'pages/Scroll/ScrollModifier/friction'),
+    new TextList(19, 'initialOffsetXOffset(ScrollModifier)', 'pages/Scroll/ScrollModifier/initialOffsetXOffset'),
+    new TextList(20, 'initialOffsetYOffset(ScrollModifier)', 'pages/Scroll/ScrollModifier/initialOffsetYOffset'),
+    new TextList(21, 'scrollSnap(ScrollModifier)', 'pages/Scroll/ScrollModifier/scrollSnap'),
+    new TextList(22, 'ScrollIndex', 'pages/Scroll/ScrollIndex'),
+    new TextList(23, 'ScrollModifierIndex', 'pages/Scroll/ScrollModifier/ScrollModifierIndex'),
+    new TextList(24, 'scrollBarColor', 'pages/Scroll/scrollBarColor'),
+    new TextList(25, 'scrollBarColor(ScrollModifier)', 'pages/Scroll/ScrollModifier/scrollBarColor'),
+    new TextList(26, 'ScrollableInfiniteScroll', 'pages/Scroll/CAPI/ScrollableInfiniteScroll'),
+    new TextList(27, 'LayoutConstraints', 'pages/Scroll/LayoutConstraints/LayoutConstraints_MainPage'),
+    new TextList(28, 'BindControllerDeclare', 'pages/Scroll/bindController/ScrollDeclare'),
+    new TextList(29, 'BindControllerCommand', 'pages/Scroll/bindController/ScrollCommand'),
+    new TextList(30, 'ScrollerGetFrameNodeScenes', 'pages/Scroll/bindController/ScrollFrameNodeScenes'),
+    new TextList(31, 'ScrollEventReport', 'pages/Scroll/ScrollEventReport'),
+    new TextList(32, 'ScrollEventReportNestedScroll', 'pages/Scroll/ScrollEventReportNestedScroll'),
+    new TextList(33, 'HorizontalGallerySample', 'pages/Scroll/HorizontalGallerySample'),
+    new TextList(34, 'PagingCardsSample', 'pages/Scroll/PagingCardsSample'),
+    new TextList(35, 'EdgeEffectSample', 'pages/Scroll/EdgeEffectSample'),
+    new TextList(36, 'ComplexDashboardScrollSample', 'pages/Scroll/ComplexDashboardScrollSample'),
+    new TextList(37, 'ComplexControlMatrixScrollSample', 'pages/Scroll/ComplexControlMatrixScrollSample'),
+    new TextList(38, 'ScrollDashboardInteractiveSample', 'pages/Scroll/ScrollDashboardInteractiveSample'),
+    new TextList(39, 'ScrollNestedListComprehensiveSample', 'pages/Scroll/ScrollNestedListComprehensiveSample'),
+    new TextList(40, 'ScrollBarComprehensiveSample', 'pages/Scroll/ScrollBarComprehensiveSample'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
@@ -76,7 +83,7 @@ struct IndexPage {
               .margin(10)
               .padding({ top: 5, bottom: 5 })
               .onClick(() => {
-                router.pushUrl({ url: item.url })
+                this.getUIContext().getRouter().pushUrl({ url: item.url })
               })
           }, (item: TextList) => JSON.stringify(item.id))
         }

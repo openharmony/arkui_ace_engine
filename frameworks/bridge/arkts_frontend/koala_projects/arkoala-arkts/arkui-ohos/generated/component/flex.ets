@@ -23,18 +23,17 @@ import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
-import { AttributeModifier, hookFlexAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, LengthMetrics as arkui_Graphics_LengthMetrics, hookFlexAttributeModifier, AttributeUpdater, extractors } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from './enums'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { FlexModifier } from './../FlexModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class ArkFlexPeer extends ArkCommonMethodPeer {
     flexAttributeSet?: FlexModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -165,7 +164,8 @@ export class FlexSpaceOptions_serializer {
         if (valueHolderForMain !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMainTmpValue = valueHolderForMain!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMainTmpValue)
+            const valueHolderForMainTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForMainTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForMainTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -173,7 +173,8 @@ export class FlexSpaceOptions_serializer {
         if (valueHolderForCross !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCrossTmpValue = valueHolderForCross!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForCrossTmpValue)
+            const valueHolderForCrossTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForCrossTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForCrossTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -183,13 +184,15 @@ export class FlexSpaceOptions_serializer {
         const mainTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let mainTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((mainTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            mainTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const mainTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            mainTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(mainTmpBufOptDeserialized)
         }
         const mainTmpResult: arkui_Graphics_LengthMetrics | undefined = mainTmpBuf
         const crossTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let crossTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((crossTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            crossTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const crossTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            crossTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(crossTmpBufOptDeserialized)
         }
         const crossTmpResult: arkui_Graphics_LengthMetrics | undefined = crossTmpBuf
         let value: FlexSpaceOptions = ({main: mainTmpResult, cross: crossTmpResult} as FlexSpaceOptions)

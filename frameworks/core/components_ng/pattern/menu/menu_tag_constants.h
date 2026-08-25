@@ -26,6 +26,9 @@ const char MENU_ITEM_GROUP_ETS_TAG[] = "MenuItemGroup";
 const char MENU_PREVIEW_ETS_TAG[] = "MenuPreview";
 const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 
+// Root tag
+const char ROOT_ETS_TAG[] = "root";
+
 // Related component tags
 const char ROW_ETS_TAG[] = "Row";
 const char TEXT_ETS_TAG[] = "Text";

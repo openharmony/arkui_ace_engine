@@ -1,0 +1,11 @@
+{
+  "src": [
+    "pages/NormalTextList",
+    "pages/ComponentListenEvent",
+    "pages/Index",
+    "pages/BindGestureEvent",
+    "pages/LongPressAndSwipe",
+    "pages/LongPressAndFlick",
+    "pages/SwipeAndPinchExclusive"
+  ]
+}

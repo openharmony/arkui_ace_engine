@@ -47,7 +47,7 @@ enum class ToggleDimensionType {
     POINT_RADIUS,
     TRACK_BORDER_RADIUS
 };
-class ACE_FORCE_EXPORT ToggleModel {
+class ToggleModel {
 public:
     static ToggleModel* GetInstance();
     virtual ~ToggleModel() = default;

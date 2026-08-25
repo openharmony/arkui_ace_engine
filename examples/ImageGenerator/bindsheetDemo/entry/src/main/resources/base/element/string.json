@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "bindsheet demo module"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "bindsheet demo"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "BindSheetDemo"
+    }
+  ]
+}

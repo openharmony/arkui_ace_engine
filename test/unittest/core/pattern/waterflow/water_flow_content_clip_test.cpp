@@ -34,9 +34,12 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t RELOADED_ITEM_COUNT = 3;
+
 PaddingProperty CreatePadding(float left, float top, float right, float bottom)
 {
     PaddingProperty padding;
@@ -79,6 +82,60 @@ protected:
         layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 150.0f));
         ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
     }
+
+    RefPtr<FrameNode> PrepareBoundaryLazyColumnReload(bool useSections = false)
+    {
+        WaterFlowModelNG model = CreateWaterFlow();
+        if (useSections) {
+            model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+        }
+        PrepareBoundaryLazyChildWaterFlow(model);
+        LazyColumnLayoutModel::Create();
+        ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+        LazyColumnLayoutModel::SetOnVisibleIndexesChange([this](int32_t start, int32_t end) {
+            reloadVisibleStart_ = start;
+            reloadVisibleEnd_ = end;
+        });
+        auto mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+        ViewStackProcessor::GetInstance()->Pop();
+        RefPtr<WaterFlowSections> sections;
+        const std::vector<WaterFlowSections::Section> sectionData = { { .itemsCount = 1, .crossCount = 1 } };
+        if (useSections) {
+            sections = pattern_->GetOrCreateWaterFlowSections();
+            sections->ChangeData(0, 0, sectionData);
+        }
+        CreateDone();
+
+        auto lazyColumn = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+        if (!lazyColumn) {
+            return nullptr;
+        }
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(lazyColumn->GetChildAtIndex(0));
+        if (!lazyForEachNode) {
+            return nullptr;
+        }
+        UpdateCurrentOffset(-5000.0f);
+        if (sections) {
+            // Combine section reset and reload to cover pending-jump re-anchoring.
+            sections->ChangeData(0, 1, sectionData);
+        }
+        mockLazy->SetTotalCount(RELOADED_ITEM_COUNT);
+        lazyForEachNode->OnDataReloaded();
+        return lazyColumn;
+    }
+
+    void ExpectBoundaryLazyColumnReloaded(const RefPtr<FrameNode>& lazyColumn)
+    {
+        ASSERT_NE(lazyColumn, nullptr);
+        const auto lazyColumnRect = lazyColumn->GetGeometryNode()->GetFrameRect();
+        EXPECT_LT(lazyColumnRect.Top(), 400.0f);
+        EXPECT_GT(lazyColumnRect.Bottom(), 0.0f);
+        EXPECT_GE(reloadVisibleStart_, 0);
+        EXPECT_LT(reloadVisibleEnd_, RELOADED_ITEM_COUNT);
+    }
+
+    int32_t reloadVisibleStart_ = -1;
+    int32_t reloadVisibleEnd_ = -1;
 };
 
 /**
@@ -241,6 +298,35 @@ HWTEST_F(WaterFlowContentClipTest, ContentClipDefault001, TestSize.Level1)
 }
 
 #if !defined(TEST_WATER_FLOW_SW) && !defined(TEST_SEGMENTED_WATER_FLOW)
+/**
+ * @tc.name: ContentClipDefaultZeroHeightHead001
+ * @tc.desc: Default CONTENT_ONLY keeps a zero-height item on the leading boundary in the reported visible range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowContentClipTest, ContentClipDefaultZeroHeightHead001, TestSize.Level1)
+{
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetOnScrollIndex([&startIndex, &endIndex](int32_t start, int32_t end) {
+        startIndex = start;
+        endIndex = end;
+    });
+    // Empty LazyForEach branches reach report-range calculation as zero-size items.
+    CreateItemWithHeight(0.0f);
+    for (int32_t i = 0; i < 6; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateDone();
+
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->reportStartIndex_, 0);
+    EXPECT_EQ(info->reportEndIndex_, 6);
+    EXPECT_EQ(startIndex, info->reportStartIndex_);
+    EXPECT_EQ(endIndex, info->reportEndIndex_);
+}
+
 /**
  * @tc.name: ContentClipDefaultZeroHeightTail001
  * @tc.desc: Default CONTENT_ONLY keeps trailing zero-height items in report range at end.
@@ -823,6 +909,35 @@ HWTEST_F(WaterFlowContentClipTest, ContentClipBoundaryLazyColumn001, TestSize.Le
     ASSERT_NE(lazyColumnPattern, nullptr);
     EXPECT_EQ(visibleStart, 0);
     EXPECT_GT(lazyColumnPattern->layoutInfo_->endIndex_, visibleEnd);
+}
+
+/**
+ * @tc.name: ContentClipBoundaryLazyColumnReload001
+ * @tc.desc: A deeply scrolled LazyColumn remains visible after DataReload shrinks its data below the old viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowContentClipTest, ContentClipBoundaryLazyColumnReload001, TestSize.Level1)
+{
+    auto lazyColumn = PrepareBoundaryLazyColumnReload();
+    ASSERT_NE(lazyColumn, nullptr);
+    FlushUITasks(frameNode_);
+    ExpectBoundaryLazyColumnReloaded(lazyColumn);
+}
+
+/**
+ * @tc.name: ContentClipBoundarySegmentedLazyColumnReload001
+ * @tc.desc: Segmented WaterFlow discards a pending jump anchor when reload re-anchors its sole lazy child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowContentClipTest, ContentClipBoundarySegmentedLazyColumnReload001, TestSize.Level1)
+{
+    auto lazyColumn = PrepareBoundaryLazyColumnReload(true);
+    ASSERT_NE(lazyColumn, nullptr);
+    auto algorithm = pattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(AceType::DynamicCast<WaterFlowSegmentedLayout>(algorithm), nullptr);
+
+    FlushUITasks(frameNode_);
+    ExpectBoundaryLazyColumnReloaded(lazyColumn);
 }
 
 /**

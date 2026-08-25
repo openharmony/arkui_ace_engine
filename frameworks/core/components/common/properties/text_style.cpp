@@ -232,7 +232,7 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propIncludeFontPadding_ == rhs.propIncludeFontPadding_ &&
            propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ && propStrokeWidth_ == rhs.propStrokeWidth_ &&
            propStrokeColor_ == rhs.propStrokeColor_ && propStrokeJoinStyle_ == rhs.propStrokeJoinStyle_ &&
-           NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_) && propTailIndent_ == rhs.propTailIndent_;
+           NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_) && GetTailIndent() == rhs.GetTailIndent();
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const

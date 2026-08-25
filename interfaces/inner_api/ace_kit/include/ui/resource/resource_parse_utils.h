@@ -76,7 +76,7 @@ protected:
     static void InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
         const ColorMode& colorMode);
     static bool ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
-        RefPtr<ResourceAdapter>& resourceAdapter, const ColorMode& colorMode);
+        RefPtr<ResourceAdapter>& resourceAdapter, const ColorMode& colorMode, bool adaptMaterial);
     static bool ParseResStringObj(const std::vector<ResourceObjectParams>& params,
         RefPtr<ResourceAdapter>& resourceAdapter, std::string& result, int32_t type);
 };

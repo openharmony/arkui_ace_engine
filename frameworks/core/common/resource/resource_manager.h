@@ -91,6 +91,7 @@ private:
 
     static const size_t MAX_DUMP_LIST_SIZE = 100;
     std::unordered_map<std::string, RefPtr<ResourceAdapter>> resourceAdapters_;
+    std::unordered_map<std::string, int32_t> undefinedIdRefCount_;
     std::shared_mutex mutex_;
 
     std::atomic<size_t> capacity_ = 3;

@@ -13,21 +13,32 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("divider_test_ng") {
-  type = "new"
-  module_name = "Modifier-AttributeUpdater"
-  sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng_static.cpp",
-    "divider_base_test_ng.cpp",
-    "divider_base_test_ng.h",
-    "divider_new_test_ng.cpp",
-    "divider_branch_coverage_test_ng.cpp",
-    "old_cases/divider_test_ng.cpp",
-  ]
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "divider_test_core.cpp" ]
-  } else {
-    sources += [ "divider_test_core.cpp" ]
+test_sources = [
+  "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng_static.cpp",
+  "divider_base_test_ng.cpp",
+  "divider_base_test_ng.h",
+  "divider_new_test_ng.cpp",
+  "divider_branch_coverage_test_ng.cpp",
+  "old_cases/divider_test_ng.cpp",
+  "divider_test_core.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("divider_test_ng") {
+    type = "host_components"
+    module_name = "Modifier-AttributeUpdater"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("divider_test_ng") {
+    type = "new"
+    module_name = "Modifier-AttributeUpdater"
+    sources = test_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "divider_test_core.cpp" ]
+    }
   }
 }

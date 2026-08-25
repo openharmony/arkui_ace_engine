@@ -15,7 +15,7 @@
 
 @Entry
 @Component
-export struct DragPageDemo {
+struct DragPageDemo {
   @State dragListData1: DragListItemObj[] = [
     new DragListItemObj($r('app.media.startIcon'), '名字1', 1),
     new DragListItemObj($r('app.media.startIcon'), '名字2', 2),
@@ -70,7 +70,8 @@ export struct DragPageDemo {
 struct DragList {
   @Link dragListData: DragListItemObj[];
   @Link temp: DragListItemObj;
-  @BuilderParam name: string;
+  // Plain data passed down from the parent - @BuilderParam is only for @Builder functions.
+  @Prop name: string;
   @Link h: number;
   @Link h2: number;
 
@@ -154,7 +155,7 @@ struct DragList {
 
 @Component
 export struct DragListItem {
-  @BuilderParam dragListItemObj: DragListItemObj;
+  @Prop dragListItemObj: DragListItemObj;
   dragging: boolean = false;
   @State symbolSize: number = 20;
   @State titleFontSize: number = 16;

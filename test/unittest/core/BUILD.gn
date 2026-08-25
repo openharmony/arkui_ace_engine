@@ -18,8 +18,41 @@ group("core_unittest") {
   deps = []
   if (is_host_product) {
     deps += [
+      "accessibility:core_accessibility_unittest",
+      "common:common_test",
+      "manager:content_change_manager_test_ng",
+      "manager:display_sync_manager_test_ng",
+      "manager:full_screen_manager_test_ng",
+      "manager:frame_rate_manager_test_ng",
+      "base:core_base_unittest",
+      "common/others:thread_checker_test",
+      "layout:core_layout_unittest",
+      "layout/safe_area:ignore_layout_safe_area_scheduling_test_ng",
+      "common/ime:ime_test",
       "manager:page_scene_rule_manager_test_ng",
+      "manager:safe_area_manager_test_ng",
+      "manager:select_overlay_manager_test_ng",
+      "manager:select_overlay_proxy_test_ng",
       "pattern:core_pattern_unittest",
+      "property:accessibility_property_test_ng",
+      "property:accessibility_property_test_three_ng",
+      "property:accessibility_property_testtwo_ng",
+      "property:measure_utils_test_ng",
+      "render:drawing_prop_convertor_test_ng",
+      "render:painter_test",
+      "render:render_context_test_ng",
+      "render:render_property_test_ng",
+      "syntax:core_syntax_unittest",
+      "animation:core_animation_unittest",
+      "property:core_property_unittest",
+      "animation:callback_thread_wrapper_test",
+      "common/resource:resource_manager_test",
+      "common/resource:resource_parse_utils_test_ng",
+      "manager:avoid_info_manager_test_ng",
+      "interfaces:interfaces_test",
+      "manager:navigation_manager_test_ng",
+      "manager:theme_manager_test_ng",
+      ":navigation_controller_test",
     ]
   } else {
     deps = [
@@ -45,5 +78,26 @@ group("core_unittest") {
       "svg:core_svg_unittest",
       "syntax:core_syntax_unittest",
     ]
+  }
+}
+
+if (is_host_product) {
+  ace_root = "//foundation/arkui/ace_engine"
+  executable("navigation_controller_test") {
+    testonly = true
+    sources = [
+      "$ace_root/interfaces/inner_api/ace/navigation_controller.cpp",
+      "$ace_root/interfaces/inner_api/ace/ace_forward_compatibility.cpp",
+      "$ace_root/test/unittest/interfaces/navigation_controller_test.cpp",
+    ]
+    include_dirs = [
+      "$ace_root/interfaces/inner_api/ace",
+      "$ace_root/test/mock/frameworks/core/osal/mock_hilog",
+      "//third_party/googletest/googletest/include",
+      "//third_party/googletest/googlemock/include",
+    ]
+    configs += [ "$ace_root/test/unittest:ace_unittest_config" ]
+    deps = [ "$ace_root/test/unittest:ace_components_deps" ]
+    defines = [ "ACE_HOST_PRODUCT" ]
   }
 }

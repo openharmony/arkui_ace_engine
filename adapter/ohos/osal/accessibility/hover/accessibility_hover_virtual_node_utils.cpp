@@ -23,6 +23,19 @@
 #include "core/accessibility/utils/accessibility_manager_utils.h"
 #include "core/components_ng/property/accessibility_property.h"
 
+namespace {
+std::string GetAddChildCycleStr(const std::vector<int32_t>& chain, int32_t startNodeId, int32_t endNodeId)
+{
+    std::string cycleStr = std::to_string(startNodeId);
+    for (auto it = chain.rbegin(); it != chain.rend(); it++) {
+        cycleStr += " -> " + std::to_string(*it);
+    }
+    cycleStr += " -> " + std::to_string(endNodeId);
+    cycleStr += " -> (back to " + std::to_string(startNodeId) + ")";
+    return cycleStr;
+}
+} // namespace
+
 namespace OHOS::Ace::NG {
 
 // ============================================================================
@@ -161,11 +174,52 @@ RefPtr<VirtualAccessibilityNode> VirtualAccessibilityNode::FindNodeByPoint(int32
     return lastHit ? lastHit : AceType::Claim(const_cast<VirtualAccessibilityNode*>(this));
 }
 
-void VirtualAccessibilityNode::AddChild(const RefPtr<VirtualAccessibilityNode>& child)
+bool VirtualAccessibilityNode::AddChild(const RefPtr<VirtualAccessibilityNode>& child)
 {
-    CHECK_NULL_VOID(child);
+    CHECK_NULL_RETURN(child, false);
+
+    // Case 1: child is this.
+    if (AceType::RawPtr(child) == this) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "VirtualAccessibilityNode AddChild reject self-reference, nodeId: %{public}d", nodeId_);
+        return false;
+    }
+
+    // Case 2: this is already an ancestor of child.
+    {
+        std::vector<int32_t> chainIfThisIsAncestorOfChild;
+        for (auto ancestor = child->parent_.Upgrade(); ancestor; ancestor = ancestor->parent_.Upgrade()) {
+            chainIfThisIsAncestorOfChild.push_back(ancestor->nodeId_);
+            if (AceType::RawPtr(ancestor) != this) {
+                continue;
+            }
+            std::string cycle = GetAddChildCycleStr(chainIfThisIsAncestorOfChild, nodeId_, child->nodeId_);
+            TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+                "VirtualAccessibilityNode AddChild reject cycle, nodeId: %{public}d, cycle: %{public}s",
+                nodeId_, cycle.c_str());
+            return false;
+        }
+    }
+
+    // Case 3: child is already an ancestor of this.
+    {
+        std::vector<int32_t> chainIfChildIsAncestorOfThis;
+        for (auto selfAncestor = parent_.Upgrade(); selfAncestor; selfAncestor = selfAncestor->parent_.Upgrade()) {
+            chainIfChildIsAncestorOfThis.push_back(selfAncestor->nodeId_);
+            if (AceType::RawPtr(selfAncestor) != AceType::RawPtr(child)) {
+                continue;
+            }
+            std::string cycle = GetAddChildCycleStr(chainIfChildIsAncestorOfThis, child->nodeId_, nodeId_);
+            TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+                "VirtualAccessibilityNode AddChild reject cycle, nodeId: %{public}d, cycle: %{public}s",
+                nodeId_, cycle.c_str());
+            return false;
+        }
+    }
+
     child->parent_ = AceType::WeakClaim(this);
     children_.push_back(child);
+    return true;
 }
 
 void VirtualAccessibilityNode::RemoveChild(const RefPtr<VirtualAccessibilityNode>& child)
@@ -265,14 +319,17 @@ RefPtr<VirtualAccessibilityNode> VirtualAccessibilityNode::CloneTree() const
     CHECK_NULL_RETURN(root, nullptr);
 
     root->nodeId_ = nodeId_;
+    root->SetText(GetText());
     root->SetAccessibilityText(GetAccessibilityText());
     root->SetAccessibilityLevel(GetAccessibilityLevel());
     root->SetAccessibilityGroup(GetAccessibilityGroup());
     root->SetRole(GetRole());
+    root->SetAccessibilityRole(GetAccessibilityRole());
     root->SetCheckable(GetCheckable());
     root->SetChecked(GetChecked());
     root->SetEnabled(GetEnabled());
     root->SetSelected(GetSelected());
+    root->SetClickable(GetClickable());
     root->rect_ = rect_;
 
     for (const auto& child : children_) {

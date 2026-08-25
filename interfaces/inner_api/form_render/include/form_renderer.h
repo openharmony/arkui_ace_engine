@@ -88,6 +88,7 @@ private:
     float width_ = 0.0f;
     float height_ = 0.0f;
     float formViewScale_ = 1.0f;
+    uint64_t formDisplayId_ = static_cast<uint64_t>(-1);
     float borderWidth_ = 0.0f;
     float lastBorderWidth_ = 0.0f;
     bool fontScaleFollowSystem_ = true;

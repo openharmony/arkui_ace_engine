@@ -66,14 +66,14 @@
 | OH-ARCH-IPC-SAF | 涉及 SA IPC 和跨进程文本传输 | 新接口只在 Uisession innerAPI 内扩展；不新增 Public API 或应用权限 | IPC 单测、dump 验证 |
 | OH-ARCH-API-LEVEL | 修改 innerAPI，不涉及 SDK d.ts | innerAPI 命名使用页面文本而非 Web-only 语义；老 Web 接口保留 | API 审查 |
 | OH-ARCH-COMPONENT-BUILD | 可能新增源文件和测试 | BUILD.gn 按最小影响更新，只纳入 ace_engine 相关目标 | 构建 |
-| OH-ARCH-ERROR-LOG | 文本内容敏感 | 对 SA 不输出正文以外多余 UI 内部字段；日志不输出正文，仅输出 nodeId、长度、范围、错误码，UI 内部可记录 changeType/sourceType | 单测/日志审查 |
+| OH-ARCH-ERROR-LOG | 文本内容敏感 | 真实 SA 和产品日志不输出正文，仅输出 nodeId、长度、范围、错误码，UI 内部可记录 changeType/sourceType；`ui_session_sample`（UISA）是非随版本编译发布的测试 SA，在受控开发调试中可输出截断正文，以核验 IPC 调用和回调参数 | 单测/日志审查 |
 
 ## 不涉及项确认
 
 | 维度 | 需求阶段结论 | 设计阶段处理方式 | 设计结论 |
 |------|---------|-------------|----------|
 | 性能 | 是 | 展开设计 | 增量上报去重；只在 Start 后按需写入 translate 容器；无连续翻译任务时不维护版本/hash/pending；译文变化才触发布局刷新 |
-| 安全与权限 | 是 | 展开设计 | 沿用系统 SA innerAPI 边界；日志不打印正文；不新增权限 |
+| 安全与权限 | 是 | 展开设计 | 沿用系统 SA innerAPI 边界；真实 SA、产品日志和持久化报告不打印正文；UISA 仅在受控开发调试中允许打印截断正文以核验 IPC；不新增权限 |
 | 兼容性 | 是 | 展开设计 | 保留现有 Web 接口和脚本注入路径；新增统一接口覆盖 Web 能力 |
 | API/SDK | 是 | 展开设计 | 只新增/扩展 innerAPI，不改 ArkTS/Public API |
 | IPC/跨进程 | 是 | 展开设计 | 增加统一 request/result/report payload，明确范围入参 |
@@ -90,7 +90,7 @@
 | ADR-4 | ArkUI 译文展示方式 | Pattern 保存临时译文状态，布局阶段优先使用译文内容，不更新原始 layout property / span / placeholder 内容 | 直接写回 `TextLayoutProperty::Content`、Span 内容或 TextInput placeholder 属性；用 overlay 覆盖绘制 | 运行时状态兼容性最好，Reset/End 可恢复原文；overlay 难以正确参与布局；TextInput 用户输入内容必须保持不被覆盖 | Text/RichEditor/TextField Pattern 需增加运行时 translate 状态和 dirty 标记 |
 | ADR-5 | 连续翻译变化上报 | Start 后启用 manager 会话状态，文本节点只有在产生实际文本绘制或已绘制文本内容变化时向 manager 报告，空内容 TextInput placeholder 仅在实际展示时报告，manager 去重后通过 report proxy 上报 `nodeId/text/version` | SA 轮询；全量上报页面所有文本；向 SA 暴露 changeType；节点上树/占位布局即上报；上报 TextInput 用户输入内容 | 主动增量符合需求且 IPC 数据量可控；全量上报和占位布局提前上报都有性能风险；翻译 SA 无需感知变化原因；用户输入内容不跨进程传输 | 需要内容版本/哈希，changeType 仅保留为 UI 内部 DFX/去重字段；TextInput placeholder 与用户内容分支必须隔离 |
 | ADR-6 | SA 死亡恢复 | 在现有 report death recipient 中对 translate 会话执行全量 Reset/End，恢复 Web 和 ArkUI 原文并停止上报 | 等下一次 SA 连接再恢复；只清理 callback | 防止译文残留和继续上报，符合异常恢复 AC | `UiSessionManagerOhos` 死亡监听需覆盖统一 translate process key |
-| ADR-7 | 真机验证方式 | 在 `ui_session_sample` 新增 dump 命令覆盖统一接口、范围入参、回填、Reset/End | 只依赖单元测试；另写临时工具 | sample SA 已是现有调试入口，改动最小且便于终端复现 | 需要补 handler 和安全日志输出 |
+| ADR-7 | 真机验证方式 | 在 `ui_session_sample` 新增 dump 命令覆盖统一接口、范围入参、回填、Reset/End | 只依赖单元测试；另写临时工具 | sample SA 已是现有调试入口，改动最小且便于终端复现；其不随正式版本编译发布，可在受控调试中通过截断正文核验 IPC 参数和回调 | 需要补 handler、状态日志和受控调试正文日志；真实 SA 保持安全摘要日志 |
 | ADR-8 | ArkUI 文本节点管理边界 | 增强现有 `ContentChangeManager`，在其中新增独立待翻译文本容器和 translate 专用注册/反注册接口，由 `UiTranslateManagerImpl` 编排调用；Text/RichEditor/TextField Pattern 在自身上树/离树/文本绘制变化时调用 translate 专用入口，与纯 content change 监听入口隔离 | 新增 `TextTranslateNodeManager`；把所有 ArkUI 节点状态放进 `UiTranslateManagerImpl`；每个 Pattern 自己上报 IPC；直接复用 `AddOnContentChangeNode` / `RemoveOnContentChangeNode` 纯内容变化监听入口 | `ContentChangeManager` 已有文本展示类控件变化管理、Text AABB 收集、content change dump 和 taskExecutor，增强它能复用内部基础设施，避免新增小管理类；独立入口和独立容器可防止翻译监听改变原 content change detect 行为 | `ContentChangeManager` 增加 translate 专用入口、容器、节点版本、快照/增量接口和单测；纯 content change start/stop 不得清理或触发翻译容器，翻译 start/end 不得影响纯 content change 容器 |
 | ADR-9 | 翻译请求 DFX 和超时定界 | 复用 `Connect` 传入的 `EventHandler`，在 `UiReportStub` 为单次 Get 请求投递 callback timeout task；超时记录故障日志、清 callback、清理 snapshot cache 和调用方 pid。连续 Start 初始无文本不自动 End；译文等待 watchdog 只对真实节点 5s 无结果输出告警 | 不做超时；由 SA 自行超时；只清 callback 不清一次性现场；对连续 Start 初始无文本直接 End | 现有 `GetInspectorTree` 已采用 EventHandler timeout 清 callback；单次 Get 需要清理 pending 和 pid，连续翻译需要允许空页面等待后续增量；译文长时间无结果时保留会话更符合连续翻译语义 | 需要新增 translate timeout/watchdog task name、注册/取消/超时处理函数和测试；`nodeId < 0` 哨兵不启动 watchdog |
 | ADR-10 | Host Preview 验证方式 | 通过 PreviewerCLI `remoteRequest` 的 `business + method` 通用分发模拟 Uisession 调用，`pageTranslate/getText/start/collect/sendResult/reset/end/simulateResultWatchdog` 只作为 host 验证能力；`sendResult` 必须支持 `{"results":[...]}` 批量译文，一次请求回填多个节点；使用 `inspector --business simpleTree` 辅助核对真实节点和临时译文字段 | 只依赖真机 dump；为每个函数新增独立 PreviewerCLI 命令；把 preview 模拟命令暴露为产品接口；脚本按节点循环多次发送译文 | Preview 环境能快速验证 ArkUI 文本提取、连续翻译增量、译文批量回填、result watchdog 告警和 reset/end 恢复链路，减少真机 SA 依赖；通用 remoteRequest 避免命令膨胀；该能力明确限定为验证工具，不改变正式 innerAPI | 需要 `adapter/preview/entrance`、`ide/tools/previewer` 和 `examples/UISessionTranslate` 脚本配合，SDK 编译和 Host Preview 脚本作为 TASK-007 验证；脚本覆盖初始页面、动态新页面、List 滚动 repeat 文本进入视口、批量回填、result watchdog 和 reset/end |
@@ -476,6 +476,17 @@ Stage 3 实现中的编译验证遵循最小相关目标原则：修改了哪个
 Stage 3 实现应减少重复代码。翻译节点和纯 content change 共享的底层判断或数据处理逻辑，应抽成职责单一的小函数复用，而不是复制分支实现；但不得为复用而新增独立小 manager 类。优先抽取的函数包括：节点有效性判断、实际文本绘制过滤、文本摘要/version 更新、弱引用清理、非正文 DFX 摘要生成、timeout/watchdog task 注册取消。
 
 ## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| PageTranslateNode | 分离期间访问宿主FrameNode | 可能导致UAF问题cpp_crash | Pattern在OnDetachFromMainTree期间仍尝试通过GetHost访问宿主节点 | 严重 | 输出LOGF_ABORT，第一现场崩溃 | "fatal: can't GetHost at detaching period" | 不涉及 |
+| ContentChangeManager | 遍历期间移除子节点 | 可能导致cpp_crash | 在子节点遍历过程中执行移除操作，破坏遍历状态 | 严重 | 输出LOGF_ABORT，第一现场崩溃 | "Try to remove the child([%{public}s][%{public}d]) of " | 不涉及 |
+| TextPattern | 文字绘制指令为空 | 文本不显示 | 字体引擎或开发者代码问题 | 一般 | 上报大数据 | 不涉及 | COMPONENT_EXCEPTION |
+| ContentChangeManager | WeakPtr裸指针使用 | UAF问题 cppcrash | 内部业务通过WeakPtr获取已销毁对象的裸指针使用，WeakPtr的Upgrade应先于裸指针访问 | 严重 | 排查代码中直接使用WeakPtr裸指针的地方并整改为安全的Upgrade方法 | 不涉及 | 不涉及 |
 
 现有 `UIContentServiceProxy::Connect` 在连接时创建 `UiReportStub`，并通过 `report_->SetEventHandler(eventHandler)` 保存 SA 传入的 `EventHandler`。`GetInspectorTree` 已在注册回调后调用 `PostGetInspectorTreeCallbackRemoveTask(timeout)`，通过 EventHandler 投递超时任务；超时后 `HandleInspectorTreeCallbackTimeout` 清理 callback。统一翻译接口沿用该 DFX 模式。
 

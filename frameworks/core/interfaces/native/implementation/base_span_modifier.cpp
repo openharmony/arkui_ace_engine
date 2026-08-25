@@ -60,7 +60,7 @@ void SetTextBackgroundStyleImpl(Ark_NativePointer node,
     }
 }
 void SetBaselineOffsetImpl(Ark_NativePointer node,
-                           const Opt_LengthMetrics* value)
+                           const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

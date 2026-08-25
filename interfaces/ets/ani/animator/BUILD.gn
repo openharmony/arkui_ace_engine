@@ -30,6 +30,7 @@ ohos_shared_library("animator_ani") {
   deps = [ "$ace_root/build:libace_compatible" ]
   external_deps = [
     "napi:ace_napi",
+    "node:node_header_notice",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
   ]

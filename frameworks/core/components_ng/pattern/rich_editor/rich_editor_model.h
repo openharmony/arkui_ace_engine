@@ -28,17 +28,21 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/text/styled_string_change_value.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components/common/properties/text_style_gradient.h"
+
 namespace OHOS::Ace {
+enum class ColorMode;
+
 struct SpanPositionInfo {
     SpanPositionInfo(int32_t index, int32_t start, int32_t end, int32_t offset)
         : spanIndex_(index), spanStart_(start), spanEnd_(end), spanOffset_(offset)
@@ -395,6 +399,7 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
+    virtual ColorMode GetColorMode() const = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {

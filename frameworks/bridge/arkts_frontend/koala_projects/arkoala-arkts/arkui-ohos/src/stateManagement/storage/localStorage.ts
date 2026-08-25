@@ -66,19 +66,9 @@ export class LocalStorage {
                     }
                 }
             } else {
-                const cls = Class.of(initializingProperties as Object);
-                const fields = reflect.getInstanceFieldsRecursive(cls);
-                const getters = reflect.getInstanceGettersRecursive(cls);
-                for (const getter of getters) {
-                    const value = getter.invoke(initializingProperties as Object);
-                    if (value) {
-                        this.setOrCreate(getter.getName().substring(6), value);
-                    }
-                }
-                for (const field of fields) {
-                    const value = field.getValue(initializingProperties as Object);
-                    if (value) {
-                        this.setOrCreate(field.getName(), value);
+                for (const entry of Object.entries(initializingProperties)) {
+                    if (entry && entry[1]) {
+                        this.setOrCreate(entry[0], entry[1]);
                     }
                 }
             }

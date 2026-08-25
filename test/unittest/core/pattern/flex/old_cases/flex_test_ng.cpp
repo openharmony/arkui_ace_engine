@@ -582,7 +582,7 @@ HWTEST_F(FlexTestNg, FlexRowLayoutTest003, TestSize.Level0)
     childLayoutConstraint.maxSize = SizeF(RK356_WIDTH, ROW_HEIGHT);
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
     /* corresponding ets code:
-        Flex({direction: FlexDirection.Reverse, alignItems: ItemAlign.Start}) {
+        Flex({direction: FlexDirection.RowReverse, alignItems: ItemAlign.Start}) {
             Text('1').width('20%').height(40).backgroundColor(0xF5DEB3)
             Text('2').width('20%').height(40).backgroundColor(0xD2B48C)
             Text('3').width('20%').height(40).backgroundColor(0xF5DEB3)
@@ -1292,7 +1292,7 @@ HWTEST_F(FlexTestNg, FlexRowLayoutTest009, TestSize.Level0)
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
     /* corresponding ets code:
-        Flex({direction: FlexDirection.Row, ItemAlign.Baseline, justifyContent: FlexAlign.SpaceEvenly}) {
+        Flex({direction: FlexDirection.Row, alignItems: ItemAlign.Baseline, justifyContent: FlexAlign.SpaceEvenly}) {
             Text('1').width('20%').height(40).backgroundColor(0xDDDDDD)
             Text('2').width('20%').height(40).backgroundColor(0xDFFFFF)
             Text('3').width('20%').height(40).backgroundColor(0xF5DEB3)
@@ -1377,7 +1377,7 @@ HWTEST_F(FlexTestNg, FlexRowLayoutTest010, TestSize.Level0)
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
     /* corresponding ets code:
-        Flex({direction: FlexDirection.Row, ItemAlign.Start, justifyContent: FlexAlign.SpaceAround}) {
+        Flex({direction: FlexDirection.Row, alignItems: ItemAlign.Start, justifyContent: FlexAlign.SpaceAround}) {
             Text('1').width('20%').height(40).backgroundColor(0xDDDDDD)
             Text('2').width('20%').height(40).backgroundColor(0xDFFFFF)
             Text('3').width('20%').height(40).backgroundColor(0xF5DEB3)

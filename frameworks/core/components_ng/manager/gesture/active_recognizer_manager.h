@@ -24,6 +24,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -69,7 +70,12 @@ public:
     void DumpRecognizerStates() const;
 
     void CleanFinishedRecognizersWithStaleFingers(
-        int32_t currentFingerId, const std::unordered_map<int32_t, int32_t>& downFingerIds);
+        const std::unordered_map<int32_t, int32_t>& downFingerIds,
+        const RefPtr<NG::GestureReferee>& currentReferee);
+
+    void CleanFinishedRecognizersWithStaleFingersForPost(
+        const std::unordered_map<int32_t, int32_t>& downFingerIds,
+        const RefPtr<NG::GestureReferee>& currentReferee);
 
 private:
     bool CheckPendingTimeout(const RefPtr<NGGestureRecognizer>& recognizer, const RecognizerInfo& info);

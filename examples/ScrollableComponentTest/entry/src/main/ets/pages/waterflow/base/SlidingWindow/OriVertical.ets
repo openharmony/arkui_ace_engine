@@ -143,7 +143,6 @@ struct WaterFlowDemo33 {
         .width(50)
         .height(100)
         .align(Alignment.Center)
-      // .margin({ top: 20,bottom:5 })
     }
   }
 
@@ -294,7 +293,6 @@ struct WaterFlowDemo33 {
             }
             .padding(this.paddings[this.paddingIndex])
             .width('100%')
-            //.aspectRatio(this.itemHeightArray[item % 100] / this.itemWidthArray[item%100])
             .backgroundColor(this.colors[item % this.colors.length])
           }, (item: string) => item)
         }

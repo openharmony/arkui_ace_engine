@@ -127,6 +127,7 @@ void JSTabsControllerBinding::JSBind(BindingTarget globalObj)
     JSClass<JSTabsController>::CustomMethod("preloadItems", &JSTabsControllerBinding::PreloadItems);
     JSClass<JSTabsController>::CustomMethod("setTabBarTranslate", &JSTabsControllerBinding::SetTabBarTranslate);
     JSClass<JSTabsController>::CustomMethod("setTabBarOpacity", &JSTabsControllerBinding::SetTabBarOpacity);
+    JSClass<JSTabsController>::CustomMethod("getBarDisplayMode", &JSTabsControllerBinding::GetBarDisplayMode);
     JSClass<JSTabsController>::Bind(globalObj, JSTabsControllerBinding::Constructor, JSTabsController::Destructor);
 }
 
@@ -317,4 +318,14 @@ void JSTabsController::UpdateTabBarHiddenOffset(float offset)
     }
 }
 
+void JSTabsControllerBinding::GetBarDisplayMode(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    auto* modifier = GetTabsControllerModifier();
+    if (!modifier || !controllerHandle_) {
+        return;
+    }
+    int32_t displayMode = modifier->getBarDisplayMode(controllerHandle_);
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(displayMode)));
+}
 } // namespace OHOS::Ace::Framework

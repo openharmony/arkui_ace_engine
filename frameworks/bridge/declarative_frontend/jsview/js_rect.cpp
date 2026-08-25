@@ -23,14 +23,17 @@
 namespace {
 OHOS::Ace::NG::RectModelNG* GetRectModel()
 {
-    static OHOS::Ace::NG::RectModelNG* cachedModel = nullptr;
-    if (cachedModel == nullptr) {
+    static OHOS::Ace::NG::RectModelNG* cachedModel = []() -> OHOS::Ace::NG::RectModelNG* {
         auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Rect");
         if (module == nullptr) {
             LOGF_ABORT("Can't find rect dynamic module");
         }
-        cachedModel = reinterpret_cast<OHOS::Ace::NG::RectModelNG*>(module->GetModel());
-    }
+        auto* model = reinterpret_cast<OHOS::Ace::NG::RectModelNG*>(module->GetModel());
+        if (model == nullptr) {
+            LOGF_ABORT("Rect dynamic module GetModel returned null");
+        }
+        return model;
+    }();
     return cachedModel;
 }
 } // namespace
@@ -103,7 +106,9 @@ void JSRect::SetRadiusValue(
     const RefPtr<ShapeRect>& shapeRect, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index)
 {
     if (shapeRect) {
-        GetRectModel()->SetShapeRectRadius(shapeRect, radiusX, radiusY, index);
+        auto* model = GetRectModel();
+        CHECK_NULL_VOID(model);
+        model->SetShapeRectRadius(shapeRect, radiusX, radiusY, index);
     }
 }
 

@@ -255,9 +255,7 @@ export class StateMgmtDFX {
     private static dumpObjectProperty(value: Object): DumpObjectType | string {
         const tempObj: DumpObjectType = new Array<[string, Any]>();
         try {
-            let cls = Class.of(value);
-            let properties: string[] = [...reflect.getInstanceFieldsRecursive(cls).map<string>(field => field.getName()),
-                ...reflect.getInstanceGettersRecursive(cls).map<string>(getter => getter.getName().substring('%%get-'.length))];
+            let properties: string[] = Object.getOwnPropertyNames(value);
             properties
                 .slice(0, StateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
                 .forEach((varName: string) => {
@@ -300,7 +298,7 @@ export class StateMgmtDFX {
             }
 
             // Get original object
-            rawValue = UIUtils.getTarget(rawValue as Object) as T;
+            rawValue = UIUtils.getTarget(rawValue);
 
             if (rawValue instanceof Map) {
                 return StateMgmtDFX.dumpMap(rawValue as Any as Map<Object, Object>) as Any;

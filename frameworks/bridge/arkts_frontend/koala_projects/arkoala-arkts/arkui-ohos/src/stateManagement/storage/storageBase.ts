@@ -173,7 +173,7 @@ export class StorageBase {
     ): StorageLinkDecoratedVariable<T> | undefined {
         let sp = this.repoAllTypes.get(key);
         if (sp === undefined) {
-            if (!this.createAndSet<T>(key, defaultValue, decoratorName, owner)) {
+            if (!this.createAndSet<T>(key, defaultValue, decoratorName)) {
                 StateMgmtConsole.log(`makeStorageLink: key '${key}' is new, createAndSet failed`);
                 return undefined;
             }

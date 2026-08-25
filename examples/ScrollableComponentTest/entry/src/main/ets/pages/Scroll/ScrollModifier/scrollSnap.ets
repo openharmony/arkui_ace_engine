@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import { common } from '@kit.AbilityKit';
-
-class CustomModifier1 implements AttributeModifier<ScrollAttribute> {
+export class CustomModifier1 implements AttributeModifier<ScrollAttribute> {
   public changeIndex: number = 0;
   public changeList: (number | Resource | undefined | null)[] = [
     200, 330, undefined, 200, null,
@@ -40,7 +38,6 @@ struct NestedScroll11 {
   private scrollerForScroll: Scroller = new Scroller();
   private scrollerForList: Scroller = new Scroller();
   @State isDark: boolean = false;
-  @State context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State vOutSetValueTwo: number = 40;
   @State modifier1: CustomModifier1 = new CustomModifier1();
   scroller: Scroller = new Scroller;

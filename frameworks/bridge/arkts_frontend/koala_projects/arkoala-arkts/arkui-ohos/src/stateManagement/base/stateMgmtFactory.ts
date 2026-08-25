@@ -39,6 +39,7 @@ import {
     IStoragePropRefDecoratedVariable,
     ILocalStorageLinkDecoratedVariable,
     LinkSourceType,
+    SystemEnvKey,
     IMonitorPathInfo,
     IMonitor,
     IMonitorDecoratedVariable,
@@ -48,7 +49,6 @@ import {
     ReusePoolOwnership,
     EnvOptions,
     ICustomEnvDecoratedVariable,
-    SystemEnvKey,
     CustomEnvOptions
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';

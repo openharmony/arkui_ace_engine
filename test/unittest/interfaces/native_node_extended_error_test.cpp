@@ -18,6 +18,7 @@
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "node_model.h"
+#include "styled_string.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -367,6 +368,80 @@ HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterPositionAtCo
 }
 
 /**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterPositionAtCoordinate_NullOutPos_003
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate with null outPos.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return instead of crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterPositionAtCoordinate_NullOutPos_003, TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    ArkUI_Node node;
+    node.type = ARKUI_NODE_TEXT;
+    layoutManager->node = &node;
+    ArkUI_ErrorCode result =
+        OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(layoutManager, 0.0, 0.0, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding_NullOutPos_001
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding with null outPos.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return instead of crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding_NullOutPos_001,
+    TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    ArkUI_Node node;
+    node.type = ARKUI_NODE_TEXT;
+    layoutManager->node = &node;
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding(
+        layoutManager, 0.0, 0.0, OH_ARKUI_TEXT_ENCODING_UTF8, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding_NullManager_002
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding with null layoutManager.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding_NullManager_002,
+    TestSize.Level1)
+{
+    OH_Drawing_PositionAndAffinity* outPos = nullptr;
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding(
+        nullptr, 0.0, 0.0, OH_ARKUI_TEXT_ENCODING_UTF8, &outPos);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding_NullNode_003
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding with null node.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding_NullNode_003,
+    TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    layoutManager->node = nullptr;
+    OH_Drawing_PositionAndAffinity* outPos = nullptr;
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding(
+        layoutManager, 0.0, 0.0, OH_ARKUI_TEXT_ENCODING_UTF8, &outPos);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
  * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetGlyphRangeForCharacterRange_NullManager_001
  * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange with null layoutManager.
  *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return.
@@ -430,6 +505,168 @@ HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterRangeForGlyp
     OH_Drawing_Range* outActualGlyphRange = nullptr;
     ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(
         layoutManager, nullptr, &outCharRange, &outActualGlyphRange);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetGlyphRangeForCharacterRange_NullOutGlyphRange_003
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange with null outGlyphRange.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return instead of crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetGlyphRangeForCharacterRange_NullOutGlyphRange_003,
+    TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    ArkUI_Node node;
+    node.type = ARKUI_NODE_TEXT;
+    layoutManager->node = &node;
+    ArkUI_Boundary dummyRange(0, 0);
+    OH_Drawing_Range* charRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);
+    ArkUI_ErrorCode result =
+        OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(layoutManager, charRange, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterRangeForGlyphRange_NullOutCharRange_003
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange with null outCharRange.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return instead of crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterRangeForGlyphRange_NullOutCharRange_003, TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    ArkUI_Node node;
+    node.type = ARKUI_NODE_TEXT;
+    layoutManager->node = &node;
+    ArkUI_Boundary dummyRange(0, 0);
+    OH_Drawing_Range* glyphRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);
+    ArkUI_ErrorCode result =
+        OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(layoutManager, glyphRange, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding_NullManager_001
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding with null layoutManager.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding_NullManager_001,
+    TestSize.Level1)
+{
+    OH_Drawing_Range* outGlyphRange = nullptr;
+    OH_Drawing_Range* outActualCharRange = nullptr;
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding(
+        nullptr, nullptr, OH_ARKUI_TEXT_ENCODING_UTF8, &outGlyphRange, &outActualCharRange);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding_NullNode_002
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding with null node.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding_NullNode_002,
+    TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    layoutManager->node = nullptr;
+    OH_Drawing_Range* outGlyphRange = nullptr;
+    OH_Drawing_Range* outActualCharRange = nullptr;
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding(
+        layoutManager, nullptr, OH_ARKUI_TEXT_ENCODING_UTF8, &outGlyphRange, &outActualCharRange);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name:
+ * NativeNodeExtendedErrorTest_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding_NullOutGlyphRange_003
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding with null outGlyphRange.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return instead of crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest,
+    TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding_NullOutGlyphRange_003, TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    ArkUI_Node node;
+    node.type = ARKUI_NODE_TEXT;
+    layoutManager->node = &node;
+    ArkUI_Boundary dummyRange(0, 0);
+    OH_Drawing_Range* charRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding(
+        layoutManager, charRange, OH_ARKUI_TEXT_ENCODING_UTF8, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding_NullManager_001
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding with null layoutManager.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding_NullManager_001,
+    TestSize.Level1)
+{
+    OH_Drawing_Range* outCharRange = nullptr;
+    OH_Drawing_Range* outActualGlyphRange = nullptr;
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding(
+        nullptr, nullptr, OH_ARKUI_TEXT_ENCODING_UTF8, &outCharRange, &outActualGlyphRange);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding_NullNode_002
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding with null node.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding_NullNode_002,
+    TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    layoutManager->node = nullptr;
+    OH_Drawing_Range* outCharRange = nullptr;
+    OH_Drawing_Range* outActualGlyphRange = nullptr;
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding(
+        layoutManager, nullptr, OH_ARKUI_TEXT_ENCODING_UTF8, &outCharRange, &outActualGlyphRange);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
+
+/**
+ * @tc.name:
+ * NativeNodeExtendedErrorTest_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding_NullOutCharRange_003
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding with null outCharRange.
+ *           Verifies CHECK_NULL_RETURN_WITH_MESSAGE triggers error return instead of crashing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding_NullOutCharRange_003,
+    TestSize.Level1)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    ASSERT_NE(layoutManager, nullptr);
+    ArkUI_Node node;
+    node.type = ARKUI_NODE_TEXT;
+    layoutManager->node = &node;
+    ArkUI_Boundary dummyRange(0, 0);
+    OH_Drawing_Range* glyphRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);
+    ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding(
+        layoutManager, glyphRange, OH_ARKUI_TEXT_ENCODING_UTF8, nullptr, nullptr);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
     delete layoutManager;
 }

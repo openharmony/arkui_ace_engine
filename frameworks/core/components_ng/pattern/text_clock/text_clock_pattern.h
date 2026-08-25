@@ -126,7 +126,6 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
     void OnColorModeChange(uint32_t colorMode) override;
     void UpdateTextColor(const Color& color);
     void UpdateFontSize(const CalcDimension& fontSize);

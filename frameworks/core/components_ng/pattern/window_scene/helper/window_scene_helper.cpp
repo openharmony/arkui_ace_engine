@@ -23,7 +23,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"

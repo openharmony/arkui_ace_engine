@@ -60,8 +60,13 @@ RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType 
         case ToggleType::CHECKBOX: {
             auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
             CHECK_NULL_RETURN(checkboxModifier, nullptr);
-            return AceType::Claim(
-                reinterpret_cast<FrameNode*>(checkboxModifier->createToggleCheckboxFrameNode(nodeId)));
+            auto rawFrameNode =
+                reinterpret_cast<FrameNode*>(checkboxModifier->createToggleCheckboxFrameNode(nodeId));
+            CHECK_NULL_RETURN(rawFrameNode, nullptr);
+            auto frameNode = AceType::Claim(rawFrameNode);
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            frameNode->DecRefCount();
+            return frameNode;
         }
         case ToggleType::BUTTON: {
             auto buttonModifier = NodeModifier::GetButtonCustomModifier();

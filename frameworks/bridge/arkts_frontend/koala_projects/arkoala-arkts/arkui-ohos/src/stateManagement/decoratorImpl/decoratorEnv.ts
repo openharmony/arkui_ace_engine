@@ -15,8 +15,19 @@
 
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
-import { EnvOptions, IEnvDecoratedVariable, IVariableOwner, OBSERVE, SystemEnvKey, ReadonlyEnvKey } from '../decorator';
+import {
+    EnvOptions,
+    IEnvDecoratedVariable,
+    IVariableOwner,
+    OBSERVE,
+    SystemEnvKey,
+    ReadonlyEnvKey,
+    WatchFuncType,
+    WatchIdType,
+} from '../decorator';
 import { DecoratedVariableBase } from './decoratorBase';
+import { WatchFunc } from './decoratorWatch';
+import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { default as uiObserver } from '@ohos/arkui/observer';
@@ -37,6 +48,8 @@ export interface IEnvironmentValue<T> extends IEnvironmentValueBase {
     get(): T;
     shouldAddRef(): boolean;
     reConstructor(instanceId: int32): void;
+    addChangeListener(cb: () => void): void;
+    removeChangeListener(cb: () => void): void;
 }
 
 export interface IEnvVariable {
@@ -50,6 +63,7 @@ export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBr
     private heightBreakPointBackingValue: IBackingValue<HeightBreakpoint>;
     private uiObserver: UIObserver;
     private instanceId: int32;
+    private changeCallbacks_: Set<() => void> = new Set<() => void>();
 
     constructor(instanceId: int32) {
         this.instanceId = instanceId;
@@ -73,6 +87,19 @@ export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBr
 
     public breakPointCallback(breakPoint: uiObserver.WindowSizeLayoutBreakpointInfo): void {
         this.set(breakPoint);
+        this.notifyChanged();
+    }
+
+    public addChangeListener(cb: () => void): void {
+        this.changeCallbacks_.add(cb);
+    }
+
+    public removeChangeListener(cb: () => void): void {
+        this.changeCallbacks_.delete(cb);
+    }
+
+    private notifyChanged(): void {
+        this.changeCallbacks_.forEach((cb: () => void) => cb());
     }
 
     get widthBreakpoint(): WidthBreakpoint {
@@ -127,6 +154,7 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
     private navigationIndicatorBackingValue: IBackingValue<window.AvoidArea>;
     private win: window.Window;
     private instanceId: int32;
+    private changeCallbacks_: Set<() => void> = new Set<() => void>();
     
     constructor(instanceId: int32) {
         this.instanceId = instanceId;
@@ -154,6 +182,19 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
 
     public avoidAreaChangeCallback(avoidArea: window.AvoidAreaOptions): void {
         this.set(avoidArea);
+        this.notifyChanged();
+    }
+
+    public addChangeListener(cb: () => void): void {
+        this.changeCallbacks_.add(cb);
+    }
+
+    public removeChangeListener(cb: () => void): void {
+        this.changeCallbacks_.delete(cb);
+    }
+
+    private notifyChanged(): void {
+        this.changeCallbacks_.forEach((cb: () => void) => cb());
     }
 
     public shouldAddRef(): boolean {
@@ -253,6 +294,7 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
     private context: UIContext;
     private areaInPx: Map<window.AvoidAreaType, window.AvoidArea> = new Map<window.AvoidAreaType, window.AvoidArea>();
     private uiObserver: UIObserver;
+    private changeCallbacks_: Set<() => void> = new Set<() => void>();
 
     constructor(instanceId: int32) {
         this.instanceId = instanceId;
@@ -388,6 +430,7 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
             default:
                 break;
         }
+        this.notifyChanged();
     }
 
     public densityUpdateCallback(): void {
@@ -402,6 +445,19 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
         this.cutout = this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_CUTOUT)!);
         this.keyboard = this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_KEYBOARD)!);
         this.navigationIndicator = this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR)!);
+        this.notifyChanged();
+    }
+
+    public addChangeListener(cb: () => void): void {
+        this.changeCallbacks_.add(cb);
+    }
+
+    public removeChangeListener(cb: () => void): void {
+        this.changeCallbacks_.delete(cb);
+    }
+
+    private notifyChanged(): void {
+        this.changeCallbacks_.forEach((cb: () => void) => cb());
     }
 
     public get(): window.UIEnvWindowAvoidAreaInfoVP {
@@ -422,6 +478,7 @@ export class WindowSizePxEnv implements window.Size, IEnvironmentValue<window.Si
     private heightBackingValue: IBackingValue<int>;
     private win: window.Window;
     private instanceId: int32;
+    private changeCallbacks_: Set<() => void> = new Set<() => void>();
     
     constructor(instanceId: int32) {
         this.instanceId = instanceId;
@@ -477,11 +534,24 @@ export class WindowSizePxEnv implements window.Size, IEnvironmentValue<window.Si
 
     public sizeChangeCallback(size: window.Size): void {
         this.set(size);
+        this.notifyChanged();
     }
 
     private set(size: window.Size): void {
         this.width = size.width;
         this.height = size.height;
+    }
+
+    public addChangeListener(cb: () => void): void {
+        this.changeCallbacks_.add(cb);
+    }
+
+    public removeChangeListener(cb: () => void): void {
+        this.changeCallbacks_.delete(cb);
+    }
+
+    private notifyChanged(): void {
+        this.changeCallbacks_.forEach((cb: () => void) => cb());
     }
 
     public get(): window.Size {
@@ -504,7 +574,8 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
     private heightPx: int = 0;
     private uiObserver: UIObserver;
     private instanceId: int32;
-    
+    private changeCallbacks_: Set<() => void> = new Set<() => void>();
+
     constructor(instanceId: int32) {
         this.instanceId = instanceId;
         this.context = UIContextUtil.getOrCreateUIContextById(this.instanceId);
@@ -572,6 +643,19 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
             width: this.context.px2vp(this.widthPx),
             height: this.context.px2vp(this.heightPx)
         } as window.SizeInVP);
+        this.notifyChanged();
+    }
+
+    public addChangeListener(cb: () => void): void {
+        this.changeCallbacks_.add(cb);
+    }
+
+    public removeChangeListener(cb: () => void): void {
+        this.changeCallbacks_.delete(cb);
+    }
+
+    private notifyChanged(): void {
+        this.changeCallbacks_.forEach((cb: () => void) => cb());
     }
 
     public densityChangeCallback(density: uiObserver.DensityInfo): void {
@@ -657,10 +741,24 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
     // need to register to view's dispatch function
     private systemEnvValueCallback: ((value: Any) => void) | undefined;
 
+    public readonly _watchFuncs: Map<WatchIdType, WatchFunc> = new Map<WatchIdType, WatchFunc>();
+    protected onObservedObjectChangeExecWatchFuncs_: WatchFunc;
+    private envValueChangeCallback_: (() => void) | undefined;
+
     constructor(owningView: IVariableOwner, envValue: string | SystemEnvKey<T>, varName: string, envOptions?: EnvOptions<T>) {
         super('@Env', owningView, varName);
         this.owningViewInternal = owningView;
         this.envValue = envValue;
+
+        const watchFunc: WatchFuncType | undefined = envOptions?.watchFunc;
+        if (watchFunc) {
+            const watchFuncInstance = new WatchFunc(watchFunc);
+            this._watchFuncs.set(watchFuncInstance.id(), watchFuncInstance);
+        }
+        this.onObservedObjectChangeExecWatchFuncs_ = new WatchFunc(this.execWatchFuncs);
+        this.envValueChangeCallback_ = (): void => {
+          this.execWatchFuncs();
+        };
 
         const isSystemEnvKey = !(typeof envValue === 'string');
 
@@ -808,6 +906,25 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         return;
     }
 
+    public isViewActive(): boolean {
+        return this.owningViewInternal!.__isViewActive__Internal();
+    }
+
+    public execWatchFuncs(_: string = ''): void {
+        if (this.owningViewInternal && !this.isViewActive()) {
+            StateUpdateLoop.addFreezeTask(
+                this.owningViewInternal!.getUniqueId(),
+                this.onObservedObjectChangeExecWatchFuncs_.id()
+            );
+        } else {
+            if (this._watchFuncs.size > 0) {
+                this._watchFuncs.forEach((watchFunc: WatchFunc) => {
+                    watchFunc.execute(this.varName);
+                });
+            }
+        }
+    }
+
     public shouldAddRef(): boolean {
         return OBSERVE.renderingComponent > 0;
     }
@@ -820,12 +937,49 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
     set finalResult(newValue: IEnvironmentValue<T> | undefined) {
         const oldFinalResultValue = this.finalResultBackingValue!.get(false);
         if (oldFinalResultValue !== newValue) {
+            const cb = this.envValueChangeCallback_;
+            if (cb !== undefined) {
+                if (oldFinalResultValue !== undefined) {
+                    oldFinalResultValue.removeChangeListener(cb);
+                }
+                if (newValue !== undefined) {
+                    newValue.addChangeListener(cb);
+                }
+            }
             this.finalResultBackingValue!.setNoCheck(newValue);
         }
     }
 
     public info(): string {
         return this.varName;
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        this._watchFuncs.forEach((watch: WatchFunc, id: WatchIdType) => {
+            WatchFunc.watchId2WatchFunc.delete(id);
+            watch.aboutToBeDeleted();
+        });
+        this._watchFuncs.clear();
+        WatchFunc.watchId2WatchFunc.delete(this.onObservedObjectChangeExecWatchFuncs_.id());
+        this.onObservedObjectChangeExecWatchFuncs_.aboutToBeDeleted();
+
+        const cb = this.envValueChangeCallback_;
+        if (cb === undefined) {
+            super.aboutToBeDeletedInternal();
+            return;
+        }
+
+        if (this.envSystemEnvString) {
+            this.unregisterSystemEnvKey();
+        } else {
+            const current = this.finalResult;
+            if (current !== undefined) {
+                current.removeChangeListener(cb);
+            }
+        }
+        this.envValueChangeCallback_ = undefined;
+
+        super.aboutToBeDeletedInternal();
     }
 
     public get(): T {
@@ -844,6 +998,7 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         }
         if (oldValue !== (value as T)) {
             this.systemEnvKeyBackingValue!.setNoCheck(value as T);
+            this.execWatchFuncs();
         }
     }
 

@@ -446,11 +446,11 @@ virtual void SendPageText(int32_t nodeId, const std::string& text, int64_t versi
 |------|-----------|----------|------|
 | 性能 | Start 前不启用 ArkUI 文本变化主动上报，且不写 translate 容器/不算 version/hash/不投递任务；Start 后相同内容不重复上报 | Manager/ContentChangeManager 单测 | test/unittest |
 | 内存 | End/Reset/SA death 后 manager 会话状态和 Pattern 临时译文清空 | 单测 | test/unittest |
-| 安全 | 对翻译 SA 暴露字段收敛为 nodeId、text、version；日志不打印原文/译文，只打印 nodeId、长度、错误码，UI 内部可附带 scope/changeType/sourceType | 代码审查/单测 | review.md |
+| 安全 | 对翻译 SA 暴露字段收敛为 nodeId、text、version；真实 SA、产品日志和持久化报告不打印原文/译文，只打印 nodeId、长度、错误码，UI 内部可附带 scope/changeType/sourceType。`ui_session_sample`（UISA）是非随版本编译发布的测试 SA，仅允许在受控开发调试中输出截断原文/译文，用于核验 IPC 参数和回调 | 代码审查/单测 | review.md |
 | 可靠性 | nodeId 无效、版本不匹配、SA death 均不导致崩溃或译文残留 | 单测 | test/unittest |
 | IPC | 大文本统一复用现有 `LargeStringAshmem` 共享内存方式传输，不新增分片策略 | IPC 单测/代码审查 | test/unittest |
 | DFX | 单次 Get callback timeout 后必须清 callback、snapshot cache、调用方 pid并记录非正文故障日志；Start 初始无文本不自动 End；原文发送后 5s 未收到译文且 SA 未死亡时必须输出非正文告警日志，不强制恢复原文或结束会话 | DFX 单测 | test/unittest |
-| 问题定位 | sample SA dump 能输出安全摘要和状态；timeout/cleanup 日志可定位 requestId、scope、错误码；Host Preview 脚本能输出 Previewer 日志和 remoteRequest 响应文件 | 真机验证 + Host Preview | release 记录 + `.report` |
+| 问题定位 | UISA dump 在受控开发调试中能输出截断正文、状态，用于观察接口调用是否正确；真实 SA 的 timeout/cleanup 日志只定位 requestId、scope、错误码；Host Preview 脚本能输出 Previewer 日志和 remoteRequest 响应文件 | 真机验证 + Host Preview | release 记录 + `.report` |
 
 ## 全局特性影响
 

@@ -431,7 +431,37 @@ public:
     {
         return fontPrimary_;
     }
-    
+
+    // For Tabs's SideBar
+    const Dimension& GetSideBarListItemCornerRadius() const
+    {
+        return sideBarListItemCornerRadius_;
+    }
+    const Color& GetSideBarListItemActivedColor() const
+    {
+        return sideBarListItemActivedColor_;
+    }
+    const Color& GetSideBarListItemHoverColor() const
+    {
+        return sideBarListItemHoverColor_;
+    }
+    const Color& GetSideBarListItemPressedColor() const
+    {
+        return sideBarListItemPressedColor_;
+    }
+    const Color& GetSideBarListItemFocusColor() const
+    {
+        return sideBarListItemFocusColor_;
+    }
+    const Dimension& GetSideBarListItemFocusWidth() const
+    {
+        return sideBarListItemFocusWidth_;
+    }
+    const Dimension& GetSideBarListItemLeftRightPadding() const
+    {
+        return sideBarListItemLeftRightPadding_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -515,6 +545,14 @@ protected:
     Color iconPrimary_;
     Color fontEmphasize_;
     Color fontPrimary_;
+
+    Dimension sideBarListItemCornerRadius_;
+    Color sideBarListItemActivedColor_;
+    Color sideBarListItemHoverColor_;
+    Color sideBarListItemPressedColor_;
+    Color sideBarListItemFocusColor_;
+    Dimension sideBarListItemFocusWidth_;
+    Dimension sideBarListItemLeftRightPadding_ = 8.0_vp;
 };
 
 } // namespace OHOS::Ace

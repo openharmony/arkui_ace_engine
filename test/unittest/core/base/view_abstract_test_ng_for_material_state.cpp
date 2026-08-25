@@ -21,6 +21,8 @@
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/render/render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -899,7 +901,7 @@ HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_NoFlags, TestSize.Level1)
     ImmersiveMaterialConfig config;
     config.interactive = false;
     config.colorInvert = false;
-    config.lightEffectOptions = std::nullopt;
+    config.lightEffectOptions = nullptr;
     ViewAbstract::HistogramImmersiveOptions(config);
     EXPECT_FALSE(config.HasLightEffect());
     EXPECT_FALSE(config.interactive);
@@ -921,7 +923,7 @@ HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_LightEffectOnly, TestSize
     ImmersiveMaterialConfig config;
     config.interactive = false;
     config.colorInvert = false;
-    config.lightEffectOptions = LightEffectOptions();
+    config.lightEffectOptions = std::make_shared<LightEffectOptions>();
     ViewAbstract::HistogramImmersiveOptions(config);
     EXPECT_TRUE(config.HasLightEffect());
     EXPECT_FALSE(config.interactive);
@@ -943,7 +945,7 @@ HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_InteractiveOnly, TestSize
     ImmersiveMaterialConfig config;
     config.interactive = true;
     config.colorInvert = false;
-    config.lightEffectOptions = std::nullopt;
+    config.lightEffectOptions = nullptr;
     ViewAbstract::HistogramImmersiveOptions(config);
     EXPECT_TRUE(config.interactive);
     EXPECT_FALSE(config.HasLightEffect());
@@ -965,7 +967,7 @@ HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_ColorInvertOnly, TestSize
     ImmersiveMaterialConfig config;
     config.interactive = false;
     config.colorInvert = true;
-    config.lightEffectOptions = std::nullopt;
+    config.lightEffectOptions = nullptr;
     ViewAbstract::HistogramImmersiveOptions(config);
     EXPECT_TRUE(config.colorInvert);
     EXPECT_FALSE(config.HasLightEffect());
@@ -987,7 +989,7 @@ HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_AllFlags, TestSize.Level1
     ImmersiveMaterialConfig config;
     config.interactive = true;
     config.colorInvert = true;
-    config.lightEffectOptions = LightEffectOptions();
+    config.lightEffectOptions = std::make_shared<LightEffectOptions>();
     ViewAbstract::HistogramImmersiveOptions(config);
     EXPECT_TRUE(config.HasLightEffect());
     EXPECT_TRUE(config.interactive);
@@ -1009,5 +1011,44 @@ HWTEST_F(ViewAbstractTestNg, LowerGearLevel001, TestSize.Level1)
     auto level = UiMaterialLevel::GENTLE;
     MaterialUtils::LowerGearLevel(level, node);
     EXPECT_EQ(level, UiMaterialLevel::SMOOTH);
+}
+
+/**
+ * @tc.name: SetImmersiveOptionsLightEffectDisable001
+ * @tc.desc: Test UninitLightEffect triggers when lightEffect config changes from enabled to disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetImmersiveOptionsLightEffectDisable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set g_uiMaterialLevel to EXQUISITE (fixed, same level throughout).
+     * @tc.steps: step2. Create node with immersive options having lightEffect enabled.
+     * @tc.steps: step3. Call SetImmersiveOptions and verify light properties are set.
+     * @tc.steps: step4. Create new options with disableLightEffect=true, same level.
+     * @tc.steps: step5. Call SetImmersiveOptions again and verify UninitLightEffect was called.
+     * @tc.expected: step5. LightIlluminated is reset (no value) after lightEffect disabled.
+     */
+    auto backupLevel = g_uiMaterialLevel;
+
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto lightOpts = std::make_shared<LightEffectOptions>();
+    auto optionsWithLight = std::make_shared<ImmersiveOptions>();
+    optionsWithLight->interactive = true;
+    optionsWithLight->lightEffectOptions = *lightOpts;
+    optionsWithLight->disableLightEffect = false;
+    ViewAbstract::SetImmersiveOptions(node, optionsWithLight);
+    EXPECT_TRUE(renderContext->GetLightIlluminated().has_value());
+
+    auto optionsNoLight = std::make_shared<ImmersiveOptions>();
+    optionsNoLight->interactive = true;
+    optionsNoLight->disableLightEffect = true;
+    ViewAbstract::SetImmersiveOptions(node, optionsNoLight);
+    EXPECT_FALSE(renderContext->GetLightIlluminated().has_value());
+
+    g_uiMaterialLevel = backupLevel;
 }
 } // namespace OHOS::Ace::NG

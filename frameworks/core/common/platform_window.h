@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PLATFORM_WINDOW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PLATFORM_WINDOW_H
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 
@@ -25,6 +26,12 @@
 
 namespace OHOS::Ace {
 using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
+
+enum class FromWhom : uint8_t {
+    INNER = 0,
+    API = 1,
+};
+
 class AceView;
 class RenderNode;
 
@@ -46,7 +53,7 @@ public:
     // Attach root render node to container
     virtual void SetRootRenderNode(const RefPtr<RenderNode>& root) = 0;
 
-    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom = FromWhom::INNER) {}
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(PlatformWindow);

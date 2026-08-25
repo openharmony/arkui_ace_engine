@@ -112,8 +112,11 @@ void JSVideoControllerBinding::SetCurrentTime(const JSCallbackInfo& args)
     }
 
     SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC;
-    if (args.Length() > 1 && args[1]->IsNumber() && args[1]->ToNumber<uint32_t>() < SEEK_MODE.size()) {
-        seekMode = SEEK_MODE[args[1]->ToNumber<int32_t>()];
+    if (args.Length() > 1 && args[1]->IsNumber()) {
+        int32_t seekModeValue = args[1]->ToNumber<int32_t>();
+        if (seekModeValue >= 0 && static_cast<size_t>(seekModeValue) < SEEK_MODE.size()) {
+            seekMode = SEEK_MODE[seekModeValue];
+        }
     }
 
     const auto& controller = GetController();

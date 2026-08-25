@@ -41,6 +41,11 @@ enum RectHeightPolicy {
     COVER_LINE
 };
 
+enum class TextEncoding : int32_t {
+    UTF8 = 0,
+    UTF16 = 1,
+};
+
 class LeadingMarginSize {
 public:
     LeadingMarginSize() = default;
@@ -317,17 +322,20 @@ public:
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
-    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(const Offset& offset)
+    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(
+        const Offset& offset, TextEncoding encoding = TextEncoding::UTF8)
     {
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
-    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;
     }
-    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;
@@ -347,6 +355,7 @@ public:
     virtual void SetIndents(const std::vector<float>& indents) = 0;
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
     virtual std::u16string GetParagraphText() = 0;
+    virtual size_t GetParagraphTextLength() const = 0;
     virtual const ParagraphStyle& GetParagraphStyle() const = 0;
     // interfaces for pass on Symbol Animation interface
     virtual void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) = 0;

@@ -2630,6 +2630,20 @@ void SetSwiperIndicatorWithIcon(
     ApplySwiperIndicatorWithIcon(node, indicatorStr, resObjs, indicatorIconRawPtr);
 }
 
+void SetSwiperIgnoreHiddenItem(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIgnoreHiddenItem(frameNode, value);
+}
+
+void ResetSwiperIgnoreHiddenItem(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIgnoreHiddenItem(frameNode, false);
+}
+
 #ifndef CROSS_PLATFORM
 OHOS::Ace::SwiperModel* GetSwiperModelImpl()
 {
@@ -3483,6 +3497,12 @@ void SetJsSwiperOnClickImpl(ArkUINodeHandle node, ArkUI_VoidPtr clickFunc)
 void SetSwiperIndicatorWithIconImpl(
     ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs, const void* indicatorIconRawPtr)
 {}
+
+void SetSwiperIgnoreHiddenItemImpl(ArkUINodeHandle node, ArkUI_Bool value)
+{}
+
+void ResetSwiperIgnoreHiddenItemImpl(ArkUINodeHandle node)
+{}
 #endif
 
 namespace NodeModifier {
@@ -3643,6 +3663,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperIndexForJs = SetSwiperIndexForJs,
         .setJsSwiperRemoteMessage = SetJsSwiperRemoteMessage,
         .setJsSwiperOnClick = SetJsSwiperOnClick,
+        .setSwiperIgnoreHiddenItem = SetSwiperIgnoreHiddenItem,
+        .resetSwiperIgnoreHiddenItem = ResetSwiperIgnoreHiddenItem,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3801,6 +3823,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperIndexForJs = SetSwiperIndexForJsImpl,
         .setJsSwiperRemoteMessage = SetJsSwiperRemoteMessageImpl,
         .setJsSwiperOnClick = SetJsSwiperOnClickImpl,
+        .setSwiperIgnoreHiddenItem = SetSwiperIgnoreHiddenItemImpl,
+        .resetSwiperIgnoreHiddenItem = ResetSwiperIgnoreHiddenItemImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

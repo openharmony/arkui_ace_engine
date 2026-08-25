@@ -36,7 +36,7 @@ class LineHeightStyleAccessorTest
 public:
     void* CreatePeerInstance() override
     {
-        auto metrics = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_HEIGHT));
+        auto metrics = Converter::ArkValue<Ark_LengthMetricsProxy>(Dimension(TEST_HEIGHT));
         return accessor_->construct0(&metrics);
     }
     void DestroyPeer(LineHeightStylePeer* peer)
@@ -62,7 +62,7 @@ HWTEST_F(LineHeightStyleAccessorTest, getLineHeightTest, TestSize.Level1)
 HWTEST_F(LineHeightStyleAccessorTest, construct1TestNormalValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct1, nullptr);
-    auto metrics = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_HEIGHT));
+    auto metrics = Converter::ArkValue<Ark_LengthMetricsProxy>(Dimension(TEST_HEIGHT));
     Ark_Float64 multiple = TEST_MULTIPLE;
     auto peer = accessor_->construct1(&metrics, multiple);
     ASSERT_NE(peer, nullptr);

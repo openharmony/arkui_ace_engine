@@ -60,7 +60,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0 = valueTmpValue as MenuItemOptions
                 MenuItemOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof CustomBuilder) {
+            } else if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))

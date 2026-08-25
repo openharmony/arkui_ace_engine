@@ -159,11 +159,11 @@ class EntryComponent extends ExtendableComponent {
         // @State nothing, can not update from parent
     }
 
-    incrPropB() {
+    incrPropB(): void {
       this.stateA.propB += 1;
     }
 
-    resetName() {
+    resetName(): void {
       this.stateA.propA = this.stateA.propA+'_A'
     }
 
@@ -171,7 +171,7 @@ class EntryComponent extends ExtendableComponent {
       this.stateA = new ClassA('newObject', 1101)
     }
 
-    build() {
+    build(): void {
     }
 }
 

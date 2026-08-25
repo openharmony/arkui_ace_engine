@@ -27,9 +27,9 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -1354,9 +1354,9 @@ void CalendarDialogPattern::HandleEntryLayoutChange()
             auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
             CHECK_NULL_VOID(pattern);
             node->dialogOffset_ = pattern->CalculateDialogOffset();
-            auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
-            CHECK_NULL_VOID(dialogLayoutProp);
-            dialogLayoutProp->UpdateDialogOffset(DimensionOffset(node->dialogOffset_));
+            const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+            CHECK_NULL_VOID(dialogInnerModifier);
+            dialogInnerModifier->updateDialogOffset(dialogNode, DimensionOffset(node->dialogOffset_));
             dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         });
     }

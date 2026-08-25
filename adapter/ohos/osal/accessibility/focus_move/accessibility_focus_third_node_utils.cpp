@@ -65,6 +65,12 @@ bool ThirdRulesCheckNode::GetPropDesc(Accessibility::PropValue& value)
 bool ThirdRulesCheckNode::GetPropAccessibilityText(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
+    auto customProperty = GetCustomProperty();
+    if (customProperty && !customProperty->GetAccessibilityText().empty()) {
+        value.valueType = Accessibility::ValueType::STRING;
+        value.valueStr = customProperty->GetAccessibilityText();
+        return true;
+    }
     value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetAccessibilityText();
     return true;
@@ -73,6 +79,12 @@ bool ThirdRulesCheckNode::GetPropAccessibilityText(Accessibility::PropValue& val
 bool ThirdRulesCheckNode::GetPropType(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
+    auto customProperty = GetCustomProperty();
+    if (customProperty && !customProperty->GetRole().empty()) {
+        value.valueType = Accessibility::ValueType::STRING;
+        value.valueStr = customProperty->GetRole();
+        return true;
+    }
     value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetComponentType();
     return true;
@@ -81,6 +93,12 @@ bool ThirdRulesCheckNode::GetPropType(Accessibility::PropValue& value)
 bool ThirdRulesCheckNode::GetPropAccessibilityLevel(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
+    auto customProperty = GetCustomProperty();
+    if (customProperty && !customProperty->GetAccessibilityLevel().empty()) {
+        value.valueType = Accessibility::ValueType::STRING;
+        value.valueStr = customProperty->GetAccessibilityLevel();
+        return true;
+    }
     value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = nodeInfo_->GetAccessibilityLevel();
     return true;
@@ -89,6 +107,12 @@ bool ThirdRulesCheckNode::GetPropAccessibilityLevel(Accessibility::PropValue& va
 bool ThirdRulesCheckNode::GetPropAccessibilityGroup(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
+    auto customProperty = GetCustomProperty();
+    if (customProperty) {
+        value.valueType = Accessibility::ValueType::BOOL;
+        value.valueBool = customProperty->GetAccessibilityGroup();
+        return true;
+    }
     value.valueType = Accessibility::ValueType::BOOL;
     value.valueBool = nodeInfo_->GetAccessibilityGroup();
     return true;
@@ -97,6 +121,12 @@ bool ThirdRulesCheckNode::GetPropAccessibilityGroup(Accessibility::PropValue& va
 bool ThirdRulesCheckNode::GetPropIsEnable(Accessibility::PropValue& value)
 {
     CHECK_NULL_RETURN(nodeInfo_, false);
+    auto customProperty = GetCustomProperty();
+    if (customProperty) {
+        value.valueType = Accessibility::ValueType::BOOL;
+        value.valueBool = customProperty->GetEnabled();
+        return true;
+    }
     value.valueType = Accessibility::ValueType::BOOL;
     value.valueBool = nodeInfo_->IsEnabled();
     return true;

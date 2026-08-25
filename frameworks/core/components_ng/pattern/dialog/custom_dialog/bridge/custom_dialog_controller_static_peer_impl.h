@@ -74,7 +74,7 @@ public:
         Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetOnWillDisappearExtender(
         Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
-    void SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance);
+    void SetKeyboardAvoidDistance(Opt_LengthMetricsProxy keyboardAvoidDistance);
     void SetLevelMode(Opt_Boolean showInSubWindow, Opt_LevelMode levelMode);
     void SetLevelUniqueId(Opt_Int32 levelUniqueId);
     void SetImersiveMode(Opt_ImmersiveMode immersiveMode);

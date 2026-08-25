@@ -42,9 +42,7 @@ bool RefreshCoordination::UpdateRefreshNode()
     auto refreshNode = FindRefreshNode();
     refreshNode_ = WeakClaim(RawPtr(refreshNode));
     coordinationEvent_ = nullptr;
-    if (!refreshNode) {
-        return false;
-    }
+    CHECK_NULL_RETURN(refreshNode, false);
     coordinationEvent_ = CreateCoordinationEvent();
     return !!coordinationEvent_;
 }

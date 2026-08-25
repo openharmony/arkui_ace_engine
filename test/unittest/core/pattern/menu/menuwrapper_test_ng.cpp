@@ -1469,4 +1469,421 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg031, TestSize.Level1)
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;
     EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
 }
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg032
+ * @tc.desc: test ResetMenuStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg032, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    wrapperPattern->menuStatus_ = MenuStatus::SHOW;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::ON_SHOW_ANIMATION;
+
+    wrapperPattern->ResetMenuStatus();
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::INIT);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::INIT);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg033
+ * @tc.desc: test ForceSetMenuStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg033, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->ForceSetMenuStatus(MenuStatus::HIDE);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::INIT);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg034
+ * @tc.desc: test SetMenuStatus when menuStatus >= newStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg034, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    wrapperPattern->menuStatus_ = MenuStatus::SHOW;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::ON_START_ANIMATION;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::SHOW);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::ON_START_ANIMATION);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg035
+ * @tc.desc: test SetMenuStatus from INIT to ON_HOVER_SCALE
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg035, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t callbackCount = 0;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&callbackCount]() { callbackCount++; });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&callbackCount]() { callbackCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_HOVER_SCALE);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::ON_HOVER_SCALE);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::INIT);
+    EXPECT_EQ(callbackCount, 0);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg036
+ * @tc.desc: test SetMenuStatus from ON_HOVER_SCALE to ON_SHOW_ANIMATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg036, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t callbackCount = 0;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&callbackCount]() { callbackCount++; });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&callbackCount]() { callbackCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::ON_HOVER_SCALE;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::ON_SHOW_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::ON_HOVER_SCALE);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg037
+ * @tc.desc: test SetMenuStatus from ON_SHOW_ANIMATION to ON_START_ANIMATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg037, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t callbackCount = 0;
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&callbackCount]() { callbackCount++; });
+    wrapperPattern->RegisterMenuAppearCallback([&callbackCount]() { callbackCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::ON_SHOW_ANIMATION;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::ON_HOVER_SCALE;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_START_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::ON_START_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::ON_SHOW_ANIMATION);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg038
+ * @tc.desc: test SetMenuStatus from ON_START_ANIMATION to SHOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg038, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t appearCount = 0;
+    int32_t didAppearCount = 0;
+    wrapperPattern->RegisterMenuAppearCallback([&appearCount]() { appearCount++; });
+    wrapperPattern->RegisterMenuOnDidAppearCallback([&didAppearCount]() { didAppearCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::ON_START_ANIMATION;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::ON_SHOW_ANIMATION;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::SHOW);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::ON_START_ANIMATION);
+    EXPECT_EQ(appearCount, 1);
+    EXPECT_EQ(didAppearCount, 1);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg039
+ * @tc.desc: test SetMenuStatus from SHOW to ON_HIDE_ANIMATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg039, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t aboutToDisappearCount = 0;
+    int32_t willDisappearCount = 0;
+    wrapperPattern->RegisterMenuAboutToDisappearCallback([&aboutToDisappearCount]() { aboutToDisappearCount++; });
+    wrapperPattern->RegisterMenuOnWillDisappearCallback([&willDisappearCount]() { willDisappearCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::SHOW;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::ON_START_ANIMATION;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::ON_HIDE_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::SHOW);
+    EXPECT_EQ(aboutToDisappearCount, 1);
+    EXPECT_EQ(willDisappearCount, 1);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg040
+ * @tc.desc: test SetMenuStatus from ON_HIDE_ANIMATION to HIDE
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg040, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t disappearCount = 0;
+    int32_t didDisappearCount = 0;
+    wrapperPattern->RegisterMenuDisappearCallback([&disappearCount]() { disappearCount++; });
+    wrapperPattern->RegisterMenuOnDidDisappearCallback([&didDisappearCount]() { didDisappearCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::SHOW;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_EQ(wrapperPattern->GetPreviewMenuStatus(), MenuStatus::ON_HIDE_ANIMATION);
+    EXPECT_EQ(disappearCount, 1);
+    EXPECT_EQ(didDisappearCount, 1);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg041
+ * @tc.desc: test SetMenuStatus lifecycle compensation from INIT to SHOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg041, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t aboutToAppearCount = 0;
+    int32_t willAppearCount = 0;
+    int32_t appearCount = 0;
+    int32_t didAppearCount = 0;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&aboutToAppearCount]() { aboutToAppearCount++; });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&willAppearCount]() { willAppearCount++; });
+    wrapperPattern->RegisterMenuAppearCallback([&appearCount]() { appearCount++; });
+    wrapperPattern->RegisterMenuOnDidAppearCallback([&didAppearCount]() { didAppearCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::SHOW);
+    EXPECT_EQ(aboutToAppearCount, 1);
+    EXPECT_EQ(willAppearCount, 1);
+    EXPECT_EQ(appearCount, 1);
+    EXPECT_EQ(didAppearCount, 1);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg042
+ * @tc.desc: test SetMenuStatus lifecycle compensation from INIT to HIDE
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg042, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t totalCallbackCount = 0;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+    wrapperPattern->RegisterMenuAppearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+    wrapperPattern->RegisterMenuOnDidAppearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+    wrapperPattern->RegisterMenuAboutToDisappearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+    wrapperPattern->RegisterMenuOnWillDisappearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+    wrapperPattern->RegisterMenuDisappearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+    wrapperPattern->RegisterMenuOnDidDisappearCallback([&totalCallbackCount]() { totalCallbackCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_EQ(totalCallbackCount, 8);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg043
+ * @tc.desc: test SetMenuStatus with onlyNewLifeCycle true for SHOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg043, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t oldApiCount = 0;
+    int32_t newApiCount = 0;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&oldApiCount]() { oldApiCount++; });
+    wrapperPattern->RegisterMenuAppearCallback([&oldApiCount]() { oldApiCount++; });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&newApiCount]() { newApiCount++; });
+    wrapperPattern->RegisterMenuOnDidAppearCallback([&newApiCount]() { newApiCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW, true);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::SHOW);
+    EXPECT_EQ(oldApiCount, 0);
+    EXPECT_EQ(newApiCount, 2);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg044
+ * @tc.desc: test SetMenuStatus with onlyNewLifeCycle true for HIDE
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg044, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t oldApiCount = 0;
+    int32_t newApiCount = 0;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&oldApiCount]() { oldApiCount++; });
+    wrapperPattern->RegisterMenuAppearCallback([&oldApiCount]() { oldApiCount++; });
+    wrapperPattern->RegisterMenuAboutToDisappearCallback([&oldApiCount]() { oldApiCount++; });
+    wrapperPattern->RegisterMenuDisappearCallback([&oldApiCount]() { oldApiCount++; });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&newApiCount]() { newApiCount++; });
+    wrapperPattern->RegisterMenuOnDidAppearCallback([&newApiCount]() { newApiCount++; });
+    wrapperPattern->RegisterMenuOnWillDisappearCallback([&newApiCount]() { newApiCount++; });
+    wrapperPattern->RegisterMenuOnDidDisappearCallback([&newApiCount]() { newApiCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::HIDE, true);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_EQ(oldApiCount, 0);
+    EXPECT_EQ(newApiCount, 4);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg045
+ * @tc.desc: test SetMenuStatus when callback changes state
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg045, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t callbackCount = 0;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&wrapperPattern, &callbackCount]() {
+        callbackCount++;
+        wrapperPattern->ForceSetMenuStatus(MenuStatus::HIDE);
+    });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&callbackCount]() { callbackCount++; });
+    wrapperPattern->RegisterMenuAppearCallback([&callbackCount]() { callbackCount++; });
+    wrapperPattern->RegisterMenuOnDidAppearCallback([&callbackCount]() { callbackCount++; });
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg046
+ * @tc.desc: test SetMenuStatus state transition stops when callback changes state
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg046, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    int32_t callbackOrder = 0;
+    std::vector<int32_t> callbackSequence;
+    wrapperPattern->RegisterMenuAboutToAppearCallback([&callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+    });
+    wrapperPattern->RegisterMenuOnWillAppearCallback([&wrapperPattern, &callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+        wrapperPattern->ForceSetMenuStatus(MenuStatus::HIDE);
+    });
+    wrapperPattern->RegisterMenuAppearCallback([&callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+    });
+    wrapperPattern->RegisterMenuOnDidAppearCallback([&callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+    });
+    wrapperPattern->RegisterMenuAboutToDisappearCallback([&callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+    });
+    wrapperPattern->RegisterMenuOnWillDisappearCallback([&callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+    });
+    wrapperPattern->RegisterMenuDisappearCallback([&callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+    });
+    wrapperPattern->RegisterMenuOnDidDisappearCallback([&callbackOrder, &callbackSequence]() {
+        callbackSequence.push_back(callbackOrder++);
+    });
+
+    wrapperPattern->menuStatus_ = MenuStatus::INIT;
+    wrapperPattern->previewMenuStatus_ = MenuStatus::INIT;
+
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    EXPECT_EQ(wrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_EQ(callbackSequence.size(), 2);
+    EXPECT_EQ(callbackSequence[0], 0);
+    EXPECT_EQ(callbackSequence[1], 1);
+}
 } // namespace OHOS::Ace::NG

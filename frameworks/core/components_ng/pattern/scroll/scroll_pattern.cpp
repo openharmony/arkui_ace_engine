@@ -175,6 +175,10 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (!SetScrollProperties(dirty, host)) {
         return false;
     }
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->ResetDragUpdateDelta();
+    }
     UpdateScrollBarOffset();
     if (config.frameSizeChange && isInitialized_ && GetScrollBar() != nullptr) {
         GetScrollBar()->ScheduleDisappearDelayTask();
@@ -206,10 +210,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
     SetAccessibilityFocusScroll(false);
-    if (!IsScrolling()) {
-        // Reset accessibilityScrollSource_ when scrolling is not in progress
-        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
-    }
+    ResetAccessibilityScrollSourceIfIdle();
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
@@ -223,9 +224,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 bool ScrollPattern::IsScrollReachEdge() const
 {
     if (scrollEdgeType_ == ScrollEdgeType::SCROLL_BOTTOM || scrollEdgeType_ == ScrollEdgeType::SCROLL_RIGHT) {
-        return LessOrEqual(currentOffset_, -scrollableDistance_ - contentEndOffset_);
+        return IsAtBottom();
     } else {
-        return LessOrEqual(currentOffset_, contentStartOffset_);
+        return IsAtTop();
     }
 }
 
@@ -1145,7 +1146,9 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
     }
     float head = 0.0f;
     float tail = -scrollableDistance_;
-    if (GreatOrEqual(finalPosition, head) || LessOrEqual(finalPosition, tail)) {
+    // 0.1f : tail is difference between content size and scroll mainsize, if ULP of the two float values is different,
+    // this difference might be bigger than the epsilon of LessOrEqual function.
+    if (GreatOrEqual(finalPosition, head) || LessOrEqualCustomPrecision(finalPosition, tail, 0.1f)) {
         predictSnapOffset = finalPosition;
     } else if (LessNotEqual(finalPosition, head) && GreatOrEqual(finalPosition, *(snapOffsets_.begin()))) {
         predictSnapOffset = *(snapOffsets_.begin());

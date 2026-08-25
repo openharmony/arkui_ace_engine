@@ -147,10 +147,10 @@ EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): 
     ani_ref undefined;
     ANI_CALL(env, GetUndefined(&undefined), return);
 
-    ani_fixedarray_byte byteArray;
-    ANI_CALL(env, FixedArray_New_Byte(abcContent.size(), &byteArray), return);
+    ani_valuearray_byte byteArray;
+    ANI_CALL(env, ValueArray_New_Byte(abcContent.size(), &byteArray), return);
     const auto *data = reinterpret_cast<const ani_byte *>(abcContent.data());
-    ANI_CALL(env, FixedArray_SetRegion_Byte(byteArray, 0, abcContent.size(), data));
+    ANI_CALL(env, ValueArray_SetRegion_Byte(byteArray, 0, abcContent.size(), data));
 
     ani_array refArray;
     ANI_CALL(env, Array_New(1, byteArray, &refArray), return);

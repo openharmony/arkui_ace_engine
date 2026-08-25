@@ -30,3 +30,10 @@ ohos_source_set("mock_rosen_graphic") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   public_configs = [ ":mock_rosen_graphic_config" ]
 }
+
+ohos_source_set("mock_render_service") {
+  testonly = true
+  sources = []
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  public_configs = [ ":mock_rosen_graphic_config" ]
+}

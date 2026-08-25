@@ -28,6 +28,10 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
+#undef private
+#undef protected
+
+
 using namespace testing;
 using namespace testing::ext;
 

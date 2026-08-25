@@ -73,6 +73,7 @@ public:
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
         const std::optional<bool> &ignoreBlank = false);
     static void SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value);
+    static void SetIgnoreHiddenItem(FrameNode* frameNode, bool value);
     static void SetOnScrollStateChanged(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged);
     static void SetFillType(FrameNode* frameNode, int32_t options);

@@ -13,24 +13,34 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("panel_test_ng") {
-  module_name = "CommonProperties-LayoutAndBorder"
-  type = "new"
+test_sources = [
+  "close_icon_pattern_test_ng.cpp",
+  "dragBar_pattern_test_ng.cpp",
+  "dragBar_pattern_test_two_ng.cpp",
+  "panel_property_test_ng.cpp",
+  "panel_test_ng.cpp",
+  "panel_test_three_ng.cpp",
+  "panel_test_two_ng.cpp",
+]
 
-  sources = [
-    "close_icon_pattern_test_ng.cpp",
-    "dragBar_pattern_test_ng.cpp",
-    "dragBar_pattern_test_two_ng.cpp",
-    "panel_property_test_ng.cpp",
-    "panel_test_ng.cpp",
-    "panel_test_three_ng.cpp",
-    "panel_test_two_ng.cpp",
-  ]
+core_min_sources = [ "panel_test_core.cpp" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "panel_test_core.cpp" ]
-  } else {
-    sources += [ "panel_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("panel_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = test_sources + core_min_sources
+  }
+} else {
+  ace_unittest("panel_test_ng") {
+    module_name = "CommonProperties-LayoutAndBorder"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = core_min_sources
+    } else {
+      sources += core_min_sources
+    }
   }
 }

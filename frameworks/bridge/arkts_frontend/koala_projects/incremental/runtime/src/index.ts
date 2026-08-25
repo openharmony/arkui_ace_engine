@@ -153,6 +153,7 @@ export {
     ControlledScope,
     createStateManager,
     Equivalent,
+    GetReusableScopeNode,
     IncrementalScopeEx,
     InternalScope,
     MutableState,
@@ -170,10 +171,12 @@ export {
     __memo_transformed_before,
     __memo_transformed_after,
 } from './internals'
-export { Dependency, StateToScopes } from './states/Dependency'
+export type { Dependency } from './states/Dependency'
 
 export { IncrementalNode } from './tree/IncrementalNode'
 export { PrimeNumbers } from './tree/PrimeNumbers'
 export { ReadonlyTreeNode } from './tree/ReadonlyTreeNode'
+export { StateToScopes } from './states/Dependency'
 export { TreeNode } from './tree/TreeNode'
 export { TreePath } from './tree/TreePath'
+

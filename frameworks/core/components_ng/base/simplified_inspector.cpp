@@ -707,9 +707,9 @@ void SimplifiedInspector::GetInspectorChildrenBackground(
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
+#ifndef CROSS_PLATFORM
 void SimplifiedInspector::ExecuteUICommand(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector)
 {
-#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(collector);
     collector_ = collector;
     ContainerScope scope(Container::CurrentIdSafely());
@@ -739,8 +739,8 @@ void SimplifiedInspector::ExecuteUICommand(const std::shared_ptr<Recorder::Inspe
             collector->DecreaseTaskNum();
         }
     }
-#endif
 }
+#endif
 
 int32_t SimplifiedInspector::ExecuteWebScrollCommand(
     const RefPtr<FrameNode>& rootNode, int32_t nodeId, const std::string& jsCode)

@@ -301,14 +301,14 @@ HWTEST_F(TransparencyUtilsTestNg, RegisterTransparencyListenerAll, TestSize.Leve
 
     TransparencyCallback cb = [](int32_t) {};
     auto ret = TransparencyUtils::RegisterTransparencyListener(emptyNode, std::move(cb));
-    EXPECT_FALSE(ret.has_value());
+    EXPECT_TRUE(ret.has_value());
 
     TransparencyUtils::listenerSet_ = true;
     TransparencyUtils::callbackIdsMap_.clear();
     TransparencyCallback cb2 = [](int32_t) {};
     auto ret2 = TransparencyUtils::RegisterTransparencyListener(emptyNode, std::move(cb2));
     EXPECT_TRUE(ret2.has_value());
-    EXPECT_EQ(ret2.value(), 0);
+    EXPECT_EQ(ret2.value(), 1);
     EXPECT_EQ(TransparencyUtils::callbackIdsMap_.size(), 1);
 
     auto savedContainerId = Container::CurrentIdSafelyWithCheck();

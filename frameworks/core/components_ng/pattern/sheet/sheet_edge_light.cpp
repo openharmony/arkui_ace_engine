@@ -17,13 +17,13 @@
 
 #include "ui/animation/curves.h"
 
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_style.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t UI_MATERIAL_LEVEL_LOW = 2;
-
 constexpr float NUM_NOT_ZERO = 1.0f;
 constexpr int EDGE_LIGHT_SHOW_ANIMATE_DURATION = 166;
 #ifndef PREVIEW
@@ -70,6 +70,8 @@ std::function<void()> SheetEdgeLightBase::GetSheetEdgeLightAnimateEvent(RefPtr<F
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
         SheetEdgeLightBase::SetSheetEdgeLightTransitionStart(sheetNode);
+        PerfMonitor::GetPerfMonitor()->Start(
+            PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, PerfActionType::LAST_UP, "");
     };
 }
 
@@ -83,11 +85,12 @@ std::function<void()> SheetEdgeLightBase::GetSheetEdgeLightAnimateFinishEvent(Re
         SheetEdgeLightBase::SetSheetEdgeLightTransitionEnd(sheetNode);
     };
     const std::function<void()> edgeLightFinishEvent = [sheetWK = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, false);
         auto sheetNode = sheetWK.Upgrade();
         CHECK_NULL_VOID(sheetNode);
         auto renderContext = sheetNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->SetForegroundShader(nullptr);
+        renderContext->SetOverlayNGShader(nullptr);
     };
     return [edgeLightEvent = edgeLightMoveEvent, finishEvent = edgeLightFinishEvent,
                sheetWK = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
@@ -105,15 +108,14 @@ bool SheetEdgeLightBase::CheckIfNeedShowEdgeLight(EdgeLightMode mode, SheetType 
     if (sheetType != SHEET_BOTTOM) {
         return false;
     }
-    int32_t currentLevel = static_cast<int32_t>(SystemProperties::GetUiMaterialLevel());
     if (mode == EdgeLightMode::EDGELIGHT_DISABLED) {
         return false;
     }
     if (mode == EdgeLightMode::EDGELIGHT_ENABLED) {
         return true;
     }
-    if (mode == EdgeLightMode::EDGELIGHT_AUTO && currentLevel != UI_MATERIAL_LEVEL_LOW) {
-        return true;
+    if (mode == EdgeLightMode::EDGELIGHT_AUTO) {
+        return false;
     }
     return false;
 }
@@ -160,7 +162,7 @@ void SheetEdgeLightBase::SetSheetEdgeLightTransitionPreShow(RefPtr<FrameNode>& s
         std::static_pointer_cast<Rosen::RSNGMaskBase>(radialGradientMask));
 
     auto edgeLightModifier = std::make_shared<RenderEdgeLightModifier>(edgeLightFilter);
-    renderContext->SetForegroundShader(edgeLightModifier);
+    renderContext->SetOverlayNGShader(edgeLightModifier);
 #endif
 }
 
@@ -206,7 +208,7 @@ void SheetEdgeLightBase::SetSheetEdgeLightTransitionStart(RefPtr<FrameNode>& she
         std::static_pointer_cast<Rosen::RSNGMaskBase>(radialGradientMask));
 
     auto edgeLightModifier = std::make_shared<RenderEdgeLightModifier>(edgeLightFilter);
-    renderContext->SetForegroundShader(edgeLightModifier);
+    renderContext->SetOverlayNGShader(edgeLightModifier);
 #endif
 }
 
@@ -252,7 +254,7 @@ void SheetEdgeLightBase::SetSheetEdgeLightTransitionEnd(RefPtr<FrameNode>& sheet
         std::static_pointer_cast<Rosen::RSNGMaskBase>(radialGradientMask));
 
     auto edgeLightModifier = std::make_shared<RenderEdgeLightModifier>(edgeLightFilter);
-    renderContext->SetForegroundShader(edgeLightModifier);
+    renderContext->SetOverlayNGShader(edgeLightModifier);
 #endif
 }
 

@@ -16,19 +16,36 @@
 #include <optional>
 #include <string>
 
+#include "base/json/json_util.h"
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/common_text_constants.h"
+#include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_area/bridge/text_area_model_common.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
+#include "core/components_ng/pattern/text_input/bridge/text_input_custom_modifier.h"
+#include "core/components_ng/pattern/text_input/bridge/arkts_native_text_input_bridge.h"
+#include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/node/node_model.h"
+#include "interfaces/inner_api/ace/stylus/stylus_detector_interface.h"
+#include "core/common/udmf/udmf_client.h"
+#ifdef ENABLE_STANDARD_INPUT
+#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
+#endif
 
 namespace OHOS::Ace::NG {
 void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
@@ -67,7 +84,6 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int CALL_ARG_0 = 0;
 constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
@@ -1469,6 +1485,26 @@ void SetTextInputBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint3
     } else {
         backgroundColor.SetColorSpace(ColorSpace::SRGB);
     }
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
+        } else {
+            pattern->UnRegisterResource("backgroundColor");
+        }
+    }
+}
+
+void SetTextInputBackgroundColorForHDR(ArkUINodeHandle node, const ArkUI_Float32* hdrValues,
+    ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    backgroundColor.SetColorSpace(static_cast<ColorSpace>(colorSpace));
     TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
@@ -3336,6 +3372,148 @@ void SetUserAccessibilityText(ArkUINodeHandle node)
     TextFieldModelNG::SetUserAccessibilityText(frameNode);
 }
 
+void SetTextInputSetCancelButtonStyle(ArkUINodeHandle node, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, static_cast<CleanNodeStyle>(style));
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+}
+
+void SetTextInputSetCancelDefaultIcon(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModelNG::SetCancelIconColor(frameNode, Color());
+    }
+    TextFieldModelNG::SetCancelIconSize(frameNode, theme->GetCancelIconSize());
+    TextFieldModelNG::SetCanacelIconSrc(frameNode, std::string());
+    TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("cancelButtonIconSrc");
+        pattern->UnRegisterResource("cancelButtonIconColor");
+        pattern->UnRegisterResource("cancelButtonIconSize");
+    }
+}
+
+void SetTextInputSetCancelSymbolIconJs(ArkUINodeHandle node, void* symbolFunction)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (symbolFunction) {
+        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, std::move(*symbolCallback));
+    } else {
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
+    }
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
+}
+
+void SetTextInputCancelImageIconSize(ArkUINodeHandle node, const struct ArkUISizeType* size, void* resRawPtr)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
+    if (LessNotEqual(iconSize.Value(), 0.0)) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        auto theme = themeManager->GetTheme<TextFieldTheme>();
+        iconSize = theme->GetCancelIconSize();
+    }
+    TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("cancelButtonIconSize", resObj, iconSize);
+        } else {
+            pattern->UnRegisterResource("cancelButtonIconSize");
+        }
+    }
+}
+
+void SetCancelButtonIconColorDefault(FrameNode* frameNode, const Color& iconColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        pattern->RegisterResource<Color>("cancelButtonIconColorDefault", resObj, iconColor);
+    }
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModelNG::SetCancelIconColor(frameNode, iconColor);
+    }
+}
+
+void SetTextInputCancelImageIconSrcAndColor(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName,
+    ArkUI_CharPtr moduleName, void* srcRawPtr, ArkUI_Uint32 color, void* colorRawPtr, bool isColorInvalid)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    std::string iconSrc(src);
+    std::string iconBundleName(bundleName);
+    std::string iconModuleName(moduleName);
+    TextFieldModelNG::SetCanacelIconSrc(frameNode, iconSrc, iconBundleName, iconModuleName);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("cancelButtonIconSrc");
+        pattern->UnRegisterResource("cancelButtonIconColor");
+        pattern->UnRegisterResource("cancelButtonIconColorDefault");
+        if (srcRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(srcRawPtr));
+            pattern->RegisterResource<std::string>("cancelButtonIconSrc", resObj, iconSrc);
+        }
+    }
+    Color iconColor(color);
+    if (isColorInvalid) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, iconColor);
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+            pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
+        }
+        return;
+    }
+    auto info = ImageSourceInfo(iconSrc, iconBundleName, iconModuleName);
+    if (info.IsSvg() && iconSrc != "") { // svg need not default color, otherwise multi color svg will render fault
+        return;
+    }
+    SetCancelButtonIconColorDefault(frameNode, iconColor);
+}
+
 #ifndef CROSS_PLATFORM
 ArkUINodeHandle CreateTextInputImpl(std::optional<std::u16string>& stringValue,
     std::optional<std::u16string>& placeholder, const ArkUITextEditCreateResourceParams* resParams)
@@ -3581,6 +3759,12 @@ void SetTextInputBackgroundColorWithColorSpaceImpl(ArkUINodeHandle node, ArkUI_U
     GetTextFieldModelImpl()->SetBackgroundColor(backgroundColor, false);
 }
 
+void SetTextInputBackgroundColorForHDRImpl(ArkUINodeHandle node, const ArkUI_Float32* hdrValues,
+    ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    return;
+}
+
 void SetTextInputFocusableAndFocusNodeImpl()
 {
     GetTextFieldModelImpl()->SetFocusableAndFocusNode();
@@ -3604,6 +3788,10 @@ void SetTextInputOnChangeEventImpl(void* callback)
     return;
 }
 
+void SetTextInputEnablePreviewTextImpl(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    return;
+}
 #endif
 } // namespace
 
@@ -3706,6 +3894,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .getTextInputCancelButtonStyle = nullptr,
             .setTextInputBackgroundColor = nullptr,
             .setTextInputBackgroundColorWithColorSpace = SetTextInputBackgroundColorWithColorSpaceImpl,
+            .setTextInputBackgroundColorForHDR = SetTextInputBackgroundColorForHDRImpl,
             .resetTextInputBackgroundColor = nullptr,
             .setTextInputTextSelection = nullptr,
             .getTextInputTextSelectionIndex = nullptr,
@@ -3802,6 +3991,38 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .resetTextInputOnCut = nullptr,
             .setTextInputOnPaste = SetTextInputOnPasteImpl,
             .resetTextInputOnPaste = nullptr,
+            .setOnTextInputChange = nullptr,
+            .setOnTextInputChangeWithPreviewText = nullptr,
+            .setTextInputOnSubmit = nullptr,
+            .setOnTextInputCut = nullptr,
+            .setOnTextInputPaste = nullptr,
+            .setOnTextInputSelectionChange = nullptr,
+            .setOnTextInputEditChange = nullptr,
+            .setOnTextInputContentSizeChange = nullptr,
+            .setOnTextInputInputFilterError = nullptr,
+            .setTextInputOnTextContentScroll = nullptr,
+            .setOnTextInputWillChange = nullptr,
+            .setTextInputOnWillInsert = nullptr,
+            .setTextInputOnDidInsert = nullptr,
+            .setTextInputOnWillDelete = nullptr,
+            .setTextInputOnDidDelete = nullptr,
+            .setOnTextInputWillCopy = nullptr,
+            .setOnTextInputCopy = nullptr,
+            .setOnTextInputWillCut = nullptr,
+            .resetOnTextInputChange = nullptr,
+            .resetOnTextInputChangeWithPreviewText = nullptr,
+            .resetTextInputOnSubmit = nullptr,
+            .resetOnTextInputCut = nullptr,
+            .resetOnTextInputPaste = nullptr,
+            .resetOnTextInputSelectionChange = nullptr,
+            .resetOnTextInputEditChange = nullptr,
+            .resetOnTextInputContentSizeChange = nullptr,
+            .resetOnTextInputInputFilterError = nullptr,
+            .resetTextInputOnTextContentScroll = nullptr,
+            .resetOnTextInputWillChange = nullptr,
+            .resetOnTextInputWillCopy = nullptr,
+            .resetOnTextInputCopy = nullptr,
+            .resetOnTextInputWillCut = nullptr,
             .setTextInputShowKeyBoardOnFocus = nullptr,
             .getTextInputShowKeyBoardOnFocus = nullptr,
             .resetTextInputShowKeyBoardOnFocus = nullptr,
@@ -3819,7 +4040,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .getTextInputMargin = nullptr,
             .setTextInputCaret = nullptr,
             .getTextInputController = nullptr,
-            .setTextInputEnablePreviewText = nullptr,
+            .setTextInputEnablePreviewText = SetTextInputEnablePreviewTextImpl,
             .resetTextInputEnablePreviewText = nullptr,
             .setTextInputSelectionMenuOptions = nullptr,
             .resetTextInputSelectionMenuOptions = nullptr,
@@ -3894,6 +4115,11 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .setTextInputColorShaderColor = nullptr,
             .resetTextInputColorShaderColor = nullptr,
             .setUserAccessibilityText = nullptr,
+            .setTextInputSetCancelButtonStyle = nullptr,
+            .setTextInputSetCancelDefaultIcon = nullptr,
+            .setTextInputSetCancelSymbolIconJs = nullptr,
+            .setTextInputCancelImageIconSize = nullptr,
+            .setTextInputCancelImageIconSrcAndColor = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -3992,6 +4218,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         .getTextInputCancelButtonStyle = GetTextInputCancelButtonStyle,
         .setTextInputBackgroundColor = SetTextInputBackgroundColor,
         .setTextInputBackgroundColorWithColorSpace = SetTextInputBackgroundColorWithColorSpace,
+        .setTextInputBackgroundColorForHDR = SetTextInputBackgroundColorForHDR,
         .resetTextInputBackgroundColor = ResetTextInputBackgroundColor,
         .setTextInputTextSelection = SetTextInputTextSelection,
         .getTextInputTextSelectionIndex = GetTextInputTextSelectionIndex,
@@ -4088,6 +4315,38 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         .resetTextInputOnCut = ResetTextInputOnCut,
         .setTextInputOnPaste = SetTextInputOnPaste,
         .resetTextInputOnPaste = ResetTextInputOnPaste,
+        .setOnTextInputChange = SetOnTextInputChange,
+        .setOnTextInputChangeWithPreviewText = SetOnTextInputChangeWithPreviewText,
+        .setTextInputOnSubmit = SetTextInputOnSubmit,
+        .setOnTextInputCut = SetOnTextInputCut,
+        .setOnTextInputPaste = SetOnTextInputPaste,
+        .setOnTextInputSelectionChange = SetOnTextInputSelectionChange,
+        .setOnTextInputEditChange = SetOnTextInputEditChange,
+        .setOnTextInputContentSizeChange = SetOnTextInputContentSizeChange,
+        .setOnTextInputInputFilterError = SetOnTextInputInputFilterError,
+        .setTextInputOnTextContentScroll = SetTextInputOnTextContentScroll,
+        .setOnTextInputWillChange = SetOnTextInputWillChange,
+        .setTextInputOnWillInsert = SetTextInputOnWillInsert,
+        .setTextInputOnDidInsert = SetTextInputOnDidInsert,
+        .setTextInputOnWillDelete = SetTextInputOnWillDelete,
+        .setTextInputOnDidDelete = SetTextInputOnDidDelete,
+        .setOnTextInputWillCopy = SetOnTextInputWillCopy,
+        .setOnTextInputCopy = SetOnTextInputCopy,
+        .setOnTextInputWillCut = SetOnTextInputWillCut,
+        .resetOnTextInputChange = ResetTextInputOnChange,
+        .resetOnTextInputChangeWithPreviewText = ResetTextInputOnChange,
+        .resetTextInputOnSubmit = ResetTextInputOnSubmitWithEvent,
+        .resetOnTextInputCut = ResetTextInputOnCut,
+        .resetOnTextInputPaste = ResetTextInputOnPaste,
+        .resetOnTextInputSelectionChange = ResetTextInputOnTextSelectionChange,
+        .resetOnTextInputEditChange = ResetTextInputOnEditChange,
+        .resetOnTextInputContentSizeChange = ResetOnTextInputContentSizeChange,
+        .resetOnTextInputInputFilterError = ResetOnTextInputInputFilterError,
+        .resetTextInputOnTextContentScroll = ResetTextInputOnContentScroll,
+        .resetOnTextInputWillChange = ResetTextInputOnWillChange,
+        .resetOnTextInputWillCopy = ResetTextInputOnWillCopy,
+        .resetOnTextInputCopy = ResetTextInputOnCopy,
+        .resetOnTextInputWillCut = ResetTextInputOnWillCut,
         .setTextInputShowKeyBoardOnFocus = SetTextInputShowKeyBoardOnFocus,
         .getTextInputShowKeyBoardOnFocus = GetTextInputShowKeyBoardOnFocus,
         .resetTextInputShowKeyBoardOnFocus = ResetTextInputShowKeyBoardOnFocus,
@@ -4180,6 +4439,11 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         .setTextInputColorShaderColor = SetTextInputColorShaderColor,
         .resetTextInputColorShaderColor = ResetTextInputColorShaderColor,
         .setUserAccessibilityText = SetUserAccessibilityText,
+        .setTextInputSetCancelButtonStyle = SetTextInputSetCancelButtonStyle,
+        .setTextInputSetCancelDefaultIcon = SetTextInputSetCancelDefaultIcon,
+        .setTextInputSetCancelSymbolIconJs = SetTextInputSetCancelSymbolIconJs,
+        .setTextInputCancelImageIconSize = SetTextInputCancelImageIconSize,
+        .setTextInputCancelImageIconSrcAndColor = SetTextInputCancelImageIconSrcAndColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -4569,36 +4833,6 @@ void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
 }
 
-void ResetOnTextInputChange(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnChange(node);
-}
-
-void ResetTextInputOnSubmit(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnSubmitWithEvent(node);
-}
-
-void ResetOnTextInputCut(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnCut(node);
-}
-
-void ResetOnTextInputPaste(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnPaste(node);
-}
-
-void ResetOnTextInputSelectionChange(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnTextSelectionChange(node);
-}
-
-void ResetOnTextInputEditChange(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnEditChange(node);
-}
-
 void ResetOnTextInputContentSizeChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4611,31 +4845,6 @@ void ResetOnTextInputInputFilterError(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
-}
-
-void ResetTextInputOnTextContentScroll(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnContentScroll(node);
-}
-
-void ResetOnTextInputWillChange(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnWillChange(node);
-}
-
-void ResetOnTextInputWillCopy(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnWillCopy(node);
-}
-
-void ResetOnTextInputCopy(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnCopy(node);
-}
-
-void ResetOnTextInputWillCut(ArkUINodeHandle node)
-{
-    GetTextInputDynamicModifier()->resetTextInputOnWillCut(node);
 }
 
 void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam)
@@ -4770,9 +4979,314 @@ void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam)
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 
-void ResetOnTextInputChangeWithPreviewText(ArkUINodeHandle node)
+ArkUINodeHandle CreateTextInputNode(int32_t nodeId)
 {
-    GetTextInputDynamicModifier()->resetTextInputOnChange(node);
+    auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, u"", u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+}
+
+void SetTextFieldWidthAuto(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetWidthAuto(frameNode, value);
+}
+
+void SetTextFieldPadding(FrameNode* frameNode, const PaddingProperty& newPadding, bool tmp)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetPadding(frameNode, newPadding, tmp);
+}
+
+void SetTextFieldMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetMargin(frameNode);
+}
+
+void SetTextFieldBackBorder(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetBackBorder(frameNode);
+}
+
+void SetTextFieldBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetBackgroundColor(frameNode, color);
+}
+
+void SetTextFieldTextColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetTextColor(frameNode, color);
+}
+
+void UpdateTextFieldTextColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::UpdateTextColor(frameNode, color);
+}
+
+std::optional<BorderRadiusProperty> GetTextFieldThemeBorderRadius(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
+    auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+    return BorderRadiusProperty {
+        borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+        borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+    };
+}
+
+void UpdateTextFieldValueAtCreation(FrameNode* frameNode, const std::optional<std::u16string>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textValue = pattern->GetTextUtf16Value();
+    if (value.has_value() && value.value() != textValue) {
+        auto changed = pattern->InitValueText(value.value());
+        pattern->SetTextChangedAtCreation(changed);
+    }
+}
+
+void SetTextFieldOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(func));
+}
+
+RefPtr<FocusHub> GetSearchTextFieldFocusHub(const RefPtr<FrameNode>& frameNode)
+{
+    auto searchTextFieldPattern = frameNode->GetPattern<NG::SearchTextFieldPattern>();
+    CHECK_NULL_RETURN(searchTextFieldPattern, nullptr);
+    return searchTextFieldPattern->GetFocusHub();
+}
+
+void RequestTextFieldKeyboardForStylus(const RefPtr<FrameNode>& frameNode, int32_t& resultCode)
+{
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->NeedToRequestKeyboardOnFocus()) {
+        pattern->RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::STYLUS_DETECTOR);
+    }
+    resultCode = 0;
+}
+
+void SetTextFieldTextForStylus(const RefPtr<FrameNode>& frameNode, const std::string& text,
+    const std::shared_ptr<IAceStylusCallback>& callback, const ResultData& res)
+{
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!text.empty()) {
+        pattern->UpdateEditingValue(text, text.size());
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (callback) {
+        callback->Callback(res);
+    }
+}
+
+void GetText(const RefPtr<FrameNode>& frameNode, const std::shared_ptr<IAceStylusCallback>& callback, ResultData& res)
+{
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    if (!pattern) {
+        callback->Callback(res);
+        return;
+    }
+    res.resultData = pattern->GetTextValue();
+    callback->Callback(res);
+}
+
+void RedoTextField(const RefPtr<FrameNode>& frameNode)
+{
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CloseSelectOverlay(true);
+    pattern->HandleOnRedoAction();
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void UndoTextField(const RefPtr<FrameNode>& frameNode)
+{
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CloseSelectOverlay(true);
+    pattern->HandleOnUndoAction();
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OnDetectorSync(const RefPtr<FrameNode>& frameNode, bool& result, const CommandType& command)
+{
+    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    switch (command) {
+        case CommandType::COMMAND_CANUNDO:
+            result = pattern->CanUndo();
+            break;
+        case CommandType::COMMAND_CANREDO:
+            result = pattern->CanRedo();
+            break;
+        default:
+            break;
+    }
+}
+
+void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config)
+{
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetKeyboardAppearanceConfig(frameNode, config);
+}
+
+IMEAttachCallback ParseAndCreateIMEAttachCallback(
+    panda::EcmaVM* vm, panda::Local<panda::JSValueRef> callbackArg, FrameNode* frameNode, bool isJsView)
+{
+    return TextInputBridge::ParseAndCreateIMEAttachCallback(vm, callbackArg, frameNode, isJsView);
+}
+
+std::string ExtractTextFieldText(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, "");
+    auto textFieldPattern = node->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, "");
+    auto text = textFieldPattern->GetTextValue();
+    if (!text.empty()) {
+        return text;
+    }
+    return UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder());
+}
+
+RefPtr<Pattern> CreateTextFieldPattern()
+{
+    return AceType::MakeRefPtr<TextFieldPattern>();
+}
+
+void UpdateCaretInfoToControllerCustom(const RefPtr<Pattern>& pattern, bool forceUpdate)
+{
+    CHECK_NULL_VOID(pattern);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->UpdateCaretInfoToController(forceUpdate);
+}
+
+int32_t GetSessionId(const RefPtr<FrameNode>& host)
+{
+    auto textFieldPattern = host->GetPattern<TextFieldPattern>();
+    if (textFieldPattern) {
+        return textFieldPattern->GetSessionId();
+    }
+    if (host->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(textFieldFrameNode, -1);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        if (textFieldPattern) {
+            return textFieldPattern->GetSessionId();
+        }
+    }
+    return -1;
+}
+
+void TriggerCustomKeyboardAvoid(const RefPtr<Pattern>& pattern)
+{
+    auto curPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(curPattern);
+    if (!curPattern->GetIsCustomKeyboardAttached()) {
+        return;
+    }
+    auto caretRectWithScale = curPattern->GetCaretRect(false);
+    auto caretHeight = caretRectWithScale.Height();
+    auto safeHeight = caretHeight + caretRectWithScale.GetY();
+    if (caretRectWithScale.GetY() > caretHeight) {
+        safeHeight = caretHeight;
+    }
+    auto keyboardOverLay = curPattern->GetKeyboardOverLay();
+    CHECK_NULL_VOID(keyboardOverLay);
+    auto host = curPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    keyboardOverLay->TriggerCustomKeyboardAvoid(nodeId, safeHeight);
+}
+
+void* CreateTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern)
+{
+#ifdef ENABLE_STANDARD_INPUT
+    auto* listener = new OnTextChangedListenerImpl(pattern);
+    return reinterpret_cast<void *>(listener);
+#else
+    return nullptr;
+#endif
+}
+
+bool GetTextByPattern(const RefPtr<NG::FrameNode>& frameNode, std::string& text)
+{
+    const RefPtr<NG::Pattern>& pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    if (AceType::InstanceOf<NG::TextFieldPattern>(pattern)) {
+        auto textFieldPattern = AceType::DynamicCast<NG::TextFieldPattern>(pattern);
+        CHECK_NULL_RETURN(textFieldPattern, false);
+        text = textFieldPattern->GetTextValue();
+        return true;
+    } else if (AceType::InstanceOf<NG::SearchPattern>(pattern)) {
+        auto searchPattern = AceType::DynamicCast<NG::SearchPattern>(pattern);
+        if (searchPattern) {
+            auto textFieldFrameNode = AceType::DynamicCast<NG::FrameNode>(frameNode->GetChildAtIndex(0));
+            auto textFieldPattern = textFieldFrameNode->GetPattern<NG::TextFieldPattern>();
+            CHECK_NULL_RETURN(textFieldPattern, false);
+            text = textFieldPattern->GetTextValue();
+            return true;
+        }
+    }
+    return false;
+}
+
+const ArkUITextInputCustomModifier* GetTextInputCustomModifier()
+{
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUITextInputCustomModifier modifier = {
+        .createTextInputNode = CreateTextInputNode,
+        .setTextFieldWidthAuto = SetTextFieldWidthAuto,
+        .setTextFieldPadding = SetTextFieldPadding,
+        .setTextFieldMargin = SetTextFieldMargin,
+        .setTextFieldBackBorder = SetTextFieldBackBorder,
+        .setTextFieldBackgroundColor = SetTextFieldBackgroundColor,
+        .setTextFieldTextColor = SetTextFieldTextColor,
+        .updateTextFieldTextColor = UpdateTextFieldTextColor,
+        .getTextFieldThemeBorderRadius = GetTextFieldThemeBorderRadius,
+        .updateTextFieldValueAtCreation = UpdateTextFieldValueAtCreation,
+        .setTextFieldOnChangeEvent = SetTextFieldOnChangeEvent,
+        .getSearchTextFieldFocusHub = GetSearchTextFieldFocusHub,
+        .requestTextFieldKeyboardForStylus = RequestTextFieldKeyboardForStylus,
+        .setTextFieldTextForStylus = SetTextFieldTextForStylus,
+        .getText = GetText,
+        .redoTextField = RedoTextField,
+        .undoTextField = UndoTextField,
+        .onDetectorSync = OnDetectorSync,
+        .setKeyboardAppearanceConfig = SetKeyboardAppearanceConfig,
+        .parseAndCreateIMEAttachCallback = ParseAndCreateIMEAttachCallback,
+        .extractTextFieldText = ExtractTextFieldText,
+        .needAIAnalysis = InputAIChecker::NeedAIAnalysis,
+        .isSingleClickAtBoundary = InputAIChecker::IsSingleClickAtBoundary,
+        .isMultiClickAtBoundary = InputAIChecker::IsMultiClickAtBoundary,
+        .createTextFieldPattern = CreateTextFieldPattern,
+        .updateCaretInfoToController = UpdateCaretInfoToControllerCustom,
+        .getSessionId = GetSessionId,
+        .triggerCustomKeyboardAvoid = TriggerCustomKeyboardAvoid,
+        .getTextByPattern = GetTextByPattern,
+        .createTextChangedListenerImpl = CreateTextChangedListenerImpl,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    return &modifier;
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

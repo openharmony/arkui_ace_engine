@@ -85,13 +85,22 @@ void ListItemLayoutAlgorithm::MeasureItemChild(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     std::list<RefPtr<LayoutWrapper>> childList;
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
-    if (needReserveEditModeCheckBoxSpace_) {
-        auto maxWidth = layoutConstraint.maxSize.Width();
-        if (Positive(maxWidth) && !NearEqual(maxWidth, Infinity<float>())) {
-            auto checkBoxHotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(layoutWrapper);
-            auto contentWidth = std::max(0.0f, maxWidth - checkBoxHotZoneWidth);
-            layoutConstraint.maxSize.SetWidth(contentWidth);
-            layoutConstraint.percentReference.SetWidth(contentWidth);
+    if (needReserveEditModeCheckBoxSpace_ && editModeCheckBoxNodeIndex_ >= 0) {
+        auto checkBoxHotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(layoutWrapper);
+        if (axis_ == Axis::HORIZONTAL) {
+            auto maxHeight = layoutConstraint.maxSize.Height();
+            if (Positive(maxHeight) && !NearEqual(maxHeight, Infinity<float>())) {
+                auto contentHeight = std::max(0.0f, maxHeight - checkBoxHotZoneWidth);
+                layoutConstraint.maxSize.SetHeight(contentHeight);
+                layoutConstraint.percentReference.SetHeight(contentHeight);
+            }
+        } else {
+            auto maxWidth = layoutConstraint.maxSize.Width();
+            if (Positive(maxWidth) && !NearEqual(maxWidth, Infinity<float>())) {
+                auto contentWidth = std::max(0.0f, maxWidth - checkBoxHotZoneWidth);
+                layoutConstraint.maxSize.SetWidth(contentWidth);
+                layoutConstraint.percentReference.SetWidth(contentWidth);
+            }
         }
     }
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
@@ -128,10 +137,17 @@ void ListItemLayoutAlgorithm::UpdateEditModeSelfSize(LayoutWrapper* layoutWrappe
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    auto maxWidth = layoutConstraint->maxSize.Width();
     auto checkBoxHotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(layoutWrapper);
-    if (NearEqual(maxWidth, Infinity<float>()) || !layoutConstraint->selfIdealSize.Width().has_value()) {
-        frameSize.SetWidth(frameSize.Width() + checkBoxHotZoneWidth);
+    if (axis_ == Axis::HORIZONTAL) {
+        auto maxHeight = layoutConstraint->maxSize.Height();
+        if (NearEqual(maxHeight, Infinity<float>()) || !layoutConstraint->selfIdealSize.Height().has_value()) {
+            frameSize.SetHeight(frameSize.Height() + checkBoxHotZoneWidth);
+        }
+    } else {
+        auto maxWidth = layoutConstraint->maxSize.Width();
+        if (NearEqual(maxWidth, Infinity<float>()) || !layoutConstraint->selfIdealSize.Width().has_value()) {
+            frameSize.SetWidth(frameSize.Width() + checkBoxHotZoneWidth);
+        }
     }
     geometryNode->SetFrameSize(frameSize);
 }
@@ -240,8 +256,13 @@ void ListItemLayoutAlgorithm::LayoutEditModeCheckBox(
     auto childSize = checkBoxGeometryNode->GetMarginFrameSize();
     float crossOffset = 0.0f;
     float mainOffset = 0.0f;
-    crossOffset = IsRTLAndVertical(layoutWrapper) ? 0 : (size.Width() - childSize.Width());
-    mainOffset = (size.Height() - childSize.Height()) / 2.0f;
+    if (axis_ == Axis::HORIZONTAL) {
+        crossOffset = (size.Width() - childSize.Width()) / 2.0f;
+        mainOffset = size.Height() - childSize.Height();
+    } else {
+        crossOffset = IsRTLAndVertical(layoutWrapper) ? 0 : (size.Width() - childSize.Width());
+        mainOffset = (size.Height() - childSize.Height()) / 2.0f;
+    }
     auto checkBoxOffset = paddingOffset + OffsetF(crossOffset, mainOffset);
     checkBoxGeometryNode->SetMarginFrameOffset(checkBoxOffset);
     child->Layout();

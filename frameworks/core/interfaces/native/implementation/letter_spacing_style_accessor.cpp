@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LetterSpacingStyle ConstructImpl(const Ark_LengthMetrics* value)
+Ark_LetterSpacingStyle ConstructImpl(const Ark_LengthMetricsProxy* value)
 {
     auto peer = PeerUtils::CreatePeer<LetterSpacingStylePeer>();
     std::optional<Dimension> spacing;

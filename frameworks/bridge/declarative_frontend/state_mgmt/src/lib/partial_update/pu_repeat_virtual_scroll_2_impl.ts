@@ -379,7 +379,7 @@ class __RepeatVirtualScroll2Impl<T> {
     private preventReRender_: boolean = false;
 
     // memory optimization strategy
-    private memOptStrategy_: RepeatMemOptStrategy = RepeatMemOptStrategy.DEFAULT;
+    private memOptStrategy_: RepeatMemOptStrategy = RepeatMemOptStrategy.UNDEFINED;
 
     // when access view model record dependency on 'this'.
     private startRecordDependencies(clearBindings: boolean = false): void {
@@ -492,7 +492,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
             this.mkRepeatItem_ = config.mkRepeatItem;
 
-            this.memOptStrategy_ = config.memOptStrategy ?? RepeatMemOptStrategy.DEFAULT;
+            this.memOptStrategy_ = config.memOptStrategy ?? RepeatMemOptStrategy.UNDEFINED;
 
             if (!(this.owningViewV2_ instanceof ViewV2)) {
                 stateMgmtConsole.applicationWarn(`${this.constructor.name}(${this.repeatElmtId_}))`,

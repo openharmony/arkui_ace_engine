@@ -152,7 +152,7 @@ private:
 
     int32_t GetSCBOrientation(const RefPtr<FrameNode>& windowSceneNode);
 
-    sptr<IRemoteObject> GetconnectToRender();
+    sptr<IRemoteObject> GetConnectToRender();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;

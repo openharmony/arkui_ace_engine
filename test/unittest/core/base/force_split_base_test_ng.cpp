@@ -54,6 +54,7 @@ public:
  * @tc.desc: Testing object creating function of ViewAdvancedRegister.
  * @tc.type: FUNC
  */
+#ifdef ENABLE_SPLIT_MODE
 HWTEST_F(ParallelBaseTestNg, ViewAdvancedRegisterTest001, TestSize.Level1)
 {
     DeviceType preDeviceType_ = SystemProperties::deviceType_;
@@ -93,4 +94,5 @@ HWTEST_F(ParallelBaseTestNg, ViewAdvancedRegisterTest001, TestSize.Level1)
     ASSERT_NE(stageManager, nullptr);
     SystemProperties::deviceType_ = preDeviceType_;
 }
+#endif // ENABLE_SPLIT_MODE
 } // namespace OHOS::Ace::NG

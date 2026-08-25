@@ -918,6 +918,9 @@ std::list<RefPtr<SpanBase>> SpanString::GetSubSpanList(
     std::list<RefPtr<SpanBase>> res;
     int32_t end = start + length;
     for (auto& span : spans) {
+        if (!span) {
+            continue;
+        }
         auto intersection = span->GetIntersectionInterval({ start, end });
         if (intersection) {
             int32_t spanStart = span->GetStartIndex();
@@ -927,7 +930,10 @@ std::list<RefPtr<SpanBase>> SpanString::GetSubSpanList(
             if (spanStart == spanEnd) {
                 continue;
             }
-            res.emplace_back(span->GetSubSpan(spanStart, spanEnd));
+            auto subSpan = span->GetSubSpan(spanStart, spanEnd);
+            if (subSpan) {
+                res.emplace_back(subSpan);
+            }
         }
     }
     return res;

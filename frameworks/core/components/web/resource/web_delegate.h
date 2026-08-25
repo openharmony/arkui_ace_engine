@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,12 @@
 
 #include <list>
 #include <map>
+#include <memory>
+#include <optional>
+#include <atomic>
 
 #include "ability_runtime/context/environment_callback.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
@@ -57,7 +61,11 @@
 #include "wm/window.h"
 #endif
 
+#include "core/components/web/resource/web_page_scene_types.h"
+
 namespace OHOS::Ace {
+
+class JsonValue;
 
 typedef struct WindowsSurfaceInfoTag {
     void* window;
@@ -1152,6 +1160,8 @@ private:
     int32_t speed_ = 0;
 };
 
+// ===== PageScene Rule-Based Perception Data Structures =====
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -1503,6 +1513,7 @@ public:
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
+    int32_t GetHostNodeId();
     void JavaScriptOnDocumentStart();
     void JavaScriptOnDocumentEnd();
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
@@ -1773,10 +1784,28 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void RequestWebDomJsonStringWithOptions(
+        const std::function<void(const std::string)>&& callback, int32_t mode);
     void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
     void SetIsSystemRtlEnable(bool enable);
     void FetchCloudControlWebAutoLayoutConfig();
     void UpdateTouchEventFeatureDetectionEnabled();
+
+    // ===== PageScene Rule-Based Perception Methods =====
+
+    void ExecuteReportOnRegisterMatch(int32_t processId);
+    void GetPageSceneForWeb(int32_t processId, const std::string& ruleJsonOrRuleSetId);
+
+    // Selector & query
+    void QueryPageControls(const std::string& selectorJson,
+        const std::string& ruleId, const std::vector<std::string>& nodeTypes,
+        std::function<void(const std::string& resultJson)>&& callback);
+
+    // Page scene match execution
+    void ProcessPageSceneDomReadyResult(const std::string& resultJson, const std::string& selectorJson);
+    void ExecuteGetPageSceneMatch(int32_t processId, const WebPageSceneRuleSet& ruleSet, bool isTemporary);
+    void ExecuteAllRuleSetMatch();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1793,6 +1822,7 @@ private:
     void BindIsPagePathInvalidMethod();
     void WebComponentClickReport(int64_t accessibilityId);
     void AccessibilityReleasePageEvent();
+
     void AccessibilitySendPageChange();
     void AccessibilitySendPageChange(int32_t retryCount);
     void HandleAccessibilitySendPageChange(int32_t retryCount);

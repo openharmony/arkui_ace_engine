@@ -28,6 +28,7 @@
 #include "parameters.h"
 
 #include "adapter/ohos/osal/window_utils.h"
+#include "base/thread/background_task_executor.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/properties/ui_material.h"
 
@@ -54,6 +55,7 @@ constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.
 #endif
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
+constexpr char ENABLE_NAVIGATION_IMAGE_KEY[] = "const.arkui.recycle.navigation.image.enable";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
 constexpr char ENABLE_IMAGE_AUTO_RESIZE_KEY[] = "persist.ace.image.autoresize.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
@@ -63,6 +65,7 @@ constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engi
 constexpr char IS_OPINC_ENABLE[] = "persist.ddgr.opinctype";
 constexpr char LAYOUT_BREAKPOINT[] = "const.arkui.layoutbreakpoint";
 constexpr char LAYOUT_BREAKPOINT_DEFAULT[] = "320,600,1000,1440;0.8,1.2;";
+constexpr char ENABLE_SMART_LAYOUT_KEY[] = "persist.ace.layout.smartlayout.enabled";
 enum class LayoutBreakPointPart : uint32_t { WIDTH_PART = 0, HEIGHT_PART };
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -132,6 +135,11 @@ bool IsDownloadByNetworkDisabled()
 bool IsRecycleImageEnabled()
 {
     return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
+}
+
+bool IsNavigationImageRecycleEnabled()
+{
+    return system::GetBoolParameter(ENABLE_NAVIGATION_IMAGE_KEY, false);
 }
 
 bool IsImageReleaseManageObjectEnabled()
@@ -322,6 +330,16 @@ float ReadScrollCoefficients()
     return DEFAULT_SCROLL_COEFFICEIENT;
 }
 
+int32_t ReadSyntaxMemOptStrategy()
+{
+    return system::GetIntParameter<int32_t>("persist.ace.trace.syntax.memoptstrategy", -1);
+}
+
+int32_t ReadBootVendorDdrSize()
+{
+    return system::GetIntParameter<int32_t>("ohos.boot.vendor.ddrsize", 12); // Set default memory size as 12
+}
+
 int64_t GetDebugFlags()
 {
     return system::GetIntParameter<int64_t>("persist.ace.debug.flags", 0);
@@ -340,6 +358,11 @@ bool IsMultiInstanceEnabled()
 bool IsLayoutDetectEnabled()
 {
     return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
+}
+
+bool IsSmartLayoutEnabled()
+{
+    return system::GetBoolParameter(ENABLE_SMART_LAYOUT_KEY, true);
 }
 
 bool IsConfigChangePerform()
@@ -705,6 +728,16 @@ std::string InitSysSdkApiVersion()
     return std::to_string(::GetSdkApiVersion());
 }
 
+std::string InitSysSdkPatchApiVersion()
+{
+    return std::to_string(::GetSdkPatchApiVersion());
+}
+
+std::string InitSysSdkMinorApiVersion()
+{
+    return std::to_string(::GetSdkMinorApiVersion());
+}
+
 std::string InitSysOsReleaseType()
 {
     const char* res = ::GetOsReleaseType();
@@ -759,6 +792,8 @@ std::string SystemProperties::manufacturer_ = InitSysManufacture();
 std::string SystemProperties::model_ = InitSysProductModel();
 std::string SystemProperties::product_ = InitSysMarketName();
 std::string SystemProperties::apiVersion_ = InitSysSdkApiVersion();
+std::string SystemProperties::sdkPatchApiVersion_ = InitSysSdkPatchApiVersion();
+std::string SystemProperties::sdkMinorApiVersion_ = InitSysSdkMinorApiVersion();
 std::string SystemProperties::releaseType_ = InitSysOsReleaseType();
 std::string SystemProperties::paramDeviceType_ = InitSysDeviceType();
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
@@ -772,6 +807,7 @@ bool SystemProperties::gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnab
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
+bool SystemProperties::navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
 bool SystemProperties::imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
@@ -798,6 +834,7 @@ bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
+bool SystemProperties::smartLayoutEnabled_ = IsSmartLayoutEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -835,6 +872,8 @@ bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::autoResizeEnabled_ = false;
+int32_t SystemProperties::syntaxMemOptStrategy_ = ReadSyntaxMemOptStrategy();
+int32_t SystemProperties::bootVendorDdrSize_ = ReadBootVendorDdrSize();
 int32_t SystemProperties::sensorCorrectionEnable_ = 0;
 
 std::once_flag SystemProperties::getSysPropertiesFlag_;
@@ -971,7 +1010,7 @@ void SystemProperties::InitDeviceInfo(
 
 void SystemProperties::ReadSystemParametersCallOnce()
 {
-    std::call_once(getSysPropertiesFlag_, [] () {
+    std::call_once(getSysPropertiesFlag_, []() {
         developerModeOn_ = IsDeveloperModeOn();
         debugEnabled_ = IsDebugEnabled();
         eventBenchMarkEnabled_ = IsEventBenchMarkEnabled();
@@ -996,6 +1035,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
         recycleImageEnabled_ = IsRecycleImageEnabled();
+        navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
         imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
         pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
         forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
@@ -1010,6 +1050,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         arkUIHookEnabled_ = IsArkUIHookEnabled();
         gridCacheEnabled_ = IsGridCacheEnabled();
         gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
+        smartLayoutEnabled_ = IsSmartLayoutEnabled();
         sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
         faultInjectEnabled_  = IsFaultInjectEnabled();
         windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
@@ -1038,6 +1079,10 @@ void SystemProperties::ReadSystemParametersCallOnce()
             "const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
 
         InitDeviceTypeBySystemProperty();
+        BackgroundTaskExecutor::GetInstance().PostTask([]() {
+            [[maybe_unused]] auto supported = SystemProperties::IsDeviceSystemMaterialSupported();
+            [[maybe_unused]] auto level = SystemProperties::GetUiMaterialLevel();
+        });
     });
 }
 
@@ -1084,6 +1129,11 @@ ACE_WEAK_SYM bool SystemProperties::GetDebugEnabled()
 ACE_WEAK_SYM bool SystemProperties::GetLayoutDetectEnabled()
 {
     return layoutDetectEnabled_;
+}
+
+bool SystemProperties::GetSmartLayoutEnabled()
+{
+    return smartLayoutEnabled_;
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetMultiInstanceEnabled()

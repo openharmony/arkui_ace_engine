@@ -66,6 +66,7 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(
             resObj, maskColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
+
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -648,8 +649,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(const int32_t nodeId, const Dialo
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
     pattern->SetDialogProperties(param);
-    auto isSubwindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
-    if (isSubwindow || !dialogLayoutProp->GetIsModal().value_or(true)) {
+    auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
+    if (isSubWindow || !dialogLayoutProp->GetIsModal().value_or(true)) {
         dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));

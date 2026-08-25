@@ -13,111 +13,225 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("layout_property_test_ng") {
-  type = "new"
-  module_name = "Layout-RowSplit"
-  sources = [
-    "layout_property_test_ng_first_part.cpp",
-    "layout_property_test_ng_second_part.cpp",
-    "layout_property_test_ng_third_part.cpp",
-    "layout_property_test_ng_two_first_part.cpp",
-    "layout_property_test_ng_two_second_part.cpp",
-  ]
+layout_property_sources = [
+  "layout_property_test_ng_first_part.cpp",
+  "layout_property_test_ng_second_part.cpp",
+  "layout_property_test_ng_third_part.cpp",
+  "layout_property_test_ng_two_first_part.cpp",
+  "layout_property_test_ng_two_second_part.cpp",
+  "layout_test_min.cpp",
+  "layout_test_core.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "layout_test_min.cpp",
-      "layout_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "layout_test_min.cpp",
-      "layout_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("layout_property_test_ng") {
+    type = "host_components"
+    module_name = "Layout-RowSplit"
+    sources = layout_property_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("layout_property_test_ng") {
+    type = "new"
+    module_name = "Layout-RowSplit"
+    sources = layout_property_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "layout_test_min.cpp",
+        "layout_test_core.cpp",
+      ]
+    }
   }
 }
 
-ace_unittest("layout_wrapper_test_ng") {
-  type = "new"
-  module_name = "CommonProperties-LayoutAndBorder"
-  sources = [
-    "layout_wrapper_test_ng_first_part.cpp",
-    "layout_wrapper_test_ng_second_part.cpp",
-    "layout_wrapper_testtwo_ng.cpp",
-  ]
+layout_wrapper_sources = [
+  "layout_wrapper_test_ng_first_part.cpp",
+  "layout_wrapper_test_ng_second_part.cpp",
+  "layout_wrapper_testtwo_ng.cpp",
+  "layout_test_min.cpp",
+  "layout_test_core.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "layout_test_min.cpp",
-      "layout_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "layout_test_min.cpp",
-      "layout_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("layout_wrapper_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_wrapper_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("layout_wrapper_test_ng") {
+    type = "new"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_wrapper_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "layout_test_min.cpp",
+        "layout_test_core.cpp",
+      ]
+    }
   }
 }
 
-ace_unittest("layout_algorithm_test_ng") {
-  type = "new"
-  module_name = "Layout-Column"
-  sources = [ "layout_algorithm_test_ng.cpp" ]
+layout_algorithm_sources = [ "layout_algorithm_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("layout_algorithm_test_ng") {
+    type = "host_components"
+    module_name = "Layout-Column"
+    sources = layout_algorithm_sources
+  }
+} else {
+  ace_unittest("layout_algorithm_test_ng") {
+    type = "new"
+    module_name = "Layout-Column"
+    sources = layout_algorithm_sources
+  }
 }
 
-ace_unittest("layout_wrapper_build_test_ng") {
-  type = "new"
-  module_name = "CommonProperties-LayoutAndBorder"
-  sources = [ "layout_wrapper_build_test_ng.cpp" ]
+layout_wrapper_build_sources = [ "layout_wrapper_build_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("layout_wrapper_build_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_wrapper_build_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("layout_wrapper_build_test_ng") {
+    type = "new"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_wrapper_build_sources
+  }
 }
 
-ace_unittest("layout_wrapper_node_test_ng") {
-  type = "new"
-  module_name = "CommonProperties-LayoutAndBorder"
-  sources = [ "layout_wrapper_node_test_ng.cpp" ]
+layout_wrapper_node_sources = [ "layout_wrapper_node_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("layout_wrapper_node_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_wrapper_node_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("layout_wrapper_node_test_ng") {
+    type = "new"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_wrapper_node_sources
+  }
 }
 
-ace_unittest("drawing_layout_utils_test_ng") {
-  module_name = "DrawingSet-XComponent"
-  type = "new"
-  sources = [ "drawing_layout_utils_test_ng.cpp" ]
+drawing_layout_utils_sources = [ "drawing_layout_utils_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("drawing_layout_utils_test_ng") {
+    module_name = "DrawingSet-XComponent"
+    type = "host_components"
+    sources = drawing_layout_utils_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("drawing_layout_utils_test_ng") {
+    module_name = "DrawingSet-XComponent"
+    type = "new"
+    sources = drawing_layout_utils_sources
+  }
 }
 
-ace_unittest("overflow_test_ng") {
-  module_name = "DrawingSet-Rect"
-  type = "new"
-  sources = [ 
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_child_tree_callback.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_provider.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_pattern.cpp",
-    "vertical_overflow_handler_test_ng.cpp" ]
+overflow_sources = [
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_child_tree_callback.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_provider.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_pattern.cpp",
+  "vertical_overflow_handler_test_ng.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("overflow_test_ng") {
+    module_name = "DrawingSet-Rect"
+    type = "host_components"
+    sources = overflow_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("overflow_test_ng") {
+    module_name = "DrawingSet-Rect"
+    type = "new"
+    sources = overflow_sources
+  }
 }
 
-ace_unittest("overflow_collector_test_ng") {
-  module_name = "Animation-Frame"
-  type = "new"
-  sources = [ "overflow_collector_test_ng.cpp" ]
+overflow_collector_sources = [ "overflow_collector_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("overflow_collector_test_ng") {
+    module_name = "Animation-Frame"
+    type = "host_components"
+    sources = overflow_collector_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("overflow_collector_test_ng") {
+    module_name = "Animation-Frame"
+    type = "new"
+    sources = overflow_collector_sources
+  }
 }
 
-ace_unittest("layout_algorithm_overflow_test_ng") {
-  type = "new"
-  module_name = "CommonProperties-LayoutAndBorder"
-  sources = [ "layout_algorithm_overflow_test_ng.cpp" ]
+layout_algorithm_overflow_sources = [ "layout_algorithm_overflow_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("layout_algorithm_overflow_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_algorithm_overflow_sources
+  }
+} else {
+  ace_unittest("layout_algorithm_overflow_test_ng") {
+    type = "new"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = layout_algorithm_overflow_sources
+  }
 }
 
-ace_unittest("vertical_overflow_handler_horizontal_test_ng") {
-  type = "new"
-  module_name = "PickerSet-CalendarPicker/CalendarPickerDialog"
-  sources = [ "vertical_overflow_handler_horizontal_test_ng.cpp" ]
+vertical_overflow_handler_horizontal_sources = [ "vertical_overflow_handler_horizontal_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("vertical_overflow_handler_horizontal_test_ng") {
+    type = "host_components"
+    module_name = "PickerSet-CalendarPicker/CalendarPickerDialog"
+    sources = vertical_overflow_handler_horizontal_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("vertical_overflow_handler_horizontal_test_ng") {
+    type = "new"
+    module_name = "PickerSet-CalendarPicker/CalendarPickerDialog"
+    sources = vertical_overflow_handler_horizontal_sources
+  }
 }
 
-ace_unittest("pixel_round_test_ng") {
-  type = "new"
-  module_name = "Layout-Flex"
-  sources = [ "pixel_round_test_ng.cpp" ]
+pixel_round_sources = [ "pixel_round_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("pixel_round_test_ng") {
+    type = "host_components"
+    module_name = "Layout-Flex"
+    sources = pixel_round_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("pixel_round_test_ng") {
+    type = "new"
+    module_name = "Layout-Flex"
+    sources = pixel_round_sources
+  }
 }
 
 group("core_layout_unittest") {

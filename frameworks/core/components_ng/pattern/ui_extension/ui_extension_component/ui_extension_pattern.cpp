@@ -32,7 +32,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
@@ -252,6 +252,15 @@ void UIExtensionPattern::OnDetachFromMainTree()
     UIEXT_LOGI("OnDetachFromMainTree, isMoving: %{public}d", IsMoving());
 }
 
+void UIExtensionPattern::AddWindowStateChangedCallback()
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->AddWindowStateChangedCallback(host->GetId());
+}
+
 void UIExtensionPattern::OnAttachContext(PipelineContext *context)
 {
     CHECK_NULL_VOID(context);
@@ -269,7 +278,7 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
     } else if (detachContextHappened) {
         RegisterEvent(instanceId_);
     }
-
+    AddWindowStateChangedCallback();
     RegisterAvoidInfoChangeListener(instanceId_);
 
     /* only for 1.2 begin */
@@ -1117,6 +1126,7 @@ void UIExtensionPattern::InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& f
         auto pattern = weak.Upgrade();
         if (pattern) {
             TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
+            pattern->SetForceProcessOnKeyEventInternal(false);
             pattern->DispatchFocusActiveEvent(false);
         }
     });
@@ -1676,7 +1686,7 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
 
 void UIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)
 {
-    UIEXT_LOGI("OnReceive the current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGD("OnReceive the current state is '%{public}s'.", ToString(state_));
     if (onReceiveCallback_) {
         ContainerScope scope(instanceId_);
         onReceiveCallback_(params);

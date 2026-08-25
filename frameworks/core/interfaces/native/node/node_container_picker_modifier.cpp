@@ -14,6 +14,7 @@
  */
 
 #include "bridge/common/utils/utils.h"
+#include <cmath>
 #include <optional>
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -39,6 +40,8 @@ enum ValueArrayIndex {
     BOTTOMLEFT,
     BOTTOMRIGHT,
 };
+
+constexpr int32_t DEFAULT_DISPLAYED_ITEM_COUNT = 7;
 
 void SetContainerPickerCanLoop(ArkUINodeHandle node, int isLoop)
 {
@@ -327,6 +330,9 @@ void SetContainerPickerItemHeight(ArkUINodeHandle node, ArkUI_Float32 itemHeight
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (itemHeight < 0.0f || !std::isfinite(itemHeight)) {
+        return;
+    }
     ContainerPickerModel::SetItemHeight(frameNode, std::make_optional(Dimension(itemHeight, DimensionUnit::VP)));
 }
 
@@ -382,7 +388,6 @@ ArkUI_PickerIndicatorStyle GetContainerPickerIndicator(ArkUINodeHandle node)
 
 ArkUI_Int32 GetContainerPickerDisplayedItemCount(ArkUINodeHandle node)
 {
-    constexpr int32_t DEFAULT_DISPLAYED_ITEM_COUNT = 7;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, DEFAULT_DISPLAYED_ITEM_COUNT);
     auto containerPickerPattern = frameNode->GetPattern<ContainerPickerPattern>();

@@ -29,13 +29,12 @@ static constexpr uint64_t ANIMATION_TRACE_COMMERCIAL = HITRACE_TAG_ANIMATION | H
 void AceTraceBegin(const char* name)
 {
     CHECK_NULL_VOID(name);
-    std::string nameStr(name);
-    StartTrace(HITRACE_TAG_ACE, nameStr);
+    StartTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_ACE, name);
 }
 
 void AceTraceEnd()
 {
-    FinishTrace(HITRACE_TAG_ACE);
+    FinishTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_ACE);
 }
 
 void AceTraceBeginCommercial(const char* name)
@@ -51,52 +50,35 @@ void AceTraceEndCommercial()
 void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace)
 {
     CHECK_NULL_VOID(name);
-    std::string nameStr(name);
-    if (isAnimationTrace) {
-        StartAsyncTrace(HITRACE_TAG_ANIMATION, nameStr, taskId);
-    } else {
-        StartAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
-    }
+    uint64_t tag = isAnimationTrace ? HITRACE_TAG_ANIMATION : HITRACE_TAG_ACE;
+    StartAsyncTraceEx(HITRACE_LEVEL_INFO, tag, name, taskId, "");
 }
 
 void AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace)
 {
     CHECK_NULL_VOID(name);
-    std::string nameStr(name);
-    if (isAnimationTrace) {
-        FinishAsyncTrace(HITRACE_TAG_ANIMATION, nameStr, taskId);
-    } else {
-        FinishAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
-    }
+    uint64_t tag = isAnimationTrace ? HITRACE_TAG_ANIMATION : HITRACE_TAG_ACE;
+    FinishAsyncTraceEx(HITRACE_LEVEL_INFO, tag, name, taskId);
 }
 
 void AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace)
 {
     CHECK_NULL_VOID(name);
-    std::string nameStr(name);
-    if (isAnimationTrace) {
-        StartAsyncTrace(ANIMATION_TRACE_COMMERCIAL, nameStr, taskId);
-    } else {
-        StartAsyncTrace(ACE_TRACE_COMMERCIAL, nameStr, taskId);
-    }
+    uint64_t tag = isAnimationTrace ? ANIMATION_TRACE_COMMERCIAL : ACE_TRACE_COMMERCIAL;
+    StartAsyncTraceEx(HITRACE_LEVEL_COMMERCIAL, tag, name, taskId, "");
 }
 
 void AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace)
 {
     CHECK_NULL_VOID(name);
-    std::string nameStr(name);
-    if (isAnimationTrace) {
-        FinishAsyncTrace(ANIMATION_TRACE_COMMERCIAL, nameStr, taskId);
-    } else {
-        FinishAsyncTrace(ACE_TRACE_COMMERCIAL, nameStr, taskId);
-    }
+    uint64_t tag = isAnimationTrace ? ANIMATION_TRACE_COMMERCIAL : ACE_TRACE_COMMERCIAL;
+    FinishAsyncTraceEx(HITRACE_LEVEL_COMMERCIAL, tag, name, taskId);
 }
 
 void AceCountTrace(const char *key, int32_t count)
 {
     CHECK_NULL_VOID(key);
-    std::string keyStr(key);
-    CountTrace(HITRACE_TAG_ACE, keyStr, count);
+    CountTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_ACE, key, count);
 }
 
 void AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceType, uint64_t* pOldTraceId)

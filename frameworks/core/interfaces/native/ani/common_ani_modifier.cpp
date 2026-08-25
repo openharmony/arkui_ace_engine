@@ -82,6 +82,7 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 constexpr int NUM_8 = 8;
+constexpr int NUM_NEG_1 = -1;
 
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -508,6 +509,18 @@ static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandl
     } else {
         return std::nullopt;
     }
+}
+
+static std::string GetIdString(ArkUINodeHandle node)
+{
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
+    CHECK_NULL_RETURN(frameNodePeer, "");
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_RETURN(frameNode, "");
+    if (!MultiThreadBuildManager::CheckNodeOnValidThread(AceType::RawPtr(frameNode))) {
+        return "";
+    }
+    return frameNode->GetInspectorId().value_or("");
 }
 
 Alignment ParseAlignment(int32_t align)
@@ -1247,6 +1260,20 @@ void FireArkUIObjectLifecycleCallbackImpl(ani_long nodePtr, const std::string& c
     context->FireArkUIObjectLifecycleCallback(data);
 }
 
+int32_t GetBuilderNodeParentViewId(ani_long nodePtr)
+{
+    UINode* node = reinterpret_cast<UINode*>(nodePtr);
+    CHECK_NULL_RETURN(node, NUM_NEG_1);
+    auto parent = node->GetParent();
+    while (parent && !parent->IsCNode()) {
+        if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            return parent->GetId();
+        }
+        parent = parent->GetParent();
+    }
+    return NUM_NEG_1;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -1338,8 +1365,10 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
         .isEasySplit = OHOS::Ace::NG::IsEasySplit,
         .dumpLogPrint = OHOS::Ace::NG::DumpLogPrintImpl,
-        .fireArkUIObjectLifecycleCallback = OHOS::Ace::NG::FireArkUIObjectLifecycleCallbackImpl,
+        .getBuilderNodeParentViewId = OHOS::Ace::NG::GetBuilderNodeParentViewId,
         .setOnNodeDestroyEvent = OHOS::Ace::NG::SetOnNodeDestroyEvent,
+        .fireArkUIObjectLifecycleCallback = OHOS::Ace::NG::FireArkUIObjectLifecycleCallbackImpl,
+        .GetIdString = OHOS::Ace::NG::GetIdString,
     };
     return &impl;
 }

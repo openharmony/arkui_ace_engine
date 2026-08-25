@@ -20,6 +20,13 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/animation/geometry_transition.h"
+#include <random>
+
+namespace {
+constexpr int32_t MAX_RANDOM_KEY = 10000;
+constexpr int32_t LOW_MEMORY_DDR_THRESHOLD_GB = 6;
+constexpr int32_t MAX_CACHED_COUNT_FOR_MEMORY_OPTIMIZATION = 2;
+}
 
 namespace OHOS::Ace::NG {
     std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(
@@ -81,16 +88,20 @@ namespace OHOS::Ace::NG {
         CHECK_EQUAL_VOID(reuseImmediately, false);
         auto lazyForEachNode = GetLazyForEachNode();
         CHECK_NULL_VOID(lazyForEachNode);
+        // Add random suffix to all keys in expiringItem_ to avoid reused by LazyForEach
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int32_t> dist(0, MAX_RANDOM_KEY);
+        std::string randomKey = "__MarkedByReuseImmediately__Internal__" + std::to_string(dist(gen));
         for (const auto& [key, node] : expiringItem_) {
             if (node.second) {
-                TryRecordRecyclableNodeRecursively(key + "__MarkedByReuseImmediately__Internal", node.second);
+                TryRecordRecyclableNodeRecursively(key + randomKey, node.second);
             }
         }
         CHECK_EQUAL_VOID(recyclableNodeSet_.empty(), true);
-        // Add suffix to all keys in expiringItem_ to avoid reused by LazyForEach
         std::unordered_map<std::string, LazyForEachCacheChild> newExpiringItem;
         for (const auto& [key, node] : expiringItem_) {
-            newExpiringItem[key + "__MarkedByReuseImmediately__Internal"] = node;
+            newExpiringItem[key + randomKey] = node;
         }
         expiringItem_ = std::move(newExpiringItem);
         auto reuseIds = GetReuseIdsCanBeRecycled();
@@ -466,6 +477,7 @@ namespace OHOS::Ace::NG {
                 nodeList_.emplace_back(child.first, child.second);
             } else if (info.isChanged) {
                 expiringTempItem_.try_emplace(index + changedIndex, LazyForEachChild(info.key, nullptr));
+                ProcessOffscreenNode(child.second, true);
             } else if (!info.extraKey.empty()) {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
                 int32_t preChangedIndex = 0;
@@ -800,9 +812,8 @@ namespace OHOS::Ace::NG {
         auto count = OnGetTotalCount();
         std::unordered_map<std::string, LazyForEachCacheChild> cache;
         std::set<int32_t> idleIndexes;
-        if (startIndex_ != -1 && endIndex_ != -1) {
-            CheckCacheIndex(idleIndexes, count);
-        }
+        bool outOfScreen = CheckOutOfScreenAndUpdateCachedCount();
+        CheckCacheIndex(idleIndexes, count, outOfScreen);
 
         ProcessCachedIndex(cache, idleIndexes);
 
@@ -918,18 +929,18 @@ namespace OHOS::Ace::NG {
             auto tempNode = node.second;
             auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
             if (!pair.second) {
-                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
                 ProcessOffscreenNode(tempNode, true);
             }
         }
     }
 
-    bool LazyForEachBuilder::SetActiveChildRange(int32_t start, int32_t end)
+    bool LazyForEachBuilder::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
     {
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
-        RecordActiveRange(start, end);
+        RecordActiveRange(start, end, cacheStart, cacheEnd);
         for (auto iter = cachedItems_.begin(); iter != cachedItems_.end();) {
             auto& [index, node] = *iter;
             bool isInRange = (index < count) && ((start <= end && start <= index && end >= index) ||
@@ -946,7 +957,7 @@ namespace OHOS::Ace::NG {
                 auto tempNode = node.second;
                 auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 if (!pair.second) {
-                    TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
                     ProcessOffscreenNode(tempNode, true);
                 }
                 needBuild = true;
@@ -1018,7 +1029,7 @@ namespace OHOS::Ace::NG {
         if (pair.second) {
             ProcessOffscreenNode(itemInfo.second, false);
         } else {
-            TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+            TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
         }
 
         itemInfo.second->Build(nullptr);
@@ -1028,15 +1039,13 @@ namespace OHOS::Ace::NG {
         return itemInfo.second;
     }
 
-    void LazyForEachBuilder::CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
+    void LazyForEachBuilder::CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count, bool outOfScreen)
     {
         if (count == 0) {
             return;
         }
-        int32_t range = cacheCount_ - endShowCached_;
-        if (reduceCache_) {
-            range = ReduceCacheCount(range);
-        }
+        int32_t range = outOfScreen ? cachedCountEnd_ - endShowCached_ : cacheCount_ - endShowCached_;
+        range = ReduceCacheCount(range);
         for (int32_t i = 1; i <= range; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
@@ -1051,10 +1060,8 @@ namespace OHOS::Ace::NG {
                 }
             }
         }
-        range = cacheCount_ - startShowCached_;
-        if (reduceCache_) {
-            range = ReduceCacheCount(range);
-        }
+        range = outOfScreen ? cachedCountStart_ - startShowCached_ : cacheCount_ - startShowCached_;
+        range = ReduceCacheCount(range);
         for (int32_t i = 1; i <= range; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
@@ -1069,6 +1076,7 @@ namespace OHOS::Ace::NG {
                 }
             }
         }
+        RemoveIllegalIndex(idleIndexes, count);
     }
 
     bool LazyForEachBuilder::PreBuildByIndex(int32_t index,
@@ -1241,17 +1249,22 @@ namespace OHOS::Ace::NG {
 
     void LazyForEachBuilder::PaintDebugBoundaryTreeAll(bool flag)
     {
+        std::vector<RefPtr<UINode>> nodes(cachedItems_.size() + expiringItem_.size());
+        size_t nodeCount = 0;
         for (const auto& node : cachedItems_) {
             if (node.second.second == nullptr) {
                 continue;
             }
-            node.second.second->PaintDebugBoundaryTreeAll(flag);
+            nodes[nodeCount++] = node.second.second;
         }
         for (const auto& node : expiringItem_) {
             if (node.second.second == nullptr) {
                 continue;
             }
-            node.second.second->PaintDebugBoundaryTreeAll(flag);
+            nodes[nodeCount++] = node.second.second;
+        }
+        for (size_t i = 0; i < nodeCount; i++) {
+            nodes[i]->PaintDebugBoundaryTreeAll(flag);
         }
     }
     void LazyForEachBuilder::SetDestroying(bool isDestroying, bool cleanStatus)
@@ -1466,10 +1479,10 @@ namespace OHOS::Ace::NG {
 
     int32_t LazyForEachBuilder::ReduceCacheCount(int32_t count)
     {
-        if (startShowCached_ || endShowCached_) {
-            return count;
-        }
-        const int32_t maxCacheCount = 2;
+        CHECK_EQUAL_RETURN(!reduceCache_ || startShowCached_ > 0 || endShowCached_ > 0, true, count);
+        // maxCacheCount defaults to 2; 0 when deviceMemory <= 6G
+        int32_t maxCacheCount = SystemProperties::GetBootVendorDdrSize() <= LOW_MEMORY_DDR_THRESHOLD_GB ?
+            0 : MAX_CACHED_COUNT_FOR_MEMORY_OPTIMIZATION;
         return count < maxCacheCount ? count : maxCacheCount;
     }
 
@@ -1477,6 +1490,10 @@ namespace OHOS::Ace::NG {
         const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
     {
         auto enableDebugTrace = SystemProperties::GetSyntaxTraceEnabled();
+        auto lazyForEachNode = GetLazyForEachNode();
+        if (lazyForEachNode) {
+            lazyForEachNode->MarkNeedSyncRenderTree(true);
+        }
         for (const auto& [key, node] : cache) {
             if (expiringItem_.find(key) != expiringItem_.end()) {
                 continue;
@@ -1524,10 +1541,29 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    void LazyForEachBuilder::RecordActiveRange(int32_t start, int32_t end)
+    void LazyForEachBuilder::RecordActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
     {
         activeRangeStart_ = start;
         activeRangeEnd_ = end;
+        cachedCountStart_ = cacheStart;
+        cachedCountEnd_ = cacheEnd;
+    }
+
+    bool LazyForEachBuilder::CheckOutOfScreenAndUpdateCachedCount()
+    {
+        if (startIndex_ == -1 || endIndex_ == -1) {
+            startIndex_ = activeRangeStart_;
+            endIndex_ = activeRangeEnd_;
+            return true;
+        }
+        return false;
+    }
+
+    void LazyForEachBuilder::RemoveIllegalIndex(std::set<int32_t>& indexes, int32_t count)
+    {
+        for (auto it = indexes.begin(); it != indexes.end();) {
+            (*it < 0 || *it >= count) ? it = indexes.erase(it) : it++;
+        }
     }
 
     bool LazyForEachBuilder::ReleaseExpiringNode(std::string reuseId)

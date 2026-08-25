@@ -161,6 +161,9 @@ public:
         return selectionMovingChild_.Upgrade();
     }
 
+    void SetShiftFlag(bool flag) { shiftFlag_ = flag; }
+    bool IsShiftFlagSet() const { return shiftFlag_; }
+
 protected:
     struct SelectionChildSortInfo {
         WeakPtr<SelectionContainerChild> child;
@@ -191,6 +194,7 @@ protected:
     bool fixedHandleIsTopOnStart_ = true;
     bool hasSelectionStartEvent_ = false;
     bool sortDirty_ = true;
+    bool shiftFlag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

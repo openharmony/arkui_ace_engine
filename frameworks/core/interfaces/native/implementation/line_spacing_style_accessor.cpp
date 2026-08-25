@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_LineSpacingStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LineSpacingStyle ConstructImpl(const Ark_LengthMetrics* lineSpacing,
+Ark_LineSpacingStyle ConstructImpl(const Ark_LengthMetricsProxy* lineSpacing,
                                    const Opt_LineSpacingOptions* options)
 {
     auto peer = PeerUtils::CreatePeer<LineSpacingStylePeer>();

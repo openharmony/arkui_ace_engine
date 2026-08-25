@@ -25,6 +25,7 @@ struct PositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, Alignment);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LayoutGravity, Alignment);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LocalizedAlignment, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LocalizedAlignmentRaw, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IsMirrorable, bool);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

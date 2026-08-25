@@ -609,15 +609,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "FormComponent", JSForm::JSBind },
     { "IsolatedComponent", JSIsolatedComponent::JSBind },
-    { "XComponentController", JSXComponentControllerBinding::JSBind },
     { "RemoteWindow", JSRemoteWindow::JSBind },
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
-#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
-    { "VideoControllerAsync", JSVideoControllerAsyncBinding::JSBind },
-    { "VideoController", JSVideoControllerBinding::JSBind },
-#endif
     { "PluginComponent", JSPlugin::JSBind },
     { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
     { "PreviewUIExtensionComponent", JSPreviewUIExtension::JSBind },
@@ -875,7 +870,6 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     } else if ((*func).first == V2::TEXT_ETS_TAG) {
         JSTextController::JSBind(globalObj);
     }
-
     (*func).second(globalObj);
 }
 

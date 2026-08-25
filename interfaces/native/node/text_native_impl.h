@@ -79,6 +79,10 @@ struct OH_ArkUI_TextController {
     ArkUI_NodeHandle node = nullptr;
 };
 
+struct OH_ArkUI_NativeModule_LineSpacingOptions {
+    bool onlyBetweenLines = false;
+};
+
 #ifdef __cplusplus
 }
 #endif

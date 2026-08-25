@@ -50,6 +50,7 @@ struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
+    bool isLazyChild = false;
     bool isPressed = false;
     float scale = 1.0f;
     float offsetY = 0.0f;

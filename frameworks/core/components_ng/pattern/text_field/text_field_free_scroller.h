@@ -47,10 +47,10 @@ public:
     void ScheduleDisappearDelayTask();
     void ScheduleScrollingDisappearDelayTask();
     void StopScrolling();
-    void OnDrawScrollBar(DrawingContext& context)
+    void OnDrawScrollBar(DrawingContext& context, const RefPtr<OverlayModifier>& modifier)
     {
         if (scrollBar_) {
-            scrollBar_->OnDraw(context);
+            scrollBar_->OnDraw(context, modifier);
         }
     }
 

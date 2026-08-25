@@ -357,12 +357,16 @@ int32_t UIContentServiceProxy::RegisterComponentChangeEventCallback(const EventC
         LOGW("reportStub is nullptr");
         return FAILED;
     }
+    if (report_->IsComponentChangeEventCallbackRegistered()) {
+        LOGW("RegisterComponentChangeEventCallback callback has already been registered");
+    }
     report_->RegisterComponentChangeEventCallback(eventCallback);
     int32_t sendRequestErrorCode = Remote()->SendRequest(REGISTER_COMPONENT_EVENT, data, reply, option);
     if (sendRequestErrorCode != ERR_NONE) {
         LOGW("RegisterComponentChangeEventCallback send request failed, errorCode is %{public}d", sendRequestErrorCode);
         return REPLY_ERROR;
     }
+    LOGI("RegisterComponentChangeEventCallback success");
     return NO_ERROR;
 }
 
@@ -683,6 +687,7 @@ int32_t UIContentServiceProxy::UnregisterComponentChangeEventCallback()
             sendRequestErrorCode);
         return REPLY_ERROR;
     }
+    LOGI("UnregisterComponentChangeEventCallback success");
     return NO_ERROR;
 }
 
@@ -1235,6 +1240,9 @@ int32_t UIContentServiceProxy::RegisterContentChangeCallback(const ContentChange
         LOGW("RegisterContentChangeCallback is nullptr,connect is not execute");
         return FAILED;
     }
+    if (report_->IsContentChangeCallbackRegistered()) {
+        LOGW("RegisterContentChangeCallback callback has already been registered");
+    }
     report_->RegisterContentChangeCallback(callback);
 
     int32_t sendRequestErrorCode = Remote()->SendRequest(REGISTER_CONTENT_CHANGE, data, reply, option);
@@ -1242,6 +1250,7 @@ int32_t UIContentServiceProxy::RegisterContentChangeCallback(const ContentChange
         LOGW("RegisterContentChangeCallback send request failed, errorCode is %{public}d", sendRequestErrorCode);
         return REPLY_ERROR;
     }
+    LOGI("RegisterContentChangeCallback success");
     return NO_ERROR;
 }
 
@@ -1264,6 +1273,7 @@ int32_t UIContentServiceProxy::UnregisterContentChangeCallback()
         LOGW("UnregisterContentChangeCallback send request failed, errorCode is %{public}d", sendRequestErrorCode);
         return REPLY_ERROR;
     }
+    LOGI("UnregisterContentChangeCallback success");
     return NO_ERROR;
 }
 

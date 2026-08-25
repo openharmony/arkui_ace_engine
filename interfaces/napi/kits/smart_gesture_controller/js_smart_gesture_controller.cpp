@@ -824,6 +824,7 @@ napi_value JSEnableSmartTapAndSlideGestures(napi_env env, napi_callback_info inf
     ContainerScope scope(instanceId);
     auto manager = GetRequiredManager(env, instanceId);
     CHECK_NULL_RETURN(manager, nullptr);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "enableSmartTapAndSlide is set to %{public}d", enabled);
     manager->SetSmartTapAndSlideGesturesEnabled(enabled);
     return nullptr;
 }

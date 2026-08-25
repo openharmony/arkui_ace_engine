@@ -33,6 +33,9 @@
 #include "core/components_ng/pattern/selection_container/selection_container_pattern.h"
 #include "core/components_ng/pattern/selection_container/selection_container_layout_property.h"
 #include "core/components_ng/pattern/selection_container/selection_select_overlay.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 
 using namespace testing;
@@ -43,6 +46,8 @@ namespace {
 constexpr int32_t TEST_NODE_ID = 100;
 constexpr int32_t TEST_NODE_ID_CHILD1 = 200;
 constexpr int32_t TEST_NODE_ID_CHILD2 = 300;
+constexpr int32_t TEST_NODE_ID_INNER_SCROLL = 400;
+constexpr int32_t TEST_NODE_ID_OUTER_SCROLL = 500;
 constexpr int32_t TEST_START_INDEX = 10;
 constexpr int32_t TEST_END_INDEX = 20;
 constexpr int32_t TEST_SELECT_ALL_END_INDEX = 100;
@@ -165,6 +170,16 @@ public:
     std::optional<RectF> GetAncestorNodeViewPortForChild() override
     {
         return RectF(0.0f, 0.0f, TEST_WIDTH, TEST_HEIGHT);
+    }
+
+    std::vector<AncestorNodeViewPortInfo> GetAncestorNodeViewPortInfos() override
+    {
+        return ancestorNodeViewPortInfos_;
+    }
+
+    void SetAncestorNodeViewPortInfos(const std::vector<AncestorNodeViewPortInfo>& infos)
+    {
+        ancestorNodeViewPortInfos_ = infos;
     }
 
     void SetHasSecondHandle(bool has)
@@ -340,6 +355,7 @@ private:
     bool vibratorStarted_ = false;
     bool propertyUpdated_ = false;
     RectF selectionArea_ = RectF(TEST_RECT_X, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
+    std::vector<AncestorNodeViewPortInfo> ancestorNodeViewPortInfos_;
 };
 
 class SelectionSelectOverlayTest : public testing::Test {
@@ -535,6 +551,50 @@ HWTEST_F(SelectionSelectOverlayTest, GetSecondHandleInfoTest002, TestSize.Level1
     
     auto result = overlay_->GetSecondHandleInfo();
     EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: GetAncestorNodeViewPortTest001
+ * @tc.desc: Constrain all common ancestor viewports for cross-node selection in nested scrolls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, GetAncestorNodeViewPortTest001, TestSize.Level1)
+{
+    auto innerScrollNode = FrameNode::CreateFrameNode(
+        "InnerScroll", TEST_NODE_ID_INNER_SCROLL, AceType::MakeRefPtr<Pattern>());
+    auto outerScrollNode = FrameNode::CreateFrameNode(
+        "OuterScroll", TEST_NODE_ID_OUTER_SCROLL, AceType::MakeRefPtr<Pattern>());
+    const RectF innerViewPort(0.0f, 0.0f, 200.0f, 200.0f);
+    const RectF innerClipViewPort(10.0f, 10.0f, 60.0f, 70.0f);
+    const RectF outerViewPort(20.0f, 30.0f, 100.0f, 80.0f);
+    std::vector<AncestorNodeViewPortInfo> viewPortInfos = {
+        { innerScrollNode, innerViewPort }, { innerScrollNode, innerClipViewPort },
+        { outerScrollNode, outerViewPort }
+    };
+    child1_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    child2_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    pattern_->selectionStartChild_ = child1_;
+    pattern_->selectionEndChild_ = child2_;
+
+    auto result = overlay_->GetAncestorNodeViewPort();
+
+    ASSERT_TRUE(result.has_value());
+    auto expectedViewPort = innerViewPort.Constrain(innerClipViewPort);
+    expectedViewPort = expectedViewPort.Constrain(outerViewPort);
+    EXPECT_EQ(result.value(), expectedViewPort);
+
+    const RectF disjointOuterViewPort(300.0f, 300.0f, 50.0f, 50.0f);
+    viewPortInfos.back().viewPort = disjointOuterViewPort;
+    child1_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    child2_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    result = overlay_->GetAncestorNodeViewPort();
+
+    ASSERT_TRUE(result.has_value());
+    expectedViewPort = innerViewPort.Constrain(innerClipViewPort);
+    expectedViewPort = expectedViewPort.Constrain(disjointOuterViewPort);
+    EXPECT_EQ(result.value(), expectedViewPort);
+    EXPECT_TRUE(result->IsValid());
+    EXPECT_TRUE(result->IsEmpty());
 }
 
 /**
@@ -1043,5 +1103,84 @@ HWTEST_F(SelectionSelectOverlayTest, GetSelectAreaFromRectsTest002, TestSize.Lev
     EXPECT_EQ(result.Height(), TEST_RECT_HEIGHT);
 }
 
+
+/**
+ * @tc.name: UpdateSelectMenuBgTest001
+ * @tc.desc: Test UpdateSelectMenuBg skips when menu is custom select overlay menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, UpdateSelectMenuBgTest001, TestSize.Level1)
+{
+    // Create a SelectOverlayNode with a selectMenu_ that has SELECT_OVERLAY_CUSTOM_MENU type
+    auto overlayPattern = AceType::MakeRefPtr<SelectOverlayPattern>(std::make_shared<SelectOverlayInfo>(),
+        SelectOverlayMode::ALL);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(overlayNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    // Create a menu with SELECT_OVERLAY_CUSTOM_MENU type
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(0, "Menu", MenuType::SELECT_OVERLAY_CUSTOM_MENU);
+    auto menuNode = FrameNode::CreateFrameNode("Menu", 201, menuPattern);
+    ASSERT_NE(menuNode, nullptr);
+    selectOverlayNode->selectMenu_ = menuNode;
+
+    // Verify that IsSelectOverlayCustomMenu returns true
+    EXPECT_TRUE(menuPattern->IsSelectOverlayCustomMenu());
+
+    // Call UpdateSelectMenuBg - should return early without crash
+    selectOverlayNode->UpdateSelectMenuBg(nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuBgTest002
+ * @tc.desc: Test UpdateSelectMenuBg proceeds when menu is not custom select overlay menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, UpdateSelectMenuBgTest002, TestSize.Level1)
+{
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(overlayNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    // Create a menu with normal MENU type (not SELECT_OVERLAY_CUSTOM_MENU)
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(0, "Menu", MenuType::MENU);
+    auto menuNode = FrameNode::CreateFrameNode("Menu", 202, menuPattern);
+    ASSERT_NE(menuNode, nullptr);
+    selectOverlayNode->selectMenu_ = menuNode;
+
+    // Verify that IsSelectOverlayCustomMenu returns false
+    EXPECT_FALSE(menuPattern->IsSelectOverlayCustomMenu());
+
+    // Call UpdateSelectMenuBg - should not return early, may update render context
+    selectOverlayNode->UpdateSelectMenuBg(nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuBgTest003
+ * @tc.desc: Test UpdateSelectMenuBg with null caller uses pipeline color mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, UpdateSelectMenuBgTest003, TestSize.Level1)
+{
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(overlayNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(0, "Menu", MenuType::MENU);
+    auto menuNode = FrameNode::CreateFrameNode("Menu", 203, menuPattern);
+    ASSERT_NE(menuNode, nullptr);
+    selectOverlayNode->selectMenu_ = menuNode;
+
+    // Call with null caller - should use pipeline context color mode
+    selectOverlayNode->UpdateSelectMenuBg(nullptr);
+
+    // Verify function completed without crash; render context may or may not have
+    // background color set depending on UseNewMaterial path.
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
 
 } // namespace OHOS::Ace::NG

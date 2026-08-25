@@ -15,8 +15,6 @@ import("../../components.gni")
 
 build_component_ng("rich_editor_pattern_ng") {
   sources = [
-    "one_step_drag_controller.cpp",
-    "paragraph_manager.cpp",
     "rich_editor_accessibility_property.cpp",
     "rich_editor_base_controller.cpp",
     "rich_editor_content_modifier.cpp",
@@ -36,7 +34,6 @@ build_component_ng("rich_editor_pattern_ng") {
     "rich_editor_styled_string_controller.cpp",
     "rich_editor_theme.cpp",
     "rich_editor_undo_manager.cpp",
-    "selection_info.cpp",
   ]
 
   ark_sources = [
@@ -58,6 +55,9 @@ build_component_ng("rich_editor_pattern_ng") {
       "ipc:ipc_single",
       "napi:ace_napi",
       "window_manager:libwm",
+      "node:node_header_notice",
+      "libuv:uv",
+      "ets_runtime:libark_jsruntime",
     ]
   }
 

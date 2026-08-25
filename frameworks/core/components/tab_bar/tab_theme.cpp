@@ -152,6 +152,18 @@ void TabTheme::Builder::ParsePattern2(const RefPtr<TabTheme>& theme, const RefPt
         pattern->GetAttr<Color>("font_emphasize", Color::BLACK);
     theme->fontPrimary_ =
         pattern->GetAttr<Color>("font_primary", Color::BLACK);
+    theme->sideBarListItemCornerRadius_ =
+        pattern->GetAttr<Dimension>("corner_radius_level6", 12.0_vp);
+    theme->sideBarListItemActivedColor_ =
+        pattern->GetAttr<Color>("comp_emphasize_tertiary", Color(0x19007DFF));
+    theme->sideBarListItemHoverColor_ =
+        pattern->GetAttr<Color>("interactive_hover", Color(0x0c182431));
+    theme->sideBarListItemPressedColor_ =
+        pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
+    theme->sideBarListItemFocusColor_ =
+        pattern->GetAttr<Color>("interactive_focus", Color(0x007DFF));
+    theme->sideBarListItemFocusWidth_ =
+        pattern->GetAttr<Dimension>("outline_extra_larger", 2.0_vp);
 }
 
 } // namespace OHOS::Ace

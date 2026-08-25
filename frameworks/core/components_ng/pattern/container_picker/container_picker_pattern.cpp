@@ -1451,6 +1451,7 @@ void ContainerPickerPattern::InitOrRefreshHapticController()
     } else if (!IsEnableHaptic() && hapticController_) {
         TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "stop haptic controller");
         hapticController_->Stop();
+        hapticController_ = nullptr;
     }
     isEnableHaptic_ = IsEnableHaptic();
 }

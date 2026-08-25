@@ -58,6 +58,7 @@ ohos_shared_library("arcalphabetindexer") {
     "bounds_checking_function:libsec_static",
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   deps = [

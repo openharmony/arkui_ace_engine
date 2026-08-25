@@ -219,6 +219,7 @@ public:
     static int32_t GetFillType(FrameNode* frameNode);
     static void ResetFillType(FrameNode* frameNode);
     static void ResetDisplayCountWithObject(FrameNode* frameNode);
+    static void SetIgnoreHiddenItem(FrameNode* frameNode, bool ignoreHiddenItem);
     static bool CallSwiperStartFakeDrag(FrameNode* frameNode);
     static bool CallSwiperFakeDragBy(FrameNode* frameNode, float offset);
     static bool CallSwiperStopFakeDrag(FrameNode* frameNode);

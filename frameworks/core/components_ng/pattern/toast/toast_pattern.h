@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -30,8 +31,8 @@
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class ToastPattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(ToastPattern, PopupBasePattern);
+class ToastPattern : public PopupBasePattern, public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(ToastPattern, PopupBasePattern, IAvoidInfoListener);
 
 public:
     ToastPattern() = default;
@@ -58,9 +59,6 @@ public:
     }
 
     void InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<ToastLayoutProperty>& toastProps);
-
-    void CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
-        const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp);
 
     void OnAttachToFrameNode() override;
 
@@ -193,6 +191,34 @@ private:
     void OnDetachFromMainTree() override;
     void OnDetachFromMainTreeMultiThread();
     void AdjustOffsetInSubwindow(OffsetT<Dimension>& offset, RefPtr<PipelineContext> context);
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
+
+    int32_t GetToastParentContainerId(const RefPtr<FrameNode>& host);
+
+    bool IsToastInUIExtensionWindow(const RefPtr<FrameNode>& host);
+
+    float GetTitleBarHeightFromContext(const RefPtr<PipelineContext>& pipelineContext);
+
+    float GetUIExtensionTitleBarHeight(const RefPtr<FrameNode>& host, int32_t parentContainerId);
+
+    float GetTopMostTitleBarHeightInUEC(const RefPtr<FrameNode>& host);
+
+    bool NeedAvoidTitleBarForSystemTopMostInUEC(int32_t parentContainerId);
+
+    float GetSystemTopMostTitleBarHeightInUEC(int32_t parentContainerId);
+
+    float GetUECTitleBarHeightForTopAlignment(
+        const RefPtr<FrameNode>& host, const RefPtr<ToastLayoutProperty>& toastProp);
+
+    void CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
+        const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp,
+        bool isToastInUEC);
+
+    void CalculateSafeAreaTopForTopAlignment(float& safeAreaTop,
+        const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp,
+        const RefPtr<FrameNode>& host);
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;

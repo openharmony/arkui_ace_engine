@@ -87,9 +87,9 @@ export class VideoOpsHandWritten {
             return;
         }
         const valueTmpValue = value!;
-        if (valueTmpValue instanceof VoidCallback) {
+        if (valueTmpValue instanceof (() => never)) {
             ArkUIAniModule._Video_SetVoidCallback(peerPtr, valueTmpValue as VoidCallback);
-        } else if (valueTmpValue instanceof ErrorCallback) {
+        } else if (valueTmpValue instanceof ((p0: Any) => never)) {
             ArkUIAniModule._Video_SetErrorCallback(peerPtr, valueTmpValue as ErrorCallback);
         }
     }

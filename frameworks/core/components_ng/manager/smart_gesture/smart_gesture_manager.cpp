@@ -32,6 +32,7 @@
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -175,6 +176,31 @@ RectF GetNodeVisibleRect(const RefPtr<FrameNode>& node)
     RectF frameRect;
     node->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect, false);
     return visibleRect;
+}
+
+void ReportSmartGestureError(const RefPtr<PipelineContext>& context, const std::string& tag)
+{
+    CHECK_NULL_VOID(context);
+    GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::SMART_GESTURE_ERROR, -1, -1, tag };
+    GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, context->GetInstanceId());
+}
+
+std::string BuildSmartGestureErrorTag(const std::string& branch, SmartGestureTrigger trigger)
+{
+    return "SmartGesture:" + branch + ", trigger=" + std::to_string(static_cast<int32_t>(trigger));
+}
+
+std::string BuildSmartGestureErrorTag(const std::string& branch, const SmartGestureProposal& proposal)
+{
+    auto node = proposal.GetTargetNode();
+    return "SmartGesture:" + branch + ", proposalType=" + std::to_string(static_cast<int32_t>(proposal.type)) +
+           ", intention=" + std::to_string(static_cast<int32_t>(proposal.operateIntention)) +
+           ", nodeId=" + std::to_string(node ? node->GetId() : -1);
+}
+
+std::string BuildSmartGestureErrorTag(const std::string& branch, const RefPtr<FrameNode>& node)
+{
+    return "SmartGesture:" + branch + ", nodeId=" + std::to_string(node ? node->GetId() : -1);
 }
 
 double GetCenterX(const RectF& rect)
@@ -369,9 +395,24 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger)
 
 bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEvent& event)
 {
+    if (!SystemProperties::GetFocusCanBeActive()) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "focusCanBeActive is false");
+        ReportSmartGestureError(
+            GetPipelineContext(), BuildSmartGestureErrorTag("focus can be active is false", trigger));
+        return false;
+    }
     RefreshSelectedNodeState();
-    CHECK_EQUAL_RETURN(productGestureEnabled_, false, false);
+    if (!productGestureEnabled_) {
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "smart gesture product disabled, trigger=%{public}d",
+            static_cast<int32_t>(trigger));
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("product gesture disabled", trigger));
+        return false;
+    }
     if (trigger != SmartGestureTrigger::WRIST_BACK && !smartTapAndSlideGesturesEnabled_) {
+        TAG_LOGE(AceLogTag::ACE_GESTURE,
+            "smart gesture tap and slide disabled, trigger=%{public}d, smartTapAndSlideGesturesEnabled=%{public}d",
+            static_cast<int32_t>(trigger), static_cast<int32_t>(smartTapAndSlideGesturesEnabled_));
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("tap and slide disabled", trigger));
         return false;
     }
 
@@ -390,6 +431,10 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEv
     }
 
     if (!defaultProposal.has_value() && !GetMonitorHandle()) {
+        TAG_LOGE(AceLogTag::ACE_GESTURE,
+            "smart gesture default proposal empty, trigger=%{public}d, hasMonitor=%{public}d",
+            static_cast<int32_t>(trigger), static_cast<int32_t>(static_cast<bool>(GetMonitorHandle())));
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("default proposal empty", trigger));
         return false;
     }
 
@@ -408,6 +453,21 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEv
 
 void SmartGestureManager::RequestSelected(const std::string& inspectorId)
 {
+    if (!SystemProperties::GetFocusCanBeActive()) {
+        ReportSmartGestureError(GetPipelineContext(), "focus can be active is false");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus can be active is false, requestSelected failed");
+        return;
+    }
+    if (!IsProductGestureEnabled()) {
+        ReportSmartGestureError(GetPipelineContext(), "product gesture disabled");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "product gesture disabled, requestSelected failed");
+        return;
+    }
+    if (!IsSmartTapAndSlideGesturesEnabled()) {
+        ReportSmartGestureError(GetPipelineContext(), "smart tap and slide gestures disabled");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "smart tap and slide gestures disabled, requestSelected failed");
+        return;
+    }
     RefreshSelectedNodeState();
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -702,6 +762,8 @@ std::optional<SmartGestureProposal> SmartGestureManager::ResolveProposal(
     if (!ValidateProposal(defaultProposal)) {
         TAG_LOGW(AceLogTag::ACE_GESTURE, "smart gesture reject invalid default proposal, type=%{public}d",
             static_cast<int32_t>(defaultProposal.type));
+        ReportSmartGestureError(
+            GetPipelineContext(), BuildSmartGestureErrorTag("invalid default proposal", defaultProposal));
         return std::nullopt;
     }
     auto monitor = GetMonitorHandle();
@@ -716,11 +778,15 @@ std::optional<SmartGestureProposal> SmartGestureManager::ResolveProposal(
         return defaultProposal;
     }
     if (!resolution.selectedProposal.has_value()) {
+        ReportSmartGestureError(
+            GetPipelineContext(), BuildSmartGestureErrorTag("selected proposal empty", defaultProposal));
         return std::nullopt;
     }
     if (!ValidateProposal(resolution.selectedProposal.value())) {
         TAG_LOGW(AceLogTag::ACE_GESTURE, "smart gesture reject invalid monitor proposal, type=%{public}d",
             static_cast<int32_t>(resolution.selectedProposal->type));
+        ReportSmartGestureError(GetPipelineContext(),
+            BuildSmartGestureErrorTag("invalid monitor proposal", resolution.selectedProposal.value()));
         return std::nullopt;
     }
     return resolution.selectedProposal;
@@ -730,6 +796,12 @@ void SmartGestureManager::RecordExecutionSnapshot(SmartGestureTrigger trigger, b
     const SmartGestureProposal& defaultProposal, const std::optional<SmartGestureProposal>& resolvedProposal,
     bool executeResult) const
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "smart gesture execution snapshot, trigger=%{public}d, defaultProposalType=%{public}d, "
+        "hasMonitor=%{public}d, resolvedProposalType=%{public}d, executeResult=%{public}d",
+        static_cast<int32_t>(trigger), static_cast<int32_t>(defaultProposal.type), static_cast<int32_t>(hasMonitor),
+        static_cast<int32_t>(resolvedProposal.has_value() ? static_cast<int32_t>(resolvedProposal->type) : -1),
+        static_cast<int32_t>(executeResult));
 #ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -836,26 +908,49 @@ bool SmartGestureManager::ExecuteProposal(const SmartGestureProposal& proposal, 
             ExecuteBackPressProposal();
             return true;
     }
+    ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("unknown proposal type", proposal));
     return false;
 }
 
 bool SmartGestureManager::ExecuteSelectProposal(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(IsPrimaryActionNodeActive(node), false);
-    CHECK_NULL_RETURN(IsNodeClickable(node), false);
+    if (!node) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("select node null", node));
+        return false;
+    }
+    if (!IsPrimaryActionNodeActive(node)) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("select node inactive", node));
+        return false;
+    }
+    if (!IsNodeClickable(node)) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("select node not clickable", node));
+        return false;
+    }
 
     UpdateSelectedNode(node);
 
     auto selectedNode = selectedNode_.Upgrade();
-    return selectedNode && selectedNode->GetId() == node->GetId();
+    if (selectedNode && selectedNode->GetId() == node->GetId()) {
+        return true;
+    }
+    ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("select state mismatch", node));
+    return false;
 }
 
 bool SmartGestureManager::ExecuteClickProposal(const RefPtr<FrameNode>& node, const KeyEvent& event)
 {
-    CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(IsPrimaryActionNodeActive(node), false);
-    CHECK_NULL_RETURN(IsNodeClickable(node), false);
+    if (!node) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("click node null", node));
+        return false;
+    }
+    if (!IsPrimaryActionNodeActive(node)) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("click node inactive", node));
+        return false;
+    }
+    if (!IsNodeClickable(node)) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("click node not clickable", node));
+        return false;
+    }
     auto selectedNode = selectedNode_.Upgrade();
     // Smart-gesture click follows a strict select-then-click flow:
     // 1. If nothing is selected yet, clicking a target first establishes selection only.
@@ -866,20 +961,36 @@ bool SmartGestureManager::ExecuteClickProposal(const RefPtr<FrameNode>& node, co
         return true;
     }
     if (selectedNode->GetId() != node->GetId()) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("selected node mismatch", node));
         return false;
     }
     UpdateSelectedNode(node);
-    return DispatchSmartGestureClick(node, event);
+    auto dispatchResult = DispatchSmartGestureClick(node, event);
+    if (!dispatchResult) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("click dispatch failed", node));
+    }
+    return dispatchResult;
 }
 
 bool SmartGestureManager::ExecuteScrollProposal(const SmartGestureProposal& proposal)
 {
     auto node = proposal.GetTargetNode();
-    CHECK_NULL_RETURN(node, false);
+    if (!node) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("scroll node null", proposal));
+        return false;
+    }
     auto pattern = node->GetPattern();
-    CHECK_NULL_RETURN(pattern, false);
-    CHECK_NULL_RETURN(pattern->IsScrollAble(), false);
-    CHECK_NULL_RETURN(proposal.scrollingConfig.has_value(), false);
+    if (!pattern) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("scroll pattern null", proposal));
+        return false;
+    }
+    if (!pattern->IsScrollAble()) {
+        return false;
+    }
+    if (!proposal.scrollingConfig.has_value()) {
+        ReportSmartGestureError(GetPipelineContext(), BuildSmartGestureErrorTag("scroll config empty", proposal));
+        return false;
+    }
     pattern->PerformScroll(proposal.scrollingConfig.value());
     return true;
 }
@@ -891,7 +1002,16 @@ void SmartGestureManager::ExecuteBackPressProposal()
     int32_t instanceId = context->GetInstanceId();
     auto uiContent = UIContent::GetUIContent(instanceId);
     CHECK_NULL_VOID(uiContent);
-    uiContent->ProcessBackPressed();
+    auto result = uiContent->ProcessBackPressed();
+    if (!result) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (container->IsUIExtensionWindow()) {
+            container->TerminateUIExtension();
+        } else {
+            context->Finish(false);
+        }
+    }
 }
 
 bool SmartGestureManager::IsPrimaryActionNodeActive(const RefPtr<FrameNode>& node) const

@@ -19,6 +19,7 @@
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -29,6 +30,7 @@
 #include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace {
@@ -214,45 +216,27 @@ bool DialogManager::HandleSmoothImmersiveMaterial(
     const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial)
 {
     CHECK_NULL_RETURN(columnNode, false);
-    auto renderContext = columnNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-
-    SetSmoothImmersiveBackground(renderContext);
-    SetSmoothImmersiveShadow(columnNode, systemMaterial);
-    return true;
-}
-
-void DialogManager::SetSmoothImmersiveBackground(const RefPtr<RenderContext>& renderContext)
-{
-    CHECK_NULL_VOID(renderContext);
-    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_VOID(themeConstants);
-
-    auto resId = Ace::TokenColors::GetSystemColorResIdByIndex(Ace::TokenColors::COMP_BACKGROUND_PRIMARY);
-    auto backgroundColor = themeConstants->GetColor(resId);
-    renderContext->UpdateBackgroundColor(backgroundColor);
-}
-
-void DialogManager::SetSmoothImmersiveShadow(
-    const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial)
-{
-    CHECK_NULL_VOID(columnNode);
-    auto renderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    if (!ShouldApplySystemMaterialShadow(systemMaterial)) {
-        return;
+    CHECK_NULL_RETURN(systemMaterial, false);
+    auto options = systemMaterial->GetImmersiveOptions();
+    if (options && !options->materialColor.has_value() && !options->colorResObj) {
+        auto pipelineContext = columnNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, false);
+        auto themeContants = themeManager->GetThemeConstants();
+        CHECK_NULL_RETURN(themeContants, false);
+        auto resId = Ace::TokenColors::GetSystemColorResIdByIndex(Ace::TokenColors::COMP_BACKGROUND_PRIMARY);
+        auto backgroundColor = themeContants->GetColor(resId);
+        auto copiedMaterial = systemMaterial->Copy();
+        CHECK_NULL_RETURN(copiedMaterial, false);
+        auto copiedOptions = copiedMaterial->GetImmersiveOptions();
+        CHECK_NULL_RETURN(copiedOptions, false);
+        copiedOptions->materialColor = backgroundColor;
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(copiedMaterial));
+    } else {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(systemMaterial));
     }
-
-    auto pipelineContext = columnNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dipScale = pipelineContext->GetDipScale();
-    auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
-    renderContext->UpdateBackShadow(shadow);
+    return true;
 }
 
 bool DialogManager::IsUseImmersiveDistortionEffect()

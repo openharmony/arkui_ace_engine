@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-
-import { ArkScrollable } from "./ArkScrollable";
 
 class ListEditModeModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
@@ -160,8 +157,8 @@ class ListChainAnimationModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class ListCachedCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class ListCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions> {
+  constructor(value: ArkScrollableCacheOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('listCachedCount');

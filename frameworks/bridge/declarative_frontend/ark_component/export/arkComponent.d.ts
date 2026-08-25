@@ -48,6 +48,8 @@ declare interface AreaChangeOptions {
 }
 declare interface NavigationConfiguration {
     stackSizeLimit?: number;
+    clearContentStackOnPrimaryNavigation?: boolean;
+    recyclePagesOnLowMemory?: boolean;
 }
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;
@@ -2042,6 +2044,11 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     nestedScroll(value: TabsNestedScrollMode): TabsAttribute;
     pageFlipMode(value: PageFlipMode): TabsAttribute;
     cachedMaxCount(count: number, mode: CacheMode): TabsAttribute;
+    barStyle(value: TabBarStyle): TabsAttribute;
+    sidebarPosition(value: BarPosition): TabsAttribute;
+    sidebarHeader(value: ComponentContent): TabsAttribute;
+    sidebarSearchable(value?: TabsSidebarSearchableOptions): TabsAttribute;
+    barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

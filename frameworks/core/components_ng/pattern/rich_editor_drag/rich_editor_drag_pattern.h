@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_DRAG_RICH_EDITOR_DRAG_PATTERN_H
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 
 namespace OHOS::Ace::NG {
 class RichEditorDragPattern : public TextDragPattern {
@@ -71,7 +72,9 @@ public:
         CHECK_NULL_RETURN(deviceType != DeviceType::TWO_IN_ONE, TEXT_DRAG_RADIUS_2IN1);
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, TEXT_DRAG_RADIUS);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        auto* modifier = NodeModifier::GetRichEditorCustomModifier();
+        CHECK_NULL_RETURN(modifier && modifier->getRichEditorTheme, TEXT_DRAG_RADIUS);
+        auto richEditorTheme = modifier->getRichEditorTheme(pipeline);
         CHECK_NULL_RETURN(richEditorTheme, TEXT_DRAG_RADIUS);
         return richEditorTheme->GetDragCornerRadius();
     }

@@ -1159,11 +1159,12 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerOnChange(ArkUIRunt
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const std::string&)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                            const std::string& dateStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::DateRef> dateObj = panda::DateRef::New(vm, GetMSByDate(dateStr));
         panda::Local<panda::JSValueRef> params[] = { dateObj };
         auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);

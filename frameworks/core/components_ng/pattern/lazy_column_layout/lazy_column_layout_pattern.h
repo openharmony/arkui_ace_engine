@@ -50,6 +50,7 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
     AdjustOffset GetAdjustOffset() const override;
     AdjustOffset GetAndResetAdjustOffset() override;
+    bool HasStickyHeader() const override;
 
     void SetOnVisibleIndexesChange(std::function<void(int32_t, int32_t)>&& onVisibleIndexesChange);
 

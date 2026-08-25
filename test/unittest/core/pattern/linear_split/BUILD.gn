@@ -13,24 +13,31 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("linear_split_test_ng") {
-  type = "new"
-  module_name = "ScrollingSet-ArcListAndArcListItem"
-  sources = [ "linear_split_test_ng.cpp" ]
+test_sources = [
+  "linear_split_test_ng.cpp",
+  "linear_split_test_min.cpp",
+  "linear_split_test_core.cpp",
+  "linear_split_lpx_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "linear_split_test_min.cpp",
-      "linear_split_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "linear_split_test_min.cpp",
-      "linear_split_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("linear_split_test_ng") {
+    type = "host_components"
+    module_name = "ScrollingSet-ArcListAndArcListItem"
+    sources = test_sources
   }
+} else {
+  ace_unittest("linear_split_test_ng") {
+    type = "new"
+    module_name = "ScrollingSet-ArcListAndArcListItem"
+    sources = test_sources
 
-  sources += [ "linear_split_lpx_test_ng.cpp" ]
-
+    if (!ace_enable_full_test_suite) {
+      sources = [
+        "linear_split_test_min.cpp",
+        "linear_split_test_core.cpp",
+        "linear_split_lpx_test_ng.cpp",
+      ]
+    }
+  }
 }

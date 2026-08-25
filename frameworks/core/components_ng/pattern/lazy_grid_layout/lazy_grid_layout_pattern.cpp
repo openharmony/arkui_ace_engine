@@ -74,6 +74,11 @@ StickyStyle LazyGridLayoutPattern::GetStickyStyle() const
     return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
 }
 
+bool LazyGridLayoutPattern::HasStickyHeader() const
+{
+    return GetHeaderNode() && HeaderFooterUtils::IsHeaderSticky(GetStickyStyle());
+}
+
 float LazyGridLayoutPattern::GetHeaderMainSize() const
 {
     return layoutInfo_ ? layoutInfo_->headerMainSize_ : 0.0f;
@@ -286,7 +291,8 @@ void LazyGridLayoutPattern::FireOnVisibleIndexesChange(const std::pair<int32_t, 
     if (hasVisibleIndexesChangeFired_ && currentRange == lastVisibleIndexesRange_) {
         return;
     }
-    onVisibleIndexesChange_(currentRange.first, currentRange.second);
+    auto onVisibleIndexesChange = onVisibleIndexesChange_;
+    onVisibleIndexesChange(currentRange.first, currentRange.second);
     lastVisibleIndexesRange_ = currentRange;
     hasVisibleIndexesChangeFired_ = true;
 }
@@ -363,11 +369,13 @@ void LazyGridLayoutPattern::DumpAdvanceInfo()
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo();
+    DumpStickyHeaderHandoffInfo();
 }
 
 void LazyGridLayoutPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo(json);
+    DumpStickyHeaderHandoffInfo(json);
 }
 } // namespace OHOS::Ace::NG

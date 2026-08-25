@@ -17,11 +17,17 @@
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/render/animation_utils.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
+#include "core/components_ng/syntax/arkoala_syntax_item.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 ArkoalaLazyNode::ArkoalaLazyNode(int32_t nodeId, bool isRepeat) : ForEachBaseNode(
     isRepeat ? V2::JS_REPEAT_ETS_TAG : V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId), isRepeat_(isRepeat) {}
 
@@ -53,7 +59,8 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
         cacheEnd = 0;
     }
     const ActiveRangeParam newParam = { start, end, cacheStart, cacheEnd };
-    if (newParam == activeRangeParam_) {  // active range not changed, return directly.
+    // active range not changed and not in animation, return directly.
+    if (newParam == activeRangeParam_ && !AnimationUtils::IsImplicitAnimationOpen()) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
@@ -63,7 +70,7 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     activeRangeParam_ = newParam;
     if (updateRange_) {
         // trigger TS-side
-        updateRange_(start, end, cacheStart, cacheEnd, isLoop_);
+        updateRange_(start - cacheStart, end + cacheEnd, cacheStart, cacheEnd, isLoop_);
     }
     // rebuild children of arkoalaLazyNode according to new active range.
     RebuildCache();
@@ -89,16 +96,75 @@ void ArkoalaLazyNode::RebuildCache()
             } else {
                 AddDisappearingChild(node);
             }
+            if (isRepeat_) {
+                // Keep Repeat recycle/reuse bookkeeping, but do not touch active state of nodes already leaving tree.
+                UpdateIsCache(node, isInCacheRange);
+            }
+            continue;
         }
         node->SetActive(isInActiveRange);
+        if (isInActiveRange) {
+            node->SetActive(isInActiveRange);
+        } else {
+            AnimationUtils::IsImplicitAnimationOpen() ?
+                node->NeedSetInActiveAfterTransitionOut(true) : node->SetActive(false);
+        }
+        for (auto& [rid, ridNodeInfo] : repeatNode4Rid_) {
+            auto child = node->GetFirstChild();
+            if (!child) {
+                continue;
+            }
+            if (rid == child->GetId()) {
+                ridNodeInfo.isActive = isInActiveRange;
+                break;
+            }
+        }
         if (isRepeat_) {
             // trigger onReuse/onRecycle
             UpdateIsCache(node, isInCacheRange);
         }
     }
-
+    ProcessRepeatNodeCleanup(isRepeat_);
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "RebuildCache DONE. Cache nodes count: %{public}zu", node4Index_.Size());
     RequestSyncTree(); // order a resync from layout
+}
+
+void ArkoalaLazyNode::ProcessRepeatNodeCleanup(bool isRepeat)
+{
+    if (!isRepeat) {
+        return;
+    }
+
+    for (auto& [rid, ridNodeInfo] : repeatNode4Rid_) {
+        auto node = ridNodeInfo.rootNode.Upgrade();
+        if (!node) {
+            continue;
+        }
+
+        if (!ridNodeInfo.isActive) {
+            continue;
+        }
+
+        bool inL1 = false;
+        for (const auto& [index, l1Node] : node4Index_) {
+            auto l1Child = l1Node->GetFirstChild();
+            auto child = node->GetFirstChild();
+            if (l1Child && child && l1Child->GetId() == child->GetId()) {
+                inL1 = true;
+                break;
+            }
+        }
+        if (!inL1) {
+            ridNodeInfo.isActive = false;
+            AnimationUtils::IsImplicitAnimationOpen() ?
+                node->NeedSetInActiveAfterTransitionOut(true) : node->SetActive(false);
+            if (node->OnRemoveFromParent(true)) {
+                RemoveDisappearingChild(node);
+            } else {
+                AddDisappearingChild(node);
+            }
+        }
+    }
 }
 
 void ArkoalaLazyNode::PurgeNode()
@@ -181,14 +247,15 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
 RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndexImpl(
     int32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
+    ProcessAfterDataChange();
     auto child = GetChildByIndex(index);
-    if (!child && !needBuild) {
+    if (!child && !needBuild && !AnimationUtils::IsImplicitAnimationOpen()) {
         TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
             "child not found and needBuild==false for index %{public}d, return nullptr.", index);
         return nullptr;
     }
     if (!child && createItem_) {
-        child = createItem_(index);
+        child = createItem_(index, isCache ? AnimationUtils::IsImplicitAnimationOpen() : false);
     }
     if (!child) {
         TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "createItem_ failed to create new node for index %{public}d", index);
@@ -196,24 +263,23 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndexImpl(
     }
     node4Index_.Put(index, child);
     sparedIdx_.insert(index);
+    // Keep a rid-scoped handle even after index mappings change, so frontend can query this node by rid.
+    auto syntaxNode = child->GetFirstChild();
+    ProcessOldNode(child, syntaxNode);
 
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "GetChild returns node %{public}s for index %{public}d", DumpUINode(child).c_str(), index);
 
     if (isCache) {
-        child->SetJSViewActive(false, !isRepeat_);
         if (!isRepeat_) {
             child->SetParent(WeakClaim(this));
-            bool enableCustomComponentFreeze = LazyForEachUtils::GetEnableCustomComponentFreeze();
-            if (options_.customComponentFreezeMode == LazyForEachCustomComponentFreezeMode::DISABLED) {
-                enableCustomComponentFreeze = false;
-            } else if (options_.customComponentFreezeMode == LazyForEachCustomComponentFreezeMode::ENABLED) {
-                enableCustomComponentFreeze = true;
-            }
-            return child->GetFrameChildByIndex(0, needBuild, enableCustomComponentFreeze);
+            return child->GetFrameChildByIndex(0, needBuild);
         }
     } else if (addToRenderTree) {
         child->SetActive(true);
+        if (syntaxNode) {
+            repeatNode4Rid_[syntaxNode->GetId()].isActive = true;
+        }
     }
     if (isActive_) {
         child->SetJSViewActive(true, !isRepeat_);
@@ -236,10 +302,87 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndexImpl(
     return childNode;
 }
 
+void ArkoalaLazyNode::ProcessAfterDataChange()
+{
+    if (afterDataChange) {
+        afterDataChange = false;
+        if (updateRange_) {
+            updateRange_(activeRangeParam_.start - activeRangeParam_.cacheStart,
+                activeRangeParam_.end + activeRangeParam_.cacheEnd,
+                activeRangeParam_.cacheStart, activeRangeParam_.cacheEnd, false);
+        }
+    }
+}
+
+void ArkoalaLazyNode::ProcessOldNode(RefPtr<UINode> child, RefPtr<UINode> syntaxNode)
+{
+    if (!syntaxNode) {
+        return;
+    }
+
+    auto rid = syntaxNode->GetId();
+    auto it = repeatNode4Rid_.find(rid);
+    if (it != repeatNode4Rid_.end()) {
+        auto oldNode = it->second.rootNode.Upgrade();
+        if (oldNode) {
+            RemoveDisappearingChild(oldNode);
+        }
+    }
+    repeatNode4Rid_[rid] = { child, syntaxNode, false };
+}
+
 RefPtr<UINode> ArkoalaLazyNode::GetChildByIndex(int32_t index)
 {
     auto node = node4Index_.Get(index);
     return node ? node.value() : nullptr;
+}
+
+RefPtr<UINode> ArkoalaLazyNode::GetRepeatNodeByRid(int32_t rid)
+{
+    auto iter = repeatNode4Rid_.find(rid);
+    if (iter == repeatNode4Rid_.end()) {
+        return nullptr;
+    }
+    auto node = iter->second.syntaxNode.Upgrade();
+    if (!node) {
+        repeatNode4Rid_.erase(iter);
+        return nullptr;
+    }
+    return node;
+}
+
+bool ArkoalaLazyNode::IsAllowAnimation()
+{
+    auto parent = GetParentFrameNode();
+    if (!parent) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT,
+            "ArkoalaLazyNode::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
+        return false;
+    }
+    return parent->GetTag() == V2::LIST_ETS_TAG;
+}
+
+bool ArkoalaLazyNode::IsChildInAnimation(int32_t rid)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    auto repeatNode = GetRepeatNodeByRid(rid);
+    CHECK_NULL_RETURN(repeatNode, false);
+    auto node = AceType::DynamicCast<FrameNode>(repeatNode->GetFrameChildByIndex(0, false, true));
+    CHECK_NULL_RETURN(node, false);
+    auto renderContext = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rsNode = renderContext->GetRSNode();
+    CHECK_NULL_RETURN(rsNode, false);
+    return rsNode->GetAnimationsCount() > 0;
+#endif
+#ifndef ENABLE_ROSEN_BACKEND
+    return false;
+#endif
+}
+
+bool ArkoalaLazyNode::IsChildOnMainTree(int32_t rid)
+{
+    return tempL1Node.find(rid) != tempL1Node.end();
 }
 
 const std::list<RefPtr<UINode>>& ArkoalaLazyNode::GetChildren(bool /* notDetach */) const
@@ -278,8 +421,13 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
 {
     // temp: naive data reset
     bool needSync = false;
+    afterDataChange = true;
     for (const auto& [index, node] : node4Index_) {
         if (index >= changeIndex) {
+            auto child = node->GetFirstChild();
+            if (child) {
+                tempL1Node.insert(child->GetId());
+            }
             if (node->OnRemoveFromParent(true)) { // can be removed from tree immediately.
                 RemoveDisappearingChild(node);
             } else {
@@ -351,6 +499,7 @@ void ArkoalaLazyNode::PostIdleTask()
         ACE_SCOPED_TRACE("ArkoalaLazyNode.IdleTask");
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
+        node->tempL1Node.clear();
         node->postUpdateTaskHasBeenScheduled_ = false;
         TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "idle task calls GetChildren");
         node->GetChildren();
@@ -874,6 +1023,7 @@ void ArkoalaLazyNode::SetParentVisibility(bool visibility)
 {
     isParentVisible_ = visibility;
 }
+
 bool ArkoalaLazyNode::GetParentVisibility()
 {
     return isParentVisible_;

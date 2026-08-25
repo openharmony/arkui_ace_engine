@@ -770,6 +770,42 @@ ArkUI_ErrorCode OH_ArkUI_TextController_SetStyledString(
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+OH_ArkUI_NativeModule_LineSpacingOptions *OH_ArkUI_NativeModule_LineSpacingOptions_Create()
+{
+    OH_ArkUI_NativeModule_LineSpacingOptions *options = new (std::nothrow) OH_ArkUI_NativeModule_LineSpacingOptions();
+    return options;
+}
+
+void OH_ArkUI_NativeModule_LineSpacingOptions_Destroy(OH_ArkUI_NativeModule_LineSpacingOptions *options)
+{
+    if (!options) {
+        return;
+    }
+    delete options;
+    options = nullptr;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_LineSpacingOptions_SetOnlyBetweenLines(
+    OH_ArkUI_NativeModule_LineSpacingOptions *options, bool onlyBetweenLines)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    options->onlyBetweenLines = onlyBetweenLines;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_LineSpacingOptions_GetOnlyBetweenLines(
+    const OH_ArkUI_NativeModule_LineSpacingOptions *options, bool *onlyBetweenLines)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        onlyBetweenLines, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "onlyBetweenLines is null");
+    *onlyBetweenLines = options->onlyBetweenLines;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 }
 #endif

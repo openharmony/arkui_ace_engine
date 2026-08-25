@@ -105,6 +105,7 @@ public:
     void SetUp()
     {
         flag = 0;
+        FLAG_FUNC = []() { flag++; };
     }
 
     void TearDown()
@@ -1109,6 +1110,7 @@ HWTEST_F(StageTestNg, PagePatternTest001, TestSize.Level1)
      * @tc.steps: step4. Call SetFirstBuildCallback again.
      * @tc.expected: The callback will be executed immediately.
      */
+    FLAG_FUNC = []() { flag++; };
     pattern.SetFirstBuildCallback(std::move(FLAG_FUNC));
     EXPECT_EQ(flag, 2);
     /**
@@ -1218,6 +1220,7 @@ HWTEST_F(StageTestNg, PagePatternTest004, TestSize.Level1)
      * @tc.expected: The callback call times meets expectation.
      */
     pattern.SetOnPageShow(std::move(FLAG_FUNC));
+    FLAG_FUNC = []() { flag++; };
     pattern.SetOnPageHide(std::move(FLAG_FUNC));
     pattern.OnShow();
     pattern.OnHide();

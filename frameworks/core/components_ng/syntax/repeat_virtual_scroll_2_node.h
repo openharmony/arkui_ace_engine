@@ -93,6 +93,7 @@
 namespace OHOS::Ace::NG {
 
 enum class RepeatMemOptStrategy {
+    UNDEFINED = -1,
     DEFAULT = 0,
     ENABLE_AUTO_CACHE_OPTIMIZATION = 1
 };
@@ -211,6 +212,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    bool NeedClearDisappearingChildrenRecursively() const override
+    {
+        return true;
     }
 
     // used for drag move operation.
@@ -352,7 +358,7 @@ private:
     int32_t prevRecycleFrom_ = -1;
     int32_t prevRecycleTo_ = -1;
 
-    RepeatMemOptStrategy memOptStrategy_ = RepeatMemOptStrategy::DEFAULT;
+    RepeatMemOptStrategy memOptStrategy_ = RepeatMemOptStrategy::UNDEFINED;
     bool pendingCleanCache_ = false;
     bool pendingRestoreCache_ = false;
     bool isParentVisible_ = false;

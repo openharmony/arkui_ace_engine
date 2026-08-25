@@ -29,13 +29,12 @@ const size_t MAX_STRING_SIZE = 512;
 void UiSessionTraceBegin(const char* name)
 {
     CHECK_NULL_VOID(name);
-    std::string nameStr(name);
-    StartTrace(HITRACE_TAG_ACE, nameStr);
+    StartTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_ACE, name);
 }
 
 void UiSessionTraceEnd()
 {
-    FinishTrace(HITRACE_TAG_ACE);
+    FinishTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_ACE);
 }
 
 bool UiSessionTraceBeginWithArgv(const char* format, va_list args)

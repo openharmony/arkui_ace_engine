@@ -135,7 +135,7 @@ public:
 
     const Dimension& GetBadgeCircleSize()
     {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, badgeSize_);
         auto fontManager = pipelineContext->GetFontManager();
         CHECK_NULL_RETURN(fontManager, badgeSize_);
@@ -148,7 +148,7 @@ public:
 
     const Dimension& GetBadgeAgeCircleSize() const
     {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, badgeAgeSize_);
         auto fontManager = pipelineContext->GetFontManager();
         CHECK_NULL_RETURN(fontManager, badgeAgeSize_);

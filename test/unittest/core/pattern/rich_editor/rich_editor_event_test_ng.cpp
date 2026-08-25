@@ -16,7 +16,7 @@
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_clipboard.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -1430,5 +1430,98 @@ HWTEST_F(RichEditorEventTestNg, HasOnStyledStringDidChange001, TestSize.Level0)
 
     eventHub->SetOnStyledStringDidChange(nullptr);
     EXPECT_FALSE(eventHub->HasOnStyledStringDidChange());
+}
+
+/**
+ * @tc.name: FireEventNullCallback001
+ * @tc.desc: test Fire* methods with null callback (early return path)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireEventNullCallback001, TestSize.Level1)
+{
+    auto eventHub = richEditorNode_->GetPattern<RichEditorPattern>()->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    // All callbacks are null by default - verify early return without crash
+    eventHub->FireOnReady();
+    RichEditorAbstractSpanResult spanResult;
+    eventHub->FireOnIMEInputComplete(spanResult);
+    TextRange range { 0, 5 };
+    eventHub->FireOnDidIMEInput(range);
+    eventHub->FireOnDeleteComplete();
+    eventHub->FireOnEditingChange(true);
+    TextCommonEvent textEvent;
+    eventHub->FireOnShare(textEvent);
+    RichEditorInsertValue selectInfo;
+    eventHub->FireOnSelect(&selectInfo);
+    eventHub->FireOnSelectionChange(&selectInfo);
+    TextFieldCommonEvent submitEvent;
+    eventHub->FireOnSubmit(0, submitEvent);
+    IMEClient imeClient;
+    eventHub->FireOnWillAttachIME(imeClient);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FireEventWithCallback001
+ * @tc.desc: test Fire* methods with callback set (callback execution path)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireEventWithCallback001, TestSize.Level0)
+{
+    auto eventHub = richEditorNode_->GetPattern<RichEditorPattern>()->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool ready = false, imeComplete = false, didIme = false, delComplete = false;
+    bool didChange = false, share = false, styledDid = false;
+    bool select = false, selChange = false, submit = false;
+    eventHub->SetOnReady([&]() { ready = true; });
+    eventHub->SetOnIMEInputComplete([&](const RichEditorAbstractSpanResult&) { imeComplete = true; });
+    eventHub->SetOnDidIMEInput([&](const TextRange&) { didIme = true; });
+    eventHub->SetOnDeleteComplete([&]() { delComplete = true; });
+    eventHub->SetOnDidChange([&](const RichEditorChangeValue&) { didChange = true; });
+    eventHub->SetOnShare([&](TextCommonEvent&) { share = true; });
+    eventHub->SetOnStyledStringDidChange([&](const StyledStringChangeValue&) { styledDid = true; });
+    eventHub->SetOnSelect([&](const BaseEventInfo*) { select = true; });
+    eventHub->SetOnSelectionChange([&](const BaseEventInfo*) { selChange = true; });
+    eventHub->SetOnSubmit([&](int32_t, TextFieldCommonEvent&) { submit = true; });
+    eventHub->FireOnReady();
+    RichEditorAbstractSpanResult spanResult;
+    eventHub->FireOnIMEInputComplete(spanResult);
+    TextRange range { 0, 5 };
+    eventHub->FireOnDidIMEInput(range);
+    eventHub->FireOnDeleteComplete();
+    RichEditorChangeValue changeValue;
+    eventHub->FireOnDidChange(changeValue);
+    TextCommonEvent textEvent;
+    eventHub->FireOnShare(textEvent);
+    StyledStringChangeValue styledInfo;
+    eventHub->FireOnStyledStringDidChange(styledInfo);
+    RichEditorInsertValue selectInfo;
+    eventHub->FireOnSelect(&selectInfo);
+    eventHub->FireOnSelectionChange(&selectInfo);
+    TextFieldCommonEvent submitEvent;
+    eventHub->FireOnSubmit(0, submitEvent);
+    EXPECT_TRUE(ready && imeComplete && didIme && delComplete);
+    EXPECT_TRUE(didChange && share && styledDid && select && selChange && submit);
+}
+
+/**
+ * @tc.name: FireEventReentrancy001
+ * @tc.desc: test reentrancy: callback clears member during execution, local copy ensures safety
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireEventReentrancy001, TestSize.Level1)
+{
+    auto eventHub = richEditorNode_->GetPattern<RichEditorPattern>()->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    // Reentrancy: callback clears member during execution
+    // Refactored code uses local copy, so callback should still execute safely
+    bool called = false;
+    eventHub->SetOnEditingChange([&](bool) {
+        called = true;
+        eventHub->SetOnEditingChange(nullptr);
+    });
+    eventHub->FireOnEditingChange(true);
+    EXPECT_TRUE(called);
+    EXPECT_FALSE(static_cast<bool>(eventHub->onEditingChange_));
 }
 }

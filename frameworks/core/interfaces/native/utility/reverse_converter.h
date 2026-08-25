@@ -392,7 +392,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Length& dst, const float& src);
     void AssignArkValue(Ark_Length& dst, const int64_t& id);
     void AssignArkValue(Ark_Length& dst, const std::string& src, ConvContext *ctx);
-    void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
+    void AssignArkValue(Ark_LengthMetricsProxy& dst, const Dimension& src);
     void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src);
     void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src);
     void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src);
@@ -532,7 +532,7 @@ namespace OHOS::Ace::NG::Converter {
     // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     // SORTED_SECTION
-    template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);
+    template<> Ark_LengthMetricsProxy ArkCreate(Ark_LengthUnit unit, float value);
     template<> Ark_Resource ArkCreate(int64_t id, ResourceType type);
     template<> Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx);
 

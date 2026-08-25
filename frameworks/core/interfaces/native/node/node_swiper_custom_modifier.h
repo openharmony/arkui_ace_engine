@@ -20,7 +20,16 @@
 #include "core/components_ng/pattern/swiper/bridge/swiper_custom_modifier.h"
 
 namespace OHOS::Ace::NG {
+#ifdef ACE_UNITTEST
+namespace NodeModifier {
+const ArkUISwiperCustomModifier* GetSwiperCustomModifier();
+} // namespace NodeModifier
 
+static const ArkUISwiperCustomModifier* GetSwiperCustomModifier()
+{
+    return NodeModifier::GetSwiperCustomModifier();
+}
+#else
 static const ArkUISwiperCustomModifier* GetSwiperCustomModifier()
 {
     static const ArkUISwiperCustomModifier* cachedModifier = nullptr;
@@ -33,7 +42,7 @@ static const ArkUISwiperCustomModifier* GetSwiperCustomModifier()
     }
     return cachedModifier;
 }
-
+#endif
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SWIPER_CUSTOM_MODIFIER_H

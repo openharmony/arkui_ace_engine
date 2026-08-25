@@ -1876,7 +1876,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkRelativeContainerComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('RelativeContainer');
+      let module = globalThis.requireNapi('arkui.components.arkrelativecontainer');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['XComponent', (node: FrameNode): ArkXComponentComponent => {

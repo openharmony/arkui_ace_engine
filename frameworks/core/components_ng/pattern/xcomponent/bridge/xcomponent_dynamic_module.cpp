@@ -89,8 +89,10 @@ void* XComponentDynamicModule::GetModel()
     static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
     if (!isCurrentUseNewPipeline) {
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
         static Framework::XComponentModelImpl model;
         return &model;
+#endif
 #endif
     }
     static NG::XComponentModelNG model;

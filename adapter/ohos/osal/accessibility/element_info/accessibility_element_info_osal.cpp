@@ -45,6 +45,15 @@ void UpdateCheckedSelectedElementInfo(const RefPtr<NG::AccessibilityProperty>& a
             nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
         }
     }
+
+    // Handle checkable state - custom property takes precedence
+    auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+    if (customProperty) {
+        nodeInfo.SetCheckable(customProperty->GetCheckable());
+        nodeInfo.SetChecked(customProperty->GetChecked());
+        nodeInfo.SetEnabled(customProperty->GetEnabled());
+        nodeInfo.SetSelected(customProperty->GetSelected());
+    }
 }
 
 void RemoveControllerTextFromGroup(const RefPtr<NG::FrameNode>& controllerNode,

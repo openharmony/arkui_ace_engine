@@ -67,6 +67,26 @@ public:
         imageSource_ = imageSource;
     }
 
+    const std::string& GetBundleName() const
+    {
+        return bundleName_;
+    }
+
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    const std::string& GetModuleName() const
+    {
+        return moduleName_;
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+
     const std::pair<Dimension, Dimension>& GetSize() const
     {
         return size_;
@@ -100,7 +120,8 @@ public:
     bool operator==(const ImageParticleParameter& other) const
     {
         return (imageSource_ == other.GetImageSource()) && (size_ == other.GetSize()) &&
-               (imageFit_ == other.GetImageFit());
+               (imageFit_ == other.GetImageFit()) && (bundleName_ == other.GetBundleName()) &&
+               (moduleName_ == other.GetModuleName());
     }
 
     std::string ToString() const;
@@ -138,6 +159,8 @@ private:
     };
     std::unordered_map<std::string, ResourceUpdater> EmitterResMap_;
     std::string imageSource_;
+    std::string bundleName_;
+    std::string moduleName_;
     std::pair<Dimension, Dimension> size_;
     std::optional<ImageFit> imageFit_;
 };

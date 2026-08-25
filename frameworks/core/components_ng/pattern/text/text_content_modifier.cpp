@@ -458,7 +458,6 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         host->GetId(), paintOffset_.GetX(), paintOffset_.GetY(), contentRect.ToString().c_str(), paragraphs.size(),
         lastParagraphLength);
 
-    SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
@@ -507,35 +506,6 @@ void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const R
     canvas.Restore();
 }
 
-void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
-    const RefPtr<TextPattern>& textPattern, const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
-    if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr) {
-        if (host->IsAtomicNode()) {
-            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
-                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::HMSYMBOL);
-            }
-        } else {
-            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) &&
-                static_cast<uint32_t>(pManager->GetLineCount()) >=
-                Rosen::RSUIDirector::GetHybridRenderTextBlobLenCount()) {
-                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
-                auto baselineOffset = LessOrEqual(textPattern->GetBaselineOffset(), 0.0) ?
-                    std::fabs(textPattern->GetBaselineOffset()) : 0.0;
-                const RectF& contentRect = textPattern->GetTextRect();
-                RectF boundsRect;
-                pManager->GetPaintRegion(boundsRect, contentRect.GetX(), contentRect.GetY() + baselineOffset);
-                recordingCanvas->ResetHybridRenderSize(
-                    std::max(boundsRect.Width(), pManager->GetLongestLineWithIndent()),
-                    std::max(boundsRect.Height(), pManager->GetHeight()));
-            }
-        }
-    }
-#endif
-}
-
 float TextContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect)
 {
     auto x = paintOffset_.GetX();
@@ -563,7 +533,7 @@ void TextContentModifier::ReportFaultEvent(RSCanvas& canvas, const RefPtr<Paragr
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto lineCount = pManager->GetLineCount();
-    auto paragraphs = pManager->GetParagraphs();
+    const auto& paragraphs = pManager->GetParagraphs();
     auto paragraphsSize = paragraphs.size();
     std::u16string reportParagraph = paragraphContent;
     RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
@@ -590,7 +560,7 @@ bool TextContentModifier::HandleDrawCallback(
     CHECK_NULL_RETURN(textPattern, false);
     auto drawCallback = textPattern->GetExternalDrawCallback();
     CHECK_NULL_RETURN(drawCallback, false);
-    auto paragraphs = pManager->GetParagraphs();
+    const auto& paragraphs = pManager->GetParagraphs();
     if (paragraphs.size() == 1) {
         auto paintOffsetY = paintOffset_.GetY();
         SetTextContentAlingOffsetY(paintOffsetY);
@@ -625,7 +595,7 @@ void TextContentModifier::DrawText(
     }
     auto paintOffsetY = paintOffset_.GetY();
     SetTextContentAlingOffsetY(paintOffsetY);
-    auto paragraphs = pManager->GetParagraphs();
+    const auto& paragraphs = pManager->GetParagraphs();
     std::u16string paragraphContent;
     for (auto&& info : paragraphs) {
         auto paragraph = info.paragraph;
@@ -690,6 +660,9 @@ void TextContentModifier::ContentChangeReport()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
+    if (host->GetTag() != "SymbolGlyph") {
+        textPattern->ReportPageTranslateTextDrawn();
+    }
     if (!mgr->IsTextAABBCollecting() || host->GetTag() == "SymbolGlyph") {
         return;
     }
@@ -732,7 +705,7 @@ void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragrap
 {
     CHECK_NULL_VOID(paragraph);
     if (onlyTextColorAnimation_) {
-        auto length = paragraph->GetParagraphText().length();
+        auto length = paragraph->GetParagraphTextLength();
         if (animatableTextColor_) {
             Color c { animatableTextColor_->Get().GetValue() };
             if (textColor_.has_value()) {

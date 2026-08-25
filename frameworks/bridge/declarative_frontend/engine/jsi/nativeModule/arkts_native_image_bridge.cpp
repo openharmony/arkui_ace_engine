@@ -1263,11 +1263,12 @@ ArkUINativeModuleValue ImageBridge::SetOnComplete(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadImageSuccessEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(LoadImageSuccessEvent&)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                                LoadImageSuccessEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         const char* keys[] = { "width", "height", "componentWidth", "componentHeight", "loadingStatus", "contentWidth",
             "contentHeight", "contentOffsetX", "contentOffsetY" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetWidth()),
@@ -1316,11 +1317,12 @@ ArkUINativeModuleValue ImageBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadImageFailEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(LoadImageFailEvent&)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                             LoadImageFailEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         const char* errKeys[] = { "code", "message" };
         Local<JSValueRef> errValues[] = { panda::NumberRef::New(
                                               vm, static_cast<int32_t>(event.GetErrorInfo().errorCode)),
@@ -1370,10 +1372,11 @@ ArkUINativeModuleValue ImageBridge::SetOnFinish(ArkUIRuntimeCallInfo* runtimeCal
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(void)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     nodeModifiers->getImageModifier()->setImageOnFinish(nativeNode, reinterpret_cast<void*>(&callback));

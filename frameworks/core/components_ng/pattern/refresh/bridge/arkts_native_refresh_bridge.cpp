@@ -71,6 +71,7 @@ void ParseRefreshingChangeEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, const Loc
             return;
         }
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -99,6 +100,7 @@ bool ParseCustomBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo, const Local<JSVal
     bool isJsView = ArkTSUtils::IsJsView(vm, runtimeCallInfo->GetCallArgRef(CALL_ARG_0));
     std::function<void()> builderFunc = [vm, isJsView, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope scope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(node);
@@ -384,6 +386,7 @@ ArkUINativeModuleValue RefreshBridge::SetOnStateChange(ArkUIRuntimeCallInfo* run
     std::function<void(RefreshStatus)> callback = [vm, isJsView, targetNode, func = panda::CopyableGlobal(vm, func)](
                                                       RefreshStatus stateChange) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(targetNode);
@@ -434,6 +437,7 @@ ArkUINativeModuleValue RefreshBridge::SetOnRefreshing(ArkUIRuntimeCallInfo* runt
     auto targetNode = AceType::WeakClaim(frameNode);
     std::function<void()> callback = [vm, isJsView, targetNode, func = panda::CopyableGlobal(vm, func)]() {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(targetNode);
@@ -478,6 +482,7 @@ ArkUINativeModuleValue RefreshBridge::SetOnOffsetChange(ArkUIRuntimeCallInfo* ru
     std::function<void(const float)> callback = [vm, isJsView, targetNode, func = panda::CopyableGlobal(vm, func)](
                                                     const float offsetChange) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(targetNode);

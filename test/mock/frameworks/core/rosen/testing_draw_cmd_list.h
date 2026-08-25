@@ -23,9 +23,6 @@
 namespace OHOS::Ace::Testing {
 enum class TestingHybridRenderType : uint32_t {
     NONE,
-    TEXT,
-    SVG,
-    HMSYMBOL,
     CANVAS,
     TYPE_MAX
 };

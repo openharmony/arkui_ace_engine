@@ -44,7 +44,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     GetExpandArea(props_, info_);
 
     auto [size, matchChildren, originalWidth] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
-    syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = props_->GetSyncLoad().value_or(true) || matchChildren ||
                 !NearZero(info_->delta_) || info_->targetIndex_.has_value();
     Init(size, originalWidth);
     CalculateContentClipFixOffset(wrapper_, info_);
@@ -237,15 +237,33 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize, double originalWidth)
     info_->lanes_[0].resize(itemsCrossSize_[0].size(), WaterFlowLayoutInfoSW::Lane { newStartPos, newStartPos });
 }
 
-bool WaterFlowLayoutSW::ItemHeightChanged() const
+bool WaterFlowLayoutSW::CheckItemSizeChanged(bool forceMeasure) const
 {
     for (const auto& section : info_->lanes_) {
         for (size_t i = 0; i < section.size(); ++i) {
-            for (const auto& item : section[i].items_) {
-                if (!NearEqual(MeasureChild(item.idx, i), item.mainSize)) {
-                    return true;
-                }
+            if (LaneItemSizeChanged(section[i], i, forceMeasure)) {
+                return true;
             }
+        }
+    }
+    return false;
+}
+
+bool WaterFlowLayoutSW::LaneItemSizeChanged(
+    const WaterFlowLayoutInfoSW::Lane& lane, size_t laneIdx, bool forceMeasure) const
+{
+    for (const auto& item : lane.items_) {
+        // stable-state lanes_ only hold in-viewport items; pass isCache defensively
+        auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), IsCache(info_, item.idx));
+        // Measure lazy items later with a viewport reference.
+        if (child && child->GetLayoutProperty()->GetNeedLazyLayout()) {
+            continue;
+        }
+        if (!forceMeasure && !IsChildMeasureDirty(child)) {
+            continue;
+        }
+        if (!NearEqual(MeasureChild(item.idx, laneIdx), item.mainSize)) {
+            return true;
         }
     }
     return false;
@@ -278,7 +296,7 @@ int32_t WaterFlowLayoutSW::CheckReset()
     }
 
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
-    if (childDirty && ItemHeightChanged()) {
+    if (CheckItemSizeChanged(childDirty)) {
         info_->ResetWithLaneOffset(std::nullopt);
         info_->needFixOffsetCache_ = hasValidItemRange;
         return info_->startIndex_;
@@ -1124,19 +1142,70 @@ void WaterFlowLayoutSW::MeasureRemainingLazyChild(int32_t startIdx, int32_t endI
     }
 }
 
+void WaterFlowLayoutSW::MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane,
+    float referencePos, ReferenceEdge referenceEdge, std::optional<int64_t> deadline) const
+{
+    auto ref = CreateLazyChildViewPosReference(
+        info_, mainLen_, referencePos, referenceEdge, Axis::VERTICAL, deadline, false);
+    auto childConstraint = WaterFlowLayoutUtils::CreateChildConstraint(
+        { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child);
+    LazyLayoutUtils::SetStickyInsets(childConstraint, info_->contentStartOffset_, info_->contentEndOffset_);
+    child->Measure(childConstraint);
+}
+
+float WaterFlowLayoutSW::ReanchorSoleLazyChildToStart(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane,
+    int32_t segment, float previousStart, float measureHeight) const
+{
+    auto& lazyLane = info_->lanes_[segment][0];
+    const float startBoundary = info_->TopMargin() + info_->contentStartOffset_;
+    if (!ShouldReanchorLazyChildToStart(
+        previousStart, lazyLane.startPos, startBoundary, cacheDeadline_.has_value())) {
+        return measureHeight;
+    }
+
+    const float correction = startBoundary - lazyLane.startPos;
+    lazyLane.startPos += correction;
+    lazyLane.endPos += correction;
+    info_->totalOffset_ = info_->contentStartOffset_;
+    MeasureLazyLayoutItem(child, idx, lane, info_->GetDistanceToTop(idx, lane, mainGaps_[segment]),
+        ReferenceEdge::START, std::nullopt);
+    ConsumeLazyChildReanchorOffset(child, idx);
+    measureHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    lazyLane.endPos = lazyLane.startPos + measureHeight;
+    return measureHeight;
+}
+
+void WaterFlowLayoutSW::UpdateSoleLazyChild(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane,
+    float adjustStart, float cacheHeight, float measureHeight) const
+{
+    int32_t segment = info_->GetSegment(idx);
+    auto& lazyLane = info_->lanes_[segment][0];
+    const float previousStart = lazyLane.startPos;
+    lazyLane.startPos -= adjustStart;
+    lazyLane.endPos = lazyLane.startPos + measureHeight;
+    if (itemCnt_ != 1) {
+        return;
+    }
+    if (cacheDeadline_.has_value()) {
+        // Cache layout must not publish persistent state.
+        return;
+    }
+
+    info_->totalOffset_ -= adjustStart;
+    measureHeight = ReanchorSoleLazyChildToStart(child, idx, lane, segment, previousStart, measureHeight);
+    info_->contentSizeDiminished_ = info_->contentSizeDiminished_ || LessNotEqual(measureHeight, cacheHeight);
+    info_->maxHeight_ =
+        std::max(0.0f, -info_->totalOffset_ + lazyLane.endPos + info_->footerHeight_ + info_->BotMargin());
+}
+
 void WaterFlowLayoutSW::MeasureLazyChild(
     const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, bool forward) const
 {
-    int32_t seg = info_->GetSegment(idx);
-    const auto distanceToTop = info_->GetDistanceToTop(idx, lane, mainGaps_[seg]);
-    const auto distanceToBottom = info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]);
-    auto ref = CreateLazyChildViewPosReference(info_, mainLen_, forward ? distanceToTop : distanceToBottom,
-        forward ? ReferenceEdge::START : ReferenceEdge::END, Axis::VERTICAL, cacheDeadline_, false);
-    auto childConstraint = WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child);
-    // Pass WaterFlow's contentStart/EndOffset through the constraint so changes trigger child lazy remeasure.
-    LazyLayoutUtils::SetStickyInsets(childConstraint, info_->contentStartOffset_, info_->contentEndOffset_);
-    child->Measure(childConstraint);
+    int32_t segment = info_->GetSegment(idx);
+    const auto distanceToTop = info_->GetDistanceToTop(idx, lane, mainGaps_[segment]);
+    const auto distanceToBottom = info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[segment]);
+    MeasureLazyLayoutItem(child, idx, lane, forward ? distanceToTop : distanceToBottom,
+        forward ? ReferenceEdge::START : ReferenceEdge::END, cacheDeadline_);
 
     auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
     if (!info_->HaveRecordIdx(idx)) {
@@ -1144,19 +1213,15 @@ void WaterFlowLayoutSW::MeasureLazyChild(
         return;
     }
 
-    auto allAdjustOffset = adjustOffset.start + adjustOffset.end;
     const float cacheHeight = info_->GetCachedHeightInLanes(idx);
     const float measureHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
-    auto& lazyLane = info_->lanes_[seg][0];
+    auto& lazyLane = info_->lanes_[segment][0];
     if (lazyLane.items_.size() == 1) {
-        // Sole lazy child: keep startPos as the anchor, pin the lane bottom to the full measured height. Covers
-        // below-viewport growth (reported as adjustOffset 0) the incremental += path misses, which would make
-        // AdjustOverScroll snap slow scrolls back near the end.
-        lazyLane.startPos -= adjustOffset.start;
-        lazyLane.endPos = lazyLane.startPos + measureHeight;
+        UpdateSoleLazyChild(child, idx, lane, adjustOffset.start, cacheHeight, measureHeight);
         return;
     }
-    // Multiple items share this lane: fall back to the incremental adjustOffset behavior.
+
+    const auto allAdjustOffset = adjustOffset.start + adjustOffset.end;
     if (!NearEqual(allAdjustOffset, measureHeight - cacheHeight)) {
         TAG_LOGW(ACE_WATERFLOW, "AdjustOffset %{public}f is not equal to HeightChange %{public}f", allAdjustOffset,
             measureHeight - cacheHeight);

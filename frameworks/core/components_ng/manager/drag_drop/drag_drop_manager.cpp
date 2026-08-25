@@ -2147,12 +2147,16 @@ bool DragDropManager::FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, Dr
     if (dragType == DragType::GRID) {
         auto eventHub = NodeModifier::GetGridCustomModifier();
         CHECK_NULL_RETURN(eventHub, false);
+#ifndef CROSS_PLATFORM
         ReportOnItemDropEvent(dragType, frameNode, dropPositionX, dropPositionY);
+#endif
         return eventHub->fireOnItemDrop(frameNode, itemDragInfo, draggedIndex, insertIndex, isSuccess);
     } else if (dragType == DragType::LIST) {
         auto eventHub = frameNode->GetEventHub<ListEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+#ifndef CROSS_PLATFORM
         ReportOnItemDropEvent(dragType, frameNode, dropPositionX, dropPositionY);
+#endif
         return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
     }
     return false;
@@ -3678,15 +3682,14 @@ std::shared_ptr<Rosen::RSTransaction> DragDropManager::GetRSTransaction()
 }
 #endif
 
+#ifndef CROSS_PLATFORM
 void DragDropManager::ReportOnItemDropEvent(
     DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY)
 {
     CHECK_NULL_VOID(dragFrameNode);
-#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
-#endif
     auto windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
     auto windowX = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetX() * windowScale);
     auto windowY = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetY() * windowScale);
@@ -3720,9 +3723,8 @@ void DragDropManager::ReportOnItemDropEvent(
     auto result = JsonUtil::Create();
     CHECK_NULL_VOID(result);
     result->Put("result", json);
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
-#endif
 }
+#endif
 } // namespace OHOS::Ace::NG

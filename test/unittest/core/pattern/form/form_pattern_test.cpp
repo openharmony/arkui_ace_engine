@@ -1316,6 +1316,18 @@ HWTEST_F(FormPatternTest, FormPatternTest_031, TestSize.Level1)
     dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
     EXPECT_EQ(dimensionHeight, 2);
 
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_1);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 2);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_3);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 2);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_3_3);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 3);
+
     pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_4_4);
     dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
     EXPECT_EQ(dimensionHeight, 4);

@@ -35,6 +35,7 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/dump_utils/dump_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
@@ -54,14 +55,17 @@ class RSUIDirector;
 
 namespace OHOS::Ace::NG {
     class RecycleManager;
+    class RenderContext;
 }
 
 namespace OHOS::Ace {
 class AIWriteAdapter;
 class RRect;
+#ifndef CROSS_PLATFORM
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
 class TaihangOptimizer;
+#endif
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -218,6 +222,8 @@ public:
     const RefPtr<PageInfo> GetLastPageInfo() const;
 
     std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo) const;
+
+    std::string GetNavDestinationJSViewName(const RefPtr<PageInfo>& pageInfo) const;
 
     std::string GetCurrentPageName();
 
@@ -1010,7 +1016,11 @@ public:
     void GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>& root, std::shared_ptr<JsonValue>& overlayContent,
         std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& overlayArray) const;
 
-    bool IsTagInOverlay(const std::string& tag) const;
+    // Collect Inspector-style visible starting nodes. Delegates the pure
+    // algorithm to DumpUtil so both Inspector dump and PageScene
+    // share one starting-node resolution path (eliminating the redundant
+    // full-tree traversal that previously started from rootNode_).
+    DumpStartNodeSet GetDumpStartNodes() const;
 
     void GetComponentOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
         ParamConfig config, bool isInSubWindow, double parentFinalOpacity = 1.0) const;
@@ -1050,6 +1060,11 @@ public:
     bool IsDirtyLayoutNodesEmpty() const override
     {
         return taskScheduler_->IsDirtyLayoutNodesEmpty();
+    }
+
+    const std::list<RefPtr<FrameNode>>& GetDirtyLayoutNodes() const
+    {
+        return taskScheduler_->GetDirtyLayoutNodes();
     }
 
     bool IsDirtyPropertyNodesEmpty() const override
@@ -1195,9 +1210,11 @@ public:
     void OnDumpBindAICaller(const std::vector<std::string>& params) const;
     bool GetIsRequestFrame() const;
 
+#ifndef CROSS_PLATFORM
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
     const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
     const std::shared_ptr<TaihangOptimizer>& GetTaihangOptimizer() const;
+#endif
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1244,9 +1261,13 @@ public:
     }
 
     bool IsDisplayInForceSplitMode() const override;
-    void SetAfterRenderZindexRebuild(int32_t nodeId);
-    void UpdateIdUpdateZOrderIndex();
-    size_t GetIdUpdateZOrderIndex() const;
+    // Per-parent throttle gate for synchronous render-tree rebuilds. Drop-in for any property setter
+    // that would otherwise call FrameNode::RebuildRenderContextTree() many times per vsync (z-index,
+    // visibility, ...). `renderContext` is the changed node's context; on overflow the next frame is
+    // requested via RenderContext::RequestNextFrame() (keeps its FREE_NODE_CHECK / requestFrame_ path).
+    // Returns true when the rebuild for `nodeId` was deferred/coalesced (caller must skip its
+    // synchronous rebuild); false to rebuild eagerly now.
+    bool ThrottleRenderTreeRebuild(int32_t nodeId, const RefPtr<RenderContext>& renderContext);
 
     void SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId);
 
@@ -1324,8 +1345,8 @@ private:
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
-    void DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode, std::shared_ptr<JsonValue>& root,
-        std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const;
+    void DumpSimplifyTreeJsonFromTopNavNode(std::shared_ptr<JsonValue>& root,
+        const std::vector<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const;
 
     bool ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
         std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
@@ -1334,8 +1355,8 @@ private:
     void GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config,
         double parentFinalOpacity = 1.0) const;
 
-    void DumpSimplifyTreeJsonEntrance(
-        std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
+    void DumpSimplifyTreeJsonEntrance(std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode,
+        const std::vector<RefPtr<NG::FrameNode>>& navNodes, ParamConfig config) const;
 
     void DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const;
 
@@ -1366,7 +1387,7 @@ private:
     void FlushFocusView();
     void FlushRelaxedInteraction();
     void FlushFocusScroll();
-    void FlushZindexUpdate();
+    void FlushRebuildRenderTree();
 
     void ProcessDelayTasks();
 
@@ -1601,8 +1622,10 @@ private:
     std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
-    std::unordered_map<int32_t, size_t> idUpdateZOrder_;
-    size_t idUpdateZOrderIndex_ = 0;
+    static constexpr size_t MAX_RENDER_TREE_REBUILD_PER_VSYNC = 20;
+    std::unordered_map<int32_t, size_t> deferredRebuildRenderTree_; // parentId -> flush order
+    std::unordered_map<int32_t, size_t> rebuildRenderTreeCount_;    // parentId -> rebuild attempts this vsync
+    size_t rebuildRenderTreeOrder_ = 0;                             // monotonic order for coalesced flush
 
     RefPtr<FrameNode> predictNode_;
 
@@ -1661,9 +1684,11 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
+#ifndef CROSS_PLATFORM
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
     std::shared_ptr<TaihangOptimizer> taihangOptimizer_;
+#endif
     RefPtr<ContentChangeManager> contentChangeMgr_;
     std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;

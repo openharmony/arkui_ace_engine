@@ -1,0 +1,14 @@
+{
+  "devices": {
+    "general": [
+      "default"
+    ],
+    "custom": [
+      {
+        "xts": [
+          "SystemCapability.Graphic.Graphic2D.NativeDrawing"
+        ]
+      }
+    ]
+  }
+}

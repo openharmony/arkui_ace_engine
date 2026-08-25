@@ -222,6 +222,33 @@ void SetColumnLayoutAlgorithmParam(
     }
 }
 
+void SetDynamicLayoutGridLayoutAlgorithm(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object gridLayoutAlgorithm)
+{
+    const auto* modifier = GetNodeAniModifier();
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    if (!modifier || !arkNode) {
+        return;
+    }
+    const auto* dynamicLayoutModifier = modifier->getArkUIAniDynamicLayoutModifier();
+    if (!dynamicLayoutModifier) {
+        return;
+    }
+    if (AniUtils::IsUndefined(env, gridLayoutAlgorithm)) {
+        return;
+    }
+
+    ani_class dynamicLayoutGridLayoutAlgorithm;
+    if (env->FindClass("arkui.LayoutAlgorithm.GridLayoutAlgorithm", &dynamicLayoutGridLayoutAlgorithm) != ANI_OK) {
+        return;
+    }
+    ani_boolean isExpectedType = ANI_FALSE;
+    env->Object_InstanceOf(gridLayoutAlgorithm, dynamicLayoutGridLayoutAlgorithm, &isExpectedType);
+    if (isExpectedType) {
+        SetGridLayoutAlgorithmParam(env, gridLayoutAlgorithm, arkNode, dynamicLayoutModifier);
+    }
+}
+
 void SetDynamicLayoutStackLayoutAlgorithm(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object stackLayoutAlgorithm)
 {
@@ -300,33 +327,6 @@ void SetDynamicLayoutColumnLayoutAlgorithm(
     env->Object_InstanceOf(columnLayoutAlgorithm, dynamicLayoutColumnLayoutAlgorithm, &isExpectedType);
     if (isExpectedType) {
         SetColumnLayoutAlgorithmParam(env, columnLayoutAlgorithm, arkNode, dynamicLayoutModifier);
-    }
-}
-
-void SetDynamicLayoutGridLayoutAlgorithm(
-    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object gridLayoutAlgorithm)
-{
-    const auto* modifier = GetNodeAniModifier();
-    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
-    if (!modifier || !arkNode) {
-        return;
-    }
-    const auto* dynamicLayoutModifier = modifier->getArkUIAniDynamicLayoutModifier();
-    if (!dynamicLayoutModifier) {
-        return;
-    }
-    if (AniUtils::IsUndefined(env, gridLayoutAlgorithm)) {
-        return;
-    }
-
-    ani_class dynamicLayoutGridLayoutAlgorithm;
-    if (env->FindClass("arkui.LayoutAlgorithm.GridLayoutAlgorithm", &dynamicLayoutGridLayoutAlgorithm) != ANI_OK) {
-        return;
-    }
-    ani_boolean isExpectedType = ANI_FALSE;
-    env->Object_InstanceOf(gridLayoutAlgorithm, dynamicLayoutGridLayoutAlgorithm, &isExpectedType);
-    if (isExpectedType) {
-        SetGridLayoutAlgorithmParam(env, gridLayoutAlgorithm, arkNode, dynamicLayoutModifier);
     }
 }
 

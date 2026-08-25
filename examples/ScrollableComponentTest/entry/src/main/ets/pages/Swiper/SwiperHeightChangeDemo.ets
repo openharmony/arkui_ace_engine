@@ -61,7 +61,7 @@ struct GridDemo {
   getHeights() {
     for (let index = 0; index < this.numberList.length; index++) {
       let rowNumber = Math.ceil(this.numberList[index].length / COLUMN_NUMBER)
-      let gridHeight = px2vp(122) * rowNumber + COLUMNS_GAP * (rowNumber - 1)
+      let gridHeight = this.getUIContext().px2vp(122) * rowNumber + COLUMNS_GAP * (rowNumber - 1)
       this.gridHeights.push(gridHeight)
     }
     this.swiperHeight = this.gridHeights[0]

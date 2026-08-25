@@ -314,7 +314,7 @@ bool StateStyleManager::GetCustomNodeFromSelf(RefPtr<UINode>& node, RefPtr<Custo
         auto customNodeBase = DynamicCast<CustomNodeBase>(node);
         if (customNodeBase && customNodeBase->FireHasNodeUpdateFunc(nodeId)) {
             customNode = customNodeBase;
-            TAG_LOGI(
+            TAG_LOGD(
                 AceLogTag::ACE_STATE_STYLE, "Find customNode by self: %{public}s", customNode->GetJSViewName().c_str());
             return true;
         }
@@ -382,7 +382,7 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
     pressCancelStyleTask_.Reset([weak = WeakClaim(this)] {
         auto stateStyleMgr = weak.Upgrade();
         CHECK_NULL_VOID(stateStyleMgr);
-        TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Execute press clear task");
+        TAG_LOGD(AceLogTag::ACE_STATE_STYLE, "Execute press clear task");
         stateStyleMgr->ResetPressedCancelPendingState();
         stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
         stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);

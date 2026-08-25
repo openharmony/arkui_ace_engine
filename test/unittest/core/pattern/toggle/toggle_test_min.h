@@ -30,6 +30,10 @@
 #include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
+#undef private
+#undef protected
+
+
 namespace OHOS::Ace::NG {
 
 // Base test class for toggle tests

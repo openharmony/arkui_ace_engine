@@ -16,6 +16,10 @@
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/components_ng/pattern/progress/bridge/progress_custom_modifier.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
+#include "core/components_ng/pattern/progress/progress_layout_property.h"
 namespace OHOS::Ace::NG {
 ArkUINodeHandle CreateProgressFrameNode(ArkUI_Uint32 nodeId, ArkUI_Float32 value, ArkUI_Float32 max, ArkUI_Int32 type)
 {
@@ -35,6 +39,37 @@ static void SetBuilderFuncToModelNGForMock(FrameNode* frameNode, ProgressMakeCal
 {
     ProgressModelNG::SetBuilderFunc(frameNode, std::move(makeFunc));
 }
+
+static RefPtr<FrameNode> CreateProgressNodeForLinearIndicator(int32_t nodeId)
+{
+    auto progressNode = FrameNode::GetOrCreateFrameNode(
+        PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
+    return progressNode;
+}
+
+static void UpdateProgressPropertiesForLinearIndicator(const RefPtr<FrameNode>& targetNode,
+    const LinearIndicatorProgressConfig& config)
+{
+    auto paintProperty = targetNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateColor(config.color);
+        paintProperty->UpdateBackgroundColor(config.backgroundColor);
+        paintProperty->UpdateStrokeRadius(config.strokeRadius);
+        if (config.isInitialCreate) {
+            paintProperty->UpdateEnableSmoothEffect(false);
+        }
+    }
+    auto layoutProperty = targetNode->GetLayoutProperty<NG::ProgressLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateStrokeWidth(config.strokeWidth);
+        layoutProperty->UpdateLayoutDirection(static_cast<TextDirection>(config.direction));
+        if (config.isInitialCreate) {
+            layoutProperty->UpdateLayoutWeight(1);
+        }
+    }
+    targetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
 {
@@ -47,6 +82,8 @@ const ArkUIProgressModifier* GetProgressModifier()
 const ArkUIProgressCustomModifier* GetProgressCustomModifier()
 {
     static const ArkUIProgressCustomModifier modifier = {
+        .createProgressNode = CreateProgressNodeForLinearIndicator,
+        .updateProgressProperties = UpdateProgressPropertiesForLinearIndicator,
         .setBackgroundColorToModelStatic = SetBackgroundColorToModelStaticForMock,
         .setBuilderFuncToModelNG = SetBuilderFuncToModelNGForMock,
     };

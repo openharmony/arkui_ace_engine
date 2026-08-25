@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
@@ -24,6 +26,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
@@ -58,6 +61,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const TrailOptimization trailOptimization = {
+    .progressThreshold = 0.98f,
+    .responseDecayFactor = 0.9f,
+};
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
@@ -75,14 +82,16 @@ const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const RefPtr<InterpolatingSpring> STACK_SUB_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 26.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_1 =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 322.0f, 28.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_2 =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 273.0f, 26.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_3 =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 363.0f, 29.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_FINISH =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 158.0f, 17.0f);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_1 =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 322.0f, 28.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_2 =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 273.0f, 26.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_3 =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 363.0f, 29.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_FINISH =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 158.0f, 17.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> TRANSLATE_ANIMATION_CURVE =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 128.0f, 18.0f, trailOptimization);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 const float EDGELIGHT_LENGTH_RATIO = 0.4f;
 const float EDGELIGHT_INTENSITY = 0.2f;
@@ -1021,7 +1030,7 @@ void MenuPattern::UpdateSelectOptionTextByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    if (index >= static_cast<int32_t>(children.size())) {
+    if (index < 0 || index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
@@ -1044,7 +1053,7 @@ void MenuPattern::UpdateSelectOptionIconByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    if (index >= static_cast<int32_t>(children.size())) {
+    if (index < 0 || index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
@@ -1779,6 +1788,15 @@ bool MenuPattern::ShouldUpdateShadow() const
 
 bool MenuPattern::IsUseDistortionAnimation() const
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    if (theme->GetExpandDisplay()) {
+        return false;
+    }
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
     if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
@@ -1804,6 +1822,15 @@ bool MenuPattern::IsUseDistortionAnimation() const
 
 bool MenuPattern::IsUseEdgeLightAnimation() const
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    if (theme->GetExpandDisplay()) {
+        return false;
+    }
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
     if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
@@ -1825,6 +1852,21 @@ bool MenuPattern::IsUseEdgeLightAnimation() const
         return true;
     }
     return false;
+}
+
+void MenuPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto menuParam = GetMenuParam();
+    json->PutExtAttr("distortionMode",
+        DistortionModeToString(menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)).c_str(), filter);
+    json->PutExtAttr("edgeLightMode",
+        EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str(), filter);
+    json->PutExtAttr("distortionEnabled", IsUseDistortionAnimation() ? "true" : "false", filter);
+    json->PutExtAttr("edgeLightEnabled", IsUseEdgeLightAnimation() ? "true" : "false", filter);
 }
 
 OffsetF MenuPattern::GetDistortionMenuOffset(Placement placement) const
@@ -2267,6 +2309,7 @@ void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int32_t dela
     ConfigDistortParam(finalPlacement, param, param1, param2, param3);
     OffsetF offset = GetDistortionMenuOffset(finalPlacement);
     PlayTranslateAnimation(renderContext, offset, delay);
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::MENU_LIGHT_SENSE_ANIMATION, PerfActionType::LAST_UP, "");
     AnimationOption option;
     option.SetDuration(MATERIAL_DISTORT_ANIMATION_DURATION);
     if (isShowHoverImage_) {
@@ -2315,7 +2358,9 @@ void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int32_t dela
         if (menuChildRenderContext) {
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param5);
         }
-    }, nullptr, nullptr, host->GetContextRefPtr());
+    }, []() {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::MENU_LIGHT_SENSE_ANIMATION, false);
+    }, nullptr, host->GetContextRefPtr());
     // for menu disappear animation
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
     renderContext->UpdateOpacity(1.0f);
@@ -2370,7 +2415,7 @@ void MenuPattern::PlayTranslateAnimation(
         option.SetDelay(delay);
     }
     renderContext->UpdateTranslateInXY(OffsetF());
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18));
+    option.SetCurve(TRANSLATE_ANIMATION_CURVE);
     AnimationUtils::Animate(option, [renderContext, offset]() {
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTranslateInXY(offset);
@@ -2380,7 +2425,7 @@ void MenuPattern::PlayTranslateAnimation(
         finishDelay += delay;
     }
     option.SetDelay(finishDelay);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18));
+    option.SetCurve(TRANSLATE_ANIMATION_CURVE);
     AnimationUtils::Animate(option, [renderContext]() {
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTranslateInXY(OffsetF());
@@ -2466,7 +2511,7 @@ void MenuPattern::PlayLightAnimation(int32_t delay)
         option.SetDelay(delay);
     }
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(
+    edgeLightAnimation_ = AnimationUtils::StartAnimation(
         option,
         [renderContext, param2]() {
             renderContext->UpdateEdgeLightParam(param2);
@@ -2489,10 +2534,15 @@ void MenuPattern::PlayLightAnimation(int32_t delay)
         finalDelay += delay;
     }
     option1.SetDelay(finalDelay);
-    option1.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
+    option1.SetOnFinishEvent([weak = WeakClaim(this), weakRender = WeakPtr<RenderContext>(renderContext)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern && pattern->edgeLightAnimation_) {
+            AnimationUtils::StopAnimation(pattern->edgeLightAnimation_);
+        }
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
     });
     AnimationUtils::Animate(
         option1,
@@ -2988,7 +3038,6 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageFlexNode() : menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(preview);
     AnimationUtils::Animate(option, [menuNode, menuPosition, preview]() {
         CHECK_NULL_VOID(menuNode);
         auto menuContext = menuNode->GetRenderContext();
@@ -3002,7 +3051,7 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
                 menuNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF(menuPosition.GetX(),
                     menuPattern->GetOriginMenuYForStack()));
             }
-            if (GreatNotEqual(menuPattern->GetOriginPreviewYForStack(), 0.0f)) {
+            if (GreatNotEqual(menuPattern->GetOriginPreviewYForStack(), 0.0f) && preview) {
                 CHECK_NULL_VOID(preview);
                 auto previewRenderContext = preview->GetRenderContext();
                 CHECK_NULL_VOID(previewRenderContext);
@@ -3014,7 +3063,7 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
                     menuPattern->GetOriginPreviewYForStack()));
             }
         }
-    }, nullptr, nullptr, preview->GetContextRefPtr());
+    }, nullptr, nullptr, preview ? preview->GetContextRefPtr() : nullptr);
 
     ShowStackMainMenuDisappearOpacityAnimation(menuNode, option);
 }

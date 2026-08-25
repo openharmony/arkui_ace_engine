@@ -153,7 +153,7 @@ void JSContainerPicker::SetItemHeight(const JSCallbackInfo& info)
     }
     CalcDimension dim;
     RefPtr<ResourceObject> resObj;
-    if (!ParseLengthMetricsToDimension(info[0], dim, resObj)) {
+    if (!JSViewAbstract::ParseLengthMetricsToPositiveDimension(info[0], dim, resObj)) {
         return;
     }
     Dimension pickerDim = dim;
@@ -162,7 +162,8 @@ void JSContainerPicker::SetItemHeight(const JSCallbackInfo& info)
 
 void JSContainerPicker::SetSelectionIndicator(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        NG::ContainerPickerModel::ResetIndicatorStyle();
         return;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);

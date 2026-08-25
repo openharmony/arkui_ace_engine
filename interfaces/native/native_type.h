@@ -6914,6 +6914,54 @@ typedef enum {
     OH_ARKUI_ARCDIRECTION_NINE_CLOCK_DIRECTION = 2
 } OH_ArkUI_ArcDirection;
 
+/**
+ * @brief Defines the line spacing options for text.
+ *
+ * @since 26.0.0
+ */
+typedef struct OH_ArkUI_NativeModule_LineSpacingOptions OH_ArkUI_NativeModule_LineSpacingOptions;
+
+/**
+ * @brief Creates an <b>OH_ArkUI_NativeModule_LineSpacingOptions</b> object.
+ *
+ * @return Returns the pointer to the <b>OH_ArkUI_NativeModule_LineSpacingOptions</b> object.
+ * @since 26.0.0
+ */
+OH_ArkUI_NativeModule_LineSpacingOptions* OH_ArkUI_NativeModule_LineSpacingOptions_Create();
+
+/**
+ * @brief Destroys an <b>OH_ArkUI_NativeModule_LineSpacingOptions</b> object.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_NativeModule_LineSpacingOptions</b> object.
+ * @since 26.0.0
+ */
+void OH_ArkUI_NativeModule_LineSpacingOptions_Destroy(OH_ArkUI_NativeModule_LineSpacingOptions* options);
+
+/**
+ * @brief Sets the onlyBetweenLines flag for line spacing options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_NativeModule_LineSpacingOptions</b> object.
+ * @param onlyBetweenLines Whether line spacing only takes effect between lines.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_NativeModule_LineSpacingOptions_SetOnlyBetweenLines(
+    OH_ArkUI_NativeModule_LineSpacingOptions* options, bool onlyBetweenLines);
+
+/**
+ * @brief Gets the onlyBetweenLines flag from line spacing options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_NativeModule_LineSpacingOptions</b> object.
+ * @param onlyBetweenLines Pointer to the boolean value to receive the flag.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_NativeModule_LineSpacingOptions_GetOnlyBetweenLines(
+    const OH_ArkUI_NativeModule_LineSpacingOptions* options, bool* onlyBetweenLines);
+
+
 #ifdef __cplusplus
 };
 #endif

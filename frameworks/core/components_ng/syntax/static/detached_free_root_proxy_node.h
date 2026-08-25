@@ -56,6 +56,11 @@ public:
         return false;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
 private:
     WeakPtr<Frontend> frontend_;
 };

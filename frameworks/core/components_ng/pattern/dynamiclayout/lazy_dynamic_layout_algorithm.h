@@ -16,12 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_LAZY_DYNAMIC_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_LAZY_DYNAMIC_LAYOUT_ALGORITHM_H
 
+#include <optional>
 #include <vector>
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
+
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class LazyCustomLayoutAlgorithmParam;
+enum class LazyLayoutMeasureMode;
 
 class ACE_EXPORT LazyDynamicLayoutAlgorithm : public StackLayoutAlgorithm {
     DECLARE_ACE_TYPE(LazyDynamicLayoutAlgorithm, StackLayoutAlgorithm);
@@ -40,12 +43,20 @@ public:
     }
 
 private:
+    LazyLayoutMeasureMode ResolveMeasureMode(LayoutWrapper* layoutWrapper);
+    // Returns the original constraint to restore; nullopt means no temporary estimate constraint was applied.
+    std::optional<LayoutConstraintF> PrepareEstimateConstraint(LayoutWrapper* layoutWrapper);
+    void RestoreEstimateConstraint(
+        LayoutWrapper* layoutWrapper, const std::optional<LayoutConstraintF>& originalConstraint);
+    bool MeasureWithCustomAlgorithm(LayoutWrapper* layoutWrapper);
     void RecycleOutOfThreshold(LayoutWrapper* layoutWrapper);
-    void ProcessAdjustOffset(LayoutWrapper* layoutWrapper, float adjustOffset,  float prevMainSize);
+    void ProcessAdjustOffset(LayoutWrapper* layoutWrapper, float adjustOffset, float prevMainSize);
 
     RefPtr<LazyCustomLayoutAlgorithmParam> customParams_;
     float prevMainSize_ = 0;
     Axis axis_ = Axis::VERTICAL;
+    bool needSkipLayout_ = false;
+    bool isEstimatePass_ = false;
     std::vector<int32_t> visibleIndexes_;
 };
 

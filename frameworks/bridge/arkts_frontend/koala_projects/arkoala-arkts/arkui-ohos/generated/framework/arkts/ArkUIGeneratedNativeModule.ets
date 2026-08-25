@@ -2380,6 +2380,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwiperAttribute_setMaintainVisibleContentPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SwiperAttribute_setIgnoreHiddenItem(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SwiperAttribute_setAutoPlay1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SwiperAttribute_setDisplayArrow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -3554,7 +3556,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableFullscreenVideoOverlay(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-	native static _WebAttribute_setEnableMediaNetworkProxy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _WebAttribute_setEnableMediaNetworkProxy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WebAttribute_setRegisterNativeEmbedRule(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -5456,11 +5458,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _LayoutManager_getGlyphPositionAtCoordinate(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _LayoutManager_getCharacterPositionAtCoordinate(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
+    native static _LayoutManager_getCharacterPositionAtCoordinate0(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _LayoutManager_getGlyphRangeForCharacterRange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    native static _LayoutManager_getCharacterPositionAtCoordinate1(ptr: KPointer, x: KDouble, y: KDouble, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _LayoutManager_getCharacterRangeForGlyphRange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    native static _LayoutManager_getGlyphRangeForCharacterRange0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getGlyphRangeForCharacterRange1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getCharacterRangeForGlyphRange0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getCharacterRangeForGlyphRange1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _LayoutManager_getLineMetrics(ptr: KPointer, lineNumber: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
@@ -5962,6 +5970,7 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_getPathStack(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _NavPathStack_setPathStack(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _NavPathStack_preloadPath(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NodeContainerOps_nodeContainerOpsConstruct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -6578,6 +6587,30 @@ export class ArkUIGeneratedNativeModule {
     native static _SearchOps_registerSearchValueCallback(node: KPointer, value: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
     native static _SelectExtender_setDivider(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_selectionContainerConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_setSelectionContainerOptions(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_copyOption(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_caretColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_selectedBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_enableHapticFeedback(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_textJoinStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_bindSelectionMenu(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_editMenuOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_onTextSelectionChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_onWillCopy(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_onCopy(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SheetDismiss_construct(): KPointer
     @ani.unsafe.Direct
@@ -7405,6 +7438,8 @@ export class ArkUIGeneratedNativeModule {
     native static _WebResourceError_getErrorInfo(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _WebResourceError_getErrorCode(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _WebResourceError_getCustomErrorCode(ptr: KPointer): KInt
     @ani.unsafe.Direct
     native static _WebResourceRequest_construct(): KPointer
     @ani.unsafe.Direct

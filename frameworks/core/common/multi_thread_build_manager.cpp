@@ -197,16 +197,16 @@ bool MultiThreadBuildManager::PostUITaskAndWait(int32_t contextId, std::function
         TaskExecutor::TaskType::UI, "ArkUISyncTaskAndWait", PriorityType::IMMEDIATE);
 }
 
-void MultiThreadBuildManager::CheckTag(const std::string& tag)
+void MultiThreadBuildManager::CheckTag(std::string_view tag)
 {
     if (!isParallelizeUI_) {
         return;
     }
-    static std::unordered_set<std::string> notSupportTags { V2::WEB_COMPONENT_TAG, V2::WEB_ETS_TAG,
+    static std::unordered_set<std::string_view> notSupportTags { V2::WEB_COMPONENT_TAG, V2::WEB_ETS_TAG,
         V2::WEB_CORE_TAG, V2::JS_WITH_THEME_ETS_TAG };
 
     if (auto search = notSupportTags.find(tag); search != notSupportTags.end()) {
-        LOGF_ABORT("Unsupported UI components '%{public}s' used in ParallelizeUI", tag.c_str());
+        LOGF_ABORT("Unsupported UI components '%{public}s' used in ParallelizeUI", std::string(tag).c_str());
     }
 }
 } // namespace OHOS::Ace

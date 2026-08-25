@@ -21,8 +21,9 @@ namespace OHOS::Ace::NG {
 
 void DialogEventHub::FireCancelEvent() const
 {
-    CHECK_NULL_VOID(onCancel_);
-    onCancel_();
+    auto onCancel = onCancel_;
+    CHECK_NULL_VOID(onCancel);
+    onCancel();
 }
 
 void DialogEventHub::FireSuccessEvent(int32_t buttonIdx, const RefPtr<FrameNode>& frameNode)

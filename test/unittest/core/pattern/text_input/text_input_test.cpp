@@ -1199,6 +1199,20 @@ HWTEST_F(TextFieldUXTest, SetIsShowVoiceButton001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetCanacelIconSrc001
+ * @tc.desc: Verify SetCanacelIconSrc updates layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetCanacelIconSrc001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    TextFieldModelNG::SetCanacelIconSrc(AceType::RawPtr(frameNode_), "icon.png", bundleName, moduleName);
+    EXPECT_EQ(layoutProperty_->GetIconSrc().value(), "icon.png");
+}
+
+/**
  * @tc.name: testBarState001
  * @tc.desc: test testInput barState
  * @tc.type: FUNC

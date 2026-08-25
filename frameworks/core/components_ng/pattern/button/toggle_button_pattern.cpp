@@ -21,7 +21,6 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/event/state_style_manager.h"
 
@@ -76,7 +75,7 @@ void ToggleButtonPattern::OnModifyDone()
     auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
     CHECK_NULL_VOID(buttonPaintProperty);
     if (!isOn_.has_value()) {
-        isOn_ = buttonPaintProperty->GetIsOnValue();
+        isOn_ = buttonPaintProperty->GetIsOnValue(false);
     }
     bool changed = false;
     if (buttonPaintProperty->HasIsOn()) {

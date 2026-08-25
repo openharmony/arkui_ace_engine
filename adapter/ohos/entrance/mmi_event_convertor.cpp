@@ -946,6 +946,15 @@ void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEven
     event.absHat3XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT3X);
     event.absHat3YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT3Y);
     int32_t orgAction = pointerEvent->GetPointerAction();
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+        "FocusAxis id:%{public}d act:%{public}d X:%{public}f Y:%{public}f Z:%{public}f Rz:%{public}f "
+        "H0X:%{public}f H0Y:%{public}f brk:%{public}f gas:%{public}f Rx:%{public}f Ry:%{public}f "
+        "thr:%{public}f rud:%{public}f whl:%{public}f H1X:%{public}f H1Y:%{public}f H2X:%{public}f "
+        "H2Y:%{public}f H3X:%{public}f H3Y:%{public}f",
+        event.id, orgAction, event.absXValue, event.absYValue, event.absZValue, event.absRzValue,
+        event.absHat0XValue, event.absHat0YValue, event.absBrakeValue, event.absGasValue, event.absRxValue,
+        event.absRyValue, event.absThrottleValue, event.absRudderValue, event.absWheelValue, event.absHat1XValue,
+        event.absHat1YValue, event.absHat2XValue, event.absHat2YValue, event.absHat3XValue, event.absHat3YValue);
     GetNonPointerAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);

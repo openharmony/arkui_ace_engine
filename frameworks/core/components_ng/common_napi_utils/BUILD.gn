@@ -16,5 +16,8 @@ import("$ace_root/frameworks/core/components_ng/components.gni")
 
 build_component_ng("common_napi_utils") {
   sources = [ "common_napi_utils.cpp" ]
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "napi:ace_napi",
+    "node:node_header_notice",
+  ]
 }

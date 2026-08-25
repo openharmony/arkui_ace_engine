@@ -132,7 +132,7 @@ void MaxDisplayCountImpl(Ark_DotIndicator peer,
     peer->SetMaxDisplayCount(optMaxDisplayCount);
 }
 void SpaceImpl(Ark_DotIndicator peer,
-               const Opt_LengthMetrics* space)
+               const Opt_LengthMetricsProxy* space)
 {
     CHECK_NULL_VOID(peer);
     auto optSpace = Converter::OptConvertPtr<Dimension>(space);

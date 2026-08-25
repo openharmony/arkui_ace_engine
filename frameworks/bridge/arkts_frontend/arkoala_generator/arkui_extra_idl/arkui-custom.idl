@@ -22,15 +22,17 @@ import ohos.arkui.observer.default as observer;
 import arkui.component.gesture.GestureEvent as GestureEvent;
 import arkui.component.lazyForEach.LazyForEachOptions as LazyForEachOptions;
 import arkui.component.enums.CompetitionStrategy as CompetitionStrategy;
+import arkui.Graphics.LengthUnit as LengthUnit;
 
 callback Callback_RangeUpdate = void (i32 start, i32 end, i32 cacheStart, i32 cacheEnd, boolean isLoop);
-callback Callback_CreateItem = pointer (i32 index);
+callback Callback_CreateItem = pointer (i32 index, boolean skipCreate);
 callback Callback_OnMoveFromTo = void (i32 from, i32 to);
 callback Callback_ClearCache = void ();
 callback Callback_ReleaseItemByIndex = void(i32 index);
 
 [Entity=Class]
 interface ForEachOps {
+    static void Sync(pointer node, Callback_RangeUpdate updater);
     static void SyncOnMoveOps(pointer node, sequence<pointer> additionalChild,
         (OnMoveHandler or undefined) onMoveOps, (ItemDragEventHandler or undefined) onMoveDragEventOps);
 };
@@ -301,3 +303,8 @@ interface ThemeOps {
     static void applyThemeScopeIdToNode(pointer ptr, i32 themeScopeId);
 };
 
+[Entity=Class]
+interface LengthMetricsProxy {
+    attribute f64 value;
+    attribute LengthUnit unit;
+};

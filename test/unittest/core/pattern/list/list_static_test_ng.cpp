@@ -100,4 +100,33 @@ HWTEST_F(ListScrollerTestNg, ListLpxAttribute001, TestSize.Level1)
     EXPECT_FALSE(frameNode_->lpxAttributes_.count(LpxAttribute::LPX_SPACE));
     EXPECT_TRUE(frameNode_->lpxAttributes_.count(LpxAttribute::LPX_SPACE_WIDTH));
 }
+
+/**
+ * @tc.name: ResetListLayoutProperty001
+ * @tc.desc: Test resetting list properties marks the node for measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ResetListLayoutProperty001, TestSize.Level1)
+{
+    CreateList();
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    ListModelStatic::SetListSpace(AceType::RawPtr(frameNode_), Dimension(10.0_vp));
+    layoutProperty_->CleanDirty();
+    ListModelStatic::SetListSpace(AceType::RawPtr(frameNode_), std::nullopt);
+    EXPECT_FALSE(layoutProperty_->GetSpace().has_value());
+    EXPECT_TRUE(CheckNeedMeasure(layoutProperty_->GetPropertyChangeFlag()));
+
+    ListModelStatic::SetChainAnimation(AceType::RawPtr(frameNode_), true);
+    layoutProperty_->CleanDirty();
+    ListModelStatic::SetChainAnimation(AceType::RawPtr(frameNode_), std::nullopt);
+    EXPECT_FALSE(layoutProperty_->GetChainAnimation().has_value());
+    EXPECT_TRUE(CheckNeedMeasure(layoutProperty_->GetPropertyChangeFlag()));
+
+    ListModelStatic::SetScrollEnabled(AceType::RawPtr(frameNode_), false);
+    layoutProperty_->CleanDirty();
+    ListModelStatic::SetScrollEnabled(AceType::RawPtr(frameNode_), std::nullopt);
+    EXPECT_FALSE(layoutProperty_->GetScrollEnabled().has_value());
+    EXPECT_TRUE(CheckNeedMeasure(layoutProperty_->GetPropertyChangeFlag()));
+}
 } // namespace OHOS::Ace::NG

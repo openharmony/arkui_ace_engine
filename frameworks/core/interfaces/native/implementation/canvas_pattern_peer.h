@@ -27,30 +27,28 @@ public:
 
     void SetTransform(const std::optional<Matrix2DPeer*>& optMatrix)
     {
-        if (OHOS::Ace::Container::GreatOrEqualAPITargetVersion(OHOS::Ace::PlatformVersion::VERSION_TEN)) {
-            if (optMatrix && optMatrix.value()) {
-                auto matrix = optMatrix.value();
-                auto canvasRenderer = canvasRenderWeak_.Upgrade();
-                if (canvasRenderer) {
-                    canvasRenderer->SetTransform(GetId(), matrix->GetTransform());
-                }
-            }
+        CHECK_NULL_VOID(pattern_);
+        if (optMatrix && optMatrix.value()) {
+            auto matrix = optMatrix.value();
+            CHECK_NULL_VOID(matrix);
+            auto transform = matrix->GetTransform();
+            pattern_->SetScaleX(transform.scaleX);
+            pattern_->SetScaleY(transform.scaleY);
+            pattern_->SetSkewX(transform.skewX);
+            pattern_->SetSkewY(transform.skewY);
+            pattern_->SetTranslateX(transform.translateX);
+            pattern_->SetTranslateY(transform.translateY);
         }
     }
 
-    void SetCanvasRenderer(OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl> canvasRenderer)
+    std::shared_ptr<OHOS::Ace::Pattern> GetPattern() const
     {
-        canvasRenderWeak_ = canvasRenderer;
+        return pattern_;
     }
 
-    void SetId(int32_t id)
+    void SetPattern(const std::shared_ptr<OHOS::Ace::Pattern>& pattern)
     {
-        id_ = id;
-    }
-
-    int32_t GetId() const
-    {
-        return id_;
+        pattern_ = pattern;
     }
 
     void SetUnit(OHOS::Ace::CanvasUnit unit)
@@ -70,8 +68,7 @@ public:
     }
 
 private:
-    int32_t id_ = 0;
-    OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl> canvasRenderWeak_;
+    std::shared_ptr<OHOS::Ace::Pattern> pattern_;
     OHOS::Ace::CanvasUnit unit_ = OHOS::Ace::CanvasUnit::DEFAULT;
 };
 

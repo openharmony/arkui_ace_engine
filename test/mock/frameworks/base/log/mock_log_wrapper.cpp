@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 #include "base/log/log_wrapper.h"
-#include "base/thread/task_executor.h"
 
 namespace OHOS::Ace {
-void CheckThread(TaskExecutor::TaskType taskType)
-{
-    (void)taskType;
-}
 
 bool LogWrapper::JudgeLevel(LogLevel level)
 {
@@ -27,9 +22,32 @@ bool LogWrapper::JudgeLevel(LogLevel level)
     return true;
 }
 
+void LogWrapper::SetLogLevel(LogLevel level)
+{
+    level_ = level;
+}
+
+LogLevel LogWrapper::GetLogLevel()
+{
+    return level_;
+}
+
 const char* LogWrapper::GetBriefFileName(const char* filePath)
 {
     return filePath;
+}
+
+void LogWrapper::StripFormatString(const std::string& prefix, std::string& str)
+{
+    (void)prefix;
+    (void)str;
+}
+
+void LogWrapper::ReplaceFormatString(const std::string& prefix, const std::string& replace, std::string& str)
+{
+    (void)prefix;
+    (void)replace;
+    (void)str;
 }
 
 void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, ...)

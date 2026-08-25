@@ -75,6 +75,17 @@
 | ADR-6 | `transformFromCustomBuilder` UIContext 获取时机 | 将 `UIContext` 获取从方法外层移到返回的闭包内部 | 在方法外层获取，闭包捕获固化 | 跨 Ability 迁移后闭包执行时外层 context 已过时；闭包内获取保证每次都是最新 | FR-2.4 |
 | ADR-7 | `__getIExtendableDelegate__Internal` vs 泛型 `__getDelegate__Internal` | 新增 `__getIExtendableDelegate__Internal(): IExtendableComponent \| undefined` 返回接口类型 | 使用泛型 `__getDelegate__Internal` | 传播时调用 `__updateUIContext__Internal` 不需要泛型参数；接口类型保证类型安全 | FR-2.3 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| extendableComponent | 使用中的对象非法销毁检查 | 可能导致cpp_crash | RefPtr智能指针在被使用时，如果被重新赋值将可能导致所管理的对象被析构失效，进而造成UAF问题 | 严重 | 识别是不是有对象使用中被销毁的问题，避免程序带着问题继续运行进而出现难以定位的问题现场 | "this object is still in use" | 不涉及 |
+| extendableComponent | WeakPtr裸指针使用 | UAF问题 cppcrash | 内部业务通过WeakPtr获取已销毁对象的裸指针使用，WeakPtr的Upgrade应先于裸指针访问 | 严重 | 排查代码中直接使用WeakPtr裸指针的地方并整改为安全的Upgrade方法 | 不涉及 | 不涉及 |
+
 ## 设计骨架
 
 ### 骨架范围

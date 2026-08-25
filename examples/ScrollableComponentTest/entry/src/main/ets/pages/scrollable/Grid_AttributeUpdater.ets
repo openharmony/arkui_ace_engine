@@ -34,7 +34,11 @@ class MyGridUpdater extends AttributeUpdater<GridAttribute> {
     this.this_ = aaa
   }
 
-  changeIndex(index1: number, index2: number) { //交换数组位置
+  changeIndex(index1: number, index2: number) { // 交换数组位置
+    if (index1 < 0 || index1 >= this.this_.numbers.length ||
+      index2 < 0 || index2 >= this.this_.numbers.length) {
+      return
+    }
     let temp: string;
     temp = this.this_.numbers[index1];
     this.this_.numbers[index1] = this.this_.numbers[index2];
@@ -156,9 +160,6 @@ class MyGridUpdater extends AttributeUpdater<GridAttribute> {
   }
 }
 
-
-
-
 @Entry
 @Component
 export struct GridExample_Updater {
@@ -167,7 +168,6 @@ export struct GridExample_Updater {
   scroller2: Scroller = new Scroller()
   @State text: string = 'drag'
   @State gridUpdater: MyGridUpdater = new MyGridUpdater(this)
-
 
   aboutToAppear() {
     for (let i = 1; i <= 15; i++) {
@@ -186,7 +186,10 @@ export struct GridExample_Updater {
     }
   }
 
-  changeIndex(index1: number, index2: number) { //交换数组位置
+  changeIndex(index1: number, index2: number) { // 交换数组位置
+    if (index1 < 0 || index1 >= this.numbers.length || index2 < 0 || index2 >= this.numbers.length) {
+      return
+    }
     let temp: string;
     temp = this.numbers[index1];
     this.numbers[index1] = this.numbers[index2];

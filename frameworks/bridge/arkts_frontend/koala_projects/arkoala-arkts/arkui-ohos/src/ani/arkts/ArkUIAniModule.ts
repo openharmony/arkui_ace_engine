@@ -175,6 +175,10 @@ export class ArkUIAniModule {
     native static _UpdateWaterFlowSection(ptr: KPointer, changeInfo: SectionChangeInfo): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize | undefined): void
     native static _LazyForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
+    native static _Repeat_IsChildInAnimation(lazyNodePtr: KPointer, rid: KInt): KBoolean
+    native static _Repeat_IsChildOnMainTree(lazyNodePtr: KPointer, rid: KInt): KBoolean
+    native static _Repeat_IsAllowAnimation(lazyNodePtr: KPointer): KBoolean
+    native static _Repeat_IsImplicitAnimationOpen(lazyNodePtr: KPointer): KBoolean
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
@@ -349,6 +353,9 @@ export class ArkUIAniModule {
     native static _UiMaterial_ConvertToECSubMaterial(value: long): long
     native static _UiMaterial_GetGlobalMaterialLevel(): int
     native static _UiMaterial_IsImmersiveMaterialSupported(): boolean
+    native static _UiMaterial_GetMaterialState(): int
+    native static _UiMaterial_GetMaterialType(): int
+    native static _UiMaterial_GetEmpty(): long
 
     native static _CreateViewStackProcessor(): KPointer
 
@@ -523,6 +530,7 @@ export class ArkUIAniModule {
     native static _SyntaxItem_Construct(id: KInt): KPointer
     native static _ForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
     native static _ForEach_FinishRender(peerPtr: KPointer): void
+    native static _ForEach_IsImplicitAnimationOpen(): boolean
     // for Component3D
     native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
     native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void
@@ -557,4 +565,6 @@ export class ArkUIAniModule {
     native static _GestureEventUIObserver_RemoveTapListenerCallback(instanceId: KInt, tag: string, callback?: GestureEventListenerCallback): void
     native static _GestureEventUIObserver_AddGlobalGestureListener(resourceId: KInt, type: KInt, callback: GestureListenerCallback): void
     native static _GestureEventUIObserver_RemoveGlobalGestureListener(type: KInt, callback?: GestureListenerCallback): void
+    native static __BuilderNode_GetParentViewId(ptr: KPointer): KInt;
+    native static _ArkTSFrameNode_GetId(peer: KPointer): string
 }

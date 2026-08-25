@@ -788,8 +788,8 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     imageData.data = std::vector<uint32_t>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
+            int64_t idx = 4 * (static_cast<int64_t>(j) + static_cast<int64_t>(imgWidth) * i);
+            if (idx >= 0 && static_cast<int64_t>(bufferLength) > idx + ALPHA_INDEX) {
                 uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
                 uint8_t red = buffer[idx]; // idx: the 1st byte format: red
                 uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green

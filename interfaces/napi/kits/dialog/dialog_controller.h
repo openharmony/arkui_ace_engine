@@ -18,7 +18,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 

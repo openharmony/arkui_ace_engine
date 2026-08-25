@@ -201,6 +201,31 @@ class LazyArkTabsComponent extends ArkComponent {
     this.lazyComponent.onContentWillChange(handler);
     return this;
   }
+
+  barStyle(value: TabBarStyle): this {
+    this.lazyComponent.barStyle(value);
+    return this;
+  }
+
+  sidebarPosition(value: BarPosition): this {
+    this.lazyComponent.sidebarPosition(value);
+    return this;
+  }
+
+  sidebarHeader(value: ComponentContent): this {
+    this.lazyComponent.sidebarHeader(value);
+    return this;
+  }
+
+  sidebarSearchable(value: TabsSidebarSearchableOptions): this {
+    this.lazyComponent.sidebarSearchable(value);
+    return this;
+  }
+
+  barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): this {
+    this.lazyComponent.barDisplayModeBreakpoint(value);
+    return this;
+  }
 }
 
 class TabsModifier extends LazyArkTabsComponent implements AttributeModifier<TabsAttribute> {

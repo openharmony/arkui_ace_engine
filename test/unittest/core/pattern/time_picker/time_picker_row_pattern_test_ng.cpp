@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"

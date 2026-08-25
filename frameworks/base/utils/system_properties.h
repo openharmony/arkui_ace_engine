@@ -240,6 +240,16 @@ public:
         return apiVersion_;
     }
 
+    static const std::string& GetSdkPatchApiVersion()
+    {
+        return sdkPatchApiVersion_;
+    }
+
+    static const std::string& GetSdkMinorApiVersion()
+    {
+        return sdkMinorApiVersion_;
+    }
+
     static const std::string& GetReleaseType()
     {
         return releaseType_;
@@ -311,6 +321,11 @@ public:
     static bool GetRecycleImageEnabled()
     {
         return recycleImageEnabled_;
+    }
+
+    static bool GetNavigationImageRecycleEnabled()
+    {
+        return navigationImageRecycleEnabled_;
     }
 
     static bool GetImageReleaseManageObjectEnabled()
@@ -619,6 +634,8 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool GetSmartLayoutEnabled();
+
     static std::optional<bool> GetArkUIHookEnabled();
 
     static bool WaterFlowUseSegmentedLayout();
@@ -786,6 +803,16 @@ public:
         return isOpenYuvDecode_;
     }
 
+    static int32_t GetSyntaxMemOptStrategy()
+    {
+        return syntaxMemOptStrategy_;
+    }
+
+    static int32_t GetBootVendorDdrSize()
+    {
+        return bootVendorDdrSize_;
+    }
+
     static UiMaterialLevel GetUiMaterialLevel();
     static bool IsDeviceSystemMaterialSupported();
 
@@ -831,6 +858,8 @@ private:
     static std::string model_;
     static std::string product_;
     static std::string apiVersion_;
+    static std::string sdkPatchApiVersion_;
+    static std::string sdkMinorApiVersion_;
     static std::string releaseType_;
     static std::string paramDeviceType_;
     static int32_t mcc_;
@@ -855,6 +884,7 @@ private:
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool recycleImageEnabled_;
+    static bool navigationImageRecycleEnabled_;
     static bool imageReleaseManageObjectEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
@@ -871,6 +901,7 @@ private:
     static std::optional<bool> arkUIHookEnabled_;
     static bool gridCacheEnabled_;
     static bool gridIrregularLayoutEnable_;
+    static bool smartLayoutEnabled_;
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
@@ -906,6 +937,8 @@ private:
     static bool syncLoadEnabled_;
     static bool whiteBlockEnabled_;
     static int32_t previewStatus_;
+    static int32_t syntaxMemOptStrategy_;
+    static int32_t bootVendorDdrSize_;
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;

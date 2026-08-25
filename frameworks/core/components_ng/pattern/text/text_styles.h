@@ -85,7 +85,7 @@ struct TextDecorationOptions {
 
 struct LineSpacingOptions {
     std::optional<bool> onlyBetweenLines;
- 
+
     bool IsEqual(const LineSpacingOptions& other) const
     {
         return this->onlyBetweenLines.has_value() == other.onlyBetweenLines.has_value() &&
@@ -400,17 +400,17 @@ struct TextLineStyle {
         CHECK_NULL_VOID(resObj && updateFunc);
         resMap_[key] = {resObj, std::move(updateFunc)};
     }
- 
+
     size_t RemoveResource(const std::string& key)
     {
         return resMap_.erase(key);
     }
- 
+
     void CopyResource(const std::unique_ptr<TextLineStyle>& source)
     {
         resMap_ = source->resMap_;
     }
- 
+
     void ReloadResources()
     {
         for (const auto& [key, resourceUpdater] : resMap_) {

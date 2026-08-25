@@ -1171,6 +1171,9 @@ HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation004, TestS
  */
 HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback001, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: transition callback env difference";
+#endif
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->SetIsOnAnimation(true);

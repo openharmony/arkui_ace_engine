@@ -100,7 +100,7 @@ HWTEST_F(UINodeIsolatedThreadTest, UINodeIsolatedThreadTest_GetContextVariantsMi
 
 /**
  * @tc.name: UINodeIsolatedThreadTest_AttachContextMismatchAndImmutable001
- * @tc.desc: Test AttachContext with mismatch logs warning, and node's isIsolatedThread_ remains immutable
+ * @tc.desc: Test AttachContext with mismatch logs debug, and node's isIsolatedThread_ remains immutable
  * @tc.type: FUNC
  */
 HWTEST_F(UINodeIsolatedThreadTest, UINodeIsolatedThreadTest_AttachContextMismatchAndImmutable001, TestSize.Level1)

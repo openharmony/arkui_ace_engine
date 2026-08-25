@@ -49,6 +49,7 @@
 
 #include "core/common/window.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -96,7 +97,16 @@ public:
     }
 };
 
-void UIExtensionComponentTestTwoNg::SetUp() {}
+void UIExtensionComponentTestTwoNg::SetUp()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto mgr = AceType::MakeRefPtr<AvoidInfoManager>();
+    ASSERT_NE(mgr, nullptr);
+    mgr->SetPipelineContext(WeakPtr(pipeline));
+    mgr->SetInstanceId(pipeline->GetInstanceId());
+    pipeline->avoidInfoMgr_ = mgr;
+}
 
 void UIExtensionComponentTestTwoNg::TearDown() {}
 

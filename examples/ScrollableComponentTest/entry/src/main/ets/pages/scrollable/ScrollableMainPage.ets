@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import router from '@ohos.router';
-
-class TextList {
+export class TextList {
   public id: number;
   public text: string;
   public url: string;
@@ -44,7 +42,8 @@ struct IndexPage {
     new TextList(10, 'ScrollEventObserver', 'pages/scrollable/ScrollEventObserver'),
     new TextList(11, 'FreeScroll', 'pages/scrollable/FreeScroll'),
     new TextList(12, 'RefreshNestedScroll', 'pages/scrollable/RefreshNestedScroll'),
-    new TextList(13, 'ScrollSpeak', 'pages/scrollable/ScrollSpeak/Index')
+    new TextList(13, 'RefreshNestedScrollIssueDemo', 'pages/scrollable/RefreshNestedScrollIssueDemo'),
+    new TextList(14, 'ScrollSpeak', 'pages/scrollable/ScrollSpeak/Index')
   ]
   @State fontSize: Resource | undefined = undefined
 
@@ -59,7 +58,7 @@ struct IndexPage {
               .margin(10)
               .padding({ top: 5, bottom: 5 })
               .onClick(() => {
-                router.pushUrl({ url: item.url })
+                this.getUIContext().getRouter().pushUrl({ url: item.url })
               })
           }, (item: TextList) => JSON.stringify(item.id))
         }

@@ -69,7 +69,7 @@ export class ObserveSingleton implements IObserve {
 
     get renderingId(): RenderIdType | undefined {
         const id =
-            GlobalStateManager.instance.currentScope?.id ?? ObserveSingleton.InvalidRenderId;
+            StateMgmtTool.getGlobalStateManager().currentScope?.id ?? ObserveSingleton.InvalidRenderId;
         return id;
     }
     set renderingId(value: RenderIdType | undefined) {

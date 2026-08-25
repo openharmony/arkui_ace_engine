@@ -14,7 +14,6 @@
  */
 
 #include <functional>
-#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 
 #include "gtest/gtest.h"
@@ -468,8 +467,8 @@ HWTEST_F(TextPickerColumnTestOneNg, ParseTouchListener002, TestSize.Level1)
     testImpl->GetTouchEventCallback()(info);
     EXPECT_TRUE(columnPattern->localDownDistance_ == 0.0f);
     AnimationOption tstOption;
-    info.touches_.front().localLocation_.deltaX_ = 300.0f;
-    info.touches_.front().localLocation_.deltaY_ = 400.0f;
+    info.touches_.front().localLocation_.SetX(300.0f);
+    info.touches_.front().localLocation_.SetY(400.0f);
     columnPattern->localDownDistance_ = 100.0f;
     testImpl->GetTouchEventCallback()(info);
     EXPECT_TRUE(columnPattern->localDownDistance_ != 0.0f);
@@ -694,9 +693,9 @@ HWTEST_F(TextPickerColumnTestOneNg, OnAroundButtonClick002, TestSize.Level1)
     ASSERT_NE(child, nullptr);
     auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
-    auto childNode = AccessibilityManager::DynamicCast<FrameNode>(child->GetChildAtIndex(0));
+    auto childNode = AceType::DynamicCast<FrameNode>(child->GetChildAtIndex(0));
     auto childSize = static_cast<int32_t>(child->GetChildren().size());
-    RefPtr<EventParam> param = AccessibilityManager::MakeRefPtr<EventParam>();
+    RefPtr<EventParam> param = AceType::MakeRefPtr<EventParam>();
     AnimationOption option;
     param->itemIndex = 0;
     param->instance = childNode;
@@ -1028,7 +1027,7 @@ HWTEST_F(TextPickerColumnTestOneNg, HandleDragMove001, TestSize.Level1)
     EXPECT_TRUE(event.GetFingerList().size() > 1);
     event.fingerList_.clear();
     event.inputEventType_ = InputEventType::AXIS;
-    event.sourceTool_ = SourceTool::MOUSE;
+    event.SetSourceTool(SourceTool::MOUSE);
     event.fingerList_.push_back(tstFinger);
     columnPattern->HandleDragMove(event);
     EXPECT_FALSE(event.GetFingerList().size() > 1);
@@ -1036,7 +1035,7 @@ HWTEST_F(TextPickerColumnTestOneNg, HandleDragMove001, TestSize.Level1)
      * @tc.steps: step1. Call HandleDragMove
      * @tc.expected: inner code of function: NearEqual(offsetY, yLast_, MOVE_THRESHOLD)==TRUE
      */
-    event.sourceTool_ = SourceTool::FINGER;
+    event.SetSourceTool(SourceTool::FINGER);
     columnPattern->pressed_ = true;
     columnPattern->HandleDragMove(event);
     EXPECT_FALSE(columnPattern->animationBreak_);
@@ -1109,14 +1108,14 @@ HWTEST_F(TextPickerColumnTestOneNg, InitPanEvent001, TestSize.Level1)
     GestureEvent event;
     FingerInfo tstFinger;
     event.fingerList_.push_back(tstFinger);
-    event.sourceTool_ = SourceTool::MOUSE;
+    event.SetSourceTool(SourceTool::MOUSE);
     event.inputEventType_ = InputEventType::AXIS;
     panEvent->actionStart_(event);
     EXPECT_TRUE(event.GetSourceTool() == SourceTool::MOUSE);
-    event.sourceTool_ = SourceTool::FINGER;
+    event.SetSourceTool(SourceTool::FINGER);
     panEvent->actionStart_(event);
     EXPECT_TRUE(event.GetSourceTool() != SourceTool::MOUSE);
-    event.sourceTool_ = SourceTool::MOUSE;
+    event.SetSourceTool(SourceTool::MOUSE);
     panEvent->actionEnd_(event);
     EXPECT_TRUE(event.GetSourceTool() == SourceTool::MOUSE);
 }

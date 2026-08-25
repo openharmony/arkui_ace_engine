@@ -19,11 +19,11 @@
 | 状态 | Draft |
 | 复杂度 | 标准 + 安全/DFX专项 |
 | 创建日期 | 2026-06-18 |
-| 最后更新 | 2026-07-13 |
+| 最后更新 | 2026-08-22 |
 
 ## 一、需求目标与规格 `[源: spec.md]`
 
-UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UISession 下发 `ruleJson`，宿主 ArkUI 按规则匹配场景并统一上报给 SA；Web / UIExtension 提供宿主到控件的规则透传通路。本能力不复用、不绑定 `ContentChange` / `ComponentChange` 事件语义，但 PageScene 检测时机复用 `ContentChangeManager` 的页面级稳定点。
+UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UISession 下发 `ruleJson`，宿主 ArkUI 按规则匹配场景并统一上报给 SA；Web / UIExtension 提供宿主到控件的规则透传通路。本能力不复用、不绑定 `ContentChange` / `ComponentChange` 事件语义，但 PageScene 检测时机复用页面级稳定点。`onlyVisible` 仅过滤组件属性可见性，新增 `rectCulling`（缺省为 `false`）独立控制 viewport 相交过滤；本次同时覆盖 opacity 和父子树 dirty 通知。
 
 首批场景：
 
@@ -31,6 +31,55 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 - 命中规则：当前页面或子内容源内存在 2 个及以上文本输入类控件。
 - ArkUI 文本输入类控件：`TextInput`、`TextArea`、`Search`、`RichEditor`
 - Web / UIExtension：规则注册、反注册、查询请求透传
+
+### 1.0 本次状态通知增量与行为差异 UML
+
+本节 UML 只比较文本输入类控件状态变化路径；页面级稳定事件原有调度不变。
+
+修改前：
+
+```mermaid
+sequenceDiagram
+    participant N as 主树文本输入类控件
+    participant P as PageScene 待检测调度
+    participant S as 页面稳定状态
+    participant M as 当前页面树匹配
+
+    N->>N: visibility / active / focusable 相关状态变化
+    Note over N,P: 无专用 PageScene 状态通知
+    alt 后续出现上下树或页面级稳定事件
+        N-->>P: 由其他事件产生待检测状态
+        S-->>P: 页面稳定
+        P->>M: 全量扫描当前页面树
+    else 没有其他检测入口
+        Note over P,M: 状态变化可能不能被及时重检
+    end
+```
+
+修改后：
+
+```mermaid
+sequenceDiagram
+    participant N as 主树文本输入类控件
+    participant P as PageScene 规则级调度
+    participant S as 页面稳定状态
+    participant M as 当前页面树匹配
+
+    N->>P: visibility / active / 有效可获焦性变化
+    P->>P: 按规则过滤维度判断是否受影响
+    alt 规则受影响
+        P->>P: 合并规则待检测状态
+        alt 页面不稳定
+            S-->>P: 滚动 / Swiper 滚动 / 转场中
+            Note over P: pending 保留，不扫描
+        else 页面稳定
+            S-->>P: 可执行检测
+            P->>M: 消费 pending 并全量扫描当前页面树
+        end
+    else 规则不受影响
+        Note over P: 不增加 pending
+    end
+```
 
 ### 1.1 US-1：SA 注册页面场景规则
 
@@ -48,18 +97,40 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 |--------|----------|------|
 | AC-2.1 | GIVEN 规则中 `policy.reportOnRegister=true`，WHEN `RegisterPageSceneRules` 注册成功，THEN 宿主立即扫描当前页面顶部控件树并执行 `TEXT_EDITOR` 匹配 | 正常 |
 | AC-2.2 | GIVEN 当前页面顶部控件树中命中文本输入类控件数量大于等于 `condition.threshold`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 宿主通过 `ReportPageSceneEvent` 上报 `TEXT_EDITOR` 场景结果 | 正常 |
-| AC-2.3 | GIVEN `scope.onlyVisible=true`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 不可见或屏幕范围外控件不参与计数 | 边界 |
-| AC-2.4 | GIVEN `globalConfig.includeUnfocusableTextInput=false`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 不可获焦文本输入类控件不参与计数 | 边界 |
+| AC-2.3 | GIVEN `scope.onlyVisible=true`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN visible/active 不通过、transform 后宽高为 0、或自身/祖先最终 opacity 为 0 的控件不参与计数；不因屏外而排除 | 边界 |
+| AC-2.4 | GIVEN `scope.rectCulling=true`，WHEN 执行匹配，THEN 仅与当前页面 viewport 有交集的控件参与计数 | 边界 |
+| AC-2.5 | GIVEN `scope.onlyVisible=false` 且 `scope.rectCulling=true`，WHEN 执行匹配，THEN 透明、隐藏或零尺寸属性不作为过滤条件，仅执行 rect 相交过滤 | 边界 |
+| AC-2.6 | GIVEN `globalConfig.includeUnfocusableTextInput=false`，WHEN 执行匹配，THEN 不可获焦控件不参与计数 | 边界 |
 
-### 1.3 US-3：文本输入类控件上下树后稳定检测
+### 1.3 US-3：文本输入类控件上下树和匹配状态变化后稳定检测
 
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
-| AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 文本输入类控件上树且满足可见性/可获焦规则，THEN 宿主将该控件加入页面输入控件计数并挂起待检测规则；不得仅因数量达到阈值立即上报 | 正常 |
-| AC-3.2 | GIVEN `policy.deduplicate=true` 且同一页面、同一规则、同一命中节点集合已上报，WHEN 再次触发匹配且命中集合未变化，THEN 不重复上报 | 边界 |
-| AC-3.3 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 命中节点集合变化或当前页面名变化且页面已稳定，THEN 可以重新上报新的命中结果 | 正常 |
-| AC-3.4 | GIVEN 已注册 `TEXT_EDITOR` 规则且页面内已计数某个文本输入类控件，WHEN 该控件下树，THEN 宿主从页面输入控件计数中移除该控件，并挂起待检测规则等待页面稳定点检查 | 边界 |
+| AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 文本输入类控件上树，或主树文本输入类控件发生 `visibility`、`active`、有效可获焦性变化，THEN 宿主仅按下方“状态变化影响矩阵”合并受影响规则的待检测状态；页面稳定后全量扫描当前页面树并重新执行规则过滤 | 正常 |
+| AC-3.2 | GIVEN `policy.deduplicate=true` 且同一规则的命中节点 ID 列表已上报，WHEN 节点仅发生坐标变化，THEN 不重复上报 | 边界 |
+| AC-3.3 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 上下树、`rectCulling=true` 时移入/移出 viewport，或相关状态变化导致节点是否参与匹配发生变化，且页面已稳定，THEN 重新应用规则检测并允许上报新的状态 | 正常 |
+| AC-3.4 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 文本输入类控件下树，THEN 宿主挂起待检测规则；页面稳定后通过全量扫描自然排除已下树节点 | 边界 |
 | AC-3.5 | GIVEN 已注册 `TEXT_EDITOR` 规则且同一规则曾上报过命中事件，WHEN 后续页面稳定点检查发现当前页面不再满足规则，THEN 宿主额外上报一次场景退出事件 `TEXT_EDITOR_EXIT`；若此前未上报过命中或已上报过退出，则不得重复上报退出事件 | 正常 |
+| AC-3.6 | GIVEN 输入节点自身或祖先 opacity 在零与非零之间变化，WHEN 页面达到稳定点，THEN `onlyVisible=true` 的相关规则重新检测；同值 opacity 更新不产生 dirty | 正常 |
+| AC-3.7 | GIVEN 父节点 visibility/active/opacity 变化影响子树，WHEN 页面达到稳定点，THEN 重新读取父子树状态且同一规则只匹配一次 | 性能/边界 |
+
+状态变化影响矩阵：
+
+| `onlyVisible` | `includeUnfocusableTextInput` | `visibility` 变化 | `active` 变化 | 有效可获焦性变化 |
+|---------------|---------------------------------|-------------------|---------------|--------------------|
+| `true` | `false` | pending | pending | pending |
+| `true` | `true` | pending | pending | 不触发 |
+| `false` | `false` | pending | 不触发 | pending |
+| `false` | `true` | 不触发 | 不触发 | 不触发 |
+
+测试判定补充：
+
+- `visibility` 变化采用 `onlyVisible || !includeUnfocusableTextInput`，需要覆盖其对可见过滤和有效可获焦性的双重影响。
+- `active` 变化只覆盖 `onlyVisible=true` 的规则。
+- 有效可获焦性变化需要覆盖控件自身可获焦、父级可获焦、enabled 三类来源；变化前后最终有效可获焦性相同时不得触发该路径的 pending。
+- 父节点 visibility 变化只产生一次 PageScene dirty；子树仍执行框架可见性回调，稳定点从 pageRoot 重算父子状态。
+- opacity 同值更新不产生 dirty；半透明且最终 opacity 大于零的节点不因 opacity 过滤。
+- rect/viewport 变化通过页面稳定事件重检；`rectCulling=false` 时不执行 viewport 相交判断。
 
 ### 1.4 US-4：SA 主动查询当前页面场景
 
@@ -85,7 +156,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 |--------|----------|------|
 | AC-5A.1 | GIVEN SA 已成功注册页面场景规则，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 且 `ruleSetId` 匹配当前注册规则，THEN 宿主删除该规则、待检测状态和去重缓存，并返回成功 | 正常 |
 | AC-5A.2 | GIVEN SA 未注册页面场景规则或传入 `ruleSetId` 为空/不匹配，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)`，THEN 接口返回参数错误或未注册错误，不影响其他 SA 已注册规则 | 异常 |
-| AC-5A.3 | GIVEN SA 已成功反注册页面场景规则，WHEN 后续页面文本输入类控件上树、下树或页面稳定点到达，THEN 宿主不得再因该规则上报 PageScene 事件 | 恢复 |
+| AC-5A.3 | GIVEN SA 已成功反注册页面场景规则，WHEN 后续页面文本输入类控件上树、下树、相关状态变化或页面稳定点到达，THEN 宿主不得再因该规则上报 PageScene 事件 | 恢复 |
 
 ### 1.6 US-6：上报结果脱敏
 
@@ -101,7 +172,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
 | AC-7.1 | GIVEN 仅注册了 PageScene、未注册 ContentChange，WHEN 页面切换结束、滚动结束、Swiper/Tabs 切换结束或弹窗显示隐藏结束，THEN 宿主仍应触发 PageScene 待检测规则检查；不得上报 ContentChange 事件 | 正常 |
-| AC-7.2 | GIVEN 文本输入类控件上下树后存在待检测规则，WHEN 当前仍处于普通滚动、Swiper 滚动或页面转场中，THEN 不触发 PageScene 上报，等待后续稳定点或 VSync 末尾再检查 | 边界 |
+| AC-7.2 | GIVEN 文本输入类控件上下树或相关状态变化后存在待检测规则，WHEN 当前仍处于普通滚动、Swiper 滚动或页面转场中，THEN 不消费该待检测状态、不扫描、不触发 PageScene 上报，等待后续稳定点或 VSync 末尾再检查；GIVEN Navigation 已登记 NavDestination 转场 ID，WHEN 对应 NavDestination 提前下树、Navigation 整体下树或交互转场取消，THEN 必须释放已结束的转场 ID，仅在仍有其他转场 ID 时继续保持转场态 | 边界/恢复 |
 | AC-7.3 | GIVEN 仅注册了 PageScene、未注册 ContentChange，WHEN 只发生 Text/Image 具体控件 ContentChange 事件，THEN 不以这些具体控件事件作为 PageScene-only 检测入口 | 边界 |
 | AC-7.4 | GIVEN Pipeline 执行 VSync 尾部逻辑，WHEN 需要处理 PageScene 待检测规则，THEN Pipeline 只调用 `ContentChangeManager::OnVsyncEnd`；PageScene 规则判断和 `FlushPageSceneNodeChanged` 封装在 ContentChangeManager / UiSessionManager 内部 | 架构 |
 
@@ -121,15 +192,23 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | R-1 | 行为 | 首次合法注册 | 保存规则并建立回调路由 | 单 SA 单注册态 | AC-1.1 | 单测/sample | 合法 `TEXT_EDITOR` ruleJson | P0 |
 | R-2 | 异常 | `ruleJson` 非法、缺少/不支持 `version`、回调为空或未连接 `ReportService` | 返回错误，不保存规则 | 不触发扫描和下发 | AC-1.2 | 单测 | 空串、非 JSON、缺少 `version`、`version=2`、缺少 `ruleSetId`、空 callback、未 Connect | P0 |
 | R-3 | 异常 | 已注册未注销时再次注册 | 返回重复注册错误，不覆盖旧规则 | 防重复注册 | AC-1.3, AC-8.1 | 单测/并发测试 | ruleA 注册成功后注册 ruleB | P0 |
-| R-4 | 行为 | `reportOnRegister=true` 且注册成功 | 扫描当前页面顶部控件树，初始化页面可见输入控件计数 | 只采集规则所需字段 | AC-2.1 | 集成测试 | 注册后立即检查 tracker 计数和回调 | P0 |
+| R-4 | 行为 | `reportOnRegister=true` 且注册成功 | 全量扫描当前页面顶部控件树并执行规则匹配 | 只采集规则所需字段 | AC-2.1 | 集成测试 | 注册后立即检查扫描结果和回调 | P0 |
 | R-5 | 行为 | 页面内符合规则的可见输入节点数量 >= 2 | 上报 `TEXT_EDITOR` | `COUNT_GTE` 阈值为 2 | AC-2.2 | 单测/集成 | 0/1/2/3 个文本输入控件 | P0 |
-| R-6 | 边界 | `onlyVisible=true` | 不可见/屏外控件不计数 | 空 rect 或无交集过滤 | AC-2.3 | 单测 | visible/hidden/offscreen 三类节点 | P0 |
-| R-7 | 边界 | `includeUnfocusableTextInput=false` | 不可获焦控件不计数 | 默认 false | AC-2.4 | 单测 | focusable=true/false | P0 |
-| R-8 | 行为 | 文本输入类控件上树 | 按规则加入页面输入控件计数，并挂起对应规则待检测任务 | 不因达到阈值立即上报 | AC-3.1 | 单测/集成测试 | 动态添加 TextInput/TextArea/Search/RichEditor，确认未稳定前不回调 | P0 |
-| R-9 | 边界 | 重复命中集合 | 不重复上报 | 页面名、规则、来源、节点集合构成签名 | AC-3.2 | 单测 | 连续相同节点集合触发 3 次 | P0 |
-| R-10 | 行为 | 命中集合或页面名变化 | 页面稳定后允许重新上报 | 满足最小间隔 | AC-3.3 | 集成测试 | 增加一个输入框、切换页面名，再触发稳定点 | P1 |
-| R-10A | 边界 | 已计数文本输入类控件下树 | 从页面输入控件计数中移除，并挂起待检测规则等待页面稳定点检查 | 防止销毁节点继续贡献计数 | AC-3.4 | 单测/集成 | 2 个输入框命中后移除 1 个 | P0 |
+| R-6 | 边界 | `onlyVisible=true` | visible/active 不通过、transform 后宽高为 0、或最终 opacity 为 0 的控件不计数 | 不因屏外而排除；不验证滚动容器逐层裁剪 | AC-2.3 | 单测 | visible/hidden/zero-size/transparent 与 onlyVisible 开关 | P0 |
+| R-6A | 边界 | `rectCulling=true` | 仅与当前页面 viewport 有交集的控件计数 | 缺省 false；边界仅接触不算相交 | AC-2.4 | 单测 | onscreen/offscreen/boundary 与 rectCulling 开关 | P0 |
+| R-6B | 边界 | `onlyVisible=false && rectCulling=true` | 透明、隐藏或零尺寸属性不作为过滤条件，仅执行 rect 相交过滤 | 屏外节点不计数 | AC-2.5 | 单测 | transparent/hidden/zero-size onscreen 节点 | P0 |
+| R-7 | 边界 | `includeUnfocusableTextInput=false` | 不可获焦控件不计数 | 默认 false | AC-2.6 | 单测 | focusable=true/false | P0 |
+| R-8 | 行为 | 文本输入类控件上树 | 挂起对应规则待检测任务，稳定点全量扫描当前页面树 | 不维护候选索引或增量计数 | AC-3.1 | 单测/集成测试 | 动态添加 TextInput/TextArea/Search/RichEditor，确认未稳定前不回调 | P0 |
+| R-9 | 边界 | 重复命中节点 ID 列表 | 不重复上报 | rect、页面名和文本不参与重复状态判断 | AC-3.2 | 单测 | 相同节点 ID 仅改变坐标后再次检测 | P0 |
+| R-10 | 行为 | 上下树或 rectCulling 过滤导致命中节点 ID 列表变化 | 页面稳定后重新应用规则并允许上报 | 满足最小间隔 | AC-3.3 | 集成测试 | 替换输入框 ID、把输入框移出 viewport，再触发稳定点 | P0 |
+| R-10A | 边界 | 文本输入类控件下树 | 挂起待检测规则，稳定点全量扫描时排除已下树节点 | 不维护候选索引或增量计数 | AC-3.4 | 单测/集成 | 2 个输入框命中后移除 1 个 | P0 |
 | R-10B | 行为 | 同一规则已上报过命中，后续稳定点检查不再命中 | 上报一次 `TEXT_EDITOR_EXIT`，`matched=false`，`matchedCount` 为当前计数；上报后清理命中态，后续未命中不重复上报退出 | 退出事件不受命中去重和最小命中上报间隔抑制；再次命中后可重新上报 `TEXT_EDITOR` | AC-3.5 | 单测/集成 | 2 个输入框命中后移除到 1 个，再重复稳定点检查，再重新添加到 2 个 | P0 |
+| R-10C | 行为 | 主树文本输入类控件或其父级的 `visibility` 发生变化 | 当 `onlyVisible=true` 或 `includeUnfocusableTextInput=false` 时，合并该规则的待检测状态 | 父级变化只产生一次子树 dirty | AC-3.1, AC-3.3, AC-3.7 | 单测/集成 | 节点及父级 visible→invisible/gone、双向恢复 | P0 |
+| R-10D | 行为 | 主树文本输入类控件的 `active` 发生变化 | 仅为 `onlyVisible=true` 的规则合并待检测状态 | `active` 不参与有效可获焦性过滤 | AC-3.1, AC-3.3 | 单测/集成 | active→inactive、inactive→active，`onlyVisible=true/false` | P0 |
+| R-10E | 行为 | 主树文本输入类控件的有效可获焦性结果发生变化 | 仅为 `includeUnfocusableTextInput=false` 的规则合并待检测状态 | 原始状态变化但最终结果不变时不增加 | AC-3.1, AC-3.3 | 单测/集成 | focusable、parentFocusable、enabled 双向切换；节点已隐藏/禁用等导致最终结果不变 | P0 |
+| R-10F | 边界 | 状态变化不影响规则使用的过滤维度，或同一规则在稳定前重复收到相关状态变化 | 不为不相关规则增加待检测状态；相关规则只保留一个待检测状态 | `onlyVisible=false && includeUnfocusableTextInput=true` 时三类状态变化均不触发 | AC-3.1 | 单测 | 四种规则组合、同一节点连续切换、多个输入节点短时间连续切换 | P0 |
+| R-10G | 行为 | 输入节点或其祖先 opacity 实际发生变化 | `onlyVisible=true` 的相关规则在稳定点重新检测；opacity 同值更新不产生 dirty | 最终 opacity 为零时过滤；半透明且大于零时不因 opacity 过滤 | AC-3.6 | 单测/集成 | 节点/祖先 opacity 1↔0、同值更新、半透明 | P0 |
+| R-10H | 性能 | 父节点 visibility/active/opacity 变化影响子树 | 源节点只合并一次 dirty，稳定点从 pageRoot 重算父子状态 | 同一稳定点同一规则只匹配一次；nodeId 去重不变 | AC-3.7 | 单测/性能测试 | 父节点变化、多子孙输入框、重复状态事件 | P0 |
 | R-11 | 行为 | 合法 Get 且无 pending 请求 | 返回本次匹配结果 | 一次性规则不长期保存 | AC-4.1 | 单测/sample | `ruleSetId` 查询、临时 ruleJson 查询 | P0 |
 | R-12 | 异常 | Get 未返回时再次 Get | 返回 busy，不启动新扫描 | 防并发查询 | AC-4.4, AC-8.2 | 并发测试 | 两次连续 Get，首个回调延迟 | P0 |
 | R-13 | 行为 | 规则允许 Web 来源且 `webRules` 存在 | 宿主向 Web 控件透传 `webRules` 及反注册/查询请求 | `webRules` 按原始 JSON 值透传 | AC-1.4, AC-4.2, AC-5.1, AC-5.3, AC-5.4 | mock/单测 | Web enabled/disabled、webRules 原样透传、register/unregister/get | P1 |
@@ -140,7 +219,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | R-17 | 行为 | `includeRect=true` / `includeFocusable=true` | ArkUI 宿主来源节点包含 rect/focusable | rect 四字段完整 | AC-6.3, AC-6.4 | 单测 | include 开关 true/false | P0 |
 | R-18 | 恢复 | 反注册、SA 死亡或断连 | 清理所有该 SA 状态 | 不影响其他 SA | AC-8.3, AC-8.4 | 单测/死亡监听测试 | unregister、remote death、disconnect | P0 |
 | R-19 | 行为 | PageScene 已注册且页面级稳定点到达 | `ContentChangeManager` 检查并 flush PageScene 待检测规则 | PageScene-only 时不得发送 ContentChange 事件 | AC-7.1 | 单测 | Page/Scroll/Dialog 稳定点，PageScene-only 注册 | P0 |
-| R-20 | 边界 | 存在待检测规则但页面仍滚动、Swiper 滚动或转场 | 暂不 flush，稳定后再检测 | 防中间态上报 | AC-7.2 | 单测 | OnVsyncEnd 时 scrolling/swiperScrolling/transitioning 为 true | P0 |
+| R-20 | 边界/恢复 | 上下树或相关状态变化已产生待检测规则但页面仍滚动、Swiper 滚动或转场；或 Navigation 转场在完成回调前因节点下树/交互取消终止 | 活跃转场存在时不消费 PageScene pending、不扫描、不上报；单个 NavDestination 下树只清理自身 ID，Navigation 整体下树清理其全部活跃 ID，交互取消释放本次 ID；最后一个 ID 释放后恢复稳定点检测并消费保留的 pending | 防中间态上报、防 pending 丢失，同时防止残留 ID 永久阻塞 PageScene | AC-7.2 | 单测 | 状态变化产生 pending 后分别置 scrolling/swiperScrolling/transitioning；两个 destination ID 并存后单节点下树、Navigation 整体下树、正常完成、交互取消 | P0 |
 | R-21 | 架构 | Pipeline VSync 尾部 | 只调用 `ContentChangeManager::OnVsyncEnd(rootRect)` | Pipeline 不直接调用 UiSessionManager PageScene flush | AC-7.4 | 代码检查 | `pipeline_context.cpp` 无 `FlushPageSceneNodeChanged` 调用 | P0 |
 | R-22 | 边界 | 仅发生 Text/Image 具体控件 ContentChange 事件 | 不触发 PageScene-only 检测 | Text/Image 仍由 ContentChange 注册控制 | AC-7.3 | 单测/代码检查 | PageScene-only 时 Text/Image 路径不调用 PageScene flush | P1 |
 | R-23 | 恢复 | SA 调用合法 `UnregisterPageSceneRules(ruleSetId)` | 删除当前 SA 的已注册规则、待检测规则和去重状态，后续不再按该规则上报 | 子来源已下发规则时同步反注册；不影响其他 SA | AC-5A.1, AC-5A.3 | 单测/sample/mock | 注册后反注册、反注册后触发文本输入上下树和稳定点 | P0 |
@@ -192,6 +271,9 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 已有 API 行为变更 | 否 |
 | 修改前规格 | 无页面场景规则化感知能力 |
 | 修改后规格 | 系统 SA 可通过 UISession 注册/查询页面场景规则 |
+| 本次状态通知修改前 | 文本输入类控件仅改变 `visibility`、`active` 或可获焦相关状态时，没有专用 PageScene 重检通知 |
+| 本次状态通知修改后 | 仅受状态变化影响的规则增加去重 pending，页面不稳定时保留，稳定后全量扫描当前页面树 |
+| 组件行为兼容性 | 不改变组件显示、激活、enabled 和焦点切换行为，只改变 PageScene 重新检测时机 |
 | 是否进行版本隔离 | 否，System innerAPI 随 UISession 内部能力管理 |
 | 配置文件格式变更 | 否 |
 | 数据存储格式变更 | 否 |
@@ -214,7 +296,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 ### 5.4 是否涉及 IDE 预览
 
-**是否涉及：** 否。
+**是否涉及：** 否。该增量属于内部状态通知、规则 pending 和稳定点调度，Host Preview Inspector 无法稳定观测 pending 是否生成、保留或消费；使用组件/Manager 单元测试和集成测试替代。
 
 ### 5.5 是否涉及编译工具链
 
@@ -242,8 +324,8 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | 设备类型 | 差异化描述 | 测试验证 |
 |----------|-----------|----------|
-| 手机 | 按当前窗口可见区域计算 `onlyVisible` 和 `rect` | 是 |
-| Pad | 多窗口/分屏验证当前宿主窗口页面名、rect、可见性 | 是 |
+| 手机 | `onlyVisible` 按组件可见属性过滤；`rectCulling=true` 时按当前窗口 viewport 过滤 | 是 |
+| Pad | 多窗口/分屏验证当前宿主窗口页面名、rect、组件可见性和 rectCulling | 是 |
 | PC | 窗口尺寸变化和焦点场景验证 rect 与 focusable | 是 |
 
 ### 5.11 是否涉及适老化
@@ -262,7 +344,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | 规格描述 | 验证指标 | 验证方式 |
 |----------|----------|----------|
-| WHEN 文本输入类控件频繁上下树触发计数变化 THEN 只维护计数和待检测规则，页面稳定后再 check 并按 `policy.minReportIntervalMs` / `deduplicate` 限制重复命中上报，且已命中后不再命中时补发一次退出事件 | 未稳定前无上报；稳定后同一规则相同命中集合不重复上报；命中上报间隔不小于配置值；退出事件每次命中态到未命中态只上报一次 | 单测/集成测试 |
+| WHEN 文本输入类控件频繁上下树或发生相关 `visibility`、`active`、opacity 变化 THEN 仅合并受影响规则的待检测状态，页面稳定后全量扫描当前页面树，并按节点 ID 列表、`policy.minReportIntervalMs` / `deduplicate` 限制重复上报 | onlyVisible/rectCulling 四象限符合规格；同一规则稳定前重复事件只保留一个 pending；不稳定时 pending 不被消费；坐标变化不重复上报；上下树、移出 viewport 或属性变化导致 ID 列表变化时重新检测；退出事件每次命中态到未命中态只上报一次 | 单测/集成测试 |
 
 ### 6.2 功耗指标
 
@@ -279,6 +361,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 生命周期清理 | 反注册或 SA 死亡后不再上报 | 注册、命中、反注册、再次上树 | 单测/sample |
 | 子来源透传隔离 | Web/UIExtension 透传失败不影响 ArkUI 匹配 | Web/UIExtension 控件不存在或透传失败 | mock/单元测试 |
 | 稳定点调度 | PageScene-only 注册时页面级稳定点仍触发检测，且 Text/Image 具体事件不触发 PageScene-only 检测 | Page/Scroll/Swiper/Dialog/VSync/Text/Image 路径组合 | ContentChangeManager 单元测试 |
+| 状态通知裁剪与 pending 保留 | 不相关规则不增加 pending；相关规则重复通知合并；滚动/转场/Swiper 滚动中 pending 不丢失 | 四种规则组合、单节点与多节点连续状态切换、不稳定状态后恢复稳定 | PageScene Manager / ContentChangeManager 单元测试与集成测试 |
 
 ### 6.4 安全隐私合规
 
@@ -318,6 +401,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 交互类型 | 触发条件 | 预期结果 | UX 效果图 |
 |----------|----------|----------|-----------|
 | 焦点属性采集 | WHEN 命中文本输入类控件且 `report.includeFocusable=true` | THEN 上报节点包含 `focusable`，用于区分可自由输入和可能拉起 picker 的表单入口 | JSON 字段检查 |
+| 有效可获焦性变化 | WHEN 文本输入类控件因自身可获焦、父级可获焦或 enabled 状态切换而改变最终可获焦结果 | THEN 仅在规则排除不可获焦输入控件时增加待检测状态；不改变原有焦点切换结果 | pending 与回调检查 |
 
 ### 7.4 是否涉及用户数据
 
@@ -335,10 +419,11 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 用例组 | 重点用例 |
 |--------|----------|
 | 注册接口 | 首次合法注册、缺少/不支持 `version`、非法 JSON、空 callback、未 Connect、重复注册、注册期间并发注册 |
-| 首次扫描 | 0/1/2/3 个文本输入控件、`reportOnRegister=false`、页面名变化 |
-| 节点过滤 | visible/hidden/offscreen、focusable true/false、rect 开关、focusable 开关 |
-| 上下树触发 | 动态添加 TextInput/TextArea/Search/RichEditor、控件下树移除计数、未稳定前不立即上报、稳定后触发检测、重复触发去重、最小间隔、命中后跌出阈值上报一次 `TEXT_EDITOR_EXIT` |
-| 稳定点调度 | PageScene-only 注册下 Page/Scroll/Dialog 稳定点触发、Swiper 延迟到 VSync、滚动/转场/Swiper 滚动中不 flush、Pipeline 不直接依赖 PageScene flush、Text/Image 不触发 PageScene-only |
+| 首次扫描 | 0/1/2/3 个文本输入控件、`reportOnRegister=false`、`onlyVisible=true/false` |
+| 节点过滤 | `onlyVisible`/`rectCulling` 四象限、visible/active/hidden/zero-size/opacity、onscreen/offscreen/boundary、focusable 和 includeRect 开关；不覆盖滚动容器逐层裁剪 |
+| 上下树触发 | 动态添加/移除 TextInput/TextArea/Search/RichEditor、稳定点全量扫描、节点 ID 列表变化重新上报、命中后跌出阈值上报一次 `TEXT_EDITOR_EXIT` |
+| 状态变化触发 | `visibility`/`active`/opacity 双向切换、父级属性变化、focusable/parentFocusable/enabled 双向切换；覆盖四种 `onlyVisible` × `includeUnfocusableTextInput` 组合、有效可获焦性最终结果未变化、同值 opacity、父子树 dirty 合并、非输入节点、未上主树节点、未注册规则 |
+| 稳定点调度 | PageScene-only 注册下 Page/Scroll/Dialog 稳定点触发、Swiper 延迟到 VSync、滚动/转场/Swiper 滚动中不 flush；Navigation 转场登记 destination ID 后覆盖正常完成、单 NavDestination 下树、Navigation 整体下树、两个 ID 独立清理和交互取消，确认最后一个 ID 释放后 `IsTransitioning()` 恢复为 false；Pipeline 不直接依赖 PageScene flush、Text/Image 不触发 PageScene-only |
 | 主动查询 | ruleSetId 查询、一次性 ruleJson 查询、非法参数、pending Get busy |
 | Web 透传 | `webRules` 注册透传、反注册透传、查询请求透传、透传失败隔离 |
 | UIExtension 透传 | 规则注册透传、反注册透传、查询请求透传、透传失败隔离 |
@@ -365,3 +450,5 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | COUNT_GTE | `COUNT Greater Than or Equal`，命中节点数量大于等于阈值 |
 | SubSource | Web 或 UIExtension 等由宿主控件承载的子内容源 |
 | 稳定点 | 页面切换、滚动、Swiper/Tabs 切换、弹窗显示隐藏等完成后，或 VSync 尾部确认无滚动/转场/Swiper 滚动时执行场景检测的时机 |
+| 有效可获焦性 | 控件自身可获焦、父级可获焦、enabled、可见性及祖先可见性等条件共同作用后的最终可获焦结果 |
+| PageScene pending | 已被规则级筛选确定需要在后续稳定点重新检测的规则集合；同一规则重复加入时合并，页面不稳定时保留 |

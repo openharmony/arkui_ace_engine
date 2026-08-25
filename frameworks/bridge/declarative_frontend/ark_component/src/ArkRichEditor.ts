@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class RichEditorEnableDataDetectorModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -625,7 +624,7 @@ class RichEditorSingleLineModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
+class ArkRichEditorComponent extends ArkComponent implements RichEditorAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }

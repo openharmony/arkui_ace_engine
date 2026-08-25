@@ -49,8 +49,8 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
     allowChildTypes(): string[] {
         return ['ListItem'];
     }
-    divider(value: ListDividerOptions | undefined): this {
-        const value_casted = value as (ListDividerOptions | undefined)
+    divider(value: ListDividerOptions | null | undefined): this {
+        const value_casted = value as (ListDividerOptions | null | undefined)
         this.getPeer()?.setDividerAttribute(value_casted)
         this.markDirty()
         return this

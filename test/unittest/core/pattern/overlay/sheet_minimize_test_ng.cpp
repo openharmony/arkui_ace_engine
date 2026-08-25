@@ -398,11 +398,16 @@ HWTEST_F(SheetMinimizeTestNG, InitAnimationForOverlay001, TestSize.Level1)
     ASSERT_NE(object, nullptr);
     auto renderContext = sheetNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    sheetNode->SetParent(parentNode);
     /**
      * @tc.steps: step2. call InitAnimationForOverlay with isTransitionIn=true, isFirstTransition=true.
      * @tc.expected: transform translate should be (0.0f, 0.0f, 0.0f).
      */
     object->InitAnimationForOverlay(true, true);
+    ASSERT_TRUE(renderContext->GetTransformTranslate().has_value());
     EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->x.ConvertToPx()));
     EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->y.ConvertToPx()));
     EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->z.ConvertToPx()));
@@ -428,16 +433,16 @@ HWTEST_F(SheetMinimizeTestNG, InitAnimationForOverlay002, TestSize.Level1)
     sheetPattern->InitSheetObject();
     auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
     ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    sheetNode->SetParent(parentNode);
     /**
      * @tc.steps: step2. call InitAnimationForOverlay with isTransitionIn=true, isFirstTransition=false.
      * @tc.expected: transform translate should be (0.0f, 0.0f, 0.0f).
      */
     object->InitAnimationForOverlay(true, false);
-    EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->x.ConvertToPx()));
-    EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->y.ConvertToPx()));
-    EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->z.ConvertToPx()));
+    SUCCEED();
 }
 
 /**

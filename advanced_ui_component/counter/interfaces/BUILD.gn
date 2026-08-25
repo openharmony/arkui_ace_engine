@@ -49,6 +49,7 @@ ohos_shared_library("counter") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   relative_install_dir = "module/arkui/advanced"

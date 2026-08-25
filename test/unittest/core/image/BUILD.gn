@@ -82,6 +82,8 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/frameworks/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_animated_image.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_ui_material_filter_creator.cpp",
+    "$ace_root/test/mock/frameworks/core/event/mock_point_event.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_dialog_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_font_collection.cpp",

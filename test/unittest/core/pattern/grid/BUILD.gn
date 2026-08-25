@@ -35,93 +35,140 @@ COMMON_SRC = [
   "selectable_item_test.cpp",
 ]
 
-ace_unittest("grid_test_regular") {
-  module_name = "ScrollingSet-Scroll"
-  type = "new"
-  sources = COMMON_SRC
-  sources += [
-    "grid_attr_test_ng.cpp",
-    "grid_attr_testtwo_ng.cpp",
-    "grid_content_clip_test.cpp",
-    "grid_event_test_ng.cpp",
-    "grid_focus_test_ng.cpp",
-    "grid_layout_test_ng.cpp",
-    "grid_pattern_testthree_ng.cpp",
-    "grid_pattern_testtwo_ng.cpp",
-    "grid_scroll_layout_test_ng.cpp",
-    "grid_scroll_layout_testfour_ng.cpp",
-    "grid_scroll_layout_testthree_ng.cpp",
-    "grid_scroll_layout_testtwo_ng.cpp",
-    "grid_scroller_event_test_ng.cpp",
-    "grid_scroller_event_testtwo_ng.cpp",
-    "grid_sync_load_test_ng.cpp",
-  ]
+REGULAR_SRC = [
+  "grid_attr_test_ng.cpp",
+  "grid_attr_testtwo_ng.cpp",
+  "grid_content_clip_test.cpp",
+  "grid_event_test_ng.cpp",
+  "grid_focus_test_ng.cpp",
+  "grid_layout_test_ng.cpp",
+  "grid_pattern_testthree_ng.cpp",
+  "grid_pattern_testtwo_ng.cpp",
+  "grid_scroll_layout_test_ng.cpp",
+  "grid_scroll_layout_testfour_ng.cpp",
+  "grid_scroll_layout_testthree_ng.cpp",
+  "grid_scroll_layout_testtwo_ng.cpp",
+  "grid_scroller_event_test_ng.cpp",
+  "grid_scroller_event_testtwo_ng.cpp",
+  "grid_sync_load_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources += [ "grid_test_core.cpp" ]
-  } else {
-    sources += [ "grid_test_core.cpp" ]
+IRREGULAR_SRC = [
+  "grid_generated_layout_info_test.cpp",
+  "grid_item_drag_manager_test.cpp",
+  "irregular/grid_irregular_filler_test.cpp",
+  "irregular/grid_irregular_layout_test.cpp",
+  "irregular/grid_irregular_layout_testtwo.cpp",
+  "irregular/grid_layout_range_solver_test.cpp",
+  "irregular/irregular_matrics.cpp",
+  "layout_info_test.cpp",
+]
+
+CUSTOM_SRC = [
+  "custom/custom_layout_options.cpp",
+  "custom/grid_custom_algorithm_test_ng.cpp",
+  "custom/grid_custom_layout_algorithm_test.cpp",
+  "custom/grid_custom_layout_test_ng.cpp",
+  "custom/grid_custom_over_scroll_test_ng.cpp",
+  "custom/grid_custom_scroller_test_ng.cpp",
+  "grid_test_ng.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("grid_test_regular") {
+    type = "host_components"
+      cflags = [ "-fno-access-control" ]
+    module_name = "ScrollingSet-GridAndGridItem"
+    sources = COMMON_SRC + REGULAR_SRC + [ "grid_test_core.cpp" ]
+  }
+} else {
+  ace_unittest("grid_test_regular") {
+    module_name = "ScrollingSet-GridAndGridItem"
+    type = "new"
+    sources = COMMON_SRC
+    sources += REGULAR_SRC
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources += [ "grid_test_core.cpp" ]
+    } else {
+      sources += [ "grid_test_core.cpp" ]
+    }
   }
 }
 
-ace_unittest("grid_test_ng") {
-  module_name = "StateManagement-InComponent"
-  type = "new"
-  sources = COMMON_SRC
-  defines = [ "TEST_IRREGULAR_GRID" ]
-  sources += [
-    "grid_generated_layout_info_test.cpp",
-    "grid_item_drag_manager_test.cpp",
-    "irregular/grid_irregular_filler_test.cpp",
-    "irregular/grid_irregular_layout_test.cpp",
-    "irregular/grid_irregular_layout_testtwo.cpp",
-    "irregular/grid_layout_range_solver_test.cpp",
-    "irregular/irregular_matrics.cpp",
-    "layout_info_test.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("grid_test_ng") {
+    module_name = "ScrollingSet-GridAndGridItem"
+    type = "host_components"
+      cflags = [ "-fno-access-control" ]
+    sources = COMMON_SRC + IRREGULAR_SRC + [ "grid_test_core.cpp" ]
+    defines = [ "TEST_IRREGULAR_GRID" ]
+  }
+} else {
+  ace_unittest("grid_test_ng") {
+    module_name = "ScrollingSet-GridAndGridItem"
+    type = "new"
+    sources = COMMON_SRC
+    sources += IRREGULAR_SRC
+    defines = [ "TEST_IRREGULAR_GRID" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources += [ "grid_test_core.cpp" ]
-  } else {
-    sources += [ "grid_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources += [ "grid_test_core.cpp" ]
+    } else {
+      sources += [ "grid_test_core.cpp" ]
+    }
   }
 }
 
-ace_unittest("grid_static_test_ng") {
-  module_name = "StateManagement-InComponent"
-  type = "new"
-  sources = [
-    "grid_static_test_ng.cpp",
-    "grid_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "grid_static_test_core.cpp" ]
-  } else {
+if (is_host_product) {
+  ace_unittest("grid_static_test_ng") {
+    module_name = "ScrollingSet-GridAndGridItem"
+    type = "host_components"
+      cflags = [ "-fno-access-control" ]
+    sources = [
+      "grid_static_test_ng.cpp",
+      "grid_test_ng.cpp",
+    ]
     sources += [ "grid_static_test_core.cpp" ]
   }
+} else {
+  ace_unittest("grid_static_test_ng") {
+    module_name = "ScrollingSet-GridAndGridItem"
+    type = "new"
+    sources = [
+      "grid_static_test_ng.cpp",
+      "grid_test_ng.cpp",
+    ]
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources += [ "grid_static_test_core.cpp" ]
+    } else {
+      sources += [ "grid_static_test_core.cpp" ]
+    }
+  }
 }
 
-ace_unittest("grid_test_custom") {
-  module_name = "ScrollingSet-Scroll"
-  type = "new"
-  sources = [
-    "custom/custom_layout_options.cpp",
-    "custom/grid_custom_algorithm_test_ng.cpp",
-    "custom/grid_custom_layout_algorithm_test.cpp",
-    "custom/grid_custom_layout_test_ng.cpp",
-    "custom/grid_custom_over_scroll_test_ng.cpp",
-    "custom/grid_custom_scroller_test_ng.cpp",
-    "grid_test_ng.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("grid_test_custom") {
+    type = "host_components"
+      cflags = [ "-fno-access-control" ]
+    module_name = "ScrollingSet-GridAndGridItem"
+    sources = CUSTOM_SRC + [ "grid_custom_test_core.cpp" ]
+  }
+} else {
+  ace_unittest("grid_test_custom") {
+    type = "new"
+    module_name = "ScrollingSet-GridAndGridItem"
+    sources = CUSTOM_SRC
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "grid_custom_test_core.cpp" ]
-  } else {
-    sources += [ "grid_custom_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources += [ "grid_custom_test_core.cpp" ]
+    } else {
+      sources += [ "grid_custom_test_core.cpp" ]
+    }
   }
 }

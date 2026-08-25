@@ -193,6 +193,11 @@ public:
         return buttonPaddingBottom_;
     }
 
+    const Dimension& GetButtonPaddingBottomVertical() const
+    {
+        return buttonPaddingBottomVertical_;
+    }
+
     const Dimension& GetSingleButtonPaddingStart() const
     {
         return singleButtonPaddingStart_;
@@ -582,6 +587,26 @@ public:
         return paddingSingleTitle_;
     }
 
+    const Dimension& GetTitlePrimaryMinHeight() const
+    {
+        return titlePrimaryMinHeight_;
+    }
+
+    const Dimension& GetTitleSecondaryMinHeight() const
+    {
+        return titleSecondaryMinHeight_;
+    }
+
+    const Dimension& GetTitlePaddingTop() const
+    {
+        return titlePaddingTop_;
+    }
+
+    const Dimension& GetTitlePaddingBottom() const
+    {
+        return titlePaddingBottom_;
+    }
+
     const Dimension& GetNormalButtonFontSize() const
     {
         return normalButtonFontSize_;
@@ -675,6 +700,7 @@ private:
     Dimension defaultPaddingBottomFixed_;
     Dimension defaultDialogMarginBottom_;
     Dimension buttonPaddingBottom_;
+    Dimension buttonPaddingBottomVertical_;
     Dimension singleButtonPaddingStart_;
     Dimension singleButtonPaddingEnd_;
     Dimension mutiButtonPaddingStart_;
@@ -699,6 +725,10 @@ private:
     Color dialogInnerBorderColor_;
     Dimension paddingSingleTitle_;
     Dimension paddingTopTitle_;
+    Dimension titlePrimaryMinHeight_;
+    Dimension titleSecondaryMinHeight_;
+    Dimension titlePaddingTop_;
+    Dimension titlePaddingBottom_;
     Dimension backgroundBorderWidth_;
     double dialogRatioHeight_ = 0.9;
     int32_t text_align_content_ = 0;

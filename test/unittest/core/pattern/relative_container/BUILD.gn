@@ -13,39 +13,45 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("relative_container_test_ng") {
-  type = "new"
-  module_name = "Layout-RelativeContainer"
+test_sources = [
+  "feature/relative_container_barrier_test_ng.cpp",
+  "feature/relative_container_guideline_test_ng.cpp",
+  "layout/relative_container_layout_test.cpp",
+  "measure/relative_container_measure_test.cpp",
+  "old_cases/relative_container_common_ng.cpp",
 
-  sources = [
-    "feature/relative_container_barrier_test_ng.cpp",
-    "feature/relative_container_guideline_test_ng.cpp",
-    "layout/relative_container_layout_test.cpp",
-    "measure/relative_container_measure_test.cpp",
-    "old_cases/relative_container_common_ng.cpp",
+  # "old_cases/relative_container_guideline_test_ng.cpp",
+  # "old_cases/relative_container_new_test_ng.cpp",
+  "old_cases/relative_container_biasrules_test.cpp",
+  "old_cases/relative_container_chain_test.cpp",
+  "old_cases/relative_container_test_ng.cpp",
+  "old_cases/relative_container_testthree_ng.cpp",
+  "old_cases/relative_container_testtwo_ng.cpp",
+  "relative_container_algorithm_test_ng.cpp",
+  "relative_container_base_test_ng.cpp",
+  "relative_container_test_min.cpp",
+  "relative_container_test_core.cpp",
+]
 
-    # "old_cases/relative_container_guideline_test_ng.cpp",
-    # "old_cases/relative_container_new_test_ng.cpp",
-    "old_cases/relative_container_biasrules_test.cpp",
-    "old_cases/relative_container_chain_test.cpp",
-    "old_cases/relative_container_test_ng.cpp",
-    "old_cases/relative_container_testthree_ng.cpp",
-    "old_cases/relative_container_testtwo_ng.cpp",
-    "relative_container_algorithm_test_ng.cpp",
-    "relative_container_base_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "relative_container_test_min.cpp",
-      "relative_container_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "relative_container_test_min.cpp",
-      "relative_container_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("relative_container_test_ng") {
+    type = "host_components"
+    module_name = "Layout-RelativeContainer"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
   }
+} else {
+  ace_unittest("relative_container_test_ng") {
+    type = "new"
+    module_name = "Layout-RelativeContainer"
+    sources = test_sources
 
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "relative_container_test_min.cpp",
+        "relative_container_test_core.cpp",
+      ]
+    }
+  }
 }

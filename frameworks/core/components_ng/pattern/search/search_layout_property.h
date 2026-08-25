@@ -31,11 +31,6 @@ public:
     SearchLayoutProperty() = default;
     ~SearchLayoutProperty() override = default;
 
-    bool NeedReadFontScaleFromEnv() const override
-    {
-        return true;
-    }
-
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<SearchLayoutProperty>();

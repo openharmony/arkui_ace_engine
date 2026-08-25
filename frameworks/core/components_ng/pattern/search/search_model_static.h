@@ -87,6 +87,7 @@ public:
     static void SetCustomKeyboardWithNode(
  	    FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance);
 private:
+
 };
 
 } // namespace OHOS::Ace::NG

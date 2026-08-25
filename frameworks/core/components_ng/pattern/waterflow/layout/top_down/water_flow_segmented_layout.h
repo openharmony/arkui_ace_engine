@@ -94,11 +94,14 @@ private:
     void Init(const SizeF& frameSize, double originalWidth);
 
     /**
-     * @brief check if any items in view have changed height.
+     * @brief Measure items whose property flags require measurement, or all items requested by the
+     * parent, and check for height changes. Dirty lazy-layout items are skipped; they are
+     * re-measured by MeasureRemainingLazyChild or a refill.
      *
-     * @return index of the first dirty item. -1 if no dirty item found.
+     * @param forceMeasure whether to measure all items whose size is managed by the item itself.
+     * @return index of the first item with a changed height. -1 if no height change is found.
      */
-    int32_t CheckDirtyItem() const;
+    int32_t CheckDirtyItem(bool forceMeasure) const;
 
     /**
      * @brief init regular WaterFlow with a single segment.
@@ -148,6 +151,8 @@ private:
      */
     RefPtr<LayoutWrapper> MeasureItem(
         int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, std::optional<int64_t> deadline) const;
+    void MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>& item, int32_t segment, int32_t crossIndex,
+        float startMainPos, float userDefMainSize, std::optional<int64_t> deadline) const;
 
     /**
      * @brief Layout a FlowItem at [idx].

@@ -1201,12 +1201,13 @@ ArkUINativeModuleValue ListBridge::SetOnScrollIndex(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(int32_t, int32_t, int32_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(int32_t, int32_t, int32_t)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](
                                                            const int32_t start, const int32_t end,
                                                            const int32_t center) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, start);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, end);
@@ -1252,10 +1253,11 @@ ArkUINativeModuleValue ListBridge::SetOnScrollVisibleContentChange(ArkUIRuntimeC
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(ListItemIndex, ListItemIndex)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const ListItemIndex start, const ListItemIndex end) {
+        [vm, weakNode = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](const ListItemIndex start, const ListItemIndex end) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         auto startParam = SetListItemIndex(vm, start);
         auto endParam = SetListItemIndex(vm, end);
@@ -1287,11 +1289,12 @@ ArkUINativeModuleValue ListBridge::SetOnItemMove(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<bool(int32_t, int32_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(int32_t, int32_t)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](
                                                          int32_t start, int32_t end) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, start);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, end);
@@ -1324,7 +1327,8 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragStart(ArkUIRuntimeCallInfo* runt
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
     std::function<RefPtr<AceType>(const ItemDragInfo&, int32_t)> callback =
-        [vm, frameNode, func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
+        [vm, weakNode = AceType::WeakClaim(frameNode),
+            func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
             const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         panda::LocalScope pandaScope(vm);
@@ -1342,7 +1346,7 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragStart(ArkUIRuntimeCallInfo* runt
         // use another VSP instance while executing the builder function
         ViewStackModel::GetInstance()->NewScope();
         {
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             builderFunc->Execute();
         }
         return ViewStackModel::GetInstance()->Finish();
@@ -1366,14 +1370,15 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragEnter(ArkUIRuntimeCallInfo* runt
     }
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
-    std::function<void(const ItemDragInfo&)> callback = [vm, frameNode, func = std::move(jsOnDragFunc),
+    std::function<void(const ItemDragInfo&)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = std::move(jsOnDragFunc),
                                                       execCtx = info.GetExecutionContext()](
                                                       const ItemDragInfo& dragInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
 
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->ItemDragEnterExecute(dragInfo);
     };
     GetArkUINodeModifiers()->getListModifier()->setOnItemDragEnter(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1396,13 +1401,14 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragMove(ArkUIRuntimeCallInfo* runti
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
     std::function<void(const ItemDragInfo&, int32_t, int32_t)> callback =
-        [vm, frameNode, func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
+        [vm, weakNode = AceType::WeakClaim(frameNode),
+            func = std::move(jsOnDragFunc), execCtx = info.GetExecutionContext()](
             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
 
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
         };
     GetArkUINodeModifiers()->getListModifier()->setOnItemDragMove(
@@ -1425,12 +1431,13 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragLeave(ArkUIRuntimeCallInfo* runt
     }
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
-    std::function<void(const ItemDragInfo&, int32_t)> callback = [vm, frameNode, func = std::move(jsOnDragFunc)](
+    std::function<void(const ItemDragInfo&, int32_t)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = std::move(jsOnDragFunc)](
                                const ItemDragInfo& dragInfo, int32_t itemIndex) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
 
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->ItemDragLeaveExecute(dragInfo, itemIndex);
     };
     GetArkUINodeModifiers()->getListModifier()->setOnItemDragLeave(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1453,12 +1460,12 @@ ArkUINativeModuleValue ListBridge::SetOnItemDrop(ArkUIRuntimeCallInfo* runtimeCa
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[1]));
 
     std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)> callback =
-        [vm, frameNode, func = std::move(jsOnDragFunc)](
+        [vm, weakNode = AceType::WeakClaim(frameNode), func = std::move(jsOnDragFunc)](
             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
 
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
             func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
         };
     GetArkUINodeModifiers()->getListModifier()->setOnItemDrop(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1480,10 +1487,11 @@ ArkUINativeModuleValue ListBridge::SetOnListScrollStart(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getListModifier()->setOnListScrollStartCallBack(
@@ -1505,10 +1513,11 @@ ArkUINativeModuleValue ListBridge::SetOnListScrollStop(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getListModifier()->setOnListScrollStopCallBack(
@@ -1530,11 +1539,11 @@ ArkUINativeModuleValue ListBridge::SetOnListScrollFrameBegin(ArkUIRuntimeCallInf
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<ScrollFrameResult(Dimension, ScrollState)> callback = [vm, frameNode,
+    std::function<ScrollFrameResult(Dimension, ScrollState)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](Dimension offset, ScrollState state) -> ScrollFrameResult {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> offsetParam = panda::NumberRef::New(
             vm, static_cast<double>(offset.ConvertToVp()));
@@ -1577,11 +1586,11 @@ ArkUINativeModuleValue ListBridge::SetOnListWillScroll(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<ScrollFrameResult(CalcDimension, ScrollState, ScrollSource)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        [vm, weakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
             const CalcDimension& scrollOffset, const ScrollState& scrollState, ScrollSource scrollSource) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> offsetParam = panda::NumberRef::New(
             vm, static_cast<double>(scrollOffset.ConvertToVp()));
@@ -1621,11 +1630,12 @@ ArkUINativeModuleValue ListBridge::SetOnListDidScroll(ArkUIRuntimeCallInfo* runt
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(Dimension, ScrollState)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(Dimension, ScrollState)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> offsetParam =
             panda::NumberRef::New(vm, static_cast<double>(scrollOffset.ConvertToVp()));
@@ -1653,10 +1663,11 @@ ArkUINativeModuleValue ListBridge::SetOnListReachStart(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
 
@@ -1679,10 +1690,11 @@ ArkUINativeModuleValue ListBridge::SetOnListReachEnd(ArkUIRuntimeCallInfo* runti
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
 

@@ -29,6 +29,9 @@
     "pages/components/dialog/page/AlertDialogExtended_Callbacks",
     "pages/components/dialog/page/AlertDialogExtended_CornerRadius",
     "pages/components/dialog/page/AlertDialogExtended_Styles",
-    "pages/components/dialog/page/AlertDialogExtended_TextStyle"
+    "pages/components/dialog/page/AlertDialogExtended_TextStyle",
+    "pages/components/dialog/page/CustomDialogSystemMaterial_Styles",
+    "pages/components/dialog/page/CustomDialogSystemMaterial_Properties",
+    "pages/components/dialog/page/CustomDialogSystemMaterial_Combined"
   ]
 }

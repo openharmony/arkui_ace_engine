@@ -131,7 +131,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
          }
     }
     dispose() {
-        if (this.childPeerPtr !== nullptr) {
+        if (this.childPeerPtr !== nullptr && this.component) {
             destroyUiDetachedRoot(this.childPeerPtr, (this.component!.getUIContext() as UIContext).getInstanceId());
             this.childPeerPtr = nullptr;
         }

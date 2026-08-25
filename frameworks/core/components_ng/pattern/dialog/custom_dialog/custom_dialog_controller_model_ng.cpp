@@ -270,6 +270,14 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const Wea
             TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController is null.");
             return;
         }
+        // Remove all expired weak references
+        size_t validIdx = 0;
+        for (size_t i = 0; i < dialogs.size(); ++i) {
+            auto node = AceType::DynamicCast<NG::FrameNode>(dialogs[i].Upgrade());
+            CHECK_NULL_CONTINUE(node);
+            dialogs[validIdx++] = dialogs[i];
+        }
+        dialogs.resize(validIdx);
         RefPtr<NG::FrameNode> dialog;
         ACE_UINODE_TRACE(dialog);
         while (!dialogs.empty()) {

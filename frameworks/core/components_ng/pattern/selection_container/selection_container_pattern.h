@@ -178,6 +178,7 @@ public:
 
 private:
     std::u16string GetSelectAllText();
+    void SelectAllChildren(const std::vector<WeakPtr<SelectionContainerChild>>& childList);
     std::u16string GetSelectionTextForMenuItemClick(const MenuItemParam& menuItemParam);
     void DismissMenuAfterCopy();
     void ApplySelectionSummaryDelta(const ChildSelectionSummary& summary, int32_t delta);
@@ -193,6 +194,7 @@ private:
     std::string GetSelectedBackgroundColorStr() const;
     void InitKeyEvent();
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void UpdateShiftFlag(const KeyEvent& keyEvent);
     void WriteClipboard(const std::u16string& clipboardText,
         const RefPtr<MutableSpanString>& mergedSpanString, bool hasSpanString, CopyOptions copyOption);
     void HandleOnCopySpanString(const RefPtr<SpanString>& spanString, CopyOptions copyOption);

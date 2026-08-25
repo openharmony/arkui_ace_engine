@@ -873,7 +873,13 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
     */
     auto arkExtraInfoJson = JsonUtil::Create(true);
     PreparedInfoForDrag data;
-    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
+    GestureEvent info = GestureEvent();
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.scale = 1.0f;
+    ctx.preparedInfo = data;
+    ctx.info = info;
+    guestureEventHub->UpdateExtraInfo(arkExtraInfoJson, ctx);
     auto radiusJs = arkExtraInfoJson->GetDouble("blur_radius", -1);
     EXPECT_EQ(radiusJs, 2.0);
     /**
@@ -882,9 +888,36 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
     dragPreviewInfos.options.blurbgEffect.backGroundEffect.radius.SetValue(0);
     frameNode->SetDragPreviewOptions(dragPreviewInfos);
     auto jsInfos = JsonUtil::Create(true);
-    guestureEventHub->UpdateExtraInfo(frameNode, jsInfos, 1.0f, data);
+    guestureEventHub->UpdateExtraInfo(jsInfos, ctx);
     radiusJs = jsInfos->GetDouble("blur_radius", -1);
     EXPECT_EQ(radiusJs, -1);
+}
+
+/**
+ * @tc.name: UpdateExtraInfoIsNeedCreateTiledTest001
+ * @tc.desc: Test UpdateExtraInfo when isNeedCreateTiled is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoIsNeedCreateTiledTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(2.0));
+    DragPreviewOption dragPreviewInfos;
+    dragPreviewInfos.options.borderRadius = borderRadius;
+    frameNode->SetDragPreviewOptions(dragPreviewInfos);
+
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.scale = 1.0f;
+    ctx.preparedInfo.isNeedCreateTiled = true;
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    guestureEventHub->UpdateExtraInfo(arkExtraInfoJson, ctx);
+
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius1", -1), -1);
 }
 
 /**
@@ -908,7 +941,11 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoEnableAnimationTest001, TestSize.
     auto arkExtraInfoJson = JsonUtil::Create(true);
     PreparedInfoForDrag data;
     data.disableArkuiAnimation = false;
-    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.scale = 1.0f;
+    ctx.preparedInfo = data;
+    guestureEventHub->UpdateExtraInfo(arkExtraInfoJson, ctx);
     auto enableAnimation = arkExtraInfoJson->GetBool("enable_animation", true);
     EXPECT_EQ(enableAnimation, false);
 }
@@ -935,7 +972,11 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoEnableAnimationTest002, TestSize.
     PreparedInfoForDrag data;
     data.disableArkuiAnimation = true;
     data.isSceneBoardTouchDrag = true;
-    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.scale = 1.0f;
+    ctx.preparedInfo = data;
+    guestureEventHub->UpdateExtraInfo(arkExtraInfoJson, ctx);
     auto enableAnimation = arkExtraInfoJson->GetBool("enable_animation", false);
     EXPECT_EQ(enableAnimation, true);
 }
@@ -962,7 +1003,11 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoEnableAnimationTest003, TestSize.
     PreparedInfoForDrag data;
     data.disableArkuiAnimation = true;
     data.isSceneBoardTouchDrag = false;
-    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.scale = 1.0f;
+    ctx.preparedInfo = data;
+    guestureEventHub->UpdateExtraInfo(arkExtraInfoJson, ctx);
     auto enableAnimation = arkExtraInfoJson->GetBool("enable_animation", false);
     EXPECT_EQ(enableAnimation, true);
 }

@@ -29,6 +29,21 @@ class ArkoalaForEachNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(ArkoalaForEachNode, ForEachBaseNode);
 
 public:
+    struct ActiveRangeParam {
+        int32_t start;
+        int32_t end;
+        int32_t cacheStart;
+        int32_t cacheEnd;
+
+        bool operator==(const ActiveRangeParam& other) const
+        {
+            return start == other.start && end == other.end &&
+                cacheStart == other.cacheStart && cacheEnd == other.cacheEnd;
+        }
+    };
+
+    using UpdateRangeCb = std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>;
+
     explicit ArkoalaForEachNode(int32_t id, bool isRepeat = false);
     ~ArkoalaForEachNode() override = default;
 
@@ -39,6 +54,7 @@ public:
 
     void FinishRender();
     void FlushUpdateAndMarkDirty() override;
+    bool AddOrMoveChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
     // used for drag move operation.
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
@@ -46,9 +62,14 @@ public:
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetItemDragEvent(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
         std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+    void SetUpdateRange(UpdateRangeCb&& update)
+    {
+        updateRange_ = std::move(update);
+    }
     void FireOnMove(int32_t from, int32_t to) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChildrenDragManager(bool init);
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache) final;
 
     void DumpInfo() override;
 
@@ -56,8 +77,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ArkoalaForEachNode);
 
     bool isRepeat_ = false;
+    ActiveRangeParam activeRangeParam_ = { -1, -1, -1, -1 };
+    UpdateRangeCb updateRange_;
 };
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_FOR_EACH_NODE_H
-

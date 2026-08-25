@@ -22,6 +22,9 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "ui/properties/ui_material_structs.h"
 #include "ui/properties/ui_material_enums.h"
+#ifndef ACE_UNITTEST
+#include "ui_effect/effect/include/brightness_blender.h"
+#endif
 #include "core/components_ng/render/animation_utils.h"
 #include "core/animation/curve.h"
 
@@ -74,6 +77,7 @@ constexpr float DRAG_DEFORM_SCALE_Y = 0.95f;
 constexpr int32_t DRAG_DEFORM_RESTORE_DELAY_MS = 150;
 constexpr int32_t DRAG_FRAME_ANIMATION_DURATION = 150;
 constexpr int32_t LONG_PRESS_DELAY_MS = 400;
+constexpr float LIGHT_POSITION_Z_SCALE = 5.0f;
 
 constexpr float SPRING_VELOCITY = 0.0f;
 constexpr float SPRING_MASS = 1.0f;
@@ -87,9 +91,9 @@ constexpr float LOW_GRADE_SPRING_STIFFNESS = 224.0f;
 constexpr float LOW_GRADE_SPRING_DAMPING = 12.0f;
 constexpr float NUMBER_TWO = 2.0f;
 
-constexpr int32_t DRAG_FRAME_NODE_ZINDEX = 4;
-constexpr int32_t BLUR_COVER_NODE_ZINDEX = 5;
-constexpr int32_t DRAG_POINT_NODE_ZINDEX = 3;
+constexpr int32_t DRAG_FRAME_NODE_ZINDEX = 5;
+constexpr int32_t DRAG_POINT_NODE_ZINDEX = 4;
+constexpr int32_t BLUR_COVER_NODE_ZINDEX = 3;
 constexpr int32_t PREFIX_SUFFIX_STACK_ZINDEX = 10;
 
 constexpr int32_t PARTICLE_LIFE_TIME = 1000;
@@ -357,7 +361,7 @@ RefPtr<NodePaintMethod> SliderPattern::CreateNodePaintMethod()
     std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
     SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
     if (!sliderTipModifier_ && bubbleFlag_) {
-        sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
+        sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>(GetHost(), [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             if (!pattern) {
                 return std::pair<OffsetF, float>();
@@ -3379,27 +3383,23 @@ void SliderPattern::StartDeformAnimation()
     
     auto frameRC = dragFrameNode_->GetRenderContext();
     auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
-    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
-    
+
     auto direction = GetDirection();
     float scaleX = (direction == Axis::VERTICAL) ? DRAG_DEFORM_SCALE_Y : DRAG_DEFORM_SCALE_X;
     float scaleY = (direction == Axis::VERTICAL) ? DRAG_DEFORM_SCALE_X : DRAG_DEFORM_SCALE_Y;
-    
+
     AnimationOption option;
     option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(
         SPRING_VELOCITY, SPRING_MASS, SPRING_STIFFNESS, SPRING_DAMPING);
     option.SetCurve(springCurve);
-    
-    AnimationUtils::Animate(option, [frameRC, pointRC, blurRC, scaleX, scaleY]() {
+
+    AnimationUtils::Animate(option, [frameRC, pointRC, scaleX, scaleY]() {
         if (frameRC) {
             frameRC->UpdateTransformScale({ scaleX, scaleY });
         }
         if (pointRC) {
             pointRC->UpdateTransformScale({ scaleX, scaleY });
-        }
-        if (blurRC) {
-            blurRC->UpdateTransformScale({ scaleX, scaleY });
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
     
@@ -3418,23 +3418,19 @@ void SliderPattern::RestoreDeformAnimation()
     
     auto frameRC = dragFrameNode_->GetRenderContext();
     auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
-    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
-    
+
     AnimationOption option;
     option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(
         SPRING_VELOCITY, SPRING_MASS, SPRING_STIFFNESS, SPRING_DAMPING);
     option.SetCurve(springCurve);
-    
-    AnimationUtils::Animate(option, [frameRC, pointRC, blurRC]() {
+
+    AnimationUtils::Animate(option, [frameRC, pointRC]() {
         if (frameRC) {
             frameRC->UpdateTransformScale({ 1.0f, 1.0f });
         }
         if (pointRC) {
             pointRC->UpdateTransformScale({ 1.0f, 1.0f });
-        }
-        if (blurRC) {
-            blurRC->UpdateTransformScale({ 1.0f, 1.0f });
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
@@ -3501,38 +3497,21 @@ void SliderPattern::CreateDragFrameNode()
 void SliderPattern::UpdateDragFrameNode()
 {
     CHECK_NULL_VOID(dragFrameNode_);
-    
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    
+
     auto renderContext = dragFrameNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    
-    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto theme = host->GetTheme<SliderTheme>(true);
-    CHECK_NULL_VOID(theme);
-    
+
     auto blockRadius = GetBlockRadius();
     auto blockDiameter = blockRadius * NUMBER_TWO;
     auto frameSize = blockDiameter * GetDragFrameBaseScale();
-    
+
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
     renderContext->UpdateBorderRadius(borderRadius);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    
+
     dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
-    
-    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
-    ViewAbstract::SetLightPosition(AceType::RawPtr(dragFrameNode_),
-        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
-        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
-        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
-    ViewAbstract::SetLightColor(AceType::RawPtr(dragFrameNode_), blockColor);
-    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragFrameNode_), 0.5f);
-    ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragFrameNode_), 2u);
 }
 
 void SliderPattern::CreateDragPointNode()
@@ -3581,10 +3560,9 @@ void SliderPattern::UpdateDragPointNode()
     auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
     ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
         CalcDimension(blockRadius, DimensionUnit::PX), CalcDimension(blockRadius, DimensionUnit::PX),
-        CalcDimension(blockRadius, DimensionUnit::PX));
+        CalcDimension(blockRadius * LIGHT_POSITION_Z_SCALE, DimensionUnit::PX));
     ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), blockColor);
-    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 6.0f);
-    ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragPointNode_), 2u);
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 4.0f);
 }
 
 void SliderPattern::CreateBlurCoverNode()
@@ -3608,39 +3586,26 @@ void SliderPattern::UpdateBlurCoverNode()
     if (!blurCoverNode_) {
         return;
     }
-    
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    
-    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto theme = host->GetTheme<SliderTheme>(true);
-    CHECK_NULL_VOID(theme);
-    
+    CHECK_NULL_VOID(sliderContentModifier_);
+
     auto renderContext = blurCoverNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    
+
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    
-    auto blockRadius = GetBlockRadius();
-    auto blockDiameter = blockRadius * NUMBER_TWO;
-    auto frameSize = blockDiameter * GetDragFrameBaseScale();
-    
+
+    auto trackRect = sliderContentModifier_->GetTrackRect();
+    float trackWidth = trackRect.GetWidth();
+    float trackHeight = trackRect.GetHeight();
+
     blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
-    
+        CalcSize(CalcLength(trackWidth), CalcLength(trackHeight)));
+
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    borderRadius.SetRadius(Dimension(std::min(trackWidth, trackHeight) / NUMBER_TWO, DimensionUnit::PX));
     renderContext->UpdateBorderRadius(borderRadius);
-    
-    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
-    ViewAbstract::SetLightPosition(AceType::RawPtr(blurCoverNode_),
-        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
-        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
-        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
-    ViewAbstract::SetLightColor(AceType::RawPtr(blurCoverNode_), blockColor);
-    ViewAbstract::SetLightIntensity(AceType::RawPtr(blurCoverNode_), 1.5f);
-    ViewAbstract::SetLightIlluminated(AceType::RawPtr(blurCoverNode_), 2u);
 }
 
 void SliderPattern::CreateSelectedTrackFrameNode()
@@ -3741,82 +3706,37 @@ void SliderPattern::UpdateSelectedTrackFrameNode(float centerX, float centerY)
 {
     CHECK_NULL_VOID(selectedTrackFrameNode_);
     CHECK_NULL_VOID(sliderContentModifier_);
-    
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    
-    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto theme = host->GetTheme<SliderTheme>(true);
-    CHECK_NULL_VOID(theme);
-    
-    auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    
-    auto direction = GetDirection();
-    auto reverse = GetReverseValue(layoutProperty);
-    
+
     auto rect = sliderContentModifier_->GetSelectedTrackRect();
     float borderRadiusValue = sliderContentModifier_->GetSelectedBorderRadius();
 
     const auto& content = host->GetGeometryNode()->GetContent();
     auto contentOffsetF = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
-    
+
     float width = rect.GetWidth();
     float height = rect.GetHeight();
     float x = rect.GetLeft() - contentOffsetF.GetX();
     float y = rect.GetTop() - contentOffsetF.GetY();
-    
+
     selectedTrackFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(width), CalcLength(height)));
-    
+
     auto geometryNode = selectedTrackFrameNode_->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(SizeF(width, height));
     selectedTrackFrameNode_->ForceSyncGeometryNode();
-    
+
     auto trackRC = selectedTrackFrameNode_->GetRenderContext();
     CHECK_NULL_VOID(trackRC);
-    
+
     trackRC->UpdatePosition(OffsetT<Dimension>(Dimension(x), Dimension(y)));
-    
+
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(borderRadiusValue, DimensionUnit::PX));
     trackRC->UpdateBorderRadius(borderRadius);
-    
-    auto blockRadius = GetBlockRadius();
-    auto blockDiameter = blockRadius * NUMBER_TWO;
-    auto frameSize = blockDiameter * GetDragFrameBaseScale();
-    
-    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
-    
-    float lightPosX = 0.0f;
-    float lightPosY = 0.0f;
-    
-    if (direction == Axis::HORIZONTAL) {
-        if (!reverse) {
-            lightPosX = centerX - frameSize / NUMBER_TWO - x;
-        } else {
-            lightPosX = centerX + frameSize / NUMBER_TWO - x;
-        }
-        lightPosY = centerY - y;
-    } else {
-        lightPosX = centerX - x;
-        if (!reverse) {
-            lightPosY = centerY - frameSize / NUMBER_TWO - y;
-        } else {
-            lightPosY = centerY + frameSize / NUMBER_TWO - y;
-        }
-    }
-    
-    ViewAbstract::SetLightPosition(AceType::RawPtr(selectedTrackFrameNode_),
-        CalcDimension(lightPosX, DimensionUnit::PX),
-        CalcDimension(lightPosY, DimensionUnit::PX),
-        CalcDimension(frameSize, DimensionUnit::PX));
-    ViewAbstract::SetLightColor(AceType::RawPtr(selectedTrackFrameNode_), blockColor);
-    ViewAbstract::SetLightIntensity(AceType::RawPtr(selectedTrackFrameNode_), 1.0f);
-    ViewAbstract::SetLightIlluminated(AceType::RawPtr(selectedTrackFrameNode_), 3u);
-    ViewAbstract::SetIlluminatedBorderWidth(AceType::RawPtr(selectedTrackFrameNode_), Dimension(1, DimensionUnit::PX));
 }
 
 void SliderPattern::UpdateParticleFrameNode(float centerX, float centerY)
@@ -3930,8 +3850,19 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     float frameNodeY = realCenterY - frameSize / NUMBER_TWO;
     
     UpdateMaterialFrameNode(dragFrameNode_, frameSize, frameNodeX, frameNodeY, frameSize / NUMBER_TWO);
-    UpdateMaterialFrameNode(blurCoverNode_, frameSize, frameNodeX, frameNodeY, frameSize / NUMBER_TWO);
-    
+
+    if (blurCoverNode_ && sliderContentModifier_) {
+        auto trackRect = sliderContentModifier_->GetTrackRect();
+        blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(trackRect.GetWidth()), CalcLength(trackRect.GetHeight())));
+        auto blurRC = blurCoverNode_->GetRenderContext();
+        if (blurRC) {
+            blurRC->UpdatePosition(OffsetT<Dimension>(
+                Dimension(trackRect.GetLeft() - contentOffset.GetX()),
+                Dimension(trackRect.GetTop() - contentOffset.GetY())));
+        }
+    }
+
     float pointNodeX = realCenterX - blockRadius;
     float pointNodeY = realCenterY - blockRadius;
     UpdateMaterialFrameNode(dragPointNode_, blockDiameter, pointNodeX, pointNodeY, blockRadius);
@@ -3961,11 +3892,6 @@ void SliderPattern::UpdateMaterialFrameNode(const RefPtr<FrameNode>& frameNode,
         BorderRadiusProperty borderRadius;
         borderRadius.SetRadius(Dimension(borderRadiusValue, DimensionUnit::PX));
         renderContext->UpdateBorderRadius(borderRadius);
-        
-        ViewAbstract::SetLightPosition(AceType::RawPtr(frameNode),
-            CalcDimension(borderRadiusValue, DimensionUnit::PX),
-            CalcDimension(borderRadiusValue, DimensionUnit::PX),
-            CalcDimension(borderRadiusValue, DimensionUnit::PX));
     }
 }
 
@@ -3986,6 +3912,8 @@ void SliderPattern::ShowMaterialNode()
     if (!IsNeedShowMaterial()) {
         return;
     }
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsShowMaterialNode(true);
     if (!IsHighGradeMaterial() && !IsMiddleGradeMaterial()) {
         return;
     }
@@ -4010,7 +3938,17 @@ void SliderPattern::ShowMaterialNode()
 
     host->AddChild(dragPointNode_);
     host->AddChild(blurCoverNode_);
-    
+#ifndef ACE_UNITTEST
+    auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+        SliderModel::SliderMode::INSET) {
+        ApplyBlendMode(blurCoverNode_);
+    } else {
+        ViewAbstract::SetLightIlluminated(AceType::RawPtr(blurCoverNode_), 0u);
+    }
+#endif
+
     AnimationUtils::ExecuteWithoutAnimation(
         [pointRC, blurRC]() {
             CHECK_NULL_VOID(pointRC);
@@ -4038,7 +3976,6 @@ void SliderPattern::HideMaterialNode()
     if (!IsNeedShowMaterial()) {
         return;
     }
-    
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!IsHighGradeMaterial() && !IsMiddleGradeMaterial()) {
@@ -4095,6 +4032,8 @@ void SliderPattern::HideMaterialNodes()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetAlphaOffscreen(true);
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsShowMaterialNode(false);
 }
 
 void SliderPattern::AnimateHighGradeHide(
@@ -4125,10 +4064,6 @@ void SliderPattern::AnimateHighGradeHide(
         auto particleRC = particleFrameNode_->GetRenderContext();
         CHECK_NULL_VOID(particleRC);
         particleRC->UpdateOpacity(0.0);
-    }
-    
-    if (sliderContentModifier_) {
-        sliderContentModifier_->SetBlockAlpha(1.0f);
     }
 }
 
@@ -4173,7 +4108,9 @@ void SliderPattern::ApplyDragFrameNodeSystemMaterial()
     auto filter = renderContext->CreateFrostedGlassFilter(dragFrameMaterialParam, dipScale);
     if (filter) {
         renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
-        renderContext->UpdateBackShadow(MaterialUtils::GetImmersiveShadow(dipScale));
+        auto shadow = MaterialUtils::GetImmersiveShadow(dipScale * 0.8);
+        shadow.SetColor(Color(0x1F050505));
+        renderContext->UpdateBackShadow(shadow);
     }
     ResetHostMaterialEffects();
 }
@@ -4208,17 +4145,44 @@ void SliderPattern::ResetHostMaterialEffects()
     } else {
         BorderWidthProperty borderWidth;
         borderWidth.SetBorderWidth(Dimension(0));
-        borderWidth.leftDimen = Dimension(0);
-        borderWidth.rightDimen = Dimension(0);
-        borderWidth.topDimen = Dimension(0);
-        borderWidth.bottomDimen = Dimension(0);
         auto layoutProperty = host->GetLayoutProperty();
         if (layoutProperty) {
             layoutProperty->UpdateBorderWidth(borderWidth);
         }
         renderContext->UpdateBorderWidth(borderWidth);
     }
+    
+    auto preBackShadow = renderContext->GetPreBackShadow();
+    if (preBackShadow.has_value()) {
+        renderContext->UpdateBackShadow(preBackShadow.value());
+    } else {
+        renderContext->ResetBackShadow();
+    }
 }
+
+#ifndef ACE_UNITTEST
+void SliderPattern::ApplyBlendMode(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    static const auto brightnessBlender = CreateBrightnessBlender();
+    ViewAbstract::SetBlender(AceType::RawPtr(frameNode), brightnessBlender.get());
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(frameNode), 2u);
+}
+
+std::shared_ptr<Rosen::BrightnessBlender> SliderPattern::CreateBrightnessBlender()
+{
+    auto blender = std::make_shared<Rosen::BrightnessBlender>();
+    blender->SetCubicRate(0.0f);
+    blender->SetQuadRate(0.0f);
+    blender->SetLinearRate(1.048f);
+    blender->SetDegree(0.37647f);
+    blender->SetSaturation(1.5f);
+    blender->SetPositiveCoeff(Rosen::Vector3f(3.5f, 4.0f, 1.0f));
+    blender->SetNegativeCoeff(Rosen::Vector3f(1.0f, 2.0f, 2.0f));
+    blender->SetFraction(0.0f);
+    return blender;
+}
+#endif
 
 AnimationOption SliderPattern::CreateDragAnimationOption() const
 {
@@ -4311,6 +4275,13 @@ void SliderPattern::HandleHighGradeLongPress()
         selectedTrackFrameNode_->AddChild(particleFrameNode_);
     }
     ApplyDragFrameNodeSystemMaterial();
+#ifndef ACE_UNITTEST
+    if (sliderMode != SliderModel::SliderMode::INSET) {
+        ApplyBlendMode(dragFrameNode_);
+    } else {
+        ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragFrameNode_), 0u);
+    }
+#endif
 
     auto blockRadius = GetBlockRadius();
     UpdateMaterialNodePosition(circleCenter_.GetX(), circleCenter_.GetY(), blockRadius, false);
@@ -4322,9 +4293,7 @@ void SliderPattern::HandleHighGradeLongPress()
     CHECK_NULL_VOID(trackRC);
 
     auto particleRC = (useParticle && particleFrameNode_) ? particleFrameNode_->GetRenderContext() : nullptr;
-    
-    auto sliderModifier = sliderContentModifier_;
-    
+
     AnimationUtils::ExecuteWithoutAnimation(
         [frameRC, trackRC, particleRC]() {
             CHECK_NULL_VOID(frameRC);
@@ -4336,17 +4305,15 @@ void SliderPattern::HandleHighGradeLongPress()
             particleRC->UpdateOpacity(0.0);
         },
         host->GetContextRefPtr());
-    
+
     AnimationOption option = CreateDragAnimationOption();
     AnimationUtils::Animate(option,
-        [frameRC, trackRC, particleRC, sliderModifier]() {
+        [frameRC, trackRC, particleRC]() {
             CHECK_NULL_VOID(frameRC);
             frameRC->UpdateOpacity(1.0);
             frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
             CHECK_NULL_VOID(trackRC);
             trackRC->UpdateOpacity(1.0);
-            CHECK_NULL_VOID(sliderModifier);
-            sliderModifier->SetBlockAlpha(0.0f);
             CHECK_NULL_VOID(particleRC);
             particleRC->UpdateOpacity(0.8f);
         },

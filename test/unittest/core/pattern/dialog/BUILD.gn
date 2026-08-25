@@ -13,25 +13,37 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("dialog_test_ng") {
-  module_name = "DialogSet-bindContentCover"
-  type = "new"
-  sources = [
-    "dialog_layout_test_ng.cpp",
-    "dialog_layout_test_two_ng.cpp",
-    "dialog_model_test_ng.cpp",
-    "dialog_model_test_two_ng.cpp",
-    "dialog_pattern_test_ng.cpp",
-    "dialog_pattern_test_two_ng.cpp",
-    "dialog_pattern_test_three_ng.cpp",
-    "dialog_test_ng.cpp",
-    "dialog_test_two_ng.cpp",
-  ]
+test_sources = [
+  "custom_dialog_controller_model_test_ng.cpp",
+  "dialog_layout_test_ng.cpp",
+  "dialog_layout_test_two_ng.cpp",
+  "dialog_model_test_ng.cpp",
+  "dialog_model_test_two_ng.cpp",
+  "dialog_pattern_test_ng.cpp",
+  "dialog_pattern_test_two_ng.cpp",
+  "dialog_pattern_test_three_ng.cpp",
+  "dialog_pattern_test_four_ng.cpp",
+  "dialog_test_ng.cpp",
+  "dialog_test_two_ng.cpp",
+  "dialog_test_core.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "dialog_test_core.cpp" ]
-  } else {
-    sources += [ "dialog_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("dialog_test_ng") {
+    type = "host_components"
+    module_name = "DialogSet-bindContentCover"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("dialog_test_ng") {
+    module_name = "DialogSet-bindContentCover"
+    type = "new"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+
+    if (!ace_enable_full_test_suite) {
+      sources -= [ "dialog_test_core.cpp" ]
+    }
   }
 }

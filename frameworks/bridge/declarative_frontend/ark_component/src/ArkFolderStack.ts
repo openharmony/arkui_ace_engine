@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 interface FolderStackParam {
   alignContent?: Alignment;

@@ -46,7 +46,7 @@ constexpr uint32_t PERCENT_100 = 100;
 constexpr uint32_t NUM_9 = 9;
 #endif
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
-constexpr uint32_t DEPTH_COMPONENT_NATIVE_WINDOW_COUNT = 2;
+constexpr uint32_t DEPTH_COMPONENT_SURFACE_COUNT = 2;
 constexpr uint32_t SURFACE_QUEUE_SIZE = 2;
 constexpr uint32_t DEFAULT_DEPTH_BACKGROUND_COLOR = 0x00000000;
 constexpr uint32_t SURFACE_STRIDE_ALIGNMENT = 8;
@@ -139,7 +139,7 @@ void DepthComponentPattern::OnModifyDone()
         }
         InitGltfAdapter();
         if (!gltfWindowsInitialized_) {
-            CreateCustomNativeWindows(width3d_, height3d_);
+            CreateNativeSurfaces(width3d_, height3d_);
         }
         UpdateGltfScene();
         UpdateWindowChangeSize(true);
@@ -722,7 +722,7 @@ void DepthComponentPattern::InitGltfAdapter()
         gltfSceneLoaded_ = false;
         isGltfLoaded_ = false;
         pendingGltfLoadSuccess_.reset();
-        nativeWindowSetUp_ = false;
+        nativeSurfaceSetUp_ = false;
         return;
     }
 
@@ -850,8 +850,8 @@ void DepthComponentPattern::UpdateGltfWindowChange(const RefPtr<LayoutWrapper>& 
 
 void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
 {
-    ACE_SCOPED_TRACE("DepthComponent::CleanupGltfResources clearAdapter=%d windows=%zu surfaces=%zu", clearAdapter,
-        nativeWindows_.size(), nativeSurfaces_.size());
+    ACE_SCOPED_TRACE("DepthComponent::CleanupGltfResources clearAdapter=%d surfaces=%zu", clearAdapter,
+        nativeSurfaces_.size());
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -861,7 +861,6 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
         renderContext->RemoveChild(surfaceRenderContext_[i]);
     }
     windowChangeInfos_.clear();
-    nativeWindows_.clear();
     nativeSurfaceNodes_.clear();
     nativeSurfaces_.clear();
     surfaceRenderContext_.clear();
@@ -869,7 +868,7 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
     gltfSceneLoaded_ = false;
     isGltfLoaded_ = false;
     pendingGltfLoadSuccess_.reset();
-    nativeWindowSetUp_ = false;
+    nativeSurfaceSetUp_ = false;
     lastLoadedGltfPath_.clear();
     pendingCleanupGltf_ = false;
     if (clearAdapter) {
@@ -877,28 +876,32 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
     }
 }
 
-void DepthComponentPattern::CreateCustomNativeWindows(float width, float height)
+void DepthComponentPattern::CreateNativeSurfaces(float width, float height)
 {
-    ACE_SCOPED_TRACE("DepthComponent::CreateCustomNativeWindows width=%.1f height=%.1f current=%zu scale=%.1f",
-        width, height, nativeWindows_.size(), render3DScale_);
-    if (nativeWindows_.size() == DEPTH_COMPONENT_NATIVE_WINDOW_COUNT) {
+    ACE_SCOPED_TRACE("DepthComponent::CreateNativeSurfaces width=%.1f height=%.1f current=%zu scale=%.1f",
+        width, height, nativeSurfaces_.size(), render3DScale_);
+    if (nativeSurfaces_.size() == DEPTH_COMPONENT_SURFACE_COUNT) {
         return;
     }
-    nativeWindows_.clear();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     nativeSurfaceNodes_.clear();
     nativeSurfaces_.clear();
     windowChangeInfos_.clear();
-    for (uint32_t index = 0; index < DEPTH_COMPONENT_NATIVE_WINDOW_COUNT; ++index) {
+    for (uint32_t index = 0; index < DEPTH_COMPONENT_SURFACE_COUNT; ++index) {
         RefPtr<RosenRenderContext> renderContextForSurface = MakeRefPtr<RosenRenderContext>();
         CHECK_NULL_VOID(renderContextForSurface);
-        auto hostId = std::to_string(GetHost() ? GetHost()->GetId() : 0);
+        auto hostId = std::to_string(host->GetId());
         RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE,
             std::string("DepthComponent_") + hostId + "_" + std::to_string(index) };
         renderContextForSurface->InitContext(false, param);
         surfaceRenderContext_.emplace_back(renderContextForSurface);
         auto surfaceNode =
             OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(renderContextForSurface->GetRSNode());
-        GetRenderContext()->AddChild(renderContextForSurface, index);
+        renderContext->AddChild(renderContextForSurface, index);
         CHECK_NULL_VOID(surfaceNode);
         surfaceNode->SetFrameGravity(Rosen::Gravity::RESIZE);
         surfaceNode->SetHardwareEnabled(true);
@@ -911,16 +914,13 @@ void DepthComponentPattern::CreateCustomNativeWindows(float width, float height)
         surface->SetUserData("SURFACE_FORMAT", std::to_string(OHOS::GRAPHIC_PIXEL_FMT_RGBA_8888));
         surface->SetUserData("SURFACE_WIDTH", std::to_string(static_cast<uint32_t>(width * render3DScale_)));
         surface->SetUserData("SURFACE_HEIGHT", std::to_string(static_cast<uint32_t>(height * render3DScale_)));
-        auto* nativeWindow = CreateNativeWindowFromSurface(&surface);
         if (index == 0) {
             surfaceNode->SetIsDepthBackground(true);
         } else {
             surfaceNode->SetIsDepthResource(true);
         }
-        CHECK_NULL_VOID(nativeWindow);
         nativeSurfaceNodes_.emplace_back(surfaceNode);
         nativeSurfaces_.emplace_back(surface);
-        nativeWindows_.emplace_back(reinterpret_cast<void*>(nativeWindow));
         auto info = GetWindowChangeInfos(width, height);
         windowChangeInfos_.emplace_back(info);
     }
@@ -938,7 +938,6 @@ Render3D::WindowChangeInfo DepthComponentPattern::GetWindowChangeInfos(float wid
     info.surfaceType = Render3D::SurfaceType::SURFACE_WINDOW;
     info.backgroundColor = DEFAULT_DEPTH_BACKGROUND_COLOR;
     info.transformType = rotation_;
-    info.customNativeWin = nativeWindows_.back();
     return info;
 }
 
@@ -957,8 +956,9 @@ void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
         info.surfaceType = Render3D::SurfaceType::SURFACE_WINDOW;
         info.transformType = rotation_;
         info.backgroundColor = DEFAULT_DEPTH_BACKGROUND_COLOR;
-        info.customNativeWin = index < nativeWindows_.size() ? nativeWindows_[index] : nullptr;
+        info.colorSpace = colorSpace_;
         if (index < nativeSurfaces_.size() && nativeSurfaces_[index]) {
+            info.producerSurfaceId = nativeSurfaces_[index]->GetUniqueId();
             nativeSurfaces_[index]->SetTransformHint(RotationToTransform(rotation_));
             nativeSurfaces_[index]->SetUserData("SURFACE_WIDTH",
                 std::to_string(static_cast<uint32_t>(width3d_ * render3DScale_)));
@@ -972,8 +972,8 @@ void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
 
 bool DepthComponentPattern::NeedUpdateWindowInfo()
 {
-    return !(nativeWindowSetUp_ && NearEqual(lastWidth3d_, width3d_) && NearEqual(lastHeight3d_, height3d_)
-        && NearEqual(lastRender3DScale_, render3DScale_));
+    return !(nativeSurfaceSetUp_ && NearEqual(lastWidth3d_, width3d_) && NearEqual(lastHeight3d_, height3d_)
+        && NearEqual(lastRender3DScale_, render3DScale_) && lastColorSpace_ == colorSpace_);
 }
 
 void DepthComponentPattern::UpdateWindowInfo()
@@ -984,10 +984,11 @@ void DepthComponentPattern::UpdateWindowInfo()
     }
     isNeedRender_ = true;
     mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
-    nativeWindowSetUp_ = true;
+    nativeSurfaceSetUp_ = true;
     lastWidth3d_ = width3d_;
     lastHeight3d_ = height3d_;
     lastRender3DScale_ = render3DScale_;
+    lastColorSpace_ = colorSpace_;
 }
 
 void DepthComponentPattern::MarkRender3D()

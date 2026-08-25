@@ -1524,7 +1524,7 @@ class DialogPresenter {
     present(optionsOrContent, options) {
         let paramErrMsg =
             'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified.' +
-            ' 2. Incorrect parameters types. 3. Parameter verification failed.';
+            ' 2. Incorrect parameter types. 3. Parameter verification failed.';
         let argLength = arguments.length;
         if (argLength < 1 || optionsOrContent === null || optionsOrContent === undefined) {
             return new Promise((resolve, reject) => {
@@ -1548,7 +1548,7 @@ class DialogPresenter {
     update(content, options) {
         let paramErrMsg =
             'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified.' +
-            ' 2. Incorrect parameters types. 3. Parameter verification failed.';
+            ' 2. Incorrect parameter types. 3. Parameter verification failed.';
         let argLength = arguments.length;
         if (argLength < 2 || content === null || content === undefined) {
             return new Promise((resolve, reject) => {
@@ -1568,7 +1568,7 @@ class DialogPresenter {
     dismiss(target) {
         let paramErrMsg =
             'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified.' +
-            ' 2. Incorrect parameters types. 3. Parameter verification failed.';
+            ' 2. Incorrect parameter types. 3. Parameter verification failed.';
         if (arguments.length < 1 || target === null || target === undefined) {
             return new Promise((resolve, reject) => {
                 reject({ message: paramErrMsg, code: 401 });

@@ -25,19 +25,18 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
-import { ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
-import { extractors, ShaderStyle, AttributeModifier, initializers, hookTextAttributeModifier, AttributeUpdater } from '#handwritten'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
+import { extractors, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, ShaderStyle, AttributeModifier, initializers, hookTextAttributeModifier, AttributeUpdater } from '#handwritten'
 import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
-import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, LengthMetrics as arkui_component_units_LengthMetrics, Font as arkui_component_units_Font, ResourceStr, VoidCallback } from './units'
+import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, Font as arkui_component_units_Font, ResourceStr, VoidCallback } from './units'
 import { SelectionMenuOptions_serializer, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, PreviewMenuOptions } from './richEditor'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { Color as arkui_component_enums_Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight, TextOverflow } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit } from 'arkui.Graphics'
 import { default as text } from '@ohos.graphics.text'
 import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
+import { LengthUnit } from 'arkui.Graphics'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
@@ -567,7 +566,8 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof arkui_component_units_LengthMetrics) {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0 = valueTmpValue as arkui_component_units_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValueForIdx0)
+                const valueTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueForIdx0Transformed)
             } else if (valueTmpValue instanceof Array) {
                 if (valueTmpValue.length == 0) {
                     thisSerializer.writeInt8((1).toByte())
@@ -580,7 +580,8 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                         thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
                         for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
                             const valueTmpValueForIdx1TmpElement: arkui_component_units_LengthMetrics = valueTmpValueForIdx1[valueTmpValueForIdx1CounterI]
-                            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValueForIdx1TmpElement)
+                            const valueTmpValueForIdx1TmpElementTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValueForIdx1TmpElement)
+                            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueForIdx1TmpElementTransformed)
                         }
                     }
                 }
@@ -953,7 +954,8 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -965,7 +967,8 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1147,7 +1150,8 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2554,7 +2558,8 @@ export class TextMarqueeOptions_serializer {
         if (valueHolderForSpacing !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSpacingTmpValue = valueHolderForSpacing!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
+            const valueHolderForSpacingTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForSpacingTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForSpacingTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2619,7 +2624,8 @@ export class TextMarqueeOptions_serializer {
         const spacingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let spacingTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            spacingTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const spacingTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            spacingTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(spacingTmpBufOptDeserialized)
         }
         const spacingTmpResult: arkui_component_units_LengthMetrics | undefined = spacingTmpBuf
         const loopTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()

@@ -298,10 +298,12 @@ struct GridDragAndPan {
   @StorageProp('smallCardWidth') smallCardWidth: number = 1;
   @StorageProp('smallCardHeight') smallCardHeight: number = 1;
   phoneWidth: number = display.getDefaultDisplaySync().width
-  windowWithVp: number = px2vp(this.phoneWidth)
+  windowWithVp: number = 0
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
+    // px2vp needs the UIContext, which is only attached by the time aboutToAppear runs.
+    this.windowWithVp = this.getUIContext().px2vp(this.phoneWidth);
     AppStorage.setOrCreate('windowWidthVp', this.windowWithVp);
     const width = (this.windowWithVp - CardInfo.CARD_MARGIN_SCREEN * 2 - CardInfo.CARD_MARGIN) / 2;
     AppStorage.setOrCreate<number>('midCardWidth', Math.floor(width));
@@ -341,7 +343,7 @@ struct GridDragAndPan {
       console.log('CARD_INSERT error startId or endId is null');
       return;
     }
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 200,
       curve: Curve.Friction,
       onFinish: () => {

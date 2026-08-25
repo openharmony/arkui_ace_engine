@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"

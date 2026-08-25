@@ -28,7 +28,7 @@
 #include "core/common/font_manager.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -744,7 +744,7 @@ bool MultipleParagraphLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* la
             paraStyle = ParagraphUtil::GetParagraphStyle(spanTextStyle);
         }
         reLayout |= spanTextStyle.NeedReLayout();
-        textStyles.emplace_back(spanTextStyle);
+        textStyles.emplace_back(std::move(spanTextStyle));
         child->ResetReCreateAndReLayout();
         index++;
     }
@@ -793,11 +793,15 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
     CHECK_NULL_RETURN(theme, false);
     auto width = 0.0f;
     auto height = 0.0f;
-    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
+    auto fontScale = context->GetFontScaleFromEnv(frameNode);
+    if (LessOrEqual(fontScale, 0.0f)) {
+        fontScale = 1.0f;
+    }
+    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * fontScale;
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
     auto fontSizeOpt = textLayoutProperty->GetFontSize();
     if (fontSizeOpt.has_value()) {
-        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
+        fontSize = fontSizeOpt.value().ConvertToVp() * fontScale;
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
@@ -811,7 +815,7 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
         CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize, maxWidth, layoutPolicy });
         width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
         height = static_cast<float>(
-        customSpanMetrics.height.value_or(fontSize / context->GetFontScaleFromEnv(frameNode)) * context->GetDipScale());
+        customSpanMetrics.height.value_or(fontSize / fontScale) * context->GetDipScale());
     }
     PlaceholderStyle placeholderStyle;
     placeholderStyle.width = width;
@@ -839,13 +843,13 @@ bool MultipleParagraphLayoutAlgorithm::PlaceholderSpanMeasure(const RefPtr<Place
     return placeholderSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
-void MultipleParagraphLayoutAlgorithm::MeasureChildren(
+bool MultipleParagraphLayoutAlgorithm::MeasureChildren(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
 {
-    CHECK_NULL_VOID(!spans_.empty());
-    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_RETURN(!spans_.empty(), false);
+    CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, false);
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     auto placeHolderLayoutConstrain = layoutConstrain;
     placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
@@ -906,8 +910,9 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(
             }
         }
     }
-    CHECK_NULL_VOID(needReCreateParagraph);
+    CHECK_NULL_RETURN(needReCreateParagraph, false);
     layoutProperty->OnPropertyChangeMeasure();
+    return true;
 }
 
 ChildrenListWithGuard MultipleParagraphLayoutAlgorithm::GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper)

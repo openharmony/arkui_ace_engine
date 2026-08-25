@@ -131,7 +131,11 @@ class MyNodeAdapter extends NodeAdapter {
     let itemNode = typeNode.createNode(this.uiContext, 'FlowItem');
     let textNode = typeNode.createNode(this.uiContext, 'Text');
     textNode.initialize(this.data[index]).fontSize(20);
-    itemNode.appendChild(textNode);
+    try {
+      itemNode.appendChild(textNode);
+    } catch (e) {
+      console.error(`onCreateChild appendChild failed: code=${e.code}, msg=${e.message}`);
+    }
     return itemNode;
   }
 
@@ -188,8 +192,12 @@ class MyNodeAdapterController extends NodeController {
     const flowItemFrameNode = typeNode.createNode(uiContext, 'FlowItem')
     const textFrameNode = typeNode.createNode(uiContext, 'Text')
     textFrameNode.initialize('frameNode flow-item-1')
-    flowItemFrameNode.appendChild(textFrameNode)
-    waterFlowNode.appendChild(flowItemFrameNode)
+    try {
+      flowItemFrameNode.appendChild(textFrameNode)
+      waterFlowNode.appendChild(flowItemFrameNode)
+    } catch (e) {
+      console.error(`makeNode appendChild failed: code=${e.code}, msg=${e.message}`)
+    }
 
     this.nodeAdapter = new MyNodeAdapter(uiContext, 100);
     NodeAdapter.attachNodeAdapter(this.nodeAdapter, waterFlowNode);

@@ -104,7 +104,11 @@ void GeometryNode::ResetAccumulatedSafeAreaPadding()
 
 void GeometryNode::SetResolvedSingleSafeAreaPadding(const PaddingPropertyF& safeAreaPadding)
 {
-    resolvedSingleSafeAreaPadding_ = std::make_unique<PaddingPropertyF>(safeAreaPadding);
+    if (!resolvedSingleSafeAreaPadding_) {
+        resolvedSingleSafeAreaPadding_ = std::make_unique<PaddingPropertyF>(safeAreaPadding);
+    } else {
+        *resolvedSingleSafeAreaPadding_ = safeAreaPadding;
+    }
 }
 
 const std::unique_ptr<PaddingPropertyF>& GeometryNode::GetResolvedSingleSafeAreaPadding() const

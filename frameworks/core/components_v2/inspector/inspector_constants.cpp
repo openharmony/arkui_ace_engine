@@ -127,6 +127,8 @@ const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
 const char TABS_ETS_TAG[] = "Tabs";
 const char TABS_BACKGROUND_MASK_ETS_TAG[] = "BackgroundMask";
+const char TABS_SIDE_BAR_TAG[] = "TabsSideBar";
+const char TABS_SIDE_BAR_TAB_LIST_TAG[] = "TabsSideBarTabList";
 
 // tab content item
 const char TAB_CONTENT_ITEM_COMPONENT_TAG[] = "TabContentItemComponent";

@@ -51,7 +51,8 @@ public:
     std::string GetSelectedText() override;
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
-    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed = true,
+        bool transformTriggersEmbed = true) override;
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
@@ -62,7 +63,6 @@ public:
 
 protected:
     RectF GetSelectAreaFromRects(SelectRectsType pos) override;
-    void CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect) override;
     bool AllowTranslate() override;
     bool AllowSearch() override;
     bool AllowShare() override;

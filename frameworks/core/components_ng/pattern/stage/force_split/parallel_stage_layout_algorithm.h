@@ -19,12 +19,13 @@
 #include "base/memory/ace_type.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class ParallelStagePattern;
 
-class ParallelStageLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(ParallelStageLayoutAlgorithm, BoxLayoutAlgorithm);
+class ParallelStageLayoutAlgorithm : public StageLayoutAlgorithm {
+    DECLARE_ACE_TYPE(ParallelStageLayoutAlgorithm, StageLayoutAlgorithm);
 
 public:
     ParallelStageLayoutAlgorithm() = default;

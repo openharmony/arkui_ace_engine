@@ -123,7 +123,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp();
-    void TearDown() {}
+    void TearDown();
 
 protected:
     static RefPtr<FrameNode> CreateVideoNode(TestProperty& testProperty);
@@ -153,6 +153,22 @@ void VideoPropertyTestNg::TearDownTestSuite()
 void VideoPropertyTestNg::SetUp()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+void VideoPropertyTestNg::TearDown()
+{
+    // Drop the pattern's strong refs to the mock player/surface so that gmock
+    // verifies expectations at end-of-test; otherwise the mocks leak to program
+    // exit (the frame node is retained by the ViewStackProcessor stack until
+    // the next SetUp clears it).
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (frameNode) {
+        auto pattern = frameNode->GetPattern<VideoPattern>();
+        if (pattern) {
+            pattern->mediaPlayer_.Reset();
+            pattern->renderSurface_.Reset();
+        }
+    }
 }
 
 RefPtr<FrameNode> VideoPropertyTestNg::CreateVideoNode(TestProperty& testProperty)

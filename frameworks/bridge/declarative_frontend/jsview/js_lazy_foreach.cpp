@@ -232,6 +232,10 @@ LazyForEachCustomComponentFreezeMode ParseLazyForEachCustomComponentFreezeMode(c
 
 LazyForEachMemOptStrategy ParseLazyForEachMemOptStrategy(const JSRef<JSVal>& value)
 {
+    if (value->IsUndefined() || value->IsNull()) {
+        return LazyForEachMemOptStrategy::UNDEFINED;
+    }
+
     // try to convert to number
     int32_t intValue = 0;
     if (ConvertFromJSValue(value, intValue)) {

@@ -210,6 +210,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childLayoutConstraint_ = childLayoutConstraint;
     if (totalItemCount_ > 0) {
         UpdateLayoutInfoBeforeMeasureSwiper(swiperLayoutProperty, childLayoutConstraint);
+        CheckIndexWithIgnoreHiddenItem(layoutWrapper);
         MeasureSwiper(layoutWrapper, childLayoutConstraint);
     } else {
         itemPosition_.clear();
@@ -311,7 +312,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // set swiper cache info.
-    auto measuredItemCount = static_cast<int32_t>(measuredItems_.size());
+    auto measuredItemCount = static_cast<int32_t>(itemPosition_.size());
     auto maxCachedCount =
         isLoop_ ? static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2))
                 : realTotalCount_;
@@ -426,6 +427,15 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
     for (const auto& index : removeIndexs) {
         needUnmountIndexs_.erase(index);
     }
+
+    if (!customAnimationToIndex_ && indexsInAnimation_.empty()) {
+        int32_t totalChildCount = layoutWrapper->GetTotalChildCount();
+        for (int32_t i = 0; i < totalChildCount; ++i) {
+            if (i != currentIndex) {
+                layoutWrapper->RemoveChildInRenderTree(i);
+            }
+        }
+    }
 }
 
 void SwiperLayoutAlgorithm::MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper,
@@ -490,20 +500,12 @@ void SwiperLayoutAlgorithm::AdjustItemPositionOnCachedShow()
     auto startIndex = GetStartIndex();
     while (startIndex < cachedStartIndex_) {
         itemPosition_.erase(startIndex);
-        auto item = measuredItems_.find(startIndex);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
         startIndex++;
     }
 
     auto endIndex = GetEndIndex();
     while (endIndex > cachedEndIndex_) {
         itemPosition_.erase(endIndex);
-        auto item = measuredItems_.find(endIndex);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
         endIndex--;
     }
 }
@@ -794,7 +796,6 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     }
     ++currentIndex;
     wrapper->Measure(layoutConstraint);
-    measuredItems_.insert(measureIndex);
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
@@ -839,7 +840,6 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     }
     --currentIndex;
     wrapper->Measure(layoutConstraint);
-    measuredItems_.insert(measureIndex);
 
     float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty);
     startPos = endPos - mainAxisSize;
@@ -872,10 +872,6 @@ void SwiperLayoutAlgorithm::SetInactiveOnForward(LayoutWrapper* layoutWrapper)
 
         ResetOffscreenItemPosition(layoutWrapper, GetLoopIndex(pos->first), true);
         pos = itemPosition_.erase(pos);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 
@@ -912,7 +908,9 @@ float SwiperLayoutAlgorithm::GetChildMainAxisSize(
     auto childProperty = childWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(childProperty, mainAxisSize);
     auto visibilityValue = childProperty->GetVisibilityValue(VisibleType::VISIBLE);
-    if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
+    if (ignoreHiddenItem_ && visibilityValue == VisibleType::GONE) {
+        mainAxisSize = 0.0f;
+    } else if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
         mainAxisSize = (contentMainSize_ - nextMargin_ - prevMargin_ - (displayCount - 1) * spaceWidth_)
             / displayCount;
     }
@@ -994,7 +992,13 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             endMainPos_ = endMainPos;
         }
         if ((currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) || isLoop_) {
-            currentEndPos += spaceWidth_;
+            // When ignoreHiddenItem is true, GONE items with size=0 should not produce spacing
+            auto itemIter = itemPosition_.find(currentIndex);
+            bool isGoneItem = ignoreHiddenItem_ && itemIter != itemPosition_.end() &&
+                              NearEqual(itemIter->second.startPos, itemIter->second.endPos);
+            if (!isGoneItem) {
+                currentEndPos += spaceWidth_;
+            }
         }
         // reach the valid target index
         if (targetIndex_ && currentIndex >= targetIndex_.value()) {
@@ -1045,10 +1049,6 @@ void SwiperLayoutAlgorithm::SetInactive(
     }
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 
@@ -1078,10 +1078,6 @@ void SwiperLayoutAlgorithm::SetInactiveOnBackward(LayoutWrapper* layoutWrapper)
 
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 
@@ -1118,7 +1114,13 @@ void SwiperLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, const L
             break;
         }
         if (currentIndex > 0 || isLoop_) {
-            currentStartPos = currentStartPos - spaceWidth_;
+            // When ignoreHiddenItem is true, GONE items with size=0 should not produce spacing
+            auto itemIter = itemPosition_.find(currentIndex);
+            bool isGoneItem = ignoreHiddenItem_ && itemIter != itemPosition_.end() &&
+                              NearEqual(itemIter->second.startPos, itemIter->second.endPos);
+            if (!isGoneItem) {
+                currentStartPos = currentStartPos - spaceWidth_;
+            }
         }
         // reach the valid target index
         if (targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
@@ -1808,10 +1810,6 @@ void SwiperLayoutAlgorithm::MeasureSwiperInFakeDrag(
     }
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 
@@ -1955,5 +1953,23 @@ void SwiperLayoutAlgorithm::MeasureBackwardItemFakeDrag(LayoutWrapper* layoutWra
     auto startPos = measureEndPos - mainAxisSize;
     itemPosition_[backwardMeasureIndex] = { startPos, measureEndPos, wrapper->GetHostNode() };
     measureEndPos = startPos - spaceWidth_;
+}
+
+void SwiperLayoutAlgorithm::CheckIndexWithIgnoreHiddenItem(LayoutWrapper* layoutWrapper)
+{
+    // When ignoreHiddenItem is true and currentIndex_ points to a GONE item,
+    // the layout starting position is invalid. Search for the visible item
+    // and set jumpIndex_ to force position recalculation via JumpTo.
+    if (!ignoreHiddenItem_ || jumpIndex_.has_value() || targetIndex_.has_value()) {
+        return;
+    }
+    auto childWrapper = layoutWrapper->GetChildByIndex(currentIndex_, false);
+    if (childWrapper) {
+        auto hostNode = childWrapper->GetHostNode();
+        auto props = hostNode ? hostNode->GetLayoutProperty<LayoutProperty>() : nullptr;
+        if (props && props->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
+            jumpIndex_ = 0;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

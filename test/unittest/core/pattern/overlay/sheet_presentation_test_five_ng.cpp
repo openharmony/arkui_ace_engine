@@ -21,6 +21,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/window/mock_foldable_window.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -28,6 +29,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_style.h"
@@ -39,6 +41,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/common/properties/ui_material.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1930,6 +1933,165 @@ HWTEST_F(SheetPresentationTestFiveNg, ClearSheetCloseIconMaterial001, TestSize.L
     auto backgroundColor = renderContext->GetBackgroundColor();
     EXPECT_TRUE(backgroundColor.has_value());
     EXPECT_EQ(backgroundColor.value(), sheetTheme->GetCloseIconColor());
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+HWTEST_F(SheetPresentationTestFiveNg, SetSheetCloseIconMaterial002_SMOOTH, TestSize.Level1)
+{
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto isUiMaterialLevel = g_uiMaterialLevel;
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto rootNode = FrameNode::CreateFrameNode("Root", 301, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 302, AceType::MakeRefPtr<SheetPresentationPattern>(303, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 304, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto symbolNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 305, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(symbolNode, nullptr);
+    auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    symbolLayoutProperty->UpdateSymbolColorList({Color::BLACK});
+    symbolNode->MountToParent(buttonNode);
+    buttonNode->MountToParent(sheetNode);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetCloseButtonNode(WeakPtr<FrameNode>(buttonNode));
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->closeIconColor_ = Color(0x0c182431);
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+
+    sheetPattern->SetSheetCloseIconMaterial();
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    EXPECT_TRUE(buttonEventHub->GetStateEffect());
+
+    g_uiMaterialLevel = isUiMaterialLevel;
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+HWTEST_F(SheetPresentationTestFiveNg, SetSheetCloseIconMaterial003_NonSMOOTH, TestSize.Level1)
+{
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto isUiMaterialLevel = g_uiMaterialLevel;
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto rootNode = FrameNode::CreateFrameNode("Root", 401, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 402, AceType::MakeRefPtr<SheetPresentationPattern>(403, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 404, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto symbolNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 405, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(symbolNode, nullptr);
+    auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    symbolLayoutProperty->UpdateSymbolColorList({Color::BLACK});
+    symbolNode->MountToParent(buttonNode);
+    buttonNode->MountToParent(sheetNode);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetCloseButtonNode(WeakPtr<FrameNode>(buttonNode));
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->closeIconColor_ = Color(0x0c182431);
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+
+    sheetPattern->SetSheetCloseIconMaterial();
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    EXPECT_FALSE(buttonEventHub->GetStateEffect());
+
+    g_uiMaterialLevel = isUiMaterialLevel;
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+HWTEST_F(SheetPresentationTestFiveNg, ClearSheetCloseIconMaterial002_StateEffectRestore, TestSize.Level1)
+{
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto isUiMaterialLevel = g_uiMaterialLevel;
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto rootNode = FrameNode::CreateFrameNode("Root", 501, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 502, AceType::MakeRefPtr<SheetPresentationPattern>(503, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 504, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto symbolNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 505, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(symbolNode, nullptr);
+    auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    symbolLayoutProperty->UpdateSymbolColorList({Color::BLACK});
+    symbolNode->MountToParent(buttonNode);
+    buttonNode->MountToParent(sheetNode);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetCloseButtonNode(WeakPtr<FrameNode>(buttonNode));
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->closeIconColor_ = Color(0x0c182431);
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+
+    sheetPattern->SetSheetCloseIconMaterial();
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    EXPECT_FALSE(buttonEventHub->GetStateEffect());
+
+    sheetPattern->ClearSheetCloseIconMaterial();
+    EXPECT_TRUE(buttonEventHub->GetStateEffect());
+
+    g_uiMaterialLevel = isUiMaterialLevel;
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetMaterialNeedSplitOverlayShader001
+ * @tc.desc: Test SetMaterialNeedSplitOverlayShader with valid material and immersive options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, SetMaterialNeedSplitOverlayShader001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node and pattern.
+     */
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. create UiMaterial with ImmersiveOptions.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto options = std::make_shared<ImmersiveOptions>();
+    EXPECT_FALSE(options->needSplitOverlayShader);
+    material->SetImmersiveOptions(*options);
+
+    /**
+     * @tc.steps: step3. call SetMaterialNeedSplitOverlayShader.
+     * @tc.expected: needSplitOverlayShader is set to true.
+     */
+    sheetPattern->SetMaterialNeedSplitOverlayShader(material);
+    const auto& updatedOptions = material->GetImmersiveOptions();
+    ASSERT_NE(updatedOptions, nullptr);
+    EXPECT_TRUE(updatedOptions->needSplitOverlayShader);
+
     SheetPresentationTestFiveNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

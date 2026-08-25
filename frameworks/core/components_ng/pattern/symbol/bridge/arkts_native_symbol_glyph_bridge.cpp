@@ -377,11 +377,6 @@ void ParseSymbolShadowCompat(const EcmaVM* vm, const Local<panda::ObjectRef>& ob
     }
 }
 
-bool IsJsView(const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
-{
-    return jsVal->IsBoolean() && jsVal->ToBoolean(vm)->Value();
-}
-
 void PrepareFontColorContainers(size_t length, std::vector<Color>& colorArray,
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>* resObjArr, std::vector<int32_t>* resIndexes,
     std::vector<RefPtr<ResourceObject>>* resObjects)
@@ -470,7 +465,7 @@ bool BuildFontColors(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<panda::
 }
 
 ArkUINativeModuleValue SetFontColorCommon(
-    EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& secondArg)
+    EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& secondArg, bool isJsView)
 {
     if (!secondArg->IsArray(vm)) {
         return panda::JSValueRef::Undefined(vm);
@@ -481,8 +476,12 @@ ArkUINativeModuleValue SetFontColorCommon(
     std::vector<RefPtr<ResourceObject>> resObjects;
     auto modifier = GetArkUINodeModifiers()->getSymbolGlyphModifier();
     if (!BuildFontColors(vm, nativeNode, array, colorArray, nullptr, &resIndexes, &resObjects)) {
-        modifier->setFontColorJs(nativeNode, reinterpret_cast<ArkUI_InnerColor*>(colorArray.data()),
-            static_cast<ArkUI_Int32>(colorArray.size()), nullptr, nullptr, 0);
+        if (isJsView) {
+            modifier->unRegisterJsFontColor(nativeNode);
+        } else {
+            modifier->setFontColorJs(nativeNode, reinterpret_cast<ArkUI_InnerColor*>(colorArray.data()),
+                static_cast<ArkUI_Int32>(colorArray.size()), nullptr, nullptr, 0);
+        }
         return panda::JSValueRef::Undefined(vm);
     }
     modifier->setFontColorJs(nativeNode, reinterpret_cast<ArkUI_InnerColor*>(colorArray.data()),
@@ -491,18 +490,7 @@ ArkUINativeModuleValue SetFontColorCommon(
         static_cast<ArkUI_Int32>(resObjects.size()));
     return panda::JSValueRef::Undefined(vm);
 }
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
-{
-    if (jsVal->IsNativePointer(vm)) {
-        nativeNode = nodePtr(jsVal->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (IsJsView(jsVal, vm)) {
-        nativeNode = nullptr;
-        return true;
-    }
-    return false;
-}
+
 } // namespace
 
 void SymbolGlyphBridge::RegisterSymbolGlyphAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -568,7 +556,13 @@ ArkUINativeModuleValue SymbolGlyphBridge::CreateSymbolGlyph(ArkUIRuntimeCallInfo
         familyNames.push_back(std::string(DEFAULT_SYMBOL_FONTFAMILY));
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolGlyphType(systemType);
     }
-    GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolFontFamilies(familyNames);
+    std::vector<ArkUI_CharPtr> familyNamePtrs;
+    familyNamePtrs.reserve(familyNames.size());
+    for (const auto& familyName : familyNames) {
+        familyNamePtrs.emplace_back(familyName.c_str());
+    }
+    GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolFontFamilies(
+        familyNamePtrs.data(), static_cast<ArkUI_Int32>(familyNamePtrs.size()));
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -578,8 +572,9 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    return SetFontColorCommon(vm, nativeNode, secondArg);
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
+    return SetFontColorCommon(vm, nativeNode, secondArg, isJsView);
 }
 
 ArkUINativeModuleValue SymbolGlyphBridge::ResetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -600,8 +595,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontSize(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    bool isJsView = IsJsView(firstArg, vm);
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
 
     CalcDimension fontSize;
     RefPtr<ResourceObject> fontSizeResObj;
@@ -651,7 +646,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontWeight(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsString(vm)) {
         std::string weight = secondArg->ToString(vm)->ToString(vm);
         auto theme = ArkTSUtils::GetTheme<TextTheme>();
@@ -709,8 +704,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetRenderingStrategy(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    bool isJsView = IsJsView(firstArg, vm);
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     if (isJsView) {
         uint32_t strategy = 0;
         ParseJsIntegerCompat(vm, secondArg, strategy);
@@ -744,8 +739,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetEffectStrategy(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    bool isJsView = IsJsView(firstArg, vm);
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     if (isJsView) {
         uint32_t strategy = 0;
         ParseJsIntegerCompat(vm, secondArg, strategy);
@@ -780,7 +775,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolEffect(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     NG::SymbolEffectOptions options;
     if (!secondArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
@@ -844,7 +839,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMinFontScale(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     double minFontScale = 0.0;
     RefPtr<ResourceObject> resourceObject;
     if (ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale, resourceObject)) {
@@ -872,7 +867,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     double maxFontScale = 0.0;
     RefPtr<ResourceObject> resourceObject;
     if (ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale, resourceObject)) {
@@ -900,7 +895,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolShadow(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     SymbolShadow symbolShadow;
     auto modifier = GetArkUINodeModifiers()->getSymbolGlyphModifier();
     if (secondArg->IsObject(vm)) {
@@ -916,7 +911,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetSymbolShadow(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     auto modifier = GetArkUINodeModifiers()->getSymbolGlyphModifier();
     SymbolShadow symbolShadow;
     modifier->resetSymbolShadow(nativeNode);
@@ -930,7 +925,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetShaderStyle(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
 
     std::vector<SymbolGradient> gradients;
     auto modifier = GetArkUINodeModifiers()->getSymbolGlyphModifier();
@@ -948,7 +943,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetShaderStyle(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     auto modifier = GetArkUINodeModifiers()->getSymbolGlyphModifier();
     modifier->resetShaderStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -958,11 +953,12 @@ ArkUINativeModuleValue SymbolGlyphBridge::JsClip(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    bool isJsView = IsJsView(firstArg, vm);
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     if (isJsView) {
-        if (firstArg->IsBoolean()) {
+        if (secondArg->IsBoolean()) {
             GetArkUINodeModifiers()->getSymbolGlyphModifier()->jsClip(nativeNode);
         }
         return panda::JSValueRef::Undefined(vm);

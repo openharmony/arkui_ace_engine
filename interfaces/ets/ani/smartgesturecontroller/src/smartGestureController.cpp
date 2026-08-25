@@ -117,11 +117,11 @@ ani_object WrapStsError(ani_env* env, const std::string& msg)
     ani_class cls;
     ani_method ctor;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("std.core.Error", &cls)) != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_GESTURE, "FindClass std.core.Error failed, status=%{public}d", status);
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "FindClass escompat.Error failed, status=%{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &ctor)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor)) !=
         ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_GESTURE, "FindMethod Error ctor failed, status=%{public}d", status);
         return nullptr;
@@ -154,7 +154,7 @@ ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg)
         TAG_LOGE(AceLogTag::ACE_GESTURE, "FindClass BusinessError failed, status=%{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{std.core.Error}:", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_GESTURE, "FindMethod BusinessError ctor failed, status=%{public}d", status);
         return nullptr;
     }

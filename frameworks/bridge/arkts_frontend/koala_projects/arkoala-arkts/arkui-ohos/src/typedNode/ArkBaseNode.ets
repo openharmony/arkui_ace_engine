@@ -42,10 +42,11 @@ import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.sha
 import { FocusBoxStyle, FocusPriority } from "../component/focus"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../component/gesture"
 import { ComponentContent } from 'arkui/ComponentContent'
-import { BlendMode } from "../component/common"
+import { BlendMode, Blender, Matrix4Transit } from "../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
-import { hookCustomPropertyImpl, hookAllowDrop, hookDragPreviewOptions } from '#handwritten';
+import { hookCustomPropertyImpl, hookAllowDrop, hookDragPreviewOptions, hookStateStyleImpl } from '#handwritten';
+import { _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { CustomProperty } from '#generated';
 import { dragController } from "@ohos.arkui.dragController"
 import { SpringLoadingContext, DragSpringLoadingConfiguration } from '#generated';
@@ -133,6 +134,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
+        this.getPeer().setBackgroundEffectAttribute(options, sysOptions);
         return this
     }
     public backgroundImageResizable(value: ResizableOptions | undefined): this {
@@ -140,18 +142,23 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public foregroundEffect(value: ForegroundEffectOptions | undefined): this {
+        this.getPeer().setForegroundEffectAttribute(value);
         return this
     }
     public visualEffect(value: VisualEffect | undefined): this {
+        this.getPeer().setVisualEffectAttribute(value);
         return this
     }
     public backgroundFilter(value: Filter | undefined): this {
+        this.getPeer().setBackgroundFilterAttribute(value);
         return this
     }
     public foregroundFilter(value: Filter | undefined): this {
+        this.getPeer().setForegroundFilterAttribute(value);
         return this
     }
     public compositingFilter(value: Filter | undefined): this {
+        this.getPeer().setCompositingFilterAttribute(value);
         return this
     }
     public opacity(value: double | Resource | undefined): this {
@@ -187,21 +194,27 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public outline(value: OutlineOptions | undefined): this {
+        this.getPeer().setOutlineAttribute(value);
         return this
     }
     public outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {
+        this.getPeer().setOutlineStyleAttribute(value);
         return this
     }
     public outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {
+        this.getPeer().setOutlineWidthAttribute(value);
         return this
     }
     public outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        this.getPeer().setOutlineColorAttribute(value);
         return this
     }
     public outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {
+        this.getPeer().setOutlineRadiusAttribute(value);
         return this
     }
     public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
+        this.getPeer().setForegroundColorAttribute(value);
         return this
     }
     public onHover(value: ((isHover: boolean, event: HoverEvent) => void) | undefined): this {
@@ -299,62 +312,102 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public animationStart(value: AnimateParam | undefined): this {
+        _animationStart(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
         return this
     }
     public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
-        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        if (this.getPeer()) {
+            const peer = this.getPeer();
+            let isFirst = true;
+            const newCallback = (value: number | AnimatableArithmetic<T>): void => {
+                if (isFirst) {
+                    isFirst = false;
+                    callback(value);
+                    return;
+                }
+                this.setPeer(peer);
+                callback(value);
+                this.setPeer(undefined);
+            }
+            ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.getPeer().getPeerPtr(),
+                functionName, value, newCallback);
+        }
+    }
     public animationStop(value: AnimateParam | undefined): this {
+        _animationStop(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
         return this
     }
     public animation(value: AnimateParam | undefined): this {
+        this.getPeer().setAnimationAttribute(value);
         return this
     }
     public transition(value: TransitionEffect | undefined): this {
+        this.getPeer().setTransition0Attribute(value);
         return this
     }
     public motionBlur(value: MotionBlurOptions | undefined): this {
+        this.getPeer().setMotionBlurAttribute(value);
         return this
     }
     public brightness(value: number | undefined): this {
+        this.getPeer().setBrightnessAttribute(value);
         return this
     }
     public contrast(value: number | undefined): this {
+        this.getPeer().setContrastAttribute(value);
         return this
     }
     public grayscale(value: number | undefined): this {
+        this.getPeer().setGrayscaleAttribute(value);
         return this
     }
     public colorBlend(value: Color | string | Resource | undefined): this {
+        this.getPeer().setColorBlendAttribute(value);
         return this
     }
     public saturate(value: number | undefined): this {
+        this.getPeer().setSaturateAttribute(value);
         return this
     }
     public sepia(value: number | undefined): this {
+        this.getPeer().setSepiaAttribute(value);
         return this
     }
     public invert(value: number | InvertOptions | undefined): this {
+        this.getPeer().setInvertAttribute(value);
         return this
     }
     public hueRotate(value: number | string | undefined): this {
+        this.getPeer().setHueRotateAttribute(value);
         return this
     }
     public useShadowBatching(value: boolean | undefined): this {
+        this.getPeer().setUseShadowBatchingAttribute(value);
         return this
     }
     public useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this {
+        if (effectType !== undefined) {
+            this.getPeer().setUseEffect1Attribute(useEffect, effectType);
+        } else {
+            this.getPeer().setUseEffect0Attribute(useEffect);
+        }
         return this
     }
     public renderGroup(value: boolean | undefined): this {
+        this.getPeer().setRenderGroupAttribute(value);
         return this
     }
     public freeze(value: boolean | undefined): this {
+        this.getPeer().setFreezeAttribute(value);
         return this
     }
     public translate(value: TranslateOptions | undefined): this {
+        this.getPeer().setTranslateAttribute(value);
         return this
     }
     public scale(value: ScaleOptions | undefined): this {
+        this.getPeer().setScaleAttribute(value);
         return this
     }
     public gridSpan(value: number | undefined): this {
@@ -368,6 +421,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public transform(value: Object | undefined): this {
+        this.getPeer().setTransformAttribute(value as (Matrix4Transit | undefined));
         return this
     }
     public onAppear(value: (() => void) | undefined): this {
@@ -447,7 +501,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setAspectRatioAttribute(value);
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
+        this.getPeer().setClickEffectAttribute(value);
         return this
     }
     public enableClickSoundEffect(value: boolean | undefined): this {
@@ -503,30 +558,39 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public linearGradient(value: LinearGradientOptions | undefined): this {
+        this.getPeer().setLinearGradientAttribute(value);
         return this
     }
     public sweepGradient(value: SweepGradientOptions | undefined): this {
+        this.getPeer().setSweepGradientAttribute(value);
         return this
     }
     public radialGradient(value: RadialGradientOptions | undefined): this {
+        this.getPeer().setRadialGradientAttribute(value);
         return this
     }
     public motionPath(value: MotionPathOptions | undefined): this {
+        this.getPeer().setMotionPathAttribute(value);
         return this
     }
     public shadow(value: ShadowOptions | ShadowStyle | undefined): this {
+        this.getPeer().setShadowAttribute(value);
         return this
     }
     public clip(value: boolean | undefined): this {
+        this.getPeer().setClipAttribute(value);
         return this
     }
     public clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        this.getPeer().setClipShapeAttribute(value);
         return this
     }
     public mask(value: ProgressMask | undefined): this {
+        this.getPeer().setMaskAttribute(value);
         return this
     }
     public maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        this.getPeer().setMaskShapeAttribute(value);
         return this
     }
     public key(value: string | undefined): this {
@@ -538,9 +602,11 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
+        this.getPeer().setGeometryTransitionAttribute(id, options);
         return this
     }
     public stateStyles(value: StateStyles | undefined): this {
+        hookStateStyleImpl(this.getPeer(), value);
         return this
     }
     public restoreId(value: int | undefined): this {
@@ -548,12 +614,15 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public sphericalEffect(value: number | undefined): this {
+        this.getPeer().setSphericalEffectAttribute(value);
         return this
     }
     public lightUpEffect(value: number | undefined): this {
+        this.getPeer().setLightUpEffectAttribute(value);
         return this
     }
     public pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
+        this.getPeer().setPixelStretchEffectAttribute(value);
         return this
     }
     public accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
@@ -608,12 +677,14 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public renderFit(value: RenderFit | undefined): this {
+        this.getPeer().setRenderFitAttribute(value);
         return this
     }
     public gestureModifier(value: GestureModifier | undefined): this {
         return this
     }
     public backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
+        this.getPeer().setBackgroundBrightnessAttribute(value);
         return this
     }
     public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
@@ -676,9 +747,11 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        this.getPeer().setBackgroundBlurStyleAttribute(style, options, sysOptions);
         return this
     }
     public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        this.getPeer().setForegroundBlurStyleAttribute(style, options, sysOptions);
         return this
     }
     public focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
@@ -699,15 +772,19 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        this.getPeer().setBlurAttribute(blurRadius, options, sysOptions);
         return this
     }
     public linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+        this.getPeer().setLinearGradientBlurAttribute(value, options);
         return this
     }
     public systemBarEffect(): this {
+        this.getPeer().setSystemBarEffectAttribute();
         return this
     }
     public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        this.getPeer().setBackdropBlurAttribute(radius, options, sysOptions);
         return this
     }
     public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
@@ -715,6 +792,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
+        this.getPeer().setSharedTransitionAttribute(id, options);
         return this
     }
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
@@ -730,9 +808,11 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
+        this.getPeer().setBlendModeAttribute(value, type);
         return this
     }
     public advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this {
+        this.getPeer().setAdvancedBlendModeAttribute(effect as (BlendMode | Blender | undefined), type);
         return this
     }
     public bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
@@ -751,6 +831,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+        this.getPeer().setBindSheetAttribute(isShow, builder, options);
         return this
     }
     public onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -782,7 +863,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         }
         return this;
     }
-    backgroundColor(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): this {
+    backgroundColor(value: ResourceColor | undefined): this {
         if (value != null) {
             const value_casted = value as (ResourceColor | arkui_component_units_ColorMetrics | undefined);
             this.getPeer().setBackgroundColorAttribute(value_casted);

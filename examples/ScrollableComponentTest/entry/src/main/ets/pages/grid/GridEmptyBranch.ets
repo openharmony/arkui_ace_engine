@@ -137,7 +137,6 @@ struct GridItemExample {
       .columnsTemplate(this.temp ? '1fr' : '1fr 1fr 1fr')
       .scrollBar(BarState.On)
       .borderWidth(1)
-      // .syncLoad(true)
       .cachedCount(3, this.iShow)
       .clip(this.clips)
       .edgeEffect(EdgeEffect.Spring)

@@ -13,27 +13,41 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("ime_test") {
-  module_name = "TextSet-Text"
-  type = "new"
-  sources = [ "ime_test.cpp" ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
+if (is_host_product) {
+  ace_unittest("ime_test") {
+    type = "host_components"
+    module_name = "TextSet-Text"
     sources = [
+      "ime_test.cpp",
       "ime_test_min.cpp",
       "ime_test_core.cpp",
     ]
-  } else {
-    sources += [
-      "ime_test_min.cpp",
-      "ime_test_core.cpp",
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+} else {
+  ace_unittest("ime_test") {
+    module_name = "TextSet-Text"
+    type = "new"
+    sources = [ "ime_test.cpp" ]
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "ime_test_min.cpp",
+        "ime_test_core.cpp",
+      ]
+    } else {
+      sources += [
+        "ime_test_min.cpp",
+        "ime_test_core.cpp",
+      ]
+    }
+
+    external_deps = [ "ability_base:base" ]
+    external_deps += [
+      "c_utils:utils",
+      "hilog:libhilog",
     ]
   }
-
-  external_deps = [ "ability_base:base" ]
-  external_deps += [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
 }

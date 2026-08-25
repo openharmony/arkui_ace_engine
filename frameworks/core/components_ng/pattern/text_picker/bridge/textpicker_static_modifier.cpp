@@ -294,13 +294,13 @@ uint32_t CalculateKind(bool fromRangeContent, const std::vector<NG::RangeContent
     return kind;
 }
 
-inline std::vector<Dimension> ParseColumnWidths(const Opt_Array_LengthMetrics& columnWidths)
+inline std::vector<Dimension> ParseColumnWidths(const Opt_Array_LengthMetricsProxy& columnWidths)
 {
     std::vector<Dimension> result;
     if (columnWidths.tag != 0 && columnWidths.value.array && columnWidths.value.length > 0) {
         result.reserve(static_cast<size_t>(columnWidths.value.length));
         for (auto i = 0; i < columnWidths.value.length; i++) {
-            Ark_LengthMetrics lengthMetrics = columnWidths.value.array[i];
+            Ark_LengthMetricsProxy lengthMetrics = columnWidths.value.array[i];
             result.emplace_back(Converter::OptConvert<Dimension>(lengthMetrics).value_or(Dimension()));
         }
     }

@@ -52,8 +52,6 @@ struct barHeightTest {
             // 滚动组件List/Grid/WaterFlow设置显示缓存节点
             .cachedCount(1, true)
             .columnsTemplate('1fr 1fr')
-            // .lanes(2)
-            // .alignListItem(ListItemAlign.Center)
           }.width('100%').height('100%')
           .backgroundColor(Color.Pink)
         }
@@ -64,9 +62,7 @@ struct barHeightTest {
       .scrollable(false)
       .layoutWeight(1)
       .barOverlap(this.barOverlap)
-      //.safeAreaPadding({bottom:0})
     }
     .height('100%')
-    // .padding({ top: '24vp', left: '24vp', right: '24vp' })
   }
 }

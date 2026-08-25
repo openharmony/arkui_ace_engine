@@ -54,6 +54,7 @@ void CreateForPartialUpdate(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallI
                 ACE_SCOPED_TRACE("JSGridItem::ExecuteDeepRender");
                 ACE_DCHECK(componentsStack_.empty());
                 auto vm = jsDeepRenderFunc.GetEcmaVM();
+                CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
                 panda::LocalScope scope(vm);
                 panda::TryCatch trycatch(vm);
                 Local<JSValueRef> jsParams[] = { ArkTSUtils::ToJsValueWithVM(vm, elmtId),
@@ -271,6 +272,8 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemOnSelected(ArkUIRuntimeCallInf
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     auto targetNode = AceType::WeakClaim(frameNode);
     std::function<void(bool)> callback = [vm, targetNode, func = panda::CopyableGlobal(vm, func)](bool isSelected) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(targetNode);
@@ -398,6 +401,7 @@ ArkUINativeModuleValue GridItemBridge::SetJSOnSelect(ArkUIRuntimeCallInfo* runti
     std::function<void(bool)> callback = [weakNode = AceType::WeakClaim(frameNode),
                                              func = panda::CopyableGlobal(vm, func)](bool isSelected) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);

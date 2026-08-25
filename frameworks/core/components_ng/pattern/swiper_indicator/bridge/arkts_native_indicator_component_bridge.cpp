@@ -230,7 +230,7 @@ std::optional<Dimension> ParseIndicatorDimension(EcmaVM* vm, const Local<JSValue
         return indicatorDimension;
     }
     CalcDimension dimPosition;
-    auto parseOk = ArkTSUtils::ParseJsDimensionVpNG(vm, value, dimPosition);
+    auto parseOk = ArkTSUtils::ParseJsDimensionVp(vm, value, dimPosition, false);
     indicatorDimension = parseOk && dimPosition.ConvertToPx() >= 0.0f ? dimPosition : 0.0_vp;
     return indicatorDimension;
 }
@@ -325,7 +325,7 @@ SwiperParameters GetJsViewDotIndicatorInfo(EcmaVM* vm, const Local<JSValueRef>& 
     RefPtr<ResourceObject> resSelectedItemWidthObj;
     RefPtr<ResourceObject> resSelectedItemHeightObj;
     bool parseItemWOk = !itemWidthValue.IsNull() && !itemWidthValue->IsUndefined() &&
-                        ArkTSUtils::ParseJsDimensionVpNG(vm, itemWidthValue, dimPosition, resItemWidthObj) &&
+                        ArkTSUtils::ParseJsDimensionVp(vm, itemWidthValue, dimPosition, resItemWidthObj, false) &&
                         (dimPosition.Unit() != DimensionUnit::PERCENT);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     if (parseItemWOk && dimPosition > 0.0_vp) {
@@ -335,7 +335,7 @@ SwiperParameters GetJsViewDotIndicatorInfo(EcmaVM* vm, const Local<JSValueRef>& 
         swiperParameters.itemWidth = defaultSize;
     }
     bool parseItemHOk = !itemHeightValue.IsNull() && !itemHeightValue->IsUndefined() &&
-                        ArkTSUtils::ParseJsDimensionVpNG(vm, itemHeightValue, dimPosition, resItemHeightObj) &&
+                        ArkTSUtils::ParseJsDimensionVp(vm, itemHeightValue, dimPosition, resItemHeightObj, false) &&
                         (dimPosition.Unit() != DimensionUnit::PERCENT);
     if (parseItemHOk && dimPosition > 0.0_vp) {
         swiperParameters.parametersByUser.insert("itemHeight");
@@ -345,7 +345,7 @@ SwiperParameters GetJsViewDotIndicatorInfo(EcmaVM* vm, const Local<JSValueRef>& 
     }
     bool parseSelectedItemWOk =
         !selectedItemWidthValue.IsNull() && !selectedItemWidthValue->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionVpNG(vm, selectedItemWidthValue, dimPosition, resSelectedItemWidthObj) &&
+        ArkTSUtils::ParseJsDimensionVp(vm, selectedItemWidthValue, dimPosition, resSelectedItemWidthObj, false) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
     if (parseSelectedItemWOk && dimPosition > 0.0_vp) {
         swiperParameters.parametersByUser.insert("selectedItemWidth");
@@ -355,7 +355,7 @@ SwiperParameters GetJsViewDotIndicatorInfo(EcmaVM* vm, const Local<JSValueRef>& 
     }
     bool parseSelectedItemHOk =
         !selectedItemHeightValue.IsNull() && !selectedItemHeightValue->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionVpNG(vm, selectedItemHeightValue, dimPosition, resSelectedItemHeightObj) &&
+        ArkTSUtils::ParseJsDimensionVp(vm, selectedItemHeightValue, dimPosition, resSelectedItemHeightObj, false) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
     if (parseSelectedItemHOk && dimPosition > 0.0_vp) {
         swiperParameters.parametersByUser.insert("selectedItemHeight");
@@ -394,7 +394,8 @@ void GetFontContent(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueR
     CHECK_NULL_VOID(swiperIndicatorTheme);
     CalcDimension fontSize;
     RefPtr<ResourceObject> resObj;
-    if (!size.IsNull() && !size->IsUndefined() && ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, resObj)) {
+    if (!size.IsNull() && !size->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, resObj, true, false)) {
         if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber(vm)->Value(), 0.0) ||
             fontSize.Unit() == DimensionUnit::PERCENT) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();

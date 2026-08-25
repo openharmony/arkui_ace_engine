@@ -90,8 +90,11 @@ private:
      * @brief Find the starting row using SkipLinesAboveView (accounts for startFixOffset_).
      *
      * Used when currentOffset_ < 0 and startFixOffset_ > 0: lines whose bottom is above
-     * the clip start (-startFixOffset_) are skipped, the rest are kept. Returns nullopt
-     * if no valid line is found (caller should fall back to SolveForward).
+     * the clip start (-startFixOffset_) are skipped, the rest are kept. Then walks backward
+     * from the found line to also include lines that became visible in the start extension
+     * area during upward scrolling (without this walk they would be dropped from the visible
+     * range and not laid out every frame). Returns nullopt if no valid line is found (caller
+     * should fall back to SolveForward).
      *
      * @param mainGap The gap length between rows.
      * @return The StartingRowInfo, or nullopt if lineHeightMap_ is exhausted.

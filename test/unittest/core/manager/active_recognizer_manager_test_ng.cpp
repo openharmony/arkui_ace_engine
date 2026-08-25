@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/manager/gesture/active_recognizer_manager.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 #undef private
 #undef protected
 
@@ -858,4 +859,206 @@ HWTEST_F(ActiveRecognizerManagerTestNg, ClearAllRecognizers_NullWeakPtrSkips, Te
     EXPECT_EQ(manager_->GetActiveRecognizerCount(), 0);
     EXPECT_TRUE(manager_->activeTouchIds_.empty());
 }
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_NullReferee, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds, nullptr);
+    EXPECT_EQ(manager_->GetActiveRecognizerCount(), 1);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_001, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    TouchEvent touchEvent1;
+    touchEvent1.id = TOUCH_ID_1;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 }, { TOUCH_ID_1, touchEvent1 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+
+    std::unordered_map<int32_t, int32_t> downFingerIds = { { TOUCH_ID_0, 0 } };
+    manager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_002, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    TouchEvent touchEvent1;
+    touchEvent1.id = TOUCH_ID_1;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 }, { TOUCH_ID_1, touchEvent1 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+    referee->AddGestureToScope(static_cast<size_t>(TOUCH_ID_1), TouchTestResult());
+
+    std::unordered_map<int32_t, int32_t> downFingerIds = { { TOUCH_ID_0, 0 } };
+    manager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_003, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+
+    std::unordered_map<int32_t, int32_t> downFingerIds = { { TOUCH_ID_0, 0 } };
+    manager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_004, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+    recognizer = nullptr;
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_005, TestSize.Level1)
+{
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds, referee);
+    EXPECT_EQ(manager_->GetActiveRecognizerCount(), 0);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_006, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, nullptr);
+    EXPECT_EQ(manager_->GetActiveRecognizerCount(), 1);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_007, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    TouchEvent touchEvent1;
+    touchEvent1.id = TOUCH_ID_1;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 }, { TOUCH_ID_1, touchEvent1 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+    recognizer->referee_ = WeakPtr<NG::GestureReferee>(referee);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds = { { TOUCH_ID_0, 0 } };
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_008, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    TouchEvent touchEvent1;
+    touchEvent1.id = TOUCH_ID_1;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 }, { TOUCH_ID_1, touchEvent1 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+    referee->AddGestureToScope(static_cast<size_t>(TOUCH_ID_1), TouchTestResult());
+    recognizer->referee_ = WeakPtr<NG::GestureReferee>(referee);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds = { { TOUCH_ID_0, 0 } };
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_009, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    TouchEvent touchEvent1;
+    touchEvent1.id = TOUCH_ID_1;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 }, { TOUCH_ID_1, touchEvent1 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto currentReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    auto otherReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    recognizer->referee_ = WeakPtr<NG::GestureReferee>(otherReferee);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds = { { TOUCH_ID_0, 0 } };
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, currentReferee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_010, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_011, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+    recognizer->referee_ = WeakPtr<NG::GestureReferee>(referee);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds = { { TOUCH_ID_0, 0 } };
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, referee);
+}
+
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_012, TestSize.Level1)
+{
+    auto recognizer1 = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    std::map<int32_t, TouchEvent> touchPoints1 = { { TOUCH_ID_0, touchEvent0 } };
+    EXPECT_CALL(*recognizer1, GetTouchPoints()).WillRepeatedly(Return(touchPoints1));
+    manager_->RegisterRecognizer(recognizer1, TOUCH_ID_0);
+
+    auto recognizer2 = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent1;
+    touchEvent1.id = TOUCH_ID_1;
+    std::map<int32_t, TouchEvent> touchPoints2 = { { TOUCH_ID_1, touchEvent1 } };
+    EXPECT_CALL(*recognizer2, GetTouchPoints()).WillRepeatedly(Return(touchPoints2));
+    manager_->RegisterRecognizer(recognizer2, TOUCH_ID_1);
+
+    auto currentReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    auto otherReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    recognizer1->referee_ = WeakPtr<NG::GestureReferee>(currentReferee);
+    recognizer2->referee_ = WeakPtr<NG::GestureReferee>(otherReferee);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, currentReferee);
+}
+
 } // namespace OHOS::Ace::NG

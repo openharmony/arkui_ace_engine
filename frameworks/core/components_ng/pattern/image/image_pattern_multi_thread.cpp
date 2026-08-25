@@ -39,6 +39,7 @@ void ImagePattern::OnAttachToMainTreeMultiThread()
     auto imageTheme = pipeline->GetTheme<ImageTheme>();
     CHECK_NULL_VOID(imageTheme);
     smoothEdge_ = imageTheme->GetMinEdgeAntialiasing();
+    RegisterNavDestinationHiddenChange();
 }
 
 void ImagePattern::OnDetachFromMainTreeMultiThread()
@@ -51,6 +52,9 @@ void ImagePattern::OnDetachFromMainTreeMultiThread()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CloseSelectOverlay();
+
+    CancelNavDestRecycleTask();
+    UnregisterNavDestinationHiddenChange();
 
     auto id = host->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());

@@ -6185,9 +6185,9 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyNormal001, TestSize.Level1)
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
-    // Test: should return false when List has no restricting properties
+    // Test: should return true when List has no restricting properties
     bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, TEST_LANE);
-    EXPECT_FALSE(canSupport);
+    EXPECT_TRUE(canSupport);
 }
 
 /**

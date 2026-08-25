@@ -33,6 +33,8 @@ public:
     static void SetBackgroundSource(FrameNode* frameNode, const OHOS::Ace::DepthBackgroundSource& background);
     static void SetDepthSpace(OHOS::Ace::DepthSpaceType depthSpace);
     static void SetDepthSpace(FrameNode* frameNode, OHOS::Ace::DepthSpaceType depthSpace);
+    static void SetColorSpace(int32_t colorSpace);
+    static void SetColorSpace(FrameNode* frameNode, int32_t colorSpace);
     static void SetRender3DScale(float render3DScale);
     static void SetRender3DScale(FrameNode* frameNode, float render3DScale);
     static void SetDepthMap(const ImageSourceInfo& depthMap);

@@ -67,6 +67,16 @@ class GridCommandController extends NodeController {
     this.refreshOffsetText();
   }
 
+  // FrameNode.appendChild() throws when the node tree rejects the child, so keep the failure local
+  // instead of letting it escape makeNode().
+  private appendChildSafely(parent: FrameNode, child: FrameNode): void {
+    try {
+      parent.appendChild(child);
+    } catch (e) {
+      console.error(`GridCommand appendChild failed: code=${e.code}, msg=${e.message}`);
+    }
+  }
+
   makeNode(uiContext: UIContext): FrameNode | null {
     const root = typeNode.createNode(uiContext, 'Column');
     root.initialize().width('100%').height('100%').padding(16);
@@ -97,8 +107,8 @@ class GridCommandController extends NodeController {
       this.refreshOffsetText();
     });
 
-    actionRow.appendChild(bindBtn);
-    actionRow.appendChild(readBtn);
+    this.appendChildSafely(actionRow, bindBtn);
+    this.appendChildSafely(actionRow, readBtn);
 
     const defaultTitle = typeNode.createNode(uiContext, 'Text');
     defaultTitle.initialize('Default Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
@@ -121,9 +131,9 @@ class GridCommandController extends NodeController {
       this.scrollBottom(this.defaultScroller);
     });
 
-    defaultRow.appendChild(defaultByBtn);
-    defaultRow.appendChild(defaultTopBtn);
-    defaultRow.appendChild(defaultBottomBtn);
+    this.appendChildSafely(defaultRow, defaultByBtn);
+    this.appendChildSafely(defaultRow, defaultTopBtn);
+    this.appendChildSafely(defaultRow, defaultBottomBtn);
 
     const dynamicTitle = typeNode.createNode(uiContext, 'Text');
     dynamicTitle.initialize('Dynamic Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
@@ -146,9 +156,9 @@ class GridCommandController extends NodeController {
       this.scrollBottom(this.dynamicScroller);
     });
 
-    dynamicRow.appendChild(dynamicByBtn);
-    dynamicRow.appendChild(dynamicTopBtn);
-    dynamicRow.appendChild(dynamicBottomBtn);
+    this.appendChildSafely(dynamicRow, dynamicByBtn);
+    this.appendChildSafely(dynamicRow, dynamicTopBtn);
+    this.appendChildSafely(dynamicRow, dynamicBottomBtn);
 
     const grid = typeNode.createNode(uiContext, 'Grid');
     grid.initialize()
@@ -161,7 +171,11 @@ class GridCommandController extends NodeController {
       .borderColor('#d0d7de');
 
     this.gridNode = grid;
-    typeNode.bindController(grid, this.defaultScroller, 'Grid');
+    try {
+      typeNode.bindController(grid, this.defaultScroller, 'Grid');
+    } catch (e) {
+      console.error(`GridCommand bindController failed: code=${e.code}, msg=${e.message}`);
+    }
 
     for (let i = 0; i < 40; i++) {
       const gridItem = typeNode.createNode(uiContext, 'GridItem');
@@ -174,20 +188,20 @@ class GridCommandController extends NodeController {
         .textAlign(TextAlign.Center)
         .backgroundColor(i % 2 === 0 ? '#f1f3f5' : '#e9ecef');
 
-      gridItem.appendChild(item);
-      grid.appendChild(gridItem);
+      this.appendChildSafely(gridItem, item);
+      this.appendChildSafely(grid, gridItem);
     }
 
-    root.appendChild(title);
-    root.appendChild(this.bindResultNode);
-    root.appendChild(this.defaultOffsetNode);
-    root.appendChild(this.dynamicOffsetNode);
-    root.appendChild(actionRow);
-    root.appendChild(defaultTitle);
-    root.appendChild(defaultRow);
-    root.appendChild(dynamicTitle);
-    root.appendChild(dynamicRow);
-    root.appendChild(grid);
+    this.appendChildSafely(root, title);
+    this.appendChildSafely(root, this.bindResultNode);
+    this.appendChildSafely(root, this.defaultOffsetNode);
+    this.appendChildSafely(root, this.dynamicOffsetNode);
+    this.appendChildSafely(root, actionRow);
+    this.appendChildSafely(root, defaultTitle);
+    this.appendChildSafely(root, defaultRow);
+    this.appendChildSafely(root, dynamicTitle);
+    this.appendChildSafely(root, dynamicRow);
+    this.appendChildSafely(root, grid);
 
     return root;
   }

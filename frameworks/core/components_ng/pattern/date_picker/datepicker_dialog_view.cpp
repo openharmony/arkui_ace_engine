@@ -36,8 +36,6 @@
 #include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/date_picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -199,9 +197,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
     auto dialogNode = dialogInnerModifier->createDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDialog(true);
+    dialogInnerModifier->setIsPickerDialog(dialogNode, true);
     // build dialog accept and cancel button
     if (NeedAdaptForAging()) {
         BuildDialogAcceptAndCancelButtonForAging(buttonInfos, settingData, timePickerNode, acceptNode, dateNode,
@@ -2052,9 +2048,9 @@ std::function<void()> DatePickerDialogView::CloseDialogEvent(const RefPtr<FrameN
         weakDatePickerPattern = WeakPtr<DatePickerPattern>(datePickerPattern)]() {
         auto dialogNode = weak.Upgrade();
         CHECK_NULL_VOID(dialogNode);
-        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
-        CHECK_NULL_VOID(dialogPattern);
-        dialogPattern->SetIsPickerDialog(false);
+        const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+        CHECK_NULL_VOID(dialogInnerModifier);
+        dialogInnerModifier->setIsPickerDialog(dialogNode, false);
         auto datePickerPattern = weakDatePickerPattern.Upgrade();
         CHECK_NULL_VOID(datePickerPattern);
 

@@ -478,7 +478,7 @@ static void HandleNodeParams(
             xcomponentModifier->parseParams(runtimeCallInfo, params);
             params.nodeType = ARKUI_XCOMPONENT;
             nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
-            xcomponentModifier->setControllerCallback(runtimeCallInfo, &nodePtr);
+            xcomponentModifier->setControllerCallback(runtimeCallInfo, nodePtr);
         } else {
             nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
         }

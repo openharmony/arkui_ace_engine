@@ -63,6 +63,8 @@ bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
+int32_t SystemProperties::syntaxMemOptStrategy_ = -1;
+int32_t SystemProperties::bootVendorDdrSize_ = 12;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
@@ -77,6 +79,7 @@ int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::recycleImageEnabled_ = false;
+bool SystemProperties::navigationImageRecycleEnabled_ = false;
 bool SystemProperties::imageReleaseManageObjectEnabled_ = true;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
@@ -86,6 +89,7 @@ std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::cacheNavigationNodeEnable_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::gridIrregularLayoutEnable_ = true;
+bool SystemProperties::smartLayoutEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::smartGestureEnabled_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
@@ -245,6 +249,11 @@ bool SystemProperties::GetGridCacheEnabled()
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
     return gridIrregularLayoutEnable_;
+}
+
+bool SystemProperties::GetSmartLayoutEnabled()
+{
+    return smartLayoutEnabled_;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()
@@ -434,7 +443,7 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 
 int32_t SystemProperties::GetPreviewStatus()
 {
-    return 0;
+    return previewStatus_;
 }
 
 bool SystemProperties::GetCompatibleInputTransEnabled()

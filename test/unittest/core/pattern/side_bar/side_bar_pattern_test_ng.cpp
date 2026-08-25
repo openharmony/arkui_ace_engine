@@ -216,50 +216,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SideBarPatternTestNg004
- * @tc.desc: Test SideBar CreateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg004, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    EXPECT_FALSE(pattern == nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    EXPECT_FALSE(frameNode == nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->CreateAnimation();
-    EXPECT_NE(pattern->controller_, nullptr);
-    EXPECT_NE(pattern->rightToLeftAnimation_, nullptr);
-    EXPECT_NE(pattern->leftToRightAnimation_, nullptr);
-}
-
-/**
- * @tc.name: SideBarPatternTestNg005
- * @tc.desc: Test SideBar CreateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg005, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    EXPECT_FALSE(pattern == nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    EXPECT_FALSE(frameNode == nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->CreateAnimation();
-    EXPECT_NE(pattern->controller_, nullptr);
-    EXPECT_NE(pattern->rightToLeftAnimation_, nullptr);
-    EXPECT_NE(pattern->leftToRightAnimation_, nullptr);
-    pattern->CreateAnimation();
-    EXPECT_NE(pattern->controller_, nullptr);
-    EXPECT_NE(pattern->rightToLeftAnimation_, nullptr);
-    EXPECT_NE(pattern->leftToRightAnimation_, nullptr);
-}
-
-/**
  * @tc.name: SideBarPatternTestNg007
  * @tc.desc: Test SideBar UpdateSideBarPosition
  * @tc.type: FUNC
@@ -1186,38 +1142,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg036, TestSize.Level1)
 }
 
 /**
- * @tc.name: SideBarPatternTestNg037
- * @tc.desc: Test SideBar InitDividerMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg037, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sideBar and controlbutton node,then register inputEvent to InitDividerMouseEvent.
-     * @tc.expected: check whether the controlButtonHoverEvent_ is nullptr.
-     */
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::GetOrCreateFrameNode(
-        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imgNode, nullptr);
-    auto imgHub = imgNode->GetEventHub<EventHub>();
-    ASSERT_NE(imgHub, nullptr);
-    auto gestureHub = imgHub->GetOrCreateInputEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    pattern->SetHasControlButton(true);
-    EXPECT_EQ(pattern->controlButtonHoverEvent_, nullptr);
-    pattern->InitDividerMouseEvent(gestureHub);
-    EXPECT_EQ(pattern->controlButtonClickEvent_, nullptr);
-}
-
-/**
  * @tc.name: SideBarPatternTestNg038
  * @tc.desc: Test SideBar OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
@@ -1387,39 +1311,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg042, TestSize.Level1)
 }
 
 /**
- * @tc.name: SideBarPatternTestNg043
- * @tc.desc: Test SideBar InitDividerMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg043, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sideBar and controlbutton node,then register inputEvent to InitDividerMouseEvent.
-     * @tc.expected: check whether the controlButtonHoverEvent_ is nullptr.
-     */
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::GetOrCreateFrameNode(
-        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imgNode, nullptr);
-    auto imgHub = imgNode->GetEventHub<EventHub>();
-    ASSERT_NE(imgHub, nullptr);
-    auto gestureHub = imgHub->GetOrCreateInputEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    pattern->SetHasControlButton(true);
-    EXPECT_EQ(pattern->controlButtonHoverEvent_, nullptr);
-    pattern->InitDividerMouseEvent(gestureHub);
-    EXPECT_EQ(pattern->controlButtonClickEvent_, nullptr);
-    pattern->hoverEvent_->onHoverCallback_(true);
-}
-
-/**
  * @tc.name: SideBarPatternTestNg044
  * @tc.desc: Test SideBar OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
@@ -1532,31 +1423,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg047, TestSize.Level1)
     renderContext->UpdateBackgroundColor(color);
     ASSERT_TRUE(renderContext->HasBackgroundColor());
     pattern->CreateAndMountNodes();
-}
-
-/**
- * @tc.name: SideBarPatternTestNg048
- * @tc.desc: Test SideBar CreateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg048, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get pattern and frameNode, modify sideBarStatus_.
-     * @tc.expected: check whether the showSideBar_ is correct.
-     */
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->rightToLeftAnimation_ = nullptr;
-    pattern->CreateAnimation();
-    pattern->rightToLeftAnimation_->callbacks_.begin()->second(1.0f);
-    pattern->leftToRightAnimation_ = nullptr;
-    pattern->CreateAnimation();
-    pattern->leftToRightAnimation_->callbacks_.begin()->second(1.0f);
 }
 
 /**

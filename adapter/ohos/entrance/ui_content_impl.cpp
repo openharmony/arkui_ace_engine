@@ -88,6 +88,9 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
+#ifdef WEB_SUPPORTED
+#include "core/components/web/resource/web_page_scene_manager.h"
+#endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "interfaces/napi/kits/observer/ui_observer.h"
 
@@ -129,6 +132,7 @@
 #include "bridge/arkts_frontend/arkts_frontend_loader.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -146,7 +150,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
@@ -262,7 +266,7 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 
     auto mode = rsWindow->GetWindowMode();
     return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+            mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT;
 }
 
 void AddResConfigInfo(
@@ -1425,6 +1429,7 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window *window,
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
     ContainerScope scope(instanceId_);
     napi_value result = nullptr;
     auto frontend = container->GetFrontend();
@@ -2102,10 +2107,8 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
         std::unordered_map<std::string, std::string> reply;
         payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
         payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-#ifndef CROSS_PLATFORM
         g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
         ResSchedReport::GetInstance().AppVsyncEnableScene(payload, reply);
-#endif
         const std::string& replyResult = reply["result"];
         bool hasCommonScene = replyResult.find(SCENE_COMMON_CHAR) != std::string::npos;
         bool hasStartScene = replyResult.find(SCENE_START_CHAR) != std::string::npos;
@@ -2263,15 +2266,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
-    // Read the enableCustomComponentFreeze configuration from metadata and set it in LazyForEachUtils.
-    bool enableCustomComponentFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
-    bool enableRepeatAnimation = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableRepeatAnimation" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableRepeatAnimation(enableRepeatAnimation);
+    // Read metadata configurations and set them in LazyForEachUtils
+    for (const auto& metaDataItem : metaData) {
+        NG::LazyForEachUtils::ParseMetaData(metaDataItem.name, metaDataItem.value);
+    }
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
@@ -2281,11 +2279,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             return metaDataItem.name == "enableCustomComponentCrossAbility" && metaDataItem.value == "true";
         });
     AceApplicationInfo::GetInstance().SetEnableCustomComponentCrossAbility(enableCustomComponentCrossAbility);
+    bool needInitTransparency = false;
     // Read UIMaterial metadata from entry module only
     if (hapModuleInfo && hapModuleInfo->moduleType == OHOS::AppExecFwk::ModuleType::ENTRY) {
         for (const auto& metaDataItem : metaData) {
             if (metaDataItem.name == "ohos.arkui.UIMaterial.state") {
                 AceApplicationInfo::GetInstance().SetUIMaterialState(metaDataItem.value);
+                needInitTransparency = metaDataItem.value != "disable";
             } else if (metaDataItem.name == "ohos.arkui.UIMaterial.type") {
                 AceApplicationInfo::GetInstance().SetUIMaterialType(metaDataItem.value);
             }
@@ -2470,9 +2470,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #ifdef APS_ENABLE
     ApsMonitorImpl::GetInstance().SetContainerInstanceId(instanceId_);
-#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(&ApsMonitorImpl::GetInstance());
-#endif
 #endif
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     ResschedEventListener::GetInstance()->RegisterToRSS(window->GetWindowId(), instanceId_);
@@ -2517,6 +2515,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetPageProfile(pageProfile);
     container->Initialize();
     ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (needInitTransparency && taskExecutor) {
+        taskExecutor->PostTask([]() { TransparencyUtils::InitTransparencyLevelOnce(); },
+            TaskExecutor::TaskType::BACKGROUND, "InitUIMaterialTransparency", PriorityType::VIP);
+    }
     auto front = container->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -2546,9 +2549,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetSrcEntrance(info->srcEntrance);
     }
 
-#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
-#endif
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
@@ -2847,14 +2848,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             InitUISessionManagerCallbacks(taskExecutor);
         }
     }
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
                                                      .append(moduleName)
                                                      .append(",abilityName:")
                                                      .append(abilityName));
-#endif
     UpdateFontScale(context->GetConfiguration());
     auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
     if (thpExtraManager->Init()) {
@@ -2976,12 +2975,10 @@ void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window foreground", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-#ifndef CROSS_PLATFORM
     if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
         PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsBegin();
     }
-#endif
     if (!isDynamicRender_) {
         ContainerScope::UpdateRecentForeground(instanceId_);
     }
@@ -2999,18 +2996,14 @@ void UIContentImpl::Foreground()
 
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
-#ifndef CROSS_PLATFORM
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, true);
-#endif
 }
 
 void UIContentImpl::Background()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
-#endif
     if (!isFormRender_ && !isDynamicRender_) {
         // Register instanceId from pre-freeze flush when app goes to background.
         PostPreFreezeRegisterTask(true);
@@ -3019,9 +3012,23 @@ void UIContentImpl::Background()
 
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
-#ifndef CROSS_PLATFORM
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
-#endif
+}
+
+// Should be called on UI thread. Atomic variables ensure safety if called from non-UI thread.
+void UIContentImpl::SetBackgroundForceFlushVsync(bool enable, size_t count)
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: SetBackgroundForceFlushVsync enable:%{public}d count:%{public}zu",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, enable, count);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto window = pipelineContext->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetBackgroundForceFlushVsync(enable, count);
 }
 
 void UIContentImpl::NotifyWindowAttachStateChange(bool status)
@@ -3111,9 +3118,7 @@ void UIContentImpl::Focus()
     Platform::AceContainer::OnActive(instanceId_);
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
-#ifndef CROSS_PLATFORM
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
-#endif
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -3357,11 +3362,9 @@ bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: OnBackPressed called", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-#ifndef CROSS_PLATFORM
     Recorder::EventParamsBuilder builder;
     builder.SetEventType(Recorder::EventType::BACK_PRESSED);
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
-#endif
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     if (container->IsUIExtensionWindow() && !container->WindowIsShow()) {
@@ -3373,10 +3376,8 @@ bool UIContentImpl::ProcessBackPressed()
         []() {
             auto value = JsonUtil::CreateSharedPtrJson();
             value->Put("GestureType", "backpressed");
-#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
                 ComponentEventType::COMPONENT_EVENT_GESTURE);
-#endif
         },
         TaskExecutor::TaskType::UI, "ArkUIReportBackPressedEvent");
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -3395,9 +3396,7 @@ bool UIContentImpl::ProcessBackPressed()
                     ret = true;
                 }
             } else {
-#ifndef CROSS_PLATFORM
                 PerfMonitor::GetPerfMonitor()->RecordInputEvent(LAST_UP, UNKNOWN_SOURCE, 0);
-#endif
                 if (Platform::AceContainer::OnBackPressed(instanceId_)) {
                     ret = true;
                 }
@@ -4043,12 +4042,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         return;
     }
 
-#ifndef CROSS_PLATFORM
     if (SystemProperties::GetWindowRectResizeEnabled()) {
         PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
             bundleName_);
     }
-#endif
     UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas, info);
 }
 
@@ -4069,15 +4066,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        auto logTask = [bundleName = bundleName_, moduleName = moduleName_, instanceId = instanceId_,
-            config, reason, rsTransaction, stringifiedMap, keyboardRect]() {
-            TAG_LOGI(ACE_LAYOUT,
-                "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, "
-                "windowSizeChangeReason %{public}d,"
-                " is rsTransaction nullptr %{public}d, %{public}s, keyboardRect %{public}s", bundleName.c_str(),
-                moduleName.c_str(), instanceId, config.ToString().c_str(), static_cast<uint32_t>(reason),
-                rsTransaction == nullptr, stringifiedMap.c_str(), keyboardRect.ToString().c_str());
-            };
+        auto logTask = [config, reason, rsTransaction, stringifiedMap, keyboardRect]() {
+            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardRect %{public}s",
+                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+                stringifiedMap.c_str(), keyboardRect.ToString().c_str());
+        };
         taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithKeyboardInfo";
         ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     } else {
@@ -4088,15 +4081,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        auto logTask = [bundleName = bundleName_, moduleName = moduleName_, instanceId = instanceId_,
- 	            config, reason, rsTransaction, stringifiedMap]() {
-                TAG_LOGI(ACE_LAYOUT,
-                    "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, "
-                    "windowSizeChangeReason %{public}d,"
-                    " is rsTransaction nullptr %{public}d, %{public}s, keyboardInfo is null", bundleName.c_str(),
-                    moduleName.c_str(), instanceId, config.ToString().c_str(), static_cast<uint32_t>(reason),
-                    rsTransaction == nullptr, stringifiedMap.c_str());
-                };
+        auto logTask = [config, reason, rsTransaction, stringifiedMap]() {
+            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardInfo is null",
+                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+                stringifiedMap.c_str());
+        };
         taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithoutKeyboardInfo";
         ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     }
@@ -4952,10 +4941,30 @@ void UIContentImpl::SetFormViewScale(float width, float height, float formViewSc
     CHECK_NULL_VOID(pipelineContext);
 
     float viewScale = LessOrEqual(formViewScale, 0.0f) ? DEFAULT_VIEW_SCALE : formViewScale;
-    auto density = SystemProperties::GetResolution() / viewScale;
-    TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f, density: %{public}f.", viewScale, density);
+    float density = 0.0f;
+    if (formDisplayId_ != DISPLAY_ID_INVALID) {
+        auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(formDisplayId_);
+        if (display) {
+            auto displayInfo = display->GetDisplayInfo();
+            if (displayInfo) {
+                density = displayInfo->GetDensityInCurResolution();
+            }
+        }
+    }
+    if (!GreatNotEqual(density, 0.0f)) {
+        density = static_cast<float>(SystemProperties::GetResolution());
+    }
+    density = density / viewScale;
+    TAG_LOGD(AceLogTag::ACE_FORM,
+        "SetFormViewScale viewScale: %{public}f, density: %{public}f, displayId: %{public}" PRIu64 ".",
+        viewScale, density, formDisplayId_);
     pipelineContext->OnSurfaceDensityChanged(density);
     pipelineContext->SetRootSize(density, width, height);
+}
+
+void UIContentImpl::SetFormDisplayId(const uint64_t displayId)
+{
+    formDisplayId_ = displayId;
 }
 
 void UIContentImpl::SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback)
@@ -6221,9 +6230,7 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
             },
             TaskExecutor::TaskType::UI, "UiSessionSendCommandKeyCode");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
-#endif
 }
 
 void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6244,9 +6251,7 @@ void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& tas
             },
             TaskExecutor::TaskType::UI, "UiSessionRelaxedSendCommand");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveRelaxedCommandFunction(relaxedCommandCallback);
-#endif
 #endif
 }
 
@@ -6269,9 +6274,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
             },
             TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
-#endif
     auto webCallback = [weakTaskExecutor = taskExecutor](bool isRegister) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6284,9 +6287,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
             TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
-#endif
     SetupGetPixelMapCallback(taskExecutor);
     SetupGetImagesByIdCallback(taskExecutor);
     RegisterGetCurrentPageName(taskExecutor);
@@ -6303,6 +6304,8 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
     SaveArkUIPageTranslateFunctions(taskExecutor);
+    SaveGetCurrentAbilityLanguageInfoFunction(taskExecutor);
+    SaveTraverseWebForPageSceneCallback(taskExecutor);
     auto pageSceneMatcher = std::make_shared<NG::PageSceneRuleManager>();
     auto pageSceneDetectCallback = [weakTaskExecutor = taskExecutor, pageSceneMatcher](
         int32_t processId, const std::string& ruleJson, bool isGetResult) {
@@ -6336,10 +6339,9 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
                     }
                     return;
                 }
-                auto stageManager = pipeline->GetStageManager();
-                auto pageRoot = stageManager ? stageManager->GetLastPage() : pipeline->GetRootElement();
+                auto startNodes = pipeline->GetDumpStartNodes();
                 auto result = pageSceneMatcher->MatchPageScene(
-                    processId, ruleJson, pageRoot, pipeline->GetCurrentPageName(), isGetResult);
+                    processId, ruleJson, startNodes, pipeline->GetCurrentPageName(), isGetResult);
                 if (!result.has_value()) {
                     if (isGetResult) {
                         UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
@@ -6429,9 +6431,59 @@ void UIContentImpl::SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>&
         std::move(resetFunction), std::move(resultFunction));
 }
 
+void UIContentImpl::SaveGetCurrentAbilityLanguageInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    const int32_t instanceId = instanceId_;
+    auto getAbilityLanguageInfo = [weakTaskExecutor = taskExecutor, instanceId](
+                                      std::string& language, std::string& region) -> int32_t {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            LOGW("GetCurrentAbilityLanguageInfo task executor is null");
+            return FAILED;
+        }
+
+        int32_t result = FAILED;
+        std::string resultLanguage;
+        std::string resultRegion;
+        constexpr uint32_t GET_ABILITY_LANGUAGE_INFO_TIMEOUT_TIME = 1500;
+        auto task = [instanceId, &result, &resultLanguage, &resultRegion]() {
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            if (!container) {
+                LOGW("GetCurrentAbilityLanguageInfo container is null");
+                return;
+            }
+            auto languageTag = container->GetResourceInfo().GetResourceConfiguration().GetLanguage();
+            if (languageTag.empty()) {
+                LOGW("GetCurrentAbilityLanguageInfo language tag is empty");
+                return;
+            }
+            std::string script;
+            Localization::ParseLocaleTag(languageTag, resultLanguage, script, resultRegion, false);
+            if (resultLanguage.empty() || resultRegion.empty()) {
+                LOGW("GetCurrentAbilityLanguageInfo locale is empty, languageEmpty=%{public}d, "
+                     "regionEmpty=%{public}d",
+                    resultLanguage.empty(), resultRegion.empty());
+                return;
+            }
+            result = NO_ERROR;
+        };
+        if (!taskExecutor->PostSyncTaskTimeout(task, TaskExecutor::TaskType::UI,
+                GET_ABILITY_LANGUAGE_INFO_TIMEOUT_TIME, "UiSessionGetCurrentAbilityLanguageInfo")) {
+            LOGW("GetCurrentAbilityLanguageInfo post UI task failed");
+            return FAILED;
+        }
+        if (result != NO_ERROR) {
+            return result;
+        }
+        language = std::move(resultLanguage);
+        region = std::move(resultRegion);
+        return NO_ERROR;
+    };
+    UiSessionManager::GetInstance()->SaveGetCurrentAbilityLanguageInfoFunction(std::move(getAbilityLanguageInfo));
+}
+
 void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     auto&& getWebInfoCallback = [weakTaskExecutor = taskExecutor](int32_t webId, const std::string& request) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6440,13 +6492,13 @@ void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>&
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                CHECK_NULL_VOID(uiTranslateManager);
                 uint32_t windowId = pipeline->GetWindowId();
                 uiTranslateManager->GetWebInfoByRequest(windowId, webId, request);
             },
             TaskExecutor::TaskType::UI, "UiSessionWebInfoByRequest");
     };
     UiSessionManager::GetInstance()->SaveGetWebInfoByRequestFunction(getWebInfoCallback);
-#endif
 }
 
 void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6464,16 +6516,12 @@ void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<Tas
                     return;
                 }
                 offsets = node->GetSpecifiedContentOffsets(content);
-#ifndef CROSS_PLATFORM
                 UiSessionManager::GetInstance()->SendSpecifiedContentOffsets(offsets);
-#endif
             },
             TaskExecutor::TaskType::UI, "UiSessionGetSpecifiedContentOffsets");
         return offsets;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveGetSpecifiedContentOffsetsFunction(getSpecifiedContentOffsetsCallback);
-#endif
 }
 
 void UIContentImpl::RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6493,9 +6541,7 @@ void UIContentImpl::RegisterHighlightSpecifiedContentCallback(const WeakPtr<Task
             },
             TaskExecutor::TaskType::UI, "UiSessionHighlightSpecifiedContent");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveHighlightSpecifiedContentFunction(highlightSpecifiedContentCallback);
-#endif
 }
 
 void UIContentImpl::RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6511,9 +6557,7 @@ void UIContentImpl::RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& task
             },
             TaskExecutor::TaskType::UI, "UiSessionSelectText");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveSelectTextFunction(selectTextCallback);
-#endif
 }
 
 void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6529,14 +6573,11 @@ void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& task
             },
             TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
-#endif
 }
 
 void UIContentImpl::SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     auto getImagesById = [weakTaskExecutor = taskExecutor](const std::vector<int32_t>& arkUIIds,
         const std::map<int32_t, std::vector<int32_t>>& arkWebs) {
             auto taskExecutor = weakTaskExecutor.Upgrade();
@@ -6553,12 +6594,10 @@ void UIContentImpl::SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& task
                 TaskExecutor::TaskType::UI, "UiSessionGetImagesById");
         };
     UiSessionManager::GetInstance()->SaveGetImagesByIdFunction(getImagesById);
-#endif
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     auto getPixelMapCallback = [weakTaskExecutor = taskExecutor]() {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6571,7 +6610,6 @@ void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskEx
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
-#endif
 }
 
 void UIContentImpl::SaveGetCurrentInstanceId()
@@ -6583,9 +6621,7 @@ void UIContentImpl::SaveGetCurrentInstanceId()
             CHECK_NULL_RETURN(pipeline, -1);
             return pipeline->GetInstanceId();
         };
-#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->SaveGetCurrentInstanceIdCallback(saveInstanceIdCallback);
-#endif
     });
 }
 
@@ -6604,9 +6640,7 @@ void UIContentImpl::RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& task
             TaskExecutor::TaskType::UI, "UiSessionGetPageName");
         return pageName;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
-#endif
 }
 
 void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6631,9 +6665,7 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
             TaskExecutor::TaskType::UI, "UiSessionSendCommandAsyncPattern");
         return result;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
-#endif
     auto sendCommand = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6648,9 +6680,7 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
             },
             TaskExecutor::TaskType::UI, "UiSessionSendCommandPattern");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveForSendCommandFunction(sendCommand);
-#endif
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data,
@@ -6951,9 +6981,7 @@ void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskEx
             TaskExecutor::TaskType::UI, "UiSessionExeAppAIFunction");
         return result;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RegisterPipeLineExeAppAIFunction(exeAppAIFunctionCallback);
-#endif
 }
 
 int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
@@ -6973,9 +7001,19 @@ OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
     return window_;
 }
 
+void UIContentImpl::ForceRequestFrame()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetForceVsyncRequests(true);
+}
+
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
         (ContentChangeConfig config) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
@@ -7021,6 +7059,57 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
             },
             TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
     });
+}
+
+void UIContentImpl::PostTraverseWebTask(const WeakPtr<TaskExecutor>& weakTaskExecutor,
+    std::function<void()>&& task)
+{
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+    if (!taskExecutor) {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        taskExecutor = pipeline->GetTaskExecutor();
+    }
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "TraverseWebForPageScene");
+}
+
+void UIContentImpl::SaveTraverseWebForPageSceneCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+#ifdef WEB_SUPPORTED
+    auto&& webPageSceneFunc = [this, weakTaskExecutor = taskExecutor](
+        UiSessionManager::WebPageSceneOp op, int32_t processId, const std::string& ruleJson,
+        bool isGetResult) -> int32_t {
+        switch (op) {
+            case UiSessionManager::WebPageSceneOp::RegisterRules: {
+                int32_t ret = WebPageSceneManager::GetInstance().RegisterPageSceneRules(processId, ruleJson);
+                if (ret != PAGE_SCENE_ERR_OK) {
+                    return ret;
+                }
+                PostTraverseWebTask(weakTaskExecutor, [processId]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    uiTranslateManager->TraverseAndMatchAllWeb(processId, "", false);
+                });
+                return PAGE_SCENE_ERR_OK;
+            }
+            case UiSessionManager::WebPageSceneOp::UnregisterRules:
+                return WebPageSceneManager::GetInstance().UnregisterPageSceneRules(processId);
+            case UiSessionManager::WebPageSceneOp::GetPageScene: {
+                PostTraverseWebTask(weakTaskExecutor, [processId, ruleJson, isGetResult]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    uiTranslateManager->TraverseAndMatchAllWeb(processId, ruleJson, isGetResult);
+                });
+                return PAGE_SCENE_ERR_OK;
+            }
+        }
+        return PAGE_SCENE_ERR_FAILED;
+    };
+    UiSessionManager::GetInstance()->SaveWebPageSceneFunction(std::move(webPageSceneFunc));
 #endif
 }
 
@@ -7077,9 +7166,7 @@ void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& ta
             },
             TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveGetStateMgmtInfoFunction(getStateMgmtInfoCallback);
-#endif
 }
 
 const EcmaVM* UIContentImpl::GetEcmaVMOnJsThread() const

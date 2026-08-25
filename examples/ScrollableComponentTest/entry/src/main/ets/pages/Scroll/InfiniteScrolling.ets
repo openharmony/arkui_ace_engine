@@ -26,9 +26,12 @@
     | -> Stack
 */
 
+// Keeps this page an ES module so its top-level declarations stay file-scoped.
+export {};
+
 @Entry
 @Component
-export struct InfiniteScroll {
+struct InfiniteScroll {
   @Builder
   doNothingBuilder() {
   };

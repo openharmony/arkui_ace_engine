@@ -25,6 +25,7 @@
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -116,6 +117,14 @@ void SetNavigationOptions1Impl(Ark_VMContext vmContext,
     navigationStack->RegisterOnResultCallback();
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto weakStack = AceType::WeakClaim(AceType::RawPtr(navigationStack));
+    context->AddBuildFinishCallBack([weakStack]() {
+        auto stack = weakStack.Upgrade();
+        CHECK_NULL_VOID(stack);
+        stack->PreloadNodeBefore();
+    });
 }
 void SetNavigationOptions0Impl(Ark_VMContext vmContext,
                                Ark_NativePointer node,
@@ -147,6 +156,14 @@ void SetNavigationOptions0Impl(Ark_VMContext vmContext,
     navigationStack->RegisterOnResultCallback();
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto weakStack = AceType::WeakClaim(AceType::RawPtr(navigationStack));
+    context->AddBuildFinishCallBack([weakStack]() {
+        auto stack = weakStack.Upgrade();
+        CHECK_NULL_VOID(stack);
+        stack->PreloadNodeBefore();
+    });
 }
 } // namespace NavigationInterfaceModifier
 
@@ -435,6 +452,15 @@ void SetConfigurationImpl(Ark_NativePointer node,
     NG::NavigationConfiguration config;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED && value->value.stackSizeLimit.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         config.stackSizeLimit = Converter::Convert<int32_t>(value->value.stackSizeLimit.value);
+    }
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        value->value.clearContentStackOnPrimaryNavigation.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        config.needClearContentStack =
+            Converter::Convert<bool>(value->value.clearContentStackOnPrimaryNavigation.value);
+    }
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        value->value.recyclePagesOnLowMemory.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        config.recyclePagesOnLowMemory = Converter::Convert<bool>(value->value.recyclePagesOnLowMemory.value);
     }
     NavigationModelNG::SetNavigationConfiguration(frameNode, config);
 }

@@ -15,7 +15,9 @@
 
 #include "core/components_ng/event/click_event.h"
 
+#ifndef CROSS_PLATFORM
 #include "base/ressched/ressched_touch_optimizer.h"
+#endif
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -57,6 +59,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     result.emplace_back(clickRecognizer_);
     responseLinkResult.emplace_back(clickRecognizer_);
 
+#ifndef CROSS_PLATFORM
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     const auto& touchOptimizer = pipeline->GetTouchOptimizer();
@@ -65,6 +68,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
         clickRecognizer_->SetShouldReportTouchDown(true);
         touchOptimizer->SetTouchDownNotifiedToClick(true);
     }
+#endif
 }
 
 std::optional<GestureJudgeFunc> ClickEventActuator::GetSysJudgeFunc() const

@@ -89,8 +89,7 @@ class ClassA implements IObservedObject, IWatchSubscriberRegister
     private  __backing_propA: string;
     
     // @JsonIgnore
-    private readonly __meta_propA: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_propA: IMutableStateMeta = StateMgmtFactory.makeMutableStateMeta();
 
     public get propA(): string {
         stateMgmtConsole.log(`ClassD: get @Track propA`);
@@ -111,8 +110,7 @@ class ClassA implements IObservedObject, IWatchSubscriberRegister
     private __backing_propB: int;
 
     // @JsonIgnore
-    private readonly __meta_propB: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_propB: IMutableStateMeta = StateMgmtFactory.makeMutableStateMeta();
 
     public get propB(): int {
         this.conditionalAddRef(this.__meta_propB);
@@ -352,11 +350,11 @@ class EntryComputedComponent extends ExtendableComponent implements IVariableOwn
         // @State nothing, can not update from parent
     }
 
-    incrPropB() {
+    incrPropB(): void {
       this.stateA.propB += 1;
     }
  
-    resetName() {
+    resetName(): void {
       this.stateA.propA = this.stateA.propA+'_A'
     }
 
@@ -364,7 +362,7 @@ class EntryComputedComponent extends ExtendableComponent implements IVariableOwn
       this.stateA = new ClassA('newObject', 1101)
     }
 
-    build() {
+    build(): void {
     }
 }
 
@@ -464,7 +462,7 @@ class ChainedComputedComponent extends ExtendableComponent {
     __updateStruct(param: EntryComponent_init_update_struct) : void {
         // @State nothing, can not update from parent
     }
-    build() {
+    build(): void {
     }
 }
 
@@ -490,8 +488,7 @@ export class ClassWithComputed implements IObservedObject {
         return false;
     }
 
-    private readonly __meta: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta: IMutableStateMeta = StateMgmtFactory.makeMutableStateMeta();
 
     // IObservedObject interface
     // @JsonIgnore
@@ -640,7 +637,7 @@ class ComputedComponentWithException extends ExtendableComponent {
         // @State nothing, can not update from parent
     }
 
-    build() {
+    build(): void {
     }
 }
 
@@ -695,7 +692,7 @@ class ComputedComponentWithInterfaceLiteral extends ExtendableComponent {
         // @State nothing, can not update from parent
     }
 
-    build() {
+    build(): void {
     }
 }
 
@@ -750,7 +747,7 @@ class ComputedComponentWithDate extends ExtendableComponent {
         // @State nothing, can not update from parent
     }
 
-    build() {
+    build(): void {
     }
 }
 

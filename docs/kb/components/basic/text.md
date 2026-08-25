@@ -131,7 +131,7 @@ Text 功能域：`specs/05-ui-components/09-text-components/04-text/`
 ## 相关主题
 
 - `TextDrag`：`docs/pattern/text_drag/TextDrag_Knowledge_Base_CN.md`
-- `RichEditor`：`docs/pattern/rich_editor/RichEditor_Knowledge_Base_CN.md`
+- `RichEditor`：`docs/kb/components/basic/rich_editor.md`
 - `TextInput`：`docs/pattern/text_input/TextInput_Knowledge_Base_CN.md`
 - `TextArea`：`docs/pattern/text_area/TextArea_Knowledge_Base_CN.md`
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

@@ -51,7 +51,7 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& frameSize);
-    
+
     static Alignment MapLocalizedToAlignment(std::string localizedAlignment);
 
     static void CalcSingleSideMarginFrame(
@@ -61,7 +61,6 @@ public:
 protected:
     std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
     bool measureInNextFrame_ = false;
-
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);
 };

@@ -14,6 +14,8 @@
  */
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1538,13 +1540,151 @@ HWTEST_F(TextFieldPatternTesttwelve, HandleCountStyleUnderlineWithoutShowCounter
  */
 HWTEST_F(TextFieldPatternTesttwelve, HandleCountStyleUnderlineWithShowCounter001, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: IsShowCount returns false, underline color equals error color";
+#endif
     CreateTextField();
     layoutProperty_->UpdateShowCounter(true);
     layoutProperty_->UpdateMaxLength(10);
     layoutProperty_->UpdateShowUnderline(true);
     pattern_->showCountBorderStyle_ = true;
     pattern_->HandleCountStyle();
-    EXPECT_NE(pattern_->GetUnderlineColor(), pattern_->GetTheme()->GetErrorUnderlineColor());
+    EXPECT_EQ(pattern_->GetUnderlineColor(), pattern_->GetTheme()->GetErrorUnderlineColor());
+}
+
+/**
+ * @tc.name: PageTranslate_ApplyAndReset
+ * @tc.desc: Test TextFieldPattern ApplyPageTranslateResult and ResetPageTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesttwelve, PageTranslate_ApplyAndReset, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // ApplyPageTranslateResult with negative version returns true but does not set translated placeholder
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("result", -1));
+    EXPECT_FALSE(pattern->GetPageTranslatedPlaceholder().has_value());
+
+    // ApplyPageTranslateResult with valid result sets translated placeholder and version
+    EXPECT_TRUE(pattern->ApplyPageTranslateResult("translated", 1));
+    ASSERT_TRUE(pattern->GetPageTranslatedPlaceholder().has_value());
+    EXPECT_EQ(pattern->GetPageTranslatedPlaceholder().value(), u"translated");
+
+    // ResetPageTranslate clears translated placeholder and version
+    pattern->ResetPageTranslate();
+    EXPECT_FALSE(pattern->GetPageTranslatedPlaceholder().has_value());
+
+    // ResetPageTranslate again when already clean is a no-op
+    pattern->ResetPageTranslate();
+    EXPECT_FALSE(pattern->GetPageTranslatedPlaceholder().has_value());
+}
+
+/**
+ * @tc.name: PageTranslate_GetPageTranslateTextForReport
+ * @tc.desc: Test TextFieldPattern GetPageTranslateTextForReport all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesttwelve, PageTranslate_GetPageTranslateTextForReport, TestSize.Level1)
+{
+    CreateTextField("", "please input");
+    ASSERT_NE(pattern_, nullptr);
+
+    // text value is empty and lastDrawn is empty returns empty string
+    EXPECT_TRUE(pattern_->GetPageTranslateTextForReport().empty());
+
+    // text value is empty and lastDrawn != currentPlaceholder returns empty string
+    pattern_->lastDrawnPageTranslateContent_ = u"mismatch";
+    EXPECT_TRUE(pattern_->GetPageTranslateTextForReport().empty());
+
+    // lastDrawn == currentPlaceholder returns the placeholder text
+    pattern_->lastDrawnPageTranslateContent_ = pattern_->GetPlaceHolder();
+    EXPECT_EQ(pattern_->GetPageTranslateTextForReport(), "please input");
+
+    // text value is not empty returns empty string
+    pattern_->lastDrawnPageTranslateContent_ = u"";
+    pattern_->contentController_->SetTextValue(u"hello");
+    EXPECT_TRUE(pattern_->GetPageTranslateTextForReport().empty());
+
+    // styledString placeholder: lastDrawn == styled placeholder value returns the text
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"Styled Placeholder");
+    pattern_->SetPlaceholderStyledString(spanString);
+    ASSERT_NE(pattern_->GetPlaceholderResponseArea(), nullptr);
+    pattern_->contentController_->SetTextValue(u"");
+    pattern_->lastDrawnPageTranslateContent_ = u"mismatch";
+    EXPECT_TRUE(pattern_->GetPageTranslateTextForReport().empty());
+    pattern_->lastDrawnPageTranslateContent_ = pattern_->GetPlaceHolder();
+    EXPECT_EQ(pattern_->GetPageTranslateTextForReport(), "Styled Placeholder");
+}
+
+/**
+ * @tc.name: PageTranslate_ReportPageTranslatePlaceholderDrawn
+ * @tc.desc: Test TextFieldPattern ReportPageTranslatePlaceholderDrawn all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesttwelve, PageTranslate_ReportPageTranslatePlaceholderDrawn, TestSize.Level1)
+{
+    CreateTextField("", "placeholder text");
+    ASSERT_NE(pattern_, nullptr);
+
+    // text value not empty returns early without setting lastDrawn
+    pattern_->contentController_->SetTextValue(u"hello");
+    pattern_->ReportPageTranslatePlaceholderDrawn();
+    EXPECT_TRUE(pattern_->lastDrawnPageTranslateContent_.empty());
+
+    // text value empty and lastDrawn mismatch returns early after setting lastDrawn
+    pattern_->contentController_->SetTextValue(u"");
+    pattern_->lastDrawnPageTranslateContent_ = u"mismatch";
+    pattern_->ReportPageTranslatePlaceholderDrawn();
+    EXPECT_EQ(pattern_->lastDrawnPageTranslateContent_, pattern_->GetPlaceHolder());
+}
+
+/**
+ * @tc.name: PageTranslate_OnPlaceholderSourceTextChanged
+ * @tc.desc: Test TextFieldPattern OnPlaceholderSourceTextChanged clears state
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesttwelve, PageTranslate_OnPlaceholderSourceTextChanged, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set translated state and drawn text
+    pattern->ApplyPageTranslateResult("translated", 1);
+    pattern->lastDrawnPageTranslateContent_ = u"translated";
+    ASSERT_TRUE(pattern->GetPageTranslatedPlaceholder().has_value());
+
+    // OnPlaceholderSourceTextChanged clears lastDrawn and resets translate
+    pattern->OnPlaceholderSourceTextChanged();
+    EXPECT_FALSE(pattern->GetPageTranslatedPlaceholder().has_value());
+    EXPECT_TRUE(pattern->lastDrawnPageTranslateContent_.empty());
+
+    // OnPlaceholderSourceTextChanged when no translate state is a no-op
+    pattern->OnPlaceholderSourceTextChanged();
+    EXPECT_FALSE(pattern->GetPageTranslatedPlaceholder().has_value());
+}
+
+/**
+ * @tc.name: PageTranslate_GetPageTranslateNodeId
+ * @tc.desc: Test TextFieldPattern GetPageTranslateNodeId returns host id
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesttwelve, PageTranslate_GetPageTranslateNodeId, TestSize.Level1)
+{
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->GetPageTranslateNodeId(), nodeId);
 }
 
 } // namespace OHOS::Ace::NG

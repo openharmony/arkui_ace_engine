@@ -686,7 +686,7 @@ private:
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot),
       LayoutWrapper(WeakClaim(this)),
       renderContext_(RenderContext::Create()),
@@ -846,7 +846,7 @@ bool FrameNode::HasVirtualNodeAccessibilityProperty()
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
     auto newChild = CreateFrameNode(tag, nodeId, pattern, true);
     newChild->SetDepth(1);
@@ -854,7 +854,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
 }
 
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
-    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    std::string_view tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
     if (frameNode) {
@@ -864,7 +864,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     return CreateFrameNode(tag, nodeId, pattern);
 }
 
-RefPtr<FrameNode> FrameNode::GetOrCreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+RefPtr<FrameNode> FrameNode::GetOrCreateCommonNode(std::string_view tag, int32_t nodeId, bool isLayoutNode,
     const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto commonNode = GetFrameNode(tag, nodeId);
@@ -876,7 +876,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateCommonNode(const std::string& tag, int32
     return CreateCommonNode(tag, nodeId, isLayoutNode, pattern);
 }
 
-RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
+RefPtr<FrameNode> FrameNode::GetFrameNode(std::string_view tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -891,7 +891,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
     return frameNode;
 }
 
-RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(const std::string& tag, int32_t nodeId)
+RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(std::string_view tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -902,7 +902,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(const std::string& tag, int32_t no
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
@@ -912,7 +912,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 }
 
 RefPtr<FrameNode> FrameNode::CreateCommonNode(
-    const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
+    std::string_view tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
@@ -936,7 +936,7 @@ void FrameNode::SetIsFind(bool isFind)
     isFind_ = isFind;
 }
 
-void FrameNode::GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children)
+void FrameNode::GetOneDepthVisibleFrame(std::vector<RefPtr<FrameNode>>& children)
 {
     GenerateOneDepthVisibleFrameWithTransition(children);
     if (overlayNode_) {
@@ -1203,11 +1203,14 @@ void FrameNode::DumpCommonInfo()
     if (geometryNode_->GetParentLayoutConstraint().has_value())
         DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                            .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
-    if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
+    OffsetF windowOffsetWithTranslate = GetPaintRectGlobalOffsetWithTranslate(false, true).first;
+    DumpLog::GetInstance().AddDesc(std::string("windowOffset: ").append(windowOffsetWithTranslate.ToString()));
+    OffsetF windowOffset = GetOffsetRelativeToWindow();
+    if (!(NearZero(windowOffset.GetY()) && NearZero(windowOffset.GetX()))) {
         DumpLog::GetInstance().AddDesc(std::string("top: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
-                                           .append(" left: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+                .append(std::to_string(windowOffset.GetY()))
+                .append(" left: ")
+                .append(std::to_string(windowOffset.GetX())));
     }
     if (static_cast<int32_t>(IsActive()) != 1) {
         DumpLog::GetInstance().AddDesc(
@@ -1916,14 +1919,14 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         context->AddDirtyPropertyNode(Claim(this));
     }
     if (!hasPendingRequest_) {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
         UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
 #endif
         return;
     }
     context->RequestFrame();
     hasPendingRequest_ = false;
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
     UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
 #endif
 }
@@ -2111,6 +2114,12 @@ void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChan
 
 void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
 {
+    NotifyVisibleChange(preVisibility, currentVisibility, true);
+}
+
+void FrameNode::NotifyVisibleChange(
+    VisibleType preVisibility, VisibleType currentVisibility, bool notifyPageScene)
+{
     if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
         if (preVisibility == VisibleType::VISIBLE && currentVisibility != VisibleType::VISIBLE) {
             auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
@@ -2137,6 +2146,9 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
     }
     pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
     UpdateChildrenVisible(preVisibility, currentVisibility);
+    if (notifyPageScene && preVisibility != currentVisibility) {
+        NotifyPageSceneVisibilityChanged();
+    }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
@@ -2150,13 +2162,57 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
     }
 }
 
+void FrameNode::NotifyPageSceneVisibilityChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::VISIBILITY);
+#endif
+}
+
+void FrameNode::NotifyPageSceneActiveChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::ACTIVE);
+#endif
+}
+
+void FrameNode::NotifyPageSceneFocusabilityChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::FOCUSABILITY);
+#endif
+}
+
+void FrameNode::NotifyPageSceneOpacityChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::OPACITY);
+#endif
+}
+
 void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
     auto layoutProperty = GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;
     }
-    NotifyVisibleChange(preVisibility, currentVisibility);
+    NotifyVisibleChange(preVisibility, currentVisibility, false);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
@@ -2204,7 +2260,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->OnAccessibilityDetachFromMainTree();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
     UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, false);
 #endif
 }
@@ -2953,6 +3009,7 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         NotifyLazyChildren();
     }
     CHECK_NULL_VOID(activeChanged);
+    NotifyPageSceneActiveChanged();
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -3301,7 +3358,7 @@ void FrameNode::RebuildRenderContextTree()
     }
     auto oldFrameChildren = std::move(frameChildren_);
     frameChildren_.clear();
-    std::list<RefPtr<FrameNode>> children;
+    std::vector<RefPtr<FrameNode>> children;
     GenerateRenderTreeFrameChildren(children);
     for (const auto& child : children) {
         frameChildren_.emplace(child);
@@ -3323,7 +3380,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& children)
+void FrameNode::GenerateRenderTreeFrameChildren(std::vector<RefPtr<FrameNode>>& children)
 {
     // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
@@ -3338,7 +3395,7 @@ void FrameNode::GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& ch
     }
 }
 
-void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+void FrameNode::ProcessRenderTreeDiff(const std::vector<RefPtr<FrameNode>>& newChildren,
     const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren)
 {
     if (!renderContext_) {
@@ -3715,12 +3772,12 @@ void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList
     allList.emplace_back(Claim(this));
 }
 
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode)
 {
     if (isLayoutNode_) {
-        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
+        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleNode);
         if (overlayNode_) {
-            visibleList.emplace_back(overlayNode_);
+            visibleNode.emplace_back(overlayNode_);
         }
         return;
     }
@@ -3731,7 +3788,7 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
     if (!isActive_ || (!IsVisible() && !context->HasTransitionOutAnimation())) {
         return;
     }
-    visibleList.emplace_back(Claim(this));
+    visibleNode.emplace_back(Claim(this));
 }
 
 void FrameNode::OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
@@ -3969,7 +4026,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     HitTestMode onTouchInterceptresult = HitTestMode::HTMDEFAULT;
     if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON &&
-        touchRestrict.touchEvent.type != TouchType::HOVER_ENTER) {
+        !IsHoverEventType(touchRestrict.touchEvent.type)) {
         onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
     }
     TouchResult touchRes;
@@ -6385,7 +6442,9 @@ void FrameNode::UpdateFocusState()
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
         focusHub->ClearFocusState(false);
-        focusHub->PaintFocusState(false);
+        if (focusHub->PaintFocusState(false)) {
+            focusHub->RaiseZIndex();
+        }
     }
 }
 
@@ -7388,6 +7447,14 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     return result;
 }
 
+bool FrameNode::IsHoverEventType(TouchType type) const
+{
+    return type == TouchType::HOVER_ENTER || type == TouchType::HOVER_MOVE || type == TouchType::HOVER_EXIT ||
+           type == TouchType::HOVER_CANCEL || type == TouchType::LEVITATE_IN_WINDOW ||
+           type == TouchType::LEVITATE_MOVE || type == TouchType::LEVITATE_OUT_WINDOW ||
+           type == TouchType::PROXIMITY_IN || type == TouchType::PROXIMITY_OUT;
+}
+
 void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent)
 {
     auto frameNodeWeak = WeakClaim(this);
@@ -7600,6 +7667,24 @@ void FrameNode::GetVisibleRectWithClip(
     }
 }
 
+void FrameNode::LogCacheVisibleRect(const CacheVisibleRectResult& result, bool logFlag) const
+{
+    if (!logFlag) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_UIEVENT,
+        "Node(%{public}s/%{public}d/%{public}s/%{public}s) wo:%{public}s iwo:%{public}s vr:%{public}s ivr:%{public}s "
+        "cs:[%{public}f,%{public}f] ics:[%{public}f,%{public}f] fr:%{public}s ifr:%{public}s ibr:%{public}s",
+        tag_.c_str(), nodeId_, std::to_string(GetAccessibilityId()).c_str(),
+        GetInspectorId().value_or("").c_str(), result.windowOffset.ToString().c_str(),
+        result.innerWindowOffset.ToString().c_str(), result.visibleRect.ToString().c_str(),
+        result.innerVisibleRect.ToString().c_str(),
+        result.cumulativeScale.x, result.cumulativeScale.y,
+        result.innerCumulativeScale.x, result.innerCumulativeScale.y,
+        result.frameRect.ToString().c_str(), result.innerFrameRect.ToString().c_str(),
+        result.innerBoundaryRect.ToString().c_str());
+}
+
 const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
 {
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
@@ -7616,6 +7701,7 @@ const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp,
         cachedVisibleRectResult_ = { timestamp,
             { rectToParent.GetOffset(), rectToParent.GetOffset(), rectToParent, rectToParent, scale, innerScale,
                 rectToParent, rectToParent, rectToParent } };
+        LogCacheVisibleRect(cachedVisibleRectResult_.second, logFlag);
         return cachedVisibleRectResult_.second;
     }
 
@@ -7629,14 +7715,7 @@ const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp,
         result = &CalculateCacheVisibleRect(
             parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
-    if (logFlag) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT,
-            "OnVisibleAreaChange Node(%{public}s/%{public}d) windowOffset:%{public}s visibleRect:%{public}s "
-            "innerVisibleRect:%{public}s frameRect:%{public}s innerBoundaryRect:%{public}s",
-            tag_.c_str(), nodeId_, result->windowOffset.ToString().c_str(), result->visibleRect.ToString().c_str(),
-            result->innerVisibleRect.ToString().c_str(), result->frameRect.ToString().c_str(),
-            result->innerBoundaryRect.ToString().c_str());
-    }
+    LogCacheVisibleRect(*result, logFlag);
     return *result;
 }
 
@@ -8471,11 +8550,18 @@ void FrameNode::ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json,
 
 bool FrameNode::IsDebugInspectorId()
 {
+    static constexpr size_t TAG_PREFIX_LEN = 2;
     if (!SystemProperties::GetDebugEnabled()) {
         return false;
     }
     auto debugInspectorId = SystemProperties::GetDebugInspectorId();
-    return debugInspectorId == GetInspectorId().value_or("");
+    if (debugInspectorId == GetInspectorId().value_or("")) {
+        return true;
+    }
+    if (debugInspectorId.find("T:") == 0) {
+        return GetTag() == debugInspectorId.substr(TAG_PREFIX_LEN);
+    }
+    return false;
 }
 
 RefPtr<UINode> FrameNode::GetCurrentPageRootNode()

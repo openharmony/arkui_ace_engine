@@ -87,11 +87,12 @@ protected:
 void CalendarPaintMethTest::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
-    MockContainer::SetUp();
+    MockContainer::SetUp(MockPipelineContext::GetCurrent());
 }
 
 void CalendarPaintMethTest::TearDownTestCase()
 {
+    MockContainer::TearDown();
     MockPipelineContext::TearDown();
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
 }
@@ -100,6 +101,53 @@ RefPtr<FrameNode> CalendarPaintMethTest::CreateCalendarNode(TestProperty& testPr
 {
     return nullptr;
 }
+RefPtr<FrameNode> CreateCalendarNodeTree(const RefPtr<CalendarControllerNg>& controller)
+{
+    // Create calendar frame node
+    auto calendarFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPattern = calendarFrameNode->GetPattern<CalendarPattern>();
+    CHECK_NULL_RETURN(calendarPattern, nullptr);
+
+    // Create swiper frame node
+    auto swiperFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_ETS_TAG, 2, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    if (swiperPaintProperty) {
+        swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
+    }
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    if (swiperLayoutProperty) {
+        swiperLayoutProperty->UpdateLoop(true);
+        swiperLayoutProperty->UpdateIndex(1);
+        swiperLayoutProperty->UpdateShowIndicator(false);
+        swiperLayoutProperty->UpdateDisableSwipe(true);
+    }
+
+    // Create 3 month frame nodes
+    auto currentMonthNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, 3, []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto preMonthNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, 4, []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto nextMonthNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, 5, []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+
+    // Mount month nodes to swiper
+    preMonthNode->MountToParent(swiperFrameNode);
+    currentMonthNode->MountToParent(swiperFrameNode);
+    nextMonthNode->MountToParent(swiperFrameNode);
+
+    // Mount swiper to calendar
+    swiperFrameNode->MountToParent(calendarFrameNode);
+
+    // Set controller if provided
+    if (controller) {
+        calendarPattern->SetCalendarControllerNg(controller);
+    }
+
+    return calendarFrameNode;
+}
+
 
 /**
  * @tc.name: DrawDatesTest001
@@ -1087,19 +1135,18 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarThemeTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
     CalendarModelNG calendarModelNG;
     CurrentDayStyle dayStyle;
     dayStyle.UpdateDayColor(Color::BLACK);
     CalendarData calendarData;
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
-    calendarData.controller = calendarControllerNg;
-    calendarModelNG.Create(calendarData);
-    calendarModelNG.SetCurrentDayStyle(dayStyle);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto frameNode = CreateCalendarNodeTree(calendarControllerNg);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::CALENDAR_ETS_TAG);
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
     auto swiperNode = frameNode->GetChildren().front();
     auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
     auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
@@ -1134,6 +1181,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarThemeTest002, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
     theme->GetCalendarTheme().workDayMarkColor = Color::RED;
     theme->GetCalendarTheme().offDayMarkColor = Color::BLUE;
@@ -1142,13 +1190,11 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarThemeTest002, TestSize.Level1)
     dayStyle.UpdateDayColor(Color::BLACK);
     CalendarData calendarData;
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
-    calendarData.controller = calendarControllerNg;
-    calendarModelNG.Create(calendarData);
-    calendarModelNG.SetCurrentDayStyle(dayStyle);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto frameNode = CreateCalendarNodeTree(calendarControllerNg);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::CALENDAR_ETS_TAG);
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
     auto swiperNode = frameNode->GetChildren().front();
     auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
     auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
@@ -1185,6 +1231,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarThemeTest003, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
     theme->GetCalendarTheme().workDayMarkColor = Color::RED;
     theme->GetCalendarTheme().offDayMarkColor = Color::BLUE;
@@ -1193,13 +1240,11 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarThemeTest003, TestSize.Level1)
     dayStyle.UpdateDayColor(Color::BLACK);
     CalendarData calendarData;
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
-    calendarData.controller = calendarControllerNg;
-    calendarModelNG.Create(calendarData);
-    calendarModelNG.SetCurrentDayStyle(dayStyle);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto frameNode = CreateCalendarNodeTree(calendarControllerNg);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::CALENDAR_ETS_TAG);
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
+    ASSERT_NE(calendarPattern, nullptr);
     auto swiperNode = frameNode->GetChildren().front();
     auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
     auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();

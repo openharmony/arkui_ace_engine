@@ -45,7 +45,6 @@
 #include "adapter/ohos/entrance/data_share_observer_helper.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
-#include "adapter/ohos/entrance/high_contrast_observer.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/ui_event_tracker.h"
@@ -81,7 +80,7 @@
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -113,6 +112,7 @@ constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 8;
 constexpr int32_t POPUP_MIN_EDGE = 1;
+constexpr int32_t POPUP_POSITION_BUFFER = 20;
 constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
@@ -467,7 +467,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
-    SubscribeHighContrastChange();
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -492,7 +491,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-    SubscribeHighContrastChange();
 }
 
 // for DynamicComponent
@@ -518,7 +516,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-    SubscribeHighContrastChange();
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -533,7 +530,6 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
-    UnsubscribeHighContrastChange();
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -1452,13 +1448,11 @@ void AceContainer::InitializeCallback()
 
     auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
                                     const CrownEvent& event, const std::function<void()>& markProcess) {
-#ifndef CROSS_PLATFORM
         if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
             std::unordered_map<std::string, std::string> mapPayload;
             ResSchedReport::GetInstance().ResSchedDataReport(
                 RES_TYPE_CROWN_ROTATION_STATUS, static_cast<int32_t>(event.action), mapPayload);
         }
-#endif
         ContainerScope scope(id);
         auto crownTask = [context, event, markProcess, id]() {
             ContainerScope scope(id);
@@ -1716,6 +1710,10 @@ UIContentErrorCode AceContainer::SetViewNew(const RefPtr<AceView>& view, double 
             window->Destroy();
             window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
         }
+        auto runtimeContext = container->runtimeContext_.lock();
+        if (runtimeContext && runtimeContext->GetApplicationInfo()) {
+            window->SetIsSystemApp(runtimeContext->GetApplicationInfo()->isSystemApp);
+        }
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
@@ -1735,8 +1733,6 @@ void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiW
     container->SetUIWindowInner(uiWindow);
     if (!container->IsSceneBoardWindow()) {
         ResourceManager::GetInstance().SetResourceCacheSize(RESOURCE_CACHE_DEFAULT_SIZE);
-    } else {
-        OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(true);
     }
 }
 
@@ -1962,7 +1958,9 @@ private:
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
 
         auto trans = node->GetTransformRelativeOffset();
-        auto bottomAvoidHeight = GetBottomAvoidHeight();
+        auto safeArea = GetSystemSafeArea();
+        auto topAvoidHeight = safeArea.top_.Length();
+        auto bottomAvoidHeight = safeArea.bottom_.Length();
         auto edge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_EDGE_INTERVAL);
         auto minEdge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_MIN_EDGE);
 
@@ -1977,7 +1975,7 @@ private:
             } else {
                 deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge * POPUP_CALCULATE_RATIO;
             }
-        } else if (rectf.GetY() > size.height + edge + minEdge) {
+        } else if (trans.GetY() - topAvoidHeight > size.height + edge + minEdge) {
             if (isBottom) {
                 deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
             } else {
@@ -2003,49 +2001,83 @@ private:
         double deltaX = 0;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-
+        // windowRect_: window; rectf: web container; rect_: input element; size: fill popup.
+        // This method computes deltaX so the popup stays close to the input element.
+        // Stage 1: only compute the offset when the popup is no wider than both the
+        // web container and the window, the window's x is near 0, and the web container
+        // is inside the window; otherwise return 0. A POPUP_POSITION_BUFFER (20px)
+        // tolerance is applied to the window's x and the web container's bounds so a
+        // sub-pixel overflow does not skip the computation.
+        if (size.width > rectf.Width() || size.width > windowRect_.width_ ||
+            windowRect_.posX_ > POPUP_POSITION_BUFFER ||
+            windowRect_.posX_ < -POPUP_POSITION_BUFFER ||
+            rectf.Left() < windowRect_.posX_ - POPUP_POSITION_BUFFER ||
+            rectf.Left() + rectf.Width() > windowRect_.posX_ + windowRect_.width_ + POPUP_POSITION_BUFFER) {
+            TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
+                "GetPopupConfigWillUpdateX skip: size.width=%{public}f, rectf.width=%{public}f, "
+                "windowRect.width=%{public}d, windowRect.posX=%{public}d, rectf.left=%{public}f, "
+                "rectf.right=%{public}f, windowRight=%{public}d",
+                size.width, rectf.Width(), static_cast<int32_t>(windowRect_.width_),
+                static_cast<int32_t>(windowRect_.posX_), rectf.Left(),
+                rectf.Left() + rectf.Width(),
+                static_cast<int32_t>(windowRect_.posX_) + static_cast<int32_t>(windowRect_.width_));
+            return deltaX;
+        }
+        // Stage 2: estimate the popup's initial position.
+        // The exact initial position is obtained from BubbleAvoidanceRule in
+        // bubble_layout_algorithm.cpp; by default the popup is centered in the web container.
+        double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+        double basePosition = rectf.Left() + edgeDist;
+        // If the space to the right or left of the web container fits the popup,
+        // recompute the initial position; check the right side first.
+        if (windowRect_.posX_ + windowRect_.width_ - rectf.Left() - rectf.Width() > size.width) {
+            basePosition = rectf.Left() + rectf.Width();
+        } else if (rectf.Left() - windowRect_.posX_ > size.width) {
+            basePosition = rectf.Left() - size.width;
+        }
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "GetPopupConfigWillUpdateX basePosition=%{public}f", basePosition);
+        // Stage 3: compute the target position.
+        // Theoretical target left.
+        double targetLeft = 0;
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            deltaX = rect_.left - rectf.Left() - edgeDist;
-            if (deltaX > edgeDist) {
-                deltaX = edgeDist;
-            }
-            if (rect_.left + size.width > windowRect_.width_) {
-                deltaX = windowRect_.width_ - size.width - edgeDist;
-            }
-            if (edgeDist + size.width > windowRect_.width_) {
-                deltaX = 0;
-            }
+            // Align the popup's left edge with the input element's left edge.
+            targetLeft = rect_.left;
+        } else if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
+                   placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            // Align the popup's right edge with the input element's right edge.
+            targetLeft = rect_.left + rect_.width - size.width;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
+                "GetPopupConfigWillUpdateX unsupported placement: %{public}d, skip",
+                static_cast<int32_t>(placement));
+            return deltaX;
         }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
-            if ((deltaX < -DBL_EPSILON) && (std::fabs(deltaX) > edgeDist)) {
-                deltaX = -edgeDist;
-            }
-        }
+        // Final target left after clamping.
+        double webMinLeft = rectf.Left();
+        double webMaxLeft = rectf.Left() + rectf.Width() - size.width;
+        targetLeft = std::max(webMinLeft, std::min(webMaxLeft, targetLeft));
+        // Stage 4: compute the offset. Positive moves the popup right; negative moves it left.
+        deltaX = targetLeft - basePosition;
         return deltaX;
     }
 
-    uint32_t GetBottomAvoidHeight()
+    NG::SafeAreaInsets GetSystemSafeArea()
     {
         auto containerId = Container::CurrentId();
         RefPtr<NG::PipelineContext> pipelineContext;
         if (containerId >= MIN_SUBCONTAINER_ID) {
             auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
             auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-            CHECK_NULL_RETURN(parentContainer, 0);
+            CHECK_NULL_RETURN(parentContainer, NG::SafeAreaInsets());
             pipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
         } else {
             pipelineContext = NG::PipelineContext::GetCurrentContext();
         }
-        CHECK_NULL_RETURN(pipelineContext, 0);
+        CHECK_NULL_RETURN(pipelineContext, NG::SafeAreaInsets());
         auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_RETURN(safeAreaManager, 0);
-        return safeAreaManager->GetSystemSafeArea().bottom_.Length();
+        CHECK_NULL_RETURN(safeAreaManager, NG::SafeAreaInsets());
+        return safeAreaManager->GetSystemSafeArea();
     }
 
     void ProcessOnFinish()
@@ -2592,7 +2624,6 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
     return false;
 }
 
-#ifndef CROSS_PLATFORM
 void AceContainer::DumpSimplifyTreeWithParamConfig(
     std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
 {
@@ -2601,7 +2632,6 @@ void AceContainer::DumpSimplifyTreeWithParamConfig(
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetComponentOverlayInspector(root, pipelineContext->GetRootElement(), config, isInSubWindow);
 }
-#endif
 
 void AceContainer::TriggerGarbageCollection()
 {
@@ -2765,7 +2795,6 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
 
 void AceContainer::SetIsFormRender(bool isFormRender)
 {
-    OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(isFormRender);
     isFormRender_ = isFormRender;
 }
 
@@ -2800,9 +2829,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
-#endif
         if (pipeline) {
             LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
             pipeline->SaveTranslateManager(uiTranslateManager);
@@ -2820,9 +2847,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
-#endif
     if (pipeline) {
         LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
         pipeline->SaveTranslateManager(uiTranslateManager);
@@ -3080,6 +3105,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     } else {
         taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager");
         taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement");
+    }
+
+    if (fontManager) {
+        fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
     }
 
     aceView_->Launch();
@@ -3582,6 +3611,8 @@ void AceContainer::ReleaseResourceAdapter()
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
+            ResourceManager::GetInstance().RemoveResourceAdapter(
+                GetBundleName(), GetModuleName(), INSTANCE_ID_UNDEFINED);
         }
     } else {
         ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
@@ -4683,9 +4714,7 @@ void AceContainer::AddWatchSystemParameter()
 
 void AceContainer::RemoveUISessionCallbacks()
 {
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RemoveSaveGetCurrentInstanceId(instanceId_);
-#endif
 }
 
 void AceContainer::RemoveWatchSystemParameter()
@@ -5189,35 +5218,6 @@ bool AceContainer::SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, 
         return false;
     }
     return true;
-}
-
-void AceContainer::SubscribeHighContrastChange()
-{
-    if (!Rosen::RSUIDirector::IsHybridRenderEnabled()) {
-        return;
-    }
-    if (highContrastObserver_ != nullptr) {
-        return;
-    }
-    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
-    if (!config.InitializeContext()) {
-        return;
-    }
-    highContrastObserver_ = std::make_shared<HighContrastObserver>(WeakClaim(this));
-    config.SubscribeConfigObserver(AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
-}
-
-void AceContainer::UnsubscribeHighContrastChange()
-{
-    if (highContrastObserver_ == nullptr) {
-        return;
-    }
-    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
-    if (config.InitializeContext()) {
-        config.UnsubscribeConfigObserver(
-            AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
-    }
-    highContrastObserver_ = nullptr;
 }
 
 void AceContainer::DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,

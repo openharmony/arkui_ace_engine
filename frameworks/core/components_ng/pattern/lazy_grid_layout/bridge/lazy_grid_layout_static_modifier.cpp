@@ -39,7 +39,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
     return AceType::RawPtr(frameNode);
 }
 
-void SetRowsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void SetRowsGapImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -50,7 +50,7 @@ void SetRowsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
     LazyGridLayoutModelStatic::SetRowGap(frameNode, convValue);
 }
 
-void SetColumnsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void SetColumnsGapImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

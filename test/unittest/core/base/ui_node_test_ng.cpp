@@ -1519,8 +1519,8 @@ HWTEST_F(UINodeTestNg, UINodeTestAttachToMainTreeUpdateDrawLayoutChildObserver00
      * @tc.expected: child observer is updated from parent during attach
      */
     parent->AttachToMainTree(false, AceType::RawPtr(context));
-    EXPECT_EQ(child->GetObserverParentForDrawChildren(), nullptr);
-    EXPECT_EQ(child->GetObserverParentForLayoutChildren(), nullptr);
+    EXPECT_NE(child->GetObserverParentForDrawChildren(), nullptr);
+    EXPECT_NE(child->GetObserverParentForLayoutChildren(), nullptr);
 
     parent->DetachFromMainTree();
     context->weakFrontend_ = weakFrontendBackup;

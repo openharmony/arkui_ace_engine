@@ -96,6 +96,9 @@ public:
 
 void StepperTestNg::SetUpTestSuite()
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: stepper requires JS engine (ets_runtime) for NodeModifier/DynamicModule";
+#endif
     MockPipelineContext::SetUp();
     // set StepperTheme to themeManager before using themeManager to get StepperTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();

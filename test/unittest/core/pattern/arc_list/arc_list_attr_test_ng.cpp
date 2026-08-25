@@ -16,6 +16,7 @@
 #include "arc_list_test_ng.h"
 
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_static.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,6 +58,40 @@ void UpdateDisableEventState(
 class ArcListAttrTestNg : public ArcListTestNg {
 public:
 };
+
+/**
+ * @tc.name: ResetArcScrollBarStyle001
+ * @tc.desc: Test resetting ArcList scroll bar color and width to theme values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ResetArcScrollBarStyle001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetListScrollBar(AceType::RawPtr(frameNode_), static_cast<int32_t>(DisplayMode::ON));
+    CreateDone();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    ASSERT_EQ(scrollBar->GetShapeMode(), ShapeMode::ROUND);
+    auto scrollBarTheme = frameNode_->GetContext()->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(scrollBarTheme, nullptr);
+
+    scrollBar->SetForegroundColor(Color::RED, true);
+    scrollBar->SetArcActiveBackgroundWidth(Dimension(20.0_vp));
+    scrollBar->SetArcActiveScrollBarWidth(Dimension(18.0_vp));
+
+    ScrollableModelStatic::SetScrollBarColor(AceType::RawPtr(frameNode_), std::nullopt);
+    ScrollableModelStatic::SetScrollBarWidth(AceType::RawPtr(frameNode_), std::nullopt);
+
+    EXPECT_FALSE(paintProperty_->GetScrollBarColor().has_value());
+    EXPECT_FALSE(paintProperty_->GetScrollBarWidth().has_value());
+    EXPECT_EQ(scrollBar->GetArcForegroundColor(), scrollBarTheme->GetArcForegroundColor());
+    EXPECT_EQ(scrollBar->GetArcActiveBackgroundWidth(), scrollBarTheme->GetArcActiveBackgroundWidth());
+    EXPECT_EQ(scrollBar->GetArcActiveScrollBarWidth(), scrollBarTheme->GetArcActiveScrollBarWidth());
+    EXPECT_EQ(scrollBar->GetActiveWidth(), scrollBarTheme->GetNormalWidth());
+    EXPECT_EQ(scrollBar->GetTouchWidth(), scrollBarTheme->GetNormalWidth());
+    EXPECT_EQ(scrollBar->GetNormalWidth(), scrollBarTheme->GetNormalWidth());
+}
 
 /**
  * @tc.name: ArcListLayoutProperty001

@@ -34,11 +34,12 @@ namespace OHOS::Ace::NG {
 
 struct SvgTranslateProcessInfo {
     SvgTranslateProcessInfo() = default;
-    SvgTranslateProcessInfo(RefPtr<SvgNode> currentNode, const SkDOM::Node* xmlNode)
-        : currentNode(currentNode), xmlNode(xmlNode)
+    SvgTranslateProcessInfo(RefPtr<SvgNode> currentNode, const SkDOM::Node* xmlNode, int32_t depth = 0)
+        : currentNode(currentNode), xmlNode(xmlNode), depth(depth)
     {}
     RefPtr<SvgNode> currentNode = nullptr; // The SVG node currently being processed
     const SkDOM::Node* xmlNode = nullptr;
+    int32_t depth = 0; // Current nesting depth
 };
 
 class SvgDom : public SvgDomBase {

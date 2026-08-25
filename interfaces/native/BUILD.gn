@@ -139,6 +139,7 @@ ohos_shared_library("ace_ndk") {
       "image_framework:image_native",
       "ipc:ipc_core",
       "napi:ace_napi",
+      "node:node_header_notice",
       "resource_management:global_resmgr",
       "runtime_core:ani",
       "udmf:libudmf",

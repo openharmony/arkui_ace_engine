@@ -40,7 +40,9 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/rich_editor/bridge/richeditor_model_impl.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/common_text_constants.h"
@@ -53,8 +55,10 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
+#include "core/components_ng/pattern/text/styled_string_change_value.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_richeditor_binding.h"
@@ -68,25 +72,6 @@ constexpr int32_t INHERIT_INDEX = 2;
 constexpr std::string_view DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 static std::atomic<int32_t> spanStringControllerStoreIndex_;
 
-RichEditorModel* RichEditorModel::GetInstance()
-{
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-#ifdef NG_BUILD
-            instance_.reset(new NG::RichEditorModelNG());
-#else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RichEditorModelNG());
-            } else {
-                // empty implementation
-                instance_.reset(new Framework::RichEditorModelImpl());
-            }
-#endif
-        }
-    }
-    return instance_.get();
-}
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -253,7 +238,8 @@ JSRef<JSObject> JSRichEditor::CreateJsTextBackgroundStyle(const TextBackgroundSt
     return textBackgroundStyleObj;
 }
 
-JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& textStyleResult)
+JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& textStyleResult,
+    std::optional<float> envFontScale)
 {
     JSRef<JSObject> paragraphStyleObj = JSRef<JSObject>::New();
     paragraphStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
@@ -267,7 +253,7 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
     }
     if (textStyleResult.paragraphSpacing.has_value()) {
         paragraphStyleObj->SetProperty<double>("paragraphSpacing",
-            textStyleResult.paragraphSpacing.value().ConvertToFp());
+            textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale));
     }
     if (textStyleResult.textVerticalAlign.has_value()) {
         paragraphStyleObj->SetProperty<int32_t>("textVerticalAlign",
@@ -386,7 +372,8 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     return obj;
 }
 
-JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resultObject)
+JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resultObject,
+    std::optional<float> envFontScale)
 {
     JSRef<JSArray> offsetArray = JSRef<JSArray>::New();
     JSRef<JSArray> spanRangeArray = JSRef<JSArray>::New();
@@ -400,17 +387,18 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     spanPositionObj->SetPropertyObject("spanRange", spanRangeArray);
     resultObj->SetPropertyObject("offsetInSpan", offsetArray);
     resultObj->SetPropertyObject("spanPosition", spanPositionObj);
-    SetJSSpanResultObject(resultObj, resultObject);
+    SetJSSpanResultObject(resultObj, resultObject, envFontScale);
     return resultObj;
 }
 
-void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject)
+void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject,
+    std::optional<float> envFontScale)
 {
     if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
         resultObj->SetProperty<std::u16string>("previewText", resultObject.previewText);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
-        resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle));
+        resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle, envFontScale));
         SetJSUrlStyle(resultObject.urlAddress, resultObj);
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
@@ -431,7 +419,8 @@ void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const Resul
     }
 }
 
-JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo)
+JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo,
+    std::optional<float> envFontScale)
 {
     uint32_t idx = 0;
 
@@ -441,7 +430,7 @@ JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo)
 
     const std::list<ResultObject>& spanObjectList = selectInfo.GetSelection().resultObjects;
     for (const ResultObject& spanObject : spanObjectList) {
-        spanObjectArray->SetValueAt(idx++, CreateJSSpanResultObject(spanObject));
+        spanObjectArray->SetValueAt(idx++, CreateJSSpanResultObject(spanObject, envFontScale));
     }
 
     selectionArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[0])));
@@ -496,7 +485,6 @@ bool JSRichEditor::ParseJsSymbolColorWithResource(const JSRef<JSVal>& jsValue, s
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
 {
     CHECK_NULL_RETURN(jsValue->IsArray(), false);
-
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
     for (size_t i = 0; i < array->Length(); i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
@@ -518,13 +506,19 @@ void JSRichEditor::SetRichEditorKeyboardAppearanceConfig(const JSCallbackInfo& i
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_VOID(vm && info.Length() > 1);
     auto jsTargetNode = info[0];
-    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto localHandle = jsTargetNode->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return;
+    }
+    auto* targetNodePtr = localHandle->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(info[1]->IsObject());
 
     NG::KeyboardAppearanceConfig config = JSTextField::ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
-    NG::RichEditorModelNG::SetKeyboardAppearanceConfig(frameNode, config);
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->setKeyboardAppearanceConfig(frameNode, config);
 }
 
 ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute)
@@ -595,10 +589,18 @@ void JSRichEditorController::ParseJsCustomSymbolStyle(const JSRef<JSVal>& jsValu
     }
 }
 
+ColorMode JSRichEditorBaseController::GetColorMode() const
+{
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_RETURN(controller, ColorMode::COLOR_MODE_UNDEFINED);
+    return controller->GetColorMode();
+}
+
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    COLOR_MODE_LOCK(GetColorMode());
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
@@ -911,6 +913,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     }
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_VOID(customModifier);
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
@@ -926,7 +930,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+            auto host = richEditorController ? customModifier->getHost(richEditorController) : nullptr;
             auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
@@ -972,6 +976,8 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
     }
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_VOID(customModifier);
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
@@ -986,7 +992,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+            auto host = richEditorController ? customModifier->getHost(richEditorController) : nullptr;
             auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
@@ -1003,6 +1009,12 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
 
 JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const SelectionInfo& info)
 {
+    auto controller = controllerWeak_.Upgrade();
+    auto baseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(customModifier, JSRef<JSVal>());
+    auto envFontScale = baseController ? customModifier->getEnvFontScale(baseController) : std::nullopt;
+
     uint32_t idx = 0;
 
     JSRef<JSArray> spanObjectArray = JSRef<JSArray>::New();
@@ -1010,7 +1022,7 @@ JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const SelectionInfo& info
 
     const std::list<ResultObject>& spanObjectList = info.GetSelection().resultObjects;
     for (const ResultObject& spanObject : spanObjectList) {
-        spanObjectArray->SetValueAt(idx++, JSRichEditor::CreateJSSpanResultObject(spanObject));
+        spanObjectArray->SetValueAt(idx++, JSRichEditor::CreateJSSpanResultObject(spanObject, envFontScale));
     }
 
     return JSRef<JSVal>::Cast(spanObjectArray);
@@ -1162,6 +1174,7 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
             placeholderSpan.offset = placeholderOffset;
         }
     }
+    COLOR_MODE_LOCK(GetColorMode());
     JSRef<JSVal> colorMetrics = placeholderOptionObject->GetProperty("dragBackgroundColor");
     RefPtr<ResourceObject> resourceObject;
     if (Color dragBackgroundColor; !colorMetrics->IsNull() &&
@@ -1205,8 +1218,12 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     CHECK_NULL_VOID(richEditorController);
+    auto baseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    auto envFontScale = baseController ? customModifier->getEnvFontScale(baseController) : std::nullopt;
     SelectionInfo value = richEditorController->GetSelectionSpansInfo();
-    args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
+    args.SetReturnValue(JSRichEditor::CreateJSSelection(value, envFontScale));
 }
 
 void JSRichEditorController::JSBind(BindingTarget globalObj)
@@ -1392,6 +1409,7 @@ bool JSRichEditorBaseControllerBinding::ParseParagraphStyle(
     const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    COLOR_MODE_LOCK(GetColorMode());
     if (styleObject->IsUndefined()) {
         return false;
     }
@@ -1462,7 +1480,9 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     }
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
-    auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    auto host = richEditorController ? customModifier->getHost(richEditorController) : nullptr;
     auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
@@ -1641,7 +1661,9 @@ void JSRichEditorBaseControllerBinding::SetTypingStyle(const JSCallbackInfo& inf
         return;
     }
     auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
-    auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    auto host = richEditorController ? customModifier->getHost(richEditorController) : nullptr;
     auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     bool isUndefined = false;
@@ -1650,7 +1672,7 @@ void JSRichEditorBaseControllerBinding::SetTypingStyle(const JSCallbackInfo& inf
         isUndefined = richEditorTextStyle->IsUndefined();
         typingStyle_.ResetStyle();
         if (isBelowApi12) {
-            typingStyle_.updateTextColor = theme->GetTextStyle().GetTextColor();
+            typingStyle_.updateTextColor = textStyle.GetTextColor();
         }
         if (!richEditorTextStyle->IsUndefined()) {
             ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
@@ -1717,6 +1739,7 @@ void JSRichEditorBaseControllerBinding::ParseJsTextStyle(
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
+    COLOR_MODE_LOCK(GetColorMode());
     Color textColor;
     RefPtr<ResourceObject> colorResObj;
     if (!fontColor->IsNull() && JSRichEditor::ParseJsColorWithResource(fontColor, textColor, colorResObj)) {

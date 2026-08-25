@@ -17,7 +17,11 @@ group("frameworks_unittest") {
   testonly = true
   deps = []
   if (is_host_product) {
-    deps += [ "core/drawable:drawable_descriptor_test" ]
+    deps += [
+      "base/ressched:ressched_report_test",
+      "core/common:color_inverter_test",
+      "core/drawable:drawable_descriptor_test",
+    ]
   } else {
     deps += [
       "base/perfmonitor:perf_monitor_test",

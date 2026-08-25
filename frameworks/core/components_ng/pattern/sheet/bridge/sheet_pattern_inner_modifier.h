@@ -111,6 +111,8 @@ struct ArkUISheetPatternInnerModifier {
     void (*sheetSheetSpringBack)(const RefPtr<FrameNode>& sheetNode);
     void (*sheetDismissSheetAction)(const RefPtr<FrameNode>& sheetNode);
     bool (*sheetIsPresentationPattern)(const RefPtr<Pattern>& pattern);
+    void (*sheetSetSheetBlurSnapshotFreeze)(const RefPtr<FrameNode>& sheetPageNode, const SheetStyle& sheetStyle,
+        bool isPartialUpdate);
 };
 
 namespace InnerModifier {

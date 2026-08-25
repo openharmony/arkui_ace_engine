@@ -16,8 +16,10 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
 #include "core/components_ng/pattern/xcomponent/bridge/xcomponent_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#endif
 #endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/common/container.h"
@@ -66,6 +68,7 @@ FrameNode* GetFrameNode(ArkUINodeHandle node)
 }
 
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
 Framework::XComponentModelImpl* GetModelImpl()
 {
     static Framework::XComponentModelImpl impl;
@@ -615,7 +618,8 @@ void SetXComponentBlendApplyTypeImpl(ArkUINodeHandle /*node*/, ArkUI_Int32 blend
 }
 
 void CreateWithOpacityResourceObjImpl(ArkUINodeHandle node, void* opacityResObj) {}
-#endif // XCOMPONENT_SUPPORTED
+#endif
+#endif
 
 void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
 {
@@ -635,7 +639,7 @@ void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color, ArkUI_Bo
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -651,7 +655,7 @@ void SetXComponentBackgroundColorWithColorSpace(
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -673,7 +677,7 @@ void SetXComponentBackgroundColorForHDR(ArkUINodeHandle node, ArkUI_Int32 colorS
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -704,7 +708,7 @@ void ResetXComponentBackgroundColor(ArkUINodeHandle node, ArkUI_Bool isJsView = 
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -1206,7 +1210,7 @@ void SetXComponentOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
@@ -1220,7 +1224,7 @@ void ResetXComponentOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
@@ -1260,7 +1264,7 @@ ArkUI_Int32 GetXComponentType(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return static_cast<ArkUI_Int32>(XComponentModelNG::GetXComponentType(frameNode));
+    return static_cast<ArkUI_Int32>(XComponentModelNG::GetType(frameNode));
 }
 
 ArkUI_Uint32 GetXComponentSurfaceWidth(ArkUINodeHandle node)
@@ -1423,7 +1427,7 @@ void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
         renderFitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
         renderFit = static_cast<RenderFit>(renderFitNumber);
     }
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
@@ -1502,7 +1506,7 @@ ArkUI_Bool GetXComponentEnableAnalyzer(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type != XComponentType::SURFACE && type != XComponentType::TEXTURE) {
         return false;
     }
@@ -1961,6 +1965,7 @@ void CreateController(std::shared_ptr<OHOS::Ace::InnerXComponentController>* con
 
 void LegacyNativeXComponentInit(void* taskPool, void* nativeXComponent, void* nativeXComponentImpl)
 {
+#ifndef CROSS_PLATFORM
 #ifdef XCOMPONENT_SUPPORTED
     auto* pool = reinterpret_cast<XComponentTaskPool*>(taskPool);
     CHECK_NULL_VOID(pool);
@@ -1970,6 +1975,7 @@ void LegacyNativeXComponentInit(void* taskPool, void* nativeXComponent, void* na
     CHECK_NULL_VOID(componentImpl);
     pool->NativeXComponentInit(component, AceType::WeakClaim(componentImpl));
 #endif
+#endif
 }
 
 void ParseParams(void* runtimeCallInfo, ArkUI_Params& params)
@@ -1978,7 +1984,7 @@ void ParseParams(void* runtimeCallInfo, ArkUI_Params& params)
     XComponentBridge::ParseParams(runtimeCallInfoPtr, params);
 }
 
-void SetControllerCallback(void* runtimeCallInfo, ArkUINodeHandle* node)
+void SetControllerCallback(void* runtimeCallInfo, ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto* runtimeCallInfoPtr = reinterpret_cast<ArkUIRuntimeCallInfo*>(runtimeCallInfo);
@@ -1992,6 +1998,7 @@ const ArkUIXComponentModifier* GetXComponentDynamicModifier()
     static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
     if (!isCurrentUseNewPipeline) {
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUIXComponentModifier modifier = {
             .setXComponentEnableAnalyzer = SetXComponentEnableAnalyzerImpl,
@@ -2105,7 +2112,8 @@ const ArkUIXComponentModifier* GetXComponentDynamicModifier()
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
-#endif // XCOMPONENT_SUPPORTED
+#endif
+#endif
     }
 
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line

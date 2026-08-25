@@ -82,6 +82,7 @@ if (is_arkui_x) {
     }
     public_configs = [ ":drawable_config" ]
     branch_protector_ret = "pac_ret"
+    branch_protector_frt = "bti"
 
     configs = [ "$ace_root:ace_config" ]
 
@@ -99,6 +100,7 @@ if (is_arkui_x) {
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
 
     defines = [ "PICTURE_DRAWABLE_ENABLED" ]

@@ -20,6 +20,7 @@
 #include <functional>
 #include <map>
 #include <list>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 
@@ -31,6 +32,7 @@ class MemoryManager : public virtual AceType {
     DECLARE_ACE_TYPE(MemoryManager, AceType);
 public:
     using RecycleImageByPageCallback = std::function<RefPtr<FrameNode>()>;
+    using OnNavDestinationHiddenChangeCallback = std::function<void(bool)>;
     MemoryManager();
     ~MemoryManager() = default;
 
@@ -41,6 +43,10 @@ public:
     void RebuildImageByPage(const RefPtr<FrameNode>& node);
     void PostMemRecycleTask();
 
+    bool RegisterNavDestinationHiddenChange(const RefPtr<FrameNode>& imageNode,
+        OnNavDestinationHiddenChangeCallback&& callback);
+    void UnregisterNavDestinationHiddenChange(int32_t imageNodeId);
+
 private:
     void RebuildImage(const RefPtr<UINode>& node);
     void RecycleImage(const RefPtr<UINode>& node, int& recycleNum);
@@ -50,6 +56,9 @@ private:
 
     std::list<WeakPtr<FrameNode>> pageNodes_;
     bool isTrimMemWork_ = false;
+
+    // imageNodeId -> NavDestination WeakPtr, for O(1) unregister without traversal
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> imageNavDestMap_;
 };
 } // namespace OHOS::Ace::NG
 

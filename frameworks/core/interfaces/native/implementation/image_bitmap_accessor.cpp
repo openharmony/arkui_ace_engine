@@ -61,6 +61,10 @@ Ark_ImageBitmap Construct1Impl(const Ark_Union_Resource_image_PixelMap_String* s
             peer->SetOptions("", src->pixelMap);
         },
         []() {});
+    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
+    if (optUnit) {
+        peer->SetUnit(optUnit.value());
+    }
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

@@ -29,8 +29,15 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "ui/properties/ui_material_structs.h"
+#include "core/components_ng/render/adapter/rosen_effect_converter.h"
+#include "core/components_ng/render/ui_material_filter_creator.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_filter_to_para.h"
+#endif
 #include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -50,6 +57,7 @@ constexpr float AGE_SCALE_NUMBER = 1.0f;
 constexpr float AGE_BUTTONS_LAYOUT_HEIGHT_RATE = 15.0f;
 const int32_t PRIMARY_BUTTON_NUMBER = 1;
 const int32_t SECONDARY_BUTTON_NUMBER = 2;
+const char BUTTON_ETS_TAG[] = "Button";
 
 OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 {
@@ -194,6 +202,38 @@ bool BubbleView::SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, co
     // Normal processing for other cases
     return ApplySystemMaterialForBubble(bubbleNode, systemMaterial, renderContext);
 }
+
+#if defined(ENABLE_ROSEN_BACKEND)
+constexpr float REFRACT_PARAMS_FIRST = -0.03f;
+constexpr float REFRACT_PARAMS_SECOND = 0.4f;
+constexpr float REFRACT_PARAMS_THIRD = 0.13f;
+constexpr size_t REFRACT_PARAMS_FIRST_INDEX = 0;
+constexpr size_t REFRACT_PARAMS_SECOND_INDEX = 1;
+constexpr size_t REFRACT_PARAMS_THIRD_INDEX = 2;
+void BubbleView::ApplyBubbleRefractParam(const RefPtr<FrameNode>& bubbleNode)
+{
+    CHECK_NULL_VOID(bubbleNode);
+    auto renderContext = bubbleNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto immersiveConfig = renderContext->GetImmersiveMaterialConfig();
+    if (!immersiveConfig.has_value()) {
+        return;
+    }
+    auto filter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(immersiveConfig.value());
+    CHECK_NULL_VOID(filter);
+    auto glassFilter = std::static_pointer_cast<Rosen::RSNGFrostedGlassFilter>(filter);
+    CHECK_NULL_VOID(glassFilter);
+    auto pipelineContext = bubbleNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    float dipScale = static_cast<float>(pipelineContext->GetDipScale());
+    auto refractParams = glassFilter->Getter<Rosen::FrostedGlassRefractParamsTag>()->Get();
+    refractParams[REFRACT_PARAMS_FIRST_INDEX] = REFRACT_PARAMS_FIRST * dipScale;
+    refractParams[REFRACT_PARAMS_SECOND_INDEX] = REFRACT_PARAMS_SECOND;
+    refractParams[REFRACT_PARAMS_THIRD_INDEX] = REFRACT_PARAMS_THIRD;
+    glassFilter->Setter<Rosen::FrostedGlassRefractParamsTag>(refractParams);
+    renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
+}
+#endif
 
 bool BubbleView::ShouldHandleLowEndImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial)
 {
@@ -438,9 +478,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         // Set SystemMaterial first, before updating background color, blur style and shadow
         bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(child, param);
         bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
-        if (isUserSetMaterial) {
-            renderContext->SetClipToBounds(true);
-        }
+#if defined(ENABLE_ROSEN_BACKEND)
+        ApplyBubbleRefractParam(child);
+#endif
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
@@ -560,9 +600,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         // Set SystemMaterial first, before updating background color, blur style and shadow
         bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(columnNode, param);
         popupPattern->SetIsUserSetMaterial(isUserSetMaterial);
-        if (isUserSetMaterial) {
-            columnRenderContext->SetClipToBounds(true);
-        }
+#if defined(ENABLE_ROSEN_BACKEND)
+        ApplyBubbleRefractParam(columnNode);
+#endif
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
@@ -899,9 +939,9 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(childNode, param);
     bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
-    if (isUserSetMaterial) {
-        renderContext->SetClipToBounds(true);
-    }
+#if defined(ENABLE_ROSEN_BACKEND)
+    ApplyBubbleRefractParam(childNode);
+#endif
     // Clear SystemMaterial when transitioning from having material to no material
     if (wasUserSetMaterial && !isUserSetMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(childNode), nullptr);
@@ -1194,12 +1234,15 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
     CHECK_NULL_RETURN(buttonModifier, nullptr);
-    auto nodeHandle = buttonModifier->createFrameNode(buttonId);
-    CHECK_NULL_RETURN(nodeHandle, nullptr);
-    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(nodeHandle));
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    // set button focus color
+    buttonPattern->setComponentButtonType(ComponentButtonType::POPUP);
+    buttonPattern->SetFocusBorderColor(focusColor);
+    auto buttonNode = FrameNode::CreateFrameNode(BUTTON_ETS_TAG, buttonId, AceType::Claim(buttonPattern));
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::POPUP);
-    buttonModifier->setFocusBorderColor(nodeHandle, focusColor);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    CHECK_NULL_RETURN(nodeHandle, nullptr);
     ACE_UINODE_TRACE(buttonNode);
 
     auto buttonProp = buttonNode->GetLayoutProperty();

@@ -354,10 +354,28 @@ bool SvgAttributesParser::CheckColorAlpha(const std::string& colorStr, Color& re
     std::smatch matches;
     if (std::regex_match(colorStr, matches, COLOR_WITH_ALPHA)) {
         if (matches.size() == RGBA_SUB_MATCH_SIZE) {
-            auto red = static_cast<uint8_t>(std::stoi(matches[1]));
-            auto green = static_cast<uint8_t>(std::stoi(matches[2]));
-            auto blue = static_cast<uint8_t>(std::stoi(matches[3]));
-            auto alpha = static_cast<double>(std::stod(matches[4]));
+            // Validate digit length before parsing to prevent std::out_of_range exceptions
+            // RGB components max 255 (3 digits), alpha is double type max ~1.8e308 (308 digits)
+            constexpr size_t MAX_RGB_DIGITS = 3;
+            constexpr size_t MAX_DOUBLE_DIGITS = 308;
+            constexpr size_t RGBA_MATCH_RED = 1;
+            constexpr size_t RGBA_MATCH_GREEN = 2;
+            constexpr size_t RGBA_MATCH_BLUE = 3;
+            constexpr size_t RGBA_MATCH_ALPHA = 4;
+            if (matches[RGBA_MATCH_RED].length() > MAX_RGB_DIGITS ||
+                matches[RGBA_MATCH_GREEN].length() > MAX_RGB_DIGITS ||
+                matches[RGBA_MATCH_BLUE].length() > MAX_RGB_DIGITS ||
+                matches[RGBA_MATCH_ALPHA].length() > MAX_DOUBLE_DIGITS) {
+                LOGW("CheckColorAlpha rejected, numeric value too long: r=%{public}zu g=%{public}zu b=%{public}zu "
+                     "a=%{public}zu",
+                    matches[RGBA_MATCH_RED].length(), matches[RGBA_MATCH_GREEN].length(),
+                    matches[RGBA_MATCH_BLUE].length(), matches[RGBA_MATCH_ALPHA].length());
+                return false;
+            }
+            auto red = static_cast<uint8_t>(std::stoi(matches[RGBA_MATCH_RED]));
+            auto green = static_cast<uint8_t>(std::stoi(matches[RGBA_MATCH_GREEN]));
+            auto blue = static_cast<uint8_t>(std::stoi(matches[RGBA_MATCH_BLUE]));
+            auto alpha = static_cast<double>(std::stod(matches[RGBA_MATCH_ALPHA]));
             // Scale up from 0~1.0 to 255
             result = Color::FromARGB(static_cast<uint8_t>(std::min(MAX_ALPHA, alpha)) * 0xff, red, green, blue);
             return true;

@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/sheet/sheet_manager.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #endif

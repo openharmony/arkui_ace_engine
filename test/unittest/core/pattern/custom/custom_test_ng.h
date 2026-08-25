@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/custom/custom_app_bar_node.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

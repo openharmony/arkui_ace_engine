@@ -642,9 +642,11 @@ ArkUINativeModuleValue GridRowBridge::SetOnBreakpointChange(ArkUIRuntimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, frameNode, isJsView,
+    std::function<void(const std::string&)> callback = [frameNode, isJsView,
         execCtx = Framework::JsiExecutionContext(vm),
         func = panda::CopyableGlobal(vm, func)](const std::string& changeStr) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         auto invokeCallback = [&]() {
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));

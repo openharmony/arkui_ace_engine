@@ -72,6 +72,9 @@ ohos_shared_library("navpushpathhelper") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "node:node_header_notice",
+    "libuv:uv",
+    "ets_runtime:libark_jsruntime",
   ]
 
   relative_install_dir = "module/atomicservice"

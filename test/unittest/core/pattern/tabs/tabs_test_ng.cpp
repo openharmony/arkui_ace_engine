@@ -760,6 +760,43 @@ HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CustomAnimationTest003
+ * @tc.desc: test synchronous custom animation finish clears content change transition state
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, CustomAnimationTest003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetIsCustomAnimation(true);
+    model.SetOnCustomAnimation([](int32_t from, int32_t to) -> TabContentAnimatedTransition {
+        TabContentAnimatedTransition transitionInfo;
+        transitionInfo.transition = [](const RefPtr<TabContentTransitionProxy>& proxy) {
+            proxy->FinishTransition();
+        };
+        return transitionInfo;
+    });
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    auto pipeline = swiperNode_->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto contentChangeManager = pipeline->GetContentChangeManager();
+    ASSERT_NE(contentChangeManager, nullptr);
+    contentChangeManager->currentContentChangeConfig_ = ContentChangeConfig();
+    contentChangeManager->transitioningNodes_.clear();
+    contentChangeManager->changedSwiperNodes_.clear();
+    swiperPattern_->customAnimationToIndex_ = 1;
+    swiperPattern_->indexsInAnimation_.insert(1);
+
+    swiperPattern_->TriggerCustomContentTransitionEvent(0, 1);
+
+    EXPECT_FALSE(contentChangeManager->IsTransitioning());
+    contentChangeManager->currentContentChangeConfig_.reset();
+    contentChangeManager->transitioningNodes_.clear();
+    contentChangeManager->changedSwiperNodes_.clear();
+}
+
+/**
  * @tc.name: DragSwiper001
  * @tc.desc: Could drag swiper, change tabBar index
  * @tc.type: FUNC

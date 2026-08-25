@@ -32,7 +32,10 @@ template("napi_imagegeneration_static") {
     if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
     } else {
-      external_deps += [ "napi:ace_napi" ]
+      external_deps += [
+        "napi:ace_napi",
+        "node:node_header_notice",
+      ]
     }
 
     if (use_hilog) {

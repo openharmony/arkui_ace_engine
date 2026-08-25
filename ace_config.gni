@@ -104,9 +104,6 @@ declare_args() {
 
   #Enable material param customized
   ace_engine_feature_enable_material_customized = false
-
-  # Enable reduce eh_frame only for ArkUI-X release.
-  ace_engine_enable_reduce_eh_frame = is_arkui_x && runtime_mode == "release"
 }
 
 enable_dump_drawcmd = false
@@ -132,6 +129,7 @@ vpe_enabled = false
 if (defined(global_parts_info.multimedia_video_processing_engine)) {
   vpe_enabled = true
 }
+native_root = "${ace_root}/frameworks/core/interfaces/native"
 
 if (!defined(aosp_libs_dir)) {
   aosp_libs_dir = "//prebuilts/aosp_prebuilt_libs/asdk_libs"
@@ -297,7 +295,7 @@ if (defined(global_parts_info.multimedia_audio_framework)) {
   enable_audio_framework = false
 }
 
-if (defined(global_parts_info.thirdparty_qrcodegen) || is_arkui_x) {
+if (defined(global_parts_info.commonlibrary_qrcode_generator) || is_arkui_x) {
   qrcodegen_support = true
   ace_common_defines += [ "QRCODEGEN_SUPPORT" ]
 } else {

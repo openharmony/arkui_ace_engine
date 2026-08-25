@@ -148,6 +148,7 @@ public:
 private:
     void FireJSChangeEvent(int32_t preIndex, int32_t index);
     void NotifySwiperObserver(const RefPtr<FrameNode>& hostNode, int32_t index);
+    void ContentChangeOnTransitionEnd() const;
 
     Direction direction_;
     std::list<ChangeEventPtr> unselectedEvents_;

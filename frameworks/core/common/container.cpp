@@ -454,30 +454,32 @@ Window* Container::GetWindow() const
 
 bool Container::LessThanAPIVersion(PlatformVersion version)
 {
-    return static_cast<int32_t>(version) < 15
-               ? PipelineBase::GetCurrentContext() &&
-                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
-               : LessThanAPITargetVersion(version);
+    if (static_cast<int32_t>(version) >= 15) {
+        return LessThanAPITargetVersion(version);
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    return pipeline && pipeline->GetMinPlatformVersion() < static_cast<int32_t>(version);
 }
 
 bool Container::GreatOrEqualAPIVersion(PlatformVersion version)
 {
-    return static_cast<int32_t>(version) < 15
-               ? PipelineBase::GetCurrentContext() &&
-                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
-               : GreatOrEqualAPITargetVersion(version);
+    if (static_cast<int32_t>(version) >= 15) {
+        return GreatOrEqualAPITargetVersion(version);
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    return pipeline && pipeline->GetMinPlatformVersion() >= static_cast<int32_t>(version);
 }
 
 bool Container::LessThanAPIVersionWithCheck(PlatformVersion version)
 {
-    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
-           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() < static_cast<int32_t>(version);
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    return pipeline && pipeline->GetMinPlatformVersion() < static_cast<int32_t>(version);
 }
 
 bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
 {
-    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
-           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    return pipeline && pipeline->GetMinPlatformVersion() >= static_cast<int32_t>(version);
 }
 
 sptr<IRemoteObject> Container::GetToken()

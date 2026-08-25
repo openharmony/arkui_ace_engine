@@ -106,7 +106,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_LazyNodeWithForEach_ChildrenManagemen
      */
     lazyNode->SetTotalCount(TOTAL_COUNT);
     SetCallbacksForTest(lazyNode,
-        [&forEachNode](int32_t index) -> RefPtr<UINode> {
+        [&forEachNode](int32_t index, bool skipCreate) -> RefPtr<UINode> {
             // Return ForEach node as child
             return forEachNode;
         },
@@ -148,7 +148,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_DragAcrossNestedComponentsTest, TestS
      */
     lazyNode->SetTotalCount(TOTAL_COUNT);
     SetCallbacksForTest(lazyNode,
-        [&forEachNode](int32_t index) -> RefPtr<UINode> {
+        [&forEachNode](int32_t index, bool skipCreate) -> RefPtr<UINode> {
             return forEachNode;
         },
         [](int32_t, int32_t, int32_t, int32_t, bool) {}
@@ -185,7 +185,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_DataChangePropagatesToNestedNodesTest
     bool updateRangeCalled = false;
     lazyNode->SetTotalCount(TOTAL_COUNT);
     SetCallbacksForTest(lazyNode,
-        [&forEachNode](int32_t index) -> RefPtr<UINode> {
+        [&forEachNode](int32_t index, bool skipCreate) -> RefPtr<UINode> {
             return forEachNode;
         },
         [&updateRangeCalled](int32_t, int32_t, int32_t, int32_t, bool) { updateRangeCalled = true; }
@@ -282,7 +282,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_ComplexNestedStructure_LifecycleTest,
 
     lazyNode->SetTotalCount(INDEX_1);
     SetCallbacksForTest(lazyNode,
-        [&forEachNode](int32_t index) -> RefPtr<UINode> {
+        [&forEachNode](int32_t index, bool skipCreate) -> RefPtr<UINode> {
             return forEachNode;
         },
         [](int32_t, int32_t, int32_t, int32_t, bool) {}

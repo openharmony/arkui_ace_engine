@@ -18,6 +18,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/text_input/bridge/arkts_native_text_input_bridge.h"
+#include "core/components_ng/pattern/text_input/bridge/text_input_custom_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 #ifdef INCLUDE_GENERATED_SOURCES
@@ -35,6 +36,7 @@ namespace NG {
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputDynamicModifier();
 const CJUITextInputModifier* GetCJUITextInputDynamicModifier();
+const ArkUITextInputCustomModifier* GetTextInputCustomModifier();
 }
 
 #ifdef INCLUDE_GENERATED_SOURCES
@@ -76,7 +78,7 @@ void* TextInputDynamicModule::GetModel()
 
 const void* TextInputDynamicModule::GetCustomModifier(const std::string& name)
 {
-    return nullptr;
+    return NG::NodeModifier::GetTextInputCustomModifier();
 }
 
 } // namespace OHOS::Ace

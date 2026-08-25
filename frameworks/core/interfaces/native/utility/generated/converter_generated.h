@@ -1460,7 +1460,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_Array_LengthMetrics& src)
+                   const Ark_Union_LengthMetricsProxy_Array_LengthMetricsProxy& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1475,7 +1475,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_F64& src)
+                   const Ark_Union_LengthMetricsProxy_F64& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1490,7 +1490,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_String& src)
+                   const Ark_Union_LengthMetricsProxy_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2394,7 +2394,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_Length& src)
+                   const Ark_Union_LengthMetricsProxy_Length& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2885,7 +2885,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths& src)
+                   const Ark_Union_EdgeWidths_LengthMetricsProxy_LocalizedEdgeWidths& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3008,7 +3008,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_BorderRadiuses& src)
+                   const Ark_Union_LengthMetricsProxy_BorderRadiuses& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3023,7 +3023,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses& src)
+                   const Ark_Union_LengthMetricsProxy_BorderRadiuses_LocalizedBorderRadiuses& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3039,7 +3039,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_LeadingMarginPlaceholder& src)
+                   const Ark_Union_LengthMetricsProxy_LeadingMarginPlaceholder& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3054,7 +3054,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_LengthMetrics_Padding& src)
+                   const Ark_Union_LengthMetricsProxy_Padding& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3131,7 +3131,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Padding_LengthMetrics_LocalizedPadding& src)
+                   const Ark_Union_Padding_LengthMetricsProxy_LocalizedPadding& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3647,6 +3647,7 @@ ASSIGN_OPT(Opt_ColoringStrategy)
 ASSIGN_OPT(Opt_ColorMetricsLinearGradient)
 ASSIGN_OPT(Opt_ColorShaderStyle)
 ASSIGN_OPT(Opt_ColorSpace)
+ASSIGN_OPT(Opt_colorSpaceManager_ColorSpace)
 ASSIGN_OPT(Opt_CommonModifier)
 ASSIGN_OPT(Opt_CommonShape)
 ASSIGN_OPT(Opt_CompetitionStrategy)
@@ -4076,6 +4077,7 @@ ASSIGN_OPT(Opt_SecurityComponentLayoutDirection)
 ASSIGN_OPT(Opt_SecurityComponentRoleType)
 ASSIGN_OPT(Opt_SeekMode)
 ASSIGN_OPT(Opt_SelectedMode)
+ASSIGN_OPT(Opt_SelectionContainerTextJoinStyle)
 ASSIGN_OPT(Opt_SelectStatus)
 ASSIGN_OPT(Opt_ShadowStyle)
 ASSIGN_OPT(Opt_ShadowType)
@@ -4098,6 +4100,7 @@ ASSIGN_OPT(Opt_SliderStyle)
 ASSIGN_OPT(Opt_SmartGestureAction)
 ASSIGN_OPT(Opt_SourceTool)
 ASSIGN_OPT(Opt_SourceType)
+ASSIGN_OPT(Opt_SpatialPositionMode)
 ASSIGN_OPT(Opt_SpringBackAction)
 ASSIGN_OPT(Opt_SslError)
 ASSIGN_OPT(Opt_SslErrorHandler)
@@ -4170,6 +4173,7 @@ ASSIGN_OPT(Opt_TextDecorationType)
 ASSIGN_OPT(Opt_TextDeleteDirection)
 ASSIGN_OPT(Opt_TextDirection)
 ASSIGN_OPT(Opt_TextEditControllerEx)
+ASSIGN_OPT(Opt_TextEncoding)
 ASSIGN_OPT(Opt_TextHeightAdaptivePolicy)
 ASSIGN_OPT(Opt_TextInputController)
 ASSIGN_OPT(Opt_TextInputStyle)
@@ -4316,6 +4320,7 @@ ASSIGN_OPT(Opt_arkui_component_common_Callback_Boolean_Void)
 ASSIGN_OPT(Opt_arkui_component_common_Callback_F64_Void)
 ASSIGN_OPT(Opt_arkui_component_common_Callback_I32_Void)
 ASSIGN_OPT(Opt_arkui_component_common_Callback_I64_Void)
+ASSIGN_OPT(Opt_arkui_component_common_Callback_Void_Void)
 ASSIGN_OPT(Opt_arkui_component_idlize_Callback_I32_Void)
 ASSIGN_OPT(Opt_Array_AcceptableFileType)
 ASSIGN_OPT(Opt_Array_AccessibilityCustomAction)
@@ -4358,7 +4363,7 @@ ASSIGN_OPT(Opt_Array_Layoutable)
 ASSIGN_OPT(Opt_Array_LayoutSafeAreaEdge)
 ASSIGN_OPT(Opt_Array_LayoutSafeAreaType)
 ASSIGN_OPT(Opt_Array_Length)
-ASSIGN_OPT(Opt_Array_LengthMetrics)
+ASSIGN_OPT(Opt_Array_LengthMetricsProxy)
 ASSIGN_OPT(Opt_Array_LocalizedBarrierStyle)
 ASSIGN_OPT(Opt_Array_Measurable)
 ASSIGN_OPT(Opt_Array_MenuElement)
@@ -4500,7 +4505,7 @@ ASSIGN_OPT(Opt_Callback_KeyEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_KeyEvent_Void)
 ASSIGN_OPT(Opt_Callback_Length_Void)
 ASSIGN_OPT(Opt_Callback_LengthMetrics)
-ASSIGN_OPT(Opt_Callback_LengthMetrics_Void)
+ASSIGN_OPT(Opt_Callback_LengthMetricsProxy_Void)
 ASSIGN_OPT(Opt_Callback_Long_Void)
 ASSIGN_OPT(Opt_Callback_Map_String_Opt_Object)
 ASSIGN_OPT(Opt_Callback_MarqueeState_Void)
@@ -4700,6 +4705,7 @@ ASSIGN_OPT(Opt_OnItemDragStartCallback)
 ASSIGN_OPT(Opt_OnLargestContentfulPaintCallback)
 ASSIGN_OPT(Opt_OnListScrollIndexCallback)
 ASSIGN_OPT(Opt_OnMenuItemClickCallback)
+ASSIGN_OPT(Opt_OnMenuItemClickWithTextCallback)
 ASSIGN_OPT(Opt_OnMicrophoneCaptureStateChangeCallback)
 ASSIGN_OPT(Opt_OnMoveHandler)
 ASSIGN_OPT(Opt_OnNativeEmbedObjectParamChangeCallback)
@@ -4843,6 +4849,7 @@ ASSIGN_OPT(Opt_BlankScreenDetails)
 ASSIGN_OPT(Opt_BlankScreenDetectionConfig)
 ASSIGN_OPT(Opt_Blender)
 ASSIGN_OPT(Opt_BlurOptions)
+ASSIGN_OPT(Opt_BlurSnapshotOptions)
 ASSIGN_OPT(Opt_BorderRadiuses_graphics)
 ASSIGN_OPT(Opt_BreakPoints)
 ASSIGN_OPT(Opt_BuilderNodeOptions)
@@ -4964,8 +4971,8 @@ ASSIGN_OPT(Opt_LargestContentfulPaint)
 ASSIGN_OPT(Opt_LayoutConstraint)
 ASSIGN_OPT(Opt_LazyForEachOptions)
 ASSIGN_OPT(Opt_LeadingMarginSpanDrawInfo)
-ASSIGN_OPT(Opt_LengthMetrics)
 ASSIGN_OPT(Opt_LengthMetricsCustom)
+ASSIGN_OPT(Opt_LengthMetricsProxy)
 ASSIGN_OPT(Opt_LinearGradientBlurOptions)
 ASSIGN_OPT(Opt_LinearGradientOptions)
 ASSIGN_OPT(Opt_LineSpacingOptions)
@@ -5074,6 +5081,8 @@ ASSIGN_OPT(Opt_ScrollAnimationOptions)
 ASSIGN_OPT(Opt_ScrollBarOptions)
 ASSIGN_OPT(Opt_ScrollEdgeOptions)
 ASSIGN_OPT(Opt_ScrollPageOptions)
+ASSIGN_OPT(Opt_SelectionContainerEditMenuOptions)
+ASSIGN_OPT(Opt_SelectionContainerMenuOptions)
 ASSIGN_OPT(Opt_SelectionOptions)
 ASSIGN_OPT(Opt_SizeTLengthMetrics)
 ASSIGN_OPT(Opt_SlideRange)
@@ -5164,9 +5173,9 @@ ASSIGN_OPT(Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy)
 ASSIGN_OPT(Opt_Union_image_PixelMap_ResourceStr)
 ASSIGN_OPT(Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource)
 ASSIGN_OPT(Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent)
-ASSIGN_OPT(Opt_Union_LengthMetrics_Array_LengthMetrics)
-ASSIGN_OPT(Opt_Union_LengthMetrics_F64)
-ASSIGN_OPT(Opt_Union_LengthMetrics_String)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_Array_LengthMetricsProxy)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_F64)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_String)
 ASSIGN_OPT(Opt_Union_MenuPreviewMode_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_NestedScrollOptions_NestedScrollOptionsExt)
 ASSIGN_OPT(Opt_Union_OutlineStyle_EdgeOutlineStyles)
@@ -5305,6 +5314,7 @@ ASSIGN_OPT(Opt_ParticleUpdaterOptionsInner)
 ASSIGN_OPT(Opt_PasswordIcon)
 ASSIGN_OPT(Opt_PluginComponentOptions)
 ASSIGN_OPT(Opt_PopupMaskType)
+ASSIGN_OPT(Opt_PreloadOptions)
 ASSIGN_OPT(Opt_RadioStyle)
 ASSIGN_OPT(Opt_RadiusItem)
 ASSIGN_OPT(Opt_RatingOptions)
@@ -5378,7 +5388,7 @@ ASSIGN_OPT(Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource)
 ASSIGN_OPT(Opt_Union_Length_Array_RadiusItem)
 ASSIGN_OPT(Opt_Union_Length_F64)
 ASSIGN_OPT(Opt_Union_Length_LayoutPolicy)
-ASSIGN_OPT(Opt_Union_LengthMetrics_Length)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_Length)
 ASSIGN_OPT(Opt_Union_MenuItemOptions_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors)
 ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors)
@@ -5499,7 +5509,7 @@ ASSIGN_OPT(Opt_Union_Dimension_Padding)
 ASSIGN_OPT(Opt_Union_Dimension_SizeOptions)
 ASSIGN_OPT(Opt_Union_EdgeOutlineWidths_Dimension)
 ASSIGN_OPT(Opt_Union_EdgeWidths_Length_LocalizedEdgeWidths)
-ASSIGN_OPT(Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths)
+ASSIGN_OPT(Opt_Union_EdgeWidths_LengthMetricsProxy_LocalizedEdgeWidths)
 ASSIGN_OPT(Opt_Union_F64_LeadingMarginPlaceholder)
 ASSIGN_OPT(Opt_Union_IconOptions_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_Length_Bindable_Length)
@@ -5507,15 +5517,15 @@ ASSIGN_OPT(Opt_Union_Length_BorderRadiuses)
 ASSIGN_OPT(Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses)
 ASSIGN_OPT(Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths)
 ASSIGN_OPT(Opt_Union_Length_GridRowSizeOption)
-ASSIGN_OPT(Opt_Union_LengthMetrics_BorderRadiuses)
-ASSIGN_OPT(Opt_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses)
-ASSIGN_OPT(Opt_Union_LengthMetrics_LeadingMarginPlaceholder)
-ASSIGN_OPT(Opt_Union_LengthMetrics_Padding)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_BorderRadiuses)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_BorderRadiuses_LocalizedBorderRadiuses)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_LeadingMarginPlaceholder)
+ASSIGN_OPT(Opt_Union_LengthMetricsProxy_Padding)
 ASSIGN_OPT(Opt_Union_OutlineRadiuses_Dimension)
 ASSIGN_OPT(Opt_Union_Padding_Dimension)
 ASSIGN_OPT(Opt_Union_Padding_Dimension_LocalizedPadding)
 ASSIGN_OPT(Opt_Union_Padding_Length_LocalizedPadding)
-ASSIGN_OPT(Opt_Union_Padding_LengthMetrics_LocalizedPadding)
+ASSIGN_OPT(Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding)
 ASSIGN_OPT(Opt_Union_Position_Alignment)
 ASSIGN_OPT(Opt_Union_Position_Edges_LocalizedEdges)
 ASSIGN_OPT(Opt_Union_Position_LocalizedPosition)

@@ -364,6 +364,7 @@ const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor();
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor();
 const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
 const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor();
+const GENERATED_ArkUISelectionContainerExtenderAccessor* GetSelectionContainerExtenderAccessor();
 const GENERATED_ArkUISheetDismissAccessor* GetSheetDismissAccessor();
 const GENERATED_ArkUISliderExtenderAccessor* GetSliderExtenderAccessor();
 const GENERATED_ArkUISpringBackActionAccessor* GetSpringBackActionAccessor();
@@ -721,6 +722,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSearchControllerAccessor,
         GetSearchOpsAccessor,
         GetSelectExtenderAccessor,
+        GetSelectionContainerExtenderAccessor,
         GetSheetDismissAccessor,
         GetSliderExtenderAccessor,
         GetSpringBackActionAccessor,

@@ -616,6 +616,10 @@ void XComponentPatternV2::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("isOpaque: ").append(isOpaque_ ? "true" : "false"));
+    if (renderContextForSurface_) {
+        DumpLog::GetInstance().AddDesc(std::string("isSelfDrawingNode: ")
+                .append(renderContextForSurface_->IsSelfDrawingNode() ? "true" : "false"));
+    }
 }
 
 void XComponentPatternV2::SetExpectedRateRange(int32_t min, int32_t max, int32_t expected)

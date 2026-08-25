@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,6 +106,8 @@ public:
      * @param eventCallback callback to be performed
      */
     void RegisterComponentChangeEventCallback(const EventCallback& eventCallback);
+
+    bool IsComponentChangeEventCallbackRegistered() const;
 
     /**
      * @description: register a callback when get inspector tree
@@ -264,6 +266,7 @@ public:
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
     void RegisterContentChangeCallback(
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback);
+    bool IsContentChangeCallbackRegistered() const;
     void UnregisterContentChangeCallback();
     void RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& callback);
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
@@ -271,7 +274,7 @@ public:
     void UnregisterPageSceneEventCallback();
     bool RegisterGetPageSceneCallback(const PageSceneEventCallback& eventCallback);
     void UnregisterGetPageSceneCallback();
-    void ReportPageSceneEvent(const std::string& sceneJson) override;
+    void ReportPageSceneEvent(const std::string& sceneJson, bool isGetResult = false) override;
 
     void SetEventHandler(std::shared_ptr<AppExecFwk::EventHandler> eventHandler);
 

@@ -574,13 +574,13 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> styl
 };
 
 // Valid values for attribute 'radius' of method 'activateCircleStyle'
-using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
+using LengthMetrictsTestStep = std::pair<Ark_LengthMetricsProxy, std::string>;
 static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = {
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
 };
 
 // Valid values for attribute 'enableWaveEffect' of method 'activateCircleStyle'
@@ -623,7 +623,7 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
     }
 
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
-        realInputValue.value.radius = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
+        realInputValue.value.radius = Converter::ArkValue<Opt_LengthMetricsProxy>(lenMetrics);
         modifier_->setActivateCircleStyle(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue,

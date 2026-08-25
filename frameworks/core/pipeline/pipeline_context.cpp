@@ -217,16 +217,20 @@ void PipelineContext::FlushBuild()
         vsyncListener_();
     }
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
+#endif
 
     isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
         isRebuildFinished_ = true;
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushBuild();
         }
+#endif
         return;
     }
     decltype(dirtyElements_) dirtyElements(std::move(dirtyElements_));
@@ -251,9 +255,11 @@ void PipelineContext::FlushBuild()
     }
     buildingFirstPage_ = false;
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
+#endif
 #if !defined(PREVIEW)
     LayoutInspector::SupportInspector();
 #endif
@@ -508,15 +514,19 @@ void PipelineContext::FlushLayout()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushLayout();
     }
+#endif
 
     if (dirtyLayoutNodes_.empty()) {
         FlushGeometryProperties();
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushLayout();
         }
+#endif
         return;
     }
     decltype(dirtyLayoutNodes_) dirtyNodes(std::move(dirtyLayoutNodes_));
@@ -537,9 +547,11 @@ void PipelineContext::FlushLayout()
     CreateGeometryTransition();
     FlushGeometryProperties();
     TryCallNextFrameLayoutCallback();
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushLayout();
     }
+#endif
 }
 
 void PipelineContext::FlushGeometryProperties()
@@ -582,14 +594,18 @@ void PipelineContext::FlushRender()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
+#endif
 
     if (dirtyRenderNodes_.empty() && dirtyRenderNodesInOverlay_.empty() && !needForcedRefresh_) {
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushRender();
         }
+#endif
         return;
     }
 
@@ -652,9 +668,11 @@ void PipelineContext::FlushRender()
     }
     needForcedRefresh_ = false;
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRender();
     }
+#endif
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -663,18 +681,22 @@ void PipelineContext::FlushRenderFinish()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRenderFinish();
     }
+#endif
     if (!needPaintFinishNodes_.empty()) {
         decltype(needPaintFinishNodes_) Nodes(std::move(needPaintFinishNodes_));
         for (const auto& node : Nodes) {
             node->OnPaintFinish();
         }
     }
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRenderFinish();
     }
+#endif
 }
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
@@ -685,18 +707,22 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
+#endif
     flushAnimationTimestamp_ = nanoTimestamp;
     isFlushingAnimation_ = true;
 
     ProcessPreFlush();
     if (scheduleTasks_.empty()) {
         isFlushingAnimation_ = false;
+#ifndef CROSS_PLATFORM
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndFlushAnimation();
         }
+#endif
         return;
     }
     decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
@@ -705,9 +731,11 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     }
     isFlushingAnimation_ = false;
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushAnimation();
     }
+#endif
 }
 
 void PipelineContext::FlushReloadTransition()
@@ -801,9 +829,11 @@ void PipelineContext::ProcessPostFlush()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginProcessPostFlush();
     }
+#endif
 
     if (postFlushListeners_.empty()) {
         return;

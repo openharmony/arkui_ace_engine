@@ -96,11 +96,9 @@ struct ScrollHoriIndex {
             }
             .width('100%')
             .justifyContent(FlexAlign.Center)
-            // .alignItems(HorizontalAlign.Center)
           }, (day: string, index: number) => index.toString() + day)
         }
       }
-      // .scrollable(ScrollDirection.Vertical)
       .scrollable(ScrollDirection.Horizontal)
       .edgeEffect(EdgeEffect.Spring)
       .width('90%')

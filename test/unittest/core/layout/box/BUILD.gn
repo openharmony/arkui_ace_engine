@@ -13,24 +13,32 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("box_layout_algorithm_test_ng") {
-  type = "new"
-  module_name = "CommonProperties-LayoutAndBorder"
-  sources = [
-    "box_layout_algorithm_test.cpp",
-    "old_cases/box_layout_algorithm_test_old.cpp",
-  ]
+test_sources = [
+  "box_layout_algorithm_test.cpp",
+  "old_cases/box_layout_algorithm_test_old.cpp",
+  "box_layout_test_min.cpp",
+  "box_layout_test_core.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "box_layout_test_min.cpp",
-      "box_layout_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "box_layout_test_min.cpp",
-      "box_layout_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("box_layout_algorithm_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("box_layout_algorithm_test_ng") {
+    type = "new"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = test_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "box_layout_test_min.cpp",
+        "box_layout_test_core.cpp",
+      ]
+    }
   }
 }

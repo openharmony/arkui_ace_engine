@@ -517,8 +517,10 @@ ArkUINativeModuleValue VideoBridge::SetOnStart(ArkUIRuntimeCallInfo* runtimeCall
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -569,8 +571,10 @@ ArkUINativeModuleValue VideoBridge::SetOnPause(ArkUIRuntimeCallInfo* runtimeCall
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -621,8 +625,10 @@ ArkUINativeModuleValue VideoBridge::SetOnFinish(ArkUIRuntimeCallInfo* runtimeCal
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -673,8 +679,10 @@ ArkUINativeModuleValue VideoBridge::SetOnFullscreenChange(ArkUIRuntimeCallInfo* 
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -725,8 +733,10 @@ ArkUINativeModuleValue VideoBridge::SetOnPrepared(ArkUIRuntimeCallInfo* runtimeC
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -779,8 +789,10 @@ ArkUINativeModuleValue VideoBridge::SetOnSeeking(ArkUIRuntimeCallInfo* runtimeCa
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -833,8 +845,10 @@ ArkUINativeModuleValue VideoBridge::SetOnSeeked(ArkUIRuntimeCallInfo* runtimeCal
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -887,8 +901,10 @@ ArkUINativeModuleValue VideoBridge::SetOnUpdate(ArkUIRuntimeCallInfo* runtimeCal
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -941,8 +957,10 @@ ArkUINativeModuleValue VideoBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);
@@ -995,8 +1013,10 @@ ArkUINativeModuleValue VideoBridge::SetOnStop(ArkUIRuntimeCallInfo* runtimeCallI
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto weakNode = AceType::WeakClaim(frameNode);
-    VideoEventCallback callback = [vm, isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
+    VideoEventCallback callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                       const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(weakNode);

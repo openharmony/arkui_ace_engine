@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ArkIsolatedComponent extends ArkComponent implements IsolatedComponentAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {

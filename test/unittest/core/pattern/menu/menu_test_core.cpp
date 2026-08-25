@@ -27,6 +27,11 @@
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+
+#undef private
+#undef protected
+
+
 using namespace testing;
 using namespace testing::ext;
 

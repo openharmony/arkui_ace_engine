@@ -41,6 +41,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/json/json_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
@@ -2096,6 +2098,823 @@ HWTEST_F(InspectorTestNg, GetElementRegisterNodes_001, TestSize.Level1)
     auto it = treesInfos.find(id1);
     EXPECT_TRUE(it != treesInfos.end());
     it = treesInfos.find(id2);
+    EXPECT_TRUE(it != treesInfos.end());
+}
+
+/**
+ * @tc.name: InspectorOffscreenNodesMgrTest001
+ * @tc.desc: Test InspectorOffscreenNodesMgr ClearOffscreenNodes/GetOffscreenNodes/GetOffscreenNodesSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorOffscreenNodesMgrTest001, TestSize.Level1)
+{
+    auto mgr = AceType::MakeRefPtr<InspectorOffscreenNodesMgr>();
+    ASSERT_NE(mgr, nullptr);
+    EXPECT_EQ(mgr->GetOffscreenNodesSize(), 0);
+    auto node1 = FrameNode::CreateFrameNode("one", 1001, AceType::MakeRefPtr<Pattern>(), true);
+    auto node2 = FrameNode::CreateFrameNode("two", 1002, AceType::MakeRefPtr<Pattern>(), true);
+    mgr->AddOffscreenNode(node1);
+    mgr->AddOffscreenNode(node2);
+    EXPECT_EQ(mgr->GetOffscreenNodesSize(), 2);
+    auto nodes = mgr->GetOffscreenNodes();
+    EXPECT_EQ(nodes.size(), 2);
+    mgr->ClearOffscreenNodes();
+    EXPECT_EQ(mgr->GetOffscreenNodesSize(), 0);
+    auto emptyNodes = mgr->GetOffscreenNodes();
+    EXPECT_TRUE(emptyNodes.empty());
+}
+
+/**
+ * @tc.name: GetOffScreenTreeNodes_002
+ * @tc.desc: Test GetOffScreenTreeNodes with null context and null offscreenNodesMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetOffScreenTreeNodes_002, TestSize.Level1)
+{
+    RefPtr<MockPipelineContext> pipelineBak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    NG::InspectorTreeMap nodes;
+    Inspector::GetOffScreenTreeNodes(nodes);
+    EXPECT_TRUE(nodes.empty());
+    MockPipelineContext::pipeline_ = pipelineBak;
+}
+
+/**
+ * @tc.name: GetOffScreenTreeNodes_003
+ * @tc.desc: Test GetOffScreenTreeNodes with null offscreenNodesMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetOffScreenTreeNodes_003, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgrBak = context->inspectorOffscreenNodesMgr_;
+    context->inspectorOffscreenNodesMgr_ = nullptr;
+    NG::InspectorTreeMap nodes;
+    Inspector::GetOffScreenTreeNodes(nodes);
+    EXPECT_TRUE(nodes.empty());
+    context->inspectorOffscreenNodesMgr_ = mgrBak;
+}
+
+/**
+ * @tc.name: AddOffscreenNode_002
+ * @tc.desc: Test AddOffscreenNode with null pipeline and null offscreenNodesMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, AddOffscreenNode_002, TestSize.Level1)
+{
+    auto node = FrameNode::CreateFrameNode("one", 2001, AceType::MakeRefPtr<Pattern>(), true);
+    RefPtr<MockPipelineContext> pipelineBak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    Inspector::AddOffscreenNode(node);
+    EXPECT_EQ(node->context_, nullptr);
+    MockPipelineContext::pipeline_ = pipelineBak;
+
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgrBak = context->inspectorOffscreenNodesMgr_;
+    context->inspectorOffscreenNodesMgr_ = nullptr;
+    Inspector::AddOffscreenNode(node);
+    context->inspectorOffscreenNodesMgr_ = mgrBak;
+}
+
+/**
+ * @tc.name: RemoveOffscreenNode_002
+ * @tc.desc: Test RemoveOffscreenNode with null pipeline and null offscreenNodesMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, RemoveOffscreenNode_002, TestSize.Level1)
+{
+    auto node = FrameNode::CreateFrameNode("one", 2002, AceType::MakeRefPtr<Pattern>(), true);
+    RefPtr<MockPipelineContext> pipelineBak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    Inspector::RemoveOffscreenNode(node);
+    MockPipelineContext::pipeline_ = pipelineBak;
+
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgrBak = context->inspectorOffscreenNodesMgr_;
+    context->inspectorOffscreenNodesMgr_ = nullptr;
+    Inspector::RemoveOffscreenNode(node);
+    context->inspectorOffscreenNodesMgr_ = mgrBak;
+}
+
+/**
+ * @tc.name: ParseWindowIdFromMsg_002
+ * @tc.desc: Test ParseWindowIdFromMsg with json not object and paramObj not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, ParseWindowIdFromMsg_002, TestSize.Level1)
+{
+    std::string msg = "[1, 2, 3]";
+    auto result = Inspector::ParseWindowIdFromMsg(msg);
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, -1);
+
+    msg = "{\"method\":\"ArkUI.tree\", \"params\":[1,2]}";
+    result = Inspector::ParseWindowIdFromMsg(msg);
+    EXPECT_EQ(result.first, 0);
+    EXPECT_EQ(result.second, 0);
+
+    msg = "{\"method\":\"ArkUI.queryAbilities\", \"params\":{\"windowId\":\"20\"}}";
+    result = Inspector::ParseWindowIdFromMsg(msg);
+    EXPECT_EQ(result.first, 20);
+    EXPECT_EQ(result.second, 2);
+}
+
+/**
+ * @tc.name: ParseNeedFreeNodes_002
+ * @tc.desc: Test ParseNeedFreeNodes with json not object and paramObj not object
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, ParseNeedFreeNodes_002, TestSize.Level1)
+{
+    std::string msg = "[1, 2, 3]";
+    auto result = Inspector::ParseNeedFreeNodes(msg);
+    EXPECT_FALSE(result);
+
+    msg = "{\"method\":\"ArkUI.tree\", \"params\":[1,2]}";
+    result = Inspector::ParseNeedFreeNodes(msg);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetFrameNodeByKey_003
+ * @tc.desc: Test GetFrameNodeByKey with null offscreenNodesMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetFrameNodeByKey_003, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgrBak = context->inspectorOffscreenNodesMgr_;
+    context->inspectorOffscreenNodesMgr_ = nullptr;
+    auto nodePtr = Inspector::GetFrameNodeByKey("nonexistent_key");
+    EXPECT_EQ(nodePtr, nullptr);
+    context->inspectorOffscreenNodesMgr_ = mgrBak;
+}
+
+/**
+ * @tc.name: GetInspectorByKey_001
+ * @tc.desc: Test GetInspectorByKey traversal with id match and keyIsNull
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetInspectorByKey_001, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, 3001, AceType::MakeRefPtr<Pattern>(), true);
+    auto child1 = FrameNode::CreateFrameNode("child1", 3002, AceType::MakeRefPtr<Pattern>());
+    child1->UpdateInspectorId("myKey");
+    auto child2 = FrameNode::CreateFrameNode("child2", 3003, AceType::MakeRefPtr<Pattern>());
+    auto grandChild = FrameNode::CreateFrameNode("grand", 3004, AceType::MakeRefPtr<Pattern>());
+    grandChild->UpdateInspectorId("deepKey");
+    rootNode->AddChild(child1);
+    rootNode->AddChild(child2);
+    child2->AddChild(grandChild);
+
+    auto found = Inspector::GetInspectorByKey(rootNode, "myKey");
+    ASSERT_NE(found, nullptr);
+    EXPECT_EQ(found->GetId(), 3002);
+
+    found = Inspector::GetInspectorByKey(rootNode, "deepKey");
+    ASSERT_NE(found, nullptr);
+    EXPECT_EQ(found->GetId(), 3004);
+
+    found = Inspector::GetInspectorByKey(rootNode, "nonexistent");
+    EXPECT_EQ(found, nullptr);
+
+    found = Inspector::GetInspectorByKey(rootNode, "");
+    ASSERT_NE(found, nullptr);
+    EXPECT_EQ(found->GetId(), 3001);
+}
+
+/**
+ * @tc.name: NavDestinationInspector_001
+ * @tc.desc: Test NavDestination handling in GetInspectorChildren with custom node
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, NavDestinationInspector_001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto parentNode = FrameNode::CreateFrameNode(
+        "column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(parentNode);
+
+    auto navDestPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [&navDestPattern]() { return navDestPattern; });
+    ASSERT_NE(navDestNode, nullptr);
+    parentNode->AddChild(navDestNode);
+
+    auto navCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "navCustom");
+    navDestPattern->SetCustomNode(navCustomNode);
+    navCustomNode->extraInfo_ = { "navPage", 10, 5 };
+
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    navDestNode->AddChild(childNode);
+
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(true, InspectorFilter(), needThrow);
+    EXPECT_FALSE(needThrow);
+    EXPECT_NE(result, "");
+
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+    EXPECT_STREQ(jsonValue->GetValue("type")->GetString().c_str(), "root");
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: NavDestinationInspector_002
+ * @tc.desc: Test NavDestination handling when custom node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, NavDestinationInspector_002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto parentNode = FrameNode::CreateFrameNode(
+        "column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(parentNode);
+
+    auto navDestPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [&navDestPattern]() { return navDestPattern; });
+    ASSERT_NE(navDestNode, nullptr);
+    parentNode->AddChild(navDestNode);
+
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    navDestNode->AddChild(childNode);
+
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(true, InspectorFilter(), needThrow);
+    EXPECT_FALSE(needThrow);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: NavDestinationInspector_003
+ * @tc.desc: Test NavDestination handling when custom node is not CustomNode type
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, NavDestinationInspector_003, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto parentNode = FrameNode::CreateFrameNode(
+        "column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(parentNode);
+
+    auto navDestPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [&navDestPattern]() { return navDestPattern; });
+    ASSERT_NE(navDestNode, nullptr);
+    parentNode->AddChild(navDestNode);
+
+    auto nonCustomNode = FrameNode::CreateFrameNode(
+        "nonCustom", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    navDestPattern->SetCustomNode(nonCustomNode);
+
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    navDestNode->AddChild(childNode);
+
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(true, InspectorFilter(), needThrow);
+    EXPECT_FALSE(needThrow);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: NavDestinationInspector_004
+ * @tc.desc: Test NavDestination handling in non-layout inspector mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, NavDestinationInspector_004, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto parentNode = FrameNode::CreateFrameNode(
+        "column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(parentNode);
+
+    auto navDestPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [&navDestPattern]() { return navDestPattern; });
+    ASSERT_NE(navDestNode, nullptr);
+    parentNode->AddChild(navDestNode);
+
+    auto navCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "navCustom");
+    navDestPattern->SetCustomNode(navCustomNode);
+
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    navDestNode->AddChild(childNode);
+
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(false, InspectorFilter(), needThrow);
+    EXPECT_FALSE(needThrow);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: AddInspectorTreeNode_001
+ * @tc.desc: Test AddInspectorTreeNode with null node and non-processable type
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, AddInspectorTreeNode_001, TestSize.Level1)
+{
+    NG::InspectorTreeMap treesInfos;
+
+    RefPtr<NG::UINode> nullNode = nullptr;
+    auto recNode = Inspector::AddInspectorTreeNode(nullNode, treesInfos);
+    EXPECT_EQ(recNode, nullptr);
+
+    auto testNode = InspectorTestNode::CreateTestNode(4001);
+    recNode = Inspector::AddInspectorTreeNode(testNode, treesInfos);
+    EXPECT_EQ(recNode, nullptr);
+}
+
+/**
+ * @tc.name: AddInspectorTreeNode_002
+ * @tc.desc: Test AddInspectorTreeNode with null renderContext and custom node tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, AddInspectorTreeNode_002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("frame", 4002, AceType::MakeRefPtr<Pattern>(), true);
+    auto renderContextBak = frameNode->renderContext_;
+    frameNode->renderContext_ = nullptr;
+    NG::InspectorTreeMap treesInfos;
+    auto recNode = Inspector::AddInspectorTreeNode(frameNode, treesInfos);
+    ASSERT_NE(recNode, nullptr);
+    frameNode->renderContext_ = renderContextBak;
+
+    auto customNode = CustomNode::CreateCustomNode(4003, "myCustomTag");
+    customNode->SetJSViewName("myCustomTag");
+    recNode = Inspector::AddInspectorTreeNode(customNode, treesInfos);
+    ASSERT_NE(recNode, nullptr);
+    EXPECT_EQ(recNode->GetName(), "myCustomTag");
+}
+
+/**
+ * @tc.name: GetInspectorChildrenInfo_002
+ * @tc.desc: Test GetInspectorChildrenInfo with overlayNode and depth 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetInspectorChildrenInfo_002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("parent", 4004, AceType::MakeRefPtr<Pattern>(), true);
+    auto childNode = FrameNode::CreateFrameNode("child", 4005, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(childNode);
+
+    auto overlayChild = FrameNode::CreateFrameNode("overlayChild", 4006, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetOverlayNode(overlayChild);
+
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorChildrenInfo(frameNode, treesInfos, 1, 0);
+    EXPECT_TRUE(treesInfos.empty());
+
+    treesInfos.clear();
+    Inspector::GetInspectorChildrenInfo(frameNode, treesInfos, 1, 1);
+    EXPECT_FALSE(treesInfos.empty());
+}
+
+/**
+ * @tc.name: GetRecordAllPagesNodes_003
+ * @tc.desc: Test GetRecordAllPagesNodes with non-PagePattern child
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_003, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        "stageNode", 4007, AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+
+    auto nonPageNode = FrameNode::CreateFrameNode("nonPage", 4008, AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(nonPageNode);
+
+    auto pageNode = FrameNode::CreateFrameNode("page", 4009,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetRecordAllPagesNodes(treesInfos);
+    auto it = treesInfos.find(4008);
+    EXPECT_TRUE(it == treesInfos.end());
+    it = treesInfos.find(4009);
+    EXPECT_TRUE(it != treesInfos.end());
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetCustomNodeInfo_002
+ * @tc.desc: Test GetCustomNodeInfo with non-empty debugLine
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetCustomNodeInfo_002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto customNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::JS_VIEW_ETS_TAG);
+    customNode->extraInfo_ = { "pages/test", 30, 40 };
+    pageNode->AddChild(customNode);
+    customNode->debugLine_ = "pages/test(30:40)";
+
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(true, InspectorFilter(), needThrow);
+    EXPECT_FALSE(needThrow);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetOverlayNode_003
+ * @tc.desc: Test GetOverlayNode when overlay tag is stage and container modal not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetOverlayNode_003, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto stageParent = FrameNode::CreateFrameNode(
+        "stageParent", 4010, AceType::MakeRefPtr<Pattern>(), true);
+    auto stageNode = FrameNode::CreateFrameNode(
+        "stage", 4011, AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageParent->AddChild(stageNode);
+
+    auto pageNode = FrameNode::CreateFrameNode(
+        "page", 4012, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 4013, AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(frameNode);
+
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    auto it = treesInfos.find(frameNode->GetId());
+    EXPECT_TRUE(it != treesInfos.end());
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetOverlayNode_004
+ * @tc.desc: Test GetOverlayNode with container modal where overlay is container modal
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetOverlayNode_004, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        "Column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    auto containerNode = FrameNode::CreateFrameNode(
+        V2::CONTAINER_MODAL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    columnNode->AddChild(containerNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    containerNode->AddChild(stageNode);
+
+    auto containerModal2 = FrameNode::CreateFrameNode(
+        V2::CONTAINER_MODAL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    columnNode->AddChild(containerModal2);
+
+    auto pageNode = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "frameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    pageNode->AddChild(frameNode);
+
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    auto it = treesInfos.find(frameNode->GetId());
+    EXPECT_TRUE(it != treesInfos.end());
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetFreeNodesRoot_001
+ * @tc.desc: Test GetRoot with onMainTree and no parent (root)
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetFreeNodesRoot_001, TestSize.Level1)
+{
+    ElementRegister::GetInstance()->Clear();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    context->rootNode_ = stageNode;
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+
+    auto freeNode = FrameNode::CreateFrameNode(
+        FREE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    freeNode->onMainTree_ = false;
+
+    auto mainTreeNode = FrameNode::CreateFrameNode(
+        MAIN_TREE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    mainTreeNode->onMainTree_ = true;
+
+    auto result = Inspector::GetFreeNodesInspector();
+    EXPECT_NE(result, "");
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+    EXPECT_STREQ(jsonValue->GetString("type").c_str(), "root");
+
+    context->stageManager_ = nullptr;
+    context->rootNode_ = nullptr;
+}
+
+/**
+ * @tc.name: GetInspectorInfo_001
+ * @tc.desc: Test GetInspectorInfo with null pipeline in isLayoutInspector mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetInspectorInfo_001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+
+    RefPtr<MockPipelineContext> pipelineBak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    auto result = Inspector::GetInspector(true);
+    EXPECT_NE(result, "");
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+    EXPECT_FALSE(jsonValue->Contains("VsyncID"));
+    MockPipelineContext::pipeline_ = pipelineBak;
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetSubWindowInspector_002
+ * @tc.desc: Test GetSubWindowInspector with valid overlay node and children
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetSubWindowInspector_002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayRoot = FrameNode::CreateFrameNode(
+        "overlayRoot", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto overlayChild = FrameNode::CreateFrameNode(
+        "overlayChild", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    overlayRoot->AddChild(overlayChild);
+    overlayChild->isActive_ = true;
+
+    RefPtr<MockOverlayManager> overlayManager = AceType::MakeRefPtr<MockOverlayManager>(overlayRoot);
+    auto overlayManagerBak = context->overlayManager_;
+    context->overlayManager_ = overlayManager;
+
+    auto result = Inspector::GetSubWindowInspector(true);
+    EXPECT_NE(result, "");
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+    EXPECT_STREQ(jsonValue->GetValue("type")->GetString().c_str(), "root");
+
+    result = Inspector::GetSubWindowInspector(false);
+    EXPECT_NE(result, "");
+    context->overlayManager_ = overlayManagerBak;
+}
+
+/**
+ * @tc.name: GetAllPageNodes_002
+ * @tc.desc: Test GetAllPageNodes with multiple pages where lastPage is skipped
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetAllPageNodes_002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    context->rootNode_ = stageNode;
+
+    auto pageA = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto pageB = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+    stageNode->AddChild(pageB);
+
+    auto childA = FrameNode::CreateFrameNode(
+        "childA", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageA->AddChild(childA);
+    auto childB = FrameNode::CreateFrameNode(
+        "childB", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageB->AddChild(childB);
+
+    InspectorFilter filter;
+    filter.EnableFreeNodes();
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(true, filter, needThrow);
+    EXPECT_FALSE(needThrow);
+    EXPECT_NE(result, "");
+
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+    EXPECT_TRUE(jsonValue->Contains(INSPECTOR_OTHER_CONTENTS));
+
+    context->stageManager_ = nullptr;
+    context->rootNode_ = nullptr;
+}
+
+/**
+ * @tc.name: GetFrameNodeChildren_001
+ * @tc.desc: Test GetFrameNodeChildren with custom node in isLayoutInspector mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetFrameNodeChildren_001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    auto customNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "customNode");
+    pageNode->AddChild(customNode);
+
+    auto result = Inspector::GetInspector(true);
+    EXPECT_NE(result, "");
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+
+    result = Inspector::GetInspector(false);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetInspector_003
+ * @tc.desc: Test GetInspector with non-empty key where GetLastPage returns null
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetInspector_003, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto context = MockPipelineContext::GetCurrentContext();
+    RefPtr<MockStageManager> stageManager = AceType::MakeRefPtr<MockStageManager>(stageNode);
+    auto stageManagerBak = context->stageManager_;
+    context->stageManager_ = stageManager;
+    RefPtr<FrameNode> nullNode = nullptr;
+    EXPECT_CALL(*stageManager, GetLastPage()).Times(1).WillOnce(Return(nullNode));
+
+    InspectorFilter filter;
+    std::string filterId = "nonexistent";
+    filter.SetFilterID(filterId);
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(false, filter, needThrow);
+    EXPECT_TRUE(needThrow);
+    context->stageManager_ = stageManagerBak;
+}
+
+/**
+ * @tc.name: GetInspector_004
+ * @tc.desc: Test GetInspector with non-empty key where GetInspectorByKey returns null
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetInspector_004, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageNode);
+    pageNode->hostPageId_ = pageNode->GetPageId();
+
+    InspectorFilter filter;
+    std::string filterId = "nonexistent_key";
+    filter.SetFilterID(filterId);
+    bool needThrow = false;
+    auto result = Inspector::GetInspector(false, filter, needThrow);
+    EXPECT_TRUE(needThrow);
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: RecordOnePageNodes_001
+ * @tc.desc: Test RecordOnePageNodes with null pageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, RecordOnePageNodes_001, TestSize.Level1)
+{
+    NG::InspectorTreeMap treesInfos;
+    Inspector::RecordOnePageNodes(nullptr, treesInfos);
+    EXPECT_TRUE(treesInfos.empty());
+}
+
+/**
+ * @tc.name: RecordOnePageNodes_002
+ * @tc.desc: Test RecordOnePageNodes with valid page node
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, RecordOnePageNodes_002, TestSize.Level1)
+{
+    auto pageNode = FrameNode::CreateFrameNode("page", 4020,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto childNode = FrameNode::CreateFrameNode("child", 4021, AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(childNode);
+    NG::InspectorTreeMap treesInfos;
+    Inspector::RecordOnePageNodes(pageNode, treesInfos);
+    EXPECT_FALSE(treesInfos.empty());
+    auto it = treesInfos.find(4020);
+    EXPECT_TRUE(it != treesInfos.end());
+    it = treesInfos.find(4021);
     EXPECT_TRUE(it != treesInfos.end());
 }
 } // namespace OHOS::Ace::NG

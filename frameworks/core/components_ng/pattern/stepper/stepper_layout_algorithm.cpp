@@ -52,15 +52,15 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto stepperPattern = hostNode->GetPattern<StepperPattern>();
     CHECK_NULL_VOID(stepperPattern);
     isLoadingButton_ = stepperPattern->GetIsLoadingButton();
-    if ((pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
-        pipeline->GetFontScale() == LEVEL_THREE)) {
+    float fontScale = pipeline->GetFontScaleFromEnv(hostNode);
+    if (fontScale == LEVEL_ONE || fontScale == LEVEL_TWO || fontScale == LEVEL_THREE) {
         MeasureLeftButton(layoutWrapper, childLayoutConstraint);
         MeasureRightButton(layoutWrapper, childLayoutConstraint);
         auto rightButtonHeight = CaluateButtonHeight(layoutWrapper, true);
@@ -121,7 +121,7 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
     auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID(hostNode->HasLeftButtonNode());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
@@ -134,8 +134,8 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
     auto index = hostNode->GetChildIndexById(hostNode->GetLeftButtonId());
     auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     buttonLayoutConstraint.minSize = { 0, buttonHeight };
-    if (pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
-        pipeline->GetFontScale() == LEVEL_THREE) {
+    float fontScale = pipeline->GetFontScaleFromEnv(hostNode);
+    if (fontScale == LEVEL_ONE || fontScale == LEVEL_TWO || fontScale == LEVEL_THREE) {
         auto stepperHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
         auto ButtonRow = leftButtonWrapper->GetChildByIndex(0);
@@ -162,7 +162,7 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID(hostNode->HasRightButtonNode());
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
@@ -175,8 +175,8 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
     auto index = hostNode->GetChildIndexById(hostNode->GetRightButtonId());
     auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     buttonLayoutConstraint.minSize = { 0, buttonHeight };
-    if ((pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
-        pipeline->GetFontScale() == LEVEL_THREE) && !isLoadingButton_) {
+    float fontScale = pipeline->GetFontScaleFromEnv(hostNode);
+    if ((fontScale == LEVEL_ONE || fontScale == LEVEL_TWO || fontScale == LEVEL_THREE) && !isLoadingButton_) {
         auto stepperHeight = hostNode->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
         auto ButtonRow = rightButtonWrapper->GetChildByIndex(0);
@@ -275,7 +275,9 @@ void StepperLayoutAlgorithm::ReCalcStepperSize(
 
 void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
@@ -287,8 +289,8 @@ void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     LayoutSwiper(layoutWrapper);
-    if (pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
-        pipeline->GetFontScale() == LEVEL_THREE) {
+    float fontScale = pipeline->GetFontScaleFromEnv(hostNode);
+    if (fontScale == LEVEL_ONE || fontScale == LEVEL_TWO || fontScale == LEVEL_THREE) {
         auto layoutProperty = layoutWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         auto constraint = layoutProperty->GetLayoutConstraint();

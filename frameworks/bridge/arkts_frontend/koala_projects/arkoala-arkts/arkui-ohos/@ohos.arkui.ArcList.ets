@@ -31,7 +31,8 @@ import { Scroller, Scroller_serializer } from "arkui/component/scroll"
 import { ComponentContentBase } from "arkui/ComponentContent"
 import { SwipeActionOptions, SwipeActionOptions_serializer } from "arkui/component/listItem"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ListHandWritten } from "arkui/hooks/ListHandWritten"
+import { ListHandWritten, hookArcListAttributeModifier } from "arkui/hooks/ListHandWritten"
+import { ModifierStateManager } from "arkui/CommonModifier"
 export class ArkArcListPeer extends ArkCommonMethodPeer {
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -346,6 +347,9 @@ export class ArkArcListComponent extends ArkCommonMethodComponent implements Arc
         return this
     }
     public attributeModifier(value: AttributeModifier<ArcListAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookArcListAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

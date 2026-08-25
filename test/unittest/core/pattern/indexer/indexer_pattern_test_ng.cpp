@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
@@ -2334,6 +2335,217 @@ HWTEST_F(IndexerPatternTestNg, GetCollapsedItemTextTest005, TestSize.Level1)
     pattern->collapsedIndex_ = 100;
     auto result = pattern->GetCollapsedItemText(1);
     EXPECT_EQ(result, "B");
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest001
+ * @tc.desc: Test UpdateTextLayoutProperty with valid index and autoCollapse=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = false;
+    pattern->arrayValue_ = { { "A", false }, { "B", true }, { "C", false } };
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    Dimension borderWidth(1.0);
+    TextStyle fontStyle;
+    Color textColor(Color::BLACK);
+
+    pattern->UpdateTextLayoutProperty(textNode, 0, borderWidth, fontStyle, textColor);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"A");
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest002
+ * @tc.desc: Test UpdateTextLayoutProperty with negative index (out of bounds, skip content update)
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = false;
+    pattern->arrayValue_ = { { "A", false }, { "B", true }, { "C", false } };
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    Dimension borderWidth(1.0);
+    TextStyle fontStyle;
+    Color textColor(Color::BLACK);
+
+    pattern->UpdateTextLayoutProperty(textNode, -1, borderWidth, fontStyle, textColor);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"");
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::LEFT), TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest003
+ * @tc.desc: Test UpdateTextLayoutProperty with index >= size (out of bounds, skip content update)
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = false;
+    pattern->arrayValue_ = { { "A", false }, { "B", true }, { "C", false } };
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    Dimension borderWidth(1.0);
+    TextStyle fontStyle;
+    Color textColor(Color::BLACK);
+
+    pattern->UpdateTextLayoutProperty(textNode, 100, borderWidth, fontStyle, textColor);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"");
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::LEFT), TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest004
+ * @tc.desc: Test UpdateTextLayoutProperty with null textNode (early return)
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = false;
+    pattern->arrayValue_ = { { "A", false } };
+
+    RefPtr<FrameNode> textNode = nullptr;
+    Dimension borderWidth(1.0);
+    TextStyle fontStyle;
+    Color textColor(Color::BLACK);
+
+    pattern->UpdateTextLayoutProperty(textNode, 0, borderWidth, fontStyle, textColor);
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest005
+ * @tc.desc: Test UpdateTextLayoutProperty with autoCollapse=true and collapsed item shows dot
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest005, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->arrayValue_ = { { "A", false }, { "...", true }, { "C", false } };
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    Dimension borderWidth(1.0);
+    TextStyle fontStyle;
+    Color textColor(Color::BLACK);
+
+    pattern->UpdateTextLayoutProperty(textNode, 1, borderWidth, fontStyle, textColor);
+    std::u16string content = textLayoutProperty->GetContentValue(u"");
+    EXPECT_NE(content, u"");
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest006
+ * @tc.desc: Test UpdateTextLayoutProperty with autoCollapse=true and non-collapsed item shows text
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest006, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->arrayValue_ = { { "A", false }, { "...", true }, { "C", false } };
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    Dimension borderWidth(1.0);
+    TextStyle fontStyle;
+    Color textColor(Color::BLACK);
+
+    pattern->UpdateTextLayoutProperty(textNode, 0, borderWidth, fontStyle, textColor);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"A");
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest007
+ * @tc.desc: Test UpdateTextLayoutProperty sets remaining properties even with invalid index
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest007, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = false;
+    pattern->arrayValue_ = { { "A", false } };
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    Dimension borderWidth(2.0);
+    TextStyle fontStyle;
+    fontStyle.SetFontSize(Dimension(14));
+    fontStyle.SetFontWeight(FontWeight::BOLD);
+    Color textColor(Color::RED);
+
+    pattern->UpdateTextLayoutProperty(textNode, -1, borderWidth, fontStyle, textColor);
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::LEFT), TextAlign::CENTER);
+    EXPECT_EQ(textLayoutProperty->GetMaxLinesValue(0), 1);
+    EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::BLACK), Color::RED);
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest008
+ * @tc.desc: Test UpdateTextLayoutProperty with empty arrayValue (index=0 out of bounds)
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateTextLayoutPropertyTest008, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = false;
+    pattern->arrayValue_.clear();
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    Dimension borderWidth(1.0);
+    TextStyle fontStyle;
+    Color textColor(Color::BLACK);
+
+    pattern->UpdateTextLayoutProperty(textNode, 0, borderWidth, fontStyle, textColor);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"");
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::LEFT), TextAlign::CENTER);
 }
 
 } // namespace OHOS::Ace::NG

@@ -461,8 +461,16 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
             "The current node is already in the process of being drawn in the SVG rendering flow.");
         return;
     }
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext && !svgContext->IncrementDrawDepth()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgNode::Draw depth exceeded limit");
+        return;
+    }
     if (!OnCanvas(canvas)) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Draw failed(Reason: Canvas is null).");
+        if (svgContext) {
+            svgContext->DecrementDrawDepth();
+        }
         return;
     }
     isDrawing_ = true;
@@ -488,6 +496,9 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     OnDrawTraversed(canvas, viewPort, color);
     rsCanvas_->RestoreToCount(count);
     isDrawing_ = false; // end the drawing process.
+    if (svgContext) {
+        svgContext->DecrementDrawDepth();
+    }
 }
 
 void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
@@ -497,6 +508,11 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     if (isDrawing_) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "The current node is already in the process of being drawn in the SVG rendering flow.");
+        return;
+    }
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext && !svgContext->IncrementDrawDepth()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgNode::Draw depth exceeded limit");
         return;
     }
     canvas.Save();
@@ -533,6 +549,9 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     OnDrawTraversed(canvas, lengthRule);
     canvas.RestoreToCount(count);
     isDrawing_ = false;
+    if (svgContext) {
+        svgContext->DecrementDrawDepth();
+    }
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)

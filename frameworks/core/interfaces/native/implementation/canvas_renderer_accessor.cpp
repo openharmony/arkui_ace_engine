@@ -598,18 +598,18 @@ void ResetImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->Reset();
 }
-Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
+Ark_Union_LengthMetricsProxy_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
 {
-    auto defaultValue = Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(
-        Converter::ArkValue<Ark_LengthMetrics>(0.0_vp));
+    auto defaultValue = Converter::ArkUnion<Ark_Union_LengthMetricsProxy_String, Ark_LengthMetricsProxy>(
+        Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_vp));
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(
-        Converter::ArkValue<Ark_LengthMetrics>(peerImpl->GetLetterSpacing()));
+    return Converter::ArkUnion<Ark_Union_LengthMetricsProxy_String, Ark_LengthMetricsProxy>(
+        Converter::ArkValue<Ark_LengthMetricsProxy>(peerImpl->GetLetterSpacing()));
 }
 void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
-                          const Ark_Union_LengthMetrics_String* letterSpacing)
+                          const Ark_Union_LengthMetricsProxy_String* letterSpacing)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -621,7 +621,7 @@ void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
             auto spacing = Converter::Convert<std::string>(str);
             peerImpl->SetLetterSpacing(spacing);
         },
-        [peerImpl](const Ark_LengthMetrics& metrics) {
+        [peerImpl](const Ark_LengthMetricsProxy& metrics) {
             Dimension spacing = Converter::OptConvert<Dimension>(metrics).value_or(Dimension());
             peerImpl->SetLetterSpacing(spacing);
         },

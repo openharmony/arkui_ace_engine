@@ -13,24 +13,32 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("folder_stack_test_ng") {
-  type = "new"
-  module_name = "Layout-FolderStack"
-  sources = [
-    "folder_stack_multithread_test_ng.cpp",
-    "folder_stack_test_ng.cpp",
-  ]
+test_sources = [
+  "folder_stack_multithread_test_ng.cpp",
+  "folder_stack_test_ng.cpp",
+  "folder_stack_test_min.cpp",
+  "folder_stack_test_core.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "folder_stack_test_min.cpp",
-      "folder_stack_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "folder_stack_test_min.cpp",
-      "folder_stack_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("folder_stack_test_ng") {
+    type = "host_components"
+    module_name = "Layout-FolderStack"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("folder_stack_test_ng") {
+    type = "new"
+    module_name = "Layout-FolderStack"
+    sources = test_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [
+        "folder_stack_test_min.cpp",
+        "folder_stack_test_core.cpp",
+      ]
+    }
   }
 }

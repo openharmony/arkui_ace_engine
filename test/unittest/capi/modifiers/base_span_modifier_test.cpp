@@ -47,13 +47,13 @@ HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestDefaultValues, Test
 }
 
 // Valid values for method 'baselineOffset'
-using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
+using LengthMetrictsTestStep = std::pair<Ark_LengthMetricsProxy, std::string>;
 static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = {
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
-    { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 1.f), "1.00px" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 0.f), "0.00px" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
+    { Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
 };
 
 /*
@@ -66,11 +66,11 @@ HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestValues, TestSize.Le
     std::unique_ptr<JsonValue> jsonValue;
     std::optional<std::string> resultStr;
     std::string expectedStr;
-    Ark_LengthMetrics inputBaselineOffset;
+    Ark_LengthMetricsProxy inputBaselineOffset;
 
     for (auto&& value: LENGTH_METRICS_ANY_TEST_PLAN) {
         inputBaselineOffset = std::get<0>(value);
-        auto optInputBaselineOffset = Converter::ArkValue<Opt_LengthMetrics>(inputBaselineOffset);
+        auto optInputBaselineOffset = Converter::ArkValue<Opt_LengthMetricsProxy>(inputBaselineOffset);
         modifier_->setBaselineOffset(node_, &optInputBaselineOffset);
 
         jsonValue = GetJsonValue(node_);

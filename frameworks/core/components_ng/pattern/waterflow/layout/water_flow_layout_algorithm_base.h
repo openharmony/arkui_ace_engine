@@ -105,11 +105,21 @@ protected:
     ViewPosReference CreateLazyChildViewPosReference(const RefPtr<WaterFlowLayoutInfoBase>& info, float mainSize,
         float referencePos, ReferenceEdge referenceEdge, Axis axis, std::optional<int64_t> deadline,
         bool useInfinityWhenPositionCalc) const;
+    bool ShouldReanchorLazyChildToStart(
+        double previousPos, double currentPos, float startBoundary, bool isCacheLayout) const;
+    bool AdjustLazyChildOffset(double& currentOffset, float contentStartOffset, float adjustStart, float adjustEnd,
+        bool includeEndOffset, bool isCacheLayout) const;
+    void ConsumeLazyChildReanchorOffset(const RefPtr<LayoutWrapper>& child, int32_t index) const;
 
     bool CheckNeedLayout(const RefPtr<LayoutWrapper>& layoutWrapper, bool isCache) const
     {
         return (!isCache && layoutWrapper->CheckNeedForceMeasureAndLayout()) || expandSafeArea_ ||
                layoutWrapper->IsIgnoreOptsValid();
+    }
+
+    static bool IsChildMeasureDirty(const RefPtr<LayoutWrapper>& child)
+    {
+        return child && CheckNeedMeasure(child->GetLayoutProperty()->GetPropertyChangeFlag());
     }
 
     /**

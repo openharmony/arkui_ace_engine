@@ -50,16 +50,6 @@ void ImageContentModifier::onDraw(DrawingContext& drawingContext)
     UpdateSvgColorFilter(canvasImage);
     ImagePainter imagePainter(canvasImage);
     if (!sensitive_->Get()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        const auto& config = canvasImage->GetPaintConfig();
-        if (config.isSvg_) {
-            RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
-            if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr &&
-                Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::SVG)) {
-                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::SVG);
-            }
-        }
-#endif
         imagePainter.DrawImage(drawingContext.canvas, {}, size_->Get());
     }
 }

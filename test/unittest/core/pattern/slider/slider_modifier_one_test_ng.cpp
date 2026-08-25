@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/drawing_mock.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -355,7 +356,7 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest002, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.
@@ -402,18 +403,18 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest003, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.
      */
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
-    sliderTipModifier.SetTipFlag(false, frameNode);
+    sliderTipModifier.SetTipFlag(false);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
-    sliderTipModifier.SetTipFlag(true, frameNode);
+    sliderTipModifier.SetTipFlag(true);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 }
 
@@ -434,7 +435,7 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest00, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.
@@ -469,7 +470,7 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest005, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.
@@ -1389,5 +1390,129 @@ HWTEST_F(SliderModifierOneTestNg, SliderContentModifierTest047, TestSize.Level1)
     EXPECT_EQ(gradientColors[0].GetDimension(), gradientColors3[0].GetDimension());
     EXPECT_EQ(gradientColors[1].GetDimension(), gradientColors3[1].GetDimension());
     EXPECT_EQ(gradientColors[2].GetDimension(), gradientColors3[2].GetDimension());
+}
+
+/**
+ * @tc.name: SliderTipModifierOnDraw001
+ * @tc.desc: Test SliderTipModifier::onDraw when tipFlag is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierOneTestNg, SliderTipModifierOnDraw001, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderTipModifier sliderTipModifier(
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetFontScale(1.8f);
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    sliderTipModifier.SetParagraph(paragraph);
+    sliderTipModifier.axis_ = Axis::HORIZONTAL;
+    sliderTipModifier.arrowWidth_ = static_cast<float>(ARROW_WIDTH.ConvertToPx());
+    sliderTipModifier.arrowHeight_ = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    sliderTipModifier.circularHorizontalOffset_ = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
+    sliderTipModifier.onDraw(context);
+    EXPECT_EQ(sliderTipModifier.textFontSize_, SUITABLEAGING_LEVEL_1_TEXT_FONT_SIZE);
+}
+
+/**
+ * @tc.name: SliderTipModifierOnDraw002
+ * @tc.desc: Test SliderTipModifier::onDraw when sizeScale is greater than BUBBLE_SIZE_MIN_SCALE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierOneTestNg, SliderTipModifierOnDraw002, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderTipModifier sliderTipModifier(
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetFontScale(1.8f);
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
+    sliderTipModifier.sizeScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    sliderTipModifier.SetParagraph(paragraph);
+    sliderTipModifier.axis_ = Axis::HORIZONTAL;
+    sliderTipModifier.arrowWidth_ = static_cast<float>(ARROW_WIDTH.ConvertToPx());
+    sliderTipModifier.arrowHeight_ = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    sliderTipModifier.circularHorizontalOffset_ = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
+    sliderTipModifier.onDraw(context);
+    EXPECT_EQ(sliderTipModifier.textFontSize_, SUITABLEAGING_LEVEL_1_TEXT_FONT_SIZE);
+}
+
+/**
+ * @tc.name: SliderTipModifierOnDraw003
+ * @tc.desc: Test SliderTipModifier::onDraw when tipFlag is false and sizeScale <= BUBBLE_SIZE_MIN_SCALE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierOneTestNg, SliderTipModifierOnDraw003, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderTipModifier sliderTipModifier(
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
+    sliderTipModifier.sizeScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.5f);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderTipModifier.onDraw(context);
+    EXPECT_EQ(sliderTipModifier.textFontSize_, Dimension());
+}
+
+/**
+ * @tc.name: SliderTipModifierCreateParagraphAndLayout001
+ * @tc.desc: Test CreateParagraphAndLayout when fontScale >= SUITABLEAGING_LEVEL_1_SCALE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierOneTestNg, SliderTipModifierCreateParagraphAndLayout001, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderTipModifier sliderTipModifier(
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetFontScale(1.8f);
+    MockParagraph::GetOrCreateMockParagraph();
+    TextStyle textStyle;
+    sliderTipModifier.CreateParagraphAndLayout(textStyle, "test");
+    EXPECT_NE(sliderTipModifier.paragraph_, nullptr);
+}
+
+/**
+ * @tc.name: SliderTipModifierCreateParagraphAndLayout002
+ * @tc.desc: Test CreateParagraphAndLayout when fontScale < SUITABLEAGING_LEVEL_1_SCALE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierOneTestNg, SliderTipModifierCreateParagraphAndLayout002, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderTipModifier sliderTipModifier(
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetFontScale(1.0f);
+    MockParagraph::GetOrCreateMockParagraph();
+    TextStyle textStyle;
+    sliderTipModifier.CreateParagraphAndLayout(textStyle, "test");
+    EXPECT_NE(sliderTipModifier.paragraph_, nullptr);
 }
 } // namespace OHOS::Ace::NG

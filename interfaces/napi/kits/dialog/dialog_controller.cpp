@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "base/log/log.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
@@ -27,12 +28,9 @@ void DialogControllerImpl::SetDialogNode(const WeakPtr<NG::FrameNode>& node)
     dialogNode_ = node;
     auto dialogNode = dialogNode_.Upgrade();
     CHECK_NULL_VOID(dialogNode);
-    auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (PromptActionCommonState::UNINITIALIZED == pattern->GetState()) {
-        pattern->SetState(PromptActionCommonState::INITIALIZED);
-        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is INITIALIZED.");
-    }
+    const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_VOID(dialogInnerModifier);
+    dialogInnerModifier->setState(dialogNode);
     hasBind_ = true;
 }
 
@@ -58,9 +56,9 @@ PromptActionCommonState DialogControllerImpl::GetState()
     }
     auto dialogNode = dialogNode_.Upgrade();
     CHECK_NULL_RETURN(dialogNode, state);
-    auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
-    CHECK_NULL_RETURN(pattern, state);
-    state = pattern->GetState();
+    const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, state);
+    state = dialogInnerModifier->getState(dialogNode, state);
     return state;
 }
 

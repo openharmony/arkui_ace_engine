@@ -1,7 +1,7 @@
 # DrawableDescriptor Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-10
+> 文档版本：v1.1
+> 更新时间：2026-07-24
 > 来源：`docs/context_registry.json` 主题 `DrawableDescriptor`
 
 ## 定位
@@ -62,7 +62,7 @@ API 检索建议：
 |----------|----------|------------|--------------------------------|------|
 | 图片解码与 PixelMap | `frameworks/core/drawable/pixel_map_drawable_descriptor.cpp`、`frameworks/core/drawable/animated_drawable_descriptor.h`、`interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp` | `foundation/multimedia/image_framework` | `interfaces/innerkits/include/pixel_map.h`、`interfaces/innerkits/include/image_source.h`、`interfaces/kits/native/include/pixelmap_native.h` | PixelMap、ImageSource 和 Native PixelMap 互操作入口 |
 | 图形合成 | `frameworks/core/drawable/layered_drawable_descriptor.cpp`、`interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp` | `foundation/graphic/graphic_2d` | `rosen/modules/2d_graphics/include/draw/*` | RSBitmap、RSCanvas、RSBrush、RSImage 和 BlendMode 合成入口 |
-| 资源管理 | `frameworks/core/drawable/drawable_descriptor_loader.cpp`、`interfaces/inner_api/drawable_descriptor/drawable_bridge.cpp` | `base/global/resource_management` | `interfaces/inner_api/resource_manager/` | ResourceObject、ResourceManager 和资源数据读取入口 |
+| 资源管理 | `frameworks/core/drawable/drawable_descriptor_loader.cpp`、`interfaces/inner_api/drawable_descriptor/drawable_bridge.cpp` | `base/global/resource_management` | `interfaces/inner_api/include/resource_manager.h` | ResourceObject、ResourceManager 和资源数据读取入口 |
 | Picture / HDR 合成 | `frameworks/core/drawable/picture_drawable_descriptor.h`、`frameworks/core/drawable/picture_drawable_descriptor.cpp` | `foundation/arkui/ace_engine` | `base/image/picture.h`、`base/image/contrast_enhancer_image.h` | PictureDrawableDescriptor 通过 ACE image 抽象进入 Picture/HDR/FOV 路径 |
 
 ### 测试入口
@@ -109,5 +109,6 @@ DrawableDescriptor 功能域：`specs/04-common-capability/01-image-loading/03-d
 
 - `Image`：`docs/kb/components/media/image.md`
 - `ImageAnimator`：`docs/kb/components/media/image_animator.md`
-- 图片加载机制（通用能力）：`specs/04-common-capability/01-image-loading/01-image-loading-mechanism/`
+- `ImageLoading`：`docs/kb/capabilities/image-loading.md`
+- `SVG`：`docs/kb/capabilities/svg.md`
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

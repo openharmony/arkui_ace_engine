@@ -63,13 +63,13 @@ void ExpectAnyString(const std::any& value, const std::string& expected)
     EXPECT_EQ(*stringValue, expected);
 }
 
-void ExpectCustomReaderOwnedBy(const RefPtr<EnvironmentManager>& envManager, const RefPtr<UINode>& readerNode,
-    const std::string& key, const RefPtr<WithEnvNode>& ownerScope)
+template<typename ReaderRegistry, typename ScopeRegistry>
+void ExpectReaderOwnedBy(const ReaderRegistry& readerRegistry, const ScopeRegistry& scopeRegistry,
+    const RefPtr<UINode>& readerNode, const std::string& key, const RefPtr<WithEnvNode>& ownerScope)
 {
-    ASSERT_NE(envManager, nullptr);
     ASSERT_NE(readerNode, nullptr);
-    auto readerIter = envManager->customExplicitReaders_.find(readerNode->GetId());
-    ASSERT_NE(readerIter, envManager->customExplicitReaders_.end());
+    auto readerIter = readerRegistry.find(readerNode->GetId());
+    ASSERT_NE(readerIter, readerRegistry.end());
     auto registeredReader = readerIter->second.weak.Upgrade();
     EXPECT_EQ(AceType::RawPtr(registeredReader), AceType::RawPtr(readerNode));
 
@@ -81,14 +81,30 @@ void ExpectCustomReaderOwnedBy(const RefPtr<EnvironmentManager>& envManager, con
     if (!ownerScope) {
         return;
     }
-    auto scopeIter = envManager->customExplicitScopes_.find(ownerScope->GetId());
-    ASSERT_NE(scopeIter, envManager->customExplicitScopes_.end());
+    auto scopeIter = scopeRegistry.find(ownerScope->GetId());
+    ASSERT_NE(scopeIter, scopeRegistry.end());
     auto registeredScope = scopeIter->second.weak.Upgrade();
     EXPECT_EQ(AceType::RawPtr(registeredScope), AceType::RawPtr(ownerScope));
 
     auto keyIter = scopeIter->second.readerIdsByKey.find(key);
     ASSERT_NE(keyIter, scopeIter->second.readerIdsByKey.end());
     EXPECT_EQ(keyIter->second.count(readerNode->GetId()), 1U);
+}
+
+void ExpectCustomReaderOwnedBy(const RefPtr<EnvironmentManager>& envManager, const RefPtr<UINode>& readerNode,
+    const std::string& key, const RefPtr<WithEnvNode>& ownerScope)
+{
+    ASSERT_NE(envManager, nullptr);
+    ExpectReaderOwnedBy(
+        envManager->customExplicitReaders_, envManager->customExplicitScopes_, readerNode, key, ownerScope);
+}
+
+void ExpectSystemReaderOwnedBy(const RefPtr<EnvironmentManager>& envManager, const RefPtr<UINode>& readerNode,
+    const std::string& key, const RefPtr<WithEnvNode>& ownerScope)
+{
+    ASSERT_NE(envManager, nullptr);
+    ExpectReaderOwnedBy(
+        envManager->systemExplicitReaders_, envManager->systemExplicitScopes_, readerNode, key, ownerScope);
 }
 
 void ClearCustomEnvUpdateFunc(const RefPtr<CustomNode>& customNode)
@@ -738,6 +754,273 @@ HWTEST_F(PipelineContextTestNg, EnvironmentManagerSystemEnvDispatcher002, TestSi
 
     EXPECT_EQ(g_systemEnvDispatchCount, 0);
     EXPECT_TRUE(g_lastSystemEnvDispatchKey.empty());
+}
+
+/**
+ * @tc.name: EnvironmentManagerExplicitReaderReparent001
+ * @tc.desc: CustomNode detach removes old bindings before notification; attach rebuilds them from the new parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, EnvironmentManagerExplicitReaderReparent001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto envManager = context_->GetEnvironmentManager();
+    ASSERT_NE(envManager, nullptr);
+    auto ownerA = WithEnvNode::GetOrCreateWithEnvNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto ownerB = WithEnvNode::GetOrCreateWithEnvNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(ownerA, nullptr);
+    ASSERT_NE(ownerB, nullptr);
+    ASSERT_TRUE(ownerA->SetSystemEnvProperty(
+        ENV_KEY_DIRECTION, SystemEnvValue::FromDirection(TextDirection::LTR)));
+    ASSERT_TRUE(ownerB->SetSystemEnvProperty(
+        ENV_KEY_DIRECTION, SystemEnvValue::FromDirection(TextDirection::RTL)));
+    ASSERT_TRUE(ownerA->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(1.0)));
+    ASSERT_TRUE(ownerB->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(2.0)));
+    ownerA->SetCustomEnvProperty(CUSTOM_ENV_TEST_KEY, std::any(CUSTOM_ENV_TEST_VALUE));
+    ownerB->SetCustomEnvProperty(CUSTOM_ENV_TEST_KEY, std::any(CUSTOM_ENV_TEST_VALUE_UPDATED));
+
+    auto reader = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "withEnv");
+    ASSERT_NE(reader, nullptr);
+    auto attachCount = std::make_shared<int32_t>(0);
+    auto direction = std::make_shared<std::optional<TextDirection>>();
+    auto fontScale = std::make_shared<std::optional<double>>();
+    auto customValue = std::make_shared<std::string>();
+    auto detachCount = std::make_shared<int32_t>(0);
+    WeakPtr<CustomNode> weakReader = reader;
+    reader->SetOnEnvTreeStateChangeFunc(
+        [envManager, weakReader, attachCount, detachCount, direction, fontScale, customValue](bool isAttached) {
+            auto reader = weakReader.Upgrade();
+            ASSERT_NE(reader, nullptr);
+            if (!isAttached) {
+                EXPECT_FALSE(reader->IsOnMainTree());
+                EXPECT_EQ(reader->GetAttachedContext(), nullptr);
+                EXPECT_EQ(envManager->systemExplicitReaders_.count(reader->GetId()), 0U);
+                EXPECT_EQ(envManager->customExplicitReaders_.count(reader->GetId()), 0U);
+                ++(*detachCount);
+                direction->reset();
+                fontScale->reset();
+                customValue->clear();
+                return;
+            }
+            EXPECT_TRUE(reader->IsOnMainTree());
+            EXPECT_NE(reader->GetContext(), nullptr);
+            EXPECT_NE(reader->GetParent(), nullptr);
+            ++(*attachCount);
+            SystemEnvValue systemResult;
+            SystemEnvValue fontScaleResult;
+            std::any customResult;
+            if (envManager->FindSystemEnvValueByKey(reader, ENV_KEY_DIRECTION, systemResult)) {
+                *direction = systemResult.GetDirection();
+            }
+            if (envManager->FindSystemEnvValueByKey(reader, ENV_KEY_FONT_SCALE, fontScaleResult)) {
+                *fontScale = fontScaleResult.GetDouble();
+            }
+            if (envManager->FindCustomEnvValueByKey(reader, CUSTOM_ENV_TEST_KEY, customResult)) {
+                auto value = std::any_cast<std::string>(&customResult);
+                if (value) {
+                    *customValue = *value;
+                }
+            }
+        });
+
+    ownerA->AddChild(reader);
+    ownerA->AttachToMainTree(true, context_.GetRawPtr());
+    ownerB->AttachToMainTree(true, context_.GetRawPtr());
+    ASSERT_EQ(*attachCount, 1);
+    ASSERT_TRUE(direction->has_value());
+    EXPECT_EQ(direction->value(), TextDirection::LTR);
+    ASSERT_TRUE(fontScale->has_value());
+    EXPECT_DOUBLE_EQ(fontScale->value(), 1.0);
+    EXPECT_EQ(*customValue, CUSTOM_ENV_TEST_VALUE);
+
+    ownerA->RemoveChild(reader, true);
+    EXPECT_EQ(*detachCount, 1);
+    EXPECT_FALSE(direction->has_value());
+    EXPECT_FALSE(fontScale->has_value());
+    EXPECT_TRUE(customValue->empty());
+    EXPECT_EQ(envManager->systemExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(envManager->customExplicitReaders_.count(reader->GetId()), 0U);
+    ownerB->AddChild(reader);
+
+    ASSERT_EQ(*attachCount, 2);
+    ASSERT_TRUE(direction->has_value());
+    EXPECT_EQ(direction->value(), TextDirection::RTL);
+    ASSERT_TRUE(fontScale->has_value());
+    EXPECT_DOUBLE_EQ(fontScale->value(), 2.0);
+    EXPECT_EQ(*customValue, CUSTOM_ENV_TEST_VALUE_UPDATED);
+    ExpectSystemReaderOwnedBy(envManager, reader, ENV_KEY_DIRECTION, ownerB);
+    ExpectSystemReaderOwnedBy(envManager, reader, ENV_KEY_FONT_SCALE, ownerB);
+    ExpectCustomReaderOwnedBy(envManager, reader, CUSTOM_ENV_TEST_KEY, ownerB);
+
+    ownerB->RemoveChild(reader, true);
+    EXPECT_EQ(*detachCount, 2);
+    EXPECT_EQ(envManager->systemExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(envManager->customExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(envManager->systemExplicitScopes_.count(ownerB->GetId()), 0U);
+    EXPECT_EQ(envManager->customExplicitScopes_.count(ownerB->GetId()), 0U);
+    reader->ResetOnEnvTreeStateChangeFunc();
+    reader.Reset();
+}
+
+/**
+ * @tc.name: EnvironmentManagerExplicitReaderCrossContextReparent001
+ * @tc.desc: Reparent across PipelineContexts unregisters from the old manager and binds only to the new manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, EnvironmentManagerExplicitReaderCrossContextReparent001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto oldManager = context_->GetEnvironmentManager();
+    auto newContext = AceType::MakeRefPtr<PipelineContext>();
+    auto newManager = newContext->GetEnvironmentManager();
+    ASSERT_NE(oldManager, nullptr);
+    ASSERT_NE(newManager, nullptr);
+
+    auto ownerA = WithEnvNode::GetOrCreateWithEnvNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto ownerB = WithEnvNode::GetOrCreateWithEnvNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto reader = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "crossContext");
+    ASSERT_NE(ownerA, nullptr);
+    ASSERT_NE(ownerB, nullptr);
+    ASSERT_NE(reader, nullptr);
+    ASSERT_TRUE(ownerA->SetSystemEnvProperty(
+        ENV_KEY_DIRECTION, SystemEnvValue::FromDirection(TextDirection::LTR)));
+    ASSERT_TRUE(ownerB->SetSystemEnvProperty(
+        ENV_KEY_DIRECTION, SystemEnvValue::FromDirection(TextDirection::RTL)));
+    ownerA->SetCustomEnvProperty(CUSTOM_ENV_TEST_KEY, std::any(CUSTOM_ENV_TEST_VALUE));
+    ownerB->SetCustomEnvProperty(CUSTOM_ENV_TEST_KEY, std::any(CUSTOM_ENV_TEST_VALUE_UPDATED));
+
+    int32_t attachCount = 0;
+    int32_t detachCount = 0;
+    WeakPtr<CustomNode> weakReader = reader;
+    reader->SetOnEnvTreeStateChangeFunc([weakReader, &attachCount, &detachCount](bool isAttached) {
+        auto reader = weakReader.Upgrade();
+        ASSERT_NE(reader, nullptr);
+        if (!isAttached) {
+            ++detachCount;
+            return;
+        }
+        ++attachCount;
+        auto context = reader->GetContext();
+        ASSERT_NE(context, nullptr);
+        auto manager = context->GetEnvironmentManager();
+        ASSERT_NE(manager, nullptr);
+        SystemEnvValue systemValue;
+        std::any customValue;
+        EXPECT_TRUE(manager->FindSystemEnvValueByKey(reader, ENV_KEY_DIRECTION, systemValue));
+        EXPECT_TRUE(manager->FindCustomEnvValueByKey(reader, CUSTOM_ENV_TEST_KEY, customValue));
+    });
+
+    ownerA->AddChild(reader);
+    ownerA->AttachToMainTree(true, context_.GetRawPtr());
+    ASSERT_EQ(attachCount, 1);
+    ExpectSystemReaderOwnedBy(oldManager, reader, ENV_KEY_DIRECTION, ownerA);
+    ExpectCustomReaderOwnedBy(oldManager, reader, CUSTOM_ENV_TEST_KEY, ownerA);
+
+    ownerA->RemoveChild(reader, true);
+    EXPECT_EQ(detachCount, 1);
+    EXPECT_EQ(oldManager->systemExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(oldManager->customExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(oldManager->systemExplicitScopes_.count(ownerA->GetId()), 0U);
+    EXPECT_EQ(oldManager->customExplicitScopes_.count(ownerA->GetId()), 0U);
+
+    ownerB->AttachToMainTree(true, newContext.GetRawPtr());
+    ownerB->AddChild(reader);
+    ASSERT_EQ(attachCount, 2);
+    EXPECT_EQ(reader->GetContext(), newContext.GetRawPtr());
+    EXPECT_EQ(oldManager->systemExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(oldManager->customExplicitReaders_.count(reader->GetId()), 0U);
+    ExpectSystemReaderOwnedBy(newManager, reader, ENV_KEY_DIRECTION, ownerB);
+    ExpectCustomReaderOwnedBy(newManager, reader, CUSTOM_ENV_TEST_KEY, ownerB);
+
+    ownerB->RemoveChild(reader, true);
+    EXPECT_EQ(detachCount, 2);
+    EXPECT_EQ(newManager->systemExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(newManager->customExplicitReaders_.count(reader->GetId()), 0U);
+    EXPECT_EQ(newManager->systemExplicitScopes_.count(ownerB->GetId()), 0U);
+    EXPECT_EQ(newManager->customExplicitScopes_.count(ownerB->GetId()), 0U);
+    reader->ResetOnEnvTreeStateChangeFunc();
+}
+
+/**
+ * @tc.name: CustomNodeEnvTreeStateCallbackActivationOffTree001
+ * @tc.desc: Off-tree callback installation activates the next attach and detach events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, CustomNodeEnvTreeStateCallbackActivationOffTree001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto parent = WithEnvNode::GetOrCreateWithEnvNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto reader = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "unreadEnv");
+    ASSERT_NE(parent, nullptr);
+    ASSERT_NE(reader, nullptr);
+
+    EXPECT_FALSE(reader->HasOnEnvTreeStateChangeFunc());
+    parent->AddChild(reader);
+    parent->AttachToMainTree(true, context_.GetRawPtr());
+    parent->RemoveChild(reader, true);
+
+    int32_t attachCount = 0;
+    int32_t detachCount = 0;
+    reader->SetOnEnvTreeStateChangeFunc([&attachCount, &detachCount](bool isAttached) {
+        if (isAttached) {
+            ++attachCount;
+            return;
+        }
+        ++detachCount;
+    });
+    EXPECT_TRUE(reader->HasOnEnvTreeStateChangeFunc());
+
+    parent->AddChild(reader);
+    EXPECT_EQ(attachCount, 1);
+    EXPECT_EQ(detachCount, 0);
+    parent->RemoveChild(reader, true);
+    EXPECT_EQ(attachCount, 1);
+    EXPECT_EQ(detachCount, 1);
+    reader->ResetOnEnvTreeStateChangeFunc();
+    EXPECT_FALSE(reader->HasOnEnvTreeStateChangeFunc());
+    parent->AddChild(reader);
+    parent->RemoveChild(reader, true);
+    EXPECT_EQ(attachCount, 1);
+    EXPECT_EQ(detachCount, 1);
+}
+
+/**
+ * @tc.name: CustomNodeEnvTreeStateCallbackActivationOnTree001
+ * @tc.desc: On-tree callback installation activates detach and the following reattach event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, CustomNodeEnvTreeStateCallbackActivationOnTree001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto parent = WithEnvNode::GetOrCreateWithEnvNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto reader = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "onTreeEnv");
+    ASSERT_NE(parent, nullptr);
+    ASSERT_NE(reader, nullptr);
+
+    parent->AddChild(reader);
+    parent->AttachToMainTree(true, context_.GetRawPtr());
+    EXPECT_FALSE(reader->HasOnEnvTreeStateChangeFunc());
+
+    int32_t attachCount = 0;
+    int32_t detachCount = 0;
+    reader->SetOnEnvTreeStateChangeFunc([&attachCount, &detachCount](bool isAttached) {
+        if (isAttached) {
+            ++attachCount;
+            return;
+        }
+        ++detachCount;
+    });
+    parent->RemoveChild(reader, true);
+    EXPECT_EQ(attachCount, 0);
+    EXPECT_EQ(detachCount, 1);
+
+    parent->AddChild(reader);
+    EXPECT_EQ(attachCount, 1);
+    EXPECT_EQ(detachCount, 1);
+    parent->RemoveChild(reader, true);
+    EXPECT_EQ(attachCount, 1);
+    EXPECT_EQ(detachCount, 2);
+    reader->ResetOnEnvTreeStateChangeFunc();
 }
 
 } // namespace NG

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_VISUAL_EFFECT_TRANSPARENCY_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_VISUAL_EFFECT_TRANSPARENCY_UTILS_H
 
+#include <atomic>
 #include <cstdint>
 #include <functional>
 #include <list>
@@ -50,6 +51,7 @@ using TransparencyIdMap = std::unordered_map<int32_t, TransparencyMapData>;
 class TransparencyUtils {
 public:
     static ACE_FORCE_EXPORT int32_t GetTransparencyLevel(int32_t materialLevel);
+    static ACE_FORCE_EXPORT void InitTransparencyLevelOnce();
     static std::optional<int32_t> RegisterTransparencyListener(
         const WeakPtr<NG::FrameNode>& node, TransparencyCallback&& callback);
     static void UnRegisterTransparencyListener(int32_t callbackId);
@@ -67,10 +69,12 @@ private:
 
     static int32_t userId_;
     static bool userIdGet_;
-    static bool listenerSet_;
-    static bool transparencyLevelGet_;
+    static std::atomic<bool> listenerSet_;
+    static std::atomic<bool> transparencyLevelGet_;
     static TransparencyIdMap callbackIdsMap_;
     static std::mutex callbackMutex_;
+    static std::mutex listenerMutex_;
+    static std::mutex transparencyLevelMutex_;
     static int32_t callbackId_;
 };
 }  // namespace OHOS::Ace

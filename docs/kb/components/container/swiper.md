@@ -1,7 +1,7 @@
 # Swiper Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-08
+> 文档版本：v1.1
+> 更新时间：2026-07-30
 > 来源：`docs/context_registry.json` 主题 `Swiper`
 
 ## 定位
@@ -52,17 +52,18 @@ API 检索建议：
 
 ### API 解析实现路径
 
-Swiper 当前未完成组件化改造（无 `bridge/` 子目录、JSView 文件仍存在）。
+Swiper 当前已完成组件化改造：动态模块映射包含 `Swiper`，组件目录存在统一 Bridge、Dynamic/Static Modifier 和 Dynamic Module；运行产物位于 `libarkui_tabswiper.z.so`。
 
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
-| JSView（声明式组件） | `frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp` | `JSSwiper::SetXxx()` → `SwiperModel::GetInstance()->SetXxx()` |
-| ArkTS Bridge（动态属性） | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.cpp` | Bridge → node_modifier → ModelNG |
-| node_modifier 层 | `frameworks/core/interfaces/native/node/node_swiper_modifier.cpp` | C++ Set/Reset/Get，Bridge 和 C API 共用 |
+| 前端 JS/TS 定义 | `frameworks/bridge/declarative_frontend/ark_direct_component/src/arkswiper.ts` | Swiper 前端组件类 |
+| 统一 Bridge（声明式 + 动态属性） | `frameworks/core/components_ng/pattern/swiper/bridge/arkts_native_swiper_bridge.cpp` | 统一参数解析并调用组件化 Modifier |
+| Dynamic Modifier | `frameworks/core/components_ng/pattern/swiper/bridge/swiper_dynamic_modifier.cpp` | Dynamic ArkTS 属性路径 |
+| Static Modifier | `frameworks/core/components_ng/pattern/swiper/bridge/swiper_static_modifier.cpp` | 静态编译属性路径 |
+| Dynamic Module | `frameworks/core/components_ng/pattern/swiper/bridge/swiper_dynamic_module.cpp` | `SwiperDynamicModule` 和 `libarkui_tabswiper.z.so` 入口 |
+| node_modifier 委托层 | `frameworks/core/interfaces/native/node/node_swiper_modifier.cpp` | 通过 `DynamicModuleHelper` 转发到动态模块 |
 | C API（NDK） | `interfaces/native/native_node.h`、`interfaces/native/node/swiper_option.cpp` | 有 C API 枚举和选项，走通用 style_modifier 框架 |
 | 前端 Modifier（ArkTS 侧） | `frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts` | ArkTS Swiper Modifier 类 |
-
-组件化改造参考：改造后 JSView 和 Bridge 双路径将统一到 `pattern/swiper/bridge/`，并输出独立 so。
 
 ### 测试入口
 

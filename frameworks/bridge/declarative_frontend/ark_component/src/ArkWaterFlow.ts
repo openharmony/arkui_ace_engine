@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-
-import { ArkScrollable } from "./ArkScrollable";
 
 class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
   constructor(value: ArkConstraintSizeOptions) {

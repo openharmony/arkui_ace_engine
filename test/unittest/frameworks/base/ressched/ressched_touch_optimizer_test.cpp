@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include <thread>
 #define private public
 #define protected public
 #include "base/ressched/ressched_touch_optimizer.h"
@@ -30,6 +31,7 @@ namespace {
     constexpr int32_t DPT_QUEUE_SIZE = 3;
     constexpr int32_t COMPENSATE_EXTENT = 4;
     constexpr double THRESHOLD_OFFSET_VALUE = 2.0;
+    constexpr int32_t SLEEP_TIME = 1000;
 
     enum RVS_DIRECTION : int32_t {
         RVS_NOT_APPLY = 0,
@@ -70,6 +72,8 @@ public:
     static void SetUpTestSuite()
     {
         optimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+        optimizer_->RVSEnableCheck();
+        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     }
     static void TearDownTestSuite()
     {

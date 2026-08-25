@@ -26,6 +26,9 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_properties.h"
+#include "core/common/text_field_manager_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -576,7 +579,7 @@ HWTEST_F(ListAlgorithmTestNg, CheckJumpToIndex001, TestSize.Level1)
     listLayoutAlgorithm->contentMainSize_ = 1.0f;
     listLayoutAlgorithm->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
     ListItemGroupLayoutInfo groupInfo = { true, true, 4.0f, 2.0f, 4.0f, 2.0f };
-    ListItemInfo listItemInfo = { 2, 2.0f, 4.0f, true, true, 1.0f, 2.0f, groupInfo };
+    ListItemInfo listItemInfo = { 2, 2.0f, 4.0f, true, false, true, 1.0f, 2.0f, groupInfo };
     listLayoutAlgorithm->itemPosition_[0] = listItemInfo;
     listLayoutAlgorithm->CheckJumpToIndex();
     EXPECT_EQ(listLayoutAlgorithm->groupItemAverageHeight_, 4.0f);
@@ -1441,6 +1444,104 @@ HWTEST_F(ListAlgorithmTestNg, OnSurfaceChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnSurfaceChanged002
+ * @tc.desc: Test ListLayoutAlgorithm OnSurfaceChanged updates currentOffset_ (not currentDelta_)
+ *           when the focused TextField caret would be clipped after the list shrinks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, OnSurfaceChanged002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextFieldPattern> textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    auto textFieldNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, textFieldPattern);
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldPattern->frameNode_ = textFieldNode;
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<TextFieldManagerNG> manager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    manager->onFocusTextField_ = textFieldPattern;
+    pipe->SetTextFieldManager(manager);
+    auto context = AceType::RawPtr(pipe);
+    frameNode->context_ = context;
+    WeakPtr<FrameNode> node = frameNode;
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(node);
+    focusHub->currentFocus_ = true;
+    frameNode->focusHub_ = focusHub;
+    listPattern->frameNode_ = frameNode;
+    frameNode->layoutProperty_ = listLayoutProperty;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.layoutProperty_ = listLayoutProperty;
+    layoutWrapper.hostNode_ = frameNode;
+    // list shrinks (3.0 < 5.0) so the caret auto-scroll branch is reachable.
+    // In the host env caretPos/globalOffset are 0 and RESERVE_BOTTOM_HEIGHT(24_vp)->24px,
+    // so offset = 3 + 0 - 0 - 24 = -21 (<=0), currentOffset_ -= -21 => +21.
+    listLayoutAlgorithm->contentMainSize_ = 3.0f;
+    listLayoutAlgorithm->prevContentMainSize_ = 5.0f;
+    listLayoutAlgorithm->currentDelta_ = 5.0f;
+    listLayoutAlgorithm->currentOffset_ = 0.0f;
+    listLayoutAlgorithm->OnSurfaceChanged(&layoutWrapper);
+    frameNode->context_ = nullptr;
+    // Patch guarantee: OnSurfaceChanged no longer mutates currentDelta_.
+    EXPECT_EQ(listLayoutAlgorithm->currentDelta_, 5.0f);
+    // The auto-scroll adjustment now targets currentOffset_.
+    EXPECT_EQ(listLayoutAlgorithm->currentOffset_, 21.0f);
+}
+
+/**
+ * @tc.name: OnSurfaceChanged003
+ * @tc.desc: Test ListLayoutAlgorithm OnSurfaceChanged keeps both currentDelta_ and currentOffset_
+ *           unchanged when the list does not shrink, even with a focused TextField present.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, OnSurfaceChanged003, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextFieldPattern> textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    auto textFieldNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, textFieldPattern);
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldPattern->frameNode_ = textFieldNode;
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<TextFieldManagerNG> manager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    manager->onFocusTextField_ = textFieldPattern;
+    pipe->SetTextFieldManager(manager);
+    auto context = AceType::RawPtr(pipe);
+    frameNode->context_ = context;
+    WeakPtr<FrameNode> node = frameNode;
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(node);
+    focusHub->currentFocus_ = true;
+    frameNode->focusHub_ = focusHub;
+    listPattern->frameNode_ = frameNode;
+    frameNode->layoutProperty_ = listLayoutProperty;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.layoutProperty_ = listLayoutProperty;
+    layoutWrapper.hostNode_ = frameNode;
+    // contentMainSize_ >= prevContentMainSize_: list did not shrink, returns at the first guard.
+    listLayoutAlgorithm->contentMainSize_ = 10.0f;
+    listLayoutAlgorithm->prevContentMainSize_ = 5.0f;
+    listLayoutAlgorithm->currentDelta_ = 7.0f;
+    listLayoutAlgorithm->currentOffset_ = 4.0f;
+    listLayoutAlgorithm->OnSurfaceChanged(&layoutWrapper);
+    frameNode->context_ = nullptr;
+    EXPECT_EQ(listLayoutAlgorithm->currentDelta_, 7.0f);
+    EXPECT_EQ(listLayoutAlgorithm->currentOffset_, 4.0f);
+}
+
+/**
  * @tc.name: CheckAndUpdateCurOffset001
  * @tc.desc: Test ListItemLayoutAlgorithm CheckAndUpdateCurOffset
  * @tc.type: FUNC
@@ -1668,5 +1769,24 @@ HWTEST_F(ListAlgorithmTestNg, ProcessCacheCount001, TestSize.Level1)
     EXPECT_EQ(listLayoutAlgorithm->startFixOffset_, 10.0f);  // 10.0f: preset startFixOffset
     EXPECT_EQ(listLayoutAlgorithm->endFixOffset_, 15.0f);  // 15.0f: preset endFixOffset
 }
-} // namespace OHOS::Ace::NG
 
+/**
+ * @tc.name: ListLayoutAlgorithmCanUseInfoInPosMapWithLazyChild001
+ * @tc.desc: Test CanUseInfoInPosMap rejects oversized lazy child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, ListLayoutAlgorithmCanUseInfoInPosMapWithLazyChild001, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    listLayoutAlgorithm->contentMainSize_ = 100.0f;
+    listLayoutAlgorithm->totalItemCount_ = 3;
+    listLayoutAlgorithm->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
+    listLayoutAlgorithm->posMap_->UpdatePos(0, { 0.0f, 250.0f, false, false });
+    listLayoutAlgorithm->posMap_->UpdatePos(1, { 260.0f, 250.0f, true, false });
+    listLayoutAlgorithm->posMap_->UpdatePos(2, { 520.0f, 250.0f, false, true });
+
+    EXPECT_TRUE(listLayoutAlgorithm->CanUseInfoInPosMap(0, 0.0f));
+    EXPECT_FALSE(listLayoutAlgorithm->CanUseInfoInPosMap(1, 0.0f));
+    EXPECT_FALSE(listLayoutAlgorithm->CanUseInfoInPosMap(2, 0.0f));
+}
+} // namespace OHOS::Ace::NG

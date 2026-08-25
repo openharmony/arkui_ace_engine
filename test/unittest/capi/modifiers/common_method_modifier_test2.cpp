@@ -1411,13 +1411,13 @@ HWTEST_F(CommonMethodModifierTest2, setBorderTest, TestSize.Level1)
     Ark_BorderOptions arkInputValue = {
         .color = ArkUnion<Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE)),
-        .dashGap = ArkUnion<Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths, Ark_EdgeWidths>(
+        .dashGap = ArkUnion<Opt_Union_EdgeWidths_LengthMetricsProxy_LocalizedEdgeWidths, Ark_EdgeWidths>(
             Ark_EdgeWidths {
                 .left = Converter::ArkValue<Opt_Length>("8.00%"),
                 .top = Converter::ArkValue<Opt_Length>("9.0fp"),
                 .right = Converter::ArkValue<Opt_Length>("8.0px"),
                 .bottom = Converter::ArkValue<Opt_Length>("6.0vp")}),
-        .dashWidth = ArkUnion<Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths, Ark_EdgeWidths>(
+        .dashWidth = ArkUnion<Opt_Union_EdgeWidths_LengthMetricsProxy_LocalizedEdgeWidths, Ark_EdgeWidths>(
             Ark_EdgeWidths {
                 .left = Converter::ArkValue<Opt_Length>("8.00%"),
                 .top = Converter::ArkValue<Opt_Length>("4.0fp"),

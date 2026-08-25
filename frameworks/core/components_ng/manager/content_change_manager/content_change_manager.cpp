@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -245,6 +246,17 @@ ContentChangeManager::ContentChangeManager(const RefPtr<TaskExecutor>& taskExecu
 
 void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& config)
 {
+    SetContentChangeConfig(config);
+    UpdateContentChangeParameters();
+    ResetContentChangeState();
+    RegisterContentChangeNodes(config);
+#ifndef IS_RELEASE_VERSION
+    dumpMgr_->AddRegisterRecord(DumpEvent::REGISTER, currentContentChangeConfig_);
+#endif
+}
+
+void ContentChangeManager::SetContentChangeConfig(const ContentChangeConfig& config)
+{
     currentContentChangeConfig_ = config;
     if (LessNotEqual(config.textContentRatio, 0.0) || GreatNotEqual(config.textContentRatio, 1.0)) {
         currentContentChangeConfig_->textContentRatio = DEFAULT_TEXT_CONTENT_RATIO;
@@ -262,6 +274,10 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     if (config.reportDelayTime < 0) {
         currentContentChangeConfig_->reportDelayTime = DEFAULT_COMPONENT_REPORT_DELAY_TIME;
     }
+}
+
+void ContentChangeManager::UpdateContentChangeParameters()
+{
     ACE_SCOPED_TRACE("[ContentChangeManager] StartContentChangeReport: ratio:%f, minReportTime:%d, "
         "minWidth:%d, minHeight:%d, reportDelayTime:%d", currentContentChangeConfig_->textContentRatio,
         currentContentChangeConfig_->minReportTime, currentContentChangeConfig_->minWidth,
@@ -279,20 +295,30 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     imageMinWidth_ = currentContentChangeConfig_->minWidth;
     imageMinHeight_ = currentContentChangeConfig_->minHeight;
     componentReportDelayTime_ = static_cast<uint64_t>(currentContentChangeConfig_->reportDelayTime) * NS_PER_MS;
+}
+
+void ContentChangeManager::ResetContentChangeState()
+{
     changedSwiperNodes_.clear();
     scrollingNodes_.clear();
     transitioningNodes_.clear();
     scrollingSwiperNodes_.clear();
+}
+
+void ContentChangeManager::RegisterContentChangeNodes(const ContentChangeConfig& config)
+{
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
             continue;
         }
+        if (IsIgnoringEventType(ARKWEB_ALL) && node->GetTag() == V2::WEB_ETS_TAG) {
+            LOGI("[ContentChangeManager] unregister web node:%{public}d due to ARKWEB ignored", node->GetId());
+            node->OnContentChangeUnregister();
+            continue;
+        }
         node->OnContentChangeRegister(config);
     }
-#ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddRegisterRecord(DumpEvent::REGISTER, currentContentChangeConfig_);
-#endif
 }
 
 void ContentChangeManager::StopContentChangeReport()
@@ -303,6 +329,9 @@ void ContentChangeManager::StopContentChangeReport()
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
+            continue;
+        }
+        if (IsIgnoringEventType(ARKWEB_ALL) && node->GetTag() == V2::WEB_ETS_TAG) {
             continue;
         }
         node->OnContentChangeUnregister();
@@ -325,6 +354,9 @@ void ContentChangeManager::AddOnContentChangeNode(WeakPtr<FrameNode> node)
     if (IsContentChangeDetectEnable()) {
         auto nodePtr = node.Upgrade();
         CHECK_NULL_VOID(nodePtr);
+        if (IsIgnoringEventType(ARKWEB_ALL) && nodePtr->GetTag() == V2::WEB_ETS_TAG) {
+            return;
+        }
         nodePtr->OnContentChangeRegister(currentContentChangeConfig_.value());
     }
 }
@@ -528,58 +560,38 @@ void ContentChangeManager::ResetTranslateNode(const RefPtr<PageTranslateNode>& n
     node->ResetPageTranslate();
 }
 
+void ContentChangeManager::ResetTranslateNodes(std::set<WeakPtr<PageTranslateNode>>& nodes, int32_t nodeId)
+{
+    for (auto iter = nodes.begin(); iter != nodes.end();) {
+        auto translateNode = iter->Upgrade();
+        if (!translateNode) {
+            iter = nodes.erase(iter);
+            continue;
+        }
+        if (nodeId < 0) {
+            ResetTranslateNode(translateNode);
+            ++iter;
+            continue;
+        }
+        if (translateNode->GetPageTranslateNodeId() == nodeId) {
+            ResetTranslateNode(translateNode);
+            nodes.erase(iter);
+            break;
+        }
+        ++iter;
+    }
+}
+
 void ContentChangeManager::ResetTranslateTextNode(int32_t nodeId)
 {
+    ResetTranslateNodes(translateTextNodes_, nodeId);
+    ResetTranslateNodes(translateTextSnapshotNodes_, nodeId);
     if (nodeId < 0) {
-        for (auto iter = translateTextNodes_.begin(); iter != translateTextNodes_.end();) {
-            auto translateNode = iter->Upgrade();
-            if (!translateNode) {
-                iter = translateTextNodes_.erase(iter);
-                continue;
-            }
-            ResetTranslateNode(translateNode);
-            ++iter;
-        }
-        for (auto iter = translateTextSnapshotNodes_.begin(); iter != translateTextSnapshotNodes_.end();) {
-            auto translateNode = iter->Upgrade();
-            if (!translateNode) {
-                iter = translateTextSnapshotNodes_.erase(iter);
-                continue;
-            }
-            ResetTranslateNode(translateNode);
-            ++iter;
-        }
         translateTextVersions_.clear();
         translateTextSnapshotVersions_.clear();
         return;
     }
-    for (auto iter = translateTextNodes_.begin(); iter != translateTextNodes_.end();) {
-        auto translateNode = iter->Upgrade();
-        if (!translateNode) {
-            iter = translateTextNodes_.erase(iter);
-            continue;
-        }
-        if (translateNode->GetPageTranslateNodeId() == nodeId) {
-            ResetTranslateNode(translateNode);
-            translateTextNodes_.erase(iter);
-            break;
-        }
-        ++iter;
-    }
     translateTextVersions_.erase(nodeId);
-    for (auto iter = translateTextSnapshotNodes_.begin(); iter != translateTextSnapshotNodes_.end();) {
-        auto translateNode = iter->Upgrade();
-        if (!translateNode) {
-            iter = translateTextSnapshotNodes_.erase(iter);
-            continue;
-        }
-        if (translateNode->GetPageTranslateNodeId() == nodeId) {
-            ResetTranslateNode(translateNode);
-            translateTextSnapshotNodes_.erase(iter);
-            break;
-        }
-        ++iter;
-    }
     translateTextSnapshotVersions_.erase(nodeId);
 }
 
@@ -678,7 +690,7 @@ void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, b
 void ContentChangeManager::OnTextChangeEnd(const RectF& rect, const RectF& rootRect)
 {
     if (!IsContentChangeDetectEnable() || !textCollecting_ || rect.IsEmpty() ||
-        !rootRect.IsIntersectWith(rect) || IsScrolling() || IsTransitioning()) {
+        !rootRect.IsIntersectWith(rect) || IsContentChanging()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OntextChange {%s}", rect.ToString().c_str());
@@ -793,7 +805,7 @@ bool ContentChangeManager::IsTextAABBCollecting() const
 
 void ContentChangeManager::StartTextAABBCollecting()
 {
-    if (!IsContentChangeDetectEnable() || textCollecting_ || IsScrolling() || IsTransitioning()) {
+    if (!IsContentChangeDetectEnable() || textCollecting_ || IsContentChanging()) {
         return;
     }
 
@@ -806,7 +818,7 @@ void ContentChangeManager::StartTextAABBCollecting()
 
 void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty() || IsScrolling() || IsTransitioning()) {
+    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty() || IsContentChanging()) {
         return;
     }
     if (rootRect.IsIntersectWith(textAABB_) && !IsInTransitionDelayWindow()) {
@@ -854,7 +866,7 @@ void ContentChangeManager::NotifyPageSceneContentChanged(bool flushNow)
 
 void ContentChangeManager::FlushPageSceneNodeChanged()
 {
-    if (IsScrolling() || IsTransitioning() || IsSwiperScrolling()) {
+    if (IsContentChanging()) {
         return;
     }
     auto uiSessionManager = UiSessionManager::GetInstance();
@@ -929,6 +941,11 @@ bool ContentChangeManager::IsTransitioning() const
     return !transitioningNodes_.empty();
 }
 
+bool ContentChangeManager::IsContentChanging() const
+{
+    return IsScrolling() || IsTransitioning() || IsSwiperScrolling();
+}
+
 uint32_t ContentChangeManager::ConvertEventStringToEnum(const std::string& type) const
 {
     std::map<std::string, uint32_t> eventMap = {
@@ -947,15 +964,25 @@ uint32_t ContentChangeManager::GetIgnoreEventMask(const std::string& ignoreEvent
         return mask;
     }
     auto scrollValue = json->GetValue("SCROLL");
-    if (!scrollValue || !scrollValue->IsArray()) {
-        return mask;
+    if (scrollValue && scrollValue->IsArray()) {
+        int32_t arraySize = scrollValue->GetArraySize();
+        for (int32_t i = 0; i < arraySize; i++) {
+            auto item = scrollValue->GetArrayItem(i);
+            if (item && item->IsString()) {
+                uint32_t eventType = ConvertEventStringToEnum(item->GetString());
+                mask |= eventType;
+            }
+        }
     }
-    int32_t arraySize = scrollValue->GetArraySize();
-    for (int32_t i = 0; i < arraySize; i++) {
-        auto item = scrollValue->GetArrayItem(i);
-        if (item && item->IsString()) {
-            uint32_t eventType = ConvertEventStringToEnum(item->GetString());
-            mask |= eventType;
+    auto arkwebValue = json->GetValue("ARKWEB");
+    if (arkwebValue && arkwebValue->IsArray()) {
+        int32_t arraySize = arkwebValue->GetArraySize();
+        for (int32_t i = 0; i < arraySize; i++) {
+            auto item = arkwebValue->GetArrayItem(i);
+            if (item && item->IsString()) {
+                std::string typeStr = item->GetString();
+                mask |= (typeStr == "all" ? ARKWEB_ALL : NONE);
+            }
         }
     }
     return mask;
@@ -969,7 +996,7 @@ bool ContentChangeManager::IsIgnoringEventType(uint32_t type) const
 void ContentChangeManager::OnImageChangeEnd(const WeakPtr<FrameNode>& keyNode, const std::string& sourceType,
     const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable() || IsScrolling() || IsTransitioning()) {
+    if (!IsContentChangeDetectEnable() || IsContentChanging()) {
         return;
     }
 
@@ -1040,7 +1067,7 @@ void ContentChangeManager::ReportImageEvent()
         imageJson->Put("$rect", rect.ToBounds().c_str());
         imageJson->Put("sourceType", sourceType.c_str());
         imagesArray->PutRef(std::move(imageJson));
-        
+
         if (!sourceTypes.empty()) {
             sourceTypes += ",";
         }
@@ -1050,7 +1077,7 @@ void ContentChangeManager::ReportImageEvent()
     json->PutRef("images", std::move(imagesArray));
     UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::IMAGE_LOADED, json->ToString());
     lastComponentReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
-    
+
 #ifndef IS_RELEASE_VERSION
     int32_t imageCount = static_cast<int32_t>(imageChangeList.size());
     dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::IMAGE_LOADED, imageCount, sourceTypes));

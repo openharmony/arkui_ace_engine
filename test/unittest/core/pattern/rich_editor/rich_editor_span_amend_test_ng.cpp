@@ -22,6 +22,8 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -350,8 +352,18 @@ HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
     ASSERT_NE(richEditorController, nullptr);
     auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
     ASSERT_NE(spanString, nullptr);
+    // Setup content host so MarkDirtyNode can be triggered
+    richEditorPattern->OnAttachToFrameNode();
+    auto host = richEditorPattern->GetContentHost();
+    ASSERT_NE(host, nullptr);
+    auto hostLayoutProperty = host->GetLayoutProperty();
+    ASSERT_NE(hostLayoutProperty, nullptr);
+    hostLayoutProperty->CleanDirty();
     richEditorController->SetPlaceholderStyledString(spanString);
     EXPECT_NE(richEditorPattern->styledPlaceholder_, nullptr);
+    // Branch: host != nullptr, verify content host marked dirty with PROPERTY_UPDATE_MEASURE
+    EXPECT_EQ(hostLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE,
+        PROPERTY_UPDATE_MEASURE);
     richEditorPattern->isShowPlaceholder_ = true;
     richEditorPattern->richTextRect_ = RectF(50, 50, 100, 140);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
@@ -359,9 +371,19 @@ HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
     richEditorPattern->SetPlaceholder(spans);
     EXPECT_EQ(spans.size(), 1);
     EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(50.0f, 50.0f));
+    // Branch: contentRect offset == (0,0) -> UpdateRichTextRectOffsetWithPadding
     richEditorPattern->isShowPlaceholder_ = false;
+    PaddingProperty padding;
+    padding.left = CalcLength(Dimension(20.0f, DimensionUnit::PX));
+    padding.top = CalcLength(Dimension(30.0f, DimensionUnit::PX));
+    richEditorNode_->GetLayoutProperty<RichEditorLayoutProperty>()->UpdatePadding(padding);
     richEditorPattern->SetPlaceholder(spans);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(0, 0));
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(20.0f, 30.0f));
+    // Branch: contentRect offset != (0,0) -> richTextRect_.SetOffset(contentRect_.GetOffset())
+    richEditorPattern->isShowPlaceholder_ = false;
+    richEditorPattern->contentRect_ = RectF(10.0f, 20.0f, 100, 100);
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(10.0f, 20.0f));
 }
 
 /**
@@ -407,4 +429,139 @@ HWTEST_F(RichEditorSpanAmendTestNg, PlaceholderImageNode, TestSize.Level1)
     EXPECT_TRUE(placeholderSpanNodes.empty());
 }
 
+/**
+ * @tc.name: PageTranslate_ApplyAndReset
+ * @tc.desc: Test RichEditorPattern ApplyPageTranslateResult and ResetPageTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_ApplyAndReset, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // ApplyPageTranslateResult with negative version returns true but does not set translated placeholder
+    EXPECT_TRUE(richEditorPattern->ApplyPageTranslateResult("result", -1));
+    EXPECT_FALSE(richEditorPattern->pageTranslatedContent_.has_value());
+
+    // ApplyPageTranslateResult with valid result sets translated placeholder and version
+    EXPECT_TRUE(richEditorPattern->ApplyPageTranslateResult("translated", 1));
+    ASSERT_TRUE(richEditorPattern->pageTranslatedContent_.has_value());
+    EXPECT_EQ(richEditorPattern->pageTranslatedContent_.value(), u"translated");
+
+    // ResetPageTranslate clears translated placeholder and version
+    richEditorPattern->ResetPageTranslate();
+    EXPECT_FALSE(richEditorPattern->pageTranslatedContent_.has_value());
+
+    // ResetPageTranslate again when already clean is a no-op
+    richEditorPattern->ResetPageTranslate();
+    EXPECT_FALSE(richEditorPattern->pageTranslatedContent_.has_value());
+}
+
+/**
+ * @tc.name: PageTranslate_GetCurrentPlaceholderText
+ * @tc.desc: Test RichEditorPattern GetCurrentPlaceholderText for plain and styled placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_GetCurrentPlaceholderText, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // plain placeholder: returns layoutProperty placeholder value
+    auto layoutProperty = richEditorNode_->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdatePlaceholder(u"plain placeholder");
+    EXPECT_EQ(richEditorPattern->GetCurrentPlaceholderText(), u"plain placeholder");
+
+    // styled placeholder: returns styledPlaceholder_->GetU16string()
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"Styled Placeholder");
+    richEditorPattern->styledPlaceholder_ = spanString;
+    EXPECT_EQ(richEditorPattern->GetCurrentPlaceholderText(), u"Styled Placeholder");
+    richEditorPattern->styledPlaceholder_ = nullptr;
+}
+
+/**
+ * @tc.name: PageTranslate_GetPageTranslateTextForReport
+ * @tc.desc: Test RichEditorPattern GetPageTranslateTextForReport for plain and styled placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_GetPageTranslateTextForReport, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutProperty = richEditorNode_->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // isShowPlaceholder_ is false returns empty string
+    richEditorPattern->isShowPlaceholder_ = false;
+    EXPECT_TRUE(richEditorPattern->GetPageTranslateTextForReport().empty());
+
+    // isShowPlaceholder_ is true, lastDrawn mismatch returns empty string (plain placeholder)
+    richEditorPattern->isShowPlaceholder_ = true;
+    layoutProperty->UpdatePlaceholder(u"plain placeholder");
+    richEditorPattern->lastDrawnPageTranslateContent_ = u"mismatch";
+    EXPECT_TRUE(richEditorPattern->GetPageTranslateTextForReport().empty());
+
+    // isShowPlaceholder_ is true, lastDrawn match returns the text (plain placeholder)
+    richEditorPattern->lastDrawnPageTranslateContent_ = u"plain placeholder";
+    EXPECT_EQ(richEditorPattern->GetPageTranslateTextForReport(), "plain placeholder");
+
+    // styled placeholder: lastDrawn match returns the styled text
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"Styled Placeholder");
+    richEditorPattern->styledPlaceholder_ = spanString;
+    richEditorPattern->lastDrawnPageTranslateContent_ = u"Styled Placeholder";
+    EXPECT_EQ(richEditorPattern->GetPageTranslateTextForReport(), "Styled Placeholder");
+    richEditorPattern->styledPlaceholder_ = nullptr;
+}
+
+/**
+ * @tc.name: PageTranslate_ReportAndOnSourceChanged
+ * @tc.desc: Test RichEditorPattern ReportPageTranslatePlaceholderDrawn and OnPlaceholderSourceTextChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_ReportAndOnSourceChanged, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutProperty = richEditorNode_->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // ReportPageTranslatePlaceholderDrawn sets lastDrawn to current placeholder (plain)
+    richEditorPattern->isShowPlaceholder_ = true;
+    layoutProperty->UpdatePlaceholder(u"plain placeholder");
+    richEditorPattern->ReportPageTranslatePlaceholderDrawn();
+    EXPECT_EQ(richEditorPattern->lastDrawnPageTranslateContent_, u"plain placeholder");
+
+    // ReportPageTranslatePlaceholderDrawn with styled placeholder
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"Styled Placeholder");
+    richEditorPattern->styledPlaceholder_ = spanString;
+    richEditorPattern->lastDrawnPageTranslateContent_.clear();
+    richEditorPattern->ReportPageTranslatePlaceholderDrawn();
+    EXPECT_EQ(richEditorPattern->lastDrawnPageTranslateContent_, u"Styled Placeholder");
+    richEditorPattern->styledPlaceholder_ = nullptr;
+
+    // OnPlaceholderSourceTextChanged clears lastDrawn and resets translate
+    richEditorPattern->ApplyPageTranslateResult("translated", 1);
+    ASSERT_TRUE(richEditorPattern->pageTranslatedContent_.has_value());
+    richEditorPattern->OnPlaceholderSourceTextChanged();
+    EXPECT_FALSE(richEditorPattern->pageTranslatedContent_.has_value());
+    EXPECT_TRUE(richEditorPattern->lastDrawnPageTranslateContent_.empty());
+
+    // OnPlaceholderSourceTextChanged when no translate state is a no-op
+    richEditorPattern->OnPlaceholderSourceTextChanged();
+    EXPECT_FALSE(richEditorPattern->pageTranslatedContent_.has_value());
+}
+
+/**
+ * @tc.name: PageTranslate_GetPageTranslateNodeId
+ * @tc.desc: Test RichEditorPattern GetPageTranslateNodeId returns host id
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_GetPageTranslateNodeId, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    EXPECT_EQ(richEditorPattern->GetPageTranslateNodeId(), richEditorNode_->GetId());
+}
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include <fstream>
 
+#include "color_space.h"
 #include "drawable_descriptor.h"
 #include "media_errors.h"
 #include "pixel_map_manager.h"

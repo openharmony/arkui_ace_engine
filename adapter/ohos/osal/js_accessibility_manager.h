@@ -337,7 +337,7 @@ public:
         const RefPtr<NG::WebPattern>& webPattern);
     void WebFocusMoveSearchByComponent(AccessibilityElementInfo& nodeInfo, const RefPtr<NG::WebPattern>& webPattern,
         const int32_t direction, RefPtr<PipelineBase> context, FocusMoveResult& result,
-        int32_t focusRuleType = static_cast<int32_t>(FocusRuleType::DEFAULT));
+        int32_t focusRuleType = static_cast<int32_t>(FocusRuleType::DEFAULT), uint32_t searchDepth = 0);
     void WebFocusMoveSearchNG(int64_t elementId, int32_t direction,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
         const RefPtr<NG::WebPattern>& webPattern);
@@ -1044,6 +1044,11 @@ private:
 
     // Check if current pipeline context is form render
     bool IsFormRender();
+    bool SearchAccessibilityVirtualNode(int64_t elementId, int32_t mode,
+        std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
+    bool GetAllVirtualNodeElementInfo(std::list<AccessibilityElementInfo>& infos,
+        const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
+        const RefPtr<NG::FrameNode>& containerNode, AccessibilityElementInfo& parentNodeInfo);
 
     bool SearchAccessibilityVirtualNode(int64_t elementId,
         std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);

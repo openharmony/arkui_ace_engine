@@ -20,20 +20,19 @@ import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, 
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { extractors, ShaderStyle } from '#handwritten'
+import { extractors, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, ShaderStyle } from '#handwritten'
 import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
 import { text_LineMetrics_serializer, text_TextBox_serializer } from './../framework/ohos.graphics.text'
 import { default as text } from '@ohos.graphics.text'
 import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from './styledString'
 import { SelectionOptions_serializer, SelectionOptions, Callback as arkui_component_common_Callback, LinearGradientOptions_serializer, LinearGradientOptions, RadialGradientOptions_serializer, RadialGradientOptions } from './common'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { ResourceStr, Resource as arkui_component_units_Resource, LengthMetrics as arkui_component_units_LengthMetrics, ResourceColor, Length } from './units'
+import { ResourceStr, Resource as arkui_component_units_Resource, ResourceColor, Length } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { Color as arkui_component_enums_Color, TextDecorationType, TextDecorationStyle } from './enums'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class ContentTransitionInternal {
     public static fromPtr(ptr: KPointer): ContentTransition {
         return new ContentTransition(MaterializedBaseTag.NOP, ptr)
@@ -117,8 +116,11 @@ export interface LayoutManager {
     getLineCount(): int32 | undefined
     getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
     getCharacterPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
+    getCharacterPositionAtCoordinate(x: double, y: double, encoding: TextEncoding | undefined): PositionWithAffinity | undefined
     getGlyphRangeForCharacterRange(charRange: TextRange): Array<TextRange> | undefined
+    getGlyphRangeForCharacterRange(charRange: TextRange, encoding: TextEncoding | undefined): Array<TextRange> | undefined
     getCharacterRangeForGlyphRange(glyphRange: TextRange): Array<TextRange> | undefined
+    getCharacterRangeForGlyphRange(glyphRange: TextRange, encoding: TextEncoding | undefined): Array<TextRange> | undefined
     getLineMetrics(lineNumber: int32): LineMetrics | undefined
     getRectsForRange(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> | undefined
 }
@@ -154,15 +156,31 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     public getCharacterPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined {
         const x_casted = x as (double)
         const y_casted = y as (double)
-        return this.getCharacterPositionAtCoordinate_serialize(x_casted, y_casted)
+        return this.getCharacterPositionAtCoordinate0_serialize(x_casted, y_casted)
+    }
+    public getCharacterPositionAtCoordinate(x: double, y: double, encoding?: TextEncoding): PositionWithAffinity | undefined {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const encoding_casted = encoding as (TextEncoding | undefined)
+        return this.getCharacterPositionAtCoordinate1_serialize(x_casted, y_casted, encoding_casted)
     }
     public getGlyphRangeForCharacterRange(charRange: TextRange): Array<TextRange> | undefined {
         const charRange_casted = charRange as (TextRange)
-        return this.getGlyphRangeForCharacterRange_serialize(charRange_casted)
+        return this.getGlyphRangeForCharacterRange0_serialize(charRange_casted)
+    }
+    public getGlyphRangeForCharacterRange(charRange: TextRange, encoding?: TextEncoding): Array<TextRange> | undefined {
+        const charRange_casted = charRange as (TextRange)
+        const encoding_casted = encoding as (TextEncoding | undefined)
+        return this.getGlyphRangeForCharacterRange1_serialize(charRange_casted, encoding_casted)
     }
     public getCharacterRangeForGlyphRange(glyphRange: TextRange): Array<TextRange> | undefined {
         const glyphRange_casted = glyphRange as (TextRange)
-        return this.getCharacterRangeForGlyphRange_serialize(glyphRange_casted)
+        return this.getCharacterRangeForGlyphRange0_serialize(glyphRange_casted)
+    }
+    public getCharacterRangeForGlyphRange(glyphRange: TextRange, encoding?: TextEncoding): Array<TextRange> | undefined {
+        const glyphRange_casted = glyphRange as (TextRange)
+        const encoding_casted = encoding as (TextEncoding | undefined)
+        return this.getCharacterRangeForGlyphRange1_serialize(glyphRange_casted, encoding_casted)
     }
     public getLineMetrics(lineNumber: int32): LineMetrics | undefined {
         const lineNumber_casted = lineNumber as (int32)
@@ -198,8 +216,8 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         retvalDeserializer.dispose()
         return (returnResult as PositionWithAffinity | undefined)
     }
-    private getCharacterPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
-        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterPositionAtCoordinate(this.peer!.ptr, x, y)
+    private getCharacterPositionAtCoordinate0_serialize(x: double, y: double): PositionWithAffinity | undefined {
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterPositionAtCoordinate0(this.peer!.ptr, x, y)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
         let buffer: PositionWithAffinity | undefined = undefined
@@ -210,10 +228,31 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         retvalDeserializer.dispose()
         return (returnResult as PositionWithAffinity | undefined)
     }
-    private getGlyphRangeForCharacterRange_serialize(charRange: TextRange): Array<TextRange> | undefined {
+    private getCharacterPositionAtCoordinate1_serialize(x: double, y: double, encoding?: TextEncoding): PositionWithAffinity | undefined {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (encoding !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const encodingTmpValue = (encoding as TextEncoding)
+            thisSerializer.writeInt32(encodingTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterPositionAtCoordinate1(this.peer!.ptr, x, y, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: PositionWithAffinity | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
+        }
+        const returnResult: PositionWithAffinity | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as PositionWithAffinity | undefined)
+    }
+    private getGlyphRangeForCharacterRange0_serialize(charRange: TextRange): Array<TextRange> | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         TextRange_serializer.write(thisSerializer, charRange)
-        const retval = ArkUIGeneratedNativeModule._LayoutManager_getGlyphRangeForCharacterRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getGlyphRangeForCharacterRange0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
@@ -229,10 +268,62 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         retvalDeserializer.dispose()
         return (returnResult as Array<TextRange> | undefined)
     }
-    private getCharacterRangeForGlyphRange_serialize(glyphRange: TextRange): Array<TextRange> | undefined {
+    private getGlyphRangeForCharacterRange1_serialize(charRange: TextRange, encoding?: TextEncoding): Array<TextRange> | undefined {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        TextRange_serializer.write(thisSerializer, charRange)
+        if (encoding !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const encodingTmpValue = (encoding as TextEncoding)
+            thisSerializer.writeInt32(encodingTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getGlyphRangeForCharacterRange1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<TextRange> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            const bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength, (arg0: int32):TextRange => {
+            return TextRange_serializer.read(retvalDeserializer);
+        })
+            buffer = bufferOpt
+        }
+        const returnResult: Array<TextRange> | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as Array<TextRange> | undefined)
+    }
+    private getCharacterRangeForGlyphRange0_serialize(glyphRange: TextRange): Array<TextRange> | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         TextRange_serializer.write(thisSerializer, glyphRange)
-        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterRangeForGlyphRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterRangeForGlyphRange0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<TextRange> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            const bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength, (arg0: int32):TextRange => {
+            return TextRange_serializer.read(retvalDeserializer);
+        })
+            buffer = bufferOpt
+        }
+        const returnResult: Array<TextRange> | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as Array<TextRange> | undefined)
+    }
+    private getCharacterRangeForGlyphRange1_serialize(glyphRange: TextRange, encoding?: TextEncoding): Array<TextRange> | undefined {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        TextRange_serializer.write(thisSerializer, glyphRange)
+        if (encoding !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const encodingTmpValue = (encoding as TextEncoding)
+            thisSerializer.writeInt32(encodingTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterRangeForGlyphRange1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
@@ -721,6 +812,10 @@ export interface StyledStringChangeValue {
     range: TextRange;
     replacementString: StyledString;
     previewText?: StyledString;
+}
+export enum TextEncoding {
+    TEXT_ENCODING_UTF8 = 0,
+    TEXT_ENCODING_UTF16 = 1
 }
 export interface PositionWithAffinity {
     position: int32;
@@ -1733,7 +1828,8 @@ export class TextLayoutOptions_serializer {
         if (valueHolderForConstraintWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForConstraintWidthTmpValue = valueHolderForConstraintWidth!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValue)
+            const valueHolderForConstraintWidthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForConstraintWidthTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1743,7 +1839,8 @@ export class TextLayoutOptions_serializer {
         const constraintWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let constraintWidthTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((constraintWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            constraintWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const constraintWidthTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            constraintWidthTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(constraintWidthTmpBufOptDeserialized)
         }
         const constraintWidthTmpResult: arkui_component_units_LengthMetrics | undefined = constraintWidthTmpBuf
         let value: TextLayoutOptions = ({constraintWidth: constraintWidthTmpResult} as TextLayoutOptions)

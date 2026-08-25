@@ -54,7 +54,7 @@ export class WorkerLocalValue<T> {
      */
     get(): T {
         const ref = this.ref
-        if (ref) return ref.value
+        if (ref) { return ref.value }
         const init = this.init
         if (!init) { throw new Error('WorkerLocalValue not initialized: call set() first or provide init() function.') }
         const value = init()
@@ -66,7 +66,7 @@ export class WorkerLocalValue<T> {
      * Updates the worker-local value for current worker.
      * @param value - new value to store
      */
-    set(value: T) {
+    set(value: T): void {
         const ref = this.ref
         if (ref) {
             ref.value = value

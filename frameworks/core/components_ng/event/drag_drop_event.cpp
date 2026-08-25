@@ -85,10 +85,12 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
 
 void DragDropEventActuator::InitPanMouseDistance(bool isStylusMouseMode)
 {
-    panRecognizer_ = MakeRefPtr<PanRecognizer>(
-        DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
-    panRecognizer_->SetIsForDrag(true);
-    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+    if (panRecognizer_ == nullptr) {
+        panRecognizer_ = MakeRefPtr<PanRecognizer>(
+            DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
+        panRecognizer_->SetIsForDrag(true);
+        panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+    }
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragPanDistanceMouse = DRAG_PAN_DISTANCE_MOUSE;
@@ -106,11 +108,7 @@ void DragDropEventActuator::InitPanAction(bool isStylusMouseMode)
 {
     auto frameNode = GetFrameNode();
     ACE_UINODE_TRACE(frameNode);
-    if (panRecognizer_ == nullptr) {
-        InitPanMouseDistance(isStylusMouseMode);
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-    }
+    InitPanMouseDistance(isStylusMouseMode);
     panRecognizer_->SetOnActionStart(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();

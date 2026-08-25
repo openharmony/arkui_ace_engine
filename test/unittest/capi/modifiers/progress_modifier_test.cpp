@@ -91,7 +91,7 @@ namespace  {
         capsuleStyle.font = Converter::ArkValue<Opt_Font>(Ark_Empty());
         capsuleStyle.fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         capsuleStyle.showDefaultPercentage = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-        capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
+        capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty());
         return capsuleStyle;
     }
 
@@ -619,7 +619,7 @@ HWTEST_F(ProgressModifierTest, setStyleTestCapsuleValidBorderRadiusValues, TestS
     modifier_->setProgressOptions(node_, &progressOptions);
 
     Ark_CapsuleStyleOptions capsuleStyle = getEmptyCapsuleStyleOptions();
-    capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetrics>(Dimension(11, DimensionUnit::VP));
+    capsuleStyle.borderRadius = Converter::ArkValue<Opt_LengthMetricsProxy>(Dimension(11, DimensionUnit::VP));
     auto options =
         Converter::ArkUnion<Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions,
             Ark_CapsuleStyleOptions>(capsuleStyle);

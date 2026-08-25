@@ -33,10 +33,10 @@ build_component_ng("qrcode_pattern_ng") {
   ]
 
   if (is_arkui_x) {
-    deps = [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+    deps = [ "//commonlibrary/qrcode_generator:qrcodegen" ]
     public_deps = [ "//foundation/arkui/napi:ace_napi" ]
   } else {
-    external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+    external_deps = [ "qrcode_generator:qrcodegen" ]
     if (!ace_engine_feature_wearable) {
         ark_sources += [ "bridge/qrcode_static_modifier.cpp" ]
     }
@@ -54,9 +54,10 @@ build_component_plugin("qrcode_source") {
     "qrcode_paint_method.cpp",
     "qrcode_pattern.cpp",
   ]
+
   if (is_arkui_x) {
-    deps = [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+    deps = [ "//commonlibrary/qrcode_generator:qrcodegen" ]
   } else {
-    external_deps = [ "qrcodegen:ace_engine_qrcode" ]
+    external_deps = [ "qrcode_generator:qrcodegen" ]
   }
 }

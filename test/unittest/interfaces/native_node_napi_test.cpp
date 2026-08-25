@@ -886,10 +886,34 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest011, TestSize.Level1)
 
 /**
  * @tc.name: NativeNodeNapiTest012
- * @tc.desc: Test OH_ArkUI_EnableEventPassthrough function.
+ * @tc.desc: Test OH_ArkUI_GetNodeHandleFromNapiValue with a null external pointer in builderNode_.
  * @tc.type: FUNC
  */
 HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest012, TestSize.Level1)
+{
+    NativeEngineMock engine;
+    napi_env env = napi_env(engine);
+    napi_value value = nullptr;
+    napi_value builderNode = nullptr;
+    napi_value nodePtr = nullptr;
+    ASSERT_EQ(napi_create_object(env, &value), napi_ok);
+    ASSERT_EQ(napi_create_object(env, &builderNode), napi_ok);
+    ASSERT_EQ(napi_create_external(env, nullptr, nullptr, nullptr, &nodePtr), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env, builderNode, "nodePtr_", nodePtr), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env, value, "builderNode_", builderNode), napi_ok);
+
+    ArkUI_NodeHandle handle = nullptr;
+    int32_t code = OH_ArkUI_GetNodeHandleFromNapiValue(env, value, &handle);
+    EXPECT_EQ(code, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(handle, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest013
+ * @tc.desc: Test OH_ArkUI_EnableEventPassthrough function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest013, TestSize.Level1)
 {
     ArkUI_ContextHandle uiContext = new ArkUI_Context({ .id = 10000 });
     bool enable = true;

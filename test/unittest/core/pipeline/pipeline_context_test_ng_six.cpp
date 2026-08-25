@@ -32,7 +32,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
@@ -1113,33 +1113,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg156, TestSize.Level
 }
 
 // ==========================================================================
-// Batch 7: IsTagInOverlay, AddFrameNodeChangeListener, RemoveFrameNodeChangeListener,
+// Batch 7: AddFrameNodeChangeListener, RemoveFrameNodeChangeListener,
 //          AddChangedFrameNode, RemoveChangedFrameNode, CleanNodeChangeFlag,
 //          OnHalfFoldHoverChangedCallback, OnRawKeyboardChangedCallback
 // ==========================================================================
-
-/**
- * @tc.name: PipelineContextFourTestNg157
- * @tc.desc: Test IsTagInOverlay returns true for overlay tags and false otherwise.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg157, TestSize.Level1)
-{
-    AssertValidContext();
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::TOAST_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::POPUP_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::DIALOG_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::MENU_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::SHEET_PAGE_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::OVERLAY_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::ORDER_OVERLAY_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::ACTION_SHEET_DIALOG_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::ALERT_DIALOG_ETS_TAG));
-    EXPECT_TRUE(context_->IsTagInOverlay(V2::MENU_WRAPPER_ETS_TAG));
-    EXPECT_FALSE(context_->IsTagInOverlay("unknown_tag"));
-    EXPECT_FALSE(context_->IsTagInOverlay(V2::ROOT_ETS_TAG));
-    EXPECT_FALSE(context_->IsTagInOverlay(""));
-}
 
 /**
  * @tc.name: PipelineContextFourTestNg158
@@ -1183,7 +1160,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg159, TestSize.Level
 }
 
 // ==========================================================================
-// Batch 8: UpdateDrawLayoutChildObserver, SetCallBackNode, UpdateIdUpdateZOrderIndex,
+// Batch 8: UpdateDrawLayoutChildObserver, SetCallBackNode, ThrottleRenderTreeRebuild(order),
 //          RegisterAttachedNode, RemoveAttachedNode, HandleSubwindow,
 //          GetContainerCustomTitleVisible, GetContainerControlButtonVisible
 // ==========================================================================
@@ -1230,21 +1207,27 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg162, TestSize.Level
 
 /**
  * @tc.name: PipelineContextFourTestNg163
- * @tc.desc: Test UpdateIdUpdateZOrderIndex increments index.
+ * @tc.desc: Test ThrottleRenderTreeRebuild increments flush order only past the per-node limit.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg163, TestSize.Level1)
 {
     AssertValidContext();
-    context_->idUpdateZOrderIndex_ = 0;
+    constexpr int32_t nodeId = 163;
+    // Within the eager budget the flush order does not move.
+    for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+        context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+    }
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 0);
 
-    context_->UpdateIdUpdateZOrderIndex();
-    EXPECT_EQ(context_->GetIdUpdateZOrderIndex(), DEFAULT_SIZE1);
+    // Every deferred (over-limit) call increments the monotonic flush order.
+    context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE1);
 
-    context_->UpdateIdUpdateZOrderIndex();
-    EXPECT_EQ(context_->GetIdUpdateZOrderIndex(), DEFAULT_SIZE2);
+    context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE2);
 
-    context_->idUpdateZOrderIndex_ = 0;
+    context_->FlushRebuildRenderTree();
 }
 
 /**
@@ -1317,7 +1300,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg167, TestSize.Level
 
 // ==========================================================================
 // Batch 9: AddFontNodeNG, RemoveFontNodeNG, IsContainerModalVisible,
-//          StopWindowAnimation, AddDirtyFreezeNode, SetAfterRenderZindexRebuild
+//          StopWindowAnimation, AddDirtyFreezeNode, ThrottleRenderTreeRebuild(defer)
 // ==========================================================================
 
 /**
@@ -1390,25 +1373,32 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg171, TestSize.Level
 
 /**
  * @tc.name: PipelineContextFourTestNg172
- * @tc.desc: Test SetAfterRenderZindexRebuild inserts into map and increments index.
+ * @tc.desc: Test ThrottleRenderTreeRebuild inserts deferred entries past the per-node limit.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg172, TestSize.Level1)
 {
     AssertValidContext();
-    context_->idUpdateZOrder_.clear();
-    context_->idUpdateZOrderIndex_ = 0;
+    constexpr int32_t nodeId1 = 10;
+    constexpr int32_t nodeId2 = 20;
+    // Exhaust the eager budget of both nodes: nothing is deferred yet.
+    for (int32_t nodeId : { nodeId1, nodeId2 }) {
+        for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+            context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+        }
+    }
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
 
-    context_->SetAfterRenderZindexRebuild(10);
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), DEFAULT_SIZE1);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, DEFAULT_SIZE1);
+    // The first over-limit call per node inserts a deferred entry and advances the order.
+    context_->ThrottleRenderTreeRebuild(nodeId1, nullptr);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), DEFAULT_SIZE1);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE1);
 
-    context_->SetAfterRenderZindexRebuild(20);
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), DEFAULT_SIZE2);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, DEFAULT_SIZE2);
+    context_->ThrottleRenderTreeRebuild(nodeId2, nullptr);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), DEFAULT_SIZE2);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE2);
 
-    context_->idUpdateZOrder_.clear();
-    context_->idUpdateZOrderIndex_ = 0;
+    context_->FlushRebuildRenderTree();
 }
 
 // ==========================================================================

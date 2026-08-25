@@ -575,11 +575,11 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternHiddenChange001
 }
 
 /**
- * @tc.name: VideoStateMachinePatternOnVisibleChange001
- * @tc.desc: Test OnVisibleChange calls hiddenChangeEvent_.
+ * @tc.name: VideoStateMachinePatternOnVisibleAreaChange001
+ * @tc.desc: Test OnVisibleAreaChange calls hiddenChangeEvent_.
  * @tc.type: FUNC
  */
-HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnVisibleChange001, TestSize.Level1)
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnVisibleAreaChange001, TestSize.Level1)
 {
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
@@ -593,9 +593,39 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnVisibleChange
         hiddenValue = hidden;
     });
 
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     EXPECT_TRUE(called);
     EXPECT_FALSE(hiddenValue);
+}
+
+/**
+ * @tc.name: VideoStateMachinePatternVisibleAreaChange001
+ * @tc.desc: Test visible-area registration and hidden event dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternVisibleAreaChange001, TestSize.Level1)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->RegisterVisibleAreaChange();
+    EXPECT_TRUE(pattern->hasVisibleChangeRegistered_);
+
+    bool called = false;
+    bool hiddenValue = false;
+    pattern->SetHiddenChangeEvent([&called, &hiddenValue](bool hidden) {
+        called = true;
+        hiddenValue = hidden;
+    });
+
+    pattern->OnVisibleAreaChange(false);
+    EXPECT_TRUE(called);
+    EXPECT_TRUE(hiddenValue);
+
+    pattern->UnregisterVisibleAreaChange(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(pattern->hasVisibleChangeRegistered_);
 }
 
 /**
@@ -1331,17 +1361,18 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternPostSerialBgTas
 {
     auto pattern = AceType::MakeRefPtr<VideoStateMachinePattern>(nullptr);
     ASSERT_TRUE(pattern);
-    EXPECT_TRUE(pattern->serialBgTaskQueue_.empty());
+    EXPECT_TRUE(pattern->stateManager_->serialBgTaskQueue_.empty());
 
     bool taskExecuted = false;
     pattern->PostSerialBgTask([&taskExecuted]() { taskExecuted = true; }, "NoHostTest");
-    EXPECT_TRUE(pattern->serialBgTaskQueue_.empty());
+    EXPECT_TRUE(pattern->stateManager_->serialBgTaskQueue_.empty());
     EXPECT_FALSE(taskExecuted);
 }
 
 /**
  * @tc.name: VideoStateMachinePatternSerialQueueDestructor001
- * @tc.desc: Test destructor clears serial background task queue without crash.
+ * @tc.desc: Test destruction with pending serial background tasks does not crash.
+ *           The queue lives in the shared state manager and is destroyed with it.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternSerialQueueDestructor001, TestSize.Level1)
@@ -1349,13 +1380,13 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternSerialQueueDest
     {
         auto pattern = AceType::MakeRefPtr<VideoStateMachinePattern>(nullptr);
         ASSERT_TRUE(pattern);
-        pattern->serialBgTaskQueue_.push({"Task1", []() {}});
-        pattern->serialBgTaskQueue_.push({"Task2", []() {}});
-        pattern->isDrainingSerialBgQueue_ = true;
-        EXPECT_EQ(pattern->serialBgTaskQueue_.size(), 2u);
-        // Destructor should clear the queue and reset the flag without crashing.
+        pattern->stateManager_->serialBgTaskQueue_.push({"Task1", []() {}});
+        pattern->stateManager_->serialBgTaskQueue_.push({"Task2", []() {}});
+        pattern->stateManager_->isDrainingSerialBgQueue_ = true;
+        EXPECT_EQ(pattern->stateManager_->serialBgTaskQueue_.size(), 2u);
+        // Destroying the pattern (and its state manager) with pending tasks must not crash.
     }
-    // Reaching here without crash means the destructor works correctly.
+    // Reaching here without crash means the destruction works correctly.
     EXPECT_TRUE(true);
 }
 

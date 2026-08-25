@@ -165,7 +165,6 @@ ohos_unittest("container_test") {
 ohos_unittest("high_contrast_observer_test") {
   module_out_path = adapter_test_output_path
   sources = [
-    "$ace_root/adapter/ohos/entrance/high_contrast_observer.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -174,7 +173,6 @@ ohos_unittest("high_contrast_observer_test") {
     "$ace_root/test/mock/frameworks/core/common/mock_font_manager.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
-    "high_contrast_observer_test.cpp",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
@@ -254,6 +252,7 @@ ohos_unittest("layout_inspector_test") {
     "ability_runtime:napi_common",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "image_framework:image_native",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -352,9 +351,70 @@ ohos_unittest("mmi_event_converter_test") {
   ]
 }
 
+ohos_source_set("background_force_flush_vsync_test_support") {
+  testonly = true
+  sources = [
+    "$ace_root/test/mock/frameworks/base/log/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/frameworks/base/thread/mock_task_executor.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_frame_report.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_ace_performance_monitor.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_ace_trace.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/frameworks/base/subwindow/mock_subwindow_manager.cpp",
+    "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/frameworks/base/utils/mock_time_util.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_container.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_container_scope.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_thread_checker.cpp",
+    "$ace_root/test/mock/frameworks/core/pipeline/mock_pipeline_context.cpp",
+  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest",
+  ]
+}
+
+ohos_unittest("background_force_flush_vsync_test") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_window.cpp",
+    "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
+    "background_force_flush_vsync_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  defines = [
+    "OHOS_PLATFORM",
+    "USE_ROSEN_DRAWING",
+  ]
+
+  deps = [
+    ":background_force_flush_vsync_test_support",
+    "$ace_root/test/mock/ohos_mock/rosen:mock_render_service",
+    "$ace_root/test/mock/ohos_mock/window_manager:mock_window_manager",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+
 group("entrance_unittest") {
   testonly = true
   deps = [
+    ":background_force_flush_vsync_test",
     ":container_test",
     ":high_contrast_observer_test",
     ":layout_inspector_test",

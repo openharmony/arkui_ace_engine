@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_MODEL_H
 
-#include <mutex>
-
 #include "base/memory/referenced.h"
 #include "core/components/scroll_bar/scroll_bar_component.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
@@ -43,9 +41,6 @@ public:
     virtual void SetScrollBarColor(const Color& color) = 0;
     virtual void ResetScrollBarColor() = 0;
     virtual void CreateWithResourceObj(ScrollBarJsResType jsResourceType, const RefPtr<ResourceObject>& resObj) {};
-private:
-    static std::unique_ptr<ScrollBarModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_MODEL_H

@@ -24,10 +24,10 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/container_window_manager.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -1322,13 +1322,9 @@ bool CalendarPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         UpdateEntryButtonColor();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    auto dialogNode = dialogNode_.Upgrade();
-    if (dialogNode) {
-        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
-        if (dialogPattern) {
-            dialogPattern->OnThemeScopeUpdate(themeScopeId);
-        }
-    }
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, true);
+    dialogInnerModifier->onThemeScopeUpdate(dialogNode_, themeScopeId);
     return true;
 }
 

@@ -53,11 +53,8 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
     RefPtr<FrameNode> frameNode = nullptr;
     if (isCreateArc) {
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ARC_SCROLL_BAR_ETS_TAG, nodeId);
-        auto deviceType = SystemProperties::GetDeviceType();
-        if (deviceType == DeviceType::WATCH || deviceType == DeviceType::WEARABLE) {
-            frameNode = FrameNode::GetOrCreateFrameNode(
-                V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return CreateArcScrollBarPattern(); });
-        }
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return CreateArcScrollBarPattern(); });
     } else {
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
         frameNode = FrameNode::GetOrCreateFrameNode(

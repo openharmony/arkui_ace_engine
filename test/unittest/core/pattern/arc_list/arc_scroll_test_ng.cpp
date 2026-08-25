@@ -16,8 +16,12 @@
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
+#define private public
+#define protected public
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#undef private
+#undef protected
 
 namespace OHOS::Ace::NG {
 const Point IN_ACTIVE_BAR_POINT = Point(238.f, 80.f);

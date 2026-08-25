@@ -31,7 +31,7 @@ class NavBarNode;
 struct ForceSplitParam {
     std::string homePage;
     std::string relatedPage;
-    bool isArkUIHookEnabled = false;
+    bool isArkUIHookEnabled = true;
     bool navigationDisablePlaceholder = false;
     bool navigationDisableDivider = false;
     bool dialogSupportSplit = true;

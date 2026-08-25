@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 
 void CirclePaintMethod::UpdateFillHDRColorHeadRoom(
-    PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
+    PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty)
 {
     CHECK_NULL_VOID(paintWrapper);
     constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
@@ -26,12 +26,27 @@ void CirclePaintMethod::UpdateFillHDRColorHeadRoom(
     CHECK_NULL_VOID(renderContext);
     auto fillColor = shapePaintProperty.HasFill() ? shapePaintProperty.GetFillValue() : Color::BLACK;
     auto headRoomColor = fillColor.GetHeadRoomColor();
-    renderContext->SetHDRColorHeadRoom(
-        headRoomColor.has_value() ? headRoomColor.value().headRoom : DEFAULT_SDR_HEADROOM);
+    if (!headRoomColor.has_value()) {
+        if (lastFillHdrHeadRoom_ && lastFillHdrHeadRoom_->has_value() &&
+            !NearEqual(lastFillHdrHeadRoom_->value(), DEFAULT_SDR_HEADROOM)) {
+            *lastFillHdrHeadRoom_ = DEFAULT_SDR_HEADROOM;
+            renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+        }
+        return;
+    }
+    float headRoom = headRoomColor.value().headRoom;
+    if (lastFillHdrHeadRoom_ && lastFillHdrHeadRoom_->has_value() &&
+        NearEqual(lastFillHdrHeadRoom_->value(), headRoom)) {
+        return;
+    }
+    if (lastFillHdrHeadRoom_) {
+        *lastFillHdrHeadRoom_ = headRoom;
+    }
+    renderContext->SetHDRColorHeadRoom(headRoom);
 }
 
 void CirclePaintMethod::UpdateStrokeHDRColorHeadRoom(
-    PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
+    PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty)
 {
     CHECK_NULL_VOID(paintWrapper);
     if (!shapePaintProperty.HasStroke()) {
@@ -43,7 +58,15 @@ void CirclePaintMethod::UpdateStrokeHDRColorHeadRoom(
     }
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetHDRColorHeadRoom(headRoomColor.value().headRoom);
+    float headRoom = headRoomColor.value().headRoom;
+    if (lastStrokeHdrHeadRoom_ && lastStrokeHdrHeadRoom_->has_value() &&
+        NearEqual(lastStrokeHdrHeadRoom_->value(), headRoom)) {
+        return;
+    }
+    if (lastStrokeHdrHeadRoom_) {
+        *lastStrokeHdrHeadRoom_ = headRoom;
+    }
+    renderContext->SetHDRColorHeadRoom(headRoom);
 }
 
 CanvasDrawFunction CirclePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)

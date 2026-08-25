@@ -20,6 +20,23 @@
 namespace OHOS::Ace::NG {
 namespace {
 const char DOM_SVG_SRC_VIEW_BOX[] = "viewBox";
+
+class HrefResolveGuard {
+public:
+    HrefResolveGuard(const RefPtr<SvgContext>& context, const std::string& href)
+        : context_(context), href_(href) {}
+    ~HrefResolveGuard()
+    {
+        if (context_) {
+            context_->PopHrefResolving(href_);
+        }
+    }
+    bool IsValid() const { return context_ != nullptr; }
+private:
+    RefPtr<SvgContext> context_;
+    std::string href_;
+    ACE_DISALLOW_COPY_AND_MOVE(HrefResolveGuard);
+};
 }
 
 SvgUse::SvgUse() : SvgGraphic() {}
@@ -43,6 +60,17 @@ RSRecordingPath SvgUse::AsPath(const Size& viewPort) const
         LOGE("href is empty");
         return {};
     }
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
+        return RSRecordingPath();
+    }
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath circular reference detected for href=%{public}s",
+            attributes_.href.c_str());
+        return RSRecordingPath();
+    }
+    HrefResolveGuard guard(svgContext, attributes_.href);
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
 
@@ -59,19 +87,23 @@ RSRecordingPath SvgUse::AsPath(const SvgLengthScaleRule& lengthRule)
         LOGE("href is empty");
         return {};
     }
-    if (isDrawingPath_) {
-        LOGW("SvgUse::AsPath draw path is still in processing");
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
         return RSRecordingPath();
     }
-    isDrawingPath_ = true;
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath circular reference detected for href=%{public}s",
+            attributes_.href.c_str());
+        return RSRecordingPath();
+    }
+    HrefResolveGuard guard(svgContext, attributes_.href);
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
 
     AttributeScope scope(refSvgNode);
     refSvgNode->InheritAttr(attributes_);
-    auto path = refSvgNode->AsPath(lengthRule);
-    isDrawingPath_ = false;
-    return path;
+    return refSvgNode->AsPath(lengthRule);
 }
 
 void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
@@ -81,6 +113,17 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
     if (attributes_.href.empty()) {
         return;
     }
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw href resolve count exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
+        return;
+    }
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw circular reference detected for href=%{public}s",
+            attributes_.href.c_str());
+        return;
+    }
+    HrefResolveGuard guard(svgContext, attributes_.href);
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_VOID(refSvgNode);
     auto useX = useAttr_.x.Value();
@@ -119,6 +162,17 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     if (attributes_.href.empty()) {
         return;
     }
+    if (!svgContext->IncrementHrefResolveCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw href resolve count exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
+        return;
+    }
+    if (!svgContext->PushHrefResolving(attributes_.href)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw circular reference detected for href=%{public}s",
+            attributes_.href.c_str());
+        return;
+    }
+    HrefResolveGuard guard(svgContext, attributes_.href);
     // Create New coordinate system
     SvgCoordinateSystemContext useContext(lengthRule.GetContainerRect(), lengthRule.GetViewPort());
     auto useRule = useContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);

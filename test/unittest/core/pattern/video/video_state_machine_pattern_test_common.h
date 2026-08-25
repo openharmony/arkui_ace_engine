@@ -114,7 +114,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp();
-    void TearDown() {}
+    void TearDown();
 
 protected:
     static RefPtr<FrameNode> CreateVideoNode(TestProperty& testProperty);

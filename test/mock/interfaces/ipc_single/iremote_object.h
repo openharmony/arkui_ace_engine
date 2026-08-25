@@ -22,6 +22,8 @@ public:
     explicit IRemoteObject(const std::u16string& descriptor = nullptr);
     virtual ~IRemoteObject() = default;
 };
+#ifndef ACE_MOCK_REFBASE_SPTR_DEFINED
+#define ACE_MOCK_REFBASE_SPTR_DEFINED
 template <typename T>
 class sptr {
 private:
@@ -56,6 +58,7 @@ public:
         return ptr != nullptr;
     }
 };
+#endif // ACE_MOCK_REFBASE_SPTR_DEFINED
 }
 
 #endif //FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_TEST_MOCK_MOCK_IREMOTE_OBJECT_H

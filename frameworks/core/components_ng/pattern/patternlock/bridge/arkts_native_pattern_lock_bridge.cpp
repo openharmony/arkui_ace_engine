@@ -29,27 +29,9 @@
 #include "frameworks/core/components_ng/pattern/patternlock/bridge/patternlock_model_impl.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
-namespace {
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    if (firstArg->IsNativePointer(vm)) {
-        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
-        nativeNode = nullptr;
-        return true;
-    }
-
-    return false;
-}
-
-bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
-}
 } // namespace
 
 void PatternLockBridge::RegisterPatternLockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -121,7 +103,7 @@ ArkUINativeModuleValue PatternLockBridge::SetSideLength(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     CalcDimension sideLength;
     RefPtr<ResourceObject> sideLengthResObj;
@@ -144,7 +126,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetSideLength(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSideLength,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSideLength(nativeNode);
@@ -158,9 +140,9 @@ ArkUINativeModuleValue PatternLockBridge::SetAutoReset(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
-    bool isJsView = IsJsView(firstArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     uint32_t value = 1;
 
     if (secondArg->IsBoolean()) {
@@ -179,7 +161,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetAutoReset(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockAutoReset,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockAutoReset(nativeNode);
@@ -194,7 +176,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPathStrokeWidth(ArkUIRuntimeCallInf
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     CalcDimension strokeWidth;
     if (!(ArkTSUtils::ParseJsDimensionVp(vm, secondArg, strokeWidth))) {
@@ -215,7 +197,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPathStrokeWidth(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathStrokeWidth,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathStrokeWidth(nativeNode);
@@ -230,7 +212,7 @@ ArkUINativeModuleValue PatternLockBridge::SetRegularColor(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     Color color;
     RefPtr<ResourceObject> regularColorResObj;
@@ -254,7 +236,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetRegularColor(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockRegularColor,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockRegularColor(nativeNode);
@@ -269,7 +251,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPathColor(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     Color color;
     RefPtr<ResourceObject> pathColorResObj;
@@ -293,7 +275,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPathColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathColor,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathColor(nativeNode);
@@ -308,7 +290,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActiveColor(ArkUIRuntime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     Color color;
     RefPtr<ResourceObject> activeColorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
@@ -331,7 +313,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockActiveColor(ArkUIRunti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveColor,
             panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveColor(nativeNode);
@@ -345,9 +327,9 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockCircleRadius(ArkUIRuntim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
-    bool isJsView = IsJsView(firstArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     CalcDimension circleRadius;
     RefPtr<ResourceObject> circleRadiusResObj;
@@ -392,7 +374,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockCircleRadius(ArkUIRunt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockCircleRadius,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockCircleRadius(nativeNode);
@@ -407,7 +389,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockSelectedColor(ArkUIRunti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     Color color;
     RefPtr<ResourceObject> selectedColorResObj;
@@ -431,7 +413,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockSelectedColor(ArkUIRun
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSelectedColor,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSelectedColor(nativeNode);
@@ -446,7 +428,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActivateCircleStyle(ArkU
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     if (!secondArg->IsObject(vm)) {
         CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor,
@@ -514,7 +496,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockActivateCircleStyle(Ar
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor(nativeNode);
@@ -541,7 +523,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockSkipUnselectedPoint(ArkU
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     uint32_t value = 0;
     if (secondArg->IsBoolean()) {
@@ -558,7 +540,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockSkipUnselectedPoint(Ar
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSkipUnselectedPoint,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSkipUnselectedPoint(nativeNode);
@@ -572,9 +554,9 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockOnPatternComplete(ArkUIR
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
 
-    bool isJsView = IsJsView(firstArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     FrameNode* frameNode = nullptr;
     if (isJsView) {
@@ -618,7 +600,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockOnPatternComplete(ArkU
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnPatternComplete,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnPatternComplete(nativeNode);
@@ -632,9 +614,9 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockOnDotConnect(ArkUIRuntim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
 
-    bool isJsView = IsJsView(firstArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     FrameNode* frameNode = nullptr;
     if (isJsView) {
@@ -653,11 +635,13 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockOnDotConnect(ArkUIRuntim
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t code)> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)](
+    auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(int32_t code)> callback = [isJsView, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                      int32_t code) {
+        auto vm = func.GetEcmaVM();
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::JSValueRef> params = ArkTSUtils::ToJSValueWithVM(vm, code);
         auto result = func->Call(vm, func.ToLocal(), &params, 1);
         if (isJsView) {
@@ -676,7 +660,7 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockOnDotConnect(ArkUIRunt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnDotConnect,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnDotConnect(nativeNode);

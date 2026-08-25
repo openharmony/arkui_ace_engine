@@ -647,7 +647,6 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
     }
     CaretMetricsF caretMetrics;
     CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, textAffinity);
-
     RectF caretRect;
     caretRect.SetOffset(caretMetrics.offset);
     auto pattern = pattern_.Upgrade();
@@ -733,7 +732,6 @@ void TextSelectController::FireSelectEvent()
         eventHub->FireOnSelectionChange(std::min(firstHandleInfo_.index, secondHandleInfo_.index),
             std::max(firstHandleInfo_.index, secondHandleInfo_.index));
         if (secondIndexChange) {
-            // when second index change, avoid caret in time
             textField->TriggerAvoidWhenCaretGoesDown();
         }
     }

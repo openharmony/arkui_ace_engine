@@ -716,6 +716,7 @@ export class ChipComponent extends ViewPU {
     this.__breakPoint = new ObservedPropertySimplePU(BreakPointsType.SM, this, 'breakPoint');
     this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
     this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
+    this.__actualChipHeight = new ObservedPropertySimplePU(0, this, 'actualChipHeight');
     this.isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
     this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
     this.onClose = undefined;
@@ -927,6 +928,7 @@ export class ChipComponent extends ViewPU {
     this.__breakPoint.purgeDependencyOnElmtId(rmElmtId);
     this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
     this.__useAdaptiveLineHeight.purgeDependencyOnElmtId(rmElmtId);
+    this.__actualChipHeight.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeInFocus.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
@@ -963,6 +965,7 @@ export class ChipComponent extends ViewPU {
     this.__breakPoint.aboutToBeDeleted();
     this.__fontSizeScale.aboutToBeDeleted();
     this.__useAdaptiveLineHeight.aboutToBeDeleted();
+    this.__actualChipHeight.aboutToBeDeleted();
     this.__chipNodeInFocus.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
@@ -1165,6 +1168,12 @@ export class ChipComponent extends ViewPU {
   set useAdaptiveLineHeight(newValue) {
     this.__useAdaptiveLineHeight.set(newValue);
   }
+  get actualChipHeight() {
+    return this.__actualChipHeight.get();
+  }
+  set actualChipHeight(newValue) {
+    this.__actualChipHeight.set(newValue);
+  }
   get chipNodeInFocus() {
     return this.__chipNodeInFocus.get();
   }
@@ -1271,6 +1280,9 @@ export class ChipComponent extends ViewPU {
       Button.backgroundColor(this.getChipBackgroundColor());
       Button.systemMaterial(this.getBackgroundSystemMaterial());
       Button.responseRegion(this.getChipResponseRegion());
+      Button.onSizeChange((oldValue, newValue) => {
+        this.actualChipHeight = newValue?.height ?? 0;
+      });
       Button.scale(ObservedObject.GetRawObject(this.chipScale));
       Button.opacity(this.chipOpacity);
       Button.accessibilityGroup(true);
@@ -1775,7 +1787,9 @@ export class ChipComponent extends ViewPU {
   }
   getChipResponseRegion() {
     if (deviceInfo.sdkApiVersion >= 26) {
-      const chipHeight = this.getChipHeight();
+      // Large-font scaling (e.g. care mode) can stretch the chip beyond the themed or
+      // user-specified height, so prefer the measured height once layout has happened.
+      const chipHeight = this.actualChipHeight > 0 ? this.actualChipHeight : this.getChipHeight();
       if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
         return {
           x: 0,
@@ -2043,14 +2057,14 @@ export class ChipComponent extends ViewPU {
   getChipBackgroundColor() {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
-      if (!!this.activatedBackgroundSystemMaterial) {
+      if (!isNullOrEmptyMaterial(this.activatedBackgroundSystemMaterial)) {
         return undefined;
       }
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor()
         ? themeChipNode.focusActivatedBgColor
         : this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
     }
-    if (!!this.backgroundSystemMaterial) {
+    if (!isNullOrEmptyMaterial(this.backgroundSystemMaterial)) {
       return undefined;
     }
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor()
@@ -2066,13 +2080,23 @@ export class ChipComponent extends ViewPU {
       return undefined;
     }
     if (this.isChipActivated()) {
-      return info.state === uiMaterial.MaterialState.ENABLE && !this.activatedBackgroundSystemMaterial
-        ? this.theme.chipNode.activatedBackgroundSystemMaterial
-        : this.activatedBackgroundSystemMaterial;
+      if (!this.activatedBackgroundSystemMaterial) {
+        return info.state === uiMaterial.MaterialState.ENABLE ?
+          this.theme.chipNode.activatedBackgroundSystemMaterial : this.activatedBackgroundSystemMaterial;
+      }
+      if (isNullOrEmptyMaterial(this.activatedBackgroundSystemMaterial)) {
+        return undefined;
+      }
+      return this.activatedBackgroundSystemMaterial;
     }
-    return info.state === uiMaterial.MaterialState.ENABLE && !this.backgroundSystemMaterial
-      ? this.theme.chipNode.backgroundSystemMaterial
-      : this.backgroundSystemMaterial;
+    if (!this.backgroundSystemMaterial) {
+      return info.state === uiMaterial.MaterialState.ENABLE ?
+        this.theme.chipNode.backgroundSystemMaterial : this.backgroundSystemMaterial;
+    }
+    if (isNullOrEmptyMaterial(this.backgroundSystemMaterial)) {
+      return undefined;
+    }
+    return this.backgroundSystemMaterial;
   }
   getColor(color, defaultColor) {
     if (!color) {
@@ -2228,6 +2252,16 @@ export class ChipComponent extends ViewPU {
   rerender() {
     this.updateDirtyElements();
   }
+}
+
+function isNullOrEmptyMaterial(material) {
+  if (!material) {
+    return true;
+  }
+  if (material === uiMaterial.Material.empty) {
+    return true;
+  }
+  return false;
 }
 
 export default {

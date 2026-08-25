@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,7 @@ public:
         NONE = 0,                 // no event
         SCROLL_TO = 1 << 0,       // SCROLL: scrollTo
         SCROLL_TO_INDEX = 1 << 1, // SCROLL: scrollToIndex
+        ARKWEB_ALL = 1 << 2,      // ARKWEB: block all web events
     };
 
     explicit ContentChangeManager(const RefPtr<TaskExecutor>& taskExecutor = nullptr);
@@ -91,10 +92,15 @@ public:
 #endif
 
 private:
+    void SetContentChangeConfig(const ContentChangeConfig& config);
+    void UpdateContentChangeParameters();
+    void ResetContentChangeState();
+    void RegisterContentChangeNodes(const ContentChangeConfig& config);
     void ProcessSwiperNodes();
     void ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor);
     void StartTextAABBCollecting();
     void StopTextAABBCollecting(const RectF& rootRect);
+    bool IsContentChanging() const;
     bool NeedPageSceneDetect() const;
     bool NeedContentChangeReportOrPageSceneDetect() const;
     void NotifyPageSceneContentChanged(bool flushNow);
@@ -115,6 +121,7 @@ private:
         const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions, int32_t nodeId,
         const std::string& result, int64_t version);
     void ResetTranslateNode(const RefPtr<PageTranslateNode>& node);
+    void ResetTranslateNodes(std::set<WeakPtr<PageTranslateNode>>& nodes, int32_t nodeId);
 
     std::set<WeakPtr<FrameNode>> onContentChangeNodes_;
     std::set<WeakPtr<PageTranslateNode>> translateTextNodes_;

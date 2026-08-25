@@ -26,6 +26,10 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
+#undef private
+#undef protected
+
+
 using namespace testing;
 using namespace testing::ext;
 

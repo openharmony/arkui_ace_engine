@@ -43,6 +43,7 @@ import {
   MouseAction,
   Padding,
   PanGesture,
+  PanDirection,
   Position,
   Repeat,
   RepeatItem,
@@ -659,7 +660,7 @@ struct SimpleSegmentButtonV2 {
           }
           this.isPressing = false;
         }),
-      PanGesture()
+      PanGesture({ direction: PanDirection.Horizontal })
         .onActionStart((event) => {
           const finger = event.fingerList.find((element) => Boolean(element));
           if (!finger) {
@@ -1583,6 +1584,7 @@ export struct SegmentButtonV2ItemContent {
       const context: common.Context = this.getUIContext().getHostContext() as common.Context;
       return {
         id: resourceId as int, type: COLOR_RESOURCE_TYPE,
+        params: [],
         bundleName: (context as common.UIAbilityContext)?.abilityInfo?.bundleName ?? '',
         moduleName: (context as common.UIAbilityContext)?.abilityInfo?.moduleName ?? '',
       } as Resource;
@@ -1759,22 +1761,27 @@ function normalizeInt(value: int, min: int, max: int): int {
 
 function generateUniqueKye(groupId: string) {
   return (item: SegmentButtonV2Item, index: int): string => {
-    let key: string = groupId;
+    let key: string = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
+        key += '_';
         key += item.text;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.text as Resource);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
+        key += '_';
         key += item.icon;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.icon as Resource);
       }
     }
     if (item.symbol) {
+      key += '_';
       key += getResourceUniqueId(item.symbol as Resource);
     }
     return key;

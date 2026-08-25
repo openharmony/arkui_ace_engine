@@ -212,18 +212,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return SizeF {};
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
-#ifdef ENABLE_ROSEN_BACKEND
-    auto pipeline = host->GetContext();
-    auto fontManager = pipeline == nullptr ? nullptr : pipeline->GetFontManager();
-    if (fontManager != nullptr && Rosen::RSUIDirector::IsHybridRenderEnabled()) {
-        if (static_cast<uint32_t>(paragraphManager_->GetLineCount()) >=
-            Rosen::RSUIDirector::GetHybridRenderTextBlobLenCount()) {
-            fontManager->AddHybridRenderNode(host);
-        } else {
-            fontManager->RemoveHybridRenderNode(host);
-        }
-    }
-#endif
     auto height = paragraphManager_->GetHeight();
     auto maxWidth = paragraphManager_->GetMaxWidth();
     auto longestLine = paragraphManager_->GetLongestLine();
@@ -412,6 +400,11 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    auto pageTranslatedText = pattern->GetPageTranslatedText();
+    bool hasPageTranslatedText = pageTranslatedText.has_value();
+    if (hasPageTranslatedText) {
+        content = pageTranslatedText.value();
+    }
     pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnable()) {
         UpdateSensitiveContent(content);
@@ -436,7 +429,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
         paragraphManager_->Reset();
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
-    if (spans_.empty() || useExternalParagraph) {
+    if (hasPageTranslatedText || spans_.empty() || useExternalParagraph) {
         // only use for text.
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
     } else {
@@ -815,7 +808,7 @@ bool TextLayoutAlgorithm::ReLayoutParagraphs(
     CHECK_NULL_RETURN(frameNode, false);
     parStyle.textStyleUid = frameNode->GetId();
     CHECK_NULL_RETURN(paragraphManager_, false);
-    auto paragraphInfo = paragraphManager_->GetParagraphs();
+    const auto& paragraphInfo = paragraphManager_->GetParagraphs();
     for (auto pIter = paragraphInfo.begin(); pIter != paragraphInfo.end(); pIter++) {
         auto paragraph = pIter->paragraph;
         CHECK_NULL_RETURN(paragraph, false);
@@ -869,7 +862,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
 bool TextLayoutAlgorithm::LayoutParagraphs(float maxWidth)
 {
     CHECK_NULL_RETURN(paragraphManager_, false);
-    auto paragraphInfo = paragraphManager_->GetParagraphs();
+    const auto& paragraphInfo = paragraphManager_->GetParagraphs();
     for (auto pIter = paragraphInfo.begin(); pIter != paragraphInfo.end(); pIter++) {
         auto paragraph = pIter->paragraph;
         CHECK_NULL_RETURN(paragraph, false);
@@ -1061,7 +1054,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         paragraph = Paragraph::Create(externalParagraph.value());
     } else {
         paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-        auto paragraphs = paragraphManager_->GetParagraphs();
+        const auto& paragraphs = paragraphManager_->GetParagraphs();
         if (!paragraphs.empty()) {
             oldParagraph = paragraphs.front().paragraph;
         }
@@ -1293,7 +1286,7 @@ size_t TextLayoutAlgorithm::GetLineCount() const
 {
     size_t count = 0;
     CHECK_NULL_RETURN(paragraphManager_, 0);
-    auto paragraphInfo = paragraphManager_->GetParagraphs();
+    const auto& paragraphInfo = paragraphManager_->GetParagraphs();
     for (auto pIter = paragraphInfo.begin(); pIter != paragraphInfo.end(); pIter++) {
         auto paragraph = pIter->paragraph;
         CHECK_NULL_RETURN(paragraph, 0);

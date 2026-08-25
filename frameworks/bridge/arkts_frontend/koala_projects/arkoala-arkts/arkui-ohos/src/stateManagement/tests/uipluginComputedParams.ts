@@ -211,7 +211,7 @@ export class IndexComputedParamsComponent extends ExtendableComponent {
         )
     }
 
-    build() {
+    build(): void {
         this.childComp = new ChildComponent(this,
             { total: this.total, qualifiesForDiscount: this.qualifiesForDiscount })
     }
@@ -269,7 +269,7 @@ class ChildComponent extends ExtendableComponent{
         );
     }
 
-    update_struct(param: ChildComponent_init_update_struct) {
+    update_struct(param: ChildComponent_init_update_struct): void {
         this._backing_total.update(param.total);
         this._backing_qualifiesForDiscount.update(param.qualifiesForDiscount);
     }

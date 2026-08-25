@@ -108,7 +108,7 @@ HWTEST_F(ArkoalaLazyAdvancedTestNg, ArkoalaLazySetCallbacksTest002, TestSize.Lev
     auto node = CreateArkoalaLazyNode(TEST_NODE_ID);
     ASSERT_NE(node, nullptr);
 
-    auto createCallback = [](int32_t index) -> RefPtr<UINode> {
+    auto createCallback = [](int32_t index, bool skipCreate) -> RefPtr<UINode> {
         auto pattern = AceType::MakeRefPtr<Pattern>();
         return FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, index, pattern);
     };
@@ -257,7 +257,7 @@ HWTEST_F(ArkoalaLazyAdvancedTestNg, ArkoalaLazyBuildAllChildrenTest012, TestSize
 
     node->SetTotalCount(TOTAL_COUNT_5);
 
-    auto createCallback = [](int32_t index) -> RefPtr<UINode> {
+    auto createCallback = [](int32_t index, bool skipCreate) -> RefPtr<UINode> {
         auto pattern = AceType::MakeRefPtr<Pattern>();
         return FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, index, pattern);
     };

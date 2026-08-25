@@ -30,6 +30,7 @@ namespace {
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 static std::atomic<int32_t> vsyncCounter = 0;
+constexpr uint32_t FORCE_VSYNC_FRAME_THRESHOLD = 50;
 
 float GetDisplayRefreshRate()
 {
@@ -89,9 +90,36 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 #endif
 }
 
+bool FormRenderWindow::ShouldRequestFrame()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        return true;
+    }
+    if (isSystemApp_) {
+        return true;
+    }
+
+    if (forceVsync_) {
+        SetForceVsyncRequests(false);
+        forceVsyncFrameCount_ = FORCE_VSYNC_FRAME_THRESHOLD;
+    }
+    if (!onShow_ && forceVsyncFrameCount_ == 0) {
+        return false;
+    }
+    if (!onShow_ && forceVsyncFrameCount_ > 0) {
+        forceVsyncFrameCount_--;
+    }
+#endif
+    return true;
+}
+
 void FormRenderWindow::RequestFrame()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    if (!ShouldRequestFrame()) {
+        return;
+    }
     if (receiver_ != nullptr) {
         if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
             CHECK_NULL_VOID(!isRequestVsync_);
@@ -155,6 +183,7 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 void FormRenderWindow::OnShow()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    forceVsyncFrameCount_ = 0;
     Window::OnShow();
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
@@ -271,7 +300,7 @@ void FormRenderWindow::InitOnVsyncCallback()
 #endif
 }
 
-void FormRenderWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void FormRenderWindow::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
 #if defined(__OHOS__) && defined(ENABLE_ROSEN_BACKEND)
     if (receiver_ && (uiContentType_ == UIContentType::DYNAMIC_COMPONENT)) {

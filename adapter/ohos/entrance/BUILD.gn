@@ -47,7 +47,6 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/global_pipeline_context_manager.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider_impl.cpp",
-      "$ace_root/adapter/ohos/entrance/high_contrast_observer.cpp",
       "$ace_root/adapter/ohos/entrance/image_task_pool_impl.cpp",
       "$ace_root/adapter/ohos/entrance/mmi_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/navigation_controller_helper.cpp",
@@ -176,6 +175,8 @@ template("ace_ohos_standard_source_set") {
       "window_manager:scene_session",
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
+      "node:node_header_notice",
+      "libuv:uv",
     ]
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {

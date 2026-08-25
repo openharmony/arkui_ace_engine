@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 
 #include "i_start_drag_listener.h"
 
@@ -41,22 +42,23 @@ public:
         if (callback_ == nullptr) {
             return;
         }
-        // Already on the correct instance, callback_ destroyed here directly.
-        if (ContainerScope::CurrentId() == instanceId_) {
-            return;
-        }
-        // Instance mismatch — post callback destruction to the correct instance's JS thread.
-        auto cb = std::move(callback_);
         auto container = AceEngine::Get().GetContainer(instanceId_);
         auto taskExecutor = container != nullptr ? container->GetTaskExecutor() : nullptr;
-        if (taskExecutor == nullptr) {
+        // Already on the JS thread — callback_ destroyed here directly.
+        if (!taskExecutor || taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
             return;
         }
+        // Not on JS thread — post callback destruction to the JS thread with mutex to ensure
+        // the posted task waits for this destructor to complete before destroying the callback.
+        auto mutex = std::make_shared<std::mutex>();
+        std::lock_guard lock(*mutex);
         taskExecutor->PostTask(
-            [cb = std::move(cb)]() {
-                // cb destroyed here on the correct instance's JS thread.
+            [callback = callback_, mutex]() mutable {
+                std::lock_guard lock(*mutex);
+                // callback destroyed here on the JS thread.
             },
             TaskExecutor::TaskType::JS, "ArkUIDragCallbackRelease", PriorityType::VIP);
+        callback_ = nullptr;
     }
 
     void OnDragEndMessage(const OHOS::Msdp::DeviceStatus::DragNotifyMsg &msg) override

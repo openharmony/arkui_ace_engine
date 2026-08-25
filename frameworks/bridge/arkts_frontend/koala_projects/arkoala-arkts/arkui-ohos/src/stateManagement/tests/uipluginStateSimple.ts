@@ -60,15 +60,15 @@ class EntryComponent extends ExtendableComponent {
         // @State nothing, can not update from parent
     }
  
-    resetName() {
+    resetName(): void {
       this.stateA = 100;
     }
 
-    assignA200() {
+    assignA200(): void {
         this.stateA = 200;
     }
 
-    build() {
+    build(): void {
     }
 }
 

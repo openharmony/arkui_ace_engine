@@ -91,6 +91,9 @@ ohos_source_set("ace_kit") {
     external_deps += [
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
+      "node:node_header_notice",
+      "libuv:uv",
+      "ets_runtime:libark_jsruntime",
     ]
     if (current_os == "ohos") {
       external_deps += [ "eventhandler:libeventhandler" ]

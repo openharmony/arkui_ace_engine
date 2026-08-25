@@ -13,22 +13,53 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("safeArea_test_expandSafeArea_ng") {
-  type = "new"
-  module_name = "FormAndSelection-Rating"
-  sources = [ "expand_safe_area_test_ng.cpp" ]
+safe_area_expand_sources = [ "expand_safe_area_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("safeArea_test_expandSafeArea_ng") {
+    type = "host_components"
+    module_name = "FormAndSelection-Rating"
+    sources = safe_area_expand_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("safeArea_test_expandSafeArea_ng") {
+    type = "new"
+    module_name = "FormAndSelection-Rating"
+    sources = safe_area_expand_sources
+  }
 }
 
-ace_unittest("ignore_layout_safe_area_test_ng") {
-  type = "new"
-  module_name = "CommonProperties-LayoutAndBorder"
-  sources = [ "ignore_layout_safe_area_test_ng.cpp" ]
+ignore_layout_safe_area_sources = [ "ignore_layout_safe_area_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("ignore_layout_safe_area_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = ignore_layout_safe_area_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("ignore_layout_safe_area_test_ng") {
+    type = "new"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = ignore_layout_safe_area_sources
+  }
 }
 
-ace_unittest("ignore_layout_safe_area_scheduling_test_ng") {
-  type = "new"
-  module_name = "Pipeline"
-  sources = [
-    "ignore_layout_safe_area_scheduling_test_ng.cpp",
-  ]
+ignore_layout_safe_area_scheduling_sources = [ "ignore_layout_safe_area_scheduling_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("ignore_layout_safe_area_scheduling_test_ng") {
+    type = "host_components"
+    module_name = "Pipeline"
+    sources = ignore_layout_safe_area_scheduling_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("ignore_layout_safe_area_scheduling_test_ng") {
+    type = "new"
+    module_name = "Pipeline"
+    sources = ignore_layout_safe_area_scheduling_sources
+  }
 }

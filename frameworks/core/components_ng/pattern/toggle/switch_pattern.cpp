@@ -69,7 +69,11 @@ constexpr float LOW_GRADE_SPRING_DAMPING = 12.0f;
 
 constexpr int32_t LONG_PRESS_DELAY_MS = 400;
 
-constexpr float LIGHT_POSITION_Z_SCALE = 1.5f;
+constexpr float POINT_PERSIST_ALPHA = 0.8f;
+
+constexpr float LIGHT_POSITION_Z_SCALE = 5.0f;
+constexpr float LIGHT_INTENSITY_ON = 4.0f;
+constexpr float LIGHT_INTENSITY_OFF = 1.0f;
 constexpr int32_t  HOTZONE_SPACE = 2;
 const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
 const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
@@ -499,7 +503,11 @@ void SwitchPattern::OnTouchDown()
     CHECK_NULL_VOID(host);
     isTouch_ = true;
     pendingHide_ = false;
-    ShowMaterialNode();
+    pendingHidePointLight_ = false;
+    if (isFrameNodeVisible_ && dragFrameNode_) {
+        host->RemoveChild(dragFrameNode_);
+        isFrameNodeVisible_ = false;
+    }
     StartLongPressTimer();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -521,9 +529,13 @@ void SwitchPattern::OnTouchUp()
     if (longPressTask_) {
         longPressTask_.Cancel();
     }
-    if (IsHighGradeMaterial() && HasSystemMaterial() && (dragPointNode_ || dragFrameNode_)) {
-        pendingHide_ = true;
-    } else {
+    if (IsHighGradeMaterial() && HasSystemMaterial()) {
+        if (isFrameNodeVisible_) {
+            pendingHide_ = true;
+        } else {
+            TriggerPointLightBrightening();
+        }
+    } else if (HasSystemMaterial()) {
         HideMaterialNode();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -607,7 +619,7 @@ void SwitchPattern::HandleLongPress()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetAlphaOffscreen(false);
-        HandleHighGradeLongPress();
+        ShowMaterialNode();
     } else {
         HandleLowGradeLongPress();
     }
@@ -629,40 +641,6 @@ void SwitchPattern::StartLongPressTimer()
     });
     taskExecutor->PostDelayedTask(longPressTask_,
         TaskExecutor::TaskType::UI, LONG_PRESS_DELAY_MS, "ArkUISwitchLongPress");
-}
-
-void SwitchPattern::HandleHighGradeLongPress()
-{
-    CreateDragFrameNode();
-    CHECK_NULL_VOID(dragFrameNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto frameRC = dragFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(frameRC);
-    host->AddChild(dragFrameNode_);
-    isFrameNodeVisible_ = true;
-    RegisterMaterialNodePositionCallback();
-    ApplyDragFrameNodeSystemMaterial();
-    AnimationUtils::ExecuteWithoutAnimation(
-        [frameRC]() {
-            frameRC->UpdateOpacity(0.0);
-            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
-        },
-        host->GetContextRefPtr());
-    AnimationOption option = CreateDragAnimationOption();
-    AnimationUtils::Animate(option,
-        [weak = WeakClaim(this), frameRC]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            frameRC->UpdateOpacity(1.0);
-            if (pattern->isDragEvent_) {
-                frameRC->UpdateTransformScale({ DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
-            } else {
-                frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
-            }
-        },
-        nullptr, nullptr, host->GetContextRefPtr());
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SwitchPattern::HandleLowGradeLongPress()
@@ -828,7 +806,20 @@ void SwitchPattern::HandleMouseEvent(bool isHover)
 void SwitchPattern::HandleDragStart()
 {
     isDragEvent_ = true;
-    AnimateToDragState();
+    if (longPressTask_) {
+        longPressTask_.Cancel();
+    }
+    if (HasSystemMaterial()) {
+        if (IsHighGradeMaterial()) {
+            if (isFrameNodeVisible_) {
+                AnimateToDragState();
+            } else {
+                ShowMaterialNode();
+            }
+        } else {
+            HandleLowGradeLongPress();
+        }
+    }
 }
 
 void SwitchPattern::HandleDragUpdate(const GestureEvent& info)
@@ -978,6 +969,17 @@ AnimationOption SwitchPattern::CreateDragAnimationOption() const
     return option;
 }
 
+AnimationOption SwitchPattern::CreatePointLightBrightenOption() const
+{
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(
+        SPRING_VELOCITY, SPRING_MASS, SPRING_STIFFNESS * 4.0f, SPRING_DAMPING * 2.0f);
+    option.SetCurve(curve);
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    return option;
+}
+
 BlurStyleOption SwitchPattern::CreateDragBlurStyleOption(float scale) const
 {
     BlurStyleOption option;
@@ -1083,14 +1085,21 @@ void SwitchPattern::CreateDragPointNode()
 
     auto pointRadius = GetPointRadius();
     float initialLightX = isOn_.value_or(false) ? (trackWidth - halfHeight) : halfHeight;
-    if (paintProperty->HasSwitchPointColor()) {
-        ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
-            CalcDimension(initialLightX, DimensionUnit::PX), CalcDimension(halfHeight, DimensionUnit::PX),
-            CalcDimension(pointRadius * LIGHT_POSITION_Z_SCALE, DimensionUnit::PX));
-        ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), paintProperty->GetSwitchPointColor().value());
-        ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 10.0f);
-        ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragPointNode_), 2u);
-    }
+    Color lightColor = paintProperty->HasSwitchPointColor()
+        ? paintProperty->GetSwitchPointColor().value()
+        : Color::WHITE;
+    ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
+        CalcDimension(initialLightX, DimensionUnit::PX), CalcDimension(halfHeight, DimensionUnit::PX),
+        CalcDimension(pointRadius * LIGHT_POSITION_Z_SCALE, DimensionUnit::PX));
+    ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), lightColor);
+    UpdatePointLightIntensity(isOn_.value_or(false));
+}
+
+void SwitchPattern::UpdatePointLightIntensity(bool isOn)
+{
+    CHECK_NULL_VOID(dragPointNode_);
+    float intensity = isOn ? LIGHT_INTENSITY_ON : LIGHT_INTENSITY_OFF;
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), intensity);
 }
 
 void SwitchPattern::CreateBlurCoverNode()
@@ -1114,16 +1123,14 @@ void SwitchPattern::CreateBlurCoverNode()
 
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
-    auto pointRadius = GetPointRadius();
-    auto pointDiameter = pointRadius * NUMBER_TWO;
-    auto frameSize = pointDiameter * DRAG_FRAME_BASE_SCALE;
-
     blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+        CalcSize(CalcLength(width_), CalcLength(height_)));
 
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    borderRadius.SetRadius(Dimension(height_ / NUMBER_TWO, DimensionUnit::PX));
     renderContext->UpdateBorderRadius(borderRadius);
+
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(blurCoverNode_), 2u);
 }
 
 void SwitchPattern::UpdateMaterialNodePosition(float centerX, float centerY, float pointRadius)
@@ -1144,17 +1151,17 @@ void SwitchPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     }
     if (blurCoverNode_) {
         blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+            CalcSize(CalcLength(width_), CalcLength(height_)));
         auto blurRC = blurCoverNode_->GetRenderContext();
         if (blurRC) {
-            blurRC->UpdatePosition(OffsetT<Dimension>(Dimension(frameNodeX), Dimension(frameNodeY)));
+            blurRC->UpdatePosition(OffsetT<Dimension>(Dimension(offset_.GetX()), Dimension(offset_.GetY())));
         }
     }
     if (dragPointNode_) {
         auto pointRC = dragPointNode_->GetRenderContext();
         if (pointRC) {
             auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
-            if (paintProperty && paintProperty->HasSwitchPointColor()) {
+            if (paintProperty) {
                 float lightX = centerX - offset_.GetX();
                 float lightY = centerY - offset_.GetY();
                 ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
@@ -1176,60 +1183,213 @@ void SwitchPattern::RegisterMaterialNodePositionCallback()
             CHECK_NULL_VOID(pattern);
             pattern->UpdateMaterialNodePosition(centerX, centerY, pointRadius);
         });
-    paintMethod_->SetSlideFinishedCallback(
-        [weak = WeakClaim(this)]() {
+    switchModifier->SetBoardColorAnimateCallback(
+        [weak = WeakClaim(this)](bool isSelect) {
             auto pattern = weak.Upgrade();
-            if (pattern && pattern->pendingHide_) {
-                pattern->pendingHide_ = false;
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePointLightIntensity(isSelect);
+        });
+    paintMethod_->SetSlideFinishedCallback(
+        [weak = WeakClaim(this), token = materialAnimToken_]() {
+            auto pattern = weak.Upgrade();
+            if (!pattern) { return; }
+            if ((pattern->pendingHide_ || pattern->pendingHidePointLight_) &&
+                pattern->materialAnimToken_ == token) {
                 pattern->HideMaterialNode();
             }
         });
+}
+
+void SwitchPattern::AttachMaterialNodesToHost(const RefPtr<FrameNode>& host,
+    const RefPtr<RenderContext>& frameRC)
+{
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    if (blurCoverNode_ && !blurCoverNode_->GetParent()) {
+        if (blurRC) {
+            blurRC->UpdatePosition(
+                OffsetT<Dimension>(Dimension(offset_.GetX()), Dimension(offset_.GetY())));
+        }
+        host->AddChild(blurCoverNode_);
+    }
+    if (dragPointNode_ && !dragPointNode_->GetParent()) {
+        auto prc = dragPointNode_->GetRenderContext();
+        if (prc) {
+            prc->UpdatePosition(
+                OffsetT<Dimension>(Dimension(offset_.GetX()), Dimension(offset_.GetY())));
+        }
+        host->AddChild(dragPointNode_);
+    }
+    if (dragFrameNode_ && !dragFrameNode_->GetParent()) {
+        host->AddChild(dragFrameNode_);
+    }
+    if (dragFrameNode_ && frameRC) {
+        auto pointRadius = GetPointRadius();
+        auto frameSize = pointRadius * NUMBER_TWO * DRAG_FRAME_BASE_SCALE;
+        float halfHeight = height_ / NUMBER_TWO;
+        float pointCenterX = offset_.GetX() + (isOn_.value_or(false) ? (width_ - halfHeight) : halfHeight);
+        float pointCenterY = offset_.GetY() + halfHeight;
+        frameRC->UpdatePosition(OffsetT<Dimension>(Dimension(pointCenterX - frameSize / NUMBER_TWO),
+            Dimension(pointCenterY - frameSize / NUMBER_TWO)));
+    }
+}
+
+void SwitchPattern::AnimateDragFrameAppearance(const RefPtr<FrameNode>& host,
+    const RefPtr<RenderContext>& frameRC, const RefPtr<RenderContext>& pointRC,
+    const RefPtr<RenderContext>& blurRC, const RefPtr<SwitchModifier>& switchModifier)
+{
+    AnimationUtils::ExecuteWithoutAnimation(
+        [frameRC, pointRC, blurRC]() {
+            if (frameRC) {
+                frameRC->UpdateOpacity(0.0);
+                frameRC->UpdateTransformScale(
+                    { DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+            }
+            if (pointRC) { pointRC->UpdateOpacity(0.0); }
+            if (blurRC) { blurRC->UpdateOpacity(0.0); }
+        },
+        host->GetContextRefPtr());
+
+    AnimationOption option = CreateDragAnimationOption();
+    AnimationUtils::Animate(option,
+        [weak = WeakClaim(this), frameRC, pointRC, blurRC, switchModifier]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (frameRC) {
+                frameRC->UpdateOpacity(1.0);
+                if (pattern->isDragEvent_) {
+                    frameRC->UpdateTransformScale(
+                        { DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
+                } else {
+                    frameRC->UpdateTransformScale(
+                        { DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+                }
+            }
+            if (pointRC) { pointRC->UpdateOpacity(1.0); }
+            if (blurRC) { blurRC->UpdateOpacity(1.0); }
+            if (switchModifier) { switchModifier->SetPointAlpha(POINT_PERSIST_ALPHA); }
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void SwitchPattern::ShowMaterialNode()
 {
     if (!HasSystemMaterial()) { return; }
     if (!IsHighGradeMaterial()) { return; }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(false);
+
+    pendingHide_ = false;
+    pendingHidePointLight_ = false;
+    ++materialAnimToken_;
+
     CreateDragFrameNode();
     CreateDragPointNode();
     CreateBlurCoverNode();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    UpdatePointLightIntensity(isOn_.value_or(false));
+
+    auto frameRC = dragFrameNode_ ? dragFrameNode_->GetRenderContext() : nullptr;
     auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
     auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
-    if (dragPointNode_) {
-        auto pointRCNonNull = dragPointNode_->GetRenderContext();
-        if (pointRCNonNull) {
-            pointRCNonNull->UpdatePosition(
+
+    AttachMaterialNodesToHost(host, frameRC);
+    isFrameNodeVisible_ = true;
+
+    RegisterMaterialNodePositionCallback();
+    ApplyDragFrameNodeSystemMaterial();
+#ifndef ACE_UNITTEST
+    ApplyBlendMode();
+#endif
+
+    auto switchModifier = paintMethod_ ? paintMethod_->GetSwitchModifier() : nullptr;
+    AnimateDragFrameAppearance(host, frameRC, pointRC, blurRC, switchModifier);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SwitchPattern::AttachPointLightNodesToHost(const RefPtr<FrameNode>& host,
+    const RefPtr<RenderContext>& pointRC)
+{
+    if (blurCoverNode_) {
+        auto blurRC = blurCoverNode_->GetRenderContext();
+        if (blurRC) {
+            blurRC->UpdatePosition(
                 OffsetT<Dimension>(Dimension(offset_.GetX()), Dimension(offset_.GetY())));
         }
+        if (!blurCoverNode_->GetParent()) {
+            host->AddChild(blurCoverNode_);
+        }
+    }
+    pointRC->UpdatePosition(
+        OffsetT<Dimension>(Dimension(offset_.GetX()), Dimension(offset_.GetY())));
+    if (!dragPointNode_->GetParent()) {
         host->AddChild(dragPointNode_);
     }
-    if (blurCoverNode_) {
-        host->AddChild(blurCoverNode_);
+}
+
+void SwitchPattern::ResetPointLightOpacityForAnim(const RefPtr<FrameNode>& host,
+    const RefPtr<RenderContext>& pointRC, const RefPtr<RenderContext>& blurRC, bool freshShow)
+{
+    if (freshShow) {
+        AnimationUtils::ExecuteWithoutAnimation(
+            [pointRC, blurRC]() {
+                pointRC->UpdateOpacity(0.0);
+                if (blurRC) { blurRC->UpdateOpacity(0.0); }
+            },
+            host->GetContextRefPtr());
+    } else {
+        ViewAbstract::CancelPropertyAnimations(
+            AceType::RawPtr(dragPointNode_), { AnimationPropertyType::OPACITY });
+        if (blurCoverNode_) {
+            ViewAbstract::CancelPropertyAnimations(
+                AceType::RawPtr(blurCoverNode_), { AnimationPropertyType::OPACITY });
+        }
     }
+}
+
+void SwitchPattern::TriggerPointLightBrightening()
+{
+    if (!HasSystemMaterial()) { return; }
+    if (!IsHighGradeMaterial()) { return; }
+    if (isFrameNodeVisible_) { return; }
+
+    ++materialAnimToken_;
+
+    CreateDragPointNode();
+    CreateBlurCoverNode();
+    UpdatePointLightIntensity(isOn_.value_or(false));
+    CHECK_NULL_VOID(dragPointNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pointRC = dragPointNode_->GetRenderContext();
+    CHECK_NULL_VOID(pointRC);
+
+    const bool freshShow = (dragPointNode_->GetParent() == nullptr);
+    AttachPointLightNodesToHost(host, pointRC);
+
     RegisterMaterialNodePositionCallback();
-    AnimationUtils::ExecuteWithoutAnimation(
-        [pointRC, blurRC]() {
-            if (pointRC) { pointRC->UpdateOpacity(0.0); }
-            if (blurRC) {
-                blurRC->UpdateOpacity(0.0);
-                blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
-            }
-        },
-        host->GetContextRefPtr());
-    AnimationOption option = CreateDragAnimationOption();
+
+#ifndef ACE_UNITTEST
+    ApplyBlendMode();
+#endif
+
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    ResetPointLightOpacityForAnim(host, pointRC, blurRC, freshShow);
+
+    AnimationOption option = CreatePointLightBrightenOption();
     auto switchModifier = paintMethod_ ? paintMethod_->GetSwitchModifier() : nullptr;
     AnimationUtils::Animate(option,
         [pointRC, blurRC, switchModifier]() {
             if (pointRC) { pointRC->UpdateOpacity(1.0); }
-            if (blurRC) {
-                blurRC->UpdateOpacity(1.0);
-                blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
-            }
-            if (switchModifier) { switchModifier->SetPointAlpha(0.0f); }
+            if (blurRC) { blurRC->UpdateOpacity(1.0); }
+            if (switchModifier) { switchModifier->SetPointAlpha(POINT_PERSIST_ALPHA); }
         },
         nullptr, nullptr, host->GetContextRefPtr());
+
+    pendingHidePointLight_ = true;
+
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -1243,25 +1403,14 @@ void SwitchPattern::AnimateToDragState()
     CHECK_NULL_VOID(host);
 
     AnimationOption option = CreateDragAnimationOption();
-    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
 
     if (isFrameNodeVisible_ && dragFrameNode_) {
         auto frameRC = dragFrameNode_->GetRenderContext();
         CHECK_NULL_VOID(frameRC);
         AnimationUtils::Animate(
             option,
-            [frameRC, blurRC]() {
+            [frameRC]() {
                 frameRC->UpdateTransformScale({ DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
-                if (blurRC) {
-                    blurRC->UpdateTransformScale({ DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
-                }
-            },
-            nullptr, nullptr, host->GetContextRefPtr());
-    } else if (blurRC) {
-        AnimationUtils::Animate(
-            option,
-            [blurRC]() {
-                blurRC->UpdateTransformScale({ DRAG_FRAME_DRAG_SCALE_X, DRAG_FRAME_DRAG_SCALE_Y });
             },
             nullptr, nullptr, host->GetContextRefPtr());
     }
@@ -1299,7 +1448,6 @@ void SwitchPattern::AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
     }
     if (blurRC) {
         blurRC->UpdateOpacity(0.0);
-        blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
     }
     if (switchModifier) { switchModifier->SetPointAlpha(1.0f); }
 }
@@ -1307,6 +1455,7 @@ void SwitchPattern::AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
 void SwitchPattern::HideMaterialNode()
 {
     pendingHide_ = false;
+    pendingHidePointLight_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!IsHighGradeMaterial()) {
@@ -1320,6 +1469,7 @@ void SwitchPattern::HideMaterialNode()
     auto switchModifier = paintMethod_ ? paintMethod_->GetSwitchModifier() : nullptr;
     auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
     auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    auto token = materialAnimToken_;
     AnimationUtils::ExecuteWithoutAnimation(
         [pointRC, blurRC, this]() { ResetMaterialNodeAppearance(pointRC, blurRC); },
         host->GetContextRefPtr());
@@ -1328,10 +1478,12 @@ void SwitchPattern::HideMaterialNode()
         [pointRC, blurRC, switchModifier, this]() {
             AnimateHighGradeHide(pointRC, blurRC, switchModifier);
         },
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), token]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (!pattern->isTouch_) { pattern->HideMaterialNodes(); }
+            if (!pattern->isTouch_ && pattern->materialAnimToken_ == token) {
+                pattern->HideMaterialNodes();
+            }
         },
         nullptr, host->GetContextRefPtr());
 }
@@ -1379,22 +1531,21 @@ void SwitchPattern::ApplyDragFrameNodeSystemMaterial()
         auto renderContext = dragFrameNode_->GetRenderContext();
         if (renderContext) {
             renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
-            renderContext->UpdateBackShadow(MaterialUtils::GetImmersiveShadow(dipScale));
+            // UX-required shadow color.
+            auto shadow = MaterialUtils::GetImmersiveShadow(dipScale * 0.8);
+            shadow.SetColor(Color(0x1F050505));
+            renderContext->UpdateBackShadow(shadow);
         }
     }
     ResetHostMaterialEffects();
-#ifndef ACE_UNITTEST
-    ApplyDragFrameNodeBlendMode();
-#endif
 }
 
 #ifndef ACE_UNITTEST
-void SwitchPattern::ApplyDragFrameNodeBlendMode()
+void SwitchPattern::ApplyBlendMode()
 {
-    CHECK_NULL_VOID(dragFrameNode_);
+    CHECK_NULL_VOID(blurCoverNode_);
     static const auto brightnessBlender = CreateBrightnessBlender();
-    ViewAbstract::SetBlender(AceType::RawPtr(dragFrameNode_), brightnessBlender.get());
-    ViewAbstract::SetBlendApplyType(AceType::RawPtr(dragFrameNode_), BlendApplyType::OFFSCREEN);
+    ViewAbstract::SetBlender(AceType::RawPtr(blurCoverNode_), brightnessBlender.get());
 }
 
 std::shared_ptr<Rosen::BrightnessBlender> SwitchPattern::CreateBrightnessBlender()

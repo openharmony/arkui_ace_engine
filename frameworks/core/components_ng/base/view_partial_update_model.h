@@ -67,7 +67,7 @@ struct NodeInfoPU {
     int64_t creatorId = -1;
     std::string jsViewName;
     bool isV2 = false;
-    int32_t reusableMemOptStrategy = 0;
+    int32_t reusableMemOptStrategy = -1;
     NG::ExtraInfo extraInfo;
 };
 

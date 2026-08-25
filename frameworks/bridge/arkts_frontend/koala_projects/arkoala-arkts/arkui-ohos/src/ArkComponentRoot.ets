@@ -56,7 +56,7 @@ export function ArkComponentRoot(
                     });
                     return true;
                 }, (_: boolean | undefined) => {
-                    scheduleCallback(() => {
+                    ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                         component.aboutToDisappear();
                     });
                 });

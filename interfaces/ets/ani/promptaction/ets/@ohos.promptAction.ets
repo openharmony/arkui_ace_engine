@@ -128,10 +128,10 @@ export default namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
-        levelOrder?: LevelOrder;
         systemMaterial?: uiMaterial.Material;
         distortionMode?: DistortionMode;
         edgeLightMode?: EdgeLightMode;
+        levelOrder?: LevelOrder;
     }
 
     export interface ShowDialogOptionsInternal {

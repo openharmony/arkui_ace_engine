@@ -68,7 +68,7 @@ public:
     void ExecuteHide();
     void ExecuteInitiallyProvidedValue(const std::string& jsonData);
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
-    void ExecuteRecycle(const std::string& viewName);
+    void ExecuteRecycle(const std::string& viewName, int32_t memOptStrategy = 0, int32_t cachedCount = 8);
     bool ExecuteReleaseRecyclePool(int32_t remainingTimeMs, bool isProgressive, bool shouldCollect);
     void ExecuteEnableReleaseExpiringNodes(bool enable, const std::vector<std::string>& reuseIds);
     void ExecuteAboutToRecycle();

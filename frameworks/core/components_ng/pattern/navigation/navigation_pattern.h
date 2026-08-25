@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_PATTERN_H
 
+#include <set>
+
 #include "base/memory/referenced.h"
 #include "base/system_bar/system_bar_style.h"
 #include "core/common/display_info.h"
@@ -84,7 +86,6 @@ public:
     void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
-    void ContentChangeByDetaching(PipelineContext* pipeline) override;
 
     void OnModifyDone() override;
     void OnWindowHide() override;
@@ -121,6 +122,14 @@ public:
     }
 
     void SetNavigationConfiguration(const NavigationConfiguration& config);
+    bool IsClearContentStackNeeded() const
+    {
+        return config_.needClearContentStack;
+    }
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void RecyclePagesOnLowMemory();
+    void RegisterMemoryLevelNotification();
+    void UnregisterMemoryLevelNotification();
 
     bool JudgeFoldStateChangeAndUpdateState();
 
@@ -437,6 +446,10 @@ public:
 
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
     void SetSystemBarStyleMultiThread(const RefPtr<SystemBarStyle>& style);
+    void SetBackupStyle(const std::optional<RefPtr<SystemBarStyle>>& style)
+    {
+        backupStyle_ = style;
+    }
 
     void OnAttachToMainTree() override;
     void OnAttachToMainTreeMultiThread();
@@ -759,6 +772,15 @@ public:
     void SetPendingHomeRestoreInfo(const std::string& info);
     void ApplyHomeRestoreInfo();
 
+    void SetHomeRestoreState(const std::string& restoreState)
+    {
+        pendingHomeRestoreState_ = restoreState;
+    }
+    std::string GetHomeRestoreState() const
+    {
+        return pendingHomeRestoreState_;
+    }
+
 private:
     void UpdateCanForceSplitLayout();
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
@@ -854,7 +876,8 @@ private:
     void UpdateNavPathList();
     int32_t GetAutoCleanRestoreMinIndex(int32_t lastStandardIndex, int32_t stackSize) const;
     bool NeedRestoreOrAutoClean(const NavPathList& navPathList, int32_t restoreStartIndex, int32_t cleanMinIndex) const;
-    bool RestoreAutoCleanedDestination(NavPathList& navPathList, int32_t index, int32_t stackIndex = -1);
+    bool RestoreAutoCleanedDestination(
+        NavPathList& navPathList, int32_t index, bool& isStandard, int32_t stackIndex = -1);
     void RefreshNavDestination();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBarOrHomeDestination);
     void NotifyNavDestinationSwitch(RefPtr<NavDestinationContext> from,
@@ -865,6 +888,7 @@ private:
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
     void ProcessAutoSave(const RefPtr<FrameNode>& node);
+    void InitPreloadNodeInfo(int32_t index, const RefPtr<UINode>& uiNode);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
@@ -944,6 +968,7 @@ private:
     void AdjustNodeForDestForceSplit(bool needTriggerLifecycle);
     void AdjustNodeForNonDestForceSplit(bool needTriggerLifecycle);
     void ClearSecondaryNodesIfNeeded(NavPathList&& preList);
+    void ClearContentStackIfNeeded(NavPathList&& preList);
 
     bool IsTopPrimaryNode(const RefPtr<NavDestinationGroupNode>& node);
     
@@ -973,7 +998,7 @@ private:
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode);
     void UpdatePlaceholderVisibilityIfNeeded();
-    static std::string GetNavDestinationJsViewName(RefPtr<UINode> uiNode);
+    bool CheckIfLastDestWillBeFullScreenOverlay(const std::vector<RefPtr<NavDestinationGroupNode>>& destList);
 
     //-------for force split------- begin------
     bool IsNavBarValid();
@@ -1174,6 +1199,7 @@ private:
     float secondaryPartitionWidth_ = 0.0f;
     //-------for force split------- end  ------
     std::string pendingHomeRestoreInfo_;
+    std::string pendingHomeRestoreState_;
 };
 
 } // namespace OHOS::Ace::NG

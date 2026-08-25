@@ -437,11 +437,12 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerOnChange(ArkUIRu
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const double&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const double&)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                              const double& index) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { paramIndex };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -478,11 +479,12 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerOnScrollStop(Ark
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const double&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    const auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const double&)> callback = [vm, weakNode, func = panda::CopyableGlobal(vm, func)](
                                                              const double& index) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { paramIndex };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);

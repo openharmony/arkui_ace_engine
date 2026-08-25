@@ -46,24 +46,6 @@ constexpr uint32_t TYPE_CYCLE = 0;
 
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    if (firstArg->IsNativePointer(vm)) {
-        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
-        nativeNode = nullptr;
-        return true;
-    }
-    return false;
-}
-
-bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
-}
-
 bool CheckJSCallbackInfo(EcmaVM* vm, const std::string& callerName, const Local<JSValueRef>& tmpInfo,
     std::vector<JSCallbackInfoType>& infoTypes)
 {
@@ -409,7 +391,7 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> colors = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
 
@@ -420,7 +402,7 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
 
     std::vector<OHOS::Ace::NG::Gradient> valueColors;
     std::vector<RefPtr<ResourceObject>> colorVectorResObj;
-    bool isJsView = IsJsView(firstArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     auto colorsArray = panda::Local<panda::ArrayRef>(colors);
     if (!isJsView && (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull())) {
         nodeModifiers->getDataPanelModifier()->resetValueColors(nativeNode);
@@ -447,7 +429,7 @@ ArkUINativeModuleValue DataPanelBridge::ResetValueColors(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getDataPanelModifier()->resetValueColors(nativeNode);
@@ -499,7 +481,7 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsNull()) {
@@ -522,7 +504,7 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     ConvertThemeColor(shadowColors);
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
         shadowColors.clear();
-        bool isJsView = IsJsView(firstArg, vm);
+        bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
         auto array = panda::Local<panda::ArrayRef>(colors);
         if (!isJsView) {
             if (array.IsEmpty() || array->IsUndefined() || array->IsNull()) {
@@ -557,7 +539,7 @@ ArkUINativeModuleValue DataPanelBridge::ResetTrackShadow(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getDataPanelModifier()->resetTrackShadow(nativeNode);
@@ -570,14 +552,14 @@ ArkUINativeModuleValue DataPanelBridge::SetCloseEffect(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!secondArg->IsBoolean()) {
         nodeModifiers->getDataPanelModifier()->resetCloseEffect(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool boolValue = secondArg->ToBoolean(vm)->Value();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getDataPanelModifier()->setCloseEffect(nativeNode, boolValue);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -602,7 +584,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRu
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     Color color;
     RefPtr<ResourceObject> colorResObj;
@@ -639,7 +621,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
@@ -676,7 +658,7 @@ ArkUINativeModuleValue DataPanelBridge::ResetDataPanelStrokeWidth(ArkUIRuntimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getDataPanelModifier()->resetDataPanelStrokeWidth(nativeNode);
@@ -722,7 +704,7 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     if (!secondArg->IsObject(vm)) {
         DataPanelModelNG::SetBuilderFunc(frameNode, nullptr);
@@ -730,7 +712,7 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     }
     panda::CopyableGlobal<panda::ObjectRef> globalObj(vm, secondArg);
     auto containerId = Container::CurrentId();
-    bool isJsView = IsJsView(firstArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     auto weakFrameNode = AceType::WeakClaim(frameNode);
     DataPanelModelNG::SetBuilderFunc(frameNode,
         [vm, weakFrameNode, globalObj = std::move(globalObj), containerId, isJsView](

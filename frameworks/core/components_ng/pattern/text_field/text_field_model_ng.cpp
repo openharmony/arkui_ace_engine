@@ -37,14 +37,16 @@ namespace {
 constexpr std::string_view DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 constexpr std::string_view DROP_TYPE_PLAIN_TEXT = "general.plain-text";
 constexpr std::string_view DROP_TYPE_HYPERLINK = "general.hyperlink";
+constexpr char TEXTAREA_ETS_TAG[] = "TextArea";
+constexpr char TEXTINPUT_ETS_TAG[] = "TextInput";
 }
 void TextFieldModelNG::CreateNode(
     const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value, bool isTextArea)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId,
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", isTextArea ? TEXTAREA_ETS_TAG : TEXTINPUT_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(isTextArea ? TEXTAREA_ETS_TAG : TEXTINPUT_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ACE_UINODE_TRACE(frameNode);
     stack->Push(frameNode);
@@ -117,7 +119,7 @@ void TextFieldModelNG::CreateNode(
 RefPtr<FrameNode> TextFieldModelNG::CreateTextInputNode(
     int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
     ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
@@ -134,7 +136,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateTextInputNode(
 RefPtr<FrameNode> TextFieldModelNG::CreateTextAreaNode(
     int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTAREA_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(TEXTAREA_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
     ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
@@ -1975,6 +1977,14 @@ void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::string
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc, frameNode);
 }
 
+void TextFieldModelNG::SetCanacelIconSrc(
+    FrameNode* frameNode, const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, BundleName, bundleName, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ModuleName, moduleName, frameNode);
+}
+
 void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& iconColor)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor, frameNode);
@@ -2043,7 +2053,7 @@ TextInputAction TextFieldModelNG::GetEnterKeyType(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, value);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     return pattern->GetTextInputActionValue(
-        frameNode->GetTag() == V2::TEXTAREA_ETS_TAG ? TextInputAction::NEW_LINE : TextInputAction::DONE);
+        frameNode->GetTag() == TEXTAREA_ETS_TAG ? TextInputAction::NEW_LINE : TextInputAction::DONE);
 }
 
 Color TextFieldModelNG::GetPlaceholderColor(FrameNode* frameNode)

@@ -61,7 +61,6 @@
 #endif
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/interfaces/native/node/bubble_modifier.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -177,7 +176,7 @@ void ConvertToImmersiveOptionsEC(std::shared_ptr<ImmersiveOptions>& newOptions)
 {
     CHECK_NULL_VOID(newOptions);
     newOptions->style = ConvertToECStyle(newOptions->style);
-    newOptions->materialColor = Color::TRANSPARENT;
+    newOptions->materialColor = std::nullopt;
     newOptions->applyShadow = false;
     newOptions->disableLightEffect = true;
     newOptions->interactive = false;
@@ -1751,8 +1750,13 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
-    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_RADIUS);
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
+    if (CheckDimensionUseLPX(value)) {
+        auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc);
+    } else {
+        ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_RADIUS, EMPTY_CALLBACK);
+    }
 }
 
 void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
@@ -2110,8 +2114,13 @@ void ViewAbstract::SetDashGap(const Dimension& value)
     BorderWidthProperty dashGap;
     dashGap.SetBorderWidth(value);
 
-    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_GAP);
     ACE_UPDATE_RENDER_CONTEXT(DashGap, dashGap);
+    if (CheckDimensionUseLPX(value)) {
+        auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc);
+    } else {
+        ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_GAP, EMPTY_CALLBACK);
+    }
 }
 
 void ViewAbstract::SetDashGap(FrameNode *frameNode, const Dimension& value)
@@ -2119,8 +2128,13 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const Dimension& value)
     BorderWidthProperty dashGap;
     dashGap.SetBorderWidth(value);
 
-    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_GAP, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
+    if (CheckDimensionUseLPX(value)) {
+        auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc, frameNode);
+    } else {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_GAP, EMPTY_CALLBACK, frameNode);
+    }
 }
 
 void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
@@ -2179,57 +2193,35 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& v
 
 void ViewAbstract::CheckBorderDashGapLPX(const BorderWidthProperty& value)
 {
-    if (value.topDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP);
-    }
-    if (value.bottomDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM);
-    }
-    if (value.leftDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT);
-    }
-    if (value.rightDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT);
+    auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc);
+    } else {
+        ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_GAP, EMPTY_CALLBACK);
     }
 }
 
-void ViewAbstract::CheckNodeBorderDashGapLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
+void ViewAbstract::CheckNodeBorderDashGapLPX(
+    RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
 {
-    if (value.topDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP, frameNode);
-    }
-    if (value.bottomDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM, frameNode);
-    }
-    if (value.leftDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT, frameNode);
-    }
-    if (value.rightDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT, frameNode);
+    auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc, frameNode);
+    } else {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_GAP, EMPTY_CALLBACK, frameNode);
     }
 }
 
 void ViewAbstract::CheckNodeBorderDashGapLPX(FrameNode* frameNode, const BorderWidthProperty& value)
 {
-    if (value.topDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP, frameNode);
-    }
-    if (value.bottomDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM, frameNode);
-    }
-    if (value.leftDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT, frameNode);
-    }
-    if (value.rightDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(
-            value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT, frameNode);
+    auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc, frameNode);
+    } else {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_GAP, EMPTY_CALLBACK, frameNode);
     }
 }
 
@@ -2241,8 +2233,13 @@ void ViewAbstract::SetDashWidth(const Dimension& value)
     BorderWidthProperty dashWidth;
     dashWidth.SetBorderWidth(value);
 
-    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_WIDTH);
     ACE_UPDATE_RENDER_CONTEXT(DashWidth, dashWidth);
+    if (CheckDimensionUseLPX(value)) {
+        auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc);
+    } else {
+        ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_WIDTH, EMPTY_CALLBACK);
+    }
 }
 
 void ViewAbstract::SetDashWidth(FrameNode *frameNode, const Dimension& value)
@@ -2250,8 +2247,13 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const Dimension& value)
     BorderWidthProperty dashWidth;
     dashWidth.SetBorderWidth(value);
 
-    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_WIDTH, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
+    if (CheckDimensionUseLPX(value)) {
+        auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc, frameNode);
+    } else {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_WIDTH, EMPTY_CALLBACK, frameNode);
+    }
 }
 
 void ViewAbstract::SetDashWidth(const BorderWidthProperty& value)
@@ -2310,50 +2312,126 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty&
 
 void ViewAbstract::CheckBorderDashWidthLPX(const BorderWidthProperty& value)
 {
-    if (value.topDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP);
+    auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc);
+    } else {
+        ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_WIDTH, EMPTY_CALLBACK);
     }
-    if (value.bottomDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM);
-    }
-    if (value.leftDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT);
-    }
-    if (value.rightDimen.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT);
-    }
+}
+
+std::function<void()> ViewAbstract::GetBorderDashGapFuncForLPX(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BorderWidthProperty dashGap;
+        dashGap.SetBorderWidth(value);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnDashGapUpdate(dashGap);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetBorderDashGapFuncForLPX(const BorderWidthProperty& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, value, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnDashGapUpdate(value);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetBorderRadiusFuncForLPX(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(value);
+        borderRadius.multiValued = false;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnBorderRadiusUpdate(borderRadius);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetBorderRadiusFuncForLPX(const BorderRadiusProperty& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, value, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnBorderRadiusUpdate(value);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetDashWidthFuncForLPX(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BorderWidthProperty dashWidth;
+        dashWidth.SetBorderWidth(value);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnDashWidthUpdate(dashWidth);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetDashWidthFuncForLPX(const BorderWidthProperty& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, value, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnDashWidthUpdate(value);
+    };
+    return updateFunc;
 }
 
 void ViewAbstract::CheckNodeBorderDashWidthLPX(
     RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
 {
-    if (value.topDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP, frameNode);
-    }
-    if (value.bottomDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM, frameNode);
-    }
-    if (value.leftDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT, frameNode);
-    }
-    if (value.rightDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT, frameNode);
+    auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc, frameNode);
+    } else {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_WIDTH, EMPTY_CALLBACK, frameNode);
     }
 }
 
 void ViewAbstract::CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value)
 {
-    if (value.topDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP, frameNode);
-    }
-    if (value.bottomDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM, frameNode);
-    }
-    if (value.leftDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT, frameNode);
-    }
-    if (value.rightDimen.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT, frameNode);
+    auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc, frameNode);
+    } else {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_DASH_WIDTH, EMPTY_CALLBACK, frameNode);
     }
 }
 
@@ -3864,8 +3942,17 @@ void ViewAbstract::SetOpacity(double opacity)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    const auto oldOpacity = renderContext->GetOpacityValue(1.0);
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+    if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+        frameNode->NotifyPageSceneOpacityChanged();
+    }
 }
+
 void ViewAbstract::SetAllowDrop(const std::set<std::string>& allowDrop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -4833,16 +4920,23 @@ void ViewAbstract::AddHoverEventForTips(
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto hoverTask = [targetNode, targetId, tipsInfo, param, overlayManager, showInSubWindow, popupId, popupNode,
-                         containerId](bool isHover) {
+    auto hoverTask = [weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode)), targetId, tipsInfo, param,
+                         weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager)), showInSubWindow, popupId,
+                         weakPopup = AceType::WeakClaim(AceType::RawPtr(popupNode)), containerId](bool isHover) {
+        auto targetNode = weakTarget.Upgrade();
+        auto overlayManager = weakOverlay.Upgrade();
+        auto popupNode = weakPopup.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
         if (isHover && !overlayManager->GetPopupInfo(targetId).isTips &&
             overlayManager->GetPopupInfo(targetId).popupNode) {
             return;
         }
         if (isHover) {
+            CHECK_NULL_VOID(targetNode);
             const auto* modifier = NodeModifier::GetBubbleInnerModifier();
             CHECK_NULL_VOID(modifier);
             modifier->updatePopupParam(popupId, param, targetNode);
+            CHECK_NULL_VOID(popupNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             if (showInSubWindow) {
                 auto pattern = popupNode->GetPattern<NG::BubblePattern>();
@@ -6591,8 +6685,8 @@ RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveECSub(RefPtr<UiMaterial>& mat
     CHECK_NULL_RETURN(newMaterial, material);
     auto newOptions = newMaterial->GetImmersiveOptions();
     CHECK_NULL_RETURN(newOptions, material);
-    ConvertToImmersiveOptionsECSub(options);
-    newMaterial->SetImmersiveOptions(*options);
+    ConvertToImmersiveOptionsECSub(newOptions);
+    newMaterial->SetImmersiveOptions(*newOptions);
     return newMaterial;
 }
 
@@ -6617,6 +6711,9 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     if (!MaterialUtils::CallSetMaterial(frameNode, nativeMaterial)) {
         ViewAbstract::SetSystemMaterialImmediate(frameNode, nativeMaterial);
     }
+    if (material && !MaterialUtils::IsImmersiveMaterialSupported(material)) {
+        return;
+    }
     renderContext->SetSystemMaterial(nativeMaterial ? nativeMaterial->Copy() : nullptr);
 }
 
@@ -6640,9 +6737,8 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
                 frameNode->GetTag().c_str());
             return;
         }
-        if (preConfig->key.level == UiMaterialLevel::SMOOTH) {
-            ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
-        } else {
+        ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
+        if (preConfig->key.level != UiMaterialLevel::SMOOTH) {
             // reset color picker, materialFilter, and transparency callback.
             if (preConfig->colorInvert) {
                 renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
@@ -6651,6 +6747,7 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
             if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
                 preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
                 renderContext->SetMaterialShaderECSub(nullptr);
+                renderContext->SetMaterialShaderECSubOverlay(nullptr);
             } else if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
                        preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
                 renderContext->SetBackgroundNGFilterEC(nullptr);
@@ -6712,8 +6809,31 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
     }
 }
 
+void ViewAbstract::RemoveBorderAndBackgroundEffect(
+    const RefPtr<FrameNode>& frameNode, const RefPtr<RenderContext>& renderContext)
+{
+    // reset the property to no effect to avoid blocking the effect of the material
+    if (renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+    if (renderContext->HasBorderWidth()) {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(Dimension(0));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+    }
+    if (renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(Color::BLACK);
+        renderContext->UpdateBorderColor(borderColor);
+    }
+}
+
 void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material)
 {
+    if (material && !MaterialUtils::IsImmersiveMaterialSupported(material)) {
+        return;
+    }
     auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
     auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
     auto immersiveOptionsPtr = material ? material->CopyImmersiveOptions() : nullptr;
@@ -6748,9 +6868,13 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        updateFunc(nullptr);
-        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-        pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+        if (material != nullptr) {
+            updateFunc(nullptr);
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+        } else {
+            ResetSystemMaterialEffect(frameNode);
+        }
         return;
     }
 
@@ -6826,10 +6950,10 @@ void ViewAbstract::SetSystemMaterialWithScale(FrameNode* frameNode, const UiMate
 }
 
 void ViewAbstract::RegisterMaterialInteractionEvent(
-    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr, bool enableLightEffect)
 {
     CHECK_NULL_VOID(frameNode);
-    ControlInteractionBase::RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+    ControlInteractionBase::RegisterMaterialInteractionEvent(frameNode, optionsPtr, enableLightEffect);
 }
 
 void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
@@ -6866,14 +6990,20 @@ void ViewAbstract::SetImmersiveOptions(
     if (!optionsPtr) {
         return;
     }
-    if (optionsPtr->interactive || optionsPtr->lightEffectOptions) {
-        RegisterMaterialInteractionEvent(frameNode, optionsPtr);
-    } else {
-        UnRegisterMaterialInteractionEvent(AceType::RawPtr(frameNode));
-    }
     auto materialConfig = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
     if (!materialConfig) {
         return;
+    }
+    bool needInteraction = materialConfig->interactive || materialConfig->HasLightEffect();
+    bool enableLightEffect = materialConfig->HasLightEffect();
+    if (needInteraction) {
+        RegisterMaterialInteractionEvent(frameNode, optionsPtr, enableLightEffect);
+        auto preConfig = renderContext->GetImmersiveMaterialConfig();
+        if (preConfig && preConfig->HasLightEffect() && !enableLightEffect) {
+            ControlInteractionBase::UninitLightEffect(AceType::RawPtr(frameNode));
+        }
+    } else {
+        UnRegisterMaterialInteractionEvent(AceType::RawPtr(frameNode));
     }
     HistogramImmersiveOptions(*materialConfig);
     if (materialConfig->key.level != UiMaterialLevel::SMOOTH) {
@@ -6901,17 +7031,39 @@ void ViewAbstract::RegisterTransparencyListener(const RefPtr<FrameNode>& frameNo
         auto callbackId = TransparencyUtils::RegisterTransparencyListener(weakNode, [weak = weakNode](int32_t _) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
-            auto renderContext = frameNode->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            auto material = renderContext->GetSystemMaterial();
-            if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
-                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "material has changed, no need transparency callback");
-                return;
-            }
-            ViewAbstract::SetImmersiveOptions(frameNode, material->GetImmersiveOptions());
+            ViewAbstract::UpdateImmersiveMaterialOnTransparencyChange(frameNode);
         });
         renderContext->SetTransparencyCallbackId(callbackId);
     }
+}
+
+void ViewAbstract::UpdateImmersiveMaterialOnTransparencyChange(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "material has changed, no need transparency callback");
+        return;
+    }
+    auto optionsPtr = material->GetImmersiveOptions();
+    CHECK_NULL_VOID(optionsPtr);
+    auto config = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
+    if (!config) {
+        return;
+    }
+    if (config->key.level == UiMaterialLevel::SMOOTH) {
+        return;
+    }
+    // Mid/high level materials only refresh the material effect and cache the new config into renderContext.
+    // Other properties such as background color must be kept untouched.
+    auto preConfig = renderContext->GetImmersiveMaterialConfig();
+    if (preConfig == config) {
+        return;
+    }
+    ApplyImmersiveMaterialStyle(renderContext, *config, preConfig);
+    renderContext->SetImmersiveMaterialConfig(config);
 }
 
 void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const std::optional<ImmersiveMaterialConfig>& config)
@@ -6935,10 +7087,13 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
             return;
         }
-        auto params = materialTheme->GetUiMaterialParam(MaterialType::IMMERSIVE, pipeline);
+        auto params = materialTheme->GetUiMaterialParam(MaterialType::IMMERSIVE, frameNode, config->key.colorMode);
         if (!params) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "Get immersive param failed");
             return;
+        }
+        if (config->materialColor.has_value()) {
+            params->backgroundColor = config->materialColor.value();
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
@@ -6953,33 +7108,13 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
         renderContext->SetImmersiveMaterialConfig(config);
         return;
     }
+    // gentle or exquisite
+    RemoveBorderAndBackgroundEffect(frameNode, renderContext);
     if (preConfig == config) {
         return;
     }
-    // gentle or exquisite
-    int32_t style = static_cast<int32_t>(config->key.style);
-    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
-        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
-        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECFilter(*config);
-        renderContext->SetBackgroundNGFilterEC(materialFilter);
-        if (config->colorInvert) {
-            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::CONTRAST, 500);
-        } else if (preConfig && preConfig->colorInvert) {
-            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 500);
-        }
-    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
-               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
-        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(*config);
-        renderContext->SetMaterialShaderECSub(materialFilter);
-    } else {
-        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
-        if (preConfig && preConfig->colorInvert && !config->colorInvert) {
-            // reset color picker
-            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
-        }
-        renderContext->SetMaterialWithQualityLevel(
-            materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
-    }
+    ApplyImmersiveMaterialStyle(renderContext, *config, preConfig);
+
     if (config->applyShadow) {
         Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale);
         renderContext->UpdateBackShadow(shadow);
@@ -7000,6 +7135,37 @@ void ViewAbstract::ResetImmersiveShadowToDefault(
         renderContext->ResetBackShadow();
         renderContext->OnBackShadowUpdate(shadow);
         pattern->OnBackShadowReset();
+    }
+}
+
+void ViewAbstract::ApplyImmersiveMaterialStyle(const RefPtr<RenderContext>& renderContext,
+ 	const ImmersiveMaterialConfig& config, const std::optional<ImmersiveMaterialConfig>& preConfig)
+{
+    CHECK_NULL_VOID(renderContext);
+    int32_t style = static_cast<int32_t>(config.key.style);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECFilter(config);
+        renderContext->SetBackgroundNGFilterEC(materialFilter);
+        if (config.colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::CONTRAST, 500);
+        } else if (preConfig && preConfig->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 500);
+        }
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+            style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(config);
+        auto materialFilterOverlay = UiMaterialFilterCreator::ConvertToUiMaterialECSubShaderOverlay(config);
+        renderContext->SetMaterialShaderECSub(materialFilter);
+        renderContext->SetMaterialShaderECSubOverlay(materialFilterOverlay);
+    } else {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(config);
+        if (preConfig && preConfig->colorInvert && !config.colorInvert) {
+            // reset color picker
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+        }
+        renderContext->SetMaterialWithQualityLevel(
+            materialFilter, config.colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     }
 }
 
@@ -7517,8 +7683,13 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
-    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_RADIUS, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
+    if (CheckDimensionUseLPX(value)) {
+        auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+    } else {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_BORDER_RADIUS, EMPTY_CALLBACK, frameNode);
+    }
 }
 
 void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
@@ -7565,56 +7736,29 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const RefPtr<ResourceOb
 
 void ViewAbstract::CheckBorderRadiusLPX(const BorderRadiusProperty& value)
 {
-    if (value.radiusTopLeft.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.radiusTopLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT);
-    }
-    if (value.radiusTopRight.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.radiusTopRight.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT);
-    }
-    if (value.radiusBottomRight.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.radiusBottomRight.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT);
-    }
-    if (value.radiusBottomLeft.has_value()) {
-        ACE_CHECK_LPX_ATTRIBUTE(value.radiusBottomLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT);
+    auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, lpxUpdateFunc);
     }
 }
 
-void ViewAbstract::CheckNodeBorderRadiusLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode,
-                                            const BorderRadiusProperty &value)
+void ViewAbstract::CheckNodeBorderRadiusLPX(
+    RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderRadiusProperty& value)
 {
-    if (value.radiusTopLeft.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, frameNode);
-    }
-    if (value.radiusTopRight.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopRight.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT,
-                                     frameNode);
-    }
-    if (value.radiusBottomRight.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomRight.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT,
-                                     frameNode);
-    }
-    if (value.radiusBottomLeft.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT,
-                                     frameNode);
+    auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc, frameNode);
     }
 }
 
-void ViewAbstract::CheckNodeBorderRadiusLPX(FrameNode *frameNode, const BorderRadiusProperty &value)
+void ViewAbstract::CheckNodeBorderRadiusLPX(FrameNode* frameNode, const BorderRadiusProperty& value)
 {
-    if (value.radiusTopLeft.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, frameNode);
-    }
-    if (value.radiusTopRight.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopRight.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT,
-                                     frameNode);
-    }
-    if (value.radiusBottomRight.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomRight.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT,
-                                     frameNode);
-    }
-    if (value.radiusBottomLeft.has_value()) {
-        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT,
-                                     frameNode);
+    auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc, frameNode);
     }
 }
 
@@ -8087,7 +8231,14 @@ void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
 
 void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity)
 {
+    CHECK_NULL_VOID(frameNode);
+    const auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    const auto oldOpacity = renderContext->GetOpacityValue(1.0);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
+    if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+        frameNode->NotifyPageSceneOpacityChanged();
+    }
 }
 
 void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity, const RefPtr<ResourceObject>& resObj)
@@ -8109,10 +8260,22 @@ void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity, const RefPtr
         if (viewAbstractOpacity.empty()) {
             pattern->AddResCache("viewAbstract.opacity", std::to_string(result));
         }
+        const auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        const auto oldOpacity = renderContext->GetOpacityValue(1.0);
         ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, result, frameNode);
+        if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+            frameNode->NotifyPageSceneOpacityChanged();
+        }
     };
     pattern->AddResObj("viewAbstract.opacity", resObj, std::move(updateFunc));
+    const auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    const auto oldOpacity = renderContext->GetOpacityValue(1.0);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
+    if (!NearEqual(oldOpacity, renderContext->GetOpacityValue(1.0))) {
+        frameNode->NotifyPageSceneOpacityChanged();
+    }
 }
 
 void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resObj)

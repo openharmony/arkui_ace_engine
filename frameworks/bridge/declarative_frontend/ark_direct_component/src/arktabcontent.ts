@@ -125,7 +125,7 @@ function loadComponent(): ComponentObj | undefined {
       constructor(value: VoidCallback) {
         super(value);
       }
-      static identity: Symbol = Symbol('contentonwillshow');
+      static identity: Symbol = Symbol('tabcontentonwillshow');
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
           getUINativeModule().tabContent.resetTabContentOnWillShow(node);
@@ -133,27 +133,19 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabContent.setTabContentOnWillShow(node, this.value);
         }
       }
-    
-      checkObjectDiff(): boolean {
-        return this.stageValue !== this.value;
-      }
     }
     
     class TabContentOnWillHideModifier extends ModifierWithKey<VoidCallback> {
       constructor(value: VoidCallback) {
         super(value);
       }
-      static identity: Symbol = Symbol('contentonwillhide');
+      static identity: Symbol = Symbol('tabcontentonwillhide');
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
           getUINativeModule().tabContent.resetTabContentOnWillHide(node);
         } else {
           getUINativeModule().tabContent.setTabContentOnWillHide(node, this.value);
         }
-      }
-
-      checkObjectDiff(): boolean {
-        return this.stageValue !== this.value;
       }
     }
     

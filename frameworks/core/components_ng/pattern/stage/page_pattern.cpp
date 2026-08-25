@@ -376,7 +376,9 @@ void PagePattern::OnShow(bool isFromWindow)
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
 #endif
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetFullPath());
+#endif
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
@@ -424,7 +426,9 @@ void PagePattern::RecordPageEvent(bool isShow)
 void PagePattern::OnHide(bool isFromWindow)
 {
     CHECK_NULL_VOID(isOnShow_);
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().FlushRecord();
+#endif
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();

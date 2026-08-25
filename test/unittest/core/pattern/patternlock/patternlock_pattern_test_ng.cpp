@@ -990,4 +990,93 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest023, TestSize.Level1)
     pattern_->HandleTouchEvent(touchDown2);
     EXPECT_EQ(pattern_->fingerId_, 1);
 }
+
+/**
+ * @tc.name: PatternLockPatternTest024
+ * @tc.desc: Test HandleAccessibilityHoverEvent with empty choosePoint_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest024, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {});
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
+
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->CreateNodePaintMethod();
+    pattern_->OnModifyDone();
+
+    bool completeEventTriggered = false;
+    std::vector<int> capturedResult;
+    eventHub_->SetOnComplete([&completeEventTriggered, &capturedResult](const BaseEventInfo* info) {
+        completeEventTriggered = true;
+        auto* patternCompleteEvent = static_cast<const V2::PatternCompleteEvent*>(info);
+        if (patternCompleteEvent) {
+            capturedResult = patternCompleteEvent->GetInput();
+        }
+    });
+
+    /**
+     * @tc.steps: step1. hover exit without selecting any points.
+     * @tc.expected: completeEvent should NOT be triggered.
+     */
+    pattern_->choosePoint_.clear();
+    AccessibilityHoverInfo info;
+    info.SetActionType(AccessibilityHoverAction::HOVER_EXIT);
+    pattern_->HandleAccessibilityHoverEvent(false, info);
+
+    EXPECT_FALSE(completeEventTriggered);
+    EXPECT_TRUE(capturedResult.empty());
+}
+
+/**
+ * @tc.name: PatternLockPatternTest025
+ * @tc.desc: Test HandleAccessibilityHoverEvent with non-empty choosePoint_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest025, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {});
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    patternlockTheme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
+
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->CreateNodePaintMethod();
+    pattern_->OnModifyDone();
+
+    bool completeEventTriggered = false;
+    std::vector<int> capturedResult;
+    eventHub_->SetOnComplete([&completeEventTriggered, &capturedResult](const BaseEventInfo* info) {
+        completeEventTriggered = true;
+        auto* patternCompleteEvent = static_cast<const V2::PatternCompleteEvent*>(info);
+        if (patternCompleteEvent) {
+            capturedResult = patternCompleteEvent->GetInput();
+        }
+    });
+
+    /**
+     * @tc.steps: step1. select some points via focus callback.
+     */
+    pattern_->choosePoint_.clear();
+    pattern_->HandleTextOnAccessibilityFocusCallback(1, 1);
+    pattern_->HandleTextOnAccessibilityFocusCallback(2, 2);
+    EXPECT_EQ(pattern_->choosePoint_.size(), 2);
+
+    /**
+     * @tc.steps: step2. hover exit with selected points.
+     * @tc.expected: completeEvent should be triggered with correct result.
+     */
+    AccessibilityHoverInfo info;
+    info.SetActionType(AccessibilityHoverAction::HOVER_EXIT);
+    pattern_->HandleAccessibilityHoverEvent(false, info);
+
+    EXPECT_TRUE(completeEventTriggered);
+    EXPECT_EQ(capturedResult.size(), 2);
+}
 }

@@ -19,6 +19,7 @@
  */
 
 import curves from '@ohos.curves';//
+import { UIContext } from '@kit.ArkUI';
 
 class ListItemModify implements AttributeModifier<ListItemAttribute> {
   public hasShadow: boolean = false;
@@ -57,6 +58,7 @@ class DragSortCtrl<T> {
   public offsetY: number = 0;
   public state: DragSortState = DragSortState.IDLE;
   private ITEM_INTV: number = 120;
+  private uiContext: UIContext | undefined = undefined;
 
   constructor(arr: Array<T>, intv: number) {
     this.arr = arr;
@@ -65,6 +67,20 @@ class DragSortCtrl<T> {
     arr.forEach(() => {
       this.modify.push(new ListItemModify());
     })
+  }
+
+  setUIContext(uiContext: UIContext): void {
+    this.uiContext = uiContext;
+  }
+
+  // Until the owning page hands over its UIContext, run the closure unanimated rather than
+  // dropping the state updates it carries.
+  private animate(param: AnimateParam, event: () => void): void {
+    if (this.uiContext) {
+      this.uiContext.animateTo(param, event);
+    } else {
+      event();
+    }
   }
 
   itemMove(index: number, newIndex: number): void { // 移动时两个Item对换
@@ -77,7 +93,7 @@ class DragSortCtrl<T> {
   onLongPress(item: T): void { //长按修改ListItem样式
     let index = this.arr.indexOf(item);
     this.dragRefOffset = 0;
-    animateTo({ curve: Curve.Friction, duration: 300 }, () => {
+    this.animate({ curve: Curve.Friction, duration: 300 }, () => {
       this.state = DragSortState.PRESSING;
       this.modify[index].hasShadow = true;
       this.modify[index].h = 60;
@@ -89,7 +105,7 @@ class DragSortCtrl<T> {
     let index = this.arr.indexOf(item);
     this.dragRefOffset = 0;
     this.offsetY = 0;
-    animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+    this.animate({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
       this.state = DragSortState.DROPPING;
       this.modify[index].hasShadow = false;
       this.modify[index].offsetY = 0;
@@ -100,7 +116,7 @@ class DragSortCtrl<T> {
         this.modify[index - 1].scale = 1;
       }
     })
-    animateTo({ curve: curves.interpolatingSpring(14, 1, 170, 17), delay: 150 }, () => {
+    this.animate({ curve: curves.interpolatingSpring(14, 1, 170, 17), delay: 150 }, () => {
       this.state = DragSortState.IDLE;
       this.modify[index].scale = 1;
     });
@@ -130,14 +146,14 @@ class DragSortCtrl<T> {
       }
     }
     if (this.offsetY > this.ITEM_INTV / 2) {
-      animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+      this.animate({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
         this.offsetY -= this.ITEM_INTV;
         this.dragRefOffset += this.ITEM_INTV;
         this.modify[index].offsetY = this.offsetY;
         this.itemMove(index, index + 1);
       });
     } else if (this.offsetY < -this.ITEM_INTV / 2) {
-      animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
+      this.animate({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
         this.offsetY += this.ITEM_INTV;
         this.dragRefOffset -= this.ITEM_INTV;
         this.modify[index].offsetY = this.offsetY;
@@ -157,6 +173,10 @@ class DragSortCtrl<T> {
 struct ListItemExample {
   @State private arr: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   @State dragSortCtrl: DragSortCtrl<number> = new DragSortCtrl<number>(this.arr, 120);
+
+  aboutToAppear(): void {
+    this.dragSortCtrl.setUIContext(this.getUIContext());
+  }
 
   build() {
     Stack() {

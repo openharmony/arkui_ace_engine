@@ -55,6 +55,90 @@ int64_t GetRealId(int64_t elementId)
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
     return splitElementId;
 }
+
+struct UpdateElementContext {
+    WeakPtr<PipelineBase> context;
+    WeakPtr<PipelineBase> mainContext;
+    WeakPtr<JsAccessibilityManager> jsAccessibilityManager;
+    WeakPtr<NG::FrameNode> rootNode;
+    WeakPtr<NG::FrameNode> baseNode;
+    WeakPtr<NG::FrameNode> baseNextNode;
+    WeakPtr<NG::FrameNode> basePrevNode;
+};
+
+bool UpdateVirtualNodeElementInfo(const std::shared_ptr<VirtualAccessibilityNodeRulesCheckNode>& virtualCheckNode,
+    const UpdateElementContext& ctx, AccessibilityElementInfo& info)
+{
+    CHECK_NULL_RETURN(virtualCheckNode, false);
+    auto hostNode = virtualCheckNode->GetHostFrameNode();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto virtualNode = virtualCheckNode->GetAccessibilityNode();
+    CHECK_NULL_RETURN(virtualNode, false);
+    auto context = ctx.context.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    auto mainContext = ctx.mainContext.Upgrade();
+    CHECK_NULL_RETURN(mainContext, false);
+    auto jsAccessibilityManager = ctx.jsAccessibilityManager.Upgrade();
+    CHECK_NULL_RETURN(jsAccessibilityManager, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, false);
+
+    CommonProperty commonProperty;
+    jsAccessibilityManager->GenerateCommonProperty(context, commonProperty, mainContext, hostNode);
+
+    auto containerId = NG::VirtualNodeContainerIdManager::GetInstance().GetContainerId(hostNode);
+    int64_t virtualNodeAccessibilityId =
+        NG::VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(containerId, virtualNode->GetNodeId());
+    int64_t parentAccessibilityId = hostNode->GetAccessibilityId();
+    auto virtualParent = virtualNode->GetParent();
+    if (virtualParent) {
+        parentAccessibilityId =
+            NG::VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(
+                containerId, virtualParent->GetNodeId());
+    }
+
+    jsAccessibilityManager->UpdateAccessibilityElementInfoForVirtualNode(
+        hostNode, virtualNode, commonProperty, info, parentAccessibilityId);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    info.SetAccessibilityId(virtualNodeAccessibilityId);
+    return true;
+}
+
+bool UpdateFrameNodeElementInfo(const RefPtr<NG::FrameNode>& finalNode, const UpdateElementContext& ctx,
+    AccessibilityElementInfo& info)
+{
+    CHECK_NULL_RETURN(finalNode, false);
+    auto context = ctx.context.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    auto mainContext = ctx.mainContext.Upgrade();
+    CHECK_NULL_RETURN(mainContext, false);
+    auto rootNode = ctx.rootNode.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto baseNode = ctx.baseNode.Upgrade();
+    CHECK_NULL_RETURN(baseNode, false);
+    auto jsAccessibilityManager = ctx.jsAccessibilityManager.Upgrade();
+    CHECK_NULL_RETURN(jsAccessibilityManager, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, false);
+
+    CommonProperty commonProperty;
+    jsAccessibilityManager->GenerateCommonProperty(context, commonProperty, mainContext, finalNode);
+    jsAccessibilityManager->UpdateAccessibilityElementInfo(finalNode, commonProperty, info, ngPipeline);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    auto nextNode = ctx.baseNextNode.Upgrade();
+    auto prevNode = ctx.basePrevNode.Upgrade();
+    if (baseNode->GetAccessibilityId() != finalNode->GetAccessibilityId()) {
+        nextNode = jsAccessibilityManager->GetNextFocusNodeByManager(finalNode, rootNode);
+        prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(finalNode, rootNode, context);
+    }
+    if (nextNode) {
+        SetNextFocusIdToElementInfo(nextNode, info);
+    }
+    if (prevNode) {
+        SetPrevFocusIdToElementInfo(prevNode, info);
+    }
+    return true;
+}
 } // namespace
 
 void FocusStrategyOsalNG::InvailidElementInfo(Accessibility::AccessibilityElementInfo& info)
@@ -72,6 +156,32 @@ bool FocusStrategyOsalNG::UpdateOriginNodeInfo(int64_t elementId)
     CHECK_NULL_RETURN(rootNode, false);
     auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
     CHECK_NULL_RETURN(jsAccessibilityManager, false);
+
+    if (NG::VirtualNodeContainerIdManager::IsVirtualNodeContainerId(elementId)) {
+        uint8_t containerId = NG::VirtualNodeContainerIdManager::ExtractContainerId(elementId);
+        auto hostNode = NG::VirtualNodeContainerIdManager::GetInstance().GetContainerNode(containerId);
+        CHECK_NULL_RETURN(hostNode, false);
+        auto accessibilityProperty = hostNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        if (!accessibilityProperty->HasVirtualNodeTreeRoot()) {
+            return false;
+        }
+        auto virtualRoot = accessibilityProperty->GetVirtualNodeTreeRoot();
+        CHECK_NULL_RETURN(virtualRoot, false);
+        auto virtualNodeRoot = AceType::DynamicCast<NG::VirtualAccessibilityNode>(virtualRoot);
+        CHECK_NULL_RETURN(virtualNodeRoot, false);
+        int32_t virtualNodeId = static_cast<int32_t>(NG::VirtualNodeContainerIdManager::ExtractComponentId(elementId));
+        auto targetVirtualNode = virtualNodeRoot->FindNodeById(virtualNodeId);
+        CHECK_NULL_RETURN(targetVirtualNode, false);
+        NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(hostNode);
+
+        rootNode_ = rootNode;
+        baseNode_ = hostNode;
+        hostFrameNode_ = hostNode;
+        baseVirtualNode_ = targetVirtualNode;
+        return true;
+    }
+
     auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, elementId);
     CHECK_NULL_RETURN(node, false);
 
@@ -85,6 +195,18 @@ bool FocusStrategyOsalNG::UpdateOriginNodeInfo(int64_t elementId)
 
 std::shared_ptr<FocusRulesCheckNode> FocusStrategyOsalNG::GetCurrentCheckNode()
 {
+    auto baseVirtualNode = baseVirtualNode_.Upgrade();
+    if (baseVirtualNode) {
+        auto hostFrameNode = hostFrameNode_.Upgrade();
+        CHECK_NULL_RETURN(hostFrameNode, nullptr);
+        return std::make_shared<VirtualAccessibilityNodeRulesCheckNode>(
+            baseVirtualNode,
+            NG::VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(
+                NG::VirtualNodeContainerIdManager::GetInstance().GetContainerId(hostFrameNode),
+                baseVirtualNode->GetNodeId()),
+            hostFrameNode);
+    }
+
     auto baseNode = baseNode_.Upgrade();
     CHECK_NULL_RETURN(baseNode, nullptr);
     return std::make_shared<FrameNodeRulesCheckNode>(baseNode, baseNode->GetAccessibilityId());
@@ -143,40 +265,19 @@ bool FocusStrategyOsalNG::UpdateElementInfo(
     const std::shared_ptr<FocusRulesCheckNode>& resultNode, Accessibility::AccessibilityElementInfo& info)
 {
     CHECK_NULL_RETURN(resultNode, false);
+    UpdateElementContext ctx { context_, mainContext_, jsAccessibilityManager_, rootNode_, baseNode_, baseNextNode_,
+        basePrevNode_ };
+
+    auto virtualCheckNode = std::static_pointer_cast<VirtualAccessibilityNodeRulesCheckNode>(resultNode);
+    if (virtualCheckNode && virtualCheckNode->IsVirtualNode()) {
+        return UpdateVirtualNodeElementInfo(virtualCheckNode, ctx, info);
+    }
+
     auto checkTarget = std::static_pointer_cast<FrameNodeRulesCheckNode>(resultNode);
     CHECK_NULL_RETURN(checkTarget, false);
     auto finalNode = checkTarget->GetFrameNode();
     CHECK_NULL_RETURN(finalNode, false);
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, false);
-    auto mainContext = mainContext_.Upgrade();
-    CHECK_NULL_RETURN(mainContext, false);
-    auto rootNode = rootNode_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, false);
-    auto baseNode = baseNode_.Upgrade();
-    CHECK_NULL_RETURN(baseNode, false);
-    auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
-    CHECK_NULL_RETURN(jsAccessibilityManager, false);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_RETURN(ngPipeline, false);
-
-    CommonProperty commonProperty;
-    jsAccessibilityManager->GenerateCommonProperty(context, commonProperty, mainContext, finalNode);
-    jsAccessibilityManager->UpdateAccessibilityElementInfo(finalNode, commonProperty, info, ngPipeline);
-    jsAccessibilityManager->UpdateElementInfoTreeId(info);
-    auto nextNode = baseNextNode_.Upgrade();
-    auto prevNode = basePrevNode_.Upgrade();
-    if (baseNode->GetAccessibilityId() != finalNode->GetAccessibilityId()) {
-        nextNode = jsAccessibilityManager->GetNextFocusNodeByManager(finalNode, rootNode);
-        prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(finalNode, rootNode, context);
-    }
-    if (nextNode) {
-        SetNextFocusIdToElementInfo(nextNode, info);
-    }
-    if (prevNode) {
-        SetPrevFocusIdToElementInfo(prevNode, info);
-    }
-    return true;
+    return UpdateFrameNodeElementInfo(finalNode, ctx, info);
 }
 
 void FocusStrategyOsalNG::UpdateBelongTreeIdAndParentWindowId(

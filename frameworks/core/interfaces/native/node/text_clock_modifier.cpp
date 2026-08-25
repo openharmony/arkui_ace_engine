@@ -26,10 +26,7 @@ const ArkUITextClockModifier* GetTextClockModifier()
     static const ArkUITextClockModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextClock");
-        if (module == nullptr) {
-            LOGF("Can't find textclock dynamic module");
-            abort();
-        }
+        CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const ArkUITextClockModifier*>(module->GetDynamicModifier());
     }
     return cachedModifier;
@@ -40,10 +37,7 @@ const CJUITextClockModifier* GetCJUITextClockModifier()
     static const CJUITextClockModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextClock");
-        if (module == nullptr) {
-            LOGF("Can't find textclock dynamic module");
-            abort();
-        }
+        CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const CJUITextClockModifier*>(module->GetCjModifier());
     }
     return cachedModifier;
@@ -54,10 +48,7 @@ const ArkUITextClockCustomModifier* GetTextClockCustomModifier()
     static const ArkUITextClockCustomModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextClock");
-        if (module == nullptr) {
-            LOGF("Can't find textclock dynamic module");
-            abort();
-        }
+        CHECK_NULL_RETURN(module, nullptr);
         cachedModifier =
             reinterpret_cast<const ArkUITextClockCustomModifier*>(module->GetCustomModifier("customModifier"));
     }

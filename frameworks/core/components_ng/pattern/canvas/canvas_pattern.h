@@ -26,9 +26,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
-#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
-#endif
 }
 
 namespace OHOS::Ace::NG {
@@ -241,7 +239,8 @@ private:
     void FireOnContext2DAttach();
     void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void OnSizeChanged(const DirtySwapConfig& config, bool needReset);
+    void OnSizeChanged(bool needReset);
+    void ResetSurfaceAndFireReady(const SizeF& canvasSize);
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
@@ -265,11 +264,13 @@ private:
     ReadyEventNew readyEventNew_;
     std::optional<SizeF> canvasSize_;
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
-    SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
-    DirtySwapConfig recordConfig_;
-#ifdef SUPPORT_IMAGE_ANALYZER
+    SizeF dirtyFrameSize_ = { -1, -1 };
+    SizeF dirtyContentSize_ = { -1, -1 };
+    OffsetF dirtyFrameOffset_ = { -1, -1 };
+    OffsetF dirtyContentOffset_ = { -1, -1 };
+    uint32_t onSizeChangedGen_ = 0;
+    bool recordNeedReset_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-#endif
     bool isEnableAnalyzer_ = false;
     RefPtr<CanvasModifier> contentModifier_;
     bool isAttached_ = false;
@@ -282,6 +283,7 @@ private:
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     std::optional<bool> immediateRender_ = std::nullopt;
     bool hasRegisteredVisibleAreaChange_ = false;
+    std::optional<float> lastHdrColorHeadRoom_;
 
     int32_t patternInstanceId_ = INSTANCE_ID_UNDEFINED;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);

@@ -97,6 +97,8 @@ void TextPickerColumnExtendTestNg::SetUpTestSuite()
 
 void TextPickerColumnExtendTestNg::TearDownTestSuite()
 {
+    TextPickerModel::textPickerInstance_.reset();
+    TextPickerDialogModel::textPickerDialogInstance_.reset();
     TestNG::TearDownTestSuite();
 }
 

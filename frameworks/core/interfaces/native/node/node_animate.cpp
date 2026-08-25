@@ -100,8 +100,16 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
     bool isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
     bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
     while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "node_animate:%{public}s, dirtyNodes is empty:%{public}d,"
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "node_animate:%{public}s, dirtyNodes is empty:%{public}d,"
+                "dirtyLayoutNodes is empty:%{public}d, isLayouting:%{public}d",
+                animationInterfaceName, isDirtyNodesEmpty,
+                isDirtyLayoutNodesEmpty, pipelineContext->IsLayouting());
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            pipelineContext->SetInfiniteAnimationFlushExceeded(true);
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "node_animate:%{public}s, dirtyNodes is empty:%{public}d,"
                 "dirtyLayoutNodes is empty:%{public}d, isLayouting:%{public}d",
                 animationInterfaceName, isDirtyNodesEmpty,
                 isDirtyLayoutNodesEmpty, pipelineContext->IsLayouting());
@@ -289,6 +297,7 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
 
     // close KeyframeAnimation.
     AnimationUtils::CloseImplicitAnimation();
+    pipelineContext->PopInfiniteAnimationFlushExceeded();
 }
 
 void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animateOption)

@@ -877,9 +877,11 @@ bool SheetPresentationLayoutAlgorithm::SheetInSplitWindow() const
     CHECK_NULL_RETURN(windowManager, false);
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     int32_t deviceHeight = SystemProperties::GetDeviceHeight();
+    auto windowMode = windowManager->GetWindowMode();
     if (sheetType_ == SheetType::SHEET_CENTER && windowManager && windowGlobalRect.Height() < deviceHeight &&
-        (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
+        (windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+ 	    windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+ 	    windowMode == WindowMode::WINDOW_MODE_SPLIT)) {
         return true;
     }
     return false;

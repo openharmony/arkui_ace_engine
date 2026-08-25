@@ -137,6 +137,8 @@ ACE_EXPORT extern const char INDICATOR_ETS_TAG[];
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];
 ACE_EXPORT extern const char TABS_ETS_TAG[];
 ACE_EXPORT extern const char TABS_BACKGROUND_MASK_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char TABS_SIDE_BAR_TAG[];
+ACE_FORCE_EXPORT extern const char TABS_SIDE_BAR_TAB_LIST_TAG[];
 
 // tab content item
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_COMPONENT_TAG[];

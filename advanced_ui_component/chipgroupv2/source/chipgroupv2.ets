@@ -52,6 +52,9 @@ interface ChipGroupV2Theme {
   chipGroupPadding: ChipGroupV2PaddingConfig;
   itemFillColor: ResourceColor;
   itemSelectedFillColor: ResourceColor;
+  chipBackgroundSystemMaterial: uiMaterial.Material;
+  chipSelectedBackgroundSystemMaterial: uiMaterial.Material;
+  iconBackgroundSystemMaterial: uiMaterial.Material;
 }
 
 interface IconGroupSuffixTheme {
@@ -81,7 +84,17 @@ const defaultTheme: ChipGroupV2Theme = {
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
   chipGroupPadding: { top: 14, bottom: 14 },
   itemFillColor: $r('sys.color.ohos_id_color_secondary'),
-  itemSelectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary')
+  itemSelectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+  chipBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+  }),
+  chipSelectedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+    materialColor: $r('sys.color.comp_background_emphasize')
+  }),
+  iconBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+  })
 }
 
 const iconGroupSuffixTheme: IconGroupSuffixTheme = {
@@ -328,11 +341,21 @@ export struct ChipGroupV2IconGroupSuffix {
     if (deviceInfo.sdkApiVersion >= 26) {
       if (enableEffectComponent(this.iconBackgroundSystemMaterial)) {
         EffectComponent() {
-          this.IconButtonsBuilder(createSubECMaterial(this.iconBackgroundSystemMaterial))
+          this.IconButtonsBuilder(
+            createSubECMaterial(
+              withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+            )
+          )
         }
-        .systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial))
+        .systemMaterial(
+          createECMaterial(
+            withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+          )
+        )
       } else {
-        this.IconButtonsBuilder(this.iconBackgroundSystemMaterial)
+        this.IconButtonsBuilder(
+          withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+        )
       }
     } else {
       this.IconButtonsBuilder(undefined)
@@ -367,6 +390,11 @@ export struct ChipGroupV2IconGroupSuffix {
     }
     return item.accessibilityText as ESObject as Resource;
   }
+}
+
+interface ChipItemsBuilderOptions {
+  backgroundSystemMaterial?: uiMaterial.Material;
+  activatedBackgroundSystemMaterial?: uiMaterial.Material;
 }
 
 @ComponentV2
@@ -580,7 +608,7 @@ export struct ChipGroupV2 {
   }
 
   @Builder
-  ChipItemsBuilder(material: uiMaterial.Material | undefined) {
+  ChipItemsBuilder(options: ChipItemsBuilderOptions) {
     Row({ space: this.getChipGroupItemSpace() }) {
       ForEach(this.items || [], (chipItem: ChipGroupV2Item, index) => {
         if (chipItem) {
@@ -593,14 +621,14 @@ export struct ChipGroupV2 {
             enabled: true,
             activated: this.isSelected(index),
             backgroundColor: this.getBackgroundColor(),
+            backgroundSystemMaterial: options.backgroundSystemMaterial,
+            activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
             size: this.getChipSize(),
             activatedBackgroundColor: this.getSelectedBackgroundColor(),
             accessibilitySelectedType:
               this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
             accessibilityDescription: chipItem.accessibilityDescription,
             accessibilityLevel: chipItem.accessibilityLevel,
-            backgroundSystemMaterial: createSubECMaterial(material),
-            activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
             onClicked: () => {
               if (this.isSelected(index)) {
                 if (!(!this.isMultiple())) {
@@ -649,15 +677,21 @@ export struct ChipGroupV2 {
             if (enableEffectComponent(this.itemStyle?.backgroundSystemMaterial)) {
               EffectComponent() {
                 Row({ space: this.getChipGroupItemSpace() }) {
-                  this.ChipItemsBuilder(createSubECMaterial(this.itemStyle?.backgroundSystemMaterial))
+                  this.ChipItemsBuilder({
+                    backgroundSystemMaterial: createSubECMaterial(this.getBackgroundSystemMaterial()),
+                    activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+                  })
                 }
               }
-              .systemMaterial(createECMaterial(this.itemStyle?.backgroundSystemMaterial))
+              .systemMaterial(createECMaterial(this.getBackgroundSystemMaterial()))
             } else {
-              this.ChipItemsBuilder(this.itemStyle?.backgroundSystemMaterial)
+              this.ChipItemsBuilder({
+                backgroundSystemMaterial: this.getBackgroundSystemMaterial(),
+                activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+              })
             }
           } else {
-            this.ChipItemsBuilder(undefined)
+            this.ChipItemsBuilder({})
           }
         }
         .padding({
@@ -684,7 +718,7 @@ export struct ChipGroupV2 {
       }
       .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
       .layoutWeight(1)
-      .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
+      .blendMode(this.getOutsideBlendMode(), this.getOutsideBlendType())
       .alignContent(Alignment.End)
       if (this.suffix) {
         Row() {
@@ -699,14 +733,43 @@ export struct ChipGroupV2 {
     .width('100%')
   }
 
+  private getSelectedBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    return withDefaultMaterial(
+      this.itemStyle?.selectedBackgroundSystemMaterial,
+      defaultTheme.chipSelectedBackgroundSystemMaterial
+    );
+  }
+
+  private getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    return withDefaultMaterial(this.itemStyle?.backgroundSystemMaterial, defaultTheme.chipBackgroundSystemMaterial);
+  }
+
+  private getOutsideBlendType(): BlendApplyType | undefined {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendApplyType.OFFSCREEN;
+  }
+
+  private getOutsideBlendMode(): BlendMode | undefined {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendMode.SRC_OVER;
+  }
+
   private getLabel(label: ChipV2Label): ChipV2Label {
-    if (!label.fontColor) {
-      label.fontColor = this.getFontColor();
-    }
-    if (!label.activatedFontColor) {
-      label.activatedFontColor = this.getSelectedFontColor();
-    }
-    return label;
+    const result = new ChipV2Label({
+      text: label.text,
+      fontSize: label.fontSize,
+      fontColor: label.fontColor || this.getFontColor(),
+      activatedFontColor: label.activatedFontColor || this.getSelectedFontColor(),
+      fontFamily: label.fontFamily,
+      labelMargin: label.labelMargin,
+      localizedLabelMargin: label.localizedLabelMargin,
+      modifier: label.modifier
+    });
+    return result;
   }
 
   private getPrefixIcon(chipItem: ChipGroupV2Item): ChipV2Icon | undefined {
@@ -714,13 +777,13 @@ export struct ChipGroupV2 {
       return chipItem.prefixSymbolIcon;
     }
     if (chipItem.prefixIcon) {
-      if (!chipItem.prefixIcon.fillColor) {
-        chipItem.prefixIcon.fillColor = this.getFillColor();
-      }
-      if (!chipItem.prefixIcon.activatedFillColor) {
-        chipItem.prefixIcon.activatedFillColor = this.getSelectedFillColor();
-      }
-      return chipItem.prefixIcon;
+      return new ChipV2PrefixImageIcon({
+        src: chipItem.prefixIcon.src,
+        size: chipItem.prefixIcon.size,
+        fillColor: chipItem.prefixIcon.fillColor || this.getFillColor(),
+        activatedFillColor: chipItem.prefixIcon.activatedFillColor || this.getSelectedFillColor(),
+        modifier: chipItem.prefixIcon.modifier
+      });
     }
     return undefined;
   }
@@ -730,13 +793,18 @@ export struct ChipGroupV2 {
       return chipItem.suffixSymbolIcon;
     }
     if (chipItem.suffixIcon) {
-      if (!chipItem.suffixIcon.fillColor) {
-        chipItem.suffixIcon.fillColor = this.getFillColor();
-      }
-      if (!chipItem.suffixIcon.activatedFillColor) {
-        chipItem.suffixIcon.activatedFillColor = this.getSelectedFillColor();
-      }
-      return chipItem.suffixIcon;
+      const suffixIcon = new ChipV2SuffixImageIcon({
+        src: chipItem.suffixIcon.src,
+        size: chipItem.suffixIcon.size,
+        fillColor: chipItem.suffixIcon.fillColor || this.getFillColor(),
+        activatedFillColor: chipItem.suffixIcon.activatedFillColor || this.getSelectedFillColor(),
+        modifier: chipItem.suffixIcon.modifier,
+        accessibilityLevel: chipItem.suffixIcon.accessibilityLevel,
+        accessibilityText: chipItem.suffixIcon.accessibilityText,
+        accessibilityDescription: chipItem.suffixIcon.accessibilityDescription,
+        action: chipItem.suffixIcon.action
+      });
+      return suffixIcon;
     }
     return undefined;
   }
@@ -801,25 +869,44 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
   return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$', 'i'));
 }
 
-function resolveSystemMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  let info = uiMaterial.getMaterialInfo();
+function withDefaultMaterial(
+  material: uiMaterial.Material | undefined, defaultMaterial: uiMaterial.Material
+): uiMaterial.Material | undefined {
+  const info = uiMaterial.getMaterialInfo();
   if (info.state === uiMaterial.MaterialState.DISABLE) {
     return undefined;
   }
-  return info.state === uiMaterial.MaterialState.ENABLE && !material ?
-    new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) : material;
+  if (info.state === uiMaterial.MaterialState.ENABLE && !material) {
+    return defaultMaterial;
+  }
+  return material;
 }
 
-function enableEffectComponent(material: uiMaterial.Material | undefined) {
+function enableEffectComponent(material: uiMaterial.Material | undefined): boolean {
+  if (material) {
+    return material instanceof uiMaterial.ImmersiveMaterial;
+  }
   return false;
 }
 
 function createECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  return undefined;
+  if (!material) {
+    return undefined;
+  }
+  if (material instanceof uiMaterial.ImmersiveMaterial) {
+    return uiMaterial.convertToECMaterial(material);
+  }
+  return material;
 }
 
 function createSubECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  return resolveSystemMaterial(material);
+  if (!material) {
+    return undefined;
+  }
+  if (material instanceof uiMaterial.ImmersiveMaterial) {
+    return uiMaterial.convertToECSubMaterial(material);
+  }
+  return material;
 }
 
 function lengthMetricsToLength(length: LengthMetrics): Length {

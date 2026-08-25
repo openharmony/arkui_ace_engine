@@ -93,7 +93,8 @@ export class ExtendableComponentDFX {
               }
               case '-registeredElementIds': {
                   ExtendableComponentDFX.printDFXHeader(headerStr + 'Registered Element IDs', command);
-                  ExtendableComponentDFX.debugInfoRegisteredElementIds(targetView, 0, command.isRecursive, { total: 0 });
+                  ExtendableComponentDFX.debugInfoRegisteredElementIds(targetView, 0,
+                    command.isRecursive, { total: 0 });
                   break;
               }
               case '-dirtyElementIds': {
@@ -144,7 +145,7 @@ export class ExtendableComponentDFX {
                     const input = command.split('=');
                     if (input[1]) {
                         const viewId = Number.parseInt(input[1]);
-                        dfxCommand.viewId = Number.isNaN(viewId) ? undefined : Double.toInt(viewId);
+                        dfxCommand.viewId = Number.isNaN(viewId) ? undefined : (viewId.toInt());
                     }
                 }
             } else {

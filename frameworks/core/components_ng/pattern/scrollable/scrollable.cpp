@@ -612,6 +612,12 @@ bool Scrollable::IsStopped() const
     return state_ == AnimationState::IDLE;
 }
 
+bool Scrollable::IsAllAnimationStopped() const
+{
+    return !isTouching_ && state_ == AnimationState::IDLE && !nestedScrolling_
+        && !isCrownDragging_ && springAnimationCount_ == 0 && updateSnapAnimationCount_ == 0;
+}
+
 bool Scrollable::IsSpringStopped() const
 {
     return state_ != AnimationState::SPRING;
@@ -693,7 +699,9 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         }
     }
 #endif
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
+#endif
     ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, "
                      "IsAxisAnimationRunning:%u, IsSnapAnimationRunning:%u, id:%d, tag:%s",
         info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
@@ -714,6 +722,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     if (onScrollStartRec_) {
         onScrollStartRec_(static_cast<float>(dragPositionInMainAxis));
     }
+    ResetDragUpdateDelta();
 }
 
 void Scrollable::HandleExtScroll()
@@ -738,6 +747,8 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
 
 void Scrollable::HandleDragUpdate(const GestureEvent& info)
 {
+    // Keep the update delta until the layout pass consumes this frame's drag.
+    dragUpdateDelta_ = dragUpdateDelta_.value_or(0.0) + info.GetMainDelta();
     currentVelocity_ = info.GetMainVelocity();
     ReportToDragFRCScene(currentVelocity_, NG::SceneStatus::RUNNING);
     if (!NearZero(info.GetMainVelocity()) && dragCount_ >= FIRST_THRESHOLD) {
@@ -771,7 +782,9 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     auto prevMainDelta = isReverseCallback_ && isReverseCallback_() ? -mainDelta : mainDelta;
     mainDelta = Round(prevMainDelta);
     prevRemainDelta_ = prevMainDelta - mainDelta;
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().RecordFrameUpdate();
+#endif
     auto source = SCROLL_FROM_UPDATE;
     auto isAxisEvent = IsMouseWheelScroll(info);
     if (isAxisEvent) {
@@ -895,7 +908,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     }
     // avoid no render frame when drag end
     if (!isFromPanEnd) {
-        if (NearZero(info.GetMainDelta())) {
+        // For a frame containing only an up event with zero offset, replay the last delta to trigger rendering.
+        // Avoid synthesizing a second update when this frame already had one.
+        if ((!dragUpdateDelta_.has_value() || NearZero(dragUpdateDelta_.value())) && NearZero(info.GetMainDelta())) {
             auto tempInfo = info;
             tempInfo.SetMainDelta(lastMainDelta_);
             HandleDragUpdate(tempInfo);
@@ -914,7 +929,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     isSlow_ = LessNotEqual(std::abs(lastGestureVelocity_), SLOW_FRICTION_THRESHOLD);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     lastPos_ = GetDragOffset();
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
+#endif
     double mainPosition = Round(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     bool isWillFling = false;
     if (!moved_ || isAxisEvent) {
@@ -979,7 +996,9 @@ void Scrollable::ProcessAxisEndEvent()
     scrollPause_ = false;
     isTouching_ = false;
     isDragUpdateStop_ = false;
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
+#endif
     if (CanStayOverScroll()) {
         HandleOverScroll(0);
         SetCanStayOverScroll(false);

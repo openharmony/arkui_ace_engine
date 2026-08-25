@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -43,6 +44,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
@@ -51,6 +53,41 @@ constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
 constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 120;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
+constexpr int32_t MENU_LIGHT_THEME_SCOPE_ID = -100000000;
+constexpr int32_t MENU_LIGHT_THEME_ID = -100000000;
+constexpr int32_t MENU_DARK_THEME_SCOPE_ID = -100000001;
+constexpr int32_t MENU_DARK_THEME_ID = -100000001;
+}
+
+void NavigationTitleUtil::EnsureNodeThemeScopeId(const RefPtr<FrameNode>& node, ColorMode mode)
+{
+    CHECK_NULL_VOID(node);
+    int32_t themeScopeId = 0;
+    int32_t themeId = 0;
+    if (mode == ColorMode::LIGHT) {
+        themeScopeId = MENU_LIGHT_THEME_SCOPE_ID;
+        themeId = MENU_LIGHT_THEME_ID;
+    } else if (mode == ColorMode::DARK) {
+        themeScopeId = MENU_DARK_THEME_SCOPE_ID;
+        themeId = MENU_DARK_THEME_ID;
+    }
+    do {
+        if (themeScopeId == 0) {
+            break;
+        }
+        TokenThemeStorage* storage = TokenThemeStorage::GetInstance();
+        CHECK_NULL_BREAK(storage);
+        RefPtr<TokenTheme> theme = storage->CacheGet(themeId);
+        if (!theme) {
+            theme = storage->CreateSystemTokenTheme(mode, themeId);
+            if (theme) {
+                theme->SetColorMode(mode);
+                storage->CacheSet(theme);
+            }
+        }
+        storage->StoreThemeScope(themeScopeId, themeId);
+    } while (false);
+    node->SetThemeScopeId(themeScopeId);
 }
 
 bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
@@ -78,11 +115,42 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     if (menuOptions.mbOptions.bgOptions.effectOption.has_value()) {
         menuParam.backgroundEffectOption = menuOptions.mbOptions.bgOptions.effectOption.value();
     }
+    auto recreateCallback = [weakBarItemNode = WeakPtr(barItemNode), weakMenuItemNode = WeakPtr(menuItemNode),
+        weakDestNode = WeakPtr(nodeBase), innerParams = params, menuParam](
+        ColorMode mode, bool isCreateLandscapeMenu) -> RefPtr<FrameNode> {
+        auto nodeBase = weakDestNode.Upgrade();
+        CHECK_NULL_RETURN(nodeBase, nullptr);
+        auto barItemNode = weakBarItemNode.Upgrade();
+        CHECK_NULL_RETURN(barItemNode, nullptr);
+        auto menuItemNode = weakMenuItemNode.Upgrade();
+        CHECK_NULL_RETURN(menuItemNode, nullptr);
+        auto backupThemeScopeId = menuItemNode->GetThemeScopeId();
+        NavigationTitleUtil::EnsureNodeThemeScopeId(menuItemNode, mode);
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        auto copyParams = innerParams;
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "recreate titleBar menuView with colorMode:%{public}d",
+            static_cast<int32_t>(mode));
+        auto barMenuNode = menuViewModifier ? menuViewModifier->createWithOptionParams(
+            std::move(copyParams), menuItemNode->GetId(), menuItemNode->GetTag(),
+            MenuType::NAVIGATION_MENU, menuParam) : nullptr;
+        menuItemNode->SetThemeScopeId(backupThemeScopeId);
+        return barMenuNode;
+    };
+    nodeBase->SetRecreateMoreMenuViewCallback(std::move(recreateCallback), isCreateLandscapeMenu);
+    const auto& expectColorMode = nodeBase->GetExpectMoreMenuViewColorMode(isCreateLandscapeMenu);
+    std::optional<int32_t> backupThemeScopeId;
+    if (expectColorMode.has_value()) {
+        backupThemeScopeId = menuItemNode->GetThemeScopeId();
+        NavigationTitleUtil::EnsureNodeThemeScopeId(menuItemNode, expectColorMode.value());
+    }
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     auto barMenuNode = menuViewModifier ? menuViewModifier->createWithOptionParams(
         std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(),
         MenuType::NAVIGATION_MENU, menuParam) : nullptr;
-    BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, menuParam);
+    if (backupThemeScopeId.has_value()) {
+        menuItemNode->SetThemeScopeId(backupThemeScopeId.value());
+    }
+    BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, menuParam, nodeBase, isCreateLandscapeMenu);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
     InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
@@ -180,7 +248,8 @@ uint32_t NavigationTitleUtil::GetOrInitMaxMenuNums(
 }
 
 void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode,
-    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam)
+    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam,
+    const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase, bool isCreateLandscapeMenu)
 {
     auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -190,13 +259,24 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
                             id = barItemNode->GetId(),
                             param = menuParam,
                             weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                            weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
+                            weakBarItemNode = WeakPtr<BarItemNode>(barItemNode),
+                            weakNodeBase = WeakPtr(navDestinationNodeBase), isCreateLandscapeMenu]() mutable {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
-
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-
+        do {
+            auto nodeBase = weakNodeBase.Upgrade();
+            CHECK_NULL_BREAK(nodeBase);
+            auto newMenu = nodeBase->RecreateMoreMenuViewIfNeeded(isCreateLandscapeMenu);
+            CHECK_NULL_BREAK(newMenu);
+            if (isCreateLandscapeMenu) {
+                nodeBase->SetLandscapeMenuNode(newMenu);
+            } else {
+                nodeBase->SetMenuNode(newMenu);
+            }
+            weakMenu = WeakPtr(newMenu);
+        } while (false);
         auto menu = weakMenu.Upgrade();
         CHECK_NULL_VOID(menu);
 
@@ -217,7 +297,7 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
 
     auto gestureEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    auto callback = [action = clickCallback](GestureEvent& info) {
+    auto callback = [action = clickCallback](GestureEvent& info) mutable {
         if (info.GetSourceDevice() == SourceType::KEYBOARD) {
             return;
         }
@@ -252,24 +332,23 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
 {
     auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
     CHECK_NULL_RETURN(buttonModifier, nullptr);
-    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
-    CHECK_NULL_RETURN(rawPattern, nullptr);
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetNavMenuItemNeedFocus(SystemProperties::GetDeviceType() == DeviceType::TV);
+        buttonPattern->SetNavigationFocusBlendBgColor(theme->GetNavigationFocusBlendBgColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    } else {
+        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    }
     auto menuItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(buttonPattern));
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(menuItemNode));
-    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonModifier->setBlendColor(
-            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonModifier->setNavMenuItemNeedFocus(nodeHandle, SystemProperties::GetDeviceType() == DeviceType::TV);
-        buttonModifier->setNavigationFocusBlendBgColor(nodeHandle, theme->GetNavigationFocusBlendBgColor());
-        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
-        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
-    } else {
-        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetToolBarItemFocusColor());
-        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetToolBarItemFocusBorderWidth());
-    }
     auto focusHub = menuItemNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusDependence(FocusDependence::SELF);

@@ -187,7 +187,8 @@ void ContainerModalStaticPattern::SetMaximizeIconIsRecover()
     auto windowMode = windowManager->GetWindowMode();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
-        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "SetMaximizeIconIsRecover");
         customNode->FireSetCustomCallbackFunc(EVENT_NAME_MAXIMIZE_IS_RECOVER, Bool2String(true));
     } else {

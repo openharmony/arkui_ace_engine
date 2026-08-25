@@ -108,6 +108,7 @@ HWTEST_F(TextFieldTestNgTwo, testShowPasswordSymbol001, TestSize.Level1)
 {
     int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node

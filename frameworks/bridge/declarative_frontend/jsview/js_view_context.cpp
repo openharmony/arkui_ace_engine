@@ -45,7 +45,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/image/image_cache.h"
 
@@ -183,7 +183,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         jsAnimateToFunc->Call(jsAnimateToFunc);
     } else {
         TAG_LOGE(AceLogTag::ACE_ANIMATION, "jsAnimateToFunc is empty");
-        return;
     }
     pipelineContext->FlushOnceVsyncTask();
     auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
@@ -217,8 +216,16 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
     bool isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
     bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
     while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
             TAG_LOGD(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
+                "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
+                animationInterfaceName, option.ToSimpleString().c_str(), count.value_or(-1),
+                isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            pipelineContext->SetInfiniteAnimationFlushExceeded(true);
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
                 "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
                 animationInterfaceName, option.ToSimpleString().c_str(), count.value_or(-1),
                 isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
@@ -280,7 +287,9 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+#ifndef CROSS_PLATFORM
         JankFrameReport::GetInstance().RecordAnimateEnd();
+#endif
     } else {
         pipelineContext->RequestFrame();
     }
@@ -311,7 +320,9 @@ void StartAnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, Animat
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+#ifndef CROSS_PLATFORM
         JankFrameReport::GetInstance().RecordAnimateEnd();
+#endif
     } else {
         pipelineContext->RequestFrame();
     }
@@ -519,6 +530,7 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
 
     // close KeyframeAnimation.
     AnimationUtils::CloseImplicitAnimation();
+    pipelineContext->PopInfiniteAnimationFlushExceeded();
 }
 } // namespace
 
@@ -687,7 +699,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         option.GetCurve()->ToString().c_str(), option.GetIteration());
     option.SetAnimationInterface(AnimationInterface::ANIMATION);
     ViewContextModel::GetInstance()->openAnimation(option);
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().ReportJSAnimation();
+#endif
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)

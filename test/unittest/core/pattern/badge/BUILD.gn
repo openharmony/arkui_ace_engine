@@ -13,24 +13,27 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("badge_test_ng") {
-  type = "new"
-  module_name = "InfoShowSet-Badge"
-  sources = [
-    "badge_layout_algorithm_test_ng.cpp",
-    "badge_test_ng.cpp",
-    "badge_withtheme_test_ng.cpp",
-    "badge_test_tojson.cpp",
-  ]
+test_sources = [
+  "badge_layout_algorithm_test_ng.cpp",
+  "badge_test_core.cpp",
+  "badge_test_ng.cpp",
+  "badge_test_tojson.cpp",
+  "badge_withtheme_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "badge_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "badge_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("badge_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-Badge"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("badge_test_ng") {
+    type = "new"
+    module_name = "InfoShowSet-Badge"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "badge_test_core.cpp" ]
+    }
   }
 }

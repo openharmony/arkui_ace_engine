@@ -26,7 +26,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/dump_utils/dump_util.h"
 
 namespace OHOS::Ace {
 class JsonValue;
@@ -56,6 +58,7 @@ struct PageSceneRule {
     std::string sceneType;
     bool enabled = true;
     bool onlyVisible = true;
+    bool rectCulling = false;
     bool includeWeb = false;
     bool includeUIExtension = false;
     bool includeNodeIds = true;
@@ -92,13 +95,22 @@ struct PageSceneMatchResult {
     int32_t matchedCount = 0;
     int32_t minReportIntervalMs = 500;
     bool deduplicate = true;
-    std::string signature;
+    std::vector<int32_t> nodeIds;
     std::string sceneJson;
+};
+
+struct PageSceneReportState {
+    std::vector<int32_t> lastReportedNodeIds;
+    std::chrono::steady_clock::time_point lastReportTime;
 };
 
 class PageSceneInputCountTracker {
 public:
-    void Initialize(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const RefPtr<FrameNode>& pageRoot);
+    // startNodes carries Inspector-style page and overlay traversal roots
+    // resolved by DumpUtil. AtomicService structure markers are not
+    // traversal roots.
+    void Initialize(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule,
+        const DumpStartNodeSet& startNodes);
     void Reset();
     const std::vector<PageSceneNodeInfo>& GetVisibleInputNodes() const;
 
@@ -108,6 +120,9 @@ private:
         const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const RefPtr<FrameNode>& node) const;
 
     std::vector<PageSceneNodeInfo> visibleInputNodes_;
+    RectF pageViewportRect_;
+
+    bool IsOpacityVisible(const RefPtr<FrameNode>& node) const;
 };
 
 class PageSceneRuleManager {
@@ -119,9 +134,8 @@ public:
     void ClearProcess(int32_t processId);
 
     std::vector<std::pair<int32_t, std::string>> GetActiveRuleJsons() const;
-    std::optional<PageSceneMatchResult> MatchPageScene(
-        int32_t processId, const std::string& ruleJson, const RefPtr<FrameNode>& pageRoot,
-        const std::string& pageName, bool forceReportUnmatched);
+    std::optional<PageSceneMatchResult> MatchPageScene(int32_t processId, const std::string& ruleJson,
+        const DumpStartNodeSet& startNodes, const std::string& pageName, bool forceReportUnmatched);
     bool ShouldReport(int32_t processId, const PageSceneMatchResult& result);
     bool IsTextInputNodeType(const std::string& nodeType) const;
 
@@ -131,14 +145,11 @@ private:
     std::string BuildSceneJson(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule,
         const std::string& pageName, const std::vector<PageSceneNodeInfo>& nodes, bool matched,
         const std::string& eventName) const;
-    std::string BuildSignature(
-        const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const std::string& pageName,
-        const std::vector<PageSceneNodeInfo>& nodes) const;
 
     mutable std::mutex mutex_;
     std::unordered_map<int32_t, PageSceneRuleSet> registeredRuleSets_;
     std::set<int32_t> pendingGetProcesses_;
-    std::unordered_map<std::string, std::pair<std::string, std::chrono::steady_clock::time_point>> reportStates_;
+    std::unordered_map<std::string, PageSceneReportState> reportStates_;
 };
 } // namespace OHOS::Ace::NG
 

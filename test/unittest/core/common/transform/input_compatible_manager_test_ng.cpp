@@ -35,17 +35,6 @@ public:
     }
 };
 
-extern "C" {
-void* dlopen(const char* filename, int flag)
-{
-    return reinterpret_cast<void*>(1);
-}
-
-void* dlsym(void* handle, const char* symbol)
-{
-    return reinterpret_cast<void*>(MockInputCompatiblePolicy::GetInputCompatiblePolicyInstance);
-}
-}
 
 class InputCompatibleManagerTest : public testing::Test {
 public:
@@ -68,8 +57,7 @@ public:
 HWTEST_F(InputCompatibleManagerTest, Close001, TestSize.Level1)
 {
     OHOS::Ace::InputCompatibleManager& manager = OHOS::Ace::InputCompatibleManager::GetInstance();
-    manager.LoadProductCompatiblePolicy();
-    manager.Close();
+    // Test Close with nullptr handle
     manager.libraryHandle_ = nullptr;
     manager.Close();
     ASSERT_EQ(manager.libraryHandle_, nullptr);

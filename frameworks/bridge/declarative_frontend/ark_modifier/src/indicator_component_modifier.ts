@@ -19,7 +19,7 @@ class LazyArkIndicatorComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     if (LazyArkIndicatorComponent.module === undefined) {
-      LazyArkIndicatorComponent.module = globalThis.requireNapi('arkui.components.arkswiperindicator');
+      LazyArkIndicatorComponent.module = globalThis.requireNapi('arkui.components.arkindicatorcomponent');
     }
     this.lazyComponent = LazyArkIndicatorComponent.module.createComponent(nativePtr, classType);
   }

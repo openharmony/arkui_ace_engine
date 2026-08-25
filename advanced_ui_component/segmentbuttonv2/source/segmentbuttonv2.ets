@@ -581,6 +581,7 @@ struct SimpleSegmentButtonV2 {
   @Local openSelectedItemSystemMaterial?: boolean = false;
   @Local selectedItemScale?: ScaleOptions;
   @Local tempDisableAnimation?: boolean = false;
+  @Local isTapGesture?: boolean = false;
   @Local backplatePosition: Position = {x: 0, y: 0};
 
   @Computed
@@ -657,6 +658,7 @@ struct SimpleSegmentButtonV2 {
           })
           .gesture(
             TapGesture().onAction(() => {
+              this.isTapGesture = true;
               this.onItemClicked?.(repeatItem.index);
               this.backplatePosition = {
                 x: this.selectedItemRect?.position.x,
@@ -749,7 +751,7 @@ struct SimpleSegmentButtonV2 {
           }
           this.isPressing = false;
         }),
-      PanGesture()
+      PanGesture({ direction: PanDirection.Horizontal })
         .onActionStart((event) => {
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
@@ -1191,16 +1193,21 @@ struct SimpleSegmentButtonV2 {
   private updateSelectedIndex(selectedIndex: number) {
     if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex
     ) {
+      this.isTapGesture = false;
       return;
     }
 
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
-      this.getUIContext().animateTo({
-        curve: curves.interpolatingSpring(0, 1, 195, 14),
-      }, () => {
-        this.selectedItemScale = { x: 1.01, y: 0.99 }
+      if (this.isTapGesture) {
         this.openSelectedItemSystemMaterial = true;
-      })
+      } else {
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+        }, () => {
+          this.selectedItemScale = { x: 1.01, y: 0.99 }
+          this.openSelectedItemSystemMaterial = true;
+        })
+      }
     }
 
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
@@ -1212,13 +1219,18 @@ struct SimpleSegmentButtonV2 {
     });
 
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
-      this.getUIContext().animateTo({
-        curve: curves.interpolatingSpring(0, 1, 195, 14),
-        delay: 250
-      }, () => {
+      if (this.isTapGesture) {
         this.openSelectedItemSystemMaterial = false;
-      });
+      } else {
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+          delay: 250
+        }, () => {
+          this.openSelectedItemSystemMaterial = false;
+        });
+      }
     }
+    this.isTapGesture = false;
   }
 
   private updateItemScale(scale: number) {
@@ -1422,7 +1434,7 @@ export struct MultiCapsuleSegmentButtonV2 {
           .layoutWeight(1)
           .padding(0)
           .onClick(() => {
-            this.onItemClicked?.(repeatItem.index);
+                        this.onItemClicked?.(repeatItem.index);
             let selection: number[];
             const items = this.getItems();
             const selectedIndexes = this.selectedIndexes ?? [];
@@ -1769,6 +1781,7 @@ struct SegmentButtonV2ItemContent {
       const context: common.Context = this.getUIContext().getHostContext() as common.Context;
       return {
         id: resourceId, type: COLOR_RESOURCE_TYPE,
+        params: [],
         bundleName: (context as common.UIAbilityContext)?.abilityInfo?.bundleName ?? '',
         moduleName: (context as common.UIAbilityContext)?.abilityInfo?.moduleName ?? '',
       } as Resource;
@@ -1884,22 +1897,27 @@ function normalize(value: number, min: number, max: number): number {
 
 function generateUniqueKye(groupId: string) {
   return (item: SegmentButtonV2Item, index: number): string => {
-    let key = groupId;
+    let key = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
+        key += '_';
         key += item.text;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.text);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
+        key += '_';
         key += item.icon;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.icon);
       }
     }
     if (item.symbol) {
+      key += '_';
       key += getResourceUniqueId(item.symbol);
     }
     return key;

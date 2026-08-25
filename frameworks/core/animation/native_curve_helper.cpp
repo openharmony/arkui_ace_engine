@@ -30,6 +30,18 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
     } else if (auto springCurve = AceType::DynamicCast<SpringCurve>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateSpringCurve(springCurve->velocity_, springCurve->mass_,
             springCurve->stiffness_, springCurve->damping_);
+    } else if (auto trailOptSpringMotionCurve = AceType::DynamicCast<TrailOptimizedResponsiveSpringMotion>(curve)) {
+        return Rosen::RSAnimationTimingCurve::CreateSpring(trailOptSpringMotionCurve->GetResponse(),
+            trailOptSpringMotionCurve->GetDampingRatio(), trailOptSpringMotionCurve->GetBlendDuration(),
+            trailOptSpringMotionCurve->GetMinimumAmplitudeRatio(),
+            Rosen::SpringParams::ConvergeParams { trailOptSpringMotionCurve->GetTrail().progressThreshold,
+                trailOptSpringMotionCurve->GetTrail().responseDecayFactor });
+    } else if (auto trailOptInterSpringCurve = AceType::DynamicCast<TrailOptimizedInterpolatingSpring>(curve)) {
+        return Rosen::RSAnimationTimingCurve::CreateInterpolatingSpring(trailOptInterSpringCurve->GetMass(),
+            trailOptInterSpringCurve->GetStiffness(), trailOptInterSpringCurve->GetDamping(),
+            trailOptInterSpringCurve->GetVelocity(), trailOptInterSpringCurve->GetMinimumAmplitudeRatio(),
+            Rosen::SpringParams::ConvergeParams { trailOptInterSpringCurve->GetTrail().progressThreshold,
+                trailOptInterSpringCurve->GetTrail().responseDecayFactor });
     } else if (auto interpolatingSpringCurve = AceType::DynamicCast<InterpolatingSpring>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateInterpolatingSpring(interpolatingSpringCurve->GetMass(),
             interpolatingSpringCurve->GetStiffness(), interpolatingSpringCurve->GetDamping(),

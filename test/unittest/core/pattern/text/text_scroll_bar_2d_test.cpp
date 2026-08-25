@@ -833,7 +833,7 @@ HWTEST_F(TextScrollBar2DTest, OnDraw001, TestSize.Level1)
     DrawingContext context = { canvas, 100.0f, 100.0f };
 
     // Should not crash
-    textScrollBar2D->OnDraw(context);
+    textScrollBar2D->OnDraw(context, nullptr);
     EXPECT_NE(textScrollBar2D, nullptr);
 }
 
@@ -855,7 +855,7 @@ HWTEST_F(TextScrollBar2DTest, OnDraw002, TestSize.Level1)
     DrawingContext context = { canvas, 100.0f, 100.0f };
 
     // Should not crash even if one modifier is nullptr (simulated)
-    textScrollBar2D->OnDraw(context);
+    textScrollBar2D->OnDraw(context, nullptr);
     EXPECT_NE(textScrollBar2D, nullptr);
 }
 

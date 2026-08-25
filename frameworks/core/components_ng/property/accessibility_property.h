@@ -127,11 +127,20 @@ public:
     void SetAccessibilityText(const std::string& text);
     const std::string& GetAccessibilityText() const;
 
+    void SetText(const std::string& text);
+    const std::string& GetText() const;
+
+    void SetSupprtAction(uint64_t action);
+    uint64_t GetSupportAction() const;
+
     void SetAccessibilityLevel(const std::string& level);
     const std::string& GetAccessibilityLevel() const;
 
     void SetAccessibilityGroup(bool group);
     bool GetAccessibilityGroup() const;
+
+    void SetAccessibilityRole(const std::string& accessibilityRole);
+    const std::string& GetAccessibilityRole() const;
 
     void SetRole(const std::string& role);
     const std::string& GetRole() const;
@@ -148,15 +157,22 @@ public:
     void SetSelected(bool selected);
     bool GetSelected() const;
 
+    void SetClickable(bool clickable);
+    bool GetClickable() const;
+
 private:
     std::string accessibilityText_;
     std::string accessibilityLevel_;
     bool accessibilityGroup_ = false;
     std::string role_;
+    std::string accessibilityRole_;
     bool checkable_ = false;
     bool checked_ = false;
     bool isEnable_ = true;
     bool isSelected_ = false;
+    bool clickable_ = false;
+    uint64_t supportActions_ = 0;
+    std::string text_;
 };
 
 class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType,
@@ -666,6 +682,8 @@ public:
         return virtualNodeTreeRoot_ != nullptr;
     }
 
+    bool HasAccessibilityTextOrDescription() const;
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(const PointF& parentPoint, const RefPtr<FrameNode>& node,
@@ -692,8 +710,6 @@ private:
     static std::tuple<bool, bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node, bool& ancestorGroupFlag);
 
     void GetGroupTextRecursive(bool forceGetChildren, std::string& text, bool preferAccessibilityText) const;
-
-    bool HasAccessibilityTextOrDescription() const;
 
     bool HasAction() const;
 

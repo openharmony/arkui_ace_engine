@@ -93,7 +93,7 @@ public:
 
     int32_t nodeId_ = 0;
 
-    ArkoalaLazyNode::CreateItemCb createItemCb_ = [this](int32_t idx) {
+    ArkoalaLazyNode::CreateItemCb createItemCb_ = [this](int32_t idx, bool skipCreate) {
         RefPtr<TestUINode> uiNode = CreateTestUINode(GetNextId());
         auto columnNode = ColumnModelNG::CreateFrameNode(GetNextId());
         uiNode->AddChild(columnNode);
@@ -120,7 +120,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
      * @tc.steps: step1. Create LazyForEach node and set callbacks
      */
     auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
-    ArkoalaLazyNode::CreateItemCb createItemCb = [this](int32_t idx) {
+    ArkoalaLazyNode::CreateItemCb createItemCb = [this](int32_t idx, bool skipCreate) {
         RefPtr<TestUINode> uiNode = CreateTestUINode(GetNextId());
         auto columnNode = ColumnModelNG::CreateFrameNode(GetNextId());
         uiNode->AddChild(columnNode);
@@ -157,7 +157,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
 {
     auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
-    ArkoalaLazyNode::CreateItemCb createItemCb = [this](int32_t idx) {
+    ArkoalaLazyNode::CreateItemCb createItemCb = [this](int32_t idx, bool skipCreate) {
         return ColumnModelNG::CreateFrameNode(GetNextId());
     };
     ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](
@@ -822,7 +822,7 @@ TEST_F(ArkoalaLazyNodeTest, CleanCache001)
     int32_t updateCacheEnd = -1;
     bool updateIsLoop = true;
     lazyNode->SetCallbacks(
-        [this](int32_t) { return CreateFrameNode(GetNextId()); },
+        [this](int32_t, bool) { return CreateFrameNode(GetNextId()); },
         [&updateStart, &updateEnd, &updateCacheStart, &updateCacheEnd, &updateIsLoop](
             int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
             updateStart = start;

@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import router from '@ohos.router';
-
-class TextList {
+export class TextList {
   public id: number;
   public text: string;
   public url: string;
@@ -60,6 +58,7 @@ struct WaterFlowMainPage {
     new TextList(26, 'WaterFlowEmptyBranch6', 'pages/waterflow/WaterFlowEmptyBranch6'),
     new TextList(27, 'WaterFlowEmptyBranchModifier', 'pages/waterflow/WaterFlowEmptyBranchModifier'),
     new TextList(28, 'WaterFlowEmptyBranchSessionEmpty', 'pages/waterflow/WaterFlowEmptyBranchSessionEmpty'),
+    new TextList(29, 'ClipContent', 'pages/waterflow/clipContent/ClipContentMainPage'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
@@ -73,7 +72,7 @@ struct WaterFlowMainPage {
               .margin(10)
               .padding({ top: 5, bottom: 5 })
               .onClick(() => {
-                router.pushUrl({ url: item.url })
+                this.getUIContext().getRouter().pushUrl({ url: item.url })
               })
           }, (item: TextList) => JSON.stringify(item.id))
         }

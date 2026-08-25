@@ -1203,7 +1203,7 @@ std::unique_ptr<JsonValue> GestureEventHub::BuildArkExtraInfoJson(const DragStar
     arkExtraInfoJson->Put("dip_scale", ctx.pipeline->GetDipScale());
     arkExtraInfoJson->Put("drag_node_gray_scale", ctx.pipeline->GetDragNodeGrayscale());
     arkExtraInfoJson->Put("event_id", ctx.info.GetPointerEventId());
-    UpdateExtraInfo(ctx.frameNode, arkExtraInfoJson, ctx.scale, ctx.preparedInfo);
+    UpdateExtraInfo(arkExtraInfoJson, ctx);
     return arkExtraInfoJson;
 }
 
@@ -1521,13 +1521,13 @@ void GestureEventHub::StartVibratorByDrag(const RefPtr<FrameNode>& frameNode)
     DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(false);
 }
 
-void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
-    float scale, const PreparedInfoForDrag& dragInfoData)
+void GestureEventHub::UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraInfoJson, const DragStartContext& ctx)
 {
     CHECK_NULL_VOID(arkExtraInfoJson);
-    arkExtraInfoJson->Put("enable_animation", dragInfoData.disableArkuiAnimation);
-    double opacity = frameNode->GetDragPreviewOption().options.opacity;
-    auto optionInfo = frameNode->GetDragPreviewOption().options;
+    arkExtraInfoJson->Put("enable_animation",
+        ctx.preparedInfo.disableArkuiAnimation && ctx.info.GetInputEventType() != InputEventType::MOUSE_BUTTON);
+    double opacity = ctx.frameNode->GetDragPreviewOption().options.opacity;
+    auto optionInfo = ctx.frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);
     TAG_LOGD(AceLogTag::ACE_DRAG, "The info of opacity update to the framework is %{public}s",
         arkExtraInfoJson->ToString().c_str());
@@ -1535,11 +1535,11 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::u
     if (optionInfo.blurbgEffect.backGroundEffect.radius.IsValid()) {
         optionInfo.blurbgEffect.ToJsonValue(arkExtraInfoJson);
     }
-    DragEventActuator::PrepareShadowParametersForDragData(frameNode, arkExtraInfoJson, scale);
-    if (dragInfoData.isNeedCreateTiled) {
+    DragEventActuator::PrepareShadowParametersForDragData(ctx.frameNode, arkExtraInfoJson, ctx.scale);
+    if (ctx.preparedInfo.isNeedCreateTiled) {
         return;
     }
-    DragEventActuator::PrepareRadiusParametersForDragData(frameNode, arkExtraInfoJson);
+    DragEventActuator::PrepareRadiusParametersForDragData(ctx.frameNode, arkExtraInfoJson);
 }
 
 int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>& context)

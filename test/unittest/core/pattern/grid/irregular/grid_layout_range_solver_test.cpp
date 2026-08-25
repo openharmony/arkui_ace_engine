@@ -87,6 +87,55 @@ HWTEST_F(GridLayoutRangeTest, SolveForward001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutRangeSolver::SolveForward002
+ * @tc.desc: Test SolveForward when lineHeightMap_ front rows are cleared but gridMatrix_ retains
+ *           multi-row items spanning those rows, preventing iterator underflow crash at line 175.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, SolveForward002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 3 };
+    option.getSizeByIndex = [](int32_t index) -> GridItemSize {
+        return { .rows = 3, .columns = 3 };
+    };
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone();
+
+    // gridMatrix_ records item 3 starting at row 1, spanning rows 1-3.
+    // lineHeightMap_ only has row 3+ (rows 0-2 were cleared, e.g. by ClearHeightsToEnd),
+    // so row 3 is lineHeightMap_.begin().
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.axis_ = Axis::VERTICAL;
+    info.gridMatrix_ = {
+        { 1, { { 0, 3 }, { 1, -3 }, { 2, -3 } } },
+        { 2, { { 0, -3 }, { 1, -3 }, { 2, -3 } } },
+        { 3, { { 0, -3 }, { 1, -3 }, { 2, -3 } } },
+    };
+    info.lineHeightMap_ = { { 3, 40.0f }, { 4, 50.0f } };
+
+    info.currentOffset_ = -10.0f;
+    info.startMainLineIndex_ = 3;
+    info.startIndex_ = 4;
+    info.startFixOffset_ = 0.0f;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    // Before fix: --it at line 175 goes before lineHeightMap_.begin(), causing
+    // invalid iterator dereference crash. CheckMultiRow(3) returns startRow=1,
+    // so the loop tries to decrement it twice from begin().
+    // After fix: begin() guard breaks the loop, no crash.
+    auto res = solver.FindStartingRow(1.0f);
+    EXPECT_EQ(res.row, 1);
+    EXPECT_EQ(res.idx, 3);
+    EXPECT_EQ(res.pos, -10.0f);
+}
+
+/**
  * @tc.name: LayoutRangeSolver::CheckMultiRow001
  * @tc.desc: Test LayoutRangeSolver::CheckMultiRow
  * @tc.type: FUNC

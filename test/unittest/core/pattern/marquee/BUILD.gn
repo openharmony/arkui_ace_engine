@@ -13,20 +13,26 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("marquee_test_ng") {
-  module_name = "InfoShowSet-Marquee"
-  type = "new"
+test_sources = [
+  "marquee_pattern_test_ng.cpp",
+  "marquee_test_core.cpp",
+  "marquee_test_ng.cpp",
+  "marquee_test_update_strategy.cpp",
+]
 
-  sources = [
-    "marquee_pattern_test_ng.cpp",
-    "marquee_test_ng.cpp",
-    "marquee_test_update_strategy.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "marquee_test_core.cpp" ]
-  } else {
-    sources += [ "marquee_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("marquee_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-Marquee"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("marquee_test_ng") {
+    module_name = "InfoShowSet-Marquee"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "marquee_test_core.cpp" ]
+    }
   }
 }

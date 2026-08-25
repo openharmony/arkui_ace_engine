@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/date_picker/picker_change_event.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

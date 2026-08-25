@@ -18,7 +18,7 @@ import { NodeContent } from '@kit.ArkUI';
 
 @Entry
 @Component
-export struct RefreshList {
+struct RefreshList {
   private slot: NodeContent = new NodeContent();
 
   build() {

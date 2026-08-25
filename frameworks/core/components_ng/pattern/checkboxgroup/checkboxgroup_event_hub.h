@@ -91,7 +91,7 @@ public:
 
     bool HasChangeEvent()
     {
-        return selectAllChangeEvent_ != nullptr;
+        return changeEvent_ != nullptr || selectAllChangeEvent_ != nullptr;
     }
 
 private:

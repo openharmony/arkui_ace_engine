@@ -29,6 +29,7 @@ constexpr uint32_t maskRefactorParams = 0b0001u;
 constexpr uint32_t maskSdParams = 0b0111u;
 constexpr uint32_t maskEnvLightParams = 0b0111u;
 constexpr uint32_t maskEdLightParams = 0b0011u;
+const Rosen::Vector2f EMPTY_ROSEN_VECTOR2F { 0.0f, 0.0f };
 #endif
 } // namespace
 std::shared_ptr<Rosen::RSNGFilterBase> RosenEffectConverter::ConvertToFrostedGlassFilter(
@@ -98,6 +99,59 @@ std::shared_ptr<Rosen::RSNGFilterBase> RosenEffectConverter::ConvertToFrostedGla
 }
 
 std::shared_ptr<Rosen::RSNGShaderBase> RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSub(
+    const FrostedGlassParam& param, float oneVpValue, bool needSplitOverlayShader)
+{
+#if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
+    auto filter = std::make_shared<Rosen::RSNGFrostedGlassEffect>();
+    auto envLightParams = ConvertToVector3f(param.envLightParams, oneVpValue, maskEnvLightParams);
+    if (needSplitOverlayShader) {
+        filter->Setter<Rosen::FrostedGlassEffectWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+        filter->Setter<Rosen::FrostedGlassEffectWeightsEdlTag>(EMPTY_ROSEN_VECTOR2F);
+    } else {
+        filter->Setter<Rosen::FrostedGlassEffectWeightsEmbossTag>(ConvertToVector2f(param.weightsEmboss));
+        filter->Setter<Rosen::FrostedGlassEffectWeightsEdlTag>(ConvertToVector2f(param.weightsEdl));
+    }
+    filter->Setter<Rosen::FrostedGlassEffectBgRatesTag>(ConvertToVector2f(param.bgRates));
+    filter->Setter<Rosen::FrostedGlassEffectBgKBSTag>(ConvertToVector3f(param.bgKBS));
+    filter->Setter<Rosen::FrostedGlassEffectBgPosTag>(ConvertToVector3f(param.bgPos));
+    filter->Setter<Rosen::FrostedGlassEffectBgNegTag>(ConvertToVector3f(param.bgNeg));
+    filter->Setter<Rosen::FrostedGlassEffectBgAlphaTag>(param.bgAlpha);
+    filter->Setter<Rosen::FrostedGlassEffectRefractParamsTag>(
+        ConvertToVector3f(param.refractParams, oneVpValue, maskRefactorParams));
+    filter->Setter<Rosen::FrostedGlassEffectSdParamsTag>(ConvertToVector3f(param.sdParams, oneVpValue, maskSdParams));
+    filter->Setter<Rosen::FrostedGlassEffectSdRatesTag>(ConvertToVector2f(param.sdRates));
+    filter->Setter<Rosen::FrostedGlassEffectSdKBSTag>(ConvertToVector3f(param.sdKBS));
+    filter->Setter<Rosen::FrostedGlassEffectSdPosTag>(ConvertToVector3f(param.sdPos));
+    filter->Setter<Rosen::FrostedGlassEffectSdNegTag>(ConvertToVector3f(param.sdNeg));
+    filter->Setter<Rosen::FrostedGlassEffectEnvLightParamsTag>(
+        Rosen::Vector2f { envLightParams[1], envLightParams[2] });
+    filter->Setter<Rosen::FrostedGlassEffectEnvLightRatesTag>(ConvertToVector2f(param.envLightRates));
+    filter->Setter<Rosen::FrostedGlassEffectEnvLightKBSTag>(ConvertToVector3f(param.envLightKBS));
+    filter->Setter<Rosen::FrostedGlassEffectEnvLightPosTag>(ConvertToVector3f(param.envLightPos));
+    filter->Setter<Rosen::FrostedGlassEffectEnvLightNegTag>(ConvertToVector3f(param.envLightNeg));
+    filter->Setter<Rosen::FrostedGlassEffectEdLightParamsTag>(
+        ConvertToVector2f(param.edLightParams, oneVpValue, maskEdLightParams));
+    filter->Setter<Rosen::FrostedGlassEffectEdLightAnglesTag>(ConvertToVector2f(param.edLightAngles));
+    filter->Setter<Rosen::FrostedGlassEffectEdLightDirTag>(ConvertToVector2f(param.edLightDir));
+    filter->Setter<Rosen::FrostedGlassEffectEdLightRatesTag>(ConvertToVector2f(param.edLightRates));
+    filter->Setter<Rosen::FrostedGlassEffectEdLightKBSTag>(ConvertToVector3f(param.edLightKBS));
+    filter->Setter<Rosen::FrostedGlassEffectEdLightPosTag>(ConvertToVector3f(param.edLightPos));
+    filter->Setter<Rosen::FrostedGlassEffectEdLightNegTag>(ConvertToVector3f(param.edLightNeg));
+    // no FrostedGlassEffectDarkModeWeightsEmbossTag in blue env.
+    // no FrostedGlassEffectDarkModeBgRatesTag in blue env.
+    // no FrostedGlassEffectDarkModeBgKBSTag in blue env.
+    // no FrostedGlassEffectDarkModeBgPosTag in blue env.
+    // no FrostedGlassEffectDarkModeBgNegTag in blue env.
+    // no FrostedGlassEffectDarkModeEdLightAnglesTag in blue env.
+    // no FrostedGlassEffectDarkModeEdLightKBSTag in blue env.
+
+    return filter;
+#else
+    return nullptr;
+#endif
+}
+
+std::shared_ptr<Rosen::RSNGShaderBase> RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSubOverlay(
     const FrostedGlassParam& param, float oneVpValue)
 {
 #if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
@@ -109,7 +163,7 @@ std::shared_ptr<Rosen::RSNGShaderBase> RosenEffectConverter::ConvertToRSNGFroste
     filter->Setter<Rosen::FrostedGlassEffectBgKBSTag>(ConvertToVector3f(param.bgKBS));
     filter->Setter<Rosen::FrostedGlassEffectBgPosTag>(ConvertToVector3f(param.bgPos));
     filter->Setter<Rosen::FrostedGlassEffectBgNegTag>(ConvertToVector3f(param.bgNeg));
-    filter->Setter<Rosen::FrostedGlassEffectBgAlphaTag>(param.bgAlpha);
+    filter->Setter<Rosen::FrostedGlassEffectBgAlphaTag>(0.0f);
     filter->Setter<Rosen::FrostedGlassEffectRefractParamsTag>(
         ConvertToVector3f(param.refractParams, oneVpValue, maskRefactorParams));
     filter->Setter<Rosen::FrostedGlassEffectSdParamsTag>(ConvertToVector3f(param.sdParams, oneVpValue, maskSdParams));

@@ -3233,4 +3233,56 @@ HWTEST_F(ListPatternTestNg, CalculateScrollingDistanceToIndex003, TestSize.Level
     EXPECT_TRUE(result4);
 }
 
+/**
+ * @tc.name: ListPatternUpdatePosMapSyncsIsLazyChild001
+ * @tc.desc: Test ListPattern UpdatePosMap syncs isLazyChild to posMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternUpdatePosMapSyncsIsLazyChild001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
+    listPattern->currentOffset_ = 5.0f;
+    listPattern->spaceWidth_ = 10.0f;
+
+    ListLayoutAlgorithm::PositionMap itemPos;
+    itemPos[0] = { 1, 0.0f, 100.0f, false, true };
+    itemPos[1] = { 2, 110.0f, 210.0f, false };
+
+    listPattern->UpdatePosMap(itemPos);
+
+    auto lazyResult = listPattern->posMap_->GetPositionInfo(0);
+    EXPECT_EQ(lazyResult.mainPos, 5.0f);
+    EXPECT_EQ(lazyResult.mainSize, 100.0f);
+    EXPECT_TRUE(lazyResult.isLazyChild);
+
+    auto normalResult = listPattern->posMap_->GetPositionInfo(1);
+    EXPECT_FALSE(normalResult.isLazyChild);
+}
+
+/**
+ * @tc.name: ListPatternUpdateChildPosInfoKeepsIsLazyChild001
+ * @tc.desc: Test ListPattern UpdateChildPosInfo keeps isLazyChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternUpdateChildPosInfoKeepsIsLazyChild001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
+    listPattern->startIndex_ = 1;
+    listPattern->endIndex_ = 1;
+    listPattern->maxListItemIndex_ = 1;
+    listPattern->currentOffset_ = 10.0f;
+    listPattern->isStackFromEnd_ = false;
+    listPattern->itemPosition_[1] = { 1, 0.0f, 100.0f, false, true };
+    listPattern->posMap_->UpdatePos(1, { 10.0f, 100.0f, false, true });
+
+    listPattern->UpdateChildPosInfo(1, 5.0f, 10.0f);
+
+    auto result = listPattern->posMap_->GetPositionInfo(1);
+    EXPECT_EQ(result.mainPos, 15.0f);
+    EXPECT_EQ(result.mainSize, 110.0f);
+    EXPECT_TRUE(result.isLazyChild);
+}
+
 } // namespace OHOS::Ace::NG

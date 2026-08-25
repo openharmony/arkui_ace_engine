@@ -882,6 +882,11 @@ std::string SelectionContainerPattern::GetBindSelectionMenuInJson() const
 void SelectionContainerPattern::OnModifyDone()
 {
     StackPattern::OnModifyDone();
+    // Re-assert non-draggable on every property update so a runtime draggable(true)/onDragStart cannot
+    // re-enable the generic drag recognizer for the container itself.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetCustomerDraggable(false);
     if (GetCopyOption() != CopyOptions::None || HasSelectableText()) {
         InitKeyEvent();
     }
@@ -919,6 +924,7 @@ bool SelectionContainerPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     TAG_LOGI(AceLogTag::ACE_TEXT, "SelectionContainerPattern::HandleKeyEvent [action:%{public}d]", keyEvent.action);
+    UpdateShiftFlag(keyEvent);
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
@@ -933,6 +939,16 @@ bool SelectionContainerPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
     return false;
+}
+
+void SelectionContainerPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
+{
+    bool flag = false;
+    if (keyEvent.action == KeyAction::DOWN &&
+        (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT))) {
+        flag = true;
+    }
+    SetShiftFlag(flag);
 }
 
 void SelectionContainerPattern::MarkContainerPropertyUpdate(uint32_t flags)
@@ -967,10 +983,35 @@ void SelectionContainerPattern::UpdatePropertyImpl(
 void SelectionContainerPattern::HandleOnSelectAll()
 {
     auto childList = GetChildList();
+    SelectAllChildren(childList);
+    CloseSelectOverlay(true);
+    auto overlay = GetOrCreateSelectionSelectOverlay();
+    if (IsUsingMouse()) {
+        if (overlay && !GetSelectionText().empty()) {
+            overlay->SetSelectionHoldCallback();
+        }
+    } else {
+        ProcessOverlay({ .animation = true });
+    }
+    ReportSelectionText();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    for (const auto& weakChild : childList) {
+        auto child = weakChild.Upgrade();
+        CHECK_NULL_CONTINUE(child);
+        child->ResetOriginCaretPosition();
+    }
+}
+
+void SelectionContainerPattern::SelectAllChildren(
+    const std::vector<WeakPtr<SelectionContainerChild>>& childList)
+{
     RefPtr<SelectionContainerChild> firstSelectedChild;
     RefPtr<SelectionContainerChild> lastSelectedChild;
     std::vector<std::u16string> selectedTexts;
     std::vector<ChildSelectionInfo> selectionState;
+    selectedChildren_.clear();
     for (const auto& weakChild : childList) {
         auto child = weakChild.Upgrade();
         CHECK_NULL_CONTINUE(child);
@@ -984,6 +1025,7 @@ void SelectionContainerPattern::HandleOnSelectAll()
             continue;
         }
         selectedTexts.push_back(std::move(childSelectionText));
+        selectedChildren_.emplace_back(child);
         auto childHostNode = child->GetHostNode();
         if (childHostNode) {
             auto indexes = child->GetSelectionIndexes();
@@ -1003,24 +1045,6 @@ void SelectionContainerPattern::HandleOnSelectAll()
     }
     if (lastSelectedChild && lastSelectedChild != firstSelectedChild) {
         lastSelectedChild->UpdateSelectionHandleInfo();
-    }
-    CloseSelectOverlay(true);
-    auto overlay = GetOrCreateSelectionSelectOverlay();
-    if (IsUsingMouse()) {
-        if (overlay && !GetSelectionText().empty()) {
-            overlay->SetSelectionHoldCallback();
-        }
-    } else {
-        ProcessOverlay({ .animation = true });
-    }
-    ReportSelectionText();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    for (const auto& weakChild : childList) {
-        auto child = weakChild.Upgrade();
-        CHECK_NULL_CONTINUE(child);
-        child->ResetOriginCaretPosition();
     }
 }
 
@@ -1220,7 +1244,8 @@ OffsetF SelectionContainerPattern::GetContainerPaintOffsetWithTransform() const
 void SelectionContainerPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     if (selectionSelectOverlay_ && selectionSelectOverlay_->SelectOverlayIsOn()) {
-        selectionSelectOverlay_->OnAncestorNodeChanged(flag);
+        selectionSelectOverlay_->OnAncestorNodeChanged(flag, false /*scrollTriggersEmbed*/,
+            true /*transformTriggersEmbed*/);
     }
     RefreshMouseLeftSelectionOnFrameNodeChanged();
 }

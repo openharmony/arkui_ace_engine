@@ -3442,6 +3442,7 @@ void NavigationGroupNode::CreateHomeDestinationIfNeeded()
     eventHub->FireOnWillAppear();
     customHomeDestination_ = destNode;
     pattern->ApplyHomeRestoreInfo();
+    eventHub->FireOnRestoreState(pattern->GetHomeRestoreState());
     AddChild(destNode, 0);
 }
 

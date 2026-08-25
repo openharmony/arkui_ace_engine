@@ -71,7 +71,6 @@ void ApplyLowEndHeaderFooterMaterial(const RefPtr<FrameNode>& node, const RefPtr
         .applyShadow = options->applyShadow,
         .dipScale = static_cast<float>(pipeline->GetDipScale()),
         .interactive = options->interactive.value_or(false),
-        .lightEffectOptions = options->lightEffectOptions,
     };
     renderContext->SetImmersiveMaterialConfig(config);
     renderContext->SetSystemMaterial(material->Copy());
@@ -848,7 +847,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
     host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
     FrameNode::ProcessOffscreenNode(host, true);
     if ((!NearZero(adjustRefPos_) || !NearZero(adjustTotalSize_)) && !(childrenSize_ && ListChildrenSizeExist())) {
-        listPattern->UpdateChildPosInfo(GetIndexInList(), adjustRefPos_, adjustTotalSize_);
+        listPattern->UpdateChildPosInfo(indexInList_, adjustRefPos_, adjustTotalSize_);
         adjustRefPos_ = 0.0f;
         adjustTotalSize_ = 0.0f;
     }

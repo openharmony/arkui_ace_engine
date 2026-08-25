@@ -28,7 +28,7 @@ class InteropExtractorModule {
         ) {
           newValue = InteropExtractorModule.makeObserved(newValue) as T;
         }
-        if ('addWatchSubscriber' in newValue && typeof (newValue as any).addWatchSubscriber === 'function') {
+        if ('addWatchSubscriber' in newValue && typeof newValue.addWatchSubscriber === 'function') {
             const callback = () => {
                 owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(null, '');
             };
@@ -126,11 +126,11 @@ function registerCompatibleStaticComponentCallback(
 function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object): void {
     InteropExtractorModule.makeBuilderParameterStaticProxy = callback;
 }
-
+ 
 function registerUpdateInteropExtendableComponent(callback: (dynamicComponent: Object) => void): void {
     InteropExtractorModule.updateInteropExtendableComponent = callback;
 }
-
+ 
 function registerResetInteropExtendableComponent(callback: () => void): void {
     InteropExtractorModule.resetInteropExtendableComponent = callback;
 }
@@ -194,7 +194,6 @@ function registerTransferCompatibleUpdatableBuilderCallback(callback: (builder: 
 function registerLocalStorageSetProxy(callback: (storage: Object, proxy: Object) => void): void {
      InteropExtractorModule.localStorageSetProxy = callback;
 }
-
 function __Interop_RegisterIsCloneableObject_internal_(callback: (obj: Object) => boolean): void {
     InteropExtractorModule.isCloneableObject = callback;
 }

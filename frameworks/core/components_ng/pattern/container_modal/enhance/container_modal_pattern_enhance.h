@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
 
+#include <cstdint>
 #include <functional>
 #include <unordered_map>
 
@@ -110,7 +111,30 @@ private:
     void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) override;
     void InitMenuDefaultRadius();
 
-    VisibleType controlButtonVisibleBeforeAnim_;
+    void SetIsFloatingTitleHiding(bool isHiding)
+    {
+        isFloatingTitleHiding_ = isHiding;
+    }
+
+    bool GetIsFloatingTitleHiding() const
+    {
+        return isFloatingTitleHiding_;
+    }
+
+    void SetFloatingTitleAnimationToken(uint64_t token)
+    {
+        floatingTitleAnimationToken_ = token;
+    }
+
+    uint64_t GetFloatingTitleAnimationToken() const
+    {
+        return floatingTitleAnimationToken_;
+    }
+
+    VisibleType controlButtonVisibleBeforeAnim_ = VisibleType::VISIBLE;
+    bool hasControlButtonVisibleBeforeAnim_ = false;
+    bool isFloatingTitleHiding_ = false;
+    uint64_t floatingTitleAnimationToken_ = 0;
     RefPtr<FrameNode> menuList_;
     OffsetF menuOffset_;
     float textWidth_ = 0.0f;

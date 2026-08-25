@@ -81,6 +81,9 @@ void PickerHapticController::ThreadRelease()
             playThreadStatus_ = ThreadStatus::NONE;
         }
         threadCv_.notify_one();
+        if (playThread_->joinable()) {
+            playThread_->join();
+        }
         playThread_ = nullptr;
     }
     playThreadStatus_ = ThreadStatus::NONE;
@@ -116,7 +119,6 @@ void PickerHapticController::InitPlayThread()
     playThreadStatus_ = ThreadStatus::START;
     playThread_ = std::make_unique<std::thread>(&PickerHapticController::ThreadLoop, this);
     if (playThread_) {
-        playThread_->detach();
         playThreadStatus_ = ThreadStatus::READY;
     } else {
         playThreadStatus_ = ThreadStatus::NONE;
@@ -128,8 +130,11 @@ void PickerHapticController::ThreadLoop()
     while (!IsThreadNone()) {
         {
             std::unique_lock<std::recursive_mutex> lock(threadMutex_);
-            threadCv_.wait(lock, [this]() { return IsThreadPlaying() || IsThreadPlayOnce(); });
-            if (IsThreadNone()) {
+            threadCv_.wait(lock, [this]() {
+                return playThreadStatus_ == ThreadStatus::PLAYING || playThreadStatus_ == ThreadStatus::PLAY_ONCE ||
+                       playThreadStatus_ == ThreadStatus::NONE;
+            });
+            if (playThreadStatus_ == ThreadStatus::NONE) {
                 return;
             }
         }
@@ -161,11 +166,11 @@ void PickerHapticController::ThreadLoop()
             auto startTime = std::chrono::high_resolution_clock::now();
             std::unique_lock<std::recursive_mutex> lock(threadMutex_);
             std::chrono::milliseconds delayTime = DEFAULT_DELAY;
-            if (IsThreadPlayOnce() && isLoopReadyToStop_) { // 50ms delay after 40ms loop ends
+            if (playThreadStatus_ == ThreadStatus::PLAY_ONCE && isLoopReadyToStop_) { // 50ms delay after 40ms loop ends
                 delayTime = EXTENDED_DELAY;
             }
             threadCv_.wait_until(lock, startTime + delayTime);
-            if (IsThreadPlayOnce() || isLoopReadyToStop_) {
+            if (playThreadStatus_ == ThreadStatus::PLAY_ONCE || isLoopReadyToStop_) {
                 playThreadStatus_ = ThreadStatus::READY;
             }
         }

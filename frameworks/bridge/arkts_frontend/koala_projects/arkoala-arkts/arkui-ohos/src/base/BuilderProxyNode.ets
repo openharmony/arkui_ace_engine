@@ -14,7 +14,7 @@
  */
 
 import { ArkUIGeneratedNativeModule } from "#components"
-import { KPointer } from "@koalaui/interop"
+import { KPointer, SerializerBase, RuntimeType } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { PeerNode } from "../PeerNode"
 import { ComponentBase } from "../ComponentBase"
@@ -45,6 +45,35 @@ export class ArkBuilderProxyNodePeer extends PeerNode {
     }
     get hasChild():boolean{
         return this._hasChild;
+    }
+    getParentViewId(): double {
+        return Int.toDouble(ArkUIAniModule.__BuilderNode_GetParentViewId(this.getPeerPtr()));
+    }
+    setOnAttach(value: () => void): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAttach(
+            this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDetach(value: () => void): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnDetach(
+            this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     public registerDestroyEvent(event: (nodeId: int) => void) {
         ArkUIAniModule._SetOnNodeDestroyEvent(this.getPeerPtr(), event);

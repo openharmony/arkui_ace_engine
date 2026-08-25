@@ -27,23 +27,19 @@ namespace {
 
 void LongFrameReportImpl::SubmitEvent()
 {
-#ifndef CROSS_PLATFORM
     int64_t tid = ResSchedReport::GetInstance().GetTid();
     int64_t longTid = static_cast<int64_t>(ResSchedReport::GetInstance().GetPthreadSelf());
     ffrtTask = ffrt::submit_h([tid, longTid] {
         ResSchedReport::GetInstance().ResSchedDataReport("long_frame_start", {}, tid, longTid);
     }, {}, {}, ffrt::task_attr().delay(LONG_FRAME_EVENT_DELAY).qos(ffrt::qos_user_interactive));
-#endif
 }
 
 void LongFrameReportImpl::CancelEvent()
 {
-#ifndef CROSS_PLATFORM
     if (ffrt::skip(ffrtTask)) {
         ffrt::wait({ffrtTask});
         ResSchedReport::GetInstance().ResSchedDataReport("long_frame_end");
     }
-#endif
 }
 
 void ILongFrame::ReportStartEvent()

@@ -15,6 +15,10 @@
 
 #include "core/components_ng/syntax/arkoala_for_each_node.h"
 
+#include <algorithm>
+#include <iterator>
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
@@ -38,6 +42,41 @@ void ArkoalaForEachNode::FlushUpdateAndMarkDirty()
     // mark parent dirty to flush measure.
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+bool ArkoalaForEachNode::AddOrMoveChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_RETURN(child, false);
+    CHECK_NULL_RETURN(siblingNode, false);
+
+    if (child->GetAncestor() != this) {
+        AddChildBefore(child, siblingNode);
+        return true;
+    }
+
+    auto& children = ModifyChildren();
+    auto childIter = std::find(children.begin(), children.end(), child);
+    if (childIter == children.end()) {
+        AddChildBefore(child, siblingNode);
+        return true;
+    }
+
+    auto siblingIter = std::find(children.begin(), children.end(), siblingNode);
+    if (siblingIter == children.end()) {
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "nodeId:%{public}d failed to find sibling for reorder", GetId());
+        return false;
+    }
+    if (childIter == siblingIter || std::next(childIter) == siblingIter) {
+        return false;
+    }
+
+    children.splice(siblingIter, children, childIter);
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    if (auto frameNode = GetParentFrameNode()) {
+        frameNode->ChildrenUpdatedFrom(0);
+    }
+    return false;
 }
 
 void ArkoalaForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
@@ -167,6 +206,34 @@ void ArkoalaForEachNode::InitAllChildrenDragManager(bool init)
                 pattern->deInitDragManager(childNode);
             }
         }
+    }
+}
+
+void ArkoalaForEachNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
+{
+    UINode::DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    ACE_SYNTAX_SCOPED_TRACE(
+        "ArkoalaForEachNode[self:%d].DoSetActiveChildRange start[%d] end[%d] cacheStart[%d] cacheEnd[%d] "
+        "showCache[%d]",
+        GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
+    TAG_LOGD(AceLogTag::ACE_FOREACH, "ArkoalaForEachNode[self:%{public}d].DoSetActiveChildRange"
+        "(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
+        GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
+
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+        cacheStart = 0;
+        cacheEnd = 0;
+    }
+    const ActiveRangeParam newParam = { start, end, cacheStart, cacheEnd };
+    if (newParam == activeRangeParam_) {
+        return;
+    }
+    activeRangeParam_ = newParam;
+    if (updateRange_) {
+        updateRange_(start, end, cacheStart, cacheEnd, false);
     }
 }
 

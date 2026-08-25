@@ -174,9 +174,6 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     bool hasSwiperNode = tabsNode->HasSwiperNode();
     bool hasTabBarNode = tabsNode->HasTabBarNode();
     bool hasDividerNode = tabsNode->HasDividerNode();
-    bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
-    bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
-    bool hasIndicatorNode = tabsNode->HasIndicatorNode();
 
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
@@ -196,15 +193,6 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
         tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     }
 
-    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetSelectedMaskId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-
-    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, tabsNode->GetIndicatorId(),
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
-
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
@@ -214,19 +202,38 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     if (!hasTabBarNode) {
         tabBarNode->MountToParent(tabsNode);
     }
+    // Internal child nodes of TabBar (selectedMask, unselectedMask, indicator)
+    // are created lazily in InitTabBarChildNodes when first TabContent is added.
+}
+
+void TabsModelNG::InitTabBarChildNodes(RefPtr<TabsNode> tabsNode)
+{
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+
+    bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
+    bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
+    bool hasIndicatorNode = tabsNode->HasIndicatorNode();
+
     if (!hasSelectedMaskNode) {
+        auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetSelectedMaskId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         selectedMaskNode->MountToParent(tabBarNode);
         InitSelectedMaskNode(selectedMaskNode);
     }
     if (!hasUnselectedMaskNode) {
+        auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         unselectedMaskNode->MountToParent(tabBarNode);
         InitUnselectedMaskNode(unselectedMaskNode);
     }
-
     if (!hasIndicatorNode) {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, tabsNode->GetIndicatorId(),
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
         indicatorNode->MountToParent(tabBarNode);
         InitImageIndicatorNode(indicatorNode);
     }
+    tabsNode->SetTabBarChildNodesInitialized(true);
 }
 
 RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
@@ -1987,5 +1994,72 @@ void TabsModelNG::ProcessColorWithResourceObj(
     } else {
         pattern->RemoveResObj("tabs." + name);
     }
+}
+
+void TabsModelNG::SetBarLayoutStyle(TabBarLayoutStyle barLayoutStyle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarLayoutStyle(frameNode, barLayoutStyle);
+}
+
+void TabsModelNG::SetBarLayoutStyle(FrameNode* frameNode, TabBarLayoutStyle barLayoutStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarLayoutStyle, barLayoutStyle, frameNode);
+}
+
+void TabsModelNG::SetSidebarPosition(BarPosition position)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarPosition(frameNode, position);
+}
+
+void TabsModelNG::SetSidebarPosition(FrameNode* frameNode, BarPosition position)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarPosition, position, frameNode);
+}
+
+void TabsModelNG::SetSidebarHeader(const RefPtr<AceType>& header)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarHeader(frameNode, header);
+}
+
+void TabsModelNG::SetSidebarHeader(FrameNode* frameNode, const RefPtr<AceType>& header)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto customHeader = AceType::DynamicCast<NG::UINode>(header);
+    pattern->SetSidebarHeaderNode(customHeader);
+}
+
+void TabsModelNG::SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarSearchableOptions(frameNode, options);
+}
+
+void TabsModelNG::SetSidebarSearchableOptions(FrameNode* frameNode, const TabsSidebarSearchableOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetTabsSidebarSearchableOptions(options);
+}
+
+void TabsModelNG::SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint& breakpoint)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarDisplayModeBreakpoint(frameNode, breakpoint);
+}
+
+void TabsModelNG::SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarDisplayModeBreakpoint, breakpoint, frameNode);
 }
 } // namespace OHOS::Ace::NG

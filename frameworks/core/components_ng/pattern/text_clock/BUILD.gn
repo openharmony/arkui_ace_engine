@@ -15,6 +15,7 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
 build_component_ng("text_clock_pattern_ng") {
+  is_component_model = true
   sources = [
     "text_clock_accessibility_property.cpp",
     "text_clock_layout_algorithm.cpp",

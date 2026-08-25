@@ -212,7 +212,7 @@ function loadComponent(): ComponentObj | undefined {
   return loadComponent.componentObj;
 }
 
-class JSRefresh extends JSViewAbstract {
+class JSRefresh extends JSContainerBase {
   static create(params: any): void {
     getUINativeModule().refresh.create(params);
   }

@@ -99,7 +99,7 @@ public:
     RefPtr<VirtualAccessibilityNode> FindNodeByPoint(int32_t x, int32_t y) const;
 
     // Add child node
-    void AddChild(const RefPtr<VirtualAccessibilityNode>& child);
+    bool AddChild(const RefPtr<VirtualAccessibilityNode>& child);
 
     // Remove child node
     void RemoveChild(const RefPtr<VirtualAccessibilityNode>& child);

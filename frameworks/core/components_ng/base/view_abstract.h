@@ -1213,6 +1213,18 @@ public:
 
     static std::function<void()> GetPixelStretchEffectFuncForLPX(PixStretchEffectOption option);
 
+    static std::function<void()> GetBorderDashGapFuncForLPX(const Dimension& value);
+
+    static std::function<void()> GetBorderDashGapFuncForLPX(const BorderWidthProperty& value);
+
+    static std::function<void()> GetBorderRadiusFuncForLPX(const Dimension& value);
+
+    static std::function<void()> GetBorderRadiusFuncForLPX(const BorderRadiusProperty& value);
+
+    static std::function<void()> GetDashWidthFuncForLPX(const Dimension& value);
+
+    static std::function<void()> GetDashWidthFuncForLPX(const BorderWidthProperty& value);
+
     static void SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void ClearJSFrameNodeOnReachStart(FrameNode* frameNode);
     static void SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
@@ -1231,6 +1243,9 @@ public:
     static void ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode);
     static void SetJSFrameNodeOnScrollVisibleContentChange(
         FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void ApplyImmersiveMaterialStyle(const RefPtr<RenderContext>& renderContext,
+ 	    const ImmersiveMaterialConfig& config, const std::optional<ImmersiveMaterialConfig>& preConfig);
+    static void UpdateImmersiveMaterialOnTransparencyChange(const RefPtr<FrameNode>& frameNode);
     static void ClearJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode);
     static void SetJSFrameNodeOnScrollWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& onWillScroll);
     static void ClearJSFrameNodeOnScrollWillScroll(FrameNode* frameNode);
@@ -1272,10 +1287,14 @@ private:
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
     static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    // Reset to the value of the universal attribute first, if not set, reset to no effect.
     static void ResetBorderAndBackgroundEffect(
         FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
-    static void RegisterMaterialInteractionEvent(
-        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    // If has corresponding universal attribute, set it to no effect value.
+    static void RemoveBorderAndBackgroundEffect(
+        const RefPtr<FrameNode>& frameNode, const RefPtr<RenderContext>& renderContext);
+    static void RegisterMaterialInteractionEvent(const RefPtr<FrameNode>& frameNode,
+        const std::shared_ptr<ImmersiveOptions>& optionsPtr, bool enableLightEffect);
     static void UnRegisterMaterialInteractionEvent(FrameNode* frameNode);
     static void SetImmersiveOptions(
         const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);

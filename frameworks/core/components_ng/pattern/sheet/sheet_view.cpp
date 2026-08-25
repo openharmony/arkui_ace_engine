@@ -127,8 +127,8 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool needSpacingOptimize = GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
-    if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() &&
-        !needSpacingOptimize) {
+    if (sheetStyle.isTitleBuilder.has_value() &&
+        pipeline->GetFontScaleFromEnv(sheetNode) == sheetTheme->GetSheetNormalScale() && !needSpacingOptimize) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(
             std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight() - sheetTheme->GetSheetTitleAreaMargin() -
                                      sheetPattern->GetDragBarHeight(sheetPattern->GetDragBarNode()))));
@@ -530,7 +530,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
     bool needSpacingOptimize = GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
-    if ((pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() && !needSpacingOptimize) ||
+    if ((pipeline->GetFontScaleFromEnv(sheetNode) == sheetTheme->GetSheetNormalScale() && !needSpacingOptimize) ||
         isTitleCustombuilder) {
         layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight())));
@@ -555,7 +555,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             auto subtitleRow = BuildSubTitle(sheetNode, sheetStyle);
             CHECK_NULL_RETURN(subtitleRow, nullptr);
             subtitleRow->MountToParent(titleColumn);
-            if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() && !needSpacingOptimize) {
+            if (pipeline->GetFontScaleFromEnv(sheetNode) == sheetTheme->GetSheetNormalScale() && !needSpacingOptimize) {
                 layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
                     sheetTheme->GetOperationAreaHeightDouble() - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }

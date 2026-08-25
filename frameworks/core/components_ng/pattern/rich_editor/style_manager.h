@@ -578,7 +578,7 @@ public:
     RefPtr<SpanString> CreateStyledStringByTypingStyle(const std::u16string& insertValue,
         const RefPtr<MutableSpanString>& styledString, int32_t changeStart, int32_t changeLength)
     {
-        bool hasTypingStyle = typingFontStyle_.has_value();
+        bool hasTypingStyle = typingFontStyle_.has_value() && typingTextStyle_.has_value();
         bool needTypingParagraphStyle = NeedTypingParagraphStyle(styledString, changeStart, changeLength);
         CHECK_NULL_RETURN(hasTypingStyle || needTypingParagraphStyle, {});
 
@@ -593,6 +593,7 @@ public:
 
     void HandleStyledStringByTypingTextStyle(int length, std::vector<RefPtr<SpanBase>>& spans)
     {
+        CHECK_NULL_VOID(typingFontStyle_.has_value() && typingTextStyle_.has_value());
         auto& textStyle = typingTextStyle_.value();
         auto& updateSpanStyle = typingFontStyle_.value();
         spans.push_back(CreateFontSpanByTextStyle(updateSpanStyle, textStyle, length));
