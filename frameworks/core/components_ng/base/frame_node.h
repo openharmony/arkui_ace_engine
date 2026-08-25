@@ -1795,6 +1795,8 @@ private:
 
     const CacheVisibleRectResult& GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
+    void LogCacheVisibleRect(const CacheVisibleRectResult& result, bool logFlag) const;
+
     const CacheVisibleRectResult& CalculateCacheVisibleRect(const CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
         uint64_t timestamp);

@@ -1287,6 +1287,14 @@ void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
     auto host = GetFrameNode();
     CHECK_NULL_VOID(host);
     if (currFrameRect != *lastFrameRect || currParentOffsetToWindow != *lastParentOffsetToWindow) {
+        if (SystemProperties::GetDebugEnabled()) {
+            ACE_SCOPED_TRACE("HandleOnAreaChange[%s][%d][%s][%s] rect:%s->%s offset:%s->%s",
+                host->GetTag().c_str(), host->GetId(),
+                std::to_string(host->GetAccessibilityId()).c_str(),
+                host->GetInspectorId().value_or("").c_str(), lastFrameRect->ToString().c_str(),
+                currFrameRect.ToString().c_str(), lastParentOffsetToWindow->ToString().c_str(),
+                currParentOffsetToWindow.ToString().c_str());
+        }
         if (HasInnerOnAreaChanged()) {
             FireInnerOnAreaChanged(
                 *lastFrameRect, *lastParentOffsetToWindow, currFrameRect, currParentOffsetToWindow);

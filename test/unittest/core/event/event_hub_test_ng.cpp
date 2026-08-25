@@ -2097,4 +2097,28 @@ HWTEST_F(EventHubTestNg, EventHubTest054, TestSize.Level1)
     eventHub->FireOnAttach();
     eventHub->FireOnDetach();
 }
+
+/**
+ * @tc.name: EventHubTest055
+ * @tc.desc: Test HandleOnAreaChange with debug trace enabled to cover debug branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest055, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool flag = false;
+    OnAreaChangedFunc callback =
+        [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        flag = true;
+    };
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(callback));
+    auto lastFrameRect = std::make_unique<RectF>(OLD_RECT);
+    auto lastParentOffsetToWindow = std::make_unique<OffsetF>(OLD_ORIGIN);
+    SystemProperties::debugEnabled_ = true;
+    eventHub->HandleOnAreaChange(lastFrameRect, lastParentOffsetToWindow, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(flag);
+    SystemProperties::debugEnabled_ = false;
+}
 } // namespace OHOS::Ace::NG
