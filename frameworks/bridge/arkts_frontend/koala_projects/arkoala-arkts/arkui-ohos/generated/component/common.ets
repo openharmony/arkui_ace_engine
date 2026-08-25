@@ -12782,16 +12782,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         callback: (value: number | AnimatableArithmetic<T>) => void): void {
         if (this.getPeer()) {
             const peer = this.getPeer();
-            let isFirst = true;
             const newCallback = (value: number | AnimatableArithmetic<T>): void => {
-                if (isFirst) {
-                    isFirst = false;
+                const lastPeer = this.peer;
+                if (lastPeer) {
                     callback(value);
                     return;
                 }
                 this.setPeer(peer);
                 callback(value);
-                this.setPeer(undefined);
+                this.setPeer(lastPeer);
             }
             ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.getPeer().getPeerPtr(), functionName, value, newCallback);
         }
