@@ -4232,7 +4232,7 @@ ArkUINativeModuleValue TextAreaBridge::SetWidthJs(ArkUIRuntimeCallInfo* runtimeC
     if (LessNotEqual(value.Value(), 0.0)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setWidth(nativeNode, value.Value(),
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaWidthCommon(nativeNode, value.Value(),
         static_cast<int32_t>(value.Unit()), value.CalcValue().c_str(), AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }

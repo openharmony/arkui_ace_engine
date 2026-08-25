@@ -2849,6 +2849,7 @@
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::CalcLength const&)";
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::FrameNode*, OHOS::Ace::NG::CalcLength const&)";
       "OHOS::Ace::NG::ViewAbstract::UpdateOnlyLayoutPolicyProperty(OHOS::Ace::NG::FrameNode*, OHOS::Ace::LayoutCalPolicy, bool)";
+      "OHOS::Ace::NG::ViewAbstract::ResetLayoutPolicyProperty(OHOS::Ace::NG::FrameNode*, bool)";
       "OHOS::Ace::NG::ViewAbstractModelNG::RemoveResObj(OHOS::Ace::NG::FrameNode*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ViewAbstractModelNG::CheckSkipMenuShow(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::ViewAbstractModelNG::SetAccessibilityText(OHOS::Ace::NG::FrameNode*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
