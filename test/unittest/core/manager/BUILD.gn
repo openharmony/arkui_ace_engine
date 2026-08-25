@@ -183,6 +183,18 @@ ace_unittest("smart_gesture_manager_test_ng") {
   defines = [ "SMART_GESTURE_SUPPORTED" ]
 }
 
+ace_unittest("scroll_placeholder_manager_test_ng") {
+  module_name = "ScrollingSet-ScrollPlaceholder"
+  type = "new"
+  sources = [ "scroll_placeholder_manager_test.cpp" ]
+}
+
+ace_unittest("scroll_placeholder_predictor_test_ng") {
+  module_name = "ScrollingSet-ScrollPlaceholder"
+  type = "new"
+  sources = [ "scroll_placeholder_predictor_test.cpp" ]
+}
+
 ace_unittest("display_sync_manager_test_ng") {
   module_name = "DrawingSet-Line"
   type = "new"
@@ -415,6 +427,8 @@ group("core_manager_unittest") {
     ":content_change_manager_test_ng",
     ":content_change_manager_translate_test_ng",
     ":display_sync_manager_test_ng",
+    ":scroll_placeholder_manager_test_ng",
+    ":scroll_placeholder_predictor_test_ng",
     ":drag_animation_helper_test_ng",
     ":drag_drop_behavior_reporter_test_ng",
     ":drag_drop_controller_func_wrapper_test_ng",
