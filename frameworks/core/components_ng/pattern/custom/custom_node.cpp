@@ -21,6 +21,7 @@
 #include "base/log/dump_log.h"
 #include "base/thread/task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/pipeline_ng/environment_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
@@ -48,14 +49,34 @@ void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
     UINode::Build(extraInfos);
 }
 
-void CustomNode::OnAttachToMainTree(bool val)
+void CustomNode::OnAttachToMainTree(bool recursive)
 {
-    UINode::OnAttachToMainTree(val);
+    UINode::OnAttachToMainTree(recursive);
+    auto callback = onEnvTreeStateChangeFunc_;
+    if (callback) {
+        callback(true);
+    }
     auto memopt = GetMemOpt();
     SetStaMemopt(memopt);
     if (staReusableMemOptStrategy_ == StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
         StartMemOpt();
     }
+}
+
+void CustomNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+{
+    UINode::OnDetachFromMainTree(recursive, context);
+    auto callback = onEnvTreeStateChangeFunc_;
+    if (!callback) {
+        return;
+    }
+    if (context) {
+        auto environmentManager = context->GetEnvironmentManager();
+        if (environmentManager) {
+            environmentManager->UnregisterExplicitReader(this);
+        }
+    }
+    callback(false);
 }
 
 bool CustomNode::Render(int64_t deadline)

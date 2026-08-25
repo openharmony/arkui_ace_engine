@@ -444,7 +444,8 @@ const CustomEnv = (envKey: CustomEnvKey): PropertyDecorator => {
 
   return (proto: object, varName: string): void => {
     const storeProp = ObserveV2.OB_PREFIX + varName;
-    const localValueProp = `__custom_env_local_${varName}`;
+    // Keep the declared default independently from the current WithEnv override so detach can restore it.
+    const localValueProp = ObserveV2.CUSTOM_ENV_LOCAL_PREFIX + varName;
     const isCustomEnvInit = ObserveV2.IS_CUSTOM_ENV_INIT + varName;
     ObserveV2.addCustomEnvDecoratorMeta(proto, varName, envKeyId);
     Reflect.defineProperty(proto, varName, {
@@ -455,7 +456,7 @@ const CustomEnv = (envKey: CustomEnvKey): PropertyDecorator => {
           throw new Error(message);
         }
         ObserveV2.getObserve().addRef(this, varName);
-        if (!this[storeProp]) {
+        if (!Object.prototype.hasOwnProperty.call(this, storeProp)) {
           const envValue = this.findCustomValueByKey(envKeyId);
           if (envValue?.found) {
             this[storeProp] = envValue.value;
@@ -480,4 +481,3 @@ const CustomEnv = (envKey: CustomEnvKey): PropertyDecorator => {
     });
   };
 };
-

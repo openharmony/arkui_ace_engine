@@ -562,6 +562,46 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
   }
 
+  protected __onWithEnvTreeStateChanged__Internal(isAttached: boolean): void {
+    const treeState = isAttached ? 'attached' : 'detached';
+    stateMgmtConsole.debug(`${this.debugInfo__()}: start processing WithEnv tree state ${treeState}`);
+    let needUpdated: boolean = false;
+    this.__getEnvPropertyNameToKey__Internal().forEach(([varName, key]) => {
+      const storeProp = ObserveV2.ENV_PREFIX + varName;
+      if (!EnvV2.isDirectQuerySystemEnvKey(key) || !Object.prototype.hasOwnProperty.call(this, storeProp)) {
+        return;
+      }
+      const defaultValue = EnvV2.getDirectQuerySystemEnvDefaultValue(key);
+      const effectiveValue = isAttached ? this.findEnvValueByKey(key) ?? defaultValue : defaultValue;
+      if (this[storeProp] !== effectiveValue) {
+        this[storeProp] = effectiveValue;
+        ObserveV2.getObserve().fireChange(this, varName);
+        this.__notifyDecoratedWatch__Internal(varName);
+        needUpdated = true;
+      }
+    });
+    this.__getCustomEnvPropertyNameToKey__Internal().forEach(([varName, key]) => {
+      const storeProp = ObserveV2.OB_PREFIX + varName;
+      if (!Object.prototype.hasOwnProperty.call(this, storeProp)) {
+        return;
+      }
+      const defaultValue = this[ObserveV2.CUSTOM_ENV_LOCAL_PREFIX + varName];
+      const queriedValue = isAttached ? this.findCustomValueByKey(key) : undefined;
+      const effectiveValue = queriedValue !== undefined ? queriedValue : defaultValue;
+      if (this[storeProp] !== effectiveValue) {
+        this[storeProp] = effectiveValue;
+        ObserveV2.getObserve().fireChange(this, varName);
+        this.__notifyDecoratedWatch__Internal(varName);
+        needUpdated = true;
+      }
+    });
+    if (needUpdated) {
+      ObserveV2.getObserve().updateDirty2(false);
+    }
+    stateMgmtConsole.debug(
+      `${this.debugInfo__()}: finish processing WithEnv tree state ${treeState}, needUpdated=${needUpdated}`);
+  }
+
   public __isV2__Internal(): boolean {
     return this instanceof ViewV2;
   }
@@ -826,6 +866,18 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       this.__hasEnvValue__ = true;
     }
     return this.__hasEnvValue__;
+  }
+
+  get __hasDirectQueryEnv__Internal(): boolean {
+    return this.__getEnvPropertyNameToKey__Internal().some(([, key]) => EnvV2.isDirectQuerySystemEnvKey(key));
+  }
+
+  get __hasInitializedEnvValue__Internal(): boolean {
+    const hasInitializedSystemEnv = this.__getEnvPropertyNameToKey__Internal().some(([varName, key]) =>
+      EnvV2.isDirectQuerySystemEnvKey(key) &&
+      Object.prototype.hasOwnProperty.call(this, ObserveV2.ENV_PREFIX + varName));
+    return hasInitializedSystemEnv || this.__getCustomEnvPropertyNameToKey__Internal().some(([varName]) =>
+      Object.prototype.hasOwnProperty.call(this, ObserveV2.OB_PREFIX + varName));
   }
 
   public __getEnvPropertyNameToKey__Internal(): [string, string][] {
