@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -2251,5 +2252,355 @@ HWTEST_F(LazyColumnLayoutTest, EstimateItemsTotalHeight001, TestSize.Level1)
     EXPECT_EQ(layoutInfo->posMap_.size(), 2);
     EXPECT_FLOAT_EQ(layoutInfo->totalMainSize_, 536.0f);
     EXPECT_FLOAT_EQ(layoutInfo->estimateItemSize_, -1.0f);
+}
+
+namespace {
+RefPtr<FrameNode> CreatePlainFrameNode(const std::string& tag)
+{
+    return FrameNode::CreateFrameNode(tag, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+}
+
+RefPtr<FrameNode> CreateLazyColumnFrameNode()
+{
+    return FrameNode::CreateFrameNode(V2::LAZY_COLUMN_LAYOUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LazyColumnLayoutPattern>());
+}
+} // namespace
+
+/**
+ * @tc.name: IndirectScrollAncestorTest001
+ * @tc.desc: FEAT-027 AC-1/AC-4: Scroll > Column > LazyColumnLayout builds, lays out and scrolls without crash;
+ *           the intermediate Column is marked as part of the lazy path while Scroll stays unmarked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectScrollAncestorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll > Column > LazyColumnLayout(10 items)
+     * @tc.expected: first layout reports visible indexes 0..4, lazy markers cover the intermediate chain
+     */
+    int32_t indexStart = -1;
+    int32_t indexEnd = -1;
+    auto callback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+
+    CreateScroll();
+    RefPtr<FrameNode> lazyHost;
+    auto column = CreateColumn([this, &callback, &lazyHost](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+        CreateLazyColumnLayout(std::move(callback));
+        lazyHost = frameNode_;
+        CreateContent(10);
+    });
+    CreateDone();
+
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(lazyHost, nullptr);
+    EXPECT_EQ(column->GetTag(), V2::COLUMN_ETS_TAG);
+    EXPECT_TRUE(column->IsNeedLazyLayout());
+    EXPECT_TRUE(lazyHost->IsNeedLazyLayout());
+    EXPECT_FALSE(scrollableFrameNode_->IsNeedLazyLayout());
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 4);
+
+    /**
+     * @tc.steps: step2. Check the lazy semantics survived the intermediate container
+     * @tc.expected: total size comes from lazy estimation and visible items stop at index 4
+     */
+    EXPECT_FLOAT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 10 * ITEM_HEIGHT);
+    EXPECT_FLOAT_EQ(column->GetGeometryNode()->GetFrameSize().Height(), 10 * ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 4);
+
+    /**
+     * @tc.steps: step3. Scroll down 100px
+     * @tc.expected: visible indexes update through the intermediate container
+     */
+    scrollablePattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 5);
+}
+
+/**
+ * @tc.name: IndirectScrollAncestorMultiLayerTest001
+ * @tc.desc: FEAT-027 AC-2: viewport keeps flowing across two or more ordinary intermediate containers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectScrollAncestorMultiLayerTest001, TestSize.Level1)
+{
+    int32_t indexStart = -1;
+    int32_t indexEnd = -1;
+    auto callback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+
+    CreateScroll();
+    RefPtr<FrameNode> innerColumn;
+    auto outerColumn = CreateColumn([this, &callback, &innerColumn](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+        innerColumn = CreateColumn([this, &callback](ColumnModelNG innerModel) {
+            CreateLazyColumnLayout(std::move(callback));
+            CreateContent(10);
+        });
+    });
+    CreateDone();
+
+    ASSERT_NE(outerColumn, nullptr);
+    ASSERT_NE(innerColumn, nullptr);
+    EXPECT_TRUE(outerColumn->IsNeedLazyLayout());
+    EXPECT_TRUE(innerColumn->IsNeedLazyLayout());
+    EXPECT_TRUE(frameNode_->IsNeedLazyLayout());
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 4);
+    EXPECT_FLOAT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 10 * ITEM_HEIGHT);
+
+    scrollablePattern_->UpdateCurrentOffset(-150, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(indexStart, 1);
+    EXPECT_EQ(indexEnd, 6);
+}
+
+/**
+ * @tc.name: IndirectScrollAncestorMultiLazyTest001
+ * @tc.desc: FEAT-027 AC-7: two lazy descendants below one intermediate Column update their visible indexes
+ *           independently against the shared scroll viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectScrollAncestorMultiLazyTest001, TestSize.Level1)
+{
+    int32_t indexStart1 = -2;
+    int32_t indexEnd1 = -2;
+    auto callback1 = [&indexStart1, &indexEnd1](int32_t start, int32_t end) {
+        indexStart1 = start;
+        indexEnd1 = end;
+    };
+    int32_t indexStart2 = -2;
+    int32_t indexEnd2 = -2;
+    auto callback2 = [&indexStart2, &indexEnd2](int32_t start, int32_t end) {
+        indexStart2 = start;
+        indexEnd2 = end;
+    };
+
+    CreateScroll();
+    RefPtr<FrameNode> sectionHost;
+    auto column = CreateColumn([this, &callback1, &callback2, &sectionHost](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+        CreateLazyColumnLayout();
+        sectionHost = frameNode_;
+        CreateLazyColumnLayout(std::move(callback1));
+        CreateContent(5);
+        ViewStackProcessor::GetInstance()->Pop();
+        CreateLazyColumnLayout(std::move(callback2));
+        CreateContent(5);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+    CreateDone();
+
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(sectionHost, nullptr);
+    EXPECT_TRUE(column->IsNeedLazyLayout());
+    // Both lazy descendants are reachable from the shared intermediate for adjust-offset consumers.
+    auto sectionPattern = sectionHost->GetPattern<LazyColumnLayoutPattern>();
+    ASSERT_NE(sectionPattern, nullptr);
+    FlushIdleTask(sectionPattern);
+    EXPECT_EQ(indexStart1, 0);
+    EXPECT_EQ(indexEnd1, 4);
+    EXPECT_EQ(indexStart2, -1);
+    EXPECT_EQ(indexEnd2, -1);
+
+    scrollablePattern_->UpdateCurrentOffset(-300, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(indexStart1, 2);
+    EXPECT_EQ(indexEnd1, 4);
+    EXPECT_EQ(indexStart2, 0);
+    EXPECT_EQ(indexEnd2, 2);
+
+    scrollablePattern_->UpdateCurrentOffset(-300, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(sectionPattern);
+    EXPECT_EQ(indexStart1, -1);
+    EXPECT_EQ(indexEnd1, -1);
+    EXPECT_EQ(indexStart2, 0);
+    EXPECT_EQ(indexEnd2, 4);
+}
+
+/**
+ * @tc.name: IndirectScrollAncestorSiblingTest001
+ * @tc.desc: FEAT-027 AC-8: an intermediate Column may hold ordinary siblings besides the lazy host; the lazy
+ *           host is not the first child and the sibling still measures normally.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectScrollAncestorSiblingTest001, TestSize.Level1)
+{
+    int32_t indexStart = -1;
+    int32_t indexEnd = -1;
+    auto callback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+
+    CreateScroll();
+    RefPtr<FrameNode> lazyHost;
+    auto column = CreateColumn([this, &callback, &lazyHost](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+        // Ordinary sibling before the lazy host: the lazy node must not be assumed to be the first child.
+        CreateStack(CalcLength(1, DimensionUnit::PERCENT), CalcLength(50));
+        ViewStackProcessor::GetInstance()->Pop();
+        CreateLazyColumnLayout(std::move(callback));
+        lazyHost = frameNode_;
+        CreateContent(10);
+    });
+    CreateDone();
+
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(lazyHost, nullptr);
+    EXPECT_EQ(column->GetChildren().size(), 2);
+    EXPECT_NE(column->GetFirstChild(), lazyHost);
+    EXPECT_TRUE(column->IsNeedLazyLayout());
+    // Column height = sibling(50) + lazy total height(1000).
+    EXPECT_FLOAT_EQ(column->GetGeometryNode()->GetFrameSize().Height(), 50 + 10 * ITEM_HEIGHT);
+    EXPECT_FLOAT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 10 * ITEM_HEIGHT);
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_GE(indexEnd, 3);
+    EXPECT_LE(indexEnd, 4);
+
+    // The lazy pattern is still discoverable below the multi-child intermediate for adjust-offset consumers.
+    auto foundPattern = LazyLayoutUtils::GetLazyLayoutPattern(column);
+    ASSERT_NE(foundPattern, nullptr);
+    EXPECT_EQ(foundPattern, lazyHost->GetPattern<LazyLayoutPattern>());
+}
+
+/**
+ * @tc.name: IndirectScrollAncestorPaddingTest001
+ * @tc.desc: FEAT-027 AC-3: intermediate padding participates in the viewport coordinate correction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectScrollAncestorPaddingTest001, TestSize.Level1)
+{
+    int32_t indexStart = -1;
+    int32_t indexEnd = -1;
+    auto callback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+
+    CreateScroll();
+    auto column = CreateColumn([this, &callback](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+        auto padding = CreatePadding(0, 100, 0, 0);
+        ViewAbstract::SetPadding(padding);
+        CreateLazyColumnLayout(std::move(callback));
+        CreateContent(10);
+    });
+    CreateDone();
+
+    ASSERT_NE(column, nullptr);
+    EXPECT_TRUE(column->IsNeedLazyLayout());
+    // Padding top(100) shifts the lazy viewport window to [-100, 350]: items 0..3 intersect it.
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 3);
+    // Column height = padding(100) + lazy total height(1000).
+    EXPECT_FLOAT_EQ(column->GetGeometryNode()->GetFrameSize().Height(), 100 + 10 * ITEM_HEIGHT);
+
+    scrollablePattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    // Scrolling down 100 shifts the lazy window by +100: [-100, 350] -> [0, 450], so items 0..4 stay visible.
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 4);
+}
+
+/**
+ * @tc.name: IndirectAncestorNearestScrollBoundaryTest001
+ * @tc.desc: FEAT-027 AC-6: the nearest same-axis scroll ancestor validates the chain and stays unmarked while
+ *           every ordinary intermediate FrameNode on the path is marked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectAncestorNearestScrollBoundaryTest001, TestSize.Level1)
+{
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    listNode->GetPattern<ScrollablePattern>()->SetAxis(Axis::VERTICAL);
+    auto column = CreatePlainFrameNode(V2::COLUMN_ETS_TAG);
+    auto lazyNode = CreateLazyColumnFrameNode();
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(lazyNode, nullptr);
+    lazyNode->MountToParent(column, DEFAULT_NODE_SLOT, true);
+    column->MountToParent(listNode, DEFAULT_NODE_SLOT, true);
+
+    LazyLayoutUtils::ValidateLazyLayoutParent(lazyNode, "LazyColumnLayout");
+
+    EXPECT_TRUE(lazyNode->IsNeedLazyLayout());
+    EXPECT_TRUE(column->IsNeedLazyLayout());
+    EXPECT_FALSE(listNode->IsNeedLazyLayout());
+    // The bool estimator variant agrees on the valid indirect chain and marks the same path.
+    EXPECT_TRUE(LazyLayoutUtils::ValidateAndSetLazyLayoutParent(lazyNode, Axis::VERTICAL));
+}
+
+/**
+ * @tc.name: IndirectAncestorNoScrollAncestorDeathTest001
+ * @tc.desc: FEAT-027 AC-5: a lazy host without any scrollable ancestor keeps the LOGF_ABORT contract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectAncestorNoScrollAncestorDeathTest001, TestSize.Level1)
+{
+    auto column = CreatePlainFrameNode(V2::COLUMN_ETS_TAG);
+    auto lazyNode = CreateLazyColumnFrameNode();
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(lazyNode, nullptr);
+    lazyNode->MountToParent(column, DEFAULT_NODE_SLOT, true);
+
+    EXPECT_FALSE(LazyLayoutUtils::ValidateAndSetLazyLayoutParent(lazyNode, Axis::VERTICAL));
+    ASSERT_DEATH(LazyLayoutUtils::ValidateLazyLayoutParent(lazyNode, "LazyColumnLayout"), ".*");
+}
+
+/**
+ * @tc.name: IndirectAncestorCrossAxisDeathTest001
+ * @tc.desc: FEAT-027 AC-6: an axis-incompatible scroll ancestor aborts even through intermediate containers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectAncestorCrossAxisDeathTest001, TestSize.Level1)
+{
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->GetPattern<ScrollablePattern>()->SetAxis(Axis::HORIZONTAL);
+    auto column = CreatePlainFrameNode(V2::COLUMN_ETS_TAG);
+    auto lazyNode = CreateLazyColumnFrameNode();
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(lazyNode, nullptr);
+    lazyNode->MountToParent(column, DEFAULT_NODE_SLOT, true);
+    column->MountToParent(scrollNode, DEFAULT_NODE_SLOT, true);
+
+    ASSERT_DEATH(LazyLayoutUtils::ValidateLazyLayoutParent(lazyNode, "LazyColumnLayout"), ".*");
+}
+
+/**
+ * @tc.name: IndirectAncestorNonProviderScrollBoundaryDeathTest001
+ * @tc.desc: FEAT-027 AC-5/AC-6: the ancestor search must not cross a scroll context that cannot provide the
+ *           lazy viewport (e.g. a Grid-tagged scrollable between Scroll and the lazy host).
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, IndirectAncestorNonProviderScrollBoundaryDeathTest001, TestSize.Level1)
+{
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->GetPattern<ScrollablePattern>()->SetAxis(Axis::VERTICAL);
+    auto gridLikeNode = FrameNode::CreateFrameNode(
+        V2::GRID_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto lazyNode = CreateLazyColumnFrameNode();
+    ASSERT_NE(gridLikeNode, nullptr);
+    ASSERT_NE(lazyNode, nullptr);
+    lazyNode->MountToParent(gridLikeNode, DEFAULT_NODE_SLOT, true);
+    gridLikeNode->MountToParent(scrollNode, DEFAULT_NODE_SLOT, true);
+
+    ASSERT_DEATH(LazyLayoutUtils::ValidateLazyLayoutParent(lazyNode, "LazyColumnLayout"), ".*");
 }
 } // namespace OHOS::Ace::NG
