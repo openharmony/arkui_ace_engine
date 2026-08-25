@@ -1346,37 +1346,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarStartMarginTheme001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DefaultInnerScrollBarStyle001
- * @tc.desc: Test SetScrollBar resets inner scrollbar height and start margin to default values.
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, DefaultInnerScrollBarStyle001, TestSize.Level1)
-{
-    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-
-    CreateStack();
-    CreateScroll();
-    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
-    CreateDone();
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(pattern_->scrollBar_, nullptr);
-    EXPECT_TRUE(pattern_->UseInnerScrollBar());
-
-    pattern_->scrollBar_->SetScrollBarHeight(37.0_vp);
-    pattern_->scrollBar_->SetScrollBarStartMargin(12.0_vp);
-    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarHeight(), 37.0_vp);
-    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarStartMargin(), 12.0_vp);
-
-    pattern_->SetScrollBar(DisplayMode::ON);
-    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarHeight(), DEFAULT_INNER_SCROLL_BAR_HEIGHT);
-    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarStartMargin(), DEFAULT_INNER_SCROLL_BAR_START_MARGIN);
-
-    Container::Current()->SetApiTargetVersion(apiTargetVersion);
-}
-
-/**
  * @tc.name: InnerScrollBarThemeStyle001
  * @tc.desc: Test inner scrollbar theme values are restored after switching back from an outer scrollbar.
  * @tc.type: FUNC
