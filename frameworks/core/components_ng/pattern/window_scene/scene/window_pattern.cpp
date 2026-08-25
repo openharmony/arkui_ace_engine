@@ -276,6 +276,11 @@ void WindowPattern::OnAttachToFrameNode()
             attachToFrameNodeFlag_ = true;
             auto surfaceNode = session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
+            if (session_->GetSessionInfo().frameNum_ == 0 && !surfaceNode->IsBufferAvailable()) {
+                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch add starting window");
+                CreateStartingWindow();
+                AddChild(host, startingWindow_, startingWindowName_);
+            }
             surfaceNode->SetBufferAvailableCallback(callback_);
         } else if (session_->GetShowRecent() && session_->HasPersistentSnapshot()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch add snapshot");
