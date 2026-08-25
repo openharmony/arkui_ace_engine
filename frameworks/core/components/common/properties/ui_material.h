@@ -163,6 +163,11 @@ public:
     static MaterialType GetConfiguredMaterialType();
     static bool IsMaterialDisabled();
     static bool IsMaterialEnabled();
+    static bool IsSystemApp();
+    // Components whose SystemMaterial is unrestricted: not gated by the scope
+    // (titleBar / bottom TabBar) or self-drawing-overlap rules, regardless of
+    // system-app status. Identified by tag.
+    static bool IsMaterialUnrestrictedComponent(const std::string& tag);
     static bool IsEmptyMaterial(const RefPtr<UiMaterial>& material);
     static RefPtr<UiMaterial> GetInitMaterial(const UiMaterialStyle style,
         const std::optional<bool>& interactive = std::nullopt,

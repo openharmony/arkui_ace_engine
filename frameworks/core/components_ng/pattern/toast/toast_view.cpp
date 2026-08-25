@@ -179,7 +179,7 @@ bool ToastView::HandleUserSetMaterial(
 
     renderContext->UpdateBackBlurStyle(std::nullopt);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(toastInfo.systemMaterial));
+    ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(toastNode), AceType::RawPtr(toastInfo.systemMaterial));
     return true;
 }
 
@@ -209,7 +209,7 @@ bool ToastView::ApplyDefaultMaterial(
 
     renderContext->UpdateBackBlurStyle(std::nullopt);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));
+    ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));
     return true;
 }
 

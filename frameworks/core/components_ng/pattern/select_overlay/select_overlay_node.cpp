@@ -4302,7 +4302,7 @@ void SelectOverlayNode::UpdateNewMaterialProperties(const RefPtr<FrameNode>& fra
         CHECK_NULL_VOID(renderContext);
         if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
             renderContext->UpdateBackBlurStyle(std::nullopt);
-            ViewAbstract::SetSystemMaterial(
+            ViewAbstract::SetSystemMaterialForOverlay(
                 AceType::RawPtr(frameNode), AceType::RawPtr(GetMenuUiMaterial(colorMode)));
         } else {
             // 降档材质

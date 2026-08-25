@@ -425,6 +425,23 @@ void TabBarPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    // Mark this TabBar (and, via UINode::AttachToMainTree inheritance, its
+    // descendants) as being inside a bottom Tabs, so MaterialProcessor permits
+    // material on this subtree in O(1) without walking the ancestor chain. The
+    // bottom position is a Tabs layout property (tabs-specific), so it is
+    // evaluated here in the tabs layer rather than in UINode.
+    auto tabs = AceType::DynamicCast<TabsNode>(host->GetParent());
+    if (!tabs) {
+        return;
+    }
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabs->GetLayoutProperty());
+    if (!tabsLayoutProperty) {
+        return;
+    }
+    if (tabsLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
+        tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START) == BarPosition::END) {
+        host->SetInBottomTabBar(true);
+    }
 }
 
 void TabBarPattern::SetTabBarFinishCallback()
