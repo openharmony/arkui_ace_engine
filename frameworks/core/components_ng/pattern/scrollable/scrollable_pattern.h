@@ -34,6 +34,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/scrollable/scroll_snap_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -776,6 +777,36 @@ public:
     {
         return SnapType::NONE_SNAP;
     }
+
+    /**
+     * FEAT-029: item scroll snap strategy stored on the component layout property; overridden by
+     * List/Grid/WaterFlow to read their own property class.
+     */
+    virtual ScrollSnapStrategy GetScrollSnapStrategy() const
+    {
+        return ScrollSnapStrategy();
+    }
+
+    /**
+     * FEAT-029: builds snap candidates only from the currently materialized (visible + cached)
+     * items; overridden by Grid/WaterFlow.
+     */
+    virtual std::vector<ScrollSnapUtils::SnapCandidate> BuildItemSnapCandidates(ScrollSnapAlign align)
+    {
+        return {};
+    }
+
+    // Legal scroll range upper bound used to clamp item snap targets (R-3/R-7).
+    virtual float GetItemSnapMaxOffset() const
+    {
+        return 0.0f;
+    }
+
+    // Shared item snap execution for built-in align strategies and custom providers: candidate
+    // selection (threshold / predicted fling landing / direction step) followed by an
+    // interruptible responsive spring, or by the two-stage provider flow. Returns false when the
+    // strategy is disabled so the Scrollable falls back to the default motion.
+    bool StartItemSnapAnimation(const SnapAnimationOptions& snapAnimationOptions);
 
     virtual bool IsScrollSnap()
     {

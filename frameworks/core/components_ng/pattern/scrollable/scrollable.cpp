@@ -1349,6 +1349,93 @@ void Scrollable::StartScrollSnapAnimation(
     lastVsyncTime_ = context->GetVsyncTime();
 }
 
+void Scrollable::RunItemSnapStage(
+    float endPos, float velocity, bool finalStage, std::function<void(float)>&& onHandoff)
+{
+    endPos_ = endPos;
+    finalPosition_ = endPos;
+    ACE_SCOPED_TRACE("Item snap stage start, start:%f, end:%f, vel:%f, final:%u, id:%d", currentPos_, endPos,
+        velocity, finalStage, nodeId_);
+    AnimationOption option;
+    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
+    if (!NearZero(endPos - currentPos_)) {
+        auto minimumAmplitudeRatio =
+            static_cast<float>(DEFAULT_MINIMUM_AMPLITUDE_PX / std::abs(endPos - currentPos_));
+        minimumAmplitudeRatio = std::min(minimumAmplitudeRatio, RESPONSIVE_SPRING_AMPLITUDE_RATIO);
+        if (LessNotEqualCustomPrecision(minimumAmplitudeRatio,
+            ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO)) {
+            curve->UpdateMinimumAmplitudeRatio(minimumAmplitudeRatio);
+        }
+    }
+    option.SetCurve(curve);
+    snapOffsetProperty_->Set(currentPos_);
+    snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+    updateSnapAnimationCount_++;
+    snapOffsetProperty_->AnimateWithVelocity(option, endPos, velocity,
+        [weak = AceType::WeakClaim(this), id = Container::CurrentId(), finalStage, source = snapAnimationSource_,
+            onHandoff = std::move(onHandoff)]() {
+            ContainerScope scope(id);
+            auto scroll = weak.Upgrade();
+            CHECK_NULL_VOID(scroll);
+            scroll->updateSnapAnimationCount_--;
+            if (scroll->updateSnapAnimationCount_ != 0) {
+                return;
+            }
+            if (finalStage) {
+                scroll->state_ = AnimationState::IDLE;
+                scroll->nextStep_.reset();
+                scroll->axisSnapDistance_ = 0.f;
+                scroll->snapDirection_ = SnapDirection::NONE;
+                ACE_SCOPED_TRACE("Item snap final stage finish, id:%d", scroll->nodeId_);
+                scroll->ProcessScrollMotionStop(source);
+            } else if (onHandoff) {
+                // snapVelocity_ tracks the instantaneous per-frame velocity of the snap property;
+                // use it as the handoff velocity required by the provider contract.
+                onHandoff(scroll->snapVelocity_);
+            }
+        });
+    state_ = AnimationState::SNAP;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
+    MarkNeedFlushAnimationStartTime();
+}
+
+void Scrollable::StartItemSnapTwoStageAnimation(float approachDelta, float scrollSnapVelocity, bool fromScrollBar,
+    std::function<float(float handoffVelocity)>&& targetGetter, int32_t source)
+{
+    snapAnimationFromScrollBar_ = fromScrollBar;
+    snapAnimationSource_ = source;
+    if (!snapOffsetProperty_) {
+        GetSnapProperty();
+    }
+    snapVelocity_ = scrollSnapVelocity;
+
+    auto handoff = [weak = AceType::WeakClaim(this), targetGetter = std::move(targetGetter), fromScrollBar, source](
+                       float handoffVelocity) {
+        auto scroll = weak.Upgrade();
+        CHECK_NULL_VOID(scroll);
+        if (!targetGetter) {
+            return;
+        }
+        float resolved = targetGetter(handoffVelocity);
+        if (!std::isfinite(resolved)) {
+            // Non-finite provider result: keep the end of the approach motion as the final position.
+            return;
+        }
+        scroll->snapAnimationFromScrollBar_ = fromScrollBar;
+        scroll->snapAnimationSource_ = source;
+        scroll->RunItemSnapStage(resolved, handoffVelocity, true, nullptr);
+    };
+
+    if (NearZero(approachDelta)) {
+        handoff(scrollSnapVelocity);
+        return;
+    }
+    RunItemSnapStage(currentPos_ + approachDelta, scrollSnapVelocity, false, std::move(handoff));
+}
+
 void Scrollable::UpdateScrollSnapStartOffset(double offset)
 {
     UpdateScrollSnapEndWithOffset(offset);

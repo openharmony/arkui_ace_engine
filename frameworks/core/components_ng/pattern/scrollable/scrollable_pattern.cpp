@@ -926,6 +926,90 @@ void ScrollablePattern::SetDragEndCallback(const RefPtr<Scrollable>& scrollable)
     scrollable->SetDragEndCallback(std::move(dragEnd));
 }
 
+bool ScrollablePattern::StartItemSnapAnimation(const SnapAnimationOptions& snapAnimationOptions)
+{
+    auto strategy = GetScrollSnapStrategy();
+    if (!strategy.IsEnabled() || !IsScrollable()) {
+        return false;
+    }
+    auto scrollable = GetScrollable();
+    CHECK_NULL_RETURN(scrollable, false);
+    auto currentOffset = static_cast<float>(GetTotalOffset());
+    auto maxOffset = GetItemSnapMaxOffset();
+    auto minOffset = 0.0f;
+
+    if (strategy.hasProvider) {
+        // Custom provider: two-stage snap (approach offset -> handoff -> final snap target).
+        auto decayOffset = std::abs(snapAnimationOptions.snapDelta);
+        auto approachOffset = decayOffset;
+        if (strategy.calculateApproachOffset) {
+            // Negative / non-finite / throwing providers fall back to the natural decay offset.
+            auto resolved = strategy.calculateApproachOffset(snapAnimationOptions.animationVelocity, decayOffset);
+            if (std::isfinite(resolved) && GreatOrEqual(resolved, 0.0)) {
+                approachOffset = static_cast<float>(resolved);
+            }
+        }
+        float direction = !NearZero(snapAnimationOptions.animationVelocity)
+                              ? (snapAnimationOptions.animationVelocity > 0.0f ? 1.0f : -1.0f)
+                              : (snapAnimationOptions.snapDelta >= 0.0f ? 1.0f : -1.0f);
+        auto snapFunc = strategy.calculateSnapOffset;
+        auto align = strategy.align;
+        auto velocity = snapAnimationOptions.animationVelocity;
+        auto predictDelta = snapAnimationOptions.snapDelta;
+        auto targetGetter = [weak = WeakClaim(this), currentOffset, minOffset, maxOffset, snapFunc, align, velocity,
+                                predictDelta](float handoffVelocity) -> float {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, currentOffset);
+            if (snapFunc) {
+                auto resolved = snapFunc(handoffVelocity);
+                if (std::isfinite(resolved)) {
+                    return ScrollSnapUtils::ClampSnapOffset(
+                        static_cast<float>(resolved), minOffset, maxOffset);
+                }
+            }
+            // Provider fallback: the built-in alignment target when an align is also configured,
+            // otherwise the end of the approach motion.
+            if (align == ScrollSnapAlign::NONE) {
+                return currentOffset;
+            }
+            auto candidates = pattern->BuildItemSnapCandidates(align);
+            auto selection = ScrollSnapUtils::SelectSnapTarget(candidates, currentOffset, handoffVelocity,
+                predictDelta, ScrollSnapUtils::DEFAULT_SNAP_THRESHOLD, Scrollable::GetVelocityScale());
+            if (!selection.found) {
+                return currentOffset;
+            }
+            return ScrollSnapUtils::ClampSnapOffset(selection.targetOffset, minOffset, maxOffset);
+        };
+        scrollable->StartItemSnapTwoStageAnimation(approachOffset * direction,
+            snapAnimationOptions.animationVelocity, snapAnimationOptions.fromScrollBar, std::move(targetGetter),
+            snapAnimationOptions.source);
+        return true;
+    }
+
+    // Built-in align strategy: deterministic candidate selection then an interruptible spring.
+    auto candidates = BuildItemSnapCandidates(strategy.align);
+    if (candidates.empty()) {
+        return false;
+    }
+    auto selection = snapAnimationOptions.snapDirection != SnapDirection::NONE
+        ? ScrollSnapUtils::SelectByDirection(
+            candidates, currentOffset, snapAnimationOptions.snapDirection == SnapDirection::FORWARD)
+        : ScrollSnapUtils::SelectSnapTarget(candidates, currentOffset, snapAnimationOptions.animationVelocity,
+            snapAnimationOptions.snapDelta, ScrollSnapUtils::DEFAULT_SNAP_THRESHOLD,
+            Scrollable::GetVelocityScale());
+    if (!selection.found) {
+        return false;
+    }
+    auto target = ScrollSnapUtils::ClampSnapOffset(selection.targetOffset, minOffset, maxOffset);
+    auto delta = target - currentOffset;
+    if (NearZero(delta)) {
+        return true;
+    }
+    scrollable->StartScrollSnapAnimation(
+        delta, snapAnimationOptions.animationVelocity, snapAnimationOptions.fromScrollBar, snapAnimationOptions.source);
+    return true;
+}
+
 void ScrollablePattern::SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);

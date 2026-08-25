@@ -310,6 +310,46 @@ struct SnapAnimationOptions {
     bool fromScrollBar = false; // stop spring animation? true: stop spring animation,false: continue spring animation
 };
 
+/**
+ * FEAT-029: shared item scroll snap strategy contract for List/Grid/WaterFlow.
+ *
+ * Mirrors the public ArkTS `scrollSnapStrategy(strategy?: ScrollSnapAlign | ScrollSnapOffsetProvider)`
+ * declaration (interface_sdk-js PR #35304):
+ *  - built-in strategy: ScrollSnapAlign START/CENTER/END, item anchors align to the main-axis snap line;
+ *  - custom provider: two-stage snap. `calculateApproachOffset(velocity, decayOffset)` decides the approach
+ *    offset magnitude of a fling (negative/non-finite/exception falls back to natural friction decay);
+ *    `calculateSnapOffset(velocity)` decides the absolute final snap target at handoff (non-finite/exception
+ *    falls back to the natural snap target, result clamped to the legal scroll range).
+ *
+ * Stored as a layout property. `ScrollSnapAlign::NONE` without a provider disables the capability.
+ */
+using SnapApproachOffsetFunc = std::function<double(double velocity, double decayOffset)>;
+using SnapOffsetFunc = std::function<double(double velocity)>;
+
+struct ScrollSnapStrategy {
+    ScrollSnapAlign align = ScrollSnapAlign::NONE;
+    bool hasProvider = false;
+    SnapApproachOffsetFunc calculateApproachOffset;
+    SnapOffsetFunc calculateSnapOffset;
+
+    bool IsEnabled() const
+    {
+        return hasProvider || align != ScrollSnapAlign::NONE;
+    }
+
+    // Callback identity is not comparable; only the declarative part participates in equality so that
+    // a property update always re-evaluates when the declarative part changes.
+    bool operator==(const ScrollSnapStrategy& other) const
+    {
+        return align == other.align && hasProvider == other.hasProvider;
+    }
+
+    bool operator!=(const ScrollSnapStrategy& other) const
+    {
+        return !(*this == other);
+    }
+};
+
 // app tail animation
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
