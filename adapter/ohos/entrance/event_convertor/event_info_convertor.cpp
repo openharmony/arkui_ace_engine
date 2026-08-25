@@ -24,7 +24,6 @@
 namespace OHOS::Ace::NG {
 const int32_t COMPATIBLE_INPUT_MODE = 1;
 const int32_t DISABLE_TRANSFORM = 8;
-const char MULTI_MODAL_INPUT_OPTIONS[] = "multiModalInputOptions";
 const char MOUSE_2_TOUCH_EVENT_MODE[] = "mouse2TouchEventMode";
 const char MOUSE_2_TOUCH_EVENT_MODE_XCOMPONENT_AND_WEB_ONLY[] = "xcomponentAndWebOnly";
 const char CONTEXT_MENU_OPTIONS[] = "contextMenuOptions";
@@ -222,14 +221,7 @@ EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::GetRightMouse
 bool EventInfoConvertor::IsRightMouseMappingEnabled(bool& outEnabled, std::vector<std::string>& outComponents)
 {
     auto configResult = GetRightMouse2LongPressConfig(outEnabled, outComponents);
-    if (configResult == Mouse2TouchEventModeResult::UNMATCHED ||
-        configResult == Mouse2TouchEventModeResult::NOT_FOUND) {
-        return false;
-    }
-    if (configResult == Mouse2TouchEventModeResult::INIT_FAILED) {
-        return false;
-    }
-    return outEnabled;
+    return configResult == Mouse2TouchEventModeResult::MATCHED && outEnabled;
 }
 
 } // namespace OHOS::Ace::NG

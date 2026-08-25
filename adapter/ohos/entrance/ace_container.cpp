@@ -1598,10 +1598,11 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& mouseTargetHitCallback = [context = pipelineContext_](const MouseEvent& event,
+    auto&& mouseTargetHitCallback = [weakPipeline = WeakPtr<NG::PipelineContext>(
+        AceType::DynamicCast<NG::PipelineContext>(pipelineContext_))](const MouseEvent& event,
         const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& tagWhitelist,
         int32_t& longPressDuration) -> bool {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        auto pipeline = weakPipeline.Upgrade();
         CHECK_NULL_RETURN(pipeline, false);
         return pipeline->HitTestMouseTargetForMapping(event, node, tagWhitelist, longPressDuration);
     };

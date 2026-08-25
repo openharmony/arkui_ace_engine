@@ -3973,7 +3973,7 @@ bool FrameNode::IsMouseTargetHit(const MouseEvent& event, const PointF& parentRe
 
     bool ret = tagAllowed && !isOutOfRegion;
     if (ret) {
-        auto gestureHub = GetOrCreateGestureEventHub();
+        auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
         if (gestureHub) {
             auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
             if (longPressRecognizer) {
