@@ -48,7 +48,6 @@ SymbolGlyph 已完成组件化改造（在 `adapter/ohos/osal/dynamic_module_hel
 | Custom Modifier | `frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_custom_modifier.h` | 自定义字形/扩展 |
 | node_modifier 委托层 | `frameworks/core/interfaces/native/node/node_symbol_glyph_modifier.h` | 经 `DynamicModuleHelper` 转发到动态模块 |
 
-组件化改造参考：`./组件化重构通用方案.md`（如存在）。改造后 JSView 与 Bridge 双路径统一到 `pattern/symbol/bridge/`，输出独立 so。
 
 ### 外部依赖入口
 
@@ -85,4 +84,4 @@ Dump：共享 `TextPattern` dump 路径；属性经 `TextLayoutProperty` SymbolS
 ## 相关主题
 
 - [Text](./text.md)（SymbolGlyph 复用 TextPattern）
-- [StyledString](../capabilities/styled-string.md)（属性字符串，TextSpan 体系）
+- [StyledString](../../capabilities/styled-string.md)（属性字符串，TextSpan 体系）

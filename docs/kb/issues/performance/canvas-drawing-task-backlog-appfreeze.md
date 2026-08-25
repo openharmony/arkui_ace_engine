@@ -63,11 +63,11 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 | 5 | 限制单帧绘制量后复测 | 单帧耗时和任务数量下降，不再触发 `UI_BLOCK_6S` | 继续排查单条指令复杂度及其他 UI 线程耗时 |
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/canvas/canvas_render_context_deferred.cpp:30-38`：`PushTask` 将绘制任务加入 `tasks_`，并在任务数达到 100000 的整数倍时记录诊断信息。
-- `frameworks/core/components_ng/pattern/canvas/canvas_render_context_deferred.cpp:41-53`：`NeedRender` 判断队列是否非空，`FlushTask` 遍历执行全部任务后清空队列。
-- `frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp:59-69`：`CanvasPaintMethod::PushTask` 提交任务并将 Canvas 标记为需要渲染。
-- `frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp:84-104`：`UpdateContentModifier` 检测到待渲染任务后调用 `FlushTask`。
-- `frameworks/core/components_ng/pattern/canvas/canvas_modifier.cpp:120`：Dump 信息中的 `CommandSize` 可辅助判断绘制命令规模。
+- `frameworks/core/components_ng/pattern/canvas/canvas_render_context_deferred.cpp`：`PushTask` 将绘制任务加入 `tasks_`，并在任务数达到 100000 的整数倍时记录诊断信息。
+- `frameworks/core/components_ng/pattern/canvas/canvas_render_context_deferred.cpp`：`NeedRender` 判断队列是否非空，`FlushTask` 遍历执行全部任务后清空队列。
+- `frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp`：`CanvasPaintMethod::PushTask` 提交任务并将 Canvas 标记为需要渲染。
+- `frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp`：`UpdateContentModifier` 检测到待渲染任务后调用 `FlushTask`。
+- `frameworks/core/components_ng/pattern/canvas/canvas_modifier.cpp`：Dump 信息中的 `CommandSize` 可辅助判断绘制命令规模。
 
 #### 应用后台仍持续绘制排查
 
@@ -88,10 +88,10 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 公开 API 示例参见：[CanvasRenderingContext2D onDetach/off(onDetach)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-canvasrenderingcontext2d#offondetach13)。
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp:1113-1123`：Canvas 可见性变化传递给 PaintMethod。
-- `frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp:1151-1166`：在立即渲染与延迟渲染上下文之间切换。
-- `frameworks/core/components_ng/pattern/canvas/canvas_render_context_immediate.cpp:21-30`：立即渲染模式在不可见时跳过当前绘制任务。
-- `frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp:95-110`：设置和触发 CanvasRenderingContext2D 解绑回调。
+- `frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp`：Canvas 可见性变化传递给 PaintMethod。
+- `frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp`：在立即渲染与延迟渲染上下文之间切换。
+- `frameworks/core/components_ng/pattern/canvas/canvas_render_context_immediate.cpp`：立即渲染模式在不可见时跳过当前绘制任务。
+- `frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp`：设置和触发 CanvasRenderingContext2D 解绑回调。
 
 #### 6 秒 AppFreeze 判定排查
 
@@ -103,10 +103,10 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 | 4 | 完成应用侧绘制量和生命周期整改后复测 | UI 线程阻塞时间下降且不再达到 6 秒 | Canvas 绘制可能不是唯一或主要耗时来源 |
 
 关键代码定位：
-- `frameworks/core/common/watch_dog.cpp:28-30`：WatchDog 使用 3 秒、2 秒和 1 秒的分阶段检查周期。
-- `frameworks/core/common/watch_dog.cpp:240-260`：线程持续无响应时由 WARNING 进入 FREEZE 状态。
-- `adapter/ohos/osal/event_report.cpp:425-443`：FREEZE 状态映射为 `UI_BLOCK_6S`。
-- `adapter/ohos/build/hisysevent.yaml:145-151`：`UI_BLOCK_6S` 定义为线程阻塞 6 秒。
+- `frameworks/core/common/watch_dog.cpp`：WatchDog 使用 3 秒、2 秒和 1 秒的分阶段检查周期。
+- `frameworks/core/common/watch_dog.cpp`：线程持续无响应时由 WARNING 进入 FREEZE 状态。
+- `adapter/ohos/osal/event_report.cpp`：FREEZE 状态映射为 `UI_BLOCK_6S`。
+- `adapter/ohos/build/hisysevent.yaml`：`UI_BLOCK_6S` 定义为线程阻塞 6 秒。
 
 ## 修复方案
 
@@ -124,11 +124,11 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 6. 复核正常前台绘制结果，确保减少或拆分指令没有造成画面缺失。
 
 仓内现有测试验证了延迟任务入队、批量刷新、立即模式可见性和上下文解绑回调等基础机制，但没有覆盖完整的应用 AppFreeze 场景：
-- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp:66-76`：延迟任务入队后不会立即执行。
-- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp:84-95`：多个延迟任务可以连续入队。
-- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp:103-120`：`FlushTask` 执行全部任务并清空队列。
-- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp:642-656`：立即渲染模式下不可见时不执行绘制任务。
-- `test/unittest/core/pattern/canvas/canvas_test_ng.cpp:466-488`：CanvasRenderingContext2D 解绑回调。
+- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp`：延迟任务入队后不会立即执行。
+- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp`：多个延迟任务可以连续入队。
+- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp`：`FlushTask` 执行全部任务并清空队列。
+- `test/unittest/core/pattern/canvas/canvas_render_context_test.cpp`：立即渲染模式下不可见时不执行绘制任务。
+- `test/unittest/core/pattern/canvas/canvas_test_ng.cpp`：CanvasRenderingContext2D 解绑回调。
 
 ## 关联变更
 
@@ -153,7 +153,6 @@ Canvas 延迟任务队列及 `FlushTask` 调用链用于解释问题发生机制
 
 ## 相关主题
 
-- `docs/kb/components/shape/canvas.md`
-- Canvas 功能域：`05-14-02`
-- Canvas Spec：`specs/05-ui-components/14-drawing-components/02-canvas/`（当前目录尚未建立，行为以源码、测试及公开 API 文档为准）
+- [canvas](../../components/shape/canvas.md)
+- [Canvas 功能域：`05-14-02`](../../components/shape/canvas.md)
 - [CanvasRenderingContext2D onDetach/off(onDetach)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-canvasrenderingcontext2d#offondetach13)

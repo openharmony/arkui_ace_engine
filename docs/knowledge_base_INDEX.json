@@ -437,26 +437,6 @@
       "last_updated": "2026-05-23"
     },
     {
-      "name": "ArcScrollBar",
-      "name_cn": "弧形滚动条",
-      "category": "advanced",
-      "type": "component",
-      "keywords": [
-        "ArcScrollBar",
-        "弧形滚动条",
-        "滚动条",
-        "圆弧",
-        "ScrollBar"
-      ],
-      "aliases": [
-        "Arc ScrollBar",
-        "弧形Scrollbar",
-        "弧形滚动条组件"
-      ],
-      "file_path": "pattern/arcScrollBar/ArcScrollBar_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
-    },
-    {
       "name": "Pipeline",
       "name_cn": "渲染管线模块",
       "category": "system",
@@ -475,56 +455,6 @@
       ],
       "file_path": "pattern/pipeline/Pipeline_Knowledge_Base.md",
       "last_updated": "2026-05-23"
-    },
-    {
-      "name": "TextArea",
-      "name_cn": "多行文本输入组件",
-      "category": "rich_text",
-      "type": "component",
-      "keywords": [
-        "TextArea",
-        "多行输入",
-        "文本域",
-        "输入框",
-        "编辑"
-      ],
-      "aliases": [
-        "TextArea组件",
-        "文本域",
-        "多行文本"
-      ],
-      "file_path": "pattern/text_area/TextArea_Knowledge_Base_CN.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_area.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textArea.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.static.d.ets"
-      }
-    },
-    {
-      "name": "ScrollBar",
-      "name_cn": "滚动条组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "ScrollBar",
-        "滚动条",
-        "scroll bar",
-        "滑块",
-        "滚动指示"
-      ],
-      "aliases": [
-        "ScrollBar组件",
-        "滚动条",
-        "Scrollbar"
-      ],
-      "file_path": "pattern/scrollBar/ScrollBar_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll_bar.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scrollBar.static.d.ets"
-      }
     },
     {
       "name": "TextDrag",

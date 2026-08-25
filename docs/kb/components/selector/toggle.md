@@ -125,6 +125,5 @@ Toggle 已完成组件化改造，JSView 文件不存在，Bridge 和动态属�
 
 ## 相关主题
 
-- Checkbox 组件（独立组件，与 Toggle(type=Checkbox) 共享 CheckBoxPattern 基类）
-- Button 组件（ToggleButtonPattern 继承 ButtonPattern）
-- 组件化改造通用方案
+- [Checkbox 组件（独立组件，与 Toggle(type=Checkbox) 共享 CheckBoxPattern 基类）](checkbox.md)
+- [Button 组件（ToggleButtonPattern 继承 ButtonPattern）](../basic/button.md)

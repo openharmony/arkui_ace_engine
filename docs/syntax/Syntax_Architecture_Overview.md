@@ -1498,8 +1498,8 @@ private:
 | 文档 | 路径 | 说明 |
 |------|------|------|
 | **架构总览** | `docs/syntax/Syntax_Architecture_Overview.md` | 当前文档，模块全貌 |
-| **渲染控制语法（if/else + ForEach + 共享框架）** | `docs/kb/syntax/render_control.md` | 渲染控制语法上下文（ForEach、if/else、ForEachBaseNode 共享框架） |
-| **LazyForEach** | `docs/kb/syntax/lazy_for_each.md` | LazyForEach 懒加载循环渲染上下文 |
+| **渲染控制语法（if/else + ForEach + 共享框架）** | `docs/kb/syntax/render-control.md` | 渲染控制语法上下文（ForEach、if/else、ForEachBaseNode 共享框架） |
+| **LazyForEach** | `docs/kb/syntax/lazy-for-each.md` | LazyForEach 懒加载循环渲染上下文 |
 | **Repeat（含虚拟滚动）** | `docs/kb/syntax/repeat.md` | Repeat 循环渲染 + 虚拟滚动 v2 + 模板化上下文 |
 | **条件渲染** | `docs/syntax/Conditional_Rendering_Guide.md` | IfElse 条件渲染专题 |
 | **特殊语法组件** | `docs/syntax/Special_Syntax_Components.md` | WithTheme、ContentSlot 专题 |

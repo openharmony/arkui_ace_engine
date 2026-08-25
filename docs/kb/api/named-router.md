@@ -56,6 +56,6 @@ ArkUI 命名路由通过 `@ohos.router.pushNamedRoute` / `replaceNamedRoute` 接
 
 ## 相关主题
 
-- Router 路由管理
-- Navigation 导航容器
-- NavDestination
+- [Router 路由管理](router.md)
+- [Navigation 导航容器](../components/container/navigation.md)
+- [NavDestination](../components/container/navdestination.md)

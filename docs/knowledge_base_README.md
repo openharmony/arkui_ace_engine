@@ -172,11 +172,11 @@ PY
 - 2026-06-27：Text 迁移完成后从旧 `knowledge_base_INDEX.json` 移除，未迁移旧 KB 仍保留。
 - 2026-06-27：Image 迁移到 `docs/kb/components/media/image.md`，旧 KB 已移除，旧索引已更新（59 条）。
 - 2026-07-28：按 9 个长期规格（04-06-01、04-06-06、04-19-01、05-12-02、05-16-01、05-16-02、07-05-01、07-05-02、07-05-03）新增 9 个新版 KB，`context_registry.json` 条目更新至 27。
-- 新增能力/架构/组件 KB：`capabilities/placeholder_component.md`、`capabilities/node_adapter.md`、`architecture/component_reuse_framework.md`、`components/embedded/ability_component.md`、`components/custom-node/node_container.md`、`components/custom-node/content_slot.md`。
-- 迁移旧语法 KB 到 `docs/kb/syntax/`：`render_control.md`（合并 ForEach + if/else + 共享框架，旧 `ForEach` KB 已移除）、`lazy_for_each.md`、`repeat.md`（合并 Repeat + RepeatVirtualScroll）。
+- 新增能力/架构/组件 KB：`capabilities/placeholder-component.md`、`capabilities/node-adapter.md`、`architecture/component-reuse-framework.md`、`components/embedded/ability-component.md`、`components/custom-node/node-container.md`、`components/custom-node/content-slot.md`。
+- 迁移旧语法 KB 到 `docs/kb/syntax/`：`render-control.md`（合并 ForEach + if/else + 共享框架，旧 `ForEach` KB 已移除）、`lazy-for-each.md`、`repeat.md`（合并 Repeat + RepeatVirtualScroll）。
 - 旧 `ForEach/LazyForEach/Repeat/RepeatVirtualScroll_Knowledge_Base.md` 已删除，旧索引移除对应 4 条（53 → 49 条）。
-- 2026-07-10：ImageAnimator 迁移到 `docs/kb/components/media/image_animator.md`，旧 KB 已移除，旧索引已更新（57 条）。
-- 2026-07-10：新增 DrawableDescriptor 通用能力 KB：`docs/kb/capabilities/drawable_descriptor.md`。
+- 2026-07-10：ImageAnimator 迁移到 `docs/kb/components/media/image-animator.md`，旧 KB 已移除，旧索引已更新（57 条）。
+- 2026-07-10：新增 DrawableDescriptor 通用能力 KB：`docs/kb/capabilities/drawable-descriptor.md`。
 - 2026-07-11：TextPicker、DatePicker、TimePicker、UIPickerComponent 迁移到 `docs/kb/components/selector/`，旧 KB 已移除，旧索引已更新（53 条）。
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
@@ -188,8 +188,8 @@ PY
 - 2026-07-27：新增 Pixel Rounding 与 MediaQuery 新版 KB；新版 registry 增至 66 条，旧索引保持 46 条。
 - 2026-07-27：新增 Preview Platform Adaptation 新版 KB；对应架构设计已存在，新版 registry 增至 67 条，旧索引保持 46 条。
 - 2026-07-29：新增 Custom Measure/Layout 新版 KB；补充自定义组件现行回调与已废弃 API 的兼容实现边界。新版 registry 增至 68 条，旧索引保持 46 条。
-- 2026-07-29：迁移 RichEditor 到 `docs/kb/components/basic/rich_editor.md`，旧 KB 已移除，旧索引入口及 rich_text 分类已移除（旧索引 47 条）。新版 registry 增至 43 条，关联 Spec `05-09-02`（9 个 Feat spec + 1 个 design.md）。
-- 2026-07-29：迁移 Grid 到 `docs/kb/components/container/grid.md`，旧 KB 已移除，旧索引入口已移除（旧索引减至 45 条）；新增 GridItem KB `docs/kb/components/container/grid_item.md`。registry 增至 70 条。
+- 2026-07-29：迁移 RichEditor 到 `docs/kb/components/basic/rich-editor.md`，旧 KB 已移除，旧索引入口及 rich_text 分类已移除（旧索引 47 条）。新版 registry 增至 43 条，关联 Spec `05-09-02`（9 个 Feat spec + 1 个 design.md）。
+- 2026-07-29：迁移 Grid 到 `docs/kb/components/container/grid.md`，旧 KB 已移除，旧索引入口已移除（旧索引减至 45 条）；新增 GridItem KB `docs/kb/components/container/grid-item.md`。registry 增至 70 条。
 - 2026-07-29：迁移 Scroll/List/Refresh/ScrollBar 四个滚动容器旧 KB 到 `docs/kb/components/container/`，补齐 Spec 路由（func_id 05-03-03/05/06/07）。旧 KB 文件删除、旧 INDEX 条目移除（减至 37 条）、context_registry 增至 135 条；rebase 到最新 origin/master 后解决与 Grid 迁移等的冲突（grid 旧 KB 按上游删除处理）。
 
 - 2026-07-29：基于已补录的长期规格与源码新增/迁移 4 个文本类主题 KB。新建 `docs/kb/components/basic/symbol-glyph.md`（SymbolGlyph，复用 TextPattern）与 `docs/kb/capabilities/styled-string.md`（属性字符串，common_capability/api，非组件）；迁移 TextInput 旧 KB 到 `docs/kb/components/basic/text-input.md`、Hyperlink 旧 KB 到 `docs/kb/components/basic/hyperlink.md`，旧文件及旧索引入口移除。新版 registry 增至 88 条，旧索引减至 44 条。

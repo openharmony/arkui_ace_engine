@@ -8,7 +8,7 @@
 
 Progress 是 ArkUI 信息展示类组件中的进度条组件（FuncID 05-10-05），用于显示操作完成比例。当前源码按组件化路径组织，公共契约以 SDK 声明为准，行为定位需要继续回读 ace_engine 的 Pattern、Model、Layout、Paint、bridge、C API 和测试。
 
-本页只提供路由入口，不复制长期规格中的 AC/规则矩阵。具体行为基线见 `arkui-specs/05-ui-components/10-information-display-components/05-progress/Feat-01-progress-full-spec.md`。
+本页只提供路由入口，不复制长期规格中的 AC/规则矩阵。具体行为基线见 `specs/05-ui-components/10-information-display-components/05-progress/Feat-01-progress-full-spec.md`。
 
 ## 快速路由
 
@@ -76,9 +76,8 @@ Progress 已完成组件化改造，优先走 `frameworks/core/components_ng/pat
 
 | Spec | 路径 | 说明 |
 |------|------|------|
-| 长期规格 | `arkui-specs/05-ui-components/10-information-display-components/05-progress/Feat-01-progress-full-spec.md` | 本次补录的 Progress 全量长期规格。 |
-| 设计基线 | `arkui-specs/05-ui-components/10-information-display-components/05-progress/design.md` | Progress 功能域共享设计基线。 |
-| 本仓历史参考 | `specs/05-ui-components/10-information-display-components/05-progress/Feat-01-core-spec.md` | ace_engine 工作区内已有参考规格。 |
+| 长期规格 | `specs/05-ui-components/10-information-display-components/05-progress/Feat-01-progress-full-spec.md` | 本次补录的 Progress 全量长期规格。 |
+| 设计基线 | `specs/05-ui-components/10-information-display-components/05-progress/design.md` | Progress 功能域共享设计基线。 |
 
 ## 常见问题定位
 
@@ -101,8 +100,8 @@ Progress 已完成组件化改造，优先走 `frameworks/core/components_ng/pat
 
 ## 相关主题
 
-- LoadingProgress：独立加载进度组件，和 Progress 同属信息展示但源码路径不同。
-- Gauge：独立仪表盘组件，不应与 Progress 内部 Eclipse/Moon 命名混淆。
-- Text：Capsule 内部 Text 子节点的文本布局和样式承载方。
+- [LoadingProgress：独立加载进度组件，和 Progress 同属信息展示但源码路径不同。](loading-progress.md)
+- [Gauge：独立仪表盘组件，不应与 Progress 内部 Eclipse/Moon 命名混淆。](gauge.md)
+- [Text：Capsule 内部 Text 子节点的文本布局和样式承载方。](../basic/text.md)
 - ContentModifier：Progress 自定义内容机制所在的通用扩展能力。
 - Theme/TokenTheme：Progress 默认颜色、尺寸和交互态取值来源。

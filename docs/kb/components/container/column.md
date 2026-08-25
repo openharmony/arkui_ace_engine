@@ -56,7 +56,6 @@ Column **尚未完成组件化改造**：`pattern/linear_layout/` 下没有 `bri
 | Static generated modifier | `frameworks/core/interfaces/native/implementation/column_modifier.cpp` | Static 类型转换、节点构造和属性委托，落到 `ColumnModelNG` / `ColumnModelNGStatic` |
 | C API（通用 Native Node） | `interfaces/native/node/style_modifier.cpp`、`interfaces/native/native_node.h` | Column 没有专属 `column_native_impl.cpp`；公共属性由通用 style modifier 分发到 Column node modifier |
 
-组件化方案可参考仓根目录 `组件化重构通用方案.md`。本页只记录当前已验证路径；实际改造后的目录组织和 SO 归属应以届时源码、BUILD 配置及 `DynamicModuleHelper` 映射为准。
 
 ### 外部依赖入口
 
@@ -107,9 +106,9 @@ Column 功能域：`specs/05-ui-components/01-layout-components/03-column/`（�
 
 ## 相关主题
 
-- ColumnSplit 纵向分割布局：`docs/kb/components/container/column_split.md`
-- Row 横向线性布局：`docs/kb/components/container/row.md`
-- Flex 弹性布局与 Wrap：`docs/kb/components/container/flex.md`
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
-- 布局框架：`docs/kb/architecture/layout-framework.md`
-- 安全区机制：`docs/kb/capabilities/safe-area.md`
+- [ColumnSplit 纵向分割布局](column-split.md)
+- [Row 横向线性布局](row.md)
+- [Flex 弹性布局与 Wrap](flex.md)
+- [基础布局属性](../../capabilities/layout-attributes.md)
+- [布局框架](../../architecture/layout-framework.md)
+- [安全区机制](../../capabilities/safe-area.md)

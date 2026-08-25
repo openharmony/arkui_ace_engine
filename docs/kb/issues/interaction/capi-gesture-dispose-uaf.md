@@ -52,9 +52,9 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 3 | 复现时检查崩溃是否访问 `userData` 指向的已释放内存 | dispose 后 userData 应为 nullptr | 命中即为此根因 |
 
 关键代码定位：
-- `frameworks/core/components_ng/gestures/gesture_info.h:266-272`：`Gesture::SetUserData`，需向 `gestureInfo_` 传播（修复新增 `if (gestureInfo_) gestureInfo_->SetUserData(userData);`）
-- `frameworks/core/interfaces/native/node/node_gesture_modifier.cpp:222-228`：`dispose(ArkUIGesture*)`，依次 `SetDisposeTag(true)` → `SetUserData(nullptr)` → `DecRefCount()`
-- `frameworks/core/components_ng/gestures/gesture_info.h:281-286`：`SetDisposeTag` 同样向 `gestureInfo_` 传播
+- `frameworks/core/components_ng/gestures/gesture_info.h`：`Gesture::SetUserData`，需向 `gestureInfo_` 传播（修复新增 `if (gestureInfo_) gestureInfo_->SetUserData(userData);`）
+- `frameworks/core/interfaces/native/node/node_gesture_modifier.cpp`：`dispose(ArkUIGesture*)`，依次 `SetDisposeTag(true)` → `SetUserData(nullptr)` → `DecRefCount()`
+- `frameworks/core/components_ng/gestures/gesture_info.h`：`SetDisposeTag` 同样向 `gestureInfo_` 传播
 
 #### 识别器裁决回调未检查 disposeTag 排查
 
@@ -65,12 +65,12 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 3 | 检查 `gestureInfo_` 为 nullptr 的分支 | 应放行（`CONTINUE`），仅拦截已 dispose | nullptr 不应 REJECT |
 
 关键代码定位（修复后均前置 disposeTag 检查）：
-- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp:768-771`：`ClickRecognizer::TriggerGestureJudgeCallback`
-- `frameworks/core/components_ng/gestures/recognizers/pan_recognizer.cpp:1013-1016`：`PanRecognizer::TriggerGestureJudgeCallback`
-- `frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp:596-599`：`LongPressRecognizer::TriggerGestureJudgeCallback`
-- `frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.cpp:541-544`：`PinchRecognizer::TriggerGestureJudgeCallback`
-- `frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.cpp:470-473`：`RotationRecognizer::TriggerGestureJudgeCallback`
-- `frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.cpp:520-523`：`SwipeRecognizer::TriggerGestureJudgeCallback`
+- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp`：`ClickRecognizer::TriggerGestureJudgeCallback`
+- `frameworks/core/components_ng/gestures/recognizers/pan_recognizer.cpp`：`PanRecognizer::TriggerGestureJudgeCallback`
+- `frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp`：`LongPressRecognizer::TriggerGestureJudgeCallback`
+- `frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.cpp`：`PinchRecognizer::TriggerGestureJudgeCallback`
+- `frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.cpp`：`RotationRecognizer::TriggerGestureJudgeCallback`
+- `frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.cpp`：`SwipeRecognizer::TriggerGestureJudgeCallback`
 
 ## 修复方案
 
@@ -91,7 +91,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 }
 ```
 
-dispose 路径修复（`node_gesture_modifier.cpp:222-228`）：
+dispose 路径修复（`node_gesture_modifier.cpp`）：
 ```cpp
 void dispose(ArkUIGesture* recognizer)
 {
@@ -119,6 +119,6 @@ void dispose(ArkUIGesture* recognizer)
 
 ## 相关主题
 
-- `docs/kb/capabilities/gesture-modifier.md`：手势 Modifier 代码型 KB（FuncID 04-05-07，含 node_gesture_modifier dispose）
-- `docs/kb/capabilities/gesture-capability.md`：手势能力代码型 KB（FuncID 04-04-06，含各识别器与 GestureReferee）
-- `docs/kb/capabilities/interaction-normalization.md`：交互归一化代码型 KB（FuncID 04-04-11）
+- [gesture-modifier](../../capabilities/gesture-modifier.md)：手势 Modifier 代码型 KB（FuncID 04-05-07，含 node_gesture_modifier dispose）
+- [gesture-capability](../../capabilities/gesture-capability.md)：手势能力代码型 KB（FuncID 04-04-06，含各识别器与 GestureReferee）
+- [interaction-normalization](../../capabilities/interaction-normalization.md)：交互归一化代码型 KB（FuncID 04-04-11）

@@ -79,7 +79,7 @@ Dump 机制功能域：`specs/03-engine-framework/08-dfx-foundation/04-dump-mech
 
 ## 相关主题
 
-- 日志：`docs/kb/architecture/dfx/logging.md`
-- 内存管理：`docs/kb/architecture/dfx/memory-management.md`
-- Trace 打点：`docs/kb/architecture/dfx/trace.md`
-- 布局边界显示：`docs/kb/architecture/dfx/layout-boundary-display.md`
+- [日志](logging.md)
+- [内存管理](memory-management.md)
+- [Trace 打点](trace.md)
+- [布局边界显示](layout-boundary-display.md)

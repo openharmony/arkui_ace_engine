@@ -24,7 +24,7 @@ Radio 是 ArkUI 表单选择类组件，提供单选按钮交互能力，支持 
 | Radio 事件 | `frameworks/core/components_ng/pattern/radio/radio_event_hub.h` | `RadioEventHub`，onChange 等事件 |
 | Radio Dynamic Model | `frameworks/core/components_ng/pattern/radio/radio_model_ng.cpp` | `RadioModelNG`，动态属性写入、节点创建 |
 | Radio Static Model | `frameworks/core/components_ng/pattern/radio/radio_model_static.cpp` | `RadioModelStatic`，静态前端属性写入 |
-| Radio Model 实现 | `frameworks/core/components_ng/pattern/radio/radio_model_impl.cpp` | `RadioModelImpl` |
+| Radio Model 实现 | `frameworks/core/components_ng/pattern/radio/bridge/radio_model_impl.cpp` | `RadioModelImpl` |
 | Radio 无障碍 | `frameworks/core/components_ng/pattern/radio/radio_accessibility_property.cpp` | `RadioAccessibilityProperty` |
 | Radio 主题 | `frameworks/core/components_ng/pattern/radio/radio_theme.h` | Radio 主题定义 |
 | Radio Modifier | `frameworks/core/components_ng/pattern/radio/radio_modifier.h` | Radio Modifier 定义 |
@@ -99,6 +99,5 @@ Radio 已完成组件化改造，JSView 文件不存在，Bridge 和动态属性
 
 ## 相关主题
 
-- Checkbox/CheckboxGroup 组件（多选组件，同属选择类组件）
-- Toggle 组件（开关组件，同属选择类组件）
-- 组件化改造通用方案
+- [Checkbox/CheckboxGroup 组件（多选组件，同属选择类组件）](checkbox.md)
+- [Toggle 组件（开关组件，同属选择类组件）](toggle.md)

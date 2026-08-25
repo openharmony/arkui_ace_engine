@@ -142,10 +142,10 @@ FlushVsync(nano, frameCount):
 
 ## 相关主题
 
-- NG 布局框架：`docs/kb/architecture/layout-framework.md`（FrameNode/LayoutWrapper/LayoutAlgorithm/GeometryNode 细节）
-- 多级渲染管线：`docs/kb/architecture/multi-level-render-pipeline.md`（子管线与多容器 VSync 协调）
-- OH 平台适配层：`docs/kb/architecture/oh-platform-adapter.md`（Container/AceContainer/RosenWindow）
-- 编译构建：`docs/kb/architecture/build-system.md`（旧管线 vs NG 管线构建选择）
-- 窗口机制：`docs/kb/architecture/window-mechanism.md`（Rosen Window 窗口管理）
+- [NG 布局框架](layout-framework.md)（FrameNode/LayoutWrapper/LayoutAlgorithm/GeometryNode 细节）
+- [多级渲染管线（子管线与多容器 VSync 协调）](multi-level-render-pipeline.md)
+- [OH 平台适配层](oh-platform-adapter.md)（Container/AceContainer/RosenWindow）
+- [编译构建（旧管线 vs NG 管线构建选择）](build-system.md)
+- [窗口机制（Rosen Window 窗口管理）](window-mechanism.md)
 - [渲染树同步](render-tree-sync.md) — RebuildRenderContextTree 的同步触发与 FlushVsync 内延迟合并执行路径
 - [同帧下树重新上树 isPendingState_ 状态错乱](../issues/lifecycle/ispending-state-render-tree-diff.md) — isPendingState_ 同帧下树重新上树问题型 KB

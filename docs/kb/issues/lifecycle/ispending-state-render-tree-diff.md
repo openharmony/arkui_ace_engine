@@ -14,6 +14,17 @@ FrameNode::ProcessRenderTreeDiff 中将父节点的 isPendingState_ 作为 isOnM
 - OnAttachToMainRenderTree/OnDetachFromMainRenderTree 生命周期回调在同一帧下树重新上树时漏调或错调
 - 节点实际仍在渲染树上，但 isPendingState_ 为 false，后续状态判断失准
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| architecture | symptom_surface | frame_node | frameworks/core/components_ng/base/frame_node.cpp | verified |
+| capability | root_cause_owner | image_pattern | frameworks/core/components_ng/pattern/image/image_pattern.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -43,19 +54,19 @@ FrameNode::ProcessRenderTreeDiff 中将父节点的 isPendingState_ 作为 isOnM
 | 4 | 检查子节点最终 isPendingState_ 值与实际渲染树状态 | 节点实际在渲染树上，但 isPendingState_ 为 false | 确认根因 |
 
 关键代码定位：
-- `frameworks/core/components_ng/base/frame_node.cpp:3358`（ProcessRenderTreeDiff → AttachToRenderTree 调用点）
-- `frameworks/core/components_ng/base/frame_node.cpp:3365`（ProcessRenderTreeDiff → DetachFromRenderTree 调用点）
-- `frameworks/core/components_ng/base/frame_node.cpp:3396`（AttachToRenderTree 中 isPendingState_ 早退守卫）
-- `frameworks/core/components_ng/base/frame_node.cpp:3379`（DetachFromRenderTree 中 isPendingState_ 清除点）
-- `frameworks/core/components_ng/pattern/image/image_pattern.cpp:1759`（ImagePattern::OnWindowHide 中依赖 IsPendingOnMainRenderTree() 的回收判断）
+- `frameworks/core/components_ng/base/frame_node.cpp`（ProcessRenderTreeDiff → AttachToRenderTree 调用点）
+- `frameworks/core/components_ng/base/frame_node.cpp`（ProcessRenderTreeDiff → DetachFromRenderTree 调用点）
+- `frameworks/core/components_ng/base/frame_node.cpp`（AttachToRenderTree 中 isPendingState_ 早退守卫）
+- `frameworks/core/components_ng/base/frame_node.cpp`（DetachFromRenderTree 中 isPendingState_ 清除点）
+- `frameworks/core/components_ng/pattern/image/image_pattern.cpp`（ImagePattern::OnWindowHide 中依赖 IsPendingOnMainRenderTree() 的回收判断）
 
 ## 修复方案
 
 | 根因类别 | 修复策略 | 关键代码改动点 | 修复/缓解变更 | 关系证据 |
 |----------|----------|---------------|---------------|----------|
-| 父节点 isPendingState_ 作为 isOnMainTree 传递 | ProcessRenderTreeDiff 中恢复使用 renderContext_->IsOnRenderTree() 或使用子节点自身的渲染树状态判断 | frame_node.cpp:3358,3365 | 待修复 | 7e9278af335 将 renderContext_->IsOnRenderTree() 改为 isPendingState_，引入了此问题 |
-| AttachToRenderTree early return 逻辑 | 当节点从旧父节点移到新父节点时，应先 Detach 再 Attach，或允许 Attach 在 isPendingState_=true 时仍执行 | frame_node.cpp:3394-3409 | 待修复 | 03889ac01dc 引入 isPendingState_ 替代 renderContext_->IsOnRenderTree() 检查 |
-| DetachFromRenderTree 错误清除 | DetachFromRenderTree 应检查节点是否仍在渲染树上（如仍在新父节点的 frameChildren_ 中），避免错误清除 | frame_node.cpp:3377-3392 | 待修复 | 03889ac01dc 引入 isPendingState_ 作为唯一状态标记 |
+| 父节点 isPendingState_ 作为 isOnMainTree 传递 | ProcessRenderTreeDiff 中恢复使用 renderContext_->IsOnRenderTree() 或使用子节点自身的渲染树状态判断 | frame_node.cpp | 待修复 | 7e9278af335 将 renderContext_->IsOnRenderTree() 改为 isPendingState_，引入了此问题 |
+| AttachToRenderTree early return 逻辑 | 当节点从旧父节点移到新父节点时，应先 Detach 再 Attach，或允许 Attach 在 isPendingState_=true 时仍执行 | frame_node.cpp | 待修复 | 03889ac01dc 引入 isPendingState_ 替代 renderContext_->IsOnRenderTree() 检查 |
+| DetachFromRenderTree 错误清除 | DetachFromRenderTree 应检查节点是否仍在渲染树上（如仍在新父节点的 frameChildren_ 中），避免错误清除 | frame_node.cpp | 待修复 | 03889ac01dc 引入 isPendingState_ 作为唯一状态标记 |
 
 ## 关联变更
 
@@ -76,8 +87,8 @@ FrameNode::ProcessRenderTreeDiff 中将父节点的 isPendingState_ 作为 isOnM
 - [渲染树同步](../../architecture/render-tree-sync.md) — 渲染树同步机制代码型 KB，覆盖 ProcessRenderTreeDiff 全链路
 - [基础渲染管线](../../architecture/basic-render-pipeline.md) — FlushVsync 编排，RebuildRenderContextTree 在 FlushTask 阶段执行
 - [布局框架](../../architecture/layout-framework.md) — FrameNode Measure/Layout，与渲染树同步在帧编排中的位置
-- [FrameNode](../../capabilities/frame_node.md) — ArkTS FrameNode API，C++ 底层能力提供者
-- [RenderNode](../../capabilities/render_node.md) — RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制
+- [FrameNode](../../capabilities/frame-node.md) — ArkTS FrameNode API，C++ 底层能力提供者
+- [RenderNode](../../capabilities/render-node.md) — RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制
 - [Image](../../components/media/image.md) — ImagePattern::OnAttachToMainRenderTree 和 OnWindowHide 依赖 isPendingState_，受已知缺陷影响
-- [转场动画](../../capabilities/transition_animation.md) — TransitionEffect 的转出动画通过 HasTransitionOutAnimation 影响可见子节点收集
-- [共享元素动画](../../capabilities/geometry_transition.md) — GeometryTransition 触发二次布局和 isDeleteRsNode_ 传播
+- [转场动画](../../capabilities/transition-animation.md) — TransitionEffect 的转出动画通过 HasTransitionOutAnimation 影响可见子节点收集
+- [共享元素动画](../../capabilities/geometry-transition.md) — GeometryTransition 触发二次布局和 isDeleteRsNode_ 传播

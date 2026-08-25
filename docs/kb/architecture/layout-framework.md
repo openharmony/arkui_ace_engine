@@ -104,13 +104,10 @@ Layout Framework 本身是引擎内部机制，没有独立 SDK API。应用侧�
 
 ## 相关主题
 
-- 基础渲染管线 Spec：`specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/`
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
-- 自定义测量/布局：`docs/kb/capabilities/custom-measure-layout.md`
-- 像素取整：`docs/kb/capabilities/pixel-rounding.md`
-- 安全区域机制：`docs/kb/capabilities/safe-area.md`
-- 分割布局：`docs/kb/components/container/column_split.md`、`docs/kb/components/container/row_split.md`
-- 相对布局：`docs/kb/components/container/relative_container.md`
-- 动态布局：`docs/kb/components/container/dynamic_layout.md`
-- 基础布局属性 Spec：`specs/04-common-capability/03-common-attributes/01-layout-attributes/`
-- 组件布局算法：`frameworks/core/components_ng/pattern/<component>/`
+- [基础布局属性](../capabilities/layout-attributes.md)
+- [自定义测量/布局](../capabilities/custom-measure-layout.md)
+- [像素取整](../capabilities/pixel-rounding.md)
+- [安全区域机制](../capabilities/safe-area.md)
+- [分割布局](../components/container/column-split.md)、[row-split](../components/container/row-split.md)
+- [相对布局](../components/container/relative-container.md)
+- [动态布局](../components/container/dynamic-layout.md)

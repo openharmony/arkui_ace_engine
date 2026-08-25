@@ -60,6 +60,6 @@ ArkUI 信息展示类组件 ContentModifier 允许开发者自定义组件内部
 
 ## 相关主题
 
-- 自定义内容-表单类
-- Progress 组件
-- Gauge 组件
+- [自定义内容-表单类](content-modifier-form.md)
+- [Progress 组件](../components/data_display/progress.md)
+- [Gauge 组件](../components/data_display/gauge.md)

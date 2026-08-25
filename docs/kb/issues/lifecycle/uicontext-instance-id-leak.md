@@ -14,6 +14,17 @@ UIContext 动态前端（jsUIContext.js）曾使用手动 `syncInstanceId`/`rest
 - 参数校验失败后，后续 UIContext 方法调用全部指向错误实例
 - UIContext 方法抛出异常后，实例 ID 栈永久错位，整个线程实例管理失效
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | fix_location | common_ani_modifier | frameworks/core/interfaces/native/ani/common_ani_modifier.cpp | verified |
+| capability | fix_location | system_ops_accessor | frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -42,13 +53,13 @@ UIContext 动态前端（jsUIContext.js）曾使用手动 `syncInstanceId`/`rest
 | 3 | 检查是否已使用 `withInstanceId` 包装 | 所有 UIContext 方法应使用 `withInstanceId` | 如果仍使用手动 sync/restore，需替换 |
 
 关键代码定位：
-- `frameworks/bridge/declarative_frontend/engine/jsUIContext.js:2036-2043`：`withInstanceId` 工具函数定义（`try/finally` 保证 restore）
-- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp:55-94`：`SyncInstanceId`/`RestoreInstanceId` 的 C++ 实现
-- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp:35`：`restoreInstanceIds_` 为 `static thread_local std::vector<int32_t>`，非类成员，全线程共享同一栈
-- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp:64`：`SyncInstanceId` 将当前实例 ID 压入 `restoreInstanceIds_` 栈
-- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp:75-81`：`RestoreInstanceId` 空栈时将实例 ID 设为 `INSTANCE_ID_UNDEFINED`（非宏路径）或调用 `CURRENT_ID_POP(0, INSTANCE_ID_UNDEFINED)`（宏路径）
-- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp:113,179-209`：ANI 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceId`/`RestoreInstanceId`，模式相同
-- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp:29,49-78`：C API 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceIdImpl`/`RestoreInstanceIdImpl`，模式相同
+- `frameworks/bridge/declarative_frontend/engine/jsUIContext.js`：`withInstanceId` 工具函数定义（`try/finally` 保证 restore）
+- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`SyncInstanceId`/`RestoreInstanceId` 的 C++ 实现
+- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`restoreInstanceIds_` 为 `static thread_local std::vector<int32_t>`，非类成员，全线程共享同一栈
+- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`SyncInstanceId` 将当前实例 ID 压入 `restoreInstanceIds_` 栈
+- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`RestoreInstanceId` 空栈时将实例 ID 设为 `INSTANCE_ID_UNDEFINED`（非宏路径）或调用 `CURRENT_ID_POP(0, INSTANCE_ID_UNDEFINED)`（宏路径）
+- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp`：ANI 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceId`/`RestoreInstanceId`，模式相同
+- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp`：C API 接口有独立的 `restoreInstanceIds_` 和 `SyncInstanceIdImpl`/`RestoreInstanceIdImpl`，模式相同
 
 #### 栈错位 排查
 
@@ -58,12 +69,12 @@ UIContext 动态前端（jsUIContext.js）曾使用手动 `syncInstanceId`/`rest
 | 2 | 检查 `restoreInstanceIds_` 栈是否可能为空 | 空栈时 `RestoreInstanceId` 会将实例 ID 设为 `INSTANCE_ID_UNDEFINED` | 确认是否会导致实例 ID 失效 |
 
 关键代码定位：
-- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp:35`：`restoreInstanceIds_` 为 `static thread_local` 变量，非类成员
-- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp:73-94`：`RestoreInstanceId` 实现中，空栈时行为取决于 `ENABLE_CONTAINER_SCOPE_TRACKING` 宏：
+- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`restoreInstanceIds_` 为 `static thread_local` 变量，非类成员
+- `frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp`：`RestoreInstanceId` 实现中，空栈时行为取决于 `ENABLE_CONTAINER_SCOPE_TRACKING` 宏：
   - 非宏路径：`ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED)`，实例 ID 被设为无效值
   - 宏路径：`CURRENT_ID_POP(0, INSTANCE_ID_UNDEFINED, CurrentIdSourceType::JS_FRONTEND)`，同样设为无效值但记录追踪信息
-- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp:189-209`：ANI 接口的 `RestoreInstanceId`，空栈时行为类似（非宏路径用 `-1`，与 JS 前端的 `INSTANCE_ID_UNDEFINED` 值相同）
-- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp:58-78`：C API 接口的 `RestoreInstanceIdImpl`，模式相同
+- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp`：ANI 接口的 `RestoreInstanceId`，空栈时行为类似（非宏路径用 `-1`，与 JS 前端的 `INSTANCE_ID_UNDEFINED` 值相同）
+- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp`：C API 接口的 `RestoreInstanceIdImpl`，模式相同
 
 ## 修复方案
 
@@ -74,14 +85,14 @@ UIContext 动态前端（jsUIContext.js）曾使用手动 `syncInstanceId`/`rest
 | 栈错位 | 删除未经 sync 就执行的 restore；需要切换实例的业务调用统一放入 `withInstanceId` | `createFromComponent` 的参数校验仍在闭包外，但校验失败分支不再调用 `restoreInstanceId` | c13dbf04e84aa04b7803fa043b323df5aaacb0d7 (fixed) | commit diff: 删除参数校验失败分支中未配对的 `restoreInstanceId()`，并用 `withInstanceId` 包装后续业务调用 |
 
 **注意：同类问题也存在于 ANI 接口和 C API 接口**，但当前修复仅覆盖了 JS 前端（`jsUIContext.js`）：
-- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp:179-209`：ANI 接口的 `SyncInstanceId`/`RestoreInstanceId` 仍为手动调用模式，若调用方存在提前返回或异常路径，同样可能泄漏
-- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp:49-78`：C API 接口的 `SyncInstanceIdImpl`/`RestoreInstanceIdImpl` 同理
+- `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp`：ANI 接口的 `SyncInstanceId`/`RestoreInstanceId` 仍为手动调用模式，若调用方存在提前返回或异常路径，同样可能泄漏
+- `frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp`：C API 接口的 `SyncInstanceIdImpl`/`RestoreInstanceIdImpl` 同理
 
 ### ANI 路径 DragController 特例
 
 ANI 路径中 DragController 的 `createDragAction` 有两个特有风险点：
 
-1. **UIContextImpl.ets 手动 Sync/Restore 无 try/finally 保护**：`DragControllerImpl.createDragAction()`（`UIContextImpl.ets:494-541`）使用 `_Common_Sync_InstanceId`/`_Common_Restore_InstanceId`，中间代码抛异常时 `Restore_InstanceId` 不会执行，导致实例 ID 栈永久错位。与 JS 前端修复前的问题完全一致。
+1. **UIContextImpl.ets 手动 Sync/Restore 无 try/finally 保护**：`DragControllerImpl.createDragAction()`（`UIContextImpl.ets`）使用 `_Common_Sync_InstanceId`/`_Common_Restore_InstanceId`，中间代码抛异常时 `Restore_InstanceId` 不会执行，导致实例 ID 栈永久错位。与 JS 前端修复前的问题完全一致。
 
 2. **ANI 路径 instanceId 重捕获不一致**：`ANIHandleDragAction()` 在 createDragAction 时设置 `dragAsyncContext->instanceId = Container::CurrentIdSafely()`，但 `ANIHandleDragActionStartDrag()` 在 startDrag 时又用 `Container::CurrentIdSafely()` 重写 instanceId。两个函数均实现于 `frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp`。如果 startDrag 在不同上下文被调用，新值可能覆盖原始值，导致拖拽操作执行在错误的 UI 实例上。NAPI 路径不存在此重捕获行为。
 
@@ -118,5 +129,5 @@ function withInstanceId(instanceId, callback) {
 
 ## 相关主题
 
-- `docs/kb/capabilities/ui-context.md`：UIContext 代码型 KB
-- `docs/kb/architecture/multi-instance-management.md`：多实例管理架构 KB
+- [ui-context](../../capabilities/ui-context.md)：UIContext 代码型 KB
+- [multi-instance-management](../../architecture/multi-instance-management.md)：多实例管理架构 KB

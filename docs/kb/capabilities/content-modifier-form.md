@@ -64,6 +64,6 @@ ArkUI 表单类组件 ContentModifier 允许开发者自定义组件内部渲染
 
 ## 相关主题
 
-- 自定义内容-信息展示类
-- Rating 组件
-- Slider 组件
+- [自定义内容-信息展示类](content-modifier-display.md)
+- [Rating 组件](../components/input-form/rating.md)
+- [Slider 组件](../components/input-form/slider.md)

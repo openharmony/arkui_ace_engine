@@ -22,7 +22,7 @@
 | 渲染转换层（FontWeight vs VariableFontWeight 互斥 + EnableDeviceFontWeightCategory 三态 + decoration 位 OR 合并 + px 转换） | `frameworks/core/components/font/constants_converter.cpp` | `ConvertTxtStyle`/`ConvertTxtTextDecoration` 是真正决策点 |
 | 主题默认值合并 | `frameworks/core/components_ng/pattern/text/text_styles.cpp` | `CreateTextStyleUsingTheme` |
 | 主题默认值定义 | `frameworks/core/components/text/text_theme.h`、`text_theme.cpp` | legacy 主题默认值 |
-| Span 并行存储 | `frameworks/core/components_ng/pattern/span/span_node.cpp` | DEFINE_SPAN_FONT_STYLE_ITEM + 字体加载回调 |
+| Span 并行存储 | `frameworks/core/components_ng/pattern/text/span_node.cpp` | DEFINE_SPAN_FONT_STYLE_ITEM + 字体加载回调 |
 | TextField 并行存储 | `frameworks/core/components_ng/pattern/text_field/text_field_layout_property.h` | FontStyle 组 |
 | C-API 转换分发 | `interfaces/native/node/style_modifier.cpp` | SetTextTextDecoration/SetSpanFont/SetSpanFontWeight |
 | C-API 枚举定义 | `interfaces/native/native_node.h` | NODE_TEXT_DECORATION/NODE_SPAN_FONT/FONT_WEIGHT 等 |
@@ -87,5 +87,5 @@
 
 ## 相关主题
 
-- `Text` 组件（`docs/kb/components/basic/text.md`）— 核心字体属性 API（fontSize/fontColor 等）属组件级规格
+- `Text` 组件（[text](../components/basic/text.md)）— 核心字体属性 API（fontSize/fontColor 等）属组件级规格
 - `FontRegistration`（字体注册）— fontFamily 注册与加载管线

@@ -30,7 +30,7 @@ Scroll 是 ArkUI 的通用可滚动容器组件，继承 `ScrollablePattern`（�
 | 自由滚动控制器 | `frameworks/core/components_ng/pattern/scroll/free_scroll_controller.cpp` | 2D 偏移 |
 | 缩放控制器 | `frameworks/core/components_ng/pattern/scroll/zoom_controller.cpp` | 捏合缩放 |
 | Model（抽象/NG/静态） | `frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp` / `scroll_model_static.cpp` | 属性 Set/Get + 静态 FrameNode 访问器 |
-| 控制器基类 | `frameworks/core/components/scroll/scroll_controller_base.cpp` / `scroll_position_controller.cpp` | Scroller 实现 |
+| 控制器基类 | `frameworks/core/components/scroll/scroll_controller_base.h` / `scroll_position_controller.cpp` | Scroller 实现 |
 | 无障碍 | `frameworks/core/components_ng/pattern/scroll/scroll_accessibility_property.cpp` | a11y 动作 |
 
 ### API 入口
@@ -57,7 +57,6 @@ Scroll 当前未完成组件化改造（无 `bridge/` 子目录、JSView 文件�
 | C API（NDK） | `interfaces/native/native_node.h` | 30+ `NODE_SCROLL_*` 属性、17 `NODE_SCROLL_EVENT_*` 事件枚举 |
 | 前端 Modifier（ArkTS 侧） | `frameworks/bridge/declarative_frontend/ark_modifier/src/scroll_modifier.ts` | ArkTS Scroll Modifier 类 |
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后 JSView 和 Bridge 双路径将统一到 `pattern/scroll/bridge/`，并输出独立 so。
 
 ### 测试入口
 
@@ -108,6 +107,9 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/07-scroll
 
 ## 相关主题
 
-- ScrollBar：独立滚动条经 `Scroller`/`ScrollBarProxy` 与 Scroll 配对，详见 ScrollBar KB
-- List/Grid/WaterFlow：均继承 `ScrollablePattern`，复用同一滚动/嵌套基础设施
-- Tabs/Swiper：可滚动容器族，见各自 KB
+- [ScrollBar：独立滚动条经 `Scroller`/`ScrollBarProxy` 与 Scroll 配对，详见 ScrollBar KB](scroll-bar.md)
+- [List](list.md)
+- [Grid](grid.md)
+- [WaterFlow](waterflow.md)
+- [Tabs](tabs.md)
+- [Swiper](swiper.md)

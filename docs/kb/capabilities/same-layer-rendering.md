@@ -99,7 +99,7 @@ ace_engine 边界止于 `RosenRenderContext::DoTextureExport` → 交付 `Rosen:
 
 ## 相关主题
 
-- NodeContainer（生产者宿主）：`docs/kb/components/custom-node/node_container.md`
-- ContentSlot（命令式节点占位）：`docs/kb/components/custom-node/content_slot.md`
-- 占位组件（自定义节点概念入口）：`docs/kb/capabilities/placeholder_component.md`
-- 组件复用框架：`docs/kb/architecture/component_reuse_framework.md`
+- [NodeContainer（生产者宿主）](../components/custom-node/node-container.md)
+- [ContentSlot（命令式节点占位）](../components/custom-node/content-slot.md)
+- [占位组件（自定义节点概念入口）](placeholder-component.md)
+- [组件复用框架](../architecture/component-reuse-framework.md)

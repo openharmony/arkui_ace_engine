@@ -88,6 +88,6 @@ Inspector 功能域：`specs/03-engine-framework/07-accessibility-mechanism/02-i
 
 ## 相关主题
 
-- DFX Dump 机制：`docs/kb/architecture/dfx/dump-mechanism.md`（Dump 管线，与 Inspector 共用 `InspectorFilter`）
-- 布局回调：`docs/kb/capabilities/inspector-layout-callback.md`（`createComponentObserver` 布局/绘制回调）
-- 无感监听：`docs/kb/capabilities/ui-observer.md`（UIObserver，sibling 04-11-02）
+- [DFX Dump 机制（Dump 管线，与 Inspector 共用 `InspectorFilter`）](../architecture/dfx/dump-mechanism.md)
+- [布局回调](inspector-layout-callback.md)（`createComponentObserver` 布局/绘制回调）
+- [无感监听（UIObserver，sibling 04-11-02）](ui-observer.md)

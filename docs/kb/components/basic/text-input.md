@@ -55,7 +55,6 @@ TextInput 已完成组件化改造（在 `adapter/ohos/osal/dynamic_module_helpe
 | 键盘外观 helper | `frameworks/bridge/declarative_frontend/jsview/js_textfield.cpp` | `ParseKeyboardAppearanceConfig`/`SetKeyboardAppearanceConfig`/`SetSearchKeyboardAppearanceConfig` |
 | node_modifier 委托层 | `frameworks/core/interfaces/native/node/node_text_input_modifier.h` | Set/Reset/Get + event Set/Reset |
 
-组件化改造参考：`./组件化重构通用方案.md`（如存在）。改造后 JSView 与 Bridge 双路径统一到 `pattern/text_input/bridge/`，输出独立 so。
 
 ### 外部依赖入口
 
@@ -98,5 +97,5 @@ Dump：`TextFieldPattern` dump；属性经 `TextFieldLayoutProperty`/`PaintPrope
 ## 相关主题
 
 - [Text](./text.md)（共享排版基础）
-- [StyledString](../capabilities/styled-string.md)（`SetPlaceholderStyledString`）
+- [StyledString](../../capabilities/styled-string.md)（`SetPlaceholderStyledString`）
 - [TextArea](./text-area.md)（共享 TextFieldPattern，若存在）

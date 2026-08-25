@@ -110,7 +110,7 @@ Canvas 已在功能 registry 中登记为 `05-14-02`，目标功能域为 `specs
 
 ## 相关主题
 
-- OffscreenCanvas：`docs/kb/components/shape/offscreen_canvas.md`
-- Shape 组件族：`docs/kb/components/shape/shape.md`
-- Image：`docs/kb/components/media/image.md`
-- Layout Framework：`docs/kb/architecture/layout-framework.md`
+- [OffscreenCanvas](offscreen-canvas.md)
+- [Shape 组件族](shape.md)
+- [Image](../media/image.md)
+- [Layout Framework](../../architecture/layout-framework.md)

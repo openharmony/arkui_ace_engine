@@ -48,7 +48,6 @@ Hyperlink 已完成组件化改造（在 `adapter/ohos/osal/dynamic_module_helpe
 | legacy pipeline impl | `frameworks/core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h/.cpp` | `HyperlinkModelImpl : HyperlinkModel`（用 `HyperlinkComponent`） |
 | node_modifier 委托层 | `frameworks/core/interfaces/native/node/hyperlink_modifier.h/.cpp` + `implementation/hyperlink_modifier.cpp` | 懒加载 DynamicModule，静态 `GetStaticModifier()` |
 
-组件化改造参考：`./组件化重构通用方案.md`（如存在）。改造后 JSView 与 Bridge 双路径统一到 `pattern/hyperlink/bridge/`，输出独立 so。
 
 ### 外部依赖入口
 

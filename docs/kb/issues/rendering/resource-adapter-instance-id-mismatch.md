@@ -14,6 +14,20 @@
 - 某应用创建系统级 Toast 弹窗后，页面间切换触发概率复现
 - 仅在涉及 HSP 包资源的场景下出现，本包资源不受影响
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | symptom_surface | resource_manager | frameworks/core/common/resource/resource_manager.cpp | verified |
+| capability | root_cause_owner | resource_adapter | frameworks/core/components/theme/resource_adapter.h | verified |
+| architecture | root_cause_owner | resource_adapter_impl_v2 | adapter/ohos/osal/resource_adapter_impl_v2.cpp | verified |
+| architecture | root_cause_owner | subwindow_manager | frameworks/base/subwindow/subwindow_manager.cpp | verified |
+| architecture | root_cause_owner | ace_container | adapter/ohos/entrance/ace_container.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -43,10 +57,10 @@
 | 3 | 检查 `AddResourceAdapter` 调用是否使用 `actualInstanceId` 而非原始 `instanceId` | 使用 `actualInstanceId` | 若使用原始 `instanceId`，说明缺少修复 |
 
 关键代码定位：
-- `frameworks/core/common/resource/resource_manager.cpp:54-77`：`GetOrCreateResourceAdapter`，缓存入口，修复点在此
-- `frameworks/core/common/resource/resource_manager.cpp:88-102`：`AddResourceAdapter`，缓存写入，使用 `actualInstanceId` 做 key
-- `frameworks/core/components/theme/resource_adapter.h:281-282`：`CreateNewResourceAdapter` 声明，含 `int32_t& actualInstanceId` 出参
-- `adapter/ohos/osal/resource_adapter_impl_v2.cpp:99-140`：`CreateNewResourceAdapter` 实现，line 106 设置 `actualInstanceId = aceContainer->GetInstanceId()`
+- `frameworks/core/common/resource/resource_manager.cpp`：`GetOrCreateResourceAdapter`，缓存入口，修复点在此
+- `frameworks/core/common/resource/resource_manager.cpp`：`AddResourceAdapter`，缓存写入，使用 `actualInstanceId` 做 key
+- `frameworks/core/components/theme/resource_adapter.h`：`CreateNewResourceAdapter` 声明，含 `int32_t& actualInstanceId` 出参
+- `adapter/ohos/osal/resource_adapter_impl_v2.cpp`：`CreateNewResourceAdapter` 实现，line 106 设置 `actualInstanceId = aceContainer->GetInstanceId()`
 
 #### 多实例并发刷新竞争排查
 
@@ -57,9 +71,9 @@
 | 3 | 检查 `UpdateColorMode` 是否能通过 `GetCacheKeyInstanceId` 正确匹配缓存条目 | 匹配到的适配器与创建时一致 | 若不匹配，说明色彩模式更新被跳过 |
 
 关键代码定位：
-- `frameworks/core/common/resource/resource_manager.cpp:193-208`：`UpdateColorMode`，按 instanceId 过滤刷新适配器
-- `frameworks/core/common/resource/resource_manager.cpp:199-206`：`GetCacheKeyInstanceId` 过滤逻辑
-- `frameworks/base/subwindow/subwindow_manager.cpp:1487-1504`：`serviceToastSubwindows` 系统级 Toast 子窗收集逻辑
+- `frameworks/core/common/resource/resource_manager.cpp`：`UpdateColorMode`，按 instanceId 过滤刷新适配器
+- `frameworks/core/common/resource/resource_manager.cpp`：`GetCacheKeyInstanceId` 过滤逻辑
+- `frameworks/base/subwindow/subwindow_manager.cpp`：`serviceToastSubwindows` 系统级 Toast 子窗收集逻辑
 
 #### 跨包 HSP 资源上下文缺失排查
 
@@ -70,7 +84,7 @@
 | 3 | 检查 `GetAbilityContextByModule` 实现中 `runtimeContext_` 是否有效 | 有效 | 若无效，说明容器未初始化 AbilityRuntime 上下文 |
 
 关键代码定位：
-- `adapter/ohos/osal/resource_adapter_impl_v2.cpp:109`：`GetAbilityContextByModule` 调用点
+- `adapter/ohos/osal/resource_adapter_impl_v2.cpp`：`GetAbilityContextByModule` 调用点
 - `adapter/ohos/entrance/ace_container.cpp`：`AceContainer::GetAbilityContextByModule` 实现（约 line 3473），依赖 `runtimeContext_`
 - `adapter/ohos/entrance/ace_container.cpp`：`isDynamicUIContent` 判断逻辑（约 line 3478，`GetUIContentType() == UIContentType::DYNAMIC_COMPONENT`）
 
@@ -78,9 +92,9 @@
 
 | 根因类别 | 修复策略 | 关键代码改动点 | 典型 PR / Commit 参考 |
 |----------|----------|---------------|----------------------|
-| 实例 ID 缓存键不匹配 | 为 `CreateNewResourceAdapter` 增加 `int32_t& actualInstanceId` 出参，在函数内部获取真实容器实例 ID，`GetOrCreateResourceAdapter` 使用该值做缓存键 | `resource_manager.cpp:69-74`：声明 `actualInstanceId` 并传给工厂函数，`AddResourceAdapter` 使用 `actualInstanceId` | PR #81929 |
-| 多实例并发刷新竞争 | 修复后缓存键与创建实例一致，`UpdateColorMode` 能正确匹配并刷新对应实例的适配器 | `resource_adapter_impl_v2.cpp:106`：`actualInstanceId = aceContainer->GetInstanceId()` | PR #81929 |
-| 跨包 HSP 资源上下文缺失 | 修复后即使系统级弹窗实例创建的无效适配器也会以其自身 instanceId 缓存，不会污染主实例的缓存条目 | `resource_adapter.h:281-282`：签名增加 `int32_t& actualInstanceId` | PR #81929 |
+| 实例 ID 缓存键不匹配 | 为 `CreateNewResourceAdapter` 增加 `int32_t& actualInstanceId` 出参，在函数内部获取真实容器实例 ID，`GetOrCreateResourceAdapter` 使用该值做缓存键 | `resource_manager.cpp`：声明 `actualInstanceId` 并传给工厂函数，`AddResourceAdapter` 使用 `actualInstanceId` | PR #81929 |
+| 多实例并发刷新竞争 | 修复后缓存键与创建实例一致，`UpdateColorMode` 能正确匹配并刷新对应实例的适配器 | `resource_adapter_impl_v2.cpp`：`actualInstanceId = aceContainer->GetInstanceId()` | PR #81929 |
+| 跨包 HSP 资源上下文缺失 | 修复后即使系统级弹窗实例创建的无效适配器也会以其自身 instanceId 缓存，不会污染主实例的缓存条目 | `resource_adapter.h`：签名增加 `int32_t& actualInstanceId` | PR #81929 |
 
 ## 关联案例
 
@@ -98,9 +112,9 @@
 
 ## 相关主题
 
-- `docs/kb/architecture/resource-access.md` — 资源访问（FuncID 03-03-01）
-- `docs/kb/architecture/resource-dynamic-switching.md` — 资源动态切换（FuncID 03-03-04）
-- `docs/kb/architecture/theme-layered-access.md` — 主题分层访问（FuncID 03-03-02）
-- `docs/kb/capabilities/ui-appearance.md` — 色彩模式管理（FuncID 04-16-01）
-- `docs/kb/architecture/subwindow-mechanism.md` — 子窗机制
-- `docs/kb/architecture/multi-instance-management.md` — 多实例管理
+- [resource-access](../../architecture/resource-access.md) — 资源访问（FuncID 03-03-01）
+- [resource-dynamic-switching](../../architecture/resource-dynamic-switching.md) — 资源动态切换（FuncID 03-03-04）
+- [theme-layered-access](../../architecture/theme-layered-access.md) — 主题分层访问（FuncID 03-03-02）
+- [ui-appearance](../../capabilities/ui-appearance.md) — 色彩模式管理（FuncID 04-16-01）
+- [subwindow-mechanism](../../architecture/subwindow-mechanism.md) — 子窗机制
+- [multi-instance-management](../../architecture/multi-instance-management.md) — 多实例管理

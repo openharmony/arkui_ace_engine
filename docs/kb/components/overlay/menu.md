@@ -179,7 +179,6 @@ Menu 已完成组件化改造，主菜单 JSView 文件不存在，Bridge 和动
 
 ## 相关主题
 
-- Dialog 组件（自定义弹窗，同属弹窗类组件）
+- [Dialog 组件（自定义弹窗，同属弹窗类组件）](dialog.md)
 - bindSheet 组件（半模态弹窗，同属弹窗类组件）
-- bindPopup / Popup 组件（气泡弹窗，同属弹窗类组件）
-- 组件化改造通用方案
+- [bindPopup / Popup 组件（气泡弹窗，同属弹窗类组件）](bind-popup.md)

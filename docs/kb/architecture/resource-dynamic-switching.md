@@ -61,6 +61,6 @@ ArkUI 资源动态切换由 ConfigurationChange 结构体（含 ColorMode/Langua
 
 ## 相关主题
 
-- 资源访问
-- 主题分层访问
-- UIAppearance
+- [资源访问](resource-access.md)
+- [主题分层访问](theme-layered-access.md)
+- [UIAppearance](../capabilities/ui-appearance.md)

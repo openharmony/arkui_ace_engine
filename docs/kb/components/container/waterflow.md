@@ -123,6 +123,4 @@ WaterFlow/FlowItem 已完成组件化改造：动态模块映射包含 `WaterFlo
 
 ## 相关主题
 
-- 滚动公共能力：`docs/kb/capabilities/scroll-common-capability.md`。
-- LazyWaterFlowLayout：`frameworks/core/components_ng/pattern/lazy_layout/`。
-- LazyForEach/Repeat 虚拟化：`frameworks/core/components_ng/syntax/`。
+- [滚动公共能力。](../../capabilities/scroll-common-capability.md)

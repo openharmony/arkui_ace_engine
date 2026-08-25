@@ -88,7 +88,7 @@
 
 ## 相关主题
 
-- 总览：`docs/kb/frontend/state_management.md`
-- V1/V2 核心（消费这些基础设施）：`docs/kb/frontend/state_management/v1_core.md`、`v2_core.md`
-- C++ 绑定（`aceConsole`/`aceTrace`/`OnIdle` 反向调用）：`docs/kb/frontend/state_management/cpp_bindings.md`
-- 自定义组件机制（消费 `UpdateFuncRecord`/生命周期 FSM）：`docs/kb/frontend/state_management/custom_component.md`
+- [总览](../state-management.md)
+- [V1/V2 核心（消费这些基础设施）](v1-core.md)、`v2-core.md`
+- C++ 绑定（`aceConsole`/`aceTrace`/`OnIdle` 反向调用）：[cpp-bindings](cpp-bindings.md)
+- [自定义组件机制（消费 `UpdateFuncRecord`/生命周期 FSM）：custom-component](custom-component.md)

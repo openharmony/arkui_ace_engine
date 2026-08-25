@@ -56,7 +56,6 @@ Row **尚未完成组件化改造**：`pattern/linear_layout/` 下没有 `bridge
 | Static generated modifier | `frameworks/core/interfaces/native/implementation/row_modifier.cpp` | Static 类型转换、节点构造和属性委托，落到 `RowModelNG` / `RowModelNGStatic` |
 | C API（通用 Native Node） | `interfaces/native/node/style_modifier.cpp`、`interfaces/native/native_node.h` | Row 没有专属 `row_native_impl.cpp`；公共属性由通用 style modifier 分发到 Row node modifier |
 
-组件化方案可参考仓根目录 `组件化重构通用方案.md`。本页只记录当前已验证路径；实际改造后的目录组织和 SO 归属应以届时源码、BUILD 配置及 `DynamicModuleHelper` 映射为准。
 
 ### 外部依赖入口
 
@@ -108,9 +107,9 @@ Row 功能域：`specs/05-ui-components/01-layout-components/09-row/`（功能 I
 
 ## 相关主题
 
-- RowSplit 横向分割布局：`docs/kb/components/container/row_split.md`
-- Column 纵向线性布局：`docs/kb/components/container/column.md`
-- Flex 弹性布局与 Wrap：`docs/kb/components/container/flex.md`
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
-- 布局框架：`docs/kb/architecture/layout-framework.md`
-- 安全区机制：`docs/kb/capabilities/safe-area.md`
+- [RowSplit 横向分割布局](row-split.md)
+- [Column 纵向线性布局](column.md)
+- [Flex 弹性布局与 Wrap](flex.md)
+- [基础布局属性](../../capabilities/layout-attributes.md)
+- [布局框架](../../architecture/layout-framework.md)
+- [安全区机制](../../capabilities/safe-area.md)

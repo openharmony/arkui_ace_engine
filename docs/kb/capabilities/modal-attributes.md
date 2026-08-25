@@ -58,6 +58,6 @@ ArkUI 模态属性包括 bindSheet（半模态弹窗）和 bindContentCover（�
 
 ## 相关主题
 
-- 弹窗类属性
-- 半模态弹窗
-- 全模态弹窗
+- [弹窗类属性](modal-attributes.md)
+- [半模态弹窗](../components/overlay/sheet.md)
+- [全模态弹窗](../components/overlay/bind-content-cover.md)

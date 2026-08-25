@@ -54,7 +54,7 @@ QRCode 组件已组件化（`is_component_model = true`），具备完整的多�
 ### 相关 Spec
 
 - Spec 域：`specs/05-ui-components/10-information-display-components/06-qrcode`
-- arkui-specs 规格仓：`arkui-specs/05-ui-components/10-information-display-components/06-qr-code/Feat-01-qrcode-display-spec.md`
+- arkui-specs 规格仓：`specs/05-ui-components/10-information-display-components/06-qr-code/Feat-01-qrcode-display-spec.md`
 - FuncID：05-10-06
 
 ## 常见问题定位
@@ -79,4 +79,3 @@ QRCode 组件已组件化（`is_component_model = true`），具备完整的多�
 
 - LayoutFramework（布局框架）
 - ThemeManager（主题管理器）
-- ArkUI_API_Paradigm（API 范式，动态/静态管线选择）
