@@ -36,6 +36,21 @@ bool LazyLayoutUtils::IsAllowedIntermediateNode(const RefPtr<UINode>& node)
            tag == V2::LAZY_COLUMN_LAYOUT_ETS_TAG;
 }
 
+// FEAT-027: any node that owns a scroll context (ScrollablePattern) or is tagged as one of the lazy scroll
+// containers is a hard boundary for the lazy ancestor search. The lazy viewport can only come from the nearest
+// such boundary, and the search must never cross one (a crossed scroll boundary would source the viewport from
+// the wrong scroll context or leave it undeliverable).
+bool LazyLayoutUtils::IsScrollableBoundary(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    if (IsLazyLayoutScrollableContainer(node->GetTag())) {
+        return true;
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->GetPattern<ScrollablePattern>() != nullptr;
+}
+
 bool LazyLayoutUtils::IsVerticalScrollableParent(const RefPtr<UINode>& node)
 {
     return IsScrollableParent(node, Axis::VERTICAL);
@@ -72,18 +87,18 @@ void LazyLayoutUtils::ValidateLazyLayoutParentWithAxis(
             parent = parent->GetParent();
             continue;
         }
-        if (IsAllowedIntermediateNode(parent)) {
+        const auto& parentTag = parent->GetTag();
+        if (!IsScrollableBoundary(parent)) {
+            // FEAT-027: any ordinary FrameNode between the lazy host and its scroll ancestor is a transparent
+            // intermediate of the lazy path. Mark it so the viewport (viewPosRef) flows through its content
+            // constraint, then keep searching upwards.
             parentFrameNode->SetNeedLazyLayout(true);
             parent = parent->GetParent();
             continue;
         }
-        const auto& parentTag = parent->GetTag();
-        if (!IsLazyLayoutScrollableContainer(parentTag)) {
-            LOGF_ABORT("%{public}s cannot be used under the %{public}s",
-                componentName.c_str(), parentTag.c_str());
-        }
         auto scrollable = parentFrameNode->GetPattern<ScrollablePattern>();
-        if (!scrollable) {
+        if (!scrollable || !IsLazyLayoutScrollableContainer(parentTag)) {
+            // A scroll context that cannot provide the lazy viewport is a boundary the search must not cross.
             LOGF_ABORT("%{public}s cannot be used under the %{public}s",
                 componentName.c_str(), parentTag.c_str());
         }
@@ -93,21 +108,31 @@ void LazyLayoutUtils::ValidateLazyLayoutParentWithAxis(
         LOGF_ABORT("%{public}s requires parent %{public}s to be %{public}s direction",
             componentName.c_str(), parentTag.c_str(), axis == Axis::VERTICAL ? "vertical" : "horizontal");
     }
+    // Reached the tree root without any scrollable ancestor: no viewport can ever reach this host.
+    LOGF_ABORT("%{public}s must be used inside a scrollable container", componentName.c_str());
 }
 
 bool LazyLayoutUtils::ValidateAndSetLazyLayoutParent(const RefPtr<FrameNode>& host, Axis axis)
 {
     CHECK_NULL_RETURN(host, false);
+    // Collect the intermediate chain first; it is marked only when a legal same-axis scroll ancestor exists,
+    // so detached estimation paths never publish a lazy path that validation would later reject.
+    std::vector<RefPtr<FrameNode>> intermediateChain;
     auto parent = host->GetParentFrameNode();
-    CHECK_NULL_RETURN(parent, false);
-    if (IsScrollableParent(parent, axis)) {
-        host->SetNeedLazyLayout(true);
-        return true;
-    } else if (IsAllowedIntermediateNode(parent)) {
-        if (ValidateAndSetLazyLayoutParent(parent, axis)) {
+    while (parent) {
+        if (IsScrollableParent(parent, axis)) {
             host->SetNeedLazyLayout(true);
+            for (const auto& intermediate : intermediateChain) {
+                intermediate->SetNeedLazyLayout(true);
+            }
             return true;
         }
+        if (IsScrollableBoundary(parent)) {
+            // Scroll boundary that cannot provide this axis' viewport: never cross it while estimating.
+            return false;
+        }
+        intermediateChain.emplace_back(parent);
+        parent = parent->GetParentFrameNode();
     }
     return false;
 }
@@ -190,8 +215,14 @@ std::optional<ViewPosReference> LazyLayoutUtils::GetViewPosReference(
     const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& extraAllowedTags)
 {
     CHECK_NULL_RETURN(frameNode, std::nullopt);
+    // FEAT-027: nodes marked needLazyLayout (the lazy host plus any intermediate FrameNode of its lazy path)
+    // participate in the viewport chain; legacy whitelisted tags and caller-provided tags stay accepted so
+    // pre-marking orderings keep working.
     if (!IsAllowedIntermediateNode(frameNode) && !IsInExtraTags(frameNode->GetTag(), extraAllowedTags)) {
-        return std::nullopt;
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (!layoutProperty || !layoutProperty->GetNeedLazyLayout()) {
+            return std::nullopt;
+        }
     }
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
@@ -213,20 +244,25 @@ std::optional<ViewPosReference> LazyLayoutUtils::GetViewPosReference(
 
 RefPtr<LazyLayoutPattern> LazyLayoutUtils::GetLazyLayoutPattern(const RefPtr<UINode>& node)
 {
-    auto child = node;
-    while (child) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(child);
-        if (frameNode) {
-            auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
-            if (pattern) {
-                return pattern;
-            }
-            auto layoutProperty = frameNode->GetLayoutProperty();
-            if (!layoutProperty || !layoutProperty->GetNeedLazyLayout()) {
-                return nullptr;
-            }
+    CHECK_NULL_RETURN(node, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (frameNode) {
+        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+        if (pattern) {
+            return pattern;
         }
-        child = child->GetFirstChild();
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (!layoutProperty || !layoutProperty->GetNeedLazyLayout()) {
+            return nullptr;
+        }
+    }
+    // FEAT-027: a marked intermediate may hold the lazy host in any child slot (ordinary siblings are allowed
+    // before/between/after lazy nodes), so descend through every child instead of a first-child spine.
+    for (const auto& child : node->GetChildren()) {
+        auto pattern = GetLazyLayoutPattern(child);
+        if (pattern) {
+            return pattern;
+        }
     }
     return nullptr;
 }

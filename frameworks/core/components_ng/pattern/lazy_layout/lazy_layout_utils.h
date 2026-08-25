@@ -49,6 +49,9 @@ struct ACE_FORCE_EXPORT LazyLayoutUtils {
     static bool IsAllowedIntermediateNode(const RefPtr<UINode>& node);
     static bool IsVerticalScrollableParent(const RefPtr<UINode>& node);
     static bool IsScrollableParent(const RefPtr<UINode>& node, Axis axis);
+    // FEAT-027: true when the node owns a scroll context (ScrollablePattern) or is tagged as one of the lazy
+    // scroll containers (Scroll/List/WaterFlow). The lazy ancestor search treats such nodes as hard boundaries.
+    static bool IsScrollableBoundary(const RefPtr<UINode>& node);
     static void ValidateLazyLayoutParent(const RefPtr<FrameNode>& host, const std::string& componentName);
     static void ValidateLazyLayoutParentWithAxis(
         const RefPtr<FrameNode>& host, const std::string& componentName, Axis axis);
