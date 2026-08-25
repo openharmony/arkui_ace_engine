@@ -19,8 +19,8 @@
 #include <string>
 #include <vector>
 
-#define private public
-#define protected public
+#define PRIVATE public
+#define PROTECTED public
 #include "base/utils/feature_manager.h"
 #include "core/common/event_manager.h"
 #include "core/event/event_info_convertor.h"
@@ -357,7 +357,8 @@ HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled005, TestSize.Level1
 
 HWTEST_F(RightMouseMappingTestNg, LongPressDefaultDuration001, TestSize.Level1)
 {
-    RefPtr<LongPressRecognizer> recognizer = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DEFAULT_DURATION, 1, false);
+    RefPtr<LongPressRecognizer> recognizer = AceType::MakeRefPtr<
+        LongPressRecognizer>(LONG_PRESS_DEFAULT_DURATION, 1, false);
     EXPECT_EQ(recognizer->GetDuration(), LONG_PRESS_DEFAULT_DURATION);
 }
 
