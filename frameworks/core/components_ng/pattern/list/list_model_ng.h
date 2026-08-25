@@ -63,6 +63,7 @@ public:
     void SetMaintainVisibleContentPosition(bool enabled) override;
     void SetStackFromEnd(bool enabled) override;
     void SetSyncLoad(bool enabled) override;
+    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider) override;
     void SetEditModeOptions(EditModeOptions& editModeOptions) override;
     void SetEnableEditMode(bool enableEditMode) override;
     void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) override;

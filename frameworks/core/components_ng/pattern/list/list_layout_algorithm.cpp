@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/list/list_properties.h"
@@ -1469,7 +1470,11 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     auto chainOffset = 0.0f;
     do {
         if ((static_cast<int32_t>(itemPosition_.size()) > prevItemPosCount_) && !syncLoad_ &&
-            layoutWrapper->ReachResponseDeadline()) {
+            layoutWrapper->ReachResponseDeadline() &&
+            !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(layoutWrapper)) {
+            // FEAT-005: with scroll placeholder enabled the loop keeps filling
+            // the viewport with cheap placeholder items instead of deferring
+            // the whole tail to the next frame (blank area).
             measureInNextFrame_ = true;
             return;
         }
@@ -1560,7 +1565,11 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     auto chainOffset = 0.0f;
     do {
         if ((static_cast<int32_t>(itemPosition_.size()) > prevItemPosCount_) && !syncLoad_ &&
-            layoutWrapper->ReachResponseDeadline()) {
+            layoutWrapper->ReachResponseDeadline() &&
+            !ScrollPlaceholderUtils::ShouldContinuePlaceholderLayout(layoutWrapper)) {
+            // FEAT-005: with scroll placeholder enabled the loop keeps filling
+            // the viewport with cheap placeholder items instead of deferring
+            // the whole tail to the next frame (blank area).
             measureInNextFrame_ = true;
             return;
         }

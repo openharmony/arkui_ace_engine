@@ -31,6 +31,7 @@
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_utils.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -179,7 +180,47 @@ PaddingPropertyF* GetPaddingFromHost(RefPtr<FrameNode> node)
     return nullptr;
 }
 
-ListPattern::~ListPattern() = default;
+ListPattern::~ListPattern()
+{
+    UnregisterScrollPlaceHolder();
+}
+
+void ListPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+{
+    scrollPlaceholderProvider_ = provider;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto manager = ScrollPlaceholderUtils::GetManager(host);
+    CHECK_NULL_VOID(manager);
+    if (!scrollPlaceholderProvider_) {
+        manager->UnregisterContainer(host->GetId());
+        return;
+    }
+    auto weakHost = WeakClaim(RawPtr(host));
+    manager->RegisterContainer(
+        weakHost, std::move(provider),
+        [](const ScrollPlaceHolderOptions& options) -> RefPtr<FrameNode> {
+            // Placeholder item shell: a plain ListItem that carries only the
+            // placeholder visual subtree (no swipe/sticky business logic).
+            return FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+        });
+}
+
+void ListPattern::UnregisterScrollPlaceHolder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto manager = ScrollPlaceholderUtils::GetManager(host);
+    CHECK_NULL_VOID(manager);
+    manager->UnregisterContainer(host->GetId());
+}
+
+void ListPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    UnregisterScrollPlaceHolder();
+}
 
 RefPtr<LayoutProperty> ListPattern::CreateLayoutProperty()
 {

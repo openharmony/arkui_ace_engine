@@ -19,6 +19,7 @@
 #include <tuple>
 #include "core/animation/chain_animation.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_types.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -141,6 +142,17 @@ public:
     {
         maintainVisibleContentPosition_ = enabled;
     }
+
+    // FEAT-005 scroll placeholder: registers this List with the per-pipeline
+    // ScrollPlaceholderManager (shared predictor + placeholder/real-build
+    // coordination). Passing a null provider disables the feature.
+    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider);
+    bool IsScrollPlaceHolderEnabled() const
+    {
+        return scrollPlaceholderProvider_ != nullptr;
+    }
+    void UnregisterScrollPlaceHolder();
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     bool GetMaintainVisibleContentPosition()
     {
@@ -698,6 +710,7 @@ private:
     float prevEndOffset_ = 0.f;
     double currentOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
+    ScrollPlaceHolderProvider scrollPlaceholderProvider_;
     std::optional<int32_t> lastSnapTargetIndex_;
 
     bool crossMatchChild_ = false;
