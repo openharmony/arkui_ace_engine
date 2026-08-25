@@ -8855,21 +8855,26 @@ bool RosenRenderContext::SetKeyFrameNodeOpacityAnimation(int32_t duration, int32
                 keyFrameNode_->SetAlpha(0.0f);
             }
         },
-        [this, isDragEnd]() {
-            if (keyFrameNode_) {
-                keyFrameNode_->SetAlpha(1.0f);
+        [weak = WeakClaim(this), isDragEnd]() {
+            auto rosenRender = weak.Upgrade();
+            if (!rosenRender) {
+                animationFlag = false;
+                return;
             }
-            FreezeKeyFrameNode(false);
+            if (rosenRender->keyFrameNode_) {
+                rosenRender->keyFrameNode_->SetAlpha(1.0f);
+            }
+            rosenRender->FreezeKeyFrameNode(false);
             if (isDragEnd) {
-                RemoveKeyFrameNode();
+                rosenRender->RemoveKeyFrameNode();
             }
-            if (callbackAnimateEnd_ && *callbackAnimateEnd_) {
-                (*callbackAnimateEnd_)();
+            if (rosenRender->callbackAnimateEnd_ && *(rosenRender->callbackAnimateEnd_)) {
+                (*(rosenRender->callbackAnimateEnd_))();
             }
-            FlushImplicitTransaction();
+            rosenRender->FlushImplicitTransaction();
             animationFlag = false;
-            if (callbackCachedAnimateAction_ && *callbackCachedAnimateAction_) {
-                (*callbackCachedAnimateAction_)();
+            if (rosenRender->callbackCachedAnimateAction_ && *(rosenRender->callbackCachedAnimateAction_)) {
+                (*(rosenRender->callbackCachedAnimateAction_))();
             }
         });
     return true;
