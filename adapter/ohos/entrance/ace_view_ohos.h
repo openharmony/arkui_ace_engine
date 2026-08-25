@@ -33,6 +33,7 @@
 #include "core/common/thread_model_impl.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/key_event_recognizer.h"
+#include "core/event/mouse_event.h"
 #include "core/event/non_pointer_event.h"
 
 namespace OHOS::Ace::Platform {
