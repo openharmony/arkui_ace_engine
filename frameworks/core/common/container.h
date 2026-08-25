@@ -36,7 +36,6 @@
 #include "base/view_data/ace_auto_fill_type.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
-#include "core/components_ng/event/event_constants.h"
 #include "core/common/display_info.h"
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
