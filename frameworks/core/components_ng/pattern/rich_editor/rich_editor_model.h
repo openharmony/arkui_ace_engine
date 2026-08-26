@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -343,6 +343,12 @@ struct BuilderSpanOptions : SpanOptionBase {
     RefPtr<NG::UINode> customNode;
 };
 
+struct BuilderSpanRecord {
+    std::optional<std::string> id;
+    std::function<void(const BuilderSpanInfo&)> onAttach;
+    std::function<void(const BuilderSpanInfo&)> onDetach;
+};
+
 struct PlaceholderOptions {
     std::optional<std::u16string> value;
     std::optional<FontWeight> fontWeight;
@@ -410,6 +416,9 @@ public:
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
     virtual int32_t AddSymbolSpan(const SymbolSpanOptions& options) = 0;
     virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options) = 0;
+    virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options,
+        const BuilderSpanRecord& builderSpanRecord) = 0;
+    virtual std::vector<BuilderSpanInfo> GetRichEditorBuilderSpans(int32_t start, int32_t end) = 0;
     virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
     virtual void UpdateSpanStyle(
         int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -681,7 +681,9 @@ void SpansUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
     pattern->CloseSelectOverlay();
     pattern->ResetSelection();
     pattern->StopTwinkling();
+    pattern->SetSuppressBuilderSpanCallback(record.IsRestoreBuilderSpan());
     pattern->DeleteForward(record.rangeBefore.start, record.rangeBefore.GetLength());
+    pattern->SetSuppressBuilderSpanCallback(false);
     ApplyOptions(record.optionsListAfter.value_or(OptionsList{}), record.IsRestoreBuilderSpan(), isUndo);
 }
 

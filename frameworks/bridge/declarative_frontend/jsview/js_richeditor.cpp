@@ -68,6 +68,7 @@ namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+constexpr int32_t BUILDER_SPAN_INFO_ARG_INDEX = 1;
 constexpr int32_t INHERIT_INDEX = 2;
 constexpr std::string_view DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 static std::atomic<int32_t> spanStringControllerStoreIndex_;
@@ -1103,45 +1104,17 @@ void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
 void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    if (args.Length() < 1) {
-        return;
-    }
-    auto customVal = args[0];
-    if (!customVal->IsFunction() && !customVal->IsObject()) {
-        return;
-    }
-    JSRef<JSVal> funcValue;
-    auto customObject = JSRef<JSObject>::Cast(customVal);
-    auto builder = customObject->GetProperty("builder");
-    // if failed to get builder, parse function directly
-    if (builder->IsEmpty() || builder->IsNull() || !builder->IsFunction()) {
-        funcValue = customVal;
-    } else {
-        funcValue = builder;
-    }
+    auto customNode = ExecuteBuilder(args);
+    CHECK_NULL_VOID(customNode);
     SpanOptionBase options;
-    {
-        CHECK_NULL_VOID(funcValue->IsFunction());
-        auto controller = controllerWeak_.Upgrade();
-        auto richEditorBaseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
-        auto pattern = richEditorBaseController ? richEditorBaseController->GetPattern().Upgrade() : nullptr;
-        auto hostFrameNode = pattern ? pattern->GetHost() : nullptr;
-        auto jsFuncValue = JSRef<JSFunc>::Cast(funcValue);
-        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(jsFuncValue);
-        BindBuilderToHostNode(builderFunc, hostFrameNode, jsFuncValue);
-        CHECK_NULL_VOID(builderFunc);
-        ViewStackModel::GetInstance()->NewScope();
-        builderFunc->Execute();
-        auto customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
-        CHECK_NULL_VOID(customNode);
-        auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-        int32_t spanIndex = 0;
-        if (richEditorController) {
-            ParseOptions(args, options);
-            spanIndex = richEditorController->AddPlaceholderSpan(customNode, options);
-        }
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    int32_t spanIndex = 0;
+    if (richEditorController) {
+        ParseOptions(args, options);
+        spanIndex = richEditorController->AddPlaceholderSpan(customNode, options);
     }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
 
 void JSRichEditorController::BindBuilderToHostNode(RefPtr<JsFunction>& builderFunc,
@@ -1155,6 +1128,34 @@ void JSRichEditorController::BindBuilderToHostNode(RefPtr<JsFunction>& builderFu
     CHECK_NULL_VOID(thisObjTmp);
     JSRef<JSObject> thisObj = *(reinterpret_cast<JSRef<JSObject>*>(thisObjTmp));
     builderFunc = AceType::MakeRefPtr<JsFunction>(thisObj, funcValue);
+}
+
+RefPtr<NG::UINode> JSRichEditorController::ExecuteBuilder(const JSCallbackInfo& args)
+{
+    IF_TRUE(args.Length() < 1, return nullptr);
+    auto customVal = args[0];
+    IF_TRUE(!customVal->IsFunction() && !customVal->IsObject(), return nullptr);
+    JSRef<JSVal> funcValue;
+    auto customObject = JSRef<JSObject>::Cast(customVal);
+    auto builder = customObject->GetProperty("builder");
+    // if failed to get builder, parse function directly
+    if (builder->IsEmpty() || builder->IsNull() || !builder->IsFunction()) {
+        funcValue = customVal;
+    } else {
+        funcValue = builder;
+    }
+    CHECK_NULL_RETURN(funcValue->IsFunction(), nullptr);
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorBaseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
+    auto pattern = richEditorBaseController ? richEditorBaseController->GetPattern().Upgrade() : nullptr;
+    auto hostFrameNode = pattern ? pattern->GetHost() : nullptr;
+    auto jsFuncValue = JSRef<JSFunc>::Cast(funcValue);
+    RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(jsFuncValue);
+    BindBuilderToHostNode(builderFunc, hostFrameNode, jsFuncValue);
+    CHECK_NULL_RETURN(builderFunc, nullptr);
+    ViewStackModel::GetInstance()->NewScope();
+    builderFunc->Execute();
+    return AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
 }
 
 void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan)
@@ -1233,6 +1234,10 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("addTextSpan", &JSRichEditorController::AddTextSpan);
     JSClass<JSRichEditorController>::CustomMethod("addSymbolSpan", &JSRichEditorController::AddSymbolSpan);
     JSClass<JSRichEditorController>::CustomMethod("addBuilderSpan", &JSRichEditorController::AddPlaceholderSpan);
+    JSClass<JSRichEditorController>::CustomMethod("addRichEditorBuilderSpan",
+        &JSRichEditorController::AddRichEditorBuilderSpan);
+    JSClass<JSRichEditorController>::CustomMethod("getRichEditorBuilderSpans",
+        &JSRichEditorController::GetRichEditorBuilderSpans);
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretRect", &JSRichEditorController::GetCaretRect);
@@ -1295,6 +1300,101 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
     return std::make_pair(start, end);
 }
 } // namespace
+
+JSRef<JSVal> JSRichEditorController::CreateJSBuilderSpanInfo(const BuilderSpanInfo& info)
+{
+    JSRef<JSObject> infoObj = JSRef<JSObject>::New();
+    IF_TRUE(info.id.has_value(), infoObj->SetProperty<std::string>("id", info.id.value()));
+    IF_TRUE(info.offset.has_value(), infoObj->SetProperty<int32_t>("offset", info.offset.value()));
+    return JSRef<JSVal>::Cast(infoObj);
+}
+
+void JSRichEditorController::ParseBuilderSpanCallback(const JSCallbackInfo& args,
+    const JSRef<JSObject>& builderSpanObj, const char* propName,
+    std::function<void(const BuilderSpanInfo&)>& target)
+{
+    auto func = builderSpanObj->GetProperty(propName);
+    CHECK_NULL_VOID(func->IsFunction());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<BuilderSpanInfo, 1>>(
+        JSRef<JSFunc>::Cast(func), CreateJSBuilderSpanInfo);
+    target = [execCtx = args.GetExecutionContext(), callback = std::move(jsFunc)](
+        const BuilderSpanInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        callback->Execute(info);
+    };
+}
+
+void JSRichEditorController::ParseBuilderSpanCallbacks(const JSCallbackInfo& args,
+    const JSRef<JSObject>& builderSpanObj, BuilderSpanRecord& builderSpanRecord)
+{
+    ParseBuilderSpanCallback(args, builderSpanObj, "onAttach", builderSpanRecord.onAttach);
+    ParseBuilderSpanCallback(args, builderSpanObj, "onDetach", builderSpanRecord.onDetach);
+}
+
+void JSRichEditorController::ParseBuilderSpanInfo(const JSCallbackInfo& args,
+    const JSRef<JSObject>& customObject, SpanOptionBase& options, BuilderSpanRecord& builderSpanRecord)
+{
+    ParseBuilderSpanCallbacks(args, customObject, builderSpanRecord);
+    if (args.Length() > BUILDER_SPAN_INFO_ARG_INDEX && args[BUILDER_SPAN_INFO_ARG_INDEX]->IsObject()) {
+        JSRef<JSObject> infoObj = JSRef<JSObject>::Cast(args[BUILDER_SPAN_INFO_ARG_INDEX]);
+        auto idVal = infoObj->GetProperty("id");
+        if (std::string idStr; !idVal->IsNull() && JSContainerBase::ParseJsString(idVal, idStr)) {
+            builderSpanRecord.id = idStr;
+        }
+        auto offsetVal = infoObj->GetProperty("offset");
+        int32_t infoOffset = 0;
+        if (!offsetVal->IsNull() && JSContainerBase::ParseJsInt32(offsetVal, infoOffset)) {
+            IF_TRUE(infoOffset >= 0, options.offset = infoOffset);
+        }
+    }
+    auto accessibilitySpanOptionsProp = customObject->GetProperty("accessibilitySpanOptions");
+    if (accessibilitySpanOptionsProp->IsObject()) {
+        ParseAccessibilityOptions(JSObjectCast(accessibilitySpanOptionsProp), options);
+    }
+}
+
+void JSRichEditorController::AddRichEditorBuilderSpan(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto customNode = ExecuteBuilder(args);
+    CHECK_NULL_VOID(customNode);
+    // Safe to cast: ExecuteBuilder guarantees args[0] is Function or Object
+    auto customObject = JSRef<JSObject>::Cast(args[0]);
+    SpanOptionBase options;
+    BuilderSpanRecord builderSpanRecord;
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    int32_t spanIndex = 0;
+    if (richEditorController) {
+        ParseBuilderSpanInfo(args, customObject, options, builderSpanRecord);
+        spanIndex = richEditorController->AddPlaceholderSpan(customNode, options, builderSpanRecord);
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
+}
+
+void JSRichEditorController::GetRichEditorBuilderSpans(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    CHECK_NULL_VOID(richEditorController);
+    int32_t start = 0;
+    int32_t end = INT_MAX;
+    if (args.Length() > 0 && args[0]->IsObject()) {
+        JSRef<JSObject> rangeObj = JSRef<JSObject>::Cast(args[0]);
+        auto range = ParseRange(rangeObj);
+        start = range.first;
+        end = range.second;
+    }
+    auto builderSpanInfos = richEditorController->GetRichEditorBuilderSpans(start, end);
+    JSRef<JSArray> resultArray = JSRef<JSArray>::New();
+    uint32_t idx = 0;
+    for (const auto& info : builderSpanInfos) {
+        resultArray->SetValueAt(idx, CreateJSBuilderSpanInfo(info));
+        idx++;
+    }
+    args.SetReturnValue(JSRef<JSVal>::Cast(resultArray));
+}
 
 void JSRichEditorBaseControllerBinding::ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject,
     struct UpdateParagraphStyle& style)
