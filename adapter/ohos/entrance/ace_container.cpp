@@ -4272,6 +4272,13 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();
     currentEvents_[originId] = currentEvent;
+    // down state for cross-screen-lock drag detection; reset on up/cancel.
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        downScreenLockedMap_[originId] = currentEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED);
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP ||
+               pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        downScreenLockedMap_.erase(originId);
+    }
     auto callbacksIter = stopDragCallbackMap_.begin();
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
@@ -4416,6 +4423,15 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
     }
     dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
     dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
+    bool downLocked = false;
+    auto downIter = downScreenLockedMap_.find(dragPointerEvent.originId);
+    if (downIter != downScreenLockedMap_.end()) {
+        downLocked = downIter->second;
+    }
+    if (!downLocked && currentPointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Drag crossed screen lock, abort dragController start.");
+        return false;
+    }
     return true;
 }
 

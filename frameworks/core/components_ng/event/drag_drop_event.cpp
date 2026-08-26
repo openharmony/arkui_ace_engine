@@ -229,6 +229,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     }
     CHECK_NULL_VOID(dragDropInitiatingHandler_);
     auto touchEvent = touchRestrict.touchEvent;
+    CaptureDownScreenLocked(touchEvent);
     RecordTouchDownPoint(touchEvent);
     dragDropInitiatingHandler_->NotifyHitTesting(touchEvent);
     InitPanAction(touchEvent.isStylusMouseMode);

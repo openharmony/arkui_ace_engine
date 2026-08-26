@@ -244,6 +244,14 @@ void DragEventActuator::RecordTouchDownPoint(const TouchEvent& downTouchEvent)
     touchDownPoint_ = downTouchEvent;
 }
 
+void DragEventActuator::CaptureDownScreenLocked(const TouchEvent& touchEvent)
+{
+    if (touchEvent.type == TouchType::DOWN) {
+        isDownScreenLocked_ = touchEvent.isScreenLocked;
+    }
+    isTriggerScreenLocked_ = touchEvent.isScreenLocked;
+}
+
 const TouchEvent& DragEventActuator::GetTouchDownPoint()
 {
     return touchDownPoint_;
@@ -451,6 +459,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     }
     RecordTouchDownPoint(touchRestrict.touchEvent);
     lastTouchFingerId_ = touchRestrict.touchEvent.id;
+    CaptureDownScreenLocked(touchRestrict.touchEvent);
     dragDropManager->SetIsDisableDefaultDropAnimation(false);
     dragDropManager->SetIsDragNodeNeedClean(false);
     auto focusHub = frameNode->GetFocusHub();
@@ -864,6 +873,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        if (actuator->IsDragStartedAcrossScreenLock(info)) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Drag crossed screen lock, skip drag preview lift.");
+            return;
+        }
         auto panRecognizer = actuator->panRecognizer_;
         if (panRecognizer && panRecognizer->GetGestureDisposal() == GestureDisposal::REJECT) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because drag action reject");
@@ -2600,5 +2613,11 @@ void DragEventActuator::HandleTextDragCallback(Offset offset)
     } else if (!gestureHub->GetIsTextDraggable()) {
         gestureHub->SetPixelMap(nullptr);
     }
+}
+
+bool DragEventActuator::IsDragStartedAcrossScreenLock(const GestureEvent& info) const
+{
+    (void)info;
+    return !isDownScreenLocked_ && isTriggerScreenLocked_;
 }
 } // namespace OHOS::Ace::NG
