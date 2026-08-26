@@ -19,8 +19,8 @@
 #include <string>
 #include <vector>
 
-#define private public
-#define protected public
+#define private public // NOLINT
+#define protected public // NOLINT
 #include "base/utils/feature_manager.h"
 #include "core/common/event_manager.h"
 #include "core/event/event_info_convertor.h"
