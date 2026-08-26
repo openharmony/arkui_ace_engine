@@ -26,6 +26,8 @@ namespace OHOS::Ace::NG {
 
 class TabContentPattern;
 class SwiperPattern;
+class TabsLayoutProperty;
+class TabsNode;
 
 class TabsSideBarTabListPattern : public Pattern {
     DECLARE_ACE_TYPE(TabsSideBarTabListPattern, Pattern);
@@ -71,6 +73,16 @@ public:
     void ApplySearchFilter(
         std::function<bool(int32_t, const std::string& text)> searchFilter, const std::u16string& searchText);
     void AddOrUpdateTabListItem(const RefPtr<FrameNode>& tabContentNode, int32_t position, bool update);
+    void ApplyDefaultVisibility();
+    // Update a single sidebar tab item's visibility for the given tab index,
+    // considering both defaultVisibility and active search filter.
+    void UpdateSingleTabItemVisibility(int32_t tabIndex);
+
+    // Check whether a tab should be hidden by defaultVisibility.
+    // Returns true if the tab should be GONE per defaultVisibility rules.
+    bool IsHiddenByDefaultVisibility(int32_t tabIndex) const;
+    bool IsHiddenByDefaultVisibility(const RefPtr<TabContentPattern>& tabContentPattern,
+        const RefPtr<TabsLayoutProperty>& tabsProperty, const RefPtr<TabsNode>& tabsNode) const;
 
     RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
     {
@@ -119,6 +131,9 @@ private:
     RefPtr<SwiperController> swiperController_ = nullptr;
     int32_t currentIndex_ = -1;
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
+    // Active search state (set by ApplySearchFilter, consumed by ApplyDefaultVisibility)
+    std::function<bool(int32_t, const std::string& text)> activeSearchFilter_;
+    std::u16string activeSearchText_;
 };
 
 } // namespace OHOS::Ace::NG

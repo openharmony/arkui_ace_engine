@@ -25,6 +25,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -184,6 +185,7 @@ public:
     virtual void SetOnWillShow(std::function<void()>&& onWillShow) {}
     virtual void SetOnWillHide(std::function<void()>&& onWillHide) {}
     virtual void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) {}
+    virtual void SetDefaultVisibility(const NG::TabContentDefaultVisibility& defaultVisibility) {}
 
 private:
     static std::unique_ptr<TabContentModel> instance_;

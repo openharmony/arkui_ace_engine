@@ -687,6 +687,10 @@ public:
         useNewMaterial_ = useNewMaterial;
     }
 
+    // Apply per-item defaultVisibility filtering to bottom tab bar items.
+    // Called when bottom tab bar becomes visible or when defaultVisibility changes.
+    void ApplyDefaultVisibility();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

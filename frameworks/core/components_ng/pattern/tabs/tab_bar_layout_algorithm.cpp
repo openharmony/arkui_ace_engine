@@ -67,6 +67,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabsLayoutProperty);
     auto tabsDirection = tabsLayoutProperty->GetNonAutoLayoutDirection();
+    barLayoutStyle_ = tabsLayoutProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
     auto tabBarDirection = layoutProperty->GetLayoutDirection();
     isRTL_ = tabBarDirection == TextDirection::RTL ||
              (tabBarDirection == TextDirection::AUTO && tabsDirection == TextDirection::RTL);
@@ -75,7 +76,8 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CreateIdealSize(constraint.value(), axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
 
     childCount_ = layoutWrapper->GetTotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
-    if (childCount_ <= 0) {
+    UpdateEffectiveChildIndices(layoutWrapper);
+    if (childCount_ <= 0 || effectiveChildIndices_.empty()) {
         return;
     }
 
@@ -184,13 +186,36 @@ float TabBarLayoutAlgorithm::GetContentMainSize(LayoutWrapper* layoutWrapper, co
     }
 }
 
+void TabBarLayoutAlgorithm::UpdateEffectiveChildIndices(LayoutWrapper* layoutWrapper)
+{
+    effectiveChildIndices_.clear();
+    effectiveChildIndexSet_.clear();
+    for (int32_t i = 0; i < childCount_; i++) {
+        if (IsItemGone(layoutWrapper, i)) {
+            continue;
+        }
+        effectiveChildIndices_.push_back(i);
+        effectiveChildIndexSet_.insert(i);
+    }
+}
+
+bool TabBarLayoutAlgorithm::IsItemGone(LayoutWrapper* layoutWrapper, int32_t index) const
+{
+    if (barLayoutStyle_ == TabBarLayoutStyle::BOTTOM) {
+        return false;
+    }
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    return childWrapper && childWrapper->GetHostNode() && !childWrapper->GetHostNode()->IsVisible();
+}
+
 void TabBarLayoutAlgorithm::MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize)
 {
     auto childLayoutConstraint = GetChildConstraint(layoutWrapper, frameSize);
     visibleItemLength_.clear();
     visibleChildrenMainSize_ = 0.0f;
+    int32_t effectiveChildCount = static_cast<int32_t>(effectiveChildIndices_.size());
     if (axis_ == Axis::HORIZONTAL) {
-        auto allocatedWidth = contentMainSize_ / childCount_;
+        auto allocatedWidth = contentMainSize_ / effectiveChildCount;
         ApplyLayoutMode(layoutWrapper, allocatedWidth);
 
         auto host = layoutWrapper->GetHostNode();
@@ -198,9 +223,10 @@ void TabBarLayoutAlgorithm::MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF
         auto tabBarPattern = host->GetPattern<TabBarPattern>();
         CHECK_NULL_VOID(tabBarPattern);
         auto isApplySymmetricExtensible = false;
-        for (int32_t index = 0; index < childCount_ && childCount_ > TWO; index++) {
-            if (tabBarPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE &&
-                tabBarPattern->GetBottomTabBarStyle(index).symmetricExtensible) {
+        for (int32_t index = 0; index < effectiveChildCount && effectiveChildCount > TWO; index++) {
+            auto childIndex = effectiveChildIndices_[index];
+            if (tabBarPattern->GetTabBarStyle(childIndex) == TabBarStyle::BOTTOMTABBATSTYLE &&
+                tabBarPattern->GetBottomTabBarStyle(childIndex).symmetricExtensible) {
                 isApplySymmetricExtensible = true;
                 break;
             }
@@ -208,9 +234,10 @@ void TabBarLayoutAlgorithm::MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF
         if (!isApplySymmetricExtensible) {
             childLayoutConstraint.selfIdealSize.SetWidth(allocatedWidth);
         }
-        for (int32_t index = 0; index < childCount_; index++) {
-            MeasureItem(layoutWrapper, childLayoutConstraint, index);
-            visibleItemPosition_[index] = { allocatedWidth * index, allocatedWidth * (index + 1) };
+        for (int32_t index = 0; index < effectiveChildCount; index++) {
+            auto childIndex = effectiveChildIndices_[index];
+            MeasureItem(layoutWrapper, childLayoutConstraint, childIndex);
+            visibleItemPosition_[childIndex] = { allocatedWidth * index, allocatedWidth * (index + 1) };
         }
         if (isApplySymmetricExtensible) {
             ApplySymmetricExtensible(layoutWrapper, allocatedWidth);
@@ -222,17 +249,19 @@ void TabBarLayoutAlgorithm::MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF
             MeasureItemSecond(layoutWrapper, childLayoutConstraint, frameSize);
         }
     } else {
-        for (int32_t index = 0; index < childCount_; index++) {
-            MeasureItem(layoutWrapper, childLayoutConstraint, index);
+        for (int32_t index = 0; index < effectiveChildCount; index++) {
+            auto childIndex = effectiveChildIndices_[index];
+            MeasureItem(layoutWrapper, childLayoutConstraint, childIndex);
         }
     }
 
     visibleItemPosition_.clear();
     auto currentOffset =
         (axis_ == Axis::VERTICAL && tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) ? contentMainSize_ / 4 : 0.0f;
-    for (int32_t index = 0; index < childCount_; index++) {
-        visibleItemPosition_[index] = { currentOffset, currentOffset + visibleItemLength_[index] };
-        currentOffset += visibleItemLength_[index];
+    for (int32_t index = 0; index < effectiveChildCount; index++) {
+        auto childIndex = effectiveChildIndices_[index];
+        visibleItemPosition_[childIndex] = { currentOffset, currentOffset + visibleItemLength_[childIndex] };
+        currentOffset += visibleItemLength_[childIndex];
     }
 }
 
@@ -258,6 +287,7 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     ScrollableBarModeOptions layoutStyle;
+    auto effectiveChildCount = static_cast<int32_t>(effectiveChildIndices_.size());
     if (axis_ == Axis::HORIZONTAL) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
@@ -271,7 +301,7 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
 
         useItemWidth_ = true;
         if (GreatNotEqual(visibleChildrenMainSize_, contentMainSize_) ||
-            childCount_ > static_cast<int32_t>(visibleItemPosition_.size())) {
+            effectiveChildCount > static_cast<int32_t>(visibleItemPosition_.size())) {
             useItemWidth_ = false;
         } else {
             visibleChildrenMainSize_ -= scrollMargin_ * TWO;
@@ -294,12 +324,13 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
     }
 
     if (LessOrEqual(visibleChildrenMainSize_, contentMainSize_) &&
-        childCount_ == static_cast<int32_t>(visibleItemPosition_.size())) {
+        effectiveChildCount == static_cast<int32_t>(visibleItemPosition_.size())) {
         visibleItemPosition_.clear();
         float currentOffset = GetCurrentOffset(layoutProperty, layoutStyle);
-        for (int32_t index = 0; index < childCount_; index++) {
-            visibleItemPosition_[index] = { currentOffset, currentOffset + visibleItemLength_[index] };
-            currentOffset += visibleItemLength_[index];
+        for (int32_t index = 0; index < effectiveChildCount; index++) {
+            auto childIndex = effectiveChildIndices_[index];
+            visibleItemPosition_[childIndex] = { currentOffset, currentOffset + visibleItemLength_[childIndex] };
+            currentOffset += visibleItemLength_[childIndex];
         }
     }
 }
@@ -438,25 +469,36 @@ void TabBarLayoutAlgorithm::MeasureVisibleItems(LayoutWrapper* layoutWrapper, La
 
     if (targetIndex_) {
         targetIndex_ = targetIndex_.value() % childCount_;
-        MeasureTargetIndex(layoutWrapper, childLayoutConstraint);
+        if (effectiveChildIndexSet_.count(targetIndex_.value())) {
+            MeasureTargetIndex(layoutWrapper, childLayoutConstraint);
+            return;
+        }
     } else if (jumpIndex_) {
         if (jumpIndex_.value() >= childCount_) {
             jumpIndex_ = 0;
         }
-        MeasureJumpIndex(layoutWrapper, childLayoutConstraint);
-        if (GreatNotEqual(visibleChildrenMainSize_, scrollMargin_ * TWO)) {
-            jumpIndex_.reset();
+        if (effectiveChildIndexSet_.count(jumpIndex_.value())) {
+            MeasureJumpIndex(layoutWrapper, childLayoutConstraint);
+            if (GreatNotEqual(visibleChildrenMainSize_, scrollMargin_ * TWO)) {
+                jumpIndex_.reset();
+            }
+            return;
         }
     } else if (focusIndex_) {
-        MeasureFocusIndex(layoutWrapper, childLayoutConstraint);
-    } else {
-        MeasureWithOffset(layoutWrapper, childLayoutConstraint);
+        if (effectiveChildIndexSet_.count(focusIndex_.value())) {
+            MeasureFocusIndex(layoutWrapper, childLayoutConstraint);
+            return;
+        }
     }
+    MeasureWithOffset(layoutWrapper, childLayoutConstraint);
 }
 
 void TabBarLayoutAlgorithm::MeasureTargetIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
 {
     MeasureWithOffset(layoutWrapper, childLayoutConstraint);
+    if (visibleItemLength_.find(targetIndex_.value()) == visibleItemLength_.end()) {
+        return;
+    }
     if (GreatOrEqual(visibleItemLength_[targetIndex_.value()], endMainPos_ - startMainPos_)) {
         return;
     }
@@ -487,6 +529,9 @@ void TabBarLayoutAlgorithm::MeasureJumpIndex(LayoutWrapper* layoutWrapper, Layou
 {
     visibleItemPosition_.clear();
     MeasureItem(layoutWrapper, childLayoutConstraint, jumpIndex_.value());
+    if (visibleItemLength_.find(jumpIndex_.value()) == visibleItemLength_.end()) {
+        return;
+    }
     if (GreatOrEqual(visibleItemLength_[jumpIndex_.value()], endMainPos_ - startMainPos_)) {
         visibleItemPosition_[jumpIndex_.value()] = { 0.0f, visibleItemLength_[jumpIndex_.value()] };
         return;
@@ -609,6 +654,9 @@ void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutCo
             endIndex = 0;
             continue;
         }
+        if (!effectiveChildIndexSet_.count(endIndex)) {
+            continue;
+        }
         MeasureItem(layoutWrapper, childLayoutConstraint, endIndex);
         visibleItemPosition_[endIndex] = { endPos, endPos + visibleItemLength_[endIndex] };
         endPos += visibleItemLength_[endIndex];
@@ -632,6 +680,9 @@ void TabBarLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, LayoutC
         isBarAdaptiveHeight_ || (targetIndex_ && startIndex >= targetIndex_.value()))) {
         if (startIndex >= childCount_) {
             startIndex = childCount_ - 1;
+            continue;
+        }
+        if (!effectiveChildIndexSet_.count(startIndex)) {
             continue;
         }
         MeasureItem(layoutWrapper, childLayoutConstraint, startIndex);
@@ -775,11 +826,13 @@ void TabBarLayoutAlgorithm::MeasureMask(LayoutWrapper* layoutWrapper) const
 
 void TabBarLayoutAlgorithm::MeasureMaxHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
 {
-    for (int32_t index = 0; index < childCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto effectiveChildCount = static_cast<int32_t>(effectiveChildIndices_.size());
+    for (int32_t index = 0; index < effectiveChildCount; ++index) {
+        auto childIndex = effectiveChildIndices_[index];
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
         CHECK_NULL_VOID(childWrapper);
-        if (static_cast<int32_t>(visibleItemLength_.size()) == childCount_) {
-            childLayoutConstraint.selfIdealSize.SetWidth(visibleItemLength_[index]);
+        if (static_cast<int32_t>(visibleItemLength_.size()) == effectiveChildCount) {
+            childLayoutConstraint.selfIdealSize.SetWidth(visibleItemLength_[childIndex]);
         }
         childWrapper->Measure(childLayoutConstraint);
         auto geometryNode = childWrapper->GetGeometryNode();
@@ -791,13 +844,15 @@ void TabBarLayoutAlgorithm::MeasureMaxHeight(LayoutWrapper* layoutWrapper, Layou
 void TabBarLayoutAlgorithm::HandleAlwaysAverageSplitLayoutStyle(LayoutWrapper* layoutWrapper)
 {
     std::map<int32_t, float> originalVisibleItemLength;
-    for (int32_t index = 0; index < childCount_; index++) {
-        originalVisibleItemLength[index] = visibleItemLength_[index];
-        visibleItemLength_[index] = 0.0f;
+    auto effectiveChildCount = static_cast<int32_t>(effectiveChildIndices_.size());
+    for (int32_t index = 0; index < effectiveChildCount; index++) {
+        auto childIndex = effectiveChildIndices_[index];
+        originalVisibleItemLength[childIndex] = visibleItemLength_[childIndex];
+        visibleItemLength_[childIndex] = 0.0f;
     }
 
     bool hasLongItem = false;
-    int32_t remainingChildCount = childCount_;
+    int32_t remainingChildCount = effectiveChildCount;
     auto totalWidth = contentMainSize_ - scrollMargin_ * TWO;
     auto allocatedItemWidth = 0.0f;
 
@@ -806,21 +861,23 @@ void TabBarLayoutAlgorithm::HandleAlwaysAverageSplitLayoutStyle(LayoutWrapper* l
     do {
         allocatedItemWidth = totalWidth / remainingChildCount;
         hasLongItem = false;
-        for (int32_t index = 0; index < childCount_; index++) {
-            if (NearZero(visibleItemLength_[index]) &&
-                GreatNotEqual(originalVisibleItemLength[index], allocatedItemWidth)) {
-                visibleItemLength_[index] = originalVisibleItemLength[index];
+        for (int32_t index = 0; index < effectiveChildCount; index++) {
+            auto childIndex = effectiveChildIndices_[index];
+            if (NearZero(visibleItemLength_[childIndex]) &&
+                GreatNotEqual(originalVisibleItemLength[childIndex], allocatedItemWidth)) {
+                visibleItemLength_[childIndex] = originalVisibleItemLength[childIndex];
                 hasLongItem = true;
                 remainingChildCount--;
-                totalWidth -= originalVisibleItemLength[index];
+                totalWidth -= originalVisibleItemLength[childIndex];
             }
         }
     } while (hasLongItem && remainingChildCount > 0 && Positive(totalWidth));
 
     // Calculate the widths of other items
-    for (int32_t index = 0; index < childCount_; index++) {
-        if (NearZero(visibleItemLength_[index])) {
-            visibleItemLength_[index] = allocatedItemWidth;
+    for (int32_t index = 0; index < effectiveChildCount; index++) {
+        auto childIndex = effectiveChildIndices_[index];
+        if (NearZero(visibleItemLength_[childIndex])) {
+            visibleItemLength_[childIndex] = allocatedItemWidth;
         }
     }
 }
@@ -831,10 +888,12 @@ void TabBarLayoutAlgorithm::HandleSpaceBetweenOrCenterLayoutStyle(LayoutWrapper*
         useItemWidth_ = false;
         return;
     }
-    auto additionalWidth = (contentMainSize_ / TWO - visibleChildrenMainSize_) / childCount_;
+    auto effectiveChildCount = static_cast<int32_t>(effectiveChildIndices_.size());
+    auto additionalWidth = (contentMainSize_ / TWO - visibleChildrenMainSize_) / effectiveChildCount;
 
-    for (int32_t index = 0; index < childCount_; ++index) {
-        visibleItemLength_[index] += additionalWidth;
+    for (int32_t index = 0; index < effectiveChildCount; ++index) {
+        auto childIndex = effectiveChildIndices_[index];
+        visibleItemLength_[childIndex] += additionalWidth;
     }
 }
 
@@ -850,13 +909,14 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
     bool isVertical = LessOrEqual(allocatedWidth, tabTheme->GetHorizontalBottomTabMinWidth().ConvertToPx());
 
     // Calculate the initial buffer and initial space request of each item.
-    for (int32_t index = 0; index < childCount_; ++index) {
-        auto bottomTabBarStyle = tabBarPattern->GetBottomTabBarStyle(index);
-        if (tabBarPattern->GetTabBarStyle(index) != TabBarStyle::BOTTOMTABBATSTYLE ||
+    for (int32_t index = 0; index < static_cast<int32_t>(effectiveChildIndices_.size()); ++index) {
+        auto childIndex = effectiveChildIndices_[index];
+        auto bottomTabBarStyle = tabBarPattern->GetBottomTabBarStyle(childIndex);
+        if (tabBarPattern->GetTabBarStyle(childIndex) != TabBarStyle::BOTTOMTABBATSTYLE ||
             bottomTabBarStyle.layoutMode != LayoutMode::AUTO) {
             continue;
         }
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
         CHECK_NULL_VOID(childWrapper);
         auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(linearLayoutProperty);
@@ -895,41 +955,45 @@ void TabBarLayoutAlgorithm::ApplySymmetricExtensible(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(host);
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-
-    if (childCount_ <= TWO || childCount_ > static_cast<int32_t>(visibleItemLength_.size())) {
-        for (int32_t index = 0; index < static_cast<int32_t>(visibleItemLength_.size()); ++index) {
-            visibleItemLength_[index] = allocatedWidth;
+    auto effectiveChildCount = static_cast<int32_t>(effectiveChildIndices_.size());
+    if (effectiveChildCount <= TWO || effectiveChildCount > static_cast<int32_t>(visibleItemLength_.size())) {
+        for (int32_t index = 0; index < effectiveChildCount; ++index) {
+            auto childIndex = effectiveChildIndices_[index];
+            if (visibleItemLength_.count(childIndex)) {
+                visibleItemLength_[childIndex] = allocatedWidth;
+            }
         }
         return;
     }
 
-    std::vector<float> leftBuffers(childCount_);
-    std::vector<float> rightBuffers(childCount_);
-    std::vector<float> spaceRequests(childCount_);
+    std::vector<float> leftBuffers(effectiveChildCount);
+    std::vector<float> rightBuffers(effectiveChildCount);
+    std::vector<float> spaceRequests(effectiveChildCount);
 
     // Calculate the initial buffer and initial space request of each item.
-    for (int32_t index = 0; index < childCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    for (int32_t index = 0; index < effectiveChildCount; ++index) {
+        auto childIndex = effectiveChildIndices_[index];
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
         CHECK_NULL_VOID(childWrapper);
         auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(linearLayoutProperty);
-        if (GreatNotEqual(visibleItemLength_[index], allocatedWidth)) {
-            if (tabBarPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE &&
-                tabBarPattern->GetBottomTabBarStyle(index).symmetricExtensible && index > 0 &&
-                index < childCount_ - 1) {
-                spaceRequests[index] = (visibleItemLength_[index] - allocatedWidth) / TWO;
+        if (GreatNotEqual(visibleItemLength_[childIndex], allocatedWidth)) {
+            if (tabBarPattern->GetTabBarStyle(childIndex) == TabBarStyle::BOTTOMTABBATSTYLE &&
+                tabBarPattern->GetBottomTabBarStyle(childIndex).symmetricExtensible && index > 0 &&
+                index < effectiveChildCount - 1) {
+                spaceRequests[index] = (visibleItemLength_[childIndex] - allocatedWidth) / TWO;
             }
         } else {
-            if (tabBarPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE) {
-                leftBuffers[index] = index == 0 ? 0.0f : (allocatedWidth - visibleItemLength_[index]) / TWO;
+            if (tabBarPattern->GetTabBarStyle(childIndex) == TabBarStyle::BOTTOMTABBATSTYLE) {
+                leftBuffers[index] = index == 0 ? 0.0f : (allocatedWidth - visibleItemLength_[childIndex]) / TWO;
                 rightBuffers[index] =
-                    index == childCount_ - 1 ? 0.0f : (allocatedWidth - visibleItemLength_[index]) / TWO;
+                    index == effectiveChildCount - 1 ? 0.0f : (allocatedWidth - visibleItemLength_[childIndex]) / TWO;
             }
         }
     }
 
     // Decide the used buffer and used space request of each item.
-    for (int32_t index = 1; index < childCount_ - 1; ++index) {
+    for (int32_t index = 1; index < effectiveChildCount - 1; ++index) {
         auto actualRequest = std::min(std::min(rightBuffers[index - 1], leftBuffers[index + 1]), spaceRequests[index]);
         spaceRequests[index] = actualRequest;
         rightBuffers[index - 1] = actualRequest;
@@ -937,10 +1001,10 @@ void TabBarLayoutAlgorithm::ApplySymmetricExtensible(LayoutWrapper* layoutWrappe
     }
 
     spaceRequests[0] = 0.0f;
-    spaceRequests[childCount_ - 1] = 0.0f;
+    spaceRequests[effectiveChildCount - 1] = 0.0f;
 
     leftBuffers[1] = 0.0f;
-    rightBuffers[childCount_ - TWO] = 0.0f;
+    rightBuffers[effectiveChildCount - TWO] = 0.0f;
 
     CalculateItemWidthsForSymmetricExtensible(layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
 }
@@ -953,24 +1017,25 @@ void TabBarLayoutAlgorithm::CalculateItemWidthsForSymmetricExtensible(LayoutWrap
     CHECK_NULL_VOID(host);
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-
-    if ((static_cast<int32_t>(spaceRequests.size()) != childCount_) ||
-        (static_cast<int32_t>(leftBuffers.size()) != childCount_) ||
-        (static_cast<int32_t>(rightBuffers.size()) != childCount_) ||
-        (static_cast<int32_t>(visibleItemLength_.size()) != childCount_)) {
+    auto effectiveChildCount = static_cast<int32_t>(effectiveChildIndices_.size());
+    if ((static_cast<int32_t>(spaceRequests.size()) != effectiveChildCount) ||
+        (static_cast<int32_t>(leftBuffers.size()) != effectiveChildCount) ||
+        (static_cast<int32_t>(rightBuffers.size()) != effectiveChildCount) ||
+        (static_cast<int32_t>(visibleItemLength_.size()) != effectiveChildCount)) {
         return;
     }
 
-    for (int32_t index = 0; index < childCount_; ++index) {
-        if (tabBarPattern->GetTabBarStyle(index) != TabBarStyle::BOTTOMTABBATSTYLE) {
-            visibleItemLength_[index] = allocatedWidth;
+    for (int32_t index = 0; index < effectiveChildCount; ++index) {
+        auto childIndex = effectiveChildIndices_[index];
+        if (tabBarPattern->GetTabBarStyle(childIndex) != TabBarStyle::BOTTOMTABBATSTYLE) {
+            visibleItemLength_[childIndex] = allocatedWidth;
             continue;
         }
         if (!NearZero(spaceRequests[index])) {
-            visibleItemLength_[index] = allocatedWidth + spaceRequests[index] * TWO;
+            visibleItemLength_[childIndex] = allocatedWidth + spaceRequests[index] * TWO;
         } else if (!NearZero(leftBuffers[index]) || !NearZero(rightBuffers[index])) {
-            visibleItemLength_[index] = allocatedWidth - leftBuffers[index] - rightBuffers[index];
-            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            visibleItemLength_[childIndex] = allocatedWidth - leftBuffers[index] - rightBuffers[index];
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
             CHECK_NULL_VOID(childWrapper);
             // Adjust margin to keep the position of current item.
             auto leftMargin = rightBuffers[index];
@@ -984,7 +1049,7 @@ void TabBarLayoutAlgorithm::CalculateItemWidthsForSymmetricExtensible(LayoutWrap
             }
             UpdateChildMarginProperty(rightMargin, leftMargin, childWrapper);
         } else {
-            visibleItemLength_[index] = allocatedWidth;
+            visibleItemLength_[childIndex] = allocatedWidth;
         }
     }
 }

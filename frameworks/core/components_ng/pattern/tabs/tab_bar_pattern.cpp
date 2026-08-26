@@ -45,6 +45,8 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -4015,5 +4017,61 @@ void TabBarPattern::CheckFloatingStyle(int32_t index)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(height / HALF_OF_HEIGHT));
     renderContext->UpdateBorderRadius(borderRadius);
+}
+
+void TabBarPattern::ApplyDefaultVisibility()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto barStyle = tabsLayoutProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    if (barStyle == TabBarLayoutStyle::SIDEBAR) {
+        return;
+    }
+    auto currentDisplayMode = tabsPattern->GetCurrentBarDisplayMode();
+    auto tabContentNum = swiperNode->TotalChildCount();
+    auto isHiddenByDefaultVisibility = [currentDisplayMode, barStyle](
+        const RefPtr<FrameNode>& tabContentNode) -> bool {
+        // BOTTOM mode: defaultVisibility does not apply, ensure all items visible
+        if (barStyle == TabBarLayoutStyle::BOTTOM) {
+            return false;
+        }
+        // SIDEBAR / SIDEBAR_ADAPTABLE mode: apply defaultVisibility filtering
+        CHECK_NULL_RETURN(tabContentNode, false);
+        auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_RETURN(tabContentPattern, false);
+        const auto& defaultVisibility = tabContentPattern->GetDefaultVisibility();
+        if (defaultVisibility.isNull || defaultVisibility.visibility != TabVisibility::HIDDEN) {
+            return false;
+        }
+        if (!defaultVisibility.displayMode.has_value()) {
+            return true;
+        }
+        TabBarDisplayMode activeDisplayMode = currentDisplayMode.value_or(TabBarDisplayMode::BOTTOMTABBAR);
+        return defaultVisibility.displayMode.value() == activeDisplayMode;
+    };
+    // tabBarNode children: columnNodes + maskNodes + imageIndicatorNode
+    // columnNodes are at the front, count = tabContentNum
+    auto tabBarChildren = host->GetChildren();
+    int32_t tabIndex = 0;
+    for (auto it = tabBarChildren.begin(); it != tabBarChildren.end() && tabIndex < tabContentNum;
+         ++it, ++tabIndex) {
+        auto columnNode = AceType::DynamicCast<FrameNode>(*it);
+        CHECK_NULL_CONTINUE(columnNode);
+        auto columnProperty = columnNode->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(columnProperty);
+        auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(tabIndex));
+        bool needHidden = isHiddenByDefaultVisibility(tabContentNode);
+        columnProperty->UpdateVisibility(needHidden ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
+    host->MarkNeedSyncRenderTree();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

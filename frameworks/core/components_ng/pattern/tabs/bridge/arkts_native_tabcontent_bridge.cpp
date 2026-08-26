@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/swiper/bridge/arkts_native_swiper_bridge.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/sub_tab_bar_style_peer.h"
@@ -38,6 +39,13 @@ namespace {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
+constexpr int TABCONTENT_ARG_INDEX_0 = 0;
+constexpr int TABCONTENT_ARG_INDEX_1 = 1;
+constexpr int TABCONTENT_ARG_INDEX_2 = 2;
+constexpr int32_t TAB_VISIBILITY_VISIBLE = static_cast<int32_t>(TabVisibility::VISIBLE);
+constexpr int32_t TAB_VISIBILITY_HIDDEN = static_cast<int32_t>(TabVisibility::HIDDEN);
+constexpr int32_t BAR_DISPLAY_MODE_BOTTOMTABBAR = static_cast<int32_t>(TabBarDisplayMode::BOTTOMTABBAR);
+constexpr int32_t BAR_DISPLAY_MODE_SIDEBAR = static_cast<int32_t>(TabBarDisplayMode::SIDEBAR);
 #ifdef PIXEL_MAP_SUPPORTED
 constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
@@ -856,6 +864,7 @@ void TabContentBridge::RegisterTabContentAttributes(panda::Local<panda::ObjectRe
         "setTabContentSize", "resetTabContentSize",
         "setTabContentOnWillShow", "resetTabContentOnWillShow",
         "setTabContentOnWillHide", "resetTabContentOnWillHide",
+        "setDefaultVisibility", "resetDefaultVisibility",
     };
     Local<panda::JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::Create),
@@ -872,6 +881,8 @@ void TabContentBridge::RegisterTabContentAttributes(panda::Local<panda::ObjectRe
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillShow),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabContentOnWillHide),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillHide),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetDefaultVisibility),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetDefaultVisibility),
     };
     auto tabContent = panda::ObjectRef::NewWithNamedProperties(
         vm, ArraySize(functionNames), functionNames, funcValues);
@@ -1166,4 +1177,44 @@ ArkUINativeModuleValue TabContentBridge::ResetTabContentOnWillHide(ArkUIRuntimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabContentBridge::SetDefaultVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABCONTENT_ARG_INDEX_0);
+    Local<JSValueRef> visibilityArg = runtimeCallInfo->GetCallArgRef(TABCONTENT_ARG_INDEX_1);
+    Local<JSValueRef> displayModeArg = runtimeCallInfo->GetCallArgRef(TABCONTENT_ARG_INDEX_2);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    ArkUI_Int32 visibility = TAB_VISIBILITY_VISIBLE;
+    if (!visibilityArg.IsNull() && !visibilityArg->IsUndefined() && visibilityArg->IsNumber()) {
+        auto visibilityVal = visibilityArg->Int32Value(vm);
+        if (visibilityVal >= TAB_VISIBILITY_VISIBLE && visibilityVal <= TAB_VISIBILITY_HIDDEN) {
+            visibility = visibilityVal;
+        }
+    }
+    ArkUI_Int32 displayMode = BAR_DISPLAY_MODE_BOTTOMTABBAR;
+    ArkUI_Bool hasDisplayMode = false;
+    if (!displayModeArg.IsNull() && !displayModeArg->IsUndefined() && displayModeArg->IsNumber()) {
+        auto displayModeVal = displayModeArg->Int32Value(vm);
+        if (displayModeVal >= BAR_DISPLAY_MODE_BOTTOMTABBAR && displayModeVal <= BAR_DISPLAY_MODE_SIDEBAR) {
+            displayMode = displayModeVal;
+            hasDisplayMode = true;
+        }
+    }
+    GetArkUINodeModifiers()->getTabContentModifier()->setDefaultVisibility(
+        nativeNode, visibility, displayMode, hasDisplayMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabContentBridge::ResetDefaultVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabContentModifier()->resetDefaultVisibility(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

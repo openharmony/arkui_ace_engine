@@ -35,6 +35,33 @@ enum class TabBarDisplayMode {
     SIDEBAR,
 };
 
+enum class TabVisibility {
+    VISIBLE = 0,
+    HIDDEN,
+};
+
+struct TabContentDefaultVisibility {
+    TabVisibility visibility = TabVisibility::VISIBLE;
+    std::optional<TabBarDisplayMode> displayMode;
+    bool isNull = true;
+
+    bool operator==(const TabContentDefaultVisibility& other) const
+    {
+        if (isNull != other.isNull) {
+            return false;
+        }
+        if (isNull) {
+            return true;
+        }
+        return visibility == other.visibility && displayMode == other.displayMode;
+    }
+
+    bool operator!=(const TabContentDefaultVisibility& other) const
+    {
+        return !(*this == other);
+    }
+};
+
 struct TabBarDisplayModeBreakpoint {
     TabBarDisplayMode sm = TabBarDisplayMode::BOTTOMTABBAR;
     TabBarDisplayMode md = TabBarDisplayMode::BOTTOMTABBAR;
