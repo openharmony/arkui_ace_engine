@@ -636,10 +636,9 @@ public:
     void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
 
     bool HitTestMouseTarget(const MouseEvent& event, const PointF& globalPoint, const PointF& parentLocalPoint,
-        const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist = nullptr,
-        int32_t* longPressDuration = nullptr);
+        const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist = nullptr);
     bool IsMouseTargetHit(const MouseEvent& event, const PointF& parentRevertPoint,
-        const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion, int32_t& longPressDuration);
+        const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,

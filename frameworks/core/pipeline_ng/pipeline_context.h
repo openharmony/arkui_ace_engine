@@ -1176,7 +1176,7 @@ public:
     }
 
     bool HitTestMouseTargetForMapping(const MouseEvent& event, const RefPtr<NG::FrameNode>& node,
-        const std::vector<std::string>& tagWhitelist, int32_t& longPressDuration) const;
+        const std::vector<std::string>& tagWhitelist) const;
 
     void GetAllPixelMap();
     std::shared_ptr<UiTranslateManagerImpl> GetUiTranslateManagerImpl();

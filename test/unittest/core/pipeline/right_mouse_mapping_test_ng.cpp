@@ -583,8 +583,7 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping001, TestS
     event.sourceType = SourceType::MOUSE;
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> whitelist = { "TextInput" };
-    int32_t longPressDuration = 0;
-    bool result = context_->HitTestMouseTargetForMapping(event, nullptr, whitelist, longPressDuration);
+    bool result = context_->HitTestMouseTargetForMapping(event, nullptr, whitelist);
     EXPECT_FALSE(result);
 }
 
@@ -602,8 +601,7 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping002, TestS
     event.sourceType = SourceType::MOUSE;
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> emptyWhitelist;
-    int32_t longPressDuration = 0;
-    context_->HitTestMouseTargetForMapping(event, nullptr, emptyWhitelist, longPressDuration);
+    context_->HitTestMouseTargetForMapping(event, nullptr, emptyWhitelist);
     context_->rootNode_ = nullptr;
 }
 
@@ -616,9 +614,8 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping003, TestS
     event.sourceType = SourceType::MOUSE;
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> whitelist = { "TextInput" };
-    int32_t longPressDuration = 999;
-    context_->HitTestMouseTargetForMapping(event, nullptr, whitelist, longPressDuration);
-    EXPECT_EQ(longPressDuration, LONG_PRESS_DEFAULT_DURATION);
+    bool result = context_->HitTestMouseTargetForMapping(event, nullptr, whitelist);
+    EXPECT_FALSE(result);
 }
 
 HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingMoveEvent001, TestSize.Level1)
@@ -775,6 +772,78 @@ HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchDoesNotUpdateLastSourceType
     context_->OnTouchEvent(mappedDown);
 
     EXPECT_EQ(context_->lastSourceType_, savedType);
+}
+
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping004, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    context_->rootNode_ = textNode;
+
+    MouseEvent event;
+    event.x = 0.0f;
+    event.y = 0.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput" };
+    bool result = context_->HitTestMouseTargetForMapping(event, textNode, whitelist);
+    context_->rootNode_ = nullptr;
+}
+
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping005, TestSize.Level1)
+{
+    auto buttonNode = FrameNode::GetOrCreateFrameNode("button", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    context_->rootNode_ = buttonNode;
+
+    MouseEvent event;
+    event.x = 0.0f;
+    event.y = 0.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput", "TextArea" };
+    bool result = context_->HitTestMouseTargetForMapping(event, buttonNode, whitelist);
+    EXPECT_FALSE(result);
+    context_->rootNode_ = nullptr;
+}
+
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping006, TestSize.Level1)
+{
+    auto parentNode = FrameNode::GetOrCreateFrameNode("parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(parentNode, nullptr);
+    auto childNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(childNode, nullptr);
+    context_->rootNode_ = parentNode;
+
+    MouseEvent event;
+    event.x = 0.0f;
+    event.y = 0.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput" };
+    bool result = context_->HitTestMouseTargetForMapping(event, parentNode, whitelist);
+    context_->rootNode_ = nullptr;
+}
+
+HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    EXPECT_TRUE(context_->IsRightMouseMappingActive());
+
+    bool cancelCalled = false;
+    context_->SetOnRightMouseMappingCancel([&cancelCalled]() {
+        cancelCalled = true;
+    });
+
+    context_->OnHide();
+    EXPECT_TRUE(cancelCalled);
 }
 
 } // namespace OHOS::Ace::NG

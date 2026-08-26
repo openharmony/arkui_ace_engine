@@ -1600,11 +1600,10 @@ void AceContainer::InitializeCallback()
 
     auto&& mouseTargetHitCallback = [weakPipeline = WeakPtr<NG::PipelineContext>(
         AceType::DynamicCast<NG::PipelineContext>(pipelineContext_))](const MouseEvent& event,
-        const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& tagWhitelist,
-        int32_t& longPressDuration) -> bool {
+        const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& tagWhitelist) -> bool {
         auto pipeline = weakPipeline.Upgrade();
         CHECK_NULL_RETURN(pipeline, false);
-        return pipeline->HitTestMouseTargetForMapping(event, node, tagWhitelist, longPressDuration);
+        return pipeline->HitTestMouseTargetForMapping(event, node, tagWhitelist);
     };
     auto aceViewOhos = AceType::DynamicCast<Platform::AceViewOhos>(aceView_);
     if (aceViewOhos) {

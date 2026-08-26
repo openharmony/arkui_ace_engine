@@ -22,6 +22,8 @@
 #include "core/event/focus_axis_event.h"
 #include "core/event/event_info_convertor.h"
 
+#include <algorithm>
+
 namespace OHOS::Ace::Platform {
 namespace {
 
@@ -485,8 +487,10 @@ bool AceViewOhos::ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerE
     const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
     const std::function<void()>& markProcess, bool leftPressEnabled)
 {
-    bool rightButtonMapping = (event.button == MouseButton::RIGHT_BUTTON ||
-        (event.button == MouseButton::NONE_BUTTON && mousePressedConverted_)) &&
+    bool isRightButton = event.button == MouseButton::RIGHT_BUTTON;
+    bool rightButtonHeld = std::any_of(event.pressedButtonsArray.begin(), event.pressedButtonsArray.end(),
+        [](MouseButton b) { return b == MouseButton::RIGHT_BUTTON; });
+    bool rightButtonMapping = (isRightButton || rightButtonHeld) &&
         ShouldConvertRightMouseToTouch(event, node);
     if ((leftPressEnabled && event.button == MouseButton::LEFT_BUTTON) || rightButtonMapping) {
         TouchEvent touchEvent;
@@ -599,31 +603,33 @@ bool AceViewOhos::DispatchRightMouseTouch(const MouseEvent& event, TouchEvent& t
 
 bool AceViewOhos::ShouldConvertRightMouseToTouch(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
-    if (event.button != MouseButton::RIGHT_BUTTON && event.button != MouseButton::NONE_BUTTON) {
+    bool isRightButton = event.button == MouseButton::RIGHT_BUTTON;
+    bool rightButtonHeld = std::any_of(event.pressedButtonsArray.begin(), event.pressedButtonsArray.end(),
+        [](MouseButton b) { return b == MouseButton::RIGHT_BUTTON; });
+    if (!isRightButton && !rightButtonHeld) {
         return false;
     }
     if (event.sourceTool != SourceTool::MOUSE) {
         return false;
     }
-    if (event.action != MouseAction::PRESS && event.action != MouseAction::MOVE &&
-        event.action != MouseAction::RELEASE && event.action != MouseAction::CANCEL) {
+    bool isPress = event.action == MouseAction::PRESS;
+    bool isMove = event.action == MouseAction::MOVE;
+    bool isRelease = event.action == MouseAction::RELEASE;
+    bool isCancel = event.action == MouseAction::CANCEL;
+    if (!isPress && !isMove && !isRelease && !isCancel) {
         return false;
     }
-    if (event.action == MouseAction::PRESS && mousePressedConverted_) {
+    if (isPress && mousePressedConverted_) {
         CancelMouseMapping();
     }
-    if (event.action == MouseAction::CANCEL && mousePressedConverted_) {
+    if (isCancel && mousePressedConverted_) {
         CancelMouseMapping();
         return false;
     }
-    if (mousePressedConverted_ && (event.button == mouseConvertedButton_ ||
-            (event.button == MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE))) {
+    if (mousePressedConverted_ && (isRightButton || rightButtonHeld)) {
         return true;
     }
-    if (event.action != MouseAction::PRESS) {
-        return false;
-    }
-    if (event.button != MouseButton::RIGHT_BUTTON) {
+    if (!isPress || !isRightButton) {
         return false;
     }
     if (!CheckMouseMappingWhitelist(event, node)) {
@@ -644,12 +650,11 @@ bool AceViewOhos::CheckMouseMappingWhitelist(const MouseEvent& event, const RefP
         return false;
     }
     CHECK_NULL_RETURN(mouseTargetHitCallback_, false);
-    int32_t longPressDuration = LONG_PRESS_DEFAULT_DURATION;
-    bool hitTestResult = mouseTargetHitCallback_(event, node, components, longPressDuration);
+    bool hitTestResult = mouseTargetHitCallback_(event, node, components);
     if (!hitTestResult) {
         return false;
     }
-    mouseLongPressDuration_ = longPressDuration;
+    mouseLongPressDuration_ = LONG_PRESS_DEFAULT_DURATION;
     return true;
 }
 

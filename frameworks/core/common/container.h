@@ -85,8 +85,7 @@ using CrownEventCallback = std::function<void(const CrownEvent&, const std::func
 using TouchpadInteractionBeginCallback = std::function<void(const NonPointerEvent&, const std::function<void()>&)>;
 using AbilityRuntimeContextCallback = std::function<void(int32_t)>;
 using MouseTargetHitCallback = std::function<bool(const MouseEvent&,
-    const RefPtr<NG::FrameNode>&, const std::vector<std::string>&,
-    int32_t&)>;
+    const RefPtr<NG::FrameNode>&, const std::vector<std::string>&)>;
 
 class PipelineBase;
 class ContainerHandler;

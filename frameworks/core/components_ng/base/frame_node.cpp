@@ -3946,7 +3946,7 @@ RectF FrameNode::CheckResponseRegionForStylus(RectF& rect, const TouchEvent& tou
 }
 
 bool FrameNode::IsMouseTargetHit(const MouseEvent& event, const PointF& parentRevertPoint,
-    const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion, int32_t& longPressDuration)
+    const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion)
 {
     CHECK_NULL_RETURN(renderContext_, false);
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
@@ -3972,21 +3972,11 @@ bool FrameNode::IsMouseTargetHit(const MouseEvent& event, const PointF& parentRe
     }
 
     bool ret = tagAllowed && !isOutOfRegion;
-    if (ret) {
-        auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
-        if (gestureHub) {
-            auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
-            if (longPressRecognizer) {
-                longPressDuration = longPressRecognizer->GetDuration();
-            }
-        }
-    }
     return ret;
 }
 
 bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist,
-    int32_t* longPressDuration)
+    const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist)
 {
     CHECK_NULL_RETURN(renderContext_, false);
     if (!isActive_) {
@@ -3998,11 +3988,7 @@ bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& global
     localMat_ = cacheMatrixInfo.localMatrix;
 
     bool isOutOfRegion = false;
-    int32_t curDuration = LONG_PRESS_DEFAULT_DURATION;
-    bool ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion, curDuration);
-    if (ret && longPressDuration) {
-        *longPressDuration = curDuration;
-    }
+    bool ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion);
 
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
     renderContext_->GetPointWithTransform(localPoint);
@@ -4015,13 +4001,9 @@ bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& global
         if (!child) {
             continue;
         }
-        int32_t childDuration = LONG_PRESS_DEFAULT_DURATION;
         if (child->HitTestMouseTarget(event, globalPoint, localPoint, subRevertPoint,
-            tagWhitelist, &childDuration)) {
+            tagWhitelist)) {
             ret = true;
-            if (longPressDuration) {
-                *longPressDuration = childDuration;
-            }
             break;
         }
     }

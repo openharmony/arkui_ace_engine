@@ -8823,15 +8823,14 @@ int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& cal
 }
 
 bool PipelineContext::HitTestMouseTargetForMapping(const MouseEvent& event, const RefPtr<NG::FrameNode>& node,
-    const std::vector<std::string>& tagWhitelist, int32_t& longPressDuration) const
+    const std::vector<std::string>& tagWhitelist) const
 {
     auto frameNode = node ? node : GetRootElement();
     CHECK_NULL_RETURN(frameNode, false);
     auto scaleEvent = event.CreateScaleEvent(GetViewScale());
     const NG::PointF p { scaleEvent.x, scaleEvent.y };
     const std::vector<std::string>* whitelistPtr = tagWhitelist.empty() ? nullptr : &tagWhitelist;
-    longPressDuration = LONG_PRESS_DEFAULT_DURATION;
-    bool result = frameNode->HitTestMouseTarget(event, p, p, p, whitelistPtr, &longPressDuration);
+    bool result = frameNode->HitTestMouseTarget(event, p, p, p, whitelistPtr);
     return result;
 }
 
