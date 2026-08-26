@@ -789,6 +789,7 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping004, TestS
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> whitelist = { "TextInput" };
     bool result = context_->HitTestMouseTargetForMapping(event, textNode, whitelist);
+    EXPECT_FALSE(result);
     context_->rootNode_ = nullptr;
 }
 
@@ -829,6 +830,7 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping006, TestS
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> whitelist = { "TextInput" };
     bool result = context_->HitTestMouseTargetForMapping(event, parentNode, whitelist);
+    EXPECT_FALSE(result);
     context_->rootNode_ = nullptr;
 }
 

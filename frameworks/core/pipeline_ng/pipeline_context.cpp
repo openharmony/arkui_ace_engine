@@ -146,7 +146,6 @@ constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
-constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
 constexpr int32_t PARAM_NUM = 2;
 constexpr int64_t MAX_MISS_COUNT = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;

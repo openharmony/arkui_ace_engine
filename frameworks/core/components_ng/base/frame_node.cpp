@@ -205,7 +205,6 @@ constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
 void ClearAccessibilityFocus(
     const RefPtr<AccessibilityProperty>& accessibilityProperty, const RefPtr<RenderContext>& renderContext)
 {
