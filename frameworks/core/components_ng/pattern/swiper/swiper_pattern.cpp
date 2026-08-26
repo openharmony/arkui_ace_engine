@@ -6077,7 +6077,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
     CHECK_NULL_VOID(renderContext);
     // The common attribute rendergroup is set to false, and the default itemrendergroup does not take effect.
     // Clear the cache that has not been closed.
-    if (renderContext->HasRenderGroup() && !renderContext->GetRenderGroupValue()) {
+    if (isRenderGroupExplicitlySet_ && renderContext->HasRenderGroup() && !renderContext->GetRenderGroupValue()) {
         itemRenderGroup = false;
     }
     if (!lastSetRenderGroup_ && !itemRenderGroup) {

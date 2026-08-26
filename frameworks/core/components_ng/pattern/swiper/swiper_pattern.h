@@ -931,6 +931,11 @@ public:
         customAnimationPrevIndex_ = prevIndex;
     }
 
+    void SetRenderGroupExplicitly(bool isRenderGroup)
+    {
+        isRenderGroupExplicitlySet_ = isRenderGroup;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -1629,6 +1634,7 @@ private:
     std::optional<float> lastDragByOffset_;
 
     bool lastSetRenderGroup_ = false;
+    bool isRenderGroupExplicitlySet_ = false;
 
     bool isIgnoreHiddenItem_ = false;
 };

@@ -4943,6 +4943,7 @@ struct ArkUISwiperModifier {
     void (*setJsSwiperOnClick)(ArkUINodeHandle node, ArkUI_VoidPtr clickFunc);
     void (*setSwiperIgnoreHiddenItem)(ArkUINodeHandle node, ArkUI_Bool ignoreHiddenItem);
     void (*resetSwiperIgnoreHiddenItem)(ArkUINodeHandle node);
+    void (*setSwiperRenderGroup)(ArkUINodeHandle node, ArkUI_Bool isRenderGroup);
 };
 
 struct ArkUISwiperControllerModifier {
