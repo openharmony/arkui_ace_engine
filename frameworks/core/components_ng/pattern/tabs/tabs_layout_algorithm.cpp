@@ -926,7 +926,9 @@ SizeF TabsLayoutAlgorithm::MeasureTabBar(LayoutWrapper* layoutWrapper, LayoutCon
     CHECK_NULL_RETURN(barLayoutProperty, tabBarSize);
     auto constraint = barLayoutProperty->GetLayoutConstraint();
     float barHeight = FLOATING_BAR_HEIGHT.ConvertToPx();
-    if (!constraint || !constraint->selfIdealSize.Height().has_value()) {
+    if (layoutProperty->HasBarHeight()) {
+        // User-set barHeight takes highest priority, let it flow through naturally
+    } else if (!constraint || !constraint->selfIdealSize.Height().has_value()) {
         childLayoutConstraint.selfIdealSize.SetHeight(FLOATING_BAR_HEIGHT.ConvertToPx());
     } else {
         barHeight = constraint->selfIdealSize.Height().value();

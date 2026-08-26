@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_checker.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
@@ -30,10 +31,13 @@
 #ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
 #endif
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/pan_event.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -78,6 +82,11 @@ constexpr uint32_t MASK_COLOR_DARK = 0x99000000;
 
 const RefPtr<Curve> FOLLOW_HAND_ANIMATION_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0, 1.0, 224.0, 25.0);
 constexpr int32_t FOLLOW_HAND_ANIMATION_PART2_DELAY = 150;
+// Color invert constants for auto-inversion
+constexpr uint32_t LUMINANCE_SAMPLER_INTERVAL = 200;
+constexpr uint32_t LUMINANCE_THRESHOLD_LOW = 150;
+constexpr uint32_t LUMINANCE_THRESHOLD_HIGH = 200;
+constexpr int32_t INVERT_COLOR_ANIMATION_DURATION = 133;
 const char TAB_BAR_ETS_TAG[] = "TabBar";
 const char TABS_BACKGROUND_MASK_ETS_TAG[] = "BackgroundMask";
 const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
@@ -1324,6 +1333,7 @@ void TabsPattern::InitFloatingBar()
     lastFloatingBar_ = isFloatingBar_;
     if (isBarOverlap && isHorizontal && isBarPositionEnd && isFloatingStyle) {
         isFloatingBar_ = true;
+        SetTabBarIsFloating(true);
         if (!tabsNode->HasBackgroundMaskNode()) {
             auto backgroundMaskNode = FrameNode::GetOrCreateFrameNode(TABS_BACKGROUND_MASK_ETS_TAG,
                 tabsNode->GetBackgroundMaskId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
@@ -1343,6 +1353,7 @@ void TabsPattern::InitFloatingBar()
             backgroundMaskNode->SetActive(false);
         }
         isFloatingBar_ = false;
+        SetTabBarIsFloating(false);
         if (floatingBarPosition_ != FloatingBarPosition::CENTER) {
             ResetTabBarFollowHandPosition();
         }
@@ -1370,8 +1381,13 @@ void TabsPattern::UpdateBgMaskNode()
     CHECK_NULL_VOID(property);
     auto style = property->GetBarFloatingStyle();
     Color baseColor(MASK_COLOR_LIGHT);
+    ColorMode colorInvertColorMode = GetColorInvertColorMode();
     if (style.has_value() && style->maskColor.has_value()) {
         baseColor = style->maskColor.value();
+    } else if (colorInvertColorMode != ColorMode::COLOR_MODE_UNDEFINED) {
+        if (colorInvertColorMode == ColorMode::DARK) {
+            baseColor = Color(MASK_COLOR_DARK);
+        }
     } else {
         auto context = GetContext();
         if (context && context->GetColorMode() == ColorMode::DARK) {
@@ -1656,6 +1672,24 @@ void TabsPattern::ApplySystemMaterial()
     if (!style.has_value()) {
         return;
     }
+    bool isMaterialDisable =
+        MaterialUtils::IsMaterialDisabled() || (MaterialUtils::GetConfiguredMaterialState() == MaterialState::DEFAULT &&
+                                                   !SystemProperties::IsDeviceSystemMaterialSupported());
+    if (isMaterialDisable) {
+        UnregisterColorPicker();
+        return;
+    }
+    if (MaterialUtils::IsMaterialEnabled() && !style->systemMaterial) {
+        style->systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+        style->systemMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+        ImmersiveOptions options;
+        options.style = UiMaterialStyle::THIN;
+        options.colorInvert = true;
+        options.interactive = true;
+        options.lightEffectOptions = LightEffectOptions();
+        style->systemMaterial->SetImmersiveOptions(options);
+        property->UpdateBarFloatingStyle(style.value());
+    }
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
     auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -1670,9 +1704,13 @@ void TabsPattern::ApplySystemMaterial()
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->UpdateBackBlurStyle(std::nullopt);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), uiMaterial.GetRawPtr());
+        // Initialize color picker for auto-inversion when colorInvert is enabled
+        InitColorPickerIfNeeded();
     } else {
         tabBarPattern->SetUseNewMaterial(false);
+        tabBarPattern->SetColorInvertColorMode(ColorMode::COLOR_MODE_UNDEFINED);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
+        UnregisterColorPicker();
     }
 }
 
@@ -1686,6 +1724,7 @@ void TabsPattern::ResetSystemMaterial()
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetUseNewMaterial(false);
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
+    UnregisterColorPicker();
 }
 
 void TabsPattern::SetFloatingScaleEnabled(bool isFloatingScaleEnabled)
@@ -1702,6 +1741,134 @@ void TabsPattern::SetFloatingScaleEnabled(bool isFloatingScaleEnabled)
         return;
     }
     renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
+}
+
+bool TabsPattern::IsColorInvertEnabled()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
+    auto style = property->GetBarFloatingStyle();
+    if (!style.has_value() || !style->systemMaterial) {
+        return false;
+    }
+    const auto& options = style->systemMaterial->GetImmersiveOptions();
+    if (!options || !options->colorInvert) {
+        return false;
+    }
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel != UiMaterialLevel::EXQUISITE && materialLevel != UiMaterialLevel::GENTLE) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    if (materialLevel == UiMaterialLevel::EXQUISITE) {
+        return transparencyLevel == UiMaterialTransparency::THIN || transparencyLevel == UiMaterialTransparency::NORMAL;
+    }
+    return transparencyLevel == UiMaterialTransparency::GENTLE_THIN;
+}
+
+ColorMode TabsPattern::GetColorInvertColorMode()
+{
+    if (IsColorInvertEnabled() && isColorPickerDark_.has_value()) {
+        return isColorPickerDark_.value() ? ColorMode::DARK : ColorMode::LIGHT;
+    }
+    return ColorMode::COLOR_MODE_UNDEFINED;
+}
+
+void TabsPattern::InitColorPickerIfNeeded()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    if (!tabsNode->HasBackgroundMaskNode()) {
+        return;
+    }
+    auto backgroundMaskNode = AceType::DynamicCast<FrameNode>(tabsNode->GetBackgroundMask());
+    CHECK_NULL_VOID(backgroundMaskNode);
+    if (!IsColorInvertEnabled()) {
+        UnregisterColorPicker();
+        return;
+    }
+    if (hasRegisterColorPicker_) {
+        return;
+    }
+    hasRegisterColorPicker_ = true;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    navMgr->RegisterColorPicker(backgroundMaskNode, LUMINANCE_SAMPLER_INTERVAL, LUMINANCE_THRESHOLD_HIGH,
+        LUMINANCE_THRESHOLD_LOW, [weakPattern = WeakClaim(this)](uint32_t luminance) {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnLuminanceUpdate(luminance);
+        });
+}
+
+void TabsPattern::UnregisterColorPicker()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    if (!tabsNode->HasBackgroundMaskNode()) {
+        return;
+    }
+    auto backgroundMaskNode = AceType::DynamicCast<FrameNode>(tabsNode->GetBackgroundMask());
+    CHECK_NULL_VOID(backgroundMaskNode);
+    if (hasRegisterColorPicker_) {
+        hasRegisterColorPicker_ = false;
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto navMgr = context->GetNavigationManager();
+        CHECK_NULL_VOID(navMgr);
+        navMgr->UnregisterColorPicker(backgroundMaskNode);
+        isColorPickerDark_ = std::nullopt;
+    }
+}
+
+void TabsPattern::OnLuminanceUpdate(uint32_t luminance)
+{
+    if (luminance < LUMINANCE_THRESHOLD_LOW) {
+        isColorPickerDark_ = true;
+    } else if (luminance > LUMINANCE_THRESHOLD_HIGH) {
+        isColorPickerDark_ = false;
+    }
+    if (!IsColorInvertEnabled()) {
+        return;
+    }
+
+    StartColorInvertAnimation();
+}
+
+void TabsPattern::StartColorInvertAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    AnimationOption option;
+    option.SetDuration(INVERT_COLOR_ANIMATION_DURATION);
+    option.SetCurve(Ace::Curves::LINEAR);
+    AnimationUtils::StartAnimation(
+        option,
+        [weakPattern = WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleColorInvert();
+        },
+        nullptr, nullptr, context);
+}
+
+void TabsPattern::HandleColorInvert()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    // Update the color invert color mode on TabBarPattern
+    auto colorMode = GetColorInvertColorMode();
+    tabBarPattern->SetColorInvertColorMode(colorMode);
+
+    UpdateBgMaskNode();
 }
 
 RefPtr<FrameNode> TabsPattern::CreateSideBarNode()

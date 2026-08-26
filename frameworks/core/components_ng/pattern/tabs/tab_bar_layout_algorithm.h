@@ -94,6 +94,11 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    void SetIsFloatingBar(bool isFloatingBar)
+    {
+        isFloatingBar_ = isFloatingBar;
+    }
+
     float GetBarGridMargin()
     {
         return barGridMargin_;
@@ -166,6 +171,7 @@ private:
     bool isNoMinHeightLimit_ = false;
     bool useItemWidth_ = true;
     bool canOverScroll_ = false;
+    bool isFloatingBar_ = false;
     std::vector<int32_t> effectiveChildIndices_;
     std::unordered_set<int32_t> effectiveChildIndexSet_;
     Dimension leftAndRightMargin_ = 0.0_vp;

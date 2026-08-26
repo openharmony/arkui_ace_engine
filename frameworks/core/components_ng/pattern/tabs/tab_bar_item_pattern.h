@@ -20,7 +20,10 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/utils/resource_configuration.h"
 
 namespace OHOS::Ace::NG {
 const auto TWO = 2;
@@ -125,7 +128,43 @@ public:
         }
 
         paintRect.SetRect(columnPaintRect);
-        SetFocusRectRadius(paintRect, radius, padding, *tabTheme);
+        auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+        if (tabBarPattern && tabBarPattern->IsNewMaterial()) {
+            auto rectSize = columnPaintRect.GetSize();
+            float capsuleRadius = std::min(rectSize.Width(), rectSize.Height()) / TWO;
+            paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, capsuleRadius, capsuleRadius);
+            paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, capsuleRadius, capsuleRadius);
+            paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, capsuleRadius, capsuleRadius);
+            paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, capsuleRadius, capsuleRadius);
+            UpdateColorInvertFocusBoxStyle(host, focusHub, tabBarFocusHub, tabBarPattern);
+        } else {
+            SetFocusRectRadius(paintRect, radius, padding, *tabTheme);
+        }
+    }
+
+    void UpdateColorInvertFocusBoxStyle(const RefPtr<FrameNode>& host, const RefPtr<FocusHub>& focusHub,
+        const RefPtr<FocusHub>& tabBarFocusHub, const RefPtr<TabBarPattern>& tabBarPattern)
+    {
+        if (!tabBarPattern->IsColorInvertActive()) {
+            return;
+        }
+        FocusBoxStyle style = focusHub->GetFocusBox().HasCustomStyle()
+            ? tabBarFocusHub->GetFocusBox().GetStyle().value() : FocusBoxStyle();
+        auto pipeline = host->GetContext();
+        if (pipeline) {
+            auto colorMode = tabBarPattern->GetColorInvertColorMode();
+            auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(pipeline->GetInstanceId());
+            if (resourceAdapter) {
+                ResourceConfiguration resConfig;
+                resConfig.SetColorMode(colorMode);
+                ConfigurationChange configChange { .colorModeUpdate = true };
+                auto overrideAdapter = resourceAdapter->GetOverrideResourceAdapter(resConfig, configChange);
+                if (overrideAdapter) {
+                    style.strokeColor = overrideAdapter->GetColorByName("sys.color.interactive_focus");
+                }
+            }
+        }
+        focusHub->GetFocusBox().SetStyle(style);
     }
 
     void SetFocusRectRadius(RoundRect& paintRect, BorderRadiusProperty& radius, Dimension& padding, TabTheme& tabTheme)

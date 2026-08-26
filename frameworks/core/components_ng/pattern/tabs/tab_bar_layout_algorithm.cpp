@@ -48,6 +48,8 @@ constexpr int8_t LG_COLUMN_NUM = 12;
 constexpr int8_t TWO = 2;
 constexpr int8_t FOCUS_BOARD = 2;
 constexpr int8_t IMAGE_INDICATOR_COUNT = 1;
+
+const Dimension FLOATING_BAR_HEIGHT = Dimension(56, Ace::DimensionUnit::VP);
 } // namespace
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -115,10 +117,14 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     if (!constraint->selfIdealSize.Height().has_value()) {
         if (axis_ == Axis::HORIZONTAL) {
-            defaultHeight_ = (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE &&
-                                 Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))
-                                 ? static_cast<float>(tabTheme->GetBottomTabBarDefaultWidth().ConvertToPx())
-                                 : static_cast<float>(tabTheme->GetTabBarDefaultHeight().ConvertToPx());
+            if (isFloatingBar_) {
+                defaultHeight_ = static_cast<float>(FLOATING_BAR_HEIGHT.ConvertToPx());
+            } else {
+                defaultHeight_ = (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE &&
+                                     Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))
+                                     ? static_cast<float>(tabTheme->GetBottomTabBarDefaultWidth().ConvertToPx())
+                                     : static_cast<float>(tabTheme->GetTabBarDefaultHeight().ConvertToPx());
+            }
         }
         auto idealHeight = idealSize.Height().value_or(0.f);
         idealSize.SetHeight(std::clamp(idealHeight, constraint->minSize.Height(), constraint->maxSize.Height()));
