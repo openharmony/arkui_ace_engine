@@ -186,6 +186,7 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
     if (renderingMode_ > AppExecFwk::Constants::RenderingMode::SINGLE_COLOR ||
         renderingMode_ < AppExecFwk::Constants::RenderingMode::FULL_COLOR) {
+        HILOG_ERROR("invalid param, renderingMode_: %d", static_cast<int>(renderingMode_));
         renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     }
     enableBlurBackground_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
@@ -201,6 +202,7 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
         want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
     if (formLocation_ >= AppExecFwk::Constants::FormLocation::FORM_LOCATION_END ||
         formLocation_ < AppExecFwk::Constants::FormLocation::OTHER) {
+        HILOG_ERROR("invalid param, formLocation_: %d", static_cast<int>(formLocation_));
         formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
     }
     deleteBackgroundImage_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_DELETE_BACKGROUND_IMAGE, false);
@@ -346,7 +348,9 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, 
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
     if (width <= 0.0f || height <= 0.0f || borderWidth < 0.0f || formViewScale <= 0.0f ||
-        resizedWidth <= 0.0f || resizedHeight <= 0.0f) {
+        resizedWidth <= 0.0f || resizedHeight <= 0.0f || std::isnan(width) || std::isnan(height) ||
+        std::isnan(borderWidth) || std::isnan(formViewScale) || std::isnan(resizedWidth) ||
+        std::isnan(resizedHeight)) {
         HILOG_ERROR("invalid param: width: %.2f, height: %.2f, borderWidth: %.2f, formViewScale: %.2f, "
             "resizedWidth: %.2f, resizedHeight: %.2f.", width, height, borderWidth, formViewScale, resizedWidth,
             resizedHeight);

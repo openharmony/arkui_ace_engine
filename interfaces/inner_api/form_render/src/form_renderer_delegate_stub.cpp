@@ -98,7 +98,7 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
         HILOG_ERROR("want is nullptr");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
-    
+
     {
         std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
         if (g_surfaceNodeMap_.size() >= MAX_SURFACE_NODE_MAP_SIZE) {
