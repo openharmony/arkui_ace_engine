@@ -95,6 +95,8 @@ public:
 
     void SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>&& event);
 
+    void SetOnBarDisplayModeChangeEvent(std::function<void(TabBarDisplayMode)>&& event);
+
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll);
 
     ChangeEventPtr GetTabBarClickEvent()
@@ -171,6 +173,8 @@ public:
         return currentBarDisplayMode_;
     }
     void SetCurrentBarDisplayMode(TabBarDisplayMode mode);
+
+    void FireBarDisplayModeChangeEvent(TabBarDisplayMode mode);
 
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
@@ -306,6 +310,7 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
+    std::function<void(TabBarDisplayMode)> onBarDisplayModeChangeEvent_;
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
     BarPosition barPosition_ = BarPosition::END; // default accessibilityZIndex is consistent with BarPosition::END
