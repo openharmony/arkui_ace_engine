@@ -106,5 +106,5 @@
 ## 相关主题
 
 - [布局框架（同层级架构主题）](layout-framework.md)
-- [状态管理](../frontend/state-management.md)](../frontend/state-management.md)（frontend 主题总览页）
+- [状态管理](../frontend/state-management.md)（frontend 主题总览页）
 - [窗口机制（同层级架构主题）](window-mechanism.md)
