@@ -1587,7 +1587,8 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleTouchEvent[%{public}f,%{public}f,%{public}d,%{public}zu,%{public}u]",
-        localOffset.GetX(), localOffset.GetY(), touchInfo.GetFingerId(), touchInfoList.front().GetTouchType(),
+        localOffset.GetX() * xcomponentTouchSdrRatio_, localOffset.GetY() * xcomponentTouchSdrRatio_,
+        touchInfo.GetFingerId(), touchInfoList.front().GetTouchType(),
         static_cast<uint32_t>(touchInfo.GetSize()));
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
