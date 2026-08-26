@@ -51,8 +51,8 @@ void QRCodeModifier::onDraw(DrawingContext& context)
         QrcodeImageFree(qrCode);
         return;
     }
-    uint32_t qrWidth = qrCode->width;
-    if ((qrCodeSize <= 0) || (qrCodeSize < static_cast<float>(qrWidth))) {
+    int32_t qrWidth = static_cast<int32_t>(qrCode->width);
+    if (LessOrEqual(qrCodeSize, 0) || LessNotEqual(qrCodeSize, qrWidth)) {
         QrcodeImageFree(qrCode);
         TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeSize is too small. QRCodeSize: %{public}f", qrCodeSize);
         return;
@@ -88,7 +88,7 @@ void QRCodeModifier::onDraw(DrawingContext& context)
 RSBitmap QRCodeModifier::CreateBitMap(
     int32_t width, const QrcodeImage& qrCode, const Color& color, const Color& backgroundColor) const
 {
-    uint32_t qrWidth = qrCode.width;
+    int32_t qrWidth = static_cast<int32_t>(qrCode.width);
     RSBitmap bitMap;
     RSBitmapFormat colorType = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     bitMap.Build(width, width, colorType);
