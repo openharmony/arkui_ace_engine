@@ -155,7 +155,7 @@ void TabTheme::Builder::ParsePattern2(const RefPtr<TabTheme>& theme, const RefPt
     theme->sideBarListItemCornerRadius_ =
         pattern->GetAttr<Dimension>("corner_radius_level6", 12.0_vp);
     theme->sideBarListItemActivedColor_ =
-        pattern->GetAttr<Color>("comp_emphasize_tertiary", Color(0x19007DFF));
+        pattern->GetAttr<Color>("sidebar_board_actived_color", Color(0x19007DFF));
     theme->sideBarListItemHoverColor_ =
         pattern->GetAttr<Color>("interactive_hover", Color(0x0c182431));
     theme->sideBarListItemPressedColor_ =
@@ -164,6 +164,14 @@ void TabTheme::Builder::ParsePattern2(const RefPtr<TabTheme>& theme, const RefPt
         pattern->GetAttr<Color>("interactive_focus", Color(0x007DFF));
     theme->sideBarListItemFocusWidth_ =
         pattern->GetAttr<Dimension>("outline_extra_larger", 2.0_vp);
+    theme->sideBarSelectedIconColor_ =
+        pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
+    theme->sideBarSelectedTextColor_ =
+        pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
+    theme->sideBarUnselectedIconColor_ =
+        pattern->GetAttr<Color>("sidebar_unselected_icon_color", Color(0x99182431));
+    theme->sideBarUnselectedTextColor_ =
+        pattern->GetAttr<Color>("sidebar_unselected_text_color", Color(0x99182431));
 }
 
 } // namespace OHOS::Ace

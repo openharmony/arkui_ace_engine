@@ -65,6 +65,11 @@ public:
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override;
     void SetBarBackgroundColor(const Color& backgroundColor) override;
     void SetBarBackgroundColorByUser(bool isByUser) override;
+    void SetSidebarSelectedIconColor(const Color& color) override;
+    void SetSidebarSelectedTextColor(const Color& color) override;
+    void SetSidebarUnselectedIconColor(const Color& color) override;
+    void SetSidebarUnselectedTextColor(const Color& color) override;
+    void SetSidebarSelectedBoardColor(const Color& color) override;
     void SetClipEdge(bool clipEdge) override;
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override;
     void ResetScrollableBarModeOptions() override;
@@ -108,6 +113,11 @@ public:
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
     static void SetBarBackgroundColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetSidebarSelectedIconColor(FrameNode* frameNode, const Color& color);
+    static void SetSidebarSelectedTextColor(FrameNode* frameNode, const Color& color);
+    static void SetSidebarUnselectedIconColor(FrameNode* frameNode, const Color& color);
+    static void SetSidebarUnselectedTextColor(FrameNode* frameNode, const Color& color);
+    static void SetSidebarSelectedBoardColor(FrameNode* frameNode, const Color& color);
     static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
@@ -162,6 +172,16 @@ public:
     static void HandleBackgroundEffectInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         bool isModifier = false);
     static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleSidebarSelectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleSidebarSelectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleSidebarUnselectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleSidebarUnselectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        bool isModifier = false);
+    static void HandleSidebarSelectedBoardColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         bool isModifier = false);
 
     static void SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters);

@@ -158,6 +158,26 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, BarBackgroundColorModifier.identity, BarBackgroundColorModifier, value);
         return this;
       }
+      sidebarSelectedIconColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarSelectedIconColorModifier.identity, TabSidebarSelectedIconColorModifier, value);
+        return this;
+      }
+      sidebarSelectedTextColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarSelectedTextColorModifier.identity, TabSidebarSelectedTextColorModifier, value);
+        return this;
+      }
+      sidebarUnselectedIconColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarUnselectedIconColorModifier.identity, TabSidebarUnselectedIconColorModifier, value);
+        return this;
+      }
+      sidebarUnselectedTextColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarUnselectedTextColorModifier.identity, TabSidebarUnselectedTextColorModifier, value);
+        return this;
+      }
+      sidebarSelectedBoardColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarSelectedBoardColorModifier.identity, TabSidebarSelectedBoardColorModifier, value);
+        return this;
+      }
       barBackgroundBlurStyle(value: BlurStyle): TabsAttribute {
         if (isUndefined(value)) {
           modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, undefined);
@@ -618,6 +638,101 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.resetBarBackgroundColor(node);
         } else {
           getUINativeModule().tabs.setBarBackgroundColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarSelectedIconColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarSelectedIconColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarSelectedIconColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarSelectedIconColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarSelectedTextColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarSelectedTextColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarSelectedTextColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarSelectedTextColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarUnselectedIconColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarUnselectedIconColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarUnselectedIconColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarUnselectedIconColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarUnselectedTextColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarUnselectedTextColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarUnselectedTextColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarUnselectedTextColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarSelectedBoardColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarSelectedBoardColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarSelectedBoardColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarSelectedBoardColor(node, this.value);
         }
       }
     
@@ -1182,6 +1297,26 @@ class JSTabs extends JSContainerBase {
 
   static barBackgroundColor(value: any): void {
     getUINativeModule().tabs.setBarBackgroundColor(true, value);
+  }
+
+  static sidebarSelectedIconColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarSelectedIconColor(true, value);
+  }
+
+  static sidebarSelectedTextColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarSelectedTextColor(true, value);
+  }
+
+  static sidebarUnselectedIconColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarUnselectedIconColor(true, value);
+  }
+
+  static sidebarUnselectedTextColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarUnselectedTextColor(true, value);
+  }
+
+  static sidebarSelectedBoardColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarSelectedBoardColor(true, value);
   }
 
   static barBackgroundBlurStyle(value: any, additional: any): void {

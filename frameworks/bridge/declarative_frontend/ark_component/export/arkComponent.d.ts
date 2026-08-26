@@ -2035,6 +2035,11 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;
     barBackgroundColor(value: ResourceColor): TabsAttribute;
+    sidebarSelectedIconColor(value: ResourceColor): TabsAttribute;
+    sidebarSelectedTextColor(value: ResourceColor): TabsAttribute;
+    sidebarUnselectedIconColor(value: ResourceColor): TabsAttribute;
+    sidebarUnselectedTextColor(value: ResourceColor): TabsAttribute;
+    sidebarSelectedBoardColor(value: ResourceColor): TabsAttribute;
     barBackgroundBlurStyle(value: BlurStyle): TabsAttribute;
     barBackgroundBlurStyle(style: BlurStyle, options: BackgroundBlurStyleOptions): TabsAttribute;
     barBackgroundEffect(options: BackgroundEffectOptions): TabsAttribute;
