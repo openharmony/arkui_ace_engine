@@ -199,7 +199,7 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
     formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
         want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
-    if (formLocation_ > AppExecFwk::Constants::FormLocation::FORM_LOCATION_END ||
+    if (formLocation_ >= AppExecFwk::Constants::FormLocation::FORM_LOCATION_END ||
         formLocation_ < AppExecFwk::Constants::FormLocation::OTHER) {
         formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
     }
