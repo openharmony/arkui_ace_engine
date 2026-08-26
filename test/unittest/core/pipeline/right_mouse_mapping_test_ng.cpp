@@ -603,7 +603,7 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping002, TestS
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> emptyWhitelist;
     int32_t longPressDuration = 0;
-    bool result = context_->HitTestMouseTargetForMapping(event, nullptr, emptyWhitelist, longPressDuration);
+    context_->HitTestMouseTargetForMapping(event, nullptr, emptyWhitelist, longPressDuration);
     context_->rootNode_ = nullptr;
 }
 
@@ -617,7 +617,7 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping003, TestS
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> whitelist = { "TextInput" };
     int32_t longPressDuration = 999;
-    bool result = context_->HitTestMouseTargetForMapping(event, nullptr, whitelist, longPressDuration);
+    context_->HitTestMouseTargetForMapping(event, nullptr, whitelist, longPressDuration);
     EXPECT_EQ(longPressDuration, LONG_PRESS_DEFAULT_DURATION);
 }
 
@@ -673,8 +673,6 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingMoveEvent002, TestSiz
     moveEvent.sourceType = SourceType::TOUCH;
     moveEvent.sourceTool = SourceTool::MOUSE;
     context_->OnTouchEvent(moveEvent);
-
-    SourceType savedLastSourceType = context_->lastSourceType_;
 
     TouchEvent upEvent;
     upEvent.id = 1002;
