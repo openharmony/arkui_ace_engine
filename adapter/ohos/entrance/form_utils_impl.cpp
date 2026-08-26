@@ -54,25 +54,23 @@ int32_t FormUtilsImpl::RouterEvent(
     want.SetParam("params", params->ToString());
     AddWantFreeInstallFlagForRouterEvent(eventAction->GetValue("flag"), want);
     auto abilityName = eventAction->GetValue("abilityName");
-    if (uri->IsValid() && !abilityName->IsValid()) {
-        auto uriStr = uri->GetString();
-        want.SetUri(uriStr);
-        auto bundleName = eventAction->GetValue("bundleName");
-        auto bundle = bundleName->GetString();
-        if (!bundle.empty()) {
-            want.SetElementName(bundle, std::string());
-        }
-    } else {
-        auto bundleName = eventAction->GetValue("bundleName");
-        auto bundle = bundleName->GetString();
-        auto ability = abilityName->GetString();
-        if (ability.empty()) {
-            return -1;
-        }
+    auto bundleName = eventAction->GetValue("bundleName");
+    auto bundle = bundleName->GetString();
+    auto ability = abilityName->GetString();
+    if (uri->IsValid()) {
+        want.SetUri(uri->GetString());
+    }
+    if (!ability.empty()) {
         if (bundle.empty()) {
             bundle = defaultBundleName;
         }
         want.SetElementName(bundle, ability);
+    } else if (uri->IsValid()) {
+        if (!bundle.empty()) {
+            want.SetElementName(bundle, std::string());
+        }
+    } else {
+        return -1;
     }
 
     return AppExecFwk::FormMgr::GetInstance().RouterEvent(formId, want, token_);
