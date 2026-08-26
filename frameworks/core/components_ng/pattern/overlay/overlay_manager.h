@@ -770,6 +770,7 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
+    RefPtr<FrameNode> GetLastChildNotOnDisappearingForSheet(const RefPtr<UINode>& node);
 
     void SetDetachedFreeRootProxy(const RefPtr<UINode>& node, int32_t targetId);
     void ResetDetachedFreeRootProxy(int32_t targetId);
