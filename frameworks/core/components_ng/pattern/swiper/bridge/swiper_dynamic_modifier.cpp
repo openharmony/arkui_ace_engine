@@ -2644,6 +2644,13 @@ void ResetSwiperIgnoreHiddenItem(ArkUINodeHandle node)
     SwiperModelNG::SetIgnoreHiddenItem(frameNode, false);
 }
 
+void SetSwiperRenderGroup(ArkUINodeHandle node, ArkUI_Bool isRenderGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetRenderGroupExplicitly(frameNode, isRenderGroup);
+}
+
 #ifndef CROSS_PLATFORM
 OHOS::Ace::SwiperModel* GetSwiperModelImpl()
 {
@@ -3503,6 +3510,9 @@ void SetSwiperIgnoreHiddenItemImpl(ArkUINodeHandle node, ArkUI_Bool value)
 
 void ResetSwiperIgnoreHiddenItemImpl(ArkUINodeHandle node)
 {}
+
+void SetSwiperRenderGroupImpl(ArkUINodeHandle node, ArkUI_Bool isRenderGroup)
+{}
 #endif
 
 namespace NodeModifier {
@@ -3665,6 +3675,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setJsSwiperOnClick = SetJsSwiperOnClick,
         .setSwiperIgnoreHiddenItem = SetSwiperIgnoreHiddenItem,
         .resetSwiperIgnoreHiddenItem = ResetSwiperIgnoreHiddenItem,
+        .setSwiperRenderGroup = SetSwiperRenderGroup,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3825,6 +3836,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setJsSwiperOnClick = SetJsSwiperOnClickImpl,
         .setSwiperIgnoreHiddenItem = SetSwiperIgnoreHiddenItemImpl,
         .resetSwiperIgnoreHiddenItem = ResetSwiperIgnoreHiddenItemImpl,
+        .setSwiperRenderGroup = SetSwiperRenderGroupImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
