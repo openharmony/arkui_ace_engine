@@ -17,6 +17,35 @@
 
 #include "form_renderer_hilog.h"
 
+namespace {
+constexpr size_t MAX_PARCEL_CAPACITY = 1024 * 1024; // 1M
+constexpr size_t CAPACITY_THRESHOLD = 200 * 1024; // 200k
+
+bool WriteDumpInfo(const std::vector<std::string>& infos, OHOS::MessageParcel& reply)
+{
+    OHOS::Parcel tempParcel;
+    tempParcel.SetMaxCapacity(MAX_PARCEL_CAPACITY);
+    if (!tempParcel.WriteStringVector(infos)) {
+        HILOG_ERROR("WriteDumpInfo: serialize failed");
+        return false;
+    }
+    size_t dataSize = tempParcel.GetDataSize();
+    bool isLittle = dataSize < CAPACITY_THRESHOLD;
+    if (!reply.WriteBool(isLittle)) {
+        HILOG_ERROR("WriteDumpInfo: write isLittle failed");
+        return false;
+    }
+    if (isLittle) {
+        return reply.WriteStringVector(infos);
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(dataSize))) {
+        HILOG_ERROR("WriteDumpInfo: write dataSize failed");
+        return false;
+    }
+    return reply.WriteRawData(reinterpret_cast<uint8_t*>(tempParcel.GetData()), dataSize);
+}
+} // namespace
+
 namespace OHOS {
 namespace Ace {
 FormRendererDispatcherStub::FormRendererDispatcherStub()
@@ -196,8 +225,8 @@ int32_t FormRendererDispatcherStub::HandleOnNotifyDumpInfo(MessageParcel &data, 
     }
     std::vector<std::string> info;
     OnNotifyDumpInfo(params, info);
-    if (!reply.WriteStringVector(info)) {
-        HILOG_ERROR("WriteStringVector<dumpInfos> failed");
+    if (!WriteDumpInfo(info, reply)) {
+        HILOG_ERROR("Write dump info failed");
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
