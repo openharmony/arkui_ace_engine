@@ -468,6 +468,11 @@ void TabsPattern::SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&&
     }
 }
 
+void TabsPattern::SetOnBarDisplayModeChangeEvent(std::function<void(TabBarDisplayMode)>&& event)
+{
+    onBarDisplayModeChangeEvent_ = std::move(event);
+}
+
 void TabsPattern::OnUpdateShowDivider()
 {
     auto host = AceType::DynamicCast<TabsNode>(GetHost());
@@ -607,6 +612,13 @@ void TabsPattern::SetCurrentBarDisplayMode(TabBarDisplayMode mode)
     auto controller = AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
     if (controller) {
         controller->SetBarDisplayMode(mode);
+    }
+}
+
+void TabsPattern::FireBarDisplayModeChangeEvent(TabBarDisplayMode mode)
+{
+    if (onBarDisplayModeChangeEvent_) {
+        onBarDisplayModeChangeEvent_(mode);
     }
 }
 
