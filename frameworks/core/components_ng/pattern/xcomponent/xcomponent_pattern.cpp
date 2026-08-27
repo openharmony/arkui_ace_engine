@@ -1151,6 +1151,7 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(renderSurface_);
     renderSurface_->UpdateSurfaceSizeInUserData(
         static_cast<uint32_t>(surfaceRect.Width()), static_cast<uint32_t>(surfaceRect.Height()));
 

@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
@@ -1206,5 +1207,27 @@ HWTEST_F(XComponentV2TestNg, XComponentV2SetSurfaceRectTest, TestSize.Level1)
     XComponentModelNG::SetXComponentSurfaceRect(AceType::RawPtr(frameNode), 0.0, 0.0, 100.0, 100.0);
     EXPECT_EQ(pattern->selfIdealSurfaceHeight_, 100.0);
     EXPECT_EQ(pattern->selfIdealSurfaceWidth_, 100.0);
+}
+
+/**
+ * @tc.name: XComponentV2ControllerSetSurfaceRectTest
+ * @tc.desc: Test controller surface rect update uses V2 implementation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentV2ControllerSetSurfaceRectTest, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<XComponentPatternV2>(
+        XComponentType::SURFACE, XComponentNodeType::DECLARATIVE_NODE);
+    pattern->drawSize_ = SizeF(400.0f, 400.0f);
+    XComponentControllerNG controller;
+    controller.SetPattern(pattern);
+    controller.SetIdealSurfaceWidth(100.0f);
+    controller.SetIdealSurfaceHeight(80.0f);
+    controller.SetIdealSurfaceOffsetX(12.0f);
+    controller.SetIdealSurfaceOffsetY(16.0f);
+    controller.UpdateSurfaceBounds();
+
+    EXPECT_EQ(pattern->surfaceSize_, SizeF(100.0f, 80.0f));
+    EXPECT_EQ(pattern->surfaceOffset_, OffsetF(12.0f, 16.0f));
 }
 } // namespace OHOS::Ace::NG
