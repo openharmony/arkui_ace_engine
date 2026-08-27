@@ -17,6 +17,7 @@
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utf_helper.h"
 
 #define private public
 #define protected public
@@ -28,6 +29,8 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/page_scene/page_scene_rule_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -243,17 +246,37 @@ RefPtr<FrameNode> CreateTextInputNode(int32_t nodeId, const RectF& paintRect, bo
 
 RefPtr<FrameNode> CreateTextFieldNode(
     const std::string& tag, int32_t nodeId, const RectF& paintRect, const std::string& text, bool focusable = true,
-    const std::u16string& placeholder = u"")
+    const std::u16string& placeholder = u"", TextInputType inputType = TextInputType::UNSPECIFIED,
+    TextContentType contentType = TextContentType::UNSPECIFIED)
 {
     auto node = CreateTestNodeWithPattern(tag, nodeId, paintRect, AceType::MakeRefPtr<TextFieldPattern>(), focusable);
     if (node) {
         auto pattern = node->GetPattern<TextFieldPattern>();
         if (pattern) {
+            pattern->SetTextInputFlag(tag != V2::TEXTAREA_ETS_TAG);
             pattern->UpdateEditingValue(text, static_cast<int32_t>(text.length()));
         }
         auto layoutProperty = node->GetLayoutProperty<TextFieldLayoutProperty>();
         if (layoutProperty) {
             layoutProperty->UpdatePlaceholder(placeholder);
+            if (tag != V2::TEXTAREA_ETS_TAG) {
+                layoutProperty->UpdateMaxLines(1);
+            }
+            layoutProperty->UpdateTextInputType(inputType);
+            layoutProperty->UpdateTextContentType(contentType);
+        }
+    }
+    return node;
+}
+
+RefPtr<FrameNode> CreateRichEditorNode(int32_t nodeId, const RectF& paintRect, const std::string& placeholder)
+{
+    auto node = CreateTestNodeWithPattern(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, paintRect, AceType::MakeRefPtr<RichEditorPattern>());
+    if (node) {
+        auto layoutProperty = node->GetLayoutProperty<RichEditorLayoutProperty>();
+        if (layoutProperty) {
+            layoutProperty->UpdatePlaceholder(UtfUtils::Str8ToStr16(placeholder));
         }
     }
     return node;
@@ -447,11 +470,12 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene003, Tes
     auto pageRoot = CreatePageRoot();
     auto searchNode = CreateTestNode(
         V2::SEARCH_ETS_TAG, TEST_SEARCH_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
-    AddChild(searchNode, CreateTestNode(
-        V2::SEARCH_Field_ETS_TAG, TEST_SEARCH_FIELD_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    AddChild(searchNode, CreateTextFieldNode(V2::SEARCH_Field_ETS_TAG, TEST_SEARCH_FIELD_ID,
+        RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), FIRST_INPUT_TEXT, true,
+        FIRST_PLACEHOLDER_TEXT_U16, TextInputType::PHONE, TextContentType::PHONE_NUMBER));
     AddChild(pageRoot, searchNode);
-    AddChild(pageRoot, CreateTestNode(
-        V2::RICH_EDITOR_ETS_TAG, TEST_RICH_EDITOR_ID, RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    AddChild(pageRoot, CreateRichEditorNode(
+        TEST_RICH_EDITOR_ID, RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), "rich placeholder"));
 
     PageSceneRuleManager manager;
     EXPECT_FALSE(manager.IsTextInputNodeType(V2::SEARCH_Field_ETS_TAG));
@@ -459,17 +483,31 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene003, Tes
     EXPECT_FALSE(manager.IsTextInputNodeType(V2::TEXT_ETS_TAG));
 
     auto result = manager.MatchPageScene(
-        TEST_PROCESS_ID, BuildRuleJson(), BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
+        TEST_PROCESS_ID, BuildRuleJson(false, true), BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(result->matched);
     EXPECT_EQ(result->matchedCount, TWO_MATCHED_NODES);
 
     auto sceneJson = JsonUtil::ParseJsonString(result->sceneJson);
     ASSERT_TRUE(sceneJson);
-    auto firstNode = sceneJson->GetValue("nodes")->GetArrayItem(0);
+    auto nodesJson = sceneJson->GetValue("nodes");
+    ASSERT_TRUE(nodesJson);
+    auto firstNode = nodesJson->GetArrayItem(0);
     ASSERT_TRUE(firstNode);
     EXPECT_EQ(firstNode->GetInt("nodeId"), TEST_SEARCH_ID);
     EXPECT_EQ(firstNode->GetString("nodeType"), "Search");
+    EXPECT_EQ(firstNode->GetString("text"), FIRST_INPUT_TEXT);
+    EXPECT_EQ(firstNode->GetString("placeholder"), FIRST_PLACEHOLDER_TEXT);
+    EXPECT_EQ(firstNode->GetString("contentType"), "PHONE_NUMBER");
+    EXPECT_EQ(firstNode->GetString("inputType"), "PhoneNumber");
+
+    auto secondNode = nodesJson->GetArrayItem(1);
+    ASSERT_TRUE(secondNode);
+    EXPECT_EQ(secondNode->GetString("nodeType"), "RichEditor");
+    EXPECT_EQ(secondNode->GetString("text"), "");
+    EXPECT_EQ(secondNode->GetString("placeholder"), "rich placeholder");
+    EXPECT_EQ(secondNode->GetString("contentType"), "");
+    EXPECT_EQ(secondNode->GetString("inputType"), "");
 
     EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, result.value()));
     EXPECT_FALSE(manager.ShouldReport(TEST_PROCESS_ID, result.value()));
@@ -519,10 +557,10 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene005, Tes
     auto pageRoot = CreatePageRoot();
     AddChild(pageRoot, CreateTextFieldNode(
         V2::TEXTINPUT_ETS_TAG, TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT),
-        "", true, FIRST_PLACEHOLDER_TEXT_U16));
+        "", true, FIRST_PLACEHOLDER_TEXT_U16, TextInputType::EMAIL_ADDRESS, TextContentType::EMAIL_ADDRESS));
     AddChild(pageRoot, CreateTextFieldNode(
         V2::TEXTAREA_ETS_TAG, TEST_TEXT_AREA_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT),
-        SECOND_INPUT_TEXT));
+        SECOND_INPUT_TEXT, true, u"", TextInputType::NUMBER, TextContentType::PHONE_NUMBER));
 
     PageSceneRuleManager manager;
     auto result = manager.MatchPageScene(
@@ -543,8 +581,14 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene005, Tes
     auto secondNode = nodesJson->GetArrayItem(1);
     ASSERT_TRUE(firstNode);
     ASSERT_TRUE(secondNode);
-    EXPECT_EQ(firstNode->GetString("text"), FIRST_PLACEHOLDER_TEXT);
+    EXPECT_EQ(firstNode->GetString("text"), "");
+    EXPECT_EQ(firstNode->GetString("placeholder"), FIRST_PLACEHOLDER_TEXT);
+    EXPECT_EQ(firstNode->GetString("contentType"), "EMAIL_ADDRESS");
+    EXPECT_EQ(firstNode->GetString("inputType"), "Email");
     EXPECT_EQ(secondNode->GetString("text"), SECOND_INPUT_TEXT);
+    EXPECT_EQ(secondNode->GetString("placeholder"), "");
+    EXPECT_EQ(secondNode->GetString("contentType"), "PHONE_NUMBER");
+    EXPECT_EQ(secondNode->GetString("inputType"), "NUMBER");
 }
 
 /**
