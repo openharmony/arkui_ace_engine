@@ -1890,23 +1890,23 @@ export struct Image002Test {
     }
 
     let rgbToHsl = (r: number, g: number, b: number): { h: number, s: number, l: number } => {
-      let rn = r / 255
-      let gn = g / 255
-      let bn = b / 255
-      let max = Math.max(rn, gn, bn)
-      let min = Math.min(rn, gn, bn)
+      let rNorm = r / 255
+      let gNorm = g / 255
+      let bNorm = b / 255
+      let max = Math.max(rNorm, gNorm, bNorm)
+      let min = Math.min(rNorm, gNorm, bNorm)
       let delta = max - min
       let l = (max + min) / 2
       let h = 0
       let s = 0
       if (delta !== 0) {
         s = delta / (1 - Math.abs(2 * l - 1))
-        if (max === rn) {
-          h = 60 * (((gn - bn) / delta) % 6)
-        } else if (max === gn) {
-          h = 60 * (((bn - rn) / delta) + 2)
+        if (max === rNorm) {
+          h = 60 * (((gNorm - bNorm) / delta) % 6)
+        } else if (max === gNorm) {
+          h = 60 * (((bNorm - rNorm) / delta) + 2)
         } else {
-          h = 60 * (((rn - gn) / delta) + 4)
+          h = 60 * (((rNorm - gNorm) / delta) + 4)
         }
       }
       if (h < 0) {
@@ -1943,22 +1943,22 @@ export struct Image002Test {
     }
 
     let rgbToHsv = (r: number, g: number, b: number): { h: number, s: number, v: number } => {
-      let rn = r / 255
-      let gn = g / 255
-      let bn = b / 255
-      let max = Math.max(rn, gn, bn)
-      let min = Math.min(rn, gn, bn)
+      let rNorm = r / 255
+      let gNorm = g / 255
+      let bNorm = b / 255
+      let max = Math.max(rNorm, gNorm, bNorm)
+      let min = Math.min(rNorm, gNorm, bNorm)
       let delta = max - min
       let h = 0
       let s = max === 0 ? 0 : delta / max
       let v = max
       if (delta !== 0) {
-        if (max === rn) {
-          h = 60 * (((gn - bn) / delta) % 6)
-        } else if (max === gn) {
-          h = 60 * (((bn - rn) / delta) + 2)
+        if (max === rNorm) {
+          h = 60 * (((gNorm - bNorm) / delta) % 6)
+        } else if (max === gNorm) {
+          h = 60 * (((bNorm - rNorm) / delta) + 2)
         } else {
-          h = 60 * (((rn - gn) / delta) + 4)
+          h = 60 * (((rNorm - gNorm) / delta) + 4)
         }
       }
       if (h < 0) {
@@ -1995,16 +1995,16 @@ export struct Image002Test {
     }
 
     let rgbToCmyk = (r: number, g: number, b: number): { c: number, m: number, y: number, k: number } => {
-      let rn = r / 255
-      let gn = g / 255
-      let bn = b / 255
-      let k = 1 - Math.max(rn, gn, bn)
+      let rNorm = r / 255
+      let gNorm = g / 255
+      let bNorm = b / 255
+      let k = 1 - Math.max(rNorm, gNorm, bNorm)
       if (k === 1) {
         return { c: 0, m: 0, y: 0, k: 1 }
       }
-      let c = (1 - rn - k) / (1 - k)
-      let m = (1 - gn - k) / (1 - k)
-      let y = (1 - bn - k) / (1 - k)
+      let c = (1 - rNorm - k) / (1 - k)
+      let m = (1 - gNorm - k) / (1 - k)
+      let y = (1 - bNorm - k) / (1 - k)
       return { c, m, y, k }
     }
 
@@ -2676,8 +2676,8 @@ export struct Image002Test {
     let easeOutCirc = (t: number): number => Math.sqrt(1 - (t - 1) * (t - 1))
     let easeOutBack = (t: number): number => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2)
     let easeOutElastic = (t: number): number => {
-      if (t === 0) return 0
-      if (t === 1) return 1
+      if (t === 0) { return 0 }
+      if (t === 1) { return 1 }
       return Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * (2 * Math.PI) / 3) + 1
     }
     let easeOutBounce = (t: number): number => {
