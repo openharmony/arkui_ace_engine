@@ -1045,7 +1045,6 @@ public:
     ColorMode GetLocalColorMode() const // ColorMode for WithTheme
     {
         ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
-        TAG_LOGD(AceLogTag::ACE_THEME, "current color mode: %{public}d", colorMode);
         return colorMode;
     }
 
