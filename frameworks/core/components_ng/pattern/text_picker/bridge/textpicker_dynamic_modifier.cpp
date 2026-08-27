@@ -709,6 +709,10 @@ void SetTextCascadePickRangeContent(
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arry);
+    if (arry->rangeContentArraySize <= 0) {
+        return;
+    }
     std::vector<NG::TextCascadePickerOptions> multiResult;
 
     SetTextCascadePickChildrenRangeContent(multiResult, arry);
@@ -732,6 +736,11 @@ void SetTextPickerIconRangeStr(
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arry);
+    CHECK_NULL_VOID(arry->rangeContent);
+    if (arry->rangeContentArraySize <= 0) {
+        return;
+    }
     TextPickerModelNG::SetTextPickerSingeRange(static_cast<bool>(isSingleRange));
     std::vector<NG::RangeContent> result;
     for (int i = 0; i < arry->rangeContentArraySize; i++) {
