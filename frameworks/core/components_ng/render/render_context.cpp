@@ -235,10 +235,7 @@ void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const Ins
                 immersiveOptionsValue->Put("applyShadow", immersiveOptions->applyShadow ? "true" : "false");
                 immersiveOptionsValue->Put("disableLightEffect",
                     immersiveOptions->disableLightEffect ? "true" : "false");
-                if (immersiveOptions->lightEffectOptions.has_value()) {
-                    immersiveOptionsValue->Put("lightEffectColor",
-                        immersiveOptions->lightEffectOptions->color.ColorToString().c_str());
-                }
+                LightEffectOptionsToJsonValue(immersiveOptionsValue, immersiveOptions->lightEffectOptions);
                 if (immersiveOptions->interactive.has_value()) {
                     immersiveOptionsValue->Put("interactive",
                         immersiveOptions->interactive.value() ? "true" : "false");
@@ -249,6 +246,14 @@ void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const Ins
         auto materialJsonValue = JsonUtil::Create(true);
         materialJsonValue->Put("material", optJsonValue);
         json->PutExtAttr("systemMaterial", materialJsonValue, filter);
+    }
+}
+
+void RenderContext::LightEffectOptionsToJsonValue(
+    const std::unique_ptr<JsonValue>& json, const std::optional<LightEffectOptions>& lightEffectOptions) const
+{
+    if (lightEffectOptions.has_value() && lightEffectOptions->color.has_value()) {
+        json->Put("lightEffectColor", lightEffectOptions->color->ColorToString().c_str());
     }
 }
 

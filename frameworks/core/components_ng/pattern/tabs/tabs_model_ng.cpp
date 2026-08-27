@@ -2248,4 +2248,22 @@ void TabsModelNG::SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBar
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarDisplayModeBreakpoint, breakpoint, frameNode);
 }
+
+void TabsModelNG::SetOnBarDisplayModeChange(std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetOnBarDisplayModeChangeEvent(std::move(onBarDisplayModeChange));
+}
+
+void TabsModelNG::SetOnBarDisplayModeChange(FrameNode* frameNode,
+    std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetOnBarDisplayModeChangeEvent(std::move(onBarDisplayModeChange));
+}
 } // namespace OHOS::Ace::NG

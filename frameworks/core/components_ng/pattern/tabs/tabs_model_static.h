@@ -71,6 +71,8 @@ public:
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
+    static void SetOnBarDisplayModeChange(FrameNode* frameNode,
+        std::function<void(TabBarDisplayMode)>&& onBarDisplayModeChange);
     static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount,
         std::optional<TabsCacheMode> cacheMode);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);

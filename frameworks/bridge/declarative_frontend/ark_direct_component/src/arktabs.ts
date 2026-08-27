@@ -278,6 +278,10 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabsBarDisplayModeBreakpointModifier.identity, TabsBarDisplayModeBreakpointModifier, value);
         return this;
       }
+      onBarDisplayModeChange(event: (mode: TabBarDisplayMode) => void): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsOnBarDisplayModeChangeModifier.identity, TabsOnBarDisplayModeChangeModifier, event);
+        return this;
+      }
     }
 
     class TabBarFloatingStyleModifier extends ModifierWithKey<barFloatingStyleOptions> {
@@ -1180,6 +1184,21 @@ function loadComponent(): ComponentObj | undefined {
       }
     }
 
+    class TabsOnBarDisplayModeChangeModifier extends ModifierWithKey<(mode: TabBarDisplayMode) => void> {
+      constructor(value: (mode: TabBarDisplayMode) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('onBarDisplayModeChange');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetOnBarDisplayModeChange(node);
+        } else {
+          getUINativeModule().tabs.setOnBarDisplayModeChange(node, this.value);
+        }
+      }
+    }
+
         loadComponent.componentObj = { 'component': ArkTabsComponent };
   }
   return loadComponent.componentObj;
@@ -1390,6 +1409,10 @@ class JSTabs extends JSContainerBase {
 
   static barDisplayModeBreakpoint(value: any): void {
     getUINativeModule().tabs.setBarDisplayModeBreakpoint(true, value);
+  }
+
+  static onBarDisplayModeChange(value: any): void {
+    getUINativeModule().tabs.setOnBarDisplayModeChange(true, value);
   }
 
   static attributeModifier(modifier: any): void {

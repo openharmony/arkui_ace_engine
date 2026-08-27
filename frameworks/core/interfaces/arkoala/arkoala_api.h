@@ -4943,6 +4943,7 @@ struct ArkUISwiperModifier {
     void (*setJsSwiperOnClick)(ArkUINodeHandle node, ArkUI_VoidPtr clickFunc);
     void (*setSwiperIgnoreHiddenItem)(ArkUINodeHandle node, ArkUI_Bool ignoreHiddenItem);
     void (*resetSwiperIgnoreHiddenItem)(ArkUINodeHandle node);
+    void (*setSwiperRenderGroup)(ArkUINodeHandle node, ArkUI_Bool isRenderGroup);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -5747,6 +5748,8 @@ struct ArkUITabsModifier {
     void (*resetSidebarSearchable)(ArkUINodeHandle node);
     void (*setBarDisplayModeBreakpoint)(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint);
     void (*resetBarDisplayModeBreakpoint)(ArkUINodeHandle node);
+    void (*setOnBarDisplayModeChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnBarDisplayModeChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {

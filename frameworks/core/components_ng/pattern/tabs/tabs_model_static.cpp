@@ -527,6 +527,17 @@ void TabsModelStatic::SetOnChange(FrameNode* frameNode, std::function<void(const
     tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
+void TabsModelStatic::SetOnBarDisplayModeChange(FrameNode* frameNode,
+    std::function<void(TabBarDisplayMode)>&& onBarDisplayModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnBarDisplayModeChangeEvent(std::move(onBarDisplayModeChange));
+}
+
 void TabsModelStatic::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
 {
     CHECK_NULL_VOID(frameNode);

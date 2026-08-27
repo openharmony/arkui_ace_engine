@@ -403,6 +403,52 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateConnect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnAttachToFrameNode_StateConnectPrelaunchNoBuffer
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_CONNECT (prelaunch) and app buffer is not ready
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateConnectPrelaunchNoBuffer, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->EditSessionInfo().isPrelaunch_ = true;
+    sceneSession_->state_ = Rosen::SessionState::STATE_CONNECT;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = false;
+
+    /**
+     * @tc.steps: step1. frameNum_ == 0 && !IsBufferAvailable() → add appWindow and startingWindow.
+     */
+    sceneSession_->EditSessionInfo().frameNum_ = 0;
+    sceneSession_->surfaceNode_->bufferAvailable_ = false;
+    windowScene_->startingWindow_ = nullptr;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_NE(windowScene_->startingWindow_, nullptr);
+
+    /**
+     * @tc.steps: step2. frameNum_ > 0 && !IsBufferAvailable() → only add appWindow, no startingWindow.
+     */
+    sceneSession_->EditSessionInfo().frameNum_ = 1;
+    sceneSession_->surfaceNode_->bufferAvailable_ = false;
+    windowScene_->startingWindow_ = nullptr;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_EQ(windowScene_->startingWindow_, nullptr);
+
+    /**
+     * @tc.steps: step3. frameNum_ == 0 && IsBufferAvailable() → only add appWindow, no startingWindow.
+     */
+    sceneSession_->EditSessionInfo().frameNum_ = 0;
+    sceneSession_->surfaceNode_->bufferAvailable_ = true;
+    windowScene_->startingWindow_ = nullptr;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_EQ(windowScene_->startingWindow_, nullptr);
+}
+
+/**
  * @tc.name: OnAttachToFrameNode_StateActive
  * @tc.desc: Test OnAttachToFrameNode when state is STATE_ACTIVE with different scenarios
  * @tc.type: FUNC

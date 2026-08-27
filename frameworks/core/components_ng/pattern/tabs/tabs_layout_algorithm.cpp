@@ -263,6 +263,13 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (displayModeChanged) {
         UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::SIDEBAR);
         UpdateTabBarAndDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+        auto context = tabsNode->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterLayoutTask([weakTabsPattern = WeakPtr<TabsPattern>(tabsPattern), curDisplayMode]() {
+            auto tabsPattern = weakTabsPattern.Upgrade();
+            CHECK_NULL_VOID(tabsPattern);
+            tabsPattern->FireBarDisplayModeChangeEvent(curDisplayMode);
+        });
     }
 
     if (preIsDisableSwipe != curIsDisableSwipe) {

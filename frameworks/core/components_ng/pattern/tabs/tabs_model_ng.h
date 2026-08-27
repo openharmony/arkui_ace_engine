@@ -92,6 +92,7 @@ public:
     void SetSidebarHeader(const RefPtr<AceType>& header) override;
     void SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options) override;
     void SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint& breakpoint) override;
+    void SetOnBarDisplayModeChange(std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange) override;
 
     static void ProcessDimensionWithResourceObj(
         FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj);
@@ -191,6 +192,8 @@ public:
     static void SetSidebarHeader(FrameNode* frameNode, const RefPtr<AceType>& header);
     static void SetSidebarSearchableOptions(FrameNode* frameNode, const TabsSidebarSearchableOptions& options);
     static void SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint);
+    static void SetOnBarDisplayModeChange(FrameNode* frameNode,
+        std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange);
     static void CreateWithResourceObj(
         FrameNode* frameNode, TabJsResType colorType, const RefPtr<ResourceObject>& resObj);
     static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);

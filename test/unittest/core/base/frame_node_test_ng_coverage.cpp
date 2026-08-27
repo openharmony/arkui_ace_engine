@@ -2149,6 +2149,107 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeCreateLayoutTask02
+ * @tc.desc: Test CreateLayoutTask when not dirty, NONE type, no geometry transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask02, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = false;
+    frameNode->geometryTransitionNeedLayout_ = false;
+
+    frameNode->CreateLayoutTask(false, LayoutType::NONE);
+    EXPECT_FALSE(frameNode->isLayoutDirtyMarked_);
+    EXPECT_FALSE(frameNode->geometryTransitionNeedLayout_);
+}
+
+/**
+ * @tc.name: FrameNodeCreateLayoutTask03
+ * @tc.desc: Test CreateLayoutTask when geometryTransitionNeedLayout_ is true bypasses early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask03, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = false;
+    frameNode->geometryTransitionNeedLayout_ = true;
+
+    frameNode->CreateLayoutTask(false, LayoutType::NONE);
+    EXPECT_FALSE(frameNode->geometryTransitionNeedLayout_);
+}
+
+/**
+ * @tc.name: FrameNodeCreateLayoutTask04
+ * @tc.desc: Test CreateLayoutTask with no LayoutRect and layoutTaskType MEASURE_FOR_IGNORE
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask04, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = true;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    frameNode->SetLayoutProperty(layoutProperty);
+
+    frameNode->CreateLayoutTask(false, LayoutType::MEASURE_FOR_IGNORE);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeCreateLayoutTask05
+ * @tc.desc: Test CreateLayoutTask with no LayoutRect and layoutTaskType LAYOUT_FOR_IGNORE
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask05, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = true;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    frameNode->SetLayoutProperty(layoutProperty);
+
+    frameNode->CreateLayoutTask(false, LayoutType::LAYOUT_FOR_IGNORE);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeCreateLayoutTask06
+ * @tc.desc: Test CreateLayoutTask with no LayoutRect and layoutTaskType TRAVERSE_FOR_IGNORE
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask06, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = true;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    frameNode->SetLayoutProperty(layoutProperty);
+
+    frameNode->CreateLayoutTask(false, LayoutType::TRAVERSE_FOR_IGNORE);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeCreateLayoutTask07
+ * @tc.desc: Test CreateLayoutTask with LayoutRect set takes Measure(nullopt)+Layout path
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask07, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = true;
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f };
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    frameNode->SetLayoutProperty(layoutProperty);
+
+    frameNode->CreateLayoutTask(true, LayoutType::NONE);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: FrameNodeCreateRenderTask01
  * @tc.desc: Test the function CreateRenderTask
  * @tc.type: FUNC

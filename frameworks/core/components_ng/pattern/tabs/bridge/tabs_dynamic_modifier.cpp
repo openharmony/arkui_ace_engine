@@ -912,6 +912,10 @@ void ResetSidebarSearchableImpl(ArkUINodeHandle node) {}
 void SetBarDisplayModeBreakpointImpl(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint) {}
 
 void ResetBarDisplayModeBreakpointImpl(ArkUINodeHandle node) {}
+
+void SetOnBarDisplayModeChangeImpl(ArkUINodeHandle node, void* callback) {}
+
+void ResetOnBarDisplayModeChangeImpl(ArkUINodeHandle node) {}
 #endif
 
 void CreateTabs(
@@ -2082,6 +2086,25 @@ void ResetBarDisplayModeBreakpoint(ArkUINodeHandle node)
     TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, breakpoint);
 }
 
+void SetOnBarDisplayModeChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(NG::TabBarDisplayMode)>*>(callback);
+        TabsModelNG::SetOnBarDisplayModeChange(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnBarDisplayModeChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnBarDisplayModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnBarDisplayModeChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -2209,6 +2232,8 @@ const ArkUITabsModifier* GetTabsModifier()
             .resetSidebarSearchable = ResetSidebarSearchable,
             .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpoint,
             .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpoint,
+            .setOnBarDisplayModeChange = SetOnBarDisplayModeChange,
+            .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChange,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2336,6 +2361,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetSidebarSearchable = ResetSidebarSearchableImpl,
         .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpointImpl,
         .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpointImpl,
+        .setOnBarDisplayModeChange = SetOnBarDisplayModeChangeImpl,
+        .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChangeImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

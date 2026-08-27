@@ -212,6 +212,7 @@ public:
     virtual void SetSidebarHeader(const RefPtr<AceType>& header) {}
     virtual void SetSidebarSearchableOptions(const NG::TabsSidebarSearchableOptions& options) {}
     virtual void SetBarDisplayModeBreakpoint(const NG::TabBarDisplayModeBreakpoint& breakpoint) {}
+    virtual void SetOnBarDisplayModeChange(std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

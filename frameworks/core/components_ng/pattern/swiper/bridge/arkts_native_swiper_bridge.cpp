@@ -848,7 +848,7 @@ void SwiperBridge::RegisterSwiperAttributes(Local<panda::ObjectRef> object, Ecma
         "setSwiperOnContentWillScroll", "resetSwiperOnContentWillScroll", "setSwiperMaintainVisibleContentPosition",
         "resetSwiperMaintainVisibleContentPosition", "setSwiperOnScrollStateChanged", "resetSwiperOnScrollStateChanged",
         "setSwiperWidth", "setSwiperHeight", "setSwiperSize", "setSwiperOnClick", "setSwiperRemoteMessage",
-        "setSwiperIgnoreHiddenItem", "resetSwiperIgnoreHiddenItem" };
+        "setSwiperIgnoreHiddenItem", "resetSwiperIgnoreHiddenItem", "setSwiperRenderGroup", "resetSwiperRenderGroup" };
 
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::Create),
@@ -934,6 +934,8 @@ void SwiperBridge::RegisterSwiperAttributes(Local<panda::ObjectRef> object, Ecma
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperRemoteMessage),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperIgnoreHiddenItem),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperIgnoreHiddenItem),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperRenderGroup),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperRenderGroup),
     };
     auto swiper = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "swiper"), swiper);
@@ -3315,6 +3317,37 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperIgnoreHiddenItem(ArkUIRuntimeCal
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperIgnoreHiddenItem(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperRenderGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    auto isRenderGroup = false;
+    if (valueArg->IsBoolean()) {
+        isRenderGroup = valueArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperRenderGroup(nativeNode, true);
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperRenderGroup(nativeNode, false);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setRenderGroup(nativeNode, isRenderGroup);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperRenderGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperRenderGroup(nativeNode, false);
+    GetArkUINodeModifiers()->getCommonModifier()->resetRenderGroup(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

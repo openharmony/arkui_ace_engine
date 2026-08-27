@@ -248,6 +248,11 @@ class LazyArkTabsComponent extends ArkComponent {
     this.lazyComponent.barDisplayModeBreakpoint(value);
     return this;
   }
+
+  onBarDisplayModeChange(value: (mode: TabBarDisplayMode) => void): this {
+    this.lazyComponent.onBarDisplayModeChange(value);
+    return this;
+  }
 }
 
 class TabsModifier extends LazyArkTabsComponent implements AttributeModifier<TabsAttribute> {
