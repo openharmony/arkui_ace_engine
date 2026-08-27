@@ -56,6 +56,11 @@ enum class TabJsResType {
     COLOR,
     INACTIVE_COLOR,
     BlurStyle_INACTIVE_COLOR,
+    SIDEBAR_SELECTED_ICONCOLOR,
+    SIDEBAR_SELECTED_TEXTCOLOR,
+    SIDEBAR_UNSELECTED_ICONCOLOR,
+    SIDEBAR_UNSELECTED_TEXTCOLOR,
+    SIDEBAR_SELECTED_BOARDCOLOR
 };
 
 struct TabsItemDivider final {
@@ -180,6 +185,11 @@ public:
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetBarBackgroundColorByUser(bool isByUser) = 0;
+    virtual void SetSidebarSelectedIconColor(const Color& color) {}
+    virtual void SetSidebarSelectedTextColor(const Color& color) {}
+    virtual void SetSidebarUnselectedIconColor(const Color& color) {}
+    virtual void SetSidebarUnselectedTextColor(const Color& color) {}
+    virtual void SetSidebarSelectedBoardColor(const Color& color) {}
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
     virtual void ResetScrollableBarModeOptions() = 0;

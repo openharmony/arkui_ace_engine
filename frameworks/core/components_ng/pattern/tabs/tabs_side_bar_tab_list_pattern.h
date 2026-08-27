@@ -93,6 +93,9 @@ private:
     void OnModifyDone() override;
     void UpdateTabItemStyle(int32_t index, bool selected);
     RefPtr<FrameNode> GetOrCreateTabItemNode(int32_t id);
+    void UpdateTabItemTextAndIconColor(int32_t selectedIndex);
+    void UpdateTextColorAndIconColor(
+        const RefPtr<FrameNode>& rowNode, Color textColor, Color iconColor, bool isSelected);
     void AddOrUpdateTabItemWithContent(
         const TabBarParam& tabBarParam, const RefPtr<FrameNode>& tabItemNode, int32_t tabContentId, int32_t myIndex);
     void AddOrUpdateTabItemWithBuilder(

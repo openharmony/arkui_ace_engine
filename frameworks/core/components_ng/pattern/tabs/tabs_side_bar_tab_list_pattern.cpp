@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -61,6 +63,87 @@ void TabsSideBarTabListPattern::SetCurrentIndex(int32_t index)
     if (swiperController_) {
         swiperController_->SwipeTo(index);
     }
+
+    UpdateTabItemTextAndIconColor(index);
+}
+
+void TabsSideBarTabListPattern::UpdateTabItemTextAndIconColor(int32_t selectedIndex)
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(scrollNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(columnNode);
+    int32_t childCount = columnNode->GetTotalChildCount();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+
+    for (int32_t index = 0; index < childCount; index++) {
+        auto tabItemNode = DynamicCast<FrameNode>(columnNode->GetChildAtIndex(index));
+        CHECK_NULL_CONTINUE(tabItemNode);
+        auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(index));
+        CHECK_NULL_CONTINUE(tabContentNode);
+        auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_CONTINUE(tabContentPattern);
+        const auto& tabBarParam = tabContentPattern->GetTabBarParam();
+
+        if (tabBarParam.HasContent() || tabBarParam.HasBuilder()) {
+            continue;
+        }
+        
+        bool isSelected = (index == selectedIndex);
+        Color textColor = isSelected ? tabTheme->GetSideBarSelectedTextColor() :
+            tabTheme->GetSideBarUnselectedTextColor();
+        Color iconColor = isSelected ? tabTheme->GetSideBarSelectedIconColor() :
+            tabTheme->GetSideBarUnselectedIconColor();
+        auto rowNode = AceType::DynamicCast<FrameNode>(tabItemNode->GetChildren().front());
+        CHECK_NULL_CONTINUE(rowNode);
+        UpdateTextColorAndIconColor(rowNode, textColor, iconColor, isSelected);
+    }
+}
+
+void TabsSideBarTabListPattern::UpdateTextColorAndIconColor(const RefPtr<FrameNode>& rowNode,
+    Color textColor, Color iconColor, bool isSelected)
+{
+    auto iconNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
+    CHECK_NULL_VOID(iconNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    if (isSelected) {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarSelectedTextColor().value();
+        }
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarSelectedIconColor().value();
+        }
+    } else {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarUnselectedTextColor().value();
+        }
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarUnselectedIconColor().value();
+        }
+    }
+
+    textLayoutProperty->UpdateTextColor(textColor);
+    imagePaintProperty->UpdateSvgFillColor(iconColor);
+    textNode->MarkModifyDone();
+    textNode->MarkDirtyNode();
+    iconNode->MarkModifyDone();
+    iconNode->MarkDirtyNode();
 }
 
 void TabsSideBarTabListPattern::InitCurrentIndex(int32_t index)
@@ -94,6 +177,15 @@ void TabsSideBarTabListPattern::UpdateTabItemStyle(int32_t index, bool selected)
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto color = selected ? tabTheme->GetSideBarListItemActivedColor() : Color::TRANSPARENT;
+    if (selected) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+        if (tabsNode) {
+            auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+            if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedBoardColor().has_value()) {
+                color = tabLayoutProperty->GetSidebarSelectedBoardColor().value();
+            }
+        }
+    }
     renderContext->UpdateBackgroundColor(color);
     itemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -350,6 +442,21 @@ void TabsSideBarTabListPattern::UpdateTabBarItemTextProperties(
     if (!isFrameNode) {
         TabContentModelNG::UpdateLabelStyle(labelStyle, textLayoutProperty);
     }
+
+    bool isSelected = (myIndex == indicator);
+    Color textColor = isSelected ? tabTheme->GetSideBarSelectedTextColor() :
+        tabTheme->GetSideBarUnselectedTextColor();
+    auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    if (isSelected) {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarSelectedTextColor().value();
+        }
+    } else {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarUnselectedTextColor().value();
+        }
+    }
+    textLayoutProperty->UpdateTextColor(textColor);
 }
 
 void TabsSideBarTabListPattern::UpdateTabBarItemIconProperties(
@@ -387,6 +494,23 @@ void TabsSideBarTabListPattern::UpdateTabBarItemIconProperties(
     }
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
+
+    auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
+    bool isSelected = (myIndex == indicator);
+    Color iconColor = isSelected ? tabTheme->GetSideBarSelectedIconColor() :
+        tabTheme->GetSideBarUnselectedIconColor();
+    if (isSelected) {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarSelectedIconColor().value();
+        }
+    } else {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarUnselectedIconColor().value();
+        }
+    }
+    imagePaintProperty->UpdateSvgFillColor(iconColor);
 }
 
 void TabsSideBarTabListPattern::AddOrUpdateTabItemWithIconAndText(
@@ -458,6 +582,7 @@ RefPtr<FrameNode> TabsSideBarTabListPattern::GetOrCreateTabItemNode(int32_t id)
         });
     CHECK_NULL_RETURN(tabItemNode, nullptr);
     auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(tabItemNode));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     buttonModifier->setBlendColor(
         nodeHandle, tabTheme->GetSideBarListItemPressedColor(), tabTheme->GetSideBarListItemHoverColor());
     buttonModifier->setFocusBorderColor(nodeHandle, tabTheme->GetSideBarListItemFocusColor());
@@ -552,6 +677,12 @@ void TabsSideBarTabListPattern::AddOrUpdateTabListItem(
         auto color = (myIndex == indicator)
             ? tabTheme->GetSideBarListItemActivedColor()
             : Color::TRANSPARENT;
+        if (myIndex == indicator) {
+            auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+            if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedBoardColor().has_value()) {
+                color = tabLayoutProperty->GetSidebarSelectedBoardColor().value();
+            }
+        }
         itemRenderContext->UpdateBackgroundColor(color);
     }
     if (currentIndex_ == -1) {

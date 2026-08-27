@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
@@ -590,6 +591,41 @@ void TabsModelNG::SetBarBackgroundColorByUser(bool isByUser)
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser);
 }
 
+void TabsModelNG::SetSidebarSelectedIconColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedTextColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedIconColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedTextColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedBoardColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedBoardColor, color, frameNode);
+}
+
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -913,6 +949,36 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
 void TabsModelNG::SetBarBackgroundColorByUser(FrameNode* frameNode, bool isByUser)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedIconColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedTextColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedIconColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedTextColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedBoardColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedBoardColor, color, frameNode);
 }
 
 void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption)
@@ -1540,6 +1606,21 @@ void TabsModelNG::CreateWithResourceObj(
         case TabJsResType::BlurStyle_INACTIVE_COLOR:
             HandleBackgroundBlurStyleInactiveColor(frameNode, resObj);
             break;
+        case TabJsResType::SIDEBAR_SELECTED_ICONCOLOR:
+            HandleSidebarSelectedIconColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_SELECTED_TEXTCOLOR:
+            HandleSidebarSelectedTextColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_UNSELECTED_ICONCOLOR:
+            HandleSidebarUnselectedIconColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_UNSELECTED_TEXTCOLOR:
+            HandleSidebarUnselectedTextColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_SELECTED_BOARDCOLOR:
+            HandleSidebarSelectedBoardColor(frameNode, resObj);
+            break;
         default:
             break;
     }
@@ -1893,6 +1974,111 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
     };
     RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarSelectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarSelectedIconColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarSelectedIconColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarSelectedIconColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarSelectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarSelectedTextColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarSelectedTextColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarSelectedTextColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarUnselectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarUnselectedIconColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarUnselectedIconColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarUnselectedIconColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarUnselectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarUnselectedTextColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarUnselectedTextColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarUnselectedTextColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarSelectedBoardColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    bool isModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarSelectedBoardColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarListItemActivedColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarSelectedBoardColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void TabsModelNG::SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters)
