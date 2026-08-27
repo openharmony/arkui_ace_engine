@@ -635,7 +635,7 @@ void TabsSideBarTabListPattern::ApplyDefaultVisibility()
     CHECK_NULL_VOID(tabsNode);
     auto tabsProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsProperty);
-    // defaultVisibility only works when barStyle is SIDEBAR or SIDEBAR_ADAPTABLE
+    // The sidebar does not display in Bottom style, so there is no need to update the visibility of the internal tab.
     auto barLayoutStyle = tabsProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
     if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
         return;
@@ -646,8 +646,7 @@ void TabsSideBarTabListPattern::ApplyDefaultVisibility()
     auto tabContentNum = swiperNode->TotalChildCount();
     auto columnNode = GetTabItemContainerNode();
     CHECK_NULL_VOID(columnNode);
-    const auto& children = columnNode->GetChildren();
-
+    auto children = columnNode->GetChildren();
     // Pre-compute search state for cross-concern visibility coordination
     bool hasActiveSearch = !activeSearchText_.empty();
     auto searchTextLower = ToLowerU16Str(activeSearchText_);

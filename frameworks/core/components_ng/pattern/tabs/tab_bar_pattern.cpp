@@ -4032,30 +4032,19 @@ void TabBarPattern::ApplyDefaultVisibility()
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
     auto barStyle = tabsLayoutProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    // The tabbar does not display in Sidebar style, so there is no need to update the visibility of the internal tab.
     if (barStyle == TabBarLayoutStyle::SIDEBAR) {
         return;
     }
-    auto currentDisplayMode = tabsPattern->GetCurrentBarDisplayMode();
+
     auto tabContentNum = swiperNode->TotalChildCount();
-    auto isHiddenByDefaultVisibility = [currentDisplayMode, barStyle](
+    auto isHiddenByDefaultVisibility = [tabsPattern](
         const RefPtr<FrameNode>& tabContentNode) -> bool {
-        // BOTTOM mode: defaultVisibility does not apply, ensure all items visible
-        if (barStyle == TabBarLayoutStyle::BOTTOM) {
-            return false;
-        }
-        // SIDEBAR / SIDEBAR_ADAPTABLE mode: apply defaultVisibility filtering
         CHECK_NULL_RETURN(tabContentNode, false);
         auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
         CHECK_NULL_RETURN(tabContentPattern, false);
         const auto& defaultVisibility = tabContentPattern->GetDefaultVisibility();
-        if (defaultVisibility.isNull || defaultVisibility.visibility != TabVisibility::HIDDEN) {
-            return false;
-        }
-        if (!defaultVisibility.displayMode.has_value()) {
-            return true;
-        }
-        TabBarDisplayMode activeDisplayMode = currentDisplayMode.value_or(TabBarDisplayMode::BOTTOMTABBAR);
-        return defaultVisibility.displayMode.value() == activeDisplayMode;
+        return tabsPattern->IsTabShouldHideByVisibility(defaultVisibility);
     };
     // tabBarNode children: columnNodes + maskNodes + imageIndicatorNode
     // columnNodes are at the front, count = tabContentNum

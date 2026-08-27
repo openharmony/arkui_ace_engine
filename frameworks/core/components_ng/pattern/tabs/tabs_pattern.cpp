@@ -1769,7 +1769,6 @@ void TabsPattern::UpdateSideBarIfNeeded()
         // creation can register fresh tab items without stale ID conflicts
         ResetSideBarTabListItemIds();
         // Re-apply per-item defaultVisibility filtering for bottom tab bar
-        // (items previously hidden in sidebar/adaptable mode should become visible in BOTTOM mode)
         auto tabBar = AceType::DynamicCast<FrameNode>(host->GetTabBar());
         CHECK_NULL_VOID(tabBar);
         auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
@@ -1935,22 +1934,29 @@ void TabsPattern::SyncSideBarTabListIndicator(int32_t currentIndex)
     tabListPattern->SetCurrentIndex(currentIndex);
 }
 
+TabBarDisplayMode TabsPattern::GetActiveBarDisplayMode() const
+{
+    if (currentBarDisplayMode_.has_value()) {
+        return currentBarDisplayMode_.value();
+    }
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, TabBarDisplayMode::BOTTOMTABBAR);
+    auto barStyle = property->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    if (barStyle == TabBarLayoutStyle::SIDEBAR) {
+        return TabBarDisplayMode::SIDEBAR;
+    }
+    return TabBarDisplayMode::BOTTOMTABBAR;
+}
+
 bool TabsPattern::IsTabShouldHideByVisibility(const TabContentDefaultVisibility& visibility)
 {
     if (visibility.isNull || visibility.visibility == TabVisibility::VISIBLE) {
         return false;
     }
-    auto property = GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_RETURN(property, false);
-    auto barStyle = property->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
-    if (barStyle == TabBarLayoutStyle::BOTTOM) {
-        return false;
-    }
     if (!visibility.displayMode.has_value()) {
         return true;
     }
-    TabBarDisplayMode activeDisplayMode = currentBarDisplayMode_.value_or(
-        barStyle == TabBarLayoutStyle::SIDEBAR ? TabBarDisplayMode::SIDEBAR : TabBarDisplayMode::BOTTOMTABBAR);
+    auto activeDisplayMode = GetActiveBarDisplayMode();
     return visibility.displayMode.value() == activeDisplayMode;
 }
 } // namespace OHOS::Ace::NG

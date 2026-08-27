@@ -142,7 +142,6 @@ private:
     void MeasureSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const;
     void LayoutSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const;
     void UpdateEffectiveChildIndices(LayoutWrapper* layoutWrapper);
-    bool IsItemGone(LayoutWrapper* layoutWrapper, int32_t index) const;
 
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;
@@ -167,7 +166,6 @@ private:
     bool isNoMinHeightLimit_ = false;
     bool useItemWidth_ = true;
     bool canOverScroll_ = false;
-    TabBarLayoutStyle barLayoutStyle_ = TabBarLayoutStyle::BOTTOM;
     std::vector<int32_t> effectiveChildIndices_;
     std::unordered_set<int32_t> effectiveChildIndexSet_;
     Dimension leftAndRightMargin_ = 0.0_vp;

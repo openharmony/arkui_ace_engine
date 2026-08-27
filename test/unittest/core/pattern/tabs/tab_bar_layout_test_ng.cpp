@@ -365,8 +365,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible001, T
      */
     float allocatedWidth = 0.0f;
     tabBarLayoutAlgorithm->childCount_ = 1;
-    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0 };
-    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0 };
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0 };
     tabBarLayoutAlgorithm->visibleItemLength_.clear();
     tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
     tabBarLayoutAlgorithm->visibleItemLength_[1] = 2000.0f;
@@ -378,8 +378,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible001, T
     tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_.size(), 1);
     tabBarLayoutAlgorithm->childCount_ = 3;
-    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1, 2 };
-    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1, 2 };
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1, 2 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1, 2 };
     tabBarLayoutAlgorithm->visibleItemLength_.clear();
     tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
     tabBarLayoutAlgorithm->visibleItemLength_[1] = 2000.0f;
@@ -473,8 +473,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
 
     float allocatedWidth = 0.0f;
     tabBarLayoutAlgorithm->childCount_ = 2;
-    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
-    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
 
     /**
      * @tc.steps: steps5. Test CalculateItemWidthsForSymmetricExtensible by using different conditions.
@@ -600,8 +600,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible002, T
      */
     float allocatedWidth = 0.0f;
     tabBarLayoutAlgorithm->childCount_ = 3;
-    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1, 2 };
-    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1, 2 };
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1, 2 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1, 2 };
     tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_[0], 0.0f);
 }
@@ -666,8 +666,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
      */
     float allocatedWidth = 100.0f;
     tabBarLayoutAlgorithm->childCount_ = 2;
-    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
-    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
     std::vector<float> spaceRequests;
     std::vector<float> leftBuffers;
     std::vector<float> rightBuffers;

@@ -67,7 +67,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabsLayoutProperty);
     auto tabsDirection = tabsLayoutProperty->GetNonAutoLayoutDirection();
-    barLayoutStyle_ = tabsLayoutProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
     auto tabBarDirection = layoutProperty->GetLayoutDirection();
     isRTL_ = tabBarDirection == TextDirection::RTL ||
              (tabBarDirection == TextDirection::AUTO && tabsDirection == TextDirection::RTL);
@@ -190,22 +189,14 @@ void TabBarLayoutAlgorithm::UpdateEffectiveChildIndices(LayoutWrapper* layoutWra
 {
     effectiveChildIndices_.clear();
     effectiveChildIndexSet_.clear();
-    for (int32_t i = 0; i < childCount_; i++) {
-        if (IsItemGone(layoutWrapper, i)) {
+    for (int32_t index = 0; index < childCount_; index++) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (childWrapper && childWrapper->GetHostNode() && !childWrapper->GetHostNode()->IsVisible()) {
             continue;
         }
-        effectiveChildIndices_.push_back(i);
-        effectiveChildIndexSet_.insert(i);
+        effectiveChildIndices_.push_back(index);
+        effectiveChildIndexSet_.insert(index);
     }
-}
-
-bool TabBarLayoutAlgorithm::IsItemGone(LayoutWrapper* layoutWrapper, int32_t index) const
-{
-    if (barLayoutStyle_ == TabBarLayoutStyle::BOTTOM) {
-        return false;
-    }
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    return childWrapper && childWrapper->GetHostNode() && !childWrapper->GetHostNode()->IsVisible();
 }
 
 void TabBarLayoutAlgorithm::MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize)

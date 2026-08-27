@@ -53,24 +53,9 @@ void TabContentPattern::OnModifyDone()
     CHECK_NULL_VOID(tabsNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
-    auto tabsProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_VOID(tabsProperty);
-
-    auto barLayoutStyle = tabsProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
-    auto currentDisplayMode = tabsPattern->GetCurrentBarDisplayMode();
-    TabBarDisplayMode activeDisplayMode = TabBarDisplayMode::BOTTOMTABBAR;
-    if (currentDisplayMode.has_value()) {
-        activeDisplayMode = currentDisplayMode.value();
-    } else if (barLayoutStyle == TabBarLayoutStyle::SIDEBAR) {
-        activeDisplayMode = TabBarDisplayMode::SIDEBAR;
-    } else if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
-        activeDisplayMode = TabBarDisplayMode::BOTTOMTABBAR;
-    }
+    auto activeDisplayMode = tabsPattern->GetActiveBarDisplayMode();
     bool shouldHide = tabsPattern->IsTabShouldHideByVisibility(defaultVisibility);
-
-    if (barLayoutStyle == TabBarLayoutStyle::BOTTOM ||
-        (barLayoutStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE &&
-        activeDisplayMode == TabBarDisplayMode::BOTTOMTABBAR)) {
+    if (activeDisplayMode == TabBarDisplayMode::BOTTOMTABBAR) {
         // Bottom tab bar is currently visible — update this tab's columnNode directly
         if (!tabContentNode->HasTabBarItemId()) {
             return;
