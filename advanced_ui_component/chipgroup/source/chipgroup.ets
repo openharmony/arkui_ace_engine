@@ -481,11 +481,7 @@ export struct ChipGroup {
     return defaultTheme.itemStyle.selectedFillColor;
   }
 
-  private getBackgroundColor(): ResourceColor | undefined {
-    if (!isNullOrEmptyMaterial(this.backgroundSystemMaterial)) {
-      return undefined;
-    }
-
+  private getBackgroundColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.backgroundColor) {
       if (typeof this.itemStyle.backgroundColor === 'object') {
         let temp: Resource = this.itemStyle.backgroundColor as Resource;
@@ -502,11 +498,7 @@ export struct ChipGroup {
     return defaultTheme.itemStyle.backgroundColor;
   }
 
-  private getSelectedBackgroundColor(): ResourceColor | undefined {
-    if (!isNullOrEmptyMaterial(this.selectedBackgroundSystemMaterial)) {
-      return undefined;
-    }
-
+  private getSelectedBackgroundColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
       if (typeof this.itemStyle.selectedBackgroundColor === 'object') {
         let temp: Resource = this.itemStyle.selectedBackgroundColor as Resource;

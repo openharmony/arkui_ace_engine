@@ -1346,21 +1346,12 @@ export struct ChipComponent {
     return typeof this.chipSize === 'string' && this.chipSize === ChipSize.SMALL;
   }
 
-  getChipBackgroundColor(): ResourceColor | undefined {
+  getChipBackgroundColor(): ResourceColor {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
-      if (!isNullOrEmptyMaterial(this.activatedBackgroundSystemMaterial)) {
-        return undefined;
-      }
-
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
         this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
     }
-
-    if (!isNullOrEmptyMaterial(this.backgroundSystemMaterial)) {
-      return undefined;
-    }
-
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
       this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
   }
