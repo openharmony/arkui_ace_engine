@@ -59,7 +59,8 @@ void MaterialProcessor::ApplyScopeGate(const RefPtr<PipelineContext>& pipeline)
         bool inScope = frameNode->IsInTitleBar() || frameNode->IsInBottomTabBar();
         bool effective = MaterialUtils::IsMaterialUnrestrictedComponent(frameNode->GetTag()) ||
                          MaterialUtils::IsSystemApp() || inScope ||
-                         rc->IsMaterialScopeExempt();
+                         rc->IsMaterialScopeExempt() ||
+                         frameNode->IsInCustomSelectMenu();
         if (!effective) {
             // Not in scope -> fully remove the material. Save it first so it can be
             // restored if the node re-enters a titleBar / bottom TabBar.
@@ -75,6 +76,11 @@ void MaterialProcessor::ApplyScopeGate(const RefPtr<PipelineContext>& pipeline)
                     rc->SetMaterialLimiterUpdating(true);
                     ViewAbstract::SetSystemMaterial(AceType::RawPtr(frameNode), nullptr);
                     rc->SetMaterialLimiterUpdating(false);
+                    frameNode->MarkDirtyNode();
+                    auto pattern = frameNode->GetPattern();
+                    if (pattern) {
+                        pattern->OnMaterialDisable();
+                    }
                 }
             }
         } else if (rc->IsMaterialSuppressed()) {
@@ -87,6 +93,7 @@ void MaterialProcessor::ApplyScopeGate(const RefPtr<PipelineContext>& pipeline)
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(frameNode), saved.GetRawPtr());
             rc->SetMaterialSuppressed(false);
             rc->SetMaterialLimiterUpdating(false);
+            frameNode->MarkDirtyNode();
         }
         ++it;
     }

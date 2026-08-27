@@ -2956,6 +2956,7 @@ RefPtr<UINode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo>& 
     info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     CHECK_NULL_RETURN(customNode, nullptr);
+    customNode->SetInCustomSelectMenu(true);
     return customNode;
 }
 

@@ -1236,6 +1236,19 @@ public:
         inBottomTabBar_ = flag;
     }
 
+    // Whether this node is inside a CustomSelectMenu subtree (created by
+    // CreateCustomSelectMenu). The root is marked directly; children inherit
+    // at AttachToMainTree (once-true, never cleared). Used by MaterialProcessor
+    // to keep material effective for lazily-built CustomNode children.
+    bool IsInCustomSelectMenu() const
+    {
+        return inCustomSelectMenu_;
+    }
+    void SetInCustomSelectMenu(bool flag)
+    {
+        inCustomSelectMenu_ = flag;
+    }
+
 private:
     bool uiNodeGcEnable_ = false;
 
@@ -1404,6 +1417,9 @@ private:
     // parent Tabs is a bottom Tabs. Propagates to the TabBar subtree so
     // MaterialProcessor can decide bottom-tabBar eligibility in O(1).
     bool inBottomTabBar_ = false;
+    // Once-true: set in CreateCustomSelectMenu or inherited from parent at
+    // AttachToMainTree; never cleared (safe over-permission for re-parenting).
+    bool inCustomSelectMenu_ = false;
     bool isThreadSafeNode_ = false;
     // Indicates whether this node was created in an isolated (dc/card) thread.
     // Set at construction from ContainerScope::IsIsolatedThread() and never changes afterwards.

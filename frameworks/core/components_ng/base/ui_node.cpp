@@ -1058,6 +1058,10 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     // the hook below, after this recompute) based on the parent Tabs position;
     // its descendants then inherit via this recompute on attach.
     inBottomTabBar_ = (GetParent() && GetParent()->IsInBottomTabBar());
+    // Inherit custom-select-menu flag: once true, stays true (never cleared).
+    if (!inCustomSelectMenu_ && GetParent() && GetParent()->IsInCustomSelectMenu()) {
+        inCustomSelectMenu_ = true;
+    }
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
