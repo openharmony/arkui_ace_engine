@@ -63,8 +63,8 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     SetAllowUpdate(allowUpdate_);
     float uiWidth = width_ - borderWidth_ * DOUBLE;
     float uiHeight = height_ - borderWidth_ * DOUBLE;
-    uiContent_->SetFormWidth(uiWidth);
-    uiContent_->SetFormHeight(uiHeight);
+    uiContent_->SetFormWidth(uiWidth > 0.0f ? uiWidth : 0.0f);
+    uiContent_->SetFormHeight(uiHeight > 0.0f ? uiHeight : 0.0f);
     lastBorderWidth_ = borderWidth_;
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
@@ -165,20 +165,46 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     disableUIFirst_ = want.GetBoolParam(FORM_DISABLE_UIFIRST_KEY, false);
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
+    if (width_ < 0.0f) {
+        HILOG_ERROR("invalid param, width_: %f", width_);
+        width_ = 0.0f;
+    }
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
+    if (height_ < 0.0f) {
+        HILOG_ERROR("invalid param, height_: %f", height_);
+        height_ = 0.0f;
+    }
     formViewScale_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_VIEW_SCALE, 1.0f);
+    if (formViewScale_ <= 0.0f) {
+        HILOG_ERROR("invalid param, formViewScale_: %f", formViewScale_);
+        formViewScale_ = 1.0f;
+    }
     formDisplayId_ = static_cast<uint64_t>(
         want.GetLongParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DISPLAY_ID_KEY, INVALID_DISPLAY_ID));
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
+    if (renderingMode_ > AppExecFwk::Constants::RenderingMode::SINGLE_COLOR ||
+        renderingMode_ < AppExecFwk::Constants::RenderingMode::FULL_COLOR) {
+        HILOG_ERROR("invalid param, renderingMode_: %d", static_cast<int>(renderingMode_));
+        renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
+    }
     enableBlurBackground_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
         false);
     borderWidth_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f);
+    if (borderWidth_ < 0.0f) {
+        HILOG_ERROR("invalid param, borderWidth_: %f", borderWidth_);
+        borderWidth_ = 0.0f;
+    }
     fontScaleFollowSystem_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, true);
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
     formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
         want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
+    if (formLocation_ >= AppExecFwk::Constants::FormLocation::FORM_LOCATION_END ||
+        formLocation_ < AppExecFwk::Constants::FormLocation::OTHER) {
+        HILOG_ERROR("invalid param, formLocation_: %d", static_cast<int>(formLocation_));
+        formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
+    }
     deleteBackgroundImage_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_DELETE_BACKGROUND_IMAGE, false);
 }
 
@@ -319,12 +345,21 @@ void FormRenderer::Destroy()
 
 void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, float formViewScale)
 {
+    float resizedWidth = width - borderWidth * DOUBLE;
+    float resizedHeight = height - borderWidth * DOUBLE;
+    if (width <= 0.0f || height <= 0.0f || borderWidth < 0.0f || formViewScale <= 0.0f ||
+        resizedWidth <= 0.0f || resizedHeight <= 0.0f || std::isnan(width) || std::isnan(height) ||
+        std::isnan(borderWidth) || std::isnan(formViewScale) || std::isnan(resizedWidth) ||
+        std::isnan(resizedHeight)) {
+        HILOG_ERROR("invalid param: width: %.2f, height: %.2f, borderWidth: %.2f, formViewScale: %.2f, "
+            "resizedWidth: %.2f, resizedHeight: %.2f.", width, height, borderWidth, formViewScale, resizedWidth,
+            resizedHeight);
+        return;
+    }
     if (!uiContent_) {
         HILOG_ERROR("uiContent_ is null");
         return;
     }
-    float resizedWidth = width - borderWidth * DOUBLE;
-    float resizedHeight = height - borderWidth * DOUBLE;
     if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_) ||
         !NearEqual(formViewScale, formViewScale_)) {
         width_ = width;
