@@ -80,6 +80,14 @@ void CalendarPickerPattern::OnModifyDone()
     UpdateAccessibilityText();
 }
 
+void CalendarPickerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+}
+
 void CalendarPickerPattern::UpdateAccessibilityText()
 {
     auto host = GetHost();
