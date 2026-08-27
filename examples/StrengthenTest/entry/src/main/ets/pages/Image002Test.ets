@@ -1828,12 +1828,1454 @@ export struct Image002Test {
     hilog.info(0x0000, 'testTag', 'loadmoreImageTest completed')
   }
 
+  async loadOther14Test(): void {
+    let testCounter = 0
+    let testString = 'Other Image Test String'
+    let testArray: string[] = []
+
+    for (let i = 0; i < 100; i++) {
+      testArray.push(`OtherImageItem_${i}`)
+    }
+
+    let testMap: Map<string, number> = new Map()
+    for (let i = 0; i < 50; i++) {
+      testMap.set(`other_img_key_${i}`, i)
+    }
+
+    let testSet: Set<number> = new Set()
+    for (let i = 0; i < 75; i++) {
+      testSet.add(i)
+    }
+
+    let otherImageConfig = {
+      src: 'app.media.otherImage',
+      width: 256,
+      height: 256,
+      format: 'PNG',
+      bitDepth: 8,
+      channels: 4,
+      dpi: 72,
+      colorSpace: 'sRGB',
+      hasAlpha: true,
+      isInterlaced: false,
+      metadata: {
+        camera: 'ArkCamera',
+        iso: 100,
+        exposureTime: 0.0125,
+        aperture: 2.8,
+        focalLength: 35,
+        gpsLat: 39.9042,
+        gpsLon: 116.4074,
+        takenAt: '2024-06-01T10:00:00Z',
+        software: 'ArkUI Editor',
+        copyright: 'OpenHarmony',
+        nested: {
+          thumbnail: 'thumb_small.png',
+          histogram: { bins: 256, min: 0, max: 255 },
+          deepProp: 'otherImageDeepValue'
+        }
+      }
+    }
+
+    hilog.info(0x0000, 'testTag', `Other image setup: ${testString}, counter=${testCounter}, ` +
+      `configSrc=${otherImageConfig.src}, deep=${otherImageConfig.metadata.nested.deepProp}, ` +
+      `arrayLen=${testArray.length}, mapSize=${testMap.size}, setSize=${testSet.size}`)
+
+    let clamp = (value: number, min: number, max: number): number => {
+      return Math.min(max, Math.max(min, value))
+    }
+
+    let lerp = (a: number, b: number, t: number): number => {
+      return a + (b - a) * t
+    }
+
+    let rgbToHsl = (r: number, g: number, b: number): { h: number, s: number, l: number } => {
+      let rNorm = r / 255
+      let gNorm = g / 255
+      let bNorm = b / 255
+      let max = Math.max(rNorm, gNorm, bNorm)
+      let min = Math.min(rNorm, gNorm, bNorm)
+      let delta = max - min
+      let l = (max + min) / 2
+      let h = 0
+      let s = 0
+      if (delta !== 0) {
+        s = delta / (1 - Math.abs(2 * l - 1))
+        if (max === rNorm) {
+          h = 60 * (((gNorm - bNorm) / delta) % 6)
+        } else if (max === gNorm) {
+          h = 60 * (((bNorm - rNorm) / delta) + 2)
+        } else {
+          h = 60 * (((rNorm - gNorm) / delta) + 4)
+        }
+      }
+      if (h < 0) {
+        h += 360
+      }
+      return { h, s, l }
+    }
+
+    let hslToRgb = (h: number, s: number, l: number): { r: number, g: number, b: number } => {
+      let c = (1 - Math.abs(2 * l - 1)) * s
+      let x = c * (1 - Math.abs((h / 60) % 2 - 1))
+      let m = l - c / 2
+      let r = 0
+      let g = 0
+      let b = 0
+      if (h < 60) {
+        r = c; g = x; b = 0
+      } else if (h < 120) {
+        r = x; g = c; b = 0
+      } else if (h < 180) {
+        r = 0; g = c; b = x
+      } else if (h < 240) {
+        r = 0; g = x; b = c
+      } else if (h < 300) {
+        r = x; g = 0; b = c
+      } else {
+        r = c; g = 0; b = x
+      }
+      return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+      }
+    }
+
+    let rgbToHsv = (r: number, g: number, b: number): { h: number, s: number, v: number } => {
+      let rNorm = r / 255
+      let gNorm = g / 255
+      let bNorm = b / 255
+      let max = Math.max(rNorm, gNorm, bNorm)
+      let min = Math.min(rNorm, gNorm, bNorm)
+      let delta = max - min
+      let h = 0
+      let s = max === 0 ? 0 : delta / max
+      let v = max
+      if (delta !== 0) {
+        if (max === rNorm) {
+          h = 60 * (((gNorm - bNorm) / delta) % 6)
+        } else if (max === gNorm) {
+          h = 60 * (((bNorm - rNorm) / delta) + 2)
+        } else {
+          h = 60 * (((rNorm - gNorm) / delta) + 4)
+        }
+      }
+      if (h < 0) {
+        h += 360
+      }
+      return { h, s, v }
+    }
+
+    let hsvToRgb = (h: number, s: number, v: number): { r: number, g: number, b: number } => {
+      let c = v * s
+      let x = c * (1 - Math.abs((h / 60) % 2 - 1))
+      let m = v - c
+      let r = 0
+      let g = 0
+      let b = 0
+      if (h < 60) {
+        r = c; g = x; b = 0
+      } else if (h < 120) {
+        r = x; g = c; b = 0
+      } else if (h < 180) {
+        r = 0; g = c; b = x
+      } else if (h < 240) {
+        r = 0; g = x; b = c
+      } else if (h < 300) {
+        r = x; g = 0; b = c
+      } else {
+        r = c; g = 0; b = x
+      }
+      return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+      }
+    }
+
+    let rgbToCmyk = (r: number, g: number, b: number): { c: number, m: number, y: number, k: number } => {
+      let rNorm = r / 255
+      let gNorm = g / 255
+      let bNorm = b / 255
+      let k = 1 - Math.max(rNorm, gNorm, bNorm)
+      if (k === 1) {
+        return { c: 0, m: 0, y: 0, k: 1 }
+      }
+      let c = (1 - rNorm - k) / (1 - k)
+      let m = (1 - gNorm - k) / (1 - k)
+      let y = (1 - bNorm - k) / (1 - k)
+      return { c, m, y, k }
+    }
+
+    let cmykToRgb = (c: number, m: number, y: number, k: number): { r: number, g: number, b: number } => {
+      return {
+        r: Math.round(255 * (1 - c) * (1 - k)),
+        g: Math.round(255 * (1 - m) * (1 - k)),
+        b: Math.round(255 * (1 - y) * (1 - k))
+      }
+    }
+
+    let colorTestSamples: { r: number, g: number, b: number }[] = [
+      { r: 255, g: 0, b: 0 },
+      { r: 0, g: 255, b: 0 },
+      { r: 0, g: 0, b: 255 },
+      { r: 255, g: 255, b: 255 },
+      { r: 0, g: 0, b: 0 },
+      { r: 128, g: 128, b: 128 },
+      { r: 255, g: 128, b: 64 },
+      { r: 32, g: 200, b: 160 },
+      { r: 100, g: 50, b: 200 },
+      { r: 200, g: 200, b: 50 }
+    ]
+
+    for (let sample of colorTestSamples) {
+      let hsl = rgbToHsl(sample.r, sample.g, sample.b)
+      let backRgb = hslToRgb(hsl.h, hsl.s, hsl.l)
+      let hsv = rgbToHsv(sample.r, sample.g, sample.b)
+      let hsvBack = hsvToRgb(hsv.h, hsv.s, hsv.v)
+      let cmyk = rgbToCmyk(sample.r, sample.g, sample.b)
+      let cmykBack = cmykToRgb(cmyk.c, cmyk.m, cmyk.y, cmyk.k)
+      hilog.info(0x0000, 'testTag', `Color RGB(${sample.r},${sample.g},${sample.b}) -> ` +
+        `HSL(${hsl.h.toFixed(1)},${hsl.s.toFixed(3)},${hsl.l.toFixed(3)}) -> ` +
+        `RGB(${backRgb.r},${backRgb.g},${backRgb.b}), ` +
+        `HSV(${hsv.h.toFixed(1)},${hsv.s.toFixed(3)},${hsv.v.toFixed(3)}) -> ` +
+        `RGB(${hsvBack.r},${hsvBack.g},${hsvBack.b}), ` +
+        `CMYK(${cmyk.c.toFixed(3)},${cmyk.m.toFixed(3)},${cmyk.y.toFixed(3)},${cmyk.k.toFixed(3)}) -> ` +
+        `RGB(${cmykBack.r},${cmykBack.g},${cmykBack.b})`)
+    }
+
+    let adjustBrightness = (r: number, g: number, b: number, factor: number):
+      { r: number, g: number, b: number } => {
+      return {
+        r: clamp(Math.round(r * factor), 0, 255),
+        g: clamp(Math.round(g * factor), 0, 255),
+        b: clamp(Math.round(b * factor), 0, 255)
+      }
+    }
+
+    let adjustContrast = (r: number, g: number, b: number, factor: number):
+      { r: number, g: number, b: number } => {
+      return {
+        r: clamp(Math.round((r - 128) * factor + 128), 0, 255),
+        g: clamp(Math.round((g - 128) * factor + 128), 0, 255),
+        b: clamp(Math.round((b - 128) * factor + 128), 0, 255)
+      }
+    }
+
+    let adjustSaturation = (r: number, g: number, b: number, factor: number):
+      { r: number, g: number, b: number } => {
+      let gray = 0.299 * r + 0.587 * g + 0.114 * b
+      return {
+        r: clamp(Math.round(gray + (r - gray) * factor), 0, 255),
+        g: clamp(Math.round(gray + (g - gray) * factor), 0, 255),
+        b: clamp(Math.round(gray + (b - gray) * factor), 0, 255)
+      }
+    }
+
+    let adjustHue = (r: number, g: number, b: number, degrees: number):
+      { r: number, g: number, b: number } => {
+      let hsl = rgbToHsl(r, g, b)
+      hsl.h = (hsl.h + degrees) % 360
+      if (hsl.h < 0) {
+        hsl.h += 360
+      }
+      return hslToRgb(hsl.h, hsl.s, hsl.l)
+    }
+
+    for (let i = 0; i < colorTestSamples.length; i++) {
+      let s = colorTestSamples[i]
+      let bright = adjustBrightness(s.r, s.g, s.b, 1.2)
+      let dark = adjustBrightness(s.r, s.g, s.b, 0.6)
+      let contrast = adjustContrast(s.r, s.g, s.b, 1.5)
+      let sat = adjustSaturation(s.r, s.g, s.b, 2.0)
+      let hue = adjustHue(s.r, s.g, s.b, 45)
+      hilog.info(0x0000, 'testTag', `Color adjust ${i}: bright(${bright.r},${bright.g},${bright.b}), ` +
+        `dark(${dark.r},${dark.g},${dark.b}), contrast(${contrast.r},${contrast.g},${contrast.b}), ` +
+        `sat(${sat.r},${sat.g},${sat.b}), hue(${hue.r},${hue.g},${hue.b})`)
+    }
+
+    let buildGradient = (stops: { pos: number, color: { r: number, g: number, b: number } }[], steps: number):
+      { r: number, g: number, b: number }[] => {
+      let result: { r: number, g: number, b: number }[] = []
+      for (let i = 0; i < steps; i++) {
+        let t = i / (steps - 1)
+        let idx = 0
+        for (let j = 0; j < stops.length - 1; j++) {
+          if (t >= stops[j].pos && t <= stops[j + 1].pos) {
+            idx = j
+            break
+          }
+        }
+        let segStart = stops[idx].pos
+        let segEnd = stops[idx + 1].pos
+        let segT = segEnd === segStart ? 0 : (t - segStart) / (segEnd - segStart)
+        let c1 = stops[idx].color
+        let c2 = stops[idx + 1].color
+        result.push({
+          r: Math.round(lerp(c1.r, c2.r, segT)),
+          g: Math.round(lerp(c1.g, c2.g, segT)),
+          b: Math.round(lerp(c1.b, c2.b, segT))
+        })
+      }
+      return result
+    }
+
+    let gradientStops = [
+      { pos: 0, color: { r: 255, g: 0, b: 0 } },
+      { pos: 0.5, color: { r: 0, g: 255, b: 0 } },
+      { pos: 1, color: { r: 0, g: 0, b: 255 } }
+    ]
+    let gradient = buildGradient(gradientStops, 10)
+    for (let i = 0; i < gradient.length; i++) {
+      hilog.info(0x0000, 'testTag', `Gradient ${i}: RGB(${gradient[i].r},${gradient[i].g},${gradient[i].b})`)
+    }
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 1 completed')
+
+    let pixelGrid = (() => {
+      let width = 16
+      let height = 16
+      let data = new Uint8Array(width * height * 4)
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let offset = (y * width + x) * 4
+          data[offset] = (x * 16) % 256
+          data[offset + 1] = (y * 16) % 256
+          data[offset + 2] = ((x + y) * 8) % 256
+          data[offset + 3] = 255
+        }
+      }
+      return { width, height, data }
+    })()
+
+    let applyKernel = (
+      pixelData: Uint8Array, width: number, height: number, kernel: number[], divisor: number, offset: number
+    ): Uint8Array => {
+      let result = new Uint8Array(pixelData.length)
+      let kSize = Math.round(Math.sqrt(kernel.length))
+      let kHalf = Math.floor(kSize / 2)
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let r = 0
+          let g = 0
+          let b = 0
+          for (let ky = 0; ky < kSize; ky++) {
+            for (let kx = 0; kx < kSize; kx++) {
+              let px = clamp(x + kx - kHalf, 0, width - 1)
+              let py = clamp(y + ky - kHalf, 0, height - 1)
+              let srcOffset = (py * width + px) * 4
+              let weight = kernel[ky * kSize + kx]
+              r += pixelData[srcOffset] * weight
+              g += pixelData[srcOffset + 1] * weight
+              b += pixelData[srcOffset + 2] * weight
+            }
+          }
+          let dstOffset = (y * width + x) * 4
+          result[dstOffset] = clamp(Math.round(r / divisor + offset), 0, 255)
+          result[dstOffset + 1] = clamp(Math.round(g / divisor + offset), 0, 255)
+          result[dstOffset + 2] = clamp(Math.round(b / divisor + offset), 0, 255)
+          result[dstOffset + 3] = pixelData[dstOffset + 3]
+        }
+      }
+      return result
+    }
+
+    let sharpenKernel = [0, -1, 0, -1, 5, -1, 0, -1, 0]
+    let embossKernel = [-2, -1, 0, -1, 1, 1, 0, 1, 2]
+    let edgeKernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1]
+    let blurKernel = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    let sobelX = [-1, 0, 1, -2, 0, 2, -1, 0, 1]
+    let sobelY = [-1, -2, -1, 0, 0, 0, 1, 2, 1]
+    let laplacian = [0, 1, 0, 1, -4, 1, 0, 1, 0]
+    let gaussianKernel = [1, 4, 6, 4, 1, 4, 16, 24, 16, 4, 6, 24, 36, 24, 6, 4, 16, 24, 16, 4, 1, 4, 6, 4, 1]
+
+    let sharpened = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, sharpenKernel, 1, 0)
+    let embossed = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, embossKernel, 1, 128)
+    let edged = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, edgeKernel, 1, 0)
+    let blurred = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, blurKernel, 9, 0)
+    let sobelXResult = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, sobelX, 1, 128)
+    let sobelYResult = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, sobelY, 1, 128)
+    let laplacianResult = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, laplacian, 1, 128)
+    let gaussianResult = applyKernel(pixelGrid.data, pixelGrid.width, pixelGrid.height, gaussianKernel, 256, 0)
+    hilog.info(0x0000, 'testTag', `Filters: sharpen=${sharpened.length}, emboss=${embossed.length}, ` +
+      `edge=${edged.length}, blur=${blurred.length}, sobelX=${sobelXResult.length}, ` +
+      `sobelY=${sobelYResult.length}, laplacian=${laplacianResult.length}, gaussian=${gaussianResult.length}`)
+
+    let thresholdImage = (pixelData: Uint8Array, threshold: number): Uint8Array => {
+      let result = new Uint8Array(pixelData.length)
+      for (let i = 0; i < pixelData.length; i += 4) {
+        let gray = 0.299 * pixelData[i] + 0.587 * pixelData[i + 1] + 0.114 * pixelData[i + 2]
+        let value = gray >= threshold ? 255 : 0
+        result[i] = value
+        result[i + 1] = value
+        result[i + 2] = value
+        result[i + 3] = pixelData[i + 3]
+      }
+      return result
+    }
+
+    let posterizeImage = (pixelData: Uint8Array, levels: number): Uint8Array => {
+      let result = new Uint8Array(pixelData.length)
+      let step = 255 / (levels - 1)
+      for (let i = 0; i < pixelData.length; i += 4) {
+        result[i] = Math.round(pixelData[i] / step) * step
+        result[i + 1] = Math.round(pixelData[i + 1] / step) * step
+        result[i + 2] = Math.round(pixelData[i + 2] / step) * step
+        result[i + 3] = pixelData[i + 3]
+      }
+      return result
+    }
+
+    let invertImage = (pixelData: Uint8Array): Uint8Array => {
+      let result = new Uint8Array(pixelData.length)
+      for (let i = 0; i < pixelData.length; i += 4) {
+        result[i] = 255 - pixelData[i]
+        result[i + 1] = 255 - pixelData[i + 1]
+        result[i + 2] = 255 - pixelData[i + 2]
+        result[i + 3] = pixelData[i + 3]
+      }
+      return result
+    }
+
+    let grayscaleImage = (pixelData: Uint8Array): Uint8Array => {
+      let result = new Uint8Array(pixelData.length)
+      for (let i = 0; i < pixelData.length; i += 4) {
+        let gray = Math.round(0.299 * pixelData[i] + 0.587 * pixelData[i + 1] + 0.114 * pixelData[i + 2])
+        result[i] = gray
+        result[i + 1] = gray
+        result[i + 2] = gray
+        result[i + 3] = pixelData[i + 3]
+      }
+      return result
+    }
+
+    let ditherImage = (pixelData: Uint8Array, width: number, height: number): Uint8Array => {
+      let result = new Uint8Array(pixelData.length)
+      let bayer: number[] = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let offset = (y * width + x) * 4
+          let gray = 0.299 * pixelData[offset] + 0.587 * pixelData[offset + 1] + 0.114 * pixelData[offset + 2]
+          let threshold = (bayer[(y % 4) * 4 + (x % 4)] + 0.5) * 16
+          let value = gray > threshold ? 255 : 0
+          result[offset] = value
+          result[offset + 1] = value
+          result[offset + 2] = value
+          result[offset + 3] = pixelData[offset + 3]
+        }
+      }
+      return result
+    }
+
+    let thresholded = thresholdImage(pixelGrid.data, 128)
+    let posterized = posterizeImage(pixelGrid.data, 4)
+    let inverted = invertImage(pixelGrid.data)
+    let grayscaled = grayscaleImage(pixelGrid.data)
+    let dithered = ditherImage(pixelGrid.data, pixelGrid.width, pixelGrid.height)
+    hilog.info(0x0000, 'testTag', `Pixel ops: threshold=${thresholded.length}, posterize=${posterized.length}, ` +
+      `invert=${inverted.length}, grayscale=${grayscaled.length}, dither=${dithered.length}`)
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 2 completed')
+
+    interface RLEEntry {
+      value: number
+      count: number
+    }
+
+    let rleEncode = (data: Uint8Array): RLEEntry[] => {
+      let result: RLEEntry[] = []
+      let i = 0
+      while (i < data.length) {
+        let value = data[i]
+        let count = 1
+        while (i + count < data.length && data[i + count] === value && count < 255) {
+          count++
+        }
+        result.push({ value, count })
+        i += count
+      }
+      return result
+    }
+
+    let rleDecode = (entries: RLEEntry[]): Uint8Array => {
+      let totalLength = 0
+      for (let entry of entries) {
+        totalLength += entry.count
+      }
+      let result = new Uint8Array(totalLength)
+      let offset = 0
+      for (let entry of entries) {
+        for (let i = 0; i < entry.count; i++) {
+          result[offset++] = entry.value
+        }
+      }
+      return result
+    }
+
+    let rleTestData = (() => {
+      let data = new Uint8Array(256)
+      for (let i = 0; i < 256; i++) {
+        data[i] = i % 8 < 4 ? 100 : 200
+      }
+      return data
+    })()
+    let rleEncoded = rleEncode(rleTestData)
+    let rleDecoded = rleDecode(rleEncoded)
+    hilog.info(0x0000, 'testTag', `RLE: original=${rleTestData.length}, encoded=${rleEncoded.length} entries, ` +
+      `decoded=${rleDecoded.length}`)
+
+    let lzwCompress = (data: string): number[] => {
+      let dictionary: Map<string, number> = new Map()
+      let dictSize = 256
+      for (let i = 0; i < 256; i++) {
+        dictionary.set(String.fromCharCode(i), i)
+      }
+      let result: number[] = []
+      let current = ''
+      for (let i = 0; i < data.length; i++) {
+        let next = current + data.charAt(i)
+        if (dictionary.has(next)) {
+          current = next
+        } else {
+          result.push(dictionary.get(current) as number)
+          dictionary.set(next, dictSize++)
+          current = data.charAt(i)
+        }
+      }
+      if (current.length > 0) {
+        result.push(dictionary.get(current) as number)
+      }
+      return result
+    }
+
+    let lzwDecompress = (compressed: number[]): string => {
+      let dictionary: Map<number, string> = new Map()
+      let dictSize = 256
+      for (let i = 0; i < 256; i++) {
+        dictionary.set(i, String.fromCharCode(i))
+      }
+      let result = ''
+      let prevCode = compressed[0]
+      result += dictionary.get(prevCode) as string
+      for (let i = 1; i < compressed.length; i++) {
+        let code = compressed[i]
+        let entry = ''
+        if (dictionary.has(code)) {
+          entry = dictionary.get(code) as string
+        } else if (code === dictSize) {
+          entry = (dictionary.get(prevCode) as string) + (dictionary.get(prevCode) as string).charAt(0)
+        }
+        result += entry
+        dictionary.set(dictSize++, (dictionary.get(prevCode) as string) + entry.charAt(0))
+        prevCode = code
+      }
+      return result
+    }
+
+    let lzwTestData = 'ARKUI_OTHER_IMAGE_COMPRESSION_TEST_REPEAT_REPEAT-REPEAT'
+    let lzwCompressed = lzwCompress(lzwTestData)
+    let lzwDecompressed = lzwDecompress(lzwCompressed)
+    hilog.info(0x0000, 'testTag', `LZW: original=${lzwTestData.length}, compressed=${lzwCompressed.length}, ` +
+      `decompressed=${lzwDecompressed.length}, match=${lzwTestData === lzwDecompressed}`)
+
+    interface HuffmanNode {
+      char: string
+      freq: number
+      left: HuffmanNode | null
+      right: HuffmanNode | null
+    }
+
+    let buildFrequencyTable = (data: string): Map<string, number> => {
+      let freq: Map<string, number> = new Map()
+      for (let i = 0; i < data.length; i++) {
+        let ch = data.charAt(i)
+        freq.set(ch, (freq.get(ch) || 0) + 1)
+      }
+      return freq
+    }
+
+    let buildHuffmanTree = (freq: Map<string, number>): HuffmanNode | null => {
+      let nodes: HuffmanNode[] = []
+      freq.forEach((frequency, char) => {
+        nodes.push({ char, freq: frequency, left: null, right: null })
+      })
+      if (nodes.length === 0) {
+        return null
+      }
+      while (nodes.length > 1) {
+        nodes.sort((a, b) => a.freq - b.freq)
+        let left = nodes.shift() as HuffmanNode
+        let right = nodes.shift() as HuffmanNode
+        let parent: HuffmanNode = {
+          char: '',
+          freq: left.freq + right.freq,
+          left,
+          right
+        }
+        nodes.push(parent)
+      }
+      return nodes[0]
+    }
+
+    let buildHuffmanCodes = (root: HuffmanNode | null): Map<string, string> => {
+      let codes: Map<string, string> = new Map()
+      let traverse = (node: HuffmanNode | null, code: string) => {
+        if (!node) {
+          return
+        }
+        if (node.char !== '') {
+          codes.set(node.char, code)
+        }
+        traverse(node.left, code + '0')
+        traverse(node.right, code + '1')
+      }
+      traverse(root, '')
+      return codes
+    }
+
+    let huffmanEncode = (data: string, codes: Map<string, string>): string => {
+      let result = ''
+      for (let i = 0; i < data.length; i++) {
+        result += codes.get(data.charAt(i))
+      }
+      return result
+    }
+
+    let huffmanData = 'ARKUI_OTHER_IMAGE_HUFFMAN_COMPRESSION_DEMO_DATA_REPEAT_PATTERN'
+    let freqTable = buildFrequencyTable(huffmanData)
+    let huffmanTree = buildHuffmanTree(freqTable)
+    let huffmanCodes = buildHuffmanCodes(huffmanTree)
+    let huffmanEncoded = huffmanEncode(huffmanData, huffmanCodes)
+    hilog.info(0x0000, 'testTag', `Huffman: original=${huffmanData.length * 8} bits, ` +
+      `encoded=${huffmanEncoded.length} bits, ratio=${(huffmanEncoded.length / (huffmanData.length * 8) * 100).toFixed(2)}%`)
+
+    let deltaEncode = (data: number[]): number[] => {
+      let result: number[] = []
+      let prev = 0
+      for (let i = 0; i < data.length; i++) {
+        result.push(data[i] - prev)
+        prev = data[i]
+      }
+      return result
+    }
+
+    let deltaDecode = (data: number[]): number[] => {
+      let result: number[] = []
+      let prev = 0
+      for (let i = 0; i < data.length; i++) {
+        prev += data[i]
+        result.push(prev)
+      }
+      return result
+    }
+
+    let deltaTestData: number[] = []
+    for (let i = 0; i < 50; i++) {
+      deltaTestData.push(i * 5 + (i % 3))
+    }
+    let deltaEncoded = deltaEncode(deltaTestData)
+    let deltaDecoded = deltaDecode(deltaEncoded)
+    let deltaMatch = deltaTestData.every((v, idx) => v === deltaDecoded[idx])
+    hilog.info(0x0000, 'testTag', `Delta: original=${deltaTestData.length}, encoded=${deltaEncoded.length}, ` +
+      `match=${deltaMatch}`)
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 3 completed')
+
+    let bubbleSort = (arr: number[]): number[] => {
+      let result = [...arr]
+      let n = result.length
+      for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+          if (result[j] > result[j + 1]) {
+            let tmp = result[j]
+            result[j] = result[j + 1]
+            result[j + 1] = tmp
+          }
+        }
+      }
+      return result
+    }
+
+    let mergeSort = (arr: number[]): number[] => {
+      if (arr.length <= 1) {
+        return arr
+      }
+      let mid = Math.floor(arr.length / 2)
+      let left = mergeSort(arr.slice(0, mid))
+      let right = mergeSort(arr.slice(mid))
+      let result: number[] = []
+      let i = 0
+      let j = 0
+      while (i < left.length && j < right.length) {
+        if (left[i] <= right[j]) {
+          result.push(left[i++])
+        } else {
+          result.push(right[j++])
+        }
+      }
+      while (i < left.length) {
+        result.push(left[i++])
+      }
+      while (j < right.length) {
+        result.push(right[j++])
+      }
+      return result
+    }
+
+    let quickSort = (arr: number[]): number[] => {
+      if (arr.length <= 1) {
+        return arr
+      }
+      let pivot = arr[0]
+      let left: number[] = []
+      let right: number[] = []
+      let equal: number[] = []
+      for (let num of arr) {
+        if (num < pivot) {
+          left.push(num)
+        } else if (num > pivot) {
+          right.push(num)
+        } else {
+          equal.push(num)
+        }
+      }
+      return [...quickSort(left), ...equal, ...quickSort(right)]
+    }
+
+    let heapSort = (arr: number[]): number[] => {
+      let result = [...arr]
+      let n = result.length
+      let heapify = (size: number, i: number) => {
+        let largest = i
+        let left = 2 * i + 1
+        let right = 2 * i + 2
+        if (left < size && result[left] > result[largest]) {
+          largest = left
+        }
+        if (right < size && result[right] > result[largest]) {
+          largest = right
+        }
+        if (largest !== i) {
+          let tmp = result[i]
+          result[i] = result[largest]
+          result[largest] = tmp
+          heapify(size, largest)
+        }
+      }
+      for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+        heapify(n, i)
+      }
+      for (let i = n - 1; i > 0; i--) {
+        let tmp = result[0]
+        result[0] = result[i]
+        result[i] = tmp
+        heapify(i, 0)
+      }
+      return result
+    }
+
+    let radixSort = (arr: number[]): number[] => {
+      let result = [...arr]
+      let max = Math.max(...result)
+      let exp = 1
+      while (Math.floor(max / exp) > 0) {
+        let buckets: number[][] = Array.from({ length: 10 }, () => [])
+        for (let num of result) {
+          buckets[Math.floor(num / exp) % 10].push(num)
+        }
+        result = []
+        for (let bucket of buckets) {
+          for (let num of bucket) {
+            result.push(num)
+          }
+        }
+        exp *= 10
+      }
+      return result
+    }
+
+    let sortTestData: number[] = []
+    for (let i = 0; i < 100; i++) {
+      sortTestData.push(Math.floor(Math.random() * 1000))
+    }
+
+    let bubbleResult = bubbleSort(sortTestData)
+    let mergeResult = mergeSort(sortTestData)
+    let quickResult = quickSort(sortTestData)
+    let heapResult = heapSort(sortTestData)
+    let radixResult = radixSort(sortTestData)
+    let builtinResult = [...sortTestData].sort((a, b) => a - b)
+    hilog.info(0x0000, 'testTag', `Sorts: bubble=${bubbleResult.length}, merge=${mergeResult.length}, ` +
+      `quick=${quickResult.length}, heap=${heapResult.length}, radix=${radixResult.length}, ` +
+      `builtin=${builtinResult.length}`)
+    let allMatch = builtinResult.every((v, idx) =>
+      v === bubbleResult[idx] && v === mergeResult[idx] && v === quickResult[idx] &&
+      v === heapResult[idx] && v === radixResult[idx])
+    hilog.info(0x0000, 'testTag', `All sort results match builtin: ${allMatch}`)
+
+    let binarySearch = (arr: number[], target: number): number => {
+      let left = 0
+      let right = arr.length - 1
+      while (left <= right) {
+        let mid = Math.floor((left + right) / 2)
+        if (arr[mid] === target) {
+          return mid
+        }
+        if (arr[mid] < target) {
+          left = mid + 1
+        } else {
+          right = mid - 1
+        }
+      }
+      return -1
+    }
+
+    let interpolationSearch = (arr: number[], target: number): number => {
+      let left = 0
+      let right = arr.length - 1
+      while (left <= right && target >= arr[left] && target <= arr[right]) {
+        let pos = left + Math.floor(((right - left) / (arr[right] - arr[left])) * (target - arr[left]))
+        if (arr[pos] === target) {
+          return pos
+        }
+        if (arr[pos] < target) {
+          left = pos + 1
+        } else {
+          right = pos - 1
+        }
+      }
+      return -1
+    }
+
+    let sortedArr = builtinResult
+    for (let i = 0; i < 20; i++) {
+      let target = sortedArr[Math.floor(Math.random() * sortedArr.length)]
+      let bsResult = binarySearch(sortedArr, target)
+      let isResult = interpolationSearch(sortedArr, target)
+      hilog.info(0x0000, 'testTag', `Search ${i} target=${target}: binary=${bsResult}, interp=${isResult}`)
+    }
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 4 completed')
+
+    let linearEasing = (t: number): number => t
+    let easeInQuad = (t: number): number => t * t
+    let easeOutQuad = (t: number): number => t * (2 - t)
+    let easeInOutQuad = (t: number): number => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+    let easeInCubic = (t: number): number => t * t * t
+    let easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3)
+    let easeInOutCubic = (t: number): number => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+    let easeInQuart = (t: number): number => t * t * t * t
+    let easeOutQuart = (t: number): number => 1 - Math.pow(1 - t, 4)
+    let easeInSine = (t: number): number => 1 - Math.cos((t * Math.PI) / 2)
+    let easeOutSine = (t: number): number => Math.sin((t * Math.PI) / 2)
+    let easeInOutSine = (t: number): number => -(Math.cos(Math.PI * t) - 1) / 2
+    let easeInExpo = (t: number): number => t === 0 ? 0 : Math.pow(2, 10 * t - 10)
+    let easeOutExpo = (t: number): number => t === 1 ? 1 : 1 - Math.pow(2, -10 * t)
+    let easeInCirc = (t: number): number => 1 - Math.sqrt(1 - t * t)
+    let easeOutCirc = (t: number): number => Math.sqrt(1 - (t - 1) * (t - 1))
+    let easeOutBack = (t: number): number => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2)
+    let easeOutElastic = (t: number): number => {
+      if (t === 0) { return 0 }
+      if (t === 1) { return 1 }
+      return Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * (2 * Math.PI) / 3) + 1
+    }
+    let easeOutBounce = (t: number): number => {
+      let n1 = 7.5625
+      let d1 = 2.75
+      if (t < 1 / d1) {
+        return n1 * t * t
+      } else if (t < 2 / d1) {
+        t -= 1.5 / d1
+        return n1 * t * t + 0.75
+      } else if (t < 2.5 / d1) {
+        t -= 2.25 / d1
+        return n1 * t * t + 0.9375
+      } else {
+        t -= 2.625 / d1
+        return n1 * t * t + 0.984375
+      }
+    }
+    let easeInBounce = (t: number): number => 1 - easeOutBounce(1 - t)
+
+    let easingFunctions: Map<string, (t: number) => number> = new Map()
+    easingFunctions.set('linear', linearEasing)
+    easingFunctions.set('easeInQuad', easeInQuad)
+    easingFunctions.set('easeOutQuad', easeOutQuad)
+    easingFunctions.set('easeInOutQuad', easeInOutQuad)
+    easingFunctions.set('easeInCubic', easeInCubic)
+    easingFunctions.set('easeOutCubic', easeOutCubic)
+    easingFunctions.set('easeInOutCubic', easeInOutCubic)
+    easingFunctions.set('easeInQuart', easeInQuart)
+    easingFunctions.set('easeOutQuart', easeOutQuart)
+    easingFunctions.set('easeInSine', easeInSine)
+    easingFunctions.set('easeOutSine', easeOutSine)
+    easingFunctions.set('easeInOutSine', easeInOutSine)
+    easingFunctions.set('easeInExpo', easeInExpo)
+    easingFunctions.set('easeOutExpo', easeOutExpo)
+    easingFunctions.set('easeInCirc', easeInCirc)
+    easingFunctions.set('easeOutCirc', easeOutCirc)
+    easingFunctions.set('easeOutBack', easeOutBack)
+    easingFunctions.set('easeOutElastic', easeOutElastic)
+    easingFunctions.set('easeOutBounce', easeOutBounce)
+    easingFunctions.set('easeInBounce', easeInBounce)
+
+    for (let i = 0; i <= 10; i++) {
+      let t = i / 10
+      let values: string[] = []
+      easingFunctions.forEach((fn, name) => {
+        values.push(`${name}=${fn(t).toFixed(3)}`)
+      })
+      hilog.info(0x0000, 'testTag', `Easing t=${t.toFixed(1)}: ${values.join(', ')}`)
+    }
+
+    let animateValue = (from: number, to: number, duration: number, easing: (t: number) => number): number[] => {
+      let frames: number[] = []
+      let steps = 20
+      for (let i = 0; i <= steps; i++) {
+        let t = i / steps
+        let eased = easing(t)
+        frames.push(lerp(from, to, eased))
+      }
+      return frames
+    }
+
+    let animFrames = animateValue(0, 100, 1000, easeInOutCubic)
+    hilog.info(0x0000, 'testTag', `Animation frames: ${animFrames.length}, ` +
+      `first=${animFrames[0].toFixed(2)}, last=${animFrames[animFrames.length - 1].toFixed(2)}`)
+
+    let createKeyframes = (start: number, end: number, count: number): number[] => {
+      let result: number[] = []
+      for (let i = 0; i < count; i++) {
+        let t = i / (count - 1)
+        result.push(lerp(start, end, t))
+      }
+      return result
+    }
+
+    let keyframes = createKeyframes(0, 360, 12)
+    hilog.info(0x0000, 'testTag', `Keyframes: ${keyframes.map(v => v.toFixed(1)).join(', ')}`)
+
+    let interpolateColors = (
+      c1: { r: number, g: number, b: number }, c2: { r: number, g: number, b: number }, t: number
+    ): { r: number, g: number, b: number } => {
+      return {
+        r: Math.round(lerp(c1.r, c2.r, t)),
+        g: Math.round(lerp(c1.g, c2.g, t)),
+        b: Math.round(lerp(c1.b, c2.b, t))
+      }
+    }
+
+    let colorFrames: { r: number, g: number, b: number }[] = []
+    let startColor = { r: 255, g: 100, b: 50 }
+    let endColor = { r: 50, g: 100, b: 255 }
+    for (let i = 0; i <= 10; i++) {
+      colorFrames.push(interpolateColors(startColor, endColor, i / 10))
+    }
+    hilog.info(0x0000, 'testTag', `Color keyframes: ${colorFrames.map(c => `(${c.r},${c.g},${c.b})`).join(' ')}`)
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 5 completed')
+
+    interface Matrix {
+      rows: number
+      cols: number
+      data: number[][]
+    }
+
+    let createMatrix = (rows: number, cols: number, fill: number): Matrix => {
+      let data: number[][] = []
+      for (let i = 0; i < rows; i++) {
+        data.push(new Array(cols).fill(fill))
+      }
+      return { rows, cols, data }
+    }
+
+    let identityMatrix = (n: number): Matrix => {
+      let m = createMatrix(n, n, 0)
+      for (let i = 0; i < n; i++) {
+        m.data[i][i] = 1
+      }
+      return m
+    }
+
+    let multiplyMatrices = (a: Matrix, b: Matrix): Matrix => {
+      let result = createMatrix(a.rows, b.cols, 0)
+      for (let i = 0; i < a.rows; i++) {
+        for (let j = 0; j < b.cols; j++) {
+          let sum = 0
+          for (let k = 0; k < a.cols; k++) {
+            sum += a.data[i][k] * b.data[k][j]
+          }
+          result.data[i][j] = sum
+        }
+      }
+      return result
+    }
+
+    let addMatrices = (a: Matrix, b: Matrix): Matrix => {
+      let result = createMatrix(a.rows, a.cols, 0)
+      for (let i = 0; i < a.rows; i++) {
+        for (let j = 0; j < a.cols; j++) {
+          result.data[i][j] = a.data[i][j] + b.data[i][j]
+        }
+      }
+      return result
+    }
+
+    let transposeMatrix = (m: Matrix): Matrix => {
+      let result = createMatrix(m.cols, m.rows, 0)
+      for (let i = 0; i < m.rows; i++) {
+        for (let j = 0; j < m.cols; j++) {
+          result.data[j][i] = m.data[i][j]
+        }
+      }
+      return result
+    }
+
+    let scaleMatrix = (m: Matrix, scalar: number): Matrix => {
+      let result = createMatrix(m.rows, m.cols, 0)
+      for (let i = 0; i < m.rows; i++) {
+        for (let j = 0; j < m.cols; j++) {
+          result.data[i][j] = m.data[i][j] * scalar
+        }
+      }
+      return result
+    }
+
+    let matrixDeterminant = (m: Matrix): number => {
+      if (m.rows !== m.cols) {
+        return 0
+      }
+      if (m.rows === 1) {
+        return m.data[0][0]
+      }
+      if (m.rows === 2) {
+        return m.data[0][0] * m.data[1][1] - m.data[0][1] * m.data[1][0]
+      }
+      let det = 0
+      for (let j = 0; j < m.cols; j++) {
+        let minor: number[][] = []
+        for (let i = 1; i < m.rows; i++) {
+          let row: number[] = []
+          for (let k = 0; k < m.cols; k++) {
+            if (k !== j) {
+              row.push(m.data[i][k])
+            }
+          }
+          minor.push(row)
+        }
+        let sign = j % 2 === 0 ? 1 : -1
+        det += sign * m.data[0][j] * matrixDeterminant({ rows: minor.length, cols: minor[0].length, data: minor })
+      }
+      return det
+    }
+
+    let matA = createMatrix(2, 2, 0)
+    matA.data = [[1, 2], [3, 4]]
+    let matB = createMatrix(2, 2, 0)
+    matB.data = [[5, 6], [7, 8]]
+    let matSum = addMatrices(matA, matB)
+    let matProduct = multiplyMatrices(matA, matB)
+    let matTransposed = transposeMatrix(matA)
+    let matScaled = scaleMatrix(matA, 2)
+    let matDet = matrixDeterminant(matA)
+    hilog.info(0x0000, 'testTag', `Matrix A=[[1,2],[3,4]], B=[[5,6],[7,8]]: ` +
+      `sum=${JSON.stringify(matSum.data)}, product=${JSON.stringify(matProduct.data)}, ` +
+      `transpose=${JSON.stringify(matTransposed.data)}, scaled=${JSON.stringify(matScaled.data)}, det=${matDet}`)
+
+    let identity3 = identityMatrix(3)
+    hilog.info(0x0000, 'testTag', `Identity 3x3: ${JSON.stringify(identity3.data)}`)
+
+    let affineTranslate = (tx: number, ty: number): Matrix => {
+      let m = identityMatrix(3)
+      m.data[0][2] = tx
+      m.data[1][2] = ty
+      return m
+    }
+    let affineScale = (sx: number, sy: number): Matrix => {
+      let m = identityMatrix(3)
+      m.data[0][0] = sx
+      m.data[1][1] = sy
+      return m
+    }
+    let affineRotate = (degrees: number): Matrix => {
+      let rad = degrees * Math.PI / 180
+      let cos = Math.cos(rad)
+      let sin = Math.sin(rad)
+      let m = identityMatrix(3)
+      m.data[0][0] = cos
+      m.data[0][1] = -sin
+      m.data[1][0] = sin
+      m.data[1][1] = cos
+      return m
+    }
+
+    let translateM = affineTranslate(100, 50)
+    let scaleM = affineScale(2, 3)
+    let rotateM = affineRotate(45)
+    let combined = multiplyMatrices(multiplyMatrices(translateM, rotateM), scaleM)
+    hilog.info(0x0000, 'testTag', `Affine: translate=${JSON.stringify(translateM.data)}, ` +
+      `scale=${JSON.stringify(scaleM.data)}, rotate=${JSON.stringify(rotateM.data)}, ` +
+      `combined=${JSON.stringify(combined.data)}`)
+
+    let transformPoint = (m: Matrix, x: number, y: number): { x: number, y: number } => {
+      let vector = [x, y, 1]
+      let result = [0, 0, 0]
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          result[i] += m.data[i][j] * vector[j]
+        }
+      }
+      return { x: result[0], y: result[1] }
+    }
+
+    let transformedPoint = transformPoint(rotateM, 10, 0)
+    hilog.info(0x0000, 'testTag', `Transformed point (10,0) by rotate 45deg: ` +
+      `(${transformedPoint.x.toFixed(2)}, ${transformedPoint.y.toFixed(2)})`)
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 6 completed')
+
+    let base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+    let base64Encode = (data: string): string => {
+      let result = ''
+      let bytes: number[] = []
+      for (let i = 0; i < data.length; i++) {
+        let code = data.charCodeAt(i)
+        if (code < 128) {
+          bytes.push(code)
+        } else if (code < 2048) {
+          bytes.push(0xC0 | (code >> 6))
+          bytes.push(0x80 | (code & 0x3F))
+        } else {
+          bytes.push(0xE0 | (code >> 12))
+          bytes.push(0x80 | ((code >> 6) & 0x3F))
+          bytes.push(0x80 | (code & 0x3F))
+        }
+      }
+      let i = 0
+      while (i < bytes.length) {
+        let b1 = bytes[i] || 0
+        let b2 = bytes[i + 1] || 0
+        let b3 = bytes[i + 2] || 0
+        let enc1 = b1 >> 2
+        let enc2 = ((b1 & 3) << 4) | (b2 >> 4)
+        let enc3 = ((b2 & 15) << 2) | (b3 >> 6)
+        let enc4 = b3 & 63
+        result += base64Chars.charAt(enc1)
+        result += base64Chars.charAt(enc2)
+        result += i + 1 < bytes.length ? base64Chars.charAt(enc3) : '='
+        result += i + 2 < bytes.length ? base64Chars.charAt(enc4) : '='
+        i += 3
+      }
+      return result
+    }
+
+    let base64Decode = (data: string): string => {
+      let result = ''
+      let bytes: number[] = []
+      let cleanData = data.replace(/=/g, '')
+      for (let i = 0; i < cleanData.length; i += 4) {
+        let enc1 = base64Chars.indexOf(cleanData.charAt(i))
+        let enc2 = base64Chars.indexOf(cleanData.charAt(i + 1))
+        let enc3 = base64Chars.indexOf(cleanData.charAt(i + 2))
+        let enc4 = base64Chars.indexOf(cleanData.charAt(i + 3))
+        let b1 = (enc1 << 2) | (enc2 >> 4)
+        let b2 = ((enc2 & 15) << 4) | (enc3 >> 2)
+        let b3 = ((enc3 & 3) << 6) | enc4
+        bytes.push(b1)
+        if (enc3 >= 0) {
+          bytes.push(b2)
+        }
+        if (enc4 >= 0) {
+          bytes.push(b3)
+        }
+      }
+      let j = 0
+      while (j < bytes.length) {
+        if (bytes[j] < 128) {
+          result += String.fromCharCode(bytes[j])
+          j++
+        } else if ((bytes[j] & 0xE0) === 0xC0) {
+          result += String.fromCharCode(((bytes[j] & 31) << 6) | (bytes[j + 1] & 63))
+          j += 2
+        } else {
+          result += String.fromCharCode(((bytes[j] & 15) << 12) | ((bytes[j + 1] & 63) << 6) | (bytes[j + 2] & 63))
+          j += 3
+        }
+      }
+      return result
+    }
+
+    let base64TestData = 'ArkUI Other Image Base64 Encoding Test 2024!'
+    let b64Encoded = base64Encode(base64TestData)
+    let b64Decoded = base64Decode(b64Encoded)
+    hilog.info(0x0000, 'testTag', `Base64: original="${base64TestData}", encoded="${b64Encoded}", ` +
+      `decoded="${b64Decoded}", match=${base64TestData === b64Decoded}`)
+
+    let hexEncode = (data: string): string => {
+      let result = ''
+      for (let i = 0; i < data.length; i++) {
+        let code = data.charCodeAt(i)
+        result += code.toString(16).padStart(2, '0')
+      }
+      return result
+    }
+
+    let hexDecode = (hex: string): string => {
+      let result = ''
+      for (let i = 0; i < hex.length; i += 2) {
+        let code = parseInt(hex.substring(i, i + 2), 16)
+        result += String.fromCharCode(code)
+      }
+      return result
+    }
+
+    let hexTestData = 'ArkUI Hex Image Data'
+    let hexEncoded = hexEncode(hexTestData)
+    let hexDecoded = hexDecode(hexEncoded)
+    hilog.info(0x0000, 'testTag', `Hex: original="${hexTestData}", encoded="${hexEncoded}", ` +
+      `decoded="${hexDecoded}", match=${hexTestData === hexDecoded}`)
+
+    let binaryEncode = (data: string): string => {
+      let result = ''
+      for (let i = 0; i < data.length; i++) {
+        result += data.charCodeAt(i).toString(2).padStart(8, '0')
+      }
+      return result
+    }
+
+    let binaryDecode = (bin: string): string => {
+      let result = ''
+      for (let i = 0; i < bin.length; i += 8) {
+        let code = parseInt(bin.substring(i, i + 8), 2)
+        result += String.fromCharCode(code)
+      }
+      return result
+    }
+
+    let binTestData = 'ArkUI Binary Image'
+    let binEncoded = binaryEncode(binTestData)
+    let binDecoded = binaryDecode(binEncoded)
+    hilog.info(0x0000, 'testTag', `Binary: original="${binTestData}", encodedLen=${binEncoded.length}, ` +
+      `decoded="${binDecoded}", match=${binTestData === binDecoded}`)
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 7 completed')
+
+    let crc32 = (data: string): number => {
+      let table: number[] = []
+      for (let i = 0; i < 256; i++) {
+        let crc = i
+        for (let j = 0; j < 8; j++) {
+          if (crc & 1) {
+            crc = (crc >>> 1) ^ 0xEDB88320
+          } else {
+            crc = crc >>> 1
+          }
+        }
+        table.push(crc >>> 0)
+      }
+      let crc = 0xFFFFFFFF
+      for (let i = 0; i < data.length; i++) {
+        crc = (table[(crc ^ data.charCodeAt(i)) & 0xFF] ^ (crc >>> 8)) >>> 0
+      }
+      return (crc ^ 0xFFFFFFFF) >>> 0
+    }
+
+    let djb2Hash = (data: string): number => {
+      let hash = 5381
+      for (let i = 0; i < data.length; i++) {
+        hash = ((hash << 5) + hash) + data.charCodeAt(i)
+        hash = hash & 0xFFFFFFFF
+      }
+      return hash >>> 0
+    }
+
+    let fnv1aHash = (data: string): number => {
+      let hash = 0x811c9dc5
+      for (let i = 0; i < data.length; i++) {
+        hash ^= data.charCodeAt(i)
+        hash = Math.imul(hash, 0x01000193)
+      }
+      return hash >>> 0
+    }
+
+    let hashTestData = 'ArkUI Other Image Hash Test Data 2024'
+    let crcResult = crc32(hashTestData)
+    let djb2Result = djb2Hash(hashTestData)
+    let fnv1aResult = fnv1aHash(hashTestData)
+    hilog.info(0x0000, 'testTag', `Hashes for "${hashTestData}": CRC32=${crcResult}, ` +
+      `djb2=${djb2Result}, fnv1a=${fnv1aResult}`)
+
+    let xorCipher = (data: string, key: string): string => {
+      let result = ''
+      for (let i = 0; i < data.length; i++) {
+        result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length))
+      }
+      return result
+    }
+
+    let caesarCipher = (data: string, shift: number): string => {
+      let result = ''
+      for (let i = 0; i < data.length; i++) {
+        let code = data.charCodeAt(i)
+        if (code >= 65 && code <= 90) {
+          result += String.fromCharCode(((code - 65 + shift) % 26 + 26) % 26 + 65)
+        } else if (code >= 97 && code <= 122) {
+          result += String.fromCharCode(((code - 97 + shift) % 26 + 26) % 26 + 97)
+        } else {
+          result += data.charAt(i)
+        }
+      }
+      return result
+    }
+
+    let cipherTestData = 'ArkUI Other Image Cipher Test XYZ abc 123'
+    let xorEncrypted = xorCipher(cipherTestData, 'secret')
+    let xorDecrypted = xorCipher(xorEncrypted, 'secret')
+    let caesarEncrypted = caesarCipher(cipherTestData, 3)
+    let caesarDecrypted = caesarCipher(caesarEncrypted, -3)
+    hilog.info(0x0000, 'testTag', `Ciphers: XOR roundtrip=${xorDecrypted === cipherTestData}, ` +
+      `Caesar roundtrip=${caesarDecrypted === cipherTestData}`)
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 8 completed')
+
+    interface Vec2 {
+      x: number
+      y: number
+    }
+    interface Vec3 {
+      x: number
+      y: number
+      z: number
+    }
+
+    let vec2Add = (a: Vec2, b: Vec2): Vec2 => ({ x: a.x + b.x, y: a.y + b.y })
+    let vec2Sub = (a: Vec2, b: Vec2): Vec2 => ({ x: a.x - b.x, y: a.y - b.y })
+    let vec2Scale = (a: Vec2, s: number): Vec2 => ({ x: a.x * s, y: a.y * s })
+    let vec2Dot = (a: Vec2, b: Vec2): number => a.x * b.x + a.y * b.y
+    let vec2Length = (a: Vec2): number => Math.sqrt(a.x * a.x + a.y * a.y)
+    let vec2Normalize = (a: Vec2): Vec2 => {
+      let len = vec2Length(a)
+      return len === 0 ? { x: 0, y: 0 } : { x: a.x / len, y: a.y / len }
+    }
+    let vec2Distance = (a: Vec2, b: Vec2): number => vec2Length(vec2Sub(a, b))
+    let vec2Angle = (a: Vec2): number => Math.atan2(a.y, a.x)
+    let vec2Lerp = (a: Vec2, b: Vec2, t: number): Vec2 => ({
+      x: lerp(a.x, b.x, t),
+      y: lerp(a.y, b.y, t)
+    })
+    let vec2Rotate = (a: Vec2, angle: number): Vec2 => {
+      let cos = Math.cos(angle)
+      let sin = Math.sin(angle)
+      return { x: a.x * cos - a.y * sin, y: a.x * sin + a.y * cos }
+    }
+
+    let v1: Vec2 = { x: 3, y: 4 }
+    let v2: Vec2 = { x: 1, y: 2 }
+    hilog.info(0x0000, 'testTag', `Vec2: v1=(${v1.x},${v1.y}), v2=(${v2.x},${v2.y}), ` +
+      `add=(${vec2Add(v1, v2).x},${vec2Add(v1, v2).y}), ` +
+      `sub=(${vec2Sub(v1, v2).x},${vec2Sub(v1, v2).y}), ` +
+      `dot=${vec2Dot(v1, v2)}, len=${vec2Length(v1).toFixed(2)}, ` +
+      `dist=${vec2Distance(v1, v2).toFixed(2)}, angle=${vec2Angle(v1).toFixed(3)}, ` +
+      `norm=(${vec2Normalize(v1).x.toFixed(3)},${vec2Normalize(v1).y.toFixed(3)}), ` +
+      `lerp=(${vec2Lerp(v1, v2, 0.5).x.toFixed(2)},${vec2Lerp(v1, v2, 0.5).y.toFixed(2)})`)
+
+    let vec3Add = (a: Vec3, b: Vec3): Vec3 => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z })
+    let vec3Sub = (a: Vec3, b: Vec3): Vec3 => ({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z })
+    let vec3Dot = (a: Vec3, b: Vec3): number => a.x * b.x + a.y * b.y + a.z * b.z
+    let vec3Cross = (a: Vec3, b: Vec3): Vec3 => ({
+      x: a.y * b.z - a.z * b.y,
+      y: a.z * b.x - a.x * b.z,
+      z: a.x * b.y - a.y * b.x
+    })
+    let vec3Length = (a: Vec3): number => Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z)
+    let vec3Normalize = (a: Vec3): Vec3 => {
+      let len = vec3Length(a)
+      return len === 0 ? { x: 0, y: 0, z: 0 } : { x: a.x / len, y: a.y / len, z: a.z / len }
+    }
+    let vec3Distance = (a: Vec3, b: Vec3): number => vec3Length(vec3Sub(a, b))
+
+    let va: Vec3 = { x: 1, y: 2, z: 3 }
+    let vb: Vec3 = { x: 4, y: 5, z: 6 }
+    let cross = vec3Cross(va, vb)
+    hilog.info(0x0000, 'testTag', `Vec3: va=(${va.x},${va.y},${va.z}), vb=(${vb.x},${vb.y},${vb.z}), ` +
+      `add=(${vec3Add(va, vb).x},${vec3Add(va, vb).y},${vec3Add(va, vb).z}), ` +
+      `dot=${vec3Dot(va, vb)}, cross=(${cross.x},${cross.y},${cross.z}), ` +
+      `lenA=${vec3Length(va).toFixed(2)}, dist=${vec3Distance(va, vb).toFixed(2)}`)
+
+    let distancePointToLine = (p: Vec2, a: Vec2, b: Vec2): number => {
+      let dx = b.x - a.x
+      let dy = b.y - a.y
+      let len = Math.sqrt(dx * dx + dy * dy)
+      if (len === 0) {
+        return vec2Distance(p, a)
+      }
+      return Math.abs(dy * p.x - dx * p.y + b.x * a.y - b.y * a.x) / len
+    }
+
+    let pointInTriangle = (p: Vec2, a: Vec2, b: Vec2, c: Vec2): boolean => {
+      let d1 = (p.x - b.x) * (a.y - b.y) - (a.x - b.x) * (p.y - b.y)
+      let d2 = (p.x - c.x) * (b.y - c.y) - (b.x - c.x) * (p.y - c.y)
+      let d3 = (p.x - a.x) * (c.y - a.y) - (c.x - a.x) * (p.y - a.y)
+      let hasNeg = d1 < 0 || d2 < 0 || d3 < 0
+      let hasPos = d1 > 0 || d2 > 0 || d3 > 0
+      return !(hasNeg && hasPos)
+    }
+
+    let triangleArea = (a: Vec2, b: Vec2, c: Vec2): number => {
+      return Math.abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2)
+    }
+
+    let circleArea = (radius: number): number => Math.PI * radius * radius
+    let circleCircumference = (radius: number): number => 2 * Math.PI * radius
+    let rectangleArea = (w: number, h: number): number => w * h
+    let rectanglePerimeter = (w: number, h: number): number => 2 * (w + h)
+    let ellipseArea = (a: number, b: number): number => Math.PI * a * b
+
+    let pa: Vec2 = { x: 0, y: 0 }
+    let pb: Vec2 = { x: 4, y: 0 }
+    let pc: Vec2 = { x: 0, y: 3 }
+    let pt: Vec2 = { x: 1, y: 1 }
+    hilog.info(0x0000, 'testTag', `Geometry: pointToLine=${distancePointToLine(pt, pa, pb).toFixed(2)}, ` +
+      `pointInTriangle=${pointInTriangle(pt, pa, pb, pc)}, ` +
+      `triangleArea=${triangleArea(pa, pb, pc).toFixed(2)}, ` +
+      `circleArea(r=5)=${circleArea(5).toFixed(2)}, ` +
+      `circleCircumference(r=5)=${circleCircumference(5).toFixed(2)}, ` +
+      `rectArea(4,3)=${rectangleArea(4, 3)}, rectPerimeter(4,3)=${rectanglePerimeter(4, 3)}, ` +
+      `ellipseArea(3,2)=${ellipseArea(3, 2).toFixed(2)}`)
+
+    let lineIntersection = (a1: Vec2, a2: Vec2, b1: Vec2, b2: Vec2): Vec2 | null => {
+      let denom = (a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x)
+      if (denom === 0) {
+        return null
+      }
+      let t = ((a1.x - b1.x) * (b1.y - b2.y) - (a1.y - b1.y) * (b1.x - b2.x)) / denom
+      return { x: a1.x + t * (a2.x - a1.x), y: a1.y + t * (a2.y - a1.y) }
+    }
+
+    let l1a: Vec2 = { x: 0, y: 0 }
+    let l1b: Vec2 = { x: 10, y: 10 }
+    let l2a: Vec2 = { x: 0, y: 10 }
+    let l2b: Vec2 = { x: 10, y: 0 }
+    let intersection = lineIntersection(l1a, l1b, l2a, l2b)
+    hilog.info(0x0000, 'testTag', `Line intersection: ${intersection ? `(${intersection.x.toFixed(2)},${intersection.y.toFixed(2)})` : 'none (parallel)'}`)
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test part 9 completed')
+
+    hilog.info(0x0000, 'testTag', 'loadOther14Test completed')
+  }
+
   build() {
     NavDestination() {
       Column() {
         Button('Load Network Image Test')
           .onClick(() => {
             this.loadmoreImageTest()
+          })
+        Button('Load Other 14 Image Test')
+          .onClick(() => {
+            this.loadOther14Test()
           })
       }
     }
