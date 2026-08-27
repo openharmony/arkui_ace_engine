@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -683,6 +683,16 @@ void RichEditorPattern::SetSupportStyledUndo(bool enabled)
     ClearOperationRecords();
     isStyledUndoSupported_ = enabled;
     undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
+}
+
+void RichEditorPattern::SetSuppressBuilderSpanCallback(bool suppress)
+{
+    suppressBuilderSpanCallback_ = suppress;
+}
+
+bool RichEditorPattern::IsSuppressBuilderSpanCallback() const
+{
+    return suppressBuilderSpanCallback_;
 }
 
 void RichEditorPattern::AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan,
@@ -1385,6 +1395,57 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return spanIndex;
+}
+
+int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
+    const BuilderSpanRecord& builderSpanRecord, TextChangeReason reason)
+{
+    auto spanIndex = AddPlaceholderSpan(customNode, options, reason);
+    auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(customNode->GetParent());
+    CHECK_NULL_RETURN(placeholderSpanNode, spanIndex);
+    auto spanItem = placeholderSpanNode->GetSpanItem();
+    CHECK_NULL_RETURN(spanItem, spanIndex);
+    spanItem->builderSpanId = builderSpanRecord.id;
+    auto weakPattern = WeakClaim(this);
+    auto rawOnDetach = builderSpanRecord.onDetach;
+    if (rawOnDetach) {
+        spanItem->onDetach = [weakPattern, rawOnDetach](const BuilderSpanInfo& info) {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            // suppressBuilderSpanCallback_: batch operation (drag undo) in progress, skip callback
+            CHECK_NULL_VOID(!pattern->IsSuppressBuilderSpanCallback());
+            rawOnDetach(info);
+        };
+    }
+    IF_TRUE(builderSpanRecord.onAttach, builderSpanRecord.onAttach(spanItem->GetBuilderSpanInfo()));
+    return spanIndex;
+}
+
+std::vector<BuilderSpanInfo> RichEditorPattern::GetRichEditorBuilderSpans(int32_t start, int32_t end)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get builder spans, range=[%{public}d,%{public}d]", start, end);
+    CHECK_NULL_RETURN(start != end, {});
+    auto host = GetContentHost();
+    CHECK_NULL_RETURN(host, {});
+    CHECK_NULL_RETURN(!host->GetChildren().empty(), {});
+    std::vector<BuilderSpanInfo> result;
+    for (const auto& child : host->GetChildren()) {
+        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
+        CHECK_NULL_CONTINUE(placeholderSpanNode);
+        auto spanItem = placeholderSpanNode->GetSpanItem();
+        CHECK_NULL_CONTINUE(spanItem);
+        int32_t spanStart = spanItem->rangeStart;
+        int32_t spanEnd = spanItem->position;
+        CHECK_NULL_CONTINUE(spanStart >= 0 && spanEnd >= 0);
+        if (spanEnd - spanStart != 1) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "unexpected builder span length, start=%{public}d, end=%{public}d",
+                spanStart, spanEnd);
+            continue;
+        }
+        CHECK_NULL_CONTINUE(spanStart < end && spanStart >= start);
+        result.emplace_back(BuilderSpanInfo{ spanItem->builderSpanId, spanStart });
+    }
+    return result;
 }
 
 void RichEditorPattern::InitPlaceholderAccessibility(const RefPtr<PlaceholderSpanNode>& spanNode,
@@ -11600,6 +11661,8 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
     json->PutExtAttr("orphanCharOptimization", isOrphanCharOptimization_ ? "true" : "false", filter);
     json->PutExtAttr("horizontalScrolling", isHorizontalScrolling_ ? "true" : "false", filter);
+    auto builderSpanInfos = GetBuilderSpanInfosInJson();
+    IF_TRUE(!builderSpanInfos.empty(), json->PutExtAttr("builderSpanInfos", builderSpanInfos.c_str(), filter));
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const
@@ -11660,6 +11723,28 @@ std::string RichEditorPattern::GetPlaceHolderInJson() const
     jsonStyle->Put("fontColor", GetTextColorInJson(layoutProperty->GetPlaceholderTextColor()).c_str());
     jsonValue->Put("style", jsonStyle->ToString().c_str());
     return StringUtils::RestoreBackslash(jsonValue->ToString());
+}
+
+std::string RichEditorPattern::GetBuilderSpanInfosInJson() const
+{
+    auto host = GetContentHost();
+    CHECK_NULL_RETURN(host, "");
+    CHECK_NULL_RETURN(!host->GetChildren().empty(), "");
+    auto jsonArray = JsonUtil::CreateArray(true);
+    for (const auto& child : host->GetChildren()) {
+        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
+        CHECK_NULL_CONTINUE(placeholderSpanNode);
+        auto spanItem = placeholderSpanNode->GetSpanItem();
+        CHECK_NULL_CONTINUE(spanItem);
+        CHECK_NULL_CONTINUE(spanItem->builderSpanId.has_value());
+        CHECK_NULL_CONTINUE(spanItem->rangeStart >= 0);
+        auto item = JsonUtil::Create(true);
+        item->Put("id", spanItem->builderSpanId.value().c_str());
+        item->Put("offset", spanItem->rangeStart);
+        jsonArray->PutRef(std::move(item));
+    }
+    CHECK_NULL_RETURN(jsonArray->GetArraySize() != 0, "");
+    return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
 std::string RichEditorPattern::GetTextColorInJson(const std::optional<Color>& value) const

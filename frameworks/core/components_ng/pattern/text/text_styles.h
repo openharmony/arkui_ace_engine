@@ -53,6 +53,11 @@ struct CustomSpanMetrics {
     std::optional<float> height;
 };
 
+struct BuilderSpanInfo {
+    std::optional<std::string> id;
+    std::optional<int32_t> offset;
+};
+
 struct UserGestureOptions {
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
