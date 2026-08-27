@@ -172,7 +172,9 @@ public:
     {
         return currentBarDisplayMode_;
     }
+    TabBarDisplayMode GetActiveBarDisplayMode() const;
     void SetCurrentBarDisplayMode(TabBarDisplayMode mode);
+    bool IsTabShouldHideByVisibility(const TabContentDefaultVisibility& visibility);
 
     void FireBarDisplayModeChangeEvent(TabBarDisplayMode mode);
 

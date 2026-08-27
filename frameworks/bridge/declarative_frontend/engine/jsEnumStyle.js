@@ -1092,6 +1092,12 @@ let TabBarDisplayMode;
   TabBarDisplayMode[TabBarDisplayMode.SIDEBAR = 1] = 'SIDEBAR';
 })(TabBarDisplayMode || (TabBarDisplayMode = {}));
 
+let TabVisibility;
+(function (TabVisibility) {
+  TabVisibility[TabVisibility.VISIBLE = 0] = 'VISIBLE';
+  TabVisibility[TabVisibility.HIDDEN = 1] = 'HIDDEN';
+})(TabVisibility || (TabVisibility = {}));
+
 let SharedTransitionEffectType;
 (function (SharedTransitionEffectType) {
   SharedTransitionEffectType[SharedTransitionEffectType.Static = 0] = 'Static';

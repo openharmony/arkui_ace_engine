@@ -5810,6 +5810,9 @@ struct ArkUITabContentModifier {
     void (*setIconSelectedColorByUser)(ArkUINodeHandle node, ArkUI_Bool isByUser);
     void (*setId)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*setTabBar)(ArkUINodeHandle node, void* paramRawPtr, bool fromJsView);
+    void (*setDefaultVisibility)(
+        ArkUINodeHandle node, ArkUI_Int32 visibility, ArkUI_Int32 displayMode, ArkUI_Bool hasDisplayMode);
+    void (*resetDefaultVisibility)(ArkUINodeHandle node);
 };
 
 struct ArkUITabsControllerModifier {

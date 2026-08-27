@@ -1768,6 +1768,12 @@ void TabsPattern::UpdateSideBarIfNeeded()
         // Reset sideBarTabBarItemId on all TabContentNodes so next sidebar
         // creation can register fresh tab items without stale ID conflicts
         ResetSideBarTabListItemIds();
+        // Re-apply per-item defaultVisibility filtering for bottom tab bar
+        auto tabBar = AceType::DynamicCast<FrameNode>(host->GetTabBar());
+        CHECK_NULL_VOID(tabBar);
+        auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->ApplyDefaultVisibility();
         return;
     }
     // bottom -> adaptable/sidebar
@@ -1780,6 +1786,23 @@ void TabsPattern::UpdateSideBarIfNeeded()
     SyncPropertiesToSideBar();
     // Register all existing TabContent tab items (only when SideBar is first created/recreated)
     RegisterSideBarTabItems();
+    // Re-apply per-item defaultVisibility filtering
+    if (currentBarDisplayMode_.value_or(TabBarDisplayMode::BOTTOMTABBAR) == TabBarDisplayMode::BOTTOMTABBAR) {
+        auto tabBar = AceType::DynamicCast<FrameNode>(host->GetTabBar());
+        CHECK_NULL_VOID(tabBar);
+        auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->ApplyDefaultVisibility();
+        return;
+    }
+    CHECK_NULL_VOID(sideBarNode_);
+    auto sidebarPattern = sideBarNode_->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sidebarPattern);
+    auto sidebarTabList = sidebarPattern->GetTabListNode();
+    CHECK_NULL_VOID(sidebarTabList);
+    auto tabListPattern = sidebarTabList->GetPattern<TabsSideBarTabListPattern>();
+    CHECK_NULL_VOID(tabListPattern);
+    tabListPattern->ApplyDefaultVisibility();
 }
 
 void TabsPattern::AddTabContentNode(const RefPtr<TabContentNode>& tabContentNode)
@@ -1909,5 +1932,31 @@ void TabsPattern::SyncSideBarTabListIndicator(int32_t currentIndex)
     auto tabListPattern = tabListNode->GetPattern<TabsSideBarTabListPattern>();
     CHECK_NULL_VOID(tabListPattern);
     tabListPattern->SetCurrentIndex(currentIndex);
+}
+
+TabBarDisplayMode TabsPattern::GetActiveBarDisplayMode() const
+{
+    if (currentBarDisplayMode_.has_value()) {
+        return currentBarDisplayMode_.value();
+    }
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, TabBarDisplayMode::BOTTOMTABBAR);
+    auto barStyle = property->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    if (barStyle == TabBarLayoutStyle::SIDEBAR) {
+        return TabBarDisplayMode::SIDEBAR;
+    }
+    return TabBarDisplayMode::BOTTOMTABBAR;
+}
+
+bool TabsPattern::IsTabShouldHideByVisibility(const TabContentDefaultVisibility& visibility)
+{
+    if (visibility.isNull || visibility.visibility == TabVisibility::VISIBLE) {
+        return false;
+    }
+    if (!visibility.displayMode.has_value()) {
+        return true;
+    }
+    auto activeDisplayMode = GetActiveBarDisplayMode();
+    return visibility.displayMode.value() == activeDisplayMode;
 }
 } // namespace OHOS::Ace::NG

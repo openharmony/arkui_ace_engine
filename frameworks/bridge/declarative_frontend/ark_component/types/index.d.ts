@@ -1588,6 +1588,14 @@ declare enum TabBarDisplayMode {
   BOTTOM_TABBAR = 0,
   SIDEBAR = 1,
 }
+declare enum TabVisibility {
+  VISIBLE = 0,
+  HIDDEN = 1,
+}
+declare interface TabContentDefaultVisibility {
+  visibility?: TabVisibility;
+  displayMode?: TabBarDisplayMode;
+}
 declare interface TabsBreakpointType<T> {
   sm?: T;
   md?: T;
