@@ -655,6 +655,7 @@ void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutCo
             continue;
         }
         if (!effectiveChildIndexSet_.count(endIndex)) {
+            endIndex++;
             continue;
         }
         MeasureItem(layoutWrapper, childLayoutConstraint, endIndex);
@@ -683,6 +684,7 @@ void TabBarLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, LayoutC
             continue;
         }
         if (!effectiveChildIndexSet_.count(startIndex)) {
+            startIndex--;
             continue;
         }
         MeasureItem(layoutWrapper, childLayoutConstraint, startIndex);

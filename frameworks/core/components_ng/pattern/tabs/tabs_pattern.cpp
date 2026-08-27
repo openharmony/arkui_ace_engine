@@ -1934,4 +1934,23 @@ void TabsPattern::SyncSideBarTabListIndicator(int32_t currentIndex)
     CHECK_NULL_VOID(tabListPattern);
     tabListPattern->SetCurrentIndex(currentIndex);
 }
+
+bool TabsPattern::IsTabShouldHideByVisibility(const TabContentDefaultVisibility& visibility)
+{
+    if (visibility.isNull || visibility.visibility == TabVisibility::VISIBLE) {
+        return false;
+    }
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
+    auto barStyle = property->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    if (barStyle == TabBarLayoutStyle::BOTTOM) {
+        return false;
+    }
+    if (!visibility.displayMode.has_value()) {
+        return true;
+    }
+    TabBarDisplayMode activeDisplayMode = currentBarDisplayMode_.value_or(
+        barStyle == TabBarLayoutStyle::SIDEBAR ? TabBarDisplayMode::SIDEBAR : TabBarDisplayMode::BOTTOMTABBAR);
+    return visibility.displayMode.value() == activeDisplayMode;
+}
 } // namespace OHOS::Ace::NG

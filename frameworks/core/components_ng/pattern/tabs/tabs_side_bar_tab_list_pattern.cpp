@@ -49,7 +49,7 @@ std::u16string ToLowerU16Str(std::u16string str)
         }
     }
     return str;
-};
+}
 }
 
 void TabsSideBarTabListPattern::OnModifyDone()
@@ -603,30 +603,13 @@ RefPtr<FrameNode> TabsSideBarTabListPattern::GetOrCreateTabItemNode(int32_t id)
 }
 
 bool TabsSideBarTabListPattern::IsHiddenByDefaultVisibility(
-    const RefPtr<TabContentPattern>& tabContentPattern,
-    const RefPtr<TabsLayoutProperty>& tabsProperty,
-    const RefPtr<TabsNode>& tabsNode) const
+    const RefPtr<TabContentPattern>& tabContentPattern, const RefPtr<TabsNode>& tabsNode) const
 {
     CHECK_NULL_RETURN(tabContentPattern, false);
-    CHECK_NULL_RETURN(tabsProperty, false);
     CHECK_NULL_RETURN(tabsNode, false);
-
-    const auto& defaultVisibility = tabContentPattern->GetDefaultVisibility();
-    if (defaultVisibility.isNull || defaultVisibility.visibility != TabVisibility::HIDDEN) {
-        return false;
-    }
-    auto barLayoutStyle = tabsProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
-    if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
-        return false;
-    }
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    auto currentDisplayMode = tabsPattern ? tabsPattern->GetCurrentBarDisplayMode() : std::nullopt;
-    TabBarDisplayMode activeDisplayMode = currentDisplayMode.value_or(
-        barLayoutStyle == TabBarLayoutStyle::SIDEBAR ? TabBarDisplayMode::SIDEBAR : TabBarDisplayMode::BOTTOMTABBAR);
-    if (!defaultVisibility.displayMode.has_value()) {
-        return true;
-    }
-    return defaultVisibility.displayMode.value() == activeDisplayMode;
+    CHECK_NULL_RETURN(tabsPattern, false);
+    return tabsPattern->IsTabShouldHideByVisibility(tabContentPattern->GetDefaultVisibility());
 }
 
 bool TabsSideBarTabListPattern::IsHiddenByDefaultVisibility(int32_t tabIndex) const
@@ -641,8 +624,7 @@ bool TabsSideBarTabListPattern::IsHiddenByDefaultVisibility(int32_t tabIndex) co
     auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(tabIndex));
     CHECK_NULL_RETURN(tabContentNode, false);
     auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
-    auto tabsProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    return IsHiddenByDefaultVisibility(tabContentPattern, tabsProperty, tabsNode);
+    return IsHiddenByDefaultVisibility(tabContentPattern, tabsNode);
 }
 
 void TabsSideBarTabListPattern::ApplyDefaultVisibility()
@@ -707,61 +689,6 @@ void TabsSideBarTabListPattern::ApplyDefaultVisibility()
     }
     host->MarkNeedSyncRenderTree();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void TabsSideBarTabListPattern::UpdateSingleTabItemVisibility(int32_t tabIndex)
-{
-    auto columnNode = GetTabItemContainerNode();
-    CHECK_NULL_VOID(columnNode);
-    if (tabIndex < 0 || tabIndex >= static_cast<int32_t>(columnNode->GetChildren().size())) {
-        return;
-    }
-    auto itemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(tabIndex));
-    CHECK_NULL_VOID(itemNode);
-    auto property = itemNode->GetLayoutProperty();
-    CHECK_NULL_VOID(property);
-    const auto& currentVisibility = property->GetVisibility();
-    // defaultVisibility check
-    if (IsHiddenByDefaultVisibility(tabIndex)) {
-        if (currentVisibility.value_or(VisibleType::VISIBLE) != VisibleType::GONE) {
-            property->UpdateVisibility(VisibleType::GONE);
-            itemNode->MarkNeedSyncRenderTree();
-            itemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-        return;
-    }
-    // Neither defaultVisibility nor search hides this tab
-    if (activeSearchText_.empty()) {
-        if (currentVisibility.value_or(VisibleType::GONE) != VisibleType::VISIBLE) {
-            property->UpdateVisibility(VisibleType::VISIBLE);
-            itemNode->MarkNeedSyncRenderTree();
-            itemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-        return;
-    }
-    // Search filter check
-    auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto searchText8 = UtfUtils::Str16ToStr8(activeSearchText_);
-    bool searchVisible = true;
-    do {
-        if (activeSearchFilter_) {
-            searchVisible = activeSearchFilter_(tabIndex, searchText8);
-            break;
-        }
-        auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(tabIndex));
-        CHECK_NULL_BREAK(tabContentNode);
-        auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
-        CHECK_NULL_BREAK(tabContentPattern);
-        auto searchTextLower = ToLowerU16Str(activeSearchText_);
-        auto tabTextLower = ToLowerU16Str(UtfUtils::Str8ToStr16(tabContentPattern->GetTabBarParam().GetText()));
-        searchVisible = tabTextLower.find(searchTextLower) != std::u16string::npos;
-    } while (false);
-    property->UpdateVisibility(searchVisible ? VisibleType::VISIBLE : VisibleType::GONE);
-    itemNode->MarkNeedSyncRenderTree();
-    itemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TabsSideBarTabListPattern::AddOrUpdateTabListItem(
@@ -858,7 +785,7 @@ void TabsSideBarTabListPattern::AddOrUpdateTabListItem(
     // Apply defaultVisibility for this single tab item
     auto tabItemProperty = tabItemNode->GetLayoutProperty();
     CHECK_NULL_VOID(tabItemProperty);
-    bool shouldHide = IsHiddenByDefaultVisibility(tabContentPattern, tabsProperty, tabsNode);
+    bool shouldHide = IsHiddenByDefaultVisibility(tabContentPattern, tabsNode);
     tabItemProperty->UpdateVisibility(shouldHide ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

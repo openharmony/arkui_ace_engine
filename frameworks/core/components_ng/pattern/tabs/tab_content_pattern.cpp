@@ -58,14 +58,15 @@ void TabContentPattern::OnModifyDone()
 
     auto barLayoutStyle = tabsProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
     auto currentDisplayMode = tabsPattern->GetCurrentBarDisplayMode();
-    TabBarDisplayMode activeDisplayMode = currentDisplayMode.value_or(TabBarDisplayMode::BOTTOMTABBAR);
-
-    bool shouldHide = false;
-    if (barLayoutStyle != TabBarLayoutStyle::BOTTOM && !defaultVisibility.isNull &&
-        defaultVisibility.visibility == TabVisibility::HIDDEN) {
-        shouldHide = !defaultVisibility.displayMode.has_value() ||
-            (defaultVisibility.displayMode.value() == activeDisplayMode);
+    TabBarDisplayMode activeDisplayMode = TabBarDisplayMode::BOTTOMTABBAR;
+    if (currentDisplayMode.has_value()) {
+        activeDisplayMode = currentDisplayMode.value();
+    } else if (barLayoutStyle == TabBarLayoutStyle::SIDEBAR) {
+        activeDisplayMode = TabBarDisplayMode::SIDEBAR;
+    } else if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
+        activeDisplayMode = TabBarDisplayMode::BOTTOMTABBAR;
     }
+    bool shouldHide = tabsPattern->IsTabShouldHideByVisibility(defaultVisibility);
 
     if (barLayoutStyle == TabBarLayoutStyle::BOTTOM ||
         (barLayoutStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE &&

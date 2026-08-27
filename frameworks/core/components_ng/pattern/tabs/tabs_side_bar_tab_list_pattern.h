@@ -74,15 +74,12 @@ public:
         std::function<bool(int32_t, const std::string& text)> searchFilter, const std::u16string& searchText);
     void AddOrUpdateTabListItem(const RefPtr<FrameNode>& tabContentNode, int32_t position, bool update);
     void ApplyDefaultVisibility();
-    // Update a single sidebar tab item's visibility for the given tab index,
-    // considering both defaultVisibility and active search filter.
-    void UpdateSingleTabItemVisibility(int32_t tabIndex);
 
     // Check whether a tab should be hidden by defaultVisibility.
     // Returns true if the tab should be GONE per defaultVisibility rules.
     bool IsHiddenByDefaultVisibility(int32_t tabIndex) const;
-    bool IsHiddenByDefaultVisibility(const RefPtr<TabContentPattern>& tabContentPattern,
-        const RefPtr<TabsLayoutProperty>& tabsProperty, const RefPtr<TabsNode>& tabsNode) const;
+    bool IsHiddenByDefaultVisibility(
+        const RefPtr<TabContentPattern>& tabContentPattern, const RefPtr<TabsNode>& tabsNode) const;
 
     RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
     {

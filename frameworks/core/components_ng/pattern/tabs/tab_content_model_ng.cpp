@@ -299,20 +299,10 @@ void TabContentModelNG::AddBottomStyleTabBarItem(const RefPtr<UINode>& tabConten
 
     // Apply defaultVisibility for this single bottom tab bar item
     const auto& defaultVisibility = tabContentPattern->GetDefaultVisibility();
-    auto barLayoutStyle = tabLayoutProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
-    bool shouldHide = false;
-    if (!defaultVisibility.isNull && defaultVisibility.visibility == TabVisibility::HIDDEN &&
-        barLayoutStyle != TabBarLayoutStyle::BOTTOM) {
-        if (!defaultVisibility.displayMode.has_value()) {
-            shouldHide = true;
-        } else {
-            auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-            auto currentDisplayMode = tabsPattern ? tabsPattern->GetCurrentBarDisplayMode() : std::nullopt;
-            TabBarDisplayMode activeDisplayMode = currentDisplayMode.value_or(TabBarDisplayMode::BOTTOMTABBAR);
-            shouldHide = (defaultVisibility.displayMode.value() == activeDisplayMode);
-        }
-    }
-    if (auto columnProperty = columnNode->GetLayoutProperty()) {
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    auto columnProperty = columnNode->GetLayoutProperty();
+    if (tabsPattern && columnProperty) {
+        bool shouldHide = tabsPattern->IsTabShouldHideByVisibility(defaultVisibility);
         columnProperty->UpdateVisibility(shouldHide ? VisibleType::GONE : VisibleType::VISIBLE);
     }
 
