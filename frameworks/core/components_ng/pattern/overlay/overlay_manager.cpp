@@ -4362,7 +4362,8 @@ RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
     CHECK_NULL_RETURN(ecRSContext, nullptr);
     if (sheetStyle.systemMaterial) {
         sheetStyle.systemMaterialEC = ViewAbstract::ConvertToImmersiveEC(sheetStyle.systemMaterial);
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
+        ViewAbstract::SetSystemMaterialForOverlay(
+            AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
     }
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetECNode, sheetStyle.backgroundBlurStyle.value());

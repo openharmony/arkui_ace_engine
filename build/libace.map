@@ -2846,6 +2846,7 @@
       "OHOS::Ace::NG::ViewAbstract::SetResponseRegion(OHOS::Ace::NG::FrameNode*, std::__h::vector<OHOS::Ace::DimensionRect, std::__h::allocator<OHOS::Ace::DimensionRect>> const&)";
       "OHOS::Ace::NG::ViewAbstract::SetResponseRegion(std::__h::vector<OHOS::Ace::DimensionRect, std::__h::allocator<OHOS::Ace::DimensionRect>> const&)";
       "OHOS::Ace::NG::ViewAbstract::SetSystemMaterial(OHOS::Ace::NG::FrameNode*, OHOS::Ace::UiMaterial const*)";
+      "OHOS::Ace::NG::ViewAbstract::SetSystemMaterialForOverlay(OHOS::Ace::NG::FrameNode*, OHOS::Ace::UiMaterial const*)";
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::CalcLength const&)";
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::FrameNode*, OHOS::Ace::NG::CalcLength const&)";
       "OHOS::Ace::NG::ViewAbstract::UpdateOnlyLayoutPolicyProperty(OHOS::Ace::NG::FrameNode*, OHOS::Ace::LayoutCalPolicy, bool)";
@@ -4989,6 +4990,7 @@
       "OHOS::Ace::NG::ViewAbstract::SetSepia(OHOS::Ace::NG::FrameNode*, OHOS::Ace::Dimension const&)";
       "OHOS::Ace::NG::ViewAbstract::SetSphericalEffect(OHOS::Ace::NG::FrameNode*, double)";
       "OHOS::Ace::NG::ViewAbstract::SetSystemMaterial(OHOS::Ace::UiMaterial const*)";
+      "OHOS::Ace::NG::ViewAbstract::SetSystemMaterialForOverlay(OHOS::Ace::UiMaterial const*)";
       "OHOS::Ace::NG::ViewAbstract::SetVisibility(OHOS::Ace::NG::FrameNode*, OHOS::Ace::VisibleType)";
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::FrameNode*, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)";
       "OHOS::Ace::NG::ViewAbstract::SetZIndex(OHOS::Ace::NG::FrameNode*, int)";

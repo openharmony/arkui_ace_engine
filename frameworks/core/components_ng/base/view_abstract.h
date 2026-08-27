@@ -1194,6 +1194,12 @@ public:
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
     static void SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
+    // Like SetSystemMaterial but also marks the node exempt from the scope gate
+    // (titleBar / bottom-TabBar) in MaterialProcessor. Use for popup / dialog /
+    // menu / sheet / toast / select-overlay material targets so their material
+    // stays effective for non-system apps too.
+    static void SetSystemMaterialForOverlay(FrameNode* frameNode, const UiMaterial* material);
+    static void SetSystemMaterialForOverlay(const UiMaterial* material);
     // set systemMaterial for inner use, use SetSystemMaterial normally.
     static void SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material);
     // Set systemMaterial with component scale adjustment (for drag scenario)

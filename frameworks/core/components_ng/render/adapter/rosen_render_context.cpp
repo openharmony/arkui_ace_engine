@@ -1937,6 +1937,7 @@ bool RosenRenderContext::HasMaterialFilter() const
     return rsNode_->GetModifierByType(OHOS::Rosen::ModifierNG::RSModifierType::MATERIAL_FILTER) != nullptr;
 }
 
+
 bool RosenRenderContext::IsSelfDrawingNode() const
 {
     CHECK_NULL_RETURN(rsNode_, false);

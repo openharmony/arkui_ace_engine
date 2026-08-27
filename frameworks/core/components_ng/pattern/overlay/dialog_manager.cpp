@@ -232,9 +232,9 @@ bool DialogManager::HandleSmoothImmersiveMaterial(
         auto copiedOptions = copiedMaterial->GetImmersiveOptions();
         CHECK_NULL_RETURN(copiedOptions, false);
         copiedOptions->materialColor = backgroundColor;
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(copiedMaterial));
+        ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(columnNode), AceType::RawPtr(copiedMaterial));
     } else {
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(systemMaterial));
+        ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(columnNode), AceType::RawPtr(systemMaterial));
     }
     return true;
 }

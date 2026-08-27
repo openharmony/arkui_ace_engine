@@ -1203,7 +1203,7 @@ void IndexerPattern::ApplyPopupSystemMaterial()
         ImmersiveOptions options;
         options.style = UiMaterialStyle::THICK;
         material->SetImmersiveOptions(options);
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(popupNode_), AceType::RawPtr(material));
+        ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(popupNode_), AceType::RawPtr(material));
     } else {
         auto indexerTheme = host->GetTheme<IndexerTheme>(true);
         CHECK_NULL_VOID(indexerTheme);

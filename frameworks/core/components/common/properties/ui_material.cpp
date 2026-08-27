@@ -726,6 +726,18 @@ bool MaterialUtils::IsMaterialEnabled()
     return GetConfiguredMaterialState() == MaterialState::ENABLE;
 }
 
+bool MaterialUtils::IsSystemApp()
+{
+    return AceApplicationInfo::GetInstance().IsSystemApp();
+}
+
+bool MaterialUtils::IsMaterialUnrestrictedComponent(const std::string& tag)
+{
+    // Slider / Toggle keep material effective everywhere: not gated by scope
+    // (titleBar / bottom TabBar) or self-drawing overlap, regardless of system-app.
+    return tag == V2::SLIDER_ETS_TAG || tag == V2::TOGGLE_ETS_TAG;
+}
+
 bool MaterialUtils::IsEmptyMaterial(const RefPtr<UiMaterial>& material)
 {
     CHECK_NULL_RETURN(material, false);

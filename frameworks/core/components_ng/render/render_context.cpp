@@ -21,6 +21,7 @@
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -295,9 +296,24 @@ void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
 {
     if (!uiMaterial_) {
         uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.material = material});
-        return;
+    } else {
+        uiMaterial_->material = material;
     }
-    uiMaterial_->material = material;
+    // Track the node with its pipeline's MaterialProcessor so the limiter only
+    // iterates material nodes after layout. The IsMaterialSuppressed flag keeps the
+    // node registered while the limiter temporarily clears its material (suppress);
+    // a real clear (developer passing nullptr while not suppressed) unregisters.
+    auto host = GetHost();
+    auto* pipeline = host ? host->GetContext() : nullptr;
+    if (pipeline) {
+        bool intended = (material != nullptr && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) ||
+                        IsMaterialSuppressed();
+        if (intended) {
+            pipeline->RegisterMaterialNode(host);
+        } else {
+            pipeline->UnregisterMaterialNode(host->GetId());
+        }
+    }
 }
 
 RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
@@ -331,6 +347,16 @@ void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
         return;
     }
     uiMaterial_->transparencyCallbackId = id;
+}
+
+RefPtr<UiMaterial> RenderContext::GetSavedMaterialForSuppress() const
+{
+    return savedMaterialForSuppress_;
+}
+
+void RenderContext::SetSavedMaterialForSuppress(const RefPtr<UiMaterial>& material)
+{
+    savedMaterialForSuppress_ = material;
 }
 
 const std::unique_ptr<BorderImageProperty>& RenderContext::GetOrCreateBdImage()

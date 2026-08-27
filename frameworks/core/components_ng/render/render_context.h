@@ -903,6 +903,52 @@ public:
 
     virtual void UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void ResetRadiusGradientBlur() {}
+
+    // MaterialProcessor support. Appended at the end of the class so the new
+    // data members below do not shift the offset of any pre-existing member.
+    // Whether the material of this node has been suppressed by MaterialProcessor
+    // (e.g. the node is not inside a titleBar), so the material is fully removed
+    // until the node re-enters a titleBar.
+    bool IsMaterialSuppressed() const
+    {
+        return materialSuppressed_;
+    }
+    void SetMaterialSuppressed(bool flag)
+    {
+        materialSuppressed_ = flag;
+    }
+    // Snapshot of the material configured before suppression, kept so the
+    // processor can restore it when the node re-enters a titleBar.
+    RefPtr<UiMaterial> GetSavedMaterialForSuppress() const;
+    void SetSavedMaterialForSuppress(const RefPtr<UiMaterial>& material);
+
+    // Guard set by MaterialProcessor around its own SetSystemMaterial calls
+    // (suppress / restore) so ViewAbstract::SetSystemMaterial can distinguish
+    // them from external calls: external calls on a suppressed node are blocked
+    // (the material would otherwise re-take effect), while the processor's own
+    // suppress/restore calls bypass the block via this flag.
+    bool IsMaterialLimiterUpdating() const
+    {
+        return materialLimiterUpdating_;
+    }
+    void SetMaterialLimiterUpdating(bool flag)
+    {
+        materialLimiterUpdating_ = flag;
+    }
+    // Set by ViewAbstract::SetSystemMaterialForOverlay for popup / dialog / menu /
+    // sheet / toast / select-overlay material targets. Exempts the node from the
+// scope gate (titleBar / bottom-TabBar) in MaterialProcessor::ApplyScopeGate so
+// these components keep material effective for non-system apps too. The overlap
+// lowering (condition 2) still applies.
+    bool IsMaterialScopeExempt() const
+    {
+        return materialScopeExempt_;
+    }
+    void SetMaterialScopeExempt(bool flag)
+    {
+        materialScopeExempt_ = flag;
+    }
+
 protected:
     RenderContext();
     std::unique_ptr<BorderImageProperty> propBdImage_;
@@ -916,6 +962,10 @@ protected:
     bool isNeedAnimate_ = true;
     bool isFree_ = false;
     std::optional<std::list<ParticleOption>> propParticleOptionArray_;
+    RefPtr<UiMaterial> savedMaterialForSuppress_;
+    bool materialSuppressed_ = false;
+    bool materialLimiterUpdating_ = false;
+    bool materialScopeExempt_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

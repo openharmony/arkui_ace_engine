@@ -1048,6 +1048,20 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     // the context should not be nullptr.
     AttachContext(context, false);
     onMainTree_ = true;
+    // Inherit the titleBar flag from the parent (top-down), or set it true for the
+    // TitleBar node itself. Children attach in the loop below and read this node's
+    // flag, so the flag propagates down the subtree in O(1) per node.
+    inTitleBar_ = (GetTag() == V2::TITLE_BAR_ETS_TAG) ||
+                  (GetParent() && GetParent()->IsInTitleBar());
+    // Inherit the bottom-tabBar flag from the parent (top-down). The TabBar node
+    // itself is marked true by TabBarPattern::OnAttachToMainTree (which runs in
+    // the hook below, after this recompute) based on the parent Tabs position;
+    // its descendants then inherit via this recompute on attach.
+    inBottomTabBar_ = (GetParent() && GetParent()->IsInBottomTabBar());
+    // Inherit custom-select-menu flag: once true, stays true (never cleared).
+    if (!inCustomSelectMenu_ && GetParent() && GetParent()->IsInCustomSelectMenu()) {
+        inCustomSelectMenu_ = true;
+    }
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
