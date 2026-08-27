@@ -481,7 +481,12 @@ void UIObserver::UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value 
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([&holder]() { holder.clear(); }, TaskExecutor::TaskType::UI, "ArkUIClearListener");
+        taskExecutor->PostTask(
+            [&holder]() {
+                holder.clear();
+                TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=willDraw");
+            },
+            TaskExecutor::TaskType::UI, "ArkUIClearListener");
         return;
     }
     holder.erase(
@@ -528,7 +533,12 @@ void UIObserver::UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_valu
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([&holder]() { holder.clear(); }, TaskExecutor::TaskType::UI, "ArkUIClearListener");
+        taskExecutor->PostTask(
+            [&holder]() {
+                holder.clear();
+                TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=didLayout");
+            },
+            TaskExecutor::TaskType::UI, "ArkUIClearListener");
         return;
     }
     holder.erase(
@@ -666,6 +676,7 @@ void UIObserver::UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInst
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=windowSizeLayoutBreakpointChange");
         return;
     }
     holder.erase(
