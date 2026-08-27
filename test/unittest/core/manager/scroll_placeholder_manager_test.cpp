@@ -101,7 +101,7 @@ HWTEST_F(ScrollPlaceholderManagerTest, CommitWhenGenerationMatches, TestSize.Lev
 {
     auto host = CreateHostNode(1001);
     manager_->RegisterContainer(host, [](int32_t index) { return std::nullopt; },
-        [](const ScrollPlaceHolderOptions&) -> RefPtr<FrameNode> { return nullptr; });
+        [](const ScrollPlaceholderOptions&) -> RefPtr<FrameNode> { return nullptr; });
     auto gen = manager_->GetContainerGeneration(host->GetId());
     int64_t captured = 0;
     manager_->EnqueueRealBuild(host->GetId(), 3, gen, OkBody(captured));
@@ -121,7 +121,7 @@ HWTEST_F(ScrollPlaceholderManagerTest, StaleDroppedOnDataChange, TestSize.Level1
 {
     auto host = CreateHostNode(1002);
     manager_->RegisterContainer(host, [](int32_t index) { return std::nullopt; },
-        [](const ScrollPlaceHolderOptions&) -> RefPtr<FrameNode> { return nullptr; });
+        [](const ScrollPlaceholderOptions&) -> RefPtr<FrameNode> { return nullptr; });
     auto gen = manager_->GetContainerGeneration(host->GetId());
     int64_t captured = 0;
     manager_->EnqueueRealBuild(host->GetId(), 5, gen, OkBody(captured));
@@ -140,7 +140,7 @@ HWTEST_F(ScrollPlaceholderManagerTest, CancelledOnContainerUnregister, TestSize.
 {
     auto host = CreateHostNode(1003);
     manager_->RegisterContainer(host, [](int32_t index) { return std::nullopt; },
-        [](const ScrollPlaceHolderOptions&) -> RefPtr<FrameNode> { return nullptr; });
+        [](const ScrollPlaceholderOptions&) -> RefPtr<FrameNode> { return nullptr; });
     auto gen = manager_->GetContainerGeneration(host->GetId());
     int64_t captured = 0;
     manager_->EnqueueRealBuild(host->GetId(), 7, gen, OkBody(captured));
@@ -160,7 +160,7 @@ HWTEST_F(ScrollPlaceholderManagerTest, GenerationMismatchStale, TestSize.Level1)
 {
     auto host = CreateHostNode(1004);
     manager_->RegisterContainer(host, [](int32_t index) { return std::nullopt; },
-        [](const ScrollPlaceHolderOptions&) -> RefPtr<FrameNode> { return nullptr; });
+        [](const ScrollPlaceholderOptions&) -> RefPtr<FrameNode> { return nullptr; });
     ScrollPlaceholderGeneration stale;
     stale.containerGen = 999; // fabricated mismatch
     int64_t captured = 0;
@@ -179,7 +179,7 @@ HWTEST_F(ScrollPlaceholderManagerTest, PlaceholderLayoutBudget, TestSize.Level1)
     auto host = CreateHostNode(1005);
     EXPECT_FALSE(manager_->ShouldContinuePlaceholderLayout(host->GetId()));
     manager_->RegisterContainer(host, [](int32_t index) { return std::nullopt; },
-        [](const ScrollPlaceHolderOptions&) -> RefPtr<FrameNode> { return nullptr; });
+        [](const ScrollPlaceholderOptions&) -> RefPtr<FrameNode> { return nullptr; });
     EXPECT_TRUE(manager_->ShouldContinuePlaceholderLayout(host->GetId()));
     manager_->OnFrameStart();
     EXPECT_TRUE(manager_->ShouldContinuePlaceholderLayout(host->GetId()));
@@ -192,8 +192,8 @@ HWTEST_F(ScrollPlaceholderManagerTest, PlaceholderLayoutBudget, TestSize.Level1)
 HWTEST_F(ScrollPlaceholderManagerTest, DefaultPlaceholderCreated, TestSize.Level1)
 {
     auto host = CreateHostNode(1006);
-    manager_->RegisterContainer(host, [](int32_t index) { return ScrollPlaceHolderOptions {}; },
-        [](const ScrollPlaceHolderOptions& options) -> RefPtr<FrameNode> { return CreateHostNode(4242); });
+    manager_->RegisterContainer(host, [](int32_t index) { return ScrollPlaceholderOptions {}; },
+        [](const ScrollPlaceholderOptions& options) -> RefPtr<FrameNode> { return CreateHostNode(4242); });
     auto item = manager_->CreatePlaceholderItem(host->GetId(), 0);
     ASSERT_NE(item.node, nullptr);
     EXPECT_TRUE(item.templateId.empty());

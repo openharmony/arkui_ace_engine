@@ -674,18 +674,18 @@ void JSList::SetSyncLoad(const JSCallbackInfo& args)
     ListModel::GetInstance()->SetSyncLoad(enabled);
 }
 
-void JSList::SetScrollPlaceHolder(const JSCallbackInfo& args)
+void JSList::SetScrollPlaceholder(const JSCallbackInfo& args)
 {
     CHECK_JAVASCRIPT_SCOPE_AND_RETURN;
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         // Undefined/invalid provider: keep the default (feature disabled) path.
-        ListModel::GetInstance()->SetScrollPlaceHolder(nullptr);
+        ListModel::GetInstance()->SetScrollPlaceholder(nullptr);
         return;
     }
     auto providerFunc = JSRef<JSFunc>::Cast(args[0]);
     auto thisObj = JSRef<JSObject>::Cast(providerFunc);
-    NG::ScrollPlaceHolderProvider provider =
-        [providerFunc, thisObj](int32_t index) -> std::optional<NG::ScrollPlaceHolderOptions> {
+    NG::ScrollPlaceholderProvider provider =
+        [providerFunc, thisObj](int32_t index) -> std::optional<NG::ScrollPlaceholderOptions> {
         JAVASCRIPT_EXECUTION_SCOPE_STATIC
         JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(index));
         auto result = providerFunc->Call(thisObj, 1, &param);
@@ -693,7 +693,7 @@ void JSList::SetScrollPlaceHolder(const JSCallbackInfo& args)
             return std::nullopt; // default placeholder
         }
         auto obj = JSRef<JSObject>::Cast(result);
-        NG::ScrollPlaceHolderOptions options;
+        NG::ScrollPlaceholderOptions options;
         auto id = obj->GetProperty("id");
         if (id->IsString()) {
             options.id = id->ToString();
@@ -701,7 +701,7 @@ void JSList::SetScrollPlaceHolder(const JSCallbackInfo& args)
         auto size = obj->GetProperty("size");
         if (size->IsObject()) {
             auto sizeObj = JSRef<JSObject>::Cast(size);
-            NG::ScrollPlaceHolderSizeOption sizeOption;
+            NG::ScrollPlaceholderSizeOption sizeOption;
             auto width = sizeObj->GetProperty("width");
             if (width->IsNumber()) {
                 sizeOption.width = width->ToNumber<float>();
@@ -714,7 +714,7 @@ void JSList::SetScrollPlaceHolder(const JSCallbackInfo& args)
         }
         return options;
     };
-    ListModel::GetInstance()->SetScrollPlaceHolder(std::move(provider));
+    ListModel::GetInstance()->SetScrollPlaceholder(std::move(provider));
 }
 
 void JSList::SetEditModeOptions(const JSCallbackInfo& info)
@@ -1181,7 +1181,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("backPressBehavior", &JSList::SetBackPressBehavior);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
-    JSClass<JSList>::StaticMethod("scrollPlaceHolder", &JSList::SetScrollPlaceHolder);
+    JSClass<JSList>::StaticMethod("scrollPlaceholder", &JSList::SetScrollPlaceholder);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);
     JSClass<JSList>::StaticMethod("enableEditMode", &JSList::SetEnableEditMode);
     JSClass<JSList>::StaticMethod("onEditModeChange", &JSList::SetOnEditModeChange);

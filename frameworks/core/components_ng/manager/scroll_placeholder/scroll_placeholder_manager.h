@@ -71,7 +71,7 @@ public:
      * Re-registering bumps the template generation: in-flight tasks carrying an
      * older generation are rejected at commit time. Returns the generation.
      */
-    uint64_t RegisterTemplate(const std::string& id, ScrollPlaceHolderBuilder&& builder);
+    uint64_t RegisterTemplate(const std::string& id, ScrollPlaceholderBuilder&& builder);
     void UnregisterTemplate(const std::string& id);
 
     /** True when [id] is registered (used for fallback-to-default diagnostics). */
@@ -84,10 +84,10 @@ public:
 
     /**
      * Registers a scroll container (List/Grid/WaterFlow host) that has the
-     * scrollPlaceHolder attribute set. [itemFactory] creates the container's
+     * scrollPlaceholder attribute set. [itemFactory] creates the container's
      * item shell (ListItem/GridItem/FlowItem) for placeholders.
      */
-    void RegisterContainer(const WeakPtr<FrameNode>& host, ScrollPlaceHolderProvider&& provider,
+    void RegisterContainer(const WeakPtr<FrameNode>& host, ScrollPlaceholderProvider&& provider,
         ScrollPlaceholderItemFactory&& itemFactory);
     void UnregisterContainer(int32_t hostId);
     bool IsContainerRegistered(int32_t hostId) const;
@@ -197,12 +197,12 @@ public:
 
 private:
     struct TemplateRecord {
-        ScrollPlaceHolderBuilder builder;
+        ScrollPlaceholderBuilder builder;
         uint64_t generation = 1;
     };
     struct ContainerRecord {
         WeakPtr<FrameNode> host;
-        ScrollPlaceHolderProvider provider;
+        ScrollPlaceholderProvider provider;
         ScrollPlaceholderItemFactory itemFactory;
         uint64_t containerGen = 1;
         uint64_t dataGen = 1;
@@ -218,7 +218,7 @@ private:
     const ContainerRecord* FindContainer(int32_t hostId) const;
     ContainerRecord* FindContainerMutable(int32_t hostId);
     /** Resolves provider options for an index; counts fallback diagnostics. */
-    ScrollPlaceHolderOptions ResolveOptions(const ContainerRecord& container, int32_t index);
+    ScrollPlaceholderOptions ResolveOptions(const ContainerRecord& container, int32_t index);
     RefPtr<UINode> BuildTemplateSnapshot(const std::string& id);
     void DropTask(std::deque<RealBuildTask>::iterator& it, ScrollPlaceholderCommitResult reason);
 

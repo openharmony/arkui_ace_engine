@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_SCROLL_PLACE_HOLDER_REGISTER_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_SCROLL_PLACE_HOLDER_REGISTER_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_SCROLL_PLACEHOLDER_REGISTER_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_SCROLL_PLACEHOLDER_REGISTER_H
 
 #include "base/memory/ace_type.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
@@ -22,15 +22,15 @@
 namespace OHOS::Ace::Framework {
 
 /**
- * FEAT-005 (P-07): `ScrollPlaceHolderRegister.register(id, wrapBuilder)` —
+ * FEAT-005 (P-07): `scrollPlaceholderRegister.register(id, wrapBuilder)` —
  * registers an immutable placeholder template for the current Container/VM.
  *
  * The builder argument is the result of `wrapBuilder()` over a global, no-arg
- * `@Builder({ isScrollPlaceHolder: true })` function. Compiler-side validation
+ * `@Builder({ isScrollPlaceholder: true })` function. Compiler-side validation
  * of the Builder form lives in arkcompiler_ets_frontend; the runtime only
  * stores the builder and treats the produced subtree as read-only.
  */
-class JSScrollPlaceHolderRegister {
+class JSScrollPlaceholderRegister {
 public:
     static void Register(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
@@ -38,4 +38,4 @@ public:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_SCROLL_PLACE_HOLDER_REGISTER_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_SCROLL_PLACEHOLDER_REGISTER_H

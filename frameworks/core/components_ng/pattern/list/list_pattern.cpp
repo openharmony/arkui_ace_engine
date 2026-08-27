@@ -182,10 +182,10 @@ PaddingPropertyF* GetPaddingFromHost(RefPtr<FrameNode> node)
 
 ListPattern::~ListPattern()
 {
-    UnregisterScrollPlaceHolder();
+    UnregisterScrollPlaceholder();
 }
 
-void ListPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+void ListPattern::SetScrollPlaceholder(ScrollPlaceholderProvider&& provider)
 {
     scrollPlaceholderProvider_ = provider;
     auto host = GetHost();
@@ -199,7 +199,7 @@ void ListPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
     auto weakHost = WeakClaim(RawPtr(host));
     manager->RegisterContainer(
         weakHost, std::move(provider),
-        [](const ScrollPlaceHolderOptions& options) -> RefPtr<FrameNode> {
+        [](const ScrollPlaceholderOptions& options) -> RefPtr<FrameNode> {
             // Placeholder item shell: a plain ListItem that carries only the
             // placeholder visual subtree (no swipe/sticky business logic).
             return FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
@@ -208,7 +208,7 @@ void ListPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
         });
 }
 
-void ListPattern::UnregisterScrollPlaceHolder()
+void ListPattern::UnregisterScrollPlaceholder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -219,7 +219,7 @@ void ListPattern::UnregisterScrollPlaceHolder()
 
 void ListPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    UnregisterScrollPlaceHolder();
+    UnregisterScrollPlaceholder();
 }
 
 RefPtr<LayoutProperty> ListPattern::CreateLayoutProperty()

@@ -1131,14 +1131,14 @@ void GridModelNG::SetSyncLoad(bool syncLoad)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad);
 }
 
-void GridModelNG::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+void GridModelNG::SetScrollPlaceholder(ScrollPlaceholderProvider&& provider)
 {
-    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetScrollPlaceHolder", provider ? 1 : 0);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetScrollPlaceholder", provider ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetScrollPlaceHolder(std::move(provider));
+    pattern->SetScrollPlaceholder(std::move(provider));
 }
 
 void GridModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)

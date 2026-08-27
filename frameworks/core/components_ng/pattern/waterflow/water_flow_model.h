@@ -113,7 +113,7 @@ public:
 
     virtual void SetSyncLoad(bool syncLoad) {}
     // FEAT-005: opt-in scroll placeholder provider for this WaterFlow.
-    virtual void SetScrollPlaceHolder(NG::ScrollPlaceHolderProvider&& provider) {}
+    virtual void SetScrollPlaceholder(NG::ScrollPlaceholderProvider&& provider) {}
     virtual void ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetSupportLazyLoadingEmptyBranch(bool enable) {};
 private:

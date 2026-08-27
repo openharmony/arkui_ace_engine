@@ -64,7 +64,7 @@ public:
     void SetScrollBarColor(const std::optional<Color>& scrollBarColor) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetSyncLoad(bool syncLoad) override;
-    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider) override;
+    void SetScrollPlaceholder(ScrollPlaceholderProvider&& provider) override;
     void ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
 
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;

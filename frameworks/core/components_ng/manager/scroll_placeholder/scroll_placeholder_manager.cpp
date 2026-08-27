@@ -37,7 +37,7 @@ constexpr double NS_PER_SECOND = 1e9;
 
 ScrollPlaceholderManager::ScrollPlaceholderManager(const WeakPtr<PipelineContext>& context) : context_(context) {}
 
-uint64_t ScrollPlaceholderManager::RegisterTemplate(const std::string& id, ScrollPlaceHolderBuilder&& builder)
+uint64_t ScrollPlaceholderManager::RegisterTemplate(const std::string& id, ScrollPlaceholderBuilder&& builder)
 {
     if (id.empty() || !builder) {
         TAG_LOGW(AceLogTag::ACE_SCROLL, "scroll placeholder template register rejected: invalid id or builder");
@@ -79,7 +79,7 @@ uint64_t ScrollPlaceholderManager::GetTemplateGeneration(const std::string& id) 
 }
 
 void ScrollPlaceholderManager::RegisterContainer(const WeakPtr<FrameNode>& host,
-    ScrollPlaceHolderProvider&& provider, ScrollPlaceholderItemFactory&& itemFactory)
+    ScrollPlaceholderProvider&& provider, ScrollPlaceholderItemFactory&& itemFactory)
 {
     auto hostNode = host.Upgrade();
     CHECK_NULL_VOID(hostNode);
@@ -185,10 +185,10 @@ const ScrollPlaceholderManager::ContainerRecord* ScrollPlaceholderManager::FindC
     return iter == containers_.end() ? nullptr : &iter->second;
 }
 
-ScrollPlaceHolderOptions ScrollPlaceholderManager::ResolveOptions(
+ScrollPlaceholderOptions ScrollPlaceholderManager::ResolveOptions(
     const ContainerRecord& container, int32_t index)
 {
-    ScrollPlaceHolderOptions options;
+    ScrollPlaceholderOptions options;
     if (container.provider) {
         auto provided = container.provider(index);
         if (provided.has_value()) {
@@ -253,7 +253,7 @@ ScrollPlaceholderManager::PlaceholderItem ScrollPlaceholderManager::CreatePlaceh
         // Default placeholder: minimal transparent layout-only node (AR-UX-01
         // tracks the final default visual; the draft uses a plain FrameNode).
         visualFrame = FrameNode::CreateFrameNode(
-            "ScrollPlaceHolderVisual", ElementRegister::GetInstance()->MakeUniqueId(),
+            "ScrollPlaceholderVisual", ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<Pattern>());
         CHECK_NULL_RETURN(visualFrame, result);
         visual = visualFrame;

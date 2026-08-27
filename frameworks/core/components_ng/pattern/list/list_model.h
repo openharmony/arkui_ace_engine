@@ -77,7 +77,7 @@ public:
     virtual void SetSyncLoad(bool enabled) = 0;
     // FEAT-005: opt-in scroll placeholder provider; enables the shared
     // prediction/placeholder/deferred-build chain for this List.
-    virtual void SetScrollPlaceHolder(NG::ScrollPlaceHolderProvider&& provider) {}
+    virtual void SetScrollPlaceholder(NG::ScrollPlaceholderProvider&& provider) {}
     virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {}
     virtual void SetEnableEditMode(bool enableEditMode) {}
     virtual void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) {}

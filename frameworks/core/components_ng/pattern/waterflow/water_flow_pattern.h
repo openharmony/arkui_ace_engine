@@ -35,9 +35,9 @@ class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
 public:
     ~WaterFlowPattern() override;
 
-    // FEAT-005 scroll placeholder (see ListPattern::SetScrollPlaceHolder).
-    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider);
-    void UnregisterScrollPlaceHolder();
+    // FEAT-005 scroll placeholder (see ListPattern::SetScrollPlaceholder).
+    void SetScrollPlaceholder(ScrollPlaceholderProvider&& provider);
+    void UnregisterScrollPlaceholder();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     bool UpdateCurrentOffset(float delta, int32_t source) override;
@@ -250,7 +250,7 @@ public:
     }
 
     int32_t GetFirstIndex() const override;
-    ScrollPlaceHolderProvider scrollPlaceholderProvider_;
+    ScrollPlaceholderProvider scrollPlaceholderProvider_;
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

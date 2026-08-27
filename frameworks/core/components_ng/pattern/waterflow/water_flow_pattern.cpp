@@ -52,10 +52,10 @@ namespace OHOS::Ace::NG {
 
 WaterFlowPattern::~WaterFlowPattern()
 {
-    UnregisterScrollPlaceHolder();
+    UnregisterScrollPlaceholder();
 }
 
-void WaterFlowPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+void WaterFlowPattern::SetScrollPlaceholder(ScrollPlaceholderProvider&& provider)
 {
     scrollPlaceholderProvider_ = provider;
     auto host = GetHost();
@@ -68,7 +68,7 @@ void WaterFlowPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider
     }
     manager->RegisterContainer(
         WeakClaim(RawPtr(host)), std::move(provider),
-        [](const ScrollPlaceHolderOptions& options) -> RefPtr<FrameNode> {
+        [](const ScrollPlaceholderOptions& options) -> RefPtr<FrameNode> {
             // Placeholder item shell: a plain FlowItem.
             return FrameNode::CreateFrameNode(V2::FLOW_ITEM_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(),
@@ -76,7 +76,7 @@ void WaterFlowPattern::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider
         });
 }
 
-void WaterFlowPattern::UnregisterScrollPlaceHolder()
+void WaterFlowPattern::UnregisterScrollPlaceholder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -87,7 +87,7 @@ void WaterFlowPattern::UnregisterScrollPlaceHolder()
 
 void WaterFlowPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    UnregisterScrollPlaceHolder();
+    UnregisterScrollPlaceholder();
 }
 
 RefPtr<LayoutProperty> WaterFlowPattern::CreateLayoutProperty()

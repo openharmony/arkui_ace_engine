@@ -146,12 +146,12 @@ public:
     // FEAT-005 scroll placeholder: registers this List with the per-pipeline
     // ScrollPlaceholderManager (shared predictor + placeholder/real-build
     // coordination). Passing a null provider disables the feature.
-    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider);
-    bool IsScrollPlaceHolderEnabled() const
+    void SetScrollPlaceholder(ScrollPlaceholderProvider&& provider);
+    bool IsScrollPlaceholderEnabled() const
     {
         return scrollPlaceholderProvider_ != nullptr;
     }
-    void UnregisterScrollPlaceHolder();
+    void UnregisterScrollPlaceholder();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     bool GetMaintainVisibleContentPosition()
@@ -710,7 +710,7 @@ private:
     float prevEndOffset_ = 0.f;
     double currentOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
-    ScrollPlaceHolderProvider scrollPlaceholderProvider_;
+    ScrollPlaceholderProvider scrollPlaceholderProvider_;
     std::optional<int32_t> lastSnapTargetIndex_;
 
     bool crossMatchChild_ = false;

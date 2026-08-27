@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_scroll_place_holder_register.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scroll_placeholder_register.h"
 
 #include <cinttypes>
 
@@ -26,12 +26,12 @@
 
 namespace OHOS::Ace::Framework {
 
-void JSScrollPlaceHolderRegister::Register(const JSCallbackInfo& info)
+void JSScrollPlaceholderRegister::Register(const JSCallbackInfo& info)
 {
     CHECK_JAVASCRIPT_SCOPE_AND_RETURN;
     if (info.Length() < 2 || !info[0]->IsString() || !info[1]->IsObject()) {
         TAG_LOGW(AceLogTag::ACE_SCROLL,
-            "ScrollPlaceHolderRegister.register expects (id: string, wrapBuilder)");
+            "scrollPlaceholderRegister.register expects (id: string, wrapBuilder)");
         return;
     }
     std::string id = info[0]->ToString();
@@ -39,12 +39,12 @@ void JSScrollPlaceHolderRegister::Register(const JSCallbackInfo& info)
     auto builderProp = wrapBuilder->GetProperty("builder");
     if (!builderProp->IsFunction()) {
         TAG_LOGW(AceLogTag::ACE_SCROLL,
-            "ScrollPlaceHolderRegister.register: wrapBuilder without builder function, id=%{public}s", id.c_str());
+            "scrollPlaceholderRegister.register: wrapBuilder without builder function, id=%{public}s", id.c_str());
         return;
     }
     auto context = NG::PipelineContext::GetCurrentContext();
     if (!context) {
-        TAG_LOGW(AceLogTag::ACE_SCROLL, "ScrollPlaceHolderRegister.register: no pipeline context");
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "scrollPlaceholderRegister.register: no pipeline context");
         return;
     }
     auto manager = context->GetScrollPlaceholderManager();
@@ -56,7 +56,7 @@ void JSScrollPlaceHolderRegister::Register(const JSCallbackInfo& info)
     // Placeholder templates are immutable static subtrees: invoking the wrapped
     // builder pushes the subtree onto the view stack; Finish() detaches it as
     // the snapshot for later placeholder creation. Runs on the UI thread only.
-    NG::ScrollPlaceHolderBuilder builder = [thisObj, builderFunc]() -> RefPtr<NG::UINode> {
+    NG::ScrollPlaceholderBuilder builder = [thisObj, builderFunc]() -> RefPtr<NG::UINode> {
         JAVASCRIPT_EXECUTION_SCOPE_STATIC
         NG::ScopedViewStackProcessor scopedViewStackProcessor;
         auto* viewStack = NG::ViewStackProcessor::GetInstance();
@@ -66,14 +66,14 @@ void JSScrollPlaceHolderRegister::Register(const JSCallbackInfo& info)
     };
     auto generation = manager->RegisterTemplate(id, std::move(builder));
     TAG_LOGI(AceLogTag::ACE_SCROLL,
-        "ScrollPlaceHolderRegister.register id=%{public}s gen=%{public}" PRIu64, id.c_str(), generation);
+        "scrollPlaceholderRegister.register id=%{public}s gen=%{public}" PRIu64, id.c_str(), generation);
 }
 
-void JSScrollPlaceHolderRegister::JSBind(BindingTarget globalObj)
+void JSScrollPlaceholderRegister::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSScrollPlaceHolderRegister>::Declare("ScrollPlaceHolderRegister");
-    JSClass<JSScrollPlaceHolderRegister>::StaticMethod("register", &JSScrollPlaceHolderRegister::Register);
-    JSClass<JSScrollPlaceHolderRegister>::Bind(globalObj);
+    JSClass<JSScrollPlaceholderRegister>::Declare("scrollPlaceholderRegister");
+    JSClass<JSScrollPlaceholderRegister>::StaticMethod("register", &JSScrollPlaceholderRegister::Register);
+    JSClass<JSScrollPlaceholderRegister>::Bind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

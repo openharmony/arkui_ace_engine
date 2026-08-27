@@ -466,14 +466,14 @@ void WaterFlowModelNG::SetSyncLoad(bool syncLoad)
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad);
 }
 
-void WaterFlowModelNG::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+void WaterFlowModelNG::SetScrollPlaceholder(ScrollPlaceholderProvider&& provider)
 {
-    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetScrollPlaceHolder", provider ? 1 : 0);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetScrollPlaceholder", provider ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetScrollPlaceHolder(std::move(provider));
+    pattern->SetScrollPlaceholder(std::move(provider));
 }
 
 void WaterFlowModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)

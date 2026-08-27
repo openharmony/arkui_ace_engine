@@ -34,46 +34,46 @@ class FrameNode;
  * FEAT-005: shared contracts of the scroll placeholder framework.
  *
  * The feature is opt-in: a List/Grid/WaterFlow participates only when the
- * developer sets the `scrollPlaceHolder(provider)` attribute on it. All types
+ * developer sets the `scrollPlaceholder(provider)` attribute on it. All types
  * below are internal (framework) contracts; the public ArkTS surface is
  * declared in interface_sdk-js (PR #35330).
  */
 
 /** Layout suggestion returned by the developer provider. Values are in vp. */
-struct ScrollPlaceHolderSizeOption {
+struct ScrollPlaceholderSizeOption {
     std::optional<float> width;
     std::optional<float> height;
 };
 
-/** Result of the developer `scrollPlaceHolder((index) => {...})` callback. */
-struct ScrollPlaceHolderOptions {
+/** Result of the developer `scrollPlaceholder((index) => {...})` callback. */
+struct ScrollPlaceholderOptions {
     /** Registered template id. Empty/unknown ids fall back to the default placeholder. */
     std::string id;
     /** Suggested placeholder size; the real item is re-laid-out with normal constraints on swap. */
-    std::optional<ScrollPlaceHolderSizeOption> size;
+    std::optional<ScrollPlaceholderSizeOption> size;
 };
 
 /**
  * Provider: index -> placeholder options. Returning std::nullopt selects the
  * default (layout-only) placeholder. Provider is always invoked on the UI thread.
  */
-using ScrollPlaceHolderProvider = std::function<std::optional<ScrollPlaceHolderOptions>(int32_t index)>;
+using ScrollPlaceholderProvider = std::function<std::optional<ScrollPlaceholderOptions>(int32_t index)>;
 
 /**
  * Immutable placeholder template builder. Placeholder templates are static
- * subtrees (declared via `@Builder({ isScrollPlaceHolder: true })`); builders
+ * subtrees (declared via `@Builder({ isScrollPlaceholder: true })`); builders
  * must not touch reactive state, gestures or business callbacks. The compiler
  * side validation lives in arkcompiler_ets_frontend; the runtime treats every
  * registered builder as read-only.
  */
-using ScrollPlaceHolderBuilder = std::function<RefPtr<UINode>()>;
+using ScrollPlaceholderBuilder = std::function<RefPtr<UINode>()>;
 
 /**
  * Container adapter hook: creates the item shell node for a placeholder on the
  * UI thread, e.g. a ListItem for List, GridItem for Grid, FlowItem for
  * WaterFlow. The manager fills the shell with the placeholder visual subtree.
  */
-using ScrollPlaceholderItemFactory = std::function<RefPtr<FrameNode>(const ScrollPlaceHolderOptions& options)>;
+using ScrollPlaceholderItemFactory = std::function<RefPtr<FrameNode>(const ScrollPlaceholderOptions& options)>;
 
 /** Decision produced before a real item build. */
 enum class ScrollPlaceholderDecision {

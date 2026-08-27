@@ -469,14 +469,14 @@ void ListModelNG::SetSyncLoad(bool enabled)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SyncLoad, enabled);
 }
 
-void ListModelNG::SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider)
+void ListModelNG::SetScrollPlaceholder(ScrollPlaceholderProvider&& provider)
 {
-    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetScrollPlaceHolder", provider ? 1 : 0);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetScrollPlaceholder", provider ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetScrollPlaceHolder(std::move(provider));
+    pattern->SetScrollPlaceholder(std::move(provider));
 }
 
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)

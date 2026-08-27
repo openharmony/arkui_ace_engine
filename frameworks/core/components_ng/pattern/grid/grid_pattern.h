@@ -40,9 +40,9 @@ public:
     GridPattern();
     ~GridPattern() override;
 
-    // FEAT-005 scroll placeholder (see ListPattern::SetScrollPlaceHolder).
-    void SetScrollPlaceHolder(ScrollPlaceHolderProvider&& provider);
-    void UnregisterScrollPlaceHolder();
+    // FEAT-005 scroll placeholder (see ListPattern::SetScrollPlaceholder).
+    void SetScrollPlaceholder(ScrollPlaceholderProvider&& provider);
+    void UnregisterScrollPlaceholder();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override;
@@ -327,7 +327,7 @@ public:
 
     void ApplyEditModeToCachedItems(bool enabled) override;
 
-    ScrollPlaceHolderProvider scrollPlaceholderProvider_;
+    ScrollPlaceholderProvider scrollPlaceholderProvider_;
 
 private:
     /**

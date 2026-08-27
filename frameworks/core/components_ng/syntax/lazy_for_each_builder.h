@@ -351,7 +351,7 @@ private:
     void CollectNodesForDelayedRelease(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
 
     // ---- FEAT-005 scroll placeholder (pre-builder child resolver) ----
-    // When the enclosing List/Grid/WaterFlow opted into `scrollPlaceHolder`
+    // When the enclosing List/Grid/WaterFlow opted into `scrollPlaceholder`
     // and the remaining frame budget cannot absorb the estimated build cost,
     // GetChildByIndex returns a placeholder item here and the real build is
     // queued as a UI-thread frame task (see ScrollPlaceholderManager).

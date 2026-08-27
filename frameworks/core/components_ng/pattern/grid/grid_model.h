@@ -97,7 +97,7 @@ public:
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
     virtual void SetSyncLoad(bool syncLoad) {}
     // FEAT-005: opt-in scroll placeholder provider for this Grid.
-    virtual void SetScrollPlaceHolder(NG::ScrollPlaceHolderProvider&& provider) {}
+    virtual void SetScrollPlaceholder(NG::ScrollPlaceholderProvider&& provider) {}
     virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {};
     virtual void SetEnableEditMode(bool enableEditMode) {};
     virtual void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) {};
