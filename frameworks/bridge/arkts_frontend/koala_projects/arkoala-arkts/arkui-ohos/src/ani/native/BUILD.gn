@@ -117,6 +117,7 @@ ohos_shared_library("arkoala_native_ani") {
     "udmf:libudmf",
     "udmf:udmf_client",
     "udmf:udmf_taihe_native",
+    "resource_management:global_resmgr",
     "runtime_core:libarkruntime",
   ]
   if (!build_ohos_sdk) {
