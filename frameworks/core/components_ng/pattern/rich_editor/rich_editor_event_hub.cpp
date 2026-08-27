@@ -187,6 +187,44 @@ bool RichEditorEventHub::HasOnDidChange() const
     return static_cast<bool>(onDidChange_);
 }
 
+void RichEditorEventHub::SetOnScrollChangeEvent(std::function<void(float, float)>&& func)
+{
+    onScrollChangeEvent_ = std::move(func);
+}
+
+bool RichEditorEventHub::HasOnScrollChange() const
+{
+    return static_cast<bool>(onScrollChangeEvent_);
+}
+
+void RichEditorEventHub::FireOnScrollChangeEvent(float offsetX, float offsetY)
+{
+    if (!onScrollChangeEvent_) {
+        return;
+    }
+    auto callback = onScrollChangeEvent_;
+    callback(offsetX, offsetY);
+}
+
+void RichEditorEventHub::SetOnContentSizeChange(std::function<void(float, float)>&& func)
+{
+    onContentSizeChangeEvent_ = std::move(func);
+}
+
+bool RichEditorEventHub::HasOnContentSizeChange() const
+{
+    return static_cast<bool>(onContentSizeChangeEvent_);
+}
+
+void RichEditorEventHub::FireOnContentSizeChange(float width, float height)
+{
+    if (!onContentSizeChangeEvent_) {
+        return;
+    }
+    auto callback = onContentSizeChangeEvent_;
+    callback(width, height);
+}
+
 void RichEditorEventHub::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
 {
     onCut_ = std::move(func);

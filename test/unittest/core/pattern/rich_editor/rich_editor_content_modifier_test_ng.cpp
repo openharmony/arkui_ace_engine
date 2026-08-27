@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -546,6 +547,42 @@ HWTEST_F(RichEditorContentModifierTestNg, AdjustParagraphX001, TestSize.Level2)
     paragraphStyle.direction = TextDirection::RTL;
     info.paragraphStyle = paragraphStyle;
     EXPECT_EQ(testContentModifier->AdjustParagraphX(info, contentRect), 100);
+}
+
+/**
+ * @tc.name: RefreshRichTextRect001
+ * @tc.desc: Test RefreshRichTextRect with null and valid contentMod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorContentModifierTestNg, RefreshRichTextRect001, TestSize.Level2)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
+
+    auto contentMod = AceType::MakeRefPtr<RichEditorContentModifier>(
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
+    ASSERT_NE(contentMod, nullptr);
+
+    contentMod->SetRichTextRectX(TEXTRICHTEXTRECTX);
+    contentMod->SetRichTextRectY(TEXTRICHTEXTRECTY);
+
+    auto paintMethod = AceType::MakeRefPtr<RichEditorPaintMethod>(
+        WeakPtr<Pattern>(contentPattern), &richEditorPattern->paragraphs_, 0.0f, contentMod, nullptr);
+    ASSERT_NE(paintMethod, nullptr);
+
+    // Branch: valid contentMod — textRect refreshed
+    paintMethod->RefreshRichTextRect(contentMod);
+    auto expectedX = contentPattern->GetTextRect().GetOffset().GetX();
+    auto expectedY = contentPattern->GetTextRect().GetOffset().GetY();
+    EXPECT_FLOAT_EQ(contentMod->GetRichTextRectX(), expectedX);
+    EXPECT_FLOAT_EQ(contentMod->GetRichTextRectY(), expectedY);
+
+    // Branch: null contentMod — no crash
+    RefPtr<RichEditorContentModifier> nullMod;
+    paintMethod->RefreshRichTextRect(nullMod);
+    EXPECT_FLOAT_EQ(contentMod->GetRichTextRectX(), expectedX);
 }
 
 } // namespace OHOS::Ace::NG

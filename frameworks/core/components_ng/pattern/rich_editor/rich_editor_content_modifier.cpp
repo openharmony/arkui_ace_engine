@@ -132,6 +132,16 @@ void RichEditorContentModifier::SetRichTextRectY(float value)
     richTextRectY_->Set(value);
 }
 
+float RichEditorContentModifier::GetRichTextRectX() const
+{
+    return richTextRectX_ ? richTextRectX_->Get() : 0.0f;
+}
+
+float RichEditorContentModifier::GetRichTextRectY() const
+{
+    return richTextRectY_ ? richTextRectY_->Get() : 0.0f;
+}
+
 void RichEditorContentModifier::SetClipOffset(OffsetF offset)
 {
     clipOffset_->Set(offset);
