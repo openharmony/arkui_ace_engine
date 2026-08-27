@@ -15,6 +15,7 @@
 
 import uiMaterial from '@ohos.arkui.uiMaterial'
 import display from '@ohos.display'
+import { BusinessError } from '@ohos.base'
 
 @Entry
 @Component
@@ -188,7 +189,7 @@ struct ResponsiveCase {
         this.orientation = 'portrait'
       }
     } catch (err) {
-      console.error('Failed to get display info: ' + JSON.stringify(err))
+      console.error('Failed to get display info: code=' + (err as BusinessError).code + ', message=' + (err as BusinessError).message);
     }
   }
   
