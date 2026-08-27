@@ -84,6 +84,12 @@ public:
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func);
     void FireOnDidChange(const RichEditorChangeValue& info);
     bool HasOnDidChange() const;
+    void SetOnScrollChangeEvent(std::function<void(float, float)>&& func);
+    bool HasOnScrollChange() const;
+    void FireOnScrollChangeEvent(float offsetX, float offsetY);
+    void SetOnContentSizeChange(std::function<void(float, float)>&& func);
+    bool HasOnContentSizeChange() const;
+    void FireOnContentSizeChange(float width, float height);
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func);
     void FireOnCut(NG::TextCommonEvent& value);
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func);
@@ -112,6 +118,8 @@ private:
     std::function<void(const bool&)> onEditingChange_;
     std::function<bool(const RichEditorChangeValue&)> onWillChange_;
     std::function<void(const RichEditorChangeValue&)> onDidChange_;
+    std::function<void(float, float)> onScrollChangeEvent_;
+    std::function<void(float, float)> onContentSizeChangeEvent_;
     std::function<void(NG::TextCommonEvent&)> onCut_;
     std::function<void(NG::TextCommonEvent&)> onCopy_;
     std::function<void(NG::TextCommonEvent&)> onShare_;

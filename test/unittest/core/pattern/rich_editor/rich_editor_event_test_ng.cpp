@@ -34,6 +34,10 @@ bool g_isAboutToIMEInputCalled = false;
 bool g_isAboutToDeleteCalled = false;
 bool g_isOnWillChangeCalled = false;
 bool g_isOnStyledStringWillChangeCalled = false;
+constexpr float TEST_OFFSET_X = 10.0f;
+constexpr float TEST_OFFSET_Y = 20.0f;
+constexpr float TEST_WIDTH = 100.0f;
+constexpr float TEST_HEIGHT = 200.0f;
 } // namespace
  
 class RichEditorEventTestNg : public RichEditorCommonTestNg {
@@ -1523,5 +1527,107 @@ HWTEST_F(RichEditorEventTestNg, FireEventReentrancy001, TestSize.Level1)
     eventHub->FireOnEditingChange(true);
     EXPECT_TRUE(called);
     EXPECT_FALSE(static_cast<bool>(eventHub->onEditingChange_));
+}
+
+/**
+ * @tc.name: CapiContentScroll001
+ * @tc.desc: Test CAPI ContentScroll callback set/reset and trigger via HandleContentScroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, CapiContentScroll001, TestSize.Level2)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    float receivedX = 0.0f;
+    float receivedY = 0.0f;
+    auto callback = [&receivedX, &receivedY](float x, float y) {
+        receivedX = x;
+        receivedY = y;
+    };
+
+    // Branch: set callback via ModelNG
+    RichEditorModelNG::SetOnContentScroll(richEditorNode_.GetRawPtr(), std::move(callback));
+    EXPECT_TRUE(eventHub->HasOnScrollChange());
+
+    // Branch: offset changed — callback triggered
+    OffsetF preOffset(0.0f, 0.0f);
+    OffsetF curOffset(TEST_OFFSET_X, TEST_OFFSET_Y);
+    richEditorPattern->HandleContentScroll(preOffset, curOffset);
+    EXPECT_FLOAT_EQ(receivedX, TEST_OFFSET_X);
+    EXPECT_FLOAT_EQ(receivedY, TEST_OFFSET_Y);
+
+    // Branch: offset not changed — callback not triggered
+    receivedX = 0.0f;
+    receivedY = 0.0f;
+    richEditorPattern->HandleContentScroll(curOffset, curOffset);
+    EXPECT_FLOAT_EQ(receivedX, 0.0f);
+    EXPECT_FLOAT_EQ(receivedY, 0.0f);
+
+    // Branch: reset callback — not triggered
+    RichEditorModelNG::SetOnContentScroll(richEditorNode_.GetRawPtr(), nullptr);
+    EXPECT_FALSE(eventHub->HasOnScrollChange());
+    richEditorPattern->HandleContentScroll(preOffset, curOffset);
+    EXPECT_FLOAT_EQ(receivedX, 0.0f);
+}
+
+/**
+ * @tc.name: CapiContentSizeChange001
+ * @tc.desc: Test CAPI ContentSizeChange callback set/reset and trigger via HandleContentSizeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, CapiContentSizeChange001, TestSize.Level2)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    float receivedWidth = 0.0f;
+    float receivedHeight = 0.0f;
+    auto callback = [&receivedWidth, &receivedHeight](float w, float h) {
+        receivedWidth = w;
+        receivedHeight = h;
+    };
+
+    // Branch: set callback via ModelNG
+    RichEditorModelNG::SetOnContentSizeChange(richEditorNode_.GetRawPtr(), std::move(callback));
+    EXPECT_TRUE(eventHub->HasOnContentSizeChange());
+
+    // Setup mock paragraph with GetTextWidth=30
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(30.0f));
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph });
+
+    // Branch: textWidth(30) < textRect.Width(100) — callback returns textWidth
+    richEditorPattern->lastContentSizeRect_ = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    RectF smallTextRect(0.0f, 0.0f, TEST_WIDTH, TEST_HEIGHT);
+    richEditorPattern->HandleContentSizeChange(smallTextRect);
+    EXPECT_FLOAT_EQ(receivedWidth, 30.0f);
+    EXPECT_FLOAT_EQ(receivedHeight, TEST_HEIGHT);
+
+    // Branch: textWidth(30) >= textRect.Width(20) — callback returns textRect.Width
+    receivedWidth = 0.0f;
+    receivedHeight = 0.0f;
+    richEditorPattern->lastContentSizeRect_ = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    RectF largeTextRect(0.0f, 0.0f, 20.0f, TEST_HEIGHT);
+    richEditorPattern->HandleContentSizeChange(largeTextRect);
+    EXPECT_FLOAT_EQ(receivedWidth, 20.0f);
+    EXPECT_FLOAT_EQ(receivedHeight, TEST_HEIGHT);
+
+    // Branch: size not changed — callback not triggered
+    receivedWidth = 0.0f;
+    receivedHeight = 0.0f;
+    richEditorPattern->HandleContentSizeChange(largeTextRect);
+    EXPECT_FLOAT_EQ(receivedWidth, 0.0f);
+    EXPECT_FLOAT_EQ(receivedHeight, 0.0f);
+
+    // Branch: reset callback — not triggered
+    RichEditorModelNG::SetOnContentSizeChange(richEditorNode_.GetRawPtr(), nullptr);
+    EXPECT_FALSE(eventHub->HasOnContentSizeChange());
+    richEditorPattern->HandleContentSizeChange(smallTextRect);
+    EXPECT_FLOAT_EQ(receivedWidth, 0.0f);
 }
 }

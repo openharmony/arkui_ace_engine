@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/native/node/node_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/select_overlay/service_collaboration_menu_ace_helper.h"
@@ -888,6 +890,54 @@ void ResetRichEditorOnDidChange(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetOnDidChange(frameNode, nullptr);
+}
+
+void SetRichEditorNapiOnContentScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScroll = [extraParam](float totalOffsetX, float totalOffsetY) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_RICH_EDITOR_ON_CONTENT_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = totalOffsetX;
+        event.componentAsyncEvent.data[1].f32 = totalOffsetY;
+        SendArkUISyncEvent(&event);
+    };
+    RichEditorModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
+}
+
+void ResetRichEditorOnContentScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnContentScroll(frameNode, nullptr);
+}
+
+void SetRichEditorNapiOnContentSizeChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [extraParam](float width, float height) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_RICH_EDITOR_ON_CONTENT_SIZE_CHANGE;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
+        event.componentAsyncEvent.data[0].f32 = NearEqual(density, 0.0) ? 0.0f : width / density;
+        event.componentAsyncEvent.data[1].f32 = NearEqual(density, 0.0) ? 0.0f : height / density;
+        SendArkUISyncEvent(&event);
+    };
+    RichEditorModelNG::SetOnContentSizeChange(frameNode, std::move(onChange));
+}
+
+void ResetRichEditorOnContentSizeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnContentSizeChange(frameNode, nullptr);
 }
 
 bool SetRichEditorPlaceholderValue(
@@ -2077,6 +2127,8 @@ void* GetEventSetHandler(uint32_t kind)
         NG::SetRichEditorNapiOnCopy,
         NG::SetRichEditorNapiOnWillChange,
         NG::SetRichEditorNapiOnDidChange,
+        NG::SetRichEditorNapiOnContentScroll,
+        NG::SetRichEditorNapiOnContentSizeChange,
     };
     if (kind >= sizeof(richEditorNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
@@ -2097,6 +2149,8 @@ void* GetEventResetHandler(uint32_t kind)
         NG::ResetRichEditorOnCopy,
         NG::ResetRichEditorNapiOnWillChange,
         NG::ResetRichEditorNapiOnDidChange,
+        NG::ResetRichEditorOnContentScroll,
+        NG::ResetRichEditorOnContentSizeChange,
     };
     if (kind >=
         sizeof(richEditorNodeResetAsyncEventHandlers) / sizeof(ResetComponentAsyncEventHandler)) {
@@ -2319,6 +2373,10 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
             .resetRichEditorOnWillChange = nullptr,
             .setRichEditorOnDidChange = nullptr,
             .resetRichEditorOnDidChange = nullptr,
+            .setRichEditorNapiOnContentScroll = nullptr,
+            .resetRichEditorOnContentScroll = nullptr,
+            .setRichEditorNapiOnContentSizeChange = nullptr,
+            .resetRichEditorOnContentSizeChange = nullptr,
             .setRichEditorPlaceholder = nullptr,
             .setRichEditorNapiPlaceholder = nullptr,
             .resetRichEditorPlaceholder = nullptr,
@@ -2490,6 +2548,10 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .resetRichEditorOnWillChange = ResetRichEditorOnWillChange,
         .setRichEditorOnDidChange = SetRichEditorOnDidChange,
         .resetRichEditorOnDidChange = ResetRichEditorOnDidChange,
+        .setRichEditorNapiOnContentScroll = SetRichEditorNapiOnContentScroll,
+        .resetRichEditorOnContentScroll = ResetRichEditorOnContentScroll,
+        .setRichEditorNapiOnContentSizeChange = SetRichEditorNapiOnContentSizeChange,
+        .resetRichEditorOnContentSizeChange = ResetRichEditorOnContentSizeChange,
         .setRichEditorPlaceholder = SetRichEditorPlaceholder,
         .setRichEditorNapiPlaceholder = SetRichEditorNapiPlaceholder,
         .resetRichEditorPlaceholder = ResetRichEditorPlaceholder,

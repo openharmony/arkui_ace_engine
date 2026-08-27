@@ -169,18 +169,26 @@ void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
     richEditorPattern->ChangeLastRichTextRect();
 }
 
-void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+void RichEditorPaintMethod::RefreshRichTextRect(const RefPtr<RichEditorContentModifier>& contentMod)
 {
-    auto contentMod = DynamicCast<RichEditorContentModifier>(GetContentModifier(paintWrapper));
     CHECK_NULL_VOID(contentMod);
-    TextPaintMethod::UpdateContentModifier(paintWrapper);
     auto contentPattern = DynamicCast<RichEditorContentPattern>(GetPattern().Upgrade());
     CHECK_NULL_VOID(contentPattern);
     auto richEditorPattern = contentPattern->GetParentPattern();
     CHECK_NULL_VOID(richEditorPattern);
     auto richtTextOffset = contentPattern->GetTextRect().GetOffset();
+    OffsetF preTextOffset(contentMod->GetRichTextRectX(), contentMod->GetRichTextRectY());
+    richEditorPattern->HandleContentScroll(preTextOffset, richtTextOffset);
     contentMod->SetRichTextRectX(richtTextOffset.GetX());
     contentMod->SetRichTextRectY(richtTextOffset.GetY());
+}
+
+void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    auto contentMod = DynamicCast<RichEditorContentModifier>(GetContentModifier(paintWrapper));
+    CHECK_NULL_VOID(contentMod);
+    TextPaintMethod::UpdateContentModifier(paintWrapper);
+    RefreshRichTextRect(contentMod);
 
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();

@@ -739,6 +739,22 @@ void RichEditorModelNG::SetOnDidChange(
     eventHub->SetOnDidChange(std::move(func));
 }
 
+void RichEditorModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void RichEditorModelNG::SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnContentSizeChange(std::move(func));
+}
+
 void RichEditorModelNG::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();

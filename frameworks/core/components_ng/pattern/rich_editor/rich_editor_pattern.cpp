@@ -844,7 +844,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     UpdateParentOffsetAndOverlay();
     const auto& richTextRectOpt = layoutAlgorithm->GetTextRect();
-    IF_TRUE(richTextRectOpt.has_value(), richTextRect_ = richTextRectOpt.value());
+    UpdateRichTextRect(richTextRectOpt);
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
@@ -883,6 +883,53 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     releaseInDrop_ = false;
     return ret;
+}
+
+void RichEditorPattern::HandleContentScroll(const OffsetF& preTextOffset, const OffsetF& curTextOffset) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->HasOnScrollChange()) {
+        return;
+    }
+    if (preTextOffset == curTextOffset) {
+        return;
+    }
+    eventHub->FireOnScrollChangeEvent(curTextOffset.GetX(), curTextOffset.GetY());
+}
+
+void RichEditorPattern::HandleContentSizeChange(const RectF& textRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    const auto textWidth = paragraphs_.GetTextWidth();
+    RectF callbackRect(textRect.GetOffset(),
+        SizeF(std::min(textWidth, textRect.Width()), textRect.Height()));
+    const auto prevRect = lastContentSizeRect_;
+    lastContentSizeRect_ = callbackRect;
+    if (!eventHub->HasOnContentSizeChange() || prevRect == callbackRect) {
+        return;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([callbackRect, weak = WeakClaim(Referenced::RawPtr(eventHub))]() {
+        auto eventHub = weak.Upgrade();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnContentSizeChange(std::max(0.0f, callbackRect.Width()), callbackRect.Height());
+    });
+}
+
+void RichEditorPattern::UpdateRichTextRect(const std::optional<RectF>& richTextRectOpt)
+{
+    CHECK_NULL_VOID(richTextRectOpt.has_value());
+    const auto& textRect = richTextRectOpt.value();
+    HandleContentSizeChange(textRect);
+    richTextRect_ = textRect;
 }
 
 void RichEditorPattern::UpdateSelectionAndHandleVisibility()

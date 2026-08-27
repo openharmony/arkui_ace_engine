@@ -110,6 +110,8 @@ public:
         FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func, bool isJsView = false);
     static void SetOnDidChange(
         FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func, bool isJsView = false);
+    static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
+    static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options);
     static void SetAboutToDelete(
         FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func, bool isJsView = false);

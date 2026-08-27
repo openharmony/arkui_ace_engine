@@ -407,6 +407,9 @@ public:
     void FireOnReady();
     void MoveCaretOnLayoutSwap();
     void MoveTextRectOnLayoutSwap();
+    void HandleContentScroll(const OffsetF& preTextOffset, const OffsetF& curTextOffset) const;
+    void HandleContentSizeChange(const RectF& textRect);
+    void UpdateRichTextRect(const std::optional<RectF>& richTextRectOpt);
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     bool IsIMEOperation(OperationType operationType);
@@ -1416,6 +1419,8 @@ private:
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
+    // Tracks last min-corrected rect for content size change event
+    RectF lastContentSizeRect_;
     bool isFirstCallOnReady_ = false;
     bool scrollable_ = true;
     // add for ai input analysis

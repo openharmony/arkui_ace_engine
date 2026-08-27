@@ -1768,6 +1768,8 @@ enum ArkUIEventSubKind {
     ON_RICH_EDITOR_ON_COPY,
     ON_RICH_EDITOR_ON_WILL_CHANGE,
     ON_RICH_EDITOR_ON_DID_CHANGE,
+    ON_RICH_EDITOR_ON_CONTENT_SCROLL,
+    ON_RICH_EDITOR_ON_CONTENT_SIZE_CHANGE,
 
     ON_LAZY_COLUMN_LAYOUT_SCROLL_INDEX = ARKUI_MAX_EVENT_NUM * ARKUI_LAZY_COLUMN_LAYOUT,
 
@@ -9293,6 +9295,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnWillChange)(ArkUINodeHandle node);
     void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
+    void (*setRichEditorNapiOnContentScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnContentScroll)(ArkUINodeHandle node);
+    void (*setRichEditorNapiOnContentSizeChange)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnContentSizeChange)(ArkUINodeHandle node);
     void (*setRichEditorPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
         const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount,
         void* resRawPtr, bool isJsView);
