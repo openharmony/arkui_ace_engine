@@ -5516,6 +5516,7 @@ void TextPattern::OnPageTranslateSourceTextChanged()
 
 void TextPattern::ReportPageTranslateTextDrawn()
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     MarkPageTranslateTextDrawn();
@@ -5526,6 +5527,7 @@ void TextPattern::ReportPageTranslateTextDrawn()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->ReportTranslateTextNode(AceType::WeakClaim<PageTranslateNode>(this), text);
+#endif
 }
 
 bool TextPattern::ApplyPageTranslateResult(const std::string& result, int64_t version)
