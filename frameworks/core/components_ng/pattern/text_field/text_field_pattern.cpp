@@ -60,6 +60,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_free_scroller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_type_utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
@@ -8474,34 +8475,8 @@ std::string TextFieldPattern::TextInputTypeToString() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    constexpr std::string_view DEFAULT_INPUT_TYPE = "InputType.Normal";
-    constexpr std::string_view DEFAULT_TEXT_AREA_TYPE = "TextAreaType.NORMAL";
-    struct TextInputTypeMapping {
-        TextInputType type;
-        std::string_view inputType;
-        std::string_view textAreaType;
-    };
-    static constexpr std::array<TextInputTypeMapping, 11> TEXT_INPUT_TYPE_MAPPINGS = { {
-        { TextInputType::NUMBER, "InputType.Number", "TextAreaType.NUMBER" },
-        { TextInputType::EMAIL_ADDRESS, "InputType.Email", "TextAreaType.EMAIL" },
-        { TextInputType::PHONE, "InputType.PhoneNumber", "TextAreaType.PHONE_NUMBER" },
-        { TextInputType::URL, "InputType.URL", "TextAreaType.URL" },
-        { TextInputType::VISIBLE_PASSWORD, "InputType.Password", "InputType.Password" },
-        { TextInputType::USER_NAME, "InputType.USER_NAME", "InputType.USER_NAME" },
-        { TextInputType::NEW_PASSWORD, "InputType.NEW_PASSWORD", "InputType.NEW_PASSWORD" },
-        { TextInputType::NUMBER_PASSWORD, "InputType.NUMBER_PASSWORD", "InputType.NUMBER_PASSWORD" },
-        { TextInputType::NUMBER_DECIMAL, "InputType.NUMBER_DECIMAL", "TextAreaType.NUMBER_DECIMAL" },
-        { TextInputType::ONE_TIME_CODE, "InputType.ONE_TIME_CODE", "TextAreaType.ONE_TIME_CODE" },
-        { TextInputType::ONE_TIME_CODE_NUMBER, "InputType.ONE_TIME_CODE_NUMBER", "TextAreaType.ONE_TIME_CODE_NUMBER" },
-    } };
-
     auto textInputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-    for (const auto& mapping : TEXT_INPUT_TYPE_MAPPINGS) {
-        if (mapping.type == textInputType) {
-            return std::string(IsTextArea() ? mapping.textAreaType : mapping.inputType);
-        }
-    }
-    return std::string(isTextInput_ ? DEFAULT_INPUT_TYPE : DEFAULT_TEXT_AREA_TYPE);
+    return TextFieldTypeUtils::ToInputTypeString(textInputType, IsTextArea(), isTextInput_);
 }
 
 std::string TextFieldPattern::TextContentTypeToString() const
@@ -8509,10 +8484,7 @@ std::string TextFieldPattern::TextContentTypeToString() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     auto contentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
-    if (contentTypeMap_.find(contentType) != contentTypeMap_.end()) {
-        return contentTypeMap_[contentType].second;
-    }
-    return contentTypeMap_[TextContentType::UNSPECIFIED].second;
+    return TextFieldTypeUtils::ToContentTypeString(contentType);
 }
 
 std::string TextFieldPattern::TextInputActionToString() const

@@ -25,9 +25,14 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/rich_editor/bridge/rich_editor_custom_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_type_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -43,10 +48,30 @@ const char COUNT_GTE_OPERATOR[] = "COUNT_GTE";
 const char SOURCE_ARKUI[] = "ARKUI";
 const char SEARCH_FIELD_TAG[] = "SearchField";
 
-bool IsTextCategoryComponent(const std::string& frameTag)
+std::string ExtractTextFieldText(const RefPtr<FrameNode>& node)
 {
-    return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXTINPUT_ETS_TAG ||
-        frameTag == V2::SEARCH_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG;
+    CHECK_NULL_RETURN(node, "");
+    auto customModifier = NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(customModifier, "");
+    CHECK_NULL_RETURN(customModifier->getTextByPattern, "");
+    std::string text;
+    if (customModifier->getTextByPattern(node, text)) {
+        return text;
+    }
+    return "";
+}
+
+std::string ExtractRichEditorText(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, "");
+    auto customModifier = NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(customModifier, "");
+    CHECK_NULL_RETURN(customModifier->getContentBySpans, "");
+    std::u16string text;
+    if (!customModifier->getContentBySpans(node, text)) {
+        return "";
+    }
+    return UtfUtils::Str16DebugToStr8(text);
 }
 
 bool IsValidId(const std::string& id)
@@ -104,54 +129,59 @@ std::unique_ptr<JsonValue> BuildRectJson(const PageSceneRectInfo& rect)
     return rectJson;
 }
 
-std::string ExtractTextFieldText(const RefPtr<FrameNode>& node)
+RefPtr<FrameNode> FindSearchFieldNode(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, "");
-    if (IsTextCategoryComponent(node->GetTag())) {
-        auto textInputCustomModifier = NodeModifier::GetTextInputCustomModifier();
-        CHECK_NULL_RETURN(textInputCustomModifier, "");
-        return textInputCustomModifier->extractTextFieldText(node);
-    }
-    return "";
-}
-
-std::string ExtractSearchText(const RefPtr<FrameNode>& node)
-{
-    CHECK_NULL_RETURN(node, "");
+    CHECK_NULL_RETURN(node, nullptr);
     for (const auto& child : node->GetChildrenForInspector(true)) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
         if (childFrameNode && childFrameNode->GetTag() == SEARCH_FIELD_TAG) {
-            return ExtractTextFieldText(childFrameNode);
+            return childFrameNode;
         }
     }
-    return "";
+    return nullptr;
 }
 
-std::string ExtractRichEditorText(const RefPtr<FrameNode>& node)
+void FillTextFieldInfo(const RefPtr<FrameNode>& node, PageSceneNodeInfo& info)
 {
-    CHECK_NULL_RETURN(node, "");
-    if (node->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
-        auto* customModifier = NodeModifier::GetRichEditorCustomModifier();
-        CHECK_NULL_RETURN(customModifier, "");
-        return customModifier->extractRichEditorText(node);
+    CHECK_NULL_VOID(node);
+    info.text = ExtractTextFieldText(node);
+    auto layoutProperty = node->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasPlaceholder()) {
+        info.placeholder = UtfUtils::Str16DebugToStr8(layoutProperty->GetPlaceholderValue());
     }
-    return "";
+    const bool isTextArea = node->GetTag() == V2::TEXTAREA_ETS_TAG;
+    auto contentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    info.contentType = TextFieldTypeUtils::ToContentTypeName(contentType);
+    info.inputType = TextFieldTypeUtils::ToInputTypeName(inputType, isTextArea, !isTextArea);
 }
 
-std::string ExtractInputText(const RefPtr<FrameNode>& node)
+void FillRichEditorInfo(const RefPtr<FrameNode>& node, PageSceneNodeInfo& info)
 {
-    CHECK_NULL_RETURN(node, "");
+    CHECK_NULL_VOID(node);
+    info.text = ExtractRichEditorText(node);
+    auto layoutProperty = node->GetLayoutProperty<RichEditorLayoutProperty>();
+    if (layoutProperty && layoutProperty->HasPlaceholder()) {
+        info.placeholder = UtfUtils::Str16DebugToStr8(layoutProperty->GetPlaceholderValue());
+    }
+}
+
+void FillInputInfo(const RefPtr<FrameNode>& node, PageSceneNodeInfo& info)
+{
+    CHECK_NULL_VOID(node);
     auto tag = node->GetTag();
     if (tag == V2::TEXTINPUT_ETS_TAG || tag == V2::TEXTAREA_ETS_TAG || tag == SEARCH_FIELD_TAG) {
-        return ExtractTextFieldText(node);
+        FillTextFieldInfo(node, info);
+        return;
     }
     if (tag == V2::SEARCH_ETS_TAG) {
-        return ExtractSearchText(node);
+        FillTextFieldInfo(FindSearchFieldNode(node), info);
+        return;
     }
     if (tag == V2::RICH_EDITOR_ETS_TAG) {
-        return ExtractRichEditorText(node);
+        FillRichEditorInfo(node, info);
     }
-    return "";
 }
 
 std::string BuildPageSceneEventName(const std::string& sceneType, bool matched, bool forceReportUnmatched)
@@ -268,7 +298,7 @@ std::optional<PageSceneNodeInfo> PageSceneInputCountTracker::BuildNodeInfo(
     info.nodeId = node->GetId();
     info.nodeType = nodeType;
     if (rule.includeText) {
-        info.text = ExtractInputText(node);
+        FillInputInfo(node, info);
     }
     info.focusable = focusable;
     info.rect.x = rect.GetX();
@@ -606,6 +636,9 @@ std::string PageSceneRuleManager::BuildSceneJson(const PageSceneRuleSet& ruleSet
         }
         if (rule.includeText) {
             nodeJson->Put("text", node.text.c_str());
+            nodeJson->Put("placeholder", node.placeholder.c_str());
+            nodeJson->Put("contentType", node.contentType.c_str());
+            nodeJson->Put("inputType", node.inputType.c_str());
         }
         nodesJson->Put(nodeJson);
     }

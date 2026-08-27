@@ -31,6 +31,8 @@
       "OHOS::Ace::NG::NavigationManager::FireOverlayLifecycle(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int, int)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::SetPropertyUnit(OHOS::Ace::PropertyUnit)";
       "OHOS::Ace::NG::SafeAreaManager::GetCutoutSafeAreaWithoutProcess() const";
+      "OHOS::Ace::NG::TextFieldTypeUtils::ToContentTypeString(OHOS::Ace::NG::TextContentType)";
+      "OHOS::Ace::NG::TextFieldTypeUtils::ToInputTypeString(OHOS::Ace::TextInputType, bool, bool)";
       "OHOS::Ace::NG::SystemWindowScene::CreateOverlayManager(bool, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::SystemWindowScene::DeleteOverlayManager(int)";
       "OHOS::Ace::NG::SystemWindowScene::GetOverlayManager(int)";
