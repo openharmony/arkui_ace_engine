@@ -135,6 +135,6 @@ API 检索建议：
 
 - 子系统细分见上方「子系统导航」表。
 - 自定义组件渲染管线与 `CustomNode`：见「C++ 绑定与宿主节点」与「自定义组件机制」子页面。
-- `ForEach`/`LazyForEach`/`Repeat`/`RepeatVirtualScroll` 渲染控制语法专题：`docs/syntax/`。
+- `ForEach`/`LazyForEach`/`Repeat`/`RepeatVirtualScroll` 渲染控制语法专题：`docs/kb/syntax/`。
 - 动态/静态前端总体架构：`AGENTS.md` 的「Frontend Support」与 `frameworks/bridge/arkts_frontend/`。
 - `@ohos.data.*` 持久化后端（外部仓）：由应用通过 `PersistenceV2.configureBackend(IStorage)` 注入，不在本仓。
