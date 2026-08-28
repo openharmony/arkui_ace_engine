@@ -529,11 +529,11 @@ bool AceViewOhos::HandleMappedButtonRelease(const MouseEvent& event, const Touch
         ResetMouseMappingState();
         return true;
     }
-    constexpr int32_t DELAYED_UP_BUFFER_MS = 100;
+    constexpr int32_t DELAYED_UP_BUFFER_MS = 20;
     auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
         event.time - mousePressTime_).count();
     int32_t delayMs = mouseLongPressDuration_ - static_cast<int32_t>(elapsedMs) + DELAYED_UP_BUFFER_MS;
-    if (delayMs < DELAYED_UP_BUFFER_MS) {
+    if (delayMs < 0) {
         delayMs = DELAYED_UP_BUFFER_MS;
     }
     ScheduleDelayedUp(touchEvent, node, markProcess, delayMs);
