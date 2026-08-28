@@ -2135,7 +2135,7 @@ void FormPattern::OnActionEvent(const std::string& action)
     }
 
     auto type = actionType->GetString();
-    if (type != "router" && type != "message" && type != "call") {
+    if (type != "router" && type != "message" && type != "call" && type != "insightIntent") {
         TAG_LOGE(AceLogTag::ACE_FORM, "action type: %{public}s is error.", type.c_str());
         return;
     }
@@ -2151,7 +2151,9 @@ void FormPattern::OnActionEvent(const std::string& action)
     if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
-        if ("router" == type && !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        // insightIntent 与 router 同为用户点击触发的前台事件（意图执行会拉起 Ability），同样拦截非手动调用
+        if (("router" == type || "insightIntent" == type) &&
+            !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             TAG_LOGW(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
             return;
         }

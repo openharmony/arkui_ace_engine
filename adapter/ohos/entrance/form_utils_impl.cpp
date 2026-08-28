@@ -17,6 +17,8 @@
 
 #include "form_mgr.h"
 
+#include "want_params.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace {
@@ -149,5 +151,61 @@ int32_t FormUtilsImpl::BackgroundEvent(const int64_t formId, const std::string& 
     want.SetParam("params", params->ToString());
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_MANUAL_CLICK_KEY, isManuallyClick);
     return AppExecFwk::FormMgr::GetInstance().BackgroundEvent(formId, want, token);
+}
+
+int32_t FormUtilsImpl::InsightIntentEvent(
+    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
+{
+    ContainerScope scope(containerId);
+    auto container = Container::Current();
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, -1);
+    // 系统应用门禁已落位：宿主侧 OnInsightIntentActionEvent 内 FormMgr::IsSystemAppForm
+    // 判 provider bundleName（先例 RegisterFont 字体门禁），此处不重复校验。
+    auto token = aceContainer->GetToken();
+    CHECK_NULL_RETURN(token, -1);
+
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    auto intentNameJson = eventAction->GetValue("intentName");
+    auto intentName = intentNameJson->GetString();
+    if (intentName.empty()) {
+        return -1;
+    }
+
+    // intentParams: JSON -> AAFwk::WantParams（对照 RouterEvent 的 params 转换循环）
+    AAFwk::WantParams wantParams;
+    auto intentParams = eventAction->GetValue("intentParams");
+    if (intentParams->IsValid()) {
+        auto child = intentParams->GetChild();
+        while (child->IsValid()) {
+            auto key = child->GetKey();
+            if (child->IsNull()) {
+                wantParams.SetParam(key, std::string());
+            } else if (child->IsString()) {
+                wantParams.SetParam(key, child->GetString());
+            } else if (child->IsNumber()) {
+                wantParams.SetParam(key, child->GetInt());
+            } else {
+                wantParams.SetParam(key, std::string());
+            }
+            child = child->GetNext();
+        }
+    }
+
+    // TODO: 以下依赖 form_fwk 侧接口定稿（InsightIntentExecuteParam / InsightIntentHostClient
+    // / ExecuteIntentWithSpecalTokenId 均不在本仓库），补齐 include 后替换占位实现：
+    // 1. InsightIntentExecuteParam 字段名待接口负责人确认（推测含 intentName）；
+    // 2. uint64_t key 语义待确认。注意：aceContainer->GetToken() 返回 sptr<IRemoteObject>（IPC
+    //    token 对象，参照 RouterEvent 传 token 的旧模式），无法直接转为 uint64 数值。类型核对：
+    //    formId 为 int64_t、containerId 为 int32_t（宽度/符号不吻合），精确匹配 uint64_t 的
+    //    是 FullTokenID —— 参照 js_plugin_component.cpp 先例 IPCSkeleton::GetSelfTokenID()，
+    //    与函数名 WithSpecalTokenId 吻合，待接口负责人确认；
+    // 3. InsightIntentHostClient 已确认为外部提供，ace_engine 不实现回调，直接获取实例传入
+    //    （具体获取方式待头文件定稿：GetInstance() 单例模式，参照 FormHostClient）。
+    // InsightIntentExecuteParam param;
+    // param.intentName = intentName;
+    // return XxxMgr::GetInstance().ExecuteIntentWithSpecalTokenId(
+    //     key, InsightIntentHostClient::GetInstance(), param, wantParams);
+    return -1;
 }
 } // namespace OHOS::Ace
