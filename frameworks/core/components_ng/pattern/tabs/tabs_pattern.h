@@ -244,6 +244,8 @@ public:
 
     void AddTabContentNode(const RefPtr<TabContentNode>& tabContentNode);
     void RemoveTabContentNode(const RefPtr<TabContentNode>& tabContentNode);
+    bool IsColorInvertEnabled();
+    ColorMode GetColorInvertColorMode();
 
 private:
     void OnAttachToFrameNode() override;
@@ -288,6 +290,23 @@ private:
     void OnFollowHandAnimationFinish();
     void ApplySystemMaterial();
     void ResetSystemMaterial();
+    void InitColorPickerIfNeeded();
+    void UnregisterColorPicker();
+    void OnLuminanceUpdate(uint32_t luminance);
+    void StartColorInvertAnimation();
+    void HandleColorInvert();
+    void SetTabBarIsFloating(bool isFloating)
+    {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        if (tabBar) {
+            auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+            if (tabBarPattern) {
+                tabBarPattern->SetIsFloatingBar(isFloating);
+            }
+        }
+    }
 
     void UpdateSideBarIfNeeded();
     void UpdateSideBarNode();
@@ -334,6 +353,9 @@ private:
     RefPtr<NG::UINode> sidebarHeaderNode_;
     TabsSidebarSearchableOptions searchableOptions_;
     std::vector<WeakPtr<TabContentNode>> tabContentNodes_;
+    // Color invert state for auto-inversion
+    std::optional<bool> isColorPickerDark_;
+    bool hasRegisterColorPicker_ = false;
 };
 
 } // namespace OHOS::Ace::NG
