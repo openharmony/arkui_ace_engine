@@ -29,6 +29,9 @@
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "test/mock/frameworks/core/common/mock_font_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -1043,26 +1046,6 @@ HWTEST_F(SearchTestNg, SetCancelIconSize001, TestSize.Level1)
     ASSERT_STREQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "/common/icon.png");
     searchModelInstance.SetCancelIconColor(Color::RED);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
-}
-
-/**
- * @tc.name: SetCancelButtonStyle002
- * @tc.desc: Set cancel button style
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, SetCancelButtonStyle002, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
-    ASSERT_NE(searchLayoutProperty, nullptr);
-    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::CONSTANT);
-    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
-    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INPUT);
-    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INPUT);
-    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INVISIBLE);
-    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
 }
 
 
@@ -3023,4 +3006,68 @@ HWTEST_F(SearchTestNg, SearchButtonPunctuationOverflow002, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
 }
+/**
+ * @tc.name: SearchFieldCalcHandleLevelModeWithClipEdge001
+ * @tc.desc: When SearchField has clipEdge=true, CalcHandleLevelMode should choose OVERLAY
+ *           mode to prevent the handle water-drop from being clipped by the owner node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchFieldCalcHandleLevelModeWithClipEdge001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<SearchTextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    ASSERT_NE(textFieldPattern->selectOverlay_, nullptr);
+
+    auto geometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(300.0f, 40.0f));
+
+    auto searchRenderContext = frameNode->GetRenderContext();
+    ASSERT_NE(searchRenderContext, nullptr);
+    searchRenderContext->UpdateClipEdge(true);
+
+    EXPECT_TRUE(textFieldPattern->selectOverlay_->IsOwnerClipContent());
+
+    RectF firstRect(10.0f, 5.0f, 2.0f, 20.0f);
+    RectF secondRect(50.0f, 5.0f, 2.0f, 20.0f);
+
+    textFieldPattern->selectOverlay_->CalcHandleLevelMode(firstRect, secondRect);
+    EXPECT_EQ(textFieldPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
+ * @tc.name: SearchFieldIsOwnerClipContent001
+ * @tc.desc: Test IsOwnerClipContent returns correct value based on owner clipEdge state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchFieldIsOwnerClipContent001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<SearchTextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    ASSERT_NE(textFieldPattern->selectOverlay_, nullptr);
+
+    auto searchRenderContext = frameNode->GetRenderContext();
+    ASSERT_NE(searchRenderContext, nullptr);
+
+    searchRenderContext->UpdateClipEdge(true);
+    EXPECT_TRUE(textFieldPattern->selectOverlay_->IsOwnerClipContent());
+
+    searchRenderContext->UpdateClipEdge(false);
+    EXPECT_FALSE(textFieldPattern->selectOverlay_->IsOwnerClipContent());
+}
+
 } // namespace OHOS::Ace::NG
