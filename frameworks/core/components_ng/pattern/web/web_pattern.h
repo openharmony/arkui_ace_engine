@@ -1105,6 +1105,7 @@ public:
     int HandlePinchGestureCommand(double x, double y, double scaleFactor, int32_t speed);
     int HandleLongPressCommand(double x, double y);
     int ExecuteGestureCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteAutoFillCommand(const std::unique_ptr<JsonValue>& comJson);
     int CheckGestureCoordinatesInWebBounds(double screenX, double screenY);
     bool ConvertScreenToWebCoordinates(double screenX, double screenY, double& outWebX, double& outWebY);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
