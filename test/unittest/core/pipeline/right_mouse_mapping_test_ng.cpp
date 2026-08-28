@@ -23,7 +23,11 @@
 #define protected public // NOLINT
 #include "base/utils/feature_manager.h"
 #include "core/common/event_manager.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/event/event_info_convertor.h"
+#include "core/image/image_cache.h"
+#include "core/pipeline/container_window_manager.h"
+#include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
@@ -396,6 +400,10 @@ public:
         context_ = AceType::MakeRefPtr<PipelineContext>(
             window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
         context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
+        context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>(DEFAULT_INSTANCE_ID);
+        context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+        context_->fontManager_ = FontManager::Create();
+        context_->imageCache_ = ImageCache::Create();
         MockContainer::SetUp();
         MockContainer::Current()->pipelineContext_ = context_;
     }
