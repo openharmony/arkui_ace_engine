@@ -220,6 +220,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
+
     void DetachFromMainTree(bool recursive = false, bool needCheckThreadSafeNodeTree = false);
     virtual void FireCustomDisappear();
     // Traverse downwards to update system environment variables.
@@ -1209,6 +1210,45 @@ public:
     virtual void SetSelectionContainerId(int32_t selectionContainerId);
     virtual void UpdateSelectionContainerId(int32_t selectionContainerId);
 
+    // Whether this node is the TitleBar node or a descendant of one. Set at
+    // AttachToMainTree (inherited from the parent, or true for the TitleBar node
+    // itself). Used by MaterialProcessor to gate material effectiveness.
+    bool IsInTitleBar() const
+    {
+        return inTitleBar_;
+    }
+    void SetInTitleBar(bool flag)
+    {
+        inTitleBar_ = flag;
+    }
+
+    // Whether this node is a bottom-positioned Tabs TabBar or a descendant of
+    // one. Inherited (recomputed) at AttachToMainTree from the parent, and set
+    // true on the TabBar node itself by TabBarPattern::OnAttachToMainTree when
+    // the parent Tabs is a bottom Tabs. Used by MaterialProcessor to gate material
+    // effectiveness (same mechanism as IsInTitleBar, no ancestor walk).
+    bool IsInBottomTabBar() const
+    {
+        return inBottomTabBar_;
+    }
+    void SetInBottomTabBar(bool flag)
+    {
+        inBottomTabBar_ = flag;
+    }
+
+    // Whether this node is inside a CustomSelectMenu subtree (created by
+    // CreateCustomSelectMenu). The root is marked directly; children inherit
+    // at AttachToMainTree (once-true, never cleared). Used by MaterialProcessor
+    // to keep material effective for lazily-built CustomNode children.
+    bool IsInCustomSelectMenu() const
+    {
+        return inCustomSelectMenu_;
+    }
+    void SetInCustomSelectMenu(bool flag)
+    {
+        inCustomSelectMenu_ = flag;
+    }
+
 private:
     bool uiNodeGcEnable_ = false;
 
@@ -1367,6 +1407,19 @@ private:
     WeakPtr<UINode> lastParent_; // for dumpinfo of the @Component. don't use ancestor_ because it may be clear.
     bool isRoot_ = false;
     bool onMainTree_ = false;
+    // Inherited at AttachToMainTree: true if this node is the TitleBar node or a
+    // descendant of one. Propagated top-down (each node inherits its parent's
+    // flag) so MaterialProcessor can decide titleBar eligibility in O(1) without
+    // walking the ancestor chain.
+    bool inTitleBar_ = false;
+    // Inherited at AttachToMainTree from the parent (recomputed, like inTitleBar_);
+    // set true on the TabBar node by TabBarPattern::OnAttachToMainTree when its
+    // parent Tabs is a bottom Tabs. Propagates to the TabBar subtree so
+    // MaterialProcessor can decide bottom-tabBar eligibility in O(1).
+    bool inBottomTabBar_ = false;
+    // Once-true: set in CreateCustomSelectMenu or inherited from parent at
+    // AttachToMainTree; never cleared (safe over-permission for re-parenting).
+    bool inCustomSelectMenu_ = false;
     bool isThreadSafeNode_ = false;
     // Indicates whether this node was created in an isolated (dc/card) thread.
     // Set at construction from ContainerScope::IsIsolatedThread() and never changes afterwards.

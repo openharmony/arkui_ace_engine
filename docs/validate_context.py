@@ -18,7 +18,7 @@ from __future__ import annotations
 """
 Validate ArkUI KB/Spec context routing.
 
-The script checks docs/context_registry.json, the KB index,
+The script checks docs/context_registry.json,
 registered Spec links, existing Feat specs, and lightweight KB pages. It is
 designed for the migration period: confirmed invalid data is reported as an
 error; legacy placeholders such as "待补充" are reported as warnings.
@@ -139,7 +139,6 @@ class Validator:
 
     def validate(self) -> tuple[int, int]:
         self.validate_registry()
-        self.validate_kb_index()
         if self.specs_available():
             self.validate_specs_index()
             self.validate_feat_specs()
@@ -205,13 +204,6 @@ class Validator:
                 self.error(entry_path, "`kb` must be null or a docs/ relative path")
             elif not self.repo_path_exists(kb):
                 self.error(entry_path, f"`kb` path does not exist: {kb}")
-
-        legacy_kb = entry.get("legacy_kb")
-        if legacy_kb:
-            if not isinstance(legacy_kb, str) or not legacy_kb.startswith("docs/"):
-                self.error(entry_path, "`legacy_kb` must be a docs/ relative path")
-            elif not self.repo_path_exists(legacy_kb):
-                self.error(entry_path, f"`legacy_kb` path does not exist: {legacy_kb}")
 
         spec_domain = entry.get("spec_domain")
         func_id = entry.get("func_id")
@@ -305,27 +297,6 @@ class Validator:
             self.error(entry_path, f"`spec_domain` is not registered in specs/index.md: {spec_domain}")
         if func_id and str(func_id) not in index_text:
             self.error(entry_path, f"`func_id` is not registered in specs/index.md: {func_id}")
-
-    def validate_kb_index(self) -> None:
-        index_path = self.docs_dir / "knowledge_base_INDEX.json"
-        data = self.load_json(index_path)
-        if not isinstance(data, dict):
-            return
-        entries = data.get("knowledge_bases")
-        if not isinstance(entries, list):
-            self.error(index_path, "`knowledge_bases` must be a list")
-            return
-
-        for index, entry in enumerate(entries):
-            entry_path = f"docs/knowledge_base_INDEX.json:knowledge_bases[{index}]"
-            if not isinstance(entry, dict):
-                self.error(entry_path, "entry must be an object")
-                continue
-            file_path = entry.get("file_path")
-            if not isinstance(file_path, str) or not file_path:
-                self.error(entry_path, "`file_path` must be a non-empty string")
-            elif not (self.docs_dir / file_path).exists():
-                self.error(entry_path, f"`file_path` does not exist: docs/{file_path}")
 
     def validate_specs_index(self) -> None:
         if not self.specs_available():

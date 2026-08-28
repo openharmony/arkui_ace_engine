@@ -71,7 +71,7 @@ const void* SymbolSpanDynamicModule::GetCjModifier()
 void* SymbolSpanDynamicModule::GetModel()
 {
     static NG::SymbolSpanModelNG model;
-    return &model;
+    return static_cast<SymbolSpanModel*>(&model);
 }
 
 const void* SymbolSpanDynamicModule::GetCustomModifier(const std::string& name)

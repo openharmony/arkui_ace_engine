@@ -821,6 +821,7 @@ private:
     bool CheckDialogParamDataValid(const std::unique_ptr<JsonValue>& paramJson, const std::string& command);
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     static void Init();
     void InitDisabled();

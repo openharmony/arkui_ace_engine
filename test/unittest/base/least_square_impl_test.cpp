@@ -88,4 +88,38 @@ HWTEST_F(LeastSquareImplTest, LeastSquareImplTest002, TestSize.Level1)
     leastSquareImpl3.ResetValsFromRaw(leastSquareImpl2, 2);
     EXPECT_FALSE(leastSquareImpl3.GetLeastSquareParams(params));
 }
+
+HWTEST_F(LeastSquareImplTest, LeastSquareImplTest003, TestSize.Level1)
+{
+    const int32_t countNum = 5;
+    LeastSquareImpl impl(PARAMS_NUM3, countNum);
+    for (int32_t i = 0; i < countNum * 2 + 1; ++i) {
+        impl.UpdatePoint(static_cast<double>(i), static_cast<double>(i * 2));
+    }
+    EXPECT_EQ(impl.GetTrackNum(), countNum);
+    const auto& xVals = impl.GetXVals();
+    const auto& yVals = impl.GetYVals();
+    EXPECT_DOUBLE_EQ(xVals.front(), static_cast<double>(countNum + 1));
+    EXPECT_DOUBLE_EQ(yVals.front(), static_cast<double>((countNum + 1) * 2));
+    EXPECT_DOUBLE_EQ(xVals.back(), static_cast<double>(countNum * 2));
+    EXPECT_DOUBLE_EQ(yVals.back(), static_cast<double>(countNum * 2 * 2));
+}
+
+HWTEST_F(LeastSquareImplTest, LeastSquareImplTest004, TestSize.Level1)
+{
+    LeastSquareImpl impl(PARAMS_NUM3, 0);
+    for (int32_t i = 0; i < 10; ++i) {
+        impl.UpdatePoint(static_cast<double>(i), static_cast<double>(i));
+    }
+    EXPECT_EQ(impl.GetTrackNum(), 10);
+}
+
+HWTEST_F(LeastSquareImplTest, LeastSquareImplTest005, TestSize.Level1)
+{
+    LeastSquareImpl impl(PARAMS_NUM3, -1);
+    for (int32_t i = 0; i < 10; ++i) {
+        impl.UpdatePoint(static_cast<double>(i), static_cast<double>(i));
+    }
+    EXPECT_EQ(impl.GetTrackNum(), 10);
+}
 } // namespace OHOS::Ace

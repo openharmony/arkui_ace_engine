@@ -26,6 +26,8 @@ namespace OHOS::Ace::NG {
 
 class TabContentPattern;
 class SwiperPattern;
+class TabsLayoutProperty;
+class TabsNode;
 
 class TabsSideBarTabListPattern : public Pattern {
     DECLARE_ACE_TYPE(TabsSideBarTabListPattern, Pattern);
@@ -71,6 +73,13 @@ public:
     void ApplySearchFilter(
         std::function<bool(int32_t, const std::string& text)> searchFilter, const std::u16string& searchText);
     void AddOrUpdateTabListItem(const RefPtr<FrameNode>& tabContentNode, int32_t position, bool update);
+    void ApplyDefaultVisibility();
+
+    // Check whether a tab should be hidden by defaultVisibility.
+    // Returns true if the tab should be GONE per defaultVisibility rules.
+    bool IsHiddenByDefaultVisibility(int32_t tabIndex) const;
+    bool IsHiddenByDefaultVisibility(
+        const RefPtr<TabContentPattern>& tabContentPattern, const RefPtr<TabsNode>& tabsNode) const;
 
     RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
     {
@@ -93,6 +102,9 @@ private:
     void OnModifyDone() override;
     void UpdateTabItemStyle(int32_t index, bool selected);
     RefPtr<FrameNode> GetOrCreateTabItemNode(int32_t id);
+    void UpdateTabItemTextAndIconColor(int32_t selectedIndex);
+    void UpdateTextColorAndIconColor(
+        const RefPtr<FrameNode>& rowNode, Color textColor, Color iconColor, bool isSelected);
     void AddOrUpdateTabItemWithContent(
         const TabBarParam& tabBarParam, const RefPtr<FrameNode>& tabItemNode, int32_t tabContentId, int32_t myIndex);
     void AddOrUpdateTabItemWithBuilder(
@@ -116,6 +128,9 @@ private:
     RefPtr<SwiperController> swiperController_ = nullptr;
     int32_t currentIndex_ = -1;
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
+    // Active search state (set by ApplySearchFilter, consumed by ApplyDefaultVisibility)
+    std::function<bool(int32_t, const std::string& text)> activeSearchFilter_;
+    std::u16string activeSearchText_;
 };
 
 } // namespace OHOS::Ace::NG

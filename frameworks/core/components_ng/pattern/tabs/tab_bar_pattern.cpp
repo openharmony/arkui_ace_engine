@@ -45,6 +45,8 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -425,6 +427,23 @@ void TabBarPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    // Mark this TabBar (and, via UINode::AttachToMainTree inheritance, its
+    // descendants) as being inside a bottom Tabs, so MaterialProcessor permits
+    // material on this subtree in O(1) without walking the ancestor chain. The
+    // bottom position is a Tabs layout property (tabs-specific), so it is
+    // evaluated here in the tabs layer rather than in UINode.
+    auto tabs = AceType::DynamicCast<TabsNode>(host->GetParent());
+    if (!tabs) {
+        return;
+    }
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabs->GetLayoutProperty());
+    if (!tabsLayoutProperty) {
+        return;
+    }
+    if (tabsLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
+        tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START) == BarPosition::END) {
+        host->SetInBottomTabBar(true);
+    }
 }
 
 void TabBarPattern::SetTabBarFinishCallback()
@@ -3998,5 +4017,50 @@ void TabBarPattern::CheckFloatingStyle(int32_t index)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(height / HALF_OF_HEIGHT));
     renderContext->UpdateBorderRadius(borderRadius);
+}
+
+void TabBarPattern::ApplyDefaultVisibility()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto barStyle = tabsLayoutProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    // The tabbar does not display in Sidebar style, so there is no need to update the visibility of the internal tab.
+    if (barStyle == TabBarLayoutStyle::SIDEBAR) {
+        return;
+    }
+
+    auto tabContentNum = swiperNode->TotalChildCount();
+    auto isHiddenByDefaultVisibility = [tabsPattern](
+        const RefPtr<FrameNode>& tabContentNode) -> bool {
+        CHECK_NULL_RETURN(tabContentNode, false);
+        auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_RETURN(tabContentPattern, false);
+        const auto& defaultVisibility = tabContentPattern->GetDefaultVisibility();
+        return tabsPattern->IsTabShouldHideByVisibility(defaultVisibility);
+    };
+    // tabBarNode children: columnNodes + maskNodes + imageIndicatorNode
+    // columnNodes are at the front, count = tabContentNum
+    auto tabBarChildren = host->GetChildren();
+    int32_t tabIndex = 0;
+    for (auto it = tabBarChildren.begin(); it != tabBarChildren.end() && tabIndex < tabContentNum;
+         ++it, ++tabIndex) {
+        auto columnNode = AceType::DynamicCast<FrameNode>(*it);
+        CHECK_NULL_CONTINUE(columnNode);
+        auto columnProperty = columnNode->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(columnProperty);
+        auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(tabIndex));
+        bool needHidden = isHiddenByDefaultVisibility(tabContentNode);
+        columnProperty->UpdateVisibility(needHidden ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
+    host->MarkNeedSyncRenderTree();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

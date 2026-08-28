@@ -714,6 +714,8 @@ public:
         return false;
     }
 
+    virtual void OnMaterialDisable() {}
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

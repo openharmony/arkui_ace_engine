@@ -439,6 +439,7 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     }
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
+    mouseEvent.isScreenLocked = isScreenLocked;
     mouseEvent.mockFlushEvent = mockFlushEvent;
     mouseEvent.isStylusMouseMode = isStylusMouseMode;
     mouseEvent.rawDeltaX = rawDeltaX;

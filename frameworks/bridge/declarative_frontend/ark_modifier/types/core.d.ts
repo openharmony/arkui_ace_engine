@@ -317,6 +317,7 @@ type TabBarStyle = 'bottom' | 'sidebar' | 'sidebarAdaptable';
 type TabsSidebarSearchableOptions = object;
 type TabBarDisplayMode = 'bottomTabbar' | 'sidebar';
 type TabsBreakpointType<T> = object;
+type TabVisibility = 'visible' | 'hidden';
 
 declare class Indicator {
     left(value: LengthMetrics | undefined): this;

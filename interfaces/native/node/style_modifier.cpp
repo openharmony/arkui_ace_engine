@@ -12350,7 +12350,8 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (item->object) {
         if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT)) {
             auto* TextPickerRangeContentArray = reinterpret_cast<ArkUITextPickerRangeContentArray>(item->object);
-            if (TextPickerRangeContentArray == nullptr) {
+            if (TextPickerRangeContentArray == nullptr || TextPickerRangeContentArray->rangeContent == nullptr ||
+                TextPickerRangeContentArray->rangeContentArraySize <= 0) {
                 return ERROR_CODE_PARAM_INVALID;
             }
             fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerIconRangeStr(
@@ -12358,7 +12359,8 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         } else if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT)) {
             auto TextCascadePickerRangeContentArray =
                 reinterpret_cast<ArkUITextCascadePickerRangeContentArray>(item->object);
-            if (TextCascadePickerRangeContentArray == nullptr) {
+            if (TextCascadePickerRangeContentArray == nullptr ||
+                TextCascadePickerRangeContentArray->rangeContentArraySize <= 0) {
                 return ERROR_CODE_PARAM_INVALID;
             }
             fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextCascadePickRangeContent(

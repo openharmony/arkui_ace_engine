@@ -49,6 +49,9 @@ struct PageSceneNodeInfo {
     int32_t nodeId = -1;
     std::string nodeType;
     std::string text;
+    std::string placeholder;
+    std::string contentType;
+    std::string inputType;
     bool focusable = false;
     PageSceneRectInfo rect;
 };

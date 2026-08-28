@@ -164,9 +164,10 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetLightEffectColor(
     ArkUI_ImmersiveMaterialHandle material, uint32_t* color)
 {
     CHECK_NULL_RETURN(material && color, ARKUI_ERROR_CODE_PARAM_INVALID);
-    if (material->disableLightEffect || !material->hasLightEffect) {
+    if (material->disableLightEffect || !material->hasLightEffect
+        || !material->lightEffectOptions.color.has_value()) {
         return ARKUI_ERROR_CODE_PARAM_ERROR;
     }
-    *color = material->lightEffectOptions.color;
+    *color = material->lightEffectOptions.color.value();
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

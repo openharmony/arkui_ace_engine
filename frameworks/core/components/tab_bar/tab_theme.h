@@ -461,6 +461,22 @@ public:
     {
         return sideBarListItemLeftRightPadding_;
     }
+    const Color& GetSideBarSelectedIconColor() const
+    {
+        return sideBarSelectedIconColor_;
+    }
+    const Color& GetSideBarSelectedTextColor() const
+    {
+        return sideBarSelectedTextColor_;
+    }
+    const Color& GetSideBarUnselectedIconColor() const
+    {
+        return sideBarUnselectedIconColor_;
+    }
+    const Color& GetSideBarUnselectedTextColor() const
+    {
+        return sideBarUnselectedTextColor_;
+    }
 
 protected:
     TabTheme() = default;
@@ -551,6 +567,10 @@ protected:
     Color sideBarListItemHoverColor_;
     Color sideBarListItemPressedColor_;
     Color sideBarListItemFocusColor_;
+    Color sideBarSelectedIconColor_;
+    Color sideBarSelectedTextColor_;
+    Color sideBarUnselectedIconColor_;
+    Color sideBarUnselectedTextColor_;
     Dimension sideBarListItemFocusWidth_;
     Dimension sideBarListItemLeftRightPadding_ = 8.0_vp;
 };

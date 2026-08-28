@@ -219,6 +219,36 @@ void CreateBarBackgroundColorWithResourceObjImpl(ArkUINodeHandle node, void* bgC
     (void)bgColorRawPtr;
 }
 
+void SetTabsSidebarSelectedIconColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void CreateTabsSidebarSelectedIconWithResourceObjImpl(ArkUINodeHandle node, void* iconColorRawPtr) {}
+
+void ResetTabsSidebarSelectedIconColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarSelectedTextColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void CreateTabsSidebarSelectedTextWithResourceObjImpl(ArkUINodeHandle node, void* textColorRawPtr) {}
+
+void ResetTabsSidebarSelectedTextColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarUnselectedIconColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void CreateTabsSidebarUnselectedIconWithResourceObjImpl(ArkUINodeHandle node, void* iconColorRawPtr) {}
+
+void ResetTabsSidebarUnselectedIconColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarUnselectedTextColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void CreateTabsSidebarUnselectedTextWithResourceObjImpl(ArkUINodeHandle node, void* textColorRawPtr) {}
+
+void ResetTabsSidebarUnselectedTextColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarSelectedBoardColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void CreateTabsSidebarSelectedBoardWithResourceObjImpl(ArkUINodeHandle node, void* boardColorRawPtr) {}
+
+void ResetTabsSidebarSelectedBoardColorImpl(ArkUINodeHandle node) {}
+
 void SetBarBackgroundBlurStyleImpl(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption)
 {
     (void)node;
@@ -882,6 +912,10 @@ void ResetSidebarSearchableImpl(ArkUINodeHandle node) {}
 void SetBarDisplayModeBreakpointImpl(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint) {}
 
 void ResetBarDisplayModeBreakpointImpl(ArkUINodeHandle node) {}
+
+void SetOnBarDisplayModeChangeImpl(ArkUINodeHandle node, void* callback) {}
+
+void ResetOnBarDisplayModeChangeImpl(ArkUINodeHandle node) {}
 #endif
 
 void CreateTabs(
@@ -1059,6 +1093,156 @@ void CreateBarBackgroundColorWithResourceObj(ArkUINodeHandle node, void* bgColor
     auto* bgColorPtr = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
     auto bgColorResObj = AceType::Claim(bgColorPtr);
     TabsModelNG::HandleBarBackgroundColor(frameNode, bgColorResObj, true);
+}
+
+void SetTabsSidebarSelectedIconColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarSelectedIconColor(frameNode, Color(color));
+}
+
+void CreateTabsSidebarSelectedIconWithResourceObj(ArkUINodeHandle node, void* iconColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* iconColorPtr = reinterpret_cast<ResourceObject*>(iconColorRawPtr);
+    auto iconColorResObj = AceType::Claim(iconColorPtr);
+    TabsModelNG::HandleSidebarSelectedIconColor(frameNode, iconColorResObj, true);
+}
+
+void ResetTabsSidebarSelectedIconColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarSelectedIconColor(frameNode, tabTheme->GetSideBarSelectedIconColor());
+
+    CreateTabsSidebarSelectedIconWithResourceObj(node, nullptr);
+}
+
+void SetTabsSidebarSelectedTextColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarSelectedTextColor(frameNode, Color(color));
+}
+
+void CreateTabsSidebarSelectedTextWithResourceObj(ArkUINodeHandle node, void* textColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textColorRawPtr);
+    auto textColorResObj = AceType::Claim(textColorPtr);
+    TabsModelNG::HandleSidebarSelectedTextColor(frameNode, textColorResObj, true);
+}
+
+void ResetTabsSidebarSelectedTextColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarSelectedTextColor(frameNode, tabTheme->GetSideBarSelectedTextColor());
+
+    CreateTabsSidebarSelectedTextWithResourceObj(node, nullptr);
+}
+
+void SetTabsSidebarUnselectedIconColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarUnselectedIconColor(frameNode, Color(color));
+}
+
+void CreateTabsSidebarUnselectedIconWithResourceObj(ArkUINodeHandle node, void* iconColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* iconColorPtr = reinterpret_cast<ResourceObject*>(iconColorRawPtr);
+    auto iconColorResObj = AceType::Claim(iconColorPtr);
+    TabsModelNG::HandleSidebarUnselectedIconColor(frameNode, iconColorResObj, true);
+}
+
+void ResetTabsSidebarUnselectedIconColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarUnselectedIconColor(frameNode, tabTheme->GetSideBarUnselectedIconColor());
+
+    CreateTabsSidebarUnselectedIconWithResourceObj(node, nullptr);
+}
+
+void SetTabsSidebarUnselectedTextColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarUnselectedTextColor(frameNode, Color(color));
+}
+
+void CreateTabsSidebarUnselectedTextWithResourceObj(ArkUINodeHandle node, void* textColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textColorRawPtr);
+    auto textColorResObj = AceType::Claim(textColorPtr);
+    TabsModelNG::HandleSidebarUnselectedTextColor(frameNode, textColorResObj, true);
+}
+
+void ResetTabsSidebarUnselectedTextColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarUnselectedTextColor(frameNode, tabTheme->GetSideBarUnselectedTextColor());
+
+    CreateTabsSidebarUnselectedTextWithResourceObj(node, nullptr);
+}
+
+void SetTabsSidebarSelectedBoardColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarSelectedBoardColor(frameNode, Color(color));
+}
+
+void CreateTabsSidebarSelectedBoardWithResourceObj(ArkUINodeHandle node, void* boardColorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* boardColorPtr = reinterpret_cast<ResourceObject*>(boardColorRawPtr);
+    auto boardColorResObj = AceType::Claim(boardColorPtr);
+    TabsModelNG::HandleSidebarSelectedBoardColor(frameNode, boardColorResObj, true);
+}
+
+void ResetTabsSidebarSelectedBoardColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarSelectedBoardColor(frameNode, tabTheme->GetSideBarListItemActivedColor());
+
+    CreateTabsSidebarSelectedBoardWithResourceObj(node, nullptr);
 }
 
 void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption)
@@ -1902,6 +2086,25 @@ void ResetBarDisplayModeBreakpoint(ArkUINodeHandle node)
     TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, breakpoint);
 }
 
+void SetOnBarDisplayModeChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(NG::TabBarDisplayMode)>*>(callback);
+        TabsModelNG::SetOnBarDisplayModeChange(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnBarDisplayModeChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnBarDisplayModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnBarDisplayModeChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -1921,6 +2124,21 @@ const ArkUITabsModifier* GetTabsModifier()
             .setTabsOnContentDidScroll = SetTabsOnContentDidScroll,
             .setBarBackgroundColor = SetBarBackgroundColor,
             .setBarBackgroundColorByUser = SetBarBackgroundColorByUser,
+            .setTabsSidebarSelectedIconColor = SetTabsSidebarSelectedIconColor,
+            .createTabsSidebarSelectedIconWithResourceObj = CreateTabsSidebarSelectedIconWithResourceObj,
+            .resetTabsSidebarSelectedIconColor = ResetTabsSidebarSelectedIconColor,
+            .setTabsSidebarSelectedTextColor = SetTabsSidebarSelectedTextColor,
+            .createTabsSidebarSelectedTextWithResourceObj = CreateTabsSidebarSelectedTextWithResourceObj,
+            .resetTabsSidebarSelectedTextColor = ResetTabsSidebarSelectedTextColor,
+            .setTabsSidebarUnselectedIconColor = SetTabsSidebarUnselectedIconColor,
+            .createTabsSidebarUnselectedIconWithResourceObj = CreateTabsSidebarUnselectedIconWithResourceObj,
+            .resetTabsSidebarUnselectedIconColor = ResetTabsSidebarUnselectedIconColor,
+            .setTabsSidebarUnselectedTextColor = SetTabsSidebarUnselectedTextColor,
+            .createTabsSidebarUnselectedTextWithResourceObj = CreateTabsSidebarUnselectedTextWithResourceObj,
+            .resetTabsSidebarUnselectedTextColor = ResetTabsSidebarUnselectedTextColor,
+            .setTabsSidebarSelectedBoardColor = SetTabsSidebarSelectedBoardColor,
+            .createTabsSidebarSelectedBoardWithResourceObj = CreateTabsSidebarSelectedBoardWithResourceObj,
+            .resetTabsSidebarSelectedBoardColor = ResetTabsSidebarSelectedBoardColor,
             .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
             .setBarBackgroundBlurStyleWithStyleOption = SetBarBackgroundBlurStyleWithStyleOption,
             .setBarOverlap = SetBarOverlap,
@@ -2014,6 +2232,8 @@ const ArkUITabsModifier* GetTabsModifier()
             .resetSidebarSearchable = ResetSidebarSearchable,
             .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpoint,
             .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpoint,
+            .setOnBarDisplayModeChange = SetOnBarDisplayModeChange,
+            .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChange,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2033,6 +2253,21 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabsOnContentDidScroll = SetTabsOnContentDidScrollImpl,
         .setBarBackgroundColor = SetBarBackgroundColorImpl,
         .setBarBackgroundColorByUser = SetBarBackgroundColorByUserImpl,
+        .setTabsSidebarSelectedIconColor = SetTabsSidebarSelectedIconColorImpl,
+        .createTabsSidebarSelectedIconWithResourceObj = CreateTabsSidebarSelectedIconWithResourceObjImpl,
+        .resetTabsSidebarSelectedIconColor = ResetTabsSidebarSelectedIconColorImpl,
+        .setTabsSidebarSelectedTextColor = SetTabsSidebarSelectedTextColorImpl,
+        .createTabsSidebarSelectedTextWithResourceObj = CreateTabsSidebarSelectedTextWithResourceObjImpl,
+        .resetTabsSidebarSelectedTextColor = ResetTabsSidebarSelectedTextColorImpl,
+        .setTabsSidebarUnselectedIconColor = SetTabsSidebarUnselectedIconColorImpl,
+        .createTabsSidebarUnselectedIconWithResourceObj = CreateTabsSidebarUnselectedIconWithResourceObjImpl,
+        .resetTabsSidebarUnselectedIconColor = ResetTabsSidebarUnselectedIconColorImpl,
+        .setTabsSidebarUnselectedTextColor = SetTabsSidebarUnselectedTextColorImpl,
+        .createTabsSidebarUnselectedTextWithResourceObj = CreateTabsSidebarUnselectedTextWithResourceObjImpl,
+        .resetTabsSidebarUnselectedTextColor = ResetTabsSidebarUnselectedTextColorImpl,
+        .setTabsSidebarSelectedBoardColor = SetTabsSidebarSelectedBoardColorImpl,
+        .createTabsSidebarSelectedBoardWithResourceObj = CreateTabsSidebarSelectedBoardWithResourceObjImpl,
+        .resetTabsSidebarSelectedBoardColor = ResetTabsSidebarSelectedBoardColorImpl,
         .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyleImpl,
         .setBarBackgroundBlurStyleWithStyleOption = SetBarBackgroundBlurStyleWithStyleOptionImpl,
         .setBarOverlap = SetBarOverlapImpl,
@@ -2126,6 +2361,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetSidebarSearchable = ResetSidebarSearchableImpl,
         .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpointImpl,
         .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpointImpl,
+        .setOnBarDisplayModeChange = SetOnBarDisplayModeChangeImpl,
+        .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChangeImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,8 @@ struct TextSpanOptions;
 struct ImageSpanOptions;
 struct RichEditorInfo;
 struct BuilderSpanOptions;
+struct BuilderSpanInfo;
+struct BuilderSpanRecord;
 class SelectionInfo;
 struct SpanOptionBase;
 struct SpanPositionInfo;
@@ -105,6 +107,7 @@ class UINode;
 class ImageSpanNode;
 class PlaceholderSpanNode;
 struct SpanItem;
+struct PlaceholderSpanItem;
 struct ImageSpanItem;
 struct CaretMetricsF;
 struct DirtySwapConfig;
@@ -404,6 +407,9 @@ public:
     void FireOnReady();
     void MoveCaretOnLayoutSwap();
     void MoveTextRectOnLayoutSwap();
+    void HandleContentScroll(const OffsetF& preTextOffset, const OffsetF& curTextOffset) const;
+    void HandleContentSizeChange(const RectF& textRect);
+    void UpdateRichTextRect(const std::optional<RectF>& richTextRectOpt);
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     bool IsIMEOperation(OperationType operationType);
@@ -453,6 +459,9 @@ public:
     int32_t AddSymbolSpan(SymbolSpanOptions options, TextChangeReason reason, bool isPaste = false, int32_t index = -1);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
         TextChangeReason reason);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
+        const BuilderSpanRecord& builderSpanRecord, TextChangeReason reason);
+    std::vector<BuilderSpanInfo> GetRichEditorBuilderSpans(int32_t start, int32_t end);
 #else
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason = TextChangeReason::UNKNOWN);
     void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan,
@@ -465,6 +474,9 @@ public:
         bool isPaste = false, int32_t index = -1);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
         TextChangeReason reason = TextChangeReason::UNKNOWN);
+    int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
+        const BuilderSpanRecord& builderSpanRecord, TextChangeReason reason = TextChangeReason::UNKNOWN);
+    std::vector<BuilderSpanInfo> GetRichEditorBuilderSpans(int32_t start, int32_t end);
 #endif
     void InitPlaceholderAccessibility(const RefPtr<PlaceholderSpanNode>& spanNode, const SpanOptionBase& options);
     std::u16string DeleteBackwardOperation(int32_t length, bool isIME = true);
@@ -890,6 +902,8 @@ public:
     KeyboardAppearance GetKeyboardAppearance() const;
     void SetSupportStyledUndo(bool enabled);
     bool IsSupportStyledUndo() const;
+    void SetSuppressBuilderSpanCallback(bool suppress);
+    bool IsSuppressBuilderSpanCallback() const;
     bool IsDragging() const override;
     const RefPtr<SpanItem> GetSpanItemByPosition(int32_t position);
     const std::map<int32_t, AISpan>& GetAISpanMap() override;
@@ -1105,6 +1119,7 @@ private:
     void ResetDragSpanItems();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::string GetPlaceHolderInJson() const;
+    std::string GetBuilderSpanInfosInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     std::string GetCustomKeyboardInJson() const;
     std::string GetCursorInfoInJson() const;
@@ -1404,6 +1419,8 @@ private:
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
+    // Tracks last min-corrected rect for content size change event
+    RectF lastContentSizeRect_;
     bool isFirstCallOnReady_ = false;
     bool scrollable_ = true;
     // add for ai input analysis
@@ -1471,6 +1488,7 @@ private:
     std::unique_ptr<OneStepDragController> oneStepDragController_;
     std::unique_ptr<RichEditorUndoManager> undoManager_;
     bool isStyledUndoSupported_ = false;
+    bool suppressBuilderSpanCallback_ = false;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;

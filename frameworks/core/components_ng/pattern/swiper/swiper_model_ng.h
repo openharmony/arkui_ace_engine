@@ -220,6 +220,7 @@ public:
     static void ResetFillType(FrameNode* frameNode);
     static void ResetDisplayCountWithObject(FrameNode* frameNode);
     static void SetIgnoreHiddenItem(FrameNode* frameNode, bool ignoreHiddenItem);
+    static void SetRenderGroupExplicitly(FrameNode* frameNode, bool isRenderGroup);
     static bool CallSwiperStartFakeDrag(FrameNode* frameNode);
     static bool CallSwiperFakeDragBy(FrameNode* frameNode, float offset);
     static bool CallSwiperStopFakeDrag(FrameNode* frameNode);

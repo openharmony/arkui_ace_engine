@@ -73,6 +73,9 @@ double TLVUtil::ReadDouble(std::vector<uint8_t>& buff, int32_t& cursor)
     if (ReadUint8(buff, cursor) != TLV_DOUBLE_TAG) {
         return 0.0;
     }
+    if (cursor < 0 || static_cast<size_t>(cursor) + sizeof(double) > buff.size()) {
+        return 0.0;
+    }
     auto start = buff.begin() + cursor;
     auto end = start + sizeof(double);
     double value;

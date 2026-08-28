@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class ParagraphManager;
+class RichEditorContentModifier;
 
 class ACE_EXPORT RichEditorPaintMethod : public TextPaintMethod {
     DECLARE_ACE_TYPE(RichEditorPaintMethod, TextPaintMethod);
@@ -29,6 +30,7 @@ public:
 
     ~RichEditorPaintMethod() override = default;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    void RefreshRichTextRect(const RefPtr<RichEditorContentModifier>& contentMod);
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
     void UpdateContentOverlayModifier(PaintWrapper* paintWrapper);
     void SetCaretState(PaintWrapper* paintWrapper);

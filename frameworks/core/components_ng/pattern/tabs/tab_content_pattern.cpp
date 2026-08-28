@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,6 +33,55 @@ void TabContentPattern::OnAttachToMainTree()
         return;
     }
     GenerateGlobalComponentId(std::to_string(indexPair.second));
+}
+
+void TabContentPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+
+    const auto& defaultVisibility = GetDefaultVisibility();
+    if (defaultVisibility == lastAppliedVisibility_) {
+        return;
+    }
+    lastAppliedVisibility_ = defaultVisibility;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(host);
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(TabContentModelNG::FindTabsNode(host));
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto activeDisplayMode = tabsPattern->GetActiveBarDisplayMode();
+    bool shouldHide = tabsPattern->IsTabShouldHideByVisibility(defaultVisibility);
+    if (activeDisplayMode == TabBarDisplayMode::BOTTOMTABBAR) {
+        // Bottom tab bar is currently visible — update this tab's columnNode directly
+        if (!tabContentNode->HasTabBarItemId()) {
+            return;
+        }
+        auto columnNode = AceType::DynamicCast<FrameNode>(
+            ElementRegister::GetInstance()->GetUINodeById(tabContentNode->GetTabBarItemId()));
+        CHECK_NULL_VOID(columnNode);
+        auto columnProperty = columnNode->GetLayoutProperty();
+        CHECK_NULL_VOID(columnProperty);
+        columnProperty->UpdateVisibility(shouldHide ? VisibleType::GONE : VisibleType::VISIBLE);
+        columnNode->MarkNeedSyncRenderTree();
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    // Sidebar is currently visible — update this tab's sidebar tabItemNode directly
+    if (!tabContentNode->HasSideBarTabBarItemId()) {
+        return;
+    }
+    auto tabItemNode = AceType::DynamicCast<FrameNode>(
+        ElementRegister::GetInstance()->GetUINodeById(tabContentNode->GetSideBarTabBarItemId()));
+    CHECK_NULL_VOID(tabItemNode);
+    auto property = tabItemNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(shouldHide ? VisibleType::GONE : VisibleType::VISIBLE);
+    tabItemNode->MarkNeedSyncRenderTree();
+    tabItemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG

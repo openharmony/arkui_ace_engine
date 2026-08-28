@@ -16,11 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TABS_TAB_BAR_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TABS_TAB_BAR_LAYOUT_ALGORITHM_H
 
+#include <unordered_set>
+#include <vector>
+
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -90,6 +94,11 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    void SetIsFloatingBar(bool isFloatingBar)
+    {
+        isFloatingBar_ = isFloatingBar;
+    }
+
     float GetBarGridMargin()
     {
         return barGridMargin_;
@@ -137,6 +146,7 @@ private:
     void CheckBorderAndPadding(SizeF& frameSize, const PaddingPropertyF& padding);
     void MeasureSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const;
     void LayoutSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const;
+    void UpdateEffectiveChildIndices(LayoutWrapper* layoutWrapper);
 
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;
@@ -161,6 +171,9 @@ private:
     bool isNoMinHeightLimit_ = false;
     bool useItemWidth_ = true;
     bool canOverScroll_ = false;
+    bool isFloatingBar_ = false;
+    std::vector<int32_t> effectiveChildIndices_;
+    std::unordered_set<int32_t> effectiveChildIndexSet_;
     Dimension leftAndRightMargin_ = 0.0_vp;
     Dimension indicatorStyleMarginTop_ = 0.0_vp;
 };

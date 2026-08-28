@@ -17,7 +17,12 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_side_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_side_bar_tab_list_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -62,13 +67,6 @@ void TabsLayoutAlgorithm::UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper
     CHECK_NULL_VOID(host);
     auto tabsPattern = host->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
-    auto sideBar = tabsPattern->GetSideBarNode();
-    if (sideBar) {
-        auto property = sideBar->GetLayoutProperty();
-        if (property) {
-            property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
-        }
-    }
     auto sideBarDivider = tabsPattern->GetSideBarDividerNode();
     if (sideBarDivider) {
         auto property = sideBarDivider->GetLayoutProperty();
@@ -76,6 +74,23 @@ void TabsLayoutAlgorithm::UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper
             property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
         }
     }
+    auto sideBar = tabsPattern->GetSideBarNode();
+    CHECK_NULL_VOID(sideBar);
+    auto property = sideBar->GetLayoutProperty();
+    if (property) {
+        property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+    }
+    if (!isVisible) {
+        return;
+    }
+    // When sidebar becomes visible, apply per-item defaultVisibility filtering
+    auto sideBarPattern = sideBar->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sideBarPattern);
+    auto tabListNode = sideBarPattern->GetTabListNode();
+    CHECK_NULL_VOID(tabListNode);
+    auto tabListPattern = tabListNode->GetPattern<TabsSideBarTabListPattern>();
+    CHECK_NULL_VOID(tabListPattern);
+    tabListPattern->ApplyDefaultVisibility();
 }
 
 void TabsLayoutAlgorithm::UpdateTabBarAndDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
@@ -91,12 +106,18 @@ void TabsLayoutAlgorithm::UpdateTabBarAndDividerVisibility(LayoutWrapper* layout
         }
     }
     auto tabBar = AceType::DynamicCast<FrameNode>(host->GetTabBar());
-    if (tabBar) {
-        auto property = tabBar->GetLayoutProperty();
-        if (property) {
-            property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
-        }
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarProperty = tabBar->GetLayoutProperty();
+    if (tabBarProperty) {
+        tabBarProperty->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
     }
+    if (!isVisible) {
+        return;
+    }
+    // When bottom tab bar becomes visible, delegate per-item defaultVisibility filtering to TabBarPattern
+    auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->ApplyDefaultVisibility();
 }
 
 float TabsLayoutAlgorithm::MeasureSideBar(
@@ -263,6 +284,13 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (displayModeChanged) {
         UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::SIDEBAR);
         UpdateTabBarAndDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+        auto context = tabsNode->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterLayoutTask([weakTabsPattern = WeakPtr<TabsPattern>(tabsPattern), curDisplayMode]() {
+            auto tabsPattern = weakTabsPattern.Upgrade();
+            CHECK_NULL_VOID(tabsPattern);
+            tabsPattern->FireBarDisplayModeChangeEvent(curDisplayMode);
+        });
     }
 
     if (preIsDisableSwipe != curIsDisableSwipe) {
@@ -898,7 +926,9 @@ SizeF TabsLayoutAlgorithm::MeasureTabBar(LayoutWrapper* layoutWrapper, LayoutCon
     CHECK_NULL_RETURN(barLayoutProperty, tabBarSize);
     auto constraint = barLayoutProperty->GetLayoutConstraint();
     float barHeight = FLOATING_BAR_HEIGHT.ConvertToPx();
-    if (!constraint || !constraint->selfIdealSize.Height().has_value()) {
+    if (layoutProperty->HasBarHeight()) {
+        // User-set barHeight takes highest priority, let it flow through naturally
+    } else if (!constraint || !constraint->selfIdealSize.Height().has_value()) {
         childLayoutConstraint.selfIdealSize.SetHeight(FLOATING_BAR_HEIGHT.ConvertToPx());
     } else {
         barHeight = constraint->selfIdealSize.Height().value();

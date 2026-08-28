@@ -6707,6 +6707,14 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    // A node already suppressed by the scope gate (not in a titleBar / bottom
+    // TabBar subtree) must not have its material re-applied by external callers,
+    // otherwise the material would take effect again despite the suppression.
+    // MaterialProcessor's own suppress/restore calls set the materialLimiterUpdating
+    // guard to bypass this block.
+    if (renderContext->IsMaterialSuppressed() && !renderContext->IsMaterialLimiterUpdating()) {
+        return;
+    }
     auto nativeMaterial = MaterialUtils::PreProcessMaterial(material);
     if (!MaterialUtils::CallSetMaterial(frameNode, nativeMaterial)) {
         ViewAbstract::SetSystemMaterialImmediate(frameNode, nativeMaterial);
@@ -6715,6 +6723,28 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
         return;
     }
     renderContext->SetSystemMaterial(nativeMaterial ? nativeMaterial->Copy() : nullptr);
+}
+
+void ViewAbstract::SetSystemMaterialForOverlay(FrameNode* frameNode, const UiMaterial* material)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    // Mark the node exempt from the scope gate BEFORE applying the material, so the
+    // node is in the exempt state throughout the entire material-application chain
+    // (SetSystemMaterial -> SetSystemMaterialImmediate -> SetImmersiveOptions ->
+    // SetImmersiveConfigs -> LowerGearLevel).
+    renderContext->SetMaterialScopeExempt(true);
+    ViewAbstract::SetSystemMaterial(frameNode, material);
+}
+
+void ViewAbstract::SetSystemMaterialForOverlay(const UiMaterial* material)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::SetSystemMaterialForOverlay(frameNode, material);
 }
 
 void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)

@@ -474,7 +474,8 @@ bool DialogPattern::SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode)
             return true;
         }
         // Normal processing for other cases
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties_.systemMaterial));
+        ViewAbstract::SetSystemMaterialForOverlay(
+            AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties_.systemMaterial));
         return true;
     }
     return false;

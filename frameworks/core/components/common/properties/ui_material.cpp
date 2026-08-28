@@ -66,6 +66,13 @@ std::string ImmersiveStyleToString(UiMaterialStyle style)
     return "UNKNOWN";
 }
 
+void AppendLightEffectInfo(std::string& result, const std::optional<LightEffectOptions>& lightEffectOptions)
+{
+    if (lightEffectOptions.has_value() && lightEffectOptions->color.has_value()) {
+        result.append(", lightEffect: { color: ").append(lightEffectOptions->color->ColorToString()).append(" }");
+    }
+}
+
 constexpr float IMMERSIVE_SHADOW_RADIUS = 26.0f;  // in vp
 constexpr float IMMERSIVE_SHADOW_OFFSET_Y = 8.0f; // in vp
 const Color IMMERSIVE_SHADOW_COLOR(0x14050505);
@@ -309,6 +316,7 @@ std::string UiMaterial::ToString() const
             if (immersiveOptions_->colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
                 result.append(", colorMode: ").append(ColorModeToString(immersiveOptions_->colorMode));
             }
+            AppendLightEffectInfo(result, immersiveOptions_->lightEffectOptions);
         }
     }
     return result;
@@ -716,6 +724,18 @@ bool MaterialUtils::IsMaterialDisabled()
 bool MaterialUtils::IsMaterialEnabled()
 {
     return GetConfiguredMaterialState() == MaterialState::ENABLE;
+}
+
+bool MaterialUtils::IsSystemApp()
+{
+    return AceApplicationInfo::GetInstance().IsSystemApp();
+}
+
+bool MaterialUtils::IsMaterialUnrestrictedComponent(const std::string& tag)
+{
+    // Slider / Toggle keep material effective everywhere: not gated by scope
+    // (titleBar / bottom TabBar) or self-drawing overlap, regardless of system-app.
+    return tag == V2::SLIDER_ETS_TAG || tag == V2::TOGGLE_ETS_TAG;
 }
 
 bool MaterialUtils::IsEmptyMaterial(const RefPtr<UiMaterial>& material)

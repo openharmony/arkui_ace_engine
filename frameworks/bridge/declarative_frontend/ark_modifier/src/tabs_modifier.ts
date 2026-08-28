@@ -142,6 +142,28 @@ class LazyArkTabsComponent extends ArkComponent {
     return this;
   }
 
+  sidebarSelectedIconColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarSelectedIconColor(value);
+    return this;
+  }
+
+  sidebarSelectedTextColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarSelectedTextColor(value);
+    return this;
+  }
+  sidebarUnselectedIconColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarUnselectedIconColor(value);
+    return this;
+  }
+  sidebarUnselectedTextColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarUnselectedTextColor(value);
+    return this;
+  }
+  sidebarSelectedBoardColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarSelectedBoardColor(value);
+    return this;
+  }
+
   barBackgroundBlurStyle(style: BlurStyle, options?: BackgroundBlurStyleOptions): this {
     this.lazyComponent.barBackgroundBlurStyle(style, options);
     return this;
@@ -224,6 +246,11 @@ class LazyArkTabsComponent extends ArkComponent {
 
   barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): this {
     this.lazyComponent.barDisplayModeBreakpoint(value);
+    return this;
+  }
+
+  onBarDisplayModeChange(value: (mode: TabBarDisplayMode) => void): this {
+    this.lazyComponent.onBarDisplayModeChange(value);
     return this;
   }
 }

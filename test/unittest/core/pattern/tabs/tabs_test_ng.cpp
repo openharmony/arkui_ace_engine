@@ -2575,6 +2575,119 @@ HWTEST_F(TabsTestNg, TabBarItemFocusPatternNewMaterial002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabBarItemUpdateColorInvertFocusBoxStyle001
+ * @tc.desc: Test UpdateColorInvertFocusBoxStyle when color invert is not active
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemUpdateColorInvertFocusBoxStyle001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+
+    // Without color invert active, UpdateColorInvertFocusBoxStyle should early return
+    EXPECT_FALSE(tabBarPattern_->IsColorInvertActive());
+    auto focusHub = tabBarItemNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto tabBarFocusHub = tabBarNode_->GetFocusHub();
+    ASSERT_NE(tabBarFocusHub, nullptr);
+    // Call should not crash
+    tabBarItemPattern->UpdateColorInvertFocusBoxStyle(
+        tabBarItemNode, focusHub, tabBarFocusHub, tabBarPattern_);
+}
+
+/**
+ * @tc.name: TabBarItemUpdateColorInvertFocusBoxStyle002
+ * @tc.desc: Test UpdateColorInvertFocusBoxStyle when color invert is active with DARK mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemUpdateColorInvertFocusBoxStyle002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    tabBarPattern_->SetColorInvertColorMode(ColorMode::DARK);
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+    auto focusHub = tabBarItemNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto tabBarFocusHub = tabBarNode_->GetFocusHub();
+    ASSERT_NE(tabBarFocusHub, nullptr);
+
+    EXPECT_TRUE(tabBarPattern_->IsColorInvertActive());
+    // Call should not crash when color invert is active
+    tabBarItemPattern->UpdateColorInvertFocusBoxStyle(
+        tabBarItemNode, focusHub, tabBarFocusHub, tabBarPattern_);
+}
+
+/**
+ * @tc.name: TabBarItemGetInnerFocusPaintRectNewMaterial001
+ * @tc.desc: Test GetInnerFocusPaintRect with new material does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemGetInnerFocusPaintRectNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+
+    // Call GetInnerFocusPaintRect should not crash with new material
+    RoundRect paintRect;
+    tabBarItemPattern->GetInnerFocusPaintRect(paintRect);
+}
+
+/**
+ * @tc.name: TabBarItemGetInnerFocusPaintRectNewMaterial002
+ * @tc.desc: Test GetInnerFocusPaintRect with new material + color invert active does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemGetInnerFocusPaintRectNewMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    tabBarPattern_->SetColorInvertColorMode(ColorMode::DARK);
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+
+    // Call GetInnerFocusPaintRect with color invert active should not crash
+    RoundRect paintRect;
+    tabBarItemPattern->GetInnerFocusPaintRect(paintRect);
+}
+
+/**
  * @tc.name: HandleTouchDownNewMaterial002
  * @tc.desc: test HandleTouchDown with useNewMaterial_ false, PlayPressAnimation should be called
  * @tc.type: FUNC

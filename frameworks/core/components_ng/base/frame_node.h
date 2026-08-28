@@ -1306,6 +1306,11 @@ public:
     }
 
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override;
+
+    void SetGeometryTransitionNeedLayout(bool geometryTransitionNeedLayout)
+    {
+        geometryTransitionNeedLayout_ = geometryTransitionNeedLayout;
+    }
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
 
@@ -1944,6 +1949,7 @@ private:
     bool checkboxFlag_ = false;
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
+    bool geometryTransitionNeedLayout_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
     bool dragHitTestBlock_ = false;

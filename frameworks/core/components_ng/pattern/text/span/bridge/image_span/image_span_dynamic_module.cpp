@@ -19,7 +19,6 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "core/components_ng/pattern/text/span/bridge/image_span/arkts_native_image_span_bridge.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/span/bridge/image_span/image_span_custom_modifier.h"
  	 
 #ifdef INCLUDE_GENERATED_SOURCES
@@ -88,8 +87,8 @@ const void* ImageSpanDynamicModule::GetCustomModifier(const std::string& name)
 
 void* ImageSpanDynamicModule::GetModel()
 {
-    static NG::ImageSpanView model;
-    return &model;
+    // ImageSpan exposes static view APIs and has no stable Model interface.
+    return nullptr;
 }
 
 } // namespace OHOS::Ace

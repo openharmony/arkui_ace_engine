@@ -103,6 +103,7 @@ class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
 class DragDropManager;
+class MaterialProcessor;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
 enum class FocusActiveReason : int32_t;
@@ -1302,6 +1303,12 @@ public:
     {
         return windowSizeChangeReason_;
     }
+
+    // MaterialProcessor support. Appended at the end of the public section;
+    // these are non-virtual, so they do not shift any existing vtable slot.
+    void RegisterMaterialNode(const RefPtr<FrameNode>& node);
+    void UnregisterMaterialNode(int32_t nodeId);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1719,6 +1726,7 @@ private:
     std::list<TouchEvent> compatibleTouchEvents_;
     RefPtr<BackPressHandlerManager> backPressHandlerManager_;
     RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
+    RefPtr<MaterialProcessor> materialProcessor_;
     bool isRightMouseMappingActive_ = false;
     std::function<void()> onRightMouseMappingCancel_;
 };

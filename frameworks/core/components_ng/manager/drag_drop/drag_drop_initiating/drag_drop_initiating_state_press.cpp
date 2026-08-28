@@ -29,6 +29,14 @@ void DragDropInitiatingStatePress::HandlePreviewLongPressOnAction(const GestureE
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    auto gestureHub = frameNode ? frameNode->GetOrCreateGestureEventHub() : nullptr;
+    auto actuator = gestureHub ? gestureHub->GetDragEventActuator() : nullptr;
+    if (actuator && actuator->IsDragStartedAcrossScreenLock(info)) {
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        return;
+    }
     machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
 }
 

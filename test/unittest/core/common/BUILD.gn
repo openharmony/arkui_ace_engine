@@ -37,6 +37,7 @@ if (is_host_product) {
     "storage/storage_test.cpp",
     "transform/input_compatible_manager_test_ng.cpp",
     "vibrator/vibrator_test.cpp",
+    "visual_effect/component_material_interaction_test_ng.cpp",
     "visual_effect/transparency_utils_test_ng.cpp",
   ]
 
@@ -83,6 +84,7 @@ if (is_host_product) {
     "task_runner_adapter_impl/task_runner_adapter_test.cpp",
     "transform/input_compatible_manager_test_ng.cpp",
     "vibrator/vibrator_test.cpp",
+    "visual_effect/component_material_interaction_test_ng.cpp",
     "visual_effect/transparency_utils_test_ng.cpp",
   ]
 

@@ -24,7 +24,6 @@ docs/kb/
 ## 编写规则
 
 - 新增 KB 必须同步 `docs/context_registry.json`。
-- KB 迁移到新版路径后，同步删除对应旧 KB 文件，不再通过 `legacy_kb` 保留旧入口。
 - KB 保留定位、源码/API/测试/Spec 路由、调试入口和常见问题定位。
 - KB 不长期维护完整 API 行为矩阵、AC/BR/FR/ER/RC 或大段调用链复述。
 - 代码级结论必须能从真实源码或 SDK 声明验证，未验证内容标注为“推测”。
@@ -267,8 +266,10 @@ docs/kb/
 
 ```bash
 python3 docs/validate_context.py
-python3 docs/kb_search.py Text
-python3 docs/kb_search.py Text --field name
+python3 docs/kb_search.py Text              # 精简搜索（最多 10 条，按相关度排序）
+python3 docs/kb_search.py Text --detail     # 完整路由信息（源码/API/测试/Spec）
+python3 docs/kb_search.py Text --all        # 显示全部结果
+python3 docs/kb_search.py Text --field name # 限定搜索字段
 python3 -m json.tool docs/context_registry.json > /dev/null
 ```
 

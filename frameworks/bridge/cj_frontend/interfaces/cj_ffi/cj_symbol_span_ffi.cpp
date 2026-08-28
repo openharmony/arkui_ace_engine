@@ -21,7 +21,6 @@
 #include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/text/span/symbol_span_model.h"
-#include "core/components_ng/pattern/text/span/symbol_span_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -29,17 +28,9 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace {
 
 // Should use CJUIModifier API later
-NG::SymbolSpanModelNG* GetSymbolSpanModel()
+SymbolSpanModel* GetSymbolSpanModel()
 {
-    static NG::SymbolSpanModelNG* cachedModel = nullptr;
-    if (!cachedModel) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("SymbolSpan");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find symbolspan dynamic module");
-        }
-        cachedModel = reinterpret_cast<NG::SymbolSpanModelNG*>(module->GetModel());
-    }
-    return cachedModel;
+    return DynamicModuleHelper::GetInstance().GetModel<SymbolSpanModel>("SymbolSpan");
 }
 } // namespace OHOS::Ace
 

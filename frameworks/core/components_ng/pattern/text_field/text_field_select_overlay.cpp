@@ -23,6 +23,7 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -53,6 +54,21 @@ void RunAsyncTask(const RefPtr<TextFieldSelectOverlay>& overlay, const std::stri
     taskExecutor->PostTask(task, isUITask ? TaskExecutor::TaskType::UI : TaskExecutor::TaskType::PLATFORM, name);
 }
 } // namespace
+
+RefPtr<FrameNode> TextFieldSelectOverlay::GetOwner()
+{
+    auto textFieldPattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, nullptr);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    if (AceType::InstanceOf<SearchTextFieldPattern>(textFieldPattern)) {
+        auto parent = host->GetAncestorNodeOfFrame(false);
+        if (parent) {
+            return parent;
+        }
+    }
+    return host;
+}
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
 {

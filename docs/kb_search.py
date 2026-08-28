@@ -15,16 +15,24 @@
 # limitations under the License.
 
 """
-知识库索引检索工具。优先搜索 docs/context_registry.json，
-再兼容搜索 docs/knowledge_base_INDEX.json，返回匹配的知识库条目
-（名称、路径、关键词、源码路径等）。
+知识库索引检索工具。搜索 docs/context_registry.json，
+返回匹配的知识库条目。
+
+默认搜索字段: name / name_cn / keywords / aliases（精简搜索，减少噪声）
+默认输出: 一行一个结果，最多 10 条（按相关度排序）
+
+  --detail   查看完整路由信息（源码/API/测试/Spec 等）
+  --all      显示全部结果（不限 10 条）
+  --field    限定搜索单个字段（含 source_paths/api_paths/test_paths 等扩展字段）
 
 用法:
-  python3 docs/kb_search.py <关键字>              # 模糊搜索（name/name_cn/keywords/aliases/category）
-  python3 docs/kb_search.py <关键字> --field name  # 限定搜索字段
-  python3 docs/kb_search.py --category component   # 按分类过滤
-  python3 docs/kb_search.py --list-categories      # 列出所有分类
-  python3 docs/kb_search.py --list-all             # 列出所有知识库名称
+  python3 docs/kb_search.py <关键字>              # 精简搜索，最多 10 条
+  python3 docs/kb_search.py <关键字> --detail     # 完整路由信息
+  python3 docs/kb_search.py <关键字> --all        # 显示全部结果
+  python3 docs/kb_search.py <关键字> --field name # 限定搜索字段
+  python3 docs/kb_search.py <关键字> --category component
+  python3 docs/kb_search.py --list-categories
+  python3 docs/kb_search.py --list-all
 
 脚本位于仓根目录执行，或通过相对路径 docs/kb_search.py 调用。
 """
@@ -35,8 +43,11 @@ import argparse
 from pathlib import Path
 
 
+DEFAULT_LIMIT = 10
+
+
 def normalize_registry_entry(entry: dict) -> dict:
-    """将 context_registry 条目转换为 INDEX 检索结构。"""
+    """将 context_registry 条目转换为检索结构。"""
     kb_path = entry.get("kb")
     file_path = ""
     if kb_path:
@@ -49,7 +60,6 @@ def normalize_registry_entry(entry: dict) -> dict:
         "keywords": entry.get("keywords", []),
         "aliases": entry.get("aliases", []),
         "file_path": file_path,
-        "legacy_kb": entry.get("legacy_kb"),
         "spec_domain": entry.get("spec_domain"),
         "func_id": entry.get("func_id"),
         "source_paths": entry.get("source_paths", {}),
@@ -70,74 +80,91 @@ def load_registry(script_path: str) -> list:
     return [normalize_registry_entry(e) for e in data.get("contexts", [])]
 
 
-def load_kb_index(script_path: str) -> list:
-    """加载旧知识库索引 JSON。"""
-    index_path = Path(script_path).resolve().parent / "knowledge_base_INDEX.json"
-    if not index_path.exists():
-        return []
-    with open(index_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    entries = data.get("knowledge_bases", [])
-    for entry in entries:
-        entry.setdefault("_source", "knowledge_base_INDEX")
-    return entries
-
-
 def load_index(script_path: str) -> list:
-    """加载 registry + INDEX，并按 name 去重，registry 优先。"""
-    entries = []
-    seen_names = set()
-    for entry in load_registry(script_path) + load_kb_index(script_path):
-        name = entry.get("name", "").lower()
-        if name and name in seen_names:
-            continue
-        if name:
-            seen_names.add(name)
-        entries.append(entry)
+    """加载 context_registry 条目。"""
+    entries = load_registry(script_path)
     if not entries:
-        print("错误: 未找到 docs/context_registry.json 或 docs/knowledge_base_INDEX.json", file=sys.stderr)
+        print("错误: 未找到 docs/context_registry.json 或文件为空", file=sys.stderr)
         sys.exit(1)
     return entries
 
 
-def match_entry(entry: dict, keyword: str, field: str = None) -> bool:
-    """判断条目是否匹配关键字。"""
-    keyword_lower = keyword.lower()
+def _get_field_values(entry: dict, field: str) -> list:
+    """获取指定字段的所有值列表。"""
+    if field in ("source_paths", "api_paths"):
+        d = entry.get(field, {})
+        return list(d.keys()) + list(d.values())
+    if field == "test_paths":
+        return entry.get(field, [])
+    if field == "spec_domain":
+        return [entry.get("spec_domain", ""), entry.get("func_id", "")]
+    if field in ("keywords", "aliases"):
+        return entry.get(field, [])
+    return [entry.get(field, "")]
 
-    src = entry.get("source_paths", {})
-    api = entry.get("api_paths", {})
-    search_fields = {
-        "name": [entry.get("name", "")],
-        "name_cn": [entry.get("name_cn", "")],
-        "keywords": entry.get("keywords", []),
-        "aliases": entry.get("aliases", []),
-        "category": [entry.get("category", "")],
-        "type": [entry.get("type", "")],
-        "spec_domain": [entry.get("spec_domain", ""), entry.get("func_id", "")],
-        "test_paths": entry.get("test_paths", []),
-        "source_paths": list(src.keys()) + list(src.values()),
-        "api_paths": list(api.keys()) + list(api.values()),
-    }
+
+def _score_string(value: str, keyword: str, exact: int, prefix: int, contains: int) -> int:
+    """对单个字符串做模糊匹配打分。"""
+    vl = str(value).lower()
+    if vl == keyword:
+        return exact
+    if vl.startswith(keyword):
+        return prefix
+    if keyword in vl:
+        return contains
+    return 0
+
+
+def score_entry(entry: dict, keyword: str, field: str = None) -> int:
+    """计算条目与关键字的相关度得分，0 表示不匹配。
+
+    默认仅搜索 identity 字段（name/name_cn/keywords/aliases/category/type）。
+    指定 field 时只搜索该字段（可覆盖 source_paths/api_paths/test_paths 等扩展字段）。
+    """
+    kw = keyword.lower()
 
     if field:
-        targets = search_fields.get(field, [])
-        return any(keyword_lower in str(v).lower() for v in targets)
+        values = _get_field_values(entry, field)
+        best = 0
+        for v in values:
+            best = max(best, _score_string(str(v), kw, exact=100, prefix=70, contains=40))
+        return best
 
-    # 全字段模糊搜索
-    all_values = []
-    for values in search_fields.values():
-        all_values.extend(values)
-    return any(keyword_lower in str(v).lower() for v in all_values)
+    best = 0
+    name = str(entry.get("name", ""))
+    best = max(best, _score_string(name, kw, exact=100, prefix=85, contains=65))
+
+    name_cn = str(entry.get("name_cn", ""))
+    best = max(best, _score_string(name_cn, kw, exact=75, prefix=55, contains=40))
+
+    for v in entry.get("keywords", []):
+        best = max(best, _score_string(str(v), kw, exact=70, prefix=55, contains=35))
+
+    for v in entry.get("aliases", []):
+        best = max(best, _score_string(str(v), kw, exact=50, prefix=40, contains=30))
+
+    for key in ("category", "type"):
+        best = max(best, _score_string(str(entry.get(key, "")), kw, exact=20, prefix=15, contains=10))
+
+    return best
 
 
-def format_entry(entry: dict, index: int) -> str:
-    """格式化输出单个条目。"""
+def format_compact(entry: dict, index: int) -> str:
+    """一行精简格式。"""
+    name = entry.get("name", "N/A")
+    name_cn = entry.get("name_cn", "")
+    fp = entry.get("file_path", "N/A")
+    cn = f" ({name_cn})" if name_cn else ""
+    return f"  {index:2d}. {name}{cn} -> docs/{fp}"
+
+
+def format_detail(entry: dict, index: int, score: int = 0) -> str:
+    """完整路由信息格式。"""
     lines = []
-    lines.append(f"--- [{index}] {entry.get('name', 'N/A')} ({entry.get('name_cn', 'N/A')}) ---")
+    score_tag = f" [score:{score}]" if score else ""
+    lines.append(f"--- [{index}] {entry.get('name', 'N/A')} ({entry.get('name_cn', 'N/A')}){score_tag} ---")
     lines.append(f"  分类: {entry.get('category', 'N/A')} | 类型: {entry.get('type', 'N/A')}")
     lines.append(f"  知识库: docs/{entry.get('file_path', 'N/A')}")
-    if entry.get("legacy_kb"):
-        lines.append(f"  旧知识库: {entry.get('legacy_kb')}")
     if entry.get("spec_domain"):
         lines.append(f"  Spec: {entry.get('func_id', 'N/A')} -> {entry.get('spec_domain')}")
 
@@ -175,6 +202,8 @@ def main():
     parser.add_argument("--category", help="按分类过滤（如 component, layout）")
     parser.add_argument("--list-categories", action="store_true", help="列出所有分类")
     parser.add_argument("--list-all", action="store_true", help="列出所有知识库名称")
+    parser.add_argument("--detail", action="store_true", help="显示完整路由信息（源码/API/测试等）")
+    parser.add_argument("--all", action="store_true", help="显示全部结果（默认最多 %d 条）" % DEFAULT_LIMIT)
     args = parser.parse_args()
 
     entries = load_index(__file__)
@@ -195,22 +224,40 @@ def main():
         parser.print_help()
         return
 
-    results = []
+    scored = []
     for entry in entries:
         if args.category and entry.get("category", "").lower() != args.category.lower():
             continue
-        if match_entry(entry, args.keyword, args.field):
-            results.append(entry)
+        score = score_entry(entry, args.keyword, args.field)
+        if score > 0:
+            scored.append((score, entry))
 
-    if not results:
+    if not scored:
         print(f"未找到匹配 '{args.keyword}' 的知识库条目。")
         print("提示: 使用 --list-all 查看所有条目，或使用 --list-categories 查看分类。")
+        if not args.field:
+            print("      使用 --field source_paths 按源码路径搜索。")
         return
 
-    print(f"找到 {len(results)} 个匹配条目:\n")
-    for i, entry in enumerate(results, 1):
-        print(format_entry(entry, i))
-        print()
+    scored.sort(key=lambda x: (-x[0], x[1].get("name", "")))
+
+    total = len(scored)
+    limit = total if args.all else min(DEFAULT_LIMIT, total)
+    shown = scored[:limit]
+    formatter = format_detail if args.detail else format_compact
+
+    if total > limit:
+        print(f"找到 {total} 个匹配条目（显示前 {limit}，用 --all 查看全部）:\n")
+    else:
+        print(f"找到 {total} 个匹配条目:\n")
+
+    for i, (score, entry) in enumerate(shown, 1):
+        if args.detail:
+            print(formatter(entry, i, score))
+        else:
+            print(formatter(entry, i))
+        if args.detail:
+            print()
 
 
 if __name__ == "__main__":

@@ -395,6 +395,22 @@ void SetOnChangeImpl(Ark_NativePointer node,
     };
     TabsModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
+void SetOnBarDisplayModeChangeImpl(Ark_NativePointer node,
+                                   const Opt_arkui_component_common_Callback_I32_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TabsModelStatic::SetOnBarDisplayModeChange(frameNode, nullptr);
+        return;
+    }
+    auto onBarDisplayModeChange = [arkCallback = CallbackHelper(*optValue)](TabBarDisplayMode mode) {
+        auto modeInt = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(mode));
+        arkCallback.InvokeSync(modeInt);
+    };
+    TabsModelStatic::SetOnBarDisplayModeChange(frameNode, std::move(onBarDisplayModeChange));
+}
 void SetOnSelectedImpl(Ark_NativePointer node,
                        const Opt_arkui_component_common_Callback_I32_Void* value)
 {

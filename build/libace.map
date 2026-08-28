@@ -31,6 +31,8 @@
       "OHOS::Ace::NG::NavigationManager::FireOverlayLifecycle(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int, int)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::SetPropertyUnit(OHOS::Ace::PropertyUnit)";
       "OHOS::Ace::NG::SafeAreaManager::GetCutoutSafeAreaWithoutProcess() const";
+      "OHOS::Ace::NG::TextFieldTypeUtils::ToContentTypeString(OHOS::Ace::NG::TextContentType)";
+      "OHOS::Ace::NG::TextFieldTypeUtils::ToInputTypeString(OHOS::Ace::TextInputType, bool, bool)";
       "OHOS::Ace::NG::SystemWindowScene::CreateOverlayManager(bool, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::SystemWindowScene::DeleteOverlayManager(int)";
       "OHOS::Ace::NG::SystemWindowScene::GetOverlayManager(int)";
@@ -2846,9 +2848,11 @@
       "OHOS::Ace::NG::ViewAbstract::SetResponseRegion(OHOS::Ace::NG::FrameNode*, std::__h::vector<OHOS::Ace::DimensionRect, std::__h::allocator<OHOS::Ace::DimensionRect>> const&)";
       "OHOS::Ace::NG::ViewAbstract::SetResponseRegion(std::__h::vector<OHOS::Ace::DimensionRect, std::__h::allocator<OHOS::Ace::DimensionRect>> const&)";
       "OHOS::Ace::NG::ViewAbstract::SetSystemMaterial(OHOS::Ace::NG::FrameNode*, OHOS::Ace::UiMaterial const*)";
+      "OHOS::Ace::NG::ViewAbstract::SetSystemMaterialForOverlay(OHOS::Ace::NG::FrameNode*, OHOS::Ace::UiMaterial const*)";
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::CalcLength const&)";
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::FrameNode*, OHOS::Ace::NG::CalcLength const&)";
       "OHOS::Ace::NG::ViewAbstract::UpdateOnlyLayoutPolicyProperty(OHOS::Ace::NG::FrameNode*, OHOS::Ace::LayoutCalPolicy, bool)";
+      "OHOS::Ace::NG::ViewAbstract::ResetLayoutPolicyProperty(OHOS::Ace::NG::FrameNode*, bool)";
       "OHOS::Ace::NG::ViewAbstractModelNG::RemoveResObj(OHOS::Ace::NG::FrameNode*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ViewAbstractModelNG::CheckSkipMenuShow(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::ViewAbstractModelNG::SetAccessibilityText(OHOS::Ace::NG::FrameNode*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -4989,6 +4993,7 @@
       "OHOS::Ace::NG::ViewAbstract::SetSepia(OHOS::Ace::NG::FrameNode*, OHOS::Ace::Dimension const&)";
       "OHOS::Ace::NG::ViewAbstract::SetSphericalEffect(OHOS::Ace::NG::FrameNode*, double)";
       "OHOS::Ace::NG::ViewAbstract::SetSystemMaterial(OHOS::Ace::UiMaterial const*)";
+      "OHOS::Ace::NG::ViewAbstract::SetSystemMaterialForOverlay(OHOS::Ace::UiMaterial const*)";
       "OHOS::Ace::NG::ViewAbstract::SetVisibility(OHOS::Ace::NG::FrameNode*, OHOS::Ace::VisibleType)";
       "OHOS::Ace::NG::ViewAbstract::SetWidth(OHOS::Ace::NG::FrameNode*, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)";
       "OHOS::Ace::NG::ViewAbstract::SetZIndex(OHOS::Ace::NG::FrameNode*, int)";

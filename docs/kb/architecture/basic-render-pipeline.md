@@ -3,7 +3,6 @@
 > 文档版本：v1.2
 > 更新时间：2026-08-04
 > 来源：`docs/context_registry.json` 主题 `BasicRenderPipeline`
-> 旧 KB 迁移来源：`docs/pattern/pipeline/Pipeline_Knowledge_Base.md`（旧 KB 位置，已迁移）
 
 ## 定位
 

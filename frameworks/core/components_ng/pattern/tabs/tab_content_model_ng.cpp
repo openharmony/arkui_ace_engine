@@ -297,6 +297,15 @@ void TabContentModelNG::AddBottomStyleTabBarItem(const RefPtr<UINode>& tabConten
         columnFocusHub->SetFocusDependence(FocusDependence::SELF);
     }
 
+    // Apply defaultVisibility for this single bottom tab bar item
+    const auto& defaultVisibility = tabContentPattern->GetDefaultVisibility();
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    auto columnProperty = columnNode->GetLayoutProperty();
+    if (tabsPattern && columnProperty) {
+        bool shouldHide = tabsPattern->IsTabShouldHideByVisibility(defaultVisibility);
+        columnProperty->UpdateVisibility(shouldHide ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
+
     // Create tab bar with content.
     if (tabBarParam.HasContent()) {
         ScopedViewStackProcessor builderViewStackProcessor;
@@ -1680,6 +1689,21 @@ void TabContentModelNG::SetId(FrameNode* node, const std::string& id)
     auto pattern = GetTabContentPattern(node);
     CHECK_NULL_VOID(pattern);
     pattern->SetId(id);
+}
+
+void TabContentModelNG::SetDefaultVisibility(const NG::TabContentDefaultVisibility& defaultVisibility)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDefaultVisibility(defaultVisibility);
+}
+
+void TabContentModelNG::SetDefaultVisibility(FrameNode* node, const NG::TabContentDefaultVisibility& defaultVisibility)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDefaultVisibility(defaultVisibility);
 }
 
 void TabContentModelNG::SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder)

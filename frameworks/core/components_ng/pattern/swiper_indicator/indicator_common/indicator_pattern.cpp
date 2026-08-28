@@ -953,4 +953,20 @@ void IndicatorPattern::HandleTouchClick(const GestureEvent& info)
         isRtl ? ShowPrevious() : ShowNext();
     }
 }
+
+void IndicatorPattern::OnMaterialDisable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!swiperParameters_->parametersByUser.count("colorVal")) {
+        paintProperty->UpdateColor(swiperIndicatorTheme->GetColor());
+    }
+    if (!swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        paintProperty->UpdateSelectedColor(swiperIndicatorTheme->GetSelectedColor());
+    }
+}
 } // namespace OHOS::Ace::NG

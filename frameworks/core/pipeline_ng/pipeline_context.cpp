@@ -99,6 +99,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/material/material_processor.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
@@ -2140,6 +2141,13 @@ void PipelineContext::SetupRootElement()
     }
     postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    materialProcessor_ = MakeRefPtr<MaterialProcessor>();
+    AddPersistAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(pipeline->materialProcessor_);
+        pipeline->materialProcessor_->ApplyScopeGate(pipeline);
+    });
     focusManager_ = GetOrCreateFocusManager();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent()));
@@ -2264,6 +2272,13 @@ void PipelineContext::SetupSubRootElement()
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     fontManager_->AddFontObserver(selectOverlayManager_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    materialProcessor_ = MakeRefPtr<MaterialProcessor>();
+    AddPersistAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(pipeline->materialProcessor_);
+        pipeline->materialProcessor_->ApplyScopeGate(pipeline);
+    });
     focusManager_ = GetOrCreateFocusManager();
     postEventManager_ = MakeRefPtr<PostEventManager>();
 }
@@ -6525,6 +6540,18 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::RegisterMaterialNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(materialProcessor_);
+    materialProcessor_->Register(node);
+}
+
+void PipelineContext::UnregisterMaterialNode(int32_t nodeId)
+{
+    CHECK_NULL_VOID(materialProcessor_);
+    materialProcessor_->Unregister(nodeId);
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)

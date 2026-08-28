@@ -95,6 +95,8 @@ public:
 
     void SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>&& event);
 
+    void SetOnBarDisplayModeChangeEvent(std::function<void(TabBarDisplayMode)>&& event);
+
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll);
 
     ChangeEventPtr GetTabBarClickEvent()
@@ -170,7 +172,11 @@ public:
     {
         return currentBarDisplayMode_;
     }
+    TabBarDisplayMode GetActiveBarDisplayMode() const;
     void SetCurrentBarDisplayMode(TabBarDisplayMode mode);
+    bool IsTabShouldHideByVisibility(const TabContentDefaultVisibility& visibility);
+
+    void FireBarDisplayModeChangeEvent(TabBarDisplayMode mode);
 
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
@@ -238,6 +244,8 @@ public:
 
     void AddTabContentNode(const RefPtr<TabContentNode>& tabContentNode);
     void RemoveTabContentNode(const RefPtr<TabContentNode>& tabContentNode);
+    bool IsColorInvertEnabled();
+    ColorMode GetColorInvertColorMode();
 
 private:
     void OnAttachToFrameNode() override;
@@ -282,6 +290,23 @@ private:
     void OnFollowHandAnimationFinish();
     void ApplySystemMaterial();
     void ResetSystemMaterial();
+    void InitColorPickerIfNeeded();
+    void UnregisterColorPicker();
+    void OnLuminanceUpdate(uint32_t luminance);
+    void StartColorInvertAnimation();
+    void HandleColorInvert();
+    void SetTabBarIsFloating(bool isFloating)
+    {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        if (tabBar) {
+            auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+            if (tabBarPattern) {
+                tabBarPattern->SetIsFloatingBar(isFloating);
+            }
+        }
+    }
 
     void UpdateSideBarIfNeeded();
     void UpdateSideBarNode();
@@ -306,6 +331,7 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
+    std::function<void(TabBarDisplayMode)> onBarDisplayModeChangeEvent_;
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
     BarPosition barPosition_ = BarPosition::END; // default accessibilityZIndex is consistent with BarPosition::END
@@ -327,6 +353,9 @@ private:
     RefPtr<NG::UINode> sidebarHeaderNode_;
     TabsSidebarSearchableOptions searchableOptions_;
     std::vector<WeakPtr<TabContentNode>> tabContentNodes_;
+    // Color invert state for auto-inversion
+    std::optional<bool> isColorPickerDark_;
+    bool hasRegisterColorPicker_ = false;
 };
 
 } // namespace OHOS::Ace::NG

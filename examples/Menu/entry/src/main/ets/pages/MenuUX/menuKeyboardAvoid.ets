@@ -41,7 +41,8 @@ struct MenuKeyboardAvoid {
                 .onClick(() => {
                   this.getUIContext().getRouter().pushUrl({
                     url: item.url
-                  }).catch(() => {
+                  }).catch((err: Error) => {
+                    console.error('Navigation failed:' + err.message);
                   })
                 })
                 .key(item.key)

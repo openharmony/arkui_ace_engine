@@ -133,6 +133,16 @@ void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
     uiMaterial_->transparencyCallbackId = id;
 }
 
+RefPtr<UiMaterial> RenderContext::GetSavedMaterialForSuppress() const
+{
+    return savedMaterialForSuppress_;
+}
+
+void RenderContext::SetSavedMaterialForSuppress(const RefPtr<UiMaterial>& material)
+{
+    savedMaterialForSuppress_ = material;
+}
+
 RenderContext::RenderContext() = default;
 RenderContext::~RenderContext() = default;
 

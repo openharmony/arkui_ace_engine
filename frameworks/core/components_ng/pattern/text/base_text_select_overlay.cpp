@@ -134,6 +134,15 @@ bool BaseTextSelectOverlay::IsHandleReverse()
     return overlayManager->IsHandleReverse();
 }
 
+bool BaseTextSelectOverlay::IsOwnerClipContent()
+{
+    auto owner = GetOwner();
+    CHECK_NULL_RETURN(owner, true);
+    auto renderContext = owner->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, true);
+    return renderContext->GetClipEdge().value_or(false);
+}
+
 bool BaseTextSelectOverlay::SelectOverlayIsOn()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -831,8 +840,9 @@ bool BaseTextSelectOverlay::CheckHandleCanPaintInHost(const RectF& firstRect, co
 
 void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect)
 {
-    if (CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasUnsupportedTransform() ||
-        IsHandleInParentSafeAreaPadding(firstLocalPaintRect, secondLocalPaintRect)) {
+    if ((CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasUnsupportedTransform() ||
+        IsHandleInParentSafeAreaPadding(firstLocalPaintRect, secondLocalPaintRect)) &&
+        !IsOwnerClipContent()) {
         SetHandleLevelMode(HandleLevelMode::EMBED);
     } else {
         SetHandleLevelMode(HandleLevelMode::OVERLAY);
