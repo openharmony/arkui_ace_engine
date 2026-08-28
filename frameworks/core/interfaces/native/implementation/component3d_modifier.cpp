@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "parse_resource_uint32.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #if defined(MODEL_COMPONENT_SUPPORTED)
@@ -73,13 +74,17 @@ bool GetResourceId(const std::string& uri, uint32_t& resId)
 {
     std::smatch matches;
     if (std::regex_match(uri, matches, MODEL_RES_ID_REGEX) && matches.size() == MODEL_RESOURCE_MATCH_SIZE) {
-        resId = static_cast<uint32_t>(std::stoul(matches[1].str()));
+        if (!ParseResourceUint32(matches[1].str(), resId)) {
+            return false;
+        }
         return true;
     }
 
     std::smatch appMatches;
     if (std::regex_match(uri, appMatches, MODEL_APP_RES_ID_REGEX) && appMatches.size() == MODEL_RESOURCE_MATCH_SIZE) {
-        resId = static_cast<uint32_t>(std::stoul(appMatches[1].str()));
+        if (!ParseResourceUint32(appMatches[1].str(), resId)) {
+            return false;
+        }
         return true;
     }
     return false;
