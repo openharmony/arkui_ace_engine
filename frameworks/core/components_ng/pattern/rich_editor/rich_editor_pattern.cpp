@@ -732,11 +732,7 @@ void RichEditorPattern::OnModifyDone()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
-    auto gestureEventHub = host->GetOrCreateGestureEventHub();
-    InitClickEvent(gestureEventHub);
-    InitLongPressEvent(gestureEventHub);
-    InitTouchEvent();
-    InitPanEvent();
+    InitGestureEvents();
     HandleEnabled();
     ProcessInnerPadding();
     InitScrollablePattern();
@@ -765,6 +761,17 @@ void RichEditorPattern::OnModifyDone()
         dataDetectorAdapter_->GetAIEntityMenu();
     }
     context->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
+}
+
+void RichEditorPattern::InitGestureEvents()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    InitClickEvent(gestureEventHub);
+    InitLongPressEvent(gestureEventHub);
+    InitTouchEvent();
+    InitPanEvent();
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -811,6 +818,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
     } else if (contentMod_) {
         contentMod_->ContentChange();
     }
+    TryExecuteSelectAll();
 }
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
@@ -3878,20 +3886,14 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     RectF lastCaretRect = GetCaretRect();
     int32_t lastCaretPosition = caretPosition_;
     bool isCaretTwinkling = caretTwinkling_;
-    auto position = paragraphs_.GetIndex(textOffset);
-    AdjustCursorPosition(position);
-    if (auto focusHub = GetFocusHub(); focusHub) {
-        IF_TRUE(!isMouseClick || (blockPress_ && !isMouseClickWithShift), SetCaretPosition(position));
-        IF_TRUE(isMouseClickWithShift, HandleShiftSelect(position));
-        IF_TRUE(focusHub->IsCurrentFocus(), HandleOnEditChanged(true));
-        RICH_EDITOR_SCOPE(requestFocusBySingleClick_);
-        if (focusHub->RequestFocusImmediately()) {
-            IF_TRUE(textSelector_.SelectNothing(), StartTwinkling());
-            RequestKeyboard(false, true, true, info.GetSourceDevice());
-        }
-        lastReportSelectionText_ = "";
-    }
+    HandleFocusByClick(textOffset, info.GetSourceDevice(), isMouseClickWithShift);
     UseHostToUpdateTextFieldManager();
+    // Fallback select-all if skipped during BeforeCreateLayoutWrapper (e.g., long press).
+    if (needSelectAll_ && !isMouseClickWithShift) {
+        HandleOnSelectAll(false);
+        needSelectAll_ = false;
+        return;
+    }
     CalcCaretInfoByClick(localOffset);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
@@ -3900,6 +3902,25 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     if (IsShowSingleHandleByClick(info, lastCaretPosition, lastCaretRect, isCaretTwinkling)) {
         CreateAndShowSingleHandle();
     }
+}
+
+void RichEditorPattern::HandleFocusByClick(
+    const Offset& textOffset, SourceType sourceDevice, bool isMouseClickWithShift)
+{
+    bool isMouseClick = sourceDevice == SourceType::MOUSE;
+    auto position = paragraphs_.GetIndex(textOffset);
+    AdjustCursorPosition(position);
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    IF_TRUE(!isMouseClick || (blockPress_ && !isMouseClickWithShift), SetCaretPosition(position));
+    IF_TRUE(isMouseClickWithShift, HandleShiftSelect(position));
+    IF_TRUE(focusHub->IsCurrentFocus(), HandleOnEditChanged(true));
+    RICH_EDITOR_SCOPE(requestFocusBySingleClick_);
+    if (focusHub->RequestFocusImmediately()) {
+        IF_TRUE(textSelector_.SelectNothing(), StartTwinkling());
+        RequestKeyboard(false, true, true, sourceDevice);
+    }
+    lastReportSelectionText_ = "";
 }
 
 PointF RichEditorPattern::GetTextOffset(const Offset &localLocation, const RectF &contentRect)
@@ -4270,6 +4291,7 @@ void RichEditorPattern::HandleBlurEventReset()
     floatingCaretState_.Reset();
     firstClickResetTask_.Cancel();
     firstClickAfterWindowFocus_ = false;
+    needSelectAll_ = false;
     StopTwinkling();
 }
 
@@ -4343,6 +4365,7 @@ void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
     blockKbInFloatingWindow_= false;
     UseHostToUpdateTextFieldManager();
     ReportEditorEvent(std::string(EDITOR_FOCUS_EVENT));
+    needSelectAll_ = ShouldSelectAllOnInit(focusReason);
     if (previewLongPress_ || isOnlyRequestFocus_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent, previewLongPress=%{public}d,"
             "OnlyRequestFocus=%{public}d", previewLongPress_, isOnlyRequestFocus_);
@@ -4752,8 +4775,7 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
         }
         IF_TRUE(!IsAiSelected(), StartVibratorByLongPress());
         CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
-        editingLongPress_ = isEditing_;
-        previewLongPress_ = !isEditing_;
+        SetLongPressFlags();
         IF_TRUE(previewLongPress_, CloseKeyboard(true));
     }
     focusHub->RequestFocusImmediately();
@@ -8013,7 +8035,13 @@ int32_t RichEditorPattern::GetParagraphEndPosition(int32_t caretPosition)
 
 void RichEditorPattern::HandleOnSelectAll()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnSelectAll IsPreviewTextInputting:%{public}d", IsPreviewTextInputting());
+    HandleOnSelectAll(true);
+}
+
+void RichEditorPattern::HandleOnSelectAll(bool isKeyEvent)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnSelectAll isKeyEvent:%{public}d IsPreviewTextInputting:%{public}d",
+        isKeyEvent, IsPreviewTextInputting());
     CHECK_NULL_VOID(!IsPreviewTextInputting());
     selectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_SELECT_ALL);
     textResponseType_.reset();
@@ -8025,8 +8053,11 @@ void RichEditorPattern::HandleOnSelectAll()
     IF_TRUE(IsSelected(), StopTwinkling());
     MarkContentNodeForRender();
     auto host = GetHost();
- 	CHECK_NULL_VOID(host);
- 	ReportSelectionChangeEvent(host->GetId(), "selectionChange", 0, newPos);
+    CHECK_NULL_VOID(host);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", 0, newPos);
+    CHECK_NULL_VOID(!isKeyEvent);
+    CalculateHandleOffsetAndShowOverlay();
+    ProcessOverlay({ .menuIsShow = false, .animation = true });
 }
 
 int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
@@ -11708,8 +11739,19 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
     json->PutExtAttr("orphanCharOptimization", isOrphanCharOptimization_ ? "true" : "false", filter);
     json->PutExtAttr("horizontalScrolling", isHorizontalScrolling_ ? "true" : "false", filter);
+    FillTextEditorAttrsInJson(json, filter);
     auto builderSpanInfos = GetBuilderSpanInfosInJson();
     IF_TRUE(!builderSpanInfos.empty(), json->PutExtAttr("builderSpanInfos", builderSpanInfos.c_str(), filter));
+}
+
+void RichEditorPattern::FillTextEditorAttrsInJson(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("caretStyle", GetCaretWidth(), filter);
+    json->PutExtAttr("selectAll", selectAllOnInit_ ? "true" : "false", filter);
+    json->PutExtAttr("blurOnSubmit", blurOnSubmit_ ? "true" : "false", filter);
+    json->PutExtAttr("selectionMenuHidden", selectionMenuHidden_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSkipPreviewLongPress", enableSkipPreviewLongPress_ ? "true" : "false", filter);
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const
@@ -12362,14 +12404,14 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     if (action == TextInputAction::NEW_LINE) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "action=%{public}d, forceCloseKeyboard=%{public}d", action,
             forceCloseKeyboard);
-        InsertValue(u"\n", true);
+        IF_TRUE(!blurOnSubmit_, InsertValue(u"\n", true));
     }
     // Enter key type callback
     TextFieldCommonEvent event;
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
     // If the developer wants to keep editing, editing will not stop
-    if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
+    if (event.IsKeepEditable() || (action == TextInputAction::NEW_LINE && !blurOnSubmit_)) {
         return;
     }
     // Exit the editing state
@@ -14312,7 +14354,7 @@ void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
 
 float RichEditorPattern::GetCaretWidth() const
 {
-    return static_cast<float>(CARET_WIDTH.ConvertToPx());
+    return static_cast<float>(GetCustomCaretWidth().ConvertToPx());
 }
 
 #if defined(IOS_PLATFORM)
@@ -14772,6 +14814,89 @@ void RichEditorPattern::SetPunctuationOverflow(bool enabled)
 bool RichEditorPattern::IsPunctuationOverflow()
 {
     return isPunctuationOverflow_;
+}
+
+void RichEditorPattern::SetCustomCaretWidth(const Dimension& width)
+{
+    customCaretWidth_ = width;
+}
+
+Dimension RichEditorPattern::GetCustomCaretWidth() const
+{
+    return customCaretWidth_.value_or(CARET_WIDTH);
+}
+
+void RichEditorPattern::ResetCustomCaretWidth()
+{
+    customCaretWidth_ = std::nullopt;
+}
+
+void RichEditorPattern::SetSelectAll(bool value)
+{
+    selectAllOnInit_ = value;
+    IF_TRUE(!value, needSelectAll_ = false);
+}
+
+bool RichEditorPattern::GetSelectAll() const
+{
+    return selectAllOnInit_;
+}
+
+bool RichEditorPattern::ShouldSelectAllOnInit(FocusReason focusReason)
+{
+    return selectAllOnInit_ && GetTextContentLength() > 0 && !editingLongPress_ &&
+        focusReason != FocusReason::WINDOW_FOCUS;
+}
+
+void RichEditorPattern::TryExecuteSelectAll()
+{
+    CHECK_NULL_VOID(needSelectAll_ && !isLongPress_);
+    HandleOnSelectAll(false);
+    needSelectAll_ = false;
+}
+
+void RichEditorPattern::SetBlurOnSubmit(bool value)
+{
+    blurOnSubmit_ = value;
+}
+
+bool RichEditorPattern::GetBlurOnSubmit() const
+{
+    return blurOnSubmit_;
+}
+
+void RichEditorPattern::SetSelectionMenuHidden(bool value)
+{
+    selectionMenuHidden_ = value;
+}
+
+bool RichEditorPattern::GetSelectionMenuHidden() const
+{
+    return selectionMenuHidden_;
+}
+
+void RichEditorPattern::SetEnableSkipPreviewLongPress(bool value)
+{
+    enableSkipPreviewLongPress_ = value;
+}
+
+bool RichEditorPattern::GetEnableSkipPreviewLongPress() const
+{
+    return enableSkipPreviewLongPress_;
+}
+
+void RichEditorPattern::SetLongPressFlags()
+{
+    // isLongPress_ is already set to true by the caller (HandleDoubleClickOrLongPress)
+    if (enableSkipPreviewLongPress_ && !isEditing_) {
+        // skip preview state, let HandleFocusEvent handle edit + keyboard
+        isLongPress_ = false;
+        previewLongPress_ = false;
+        editingLongPress_ = true;
+    } else {
+        editingLongPress_ = isEditing_;
+        previewLongPress_ = !isEditing_;
+    }
 }
 
 void RichEditorPattern::OnAttachToMainTree()

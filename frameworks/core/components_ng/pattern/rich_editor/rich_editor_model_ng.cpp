@@ -20,6 +20,12 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
+namespace {
+constexpr int32_t RECT_COMPONENT_COUNT = 4;
+constexpr int32_t RECT_INDEX_WIDTH = 2;
+constexpr int32_t RECT_INDEX_HEIGHT = 3;
+}
+
 namespace OHOS::Ace::NG {
 void RichEditorModelNG::Create(bool isStyledStringMode)
 {
@@ -1145,6 +1151,140 @@ void RichEditorModelNG::SetPunctuationOverflow(FrameNode* frameNode, bool enable
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetPunctuationOverflow(enabled);
+}
+
+void RichEditorModelNG::SetRichEditorCaretStyle(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomCaretWidth(value);
+}
+
+Dimension RichEditorModelNG::GetRichEditorCaretStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Dimension());
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, Dimension());
+    return pattern->GetCustomCaretWidth();
+}
+
+void RichEditorModelNG::ResetRichEditorCaretStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetCustomCaretWidth();
+}
+
+void RichEditorModelNG::SetRichEditorSelectAll(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectAll(value);
+}
+
+bool RichEditorModelNG::GetRichEditorSelectAll(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectAll();
+}
+
+void RichEditorModelNG::ResetRichEditorSelectAll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectAll(false);
+}
+
+void RichEditorModelNG::SetRichEditorBlurOnSubmit(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBlurOnSubmit(value);
+}
+
+bool RichEditorModelNG::GetRichEditorBlurOnSubmit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetBlurOnSubmit();
+}
+
+void RichEditorModelNG::ResetRichEditorBlurOnSubmit(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBlurOnSubmit(false);
+}
+
+void RichEditorModelNG::GetRichEditorContentRect(FrameNode* frameNode, float* values, int32_t size)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto rect = pattern->GetTextContentRect();
+    if (values != nullptr && size >= RECT_COMPONENT_COUNT) {
+        values[0] = rect.GetX();
+        values[1] = rect.GetY();
+        values[RECT_INDEX_WIDTH] = rect.Width();
+        values[RECT_INDEX_HEIGHT] = rect.Height();
+    }
+}
+
+void RichEditorModelNG::SetRichEditorSelectionMenuHidden(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectionMenuHidden(value);
+}
+
+bool RichEditorModelNG::GetRichEditorSelectionMenuHidden(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectionMenuHidden();
+}
+
+void RichEditorModelNG::ResetRichEditorSelectionMenuHidden(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectionMenuHidden(false);
+}
+
+void RichEditorModelNG::SetRichEditorEnableSkipPreviewLongPress(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableSkipPreviewLongPress(value);
+}
+
+bool RichEditorModelNG::GetRichEditorEnableSkipPreviewLongPress(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetEnableSkipPreviewLongPress();
+}
+
+void RichEditorModelNG::ResetRichEditorEnableSkipPreviewLongPress(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableSkipPreviewLongPress(false);
 }
 
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)

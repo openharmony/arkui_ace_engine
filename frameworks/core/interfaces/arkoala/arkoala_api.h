@@ -9403,6 +9403,22 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorHorizontalScrolling)(ArkUINodeHandle node, ArkUI_Bool singleLine);
     void (*resetRichEditorHorizontalScrolling)(ArkUINodeHandle node);
     ArkUI_Bool (*getRichEditorHorizontalScrolling)(ArkUINodeHandle node);
+    void (*setRichEditorCaretStyle)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    ArkUI_Float32 (*getRichEditorCaretStyle)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    void (*resetRichEditorCaretStyle)(ArkUINodeHandle node);
+    void (*setRichEditorSelectAll)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorSelectAll)(ArkUINodeHandle node);
+    void (*resetRichEditorSelectAll)(ArkUINodeHandle node);
+    void (*setRichEditorBlurOnSubmit)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorBlurOnSubmit)(ArkUINodeHandle node);
+    void (*resetRichEditorBlurOnSubmit)(ArkUINodeHandle node);
+    void (*getRichEditorContentRect)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*setRichEditorSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorSelectionMenuHidden)(ArkUINodeHandle node);
+    void (*resetRichEditorSelectionMenuHidden)(ArkUINodeHandle node);
+    void (*setRichEditorEnableSkipPreviewLongPress)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorEnableSkipPreviewLongPress)(ArkUINodeHandle node);
+    void (*resetRichEditorEnableSkipPreviewLongPress)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

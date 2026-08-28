@@ -1367,6 +1367,119 @@ void ResetRichEditorPunctuationOverflow(ArkUINodeHandle node)
     RichEditorModelNG::SetPunctuationOverflow(frameNode, false);
 }
 
+void SetRichEditorCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorCaretStyle(frameNode, Dimension(value, static_cast<DimensionUnit>(unit)));
+}
+
+ArkUI_Float32 GetRichEditorCaretStyle(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return static_cast<ArkUI_Float32>(
+        RichEditorModelNG::GetRichEditorCaretStyle(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit)));
+}
+
+void ResetRichEditorCaretStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetRichEditorCaretStyle(frameNode);
+}
+
+void SetRichEditorSelectAll(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorSelectAll(frameNode, value);
+}
+
+ArkUI_Int32 GetRichEditorSelectAll(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return RichEditorModelNG::GetRichEditorSelectAll(frameNode);
+}
+
+void ResetRichEditorSelectAll(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorSelectAll(frameNode, false);
+}
+
+void SetRichEditorBlurOnSubmit(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorBlurOnSubmit(frameNode, value);
+}
+
+ArkUI_Int32 GetRichEditorBlurOnSubmit(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return RichEditorModelNG::GetRichEditorBlurOnSubmit(frameNode);
+}
+
+void ResetRichEditorBlurOnSubmit(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorBlurOnSubmit(frameNode, false);
+}
+
+void GetRichEditorContentRect(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::GetRichEditorContentRect(frameNode, values, size);
+}
+
+void SetRichEditorSelectionMenuHidden(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorSelectionMenuHidden(frameNode, value);
+}
+
+ArkUI_Int32 GetRichEditorSelectionMenuHidden(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return RichEditorModelNG::GetRichEditorSelectionMenuHidden(frameNode);
+}
+
+void ResetRichEditorSelectionMenuHidden(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorSelectionMenuHidden(frameNode, false);
+}
+
+void SetRichEditorEnableSkipPreviewLongPress(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorEnableSkipPreviewLongPress(frameNode, value);
+}
+
+ArkUI_Int32 GetRichEditorEnableSkipPreviewLongPress(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return RichEditorModelNG::GetRichEditorEnableSkipPreviewLongPress(frameNode);
+}
+
+void ResetRichEditorEnableSkipPreviewLongPress(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetRichEditorEnableSkipPreviewLongPress(frameNode, false);
+}
+
 void SetRichEditorIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2474,6 +2587,22 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
             .setRichEditorHorizontalScrolling = nullptr,
             .resetRichEditorHorizontalScrolling = nullptr,
             .getRichEditorHorizontalScrolling = nullptr,
+            .setRichEditorCaretStyle = nullptr,
+            .getRichEditorCaretStyle = nullptr,
+            .resetRichEditorCaretStyle = nullptr,
+            .setRichEditorSelectAll = nullptr,
+            .getRichEditorSelectAll = nullptr,
+            .resetRichEditorSelectAll = nullptr,
+            .setRichEditorBlurOnSubmit = nullptr,
+            .getRichEditorBlurOnSubmit = nullptr,
+            .resetRichEditorBlurOnSubmit = nullptr,
+            .getRichEditorContentRect = nullptr,
+            .setRichEditorSelectionMenuHidden = nullptr,
+            .getRichEditorSelectionMenuHidden = nullptr,
+            .resetRichEditorSelectionMenuHidden = nullptr,
+            .setRichEditorEnableSkipPreviewLongPress = nullptr,
+            .getRichEditorEnableSkipPreviewLongPress = nullptr,
+            .resetRichEditorEnableSkipPreviewLongPress = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2649,6 +2778,22 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setRichEditorHorizontalScrolling = SetRichEditorHorizontalScrolling,
         .resetRichEditorHorizontalScrolling = ResetRichEditorHorizontalScrolling,
         .getRichEditorHorizontalScrolling = GetRichEditorHorizontalScrolling,
+        .setRichEditorCaretStyle = SetRichEditorCaretStyle,
+        .getRichEditorCaretStyle = GetRichEditorCaretStyle,
+        .resetRichEditorCaretStyle = ResetRichEditorCaretStyle,
+        .setRichEditorSelectAll = SetRichEditorSelectAll,
+        .getRichEditorSelectAll = GetRichEditorSelectAll,
+        .resetRichEditorSelectAll = ResetRichEditorSelectAll,
+        .setRichEditorBlurOnSubmit = SetRichEditorBlurOnSubmit,
+        .getRichEditorBlurOnSubmit = GetRichEditorBlurOnSubmit,
+        .resetRichEditorBlurOnSubmit = ResetRichEditorBlurOnSubmit,
+        .getRichEditorContentRect = GetRichEditorContentRect,
+        .setRichEditorSelectionMenuHidden = SetRichEditorSelectionMenuHidden,
+        .getRichEditorSelectionMenuHidden = GetRichEditorSelectionMenuHidden,
+        .resetRichEditorSelectionMenuHidden = ResetRichEditorSelectionMenuHidden,
+        .setRichEditorEnableSkipPreviewLongPress = SetRichEditorEnableSkipPreviewLongPress,
+        .getRichEditorEnableSkipPreviewLongPress = GetRichEditorEnableSkipPreviewLongPress,
+        .resetRichEditorEnableSkipPreviewLongPress = ResetRichEditorEnableSkipPreviewLongPress,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

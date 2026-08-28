@@ -32,5 +32,11 @@ X(1, 1, 1, RichEditorSingleLine)
 X(1, 1, 1, OrphanCharOptimization)
 X(1, 1, 1, RichEditorHorizontalScrolling)
 X(1, 1, 1, PunctuationOverflow)
+X(1, 1, 1, RichEditorCaretStyle)
+X(1, 1, 1, RichEditorSelectAll)
+X(1, 1, 1, RichEditorBlurOnSubmit)
+X(0, 1, 0, RichEditorContentRect)
+X(1, 1, 1, RichEditorSelectionMenuHidden)
+X(1, 1, 1, RichEditorEnableSkipPreviewLongPress)
 #undef IF_1
 #undef IF_0
