@@ -19,6 +19,10 @@
 
 #include "want_params.h"
 
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace {
@@ -179,14 +183,16 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         auto child = intentParams->GetChild();
         while (child->IsValid()) {
             auto key = child->GetKey();
-            if (child->IsNull()) {
-                wantParams.SetParam(key, std::string());
-            } else if (child->IsString()) {
-                wantParams.SetParam(key, child->GetString());
+            // WantParams::SetParam 仅接受 IInterface 派生类型（Want 才有原始类型重载），
+            // 需用 AAFwk 包装类 Box() 转换，先例：js_plugin_want.cpp / ace_ability.cpp。
+            if (child->IsString()) {
+                wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
             } else if (child->IsNumber()) {
-                wantParams.SetParam(key, child->GetInt());
+                wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
+            } else if (child->IsBool()) {
+                wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
             } else {
-                wantParams.SetParam(key, std::string());
+                wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
             }
             child = child->GetNext();
         }
