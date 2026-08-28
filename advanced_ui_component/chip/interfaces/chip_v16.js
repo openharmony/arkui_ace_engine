@@ -2057,15 +2057,9 @@ export class ChipComponent extends ViewPU {
   getChipBackgroundColor() {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
-      if (!isNullOrEmptyMaterial(this.activatedBackgroundSystemMaterial)) {
-        return undefined;
-      }
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor()
         ? themeChipNode.focusActivatedBgColor
         : this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
-    }
-    if (!isNullOrEmptyMaterial(this.backgroundSystemMaterial)) {
-      return undefined;
     }
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor()
       ? themeChipNode.focusBgColor
