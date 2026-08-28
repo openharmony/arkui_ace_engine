@@ -168,7 +168,7 @@ public:
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
-    const RefPtr<Subwindow>& GetCurrentDialogWindow();
+    RefPtr<Subwindow> GetCurrentDialogWindow();
     ACE_FORCE_EXPORT void DeleteHotAreas(int32_t subwindowId, int32_t nodeId, SubwindowType type);
 
     void ClearToastInSubwindow();

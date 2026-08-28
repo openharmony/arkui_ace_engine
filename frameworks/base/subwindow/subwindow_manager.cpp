@@ -1090,7 +1090,7 @@ void SubwindowManager::SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwin
     currentDialogSubwindow_ = subwindow;
 }
 
-const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
+RefPtr<Subwindow> SubwindowManager::GetCurrentDialogWindow()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get current dialog window enter");
     std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
