@@ -1123,7 +1123,7 @@ std::vector<NG::OptionParam> JSViewPopups::ParseBindOptionParam(const JSCallback
     }
     auto paramArray = JSRef<JSArray>::Cast(arg);
     auto paramArrayLength = paramArray->Length();
-    if ((paramArrayLength == -1) || (paramArrayLength == SIZE_MAX)) {
+    if (paramArrayLength == SIZE_MAX) {
         return std::vector<NG::OptionParam>();
     }
     std::vector<NG::OptionParam> params(paramArrayLength);
