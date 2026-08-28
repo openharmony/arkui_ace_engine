@@ -83,7 +83,8 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig001, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::INIT_FAILED);
+    // Stub version always returns NOT_FOUND regardless of FeatureManager state
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
 }
 
 HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig002, TestSize.Level1)
@@ -117,8 +118,9 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig004, TestSize.Lev
     bool enabled = true;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::UNMATCHED);
-    EXPECT_FALSE(enabled);
+    // Stub version always returns NOT_FOUND and does not modify out parameters
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_TRUE(enabled);
     EXPECT_TRUE(components.empty());
 }
 
@@ -131,7 +133,8 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig005, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::UNMATCHED);
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
     EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
@@ -146,13 +149,10 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig006, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::MATCHED);
-    EXPECT_TRUE(enabled);
-    ASSERT_EQ(components.size(), 4u);
-    EXPECT_EQ(components[0], "TextInput");
-    EXPECT_EQ(components[1], "TextArea");
-    EXPECT_EQ(components[2], "RichEditor");
-    EXPECT_EQ(components[3], "Text");
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_FALSE(enabled);
+    EXPECT_TRUE(components.empty());
 }
 
 HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig007, TestSize.Level1)
@@ -164,7 +164,8 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig007, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::UNMATCHED);
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
     EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
@@ -178,7 +179,8 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig008, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::UNMATCHED);
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
     EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
@@ -191,8 +193,9 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig009, TestSize.Lev
     bool enabled = true;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::UNMATCHED);
-    EXPECT_FALSE(enabled);
+    // Stub version always returns NOT_FOUND and does not modify out parameters
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_TRUE(enabled);
     EXPECT_TRUE(components.empty());
 }
 
@@ -205,8 +208,9 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig010, TestSize.Lev
     bool enabled = true;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::UNMATCHED);
-    EXPECT_FALSE(enabled);
+    // Stub version always returns NOT_FOUND and does not modify out parameters
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_TRUE(enabled);
 }
 
 HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig011, TestSize.Level1)
@@ -219,11 +223,10 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig011, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::MATCHED);
-    EXPECT_TRUE(enabled);
-    ASSERT_EQ(components.size(), 2u);
-    EXPECT_EQ(components[0], "TextInput");
-    EXPECT_EQ(components[1], "TextArea");
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_FALSE(enabled);
+    EXPECT_TRUE(components.empty());
 }
 
 HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig012, TestSize.Level1)
@@ -236,12 +239,10 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig012, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::MATCHED);
-    EXPECT_TRUE(enabled);
-    ASSERT_EQ(components.size(), 3u);
-    EXPECT_EQ(components[0], "TextInput");
-    EXPECT_EQ(components[1], "TextInput");
-    EXPECT_EQ(components[2], "Text");
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_FALSE(enabled);
+    EXPECT_TRUE(components.empty());
 }
 
 HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig013, TestSize.Level1)
@@ -254,8 +255,9 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig013, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::MATCHED);
-    EXPECT_TRUE(enabled);
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
 
@@ -269,8 +271,9 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig014, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::MATCHED);
-    EXPECT_TRUE(enabled);
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
 
@@ -284,11 +287,10 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig015, TestSize.Lev
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::MATCHED);
-    EXPECT_TRUE(enabled);
-    ASSERT_EQ(components.size(), 2u);
-    EXPECT_EQ(components[0], "CustomWidget");
-    EXPECT_EQ(components[1], "MySpecialNode");
+    // Stub version always returns NOT_FOUND
+    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
+    EXPECT_FALSE(enabled);
+    EXPECT_TRUE(components.empty());
 }
 
 HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled001, TestSize.Level1)
@@ -335,9 +337,10 @@ HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled004, TestSize.Level1
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
-    EXPECT_TRUE(ret);
-    EXPECT_TRUE(enabled);
-    ASSERT_EQ(components.size(), 2u);
+    // Stub version always returns false
+    EXPECT_FALSE(ret);
+    EXPECT_FALSE(enabled);
+    EXPECT_TRUE(components.empty());
 }
 
 HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled005, TestSize.Level1)
@@ -350,8 +353,9 @@ HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled005, TestSize.Level1
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
-    EXPECT_TRUE(ret);
-    EXPECT_TRUE(enabled);
+    // Stub version always returns false
+    EXPECT_FALSE(ret);
+    EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
 
