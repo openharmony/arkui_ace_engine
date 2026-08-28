@@ -1061,4 +1061,121 @@ HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers
     manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, currentReferee);
 }
 
+/**
+ * @tc.name: CheckAndCleanBeforeNewTouch_HasUnclosedStartTrue
+ * @tc.desc: Test CheckAndCleanBeforeNewTouch when hasUnclosedStart is true (START state)
+ *           — SendCancelToRecognizer is called at line 69
+ * @tc.type: FUNC
+ */
+HWTEST_F(ActiveRecognizerManagerTestNg, CheckAndCleanBeforeNewTouch_HasUnclosedStartTrue, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    recognizer->SetTestRefereeState(RefereeState::DETECTING);
+    recognizer->SetTestCallbackState(CurrentCallbackState::START);
+    EXPECT_CALL(*recognizer, HandleEvent(_)).Times(1);
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    manager_->CheckAndCleanBeforeNewTouch(TOUCH_ID_1);
+    EXPECT_EQ(manager_->GetActiveRecognizerCount(), 0);
+}
+
+/**
+ * @tc.name: DumpRecognizerStates_ValidRecognizer
+ * @tc.desc: Test DumpRecognizerStates with valid recognizer — covers TAG_LOGD branch at line 145
+ * @tc.type: FUNC
+ */
+HWTEST_F(ActiveRecognizerManagerTestNg, DumpRecognizerStates_ValidRecognizer, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    recognizer->SetTestRefereeState(RefereeState::READY);
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    manager_->DumpRecognizerStates();
+    EXPECT_EQ(manager_->GetActiveRecognizerCount(), 1);
+}
+
+/**
+ * @tc.name: CleanFinishedRecognizersWithStaleFingers_QueryAllDoneFalse
+ * @tc.desc: Test CleanFinishedRecognizersWithStaleFingers when QueryAllDone returns false
+ *           — covers line 174 if-false branch (QueryAllDone == false, skip CleanGestureScope)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ActiveRecognizerManagerTestNg, CleanFinishedRecognizersWithStaleFingers_QueryAllDoneFalse, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+    auto pendingRecognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    pendingRecognizer->SetTestRefereeState(RefereeState::PENDING);
+    TouchTestResult result;
+    result.emplace_back(pendingRecognizer);
+    referee->AddGestureToScope(static_cast<size_t>(TOUCH_ID_0), result);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds, referee);
+}
+
+/**
+ * @tc.name: CleanFinishedRecognizersWithStaleFingersForPost_NullRecognizer
+ * @tc.desc: Test CleanFinishedRecognizersWithStaleFingersForPost with expired weak ptr
+ *           — covers line 191 recognizer-false branch (skip recognizer)
+ *           When all recognizers are expired, allFingerIds stays empty,
+ *           CleanGestureScope should NOT be called, and gesture scope should remain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ActiveRecognizerManagerTestNg,
+    CleanFinishedRecognizersWithStaleFingersForPost_NullRecognizer, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+    recognizer = nullptr;
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+
+    auto scopeRecognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    scopeRecognizer->SetTestRefereeState(RefereeState::SUCCEED);
+    TouchTestResult result;
+    result.emplace_back(scopeRecognizer);
+    referee->AddGestureToScope(static_cast<size_t>(TOUCH_ID_0), result);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, referee);
+
+    EXPECT_EQ(manager_->GetActiveRecognizerCount(), 1u);
+    EXPECT_FALSE(referee->IsScopesEmpty());
+}
+
+/**
+ * @tc.name: CleanFinishedRecognizersWithStaleFingersForPost_QueryAllDoneFalse
+ * @tc.desc: Test CleanFinishedRecognizersWithStaleFingersForPost when QueryAllDone returns false
+ *           — covers line 206 if-false branch (QueryAllDone == false, skip CleanGestureScope)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ActiveRecognizerManagerTestNg,
+    CleanFinishedRecognizersWithStaleFingersForPost_QueryAllDoneFalse, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    TouchEvent touchEvent0;
+    touchEvent0.id = TOUCH_ID_0;
+    std::map<int32_t, TouchEvent> touchPoints = { { TOUCH_ID_0, touchEvent0 } };
+    EXPECT_CALL(*recognizer, GetTouchPoints()).WillRepeatedly(Return(touchPoints));
+    manager_->RegisterRecognizer(recognizer, TOUCH_ID_0);
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+    recognizer->referee_ = WeakPtr<NG::GestureReferee>(referee);
+
+    auto pendingRecognizer = AceType::MakeRefPtr<TestGestureRecognizer>();
+    pendingRecognizer->SetTestRefereeState(RefereeState::PENDING);
+    TouchTestResult result;
+    result.emplace_back(pendingRecognizer);
+    referee->AddGestureToScope(static_cast<size_t>(TOUCH_ID_0), result);
+
+    std::unordered_map<int32_t, int32_t> downFingerIds;
+    manager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds, referee);
+}
 } // namespace OHOS::Ace::NG
