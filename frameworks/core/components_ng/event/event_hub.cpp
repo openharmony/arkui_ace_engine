@@ -841,7 +841,8 @@ void EventHub::FireOnAreaChanged(
 void EventHub::FireInnerOnAreaChanged(
     const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
 {
-    for (auto& innerCallbackInfo : onAreaChangedInnerCallbacks_) {
+    auto callbacks = onAreaChangedInnerCallbacks_;
+    for (auto& innerCallbackInfo : callbacks) {
         if (innerCallbackInfo.second) {
             auto innerOnAreaCallback = innerCallbackInfo.second;
             innerOnAreaCallback(oldRect, oldOrigin, rect, origin);

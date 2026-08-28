@@ -314,7 +314,7 @@ class GestureGroupHandler extends GestureHandler {
         super(CommonGestureType.GESTURE_GROUP);
         if (options !== undefined && options !== null) {
             this.mode = options.mode;
-            this.gestures = options.gestures as any;
+            this.gestures = [...options.gestures] as any;
         }
     }
 
