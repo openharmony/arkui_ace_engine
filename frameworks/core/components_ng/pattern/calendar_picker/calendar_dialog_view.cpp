@@ -1169,7 +1169,7 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
 #else
     enabled = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled();
 #endif
-    if (!enabled) {
+    if (!enabled || dialogProperties.systemMaterial) {
         return;
     }
 
@@ -1179,6 +1179,7 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
     CHECK_NULL_VOID(contentRenderContext);
     auto pipeLineContext = dialogNode->GetContext();
     CHECK_NULL_VOID(pipeLineContext);
+
     BlurStyleOption styleOption;
     if (dialogProperties.blurStyleOption.has_value()) {
         styleOption = dialogProperties.blurStyleOption.value();
@@ -1195,9 +1196,7 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
     if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
         contentRenderContext->UpdateBackgroundEffect(std::nullopt);
     }
-    if (!renderContext->GetSystemMaterial()) {
-        renderContext->UpdateBackBlurStyle(styleOption);
-    }
+    renderContext->UpdateBackBlurStyle(styleOption);
     if (dialogProperties.effectOption.has_value()) {
         if (dialogProperties.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
             pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
