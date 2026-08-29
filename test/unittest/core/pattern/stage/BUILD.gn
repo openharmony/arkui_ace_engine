@@ -57,6 +57,7 @@ if (!is_host_product) {
       "force_split_stage_test_ng.cpp",
       "force_split_stage_test_two_ng.cpp",
       "force_split_stage_test_three_ng.cpp",
+      "force_split_stage_test_four_ng.cpp",
     ]
   }
 }

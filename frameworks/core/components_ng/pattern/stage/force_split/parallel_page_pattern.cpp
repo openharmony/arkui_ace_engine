@@ -89,6 +89,9 @@ void ParallelPagePattern::InitOnTouchEvent()
         CHECK_NULL_VOID(pipeline);
         auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipeline->GetStageManager());
         CHECK_NULL_VOID(stageManager);
+        if (!stageManager->IsSplitMode()) {
+            return;
+        }
         if (IsVirtualStackBasedSplit(pipeline)) {
             stageManager->SetTouchedPrimaryColumnPage(
                 stageManager->GetTopPrimaryColumnPage() == host ? host : nullptr);

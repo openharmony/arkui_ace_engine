@@ -456,7 +456,7 @@ bool ParallelPageRouterManager::CheckSecondaryPageNeedClear(bool isPush)
     CHECK_NULL_RETURN(pipelineContext, false);
     auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
     CHECK_NULL_RETURN(stageManager, false);
-    if (pageRouterStack_.empty() || !isPush) {
+    if (pageRouterStack_.empty() || !isPush || !stageManager->IsSplitMode()) {
         stageManager->SetNeedClearSecondaryPage(false);
         return false;
     }
@@ -467,11 +467,12 @@ bool ParallelPageRouterManager::CheckSecondaryPageNeedClear(bool isPush)
         auto forceSplitMgr = pipelineContext->GetForceSplitManager();
         auto needClearSecondaryPage = false;
         if (forceSplitMgr && forceSplitMgr->CanPushPageToPrimary()) {
-            needClearSecondaryPage = isPush && RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
+            needClearSecondaryPage = RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
                 stageManager->GetTouchedPrimaryColumnPage() != nullptr;
         } else {
-            needClearSecondaryPage = isPush && RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
-                stageManager->GetHomePageTouched();
+            auto homeTouch = stageManager->GetHomePageTouched();
+            needClearSecondaryPage = RouterPageType::DETAIL_PAGE == preTopPagePattern->GetPageType() &&
+                homeTouch.has_value() && homeTouch.value();
         }
         stageManager->SetNeedClearSecondaryPage(needClearSecondaryPage);
         return needClearSecondaryPage;
