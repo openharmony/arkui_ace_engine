@@ -949,6 +949,8 @@ public:
         materialScopeExempt_ = flag;
     }
 
+    virtual void ReloadBackgroundImage() {}
+
 protected:
     RenderContext();
     std::unique_ptr<BorderImageProperty> propBdImage_;

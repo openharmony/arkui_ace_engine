@@ -462,6 +462,108 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ReloadBackgroundImage001
+ * @tc.desc: ReloadBackgroundImage() is a no-op when no background image is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ReloadBackgroundImage001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    EXPECT_FALSE(rosenRenderContext->GetBackgroundImage().has_value());
+    EXPECT_EQ(rosenRenderContext->bgLoadingCtx_, nullptr);
+    // No background image: ReloadBackgroundImage should skip OnBackgroundImageUpdate and not crash.
+    rosenRenderContext->ReloadBackgroundImage();
+    EXPECT_FALSE(rosenRenderContext->GetBackgroundImage().has_value());
+    EXPECT_EQ(rosenRenderContext->bgLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ReloadBackgroundImage002
+ * @tc.desc: ReloadBackgroundImage() reloads the existing background image via OnBackgroundImageUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ReloadBackgroundImage002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ImageSourceInfo src;
+    src.SetSrc("test");
+    rosenRenderContext->UpdateBackgroundImage(src);
+    EXPECT_TRUE(rosenRenderContext->GetBackgroundImage().has_value());
+    ASSERT_NE(rosenRenderContext->bgLoadingCtx_, nullptr);
+    // Reset the loading context to verify ReloadBackgroundImage re-triggers loading.
+    rosenRenderContext->bgLoadingCtx_ = nullptr;
+    rosenRenderContext->ReloadBackgroundImage();
+    EXPECT_NE(rosenRenderContext->bgLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: OnSkinConfigurationUpdate001
+ * @tc.desc: Pattern::OnSkinConfigurationUpdate() dispatches ReloadBackgroundImage on the host render context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnSkinConfigurationUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    frameNode->renderContext_ = rosenRenderContext;
+    ImageSourceInfo src;
+    src.SetSrc("test");
+    rosenRenderContext->UpdateBackgroundImage(src);
+    ASSERT_TRUE(rosenRenderContext->GetBackgroundImage().has_value());
+    rosenRenderContext->bgLoadingCtx_ = nullptr;
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnSkinConfigurationUpdate();
+    EXPECT_NE(rosenRenderContext->bgLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: OnSkinConfigurationUpdate002
+ * @tc.desc: FrameNode::OnConfigurationUpdate with skinUpdate dispatches to Pattern::OnSkinConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnSkinConfigurationUpdate002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    frameNode->renderContext_ = rosenRenderContext;
+    ImageSourceInfo src;
+    src.SetSrc("test");
+    rosenRenderContext->UpdateBackgroundImage(src);
+    ASSERT_TRUE(rosenRenderContext->GetBackgroundImage().has_value());
+    rosenRenderContext->bgLoadingCtx_ = nullptr;
+    ConfigurationChange configurationChange;
+    configurationChange.skinUpdate = true;
+    frameNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_NE(rosenRenderContext->bgLoadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: OnSkinConfigurationUpdate003
+ * @tc.desc: FrameNode::OnConfigurationUpdate with skinUpdate=false does not dispatch OnSkinConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnSkinConfigurationUpdate003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    frameNode->renderContext_ = rosenRenderContext;
+    ImageSourceInfo src;
+    src.SetSrc("test");
+    rosenRenderContext->UpdateBackgroundImage(src);
+    ASSERT_TRUE(rosenRenderContext->GetBackgroundImage().has_value());
+    // Reset so any accidental reload would be observable.
+    rosenRenderContext->bgLoadingCtx_ = nullptr;
+    // skinUpdate is false: the skin reload path must not run, so the loading context stays null.
+    ConfigurationChange configurationChange;
+    configurationChange.skinUpdate = false;
+    frameNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_EQ(rosenRenderContext->bgLoadingCtx_, nullptr);
+}
+
+/**
  * @tc.name: RosenRenderContextTest019
  * @tc.desc: OnParticleOptionArrayUpdate()
  * @tc.type: FUNC

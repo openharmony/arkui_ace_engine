@@ -676,6 +676,8 @@ public:
 
     void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier) override;
 
+    void ReloadBackgroundImage() override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
