@@ -6435,6 +6435,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _RichEditorController_addBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
+    native static _RichEditorController_addRichEditorBuilderSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
     native static _RichEditorController_addSymbolSpan(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _RichEditorController_updateSpanStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -6444,6 +6446,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorController_deleteSpans(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _RichEditorController_getSpans(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _RichEditorController_getRichEditorBuilderSpans(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _RichEditorController_getParagraphs(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick

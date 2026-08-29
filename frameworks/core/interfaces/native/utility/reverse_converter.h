@@ -155,6 +155,7 @@ struct TextBackgroundStyle;
 struct TextDecorationOptions;
 struct TextRange;
 struct TextStyleResult;
+struct BuilderSpanInfo;
 
 namespace NG {
 class NavDestinationContext;
@@ -325,6 +326,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src, ConvContext *ctx);
+    void AssignArkValue(Ark_BuilderSpanInfo& dst, const OHOS::Ace::BuilderSpanInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
     void AssignArkValue(Ark_Coordinate2D& dst, const Offset& src);
