@@ -351,8 +351,10 @@ bool LayoutAlgorithm::IsContentUnderutilizedForSmartLayout(LayoutWrapper* layout
         }
     }
 
-    double containerArea = static_cast<double>(frameSize.Width()) * static_cast<double>(frameSize.Height());
-    if (containerArea <= 0) {
+    double contentPadding = Dimension(SMART_LAYOUT_CONTENT_PADDING, DimensionUnit::VP).ConvertToPx();
+    double availableWidth = static_cast<double>(frameSize.Width()) - 2.0 * contentPadding;
+    double availableHeight = static_cast<double>(frameSize.Height()) - 2.0 * contentPadding;
+    if (LessOrEqual(availableWidth, 0.0) || LessOrEqual(availableHeight, 0.0)) {
         return false;
     }
     double bbArea = static_cast<double>(childRect.Width()) * static_cast<double>(childRect.Height());
@@ -360,9 +362,8 @@ bool LayoutAlgorithm::IsContentUnderutilizedForSmartLayout(LayoutWrapper* layout
         return false;
     }
 
-    double emptyRatio = 1.0 - (bbArea / containerArea);
-    // Empty area over the shared threshold of container is considered sparse
-    return GreatNotEqual(emptyRatio, SMART_LAYOUT_EMPTY_RATIO_THRESHOLD);
+    return LessNotEqual(static_cast<double>(childRect.Width()), availableWidth) &&
+        LessNotEqual(static_cast<double>(childRect.Height()), availableHeight);
 }
 
 void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)

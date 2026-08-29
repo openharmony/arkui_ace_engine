@@ -320,7 +320,7 @@ void SmartLayoutConstraints::AddGeneralConstraints(SmartLayoutNode& parent)
     }
 }
 
-void SmartLayoutConstraints::AddScaleUpConstraints(SmartLayoutNode& parent, double emptyRatioThreshold)
+void SmartLayoutConstraints::AddScaleUpConstraints(SmartLayoutNode& parent)
 {
     auto* engine = parent.GetEngine();
     if (engine == nullptr || parent.GetChildren().empty()) {
@@ -341,16 +341,19 @@ void SmartLayoutConstraints::AddScaleUpConstraints(SmartLayoutNode& parent, doub
         return;
     }
 
-    double emptyRatio = 1.0 - (bbArea / containerArea);
-    if (LessOrEqual(emptyRatio, emptyRatioThreshold)) {
+    double contentPadding = parent.GetContext().contentPadding;
+    double availableWidth = containerWidth - 2.0 * contentPadding;
+    double availableHeight = containerHeight - 2.0 * contentPadding;
+    if (LessOrEqual(availableWidth, 0.0) || LessOrEqual(availableHeight, 0.0)) {
+        return;
+    }
+    if (GreatOrEqual(boundingBox.width, availableWidth) ||
+        GreatOrEqual(boundingBox.height, availableHeight)) {
         return;
     }
 
-    // Compute maximum safe scale-up factor, reserving blank margin per axis
-    // so the scaled content does not fill the container edge-to-edge
-    constexpr double SCALE_UP_MARGIN_RATIO = 0.1;
-    double maxScaleX = containerWidth * (1.0 - SCALE_UP_MARGIN_RATIO) / boundingBox.width;
-    double maxScaleY = containerHeight * (1.0 - SCALE_UP_MARGIN_RATIO) / boundingBox.height;
+    double maxScaleX = availableWidth / boundingBox.width;
+    double maxScaleY = availableHeight / boundingBox.height;
     double upScale = std::min(maxScaleX, maxScaleY);
     if (LessOrEqual(upScale, 1.0)) {
         return;

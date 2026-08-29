@@ -66,15 +66,12 @@ public:
     void AddGeneralConstraints(SmartLayoutNode& parent);
 
     /**
-     * @brief Add scale-up constraints for underutilized containers.
-     *        Each axis reserves a 10% blank margin so the scaled content
-     *        keeps spacing from container edges after centering.
+     * @brief Add scale-up constraints for underutilized containers: scale the
+     *        bounding box to fill the container inset by LayoutContext::contentPadding
+     *        on each edge, then center it.
      * @param parent Parent (root) node with bounding box set
-     * @param emptyRatioThreshold Threshold for triggering scale-up
-     *        (defaults to SMART_LAYOUT_EMPTY_RATIO_THRESHOLD)
      */
-    void AddScaleUpConstraints(SmartLayoutNode& parent,
-        double emptyRatioThreshold = SMART_LAYOUT_EMPTY_RATIO_THRESHOLD);
+    void AddScaleUpConstraints(SmartLayoutNode& parent);
 
     /**
      * @brief Add default constraints (non-negative sizes, boundary constraints)

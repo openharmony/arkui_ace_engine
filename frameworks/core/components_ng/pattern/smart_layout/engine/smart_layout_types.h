@@ -21,12 +21,9 @@
 namespace OHOS::Ace::NG {
 
 /**
- * @brief Empty-area ratio threshold for triggering smart layout scale-up.
- *        Single source of truth shared by the entry check
- *        (IsContentUnderutilizedForSmartLayout) and the constraint
- *        builder (AddScaleUpConstraints).
+ * @brief Content-to-edge padding in VP for smart layout scale-up (UX spec).
  */
-constexpr double SMART_LAYOUT_EMPTY_RATIO_THRESHOLD = 0.1;
+constexpr double SMART_LAYOUT_CONTENT_PADDING = 12.0;
 
 /**
  * @brief Layout handling type for smart layout
