@@ -736,10 +736,7 @@ export struct ChipGroup {
     if (deviceInfo.sdkApiVersion < ENABLE_SYSTEM_MATERIAL_VERSION) {
       return undefined;
     }
-    return withDefaultMaterial(
-      this.selectedBackgroundSystemMaterial,
-      defaultTheme.chipSelectedBackgroundSystemMaterial
-    );
+    return this.selectedBackgroundSystemMaterial;
   }
 
   private getBackgroundSystemMaterial(): uiMaterial.Material | undefined {

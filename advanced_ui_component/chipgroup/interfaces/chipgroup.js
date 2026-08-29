@@ -1014,10 +1014,7 @@ export class ChipGroup extends ViewPU {
     if (deviceInfo.sdkApiVersion < ENABLE_SYSTEM_MATERIAL_VERSION) {
       return undefined;
     }
-    return withDefaultMaterial(
-      this.selectedBackgroundSystemMaterial,
-      defaultTheme.chipSelectedBackgroundSystemMaterial
-    );
+    return this.selectedBackgroundSystemMaterial;
   }
   getBackgroundSystemMaterial() {
     if (deviceInfo.sdkApiVersion < ENABLE_SYSTEM_MATERIAL_VERSION) {
