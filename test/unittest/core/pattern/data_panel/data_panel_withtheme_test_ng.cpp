@@ -267,9 +267,9 @@ HWTEST_F(DataPanelWithThemeTestNg, DataPanelThemeWrapperApplyTokenTheme001, Test
     EXPECT_EQ(wrapper->GetBackgroundColor(), TOKEN_THEME_BACKGROUND_COLOR);
     EXPECT_EQ(colors.size(), EXPECTED_THEME_COLOR_COUNT);
     EXPECT_EQ(colors.front().first, TOKEN_THEME_EMPHASIZE_COLOR);
-    EXPECT_EQ(colors.front().second, TOKEN_THEME_BACKGROUND_COLOR);
-    EXPECT_EQ(colors.back().first, TOKEN_THEME_EMPHASIZE_COLOR);
-    EXPECT_EQ(colors.back().second, TOKEN_THEME_BACKGROUND_COLOR);
+    EXPECT_EQ(colors.front().second, TOKEN_THEME_EMPHASIZE_COLOR);
+    EXPECT_EQ(colors.back().first, Color::BLACK);
+    EXPECT_EQ(colors.back().second, Color::BLACK);
 }
 
 /**

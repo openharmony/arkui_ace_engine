@@ -62,9 +62,9 @@ public:
         if (auto colors = theme.Colors(); colors) {
             // update only required attributes by TokenTheme tokens
             backgroundColor_ = colors->CompBackgroundTertiary();
-            percentageColors_.assign(
-                DATA_PANEL_THEME_COLOR_COUNT,
-                std::make_pair(colors->CompBackgroundEmphasize(), colors->CompBackgroundTertiary()));
+            if (!percentageColors_.empty()) {
+                percentageColors_[0] = {colors->CompBackgroundEmphasize(), colors->CompBackgroundEmphasize()};
+            }
         }
     }
 
