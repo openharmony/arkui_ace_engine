@@ -34,7 +34,7 @@ constexpr int32_t PROCESS_WAIT_TIME = 20;
 #endif
 constexpr float DOUBLE = 2.0;
 constexpr int32_t DEFAULT_FORM_ROTATION_ANIM_DURATION = 100;
-constexpr int32_t DUMP_WAIT_TIME = 65;
+constexpr int32_t DUMP_WAIT_TIME = 200;
 }
 
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(

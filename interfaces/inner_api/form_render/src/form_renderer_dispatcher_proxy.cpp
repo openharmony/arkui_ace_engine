@@ -14,8 +14,59 @@
  */
 #include "form_renderer_dispatcher_proxy.h"
 
+#include <securec.h>
+
 #include "form_renderer_hilog.h"
 #include "core/accessibility/accessibility_manager.h"
+
+namespace {
+constexpr size_t MAX_PARCEL_CAPACITY = 1024 * 1024; // 1M
+
+bool ReadDumpInfoFromReply(OHOS::MessageParcel& reply, std::vector<std::string>& infos)
+{
+    bool isLittle = false;
+    if (!reply.ReadBool(isLittle)) {
+        HILOG_ERROR("ReadDumpInfoFromReply: read isLittle failed");
+        return false;
+    }
+    if (isLittle) {
+        return reply.ReadStringVector(&infos);
+    }
+    int32_t dataSizeInt = 0;
+    if (!reply.ReadInt32(dataSizeInt) || dataSizeInt <= 0) {
+        HILOG_ERROR("ReadDumpInfoFromReply: read dataSize failed");
+        return false;
+    }
+    size_t dataSize = static_cast<size_t>(dataSizeInt);
+    if (dataSize >= MAX_PARCEL_CAPACITY) {
+        HILOG_ERROR("ReadDumpInfoFromReply: dataSize too large: %{public}zu", dataSize);
+        return false;
+    }
+    const void* rawData = reply.ReadRawData(dataSize);
+    if (rawData == nullptr) {
+        HILOG_ERROR("ReadDumpInfoFromReply: read rawData failed, dataSize: %{public}zu", dataSize);
+        return false;
+    }
+    auto* buffer = static_cast<uint8_t*>(malloc(dataSize));
+    if (buffer == nullptr) {
+        HILOG_ERROR("ReadDumpInfoFromReply: alloc failed, dataSize: %{public}zu", dataSize);
+        return false;
+    }
+    if (memcpy_s(buffer, dataSize, rawData, dataSize) != EOK) {
+        free(buffer);
+        HILOG_ERROR("ReadDumpInfoFromReply: memcpy_s failed");
+        return false;
+    }
+    OHOS::MessageParcel readParcel;
+    // buffer must be malloc'd because ~Parcel()->FlushBuffer() calls free() via DefaultAllocator.
+    if (!readParcel.ParseFrom(reinterpret_cast<uintptr_t>(buffer), dataSize)) {
+        free(buffer);
+        HILOG_ERROR("ReadDumpInfoFromReply: parse failed");
+        return false;
+    }
+    return readParcel.ReadStringVector(&infos);
+}
+} // namespace
 
 namespace OHOS {
 namespace Ace {
@@ -310,7 +361,7 @@ void FormRendererDispatcherProxy::OnNotifyDumpInfo(
         HILOG_ERROR("failed to SendRequest: %{public}d", error);
         return;
     }
-    if (!reply.ReadStringVector(&info)) {
+    if (!ReadDumpInfoFromReply(reply, info)) {
         HILOG_ERROR("%{public}s, Read reply info failed.", __func__);
     }
 }
