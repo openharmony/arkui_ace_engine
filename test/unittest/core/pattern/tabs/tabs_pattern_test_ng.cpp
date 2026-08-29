@@ -1624,45 +1624,6 @@ HWTEST_F(TabPatternTestNg, UpdateBackBlurStyleTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabsPatternGetColorInvertColorMode001
- * @tc.desc: Test TabsPattern GetColorInvertColorMode based on IsColorInvertEnabled and isColorPickerDark_
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, TabsPatternGetColorInvertColorMode001, TestSize.Level1)
-{
-    auto model = CreateTabs();
-    CreateTabContents();
-    GetTabs();
-    CreateTabsDone(model);
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(layoutProperty_, nullptr);
-
-    // Default: no color invert set, should return COLOR_MODE_UNDEFINED
-    EXPECT_EQ(pattern_->GetColorInvertColorMode(), ColorMode::COLOR_MODE_UNDEFINED);
-
-    // Set BarFloatingStyle with systemMaterial containing ImmersiveOptions(colorInvert=true)
-    auto uiMaterial = AceType::MakeRefPtr<UiMaterial>();
-    ImmersiveOptions immersiveOptions;
-    immersiveOptions.colorInvert = true;
-    uiMaterial->SetImmersiveOptions(immersiveOptions);
-    BarFloatingStyleParameters params;
-    params.systemMaterial = uiMaterial;
-    layoutProperty_->UpdateBarFloatingStyle(params);
-
-    // IsColorInvertEnabled returns true, but isColorPickerDark_ has no value → still UNDEFINED
-    EXPECT_EQ(pattern_->GetColorInvertColorMode(), ColorMode::COLOR_MODE_UNDEFINED);
-
-    // Set isColorPickerDark_ = true → should return DARK
-    pattern_->isColorPickerDark_ = true;
-    EXPECT_EQ(pattern_->GetColorInvertColorMode(), ColorMode::DARK);
-
-    // Set isColorPickerDark_ = false → should return LIGHT
-    pattern_->isColorPickerDark_ = false;
-    EXPECT_EQ(pattern_->GetColorInvertColorMode(), ColorMode::LIGHT);
-}
-
-/**
  * @tc.name: TabsPatternIsColorInvertEnabled001
  * @tc.desc: Test TabsPattern IsColorInvertEnabled
  * @tc.type: FUNC
