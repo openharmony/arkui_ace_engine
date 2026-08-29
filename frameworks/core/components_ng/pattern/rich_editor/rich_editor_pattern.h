@@ -365,6 +365,19 @@ public:
     bool IsCompressLeadingPunctuation();
     void SetPunctuationOverflow(bool enabled);
     bool IsPunctuationOverflow();
+    void SetCustomCaretWidth(const Dimension& width);
+    Dimension GetCustomCaretWidth() const;
+    void ResetCustomCaretWidth();
+    void SetSelectAll(bool value);
+    bool GetSelectAll() const;
+    bool ShouldSelectAllOnInit(FocusReason focusReason);
+    void TryExecuteSelectAll();
+    void SetBlurOnSubmit(bool value);
+    bool GetBlurOnSubmit() const;
+    void SetSelectionMenuHidden(bool value);
+    bool GetSelectionMenuHidden() const;
+    void SetEnableSkipPreviewLongPress(bool value);
+    bool GetEnableSkipPreviewLongPress() const;
     BlurReason GetBlurReason();
     uint32_t GetSCBSystemWindowId();
     void OnAttachToMainTree() override;
@@ -633,6 +646,7 @@ public:
     void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
     void HandleMenuCallbackOnSelectAll(bool isShowMenu = true);
+    void HandleOnSelectAll(bool isKeyEvent);
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
@@ -1024,6 +1038,7 @@ private:
     void OnFocusCustomKeyboardChange();
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
+    void HandleFocusByClick(const Offset& textOffset, SourceType sourceDevice, bool isMouseClickWithShift);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
     bool IsClickEventOnlyForMenuToggle(const OHOS::Ace::GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -1045,6 +1060,7 @@ private:
     void ProcessStyledPlaceholder();
     void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
+    void InitGestureEvents();
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
     void StartTwinkling();
@@ -1071,6 +1087,7 @@ private:
     void HandleDoubleClickEditLogic(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     bool HandleLongPressOnAiSelection();
     void StartVibratorByLongPress();
+    void SetLongPressFlags();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void FireOnSelectionChange(const int32_t caretPosition);
@@ -1118,6 +1135,7 @@ private:
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void ResetDragSpanItems();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void FillTextEditorAttrsInJson(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     std::string GetPlaceHolderInJson() const;
     std::string GetBuilderSpanInfosInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
@@ -1481,6 +1499,12 @@ private:
     bool isOrphanCharOptimization_ = false;
     bool isCompressLeadingPunctuation_ = false;
     bool isPunctuationOverflow_ = false;
+    std::optional<Dimension> customCaretWidth_;
+    bool selectAllOnInit_ = false;
+    bool needSelectAll_ = false;
+    bool blurOnSubmit_ = false;
+    bool selectionMenuHidden_ = false;
+    bool enableSkipPreviewLongPress_ = false;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;

@@ -24,6 +24,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_builder_span_test_ng.cpp",
     "rich_editor_base_test_ng.cpp",
     "rich_editor_callback_content_no_change_test_ng.cpp",
+    "rich_editor_capi_modifier_test_ng.cpp",
     "rich_editor_caret_test_ng.cpp",
     "rich_editor_change_callback_test_ng.cpp",
     "rich_editor_change_reason_test.cpp",
