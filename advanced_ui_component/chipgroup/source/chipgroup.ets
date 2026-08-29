@@ -483,16 +483,6 @@ export struct ChipGroup {
 
   private getBackgroundColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.backgroundColor) {
-      if (typeof this.itemStyle.backgroundColor === 'object') {
-        let temp: Resource = this.itemStyle.backgroundColor as Resource;
-        if (temp == undefined || temp == null) {
-          return defaultTheme.itemStyle.backgroundColor;
-        }
-        if (temp.type === 10001) {
-          return this.itemStyle.backgroundColor;
-        }
-        return defaultTheme.itemStyle.backgroundColor;
-      }
       return this.itemStyle.backgroundColor;
     }
     return defaultTheme.itemStyle.backgroundColor;
@@ -500,16 +490,6 @@ export struct ChipGroup {
 
   private getSelectedBackgroundColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
-      if (typeof this.itemStyle.selectedBackgroundColor === 'object') {
-        let temp: Resource = this.itemStyle.selectedBackgroundColor as Resource;
-        if (temp == undefined || temp == null) {
-          return defaultTheme.itemStyle.selectedBackgroundColor;
-        }
-        if (temp.type === 10001) {
-          return this.itemStyle.selectedBackgroundColor;
-        }
-        return defaultTheme.itemStyle.selectedBackgroundColor;
-      }
       return this.itemStyle.selectedBackgroundColor;
     }
     return defaultTheme.itemStyle.selectedBackgroundColor;
