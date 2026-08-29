@@ -942,7 +942,7 @@ export class ChipGroup extends ViewPU {
                 this.ChipItemsBuilder.bind(this)(
                   makeBuilderParameterProxy('ChipItemsBuilder', {
                     backgroundSystemMaterial: () => createSubECMaterial(this.getBackgroundSystemMaterial()),
-                    activatedBackgroundSystemMaterial: () => this.getSelectedBackgroundSystemMaterial(),
+                    activatedBackgroundSystemMaterial: () => createSubECMaterial(this.getSelectedBackgroundSystemMaterial()),
                   })
                 );
                 EffectComponent.pop();

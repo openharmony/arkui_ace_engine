@@ -681,7 +681,7 @@ export struct ChipGroup {
               EffectComponent() {
                 this.ChipItemsBuilder({
                   backgroundSystemMaterial: createSubECMaterial(this.getBackgroundSystemMaterial()),
-                  activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+                  activatedBackgroundSystemMaterial: createSubECMaterial(this.getSelectedBackgroundSystemMaterial())
                 })
               }
               .systemMaterial(createECMaterial(this.getBackgroundSystemMaterial())
