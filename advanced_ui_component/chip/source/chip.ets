@@ -1350,6 +1350,8 @@ export struct ChipComponent {
       .justifyContent(FlexAlign.Center)
       .padding(this.getChipNodePadding())
       .constraintSize(this.getChipConstraintWidth())
+      .backgroundColor(this.getChipActive() ? this.chipNodeActivatedBackgroundColor : Color.Transparent)
+      .borderRadius(this.getChipNodeRadius())
     }
     .constraintSize(this.getChipConstraintWidth())
     .direction(this.chipDirection)

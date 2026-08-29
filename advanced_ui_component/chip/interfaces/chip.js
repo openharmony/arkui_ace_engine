@@ -2118,6 +2118,8 @@ export class ChipComponent extends ViewPU {
       Row.justifyContent(FlexAlign.Center);
       Row.padding(this.getChipNodePadding());
       Row.constraintSize(this.getChipConstraintWidth());
+      Row.backgroundColor(this.getChipActive() ? this.chipNodeActivatedBackgroundColor : Color.Transparent);
+      Row.borderRadius(this.getChipNodeRadius());
     }, Row);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
