@@ -286,6 +286,7 @@ void UIObserver::UnRegisterScrollEventCallback(napi_value cb)
 {
     if (cb == nullptr) {
         scrollEventListeners_.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=scrollEvent");
         return;
     }
 
@@ -310,6 +311,8 @@ void UIObserver::UnRegisterScrollEventCallback(const std::string& id, napi_value
     auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER,
+            "SubEvent op=off_all, kit=ArkUI, event=scrollEvent, id=%{public}s", id.c_str());
         return;
     }
     holder.erase(
