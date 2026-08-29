@@ -75,6 +75,7 @@ void MaterialProcessor::ApplyScopeGate(const RefPtr<PipelineContext>& pipeline)
                     // does not block it as an "external call on a suppressed node".
                     rc->SetMaterialLimiterUpdating(true);
                     ViewAbstract::SetSystemMaterial(AceType::RawPtr(frameNode), nullptr);
+                    LOGW("Material inactive: out of scope. Use component in navigation title bar or Tabbar.");
                     rc->SetMaterialLimiterUpdating(false);
                     frameNode->MarkDirtyNode();
                     auto pattern = frameNode->GetPattern();
