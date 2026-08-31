@@ -112,6 +112,13 @@ export class DrawableDescriptor {
     ArkUIAniModule._Drawable_Invalidate(this)
   }
 
+  setSVGResourceLimitLevel(limit: image.SVGResourceLimitLevel): void {
+    if (this._isReleased) {
+      return
+    }
+    ArkUIAniModule._Drawable_SetSVGResourceLimitLevel(this, limit)
+  }
+
   static transferStatic(input: Any): Object {
     if (typeof (input) !== 'object' || input === null) {
       return new Object();

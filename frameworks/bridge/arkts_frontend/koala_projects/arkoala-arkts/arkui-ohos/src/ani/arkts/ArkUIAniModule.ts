@@ -300,6 +300,7 @@ export class ArkUIAniModule {
     native static _Drawable_Load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>
     native static _Drawable_GetAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined
     native static _Drawable_SetBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void
+    native static _Drawable_SetSVGResourceLimitLevel(value: DrawableDescriptor, limit: image.SVGResourceLimitLevel): void
     native static _Drawable_SetHdrComposition(value: PictureDrawableDescriptor, config: HdrCompositionConfig): void
     native static _Drawable_Invalidate(value: DrawableDescriptor): void
     native static _Drawable_NativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor

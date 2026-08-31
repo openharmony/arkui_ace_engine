@@ -46,6 +46,8 @@ ani_object DrawableGetAnimationController(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object AnimatedDrawable, [[maybe_unused]] ani_string id);
 void DrawableSetBlendMode(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_enum_item blendMode);
+void DrawableSetSVGResourceLimitLevel(
+    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_enum_item limit);
 void DrawableSetHdrComposition(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_object configAni);
 void DrawableInvalidate(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni);
