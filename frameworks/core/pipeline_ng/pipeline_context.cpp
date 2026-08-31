@@ -3828,8 +3828,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     HandlePenHoverOut(point);
-    bool isMappedMouseTouch = point.sourceTool == SourceTool::MOUSE && point.sourceType == SourceType::TOUCH;
-    if (!isMappedMouseTouch && CheckSourceTypeChange(point.sourceType)) {
+    bool isRightMouseMappedTouch = isRightMouseMappingActive_ &&
+        point.sourceTool == SourceTool::MOUSE && point.sourceType == SourceType::TOUCH;
+    if (!isRightMouseMappedTouch && CheckSourceTypeChange(point.sourceType)) {
         HandleTouchHoverOut(point);
     }
 

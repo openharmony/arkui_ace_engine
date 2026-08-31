@@ -3982,30 +3982,35 @@ bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& global
     if (!isActive_) {
         return false;
     }
-    auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
-    auto paintRect = cacheMatrixInfo.paintRectWithTransform;
-    auto origRect = renderContext_->GetPaintRectWithoutTransform();
-    localMat_ = cacheMatrixInfo.localMatrix;
 
-    bool isOutOfRegion = false;
-    bool ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion);
+    bool ret = false;
+    if (!frameChildren_.empty()) {
+        auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
+        auto paintRect = cacheMatrixInfo.paintRectWithTransform;
+        auto origRect = renderContext_->GetPaintRectWithoutTransform();
+        localMat_ = cacheMatrixInfo.localMatrix;
 
-    auto localPoint = parentLocalPoint - paintRect.GetOffset();
-    renderContext_->GetPointWithTransform(localPoint);
-    auto revertPoint = parentRevertPoint;
-    MapPointTo(revertPoint, cacheMatrixInfo.revertMatrix);
-    auto subRevertPoint = revertPoint - origRect.GetOffset();
+        auto localPoint = parentLocalPoint - paintRect.GetOffset();
+        renderContext_->GetPointWithTransform(localPoint);
+        auto revertPoint = parentRevertPoint;
+        MapPointTo(revertPoint, cacheMatrixInfo.revertMatrix);
+        auto subRevertPoint = revertPoint - origRect.GetOffset();
 
-    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        auto child = iter->Upgrade();
-        if (!child) {
-            continue;
+        for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+            auto child = iter->Upgrade();
+            if (!child) {
+                continue;
+            }
+            if (child->HitTestMouseTarget(event, globalPoint, localPoint, subRevertPoint,
+                tagWhitelist)) {
+                ret = true;
+                break;
+            }
         }
-        if (child->HitTestMouseTarget(event, globalPoint, localPoint, subRevertPoint,
-            tagWhitelist)) {
-            ret = true;
-            break;
-        }
+    }
+    if (!ret) {
+        bool isOutOfRegion = false;
+        ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion);
     }
     return ret;
 }
