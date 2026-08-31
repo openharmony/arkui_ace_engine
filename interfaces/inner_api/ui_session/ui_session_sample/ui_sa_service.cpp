@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <functional>
 #include <iomanip>
 #include <fstream>
 #include <limits>
@@ -58,7 +59,6 @@ constexpr size_t SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG = GET_VISIBLE_MIN_OPACIT
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t START_WEB_VIEW_TRANSLATE = 2;
-constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 6;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
 constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
@@ -180,24 +180,43 @@ float ParseMinOpacityParam(const std::string& param)
     return static_cast<float>(minOpacity);
 }
 
-ContentChangeConfig ParseContentChangeConfig(const std::vector<std::string>& params, bool toFile)
+ContentChangeConfig ParseContentChangeConfig(
+    const std::vector<std::string>& params, bool toFile)
 {
     ContentChangeConfig config;
-    
-    int32_t paramSize = static_cast<int32_t>(params.size());
-    int32_t effectiveParamCount = toFile ? (paramSize - PARAMS_OFFSET - 1) : (paramSize - PARAMS_OFFSET);
-    
-    bool useCustomConfig = (effectiveParamCount == CONTENT_CHANGE_EVENT_WITH_CONFIG);
-    if (!useCustomConfig) {
-        return config;
+
+    using Parser = std::function<void(const std::string&)>;
+    std::vector<Parser> parsers = {
+        [&config](const std::string& value) {
+            config.minReportTime = std::atoi(value.c_str());
+        },
+        [&config](const std::string& value) {
+            config.textContentRatio = std::atof(value.c_str());
+        },
+        [&config](const std::string& value) {
+            config.ignoreEventType = value;
+        },
+        [&config](const std::string& value) {
+            config.minWidth = std::atoi(value.c_str());
+        },
+        [&config](const std::string& value) {
+            config.minHeight = std::atoi(value.c_str());
+        },
+        [&config](const std::string& value) {
+            config.reportDelayTime = std::atoi(value.c_str());
+        },
+    };
+
+    const size_t configStart = static_cast<size_t>(PARAMS_OFFSET);
+    size_t configCount = params.size() > configStart ? params.size() - configStart : 0;
+    if (toFile && configCount > 0) {
+        --configCount;
     }
-    
-    config.minReportTime = std::atoi(params[1].c_str());  // 1 : minReportTime
-    config.textContentRatio = std::atof(params[2].c_str());  // 2 : textContentRatio
-    config.ignoreEventType = params[3];  // 3 : ignoreEventType
-    config.minWidth = std::atoi(params[4].c_str());  // 4 : minWidth
-    config.minHeight = std::atoi(params[5].c_str());  // 5 : minHeight
-    config.reportDelayTime = std::atoi(params[6].c_str());  // 6 : reportDelayTime
+
+    const size_t parseCount = std::min(configCount, parsers.size());
+    for (size_t index = 0; index < parseCount; ++index) {
+        parsers[index](params[configStart + index]);
+    }
 
     return config;
 }
