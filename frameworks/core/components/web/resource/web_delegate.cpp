@@ -1200,7 +1200,7 @@ void WebDelegate::DestroyNWeb()
     }
     auto context = context_.Upgrade();
     if (context) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "use EventHandler to destroy nweb");
+        TAG_LOGI(AceLogTag::ACE_WEB, "use TaskExecutor to destroy nweb");
         context->GetTaskExecutor()->PostSyncTask(
             [nweb = nweb_]() {
                 if (nweb) {
@@ -1217,6 +1217,10 @@ void WebDelegate::DestroyNWeb()
     TAG_LOGI(AceLogTag::ACE_WEB, "~WebDelegate context is null, use EventHandler to destroy nweb");
     auto mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
     if (mainRunner == nullptr) {
+        // Extreme fallback (no main runner at all, e.g. process teardown without a
+        // started main loop): calling OnDestroy() here is preferred over skipping
+        // it entirely (engine instance leak). NWeb::OnDestroy is assumed to be
+        // tolerant of the calling thread in this terminal path.
         TAG_LOGW(AceLogTag::ACE_WEB,
             "~WebDelegate mainRunner is null, run nweb OnDestroy on current thread");
         nweb_->OnDestroy();
