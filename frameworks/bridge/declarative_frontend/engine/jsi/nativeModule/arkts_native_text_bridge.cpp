@@ -1693,8 +1693,7 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (!typesArg->IsArray(vm)) {
-        GetArkUINodeModifiers()->getTextModifier()->
-            resetTextDataDetectorConfigWithEvent(nativeNode);
+        GetArkUINodeModifiers()->getTextModifier()->resetTextDataDetectorConfigWithEvent(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -1716,10 +1715,11 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
     std::function<void(const std::string&)> callback;
     if (callbackArg->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-        callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+        callback = [vm, node = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](const std::string& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
                 panda::StringRef::NewFromUtf8(vm, info.c_str()) };
             func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1807,11 +1807,11 @@ ArkUINativeModuleValue TextBridge::SetOnWillCopy(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(const std::u16string&)> callback = [vm, frameNode,
+    std::function<bool(const std::u16string&)> callback = [vm, node = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](const std::u16string& value) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
                 panda::StringRef::NewFromUtf16(vm, value.c_str()) };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1850,11 +1850,11 @@ ArkUINativeModuleValue TextBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeCallIn
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::u16string&)> callback = [vm, frameNode,
+    std::function<void(const std::u16string&)> callback = [vm, node = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](const std::u16string& copyStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::StringRef::NewFromUtf16(vm, copyStr.c_str()) };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1889,11 +1889,11 @@ ArkUINativeModuleValue TextBridge::SetOnTextSelectionChange(ArkUIRuntimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t, int32_t)> callback = [vm, frameNode,
+    std::function<void(int32_t, int32_t)> callback = [vm, node = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](int32_t selectionStart, int32_t selectionEnd) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, selectionStart);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, selectionEnd);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { startParam, endParam };
@@ -2262,11 +2262,11 @@ ArkUINativeModuleValue TextBridge::SetOnMarqueeStateChange(ArkUIRuntimeCallInfo*
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t)> callback = [vm, frameNode,
+    std::function<void(int32_t)> callback = [vm, node = AceType::WeakClaim(frameNode),
         func = panda::CopyableGlobal(vm, func)](int32_t state) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, state);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { stateParam };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);

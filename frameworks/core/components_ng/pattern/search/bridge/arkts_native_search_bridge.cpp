@@ -2214,12 +2214,13 @@ ArkUINativeModuleValue SearchBridge::SetJsCustomKeyboard(ArkUIRuntimeCallInfo* r
         panda::Local<panda::FunctionRef> builderObj = builderNodeParm->ToObject(vm);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-        std::function<void()> buildFunc = [frameNode, func = panda::CopyableGlobal(vm, builderObj)]() {
+        std::function<void()> buildFunc = [node = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, builderObj)]() {
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         };
@@ -2263,13 +2264,14 @@ ArkUINativeModuleValue SearchBridge::SetOnEditChange(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(bool)> callback = [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(bool)> callback = [node = AceType::WeakClaim(frameNode), isJsView,
+                                             func = panda::CopyableGlobal(vm, func)](
                                              bool isInEditStatus) {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { panda::BooleanRef::New(vm, isInEditStatus) };
         auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
         if (isJsView) {
@@ -2312,13 +2314,13 @@ ArkUINativeModuleValue SearchBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtimeCa
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     if (isJsView && !Container::IsCurrentUseNewPipeline()) {
         std::function<void(const std::string&)> oldFrameworkCallback =
-            [frameNode, func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+            [node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](const std::string& info) {
                 auto vm = func.GetEcmaVM();
                 CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
                 panda::LocalScope pandaScope(vm);
                 panda::TryCatch trycatch(vm);
                 ACE_SCORING_EVENT("onSubmit");
-                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                PipelineContext::SetCallBackNode(node);
                 panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { panda::StringRef::NewFromUtf8(
                     vm, info.c_str()) };
                 auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -2329,13 +2331,13 @@ ArkUINativeModuleValue SearchBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)> callback =
-        [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
+        [node = AceType::WeakClaim(frameNode), isJsView, func = panda::CopyableGlobal(vm, func)](
             const std::u16string& info, NG::TextFieldCommonEvent& event) {
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             const char* keys[] = { "text", "keepEditableState" };
             Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf16(vm, event.GetText().c_str()),
                 panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsKeepEditableState) };
@@ -2385,13 +2387,13 @@ ArkUINativeModuleValue SearchBridge::SetOnWillCopy(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(const std::u16string&)> callback = [frameNode, isJsView,
+    std::function<bool(const std::u16string&)> callback = [node = AceType::WeakClaim(frameNode), isJsView,
         func = panda::CopyableGlobal(vm, func)](const std::u16string& value) -> bool {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
                 panda::StringRef::NewFromUtf16(vm, value.c_str()) };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -2438,12 +2440,13 @@ ArkUINativeModuleValue SearchBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeCall
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::u16string&)> callback =
-        [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const std::u16string& copyStr) {
+        [node = AceType::WeakClaim(frameNode), isJsView,
+            func = panda::CopyableGlobal(vm, func)](const std::u16string& copyStr) {
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { panda::StringRef::NewFromUtf16(
                 vm, copyStr.c_str()) };
             auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -2485,13 +2488,13 @@ ArkUINativeModuleValue SearchBridge::SetOnWillCut(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(const std::u16string&)> callback = [frameNode, isJsView,
+    std::function<bool(const std::u16string&)> callback = [node = AceType::WeakClaim(frameNode), isJsView,
         func = panda::CopyableGlobal(vm, func)](const std::u16string& value) -> bool {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
                 panda::StringRef::NewFromUtf16(vm, value.c_str()) };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -2538,12 +2541,13 @@ ArkUINativeModuleValue SearchBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCallI
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::u16string&)> callback =
-        [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const std::u16string& cutStr) {
+        [node = AceType::WeakClaim(frameNode), isJsView,
+            func = panda::CopyableGlobal(vm, func)](const std::u16string& cutStr) {
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { panda::StringRef::NewFromUtf16(
                 vm, cutStr.c_str()) };
             auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -2586,14 +2590,14 @@ ArkUINativeModuleValue SearchBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtimeCal
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::u16string&, NG::TextCommonEvent&)> callback =
-        [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
+        [node = AceType::WeakClaim(frameNode), isJsView, func = panda::CopyableGlobal(vm, func)](
             const std::u16string& val, NG::TextCommonEvent& info) {
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("onPaste");
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             auto eventObject = panda::ObjectRef::New(vm);
             eventObject->SetNativePointerFieldCount(vm, 1);
             eventObject->Set(
@@ -2696,13 +2700,14 @@ ArkUINativeModuleValue SearchBridge::SetOnTextSelectionChange(ArkUIRuntimeCallIn
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t, int32_t)> callback = [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(int32_t, int32_t)> callback = [node = AceType::WeakClaim(frameNode), isJsView,
+                                                         func = panda::CopyableGlobal(vm, func)](
                                                          int32_t selectionStart, int selectionEnd) {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, selectionStart);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, selectionEnd);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { startParam, endParam };
@@ -2746,13 +2751,14 @@ ArkUINativeModuleValue SearchBridge::SetOnContentScroll(ArkUIRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(float, float)> callback = [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(float, float)> callback = [node = AceType::WeakClaim(frameNode), isJsView,
+                                                     func = panda::CopyableGlobal(vm, func)](
                                                      float totalOffsetX, float totalOffsetY) {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { panda::NumberRef::New(vm, totalOffsetX),
             panda::NumberRef::New(vm, totalOffsetY) };
         auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
@@ -2837,7 +2843,7 @@ ArkUINativeModuleValue SearchBridge::SetOnWillChange(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(const ChangeValueInfo&)> callback = [frameNode, isJsView,
+    std::function<bool(const ChangeValueInfo&)> callback = [node = AceType::WeakClaim(frameNode), isJsView,
                                                                func = panda::CopyableGlobal(vm, func)](
                                                                const ChangeValueInfo& changeValueInfo) -> bool {
         auto vm = func.GetEcmaVM();
@@ -2845,7 +2851,7 @@ ArkUINativeModuleValue SearchBridge::SetOnWillChange(ArkUIRuntimeCallInfo* runti
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT("onWillChange");
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto eventObject = CommonBridge::CreateChangeValueInfoObj(const_cast<panda::EcmaVM*>(vm), changeValueInfo);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { eventObject };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -2892,13 +2898,14 @@ ArkUINativeModuleValue SearchBridge::SetOnWillInsert(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(const InsertValueInfo&)> callback = [frameNode, func = panda::CopyableGlobal(vm, func),
+    std::function<bool(const InsertValueInfo&)> callback = [node = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func),
                                                                isJsView](const InsertValueInfo& insertValue) -> bool {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "insertOffset", "insertValue" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, insertValue.insertOffset),
             panda::StringRef::NewFromUtf16(vm, insertValue.insertValue.c_str()) };
@@ -2948,13 +2955,14 @@ ArkUINativeModuleValue SearchBridge::SetOnDidInsert(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const InsertValueInfo&)> callback = [frameNode, func = panda::CopyableGlobal(vm, func),
+    std::function<void(const InsertValueInfo&)> callback = [node = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func),
                                                                isJsView](const InsertValueInfo& insertValue) {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "insertOffset", "insertValue" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, insertValue.insertOffset),
             panda::StringRef::NewFromUtf16(vm, insertValue.insertValue.c_str()) };
@@ -3000,13 +3008,14 @@ ArkUINativeModuleValue SearchBridge::SetOnWillDelete(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(const DeleteValueInfo&)> callback = [frameNode, func = panda::CopyableGlobal(vm, func),
+    std::function<bool(const DeleteValueInfo&)> callback = [node = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func),
                                                                isJsView](const DeleteValueInfo& deleteValue) -> bool {
         auto vm = func.GetEcmaVM();
         CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "deleteOffset", "direction", "deleteValue" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, deleteValue.deleteOffset),
             panda::NumberRef::New(vm, static_cast<int32_t>(deleteValue.direction)),
@@ -3058,12 +3067,13 @@ ArkUINativeModuleValue SearchBridge::SetOnDidDelete(ArkUIRuntimeCallInfo* runtim
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const DeleteValueInfo&)> callback =
-        [frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const DeleteValueInfo& deleteValue) {
+        [node = AceType::WeakClaim(frameNode), isJsView,
+            func = panda::CopyableGlobal(vm, func)](const DeleteValueInfo& deleteValue) {
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             const char* keys[] = { "deleteOffset", "direction", "deleteValue" };
             Local<JSValueRef> values[] = { panda::NumberRef::New(vm, deleteValue.deleteOffset),
                 panda::NumberRef::New(vm, static_cast<int32_t>(deleteValue.direction)),
