@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 
+#include <charconv>
 #include <regex>
 
 #include "core/common/container.h"
@@ -372,9 +373,26 @@ bool SvgAttributesParser::CheckColorAlpha(const std::string& colorStr, Color& re
                     matches[RGBA_MATCH_BLUE].length(), matches[RGBA_MATCH_ALPHA].length());
                 return false;
             }
-            auto red = static_cast<uint8_t>(std::stoi(matches[RGBA_MATCH_RED]));
-            auto green = static_cast<uint8_t>(std::stoi(matches[RGBA_MATCH_GREEN]));
-            auto blue = static_cast<uint8_t>(std::stoi(matches[RGBA_MATCH_BLUE]));
+            auto parseRgb = [](const std::string &value, uint8_t &result) {
+                uint32_t parsedValue = 0;
+                const char *begin = value.data();
+                const char *end = begin + value.size();
+                auto parsed = std::from_chars(begin, end, parsedValue);
+                if (parsed.ec != std::errc{} || parsed.ptr != end || parsedValue > UINT8_MAX) {
+                    return false;
+                }
+                result = static_cast<uint8_t>(parsedValue);
+                return true;
+            };
+            uint8_t red = 0;
+            uint8_t green = 0;
+            uint8_t blue = 0;
+            if (!parseRgb(matches[RGBA_MATCH_RED].str(), red) ||
+                !parseRgb(matches[RGBA_MATCH_GREEN].str(), green) ||
+                !parseRgb(matches[RGBA_MATCH_BLUE].str(), blue)) {
+                LOGW("CheckColorAlpha rejected, RGB component is out of range");
+                return false;
+            }
             auto alpha = static_cast<double>(std::stod(matches[RGBA_MATCH_ALPHA]));
             // Scale up from 0~1.0 to 255
             result = Color::FromARGB(static_cast<uint8_t>(std::min(MAX_ALPHA, alpha)) * 0xff, red, green, blue);
