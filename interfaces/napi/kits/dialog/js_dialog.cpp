@@ -240,13 +240,28 @@ napi_value JSPresentCustomDialog(napi_env env, napi_callback_info info)
         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, result);
         auto overlayManager = pipelineContext->GetOverlayManager();
-        auto task = [dialogProps, callback = std::move(finishCallback)](
+        auto task = [dialogProps, instanceId, callback = std::move(finishCallback)](
                         const RefPtr<NG::OverlayManager>& overlayManager) mutable {
             CHECK_NULL_VOID(overlayManager);
+            auto container = AceEngine::Get().GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
+            if (container->IsSubContainer()) {
+                auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+                container = AceEngine::Get().GetContainer(parentContainerId);
+                CHECK_NULL_VOID(container);
+            }
             if (dialogProps.isShowInSubWindow) {
-                SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProps, std::move(callback));
-                if (dialogProps.isModal) {
-                    TAG_LOGW(AceLogTag::ACE_OVERLAY, "Temporary not support isShowInSubWindow and isModal.");
+                auto dialog = SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProps, std::move(callback));
+                CHECK_NULL_VOID(dialog);
+                if (dialogProps.isModal && !container->IsUIExtensionWindow()) {
+                    DialogProperties maskProps = {
+                        .autoCancel = dialogProps.autoCancel,
+                        .isMask = true,
+                        .maskColor = dialogProps.maskColor,
+                    };
+                    auto mask = overlayManager->ShowDialog(maskProps, nullptr, false);
+                    CHECK_NULL_VOID(mask);
+                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                 }
             } else {
                 overlayManager->OpenCustomDialogWithErrorCallback(dialogProps, std::move(callback));

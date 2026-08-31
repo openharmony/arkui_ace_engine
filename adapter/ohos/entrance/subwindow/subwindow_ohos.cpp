@@ -1631,43 +1631,44 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     haveDialog_ = true;
 }
 
-void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps,
+RefPtr<NG::FrameNode> SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps,
     std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "open customDialog ng subwindow enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, nullptr);
     auto overlay = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
+    CHECK_NULL_RETURN(overlay, nullptr);
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentAceContainer);
+    CHECK_NULL_RETURN(parentAceContainer, nullptr);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
-        CHECK_NULL_VOID(parentcontext);
+        CHECK_NULL_RETURN(parentcontext, nullptr);
         auto parentOverlay = parentcontext->GetOverlayManager();
-        CHECK_NULL_VOID(parentOverlay);
+        CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(childContainerId_);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
             parentContainerId_, childContainerId_);
     }
     ResizeWindowForDialog(dialogProps);
     ShowWindow(dialogProps.focusable);
-    CHECK_NULL_VOID(window_);
+    CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->OpenCustomDialogWithErrorCallback(dialogProps, std::move(callback));
-    CHECK_NULL_VOID(dialog);
+    CHECK_NULL_RETURN(dialog, nullptr);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
         SetNodeId(dialog->GetId());
         SubwindowManager::GetInstance()->AddSubwindow(
             parentContainerId_, SubwindowType::TYPE_DIALOG, AceType::Claim(this), dialog->GetId());
     }
     haveDialog_ = true;
+    return dialog;
 }
 
 void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)

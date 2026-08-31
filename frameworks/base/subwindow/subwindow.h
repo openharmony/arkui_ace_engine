@@ -111,8 +111,11 @@ public:
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
     virtual void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) = 0;
-    virtual void OpenCustomDialogNG(const DialogProperties& dialogProps,
-        std::function<void(int32_t errorCode, int32_t dialogId)>&& callback) {}
+    virtual RefPtr<NG::FrameNode> OpenCustomDialogNG(const DialogProperties& dialogProps,
+        std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
+    {
+        return nullptr;
+    }
     virtual void CloseCustomDialogNG(int32_t dialogId) = 0;
     virtual void CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback) {};
     virtual void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) = 0;
