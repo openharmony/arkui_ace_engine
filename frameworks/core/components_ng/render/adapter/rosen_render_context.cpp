@@ -5710,6 +5710,7 @@ void RosenRenderContext::UpdateBackBlur(
     FREE_RS_CONTEXT_CHECK_MULTI_THREAD(UpdateBackBlur, radius, blurOption, sysOptions);
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBackdropBlurOption = blurOption;
     if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         // Same with previous value
         return;
