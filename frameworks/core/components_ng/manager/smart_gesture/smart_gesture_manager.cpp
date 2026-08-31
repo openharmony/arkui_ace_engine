@@ -395,8 +395,8 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger)
 
 bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEvent& event)
 {
-    if (!SystemProperties::GetFocusCanBeActive()) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "focusCanBeActive is false");
+    if (!SystemProperties::GetFocusCanBeActive() && trigger != SmartGestureTrigger::WRIST_BACK) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "smart gesture focusCanBeActive is false");
         ReportSmartGestureError(
             GetPipelineContext(), BuildSmartGestureErrorTag("focus can be active is false", trigger));
         return false;

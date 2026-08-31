@@ -17,6 +17,12 @@
 
 #include "gtest/gtest.h"
 
+#define private public
+#define protected public
+#include "base/utils/system_properties.h"
+#undef private
+#undef protected
+
 #include "core/components_ng/event/event_hub.h"
 
 #define private public
@@ -625,6 +631,80 @@ HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_NoArgOverload, TestSize.Level1
     auto result = manager_->HandleTrigger(SmartGestureTrigger::TAP);
 
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleTrigger_FocusCanBeActiveDisabledForTap
+ * @tc.desc: HandleTrigger returns false for TAP when focusCanBeActive is disabled even with a valid node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_FocusCanBeActiveDisabledForTap, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeFullyActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+    SystemProperties::focusCanBeActive_.store(false);
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::TAP, event);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+    SystemProperties::focusCanBeActive_.store(true);
+}
+
+/**
+ * @tc.name: HandleTrigger_FocusCanBeActiveDisabledForSlideForward
+ * @tc.desc: HandleTrigger returns false for SLIDE_FORWARD when focusCanBeActive is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_FocusCanBeActiveDisabledForSlideForward, TestSize.Level1)
+{
+    SystemProperties::focusCanBeActive_.store(false);
+    KeyEvent event(KeyCode::KEY_TAB, KeyAction::DOWN);
+
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::SLIDE_FORWARD, event);
+
+    EXPECT_FALSE(result);
+    SystemProperties::focusCanBeActive_.store(true);
+}
+
+/**
+ * @tc.name: HandleTrigger_WristBackIgnoresFocusCanBeActive
+ * @tc.desc: WRIST_BACK bypasses the focusCanBeActive guard and still executes the back press proposal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_WristBackIgnoresFocusCanBeActive, TestSize.Level1)
+{
+    SystemProperties::focusCanBeActive_.store(false);
+    KeyEvent event(KeyCode::KEY_WRIST_TURN, KeyAction::DOWN);
+
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::WRIST_BACK, event);
+
+    EXPECT_TRUE(result);
+    SystemProperties::focusCanBeActive_.store(true);
+}
+
+/**
+ * @tc.name: HandleTrigger_FocusCanBeActiveEnabledAllowsTap
+ * @tc.desc: HandleTrigger proceeds with the tap selection flow when focusCanBeActive is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_FocusCanBeActiveEnabledAllowsTap, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeFullyActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+    SystemProperties::focusCanBeActive_.store(true);
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::TAP, event);
+
+    EXPECT_TRUE(result);
+    ASSERT_NE(manager_->selectedNode_.Upgrade(), nullptr);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade()->GetId(), node->GetId());
 }
 
 /**
