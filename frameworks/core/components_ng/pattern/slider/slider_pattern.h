@@ -462,6 +462,7 @@ private:
     std::list<NG::ParticleOption> CreateParticleOptions(
         float emitterWidth, float emitterHeight, Axis direction, float blockCenterPx, bool reverse);
     void StopParticleEffect();
+    void SetVelocityFieldEnabled(bool enabled);
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
