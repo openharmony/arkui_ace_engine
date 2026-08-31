@@ -48,7 +48,6 @@ constexpr int32_t PARENT_EFFECT_CHECK_FUNC_NUM = 15;
 
 static std::vector<uintptr_t> g_callList = {
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::RegisterSecurityComponent),
-    reinterpret_cast<uintptr_t>(SecurityComponentHandler::UpdateSecurityComponent),
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEventInner)
 };
 
@@ -1152,18 +1151,6 @@ int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& n
     }
     int32_t ret = SecCompKit::RegisterSecurityComponent(
         type, componentInfo, scId);
-    return ret;
-}
-
-int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
-{
-    std::string componentInfo;
-    SecCompType type;
-    std::string message;
-    if (!InitButtonInfo(componentInfo, node, type, message)) {
-        return -1;
-    }
-    int32_t ret = SecCompKit::UpdateSecurityComponent(scId, componentInfo);
     return ret;
 }
 
