@@ -10096,7 +10096,10 @@ void SetOnKeyEventExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandl
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onKeyEvent = [nodeId, eventReceiver, node](KeyEventInfo& info) -> bool {
+    auto onKeyEvent = [weak = AceType::WeakClaim(frameNode), nodeId, eventReceiver](KeyEventInfo& info) -> bool {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto node = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         ArkUINodeEvent event;
         event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
         event.nodeId = nodeId;
@@ -10743,7 +10746,7 @@ void SetCommonOnKeyEvent(ArkUINodeHandle node, void* userData)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onKeyEvent = [frameNode, nodeId, userData](KeyEventInfo& info) -> bool {
+    auto onKeyEvent = [weak = AceType::WeakClaim(frameNode), nodeId, userData](KeyEventInfo& info) -> bool {
         ArkUINodeEvent event;
         event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
         event.nodeId = nodeId;
@@ -10779,7 +10782,7 @@ void SetCommonOnKeyEvent(ArkUINodeHandle node, void* userData)
         event.keyEvent.isCapsLockOn = info.GetCapsLock();
         event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         SendArkUIAsyncCommonEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
         return event.keyEvent.isConsumed;
@@ -11123,8 +11126,12 @@ ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
         ViewAbstract::SetOnTouchTestDone(frameNode, nullptr);
         return ERROR_CODE_NO_ERROR;
     }
-    auto callback = [node, userData, touchTestDone](const std::shared_ptr<BaseGestureEvent>& event,
+    auto callback = [weak = AceType::WeakClaim(frameNode), userData, touchTestDone](
+                        const std::shared_ptr<BaseGestureEvent>& event,
                         const std::list<WeakPtr<NGGestureRecognizer>>& recognizers) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto node = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, nullptr };
@@ -12745,7 +12752,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+    auto onKeyEvent = [weak = AceType::WeakClaim(frameNode), nodeId, extraParam](KeyEventInfo& info) -> bool {
         ArkUINodeEvent event;
         event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
         event.nodeId = nodeId;
@@ -12781,7 +12788,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.isCapsLockOn = info.GetCapsLock();
         event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
         return event.keyEvent.isConsumed;
@@ -12794,7 +12801,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onPreImeEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+    auto onPreImeEvent = [weak = AceType::WeakClaim(frameNode), nodeId, extraParam](KeyEventInfo& info) -> bool {
         ArkUINodeEvent event;
         event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
         event.nodeId = nodeId;
@@ -12828,7 +12835,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.isCapsLockOn = info.GetCapsLock();
         event.keyEvent.isScrollLockOn = info.GetScrollLock();
     
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
         return event.keyEvent.isConsumed;
@@ -12841,7 +12848,7 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+    auto onKeyEvent = [weak = AceType::WeakClaim(frameNode), nodeId, extraParam](KeyEventInfo& info) -> bool {
         ArkUINodeEvent event;
         event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
         event.nodeId = nodeId;
@@ -12875,7 +12882,7 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.isCapsLockOn = info.GetCapsLock();
         event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
         return event.keyEvent.isConsumed;
@@ -12909,7 +12916,7 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onFocusAxisEvent = [frameNode, nodeId, extraParam](FocusAxisEventInfo& info) {
+    auto onFocusAxisEvent = [weak = AceType::WeakClaim(frameNode), nodeId, extraParam](FocusAxisEventInfo& info) {
         ArkUINodeEvent event;
         event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
         event.nodeId = nodeId;
@@ -12943,7 +12950,7 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.focusAxisEvent.targetDisplayId = info.GetTargetDisplayId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
 
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
     };
@@ -12955,7 +12962,7 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onChildTouchTest = [frameNode, nodeId, extraParam](
+    auto onChildTouchTest = [weak = AceType::WeakClaim(frameNode), nodeId, extraParam](
                                 const std::vector<TouchTestInfo>& touchInfo) -> NG::TouchResult {
         ArkUINodeEvent event;
         event.kind = CHILD_TOUCH_TEST_EVENT;
@@ -12985,7 +12992,7 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
         touchTestInfo.strategy = ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_DEFAULT;
         touchTestInfo.size = size;
         event.touchTestInfo = touchTestInfo;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         SendArkUISyncEvent(&event);
         TouchResult touchRes;
         touchRes.strategy = static_cast<TouchTestStrategy>(event.touchTestInfo.strategy);
@@ -13054,7 +13061,8 @@ void SetOnGestureCollectIntercept(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     auto onGestureCollectIntercept =
-        [frameNode, nodeId, extraParam](const std::vector<RefPtr<NGGestureRecognizer>>& recognizers,
+        [weak = AceType::WeakClaim(frameNode), nodeId, extraParam](
+            const std::vector<RefPtr<NGGestureRecognizer>>& recognizers,
             const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> GestureCollectIntervention {
         ArkUINodeEvent event;
         event.kind = GESTURE_COLLECT_INTERCEPT_EVENT;
@@ -13075,7 +13083,7 @@ void SetOnGestureCollectIntercept(ArkUINodeHandle node, void* extraParam)
         gestureCollectInterceptInfo.intervention = static_cast<int32_t>(GestureCollectIntervention::CONTINUE);
         event.gestureCollectInterceptInfo = gestureCollectInterceptInfo;
 
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         SendArkUISyncEvent(&event);
 
         return NormalizeGestureCollectIntervention(event.gestureCollectInterceptInfo.intervention);
