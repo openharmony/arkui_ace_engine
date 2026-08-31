@@ -1280,13 +1280,14 @@ bool EventHub::HasThrottledVisibleAreaCallback() const
     return static_cast<bool>(visibleAreaChangeCallbackSet_->throttledVisibleAreaChange->callbackInfo.callback);
 }
 
-void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
+bool EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
     const std::unique_ptr<OffsetF>& lastParentOffsetToWindow,
     const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow)
 {
     auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
-    if (currFrameRect != *lastFrameRect || currParentOffsetToWindow != *lastParentOffsetToWindow) {
+    CHECK_NULL_RETURN(host, false);
+    bool changed = currFrameRect != *lastFrameRect || currParentOffsetToWindow != *lastParentOffsetToWindow;
+    if (changed) {
         if (SystemProperties::GetDebugEnabled()) {
             ACE_SCOPED_TRACE("HandleOnAreaChange[%s][%d][%s][%s] rect:%s->%s offset:%s->%s",
                 host->GetTag().c_str(), host->GetId(),
@@ -1310,7 +1311,9 @@ void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
     if (!hasInnerAreaChangeUntriggered_.empty()) {
         FireUntriggeredInnerOnAreaChanged(
             *lastFrameRect, *lastParentOffsetToWindow, currFrameRect, currParentOffsetToWindow);
+        return true;
     }
+    return changed;
 }
 
 void EventHub::FireUntriggeredInnerOnAreaChanged(
