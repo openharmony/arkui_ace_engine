@@ -23,7 +23,7 @@ class ACE_EXPORT FoldableWindow : public AceType {
     DECLARE_ACE_TYPE(FoldableWindow, AceType);
 
 public:
-    static RefPtr<FoldableWindow> CreateFoldableWindow(int32_t instanceId);
+    ACE_FORCE_EXPORT static RefPtr<FoldableWindow> CreateFoldableWindow(int32_t instanceId);
 
     virtual bool IsFoldExpand() = 0;
 

@@ -108,10 +108,10 @@
       ],
       "file_path": "pattern/sheet/Sheet_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp",
-        "manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_presentation_pattern.cpp",
+        "manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_manager.cpp",
         "object": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
-        "style": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_style.h"
+        "style": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_style.h"
       },
       "api_paths": {
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.advanced.SheetPanel.d.ts"

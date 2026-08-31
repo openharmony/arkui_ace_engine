@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/sheet/sheet_view.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
@@ -23,11 +23,11 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_paint_property.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
@@ -42,6 +42,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr char SHEET_PAGE_TAG[] = "SheetPage";
 constexpr int32_t SHEET_DETENTS_ZERO = 0;
 constexpr int32_t SHEET_DETENTS_ONE = 1;
 constexpr int32_t SHEET_DETENTS_TWO = 2;
@@ -54,8 +55,8 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle)
 {
     // create sheet node
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SHEET_PAGE_TAG, targetId);
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", SHEET_PAGE_TAG, targetId);
+    auto sheetNode = FrameNode::CreateFrameNode(SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, targetTag, std::move(callback)));
     sheetNode->SetDragHitTestBlock(true);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();

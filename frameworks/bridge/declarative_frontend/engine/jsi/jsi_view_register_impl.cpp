@@ -121,7 +121,6 @@
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_sheet.h"
-#include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
 #include "bridge/declarative_frontend/jsview/js_stack.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
@@ -528,7 +527,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
-    { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
     { "RepeatVirtualScroll2Native", JSRepeatVirtualScroll2::JSBind },

@@ -45,7 +45,6 @@
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
@@ -67,6 +66,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/event/mouse_event.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/common/properties/os_content.h"
 
@@ -509,12 +509,15 @@ ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset
     auto overOffsets = GetOverScrollOffset(offset);
     if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {
         isSheetInReactive_ = true;
-        if (sheetPattern_) {
-            sheetPattern_->OnCoordScrollStart();
+        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+        if (sheetPattern_ && sheetModifier) {
+            sheetModifier->sheetOnCoordScrollStart(sheetPattern_);
         }
     }
     if (sheetPattern_ && isSheetInReactive_) {
-        if (!sheetPattern_->OnCoordScrollUpdate(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+        if (sheetModifier && !sheetModifier->sheetOnCoordScrollUpdate(
+            sheetPattern_, GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
             isSheetInReactive_ = false;
             coordinationMode = ModalSheetCoordinationMode::SCROLLABLE_SCROLL;
         } else {
@@ -621,8 +624,9 @@ void ScrollablePattern::OnScrollEnd()
     }
     if (isSheetInReactive_) {
         isSheetInReactive_ = false;
-        if (sheetPattern_) {
-            sheetPattern_->OnCoordScrollEnd(GetVelocity());
+        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+        if (sheetPattern_ && sheetModifier) {
+            sheetModifier->sheetOnCoordScrollEnd(sheetPattern_, GetVelocity());
         }
     }
     if (isReactInParentMovement_) {
@@ -2079,16 +2083,18 @@ void ScrollablePattern::GetParentModalSheet()
     if (host->GetTag() != V2::SCROLL_ETS_TAG) {
         return;
     }
-
+    auto* sheetModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetModifier);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
         RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
         if (!frameNode) {
             continue;
         }
-        sheetPattern_ = frameNode->GetPattern<SheetPresentationPattern>();
-        if (!sheetPattern_) {
+        auto pattern = frameNode->GetPattern();
+        if (!pattern || !sheetModifier->sheetIsPresentationPattern(pattern)) {
             continue;
         }
+        sheetPattern_ = pattern;
         return;
     }
     return;

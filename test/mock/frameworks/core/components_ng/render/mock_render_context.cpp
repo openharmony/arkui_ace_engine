@@ -201,6 +201,28 @@ void RenderContext::ResetBorderImage()
     }
 }
 
+bool RenderContext::HasParticleOptionArray() const
+{
+    return false;
+}
+
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue() const
+{
+    static const std::list<ParticleOption> empty;
+    return empty;
+}
+
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue(
+    const std::list<ParticleOption>& defaultValue) const
+{
+    return defaultValue;
+}
+
+std::optional<std::list<ParticleOption>> RenderContext::CloneParticleOptionArray() const
+{
+    return std::nullopt;
+}
+
 void RenderContext::UpdateParticleOptionArray(const std::list<ParticleOption>& value) {}
 
 const std::optional<std::list<ParticleOption>>& RenderContext::GetParticleOptionArray() const
