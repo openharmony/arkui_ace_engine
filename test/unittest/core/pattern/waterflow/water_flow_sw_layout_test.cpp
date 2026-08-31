@@ -1924,6 +1924,87 @@ HWTEST_F(WaterFlowSWTest, Illegal001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EmptySectionsPosition001
+ * @tc.desc: Position queries are safe before lanes are rebuilt after clearing sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, EmptySectionsPosition001, TestSize.Level1)
+{
+    WaterFlowLayoutInfoSW info;
+    info.InitSegmentsForKeepPositionMode({}, {}, 0);
+    ASSERT_TRUE(info.lanes_.empty());
+    EXPECT_FLOAT_EQ(info.StartPos(), 0.0f);
+    EXPECT_FLOAT_EQ(info.EndPos(), 0.0f);
+
+    info.lanes_.resize(1);
+    EXPECT_FLOAT_EQ(info.StartPos(), 0.0f);
+    EXPECT_FLOAT_EQ(info.EndPos(), 0.0f);
+}
+
+/**
+ * @tc.name: EmptyLanePosition001
+ * @tc.desc: An initialized lane without items retains its offset for footer-only layouts.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, EmptyLanePosition001, TestSize.Level1)
+{
+    WaterFlowLayoutInfoSW info;
+    info.lanes_.resize(1);
+    info.lanes_[0].resize(1);
+    auto& lane = info.lanes_[0][0];
+    lane.startPos = -25.0f;
+    lane.endPos = -25.0f;
+
+    ASSERT_GT(info.StartIndex(), info.EndIndex());
+    EXPECT_FLOAT_EQ(info.StartPos(), -25.0f);
+    EXPECT_FLOAT_EQ(info.EndPos(), -25.0f);
+}
+
+/**
+ * @tc.name: EmptySectionsAtBottom001
+ * @tc.desc: Clearing sections at the bottom keeps scrollbar queries safe and layout can recover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, EmptySectionsAtBottom001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.0f));
+    model.SetCachedCount(3);
+    model.SetScrollBarMode(DisplayMode::ON);
+    CreateWaterFlowItems(20);
+    const std::vector<WaterFlowSections::Section> sections = { { .itemsCount = 20, .crossCount = 1 } };
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_TRUE(scrollBar);
+    const auto initialItemRect = GetChildRect(frameNode_, 0);
+    const auto initialBarTop = scrollBar->GetActiveRect().Top();
+    const auto initialEndIndex = info_->endIndex_;
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    ASSERT_TRUE(info_->offsetEnd_);
+    ASSERT_FALSE(info_->lanes_.empty());
+
+    // Keep the data source while clearing sections, so Measure rejects the temporary mismatch.
+    secObj->ChangeData(0, sections.size(), {});
+    FlushUITasks();
+    EXPECT_TRUE(info_->lanes_.empty());
+    EXPECT_FLOAT_EQ(info_->StartPos(), 0.0f);
+    EXPECT_FLOAT_EQ(info_->EndPos(), 0.0f);
+
+    secObj->ChangeData(0, 0, sections);
+    FlushUITasks();
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, initialEndIndex);
+    EXPECT_EQ(GetChildRect(frameNode_, 0), initialItemRect);
+    EXPECT_FLOAT_EQ(scrollBar->GetActiveRect().Top(), initialBarTop);
+    EXPECT_GT(scrollBar->GetActiveRect().Height(), 0.0f);
+}
+
+/**
  * @tc.name: DataChange001
  * @tc.desc: In less-than fillViewport scene, test overScroll position after changing dataSource.
  * @tc.type: FUNC
