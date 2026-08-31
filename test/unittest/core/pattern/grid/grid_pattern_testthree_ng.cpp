@@ -418,6 +418,106 @@ HWTEST_F(GridTestThreeNg, CheckGridPlaced001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckGridPlaced002
+ * @tc.desc: Test GridScrollLayoutAlgorithm CheckGridPlaced with negative main line.
+ *           When endMainLineIndex_ < 0 (top overscroll pushes all content below viewport),
+ *           cache filling may attempt to place items at a negative main line. The negative-main
+ *           log is positioned right before the padding loop (after all early-return checks pass),
+ *           and must NOT return false: returning false would make MeasureNewChild/
+ *           MeasureCachedChild return -1, and FillNewLineBackward/FillNewCacheLineBackward
+ *           would then dereference lineHeightMap_.find(...-1)->second without a null check,
+ *           crashing. Placement continues so the item is actually written (mainSpan>0).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestThreeNg, CheckGridPlaced002, TestSize.Level1)
+{
+    GridLayoutInfo gridLayoutInfo;
+    gridLayoutInfo.lineHeightMap_[0] = 100.0f;
+    gridLayoutInfo.startMainLineIndex_ = -1;
+    gridLayoutInfo.endMainLineIndex_ = -1;
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
+    ASSERT_NE(layout, nullptr);
+    layout->info_.crossCount_ = 4;
+
+    /**
+     * @tc.steps: step1. Call CheckGridPlaced with main=-1 (passes gridMatrix-exists and
+     *            cross-range checks, reaches the negative-main guard)
+     * @tc.expected: Returns true (placement continues, guard does NOT return false),
+     *               so MeasureNewChild/MeasureCachedChild will not return -1 and the
+     *               downstream lineHeightMap_.find(...-1)->second crash is avoided.
+     */
+    auto result = layout->CheckGridPlaced(0, -1, 0, 1, 1);
+    EXPECT_TRUE(result) << "negative main must not cause CheckGridPlaced to return false (crash risk downstream)";
+
+    /**
+     * @tc.steps: step2. Verify the item was actually placed at main=-1 in gridMatrix_
+     * @tc.expected: gridMatrix_[-1] contains cross=0 -> index=0
+     */
+    auto negRow = layout->info_.gridMatrix_.find(-1);
+    ASSERT_NE(negRow, layout->info_.gridMatrix_.end());
+    ASSERT_FALSE(negRow->second.empty());
+    EXPECT_EQ(negRow->second.begin()->second, 0);
+
+    /**
+     * @tc.steps: step3. Call CheckGridPlaced with main=-2, larger spans
+     * @tc.expected: Returns true, items placed at main=-2 and main=-1
+     */
+    result = layout->CheckGridPlaced(1, -2, 1, 2, 2);
+    EXPECT_TRUE(result);
+    EXPECT_NE(layout->info_.gridMatrix_.find(-2), layout->info_.gridMatrix_.end());
+    EXPECT_NE(layout->info_.gridMatrix_.find(-1), layout->info_.gridMatrix_.end());
+
+    /**
+     * @tc.steps: step4. Verify normal placement at main=0 still succeeds (guard does not
+     *            break positive main)
+     * @tc.expected: Returns true, gridMatrix_ populated with key 0
+     */
+    result = layout->CheckGridPlaced(2, 0, 0, 1, 1);
+    EXPECT_TRUE(result);
+    EXPECT_NE(layout->info_.gridMatrix_.find(0), layout->info_.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: CheckGridPlaced003
+ * @tc.desc: Test GridScrollLayoutAlgorithm CheckGridPlaced negative-main guard does not
+ *           interfere when main=0 boundary. The guard uses strict less-than (main < 0),
+ *           so main=0 must pass through to normal placement logic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestThreeNg, CheckGridPlaced003, TestSize.Level1)
+{
+    GridLayoutInfo gridLayoutInfo;
+    gridLayoutInfo.lineHeightMap_[0] = 100.0f;
+    gridLayoutInfo.startMainLineIndex_ = 0;
+    gridLayoutInfo.endMainLineIndex_ = 0;
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
+    ASSERT_NE(layout, nullptr);
+    layout->info_.crossCount_ = 2;
+
+    /**
+     * @tc.steps: step1. Place item at main=0, cross=0 (boundary of the guard)
+     * @tc.expected: Returns true, item placed normally
+     */
+    auto result = layout->CheckGridPlaced(0, 0, 0, 1, 1);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. Place second item at main=0, cross=1
+     * @tc.expected: Returns true
+     */
+    result = layout->CheckGridPlaced(1, 0, 1, 1, 1);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step3. Attempt duplicate at main=0, cross=0 (already occupied)
+     * @tc.expected: Returns false (duplicate, not negative-main guard)
+     */
+    result = layout->CheckGridPlaced(2, 0, 0, 1, 1);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(layout->info_.gridMatrix_.count(-1), 0);
+}
+
+/**
  * @tc.name: ComputeItemCrossPosition001
  * @tc.desc: Test GridScrollLayoutAlgorithm ComputeItemCrossPosition
  * @tc.type: FUNC

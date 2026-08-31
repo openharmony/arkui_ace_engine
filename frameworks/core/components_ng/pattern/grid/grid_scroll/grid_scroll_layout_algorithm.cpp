@@ -394,7 +394,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_);
 
-    if (startIndex == -1 && endIndex == -1) {
+    // No in-range item was laid out. Decide the fallback active range by the out-of-bounds direction.
+    // When endMainLineIndex_ < 0 (top overscroll pushes all content below the viewport, and
+    // startMainLineIndex_ is even further ahead), keep the -1, -1 anchor so no item is marked
+    // active while content is off-screen.
+    if (startIndex == -1 && endIndex == -1 && info_.endMainLineIndex_ >= 0) {
+        // Bottom out of bounds: content is above the viewport, active range is past the last item.
         startIndex = endIndex = info_.GetChildrenCount();
     }
     ClearUnlayoutedItems(layoutWrapper);
@@ -2054,6 +2059,22 @@ bool GridScrollLayoutAlgorithm::CheckGridPlaced(
         }
     }
 
+    // Positioned right before the padding loop: all early-return checks (duplicate,
+    // cross-range, span-overlap) have passed, so a negative main here WILL be written
+    // to gridMatrix_ (only when mainSpan > 0 does the loop below execute the write).
+    // This leaves room for a future intercept if negative-main placement must be blocked.
+    // We do NOT return false for negative main now: returning false would make
+    // MeasureNewChild / MeasureCachedChild return -1, and FillNewLineBackward /
+    // FillNewCacheLineBackward would then dereference
+    // lineHeightMap_.find(currentMainLineIndex_ - 1)->second without a null check,
+    // causing a crash.
+    if (main < 0) {
+        TAG_LOGW(AceLogTag::ACE_GRID,
+            "negative main line about to be written to gridMatrix, main:%{public}d, mainSpan:%{public}d, "
+            "index:%{public}d, startMainLineIndex_:%{public}d, endMainLineIndex_:%{public}d",
+            main, mainSpan, index, info_.startMainLineIndex_, info_.endMainLineIndex_);
+    }
+
     // Padding grid matrix for grid item's range.
     for (int32_t i = main; i < main + mainSpan; ++i) {
         std::map<int32_t, int32_t> mainMap;
@@ -2196,7 +2217,10 @@ void GridScrollLayoutAlgorithm::FillCacheLineAtEnd(float mainSize, float crossSi
     auto tempEndIndex = info_.endIndex_;
     auto tempEndMainLineIndex = info_.endMainLineIndex_;
     auto tempCurrentMainLineIndex = currentMainLineIndex_;
-    currentMainLineIndex_ = info_.endMainLineIndex_;
+    // endMainLineIndex_ can go negative when the Grid is in top overscroll (all content pushed
+    // below the viewport). Clamp to 0 so the cache-fill loop does not start from a negative main
+    // line, which would trigger the negative-main guard in CheckGridPlaced on every iteration.
+    currentMainLineIndex_ = std::max(info_.endMainLineIndex_, 0);
 
     for (; currentMainLineIndex_ <= tempEndMainLineIndex + cacheCount; currentMainLineIndex_++) {
         float lineHeight = FillNewCacheLineBackward(crossSize, mainSize, layoutWrapper, currentMainLineIndex_);
