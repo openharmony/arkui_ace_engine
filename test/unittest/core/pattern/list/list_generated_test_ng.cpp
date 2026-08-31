@@ -2284,6 +2284,48 @@ HWTEST_F(ListGeneratedTestNg, ListEditModeChangedOnModifyDoneRemovesFromItems001
 }
 
 /**
+ * @tc.name: ListApplyEditModeToCachedItems001
+ * @tc.desc: Test applying edit mode only within the configured multi-lane cache range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListApplyEditModeToCachedItems001, TestSize.Level1)
+{
+    auto model = CreateList();
+    model.SetCachedCount(2);
+    CreateListItems(100);
+    CreateDone();
+
+    pattern_->itemPosition_.clear();
+    pattern_->itemPosition_[40] = { 40, 0.0f, 100.0f, false };
+    pattern_->itemPosition_[49] = { 49, 100.0f, 200.0f, false };
+    pattern_->maxListItemIndex_ = 99;
+    pattern_->lanes_ = 2;
+    pattern_->ApplyEditModeToCachedItems(true);
+
+    for (int32_t index : { 36, 39, 50, 53 }) {
+        auto item = GetChildFrameNode(frameNode_, index);
+        ASSERT_NE(item, nullptr);
+        auto itemPattern = item->GetPattern<SelectableItemPattern>();
+        ASSERT_NE(itemPattern, nullptr);
+        EXPECT_NE(itemPattern->editModeCheckBoxNode_, nullptr) << "cached item " << index;
+    }
+    for (int32_t index : { 35, 40, 49, 54 }) {
+        auto item = GetChildFrameNode(frameNode_, index);
+        ASSERT_NE(item, nullptr);
+        auto itemPattern = item->GetPattern<SelectableItemPattern>();
+        ASSERT_NE(itemPattern, nullptr);
+        EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "non-cached item " << index;
+    }
+
+    pattern_->ApplyEditModeToCachedItems(false);
+    for (int32_t index : { 36, 39, 50, 53 }) {
+        auto itemPattern = GetChildFrameNode(frameNode_, index)->GetPattern<SelectableItemPattern>();
+        ASSERT_NE(itemPattern, nullptr);
+        EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "cached item " << index;
+    }
+}
+
+/**
  * @tc.name: ListEditModeChangedOnModifyDoneNoDefaultMultiSelectStyle001
  * @tc.desc: Test OnModifyDone calls RemoveEditModeFromItems when useDefaultMultiSelectStyle is false
  * @tc.type: FUNC

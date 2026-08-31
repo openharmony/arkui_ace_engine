@@ -1208,6 +1208,7 @@ void ScrollablePattern::OnTouchpadInteraction(PointF point)
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (GetAxis() == Axis::FREE) {
+        activeTouchFingerIds_.clear();
         gestureHub->RemoveTouchEvent(touchEvent_);
         touchEvent_.Reset();
         return; // using custom touch event in free scroll mode
@@ -1224,21 +1225,27 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         auto scrollable = pattern->scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
         CHECK_NULL_VOID(!info.GetChangedTouches().empty());
-        switch (info.GetChangedTouches().front().GetTouchType()) {
+        const auto& changedTouch = info.GetChangedTouches().front();
+        auto fingerId = changedTouch.GetFingerId();
+        switch (changedTouch.GetTouchType()) {
             case TouchType::DOWN:
+                pattern->activeTouchFingerIds_.insert(fingerId);
                 scrollable->HandleTouchDown();
                 pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
+                pattern->activeTouchFingerIds_.erase(fingerId);
                 if (!pattern->ShouldIgnoreTouchUpWithActiveFingers() ||
-                    std::none_of(info.GetTouches().begin(), info.GetTouches().end(), [](const auto& touch) {
-                        return touch.GetTouchType() != TouchType::UP && touch.GetTouchType() != TouchType::CANCEL;
-                    })) {
+                    pattern->activeTouchFingerIds_.empty()) {
                     scrollable->HandleTouchUp();
                 }
                 break;
             case TouchType::CANCEL:
-                scrollable->HandleTouchCancel();
+                pattern->activeTouchFingerIds_.erase(fingerId);
+                if (!pattern->ShouldIgnoreTouchUpWithActiveFingers() ||
+                    pattern->activeTouchFingerIds_.empty()) {
+                    scrollable->HandleTouchCancel();
+                }
                 break;
             default:
                 break;
@@ -1287,6 +1294,7 @@ void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     // call OnDetachFromFrameNodeMultiThread() by multi thread
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
+    activeTouchFingerIds_.clear();
     CHECK_NULL_VOID(frameNode);
     UnRegister2DragDropManager(frameNode);
     auto context = frameNode->GetContextWithCheck();

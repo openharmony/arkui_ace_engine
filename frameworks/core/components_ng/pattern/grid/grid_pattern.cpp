@@ -2257,28 +2257,50 @@ void GridPattern::PostAsyncLoadTask()
     });
 }
 
+void GridPattern::CollectCachedIndexes(
+    std::unordered_set<int32_t>& cachedIndexes, int32_t startLine, int32_t endLine) const
+{
+    if (startLine > endLine) {
+        return;
+    }
+    auto iter = info_.gridMatrix_.lower_bound(startLine);
+    auto end = info_.gridMatrix_.upper_bound(endLine);
+    for (; iter != end; ++iter) {
+        for (const auto& item : iter->second) {
+            if (item.second >= 0) {
+                cachedIndexes.emplace(item.second);
+            }
+        }
+    }
+}
+
 void GridPattern::ApplyEditModeToCachedItems(bool enabled)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto startIdx = info_.startIndex_;
-    auto endIdx = info_.endIndex_;
-    for (int32_t idx = startIdx - 1; idx >= 0; --idx) {
-        auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
-        if (!child) {
-            continue;
-        }
-        auto itemPattern = child->GetPattern<SelectableItemPattern>();
-        if (itemPattern) {
-            itemPattern->SetEditModeEnabled(enabled);
-        }
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    const int32_t cachedLines =
+        std::max(layoutProperty->GetCachedCountValue(info_.defCachedCount_), 0);
+    if (cachedLines == 0 || info_.gridMatrix_.empty()) {
+        return;
     }
-    int32_t total = host->TotalChildCount();
-    for (int32_t idx = endIdx + 1; idx < total; ++idx) {
-        auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
-        if (!child) {
-            continue;
-        }
+
+    std::unordered_set<int32_t> cachedIndexes;
+
+    const int32_t cacheStartLine =
+        std::max(info_.startMainLineIndex_ - cachedLines, 0);
+    const int32_t cacheEndLine =
+        info_.endMainLineIndex_ + cachedLines;
+
+    CollectCachedIndexes(cachedIndexes, cacheStartLine, info_.startMainLineIndex_ - 1);
+    CollectCachedIndexes(cachedIndexes, info_.endMainLineIndex_ + 1, cacheEndLine);
+
+    for (int32_t index : cachedIndexes) {
+        auto* child = host->GetFrameNodeChildByIndexWithoutBuild(index);
+        CHECK_NULL_CONTINUE(child);
+
         auto itemPattern = child->GetPattern<SelectableItemPattern>();
         if (itemPattern) {
             itemPattern->SetEditModeEnabled(enabled);

@@ -20,6 +20,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -320,6 +321,9 @@ public:
     int32_t GetFirstIndex() const override;
 
     void ApplyEditModeToCachedItems(bool enabled) override;
+
+    void CollectCachedIndexes(std::unordered_set<int32_t>& cachedIndexes, int32_t startLine,
+        int32_t endLine) const;
 
 private:
     /**
