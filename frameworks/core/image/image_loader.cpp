@@ -15,6 +15,8 @@
 
 #include "core/image/image_loader.h"
 
+#include <charconv>
+
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "utils/data.h"
 #ifdef USE_NEW_SKIA
@@ -59,6 +61,14 @@ const std::regex MEDIA_APP_RES_PATH_REGEX(R"(^resource://RAWFILE/(.*)$)");
 const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
 const std::regex MEDIA_RES_NAME_REGEX(R"(^resource://.*/(\w+)\.\w+$)", std::regex::icase);
 constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
+
+bool ParseResourceId(const std::string &value, uint32_t &resourceId)
+{
+    const char *begin = value.data();
+    const char *end = begin + value.size();
+    auto parsed = std::from_chars(begin, end, resourceId);
+    return parsed.ec == std::errc{} && parsed.ptr == end;
+}
 
 const std::chrono::duration<int, std::milli> TIMEOUT_DURATION(10000);
 
@@ -644,8 +654,7 @@ bool ResourceImageLoader::GetResourceId(const std::string& uri, uint32_t& resId)
                 matches[1].length(), uri.c_str());
             return false;
         }
-        resId = static_cast<uint32_t>(std::stoul(matches[1].str()));
-        return true;
+        return ParseResourceId(matches[1].str(), resId);
     }
 
     std::smatch appMatches;
@@ -656,8 +665,7 @@ bool ResourceImageLoader::GetResourceId(const std::string& uri, uint32_t& resId)
                 appMatches[1].length(), uri.c_str());
             return false;
         }
-        resId = static_cast<uint32_t>(std::stoul(appMatches[1].str()));
-        return true;
+        return ParseResourceId(appMatches[1].str(), resId);
     }
 
     return false;
