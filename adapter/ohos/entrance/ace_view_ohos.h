@@ -252,6 +252,11 @@ private:
     bool ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected);
     bool ShouldConvertRightMouseToTouch(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node);
+    bool IsRightMouseEvent(const MouseEvent& event);
+    void HandleMappingInterrupt(const MouseEvent& event);
+    bool ShouldContinueMapping(const MouseEvent& event);
+    bool StartNewMapping(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node);
+    bool IsRightMouseMappingSwitchOn();
     bool CheckMouseMappingWhitelist(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node);
     bool HandleMappedButtonRelease(const MouseEvent& event, const TouchEvent& touchEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess);
@@ -289,6 +294,8 @@ private:
     TimeStamp mousePressTime_;
     CancelableCallback<void()> mouseDelayedUpTask_;
     TouchEvent mouseLastTouchEvent_;
+    bool rightMouseMappingSwitchEnabled_ = false;
+    bool rightMouseMappingSwitchCached_ = false;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };
 
