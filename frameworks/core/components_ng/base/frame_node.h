@@ -20,10 +20,11 @@
 #include <functional>
 #include <list>
 #include <mutex>
-#include <string_view>
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <string_view>
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "ui/base/modifier_property.h"
@@ -633,6 +634,11 @@ public:
     FocusType GetFocusType() const;
 
     void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
+
+    bool HitTestMouseTarget(const MouseEvent& event, const PointF& globalPoint, const PointF& parentLocalPoint,
+        const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist = nullptr);
+    bool IsMouseTargetHit(const MouseEvent& event, const PointF& parentRevertPoint,
+        const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,

@@ -1161,6 +1161,24 @@ public:
     }
 
     void SetIsWindowSizeDragging(bool isDragging);
+
+    bool IsRightMouseMappingActive() const
+    {
+        return isRightMouseMappingActive_;
+    }
+
+    void SetRightMouseMappingActive(bool active)
+    {
+        isRightMouseMappingActive_ = active;
+    }
+    void SetOnRightMouseMappingCancel(std::function<void()>&& callback)
+    {
+        onRightMouseMappingCancel_ = std::move(callback);
+    }
+
+    bool HitTestMouseTargetForMapping(const MouseEvent& event, const RefPtr<NG::FrameNode>& node,
+        const std::vector<std::string>& tagWhitelist) const;
+
     void GetAllPixelMap();
     std::shared_ptr<UiTranslateManagerImpl> GetUiTranslateManagerImpl();
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
@@ -1709,6 +1727,8 @@ private:
     RefPtr<BackPressHandlerManager> backPressHandlerManager_;
     RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
     RefPtr<MaterialProcessor> materialProcessor_;
+    bool isRightMouseMappingActive_ = false;
+    std::function<void()> onRightMouseMappingCancel_;
 };
 
 /**

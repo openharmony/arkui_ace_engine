@@ -17,12 +17,18 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "core/common/transform/input_compatible_manager.h"
 #include "adapter/ohos/entrance/event_compatible/compatible_interface.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/feature_manager.h"
+#include "base/json/json_util.h"
+#include "base/utils/system_properties.h"
 namespace OHOS::Ace::NG {
 const int32_t COMPATIBLE_INPUT_MODE = 1;
 const int32_t DISABLE_TRANSFORM = 8;
 const char MOUSE_2_TOUCH_EVENT_MODE[] = "mouse2TouchEventMode";
 const char MOUSE_2_TOUCH_EVENT_MODE_XCOMPONENT_AND_WEB_ONLY[] = "xcomponentAndWebOnly";
+const char CONTEXT_MENU_OPTIONS[] = "contextMenuOptions";
+const char RIGHT_MOUSE_2_LONG_PRESS[] = "rightMouse2LongPress";
+const char NEED_TRANSFER_COMPONENT[] = "needTransferComponent";
 
 EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::IsCompatibleFromFeatureManager(
     const std::string& matchedMode)
@@ -165,6 +171,57 @@ bool EventInfoConvertor::IsAppDevelopedForPC()
     }
 
     return isAppDevelopedForPC;
+}
+
+EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::GetRightMouse2LongPressConfig(
+    bool& outEnabled, std::vector<std::string>& outComponents)
+{
+    std::string config;
+    auto ret = FeatureManager::GetInstance().GetFeatureParam(CONTEXT_MENU_OPTIONS, config);
+    if (ret == FeatureManager::INIT_FAILED) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT,
+            "key contextMenuOptions, FeatureManager init failed");
+        return Mouse2TouchEventModeResult::INIT_FAILED;
+    }
+    if (ret != FeatureManager::SUCCESS) {
+        return Mouse2TouchEventModeResult::NOT_FOUND;
+    }
+
+    auto configJson = JsonUtil::ParseJsonString(config);
+    if (!configJson || configJson->IsNull() || !configJson->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT,
+            "key contextMenuOptions, value is not valid json string: %{public}s", config.c_str());
+        return Mouse2TouchEventModeResult::NOT_FOUND;
+    }
+
+    outEnabled = configJson->GetBool(RIGHT_MOUSE_2_LONG_PRESS, false);
+    if (!outEnabled) {
+        return Mouse2TouchEventModeResult::UNMATCHED;
+    }
+
+    auto componentsArray = configJson->GetValue(NEED_TRANSFER_COMPONENT);
+    if (!componentsArray || componentsArray->IsNull() || componentsArray->GetArraySize() <= 0) {
+        outEnabled = false;
+        return Mouse2TouchEventModeResult::UNMATCHED;
+    }
+    for (int32_t i = 0; i < componentsArray->GetArraySize(); ++i) {
+        auto item = componentsArray->GetArrayItem(i);
+        if (item && !item->IsNull()) {
+            std::string value = item->GetString();
+            if (value == "All") {
+                outComponents.clear();
+                return Mouse2TouchEventModeResult::MATCHED;
+            }
+            outComponents.push_back(std::move(value));
+        }
+    }
+    return Mouse2TouchEventModeResult::MATCHED;
+}
+
+bool EventInfoConvertor::IsRightMouseMappingEnabled(bool& outEnabled, std::vector<std::string>& outComponents)
+{
+    auto configResult = GetRightMouse2LongPressConfig(outEnabled, outComponents);
+    return configResult == Mouse2TouchEventModeResult::MATCHED && outEnabled;
 }
 
 } // namespace OHOS::Ace::NG

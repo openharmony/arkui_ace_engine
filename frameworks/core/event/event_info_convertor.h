@@ -36,6 +36,9 @@ public:
     static bool MatchCompatibleCondition();
     static bool IfNeedMouseTransform();
     static bool IsAppDevelopedForPC();
+    static Mouse2TouchEventModeResult GetRightMouse2LongPressConfig(
+        bool& outEnabled, std::vector<std::string>& outComponents);
+    static bool IsRightMouseMappingEnabled(bool& outEnabled, std::vector<std::string>& outComponents);
 private:
     EventInfoConvertor() = default;
     ~EventInfoConvertor() = default;

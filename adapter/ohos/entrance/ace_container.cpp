@@ -1226,6 +1226,13 @@ void AceContainer::UnActiveWindow(int32_t instanceId)
             if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
+            auto aceView = container->GetAceView();
+            if (aceView) {
+                auto aceViewOhos = AceType::DynamicCast<Platform::AceViewOhos>(aceView);
+                if (aceViewOhos) {
+                    aceViewOhos->CancelMouseMapping();
+                }
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUIWindowUnActivate", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
@@ -1590,6 +1597,36 @@ void AceContainer::InitializeCallback()
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI, "ArkUISurfaceDestroyed");
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
+
+    auto&& mouseTargetHitCallback = [weakPipeline = WeakPtr<NG::PipelineContext>(
+        AceType::DynamicCast<NG::PipelineContext>(pipelineContext_))](const MouseEvent& event,
+        const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& tagWhitelist) -> bool {
+        auto pipeline = weakPipeline.Upgrade();
+        CHECK_NULL_RETURN(pipeline, false);
+        return pipeline->HitTestMouseTargetForMapping(event, node, tagWhitelist);
+    };
+    auto aceViewOhos = AceType::DynamicCast<Platform::AceViewOhos>(aceView_);
+    if (aceViewOhos) {
+        aceViewOhos->RegisterMouseTargetHitCallback(mouseTargetHitCallback);
+    }
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    if (pipeline && aceViewOhos) {
+        aceViewOhos->RegisterRightMouseMappingActiveCallback(
+            [weakPipeline = WeakPtr<NG::PipelineContext>(pipeline)](bool active) {
+                auto p = weakPipeline.Upgrade();
+                if (p) {
+                    p->SetRightMouseMappingActive(active);
+                }
+            });
+        auto cancelCb = [weakView = WeakPtr<Platform::AceViewOhos>(aceViewOhos)]() {
+            auto view = weakView.Upgrade();
+            if (view) {
+                view->CancelMouseMapping();
+            }
+        };
+        pipeline->SetOnRightMouseMappingCancel(std::move(cancelCb));
+    }
+
     InitDragEventCallback();
 }
 
