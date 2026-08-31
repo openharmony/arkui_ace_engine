@@ -307,6 +307,12 @@ void* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
 
 void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const char* structName)
 {
+    if (structName == nullptr) {
+        TAG_LOGE(
+            OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "fail to get %{public}d node api family, struct name is null", type);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "struct name is null");
+        return nullptr;
+    }
     if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family, impl library is not found", type);
