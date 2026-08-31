@@ -42,7 +42,7 @@ public:
     void HandleGetVisibleInspectorTree(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetCurrentPageName(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleSendCommand(sptr<IUiContentService> service, std::vector<std::string> params);
-    void HandleSendCommandAsync(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleSendCommandSync(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleRegisterContentChangeCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleUnregisterContentChangeCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetCurrentImagesShowing(sptr<IUiContentService> service, std::vector<std::string> params);

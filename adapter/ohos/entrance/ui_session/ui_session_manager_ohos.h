@@ -84,10 +84,10 @@ public:
     void WebTaskNumsChange(int32_t num) override;
     void ReportInspectorTreeValue(const std::string& data) override;
     void SaveForSendCommandFunction(NotifySendCommandFunction&& function) override;
-    void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) override;
+    void SaveForSendCommandSyncFunction(NotifySendCommandSyncFunction&& function) override;
     void NotifyAllWebPattern(bool isRegister) override;
     void NotifySendCommandPattern(int32_t id, const std::string& command) override;
-    int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) override;
+    int32_t NotifySendCommandSyncPattern(int32_t id, const std::string& command) override;
     void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) override;
     void SaveGetHitTestInfoCallback(GetHitTestInfoFunction&& function) override;
     void GetLatestHitTestNodeInfosForTouch(InteractionParamConfig config) override;

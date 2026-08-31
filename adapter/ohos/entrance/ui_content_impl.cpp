@@ -6645,7 +6645,7 @@ void UIContentImpl::RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& task
 
 void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandAsync = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+    auto sendCommandSync = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         if (!taskExecutor) {
             LOGI("Task executor is null");
@@ -6656,16 +6656,16 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
             [id, command, &result]() {
                 auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
                 if (!node) {
-                    LOGI("UiSessionSendCommandAsyncPattern: Node is null for id: %{public}d", id);
+                    LOGI("UiSessionSendCommandSyncPattern: Node is null for id: %{public}d", id);
                     result = 13;
                     return;
                 }
                 result = node->OnRecvCommand(command);
             },
-            TaskExecutor::TaskType::UI, "UiSessionSendCommandAsyncPattern");
+            TaskExecutor::TaskType::UI, "UiSessionSendCommandSyncPattern");
         return result;
     };
-    UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
+    UiSessionManager::GetInstance()->SaveForSendCommandSyncFunction(sendCommandSync);
     auto sendCommand = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);

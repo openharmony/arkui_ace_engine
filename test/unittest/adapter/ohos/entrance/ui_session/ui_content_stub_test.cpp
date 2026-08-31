@@ -424,7 +424,7 @@ HWTEST_F(UIContentStubTest, UIContentStubTest011, TestSize.Level1)
 
 /**
  * @tc.name: UIContentStubTest012
- * @tc.desc: Test SENDCOMMAND_ASYNC_EVENT
+ * @tc.desc: Test SENDCOMMAND_SYNC_EVENT
  * @tc.type: FUNC
  */
 HWTEST_F(UIContentStubTest, UIContentStubTest012, TestSize.Level1)
@@ -447,7 +447,7 @@ HWTEST_F(UIContentStubTest, UIContentStubTest012, TestSize.Level1)
      */
     Security::AccessToken::AccessTokenKit::mockTokenTypeFlag_ = Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE;
     data.WriteInterfaceToken(u"ohos.ace.UIContentService");
-    res = ptr->OnRemoteRequest(IUiContentService::SENDCOMMAND_ASYNC_EVENT, data, reply, option);
+    res = ptr->OnRemoteRequest(IUiContentService::SENDCOMMAND_SYNC_EVENT, data, reply, option);
     EXPECT_EQ(res, 0);
 }
 
