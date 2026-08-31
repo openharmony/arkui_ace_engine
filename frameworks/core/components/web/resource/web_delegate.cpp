@@ -1186,16 +1186,39 @@ WebDelegate::~WebDelegate()
     UnRegisterDisplayInfoChange();
     if (nweb_) {
         auto context = context_.Upgrade();
-        if (!context) {
-            return;
+        if (context) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "use EventHandler to destroy nweb");
+            context->GetTaskExecutor()->PostSyncTask(
+                [nweb = nweb_]() {
+                    if (nweb) {
+                        nweb->OnDestroy();
+                    }
+                },
+                TaskExecutor::TaskType::PLATFORM, "ArkUIWebDelegateDestructor");
+        } else {
+            // Context is already gone: fall back to the main EventRunner so that OnDestroy
+            // still runs on the main thread.
+            // mainHandler must be captured to keep the task alive: ~EventHandler would
+            // otherwise remove the pending task as an orphan event.
+            TAG_LOGI(AceLogTag::ACE_WEB, "~WebDelegate context is null, use EventHandler to destroy nweb");
+            auto mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+            if (mainRunner) {
+                auto mainHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(mainRunner);
+                mainHandler->PostTask(
+                    [nweb = nweb_, mainHandler]() {
+                        if (nweb) {
+                            TAG_LOGI(AceLogTag::ACE_WEB,
+                                "~WebDelegate EventHandler destroying nweb on main thread");
+                            nweb->OnDestroy();
+                        }
+                    },
+                    0);
+            } else {
+                TAG_LOGW(AceLogTag::ACE_WEB,
+                    "~WebDelegate mainRunner is null, run nweb OnDestroy on current thread");
+                nweb_->OnDestroy();
+            }
         }
-        context->GetTaskExecutor()->PostSyncTask(
-            [nweb = nweb_]() {
-                if (nweb) {
-                    nweb->OnDestroy();
-                }
-            },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIWebDelegateDestructor");
     }
     UnregisterSurfacePositionChangedCallback();
     UnregisterAvoidAreaChangeListener(instanceId_);
