@@ -1211,9 +1211,9 @@ void WebDelegate::DestroyNWeb()
         return;
     }
     // Context is already gone: fall back to the main EventRunner so that OnDestroy
-    // still runs on the main thread.
-    // mainHandler must be captured to keep the task alive: ~EventHandler would
-    // otherwise remove the pending task as an orphan event.
+    // still runs on the main thread. SendSyncEvent blocks until the main thread
+    // has finished handling the event; if called on the main runner itself, the
+    // event is distributed in place. On failure, fall back to the current thread.
     TAG_LOGI(AceLogTag::ACE_WEB, "~WebDelegate context is null, use EventHandler to destroy nweb");
     auto mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
     if (mainRunner == nullptr) {
@@ -1227,15 +1227,20 @@ void WebDelegate::DestroyNWeb()
         return;
     }
     auto mainHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(mainRunner);
-    mainHandler->PostTask(
-        [nweb = nweb_, mainHandler]() {
+    bool isSent = mainHandler->SendSyncEvent(OHOS::AppExecFwk::InnerEvent::Get(
+        [nweb = nweb_]() {
             if (nweb) {
                 TAG_LOGI(AceLogTag::ACE_WEB,
                     "~WebDelegate EventHandler destroying nweb on main thread");
                 nweb->OnDestroy();
             }
         },
-        0);
+        "ArkUIWebDelegateDestroyNWeb"));
+    if (!isSent) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "~WebDelegate SendSyncEvent failed, run nweb OnDestroy on current thread");
+        nweb_->OnDestroy();
+    }
 }
 
 void WebDelegate::ReleasePlatformResource()
