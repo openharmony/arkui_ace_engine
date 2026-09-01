@@ -23,6 +23,7 @@ adapter_test_output_path = "ace_engine/ace_engine/adapter"
 svg_test_output_path = "ace_engine/ace_engine/svg"
 bridge_test_output_path = "ace_engine/ace_engine/bridge"
 frameworks_test_output_path = "ace_engine/ace_engine/frameworks"
+framework_router_test_output_path = "ace_engine/Framework-Router"
 
 template("ace_unittest") {
   type = "components"

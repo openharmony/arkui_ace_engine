@@ -228,7 +228,7 @@ if (is_host_product) {
   }
 } else {
   ohos_unittest("navigation_controller_test") {
-    module_out_path = interface_test_output_path
+    module_out_path = framework_router_test_output_path
 
     sources = [ "navigation_controller_test.cpp" ]
 
