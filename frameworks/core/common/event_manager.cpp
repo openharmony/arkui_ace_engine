@@ -2538,7 +2538,7 @@ void EventManager::ClearSmartGestureSelected()
 {
 #ifdef SMART_GESTURE_SUPPORTED
     auto smartGestureManager = GetSmartGestureManager();
-    if (smartGestureManager) {
+    if (smartGestureManager && smartGestureManager->GetSmartAutoInActive()) {
         smartGestureManager->ClearSelected();
     }
 #endif
