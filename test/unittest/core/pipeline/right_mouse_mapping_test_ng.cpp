@@ -42,7 +42,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const char CONTEXT_MENU_OPTIONS[] = "contextMenuOptions";
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t TEST_LONG_PRESS_DURATION = 3000;
 constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
