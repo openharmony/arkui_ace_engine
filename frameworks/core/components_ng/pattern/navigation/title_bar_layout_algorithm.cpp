@@ -1208,7 +1208,7 @@ void TitleBarLayoutAlgorithm::LayoutMenuColorPickerIfNeeded(
         CHECK_NULL_VOID(frameNode);
         auto geo = frameNode->GetGeometryNode();
         CHECK_NULL_VOID(geo);
-        auto rect = geo->GetMarginFrameRect();
+        auto rect = geo->GetFrameRect();
         minX = std::min(minX, rect.GetX());
         minY = std::min(minY, rect.GetY());
         maxX = std::max(maxX, rect.Right());
@@ -1231,6 +1231,16 @@ void TitleBarLayoutAlgorithm::LayoutMenuColorPickerIfNeeded(
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(SizeF(maxX - minX, maxY - minY));
     auto offset = menuGeo->GetMarginFrameOffset();
+    do {
+        auto effectNode = titleBarPattern->GetTitleBarEffectNode();
+        CHECK_NULL_BREAK(effectNode);
+        if (menuNode->GetParentFrameNode() != effectNode) {
+            break;
+        }
+        auto effectNodeGeo = effectNode->GetGeometryNode();
+        CHECK_NULL_BREAK(effectNodeGeo);
+        offset += effectNodeGeo->GetMarginFrameOffset();
+    } while (false);
     offset += OffsetF(minX, minY);
     geometryNode->SetMarginFrameOffset(offset);
     wrapper->Layout();
