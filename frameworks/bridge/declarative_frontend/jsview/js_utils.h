@@ -103,5 +103,6 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj);
  */
 void ParseJsImageSpanResizable(const JSRef<JSVal>& resizable,
     std::optional<ImageResizableSlice>& slice, std::optional<RefPtr<DrawingLattice>>& lattice);
+void* UnwrapNapiValueWithType(const JSRef<JSVal>& obj, const napi_type_tag* typeTag);
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
+#include "interfaces/napi/kits/ui_material/ui_material_napi.h"
+
 #include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -148,7 +150,8 @@ void ParseCustomDialogSystemMaterial(DialogProperties& properties, JSRef<JSObjec
 {
     auto systemMaterialValue = obj->GetProperty("systemMaterial");
     if (systemMaterialValue->IsObject()) {
-        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        auto systemUiMaterial =
+            static_cast<UiMaterial*>(UnwrapNapiValueWithType(systemMaterialValue, &Napi::UI_MATERIAL_TYPE_TAG));
         properties.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
     }
 }

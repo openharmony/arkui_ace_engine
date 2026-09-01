@@ -510,4 +510,42 @@ void ParseJsImageSpanResizable(const JSRef<JSVal>& resizable,
     ParseImageSpanResizableSlice(resizableObj, slice);
     ParseImageSpanResizableLattice(resizableObj, lattice);
 }
+
+void* UnwrapNapiValueWithType(const JSRef<JSVal>& obj, const napi_type_tag* typeTag)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!obj->IsObject()) {
+        LOGE("info[0] is not an object when try UnwrapNapiValueWithType");
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(typeTag, nullptr);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+#ifdef USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_status status = napi_unwrap_s(env, napiValue, typeTag, &objectNapi);
+    if (status != napi_ok) {
+        LOGE("napi_unwrap_s type tag mismatch, status=%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    return objectNapi;
+#else
+    return nullptr;
+#endif
+}
 } // namespace OHOS::Ace::Framework
