@@ -2826,6 +2826,31 @@ void SetTextAreaWidthAuto(ArkUINodeHandle node, ArkUI_Bool isClear, ArkUI_Bool i
     TextFieldModelNG::SetWidthAuto(frameNode, static_cast<bool>(isAuto));
 }
 
+void SetTextAreaWidthCommon(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
+    ArkUI_CharPtr calcValue, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<DimensionUnit>(unit);
+    CalcDimension width = unitEnum == DimensionUnit::CALC
+                              ? CalcDimension(std::string(calcValue), DimensionUnit::CALC)
+                              : CalcDimension(value, unitEnum);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("width");
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("width", resObj, width);
+        }
+    }
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetWidth(frameNode, CalcLength(std::string(calcValue)));
+    } else {
+        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
+    }
+}
+
 void SetTextAreaWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3951,6 +3976,7 @@ const ArkUITextAreaModifier* GetTextAreaDynamicModifier()
             .setTextAreaHeightClear = nullptr,
             .setTextAreaHeightCommon = SetTextAreaHeightCommonImpl,
             .setTextAreaWidthAuto = nullptr,
+            .setTextAreaWidthCommon = nullptr,
             .setTextAreaWidth = nullptr,
             .resetTextAreaWidth = nullptr,
             .setTextAreaEnableHapticFeedback = nullptr,
@@ -4246,6 +4272,7 @@ const ArkUITextAreaModifier* GetTextAreaDynamicModifier()
         .setTextAreaHeightClear = SetTextAreaHeightClear,
         .setTextAreaHeightCommon = SetTextAreaHeightCommon,
         .setTextAreaWidthAuto = SetTextAreaWidthAuto,
+        .setTextAreaWidthCommon = SetTextAreaWidthCommon,
         .setTextAreaWidth = SetTextAreaWidth,
         .resetTextAreaWidth = ResetTextAreaWidth,
         .setTextAreaEnableHapticFeedback = SetTextAreaEnableHapticFeedback,

@@ -22,7 +22,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -57,15 +57,15 @@ constexpr uint32_t DEFAULTMAXLINES = 3;
 
 namespace OHOS::Ace {
 // Should use CJUIModifier API later
-NG::TextFieldModelNG* GetTextFieldModel()
+TextFieldModel* GetTextFieldModel()
 {
-    static NG::TextFieldModelNG* cachedModel = nullptr;
+    static TextFieldModel* cachedModel = nullptr;
     if (cachedModel == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextInput");
         if (module == nullptr) {
             LOGF_ABORT("Can't find textfield dynamic module");
         }
-        cachedModel = reinterpret_cast<NG::TextFieldModelNG*>(module->GetModel());
+        cachedModel = reinterpret_cast<TextFieldModel*>(module->GetModel());
     }
     return cachedModel;
 }
