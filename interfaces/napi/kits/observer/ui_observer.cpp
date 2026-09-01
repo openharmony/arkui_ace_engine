@@ -2032,6 +2032,7 @@ void UIObserver::UnRegisterTextChangeEventCallback(napi_value cb)
 {
     if (cb == nullptr) {
         textChangeEventListeners_.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=%{public}s", "textChange");
         return;
     }
 
@@ -2056,6 +2057,8 @@ void UIObserver::UnRegisterTextChangeEventCallback(const std::string& id, napi_v
     auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER,
+            "SubEvent op=off_all, kit=ArkUI, event=%{public}s, id=%{public}s", "textChange", id.c_str());
         return;
     }
     holder.erase(
