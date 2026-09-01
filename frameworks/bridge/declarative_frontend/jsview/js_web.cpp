@@ -1433,7 +1433,8 @@ public:
             JsiRef<JsiArrayBuffer> arrayBuffer = JsiRef<JsiArrayBuffer>::Cast(args[0]);
             int32_t bufferSize = arrayBuffer->ByteLength();
             void* buffer = arrayBuffer->GetBuffer();
-            if ((buffer == nullptr) || (bufferSize <= 0) || (bufferSize > INT32_MAX - 1)) {
+            if ((bufferSize < 0) || (bufferSize > INT32_MAX - 1) ||
+                ((buffer == nullptr) && (bufferSize > 0))) {
                 TAG_LOGE(AceLogTag::ACE_WEB,
                     "SetResponseData: invalid arrayBuffer, bufferSize=%{public}d", bufferSize);
                 return;
