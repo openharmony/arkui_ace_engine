@@ -13641,7 +13641,7 @@ class LazyColumnLayoutSpaceModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !isObject(this.value)) {
       getUINativeModule().lazyColumnLayout.resetSpace(node);
     }
     else {
