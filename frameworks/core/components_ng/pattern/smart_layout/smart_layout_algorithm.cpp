@@ -364,6 +364,7 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
 
     auto hostNode = layoutWrapper->GetHostNode();
     auto pipeline = hostNode ? hostNode->GetContext() : nullptr;
+    context.contentPadding = Dimension(SMART_LAYOUT_CONTENT_PADDING, DimensionUnit::VP).ConvertToPx();
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     if (layoutProp) {
         if (pipeline) {
