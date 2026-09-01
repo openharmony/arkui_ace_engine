@@ -648,10 +648,9 @@ bool AceViewOhos::ShouldContinueMapping(const MouseEvent& event)
 bool AceViewOhos::IsRightMouseMappingSwitchOn()
 {
     if (!rightMouseMappingSwitchCached_) {
-        bool enabled = false;
         rightMouseMappingComponents_.clear();
         rightMouseMappingSwitchEnabled_ = NG::EventInfoConvertor::IsRightMouseMappingEnabled(
-            enabled, rightMouseMappingComponents_);
+            rightMouseMappingSwitchEnabled_, rightMouseMappingComponents_);
         rightMouseMappingSwitchCached_ = true;
     }
     return rightMouseMappingSwitchEnabled_;
