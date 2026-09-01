@@ -1952,9 +1952,15 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
         ParseIndicatorAttribute(params->selectedItemHeight, hasValue, value);
         props->selectedItemHeight = ArkUIOptionalFloat { hasValue, value };
         props->maskValue = ArkUIOptionalInt { 1, params->maskValue.value_or(0) };
-        props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
-        props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
-        props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
+        if (params->colorVal.has_value()) {
+            props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
+        }
+        if (params->selectedColorVal.has_value()) {
+            props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
+        }
+        if (params->maxDisplayCountVal.has_value()) {
+            props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
+        }
         ParseIndicatorAttribute(params->dimSpace, hasValue, value);
         props->dimSpace = ArkUIOptionalFloat { hasValue, value };
     }
