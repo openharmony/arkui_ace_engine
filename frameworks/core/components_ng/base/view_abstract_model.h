@@ -284,6 +284,7 @@ public:
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) {}
     virtual void SetExcludeFromRenderGroup(bool exclude) {}
+    virtual void SetMarkLayeredRender(bool isLayeredRender) {}
     virtual void SetRenderFit(RenderFit renderFit) = 0;
     virtual void SetRenderStrategy(RenderStrategy renderStrategy) = 0;
 

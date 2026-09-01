@@ -10490,6 +10490,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("excludeFromRenderGroup", &JSViewAbstract::JSExcludeFromRenderGroup);
+    JSClass<JSViewAbstract>::StaticMethod("markLayeredRender", &JSViewAbstract::JSMarkLayeredRender);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
     JSClass<JSViewAbstract>::StaticMethod("useUnionEffect", &JSViewAbstract::JSUseUnion);
 
@@ -12488,6 +12489,19 @@ void JSViewAbstract::JSExcludeFromRenderGroup(const JSCallbackInfo& info)
         exclude = arg0->ToBoolean();
     }
     ViewAbstractModel::GetInstance()->SetExcludeFromRenderGroup(exclude);
+}
+
+void JSViewAbstract::JSMarkLayeredRender(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    bool isLayeredRender = false;
+    auto arg0 = info[0];
+    if (arg0->IsBoolean()) {
+        isLayeredRender = arg0->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetMarkLayeredRender(isLayeredRender);
 }
 
 void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)

@@ -7282,6 +7282,10 @@ void RosenRenderContext::DumpInfo()
     if (GetExcludeFromRenderGroupValue(false)) {
         DumpLog::GetInstance().AddDesc(std::string("excludeRenderGroup:1"));
     }
+
+    if (GetMarkLayeredRenderValue(false)) {
+        DumpLog::GetInstance().AddDesc(std::string("markLayeredRender:1"));
+    }
 }
 
 void RosenRenderContext::DumpAdvanceInfo()
@@ -7882,6 +7886,14 @@ void RosenRenderContext::OnExcludeFromRenderGroupUpdate(bool exclude)
     FREE_RS_CONTEXT_CHECK(OnExcludeFromRenderGroupUpdate, exclude);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->ExcludedFromNodeGroup(exclude);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnMarkLayeredRenderUpdate(bool isLayeredRender)
+{
+    FREE_RS_CONTEXT_CHECK(OnMarkLayeredRenderUpdate, isLayeredRender);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkLayerPartRender(isLayeredRender);
     RequestNextFrame();
 }
 

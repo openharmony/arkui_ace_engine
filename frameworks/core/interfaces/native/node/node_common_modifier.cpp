@@ -4236,6 +4236,20 @@ void ResetExcludeFromRenderGroup(ArkUINodeHandle node)
     ViewAbstract::SetExcludeFromRenderGroup(frameNode, false);
 }
 
+void SetMarkLayeredRender(ArkUINodeHandle node, ArkUI_Bool isLayeredRender)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMarkLayeredRender(frameNode, isLayeredRender);
+}
+
+void ResetMarkLayeredRender(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMarkLayeredRender(frameNode, false);
+}
+
 void SetRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11587,6 +11601,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetRenderGroup = ResetRenderGroup,
         .setExcludeFromRenderGroup = SetExcludeFromRenderGroup,
         .resetExcludeFromRenderGroup = ResetExcludeFromRenderGroup,
+        .setMarkLayeredRender = SetMarkLayeredRender,
+        .resetMarkLayeredRender = ResetMarkLayeredRender,
         .setRenderFit = SetRenderFit,
         .resetRenderFit = ResetRenderFit,
         .setUseEffect = SetUseEffect,

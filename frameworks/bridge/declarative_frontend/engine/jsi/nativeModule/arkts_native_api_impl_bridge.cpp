@@ -3612,6 +3612,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExcludeFromRenderGroup));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExcludeFromRenderGroup"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExcludeFromRenderGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarkLayeredRender"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMarkLayeredRender));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarkLayeredRender"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMarkLayeredRender));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setChainWeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetChainWeight));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetChainWeight"),
