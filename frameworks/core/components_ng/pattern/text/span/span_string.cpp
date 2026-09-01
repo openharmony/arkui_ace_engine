@@ -153,6 +153,18 @@ void UpdateImageLayoutPropertyByImageSpanAttribute(std::optional<ImageSpanAttrib
         imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
         imageRenderCtx->SetClipToBounds(true);
     }
+    if (imgAttr.resizableSlice.has_value()) {
+        auto paintProperty = imageNode->GetPaintProperty<NG::ImageRenderProperty>();
+        if (paintProperty) {
+            paintProperty->UpdateImageResizableSlice(imgAttr.resizableSlice.value());
+        }
+    }
+    if (imgAttr.resizableLattice.has_value() && imgAttr.resizableLattice.value()) {
+        auto paintProperty = imageNode->GetPaintProperty<NG::ImageRenderProperty>();
+        if (paintProperty) {
+            paintProperty->UpdateImageResizableLattice(imgAttr.resizableLattice.value());
+        }
+    }
 }
 
 PlaceholderRun GetImageSpanItemPlaceholderRun(const RefPtr<NG::SpanItem>& child,

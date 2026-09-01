@@ -45,4 +45,9 @@ build_component_ng("span_pattern_ng") {
       deps = [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
     }
   }
+
+  if (is_arkui_x) {
+    deps = [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
+  }
+  external_deps = [ "graphic_2d:drawing_napi_impl" ]
 }

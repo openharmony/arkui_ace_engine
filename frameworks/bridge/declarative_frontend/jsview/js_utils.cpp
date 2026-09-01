@@ -19,6 +19,8 @@
 
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
+#include "lattice_napi/js_lattice.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -429,5 +431,83 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 #else
     return nullptr;
 #endif
+}
+
+namespace {
+void ParseImageSpanResizableSlice(const JSRef<JSObject>& resizableObj,
+    std::optional<ImageResizableSlice>& slice)
+{
+    auto sliceValue = resizableObj->GetProperty("slice");
+    if (!sliceValue->IsObject()) {
+        return;
+    }
+    auto sliceObj = JSRef<JSObject>::Cast(sliceValue);
+    if (sliceObj->IsEmpty()) {
+        return;
+    }
+    ImageResizableSlice sliceResult;
+    static const char* const edgeKeys[] = { "left", "top", "right", "bottom" };
+    for (uint32_t i = 0; i < sizeof(edgeKeys) / sizeof(edgeKeys[0]); i++) {
+        auto sliceSize = sliceObj->GetProperty(edgeKeys[i]);
+        CalcDimension sliceDimension;
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(sliceSize, sliceDimension, resObj)) {
+            continue;
+        }
+        if (!sliceDimension.IsValid()) {
+            continue;
+        }
+        switch (i) {
+            case 0:
+                sliceResult.left = sliceDimension;
+                break;
+            case 1:
+                sliceResult.top = sliceDimension;
+                break;
+            case 2:
+                sliceResult.right = sliceDimension;
+                break;
+            case 3:
+                sliceResult.bottom = sliceDimension;
+                break;
+            default:
+                break;
+        }
+    }
+    slice = sliceResult;
+}
+
+void ParseImageSpanResizableLattice(const JSRef<JSObject>& resizableObj,
+    std::optional<RefPtr<DrawingLattice>>& lattice)
+{
+    auto latticeValue = resizableObj->GetProperty("lattice");
+    if (latticeValue->IsUndefined() || latticeValue->IsNull() || !latticeValue->IsObject()) {
+        return;
+    }
+    auto* latticePtr = UnwrapNapiValue(latticeValue);
+    CHECK_NULL_VOID(latticePtr);
+    auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(latticePtr);
+    CHECK_NULL_VOID(jsLattice);
+    auto latticeSptr = jsLattice->GetLattice();
+    CHECK_NULL_VOID(latticeSptr);
+    auto drawingLattice = DrawingLattice::CreateDrawingLatticeFromSptr(&latticeSptr);
+    if (drawingLattice) {
+        lattice = drawingLattice;
+    }
+}
+} // namespace
+
+void ParseJsImageSpanResizable(const JSRef<JSVal>& resizable,
+    std::optional<ImageResizableSlice>& slice, std::optional<RefPtr<DrawingLattice>>& lattice)
+{
+    if (!resizable->IsObject()) {
+        return;
+    }
+    auto resizableObj = JSRef<JSObject>::Cast(resizable);
+    if (resizableObj->IsEmpty()) {
+        return;
+    }
+    ParseImageSpanResizableSlice(resizableObj, slice);
+    ParseImageSpanResizableLattice(resizableObj, lattice);
 }
 } // namespace OHOS::Ace::Framework

@@ -325,6 +325,11 @@ ArkUIImageAttachment ConvertToOriginImageAttachment(const OH_ArkUI_ImageAttachme
     imageAttachment.supportSvg = attachment.supportSvg;
     imageAttachment.isPixelMap = attachment.isPixelMap;
     imageAttachment.isDrawingColorFilter = attachment.isDrawingColorFilter;
+    imageAttachment.resizableSliceLeft = attachment.resizableSliceLeft;
+    imageAttachment.resizableSliceTop = attachment.resizableSliceTop;
+    imageAttachment.resizableSliceRight = attachment.resizableSliceRight;
+    imageAttachment.resizableSliceBottom = attachment.resizableSliceBottom;
+    imageAttachment.resizableLattice = reinterpret_cast<void*>(attachment.resizableLattice);
     return imageAttachment;
 }
 
@@ -550,6 +555,11 @@ OH_ArkUI_ImageAttachment ConvertToCImageAttachment(const ArkUIImageAttachment& a
     imageAttachment.supportSvg = attachment.supportSvg;
     imageAttachment.isPixelMap = attachment.isPixelMap;
     imageAttachment.isDrawingColorFilter = attachment.isDrawingColorFilter;
+    imageAttachment.resizableSliceLeft = attachment.resizableSliceLeft;
+    imageAttachment.resizableSliceTop = attachment.resizableSliceTop;
+    imageAttachment.resizableSliceRight = attachment.resizableSliceRight;
+    imageAttachment.resizableSliceBottom = attachment.resizableSliceBottom;
+    imageAttachment.resizableLattice = reinterpret_cast<OH_Drawing_Lattice*>(attachment.resizableLattice);
     return imageAttachment;
 }
 
@@ -1221,6 +1231,11 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetImageAttachment(
     spanStyle->imageAttachment.supportSvg = imageAttachment->supportSvg;
     spanStyle->imageAttachment.isPixelMap = imageAttachment->isPixelMap;
     spanStyle->imageAttachment.isDrawingColorFilter = imageAttachment->isDrawingColorFilter;
+    spanStyle->imageAttachment.resizableSliceLeft = imageAttachment->resizableSliceLeft;
+    spanStyle->imageAttachment.resizableSliceTop = imageAttachment->resizableSliceTop;
+    spanStyle->imageAttachment.resizableSliceRight = imageAttachment->resizableSliceRight;
+    spanStyle->imageAttachment.resizableSliceBottom = imageAttachment->resizableSliceBottom;
+    spanStyle->imageAttachment.resizableLattice = imageAttachment->resizableLattice;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1255,6 +1270,11 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetImageAttachment(
     imageAttachment->supportSvg = spanStyle->imageAttachment.supportSvg;
     imageAttachment->isPixelMap = spanStyle->imageAttachment.isPixelMap;
     imageAttachment->isDrawingColorFilter = spanStyle->imageAttachment.isDrawingColorFilter;
+    imageAttachment->resizableSliceLeft = spanStyle->imageAttachment.resizableSliceLeft;
+    imageAttachment->resizableSliceTop = spanStyle->imageAttachment.resizableSliceTop;
+    imageAttachment->resizableSliceRight = spanStyle->imageAttachment.resizableSliceRight;
+    imageAttachment->resizableSliceBottom = spanStyle->imageAttachment.resizableSliceBottom;
+    imageAttachment->resizableLattice = spanStyle->imageAttachment.resizableLattice;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -2443,6 +2463,52 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetSupportSvg(const OH_ArkUI_ImageAttac
 {
     CHECK_NULL_RETURN(imageAttachment && supportSvg, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *supportSvg = imageAttachment->supportSvg;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetResizableSlice(
+    OH_ArkUI_ImageAttachment* imageAttachment, float left, float top, float right, float bottom)
+{
+    CHECK_NULL_RETURN(imageAttachment, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    imageAttachment->resizableSliceLeft = left;
+    imageAttachment->resizableSliceTop = top;
+    imageAttachment->resizableSliceRight = right;
+    imageAttachment->resizableSliceBottom = bottom;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetResizableSlice(const OH_ArkUI_ImageAttachment* imageAttachment,
+    float* left, float* top, float* right, float* bottom)
+{
+    CHECK_NULL_RETURN(imageAttachment && left && top && right && bottom,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (!imageAttachment->resizableSliceLeft.has_value() && !imageAttachment->resizableSliceTop.has_value() &&
+        !imageAttachment->resizableSliceRight.has_value() && !imageAttachment->resizableSliceBottom.has_value()) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_GET_INFO_FAILED;
+    }
+    *left = imageAttachment->resizableSliceLeft.value_or(0);
+    *top = imageAttachment->resizableSliceTop.value_or(0);
+    *right = imageAttachment->resizableSliceRight.value_or(0);
+    *bottom = imageAttachment->resizableSliceBottom.value_or(0);
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetResizableLattice(
+    OH_ArkUI_ImageAttachment* imageAttachment, const OH_Drawing_Lattice* lattice)
+{
+    CHECK_NULL_RETURN(imageAttachment && lattice, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    imageAttachment->resizableLattice = const_cast<OH_Drawing_Lattice*>(lattice);
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetResizableLattice(const OH_ArkUI_ImageAttachment* imageAttachment,
+    OH_Drawing_Lattice** lattice)
+{
+    CHECK_NULL_RETURN(imageAttachment && lattice, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (imageAttachment->resizableLattice == nullptr) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_GET_INFO_FAILED;
+    }
+    *lattice = imageAttachment->resizableLattice;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 

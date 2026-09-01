@@ -213,6 +213,7 @@ type OutlineOptions = object;
 type EdgeColors = { top?: ResourceColor; bottom?: ResourceColor; left?: ResourceColor; right?: ResourceColor };
 type EdgeStyles = { top?: BorderStyle; bottom?: BorderStyle; left?: BorderStyle; right?: BorderStyle };
 type EdgeWidths = { top?: Length; bottom?: Length; left?: Length; right?: Length };
+type ResizableOptions = { slice? : EdgeWidths; lattice? : any };
 type BorderRadiuses = { topLeft?: Length; topRight?: Length; bottomLeft?: Length; bottomRight?: Length };
 type OutlineRadiuses = BorderRadiuses;
 type BorderOptions = { width?: Length | EdgeWidths; color?: ResourceColor | EdgeColors; style?: BorderStyle | EdgeStyles; radius?: Length | BorderRadiuses };

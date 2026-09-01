@@ -2393,6 +2393,12 @@ struct CJUIImageSpanModifier {
     void (*setImageSpanSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
         ArkUI_Bool isUriPureNumber);
     void (*setImageSpanPlaceHolderStyle)(ArkUINodeHandle node, void* style);
+    void (*setImageSpanResizableSlice)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetImageSpanResizableSlice)(ArkUINodeHandle node);
+    void (*getImageSpanResizableSlice)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
+    void (*setImageSpanResizableLattice)(ArkUINodeHandle node, void* lattice, bool isCapi);
+    void (*resetImageSpanResizableLattice)(ArkUINodeHandle node);
 };
 
 struct CJUIMenuModifier {

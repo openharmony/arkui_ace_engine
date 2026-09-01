@@ -773,6 +773,7 @@ private:
     void FlushContainerOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    void ApplyImageSpanAttribute(const RefPtr<ImageSpanNode>& imageNode, const ImageSpanAttribute& imgAttr);
     void ProcessSpanString();
     void SetCurrentDragTool(SourceTool tool);
     std::optional<RenderContext::ContextParam> GetContextParam() const override;

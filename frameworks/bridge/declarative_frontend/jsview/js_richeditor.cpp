@@ -573,6 +573,10 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
         imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
         updateSpanStyle_.borderRadius = imageStyle.borderRadius;
     }
+    auto resizableVal = imageAttribute->GetProperty("resizable");
+    ParseJsImageSpanResizable(resizableVal, imageStyle.resizableSlice, imageStyle.resizableLattice);
+    updateSpanStyle_.resizableSlice = imageStyle.resizableSlice;
+    updateSpanStyle_.resizableLattice = imageStyle.resizableLattice;
     return imageStyle;
 }
 

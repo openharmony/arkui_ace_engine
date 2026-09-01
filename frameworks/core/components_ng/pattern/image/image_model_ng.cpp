@@ -706,6 +706,11 @@ void ImageModelNG::SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& 
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
 }
 
+void ImageModelNG::ResetResizableSlice(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, frameNode);
+}
+
 void ImageModelNG::SetResizableLattice(const RefPtr<DrawingLattice>& lattice)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice);

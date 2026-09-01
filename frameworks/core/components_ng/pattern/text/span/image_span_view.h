@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
@@ -40,6 +42,11 @@ public:
     static ImageSourceInfo GetImageSpanSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static void SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
+    static void SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice);
+    static void ResetResizableSlice(FrameNode* frameNode);
+    static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
+    static void ResetResizableLattice(FrameNode* frameNode);
+    static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
     static VerticalAlign GetVerticalAlign(FrameNode* frameNode);
     static void SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style);
     static TextBackgroundStyle GetSpanTextBackgroundStyle(FrameNode* frameNode);

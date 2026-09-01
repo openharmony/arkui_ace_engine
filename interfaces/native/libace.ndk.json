@@ -6528,6 +6528,22 @@
         "name": "OH_ArkUI_ImageAttachment_GetSupportSvg"
     },
     {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_SetResizableSlice"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_GetResizableSlice"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_SetResizableLattice"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_GetResizableLattice"
+    },
+    {
         "first_introduced": "24",
         "name": "OH_ArkUI_TextEditorStyledStringController_GetSelection"
     },
