@@ -324,7 +324,7 @@ HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection002, TestSize.Leve
 
 // source-type protection: after mapping ends, real mouse MOVE detects no spurious change
 
-HWTEST_F(RightMousePipelineTestNg, SourceTypeProtection003, TestSize.Level1)
+HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection003, TestSize.Level1)
 {
     context_->lastSourceType_ = SourceType::MOUSE;
     context_->SetRightMouseMappingActive(true);

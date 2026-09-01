@@ -575,7 +575,14 @@ void AceViewOhos::ScheduleDelayedUp(const TouchEvent& touchEvent, const RefPtr<O
             return;
         }
     }
-    TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "MouseMapping: ScheduleDelayedUp fallback, reset mapping state");
+    TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "MouseMapping: ScheduleDelayedUp fallback, dispatch CANCEL");
+    if (touchEventCallback_) {
+        auto cancelEvent = touchEvent;
+        cancelEvent.type = TouchType::CANCEL;
+        cancelEvent.sourceType = SourceType::TOUCH;
+        cancelEvent.sourceTool = SourceTool::MOUSE;
+        touchEventCallback_(cancelEvent, nullptr, node);
+    }
     ResetMouseMappingState();
 }
 
