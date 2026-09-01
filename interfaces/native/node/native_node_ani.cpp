@@ -256,11 +256,6 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node content parameter is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    if (content == nullptr) {
-        LOGE("content is nullptr");
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content output parameter is null");
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
     ani_ref nodeContentPeerRef;
     if (env->Object_GetFieldByName_Ref(nodeContent, "nativePtr_", &nodeContentPeerRef) != ANI_OK) {
         LOGE("fail to get nativePtr_ from nodeContent");
