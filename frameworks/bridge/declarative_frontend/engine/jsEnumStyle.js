@@ -803,18 +803,6 @@ class LayoutPolicy {
 
 globalThis.LayoutPolicy = LayoutPolicy;
 
-var BlurStyle;
-(function (BlurStyle) {
-  BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
-  BlurStyle[BlurStyle.MediumLight = 101] = 'MediumLight';
-  BlurStyle[BlurStyle.LargeLight = 102] = 'LargeLight';
-  BlurStyle[BlurStyle.XlargeLight = 103] = 'XlargeLight';
-  BlurStyle[BlurStyle.SmallDark = 104] = 'SmallDark';
-  BlurStyle[BlurStyle.MediumDark = 105] = 'MediumDark';
-  BlurStyle[BlurStyle.LargeDark = 106] = 'LargeDark';
-  BlurStyle[BlurStyle.XlargeDark = 107] = 'XlargeDark';
-})(BlurStyle || (BlurStyle = {}));
-
 let Edge;
 (function (Edge) {
   Edge[Edge.Top = 0] = 'Top';
@@ -1878,7 +1866,7 @@ let ListItemAlign;
   ListItemAlign[ListItemAlign.End = 2] = 'End';
 })(ListItemAlign || (ListItemAlign = {}));
 
-var BlurStyle;
+let BlurStyle;
 (function (BlurStyle) {
   BlurStyle[BlurStyle.NoMaterial = 0] = 'NoMaterial';
   BlurStyle[BlurStyle.Thin = 1] = 'Thin';
@@ -1898,6 +1886,14 @@ var BlurStyle;
   BlurStyle[BlurStyle.COMPONENT_THICK = 11] = 'COMPONENT_THICK';
   BlurStyle[BlurStyle.COMPONENT_ULTRA_THICK = 12] = 'COMPONENT_ULTRA_THICK';
   BlurStyle[BlurStyle.NONE = 0] = 'NONE';
+  BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
+  BlurStyle[BlurStyle.MediumLight = 101] = 'MediumLight';
+  BlurStyle[BlurStyle.LargeLight = 102] = 'LargeLight';
+  BlurStyle[BlurStyle.XlargeLight = 103] = 'XlargeLight';
+  BlurStyle[BlurStyle.SmallDark = 104] = 'SmallDark';
+  BlurStyle[BlurStyle.MediumDark = 105] = 'MediumDark';
+  BlurStyle[BlurStyle.LargeDark = 106] = 'LargeDark';
+  BlurStyle[BlurStyle.XlargeDark = 107] = 'XlargeDark';
 })(BlurStyle || (BlurStyle = {}));
 
 let BlurStyleActivePolicy;
