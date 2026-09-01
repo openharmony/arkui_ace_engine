@@ -1272,6 +1272,8 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     }
 
     ParseJsImageSpanColorFilterAttribute(obj, imageStyle);
+    auto resizableVal = obj->GetProperty("resizable");
+    ParseJsImageSpanResizable(resizableVal, imageStyle.resizableSlice, imageStyle.resizableLattice);
     return imageStyle;
 }
 

@@ -3138,6 +3138,64 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetSupportSvg(const OH_ArkUI_ImageAttac
     bool* supportSvg);
 
 /**
+ * @brief Set the resizable slice of the image attachment.
+ *
+ * @param imageAttachment Pointer to the <b>OH_ArkUI_ImageAttachment</b> object.
+ * @param left Left edge width.
+ * @param top Top edge width.
+ * @param right Right edge width.
+ * @param bottom Bottom edge width.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if successful,
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if parameter is invalid.
+ * @since 26
+ */
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetResizableSlice(
+    OH_ArkUI_ImageAttachment* imageAttachment, float left, float top, float right, float bottom);
+
+/**
+ * @brief Get the resizable slice of the image attachment.
+ *
+ * @param imageAttachment Pointer to the <b>OH_ArkUI_ImageAttachment</b> object.
+ * @param left Pointer to receive left edge width.
+ * @param top Pointer to receive top edge width.
+ * @param right Pointer to receive right edge width.
+ * @param bottom Pointer to receive bottom edge width.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if successful,
+ *         {@link ARKUI_ERROR_CODE_GET_INFO_FAILED} if not set,
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if parameter is invalid.
+ * @since 26
+ */
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetResizableSlice(const OH_ArkUI_ImageAttachment* imageAttachment,
+    float* left, float* top, float* right, float* bottom);
+
+/**
+ * @brief Set the resizable lattice of the image attachment.
+ *
+ * @param imageAttachment Pointer to the <b>OH_ArkUI_ImageAttachment</b> object.
+ * @param lattice Pointer to the lattice structure.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if successful,
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if parameter is invalid.
+ * @since 26
+ */
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetResizableLattice(
+    OH_ArkUI_ImageAttachment* imageAttachment, const OH_Drawing_Lattice* lattice);
+
+/**
+ * @brief Get the resizable lattice of the image attachment.
+ *
+ * @param imageAttachment Pointer to the <b>OH_ArkUI_ImageAttachment</b> object.
+ * @param lattice Pointer to a pointer that receives the lattice handle previously set by
+ *                <b>OH_ArkUI_ImageAttachment_SetResizableLattice</b>. The caller does not take
+ *                ownership of the returned handle; its lifetime is bound to the source attachment.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if successful,
+ *         {@link ARKUI_ERROR_CODE_GET_INFO_FAILED} if not set,
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if parameter is invalid.
+ * @since 26
+ */
+ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetResizableLattice(const OH_ArkUI_ImageAttachment* imageAttachment,
+    OH_Drawing_Lattice** lattice);
+
+/**
  * @brief Obtains the range of content that will be replaced.
  *
  * @note All input pointer parameters must be allocated, managed, and released by the caller.

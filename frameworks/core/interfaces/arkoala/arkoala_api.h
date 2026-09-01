@@ -3098,6 +3098,11 @@ struct ArkUIImageAttachment {
     bool supportSvg;
     std::optional<bool> isPixelMap = std::nullopt;
     std::optional<bool> isDrawingColorFilter = std::nullopt;
+    std::optional<float> resizableSliceLeft;
+    std::optional<float> resizableSliceTop;
+    std::optional<float> resizableSliceRight;
+    std::optional<float> resizableSliceBottom;
+    void* resizableLattice = nullptr;
 };
 
 struct ArkUISpanStyle {
@@ -7344,6 +7349,12 @@ struct ArkUIImageSpanModifier {
     ArkUI_Int32 (*getSupportSvg2)(ArkUINodeHandle node);
     ArkUINodeHandle (*createImageSpanFrameNode)(ArkUI_Uint32 nodeId);
     void (*setImageSpanPlaceHolderStyle)(ArkUINodeHandle node, void* style);
+    void (*setImageSpanResizableSlice)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetImageSpanResizableSlice)(ArkUINodeHandle node);
+    void (*getImageSpanResizableSlice)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
+    void (*setImageSpanResizableLattice)(ArkUINodeHandle node, void* lattice, bool isCapi);
+    void (*resetImageSpanResizableLattice)(ArkUINodeHandle node);
 };
 
 struct ArkUIWaterFlowModifier {

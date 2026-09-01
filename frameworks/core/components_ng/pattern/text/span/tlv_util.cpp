@@ -499,6 +499,13 @@ void TLVUtil::WriteImageSpanAttribute(std::vector<uint8_t>& buff, ImageSpanAttri
     }
     WriteUint8(buff, TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG);
     WriteBool(buff, value.supportSvg2);
+    if (value.resizableSlice.has_value()) {
+        WriteUint8(buff, TLV_IMAGESPANATTRIBUTE_RESIZABLESLICE_TAG);
+        WriteDimension(buff, value.resizableSlice.value().left);
+        WriteDimension(buff, value.resizableSlice.value().top);
+        WriteDimension(buff, value.resizableSlice.value().right);
+        WriteDimension(buff, value.resizableSlice.value().bottom);
+    }
     WriteUint8(buff, TLV_IMAGESPANATTRIBUTE_END_TAG);
 }
 
@@ -511,34 +518,30 @@ ImageSpanAttribute TLVUtil::ReadImageSpanAttribute(std::vector<uint8_t>& buff, i
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_IMAGESPANATTRIBUTE_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
         switch (tag) {
-            case TLV_IMAGESPANATTRIBUTE_SIZE_TAG: {
+            case TLV_IMAGESPANATTRIBUTE_SIZE_TAG:
                 l.size = ReadImageSpanSize(buff, cursor);
                 break;
-            }
-            case TLV_IMAGESPANATTRIBUTE_VERTICALALIGN_TAG: {
+            case TLV_IMAGESPANATTRIBUTE_VERTICALALIGN_TAG:
                 l.verticalAlign = ReadVerticalAlign(buff, cursor);
                 break;
-            }
-            case TLV_IMAGESPANATTRIBUTE_OBJECTFIT_TAG: {
+            case TLV_IMAGESPANATTRIBUTE_OBJECTFIT_TAG:
                 l.objectFit = ReadImageFit(buff, cursor);
                 break;
-            }
-            case TLV_IMAGESPANATTRIBUTE_MARGINPROP_TAG: {
+            case TLV_IMAGESPANATTRIBUTE_MARGINPROP_TAG:
                 l.marginProp = ReadPaddingProperty(buff, cursor);
                 break;
-            }
-            case TLV_IMAGESPANATTRIBUTE_BORDERRADIUS_TAG: {
+            case TLV_IMAGESPANATTRIBUTE_BORDERRADIUS_TAG:
                 l.borderRadius = ReadBorderRadiusProperty(buff, cursor);
                 break;
-            }
-            case TLV_IMAGESPANATTRIBUTE_PADDINGPROP_TAG: {
+            case TLV_IMAGESPANATTRIBUTE_PADDINGPROP_TAG:
                 l.paddingProp = ReadPaddingProperty(buff, cursor);
                 break;
-            }
-            case TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG: {
+            case TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG:
                 l.supportSvg2 = ReadBool(buff, cursor);
                 break;
-            }
+            case TLV_IMAGESPANATTRIBUTE_RESIZABLESLICE_TAG:
+                l.resizableSlice = ReadImageResizableSlice(buff, cursor);
+                break;
             default:
                 break;
         }
@@ -548,6 +551,16 @@ ImageSpanAttribute TLVUtil::ReadImageSpanAttribute(std::vector<uint8_t>& buff, i
         l.verticalAlign = VerticalAlign::BOTTOM;
     }
     return l;
+}
+
+ImageResizableSlice TLVUtil::ReadImageResizableSlice(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    ImageResizableSlice slice;
+    slice.left = ReadDimension(buff, cursor);
+    slice.top = ReadDimension(buff, cursor);
+    slice.right = ReadDimension(buff, cursor);
+    slice.bottom = ReadDimension(buff, cursor);
+    return slice;
 }
 
 void TLVUtil::WriteLeadingMargin(std::vector<uint8_t>& buff, NG::LeadingMargin& value)

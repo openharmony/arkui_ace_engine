@@ -22,6 +22,8 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
+#include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -100,6 +102,8 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        resizableSlice.reset();
+        resizableLattice.reset();
         useThemeFontColor = true;
         useThemeDecorationColor = true;
         isInitDecoration = false;
@@ -140,6 +144,8 @@ struct UpdateSpanStyle {
 
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    std::optional<ImageResizableSlice> resizableSlice = std::nullopt;
+    std::optional<RefPtr<DrawingLattice>> resizableLattice = std::nullopt;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
     bool isInitDecoration = false;

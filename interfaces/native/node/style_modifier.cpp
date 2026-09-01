@@ -15675,6 +15675,55 @@ void ResetImageSpanSupportSvg2(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getImageSpanModifier()->resetSupportSvg2(node->uiNodeHandle);
 }
 
+int32_t SetImageSpanResizable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto actualSize = CheckAttributeItemArray(item, NUM_4);
+    auto isObject = CheckAttributeObject(item);
+    auto* fullImpl = GetFullImpl();
+    if (isObject) {
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanResizableLattice(
+            node->uiNodeHandle, item->object, true);
+        return ERROR_CODE_NO_ERROR;
+    }
+    if (actualSize > 0) {
+        ArkUI_Float32 values[NUM_4] = { item->value[NUM_0].f32, item->value[NUM_1].f32,
+            item->value[NUM_2].f32, item->value[NUM_3].f32 };
+        ArkUI_Int32 units[NUM_4] = { static_cast<ArkUI_Int32>(UNIT_VP), static_cast<ArkUI_Int32>(UNIT_VP),
+            static_cast<ArkUI_Int32>(UNIT_VP), static_cast<ArkUI_Int32>(UNIT_VP) };
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanResizableSlice(
+            node->uiNodeHandle, values, units, NUM_4);
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_PARAM_INVALID;
+}
+
+void ResetImageSpanResizable(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->resetImageSpanResizableSlice(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->resetImageSpanResizableLattice(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetImageSpanResizable(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto* fullImpl = GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, nullptr);
+    ArkUI_Float32 values[NUM_4] = { 0 };
+    ArkUI_Int32 units[NUM_4] = { 0 };
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->getImageSpanResizableSlice(
+        node->uiNodeHandle, values, units);
+    g_numberValues[NUM_0].f32 = values[NUM_0];
+    g_numberValues[NUM_1].f32 = values[NUM_1];
+    g_numberValues[NUM_2].f32 = values[NUM_2];
+    g_numberValues[NUM_3].f32 = values[NUM_3];
+    g_attributeItem.size = NUM_4;
+    return &g_attributeItem;
+}
+
 int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -21423,7 +21472,7 @@ void ResetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
     static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt, SetImageSpanBaselineOffset,
-        SetImageSpanColorFilter, SetImageSpanSupportSvg2 };
+        SetImageSpanColorFilter, SetImageSpanSupportSvg2, SetImageSpanResizable };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21434,7 +21483,7 @@ int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt, GetImageSpanBaselineOffset,
-        GetImageSpanColorFilter, GetImageSpanSupportSvg2 };
+        GetImageSpanColorFilter, GetImageSpanSupportSvg2, GetImageSpanResizable };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -21445,7 +21494,7 @@ const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t 
 void ResetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt, ResetImageSpanBaselineOffset,
-        ResetImageSpanColorFilter, ResetImageSpanSupportSvg2 };
+        ResetImageSpanColorFilter, ResetImageSpanSupportSvg2, ResetImageSpanResizable };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

@@ -254,6 +254,7 @@ interface ImageSpanAttribute extends CommonAttribute {
     alt(value: string | Resource): ImageSpanAttribute;
     verticalAlign(value: ImageSpanAlignment): ImageSpanAttribute;
     objectFit(value: ImageFit): ImageSpanAttribute;
+    resizable(value: ResizableOptions): ImageSpanAttribute;
 }
 
 interface TextAttribute extends CommonAttribute {

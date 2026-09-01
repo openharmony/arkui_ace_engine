@@ -3919,6 +3919,15 @@
       "OHOS::Ace::NG::ImageModelNG::SetSupportSvg2(OHOS::Ace::NG::FrameNode*, bool)";
       "OHOS::Ace::NG::ImageModelNG::ResetSupportSvg2(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::ImageModelNG::GetSupportSvg2(OHOS::Ace::NG::FrameNode*)";
+      "OHOS::Ace::NG::ImageModelNG::SetResizableSlice(OHOS::Ace::NG::FrameNode*, OHOS::Ace::ImageResizableSlice&)";
+      "OHOS::Ace::NG::ImageModelNG::ResetResizableSlice(OHOS::Ace::NG::FrameNode*)";
+      "OHOS::Ace::NG::ImageModelNG::SetResizableLattice(OHOS::Ace::NG::FrameNode*, OHOS::Ace::RefPtr<OHOS::Ace::DrawingLattice> const&)";
+      "OHOS::Ace::NG::ImageModelNG::ResetResizableLattice(OHOS::Ace::NG::FrameNode*)";
+      "OHOS::Ace::NG::ImageModelNG::GetResizableSlice(OHOS::Ace::NG::FrameNode*)";
+      "OHOS::Ace::DrawingLattice::CreateDrawingLatticeFromNative(void*)";
+      "OHOS::Ace::DrawingLattice::CreateDrawingLatticeFromSptr(void*)";
+      "OHOS::Ace::ImageResizableSlice::operator==(OHOS::Ace::ImageResizableSlice const&) const";
+      "OHOS::Ace::ImageResizableSlice::ToString() const";
       "OHOS::Ace::NG::ArkTSUtils::ParseOuterBorderRadius(panda::JsiRuntimeCallInfo*, panda::ecmascript::EcmaVM*, std::__h::vector<float, std::__h::allocator<float>>&, std::__h::vector<int, std::__h::allocator<int>>&, int, std::__h::shared_ptr<OHOS::Ace::TextBackgroundStyle>)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::VerticalAlign, Ark_ImageSpanAlignment>(std::__h::optional<OHOS::Ace::VerticalAlign>&, Ark_ImageSpanAlignment const&)";
       "OHOS::Ace::NG::GeneratedModifier::ImageCommonMethods::ApplyColorFilterValues(void*, Opt_Union_ColorFilter_drawing_ColorFilter const*)";

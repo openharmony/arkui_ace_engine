@@ -422,6 +422,7 @@ declare class ArkImageSpanComponent extends ArkComponent implements ImageSpanAtt
     constructor(nativePtr: KNode, classType?: ModifierType);
     objectFit(value: ImageFit): ImageSpanAttribute;
     verticalAlign(value: ImageSpanAlignment): ImageSpanAttribute;
+    resizable(value: ResizableOptions): ImageSpanAttribute;
     onComplete(callback: (event?: {
         width: number;
         height: number;

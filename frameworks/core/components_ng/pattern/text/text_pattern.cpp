@@ -7820,36 +7820,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     SetImageNodeGesture(imageNode);
     HandleImageDrag(imageNode);
     if (options.imageAttribute.has_value()) {
-        auto imgAttr = options.imageAttribute.value();
-        SetImageNodePattern(imageNode, imgAttr);
-        if (imgAttr.size.has_value()) {
-            imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
-        }
-        if (imgAttr.verticalAlign.has_value()) {
-            imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
-        }
-        if (imgAttr.objectFit.has_value()) {
-            imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
-        }
-        if (imgAttr.marginProp.has_value()) {
-            imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
-        }
-        if (imgAttr.paddingProp.has_value()) {
-            imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
-        }
-        if (imgAttr.borderRadius.has_value()) {
-            auto imageRenderCtx = imageNode->GetRenderContext();
-            imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
-            imageRenderCtx->SetClipToBounds(true);
-        }
-        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
-        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
-            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
-            paintProperty->ResetDrawingColorFilter();
-        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
-            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
-            paintProperty->ResetColorFilter();
-        }
+        ApplyImageSpanAttribute(imageNode, options.imageAttribute.value());
     }
     IF_PRESENT(oneStepDragController_, MarkDirtyNode(WeakClaim((ImageSpanNode*) RawPtr(imageNode))));
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -7857,6 +7828,49 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     imageItem->nodeId_ = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
     childNodes_.emplace_back(imageNode);
+}
+
+void TextPattern::ApplyImageSpanAttribute(const RefPtr<ImageSpanNode>& imageNode, const ImageSpanAttribute& imgAttr)
+{
+    SetImageNodePattern(imageNode, imgAttr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    if (imgAttr.size.has_value()) {
+        imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
+    }
+    if (imgAttr.verticalAlign.has_value()) {
+        imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
+    }
+    if (imgAttr.objectFit.has_value()) {
+        imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+    }
+    if (imgAttr.marginProp.has_value()) {
+        imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+    }
+    if (imgAttr.paddingProp.has_value()) {
+        imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
+    }
+    if (imgAttr.borderRadius.has_value()) {
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageRenderCtx);
+        imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+        imageRenderCtx->SetClipToBounds(true);
+    }
+    auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (imgAttr.colorFilterMatrix.has_value()) {
+        paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+        paintProperty->ResetDrawingColorFilter();
+    } else if (imgAttr.drawingColorFilter.has_value()) {
+        paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+        paintProperty->ResetColorFilter();
+    }
+    if (imgAttr.resizableSlice.has_value()) {
+        paintProperty->UpdateImageResizableSlice(imgAttr.resizableSlice.value());
+    }
+    if (imgAttr.resizableLattice.has_value() && imgAttr.resizableLattice.value()) {
+        paintProperty->UpdateImageResizableLattice(imgAttr.resizableLattice.value());
+    }
 }
 
 void TextPattern::HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode)

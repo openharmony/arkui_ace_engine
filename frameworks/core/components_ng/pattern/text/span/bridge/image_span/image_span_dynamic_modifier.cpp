@@ -366,6 +366,81 @@ void SetImageSpanPlaceHolderStyle(ArkUINodeHandle node, void* style)
     ImageSpanView::SetPlaceHolderStyle(frameNode, *placeHolderStyle);
 }
 
+void SetImageSpanResizableSlice(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    CHECK_NULL_VOID(values);
+    CHECK_NULL_VOID(units);
+    if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice slice;
+    slice.left = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    slice.top = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    slice.right = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    slice.bottom = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    ImageSpanView::SetResizableSlice(frameNode, slice);
+}
+
+void ResetImageSpanResizableSlice(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::ResetResizableSlice(frameNode);
+}
+
+void GetImageSpanResizableSlice(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    CHECK_NULL_VOID(values);
+    CHECK_NULL_VOID(units);
+    values[NUM_0] = 0.0f;
+    values[NUM_1] = 0.0f;
+    values[NUM_2] = 0.0f;
+    values[NUM_3] = 0.0f;
+    units[NUM_0] = static_cast<ArkUI_Int32>(OHOS::Ace::DimensionUnit::VP);
+    units[NUM_1] = static_cast<ArkUI_Int32>(OHOS::Ace::DimensionUnit::VP);
+    units[NUM_2] = static_cast<ArkUI_Int32>(OHOS::Ace::DimensionUnit::VP);
+    units[NUM_3] = static_cast<ArkUI_Int32>(OHOS::Ace::DimensionUnit::VP);
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    auto slice = ImageSpanView::GetResizableSlice(frameNode);
+    values[NUM_0] = slice.left.Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(slice.left.Unit());
+    values[NUM_1] = slice.top.Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(slice.top.Unit());
+    values[NUM_2] = slice.right.Value();
+    units[NUM_2] = static_cast<ArkUI_Int32>(slice.right.Unit());
+    values[NUM_3] = slice.bottom.Value();
+    units[NUM_3] = static_cast<ArkUI_Int32>(slice.bottom.Unit());
+}
+
+void SetImageSpanResizableLattice(ArkUINodeHandle node, void* lattice, bool isCapi)
+{
+    CHECK_NULL_VOID(lattice);
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<DrawingLattice> drawingLattice;
+    if (isCapi) {
+        drawingLattice = DrawingLattice::CreateDrawingLatticeFromNative(lattice);
+    } else {
+        drawingLattice = DrawingLattice::CreateDrawingLatticeFromSptr(lattice);
+    }
+    if (drawingLattice) {
+        ImageSpanView::SetResizableLattice(frameNode, drawingLattice);
+    } else {
+        ImageSpanView::ResetResizableLattice(frameNode);
+    }
+}
+
+void ResetImageSpanResizableLattice(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::ResetResizableLattice(frameNode);
+}
+
 void CreateImageSpan()
 {
     ImageSpanView::Create();
@@ -407,6 +482,11 @@ const ArkUIImageSpanModifier* GetImageSpanDynamicModifier()
         .getSupportSvg2 = GetSupportSvg2,
         .createImageSpanFrameNode = CreateImageSpanFrameNode,
         .setImageSpanPlaceHolderStyle = SetImageSpanPlaceHolderStyle,
+        .setImageSpanResizableSlice = SetImageSpanResizableSlice,
+        .resetImageSpanResizableSlice = ResetImageSpanResizableSlice,
+        .getImageSpanResizableSlice = GetImageSpanResizableSlice,
+        .setImageSpanResizableLattice = SetImageSpanResizableLattice,
+        .resetImageSpanResizableLattice = ResetImageSpanResizableLattice,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -434,6 +514,11 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         .resetImageSpanOnError = ResetImageSpanOnError,
         .setImageSpanSrc = SetImageSpanSrc,
         .setImageSpanPlaceHolderStyle = SetImageSpanPlaceHolderStyle,
+        .setImageSpanResizableSlice = SetImageSpanResizableSlice,
+        .resetImageSpanResizableSlice = ResetImageSpanResizableSlice,
+        .getImageSpanResizableSlice = GetImageSpanResizableSlice,
+        .setImageSpanResizableLattice = SetImageSpanResizableLattice,
+        .resetImageSpanResizableLattice = ResetImageSpanResizableLattice,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -23,6 +23,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+#include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
+
 #if !defined(PREVIEW)
 namespace OHOS::Rosen {
 class RSNode;
@@ -86,5 +89,19 @@ RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj);
 bool CheckRegexValid(const std::string& pattern);
 napi_env GetCurrentEnv();
 void* UnwrapNapiValue(const JSRef<JSVal>& obj);
+
+/**
+ * @brief Parse the <resizable> object of an image span / image attachment into slice and lattice
+ *        results. Mirrors the parsing logic of JSImage::ParseResizableSlice / ParseResizableLattice
+ *        but only fills the out parameters without touching ImageModel, so callers (image span and
+ *        rich editor) can populate ImageSpanAttribute directly.
+ *
+ * @param resizable The JS value of the "resizable" property. If it is not a non-empty object,
+ *                  both out parameters are left unchanged.
+ * @param slice Out: parsed slice edges (left/top/right/bottom) when the "slice" sub-object exists.
+ * @param lattice Out: parsed lattice when the "lattice" sub-object exists.
+ */
+void ParseJsImageSpanResizable(const JSRef<JSVal>& resizable,
+    std::optional<ImageResizableSlice>& slice, std::optional<RefPtr<DrawingLattice>>& lattice);
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

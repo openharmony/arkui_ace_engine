@@ -1977,6 +1977,15 @@ ImageSpanOptions ImageSpanItem::GetImageSpanOptionsFromImageNode() const
     if (renderContext && renderContext->HasBorderRadius()) {
         imageSpanOptions.imageAttribute->borderRadius = renderContext->GetBorderRadius();
     }
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    if (paintProperty) {
+        if (paintProperty->HasImageResizableSlice()) {
+            imageSpanOptions.imageAttribute->resizableSlice = paintProperty->GetImageResizableSliceValue({});
+        }
+        if (paintProperty->HasImageResizableLattice()) {
+            imageSpanOptions.imageAttribute->resizableLattice = paintProperty->GetImageResizableLatticeValue(nullptr);
+        }
+    }
     return imageSpanOptions;
 }
 

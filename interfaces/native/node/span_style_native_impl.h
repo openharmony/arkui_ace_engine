@@ -170,6 +170,11 @@ struct OH_ArkUI_ImageAttachment {
     bool supportSvg;
     std::optional<bool> isPixelMap = std::nullopt;
     std::optional<bool> isDrawingColorFilter = std::nullopt;
+    std::optional<float> resizableSliceLeft;
+    std::optional<float> resizableSliceTop;
+    std::optional<float> resizableSliceRight;
+    std::optional<float> resizableSliceBottom;
+    OH_Drawing_Lattice* resizableLattice = nullptr;
 };
 
 struct OH_ArkUI_SpanStyle {

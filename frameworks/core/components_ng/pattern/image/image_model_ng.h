@@ -145,6 +145,7 @@ public:
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice);
+    static void ResetResizableSlice(FrameNode* frameNode);
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void ResetResizableLattice(FrameNode* frameNode);
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);

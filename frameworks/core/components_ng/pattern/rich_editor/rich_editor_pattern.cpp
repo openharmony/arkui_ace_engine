@@ -391,6 +391,12 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
             paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
             paintProperty->ResetColorFilter();
         }
+        if (imgAttr.resizableSlice.has_value() && paintProperty) {
+            paintProperty->UpdateImageResizableSlice(imgAttr.resizableSlice.value());
+        }
+        if (imgAttr.resizableLattice.has_value() && imgAttr.resizableLattice.value() && paintProperty) {
+            paintProperty->UpdateImageResizableLattice(imgAttr.resizableLattice.value());
+        }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
@@ -2993,6 +2999,12 @@ void RichEditorPattern::UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const
     }
     if (updateSpanStyle_.borderRadius.has_value()) {
         imageAttribute->borderRadius = imageStyle.borderRadius;
+    }
+    if (updateSpanStyle_.resizableSlice.has_value()) {
+        imageAttribute->resizableSlice = imageStyle.resizableSlice;
+    }
+    if (updateSpanStyle_.resizableLattice.has_value()) {
+        imageAttribute->resizableLattice = imageStyle.resizableLattice;
     }
     if (updateSpanStyle_.marginProp.has_value()) {
         imageAttribute->marginProp = imageStyle.marginProp;

@@ -18,6 +18,8 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
 #include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -151,12 +153,15 @@ struct ImageSpanAttribute {
     bool supportSvg2 = false;
     std::optional<std::vector<float>> colorFilterMatrix;
     std::optional<RefPtr<DrawingColorFilter>> drawingColorFilter;
+    std::optional<ImageResizableSlice> resizableSlice;
+    std::optional<RefPtr<DrawingLattice>> resizableLattice;
 
     bool operator==(const ImageSpanAttribute& attribute) const
     {
         return size == attribute.size && verticalAlign == attribute.verticalAlign && objectFit == attribute.objectFit &&
                marginProp == attribute.marginProp && borderRadius == attribute.borderRadius &&
-               paddingProp == attribute.paddingProp;
+               paddingProp == attribute.paddingProp && resizableSlice == attribute.resizableSlice &&
+               resizableLattice == attribute.resizableLattice;
     }
 
     std::string ToString() const
@@ -167,6 +172,7 @@ struct ImageSpanAttribute {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, objectFit);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, marginProp);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, resizableSlice);
         return jsonValue->ToString();
     }
 };
