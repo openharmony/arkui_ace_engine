@@ -296,6 +296,7 @@ private:
     TouchEvent mouseLastTouchEvent_;
     bool rightMouseMappingSwitchEnabled_ = false;
     bool rightMouseMappingSwitchCached_ = false;
+    std::vector<std::string> rightMouseMappingComponents_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };
 

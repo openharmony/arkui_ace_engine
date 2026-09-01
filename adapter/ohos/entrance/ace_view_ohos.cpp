@@ -576,8 +576,8 @@ void AceViewOhos::ScheduleDelayedUp(const TouchEvent& touchEvent, const RefPtr<O
         }
     }
     TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "MouseMapping: ScheduleDelayedUp fallback, dispatch CANCEL");
-    if (touchEventCallback_) {
-        auto cancelEvent = touchEvent;
+    if (touchEventCallback_ && mouseTouchSessionActive_) {
+        auto cancelEvent = mouseLastTouchEvent_;
         cancelEvent.type = TouchType::CANCEL;
         cancelEvent.sourceType = SourceType::TOUCH;
         cancelEvent.sourceTool = SourceTool::MOUSE;
@@ -649,8 +649,9 @@ bool AceViewOhos::IsRightMouseMappingSwitchOn()
 {
     if (!rightMouseMappingSwitchCached_) {
         bool enabled = false;
-        std::vector<std::string> components;
-        rightMouseMappingSwitchEnabled_ = NG::EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
+        rightMouseMappingComponents_.clear();
+        rightMouseMappingSwitchEnabled_ = NG::EventInfoConvertor::IsRightMouseMappingEnabled(
+            enabled, rightMouseMappingComponents_);
         rightMouseMappingSwitchCached_ = true;
     }
     return rightMouseMappingSwitchEnabled_;
@@ -692,11 +693,8 @@ bool AceViewOhos::ShouldConvertRightMouseToTouch(const MouseEvent& event, const 
 
 bool AceViewOhos::CheckMouseMappingWhitelist(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
-    bool enabled = false;
-    std::vector<std::string> components;
-    NG::EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
     CHECK_NULL_RETURN(mouseTargetHitCallback_, false);
-    bool hitTestResult = mouseTargetHitCallback_(event, node, components);
+    bool hitTestResult = mouseTargetHitCallback_(event, node, rightMouseMappingComponents_);
     if (!hitTestResult) {
         return false;
     }

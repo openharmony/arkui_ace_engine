@@ -3983,12 +3983,13 @@ bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& global
         return false;
     }
 
+    auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
+    localMat_ = cacheMatrixInfo.localMatrix;
+
     bool ret = false;
     if (!frameChildren_.empty()) {
-        auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
         auto paintRect = cacheMatrixInfo.paintRectWithTransform;
         auto origRect = renderContext_->GetPaintRectWithoutTransform();
-        localMat_ = cacheMatrixInfo.localMatrix;
 
         auto localPoint = parentLocalPoint - paintRect.GetOffset();
         renderContext_->GetPointWithTransform(localPoint);
