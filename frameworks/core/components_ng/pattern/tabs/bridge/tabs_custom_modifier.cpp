@@ -17,8 +17,11 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -278,6 +281,41 @@ void HandleBackgroundEffectInactiveColorCustom(ArkUINodeHandle node, void* resOb
     auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
     TabsModelNG::HandleBackgroundEffectInactiveColor(frameNode, resObj);
 }
+
+RefPtr<TabsControllerNG> GetTabsController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    return AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
+}
+
+void SetTabsTabBarTranslateCustom(ArkUINodeHandle node, const void* options)
+{
+    CHECK_NULL_VOID(options);
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SetTabBarTranslate(*reinterpret_cast<const TranslateOptions*>(options));
+}
+
+void SetTabsTabBarOpacityCustom(ArkUINodeHandle node, ArkUI_Float32 opacity)
+{
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SetTabBarOpacity(opacity);
+}
+
+void SwipeToCustom(ArkUINodeHandle node, ArkUI_Int32 index)
+{
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SwipeTo(index);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -315,6 +353,9 @@ const ArkUITabsCustomModifier* GetTabsCustomModifier()
         .handleBackgroundBlurStyleInactiveColor = HandleBackgroundBlurStyleInactiveColorCustom,
         .handleBarBackgroundColor = HandleBarBackgroundColorCustom,
         .handleBackgroundEffectInactiveColor = HandleBackgroundEffectInactiveColorCustom,
+        .setTabBarTranslate = SetTabsTabBarTranslateCustom,
+        .setTabBarOpacity = SetTabsTabBarOpacityCustom,
+        .swipeTo = SwipeToCustom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

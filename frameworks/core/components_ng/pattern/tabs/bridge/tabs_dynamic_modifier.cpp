@@ -321,6 +321,14 @@ void SetTabsOptionsIndexImpl(ArkUINodeHandle node, ArkUI_Int32 indexVal)
     tabsModelImpl->SetIndex(indexVal < 0 ? 0 : indexVal);
 }
 
+void SetTabsIndexImpl(ArkUINodeHandle node, ArkUI_Int32 indexVal)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    tabsModelImpl->SetIndex(indexVal < 0 ? 0 : indexVal);
+}
+
 void SetTabsOptionsControllerImpl(ArkUINodeHandle node, ArkUINodeHandle tabsController)
 {
     (void)node;
@@ -718,6 +726,19 @@ void SetCachedMaxCountImpl(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 
     tabsModelImpl->SetCachedMaxCount(count, cacheMode);
 }
 
+void SetCachedMaxCountForJsImpl(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    tabsModelImpl->SetCachedMaxCount(count, cacheMode);
+}
+
 void ResetTabsOnSelectedImpl(ArkUINodeHandle node)
 {
     SetTabsOnSelectedImpl(node, nullptr);
@@ -741,6 +762,19 @@ void SetTabsOnChangeImpl(ArkUINodeHandle node, void* callback)
         tabsModelImpl->SetOnChange(std::move(*onChange));
     } else {
         tabsModelImpl->SetOnChange(nullptr);
+    }
+}
+
+void SetTabsOnChangeEventImpl(ArkUINodeHandle node, void* callback)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    if (callback) {
+        auto onChangeEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        tabsModelImpl->SetOnChangeEvent(std::move(*onChangeEvent));
+    } else {
+        tabsModelImpl->SetOnChangeEvent(nullptr);
     }
 }
 
@@ -1333,6 +1367,12 @@ void SetTabsOptionsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarIndex(frameNode, indexVal < 0 ? 0 : indexVal);
 }
+void SetTabsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIndex(frameNode, indexVal < 0 ? 0 : indexVal);
+}
 void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsController)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1799,6 +1839,18 @@ void SetCachedMaxCount(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode
     TabsModelNG::SetCachedMaxCount(frameNode, count, cacheMode);
 }
 
+void SetCachedMaxCountForJs(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    TabsModelNG::SetCachedMaxCountForJs(frameNode, count, cacheMode);
+}
+
 void ResetCachedMaxCount(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1814,6 +1866,18 @@ void SetTabsOnChange(ArkUINodeHandle node, void* callback)
         TabsModelNG::SetOnChange(frameNode, std::move(*onChange));
     } else {
         TabsModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void SetTabsOnChangeEvent(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChangeEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnChangeEvent(frameNode, std::move(*onChangeEvent));
+    } else {
+        TabsModelNG::SetOnChangeEvent(frameNode, nullptr);
     }
 }
 
@@ -2213,6 +2277,7 @@ const ArkUITabsModifier* GetTabsModifier()
             .setTabsOnSelected = SetTabsOnSelected,
             .resetTabsOnSelected = ResetTabsOnSelected,
             .setCachedMaxCount = SetCachedMaxCount,
+            .setCachedMaxCountForJs = SetCachedMaxCountForJs,
             .resetCachedMaxCount = ResetCachedMaxCount,
             .setTabsOnChange = SetTabsOnChange,
             .resetTabsOnChange = ResetTabsOnChange,
@@ -2254,6 +2319,8 @@ const ArkUITabsModifier* GetTabsModifier()
             .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpoint,
             .setOnBarDisplayModeChange = SetOnBarDisplayModeChange,
             .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChange,
+            .setTabsIndex = SetTabsIndex,
+            .setTabsOnChangeEvent = SetTabsOnChangeEvent,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2344,6 +2411,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabsOnSelected = SetTabsOnSelectedImpl,
         .resetTabsOnSelected = ResetTabsOnSelectedImpl,
         .setCachedMaxCount = SetCachedMaxCountImpl,
+        .setCachedMaxCountForJs = SetCachedMaxCountForJsImpl,
         .resetCachedMaxCount = ResetCachedMaxCountImpl,
         .setTabsOnChange = SetTabsOnChangeImpl,
         .resetTabsOnChange = ResetTabsOnChangeImpl,
@@ -2385,6 +2453,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpointImpl,
         .setOnBarDisplayModeChange = SetOnBarDisplayModeChangeImpl,
         .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChangeImpl,
+        .setTabsIndex = SetTabsIndexImpl,
+        .setTabsOnChangeEvent = SetTabsOnChangeEventImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

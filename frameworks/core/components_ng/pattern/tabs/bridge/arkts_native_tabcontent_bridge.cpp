@@ -273,7 +273,7 @@ void SetIndicator(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNod
     }
     if (!info->IsObject(vm) ||
         !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "height"), indicatorHeight, indicatorHightResObj) ||
+            vm, ArkTSUtils::GetProperty(vm, obj, "height"), indicatorHeight, indicatorHightResObj, false) ||
         indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
         if (tabTheme) {
@@ -284,15 +284,15 @@ void SetIndicator(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNod
     }
     if (!info->IsObject(vm) ||
         !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "width"), indicatorWidth, indicatorWidthResObj) ||
+            vm, ArkTSUtils::GetProperty(vm, obj, "width"), indicatorWidth, indicatorWidthResObj, false) ||
         indicatorWidth.Value() < 0.0f || indicatorWidth.Unit() == DimensionUnit::PERCENT) {
         indicator.width = 0.0_vp;
     } else {
         indicator.width = indicatorWidth;
     }
     if (!info->IsObject(vm) ||
-        !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), indicatorBorderRadius, indicatorRadiusResObj) ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), indicatorBorderRadius,
+            indicatorRadiusResObj, false) ||
         indicatorBorderRadius.Value() < 0.0f || indicatorBorderRadius.Unit() == DimensionUnit::PERCENT) {
         indicator.borderRadius = 0.0_vp;
     } else {
@@ -300,7 +300,7 @@ void SetIndicator(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNod
     }
     if (!info->IsObject(vm) ||
         !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "marginTop"), indicatorMarginTop, indicatorMarginTopResObj) ||
+            vm, ArkTSUtils::GetProperty(vm, obj, "marginTop"), indicatorMarginTop, indicatorMarginTopResObj, false) ||
         indicatorMarginTop.Value() < 0.0f || indicatorMarginTop.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
         if (tabTheme) {
@@ -342,8 +342,9 @@ void SetBoard(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNode)
     BoardStyle board;
     CalcDimension borderRadius;
     RefPtr<ResourceObject> borderRadiusResObj;
-    if (!info->IsObject(vm) || !ArkTSUtils::ParseJsDimensionVp(
-        vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), borderRadius, borderRadiusResObj) ||
+    if (!info->IsObject(vm) ||
+        !ArkTSUtils::ParseJsDimensionVp(
+            vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), borderRadius, borderRadiusResObj, false) ||
         borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
         CHECK_NULL_VOID(frameNode);
         RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
@@ -366,7 +367,7 @@ void GetFontContent(EcmaVM* vm, const Local<JSValueRef>& font, LabelStyle& label
     RefPtr<ResourceObject> familyColorResObj;
     auto size = ArkTSUtils::GetProperty(vm, obj, "size");
     CalcDimension fontSize;
-    if (ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, sizeResObj) && NonNegative(fontSize.Value()) &&
+    if (ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, sizeResObj, true, false) && NonNegative(fontSize.Value()) &&
         fontSize.Unit() != DimensionUnit::PERCENT) {
         labelStyle.fontSize = fontSize;
     }
@@ -500,7 +501,7 @@ void SetLabelStyle(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle
         auto minFontSizeValue = ArkTSUtils::GetProperty(vm, obj, "minFontSize");
         CalcDimension minFontSize;
         RefPtr<ResourceObject> minResObj;
-        if (ArkTSUtils::ParseJsDimensionFp(vm, minFontSizeValue, minFontSize, minResObj) &&
+        if (ArkTSUtils::ParseJsDimensionFp(vm, minFontSizeValue, minFontSize, minResObj, true, false) &&
             NonNegative(minFontSize.Value()) && minFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.minFontSize = minFontSize;
         }
@@ -508,7 +509,7 @@ void SetLabelStyle(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle
         auto maxFontSizeValue = ArkTSUtils::GetProperty(vm, obj, "maxFontSize");
         CalcDimension maxFontSize;
         RefPtr<ResourceObject> maxResObj;
-        if (ArkTSUtils::ParseJsDimensionFp(vm, maxFontSizeValue, maxFontSize, maxResObj) &&
+        if (ArkTSUtils::ParseJsDimensionFp(vm, maxFontSizeValue, maxFontSize, maxResObj, true, false) &&
             NonNegative(maxFontSize.Value()) && maxFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.maxFontSize = maxFontSize;
         }
@@ -569,7 +570,7 @@ void SetPadding(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle, F
     NG::PaddingProperty padding;
     bool useLocalizedPadding = false;
     RefPtr<ResourceObject> resPaddingObj;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, info, length, resPaddingObj) && NonNegative(length.Value()) &&
+    if (ArkTSUtils::ParseJsDimensionVp(vm, info, length, resPaddingObj, false) && NonNegative(length.Value()) &&
         length.Unit() != DimensionUnit::PERCENT) {
         padding.left = NG::CalcLength(length);
         padding.right = NG::CalcLength(length);
@@ -609,18 +610,19 @@ void SetPadding(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle, F
             padding.left = NG::CalcLength(left);
         }
         CalcDimension right;
-        if (ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, paddingObj, "right"), right,
-            resObjRight) && NonNegative(right.Value()) && right.Unit() != DimensionUnit::PERCENT) {
+        if (ArkTSUtils::ParseJsDimensionVp(
+            vm, ArkTSUtils::GetProperty(vm, paddingObj, "right"), right, resObjRight, false) &&
+            NonNegative(right.Value()) && right.Unit() != DimensionUnit::PERCENT) {
             padding.right = NG::CalcLength(right);
         }
         CalcDimension top;
-        if (ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, paddingObj, "top"), top, resObjTop) &&
+        if (ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, paddingObj, "top"), top, resObjTop, false) &&
             NonNegative(top.Value()) && top.Unit() != DimensionUnit::PERCENT) {
             padding.top = NG::CalcLength(top);
         }
         CalcDimension bottom;
         if (ArkTSUtils::ParseJsDimensionVp(
-                vm, ArkTSUtils::GetProperty(vm, paddingObj, "bottom"), bottom, resObjBottom) &&
+            vm, ArkTSUtils::GetProperty(vm, paddingObj, "bottom"), bottom, resObjBottom, false) &&
             NonNegative(bottom.Value()) && bottom.Unit() != DimensionUnit::PERCENT) {
             padding.bottom = NG::CalcLength(bottom);
         }
