@@ -37,13 +37,13 @@ void RosenRenderQrcode::Paint(RenderContext& context, const Offset& offset)
         QrcodeImageFree(qrCode);
         return;
     }
-    uint32_t qrWidth = qrCode->width;
+    int32_t qrWidth = static_cast<int32_t>(qrCode->width);
     if ((width_ <= 0) || (width_ < qrWidth)) {
         LOGE("RosenRenderQrcode::DrawQRCode qrcode create error");
         QrcodeImageFree(qrCode);
         return;
     }
-    int32_t blockWidth = width_ / qrWidth;
+    int32_t blockWidth = static_cast<int32_t>(width_) / qrWidth;
     int32_t sizeInPixel = blockWidth * qrWidth;
     auto qrOffset =
         Alignment::GetAlignPosition(Size(width_, height_), Size(sizeInPixel, sizeInPixel), Alignment::CENTER);
@@ -121,7 +121,8 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     void* rawData = skBitmap.getPixels();
     CHECK_NULL_RETURN(rawData, skBitmap);
     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
-    int32_t blockWidth = width / qrCode.width;
+    int32_t qrWidth = static_cast<int32_t>(qrCode.width);
+    int32_t blockWidth = width / qrWidth;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
             data[i * width + j] = QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)
@@ -145,7 +146,8 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     void* rawData = bitmap.GetPixels();
     CHECK_NULL_RETURN(rawData, bitmap);
     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
-    int32_t blockWidth = width / qrCode.width;
+    int32_t qrWidth = static_cast<int32_t>(qrCode.width);
+    int32_t blockWidth = width / qrWidth;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
             data[i * width + j] = QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)

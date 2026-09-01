@@ -2779,6 +2779,121 @@ HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DataPanelGetPaintPathTest002
+ * @tc.desc: Test GetPaintPath with extreme thickness causing innerRadius <= 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest002, TestSize.Level0)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
+    
+    /**
+     * @tc.steps: step1. Test with thickness larger than radius*2, causing innerRadius < 0.
+     * @tc.desc: innerRadius = radius - thickness/2. If thickness >= radius*2, innerRadius <= 0
+     *           With radius=10, thickness=25: innerRadius = 10 - 12.5 = -2.5 (< 0)
+     */
+    ArcData arcData;
+    arcData.radius = 10.0f;
+    arcData.thickness = 25.0f;  // thickness > radius * 2
+    arcData.lastAngle = 0.0f;
+    arcData.drawAngle = 180.0f;
+    arcData.totalDrawAngle = 180.0f;
+    
+    RSPath path;
+    RSPath endPath;
+    
+    // Should not crash and should return early
+    dataPanelModifier.GetPaintPath(arcData, path, endPath);
+    
+    // circleAngle should remain 0 since function returned early
+    EXPECT_EQ(arcData.circleAngle, 0.0f);
+    
+    /**
+     * @tc.steps: step2. Test with thickness exactly equal to radius*2, causing innerRadius = 0.
+     * @tc.desc: With radius=10, thickness=20: innerRadius = 10 - 10 = 0
+     */
+    arcData.radius = 10.0f;
+    arcData.thickness = 20.0f;  // thickness == radius * 2
+    arcData.circleAngle = 0.0f;  // Reset for next test
+    
+    dataPanelModifier.GetPaintPath(arcData, path, endPath);
+    
+    // Should return early when innerRadius == 0
+    EXPECT_EQ(arcData.circleAngle, 0.0f);
+    
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: DataPanelGetPaintPathTest003
+ * @tc.desc: Test GetPaintPath with thickness close to radius*2 but not exceeding
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest003, TestSize.Level0)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
+    
+    /**
+     * @tc.steps: step1. Test with thickness very close to radius*2 but slightly less.
+     * @tc.desc: This should produce a very large sine value, but clamp should prevent issues.
+     *           With radius=10, thickness=19.9: innerRadius = 10 - 9.95 = 0.05
+     *           sine = 9.95 / 0.05 = 199.0, which would be clamped to 1.0
+     */
+    ArcData arcData;
+    arcData.radius = 10.0f;
+    arcData.thickness = 19.9f;  // thickness close to radius * 2
+    arcData.lastAngle = 0.0f;
+    arcData.drawAngle = 180.0f;
+    arcData.totalDrawAngle = 180.0f;
+    
+    RSPath path;
+    RSPath endPath;
+    
+    // Should not crash even with extreme sine value
+    dataPanelModifier.GetPaintPath(arcData, path, endPath);
+    
+    // circleAngle should be calculated (sine clamped to 1.0)
+    // asin(1.0) = π/2, so circleAngle = (π/2) * 180 / π = 90.0f
+    EXPECT_NEAR(arcData.circleAngle, 90.0f, 0.1f);
+    
+    /**
+     * @tc.steps: step2. Test normal case with reasonable thickness.
+     * @tc.desc: With radius=100, thickness=24: innerRadius = 100 - 12 = 88
+     *           sine = 12 / 88 ≈ 0.1364
+     */
+    arcData.radius = 100.0f;
+    arcData.thickness = 24.0f;  // Normal case
+    arcData.circleAngle = 0.0f;
+    
+    dataPanelModifier.GetPaintPath(arcData, path, endPath);
+    
+    // Should calculate circleAngle normally
+    // sine = 12 / 88 ≈ 0.1364, asin(0.1364) ≈ 0.1368 rad
+    // circleAngle = 0.1368 * 180 / π ≈ 7.84 degrees
+    EXPECT_NEAR(arcData.circleAngle, 7.84f, 0.5f);
+    
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: DataPanelUpdateDateTest002
  * @tc.desc: Test DataPanel PaintMethod UpdateDate
  * @tc.type: FUNC

@@ -1478,6 +1478,16 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(
             "event is null or event category is not NODE_EVENT_CATEGORY_MIXED_EVENT");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
+    if (!string) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "string is null");
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    if (!stringSize) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "stringSize is null");
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
