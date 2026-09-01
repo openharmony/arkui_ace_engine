@@ -17,7 +17,9 @@
 
 #include "form_mgr.h"
 
+#include "insight_intent/insight_intent_execute_param.h"
 #include "want_params.h"
+#include "want_params_wrapper.h"
 
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
@@ -158,7 +160,7 @@ int32_t FormUtilsImpl::BackgroundEvent(const int64_t formId, const std::string& 
 }
 
 int32_t FormUtilsImpl::InsightIntentEvent(
-    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
+    const int64_t formId, const std::string& action, const int32_t containerId)
 {
     ContainerScope scope(containerId);
     auto container = Container::Current();
@@ -171,7 +173,7 @@ int32_t FormUtilsImpl::InsightIntentEvent(
 
     auto eventAction = JsonUtil::ParseJsonString(action);
     auto intentNameJson = eventAction->GetValue("intentName");
-    auto intentName = intentNameJson->GetString();
+    const auto intentName = intentNameJson->GetString();
     if (intentName.empty()) {
         return -1;
     }
@@ -198,20 +200,25 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         }
     }
 
-    // TODO: 以下依赖 form_fwk 侧接口定稿（InsightIntentExecuteParam / InsightIntentHostClient
-    // / ExecuteIntentWithSpecalTokenId 均不在本仓库），补齐 include 后替换占位实现：
-    // 1. InsightIntentExecuteParam 字段名待接口负责人确认（推测含 intentName）；
-    // 2. uint64_t key 语义待确认。注意：aceContainer->GetToken() 返回 sptr<IRemoteObject>（IPC
-    //    token 对象，参照 RouterEvent 传 token 的旧模式），无法直接转为 uint64 数值。类型核对：
-    //    formId 为 int64_t、containerId 为 int32_t（宽度/符号不吻合），精确匹配 uint64_t 的
-    //    是 FullTokenID —— 参照 js_plugin_component.cpp 先例 IPCSkeleton::GetSelfTokenID()，
-    //    与函数名 WithSpecalTokenId 吻合，待接口负责人确认；
-    // 3. InsightIntentHostClient 已确认为外部提供，ace_engine 不实现回调，直接获取实例传入
-    //    （具体获取方式待头文件定稿：GetInstance() 单例模式，参照 FormHostClient）。
-    // InsightIntentExecuteParam param;
-    // param.intentName = intentName;
-    // return XxxMgr::GetInstance().ExecuteIntentWithSpecalTokenId(
-    //     key, InsightIntentHostClient::GetInstance(), param, wantParams);
-    return -1;
+    // Want 透传（与 RouterEvent 同构）：顶层塞 4 个 insightIntent key，FMS 侧用
+    // InsightIntentExecuteParam::GenerateFromWant 解析为结构化参数，补齐 provider
+    // 三元组（FormRecord）后，以 foundation 进程身份调 AMS
+    // ExecuteIntentWithSpecalTokenId（key=matchedFormId，hostClient 携带宿主回调
+    // 上下文，wantParams 透传整个 executeWantParams；满足 FOUNDATION_UID 门禁）。
+    AAFwk::Want want;
+    AAFwk::WantParams executeWantParams;
+    executeWantParams.SetParam(
+        AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, AAFwk::String::Box(intentName));
+    // intentId 由 AMS 侧 CheckAndUpdateParam 按名称查表覆盖，此处占位 "0"；
+    // GenerateFromWant 要求该值可被 std::from_chars 解析为 uint64，不能为空。
+    executeWantParams.SetParam(
+        AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("0"));
+    // 卡片点击 = 拉起前台 UIAbility；实际支持的 executeMode 由 AMS 按 intent 配置校验。
+    executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE,
+        AAFwk::Integer::Box(static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND)));
+    executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
+        AAFwk::WantParamWrapper::Box(wantParams));
+    want.SetParams(executeWantParams);
+    return AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
 }
 } // namespace OHOS::Ace

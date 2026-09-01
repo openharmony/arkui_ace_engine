@@ -38,8 +38,7 @@ public:
     int32_t BackgroundEvent(int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defaultBundleName, bool isManuallyClick) override;
 
-    int32_t InsightIntentEvent(int64_t formId, const std::string& action, const int32_t containerId,
-        const std::string& defaultBundleName) override;
+    int32_t InsightIntentEvent(int64_t formId, const std::string& action, const int32_t containerId) override;
 
     void AddWantFreeInstallFlagForRouterEvent(const std::unique_ptr<JsonValue> &eventAction, AAFwk::Want &want);
 };

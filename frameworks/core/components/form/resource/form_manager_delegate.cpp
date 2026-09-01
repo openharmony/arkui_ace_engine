@@ -1343,7 +1343,7 @@ void FormManagerDelegate::OnInsightIntentActionEvent(const std::string& action)
     }
     // 系统应用门禁：insightIntent 仅开放给系统应用的卡片提供方（wantCache_ 持有 provider 身份）。
     // 先例：form_frontend_delegate_declarative.cpp RegisterFont 的 IsSystemAppForm 字体加载门禁。
-    auto providerBundleName = wantCache_.GetElement().GetBundleName();
+    const auto providerBundleName = wantCache_.GetElement().GetBundleName();
     if (!OHOS::AppExecFwk::FormMgr::GetInstance().IsSystemAppForm(providerBundleName)) {
         TAG_LOGW(AceLogTag::ACE_FORM,
             "insightIntent rejected: provider %{public}s is not system app", providerBundleName.c_str());
@@ -1352,9 +1352,8 @@ void FormManagerDelegate::OnInsightIntentActionEvent(const std::string& action)
     CHECK_NULL_VOID(formUtils_);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
-    auto instantId = context->GetInstanceId();
-    formUtils_->InsightIntentEvent(runningCardId_, action, instantId,
-        wantCache_.GetElement().GetBundleName());
+    const auto instantId = context->GetInstanceId();
+    formUtils_->InsightIntentEvent(runningCardId_, action, instantId);
 }
 
 void FormManagerDelegate::ProcessLockForm(bool lock)

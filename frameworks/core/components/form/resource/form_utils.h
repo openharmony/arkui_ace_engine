@@ -35,8 +35,7 @@ public:
     virtual int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defaultBundleName, bool isManuallyClick);
 
-    virtual int32_t InsightIntentEvent(const int64_t formId, const std::string& action, const int32_t containerId,
-        const std::string& defaultBundleName);
+    virtual int32_t InsightIntentEvent(const int64_t formId, const std::string& action, const int32_t containerId);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_UTILS_H
