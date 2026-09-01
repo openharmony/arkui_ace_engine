@@ -20,7 +20,7 @@ class OnVisibleIndexesChangeModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !isFunction(this.value)) {
       getUINativeModule().dynamiclayout.setOnVisibleIndexesChange(node, undefined);
     } else {
       getUINativeModule().dynamiclayout.setOnVisibleIndexesChange(node, this.value);
