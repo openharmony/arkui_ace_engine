@@ -419,7 +419,7 @@ std::vector<EventDataFloat> justPanDatas = {
  */
 HWTEST_F(VelocityTrackerTest, sampleDatas1, TestSize.Level1)
 {
-    SystemProperties::velocityTrackerPointNumber_ = 5;
+    SystemProperties::velocityTrackerPointNumber_ = 20;
     SystemProperties::isVelocityWithinTimeWindow_ = false;
     SystemProperties::isVelocityWithoutUpPoint_ = false;
     VelocityTracker velocityTracker;
