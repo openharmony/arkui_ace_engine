@@ -28,6 +28,11 @@
 #include "core/components_ng/pattern/navigation/navdestination_layout_property_base.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/token_theme/token_theme.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/token_theme/token_colors.h"
@@ -1435,5 +1440,350 @@ HWTEST_F(TitleBarPatternTestTwoNg, SetIsFlinging_Disabled_NoMaskBlurMutation, Te
 
     EXPECT_TRUE(context.titleBarPattern->IsFlinging());
     EXPECT_EQ(context.titleBarPattern->GetTitleBarMaskBlurNode(), maskBlurNode);
+}
+
+/**
+ * @tc.name: LayoutMenuColorPickerIfNeeded_FrameRectUsedForBounds
+ * @tc.desc: Verify LayoutMenuColorPickerIfNeeded uses GetFrameRect() (not GetMarginFrameRect)
+ *           to compute the color picker size from menu item bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, LayoutMenuColorPickerIfNeeded_FrameRectUsedForBounds, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    // Create NavDestinationGroupNode as parent so GetParent() returns a NavDestinationNodeBase
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestNode, nullptr);
+    navDestNode->UpdatePrevMenuIsCustom(false); // not custom menu
+    titleBarNode->parent_ = navDestNode;
+
+    // Create menu node with a MenuItem child that has known frame rect
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuGeo = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeo, nullptr);
+    menuGeo->SetFrameSize(SizeF(100.0f, 50.0f));
+    menuGeo->SetMarginFrameOffset(OffsetF(10.0f, 20.0f));
+
+    // Create a MenuItem child with known frame rect (not margin frame rect)
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemGeo = menuItemNode->GetGeometryNode();
+    ASSERT_NE(menuItemGeo, nullptr);
+    // Set frame rect: x=5, y=8, width=40, height=30
+    // GetFrameRect() returns {5,8,40,30}; GetMarginFrameRect() would include margin
+    menuItemGeo->SetFrameSize(SizeF(40.0f, 30.0f));
+    menuItemGeo->SetMarginFrameOffset(OffsetF(5.0f, 8.0f));
+    // Add margin to the menu item — GetFrameRect ignores it, GetMarginFrameRect would expand
+    MarginPropertyF margin;
+    margin.left = 10.0f;
+    margin.top = 10.0f;
+    menuItemGeo->UpdateMargin(margin);
+
+    menuNode->AddChild(menuItemNode);
+    titleBarNode->SetMenu(menuNode);
+
+    // Create color picker node and add it as a child of titleBarNode
+    auto colorPickerNode = titleBarPattern->GetOrCreateMenuColorPickerNode();
+    ASSERT_NE(colorPickerNode, nullptr);
+    titleBarNode->AddChild(colorPickerNode);
+
+    // Create layout wrapper for titleBarNode
+    auto titleBarGeo = titleBarNode->GetGeometryNode();
+    auto titleBarLayoutProp = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(titleBarNode, titleBarGeo, titleBarLayoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    // Create wrapper for the color picker child (at index 0)
+    auto cpGeo = AceType::MakeRefPtr<GeometryNode>();
+    auto cpLayoutProp = colorPickerNode->GetLayoutProperty();
+    auto cpWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(colorPickerNode, cpGeo, cpLayoutProp);
+    layoutWrapper->AppendChild(cpWrapper);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->LayoutMenuColorPickerIfNeeded(AceType::RawPtr(layoutWrapper), titleBarNode);
+
+    // GetFrameRect() of menuItem: offset(5,8) + size(40,30) → Right=45, Bottom=38
+    // Color picker frame size should be (45-5, 38-8) = (40, 30)
+    // If GetMarginFrameRect() were used, margin would expand the rect → size would differ
+    auto resultGeo = cpWrapper->GetGeometryNode();
+    ASSERT_NE(resultGeo, nullptr);
+    EXPECT_FLOAT_EQ(resultGeo->GetFrameSize().Width(), 40.0f);
+    EXPECT_FLOAT_EQ(resultGeo->GetFrameSize().Height(), 30.0f);
+}
+
+/**
+ * @tc.name: LayoutMenuColorPickerIfNeeded_EffectNodeOffsetAdded
+ * @tc.desc: Verify that when menuNode's parent is the titleBarEffectNode, the effect node's
+ *           margin frame offset is added to the color picker offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, LayoutMenuColorPickerIfNeeded_EffectNodeOffsetAdded, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    // Create NavDestinationGroupNode as parent
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestNode, nullptr);
+    navDestNode->UpdatePrevMenuIsCustom(false);
+    titleBarNode->parent_ = navDestNode;
+
+    // Create effect node and set it on the pattern
+    auto effectNode = FrameNode::CreateFrameNode("titleBarEffectNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(effectNode, nullptr);
+    auto effectGeo = effectNode->GetGeometryNode();
+    ASSERT_NE(effectGeo, nullptr);
+    effectGeo->SetMarginFrameOffset(OffsetF(100.0f, 200.0f));
+    titleBarPattern->SetTitleBarEffectNode(effectNode);
+
+    // Create menu node whose parent is the effect node
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuGeo = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeo, nullptr);
+    menuGeo->SetFrameSize(SizeF(100.0f, 50.0f));
+    menuGeo->SetMarginFrameOffset(OffsetF(10.0f, 20.0f));
+    // Set menuNode's parent to effectNode so GetParentFrameNode() returns effectNode
+    menuNode->parent_ = effectNode;
+
+    // Create a MenuItem child with known frame rect
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemGeo = menuItemNode->GetGeometryNode();
+    ASSERT_NE(menuItemGeo, nullptr);
+    menuItemGeo->SetFrameSize(SizeF(40.0f, 30.0f));
+    menuItemGeo->SetMarginFrameOffset(OffsetF(5.0f, 8.0f));
+
+    menuNode->AddChild(menuItemNode);
+    titleBarNode->SetMenu(menuNode);
+
+    // Create color picker node and add it as a child of titleBarNode
+    auto colorPickerNode = titleBarPattern->GetOrCreateMenuColorPickerNode();
+    ASSERT_NE(colorPickerNode, nullptr);
+    titleBarNode->AddChild(colorPickerNode);
+
+    // Create layout wrapper
+    auto titleBarGeo = titleBarNode->GetGeometryNode();
+    auto titleBarLayoutProp = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(titleBarNode, titleBarGeo, titleBarLayoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto cpGeo = AceType::MakeRefPtr<GeometryNode>();
+    auto cpLayoutProp = colorPickerNode->GetLayoutProperty();
+    auto cpWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(colorPickerNode, cpGeo, cpLayoutProp);
+    layoutWrapper->AppendChild(cpWrapper);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->LayoutMenuColorPickerIfNeeded(AceType::RawPtr(layoutWrapper), titleBarNode);
+
+    // Offset = menuGeo.marginFrameOffset(10,20) + effectNodeGeo.marginFrameOffset(100,200)
+    //        + OffsetF(minX=5, minY=8) = (115, 228)
+    auto resultGeo = cpWrapper->GetGeometryNode();
+    ASSERT_NE(resultGeo, nullptr);
+    auto resultOffset = resultGeo->GetMarginFrameOffset();
+    EXPECT_FLOAT_EQ(resultOffset.GetX(), 115.0f);
+    EXPECT_FLOAT_EQ(resultOffset.GetY(), 228.0f);
+}
+
+/**
+ * @tc.name: LayoutMenuColorPickerIfNeeded_EffectNodeParentMismatch
+ * @tc.desc: Verify that when menuNode's parent is NOT the titleBarEffectNode, the effect
+ *           node's offset is NOT added to the color picker offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, LayoutMenuColorPickerIfNeeded_EffectNodeParentMismatch, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    // Create NavDestinationGroupNode as parent
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestNode, nullptr);
+    navDestNode->UpdatePrevMenuIsCustom(false);
+    titleBarNode->parent_ = navDestNode;
+
+    // Create effect node with non-zero offset but DO NOT set it as menuNode's parent
+    auto effectNode = FrameNode::CreateFrameNode("titleBarEffectNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(effectNode, nullptr);
+    auto effectGeo = effectNode->GetGeometryNode();
+    ASSERT_NE(effectGeo, nullptr);
+    effectGeo->SetMarginFrameOffset(OffsetF(100.0f, 200.0f));
+    titleBarPattern->SetTitleBarEffectNode(effectNode);
+
+    // Create menu node with a DIFFERENT parent (not effectNode)
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuGeo = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeo, nullptr);
+    menuGeo->SetFrameSize(SizeF(100.0f, 50.0f));
+    menuGeo->SetMarginFrameOffset(OffsetF(10.0f, 20.0f));
+    // menuNode's parent is titleBarNode, NOT effectNode
+    menuNode->parent_ = titleBarNode;
+
+    // Create a MenuItem child with known frame rect
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemGeo = menuItemNode->GetGeometryNode();
+    ASSERT_NE(menuItemGeo, nullptr);
+    menuItemGeo->SetFrameSize(SizeF(40.0f, 30.0f));
+    menuItemGeo->SetMarginFrameOffset(OffsetF(5.0f, 8.0f));
+
+    menuNode->AddChild(menuItemNode);
+    titleBarNode->SetMenu(menuNode);
+
+    // Create color picker node and add it as a child of titleBarNode
+    auto colorPickerNode = titleBarPattern->GetOrCreateMenuColorPickerNode();
+    ASSERT_NE(colorPickerNode, nullptr);
+    titleBarNode->AddChild(colorPickerNode);
+
+    // Create layout wrapper
+    auto titleBarGeo = titleBarNode->GetGeometryNode();
+    auto titleBarLayoutProp = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(titleBarNode, titleBarGeo, titleBarLayoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto cpGeo = AceType::MakeRefPtr<GeometryNode>();
+    auto cpLayoutProp = colorPickerNode->GetLayoutProperty();
+    auto cpWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(colorPickerNode, cpGeo, cpLayoutProp);
+    layoutWrapper->AppendChild(cpWrapper);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->LayoutMenuColorPickerIfNeeded(AceType::RawPtr(layoutWrapper), titleBarNode);
+
+    // Offset = menuGeo.marginFrameOffset(10,20) + OffsetF(minX=5, minY=8) = (15, 28)
+    // EffectNode offset should NOT be added since menuNode->GetParentFrameNode() != effectNode
+    auto resultGeo = cpWrapper->GetGeometryNode();
+    ASSERT_NE(resultGeo, nullptr);
+    auto resultOffset = resultGeo->GetMarginFrameOffset();
+    EXPECT_FLOAT_EQ(resultOffset.GetX(), 15.0f);
+    EXPECT_FLOAT_EQ(resultOffset.GetY(), 28.0f);
+}
+
+/**
+ * @tc.name: LayoutMenuColorPickerIfNeeded_CustomMenuEarlyReturn
+ * @tc.desc: Verify that when PrevMenuIsCustom is true, LayoutMenuColorPickerIfNeeded returns
+ *           early and does not modify the color picker geometry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, LayoutMenuColorPickerIfNeeded_CustomMenuEarlyReturn, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    // Create NavDestinationGroupNode as parent with custom menu = true
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestNode, nullptr);
+    navDestNode->UpdatePrevMenuIsCustom(true); // custom menu → early return
+    titleBarNode->parent_ = navDestNode;
+
+    // Create menu node with a MenuItem child (should not be visited due to early return)
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuGeo = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeo, nullptr);
+    menuGeo->SetFrameSize(SizeF(100.0f, 50.0f));
+    menuGeo->SetMarginFrameOffset(OffsetF(10.0f, 20.0f));
+
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemGeo = menuItemNode->GetGeometryNode();
+    ASSERT_NE(menuItemGeo, nullptr);
+    menuItemGeo->SetFrameSize(SizeF(40.0f, 30.0f));
+    menuItemGeo->SetMarginFrameOffset(OffsetF(5.0f, 8.0f));
+    menuNode->AddChild(menuItemNode);
+    titleBarNode->SetMenu(menuNode);
+
+    // Create color picker node and add it as a child of titleBarNode
+    auto colorPickerNode = titleBarPattern->GetOrCreateMenuColorPickerNode();
+    ASSERT_NE(colorPickerNode, nullptr);
+    titleBarNode->AddChild(colorPickerNode);
+
+    // Create layout wrapper
+    auto titleBarGeo = titleBarNode->GetGeometryNode();
+    auto titleBarLayoutProp = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(titleBarNode, titleBarGeo, titleBarLayoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto cpGeo = AceType::MakeRefPtr<GeometryNode>();
+    // Set a known initial size to verify it is NOT modified
+    cpGeo->SetFrameSize(SizeF(999.0f, 888.0f));
+    auto cpLayoutProp = colorPickerNode->GetLayoutProperty();
+    auto cpWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(colorPickerNode, cpGeo, cpLayoutProp);
+    layoutWrapper->AppendChild(cpWrapper);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->LayoutMenuColorPickerIfNeeded(AceType::RawPtr(layoutWrapper), titleBarNode);
+
+    // Early return should leave the geometry unchanged
+    auto resultGeo = cpWrapper->GetGeometryNode();
+    ASSERT_NE(resultGeo, nullptr);
+    EXPECT_FLOAT_EQ(resultGeo->GetFrameSize().Width(), 999.0f);
+    EXPECT_FLOAT_EQ(resultGeo->GetFrameSize().Height(), 888.0f);
+}
+
+/**
+ * @tc.name: GetOrCreateMenuColorPickerNode_ZIndex
+ * @tc.desc: Verify that GetOrCreateMenuColorPickerNode sets ZIndex to -3 on the created node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, GetOrCreateMenuColorPickerNode_ZIndex, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    // First creation should set ZIndex
+    auto colorPickerNode = titleBarPattern->GetOrCreateMenuColorPickerNode();
+    ASSERT_NE(colorPickerNode, nullptr);
+    auto renderContext = colorPickerNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_TRUE(renderContext->HasZIndex());
+    EXPECT_EQ(renderContext->GetZIndex(), -3);
 }
 } // namespace OHOS::Ace::NG
