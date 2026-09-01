@@ -345,30 +345,31 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         HILOG_ERROR("eventHandler is nullptr");
         return;
     }
-    struct DumpInfoCondition {
+    struct DumpInfoState {
         std::mutex mtx;
         std::condition_variable cv;
+        std::vector<std::string> result;
     };
-    std::shared_ptr<DumpInfoCondition> dumpCondition = std::make_shared<DumpInfoCondition>();
-    std::unique_lock<std::mutex> lock(dumpCondition->mtx);
+    auto state = std::make_shared<DumpInfoState>();
+    std::unique_lock<std::mutex> lock(state->mtx);
     handler->PostTask(
-        [content = uiContent_, params, &info, dumpCondition]() {
-            std::unique_lock<std::mutex> lock(dumpCondition->mtx);
+        [content = uiContent_, params, state]() {
+            std::unique_lock<std::mutex> stateLock(state->mtx);
             auto uiContent = content.lock();
-            if (!uiContent) {
+            if (uiContent) {
+                uiContent->DumpInfo(params, state->result);
+            } else {
                 HILOG_ERROR("uiContent is nullptr");
-                dumpCondition->cv.notify_all();
-                return;
             }
-            HILOG_INFO("OnNotifyDumpInfo");
-            uiContent->DumpInfo(params, info);
-            dumpCondition->cv.notify_all();
+            state->cv.notify_all();
         },
         "OnNotifyDumpInfoTask");
-    if (dumpCondition->cv.wait_for(lock, std::chrono::milliseconds(DUMP_WAIT_TIME)) == std::cv_status::timeout) {
+    if (state->cv.wait_for(lock, std::chrono::milliseconds(DUMP_WAIT_TIME)) == std::cv_status::timeout) {
         HILOG_ERROR("OnNotifyDumpInfo timeout");
         info.push_back("dump timeout " + std::to_string(DUMP_WAIT_TIME) + "ms");
         handler->RemoveTask("OnNotifyDumpInfoTask");
+    } else {
+        info = std::move(state->result);
     }
 }
 
