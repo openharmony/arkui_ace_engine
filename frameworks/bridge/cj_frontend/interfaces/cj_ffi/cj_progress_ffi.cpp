@@ -16,9 +16,9 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_progress_ffi.h"
 
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/progress/progress_model.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::NG;
@@ -35,15 +35,15 @@ const std::vector<NG::ProgressType> PROGRESS_TYPES_NG = { NG::ProgressType::LINE
 
 namespace OHOS::Ace {
 
-NG::ProgressModelNG* GetProgressModel()
+ProgressModel* GetProgressModel()
 {
-    static NG::ProgressModelNG* cachedModel = nullptr;
+    static ProgressModel* cachedModel = nullptr;
     if (cachedModel == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Progress");
         if (module == nullptr) {
             LOGF_ABORT("Can't find progress dynamic module");
         }
-        cachedModel = reinterpret_cast<NG::ProgressModelNG*>(module->GetModel());
+        cachedModel = reinterpret_cast<ProgressModel*>(module->GetModel());
     }
     return cachedModel;
 }

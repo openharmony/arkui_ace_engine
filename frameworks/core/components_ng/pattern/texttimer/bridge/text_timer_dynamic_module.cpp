@@ -70,7 +70,7 @@ const void* TextTimerDynamicModule::GetCjModifier()
 void* TextTimerDynamicModule::GetModel()
 {
     static NG::TextTimerModelNG model;
-    return &model;
+    return static_cast<TextTimerModel*>(&model);
 }
 
 } // namespace OHOS::Ace

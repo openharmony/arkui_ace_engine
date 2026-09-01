@@ -20,6 +20,7 @@
 #include "cj_lambda.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -27,15 +28,15 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
 
-NG::TextTimerModelNG* GetTextTimerModel()
+TextTimerModel* GetTextTimerModel()
 {
-    static NG::TextTimerModelNG* cachedModel = nullptr;
+    static TextTimerModel* cachedModel = nullptr;
     if (cachedModel == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextTimer");
         if (module == nullptr || module->GetModel() == nullptr) {
             LOGF_ABORT("Can't find text timer dynamic module");
         }
-        cachedModel = reinterpret_cast<NG::TextTimerModelNG*>(module->GetModel());
+        cachedModel = reinterpret_cast<TextTimerModel*>(module->GetModel());
     }
     return cachedModel;
 }
