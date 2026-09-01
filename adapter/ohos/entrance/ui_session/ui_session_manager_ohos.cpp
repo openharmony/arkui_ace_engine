@@ -1251,17 +1251,17 @@ void UiSessionManagerOhos::NotifySendCommandPattern(int32_t id, const std::strin
     }
 }
 
-int32_t UiSessionManagerOhos::NotifySendCommandAsyncPattern(int32_t id, const std::string& command)
+int32_t UiSessionManagerOhos::NotifySendCommandSyncPattern(int32_t id, const std::string& command)
 {
-    NotifySendCommandAsyncFunction notifySendCommandAsyncFunction;
+    NotifySendCommandSyncFunction notifySendCommandSyncFunction;
     {
-        std::lock_guard<std::mutex> lock(notifySendCommandAsyncFunctionMutex_);
-        notifySendCommandAsyncFunction = notifySendCommandAsyncFunction_;
+        std::lock_guard<std::mutex> lock(notifySendCommandSyncFunctionMutex_);
+        notifySendCommandSyncFunction = notifySendCommandSyncFunction_;
     }
-    if (!notifySendCommandAsyncFunction) {
+    if (!notifySendCommandSyncFunction) {
         return 11; // 11 is the error code for no callback
     }
-    return notifySendCommandAsyncFunction(id, command);
+    return notifySendCommandSyncFunction(id, command);
 }
 
 void UiSessionManagerOhos::SaveRegisterForWebFunction(NotifyAllWebFunction&& function)
@@ -1317,10 +1317,10 @@ void UiSessionManagerOhos::SaveForSendCommandFunction(NotifySendCommandFunction&
     notifySendCommandFunction_ = std::move(function);
 }
 
-void UiSessionManagerOhos::SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function)
+void UiSessionManagerOhos::SaveForSendCommandSyncFunction(NotifySendCommandSyncFunction&& function)
 {
-    std::lock_guard<std::mutex> lock(notifySendCommandAsyncFunctionMutex_);
-    notifySendCommandAsyncFunction_ = std::move(function);
+    std::lock_guard<std::mutex> lock(notifySendCommandSyncFunctionMutex_);
+    notifySendCommandSyncFunction_ = std::move(function);
 }
 
 bool UiSessionManagerOhos::GetWebFocusRegistered()

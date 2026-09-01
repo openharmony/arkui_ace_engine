@@ -294,7 +294,7 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "GetVisibleInspectorTree", &UiSaService::HandleGetVisibleInspectorTree },
     { "GetCurrentPageName", &UiSaService::HandleGetCurrentPageName },
     { "SendCommand", &UiSaService::HandleSendCommand },
-    { "SendCommandAsync", &UiSaService::HandleSendCommandAsync },
+    { "SendCommandSync", &UiSaService::HandleSendCommandSync },
     { "RegisterContentChangeCallback", &UiSaService::HandleRegisterContentChangeCallback },
     { "UnregisterContentChangeCallback", &UiSaService::HandleUnregisterContentChangeCallback },
     { "GetCurrentImagesShowing", &UiSaService::HandleGetCurrentImagesShowing },
@@ -500,12 +500,13 @@ void UiSaService::HandleSendCommand(sptr<IUiContentService> service, std::vector
     }
 }
 
-void UiSaService::HandleSendCommandAsync(sptr<IUiContentService> service, std::vector<std::string> params)
+void UiSaService::HandleSendCommandSync(sptr<IUiContentService> service, std::vector<std::string> params)
 {
     CHECK_EQUAL_VOID(params.size() == SEND_COMMAND_WITH_NODEID, false);
     int32_t id = std::atoi(params[1].c_str());
     std::string command = params[2];
-    service->SendCommandAsync(id, command);
+    int32_t result = service->SendCommandSync(id, command);
+    LOGI("[SendCommandSync] result = %{public}d", result);
 }
 
 void UiSaService::HandleRegisterContentChangeCallback(sptr<IUiContentService> service, std::vector<std::string> params)

@@ -81,7 +81,7 @@ public:
         GET_CURRENT_SHOWING_IMAGE,
         GET_CURRENT_PAGE_NAME,
         GET_VISIBLE_TREE,
-        SENDCOMMAND_ASYNC_EVENT,
+        SENDCOMMAND_SYNC_EVENT,
         SENDCOMMAND_EVENT,
         SEND_COMMAND,
         EXE_APP_AI_FUNCTION,
@@ -206,7 +206,7 @@ public:
     virtual int32_t SendCommand(int32_t id, const std::string& command) = 0;
 
     /**
-     * @description: define register a callback on SendCommand Async event occur to execute interface
+     * @description: define register a callback on SendCommand Sync event occur to execute interface
      * @return: result number
      *          0: Node execution is successful.
      *          10: SendCommand Pipeline context is null.
@@ -214,7 +214,7 @@ public:
      *          12: Error occurred during self handling of SendCommand.
      *          13: Failure due to no nodes.
      */
-    virtual int32_t SendCommandAsync(int32_t id, const std::string& command) = 0;
+    virtual int32_t SendCommandSync(int32_t id, const std::string& command) = 0;
 
     /**
      * @description: define register a callback on Send keycode command occur to execute interface
