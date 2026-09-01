@@ -1700,6 +1700,8 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text_field/content_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/common_text/counter_decorator.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/common_text/counter_foreground_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/common_text/text_border_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/common_text/text_margin_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/error_decorator.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_content_modifier.cpp",

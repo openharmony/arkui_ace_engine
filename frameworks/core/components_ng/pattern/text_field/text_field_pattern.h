@@ -326,7 +326,7 @@ class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public PageTranslateNode,
                          public CleanNodeHostBase<TextFieldPattern, TextFieldLayoutProperty> {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient,
-        TextBase, Magnifier, TextGestureSelector, IPasswordIconHost, PageTranslateNode, ICleanNodeHost);
+        TextBase, Magnifier, TextGestureSelector, ICounterHost, IPasswordIconHost, PageTranslateNode, ICleanNodeHost);
 
 public:
     TextFieldPattern();
@@ -468,7 +468,7 @@ public:
     void FinishTextPreviewOperationMultiThreadPart(bool triggerOnWillChange = true);
     TextDragInfo CreateTextDragInfo() const;
 
-    RefPtr<TextComponentDecorator> GetCounterDecorator() const
+    RefPtr<TextComponentDecorator> GetCounterDecorator() const override
     {
         return counterDecorator_;
     }

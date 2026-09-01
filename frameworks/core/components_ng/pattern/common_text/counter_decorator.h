@@ -19,10 +19,13 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/common_text/counter_host.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
+
+class LayoutWrapper;
+class FrameNode;
 
 class ACE_EXPORT TextComponentDecorator : public AceType {
     DECLARE_ACE_TYPE(TextComponentDecorator, AceType);
@@ -55,6 +58,8 @@ public:
     float GetBoundHeight() const override;
     bool HasContent() const;
     void UpdateCounterContent();
+    void UltralimitShake();
+    static void LayoutCounterNode(LayoutWrapper* layoutWrapper);
     void SetCounterHost(const WeakPtr<ICounterHost>& host) { counterHost_ = host; }
     RefPtr<ICounterHost> GetCounterHost() const;
 private:

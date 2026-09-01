@@ -692,7 +692,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     return selection;
 }
 
-int32_t TextPattern::GetTextContentLength()
+int32_t TextPattern::GetTextContentLength() const
 {
     if (!spans_.empty()) {
         return static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;

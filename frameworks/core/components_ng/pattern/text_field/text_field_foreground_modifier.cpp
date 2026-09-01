@@ -15,13 +15,11 @@
 
 #include "core/components_ng/pattern/text_field/text_field_foreground_modifier.h"
 
+#include "core/components_ng/pattern/common_text/counter_constants.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr int32_t OFFESET_VALUE = 2;
-}
 
 TextFieldForegroundModifier::TextFieldForegroundModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
     : CounterForegroundModifier(pattern) {}
@@ -49,9 +47,10 @@ void TextFieldForegroundModifier::onDraw(DrawingContext& context)
     pen.SetAntiAlias(true);
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto rsRadius = MakeRRadius(renderContext->GetBorderRadius().value_or(BorderRadiusProperty()), width);
+    auto offset = width / COUNTER_BORDER_OFFSET;
     RSRoundRect rrect(
-        RSRect(width / OFFESET_VALUE, width / OFFESET_VALUE, textFrameRect.Width() - width / OFFESET_VALUE,
-            textFrameRect.Height() - width / OFFESET_VALUE),
+        RSRect(offset, offset, textFrameRect.Width() - offset,
+            textFrameRect.Height() - offset),
         rsRadius);
     canvas.AttachPen(pen);
     canvas.DrawRoundRect(rrect);
