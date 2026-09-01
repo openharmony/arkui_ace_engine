@@ -683,4 +683,149 @@ HWTEST_F(PathPatternTddTestNg, MeasureContent012, TestSize.Level1)
     EXPECT_GT(size.value().Height(), 0.0f);
 }
 
+/**
+ * @tc.name: MeasureLayoutPolicySize001
+ * @tc.desc: PathLayoutAlgorithm::MeasureLayoutPolicySize with null layoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathPatternTddTestNg, MeasureLayoutPolicySize001, TestSize.Level1)
+{
+    PathModelNG().Create();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_TRUE(frameNode);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<PathLayoutAlgorithm>(frameNode->GetPattern<PathPattern>()->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    // wrapper with null layoutProperty -> CHECK_NULL_VOID(layoutProperty) returns
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    SizeF size(10.0f, 20.0f);
+    layoutAlgorithm->MeasureLayoutPolicySize(contentConstraint, &layoutWrapper, size);
+    // size should remain unchanged because the function returned early
+    EXPECT_EQ(size, SizeF(10.0f, 20.0f));
+}
+
+/**
+ * @tc.name: MeasureLayoutPolicySize002
+ * @tc.desc: PathLayoutAlgorithm::MeasureLayoutPolicySize with no layoutPolicy set
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathPatternTddTestNg, MeasureLayoutPolicySize002, TestSize.Level1)
+{
+    PathModelNG().Create();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_TRUE(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<PathLayoutAlgorithm>(frameNode->GetPattern<PathPattern>()->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    // layoutProperty exists but layoutPolicy.has_value() is false -> CHECK_NULL_VOID returns
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    SizeF size(10.0f, 20.0f);
+    layoutAlgorithm->MeasureLayoutPolicySize(contentConstraint, &layoutWrapper, size);
+    // size should remain unchanged because the function returned early
+    EXPECT_EQ(size, SizeF(10.0f, 20.0f));
+}
+
+/**
+ * @tc.name: MeasureLayoutPolicySize003
+ * @tc.desc: PathLayoutAlgorithm::MeasureLayoutPolicySize with IsWidthMatch true and parentIdealSizeWidth has_value
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathPatternTddTestNg, MeasureLayoutPolicySize003, TestSize.Level1)
+{
+    PathModelNG().Create();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_TRUE(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<PathLayoutAlgorithm>(frameNode->GetPattern<PathPattern>()->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    // width MATCH_PARENT, height NO_MATCH; parentIdealSize has both values
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    SizeF size(10.0f, 20.0f);
+    layoutAlgorithm->MeasureLayoutPolicySize(contentConstraint, &layoutWrapper, size);
+    // IsWidthMatch true && parentIdealSizeWidth.has_value true -> SetWidth(300)
+    EXPECT_EQ(size.Width(), 300.0f);
+    // IsHeightMatch false -> height unchanged
+    EXPECT_EQ(size.Height(), 20.0f);
+}
+
+/**
+ * @tc.name: MeasureLayoutPolicySize004
+ * @tc.desc: PathLayoutAlgorithm::MeasureLayoutPolicySize with IsHeightMatch true and parentIdealSizeHeight has_value
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathPatternTddTestNg, MeasureLayoutPolicySize004, TestSize.Level1)
+{
+    PathModelNG().Create();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_TRUE(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<PathLayoutAlgorithm>(frameNode->GetPattern<PathPattern>()->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    // width NO_MATCH, height MATCH_PARENT; parentIdealSize has both values
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    SizeF size(10.0f, 20.0f);
+    layoutAlgorithm->MeasureLayoutPolicySize(contentConstraint, &layoutWrapper, size);
+    // IsWidthMatch false -> width unchanged
+    EXPECT_EQ(size.Width(), 10.0f);
+    // IsHeightMatch true && parentIdealSizeHeight.has_value true -> SetHeight(400)
+    EXPECT_EQ(size.Height(), 400.0f);
+}
+
+/**
+ * @tc.name: MeasureLayoutPolicySize005
+ * @tc.desc: PathLayoutAlgorithm::MeasureLayoutPolicySize with IsWidthMatch/IsHeightMatch true but parentIdealSize empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathPatternTddTestNg, MeasureLayoutPolicySize005, TestSize.Level1)
+{
+    PathModelNG().Create();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_TRUE(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<PathLayoutAlgorithm>(frameNode->GetPattern<PathPattern>()->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    // both width and height MATCH_PARENT, but parentIdealSize has no values (Reset)
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.Reset();
+    SizeF size(10.0f, 20.0f);
+    layoutAlgorithm->MeasureLayoutPolicySize(contentConstraint, &layoutWrapper, size);
+    // IsWidthMatch true but parentIdealSizeWidth.has_value false -> skip SetWidth
+    EXPECT_EQ(size.Width(), 10.0f);
+    // IsHeightMatch true but parentIdealSizeHeight.has_value false -> skip SetHeight
+    EXPECT_EQ(size.Height(), 20.0f);
+}
+
 } // namespace OHOS::Ace::NG

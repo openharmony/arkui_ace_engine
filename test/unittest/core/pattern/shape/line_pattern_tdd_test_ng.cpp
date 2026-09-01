@@ -931,4 +931,63 @@ HWTEST_F(LinePatternTddTestNg, LineModelNG_EndPointResObj_WeakExpired, TestSize.
     EXPECT_EQ(savedResourceMgr->resMap_.size(), initialResMapSize);
 }
 
+/**
+ * @tc.name: LineModelNG_Create
+ * @tc.desc: Create() produces a node with LINE_ETS_TAG and LinePattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinePatternTddTestNg, LineModelNG_Create, TestSize.Level1)
+{
+    auto frameNode = CreateLineFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::LINE_ETS_TAG);
+    auto pattern = frameNode->GetPattern<LinePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<LinePaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
+ * @tc.name: LineModelNG_StartPointNonStatic
+ * @tc.desc: Non-static StartPoint(value) without resObj updates LinePaintProperty via ViewStackProcessor
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinePatternTddTestNg, LineModelNG_StartPointNonStatic, TestSize.Level1)
+{
+    auto frameNode = CreateLineFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<LinePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    ShapePoint point{Dimension(ORIGINAL_POINT_X), Dimension(ORIGINAL_POINT_Y)};
+    LineModelNG().StartPoint(point);
+
+    EXPECT_TRUE(paintProperty->HasStartPoint());
+    EXPECT_FLOAT_EQ(paintProperty->GetStartPointValue().first.ConvertToPx(), ORIGINAL_POINT_X);
+    EXPECT_FLOAT_EQ(paintProperty->GetStartPointValue().second.ConvertToPx(), ORIGINAL_POINT_Y);
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
+ * @tc.name: LineModelNG_EndPointNonStatic
+ * @tc.desc: Non-static EndPoint(value) without resObj updates LinePaintProperty via ViewStackProcessor
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinePatternTddTestNg, LineModelNG_EndPointNonStatic, TestSize.Level1)
+{
+    auto frameNode = CreateLineFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<LinePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    ShapePoint point{Dimension(ORIGINAL_POINT_X), Dimension(ORIGINAL_POINT_Y)};
+    LineModelNG().EndPoint(point);
+
+    EXPECT_TRUE(paintProperty->HasEndPoint());
+    EXPECT_FLOAT_EQ(paintProperty->GetEndPointValue().first.ConvertToPx(), ORIGINAL_POINT_X);
+    EXPECT_FLOAT_EQ(paintProperty->GetEndPointValue().second.ConvertToPx(), ORIGINAL_POINT_Y);
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
 } // namespace OHOS::Ace::NG
