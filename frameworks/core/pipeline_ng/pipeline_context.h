@@ -36,6 +36,7 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
 #include "core/components_ng/dump_utils/dump_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
@@ -107,7 +108,6 @@ class DragDropManager;
 class MaterialProcessor;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
-class ScrollPlaceholderManager;
 enum class FocusActiveReason : int32_t;
 
 enum class MockFlushEventType : int32_t {
