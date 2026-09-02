@@ -380,6 +380,11 @@ struct GridLayoutInfo {
         return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
     }
 
+    // Layout viewport bounds while the contentClip extension is active (ADR-3):
+    // - GetViewStartBound/GetViewEndBound are used by fill/clear/jump paths
+    //   (including the extension area).
+    // - with fix offsets of 0 (unset/reset/DEFAULT/CONTENT_ONLY) both functions
+    //   are mathematically identical to the original bounds.
     float GetViewStartBound(bool ignoreFixOffset = false) const
     {
         return ignoreFixOffset ? 0.0f : -startFixOffset_;
@@ -390,8 +395,65 @@ struct GridLayoutInfo {
         return mainSize + (ignoreFixOffset ? 0.0f : endFixOffset_);
     }
 
+    // Reset the whole contentClip extension state (C-4). The regular fix-offset
+    // reset lives in CalculateContentClipFixOffset (called inside Measure), but
+    // two kinds of paths bypass it:
+    // 1) extension-unaware algorithms, namely the static GridLayoutAlgorithm,
+    //    the adaptive GridAdaptiveLayoutAlgorithm and the out-of-scope custom
+    //    GridCustomLayoutAlgorithm — cleared in the matching
+    //    GridPattern::CreateLayoutAlgorithm branches (the custom one matters for
+    //    an empty grid whose Measure early-returns before the reset).
+    // 2) early returns of extension-aware algorithms' Measure on an empty grid
+    //    or a zero main axis — cleared in each algorithm's early-return branch.
+    // Without the reset, info_ keeps stale fix offsets / report ranges after an
+    // algorithm-family switch or an early return.
+    // An extension-active Measure recomputes fix offsets and report ranges right
+    // after; idempotent no-op for the four states (fix = 0).
+    void ClearContentClipExtension()
+    {
+        startFixOffset_ = 0.0f;
+        endFixOffset_ = 0.0f;
+        reportStartIndex_ = startIndex_;
+        reportEndIndex_ = endIndex_;
+    }
+
+    // Report-range fast path (ADR-2): with both fix offsets 0, return the layout
+    // active range directly — bit-identical to the old behavior and independent
+    // of when SyncReportRange runs.
+    int32_t ReportStartIndex() const
+    {
+        return NearZero(startFixOffset_) && NearZero(endFixOffset_) ? startIndex_ : reportStartIndex_;
+    }
+
+    int32_t ReportEndIndex() const
+    {
+        return NearZero(startFixOffset_) && NearZero(endFixOffset_) ? endIndex_ : reportEndIndex_;
+    }
+
     // Compute reported (content-area only) start/end indices after layout.
-    void SyncReportRange(float mainSize, float mainGap);
+    // keepGapStraddlingLine: the report-start walk must mirror the calling
+    // algorithm's own unset-anchor advance, whose boundary rules differ:
+    // - scroll family (UpdateStartIndexForExtralOffset) keeps a line until the
+    //   NEXT line's top passes the content top — pass true so a fully
+    //   scrolled-out line whose gap still overlaps the content top stays
+    //   reported inside the (height, height + gap] window;
+    // - irregular (solver SolveForward) advances once a line's bottom passes
+    //   the content top — pass false (default) for the strictly-visible rule.
+    // Mismatching the caller's rule would break set-vs-unset report parity
+    // inside that window.
+    void SyncReportRange(float mainSize, float mainGap, bool keepGapStraddlingLine = false);
+
+    // Content-area first-row anchor offset: the top of the content-area start
+    // row (the row of ReportStartIndex) relative to the content-area top. When
+    // the clip extension is active and the start extension area has active rows,
+    // currentOffset_ points at the topmost active row in the extension;
+    // estimation logic (large-offset line skipping etc.) must use the content-
+    // area anchor as input, otherwise the estimated landing point drifts with the
+    // extension state and breaks "extension only backfills afterwards, content
+    // anchor matches the unset baseline" (R-11). Equals currentOffset_ when
+    // startFixOffset_ == 0 or the start extension area has no active row
+    // (four-state zero-change).
+    float GetContentAnchorOffset(float mainGap) const;
 
     std::string ToString() const;
 
@@ -414,6 +476,7 @@ struct GridLayoutInfo {
     float currentDelta_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
+
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
@@ -485,16 +548,9 @@ struct GridLayoutInfo {
     int32_t GetOriginalIndex(int32_t currentIndex) const;
     void ClearOnMoveDragState();
 
-private:
-    float GetCurrentOffsetOfRegularGrid(float mainGap) const;
-    float GetContentHeightOfRegularGrid(float mainGap) const;
-    int32_t GetItemIndexByPosition(int32_t position);
-    int32_t GetPositionByItemIndex(int32_t itemIndex);
-
     /**
      * @brief Walk backward through gridMatrix_ to find the first row of a multi-row item.
      *
-     * Mirrors the free function FindItemStartRow in grid_layout_range_solver.cpp.
      * Starting from [startRow], decrements while the value at (row, colIdx) is negative
      * (continuation marker). Stops at the first row with a non-negative value (item start).
      *
@@ -503,6 +559,12 @@ private:
      * @return The first row of the multi-row item.
      */
     int32_t FindItemStartRow(int32_t startRow, int32_t colIdx) const;
+
+private:
+    float GetCurrentOffsetOfRegularGrid(float mainGap) const;
+    float GetContentHeightOfRegularGrid(float mainGap) const;
+    int32_t GetItemIndexByPosition(int32_t position);
+    int32_t GetPositionByItemIndex(int32_t itemIndex);
     void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);
     void MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex);
     void GetLineHeights(

@@ -53,6 +53,9 @@ GridIrregularFiller::FillParameters GetFillParameters(const RefPtr<FrameNode>& h
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     if (info_.GetChildrenCount() <= 0) {
+        // The early return bypasses CalculateContentClipFixOffset's reset;
+        // clear the extension state explicitly (C-4).
+        info_.ClearContentClipExtension();
         return;
     }
     wrapper_ = layoutWrapper;
@@ -69,7 +72,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     bool matchChildren = ShouldMatchChildrenByLayoutPolicy(mainSize, layoutPolicy, info_.axis_);
     Init(props);
-    CalculateContentClipFixOffset(wrapper_, mainSize, mainGap_);
+    CalculateContentClipFixOffset(wrapper_, mainSize);
 
     if (info_.targetIndex_) {
         MeasureToTarget();
@@ -336,11 +339,10 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust
     // skip adding starting lines that are outside viewport in LayoutIrregular
     auto [it, offset] = info_.SkipLinesAboveView(mainGap_);
     GridIrregularFiller filler(&info_, wrapper_);
-    // Include startFixOffset_ in targetLen so lines in the start contentClip extension area
-    // (top padding region when contentClip = BOUNDARY) are measured. Without this, when
-    // scrolling upward, lines that become visible in the extension area have no lineHeightMap_
-    // entry and are skipped by LayoutChildren, so their items are not laid out every frame.
-    // When startFixOffset_ == 0 (CONTENT_ONLY), the addition is a no-op (original behavior).
+    // Start extension area: targetLen includes startFixOffset_ so rows inside
+    // the start extension participate in measuring. Adding 0 when
+    // startFixOffset_ == 0 (unset/CONTENT_ONLY) is an identity, matching the
+    // original behavior.
     float targetLen = offset + it->second + mainGap_ + info_.startFixOffset_;
     filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, targetLen, it->first);
 
@@ -372,10 +374,10 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
         info_.scrollAlign_ = ScrollAlign::START;
         info_.currentOffset_ = 0.0f;
         Jump(mainSize);
-        // TrySkipping calls Jump() directly (not MeasureOnJump), so the extension
-        // re-evaluation that MeasureOnJump does is skipped. Without this, the start
-        // contentClip extension area has no measured items after a large scroll skip.
-        // Mirrors the re-evaluation block in MeasureOnJump.
+        // TrySkipping calls Jump directly (not MeasureOnJump), leaving the start
+        // extension without measured rows after the jump; when the extension is
+        // active, redo the re-evaluation MeasureOnJump performs. No-op when
+        // startFixOffset_/endFixOffset_ are 0.
         if (GreatNotEqual(info_.startFixOffset_, 0.0f) || GreatNotEqual(info_.endFixOffset_, 0.0f)) {
             MeasureBackwardForStartExtension();
             info_.prevOffset_ = info_.currentOffset_;
@@ -391,6 +393,14 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
     Jump(mainSize, true);
+
+    // When first jumping into a never-measured area, FindRangeOnJump/
+    // PrepareLineHeight only prepare forward from the jump line; missing
+    // lineHeightMap_ entries above the start line defeat FindStartingRow's
+    // existence guard (same defect class as F-1). Backfill the top before the
+    // range re-evaluation once the jump line is in place; no-op with fix
+    // offsets of 0, preserving the original behavior.
+    MeasureBackwardForStartExtension();
 
     bool reevaluated = false;
     if (info_.extraOffset_ && !NearZero(*info_.extraOffset_)) {
@@ -422,13 +432,12 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
         MeasureOnOffset(mainSize);
         reevaluated = true;
     }
-    // If contentClip extension is active and MeasureOnOffset was not triggered above,
-    // re-evaluate the range to fill the extension areas that FindRangeOnJump doesn't fill
-    // (end extension via GetViewEndBound in MeasureForward, start extension via
-    // FindStartingRow which accounts for startFixOffset_).
+    // When the extension is active and none of the branches above ran,
+    // re-evaluate to fill the extension areas (FindRangeOnJump does not fill
+    // them). No-op when startFixOffset_/endFixOffset_ are 0 (unset/
+    // CONTENT_ONLY), preserving the original behavior.
     if (!reevaluated &&
         (GreatNotEqual(info_.startFixOffset_, 0.0f) || GreatNotEqual(info_.endFixOffset_, 0.0f))) {
-        MeasureBackwardForStartExtension();
         info_.prevOffset_ = info_.currentOffset_;
         MeasureOnOffset(mainSize);
     }

@@ -65,41 +65,80 @@ RefPtr<LayoutProperty> GridPattern::CreateLayoutProperty()
     return MakeRefPtr<GridLayoutProperty>();
 }
 
-void GridPattern::SetLayoutAlgorithmContentClip(const RefPtr<GridLayoutBaseAlgorithm>& algorithm)
+RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
-    CHECK_NULL_VOID(algorithm);
-    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
-    if (!paintProperty || !paintProperty->HasContentClip()) {
-        safeAreaPad_.reset();
-        return;
+    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
+    auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
+    auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
+    bool setColumns = false;
+    if (itemFillPolicy.has_value() || columnsTemplate.has_value()) {
+        setColumns = true;
     }
-    auto clip = paintProperty->GetContentClipValue();
-    auto mode = clip.first;
-    if (mode == ContentClipMode::DEFAULT) {
-        mode = paintProperty->GetDefaultContentClip();
+    auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
+    bool setRows = rowTemplate.has_value();
+    if (!setColumns && !setRows) {
+        // The adaptive algorithm is unaware of the contentClip extension: clear
+        // stale extension state (C-4) so fix offsets / report ranges do not
+        // survive a switch from an extension-active scrollable algorithm.
+        info_.ClearContentClipExtension();
+        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
     }
-    algorithm->SetContentClipMode(mode);
-    if (mode != ContentClipMode::SAFE_AREA) {
-        safeAreaPad_.reset();
+
+    if (targetIndex_.has_value()) {
+        info_.targetIndex_ = targetIndex_;
     }
-    if (mode == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
-        algorithm->SetContentClipSafeAreaPad(safeAreaPad_);
-    } else if (mode == ContentClipMode::CUSTOM) {
-        algorithm->SetContentClipShape(clip.second);
+    // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
+    if (setColumns && setRows) {
+        // The static algorithm is unaware of the contentClip extension: clear
+        // stale extension state (C-4) so fix offsets / report ranges do not
+        // survive a switch from an extension-active scrollable algorithm.
+        info_.ClearContentClipExtension();
+        return MakeRefPtr<GridLayoutAlgorithm>(info_);
     }
+
+    // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
+    const bool disableSkip = IsOutOfBoundary(true) || (ScrollablePattern::AnimateRunning() && !IsBackToTopRunning());
+    const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
+    const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || preSpring_;
+    return CreateScrollableLayoutAlgorithm(disableSkip, canOverScrollStart, canOverScrollEnd);
 }
 
-RefPtr<LayoutAlgorithm> GridPattern::CreateScrollLayoutAlgorithm(
-    bool hasLayoutOptions, bool disableSkip, bool canOverScrollStart, bool canOverScrollEnd)
+RefPtr<LayoutAlgorithm> GridPattern::CreateScrollableLayoutAlgorithm(bool disableSkip, bool canOverScrollStart,
+    bool canOverScrollEnd)
 {
+    if (userDefined_) {
+        // Custom layout is out of the contentClip-extension scope: the mode is
+        // never injected here, so the algorithm keeps CONTENT_ONLY, fix offsets
+        // stay 0, and the shared extension helpers it still calls
+        // (CalculateContentClipFixOffset's unconditional reset, SyncReportRange,
+        // GetViewEndBound) degenerate to the no-extension baseline. Like the
+        // static/adaptive algorithms, the extension state is cleared at creation
+        // (C-4): an empty grid's Measure early-returns before
+        // CalculateContentClipFixOffset's reset, so stale fix offsets / report
+        // ranges from a previously extension-active algorithm must not survive
+        // the switch.
+        info_.ClearContentClipExtension();
+        auto algo = MakeRefPtr<GridCustomLayoutAlgorithm>(
+            info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
+        algo->SetScrollSource(GetScrollSource());
+        return algo;
+    }
+    if (UseIrregularLayout()) {
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(
+            info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
+        algo->SetEnableSkip(!disableSkip);
+        SetLayoutAlgorithmContentClip(algo);
+        return algo;
+    }
     RefPtr<GridScrollLayoutAlgorithm> result;
-    if (!hasLayoutOptions) {
+    if (!GetLayoutProperty<GridLayoutProperty>()->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(info_);
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_);
     }
     result->SetCanOverScrollStart(canOverScrollStart);
-    result->SetCanOverScrollEnd(canOverScrollEnd);
+    result->SetCanOverScrollEnd(canOverScrollEnd && (info_.repeatDifference_ == 0));
     result->SetScrollSource(GetScrollSource());
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
@@ -108,71 +147,30 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateScrollLayoutAlgorithm(
     return result;
 }
 
-RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
+void GridPattern::SetLayoutAlgorithmContentClip(const RefPtr<GridLayoutBaseAlgorithm>& algorithm)
 {
-    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
-    CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
-    auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
-    auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
-    bool setColumns = itemFillPolicy.has_value() || columnsTemplate.has_value();
-    auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
-    bool setRows = rowTemplate.has_value();
-    if (!setColumns && !setRows) {
-        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
-    }
-    if (targetIndex_.has_value()) {
-        info_.targetIndex_ = targetIndex_;
-    }
-    // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
-    if (setColumns && setRows) {
-        return MakeRefPtr<GridLayoutAlgorithm>(info_);
-    }
-
-    // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
-    const bool disableSkip = IsOutOfBoundary(true) || (ScrollablePattern::AnimateRunning() && !IsBackToTopRunning());
-    const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
-    const bool canOverScrollEnd = (CanOverScrollEnd(GetScrollSource()) || preSpring_) &&
-                                  (info_.repeatDifference_ == 0);
-    if (userDefined_) {
-        auto algo = MakeRefPtr<GridCustomLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
-        algo->SetScrollSource(GetScrollSource());
-        SetLayoutAlgorithmContentClip(algo);
-        return algo;
-    }
-    if (UseIrregularLayout()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
-        algo->SetEnableSkip(!disableSkip);
-        SetLayoutAlgorithmContentClip(algo);
-        return algo;
-    }
-    return CreateScrollLayoutAlgorithm(gridLayoutProperty->GetLayoutOptions().has_value(),
-        disableSkip, canOverScrollStart, canOverScrollEnd);
-}
-
-void GridPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (type != LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA) {
-        host->PostponedTaskForIgnoreDefault();
-        return;
-    }
-    // Grid: measureInNextFrame_ lives on the algorithm, not GridLayoutInfo, so unlike WaterFlow/List
-    // the live flag is unavailable here and the guard is omitted. The safeAreaPad_ equality check below
-    // terminates the two-pass loop: pass 1 sets safeAreaPad_ (was nullopt) and triggers pass 2; pass 2 finds
-    // it unchanged and returns early (no pass 3).
-    const auto safeAreaPad = host->GetAccumulatedSafeAreaExpand(true,
-        { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
-        IgnoreStrategy::AXIS_INSENSITIVE);
-    if (safeAreaPad_.has_value() && safeAreaPad_ == safeAreaPad) {
-        return;
-    }
-    safeAreaPad_ = safeAreaPad;
-    const auto& layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(algorithm);
+    // Gate through the LayoutProperty (ADR-1): only an explicit BOUNDARY/SAFE_AREA/
+    // CUSTOM value activates the extension. Do not reuse
+    // paintProperty->HasContentClip() (still true after reset with value BOUNDARY,
+    // which would wrongly activate).
+    auto layoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-    host->SetLayoutDirtyMarked(true);
-    host->CreateLayoutTask(true, LayoutType::NONE);
+    const auto& clip = layoutProperty->GetContentClip();
+    if (!clip.has_value() || clip->first == ContentClipMode::DEFAULT ||
+        clip->first == ContentClipMode::CONTENT_ONLY) {
+        safeAreaPad_.reset();
+        return;
+    }
+    algorithm->SetContentClipMode(clip->first);
+    if (clip->first != ContentClipMode::SAFE_AREA) {
+        safeAreaPad_.reset();
+    }
+    if (clip->first == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
+        algorithm->SetContentClipSafeAreaPad(safeAreaPad_);
+    } else if (clip->first == ContentClipMode::CUSTOM) {
+        algorithm->SetContentClipShape(clip->second);
+    }
 }
 
 void GridPattern::BeforeCreateLayoutWrapper()
@@ -219,6 +217,37 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     UpdateFadingEdge(paint);
     paint->SetSafeAreaExpand(safeAreaPad_);
     return paint;
+}
+
+void GridPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (type != LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA) {
+        host->PostponedTaskForIgnoreDefault();
+        return;
+    }
+    // Grid's measureInNextFrame_ lives on the algorithm object (unavailable at
+    // info level), so the safeAreaPad_ equality check is the two-pass termination
+    // condition: pass 1 sets safeAreaPad_ (previously nullopt) and triggers pass 2;
+    // pass 2 sees no change and exits early (no pass 3). During a measure break
+    // (lazy loading) mirror List's !prevMeasureBreak_ guard: only refresh the
+    // snapshot without forcing CreateLayoutTask; the existing PostAsyncLoadTask
+    // re-drives layout after the break ends (F-2b / ADR-5).
+    const auto safeAreaPad = host->GetAccumulatedSafeAreaExpand(true,
+        { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
+        IgnoreStrategy::AXIS_INSENSITIVE);
+    if (safeAreaPad_.has_value() && safeAreaPad_ == safeAreaPad) {
+        return;
+    }
+    safeAreaPad_ = safeAreaPad;
+    if (!prevMeasureBreak_) {
+        const auto& layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        host->SetLayoutDirtyMarked(true);
+        host->CreateLayoutTask(true, LayoutType::NONE);
+    }
 }
 
 void GridPattern::OnModifyDone()
@@ -549,7 +578,7 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenCount = info_.childrenCount_ + info_.repeatDifference_;
-    if (info_.endIndex_ != (childrenCount - 1)) {
+    if (info_.ReportEndIndex() != (childrenCount - 1)) {
         return;
     }
     if (!isInitialized_) {
@@ -584,11 +613,11 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
 void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
-    int32_t endIndex = info_.reportEndIndex_;
+    int32_t endIndex = info_.ReportEndIndex();
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.reportEndIndex_);
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.ReportEndIndex());
     }
-    onScrollIndex(info_.reportStartIndex_, endIndex);
+    onScrollIndex(info_.ReportStartIndex(), endIndex);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -707,6 +736,34 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     return true;
 }
 
+bool GridPattern::IsSafeAreaIntermediatePass(const RefPtr<GridLayoutBaseAlgorithm>& algorithm)
+{
+    if (!algorithm->IsContentClipSafeArea()) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    const auto currentPad = host->GetAccumulatedSafeAreaExpand(true,
+        { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
+        IgnoreStrategy::AXIS_INSENSITIVE);
+    return algorithm->IsSafeAreaIntermediatePass(currentPad);
+}
+
+void GridPattern::UpdateEndHeightOnOffsetEnd(bool prevOffsetEnd)
+{
+    // Refresh endHeight_ only when the bottom-anchored state is newly entered
+    // or the main size changed while anchored; a stale anchor keeps its
+    // previously computed height.
+    if (!info_.offsetEnd_ || (prevOffsetEnd && NearZero(mainSizeChanged_))) {
+        return;
+    }
+    bool irregular = UseIrregularLayout();
+    float mainGap = GetMainGap();
+    auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular) + info_.contentEndOffset_;
+    auto overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+    endHeight_ = info_.currentHeight_ + overScroll;
+}
+
 bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -721,16 +778,33 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         scrollable->ResetDragUpdateDelta();
     }
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
-    if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
+    // Intermediate-pass detection for the SAFE_AREA two-pass layout (ADR-5):
+    // see IsSafeAreaIntermediatePass. Always false for non-SAFE_AREA modes,
+    // keeping the event dispatch path identical to the original
+    // implementation (zero-change guarantee).
+    const bool safeAreaIntermediatePass = IsSafeAreaIntermediatePass(gridLayoutAlgorithm);
+    const bool shouldDispatchLayoutEvents =
+        !gridLayoutAlgorithm->MeasureInNextFrame() && !safeAreaIntermediatePass;
+    if (shouldDispatchLayoutEvents) {
         auto eventhub = GetEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventhub, false);
+        // Keep the offset argument consistent with the index argument (single
+        // source of truth for reporting semantics, AC-4.1/R-10): the index uses
+        // the content-area report range, so the offset must use the content-area
+        // first-row anchor. The raw currentOffset_ includes the start-extension
+        // row offset when the extension is active (including rows backfilled after
+        // a jump), which would make the offset argument drift with the extension
+        // state. With fix = 0 the anchor always equals currentOffset_, preserving
+        // the original behavior (four-state zero-change).
+        // The handed-out Dimension must stay VP-unit with the px->vp-converted
+        // value: the ArkTS bridges run ConvertToVp() on it, so a PX-unit
+        // dimension would divide the value by dipScale a second time.
+        Dimension offsetPx(gridLayoutInfo.GetContentAnchorOffset(GetMainGap()), DimensionUnit::PX);
         Dimension offset(0, DimensionUnit::VP);
-        Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
-        auto offsetVpValue = offsetPx.ConvertToVp();
-        offset.SetValue(offsetVpValue);
-        scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
-        if (!isInitialized_ || startIndex_ != gridLayoutInfo.startIndex_) {
-            eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+        offset.SetValue(offsetPx.ConvertToVp());
+        scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.ReportStartIndex(), offset);
+        if (!isInitialized_ || startIndex_ != gridLayoutInfo.ReportStartIndex()) {
+            eventhub->FireOnScrollToIndex(gridLayoutInfo.ReportStartIndex());
         }
     }
 
@@ -747,19 +821,13 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
-    if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
-        bool irregular = UseIrregularLayout();
-        float mainGap = GetMainGap();
-        auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular) + info_.contentEndOffset_;
-        auto overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
-        endHeight_ = info_.currentHeight_ + overScroll;
-    }
-    if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
-        bool indexChanged = (startIndex_ != info_.reportStartIndex_) || (endIndex_ != info_.reportEndIndex_);
+    UpdateEndHeightOnOffsetEnd(offsetEnd);
+    if (!gridLayoutAlgorithm->MeasureInNextFrame() && !safeAreaIntermediatePass) {
+        bool indexChanged = (startIndex_ != info_.ReportStartIndex()) || (endIndex_ != info_.ReportEndIndex());
         ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
         info_.prevHeight_ = info_.currentHeight_;
-        startIndex_ = info_.reportStartIndex_;
-        endIndex_ = info_.reportEndIndex_;
+        startIndex_ = info_.ReportStartIndex();
+        endIndex_ = info_.ReportEndIndex();
         if (isConfigScrollable_) {
             focusHandler_.ProcessFocusEvent(keyEvent_, indexChanged);
         }
@@ -790,7 +858,12 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (prevMeasureBreak_) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
         PostAsyncLoadTask();
-    } else {
+    } else if (shouldDispatchLayoutEvents) {
+        // SAFE_AREA two-pass: defer setting isInitialized_ until the converged
+        // pass (F-2/ADR-5). Intermediate passes are suppressed and dispatch no
+        // events; setting it here would swallow the converged pass's initial
+        // reachStart / FireOnScrollToIndex (isInitialized_ already true),
+        // diverging from the baseline.
         isInitialized_ = true;
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
@@ -805,7 +878,7 @@ void GridPattern::CheckScrollable()
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     auto lastScrollable = scrollable_;
-    if (((info_.endIndex_ - info_.startIndex_ + 1) < info_.childrenCount_) ||
+    if (((info_.ReportEndIndex() - info_.ReportStartIndex() + 1) < info_.childrenCount_) ||
         (GreatNotEqual(
             info_.GetTotalHeightOfItemsInView(GetMainGap()) + info_.contentStartOffset_ + info_.contentEndOffset_,
             GetMainContentSize()))) {
@@ -852,7 +925,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
     if (indexChanged) {
         host->OnAccessibilityEvent(
-            AccessibilityEventType::SCROLLING_EVENT, info_.reportStartIndex_, info_.reportEndIndex_);
+            AccessibilityEventType::SCROLLING_EVENT, info_.ReportStartIndex(), info_.ReportEndIndex());
     }
     auto onReachStart = gridEventHub->GetOnReachStart();
     auto onJSFrameNodeReachStart = gridEventHub->GetJSFrameNodeOnReachStart();
@@ -1144,18 +1217,46 @@ float GridPattern::GetAverageHeight() const
     float heightSum = 0;
     int32_t itemCount = 0;
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line == info.gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
+    auto countLine = [&heightSum, &itemCount, mainGap, &info](GridLayoutInfo::HeightMapIt it) {
+        auto line = info.gridMatrix_.find(it->first);
+        if (line == info.gridMatrix_.end() || line->second.empty()) {
+            return;
         }
         auto lineStart = line->second.begin()->second;
         auto lineEnd = line->second.rbegin()->second;
         itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
+        heightSum += it->second + mainGap;
+    };
+    // When the clip extension is active, extension backfill rows are not input to
+    // the content-area estimation: large-offset line skipping (SkipIrregularLines)
+    // estimates the landing point in content-area coordinates, and counting
+    // extension rows in the average height would make the estimate drift with the
+    // extension state, breaking the "extension only backfills afterwards, content
+    // anchor matches the unset baseline" constraint (R-11). So only count the rows
+    // covered by the content-area report range (ReportStartIndex~ReportEndIndex) —
+    // the report range is decoupled from the extension state (single source of
+    // truth), giving identical statistics for the base and extension instances.
+    // No filtering when startFixOffset_/endFixOffset_ are both 0, preserving the
+    // original behavior (unset/reset/DEFAULT/CONTENT_ONLY four-state zero-change).
+    const bool clipExtensionActive =
+        GreatNotEqual(info.startFixOffset_, 0.0f) || GreatNotEqual(info.endFixOffset_, 0.0f);
+    if (!clipExtensionActive) {
+        for (auto it = info.lineHeightMap_.begin(); it != info.lineHeightMap_.end(); ++it) {
+            countLine(it);
+        }
+        if (itemCount == 0) {
+            return 0;
+        }
+        return heightSum / itemCount;
+    }
+    const int32_t reportStartLine = info.GetItemPos(info.ReportStartIndex()).second;
+    const int32_t reportEndLine = info.GetItemPos(info.ReportEndIndex()).second;
+    const bool reportRangeValid = reportStartLine >= 0 && reportEndLine >= reportStartLine;
+    for (auto it = info.lineHeightMap_.begin(); it != info.lineHeightMap_.end(); ++it) {
+        if (reportRangeValid && (it->first < reportStartLine || it->first > reportEndLine)) {
+            continue;
+        }
+        countLine(it);
     }
     if (itemCount == 0) {
         return 0;
@@ -1447,7 +1548,7 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
         }
         return offset;
     }
-    if (info_.endIndex_ == (info_.childrenCount_ + info_.repeatDifference_ - 1)) {
+    if (info_.ReportEndIndex() == (info_.childrenCount_ + info_.repeatDifference_ - 1)) {
         float endPos = info_.currentOffset_ + info_.totalHeightOfItemsInView_ + info_.contentEndOffset_;
         float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
         if (GreatNotEqual(GetMainContentSize(), info_.currentOffset_ + info_.totalHeightOfItemsInView_ +
@@ -1535,8 +1636,8 @@ void GridPattern::GetGridIndexDumpInfo()
 {
     DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info_.startIndex_));
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info_.endIndex_));
-    DumpLog::GetInstance().AddDesc("reportStartIndex:" + std::to_string(info_.reportStartIndex_));
-    DumpLog::GetInstance().AddDesc("reportEndIndex:" + std::to_string(info_.reportEndIndex_));
+    DumpLog::GetInstance().AddDesc("reportStartIndex:" + std::to_string(info_.ReportStartIndex()));
+    DumpLog::GetInstance().AddDesc("reportEndIndex:" + std::to_string(info_.ReportEndIndex()));
     DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info_.jumpIndex_));
     DumpLog::GetInstance().AddDesc("crossCount:" + std::to_string(info_.crossCount_));
     DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info_.childrenCount_));
@@ -2056,8 +2157,8 @@ void GridPattern::BuildGridIndexInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("startIndex", info_.startIndex_);
     json->Put("endIndex", info_.endIndex_);
-    json->Put("reportStartIndex", info_.reportStartIndex_);
-    json->Put("reportEndIndex", info_.reportEndIndex_);
+    json->Put("reportStartIndex", info_.ReportStartIndex());
+    json->Put("reportEndIndex", info_.ReportEndIndex());
     json->Put("jumpIndex", info_.jumpIndex_);
     json->Put("crossCount", info_.crossCount_);
     json->Put("childrenCount", info_.childrenCount_);
