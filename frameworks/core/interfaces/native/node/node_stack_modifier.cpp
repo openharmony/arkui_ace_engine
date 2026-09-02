@@ -114,7 +114,7 @@ void ResetSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    StackModelNG::SetSyncLoad(frameNode, true);
+    StackModelNG::ResetSyncLoad(frameNode);
 }
 
 ArkUI_Bool GetSyncLoad(ArkUINodeHandle node)

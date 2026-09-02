@@ -102,18 +102,71 @@ NG::OffsetF StackLayoutAlgorithm::CalculateStackAlignment(
     return offset;
 }
 
+static bool IsSafeImplicitAsync(LayoutWrapper* layoutWrapper)
+{
+    const auto& layoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto syncLoad = layoutProperty->GetSyncLoad().value_or(false);
+    // If user explicitly disable this ferature, we can not try to apply it.
+    if (syncLoad) {
+        ACE_SCOPED_TRACE("ImplicitSplit:reject syncLoad");
+        return false;
+    }
+    // Changed constraint invalidates the last-frame size as evidence: children may resolve to a
+    // different size this frame, and a deferred tail would then cause a visible reflow jump.
+    if (layoutWrapper->ConstraintChanged()) {
+        ACE_SCOPED_TRACE("ImplicitSplit:reject ConstraintChanged");
+        return false;
+    }
+    const auto& geometry = layoutWrapper->GetGeometryNode();
+    // Without a geometry node there is no measure history to base the safety argument on.
+    if (!geometry) {
+        ACE_SCOPED_TRACE("ImplicitSplit:reject geometry");
+        return false;
+    }
+    const auto& lc = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    // Never constrained means the node has not been through layout: no cap exists to pin the size.
+    if (!lc.has_value()) {
+        ACE_SCOPED_TRACE("ImplicitSplit:reject lc");
+        return false;
+    }
+    const auto& prev = geometry->GetFrameSize();
+    // Never measured (fresh container): deferring its children would flash an empty box, and the
+    // resulting size is unknown, so the no-reflow guarantee cannot hold.
+    if (NonPositive(prev.Width()) || NonPositive(prev.Height())) {
+        ACE_SCOPED_TRACE("ImplicitSplit:reject NonPositive");
+        return false;
+    }
+    // Size is pinned at the constraint cap: existing children already reach maxSize and new ones can
+    // only push into the clamp, so the final size provably equals the previous one (no parent re-layout).
+    const auto& host = layoutWrapper->GetHostNode();
+    int32_t id = host ? host->GetId() : -1;
+    if (!(NearEqual(prev.Width(), lc->maxSize.Width()) && NearEqual(prev.Height(), lc->maxSize.Height()))) {
+        ACE_SCOPED_TRACE("ImplicitSplit:reject notAtCap id[%d] prev[%.1f x %.1f] max[%.1f x %.1f]", id, prev.Width(),
+            prev.Height(), lc->maxSize.Width(), lc->maxSize.Height());
+        return false;
+    }
+    ACE_SCOPED_TRACE("ImplicitSplit:admit id[%d]", id);
+    return true;
+}
+
 bool StackLayoutAlgorithm::IsAsyncLoadAvailable(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
+    if (PipelineContext::GetCurrentContext() && AnimationUtils::IsImplicitAnimationOpen()) {
+        // Avoid splitting in animation closure. Fast check on the early stage of layout
+        return false;
+    }
+
     const auto& layoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
     auto syncLoad = layoutProperty->GetSyncLoad().value_or(true);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
-    if (syncLoad || !layoutConstraint.has_value()) {
-        return false;
+    if (!syncLoad && layoutConstraint.has_value() && layoutConstraint.value().selfIdealSize.IsValid()) {
+        return true;
     }
-    auto idealSize = layoutConstraint.value().selfIdealSize;
-    return idealSize.IsValid();
+
+    return IsSafeImplicitAsync(layoutWrapper);
 }
 
 bool StackLayoutAlgorithm::MeasureInNextFrame() const

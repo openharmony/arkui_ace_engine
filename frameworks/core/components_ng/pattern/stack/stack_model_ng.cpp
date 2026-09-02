@@ -75,6 +75,11 @@ void StackModelNG::SetSyncLoad(FrameNode* frameNode, bool enable)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(StackLayoutProperty, SyncLoad, enable, frameNode);
 }
 
+void StackModelNG::ResetSyncLoad(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(StackLayoutProperty, SyncLoad, frameNode);
+}
+
 bool StackModelNG::GetSyncLoad(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, true);
