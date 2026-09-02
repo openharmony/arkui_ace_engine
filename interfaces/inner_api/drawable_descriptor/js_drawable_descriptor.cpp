@@ -1413,7 +1413,15 @@ napi_value JsDrawableDescriptor::SetSVGResourceLimitLevel(napi_env env, napi_cal
         return nullptr;
     }
     int32_t id = 0;
-    napi_get_value_int32(env, argv[0], &id);
+    napi_status getStatus = napi_get_value_int32(env, argv[0], &id);
+    if (getStatus != napi_ok) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    constexpr int32_t MAX_LEVEL = 4;
+    if (id < 0 || id >= MAX_LEVEL) {
+        id = 0;
+    }
     napi_value typeName;
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;

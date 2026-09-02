@@ -374,6 +374,11 @@ void LayeredDrawableDescriptor::InitialMask(const SharedResourceManager& resourc
 
 void DrawableDescriptor::SetSVGResourceLimitLevel(const int32_t id)
 {
+    constexpr int32_t MAX_LEVEL = 4;
+    if (id < 0 || id >= MAX_LEVEL) {
+        svgLimitsId_ = 0;
+        return;
+    }
     svgLimitsId_ = id;
 }
 

@@ -526,6 +526,10 @@ void SetSVGResourceLimitLevel(void* object, int32_t id)
     if (object == nullptr) {
         return;
     }
+    constexpr int32_t MAX_LEVEL = 4;
+    if (id < 0 || id >= MAX_LEVEL) {
+        id = 0;
+    }
     auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
     drawable->SetSVGResourceLimitLevel(id);
 }
