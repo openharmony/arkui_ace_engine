@@ -199,7 +199,6 @@ const std::string UIEXTENSION_CONFIG_WINDOW_MODE = "ohos.system.window.mode";
 constexpr int32_t INVALID_WINDOW_MODE = 1000;
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
-constexpr uint32_t LOG_DELAY_TIME = 250; // 250ms
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
@@ -3188,8 +3187,6 @@ void UIContentImpl::Destroy()
         ResschedEventListener::GetInstance()->UnRegisterFromRSS(window_->GetWindowId());
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     }
-    taskTimeForComeIn_.lastTaskTime = 0;
-    taskTimeForExit_.lastTaskTime = 0;
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()
@@ -4066,13 +4063,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        auto logTask = [config, reason, rsTransaction, stringifiedMap, keyboardRect]() {
-            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardRect %{public}s",
-                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
-                stringifiedMap.c_str(), keyboardRect.ToString().c_str());
-        };
-        taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithKeyboardInfo";
-        ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
+        TAG_LOGD(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardRect %{public}s",
+            config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+            stringifiedMap.c_str(), keyboardRect.ToString().c_str());
     } else {
         if (SystemProperties::GetSyncDebugTraceEnabled()) {
             ACE_LAYOUT_SCOPED_TRACE(
@@ -4081,13 +4074,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        auto logTask = [config, reason, rsTransaction, stringifiedMap]() {
-            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardInfo is null",
-                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
-                stringifiedMap.c_str());
-        };
-        taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithoutKeyboardInfo";
-        ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
+        TAG_LOGD(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardInfo is null",
+            config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+            stringifiedMap.c_str());
     }
 
     // Page rotation has most of the same logic as regular rotation,
