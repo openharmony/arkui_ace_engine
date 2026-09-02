@@ -87,19 +87,41 @@ private:
     StartingRowInfo SolveForward(float mainGap, float targetLen, int32_t idx);
 
     /**
-     * @brief Find the starting row using SkipLinesAboveView (accounts for startFixOffset_).
+     * @brief Find the starting row via SkipLinesAboveView plus an extension-area walk-back.
      *
-     * Used when currentOffset_ < 0 and startFixOffset_ > 0: lines whose bottom is above
-     * the clip start (-startFixOffset_) are skipped, the rest are kept. Then walks backward
-     * from the found line to also include lines that became visible in the start extension
-     * area during upward scrolling (without this walk they would be dropped from the visible
-     * range and not laid out every frame). Returns nullopt if no valid line is found (caller
-     * should fall back to SolveForward).
+     * Used when currentOffset_ < 0 and startFixOffset_ > 0: SkipLinesAboveView skips lines
+     * whose bottom is above the content-area top (position 0 — it does NOT account for the
+     * clip start). The walk-back inside then moves further up to also include lines whose
+     * bottom is at/above the clip start (-startFixOffset_), i.e. lines that became visible
+     * in the start extension area during upward scrolling (without this walk they would be
+     * dropped from the visible range and not laid out every frame). Returns nullopt if no
+     * valid line is found (caller should fall back to SolveForward).
      *
      * @param mainGap The gap length between rows.
      * @return The StartingRowInfo, or nullopt if lineHeightMap_ is exhausted.
      */
     std::optional<StartingRowInfo> SolveForwardWithExtension(float mainGap);
+
+    /**
+     * @brief Verify SolveBackward can walk its full span without hitting a missing
+     *        lineHeightMap_ entry.
+     *
+     * SolveBackward silently returns {0, 0, 0.0f} when any line inside its backward
+     * span is missing from lineHeightMap_ (e.g. after a jump's ClearCache cleared
+     * front heights while gridMatrix_ retained rows). The extension
+     * branches in FindStartingRow augment the backward target length with
+     * startFixOffset_, which can push the walk past the single previously-guarded
+     * line — the whole span must be verified up front, otherwise the visible range
+     * silently jumps back to row 0 / item 0 (view flash).
+     *
+     * Mirrors SolveBackward's accumulation exactly (starting len = mainGap).
+     *
+     * @param mainGap The gap length between rows.
+     * @param targetLen The backward target length SolveBackward would receive.
+     * @param idx The starting line index SolveBackward would receive.
+     * @return true if every line in the span exists in lineHeightMap_.
+     */
+    bool CanSolveBackwardSpan(float mainGap, float targetLen, int32_t idx) const;
 
     /**
      * @brief Find the new starting row after offsetting by [targetLen] going backward (scrolling up).

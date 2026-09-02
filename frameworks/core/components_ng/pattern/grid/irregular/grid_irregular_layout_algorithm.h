@@ -70,6 +70,17 @@ private:
     void MeasureBackward(float mainSize, bool toAdjust = false);
 
     /**
+     * @brief Measure lines above the start line that are visible in the start contentClip
+     * extension area (top padding / safe area / custom clip region).
+     *
+     * Used after jump/skip paths that don't fill backward: those paths leave the start
+     * extension area without measured lineHeightMap_ entries, so items scrolled into it
+     * would not participate in layout every frame. startFixOffset_ == 0 (no extension)
+     * is a no-op, preserving the original behavior.
+     */
+    void MeasureBackwardForStartExtension();
+
+    /**
      * @brief Check if offset is larger than the entire viewport. If so, skip measuring intermediate items and jump
      * directly to the estimated destination.
      *
@@ -132,15 +143,6 @@ private:
      * @param jumpLineIdx The line index to jump to, can be adjusted during the function call.
      */
     void PrepareLineHeight(float mainSize, int32_t& jumpLineIdx);
-
-    /**
-     * @brief Measure items above the jump line to fill the start contentClip extension area.
-     *
-     * PrepareLineHeight for START only fills forward, so the line heights of items above
-     * the jump line are unknown. This measures them so FindStartingRow can include items
-     * that fit in the startFixOffset_ extension.
-     */
-    void MeasureBackwardForStartExtension();
     // ========================================== MeasureOnJump ends ===========================================
 
     /**

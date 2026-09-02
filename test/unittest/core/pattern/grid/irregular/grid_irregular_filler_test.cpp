@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "irregular_matrices.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 

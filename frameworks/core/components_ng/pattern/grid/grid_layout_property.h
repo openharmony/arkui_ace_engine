@@ -162,8 +162,9 @@ public:
 
     void OnContentEndOffsetUpdate(float /* contentEndOffset */) const override;
 
-    std::optional<std::string> GetFinalColumnsTemplate(double width);
-
+    // Layout-side contentClip gating (ADR-1): only an explicit BOUNDARY/SAFE_AREA/
+    // CUSTOM value activates the extension. Unset (nullopt), reset (writes
+    // nullopt), DEFAULT and CONTENT_ONLY never activate it.
     void UpdateContentClip(std::optional<ContentClip> contentClip) override
     {
         if (contentClip_ != contentClip) {
@@ -172,6 +173,12 @@ public:
         }
     }
 
+    std::optional<ContentClip> GetContentClip() const
+    {
+        return contentClip_;
+    }
+
+    std::optional<std::string> GetFinalColumnsTemplate(double width);
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -208,6 +215,7 @@ private:
 
     void UpdateIrregularFlag(const GridLayoutOptions& layoutOptions) const;
     std::string GetItemFillPolicyString() const;
+
     std::optional<ContentClip> contentClip_;
 };
 } // namespace OHOS::Ace::NG
