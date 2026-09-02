@@ -67,6 +67,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);
     static bool GetRefreshing(FrameNode* frameNode);
+    static void SetCustomBuilderNode(FrameNode* frameNode, const RefPtr<NG::UINode>& customBuilder);
     static void SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder);
     static void SetCustomBuilderMultiThread(FrameNode* frameNode, FrameNode* customBuilder);
     static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
