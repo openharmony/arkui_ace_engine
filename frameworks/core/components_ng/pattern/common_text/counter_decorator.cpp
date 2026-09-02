@@ -14,23 +14,27 @@
  */
 
 #include "core/components_ng/pattern/common_text/counter_decorator.h"
+#include "core/components_ng/pattern/common_text/counter_constants.h"
 
 #include <string_view>
 
-#include "core/components_ng/pattern/common_text/counter_host.h"
+#include "base/log/ace_trace.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/common_text/counter_host.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "frameworks/base/utils/multi_thread.h"
 #include "frameworks/base/utils/utils.h"
-
-#include "core/components_ng/pattern/text_field/text_input_response_area.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 
-constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 
 } // namespace
@@ -344,7 +348,7 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
     auto counterType = host->GetCounterType();
     double thresholdPercent = static_cast<double>(counterType) / static_cast<double>(SHOW_COUNTER_PERCENT);
     auto limitSize = static_cast<uint32_t>(static_cast<double>(maxLength) * thresholdPercent);
-    if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
+    if (counterType == COUNTER_DEFAULT_MODE || (textLength >= limitSize && counterType != COUNTER_DEFAULT_MODE)) {
         UpdateCounterContentAndStyle(textLength, maxLength, true);
     } else {
         UpdateCounterContentAndStyle(textLength, maxLength, false);
@@ -372,7 +376,7 @@ void CounterDecorator::UpdateCounterContent()
     auto counterType = host->GetCounterType();
     double thresholdPercent = static_cast<double>(counterType) / static_cast<double>(SHOW_COUNTER_PERCENT);
     auto limitSize = static_cast<uint32_t>(static_cast<double>(maxLength) * thresholdPercent);
-    if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
+    if (counterType == COUNTER_DEFAULT_MODE || (textLength >= limitSize && counterType != COUNTER_DEFAULT_MODE)) {
         UpdateCounterContentAndStyle(textLength, maxLength, true);
     } else {
         UpdateCounterContentAndStyle(textLength, maxLength, false);
@@ -503,6 +507,45 @@ std::string CounterDecorator::GetCounterFormatString(uint32_t textLength, uint32
     auto theme = context->GetTheme<TextFieldTheme>(decoratedNode->GetThemeScopeId());
     CHECK_NULL_RETURN(theme, defaultFormatStr);
     return theme->GetCounterFormatString(textLength, maxLength);
+}
+
+void CounterDecorator::UltralimitShake()
+{
+    auto frameNode = decoratedNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    AnimationOption option;
+    context->UpdateTranslateInXY({ -1.0f, 0.0f});
+    const RefPtr<InterpolatingSpring> curve =
+        AceType::MakeRefPtr<InterpolatingSpring>(COUNTER_VELOCITY, COUNTER_MASS, COUNTER_STIFFNESS, COUNTER_DAMPING);
+    option.SetCurve(curve);
+    option.SetFillMode(FillMode::FORWARDS);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    AnimationUtils::Animate(
+        option,
+        [weak = WeakClaim(Referenced::RawPtr(context))]() {
+            auto context = weak.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->UpdateTranslateInXY({ 0.0f, 0.0f });
+        },
+        option.GetOnFinishEvent());
+}
+
+void CounterDecorator::LayoutCounterNode(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto counterHost = DynamicCast<ICounterHost>(pattern);
+    CHECK_NULL_VOID(counterHost);
+    auto counterDecorator = counterHost->GetCounterDecorator();
+    CHECK_NULL_VOID(counterDecorator);
+    counterDecorator->LayoutDecorator();
 }
 
 }

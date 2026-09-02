@@ -1075,7 +1075,7 @@ std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const 
     return std::move(createSourceInfoFunc);
 }
 
-int32_t RichEditorPattern::GetTextContentLength()
+int32_t RichEditorPattern::GetTextContentLength() const
 {
     if (isSpanStringMode_ && styledString_) {
         return styledString_->GetLength();

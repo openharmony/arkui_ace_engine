@@ -2820,14 +2820,14 @@ void TextFieldModelNG::SetBorderColor(FrameNode* frameNode, NG::BorderColorPrope
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderColorFlagByUser, borderColors, frameNode);
 }
 
-void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles)
+void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, const NG::BorderStyleProperty& borderStyles)
 {
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBorderStyle(frameNode, borderStyles);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderStyleFlagByUser, borderStyles, frameNode);
 }
 
-void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin)
+void TextFieldModelNG::SetMargin(FrameNode* frameNode, const NG::PaddingProperty& margin)
 {
     CHECK_NULL_VOID(frameNode);
     MarginProperty userMargin;

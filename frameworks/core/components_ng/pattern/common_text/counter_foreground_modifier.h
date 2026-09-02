@@ -19,9 +19,10 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
+class Pattern;
 
 class CounterForegroundModifier : public ForegroundModifier {
     DECLARE_ACE_TYPE(CounterForegroundModifier, ForegroundModifier);

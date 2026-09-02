@@ -2553,7 +2553,7 @@
       "OHOS::Ace::NG::TextPattern::GetStartAndEnd(int, OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> const&)";
       "OHOS::Ace::NG::TextPattern::GetSymbolSpanStyleObject(OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanNode> const&)";
       "OHOS::Ace::NG::TextPattern::GetTextBoxes()";
-      "OHOS::Ace::NG::TextPattern::GetTextContentLength()";
+      "OHOS::Ace::NG::TextPattern::GetTextContentLength() const";
       "OHOS::Ace::NG::TextPattern::GetTextContentRect(bool) const";
       "OHOS::Ace::NG::TextPattern::GetTextDetectEnable()";
       "OHOS::Ace::NG::TextPattern::GetTextForDisplay() const";

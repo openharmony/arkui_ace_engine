@@ -563,7 +563,7 @@ public:
     void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
-    int32_t GetTextContentLength() override;
+    int32_t GetTextContentLength() const override;
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);

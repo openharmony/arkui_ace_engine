@@ -20,6 +20,8 @@ build_component_ng("common_text_pattern_ng") {
   sources = [
     "counter_decorator.cpp",
     "counter_foreground_modifier.cpp",
+    "text_border_utils.cpp",
+    "text_margin_utils.cpp",
   ]
   ark_sources = []
 }

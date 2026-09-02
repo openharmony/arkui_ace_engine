@@ -83,6 +83,8 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_theme_test_ng.cpp",
     "rich_editor_theme_wrapper_test.cpp",
     "rich_editor_overlay_modifier_test_ng.cpp",
+    "rich_editor_border_utils_test_ng.cpp",
+    "rich_editor_margin_utils_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
