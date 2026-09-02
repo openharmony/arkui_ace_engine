@@ -32,6 +32,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/window_scene/scene/mirror_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
@@ -1125,6 +1126,226 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNodeForPrelaunch02, TestSize.Level0)
     session->SetSessionState(Rosen::SessionState::STATE_CONNECT);
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_FALSE(windowScene->session_->surfaceNode_->bufferAvailable_);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap_ReplaceBlankWithStarting
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap replaces blank window with starting window when pending replace
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnDirtyLayoutWrapperSwap_ReplaceBlankWithStarting, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+        .isPrelaunch_ = true,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+
+    /**
+     * @tc.steps: step1. Null the pipeline task executor so that CleanBlankWindow skips posting
+     *            its delayed clean task (CHECK_NULL_VOID(taskExecutor)); the blank window survives
+     *            for later verification. Note: blank window logic requires non-PC window and free
+     *            multi window disabled (default system config), so keep the defaults here.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto containerPipeline = container->pipelineContext_;
+    ASSERT_NE(containerPipeline, nullptr);
+    auto originalExecutor = pipelineContext->taskExecutor_;
+    auto originalContainerExecutor = containerPipeline->taskExecutor_;
+    pipelineContext->taskExecutor_ = nullptr;
+    containerPipeline->taskExecutor_ = nullptr;
+    windowScene->attachToFrameNodeFlag_ = true;
+    windowScene->needReplaceBlankWithStarting_ = true;
+
+    /**
+     * @tc.steps: step2. Trigger OnDirtyLayoutWrapperSwap with size mismatched to layout rect.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    DirtySwapConfig dirtySwapConfig;
+    auto result = windowScene->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+
+    /**
+     * @tc.steps: step3. Capture state and restore executor before asserting, so that assertion
+     *            failures neither crash on stale pointers nor leak the null executor.
+     */
+    auto blankWindow = windowScene->blankWindow_;
+    auto startingWindow = windowScene->startingWindow_;
+    auto replaceFlag = windowScene->needReplaceBlankWithStarting_;
+    pipelineContext->taskExecutor_ = originalExecutor;
+    containerPipeline->taskExecutor_ = originalContainerExecutor;
+
+    /**
+     * @tc.steps: step4. Blank window is replaced by starting window and flag is consumed.
+     */
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(replaceFlag, false);
+    EXPECT_EQ(startingWindow, nullptr);
+    ASSERT_NE(blankWindow, nullptr);
+    EXPECT_EQ(blankWindow->GetTag(), V2::IMAGE_ETS_TAG);
+
+    /**
+     * @tc.steps: step5. Blank window exists → CreateAndAttachBlankWindow is skipped, flag keeps.
+     */
+    pipelineContext->taskExecutor_ = nullptr;
+    containerPipeline->taskExecutor_ = nullptr;
+    windowScene->attachToFrameNodeFlag_ = true;
+    windowScene->needReplaceBlankWithStarting_ = true;
+    result = windowScene->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    auto replaceFlagSecond = windowScene->needReplaceBlankWithStarting_;
+    auto blankWindowSecond = windowScene->blankWindow_;
+    pipelineContext->taskExecutor_ = originalExecutor;
+    containerPipeline->taskExecutor_ = originalContainerExecutor;
+
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(replaceFlagSecond, true);
+    ASSERT_NE(blankWindowSecond, nullptr);
+    EXPECT_EQ(blankWindowSecond->GetTag(), V2::IMAGE_ETS_TAG);
+}
+
+/**
+ * @tc.name: CreateAndAttachBlankWindow_ReplaceWithStarting
+ * @tc.desc: Test CreateAndAttachBlankWindow replaces blank window with starting window when pending replace
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, CreateAndAttachBlankWindow_ReplaceWithStarting, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+        .isPrelaunch_ = true,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+
+    /**
+     * @tc.steps: step1. Null the pipeline task executor so that CleanBlankWindow skips posting
+     *            its delayed clean task (CHECK_NULL_VOID(taskExecutor)).
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto containerPipeline = container->pipelineContext_;
+    ASSERT_NE(containerPipeline, nullptr);
+    auto originalExecutor = pipelineContext->taskExecutor_;
+    auto originalContainerExecutor = containerPipeline->taskExecutor_;
+    pipelineContext->taskExecutor_ = nullptr;
+    containerPipeline->taskExecutor_ = nullptr;
+
+    /**
+     * @tc.steps: step2. Pending replace → blank window is created from starting window.
+     */
+    windowScene->needReplaceBlankWithStarting_ = true;
+    auto result = windowScene->CreateAndAttachBlankWindow(frameNode, SizeF(100.0f, 100.0f));
+
+    /**
+     * @tc.steps: step3. Capture state and restore executor before asserting.
+     */
+    auto blankWindow = windowScene->blankWindow_;
+    auto startingWindow = windowScene->startingWindow_;
+    auto replaceFlag = windowScene->needReplaceBlankWithStarting_;
+    pipelineContext->taskExecutor_ = originalExecutor;
+    containerPipeline->taskExecutor_ = originalContainerExecutor;
+
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(replaceFlag, false);
+    EXPECT_EQ(startingWindow, nullptr);
+    ASSERT_NE(blankWindow, nullptr);
+    EXPECT_EQ(blankWindow->GetTag(), V2::IMAGE_ETS_TAG);
+}
+
+/**
+ * @tc.name: CreateAndAttachBlankWindow_CreateBlankWindow
+ * @tc.desc: Test CreateAndAttachBlankWindow creates plain blank window without pending replace
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, CreateAndAttachBlankWindow_CreateBlankWindow, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+        .isPrelaunch_ = true,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+
+    /**
+     * @tc.steps: step1. Null the pipeline task executor so that CleanBlankWindow skips posting
+     *            its delayed clean task (CHECK_NULL_VOID(taskExecutor)).
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto containerPipeline = container->pipelineContext_;
+    ASSERT_NE(containerPipeline, nullptr);
+    auto originalExecutor = pipelineContext->taskExecutor_;
+    auto originalContainerExecutor = containerPipeline->taskExecutor_;
+    pipelineContext->taskExecutor_ = nullptr;
+    containerPipeline->taskExecutor_ = nullptr;
+
+    /**
+     * @tc.steps: step2. No pending replace → plain blank window is created.
+     */
+    windowScene->needReplaceBlankWithStarting_ = false;
+    auto result = windowScene->CreateAndAttachBlankWindow(frameNode, SizeF(100.0f, 100.0f));
+
+    /**
+     * @tc.steps: step3. Capture state and restore executor before asserting.
+     */
+    auto blankWindow = windowScene->blankWindow_;
+    auto startingWindow = windowScene->startingWindow_;
+    auto replaceFlag = windowScene->needReplaceBlankWithStarting_;
+    pipelineContext->taskExecutor_ = originalExecutor;
+    containerPipeline->taskExecutor_ = originalContainerExecutor;
+
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(replaceFlag, false);
+    EXPECT_EQ(startingWindow, nullptr);
+    ASSERT_NE(blankWindow, nullptr);
+    EXPECT_EQ(blankWindow->GetTag(), V2::WINDOW_SCENE_ETS_TAG);
 }
 
 /**
