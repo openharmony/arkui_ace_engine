@@ -253,7 +253,7 @@ void VideoElement::RegisterMediaPlayerEvent()
     };
 
     auto&& errorEvent = [videoElement, uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([&videoElement] {
+        uiTaskExecutor.PostTask([videoElement] {
             auto video = videoElement.Upgrade();
             if (video) {
                 video->OnError("", "");
