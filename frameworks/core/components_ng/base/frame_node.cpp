@@ -2517,10 +2517,10 @@ void FrameNode::ThrottledAreaChangeTask()
     }
     auto currParentOffsetToWindow =
         CalculateOffsetRelativeToWindow(pipeline->GetVsyncTime(), false) - currFrameRect.GetOffset();
-    eventHub_->HandleOnAreaChange(lastFrameRect_, lastParentOffsetToWindow_,
+    bool areaChanged = eventHub_->HandleOnAreaChange(lastFrameRect_, lastParentOffsetToWindow_,
         currFrameRect, currParentOffsetToWindow);
     throttledAreaChangeCallbackOnTheWay_ = false;
-    lastAreaChangeTriggerTime_ = GetCurrentTimestamp();
+    lastAreaChangeTriggerTime_ = areaChanged ? GetCurrentTimestamp() : lastAreaChangeTriggerTime_;
 }
 
 void FrameNode::ProcessThrottledAreaChangeCallback()
@@ -2546,7 +2546,7 @@ void FrameNode::ProcessThrottledAreaChangeCallback()
         auto delay = static_cast<uint32_t>(static_cast<int64_t>(onAreaChangeMinInterval_) - interval);
         executor->PostDelayedTask(
             std::move(task), TaskExecutor::TaskType::UI, delay < 0 ? 0 : delay, "ThrottledAreaChangeCallback",
-            PriorityType::IDLE);
+            PriorityType::LOW);
     } else {
         ThrottledAreaChangeTask();
     }
