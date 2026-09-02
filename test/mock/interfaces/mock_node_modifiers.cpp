@@ -16,15 +16,11 @@
 #include <cstring>
 
 #include "core/interfaces/native/node/node_api.h"
-
-constexpr int32_t MODIFIER_COUNTS = 9;
-constexpr int32_t MODIFIER_COUNTS_CJ = 8;
-constexpr int32_t BLANK_LINES = 6;
+#include "mock_swiper_modifier.h"
 // Mock implementation for unit tests
 extern "C" {
 ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static ArkUINodeModifiers impl = {
         .version = ARKUI_NODE_MODIFIERS_API_VERSION,
         .getCommonModifier = nullptr,
@@ -100,7 +96,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCommonShapeModifier = nullptr,
         .getShapeModifier = nullptr,
         .getRectModifier = nullptr,
-        .getSwiperModifier = nullptr,
+        .getSwiperModifier = GetMockSwiperModifier,
         .getListItemModifier = nullptr,
         .getListModifier = nullptr,
         .getListItemGroupModifier = nullptr,

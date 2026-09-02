@@ -17,19 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SWIPER_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/swiper/bridge/swiper_custom_modifier.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUISwiperModifier* GetSwiperModifier();
+ACE_FORCE_EXPORT const ArkUISwiperModifier* GetSwiperModifier();
 const CJUISwiperModifier* GetCJUISwiperModifier();
-void SetSwiperChange(ArkUINodeHandle node, void* extraParam);
-void SetSwiperAnimationStart(ArkUINodeHandle node, void* extraParam);
-void SetSwiperAnimationEnd(ArkUINodeHandle node, void* extraParam);
-void SetSwiperGestureSwipe(ArkUINodeHandle node, void* extraParam);
-void SetSwiperOnContentDidScroll(ArkUINodeHandle node, void* extraParam);
-void SetSwiperSelected(ArkUINodeHandle node, void* extraParam);
-void SetSwiperUnselected(ArkUINodeHandle node, void* extraParam);
-void SetSwiperContentWillScroll(ArkUINodeHandle node, void* extraParam);
-void SetSwiperScrollStateChanged(ArkUINodeHandle node, void* extraParam);
+ACE_FORCE_EXPORT const ArkUISwiperCustomModifier* GetSwiperCustomModifier();
 void ResetSwiperOnContentDidScroll(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SWIPER_MODIFIER_H

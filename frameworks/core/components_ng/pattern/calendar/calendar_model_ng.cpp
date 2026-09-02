@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 
 namespace OHOS::Ace::NG {
 void CalendarModelNG::Create(const CalendarModelData& calendarModelData)
@@ -57,8 +58,9 @@ void CalendarModelNG::Create(const CalendarData& calendarData)
         return;
     }
     auto swiperId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
+    CHECK_NULL_VOID(swiperModifier);
+    auto swiperNode = AceType::Claim(reinterpret_cast<FrameNode*>(swiperModifier->createFrameNode(swiperId)));
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
@@ -68,9 +70,8 @@ void CalendarModelNG::Create(const CalendarData& calendarData)
     swiperLayoutProperty->UpdateIndex(1);
     swiperLayoutProperty->UpdateShowIndicator(false);
     swiperLayoutProperty->UpdateDisableSwipe(true);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperController = swiperPattern->GetSwiperController();
+    auto swiperController = AceType::Claim(reinterpret_cast<SwiperController*>(
+        swiperModifier->getSwiperController(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)))));
     CHECK_NULL_VOID(swiperController);
     swiperNode->MountToParent(frameNode);
 
@@ -668,8 +669,9 @@ RefPtr<FrameNode> CalendarModelNG::CreateFrameNode(int32_t nodeId)
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
     CHECK_NULL_RETURN(calendarPattern, frameNode);
     auto swiperId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
+    CHECK_NULL_RETURN(swiperModifier, frameNode);
+    auto swiperNode = AceType::Claim(reinterpret_cast<FrameNode*>(swiperModifier->createFrameNode(swiperId)));
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, frameNode);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
@@ -679,9 +681,8 @@ RefPtr<FrameNode> CalendarModelNG::CreateFrameNode(int32_t nodeId)
     swiperLayoutProperty->UpdateIndex(1);
     swiperLayoutProperty->UpdateShowIndicator(false);
     swiperLayoutProperty->UpdateDisableSwipe(true);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_RETURN(swiperPattern, frameNode);
-    auto swiperController = swiperPattern->GetSwiperController();
+    auto swiperController = AceType::Claim(reinterpret_cast<SwiperController*>(
+        swiperModifier->getSwiperController(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)))));
     CHECK_NULL_RETURN(swiperController, frameNode);
     swiperNode->MountToParent(frameNode);
 

@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/event/input_event.h"
 
 
 namespace OHOS::Ace::NG {
@@ -172,7 +172,6 @@ private:
     RefPtr<FrameNode> GetCalendarFrameNode();
     RefPtr<CalendarPattern> GetCalendarPattern();
     RefPtr<FrameNode> GetSwiperFrameNode();
-    RefPtr<SwiperPattern> GetSwiperPattern();
 
     void UpdateSwiperNode(const ObtainedMonth& monthData, bool isPrev);
     void UpdateSwiperNodeFocusedDay(const CalendarDay& focusedDay, bool isPrev);

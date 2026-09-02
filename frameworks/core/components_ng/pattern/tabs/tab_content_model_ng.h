@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 class TextLayoutProperty;
+class TabContentPattern;
 class TabsNode;
 }
 
@@ -68,11 +69,38 @@ public:
     void SetId(const std::string& id) override;
     static void AddTabBarItem(
         const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
+    static void CreateTabContent();
+    static void CreateTabContent(std::function<void()>&& deepRenderFunc);
+    static void PopTabContent();
     static void RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode);
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder);
     static void SetTabBarLabel(FrameNode* node, const std::string& label);
+    static void SetTabBar(FrameNode* node, const std::optional<std::string>& text,
+        const std::optional<std::string>& icon, const std::optional<TabBarSymbol>& tabBarSymbol,
+        TabBarBuilderFunc&& builder, bool useContentOnly);
+    static void SetTabBarWithContent(FrameNode* node, const RefPtr<NG::UINode>& content);
+    static void SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle);
+    static void SetIndicator(FrameNode* node, const IndicatorStyle& indicator);
+    static void SetDrawableIndicatorConfig(FrameNode* node, const ImageInfoConfig& config);
+    static void SetDrawableIndicatorFlag(FrameNode* node, bool isDrawableIndicator);
+    static void SetIndicatorColorByUser(FrameNode* node, bool isByUser);
+    static void SetBoard(FrameNode* node, const BoardStyle& board);
+    static void SetSelectedMode(FrameNode* node, SelectedMode selectedMode);
+    static void SetLabelStyle(FrameNode* node, const LabelStyle& labelStyle);
+    static void SetLabelUnselectedColorByUser(FrameNode* node, bool isByUser);
+    static void SetLabelSelectedColorByUser(FrameNode* node, bool isByUser);
+    static void SetIconStyle(FrameNode* node, const IconStyle& iconStyle);
+    static void SetIconUnselectedColorByUser(FrameNode* node, bool isByUser);
+    static void SetIconSelectedColorByUser(FrameNode* node, bool isByUser);
+    static void SetPadding(FrameNode* node, const NG::PaddingProperty& padding);
+    static void SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding);
+    static void SetLayoutMode(FrameNode* node, LayoutMode layoutMode);
+    static void SetVerticalAlign(FrameNode* node, FlexAlign verticalAlign);
+    static void SetSymmetricExtensible(FrameNode* node, bool isExtensible);
+    static void SetId(FrameNode* node, const std::string& id);
+    static void SetCustomStyleNode(FrameNode* node, const RefPtr<NG::FrameNode>& customStyleNode);
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
     void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;
@@ -100,11 +128,12 @@ public:
     static bool CreateIndicatorWidthWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static bool CreateIndicatorBorderRadiusWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static bool CreateIndicatorMarginTopWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-
-private:
-    static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
     static void CreateMoreWithResourceObj(TabContentJsType jsType, FrameNode* frameNode,
         const RefPtr<ResourceObject>& resObj);
+
+private:
+    static RefPtr<TabContentPattern> GetTabContentPattern(FrameNode* node);
+    static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
     static void InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty);
 };
 

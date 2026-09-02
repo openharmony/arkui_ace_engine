@@ -34,12 +34,15 @@
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
+#include "core/interfaces/native/node/node_swiper_custom_modifier.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -605,16 +608,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateScrollNode()
 
 RefPtr<FrameNode> CalendarDialogView::CreateCalendarSwiperNode()
 {
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    CHECK_NULL_RETURN(swiperNode, nullptr);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
-    swiperLayoutProperty->UpdateIndex(CURRENT_MONTH_INDEX);
-    swiperLayoutProperty->UpdateShowIndicator(false);
-    swiperLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    swiperLayoutProperty->UpdateLoop(true);
-    swiperLayoutProperty->UpdateDisableSwipe(false);
+    auto* modifier = GetSwiperCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto swiperNode = AceType::Claim(reinterpret_cast<FrameNode*>(
+        modifier->createCalendarSwiperNode(ElementRegister::GetInstance()->MakeUniqueId())));
     return swiperNode;
 }
 

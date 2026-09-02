@@ -19,18 +19,41 @@
 
 #include "base/i18n/localization.h"
 #include "core/components/common/layout/constants.h"
+#include "core/interfaces/native/node/node_swiper_custom_modifier.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const ArkUISwiperCustomModifier* GetStepperSwiperModifier()
+{
+    return GetSwiperCustomModifier();
+}
+
+bool IsSwiperAnimationStopped(const RefPtr<FrameNode>& swiperNode)
+{
+    CHECK_NULL_RETURN(swiperNode, true);
+    auto modifier = GetStepperSwiperModifier();
+    CHECK_NULL_RETURN(modifier, true);
+    return modifier->isAnimationStopped(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)));
+}
+
+void SwipeToSwiperNode(const RefPtr<FrameNode>& swiperNode, int32_t index)
+{
+    CHECK_NULL_VOID(swiperNode);
+    auto modifier = GetStepperSwiperModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->swipeTo(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)), index);
+}
+} // namespace
 
 void StepperPattern::OnModifyDone()
 {
@@ -571,18 +594,12 @@ void StepperPattern::HandlingLeftButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperAnimationController = swiperPattern->GetController();
-    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+    if (!IsSwiperAnimationStopped(swiperNode)) {
         return;
     }
-    auto swiperController = swiperPattern->GetSwiperController();
-    CHECK_NULL_VOID(swiperController);
     stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
     stepperHub->FirePreviousEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
-    swiperController->SwipeTo(std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
+    SwipeToSwiperNode(swiperNode, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
 }
 
 void StepperPattern::HandlingRightButtonClickEvent()
@@ -593,11 +610,7 @@ void StepperPattern::HandlingRightButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperAnimationController = swiperPattern->GetController();
-    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+    if (!IsSwiperAnimationStopped(swiperNode)) {
         return;
     }
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
@@ -612,8 +625,7 @@ void StepperPattern::HandlingRightButtonClickEvent()
         } else {
             stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
             stepperHub->FireNextEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
-            auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
-            swiperController->SwipeTo(std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
+            SwipeToSwiperNode(swiperNode, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
         }
     }
 }

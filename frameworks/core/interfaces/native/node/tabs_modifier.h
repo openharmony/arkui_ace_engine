@@ -17,10 +17,12 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TABS_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/tabs/bridge/tabs_custom_modifier.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITabsModifier* GetTabsModifier();
 const CJUITabsModifier* GetCJUITabsModifier();
+const ArkUITabsCustomModifier* GetTabsCustomModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TABS_MODIFIER_H

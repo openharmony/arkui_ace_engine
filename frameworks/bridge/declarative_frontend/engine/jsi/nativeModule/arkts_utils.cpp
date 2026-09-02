@@ -1651,6 +1651,9 @@ bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &j
 bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
     DimensionUnit defaultUnit, RefPtr<ResourceObject>& resourceObject, bool isSupportPercent)
 {
+    if (jsValue.IsEmpty() || jsValue->IsNull() || jsValue->IsUndefined()) {
+        return false;
+    }
     if (!jsValue->IsNumber() && !jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
         return false;
     }
@@ -2356,6 +2359,29 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueR
         return false;
     }
     return false;
+}
+
+bool ArkTSUtils::ParseJsMediaWithBundleName(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    std::string& bundleName, std::string& moduleName)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsMediaWithBundleName(vm, jsValue, result, bundleName, moduleName, resObj);
+}
+
+bool ArkTSUtils::ParseJsMediaWithBundleName(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    std::string& bundleName, std::string& moduleName, RefPtr<ResourceObject>& resourceObject)
+{
+    GetJsMediaBundleInfo(vm, jsValue, bundleName, moduleName);
+    if (!jsValue->IsObject(vm) && !jsValue->IsString(vm)) {
+        return !bundleName.empty() && !moduleName.empty();
+    }
+    if (jsValue->IsString(vm)) {
+        result = jsValue->ToString(vm)->ToString(vm);
+        return true;
+    }
+    return ParseJsMediaFromResource(vm, jsValue, result, resourceObject);
 }
 
 void ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result)
@@ -4938,6 +4964,8 @@ template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<Color>(
     const EcmaVM*, const Local<JSValueRef>&, Color&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<CalcDimension>(
     const EcmaVM*, const Local<JSValueRef>&, CalcDimension&, RefPtr<ResourceObject>&);
+template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<int>(
+    const EcmaVM*, const Local<JSValueRef>&, int&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<Dimension>(
     const EcmaVM*, const Local<JSValueRef>&, Dimension&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<CalcDimension>(
@@ -5300,7 +5328,7 @@ void ArkTSUtils::ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& js
 
     double brightness = 1.0f;
     if (GetProperty(vm, jsOption, "brightness")->IsNumber()) {
-        brightness = GetProperty(vm, jsOption, "brightness")->ToNumber(vm)->Int32Value(vm);
+        brightness = GetProperty(vm, jsOption, "brightness")->ToNumber(vm)->Value();
         brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
     effectOption.brightness = brightness;

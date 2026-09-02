@@ -21,13 +21,16 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
+} // namespace
 const uint32_t DEFAULT_SWIPER_CURRENT_INDEX = 0;
 
 RefPtr<FrameNode> IndicatorModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
     return FrameNode::CreateFrameNode(
-        V2::INDICATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<IndicatorPattern>());
+        INDICATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<IndicatorPattern>());
 }
 
 void IndicatorModelStatic::SetDirection(FrameNode* frameNode, Axis axis)

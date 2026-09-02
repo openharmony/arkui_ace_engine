@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
+#include "core/components_ng/pattern/swiper/bridge/swiper_content_transition_proxy_peer.h"
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

@@ -26,6 +26,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace {
+const char TAB_BAR_ETS_TAG[] = "TabBar";
+} // namespace
+
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -148,7 +152,7 @@ int32_t TabsNode::GetAnimationDuration() const
     if (!tabBarId_.has_value()) {
         return duration;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, duration);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, duration);
@@ -173,7 +177,7 @@ TabBarMode TabsNode::GetTabBarMode() const
     if (!tabBarId_.has_value()) {
         return TabBarMode::FIXED;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, TabBarMode::FIXED);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, TabBarMode::FIXED);
@@ -185,7 +189,7 @@ Dimension TabsNode::GetBarWidth() const
     if (!tabBarId_.has_value()) {
         return 0.0_vp;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
     auto geometryNode = tabBarNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0_vp);
@@ -198,7 +202,7 @@ bool TabsNode::GetBarAdaptiveHeight() const
     if (!tabBarId_.has_value()) {
         return false;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, false);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, false);
@@ -210,7 +214,7 @@ Dimension TabsNode::GetBarHeight() const
     if (!tabBarId_.has_value()) {
         return 0.0_vp;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
     auto geometryNode = tabBarNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0_vp);
@@ -224,7 +228,7 @@ Color TabsNode::GetBarBackgroundColor() const
     if (!tabBarId_.has_value()) {
         return backgroundColor;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, backgroundColor);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_RETURN(tabBarRenderContext, backgroundColor);
@@ -237,7 +241,7 @@ BlurStyle TabsNode::GetBarBackgroundBlurStyle() const
     if (!tabBarId_.has_value()) {
         return barBackgroundBlurStyle;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, barBackgroundBlurStyle);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_RETURN(tabBarRenderContext, barBackgroundBlurStyle);
@@ -256,7 +260,7 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundBlurStyleOptions() const
     static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
         "BlurStyleActivePolicy.ALWAYS_ACTIVE", "BlurStyleActivePolicy.ALWAYS_INACTIVE" };
     static const char* BLUR_TYPE[] = { "BlurType.WITHIN_WINDOW", "BlurType.BEHIND_WINDOW" };
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, jsonBlurStyle);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_RETURN(tabBarRenderContext, jsonBlurStyle);
@@ -276,7 +280,7 @@ bool TabsNode::GetFadingEdge() const
     if (!tabBarId_.has_value()) {
         return true;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, true);
     auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_RETURN(tabBarProperty, true);
@@ -289,7 +293,7 @@ BarGridColumnOptions TabsNode::GetBarGridAlign() const
     if (!tabBarId_.has_value()) {
         return option;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, option);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, option);
@@ -302,7 +306,7 @@ ScrollableBarModeOptions TabsNode::GetScrollableBarModeOptions() const
     if (!tabBarId_.has_value()) {
         return option;
     }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, option);
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, option);
@@ -376,7 +380,7 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundEffect() const
     static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
         "BlurStyleActivePolicy.ALWAYS_ACTIVE", "BlurStyleActivePolicy.ALWAYS_INACTIVE" };
     static const char* BLUR_TYPE[] = { "WITHIN_WINDOW", "BEHIND_WINDOW" };
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    auto tabBarNode = GetFrameNode(TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, jsonEffect);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_RETURN(tabBarRenderContext, jsonEffect);

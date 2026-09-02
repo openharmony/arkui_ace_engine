@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
@@ -40,7 +40,7 @@ public:
     void Execute(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& animationCallbackInfo);
     void Execute(int32_t index, const AnimationCallbackInfo& animationCallbackInfo);
     void Execute(int32_t errorCode);
-    void Execute(const RefPtr<SwiperContentTransitionProxy>& proxy);
+    void Execute(const RefPtr<AceType>& proxy);
     void Execute(int32_t selectedIndex, int32_t index, float position, float mainAxisLength);
     JSRef<JSVal> Execute(const SwiperContentWillScrollResult& result);
 };
@@ -58,12 +58,12 @@ public:
     void GetMainAxisLength(const JSCallbackInfo& args);
     void FinishTransition(const JSCallbackInfo& args);
 
-    void SetProxy(const RefPtr<SwiperContentTransitionProxy>& proxy)
+    void SetProxy(const RefPtr<AceType>& proxy)
     {
         proxy_ = proxy;
     }
 
-    RefPtr<SwiperContentTransitionProxy> GetProxy() const
+    RefPtr<AceType> GetProxy() const
     {
         return proxy_;
     }
@@ -71,7 +71,7 @@ public:
 private:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JsSwiperContentTransitionProxy* proxy);
-    RefPtr<SwiperContentTransitionProxy> proxy_;
+    RefPtr<AceType> proxy_;
 };
 } // namespace OHOS::Ace::Framework
 
