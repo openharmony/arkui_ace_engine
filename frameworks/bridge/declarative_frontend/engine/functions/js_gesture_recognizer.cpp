@@ -236,17 +236,17 @@ void JSPanRecognizer::GetDirection(const JSCallbackInfo& args)
 
 void JSPanRecognizer::GetPanDistance(const JSCallbackInfo& args)
 {
-    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
-    if (!recognizer) {
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(0.0)));
-        return;
-    }
     auto context = PipelineContext::GetCurrentContextSafely();
     if (!context) {
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(0.0)));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(distance_)));
         return;
     }
     double distance = context->ConvertPxToVp(Dimension(distance_, DimensionUnit::PX));
+    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
+    if (!recognizer) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(distance)));
+        return;
+    }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance))));
 }
 
