@@ -1184,11 +1184,23 @@ WebDelegate::~WebDelegate()
         }
     }
     UnRegisterDisplayInfoChange();
-    if (nweb_) {
-        auto context = context_.Upgrade();
-        if (!context) {
-            return;
-        }
+    DestroyNWeb();
+    UnregisterSurfacePositionChangedCallback();
+    UnregisterAvoidAreaChangeListener(instanceId_);
+    UnRegisterConfigObserver();
+    UnregisterFreeMultiWindowListener();
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(surfaceRsNode_);
+}
+
+void WebDelegate::DestroyNWeb()
+{
+    if (nweb_ == nullptr) {
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (context) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "use TaskExecutor to destroy nweb");
         context->GetTaskExecutor()->PostSyncTask(
             [nweb = nweb_]() {
                 if (nweb) {
@@ -1196,13 +1208,39 @@ WebDelegate::~WebDelegate()
                 }
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUIWebDelegateDestructor");
+        return;
     }
-    UnregisterSurfacePositionChangedCallback();
-    UnregisterAvoidAreaChangeListener(instanceId_);
-    UnRegisterConfigObserver();
-    UnregisterFreeMultiWindowListener();
-    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
-    DetachedRsNodeManager::GetInstance().PostDestructorTask(surfaceRsNode_);
+    // Context is already gone: fall back to the main EventRunner so that OnDestroy
+    // still runs on the main thread. PostSyncTask blocks until the main thread
+    // has finished handling the event; if called on the main runner itself, the
+    // event is distributed in place. On failure, fall back to the current thread.
+    TAG_LOGI(AceLogTag::ACE_WEB, "~WebDelegate context is null, use EventHandler to destroy nweb");
+    auto mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+    if (mainRunner == nullptr) {
+        // Extreme fallback (no main runner at all, e.g. process teardown without a
+        // started main loop): calling OnDestroy() here is preferred over skipping
+        // it entirely (engine instance leak). NWeb::OnDestroy is assumed to be
+        // tolerant of the calling thread in this terminal path.
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "~WebDelegate mainRunner is null, run nweb OnDestroy on current thread");
+        nweb_->OnDestroy();
+        return;
+    }
+    auto mainHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(mainRunner);
+    bool isSent = mainHandler->PostSyncTask(
+        [nweb = nweb_]() {
+            if (nweb) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "~WebDelegate EventHandler destroying nweb on main thread");
+                nweb->OnDestroy();
+            }
+        },
+        "ArkUIWebDelegateDestroyNWeb");
+    if (!isSent) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "~WebDelegate PostSyncTask failed, run nweb OnDestroy on current thread");
+        nweb_->OnDestroy();
+    }
 }
 
 void WebDelegate::ReleasePlatformResource()
