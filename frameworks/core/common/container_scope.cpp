@@ -17,10 +17,10 @@
 #include <dlfcn.h>
 #endif
 
-#include <atomic>
 #include <mutex>
 #include <set>
 #include <shared_mutex>
+#include <utility>
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
 #include <algorithm>
@@ -100,8 +100,8 @@ std::shared_mutex mutex_;
 std::set<int32_t> containerSet_;
 thread_local int32_t currentLocalId_(DEFAULT_ID);
 thread_local int32_t currentId_(DEFAULT_ID);
-std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
-std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
+int32_t recentActiveId_ = DEFAULT_ID;
+int32_t recentForegroundId_ = DEFAULT_ID;
 
 // Isolated thread state: used in dc (dynamic component) and card (Form) scenarios.
 // In these scenarios, multiple instances run in the same process but on different threads,
@@ -115,6 +115,36 @@ thread_local bool isIsolatedThread_ = false;
 thread_local std::set<int32_t> localContainerSet_;
 thread_local int32_t localRecentActiveId_ = DEFAULT_ID;
 thread_local int32_t localRecentForegroundId_ = DEFAULT_ID;
+
+using ResolvedInstance = std::pair<int32_t, InstanceIdGenReason>;
+
+ResolvedInstance ResolveInstance(const std::set<int32_t>& containerSet, int32_t recentActiveId,
+    int32_t recentForegroundId)
+{
+    if (containerSet.empty()) {
+        return { INSTANCE_ID_UNDEFINED, InstanceIdGenReason::UNDEFINED };
+    }
+    if (containerSet.size() == 1) {
+        return { *containerSet.begin(), InstanceIdGenReason::SINGLETON };
+    }
+    if (recentActiveId >= 0) {
+        return { recentActiveId, InstanceIdGenReason::ACTIVE };
+    }
+    if (recentForegroundId >= 0) {
+        return { recentForegroundId, InstanceIdGenReason::FOREGROUND };
+    }
+    return { *containerSet.rbegin(), InstanceIdGenReason::DEFAULT };
+}
+
+ResolvedInstance ResolveGlobalInstanceLocked()
+{
+    return ResolveInstance(containerSet_, recentActiveId_, recentForegroundId_);
+}
+
+ResolvedInstance ResolveLocalInstance()
+{
+    return ResolveInstance(localContainerSet_, localRecentActiveId_, localRecentForegroundId_);
+}
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
 bool trackingEnabled_ = false;
@@ -332,34 +362,26 @@ int32_t ContainerScope::CurrentLocalId()
 
 int32_t ContainerScope::DefaultId()
 {
-    // Isolated thread: return the last-inserted ID from the thread-local set.
+    // Isolated thread: thread-local set needs no locking. DefaultId returns the largest
+    // ID (rbegin), independent of recent active/foreground caches — distinct from
+    // SafelyId, which prefers those caches when present in the set.
     if (isIsolatedThread_) {
         if (localContainerSet_.empty()) {
             return INSTANCE_ID_UNDEFINED;
         }
         return *localContainerSet_.rbegin();
     }
-    if (ContainerCount() > 0) {
-        std::shared_lock<std::shared_mutex> lock(mutex_);
-        return *containerSet_.rbegin();
-    }
-    return INSTANCE_ID_UNDEFINED;
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return containerSet_.empty() ? INSTANCE_ID_UNDEFINED : *containerSet_.rbegin();
 }
 
 int32_t ContainerScope::SingletonId()
 {
-    // Isolated thread: return the only ID from the thread-local set.
     if (isIsolatedThread_) {
-        if (localContainerSet_.size() != 1) {
-            return INSTANCE_ID_UNDEFINED;
-        }
-        return *localContainerSet_.begin();
-    }
-    if (ContainerCount() != 1) {
-        return INSTANCE_ID_UNDEFINED;
+        return localContainerSet_.size() == 1 ? *localContainerSet_.begin() : INSTANCE_ID_UNDEFINED;
     }
     std::shared_lock<std::shared_mutex> lock(mutex_);
-    return *containerSet_.begin();
+    return containerSet_.size() == 1 ? *containerSet_.begin() : INSTANCE_ID_UNDEFINED;
 }
 
 int32_t ContainerScope::RecentActiveId()
@@ -368,7 +390,8 @@ int32_t ContainerScope::RecentActiveId()
     if (isIsolatedThread_) {
         return localRecentActiveId_;
     }
-    return recentActiveId_.load(std::memory_order_relaxed);
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return recentActiveId_;
 }
 
 int32_t ContainerScope::RecentForegroundId()
@@ -377,27 +400,17 @@ int32_t ContainerScope::RecentForegroundId()
     if (isIsolatedThread_) {
         return localRecentForegroundId_;
     }
-    return recentForegroundId_.load(std::memory_order_relaxed);
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return recentForegroundId_;
 }
 
 int32_t ContainerScope::SafelyId()
 {
-    uint32_t containerCount = ContainerCount();
-    if (containerCount == 0) {
-        return INSTANCE_ID_UNDEFINED;
+    if (isIsolatedThread_) {
+        return ResolveLocalInstance().first;
     }
-    if (containerCount == 1) {
-        return SingletonId();
-    }
-    int32_t currentId = RecentActiveId();
-    if (currentId >= 0) {
-        return currentId;
-    }
-    currentId = RecentForegroundId();
-    if (currentId >= 0) {
-        return currentId;
-    }
-    return DefaultId();
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return ResolveGlobalInstanceLocked().first;
 }
 
 std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
@@ -406,22 +419,11 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
     if (currentId >= 0) {
         return { currentId, InstanceIdGenReason::SCOPE };
     }
-    uint32_t containerCount = ContainerCount();
-    if (containerCount == 0) {
-        return { INSTANCE_ID_UNDEFINED, InstanceIdGenReason::UNDEFINED };
+    if (isIsolatedThread_) {
+        return ResolveLocalInstance();
     }
-    if (containerCount == 1) {
-        return { SingletonId(), InstanceIdGenReason::SINGLETON };
-    }
-    currentId = ContainerScope::RecentActiveId();
-    if (currentId >= 0) {
-        return { currentId, InstanceIdGenReason::ACTIVE };
-    }
-    currentId = ContainerScope::RecentForegroundId();
-    if (currentId >= 0) {
-        return { currentId, InstanceIdGenReason::FOREGROUND };
-    }
-    return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return ResolveGlobalInstanceLocked();
 }
 
 const std::string ContainerScope::ReasonToDescription(InstanceIdGenReason reason)
@@ -446,6 +448,7 @@ const std::string ContainerScope::ReasonToDescription(InstanceIdGenReason reason
 
 const std::set<int32_t> ContainerScope::GetAllUIContexts()
 {
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     return containerSet_;
 }
 
@@ -621,7 +624,8 @@ std::string ContainerScope::Diagnose()
 
 void ContainerScope::UpdateRecentActive(int32_t id)
 {
-    recentActiveId_.store(id, std::memory_order_relaxed);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    recentActiveId_ = id;
     // Isolated thread: also sync to thread-local cache for local queries.
     if (isIsolatedThread_) {
         localRecentActiveId_ = id;
@@ -630,7 +634,8 @@ void ContainerScope::UpdateRecentActive(int32_t id)
 
 void ContainerScope::UpdateRecentForeground(int32_t id)
 {
-    recentForegroundId_.store(id, std::memory_order_relaxed);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    recentForegroundId_ = id;
     // Isolated thread: also sync to thread-local cache for local queries.
     if (isIsolatedThread_) {
         localRecentForegroundId_ = id;
@@ -653,6 +658,8 @@ void ContainerScope::Add(int32_t id)
     containerSet_.emplace(id);
 }
 
+// See header: Remove does not reset recentActiveId_/recentForegroundId_;
+// use RemoveAndCheck when the recent-ID cache must be cleared.
 void ContainerScope::Remove(int32_t id)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
@@ -661,12 +668,24 @@ void ContainerScope::Remove(int32_t id)
 
 void ContainerScope::RemoveAndCheck(int32_t id)
 {
-    Remove(id);
-    if (RecentActiveId() == id) {
-        UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    containerSet_.erase(id);
+    if (isIsolatedThread_) {
+        if (localRecentActiveId_ == id) {
+            localRecentActiveId_ = DEFAULT_ID;
+            recentActiveId_ = DEFAULT_ID;
+        }
+        if (localRecentForegroundId_ == id) {
+            localRecentForegroundId_ = DEFAULT_ID;
+            recentForegroundId_ = DEFAULT_ID;
+        }
+        return;
     }
-    if (RecentForegroundId() == id) {
-        UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    if (recentActiveId_ == id) {
+        recentActiveId_ = DEFAULT_ID;
+    }
+    if (recentForegroundId_ == id) {
+        recentForegroundId_ = DEFAULT_ID;
     }
 }
 

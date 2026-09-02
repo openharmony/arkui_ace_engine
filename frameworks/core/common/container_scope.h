@@ -86,7 +86,13 @@ public:
     static const std::set<int32_t> GetAllUIContexts();
 
     static void Add(int32_t id);
+    // Erase the ID from the global container set only. Does NOT reset the cached
+    // recentActiveId_/recentForegroundId_ even when they equal id; callers that need
+    // the recent-ID cache invalidated (so SafelyId/CurrentIdWithReason fall back to a
+    // remaining instance instead of a stale removed ID) must use RemoveAndCheck.
     static void Remove(int32_t id);
+    // Erase the ID and, if it matches the cached recent active/foreground ID, reset
+    // those to DEFAULT_ID. Preferred over Remove when tearing down an instance.
     static void RemoveAndCheck(int32_t id);
 
     static uint32_t ContainerCount();

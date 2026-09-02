@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <atomic>
+#include <thread>
+
 #include "gtest/gtest.h"
 #include "vector"
 
@@ -1361,5 +1364,255 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest_IsIsolatedThread_Lifecycle001, T
 
     ContainerScope::ResetIsolatedThread();
     EXPECT_FALSE(ContainerScope::IsIsolatedThread());
+}
+
+/**
+ * @tc.name: ContainerScopeTest_ConcurrentGlobalQueries001
+ * @tc.desc: Global query APIs remain safe while the singleton container is removed and added.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_ConcurrentGlobalQueries001, TestSize.Level1)
+{
+    constexpr int32_t instanceId = TEST_INSTANCE_ID_CONTAINER;
+    ContainerScope::Add(instanceId);
+
+    std::atomic<bool> stop { false };
+    std::atomic<bool> failed { false };
+    std::thread writer([instanceId, &stop]() {
+        for (int32_t index = 0; index < 10000; ++index) {
+            ContainerScope::Remove(instanceId);
+            ContainerScope::Add(instanceId);
+        }
+        stop.store(true, std::memory_order_release);
+    });
+    std::thread reader([instanceId, &stop, &failed]() {
+        while (!stop.load(std::memory_order_acquire)) {
+            auto defaultId = ContainerScope::DefaultId();
+            auto singletonId = ContainerScope::SingletonId();
+            auto safelyId = ContainerScope::SafelyId();
+            auto currentIdWithReason = ContainerScope::CurrentIdWithReason();
+            if ((defaultId != INSTANCE_ID_UNDEFINED && defaultId != instanceId) ||
+                (singletonId != INSTANCE_ID_UNDEFINED && singletonId != instanceId) ||
+                (safelyId != INSTANCE_ID_UNDEFINED && safelyId != instanceId) ||
+                (currentIdWithReason.first != INSTANCE_ID_UNDEFINED &&
+                    currentIdWithReason.first != instanceId)) {
+                failed.store(true, std::memory_order_release);
+                return;
+            }
+        }
+    });
+    writer.join();
+    reader.join();
+
+    ContainerScope::Remove(instanceId);
+    EXPECT_FALSE(failed.load(std::memory_order_acquire));
+}
+
+/**
+ * @tc.name: ContainerScopeTest_ConcurrentGetAllUIContexts001
+ * @tc.desc: GetAllUIContexts stays safe (no UB copying std::set) under concurrent Add/Remove.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_ConcurrentGetAllUIContexts001, TestSize.Level1)
+{
+    constexpr int32_t instanceId = TEST_INSTANCE_ID_CONTAINER;
+    ContainerScope::Add(instanceId);
+
+    std::atomic<bool> stop { false };
+    std::atomic<bool> failed { false };
+    std::thread writer([instanceId, &stop]() {
+        for (int32_t index = 0; index < 10000; ++index) {
+            ContainerScope::Remove(instanceId);
+            ContainerScope::Add(instanceId);
+        }
+        stop.store(true, std::memory_order_release);
+    });
+    std::thread reader([instanceId, &stop, &failed]() {
+        while (!stop.load(std::memory_order_acquire)) {
+            auto contexts = ContainerScope::GetAllUIContexts();
+            if (contexts.empty()) {
+                continue;
+            }
+            if (contexts.size() != 1 || *contexts.begin() != instanceId) {
+                failed.store(true, std::memory_order_release);
+                return;
+            }
+        }
+    });
+    writer.join();
+    reader.join();
+
+    ContainerScope::Remove(instanceId);
+    EXPECT_FALSE(failed.load(std::memory_order_acquire));
+}
+
+/**
+ * @tc.name: ContainerScopeTest_RemoveAndCheckIsolated001
+ * @tc.desc: On an isolated thread, RemoveAndCheck resets the local recent active/foreground
+ *           cache when it matches the removed id, while leaving the local container set intact.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_RemoveAndCheckIsolated001, TestSize.Level1)
+{
+    constexpr int32_t localId = TEST_INSTANCE_ID_CONTAINER;
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(localId);
+    ContainerScope::UpdateRecentActive(localId);
+    ContainerScope::UpdateRecentForeground(localId);
+
+    EXPECT_EQ(ContainerScope::RecentActiveId(), localId);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), localId);
+
+    ContainerScope::RemoveAndCheck(localId);
+
+    EXPECT_EQ(ContainerScope::RecentActiveId(), INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), INSTANCE_ID_UNDEFINED);
+    // RemoveAndCheck does not touch the thread-local container set.
+    EXPECT_EQ(ContainerScope::ContainerCount(), 1);
+
+    ContainerScope::RemoveLocal(localId);
+    ContainerScope::ResetIsolatedThread();
+}
+
+/**
+ * @tc.name: ContainerScopeTest_DefaultIdIsolatedIgnoresActive001
+ * @tc.desc: On an isolated thread, DefaultId returns the largest id (rbegin) and does not
+ *           prefer the recent active id, even when that id is present in the local set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_DefaultIdIsolatedIgnoresActive001, TestSize.Level1)
+{
+    constexpr int32_t idA = TEST_INSTANCE_ID_CONTAINER;        // 100000
+    constexpr int32_t idB = TEST_INSTANCE_ID_SUB_CONTAINER;   // 1000000 (rbegin, largest)
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(idA);
+    ContainerScope::AddLocal(idB);
+    ContainerScope::UpdateRecentActive(idA);
+
+    EXPECT_EQ(ContainerScope::DefaultId(), idB);
+    // Sanity: the active cache is indeed idA, confirming DefaultId ignored it.
+    EXPECT_EQ(ContainerScope::RecentActiveId(), idA);
+
+    ContainerScope::RemoveLocal(idA);
+    ContainerScope::RemoveLocal(idB);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::ResetIsolatedThread();
+}
+
+/**
+ * @tc.name: ContainerScopeTest_SafelyIdStaleActiveReturned001
+ * @tc.desc: Preserved semantics — recentActiveId (>=0) is returned directly even if the id
+ *           was since removed from the set by a plain Remove (no set-membership check).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_SafelyIdStaleActiveReturned001, TestSize.Level1)
+{
+    constexpr int32_t removedId = TEST_INSTANCE_ID_CONTAINER;        // 100000
+    constexpr int32_t remaining1 = TEST_INSTANCE_ID_SUB_CONTAINER;   // 1000000
+    constexpr int32_t remaining2 = 2000000;
+    ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+    ContainerScope::Add(removedId);
+    ContainerScope::Add(remaining1);
+    ContainerScope::Add(remaining2);
+    ContainerScope::UpdateRecentActive(removedId);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+
+    // Plain Remove drops the id from the set but leaves recentActiveId pointing at it.
+    ContainerScope::Remove(removedId);
+    // With >1 remaining, SINGLETON does not short-circuit; the stale active (>=0) is
+    // returned without validating set membership (preserved pre-refactor behavior).
+    EXPECT_EQ(ContainerScope::SafelyId(), removedId);
+    auto reason = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(reason.first, removedId);
+    EXPECT_EQ(reason.second, InstanceIdGenReason::ACTIVE);
+
+    ContainerScope::Remove(remaining1);
+    ContainerScope::Remove(remaining2);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest_ConcurrentRemoveAndCheck001
+ * @tc.desc: RemoveAndCheck's consolidated single-lock erase+reset is safe under concurrent
+ *           mutation; readers observe only valid ids and never crash or deadlock.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_ConcurrentRemoveAndCheck001, TestSize.Level1)
+{
+    constexpr int32_t instanceId = TEST_INSTANCE_ID_CONTAINER;
+    ContainerScope::Add(instanceId);
+
+    std::atomic<bool> stop { false };
+    std::atomic<bool> failed { false };
+    std::thread writer([instanceId, &stop]() {
+        for (int32_t index = 0; index < 10000; ++index) {
+            ContainerScope::Add(instanceId);
+            ContainerScope::UpdateRecentActive(instanceId);
+            ContainerScope::RemoveAndCheck(instanceId);
+        }
+        stop.store(true, std::memory_order_release);
+    });
+    std::thread reader([instanceId, &stop, &failed]() {
+        while (!stop.load(std::memory_order_acquire)) {
+            auto safelyId = ContainerScope::SafelyId();
+            auto contexts = ContainerScope::GetAllUIContexts();
+            if (safelyId != INSTANCE_ID_UNDEFINED && safelyId != instanceId) {
+                failed.store(true, std::memory_order_release);
+                return;
+            }
+            if (!contexts.empty() && (contexts.size() != 1 || *contexts.begin() != instanceId)) {
+                failed.store(true, std::memory_order_release);
+                return;
+            }
+        }
+    });
+    writer.join();
+    reader.join();
+
+    ContainerScope::Remove(instanceId);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    EXPECT_FALSE(failed.load(std::memory_order_acquire));
+}
+
+/**
+ * @tc.name: ContainerScopeTest_ConcurrentRecentActiveId001
+ * @tc.desc: RecentActiveId/RecentForegroundId (locked non-atomic reads) stay safe under
+ *           concurrent UpdateRecent* (locked writes); reader observes no torn/garbage values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_ConcurrentRecentActiveId001, TestSize.Level1)
+{
+    constexpr int32_t instanceId = TEST_INSTANCE_ID_CONTAINER;
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+
+    std::atomic<bool> stop { false };
+    std::atomic<bool> failed { false };
+    std::thread writer([instanceId, &stop]() {
+        for (int32_t index = 0; index < 10000; ++index) {
+            ContainerScope::UpdateRecentActive(instanceId);
+            ContainerScope::UpdateRecentForeground(instanceId);
+            ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+            ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+        }
+        stop.store(true, std::memory_order_release);
+    });
+    std::thread reader([instanceId, &stop, &failed]() {
+        while (!stop.load(std::memory_order_acquire)) {
+            auto activeId = ContainerScope::RecentActiveId();
+            auto foregroundId = ContainerScope::RecentForegroundId();
+            if ((activeId != INSTANCE_ID_UNDEFINED && activeId != instanceId) ||
+                (foregroundId != INSTANCE_ID_UNDEFINED && foregroundId != instanceId)) {
+                failed.store(true, std::memory_order_release);
+                return;
+            }
+        }
+    });
+    writer.join();
+    reader.join();
+
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    EXPECT_FALSE(failed.load(std::memory_order_acquire));
 }
 } // namespace OHOS::Ace
