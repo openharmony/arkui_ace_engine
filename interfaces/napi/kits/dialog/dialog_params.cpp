@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "dialog_controller.h"
+#include "interfaces/napi/kits/ui_material/ui_material_napi.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 namespace OHOS::Ace {
@@ -1238,8 +1239,9 @@ bool GetDialogBaseOptions(napi_env env, napi_value options, DialogProperties& di
         napi_typeof(env, systemMaterialApi, &smType);
         if (smType == napi_object) {
             UiMaterial* material = nullptr;
-            napi_unwrap(env, systemMaterialApi, reinterpret_cast<void**>(&material));
-            if (material) {
+            napi_status status =
+                napi_unwrap_s(env, systemMaterialApi, &Napi::UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&material));
+            if (status == napi_ok && material) {
                 dialogProps.systemMaterial = material->Copy();
             }
         }

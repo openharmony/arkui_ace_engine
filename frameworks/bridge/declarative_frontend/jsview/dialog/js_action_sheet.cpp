@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 
+#include "interfaces/napi/kits/ui_material/ui_material_napi.h"
+
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -364,7 +366,8 @@ void ParseSystemMaterial(DialogProperties& properties, JSRef<JSObject> obj)
 {
     auto systemMaterialValue = obj->GetProperty("systemMaterial");
     if (systemMaterialValue->IsObject()) {
-        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        auto systemUiMaterial =
+            static_cast<UiMaterial*>(UnwrapNapiValueWithType(systemMaterialValue, &Napi::UI_MATERIAL_TYPE_TAG));
         properties.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
     }
 }
