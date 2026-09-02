@@ -419,6 +419,15 @@ void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[9])
     auto canOverScroll = static_cast<bool>((*values)[7]);
     auto canStayOverScroll = static_cast<bool>((*values)[8]);
     auto direction = scrollControllerBase->GetScrollDirection();
+    if (direction == Axis::FREE &&
+        scrollControllerBase->FreeScrollTo({ .xOffset = xOffset,
+            .yOffset = yOffset,
+            .duration = duration,
+            .curve = curve,
+            .smooth = smooth,
+            .canOverScroll = canStayOverScroll })) {
+        return;
+    }
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
     scrollControllerBase->SetCanStayOverScroll(canStayOverScroll);
     scrollControllerBase->AnimateTo(position, duration, curve, smooth, canOverScroll);
