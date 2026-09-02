@@ -1032,6 +1032,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_render_context_deferred.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_render_context_immediate.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/offscreen_canvas_paint_method.cpp",
