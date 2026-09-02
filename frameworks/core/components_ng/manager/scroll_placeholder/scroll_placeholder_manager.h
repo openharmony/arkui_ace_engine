@@ -39,6 +39,8 @@ struct ScrollPlaceholderPredictParams {
     std::string templateId;
     int32_t hostNodeId = -1;
     int32_t index = -1;
+    // True when the build is requested by the cache/preload path instead of the visible layout.
+    bool cacheBuild = false;
 };
 
 // Prediction outcome, kept alongside the inputs of the decision for trace/diagnostics.
@@ -46,6 +48,9 @@ struct ScrollPlaceholderPredictResult {
     ScrollPlaceholderDecision decision = ScrollPlaceholderDecision::BUILD_REAL_NOW;
     int64_t estimateNs = 0;
     int64_t remainingBudgetNs = 0;
+    // False when no frame anchor was available yet; the decision then keeps the legacy path
+    // and must not be read as a budget-based suggestion.
+    bool budgetAvailable = false;
 };
 
 // Per pipeline scroll placeholder scheduler core (design ADR-1/ADR-4/ADR-6/ADR-9):
@@ -99,8 +104,27 @@ public:
     void Destroy();
     bool IsDestroyed() const;
 
+    // Observation hooks for scroll container item builds (no behavior impact: the real item
+    // is still built synchronously; these only sample its cost and let the prediction say,
+    // per frame, how many items it would have built now and how many it would defer to
+    // placeholders once the feature is enabled by the component adapters).
+    ScrollPlaceholderPredictResult NotifyRealBuildStart(const ScrollPlaceholderPredictParams& params);
+    void NotifyRealBuildEnd(const ScrollPlaceholderPredictParams& params, int64_t buildStartNs);
+
+    // Aggregated observation of the frame closed by the most recent NotifyVsync.
+    struct FrameObservationStats {
+        uint32_t observedBuilds = 0;
+        uint32_t suggestedReal = 0;
+        uint32_t suggestedPlaceholder = 0;
+        int64_t totalBuildNs = 0;
+        int64_t maxBuildNs = 0;
+        int64_t lastRemainingBudgetNs = 0;
+    };
+    FrameObservationStats GetLastFrameObservation(ScrollPlaceholderComponentType componentType) const;
+
     // Diagnostics counters (relaxed atomics, snapshot copy for dump/trace).
     static constexpr size_t CANCEL_REASON_COUNT = 8;
+    static constexpr size_t COMPONENT_TYPE_COUNT = 3;
     struct Diagnostics {
         uint64_t predictBuildRealNow = 0;
         uint64_t predictUsePlaceholder = 0;
@@ -111,6 +135,7 @@ public:
         uint64_t lruEvictedTemplates = 0;
         uint64_t flushRounds = 0;
         uint64_t requestFrameCount = 0;
+        uint64_t observedRealBuilds = 0;
         std::array<uint64_t, CANCEL_REASON_COUNT> cancelledByReason = {};
     };
     Diagnostics GetDiagnostics() const;
@@ -124,6 +149,10 @@ private:
         RealBuildTaskFunc task;
     };
 
+    ScrollPlaceholderPredictResult PredictCore(const ScrollPlaceholderPredictParams& params, int64_t frameDeadlineNs) const;
+    void CloseObservationFrame(int64_t vsyncTimestampNs);
+    static size_t ComponentIndex(ScrollPlaceholderComponentType componentType);
+
     void RequestFrameIfAlive();
     void PurgeTemplateRealBuilds(const std::string& templateId, ScrollPlaceholderCancelReason reason);
 
@@ -135,7 +164,10 @@ private:
     uint64_t nextTaskSequence_ = 0;
     int64_t lastVsyncTimestampNs_ = 0;
     int64_t vsyncPeriodNs_ = 0;
+    bool frameAnchored_ = false;
     std::atomic<bool> destroyed_ = false;
+    std::array<FrameObservationStats, COMPONENT_TYPE_COUNT> frameStats_;
+    std::array<FrameObservationStats, COMPONENT_TYPE_COUNT> lastFrameStats_;
 
     mutable std::atomic<uint64_t> predictBuildRealNow_ = 0;
     mutable std::atomic<uint64_t> predictUsePlaceholder_ = 0;
@@ -145,6 +177,7 @@ private:
     mutable std::atomic<uint64_t> registerRejected_ = 0;
     mutable std::atomic<uint64_t> flushRounds_ = 0;
     mutable std::atomic<uint64_t> requestFrameCount_ = 0;
+    mutable std::atomic<uint64_t> observedRealBuilds_ = 0;
     mutable std::array<std::atomic<uint64_t>, CANCEL_REASON_COUNT> cancelledByReason_ = {};
 };
 

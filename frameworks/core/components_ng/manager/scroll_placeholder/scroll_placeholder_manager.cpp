@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <utility>
 
 #include "base/log/ace_trace.h"
@@ -48,8 +49,10 @@ void ScrollPlaceholderManager::NotifyVsync(int64_t vsyncTimestampNs, int64_t vsy
     if (destroyed_.load(std::memory_order_relaxed)) {
         return;
     }
+    CloseObservationFrame(vsyncTimestampNs);
     lastVsyncTimestampNs_ = vsyncTimestampNs;
     vsyncPeriodNs_ = vsyncPeriodNs;
+    frameAnchored_ = true;
 }
 
 uint64_t ScrollPlaceholderManager::RegisterTemplate(
@@ -116,6 +119,18 @@ size_t ScrollPlaceholderManager::GetHotTemplateCount() const
 ScrollPlaceholderPredictResult ScrollPlaceholderManager::Predict(
     const ScrollPlaceholderPredictParams& params, int64_t frameDeadlineNs) const
 {
+    ScrollPlaceholderPredictResult result = PredictCore(params, frameDeadlineNs);
+    if (result.decision == ScrollPlaceholderDecision::BUILD_REAL_NOW) {
+        predictBuildRealNow_.fetch_add(1, std::memory_order_relaxed);
+    } else {
+        predictUsePlaceholder_.fetch_add(1, std::memory_order_relaxed);
+    }
+    return result;
+}
+
+ScrollPlaceholderPredictResult ScrollPlaceholderManager::PredictCore(
+    const ScrollPlaceholderPredictParams& params, int64_t frameDeadlineNs) const
+{
     ScrollPlaceholderPredictResult result;
     result.estimateNs = EstimateRealBuildDuration(params);
     int64_t deadline = frameDeadlineNs > 0 ? frameDeadlineNs : GetVsyncDerivedFrameDeadlineNs();
@@ -123,16 +138,14 @@ ScrollPlaceholderPredictResult ScrollPlaceholderManager::Predict(
         // No frame anchor yet (feature engaged before the first vsync) or manager destroyed:
         // keep the legacy synchronous build path instead of forcing placeholders.
         result.decision = ScrollPlaceholderDecision::BUILD_REAL_NOW;
-        predictBuildRealNow_.fetch_add(1, std::memory_order_relaxed);
         return result;
     }
+    result.budgetAvailable = true;
     result.remainingBudgetNs = GetRemainingFrameBudgetNs(deadline);
     if (result.estimateNs <= result.remainingBudgetNs) {
         result.decision = ScrollPlaceholderDecision::BUILD_REAL_NOW;
-        predictBuildRealNow_.fetch_add(1, std::memory_order_relaxed);
     } else {
         result.decision = ScrollPlaceholderDecision::USE_PLACEHOLDER;
-        predictUsePlaceholder_.fetch_add(1, std::memory_order_relaxed);
     }
     return result;
 }
@@ -150,7 +163,7 @@ int64_t ScrollPlaceholderManager::GetRemainingFrameBudgetNs(int64_t frameDeadlin
 
 int64_t ScrollPlaceholderManager::GetVsyncDerivedFrameDeadlineNs() const
 {
-    if (lastVsyncTimestampNs_ <= 0) {
+    if (!frameAnchored_ || lastVsyncTimestampNs_ <= 0) {
         return 0;
     }
     return lastVsyncTimestampNs_ + EffectiveVsyncPeriod(vsyncPeriodNs_);
@@ -287,6 +300,95 @@ bool ScrollPlaceholderManager::IsDestroyed() const
     return destroyed_.load(std::memory_order_relaxed);
 }
 
+ScrollPlaceholderPredictResult ScrollPlaceholderManager::NotifyRealBuildStart(
+    const ScrollPlaceholderPredictParams& params)
+{
+    ScrollPlaceholderPredictResult result = PredictCore(params, 0);
+    if (destroyed_.load(std::memory_order_relaxed)) {
+        return result;
+    }
+    size_t componentIndex = ComponentIndex(params.componentType);
+    auto& stats = frameStats_[componentIndex];
+    if (result.budgetAvailable) {
+        // Budget information available: record what the prediction would have decided.
+        if (result.decision == ScrollPlaceholderDecision::BUILD_REAL_NOW) {
+            stats.suggestedReal++;
+        } else {
+            stats.suggestedPlaceholder++;
+        }
+        stats.lastRemainingBudgetNs = result.remainingBudgetNs;
+    }
+    return result;
+}
+
+void ScrollPlaceholderManager::NotifyRealBuildEnd(
+    const ScrollPlaceholderPredictParams& params, int64_t buildStartNs)
+{
+    if (destroyed_.load(std::memory_order_relaxed) || buildStartNs <= 0) {
+        return;
+    }
+    int64_t durationNs = GetSysTimestamp() - buildStartNs;
+    if (durationNs < 0) {
+        durationNs = 0;
+    }
+    costModel_.RecordRealBuildDuration(params.componentType, params.templateId, durationNs);
+    observedRealBuilds_.fetch_add(1, std::memory_order_relaxed);
+    size_t componentIndex = ComponentIndex(params.componentType);
+    auto& stats = frameStats_[componentIndex];
+    stats.observedBuilds++;
+    stats.totalBuildNs += durationNs;
+    if (durationNs > stats.maxBuildNs) {
+        stats.maxBuildNs = durationNs;
+    }
+    TAG_LOGD(AceLogTag::ACE_SCROLL,
+        "ScrollPH item built: component=%{public}d host=%{public}d index=%{public}d cache=%{public}d "
+        "costUs=%{public}" PRId64 " estimateUs=%{public}" PRId64,
+        static_cast<int32_t>(params.componentType), params.hostNodeId, params.index,
+        static_cast<int32_t>(params.cacheBuild), durationNs / 1000,
+        EstimateRealBuildDuration(params) / 1000);
+}
+
+ScrollPlaceholderManager::FrameObservationStats ScrollPlaceholderManager::GetLastFrameObservation(
+    ScrollPlaceholderComponentType componentType) const
+{
+    return lastFrameStats_[ComponentIndex(componentType)];
+}
+
+void ScrollPlaceholderManager::CloseObservationFrame(int64_t vsyncTimestampNs)
+{
+    for (size_t i = 0; i < COMPONENT_TYPE_COUNT; i++) {
+        const auto& stats = frameStats_[i];
+        if (stats.observedBuilds == 0) {
+            continue;
+        }
+        int64_t avgBuildNs = stats.observedBuilds == 0 ? 0 : stats.totalBuildNs / stats.observedBuilds;
+        int64_t estimateNs = costModel_.EstimateRealBuildDuration(
+            static_cast<ScrollPlaceholderComponentType>(i), std::string());
+        // One summary per frame and container type: measured average item cost plus what the
+        // load prediction would have suggested (build now vs defer to placeholder) this frame.
+        TAG_LOGI(AceLogTag::ACE_SCROLL,
+            "ScrollPH frame summary: component=%{public}d realBuilt=%{public}u avgCostUs=%{public}" PRId64
+            " maxCostUs=%{public}" PRId64 " estimateUs=%{public}" PRId64 " suggestReal=%{public}u "
+            "suggestPlaceholder=%{public}u remainingBudgetUs=%{public}" PRId64 " vsync=%{public}" PRId64,
+            static_cast<int32_t>(i), stats.observedBuilds, avgBuildNs / 1000, stats.maxBuildNs / 1000,
+            estimateNs / 1000, stats.suggestedReal, stats.suggestedPlaceholder,
+            stats.lastRemainingBudgetNs / 1000, vsyncTimestampNs);
+        ACE_SCOPED_TRACE_COMMERCIAL(
+            "ScrollPH.FrameSummary[component:%d realBuilt:%u avgCostUs:%" PRId64 " estimateUs:%" PRId64
+            " suggestReal:%u suggestPlaceholder:%u]",
+            static_cast<int32_t>(i), stats.observedBuilds, avgBuildNs / 1000, estimateNs / 1000,
+            stats.suggestedReal, stats.suggestedPlaceholder);
+    }
+    lastFrameStats_ = frameStats_;
+    frameStats_ = {};
+}
+
+size_t ScrollPlaceholderManager::ComponentIndex(ScrollPlaceholderComponentType componentType)
+{
+    auto index = static_cast<size_t>(componentType);
+    return index < COMPONENT_TYPE_COUNT ? index : 0;
+}
+
 ScrollPlaceholderManager::Diagnostics ScrollPlaceholderManager::GetDiagnostics() const
 {
     Diagnostics diagnostics;
@@ -299,6 +401,7 @@ ScrollPlaceholderManager::Diagnostics ScrollPlaceholderManager::GetDiagnostics()
     diagnostics.lruEvictedTemplates = registry_.GetEvictedTemplateCount();
     diagnostics.flushRounds = flushRounds_.load(std::memory_order_relaxed);
     diagnostics.requestFrameCount = requestFrameCount_.load(std::memory_order_relaxed);
+    diagnostics.observedRealBuilds = observedRealBuilds_.load(std::memory_order_relaxed);
     for (size_t i = 0; i < CANCEL_REASON_COUNT; i++) {
         diagnostics.cancelledByReason[i] = cancelledByReason_[i].load(std::memory_order_relaxed);
     }

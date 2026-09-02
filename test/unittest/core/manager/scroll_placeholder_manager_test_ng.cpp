@@ -585,4 +585,74 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, PredictDiagnosticsCounters001, TestSize
     EXPECT_EQ(diagnostics.predictBuildRealNow, 1u);
     EXPECT_EQ(diagnostics.predictUsePlaceholder, 1u);
 }
+
+/**
+ * @tc.name: ObservationFrameStatsAccumulateAndClose001
+ * @tc.desc: Real build observation accumulates per frame and closes on the next vsync; the
+ *           suggestion counts follow the anchored budget (build-now vs placeholder).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, ObservationFrameStatsAccumulateAndClose001, TestSize.Level1)
+{
+    auto params = MakeParams(ScrollPlaceholderComponentType::LIST, std::string(), 7, 0);
+
+    // Before the first anchor: the build is observed but no budget suggestion is counted.
+    manager_->NotifyRealBuildStart(params);
+    manager_->NotifyRealBuildEnd(params, GetSysTimestamp() - 1000);
+    auto stats = manager_->GetLastFrameObservation(ScrollPlaceholderComponentType::LIST);
+    EXPECT_EQ(stats.observedBuilds, 0u); // frame not closed yet
+
+    // Close the (anchorless) frame; anchor the next frame with a generous budget.
+    manager_->NotifyVsync(GetSysTimestamp(), FRAME_120HZ_NS);
+    stats = manager_->GetLastFrameObservation(ScrollPlaceholderComponentType::LIST);
+    EXPECT_EQ(stats.observedBuilds, 1u);
+    EXPECT_EQ(stats.suggestedReal, 0u);
+    EXPECT_EQ(stats.suggestedPlaceholder, 0u);
+
+    // Anchored frame with ~7ms usable budget above the 5ms cold estimate: suggest real.
+    params.index = 1;
+    auto result = manager_->NotifyRealBuildStart(params);
+    EXPECT_TRUE(result.budgetAvailable);
+    EXPECT_EQ(result.decision, ScrollPlaceholderDecision::BUILD_REAL_NOW);
+    manager_->NotifyRealBuildEnd(params, GetSysTimestamp() - 50000);
+    manager_->NotifyVsync(GetSysTimestamp(), FRAME_120HZ_NS);
+    stats = manager_->GetLastFrameObservation(ScrollPlaceholderComponentType::LIST);
+    EXPECT_EQ(stats.observedBuilds, 1u);
+    EXPECT_EQ(stats.suggestedReal, 1u);
+    EXPECT_EQ(stats.suggestedPlaceholder, 0u);
+    EXPECT_GT(stats.lastRemainingBudgetNs, 0);
+    auto diagnostics = manager_->GetDiagnostics();
+    EXPECT_EQ(diagnostics.observedRealBuilds, 2u);
+
+    // Anchored frame whose deadline is already exhausted: suggest placeholder.
+    manager_->NotifyVsync(GetSysTimestamp() - FRAME_120HZ_NS, 1);
+    params.index = 2;
+    result = manager_->NotifyRealBuildStart(params);
+    EXPECT_TRUE(result.budgetAvailable);
+    EXPECT_EQ(result.decision, ScrollPlaceholderDecision::USE_PLACEHOLDER);
+    manager_->NotifyRealBuildEnd(params, GetSysTimestamp() - 1000);
+    manager_->NotifyVsync(GetSysTimestamp(), FRAME_120HZ_NS);
+    stats = manager_->GetLastFrameObservation(ScrollPlaceholderComponentType::LIST);
+    EXPECT_EQ(stats.observedBuilds, 1u);
+    EXPECT_EQ(stats.suggestedReal, 0u);
+    EXPECT_EQ(stats.suggestedPlaceholder, 1u);
+}
+
+/**
+ * @tc.name: ObservationFeedsCostModel001
+ * @tc.desc: Observed durations are sampled into the component bucket used for estimates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, ObservationFeedsCostModel001, TestSize.Level1)
+{
+    auto params = MakeParams(ScrollPlaceholderComponentType::GRID, std::string(), 3, 0);
+    for (int i = 0; i < 4; i++) {
+        params.index = i;
+        manager_->NotifyRealBuildStart(params);
+        manager_->NotifyRealBuildEnd(params, GetSysTimestamp() - LARGE_DURATION_NS);
+    }
+    // Duration sampling reaches the component bucket of the cost model.
+    EXPECT_GE(manager_->EstimateRealBuildDuration(params), LARGE_DURATION_NS);
+    EXPECT_EQ(manager_->GetDiagnostics().observedRealBuilds, 4u);
+}
 } // namespace OHOS::Ace::NG

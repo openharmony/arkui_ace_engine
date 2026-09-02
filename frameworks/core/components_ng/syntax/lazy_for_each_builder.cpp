@@ -17,10 +17,16 @@
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "base/log/dump_log.h"
+#include "base/utils/time_util.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/animation/geometry_transition.h"
+#include <optional>
 #include <random>
+#include <utility>
 
 namespace {
 constexpr int32_t MAX_RANDOM_KEY = 10000;
@@ -29,6 +35,37 @@ constexpr int32_t MAX_CACHED_COUNT_FOR_MEMORY_OPTIMIZATION = 2;
 }
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t MAX_SCROLL_HOST_SEARCH_DEPTH = 8;
+
+// Resolves the scroll container that owns this LazyForEach (List/Grid/WaterFlow host tag and
+// node id); returns nullopt for any other hosting syntax.
+std::optional<std::pair<ScrollPlaceholderComponentType, int32_t>> FindScrollPlaceholderHost(
+    const RefPtr<UINode>& node)
+{
+    auto parent = node ? node->GetParent() : nullptr;
+    int32_t depth = 0;
+    while (parent && depth++ < MAX_SCROLL_HOST_SEARCH_DEPTH) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (frameNode) {
+            const std::string& tag = frameNode->GetTag();
+            if (tag == V2::LIST_ETS_TAG) {
+                return std::make_pair(ScrollPlaceholderComponentType::LIST, frameNode->GetId());
+            }
+            if (tag == V2::GRID_ETS_TAG) {
+                return std::make_pair(ScrollPlaceholderComponentType::GRID, frameNode->GetId());
+            }
+            if (tag == V2::WATERFLOW_ETS_TAG) {
+                return std::make_pair(ScrollPlaceholderComponentType::WATER_FLOW, frameNode->GetId());
+            }
+            return std::nullopt;
+        }
+        parent = parent->GetParent();
+    }
+    return std::nullopt;
+}
+} // namespace
+
     std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(
         int32_t index, bool needBuild, bool isCache)
     {
@@ -52,11 +89,40 @@ namespace OHOS::Ace::NG {
         if (needBuild) {
             ACE_SCOPED_TRACE("Builder:BuildLazyItem index[%d], needBuild[%d], isCache[%d]",
                 index, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache));
+            // Scroll placeholder load observation: predict before the real builder runs and
+            // sample its duration. Observation only: the item is still built synchronously
+            // with unchanged behavior; the prediction result feeds the per-frame summary of
+            // suggested real/placeholder builds.
+            RefPtr<ScrollPlaceholderManager> scrollPlaceholderManager;
+            ScrollPlaceholderPredictParams observeParams;
+            auto lazyForEachNode = GetLazyForEachNode();
+            auto scrollHost = FindScrollPlaceholderHost(lazyForEachNode);
+            if (scrollHost.has_value()) {
+                auto* context = lazyForEachNode ? lazyForEachNode->GetContext() : nullptr;
+                if (context != nullptr) {
+                    scrollPlaceholderManager = context->GetOrCreateScrollPlaceholderManager();
+                }
+            }
+            if (scrollPlaceholderManager) {
+                observeParams.componentType = scrollHost->first;
+                observeParams.hostNodeId = scrollHost->second;
+                observeParams.index = index;
+                observeParams.cacheBuild = isCache;
+                scrollPlaceholderManager->NotifyRealBuildStart(observeParams);
+            }
+            int64_t buildStartNs = GetSysTimestamp();
             std::pair<std::string, RefPtr<UINode>> itemInfo;
+            if (scrollPlaceholderManager) {
+                AceTraceBeginWithArgs("ScrollPH.RealBuild[host:%d index:%d]", observeParams.hostNodeId, index);
+            }
             if (useNewInterface_) {
                 itemInfo = OnGetChildByIndexNew(ConvertFromToIndex(index), cachedItems_, expiringItem_);
             } else {
                 itemInfo = OnGetChildByIndex(ConvertFromToIndex(index), expiringItem_);
+            }
+            if (scrollPlaceholderManager) {
+                AceTraceEnd();
+                scrollPlaceholderManager->NotifyRealBuildEnd(observeParams, buildStartNs);
             }
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             if (isCache) {
