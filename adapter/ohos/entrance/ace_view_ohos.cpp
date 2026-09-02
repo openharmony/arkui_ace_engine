@@ -581,7 +581,7 @@ void AceViewOhos::ScheduleDelayedUp(const TouchEvent& touchEvent, const RefPtr<O
         cancelEvent.type = TouchType::CANCEL;
         cancelEvent.sourceType = SourceType::TOUCH;
         cancelEvent.sourceTool = SourceTool::MOUSE;
-        touchEventCallback_(cancelEvent, nullptr, node);
+        touchEventCallback_(cancelEvent, nullptr, nullptr);
     }
     ResetMouseMappingState();
 }
@@ -683,6 +683,9 @@ bool AceViewOhos::ShouldConvertRightMouseToTouch(const MouseEvent& event, const 
     HandleMappingInterrupt(event);
     if (ShouldContinueMapping(event)) {
         return true;
+    }
+    if (event.action == MouseAction::PRESS) {
+        rightMouseMappingSwitchCached_ = false;
     }
     if (!IsRightMouseMappingSwitchOn()) {
         return false;
