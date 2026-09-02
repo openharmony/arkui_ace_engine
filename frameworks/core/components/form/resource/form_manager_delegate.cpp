@@ -676,7 +676,8 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
-void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManuallyClick)
+void FormManagerDelegate::OnActionEvent(
+    const std::string& action, bool isManuallyClick)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
@@ -1334,15 +1335,13 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action, bool isMa
 void FormManagerDelegate::OnInsightIntentActionEvent(const std::string& action)
 {
     // 不复用 ParseAction：其强制要求 abilityName（router/call 语义），
-    // insightIntent 的核心参数是 intentName/intentParams，由 FormUtilsImpl::InsightIntentEvent
-    // 内部直接解析原始 action JSON。此处仅做最小参数校验，占位实现待接口定稿后补齐。
+    // intentName/intentParams 在 FormUtilsImpl::InsightIntentEvent 内解析。
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid() || !eventAction->GetValue("intentName")->IsValid()) {
         TAG_LOGE(AceLogTag::ACE_FORM, "insightIntent action parse failed, detail action:%{public}s", action.c_str());
         return;
     }
-    // 系统应用门禁：insightIntent 仅开放给系统应用的卡片提供方（wantCache_ 持有 provider 身份）。
-    // 先例：form_frontend_delegate_declarative.cpp RegisterFont 的 IsSystemAppForm 字体加载门禁。
+    // insightIntent 仅开放给系统应用的卡片提供方。
     const auto providerBundleName = wantCache_.GetElement().GetBundleName();
     if (!OHOS::AppExecFwk::FormMgr::GetInstance().IsSystemAppForm(providerBundleName)) {
         TAG_LOGW(AceLogTag::ACE_FORM,

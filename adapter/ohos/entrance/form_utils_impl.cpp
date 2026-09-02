@@ -166,8 +166,7 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     auto container = Container::Current();
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, -1);
-    // 系统应用门禁已落位：宿主侧 OnInsightIntentActionEvent 内 FormMgr::IsSystemAppForm
-    // 判 provider bundleName（先例 RegisterFont 字体门禁），此处不重复校验。
+    // 权限校验已在宿主侧 OnInsightIntentActionEvent 完成，此处不重复。
     auto token = aceContainer->GetToken();
     CHECK_NULL_RETURN(token, -1);
 
@@ -178,15 +177,13 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         return -1;
     }
 
-    // intentParams: JSON -> AAFwk::WantParams（对照 RouterEvent 的 params 转换循环）
     AAFwk::WantParams wantParams;
     auto intentParams = eventAction->GetValue("intentParams");
     if (intentParams->IsValid()) {
         auto child = intentParams->GetChild();
         while (child->IsValid()) {
             auto key = child->GetKey();
-            // WantParams::SetParam 仅接受 IInterface 派生类型（Want 才有原始类型重载），
-            // 需用 AAFwk 包装类 Box() 转换，先例：js_plugin_want.cpp / ace_ability.cpp。
+            // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
             if (child->IsString()) {
                 wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
             } else if (child->IsNumber()) {
@@ -200,20 +197,14 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         }
     }
 
-    // Want 透传（与 RouterEvent 同构）：顶层塞 4 个 insightIntent key，FMS 侧用
-    // InsightIntentExecuteParam::GenerateFromWant 解析为结构化参数，补齐 provider
-    // 三元组（FormRecord）后，以 foundation 进程身份调 AMS
-    // ExecuteIntentWithSpecalTokenId（key=matchedFormId，hostClient 携带宿主回调
-    // 上下文，wantParams 透传整个 executeWantParams；满足 FOUNDATION_UID 门禁）。
     AAFwk::Want want;
     AAFwk::WantParams executeWantParams;
     executeWantParams.SetParam(
         AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, AAFwk::String::Box(intentName));
-    // intentId 由 AMS 侧 CheckAndUpdateParam 按名称查表覆盖，此处占位 "0"；
-    // GenerateFromWant 要求该值可被 std::from_chars 解析为 uint64，不能为空。
+    // intentId 由 AMS 侧按名称查表覆盖，此处占位 "0"（GenerateFromWant 要求可解析为 uint64，不能为空）。
     executeWantParams.SetParam(
         AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("0"));
-    // 卡片点击 = 拉起前台 UIAbility；实际支持的 executeMode 由 AMS 按 intent 配置校验。
+    // 卡片点击拉起前台 UIAbility，实际支持的 executeMode 由 AMS 校验。
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE,
         AAFwk::Integer::Box(static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND)));
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
