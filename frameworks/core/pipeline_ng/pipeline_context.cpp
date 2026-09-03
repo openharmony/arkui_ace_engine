@@ -2194,15 +2194,9 @@ void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::R
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(rsUIDirector);
-    if (SystemProperties::GetMultiInstanceEnabled()) {
-        auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
-        CHECK_NULL_VOID(surfaceNode);
-        auto shadowSurface = surfaceNode->CreateShadowSurfaceNode();
-        CHECK_NULL_VOID(shadowSurface);
-        shadowSurface->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-    } else {
-        rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-    }
+    auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    surfaceNode->SetAbilityBGAlpha(appBgColor_.GetAlpha());
 #endif
 }
 
