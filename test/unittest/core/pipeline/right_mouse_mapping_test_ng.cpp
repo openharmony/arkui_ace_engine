@@ -298,8 +298,9 @@ HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping002, TestSize.Leve
 HWTEST_F(RightMouseMappingPipelineTestNg, DoubleCancelProtection001, TestSize.Level1)
 {
     int callCount = 0;
-    context_->SetOnRightMouseMappingCancel([&callCount]() {
+    context_->SetOnRightMouseMappingCancel([&callCount, &context = context_]() {
         callCount++;
+        context->SetRightMouseMappingActive(false);
     });
     context_->SetRightMouseMappingActive(true);
     context_->OnHide();
