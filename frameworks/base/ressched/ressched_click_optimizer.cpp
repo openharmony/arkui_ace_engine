@@ -127,6 +127,22 @@ bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>&
     return true;
 }
 
+void ResSchedClickOptimizer::ReportClickWithExtData(const std::string& text, const std::string& xpath)
+{
+    if (!GetClickExtEnabled()) {
+        ResSchedReport::GetInstance().ResSchedDataReport("click");
+        return;
+    }
+    std::unordered_map<std::string, std::string> payload;
+    payload["pid"] = std::to_string(AceApplicationInfo::GetInstance().GetPid());
+    payload["uid"] = std::to_string(AceApplicationInfo::GetInstance().GetUid());
+    payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
+    payload["abilityName"] = AceApplicationInfo::GetInstance().GetAbilityName();
+    payload["text"] = text;
+    payload["path"] = xpath;
+    ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
+}
+
 void ResSchedClickOptimizer::GetComponentTextRecursive(
     const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, int32_t& maxNodes)
 {

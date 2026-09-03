@@ -47,6 +47,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
@@ -11582,6 +11583,14 @@ void WebPattern::DisableAgentManager()
 
 bool WebPattern::IsAgentManagerEnabled()
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto clickOptimizer = pipelineContext->GetClickOptimizer();
+    if (clickOptimizer && clickOptimizer->GetClickExtEnabled()) {
+        return true;
+    }
     return false;
 }
 

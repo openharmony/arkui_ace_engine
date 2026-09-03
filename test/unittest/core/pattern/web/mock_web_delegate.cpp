@@ -1521,6 +1521,7 @@ void WebDelegate::UpdateSingleHandleVisible(bool isVisible) {}
 bool WebDelegate::ShowMagnifier() { return false; }
 bool WebDelegate::HideMagnifier() { return false; }
 void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
+void WebDelegate::SetClickExtEnabled(bool enable) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}

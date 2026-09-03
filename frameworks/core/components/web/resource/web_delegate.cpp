@@ -36,6 +36,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -3179,6 +3180,12 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(delegate->context_.Upgrade());
+            CHECK_NULL_VOID(pipeline);
+            auto clickOptimizer = pipeline->GetClickOptimizer();
+            if (clickOptimizer) {
+                delegate->SetClickExtEnabled(clickOptimizer->GetClickExtEnabled());
+            }
 
             delegate->JavaScriptOnDocumentStartByOrder();
             delegate->JavaScriptOnDocumentEndByOrder();
@@ -3757,6 +3764,12 @@ void WebDelegate::InitWebViewWithSurface()
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context.Upgrade());
+            CHECK_NULL_VOID(pipeline);
+            auto clickOptimizer = pipeline->GetClickOptimizer();
+            if (clickOptimizer) {
+                delegate->SetClickExtEnabled(clickOptimizer->GetClickExtEnabled());
+            }
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             CHECK_NULL_VOID(delegate->cookieManager_);
             auto nweb_handler = std::make_shared<WebClientImpl>();
@@ -10204,6 +10217,13 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist)
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->SetTouchHandleExistState(touchHandleExist);
+}
+
+void WebDelegate::SetClickExtEnabled(bool enable)
+{
+    CHECK_NULL_VOID(nweb_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::SetClickExtEnabled enable: %{public}d", enable);
+    nweb_->SetClickExtEnabled(enable);
 }
 
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
