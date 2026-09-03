@@ -263,7 +263,7 @@ void FormRendererDispatcherImpl::OnAccessibilityChildTreeRegister(
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-        if (windowId == 0 || treeId <= 0 || accessibilityId < 0) {
+        if (windowId == 0 || treeId < 0 || accessibilityId < 0) {
             HILOG_ERROR("invalid param: windowId: %{public}u treeId: %{public}d accessibilityId: %{public}" PRId64,
             windowId, treeId, accessibilityId);
             return;
