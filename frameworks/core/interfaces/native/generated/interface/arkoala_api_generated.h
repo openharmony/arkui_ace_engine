@@ -26127,8 +26127,10 @@ typedef struct GENERATED_ArkUILazyVGridLayoutModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setLazyVGridLayoutOptions)(Ark_NativePointer node);
-    void (*setColumnsTemplate)(Ark_NativePointer node,
-                               const Opt_String* value);
+    void (*setColumnsTemplate0)(Ark_NativePointer node,
+                                const Opt_String* value);
+    void (*setColumnsTemplate1)(Ark_NativePointer node,
+                                const Opt_Union_String_ItemFillPolicy* value);
 } GENERATED_ArkUILazyVGridLayoutModifier;
 
 typedef struct GENERATED_ArkUILineModifier {
