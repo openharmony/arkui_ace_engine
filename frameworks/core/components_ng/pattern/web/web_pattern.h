@@ -1141,6 +1141,10 @@ public:
     void GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t windowId,
         const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
         MultiImageQueryErrorCode)>& arkWebfinishCallback);
+    
+    void EnableAgentManager();
+    void DisableAgentManager();
+    bool IsAgentManagerEnabled();
 
     void GetWebInfoByRequest(
         uint32_t windowId,
@@ -1772,6 +1776,7 @@ private:
     std::vector<uint32_t> pipController_;
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
     bool isRegisterJsObject_ = false;
+    ContentChangeConfig contentChangeConfig_ = {};
 
     MouseInfo mouseInfo_;
 

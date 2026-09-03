@@ -11555,6 +11555,36 @@ void SnapshotTouchReporter::OnPan()
     infos_->Put(item);
 }
 
+void WebPattern::EnableAgentManager()
+{
+    CHECK_NULL_VOID(delegate_);
+    auto agentManager = delegate_->GetNWebAgentManager();
+    if (!agentManager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "EnableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
+        return;
+    }
+    agentManager->SetContentChangeDetectionConfig(
+        contentChangeConfig_.minReportTime, contentChangeConfig_.textContentRatio);
+    agentManager->SetDomExtractionConfig(contentChangeConfig_.reportDomTree);
+    agentManager->SetAgentEnabled(true);
+}
+
+void WebPattern::DisableAgentManager()
+{
+    CHECK_NULL_VOID(delegate_);
+    auto agentManager = delegate_->GetNWebAgentManager();
+    if (!agentManager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "DisableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
+        return;
+    }
+    agentManager->SetAgentEnabled(false);
+}
+
+bool WebPattern::IsAgentManagerEnabled()
+{
+    return false;
+}
+
 namespace {
 std::string EncodeURIComponent(const std::string &value)
 {
