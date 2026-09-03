@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-// SyncLoadDemo.ets
-// Demonstrates the syncLoad property on List with LazyForEach.
-// By default (syncLoad not set), List loads all visible items synchronously in one pass.
-// Setting syncLoad(false) enables frame-split optimization: remaining items are deferred
-// to subsequent frames when the response deadline is exceeded.
+// xxx.ets
 
 interface DataItem {
   index: number;
