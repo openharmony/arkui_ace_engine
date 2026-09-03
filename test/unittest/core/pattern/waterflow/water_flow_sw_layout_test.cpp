@@ -1992,6 +1992,10 @@ HWTEST_F(WaterFlowSWTest, EmptySectionsAtBottom001, TestSize.Level1)
     secObj->ChangeData(0, sections.size(), {});
     FlushUITasks();
     EXPECT_TRUE(info_->lanes_.empty());
+    // Edge flags derived from the cleared lanes must not survive ClearData.
+    EXPECT_FALSE(info_->offsetEnd_);
+    EXPECT_FALSE(info_->itemStart_);
+    EXPECT_FALSE(info_->itemEnd_);
     EXPECT_FLOAT_EQ(info_->StartPos(), 0.0f);
     EXPECT_FLOAT_EQ(info_->EndPos(), 0.0f);
 
