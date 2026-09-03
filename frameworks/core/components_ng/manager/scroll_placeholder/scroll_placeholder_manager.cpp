@@ -21,6 +21,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/time_util.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -68,7 +69,20 @@ uint64_t ScrollPlaceholderManager::RegisterTemplate(
             instanceId_);
         return 0;
     }
-    return registry_.Register(templateId, std::move(builder));
+    uint64_t generation = registry_.Register(templateId, std::move(builder));
+    if (generation == 0) {
+        return 0;
+    }
+    // Registration builds one placeholder instance synchronously (the framework generates the
+    // read-only template subtree in its container at registration time), so the first acquire
+    // is served from the pool; background clones then refill it to capacity.
+    auto snapshot = registry_.LookupForCreate(templateId);
+    if (snapshot.has_value() && snapshot->builder) {
+        ResetPendingCloneSlots(templateId);
+        registry_.CacheTemplateInstance(templateId, snapshot->builder());
+        ScheduleBackgroundReplenish(templateId);
+    }
+    return generation;
 }
 
 bool ScrollPlaceholderManager::UnregisterTemplate(const std::string& templateId)
@@ -80,6 +94,7 @@ bool ScrollPlaceholderManager::UnregisterTemplate(const std::string& templateId)
     if (removed) {
         // Pending tasks of this template are stale by generation; drop them eagerly.
         PurgeTemplateRealBuilds(templateId, ScrollPlaceholderCancelReason::UNREGISTER);
+        ResetPendingCloneSlots(templateId);
     }
     return removed;
 }
@@ -103,7 +118,23 @@ void ScrollPlaceholderManager::CacheTemplateInstance(
 
 RefPtr<UINode> ScrollPlaceholderManager::AcquireTemplateInstance(const std::string& templateId)
 {
-    return registry_.AcquireTemplateInstance(templateId);
+    if (destroyed_.load(std::memory_order_relaxed) || templateId.empty()) {
+        return nullptr;
+    }
+    auto cached = registry_.AcquireTemplateInstance(templateId);
+    if (cached) {
+        ScheduleBackgroundReplenish(templateId);
+        return cached;
+    }
+    // Empty pool: synchronously create one instance from the current template so the request
+    // is served right away; background clones refill the pool afterwards.
+    auto snapshot = registry_.LookupForCreate(templateId);
+    if (!snapshot.has_value() || !snapshot->builder) {
+        return nullptr;
+    }
+    auto instance = snapshot->builder();
+    ScheduleBackgroundReplenish(templateId);
+    return instance;
 }
 
 size_t ScrollPlaceholderManager::GetCachedInstanceCount(const std::string& templateId) const
@@ -114,6 +145,91 @@ size_t ScrollPlaceholderManager::GetCachedInstanceCount(const std::string& templ
 size_t ScrollPlaceholderManager::GetHotTemplateCount() const
 {
     return registry_.GetHotTemplateCount();
+}
+
+size_t ScrollPlaceholderManager::GetPendingCloneCount(const std::string& templateId) const
+{
+    std::lock_guard<std::mutex> guard(cloneMutex_);
+    auto it = pendingCloneCount_.find(templateId);
+    return it == pendingCloneCount_.end() ? 0 : it->second;
+}
+
+void ScrollPlaceholderManager::ScheduleBackgroundReplenish(const std::string& templateId)
+{
+    if (destroyed_.load(std::memory_order_relaxed) || templateId.empty()) {
+        return;
+    }
+    auto snapshot = registry_.LookupForCreate(templateId);
+    if (!snapshot.has_value() || !snapshot->builder) {
+        return;
+    }
+    size_t toSubmit = 0;
+    {
+        std::lock_guard<std::mutex> guard(cloneMutex_);
+        size_t held = registry_.GetCachedInstanceCount(templateId) + pendingCloneCount_[templateId];
+        if (held < SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY) {
+            toSubmit = SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - held;
+            pendingCloneCount_[templateId] += static_cast<uint32_t>(toSubmit);
+        }
+    }
+    // The RefPtr keeps the manager alive until every submitted task finishes; the task itself
+    // only touches atomics, the mutex-guarded registry and the immutable builder handle.
+    auto self = AceType::Claim(this);
+    for (size_t i = 0; i < toSubmit; i++) {
+        ScrollPlaceholderBuilder builderCopy = snapshot->builder;
+        SubmitBackgroundCloneTask([self, templateId, generation = snapshot->generation, builderCopy]() {
+            self->RunBackgroundClone(templateId, generation, builderCopy);
+        });
+    }
+}
+
+void ScrollPlaceholderManager::RunBackgroundClone(
+    const std::string& templateId, uint64_t generation, const ScrollPlaceholderBuilder& builder)
+{
+    // Runs off the UI thread through the BackgroundTaskExecutor. Invoking the restricted
+    // immutable builder yields a fresh equivalent instance (the deep template subtree clone
+    // swaps in with the compiler restricted factory contract). Every exit path must release
+    // the pending slot this task occupies.
+    do {
+        if (destroyed_.load(std::memory_order_relaxed) || !builder) {
+            break;
+        }
+        auto instance = builder();
+        if (!instance) {
+            break;
+        }
+        if (registry_.GetCurrentGeneration(templateId) != generation) {
+            // Template re-registered or unregistered while the clone was in flight: the
+            // stale result is dropped and never cached.
+            break;
+        }
+        registry_.CacheTemplateInstance(templateId, instance);
+    } while (false);
+    ReleasePendingCloneSlot(templateId);
+}
+
+void ScrollPlaceholderManager::ReleasePendingCloneSlot(const std::string& templateId)
+{
+    std::lock_guard<std::mutex> guard(cloneMutex_);
+    auto it = pendingCloneCount_.find(templateId);
+    if (it == pendingCloneCount_.end()) {
+        return;
+    }
+    it->second = it->second > 0 ? it->second - 1 : 0;
+    if (it->second == 0) {
+        pendingCloneCount_.erase(it);
+    }
+}
+
+void ScrollPlaceholderManager::ResetPendingCloneSlots(const std::string& templateId)
+{
+    std::lock_guard<std::mutex> guard(cloneMutex_);
+    pendingCloneCount_.erase(templateId);
+}
+
+void ScrollPlaceholderManager::SubmitBackgroundCloneTask(std::function<void()> task)
+{
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(task), BgTaskPriority::LOW);
 }
 
 ScrollPlaceholderPredictResult ScrollPlaceholderManager::Predict(

@@ -133,6 +133,12 @@ void ScrollPlaceholderTemplateRegistry::CacheTemplateInstance(
     if (it == entries_.end()) {
         return;
     }
+    // Cold (LRU-demoted) entries keep only their registration relation; and the pool never
+    // holds more than the policy capacity per template, so concurrent background commits
+    // cannot overfill it.
+    if (!it->second.hot || it->second.cachedInstances.size() >= SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY) {
+        return;
+    }
     it->second.cachedInstances.emplace_back(instance);
 }
 

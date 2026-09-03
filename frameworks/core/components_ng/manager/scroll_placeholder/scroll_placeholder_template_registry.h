@@ -40,7 +40,8 @@ struct ScrollPlaceholderTemplateSnapshot {
 // Per container template registry (design ADR-3/ADR-12):
 // - registration relation (id + builder handle + generation) persists without bound;
 // - built placeholder instances are retained per template entry under an LRU of hot entries
-//   (capacity 20): eviction releases all unmounted instances of the least recently used entry
+//   (capacity 20), each hot entry holding at most SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY
+//   instances: eviction releases all unmounted instances of the least recently used entry
 //   and demotes it to a cold entry keeping only the registration relation;
 // - generation is monotonically increasing per id across re-register and unregister, so any
 //   in-flight result carrying an older generation is stale by comparison;

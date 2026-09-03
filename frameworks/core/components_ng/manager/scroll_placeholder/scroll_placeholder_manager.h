@@ -21,7 +21,9 @@
 #include <cstdint>
 #include <deque>
 #include <functional>
+#include <mutex>
 #include <string>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_cost_model.h"
@@ -79,9 +81,14 @@ public:
     bool IsTemplateRegistered(const std::string& templateId) const;
     std::optional<ScrollPlaceholderTemplateSnapshot> LookupTemplateForCreate(const std::string& templateId);
     void CacheTemplateInstance(const std::string& templateId, const RefPtr<UINode>& instance);
+    // Takes a cached instance when the pool still holds one; on an empty pool synchronously
+    // creates one instance from the current template to serve the request. Either way the
+    // pool is replenished back to capacity by background clone tasks.
     RefPtr<UINode> AcquireTemplateInstance(const std::string& templateId);
     size_t GetCachedInstanceCount(const std::string& templateId) const;
     size_t GetHotTemplateCount() const;
+    // Background clone tasks submitted but not finished yet for the template.
+    size_t GetPendingCloneCount(const std::string& templateId) const;
 
     // Prediction core.
     ScrollPlaceholderPredictResult Predict(const ScrollPlaceholderPredictParams& params, int64_t frameDeadlineNs) const;
@@ -140,6 +147,12 @@ public:
     };
     Diagnostics GetDiagnostics() const;
 
+protected:
+    // Schedules one clone task through the shared BackgroundTaskExecutor (low priority: on an
+    // empty pool the acquire path degrades to synchronous creation, so a clone never blocks
+    // user-visible work). Virtual so tests can capture and drain tasks deterministically.
+    virtual void SubmitBackgroundCloneTask(std::function<void()> task);
+
 private:
     struct RealBuildTask {
         ScrollPlaceholderPredictParams params;
@@ -152,6 +165,18 @@ private:
     ScrollPlaceholderPredictResult PredictCore(const ScrollPlaceholderPredictParams& params, int64_t frameDeadlineNs) const;
     void CloseObservationFrame(int64_t vsyncTimestampNs);
     static size_t ComponentIndex(ScrollPlaceholderComponentType componentType);
+
+    // Placeholder instance pool policy: submit as many background clone tasks as needed to
+    // bring cached + in-flight instances back to SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY.
+    void ScheduleBackgroundReplenish(const std::string& templateId);
+    // Task body running off the UI thread; every exit path releases its pending slot.
+    void RunBackgroundClone(const std::string& templateId, uint64_t generation,
+        const ScrollPlaceholderBuilder& builder);
+    void ReleasePendingCloneSlot(const std::string& templateId);
+    // Re-register/unregister invalidates in-flight clone slots of the previous generation;
+    // their late releases are floor-guarded, worst case one extra clone that the pool cap
+    // discards at commit time.
+    void ResetPendingCloneSlots(const std::string& templateId);
 
     void RequestFrameIfAlive();
     void PurgeTemplateRealBuilds(const std::string& templateId, ScrollPlaceholderCancelReason reason);
@@ -168,6 +193,10 @@ private:
     std::atomic<bool> destroyed_ = false;
     std::array<FrameObservationStats, COMPONENT_TYPE_COUNT> frameStats_;
     std::array<FrameObservationStats, COMPONENT_TYPE_COUNT> lastFrameStats_;
+    // Guards pendingCloneCount_, which is read and written from both the UI thread and the
+    // background clone tasks.
+    mutable std::mutex cloneMutex_;
+    std::unordered_map<std::string, uint32_t> pendingCloneCount_;
 
     mutable std::atomic<uint64_t> predictBuildRealNow_ = 0;
     mutable std::atomic<uint64_t> predictUsePlaceholder_ = 0;
