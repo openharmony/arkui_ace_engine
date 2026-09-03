@@ -538,18 +538,55 @@ HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_ReportAndOnSourceChanged, Test
     richEditorPattern->lastDrawnPageTranslateContent_.clear();
     richEditorPattern->ReportPageTranslatePlaceholderDrawn();
     EXPECT_EQ(richEditorPattern->lastDrawnPageTranslateContent_, u"Styled Placeholder");
-    richEditorPattern->styledPlaceholder_ = nullptr;
+}
 
-    // OnPlaceholderSourceTextChanged clears lastDrawn and resets translate
+/**
+ * @tc.name: PageTranslate_OnSourceChangedGate
+ * @tc.desc: Test OnPlaceholderSourceTextChanged gate uses isShowPlaceholder_ not lastDrawn
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_OnSourceChangedGate, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    // setup: ContentChangeManager to verify ResetTranslateTextNode via translateTextVersions_
+    auto host = richEditorPattern->GetHost();
+    auto mgr = host->GetContext()->GetContentChangeManager();
+    ASSERT_NE(mgr, nullptr);
+    mgr->StartTextTranslateReport();
+    auto nodeId = host->GetId();
+
+    // branch: pageTranslatedContent_ has value -> gate passes, ResetTranslateTextNode clears entry
     richEditorPattern->ApplyPageTranslateResult("translated", 1);
     ASSERT_TRUE(richEditorPattern->pageTranslatedContent_.has_value());
+    EXPECT_EQ(mgr->UpdateTranslateVersionIfNeeded(nodeId, "placeholder"), 1);
+    EXPECT_EQ(mgr->translateTextVersions_.count(nodeId), 1);
+    EXPECT_EQ(mgr->translateTextVersions_[nodeId].second, 1);
+    EXPECT_EQ(mgr->UpdateTranslateVersionIfNeeded(nodeId, "placeholder"), -1);
+    EXPECT_EQ(mgr->translateTextVersions_[nodeId].second, 1);
     richEditorPattern->OnPlaceholderSourceTextChanged();
     EXPECT_FALSE(richEditorPattern->pageTranslatedContent_.has_value());
     EXPECT_TRUE(richEditorPattern->lastDrawnPageTranslateContent_.empty());
+    EXPECT_EQ(mgr->translateTextVersions_.count(nodeId), 0);
+    EXPECT_EQ(mgr->UpdateTranslateVersionIfNeeded(nodeId, "placeholder"), 1);
+    EXPECT_EQ(mgr->translateTextVersions_.count(nodeId), 1);
+    EXPECT_EQ(mgr->translateTextVersions_[nodeId].second, 1);
 
-    // OnPlaceholderSourceTextChanged when no translate state is a no-op
+    // branch: isShowPlaceholder_ true -> gate passes, ResetTranslateTextNode clears entry
+    richEditorPattern->isShowPlaceholder_ = true;
     richEditorPattern->OnPlaceholderSourceTextChanged();
-    EXPECT_FALSE(richEditorPattern->pageTranslatedContent_.has_value());
+    EXPECT_EQ(mgr->translateTextVersions_.count(nodeId), 0);
+    EXPECT_EQ(mgr->UpdateTranslateVersionIfNeeded(nodeId, "placeholder"), 1);
+    EXPECT_EQ(mgr->translateTextVersions_.count(nodeId), 1);
+    EXPECT_EQ(mgr->translateTextVersions_[nodeId].second, 1);
+
+    // branch: isShowPlaceholder_ false -> gate blocks, entry retained (dedup)
+    richEditorPattern->isShowPlaceholder_ = false;
+    richEditorPattern->OnPlaceholderSourceTextChanged();
+    EXPECT_EQ(mgr->translateTextVersions_.count(nodeId), 1);
+    EXPECT_EQ(mgr->UpdateTranslateVersionIfNeeded(nodeId, "placeholder"), -1);
+    EXPECT_EQ(mgr->translateTextVersions_.count(nodeId), 1);
+    EXPECT_EQ(mgr->translateTextVersions_[nodeId].second, 1);
 }
 
 /**
@@ -563,5 +600,47 @@ HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_GetPageTranslateNodeId, TestSi
     ASSERT_NE(richEditorPattern, nullptr);
 
     EXPECT_EQ(richEditorPattern->GetPageTranslateNodeId(), richEditorNode_->GetId());
+}
+
+/**
+ * @tc.name: PageTranslate_ClearPlaceholderImageNode
+ * @tc.desc: Test ClearPlaceholderImageNode and SetTranslatedStyledPlaceholder clears image nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PageTranslate_ClearPlaceholderImageNode, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->OnAttachToFrameNode();
+
+    // Branch: no image nodes → no-op
+    EXPECT_TRUE(richEditorPattern->placeholderImageNodes_.empty());
+    richEditorPattern->ClearPlaceholderImageNode();
+    EXPECT_TRUE(richEditorPattern->placeholderImageNodes_.empty());
+
+    // Branch: image nodes present → cleared by ClearPlaceholderImageNode
+    ImageSpanOptions options;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    options.imagePixelMap = pixelMap;
+    auto spanString = AceType::MakeRefPtr<SpanString>(options);
+    richEditorPattern->SetPlaceholderStyledString(spanString);
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(richEditorPattern->placeholderImageNodes_.size(), 1);
+    richEditorPattern->ClearPlaceholderImageNode();
+    EXPECT_TRUE(richEditorPattern->placeholderImageNodes_.empty());
+
+    // Branch: SetTranslatedStyledPlaceholder clears image nodes via SetPlaceholder
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(richEditorPattern->placeholderImageNodes_.size(), 1);
+    richEditorPattern->ApplyPageTranslateResult("translated", 1);
+    ASSERT_TRUE(richEditorPattern->pageTranslatedContent_.has_value());
+    spans.clear();
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_TRUE(richEditorPattern->placeholderImageNodes_.empty());
+    EXPECT_EQ(spans.size(), 1);
 }
 } // namespace OHOS::Ace::NG
