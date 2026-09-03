@@ -86,14 +86,12 @@ CompatibleInfo CompatibleManagerExt::GetCompatibleMouseTransform(const std::stri
 {
     std::lock_guard<std::mutex> lock(compatibleInfoMapMutex_);
     if (!isSettingsDataLoaded_) {
-        if (!isSettingsDataLoaded_) {
-            std::string jsonStr = GetSettingsDataStringValue();
-            if (!ParseJsonToMap(jsonStr, compatibleInfoMap_)) {
-                TAG_LOGE(AceLogTag::ACE_XCOMPONENT, "parse json fail");
-                return CompatibleInfo(false);
-            }
-            isSettingsDataLoaded_ = true;
+        std::string jsonStr = GetSettingsDataStringValue();
+        if (!ParseJsonToMap(jsonStr, compatibleInfoMap_)) {
+            TAG_LOGE(AceLogTag::ACE_XCOMPONENT, "parse json fail");
+            return CompatibleInfo(false);
         }
+        isSettingsDataLoaded_ = true;
     }
     CompatibleInfo result;
     auto iter = compatibleInfoMap_.find(bundleName);
