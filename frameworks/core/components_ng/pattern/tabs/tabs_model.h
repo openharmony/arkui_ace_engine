@@ -207,6 +207,7 @@ public:
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) {}
     virtual void ResetBarFloatingStyle() {}
+    virtual void SetSidebarDisplayStyle(NG::SidebarDisplayStyle sidebarDisplayStyle) {}
     virtual void SetBarLayoutStyle(NG::TabBarLayoutStyle barLayoutStyle) {}
     virtual void SetSidebarPosition(BarPosition position) {}
     virtual void SetSidebarHeader(const RefPtr<AceType>& header) {}

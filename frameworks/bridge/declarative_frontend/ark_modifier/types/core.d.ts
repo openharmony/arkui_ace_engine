@@ -314,6 +314,7 @@ type LayoutMode = object;
 type TabBarIconStyle = object;
 type barFloatingStyleOptions = object;
 type TabBarStyle = 'bottom' | 'sidebar' | 'sidebarAdaptable';
+type SidebarDisplayStyle = 'embed' | 'displace';
 type TabsSidebarSearchableOptions = object;
 type TabBarDisplayMode = 'bottomTabbar' | 'sidebar';
 type TabsBreakpointType<T> = object;

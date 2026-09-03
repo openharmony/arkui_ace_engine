@@ -2182,6 +2182,18 @@ void TabsModelNG::ProcessColorWithResourceObj(
     }
 }
 
+void TabsModelNG::SetSidebarDisplayStyle(SidebarDisplayStyle sidebarDisplayStyle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarDisplayStyle(frameNode, sidebarDisplayStyle);
+}
+
+void TabsModelNG::SetSidebarDisplayStyle(FrameNode* frameNode, SidebarDisplayStyle sidebarDisplayStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDisplayStyle, sidebarDisplayStyle, frameNode);
+}
+
 void TabsModelNG::SetBarLayoutStyle(TabBarLayoutStyle barLayoutStyle)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

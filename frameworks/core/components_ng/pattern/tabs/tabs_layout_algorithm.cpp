@@ -203,7 +203,9 @@ SizeF TabsLayoutAlgorithm::MeasureSwiperInSideBarMode(
     auto paddingWidth = layoutProperty->CreatePaddingAndBorder().Width();
 
     // vertical & not overlap
-    auto idealWidth = idealSize.Width() - sideBarWidth - dividerWidth;
+    auto style = layoutProperty->GetSidebarDisplayStyle().value_or(SidebarDisplayStyle::EMBED);
+    auto idealWidth = (style == SidebarDisplayStyle::DISPLACE)
+        ? idealSize.Width() : idealSize.Width() - sideBarWidth - dividerWidth;
     SetWrapContentMaxWidth(childLayoutConstraint, (idealWidth - paddingWidth));
     if (!autoWidth) {
         childLayoutConstraint.selfIdealSize.SetWidth(idealWidth);
@@ -590,7 +592,13 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(
         swiperOffset = OffsetF(paddingOffset.GetX() + sideBarFrameSize.Width() + dividerStrokeWidth,
             paddingOffset.GetY());
     } else {
-        swiperOffset = paddingOffset;
+        auto style = layoutProperty->GetSidebarDisplayStyle().value_or(SidebarDisplayStyle::EMBED);
+        if (style == SidebarDisplayStyle::DISPLACE) {
+            swiperOffset = OffsetF(paddingOffset.GetX() - sideBarFrameSize.Width() - dividerStrokeWidth,
+                paddingOffset.GetY());
+        } else {
+            swiperOffset = paddingOffset;
+        }
         sideBarOffset = OffsetF(frameSize.Width() - sideBarFrameSize.Width() + paddingOffset.GetX(),
             paddingOffset.GetY());
         sideBarDividerOffset = OffsetF(frameSize.Width() - sideBarFrameSize.Width() - dividerStrokeWidth +

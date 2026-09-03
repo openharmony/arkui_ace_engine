@@ -1074,6 +1074,12 @@ let TabBarStyle;
   TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 2] = 'SIDEBAR_ADAPTABLE';
 })(TabBarStyle || (TabBarStyle = {}));
 
+let SidebarDisplayStyle;
+(function (SidebarDisplayStyle) {
+  SidebarDisplayStyle[SidebarDisplayStyle.EMBED = 0] = 'EMBED';
+  SidebarDisplayStyle[SidebarDisplayStyle.DISPLACE = 1] = 'DISPLACE';
+})(SidebarDisplayStyle || (SidebarDisplayStyle = {}));
+
 let TabBarDisplayMode;
 (function (TabBarDisplayMode) {
   TabBarDisplayMode[TabBarDisplayMode.BOTTOM_TABBAR = 0] = 'BOTTOM_TABBAR';

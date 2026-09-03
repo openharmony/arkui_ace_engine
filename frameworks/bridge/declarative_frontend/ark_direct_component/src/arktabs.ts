@@ -258,6 +258,10 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabsOnContentWillChange.identity, TabsOnContentWillChange, handler);
         return this;
       }
+      sidebarDisplayStyle(value: SidebarDisplayStyle): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, SidebarDisplayStyleModifier.identity, SidebarDisplayStyleModifier, value);
+        return this;
+      }
       barStyle(value: TabBarStyle): TabsAttribute {
         modifierWithKey(this._modifiersWithKeys, TabsBarStyleModifier.identity, TabsBarStyleModifier, value);
         return this;
@@ -1100,6 +1104,25 @@ function loadComponent(): ComponentObj | undefined {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     } 
+
+    class SidebarDisplayStyleModifier extends ModifierWithKey<SidebarDisplayStyle> {
+      constructor(value: SidebarDisplayStyle) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarDisplayStyle');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetSidebarDisplayStyle(node);
+        } else {
+          getUINativeModule().tabs.setSidebarDisplayStyle(node, this.value);
+        }
+      }
+
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
     
     class TabsBarStyleModifier extends ModifierWithKey<TabBarStyle> {
       constructor(value: TabBarStyle) {
@@ -1389,6 +1412,10 @@ class JSTabs extends JSContainerBase {
 
   static barFloatingStyle(value: any): void {
     getUINativeModule().tabs.setTabsBarFloatingStyle(true, value);
+  }
+
+  static sidebarDisplayStyle(value: any): void {
+    getUINativeModule().tabs.setSidebarDisplayStyle(true, value);
   }
 
   static barStyle(value: any): void {

@@ -30,6 +30,11 @@ enum class TabBarLayoutStyle {
     SIDEBAR_ADAPTABLE,
 };
 
+enum class SidebarDisplayStyle {
+    EMBED = 0,
+    DISPLACE,
+};
+
 enum class TabBarDisplayMode {
     BOTTOMTABBAR = 0,
     SIDEBAR,
