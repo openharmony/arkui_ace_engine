@@ -18,7 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/interfaces/native/utility/peer_utils.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 
 struct DismissSheetActionPeer {
     OHOS::Ace::NG::BindSheetDismissReason reason;

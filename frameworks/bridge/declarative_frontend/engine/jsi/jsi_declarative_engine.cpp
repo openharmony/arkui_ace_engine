@@ -826,6 +826,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Menu", "arkui.components.arkmenu" },
         { "MenuItem", "arkui.components.arkmenuitem" },
         { "MenuItemGroup", "arkui.components.arkmenuitemgroup" },
+        { "Panel", "arkui.components.arkpanel" },
         { "Radio", "arkui.components.arkradio" },
         { "Rating", "arkui.components.arkrating" },
         { "Richeditor", "arkui.components.arkricheditor" },

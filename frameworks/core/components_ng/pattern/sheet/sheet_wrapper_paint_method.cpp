@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_paint_method.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paint_wrapper.h"

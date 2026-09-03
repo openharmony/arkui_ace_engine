@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_WRAPPER_PATTERN_H
 
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_paint_method.h"
 #include "core/components_ng/pattern/sheet/sheet_wrapper_accessibility_property.h"
 
 namespace OHOS::Ace::NG {

@@ -63,9 +63,9 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -1409,7 +1409,9 @@ int32_t SubwindowOhos::ShowBindSheetByUIContext(
     }
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    return NG::SheetManager::GetInstance().OpenBindSheetByUIContext(sheetContentNode, std::move(buildtitleNodeFunc),
+    auto* sheetModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_RETURN(sheetModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    return sheetModifier->openBindSheetByUIContext(sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
         std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
@@ -1420,16 +1422,18 @@ int32_t SubwindowOhos::UpdateBindSheetByUIContext(
     const RefPtr<NG::FrameNode> &sheetContentNode, const NG::SheetStyle &sheetStyle, bool isPartialUpdate)
 {
     ContainerScope scope(childContainerId_);
-    return NG::SheetManager::GetInstance().UpdateBindSheetByUIContext(
-        sheetContentNode, sheetStyle, isPartialUpdate, childContainerId_);
+    auto* sheetModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_RETURN(sheetModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    return sheetModifier->updateBindSheetByUIContext(sheetContentNode, sheetStyle, isPartialUpdate, childContainerId_);
 }
 
 int32_t SubwindowOhos::CloseBindSheetByUIContext(
     const RefPtr<NG::FrameNode> &sheetContentNode)
 {
     ContainerScope scope(childContainerId_);
-    return NG::SheetManager::GetInstance().CloseBindSheetByUIContext(
-        sheetContentNode, childContainerId_);
+    auto* sheetModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_RETURN(sheetModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    return sheetModifier->closeBindSheetByUIContext(sheetContentNode, childContainerId_);
 }
 
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(

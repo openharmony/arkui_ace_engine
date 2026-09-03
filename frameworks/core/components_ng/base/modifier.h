@@ -452,7 +452,7 @@ public:
 
     void SetThresholdType(ThresholdType type);
 
-    void SetPropertyUnit(PropertyUnit unit);
+    ACE_FORCE_EXPORT void SetPropertyUnit(PropertyUnit unit);
 
     T Get() const
     {

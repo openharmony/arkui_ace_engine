@@ -30,7 +30,7 @@ class ACE_EXPORT WithThemeNode : public UINode {
     DECLARE_ACE_TYPE(WithThemeNode, UINode);
 
 public:
-    static RefPtr<WithThemeNode> GetWithThemeNode(int32_t nodeId);
+    ACE_FORCE_EXPORT static RefPtr<WithThemeNode> GetWithThemeNode(int32_t nodeId);
     static RefPtr<WithThemeNode> CreateWithThemeNode(int32_t nodeId);
     static RefPtr<WithThemeNode> GetOrCreateWithThemeNode(int32_t nodeId);
 
@@ -48,8 +48,8 @@ public:
     {
         return true;
     }
-    void PushOnThemeScopeUpdateWithId(std::function<void()>&& callback, int32_t nodeId);
-    void RemoveOnThemeScopeUpdateWithId(int32_t nodeId);
+    ACE_FORCE_EXPORT void PushOnThemeScopeUpdateWithId(std::function<void()>&& callback, int32_t nodeId);
+    ACE_FORCE_EXPORT void RemoveOnThemeScopeUpdateWithId(int32_t nodeId);
 
     void UpdateThemeScopeId(int32_t themeScopeId) override;
     void UpdateThemeScopeUpdate(int32_t themeScopeId) override;

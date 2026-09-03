@@ -104,6 +104,15 @@ ohos_abc("arktexttimer") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkpanel") {
+  sources = [ "./src/arkpanel.ts" ]
+  output_name = "arkpanel"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkpatternlock") {
   sources = [ "./src/arkpatternlock.ts" ]
   output_name = "arkpatternlock"
@@ -187,15 +196,6 @@ ohos_abc("arkimageanimator") {
 ohos_abc("arkdatepicker") {
   sources = [ "./src/arkdatepicker.ts" ]
   output_name = "arkdatepicker"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arkpanel") {
-  sources = [ "./src/arkpanel.ts" ]
-  output_name = "arkpanel"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

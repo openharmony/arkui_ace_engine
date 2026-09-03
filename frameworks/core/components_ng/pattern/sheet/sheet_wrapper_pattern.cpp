@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr char NAVDESTINATION_VIEW_TAG[] = "NavDestination";
+} // namespace
 
 void SheetWrapperPattern::RegisterSheetMaskColorRes(const RefPtr<FrameNode>& maskNode,
     const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj)
@@ -90,7 +93,7 @@ void SheetWrapperPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(host);
     auto rootNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(rootNode);
-    if (rootNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+    if (rootNode->GetTag() != NAVDESTINATION_VIEW_TAG) {
         return;
     }
     auto wrapperRenderContext = host->GetRenderContext();

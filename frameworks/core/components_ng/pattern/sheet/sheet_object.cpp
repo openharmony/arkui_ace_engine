@@ -19,8 +19,8 @@
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_manager.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/common/text_field_manager_ng.h"
 #ifdef ENABLE_ROSEN_BACKEND

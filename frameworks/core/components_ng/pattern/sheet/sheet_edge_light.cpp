@@ -17,8 +17,8 @@
 
 #include "ui/animation/curves.h"
 
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 
 namespace OHOS::Ace::NG {
 namespace {
