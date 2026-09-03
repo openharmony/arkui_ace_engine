@@ -42,6 +42,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const char CONTEXT_MENU_OPTIONS[] = "contextMenuOptions";
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t TEST_LONG_PRESS_DURATION = 3000;
 constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
@@ -78,10 +79,11 @@ public:
     }
 };
 
-// EventInfoConvertor stub always returns NOT_FOUND/false in TDD environment.
-// These tests verify the stub contract: regardless of FeatureManager state,
-// the stub returns NOT_FOUND and does not modify output parameters.
-
+/**
+ * @tc.name: GetRightMouse2LongPressConfig001
+ * @tc.desc: Test GetRightMouse2LongPressConfig returns NOT_FOUND in stub environment and does not modify output params
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig001, TestSize.Level1)
 {
     bool enabled = false;
@@ -92,6 +94,11 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig001, TestSize.Lev
     EXPECT_TRUE(components.empty());
 }
 
+/**
+ * @tc.name: IsRightMouseMappingEnabled001
+ * @tc.desc: Test IsRightMouseMappingEnabled returns false in stub environment and does not modify output params
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled001, TestSize.Level1)
 {
     bool enabled = false;
@@ -102,6 +109,11 @@ HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled001, TestSize.Level1
     EXPECT_TRUE(components.empty());
 }
 
+/**
+ * @tc.name: LongPressRecognizerGetDuration001
+ * @tc.desc: Test LongPressRecognizer GetDuration and SetDuration round-trip
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingTestNg, LongPressRecognizerGetDuration001, TestSize.Level1)
 {
     RefPtr<LongPressRecognizer> recognizer =
@@ -158,8 +170,11 @@ public:
 
 RefPtr<PipelineContext> RightMouseMappingPipelineTestNg::context_ = nullptr;
 
-// PipelineContext: isRightMouseMappingActive_ default + set/get
-
+/**
+ * @tc.name: RightMouseMappingActive001
+ * @tc.desc: Test IsRightMouseMappingActive default false and SetRightMouseMappingActive toggle
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive001, TestSize.Level1)
 {
     EXPECT_FALSE(context_->IsRightMouseMappingActive());
@@ -169,8 +184,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive001, TestSize.L
     EXPECT_FALSE(context_->IsRightMouseMappingActive());
 }
 
-// PipelineContext: onRightMouseMappingCancel_ callback
-
+/**
+ * @tc.name: RightMouseMappingCancelCallback001
+ * @tc.desc: Test onRightMouseMappingCancel_ is invoked when mapping is active
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback001, TestSize.Level1)
 {
     bool cancelCalled = false;
@@ -182,6 +200,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback001, Te
     EXPECT_TRUE(cancelCalled);
 }
 
+/**
+ * @tc.name: RightMouseMappingCancelCallback002
+ * @tc.desc: Test onRightMouseMappingCancel_ is NOT invoked when mapping is inactive
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback002, TestSize.Level1)
 {
     bool cancelCalled = false;
@@ -193,6 +216,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback002, Te
     EXPECT_FALSE(cancelCalled);
 }
 
+/**
+ * @tc.name: RightMouseMappingCancelCallback003
+ * @tc.desc: Test onRightMouseMappingCancel_ does not crash when callback is null
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback003, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -203,8 +231,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback003, Te
     EXPECT_TRUE(context_->isRightMouseMappingActive_);
 }
 
-// PipelineContext: WindowFocus(false) triggers cancel when mapping active
-
+/**
+ * @tc.name: WindowFocusCancelsMapping001
+ * @tc.desc: Test WindowFocus(false) triggers cancel callback when mapping is active
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, WindowFocusCancelsMapping001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -216,8 +247,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, WindowFocusCancelsMapping001, TestSize
     EXPECT_TRUE(cancelCalled);
 }
 
-// PipelineContext: WindowFocus(false) does NOT trigger cancel when mapping inactive
-
+/**
+ * @tc.name: WindowFocusCancelsMapping002
+ * @tc.desc: Test WindowFocus(false) does NOT trigger cancel when mapping is inactive
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, WindowFocusCancelsMapping002, TestSize.Level1)
 {
     bool cancelCalled = false;
@@ -228,8 +262,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, WindowFocusCancelsMapping002, TestSize
     EXPECT_FALSE(cancelCalled);
 }
 
-// PipelineContext: OnHide triggers cancel when mapping active
-
+/**
+ * @tc.name: OnHideCancelsMapping001
+ * @tc.desc: Test OnHide triggers cancel callback when mapping is active
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -241,8 +278,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping001, TestSize.Leve
     EXPECT_TRUE(cancelCalled);
 }
 
-// PipelineContext: OnHide does NOT trigger cancel when mapping inactive
-
+/**
+ * @tc.name: OnHideCancelsMapping002
+ * @tc.desc: Test OnHide does NOT trigger cancel when mapping is inactive
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping002, TestSize.Level1)
 {
     bool cancelCalled = false;
@@ -253,8 +293,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping002, TestSize.Leve
     EXPECT_FALSE(cancelCalled);
 }
 
-// PipelineContext: double cancel protection (OnHide then WindowFocus)
-
+/**
+ * @tc.name: DoubleCancelProtection001
+ * @tc.desc: Test OnHide then WindowFocus(false) only triggers cancel once
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, DoubleCancelProtection001, TestSize.Level1)
 {
     int callCount = 0;
@@ -268,9 +311,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, DoubleCancelProtection001, TestSize.Le
     EXPECT_EQ(callCount, 1);
 }
 
-// source-type protection: isRightMouseMappingActive_ + sourceTool=MOUSE + sourceType=TOUCH
-// skips CheckSourceTypeChange so lastSourceType_ is not polluted
-
+/**
+ * @tc.name: SourceTypeProtection001
+ * @tc.desc: Test mapped touch events (sourceTool=MOUSE, sourceType=TOUCH) preserve lastSourceType_ as MOUSE
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection001, TestSize.Level1)
 {
     context_->lastSourceType_ = SourceType::MOUSE;
@@ -306,8 +351,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection001, TestSize.Leve
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
 }
 
-// source-type protection: real touch (sourceTool=FINGER) still updates lastSourceType_
-
+/**
+ * @tc.name: SourceTypeProtection002
+ * @tc.desc: Test real touch (sourceTool=FINGER) still updates lastSourceType_ to TOUCH
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection002, TestSize.Level1)
 {
     context_->lastSourceType_ = SourceType::MOUSE;
@@ -321,8 +369,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection002, TestSize.Leve
     EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
 }
 
-// source-type protection: after mapping ends, real mouse MOVE detects no spurious change
-
+/**
+ * @tc.name: SourceTypeProtection003
+ * @tc.desc: Test after mapping ends, real mouse MOVE detects no spurious source-type change
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection003, TestSize.Level1)
 {
     context_->lastSourceType_ = SourceType::MOUSE;
@@ -346,8 +397,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection003, TestSize.Leve
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
 }
 
-// PipelineContext member layout: isRightMouseMappingActive_ at end, no ABI break
-
+/**
+ * @tc.name: PipelineContextMemberLayout001
+ * @tc.desc: Test isRightMouseMappingActive_ at end of member list, focusNode_ still works (ABI safety)
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, PipelineContextMemberLayout001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -361,8 +415,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, PipelineContextMemberLayout001, TestSi
     context_->focusNode_ = nullptr;
 }
 
-// HitTestMouseTargetForMapping: null root returns false
-
+/**
+ * @tc.name: HitTestMouseTargetForMapping001
+ * @tc.desc: Test HitTestMouseTargetForMapping returns false with null root element
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping001, TestSize.Level1)
 {
     MouseEvent event;
@@ -376,8 +433,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping001, TestS
     EXPECT_FALSE(result);
 }
 
-// HitTestMouseTargetForMapping: empty whitelist (no tag restriction)
-
+/**
+ * @tc.name: HitTestMouseTargetForMapping002
+ * @tc.desc: Test HitTestMouseTargetForMapping with empty whitelist (no tag restriction)
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping002, TestSize.Level1)
 {
     auto rootNode = FrameNode::GetOrCreateFrameNode("root", ElementRegister::GetInstance()->MakeUniqueId(),
@@ -396,8 +456,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping002, TestS
     context_->rootNode_ = nullptr;
 }
 
-// HitTestMouseTargetForMapping: tag not in whitelist returns false
-
+/**
+ * @tc.name: HitTestMouseTargetForMapping003
+ * @tc.desc: Test HitTestMouseTargetForMapping returns false when tag not in whitelist
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping003, TestSize.Level1)
 {
     auto buttonNode = FrameNode::GetOrCreateFrameNode("button", ElementRegister::GetInstance()->MakeUniqueId(),
@@ -417,8 +480,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping003, TestS
     context_->rootNode_ = nullptr;
 }
 
-// HitTestMouseTargetForMapping: tag in whitelist but no children
-
+/**
+ * @tc.name: HitTestMouseTargetForMapping004
+ * @tc.desc: Test HitTestMouseTargetForMapping with tag in whitelist but no children
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping004, TestSize.Level1)
 {
     auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
@@ -437,8 +503,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping004, TestS
     context_->rootNode_ = nullptr;
 }
 
-// HitTestMouseTargetForMapping: parent tag not in whitelist, child tag matches (recursive)
-
+/**
+ * @tc.name: HitTestMouseTargetForMapping005
+ * @tc.desc: Test HitTestMouseTargetForMapping recursive child traversal (parent tag mismatch, child tag match)
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping005, TestSize.Level1)
 {
     auto parentNode = FrameNode::GetOrCreateFrameNode("parent", ElementRegister::GetInstance()->MakeUniqueId(),
@@ -460,8 +529,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping005, TestS
     context_->rootNode_ = nullptr;
 }
 
-// CheckSourceTypeChange: NONE->TOUCH->MOUSE transitions
-
+/**
+ * @tc.name: CheckSourceTypeChange001
+ * @tc.desc: Test CheckSourceTypeChange returns true on NONE->TOUCH->MOUSE transitions
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange001, TestSize.Level1)
 {
     context_->lastSourceType_ = SourceType::NONE;
@@ -471,8 +543,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange001, TestSize.Lev
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
 }
 
-// CheckSourceTypeChange: same type returns false
-
+/**
+ * @tc.name: CheckSourceTypeChange002
+ * @tc.desc: Test CheckSourceTypeChange returns false when source type is the same
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange002, TestSize.Level1)
 {
     context_->lastSourceType_ = SourceType::TOUCH;
@@ -480,8 +555,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange002, TestSize.Lev
     EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
 }
 
-// Event interaction: mapped touch DOWN/MOVE/UP with isRightMouseMappingActive_ preserves lastSourceType_
-
+/**
+ * @tc.name: MappedTouchPreservesSourceType001
+ * @tc.desc: Test mapped touch DOWN/MOVE/UP with isRightMouseMappingActive_ preserves lastSourceType_ as MOUSE
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchPreservesSourceType001, TestSize.Level1)
 {
     context_->lastSourceType_ = SourceType::MOUSE;
@@ -518,8 +596,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchPreservesSourceType001, Tes
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
 }
 
-// Event interaction: mapped touch CANCEL does not crash
-
+/**
+ * @tc.name: MappedTouchCancel001
+ * @tc.desc: Test mapped touch CANCEL event does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchCancel001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -542,8 +623,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchCancel001, TestSize.Level1)
     context_->OnTouchEvent(cancelEvent);
 }
 
-// Event interaction: mouse MOVE when mapping active does not crash
-
+/**
+ * @tc.name: MouseMoveMappingActive001
+ * @tc.desc: Test mouse MOVE when mapping active does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, MouseMoveMappingActive001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -557,8 +641,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, MouseMoveMappingActive001, TestSize.Le
     context_->OnMouseEvent(mouseMove, context_->GetRootElement());
 }
 
-// Event interaction: left-click after mapping cancelled does not crash
-
+/**
+ * @tc.name: LeftClickAfterCancel001
+ * @tc.desc: Test left-click PRESS after mapping cancelled does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, LeftClickAfterCancel001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -573,8 +660,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, LeftClickAfterCancel001, TestSize.Leve
     context_->OnMouseEvent(mouseEvent, context_->GetRootElement());
 }
 
-// Right-button fallback: right-click PRESS with empty whitelist does not crash
-
+/**
+ * @tc.name: RightClickPressEmptyWhitelist001
+ * @tc.desc: Test right-click PRESS with mapping active does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickPressEmptyWhitelist001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -588,8 +678,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightClickPressEmptyWhitelist001, Test
     context_->OnMouseEvent(pressEvent, context_->GetRootElement());
 }
 
-// Right-button fallback: right-click MOVE with NONE_BUTTON does not crash
-
+/**
+ * @tc.name: RightClickMoveNoneButton001
+ * @tc.desc: Test right-click MOVE with NONE_BUTTON does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickMoveNoneButton001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -603,8 +696,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightClickMoveNoneButton001, TestSize.
     context_->OnMouseEvent(moveEvent, context_->GetRootElement());
 }
 
-// Right-button fallback: right-click RELEASE does not crash
-
+/**
+ * @tc.name: RightClickRelease001
+ * @tc.desc: Test right-click RELEASE with mapping active does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickRelease001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -618,8 +714,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightClickRelease001, TestSize.Level1)
     context_->OnMouseEvent(releaseEvent, context_->GetRootElement());
 }
 
-// Right-button fallback: right-click CANCEL with NONE_BUTTON does not crash
-
+/**
+ * @tc.name: RightClickCancelNoneButton001
+ * @tc.desc: Test right-click CANCEL with NONE_BUTTON does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickCancelNoneButton001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -633,8 +732,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightClickCancelNoneButton001, TestSiz
     context_->OnMouseEvent(cancelEvent, context_->GetRootElement());
 }
 
-// Right-button fallback: right-click CANCEL with RIGHT_BUTTON does not crash
-
+/**
+ * @tc.name: RightClickCancelRightButton001
+ * @tc.desc: Test right-click CANCEL with RIGHT_BUTTON does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickCancelRightButton001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -648,8 +750,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightClickCancelRightButton001, TestSi
     context_->OnMouseEvent(cancelEvent, context_->GetRootElement());
 }
 
-// Right-button fallback: stylus right-click (sourceTool=PEN) does not trigger mapping
-
+/**
+ * @tc.name: StylusRightClickNoMapping001
+ * @tc.desc: Test stylus right-click (sourceTool=PEN) does not trigger mapping
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, StylusRightClickNoMapping001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -664,8 +769,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, StylusRightClickNoMapping001, TestSize
     EXPECT_TRUE(context_->IsRightMouseMappingActive());
 }
 
-// Right-button fallback: consecutive right-click PRESS does not crash
-
+/**
+ * @tc.name: ConsecutiveRightClickPress001
+ * @tc.desc: Test consecutive right-click PRESS does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, ConsecutiveRightClickPress001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -688,8 +796,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, ConsecutiveRightClickPress001, TestSiz
     context_->OnMouseEvent(press2, context_->GetRootElement());
 }
 
-// Right-button fallback: full PRESS→MOVE→RELEASE→CANCEL sequence does not crash
-
+/**
+ * @tc.name: FullRightClickSequence001
+ * @tc.desc: Test full PRESS->MOVE->RELEASE->CANCEL sequence with mapping active does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, FullRightClickSequence001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -730,8 +841,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, FullRightClickSequence001, TestSize.Le
     context_->OnMouseEvent(cancel, context_->GetRootElement());
 }
 
-// Right-button fallback: mapping inactive + right-click PRESS does not crash
-
+/**
+ * @tc.name: RightClickPressMappingInactive001
+ * @tc.desc: Test right-click PRESS when mapping inactive does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickPressMappingInactive001, TestSize.Level1)
 {
     EXPECT_FALSE(context_->IsRightMouseMappingActive());
@@ -745,8 +859,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightClickPressMappingInactive001, Tes
     context_->OnMouseEvent(press, context_->GetRootElement());
 }
 
-// Right-button fallback: mapping inactive + right-click MOVE does not crash
-
+/**
+ * @tc.name: RightClickMoveMappingInactive001
+ * @tc.desc: Test right-click MOVE when mapping inactive does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickMoveMappingInactive001, TestSize.Level1)
 {
     EXPECT_FALSE(context_->IsRightMouseMappingActive());
@@ -760,8 +877,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightClickMoveMappingInactive001, Test
     context_->OnMouseEvent(move, context_->GetRootElement());
 }
 
-// Right-button fallback: mapping inactive + right-click RELEASE does not crash
-
+/**
+ * @tc.name: RightClickReleaseMappingInactive001
+ * @tc.desc: Test right-click RELEASE when mapping inactive does not crash
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightClickReleaseMappingInactive001, TestSize.Level1)
 {
     EXPECT_FALSE(context_->IsRightMouseMappingActive());
