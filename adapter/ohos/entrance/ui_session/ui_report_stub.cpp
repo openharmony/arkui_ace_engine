@@ -484,6 +484,7 @@ void UiReportStub::PostGetInspectorTreeCallbackRemoveTask(int32_t timeout)
     }, GET_INSPECTOR_TREE_CALLBACK_TIMEOUT, NormalizeTimeout(timeout, DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS));
     if (!postTaskSuccess) {
         LOGW("Post GetInspectorTree timeout task failed");
+        std::lock_guard<std::mutex> lock(inspectorTreeCallbackMutex_);
         inspectorTreeCallback_ = nullptr;
     }
 }
