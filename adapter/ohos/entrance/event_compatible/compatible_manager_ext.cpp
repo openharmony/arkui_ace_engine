@@ -84,8 +84,8 @@ int32_t CompatibleManagerExt::GetCompatibleinputMode(const std::string& bundleNa
 
 CompatibleInfo CompatibleManagerExt::GetCompatibleMouseTransform(const std::string& bundleName)
 {
+    std::lock_guard<std::mutex> lock(compatibleInfoMapMutex_);
     if (!isSettingsDataLoaded_) {
-        std::lock_guard<std::mutex> lock(compatibleInfoMapMutex_);
         if (!isSettingsDataLoaded_) {
             std::string jsonStr = GetSettingsDataStringValue();
             if (!ParseJsonToMap(jsonStr, compatibleInfoMap_)) {
