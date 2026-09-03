@@ -68,7 +68,14 @@ public:
         manager_->NotifyRealBuildStart(params_);
         buildStartNs_ = GetSysTimestamp();
         observing_ = true;
-        AceTraceBeginWithArgs("ScrollPH.RealBuild[host:%d index:%d]", params_.hostNodeId, index);
+        // Per-item trace follows the layout trace switch (SystemProperties::GetLayoutTraceEnabled,
+        // same predicate as ACE_LAYOUT_TRACE_BEGIN in base/log/ace_trace.h). The flag is sampled
+        // once here and reused at both close points so a runtime toggle between begin and end
+        // can never leave the section unbalanced.
+        traceEnabled_ = SystemProperties::GetLayoutTraceEnabled();
+        if (traceEnabled_) {
+            AceTraceBeginWithArgs("ScrollPH.RealBuild[host:%d index:%d]", params_.hostNodeId, index);
+        }
     }
 
     ~ScrollPlaceholderItemBuildScope()
@@ -76,7 +83,9 @@ public:
         if (!observing_) {
             return;
         }
-        AceTraceEnd();
+        if (traceEnabled_) {
+            AceTraceEnd();
+        }
         manager_->NotifyRealBuildEnd(params_, buildStartNs_);
     }
 
@@ -92,7 +101,9 @@ public:
         if (wrapper) {
             return;
         }
-        AceTraceEnd();
+        if (traceEnabled_) {
+            AceTraceEnd();
+        }
         observing_ = false;
     }
 
@@ -105,6 +116,7 @@ private:
     int64_t buildStartNs_ = 0;
     bool observing_ = false;
     bool acquiredReported_ = false;
+    bool traceEnabled_ = false;
 };
 
 } // namespace OHOS::Ace::NG
