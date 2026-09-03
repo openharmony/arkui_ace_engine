@@ -1280,6 +1280,150 @@ HWTEST_F(GridCacheLayoutTestNg, OverScrollAtTopWithCacheCount011, TestSize.Level
 }
 
 /**
+ * @tc.name: OverScrollAtTopNegativeEndMainLineIndex001
+ * @tc.desc: When all content is pushed below viewport via top overscroll (endMainLineIndex_ < 0),
+ *           the active range anchor stays at -1, -1 so no item is marked active while content is
+ *           off-screen. With cachedCount > 0, FillCacheLineAtEnd must not trigger negative-main
+ *           guard in CheckGridPlaced. After rollback, items must reappear correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, OverScrollAtTopNegativeEndMainLineIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid with cachedCount=2, spring edge effect, 10 items, rowsGap=10
+     * @tc.expected: Initial layout fills viewport with 8 items (0-7, lines 0-3)
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, false);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetRowsGap(Dimension(10));
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return 100.0f; });
+    CreateDone();
+
+    const auto& info = pattern_->info_;
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+
+    /**
+     * @tc.steps: step2. Drag down 400px (= mainSize) to push all content below viewport.
+     *             endMainLineIndex_ goes to -1 only when the offset falls in
+     *             [mainSize, mainSize + mainGap). With rowsGap=10 this interval is [400, 410).
+     * @tc.expected: endMainLineIndex_ goes negative (-1), active range stays -1, -1 (no active item)
+     */
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(400.0f);
+    FlushUITasks();
+
+    // endMainLineIndex_ must be -1: the while-loop in UseCurrentLines never executed
+    EXPECT_EQ(info.endMainLineIndex_, -1);
+
+    // No item is active: the fallback branch keeps the anchor at -1, -1 when content is off-screen
+    auto item0 = GetItem(0, true);
+    ASSERT_TRUE(item0);
+    EXPECT_FALSE(item0->IsActive()) << "Item 0 should not be active when all content is below viewport";
+
+    /**
+     * @tc.steps: step3. Release and bounce back to original position
+     * @tc.expected: Items reappear, endMainLineIndex_ returns to 3, all visible items active
+     */
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = false;
+    UpdateCurrentOffset(-400.0f);
+    FlushUITasks();
+
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 7);
+
+    // All visible items must be active again
+    for (int32_t i = 0; i <= 7; ++i) {
+        auto item = GetItem(i, true);
+        ASSERT_TRUE(item);
+        EXPECT_TRUE(item->IsActive()) << "Item " << i << " should be active after rollback";
+    }
+}
+
+/**
+ * @tc.name: OverScrollAtTopLargeDataScrollTo001
+ * @tc.desc: With large data and scrollToIndex(0) at top overscroll, verify no persistent
+ *           negative currentMainLineIndex_ state. First line must recover after rollback.
+ *           This regression test covers the FillCacheLineAtEnd guard fix that prevents
+ *           the negative-main guard in CheckGridPlaced from firing every frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, OverScrollAtTopLargeDataScrollTo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid with large data (100 items), cachedCount=2, spring effect, rowsGap=10
+     * @tc.expected: Initial layout fills viewport with 8 items (0-7, lines 0-3)
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, false);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetRowsGap(Dimension(10));
+    CreateItemsInLazyForEach(100, [](uint32_t idx) { return 100.0f; });
+    CreateDone();
+
+    const auto& info = pattern_->info_;
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+    EXPECT_EQ(info.GetChildrenCount(), 100);
+
+    /**
+     * @tc.steps: step2. Drag down 400px (= mainSize) to push all content below viewport.
+     *             endMainLineIndex_ goes to -1 only when offset is in [mainSize, mainSize+mainGap).
+     * @tc.expected: endMainLineIndex_ = -1, active range stays -1, -1 (no active item)
+     */
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(400.0f);
+    FlushUITasks();
+
+    EXPECT_EQ(info.endMainLineIndex_, -1);
+    auto item0 = GetItem(0, true);
+    ASSERT_TRUE(item0);
+    EXPECT_FALSE(item0->IsActive());
+
+    /**
+     * @tc.steps: step3. ScrollToIndex(0) while in overscroll state
+     * @tc.expected: Grid returns to top, endMainLineIndex_ recovers to non-negative,
+     *               first line is properly laid out
+     */
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushUITasks();
+
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_GE(info.endMainLineIndex_, 0) << "endMainLineIndex_ must recover to non-negative after ScrollToIndex(0)";
+    EXPECT_EQ(info.startIndex_, 0);
+
+    // First line items must be active and properly positioned
+    auto item = GetItem(0, true);
+    ASSERT_TRUE(item);
+    EXPECT_TRUE(item->IsActive());
+    EXPECT_NEAR(GetChildY(frameNode_, 0), 0.0f, 0.1f);
+    item = GetItem(1, true);
+    ASSERT_TRUE(item);
+    EXPECT_TRUE(item->IsActive());
+    EXPECT_NEAR(GetChildY(frameNode_, 1), 0.0f, 0.1f);
+
+    /**
+     * @tc.steps: step4. Release touch and verify stable state
+     * @tc.expected: Layout is stable, all visible items active
+     */
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = false;
+    FlushUITasks();
+
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+    for (int32_t i = 0; i <= 7; ++i) {
+        auto item = GetItem(i, true);
+        ASSERT_TRUE(item);
+        EXPECT_TRUE(item->IsActive());
+    }
+}
+
+/**
  * @tc.name: SyncPreloadAfterDataReloadAndScrollToIndex
  * @tc.desc: When Grid is single column with showCached=true, after data reload triggers
  *           ScrollToIndex, verify that the cache line below the viewport is correctly created.
