@@ -14,11 +14,10 @@
  */
 
 // SyncLoadDemo.ets
-// Demonstrates the syncLoad default behavior after whitelist sunset (FEAT-034, PR #87380).
-// Before the change, the default syncLoad value was driven by FeatureParam::IsSyncLoadEnabled()
-// whitelist configuration. After the change, the default is always true (synchronous loading)
-// regardless of whitelist config. Developers can still explicitly set syncLoad(false) to
-// enable frame-split optimization.
+// Demonstrates the syncLoad property on List with LazyForEach.
+// By default (syncLoad not set), List loads all visible items synchronously in one pass.
+// Setting syncLoad(false) enables frame-split optimization: remaining items are deferred
+// to subsequent frames when the response deadline is exceeded.
 
 interface DataItem {
   index: number;
@@ -32,6 +31,10 @@ class SyncLoadDataSource implements IDataSource {
   private listeners: DataChangeListener[] = [];
 
   constructor(count: number) {
+    this.regenerate(count);
+  }
+
+  regenerate(count: number): void {
     const colors: string[] = [
       '#E3F2FD', '#F3E5F5', '#E8F5E9', '#FFF3E0', '#FCE4EC',
       '#E0F7FA', '#F1F8E9', '#FFFDE7', '#FBE9E7', '#E8EAF6'
@@ -40,6 +43,7 @@ class SyncLoadDataSource implements IDataSource {
       'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry',
       'Fig', 'Grape', 'Honeydew', 'Kiwi', 'Lemon'
     ];
+    this.items = [];
     for (let i = 0; i < count; i++) {
       this.items.push({
         index: i,
@@ -99,7 +103,11 @@ struct SyncLoadDemo {
     const sizes: number[] = [50, 100, 200, 500];
     const currentIndex: number = sizes.indexOf(this.dataCount);
     this.dataCount = sizes[(currentIndex + 1) % sizes.length];
-    this.dataSource = new SyncLoadDataSource(this.dataCount);
+    // Reuse the same dataSource instance: regenerate data and notify listeners.
+    // Replacing the dataSource reference would not trigger LazyForEach rebinding
+    // because dataSource is a plain member, not a @State variable.
+    this.dataSource.regenerate(this.dataCount);
+    this.dataSource.notifyDataReload();
     this.updateStatus();
   }
 
@@ -170,7 +178,7 @@ struct SyncLoadDemo {
 
   @Builder
   FooterBuilder() {
-    Text('syncLoad default changed from whitelist-driven to always true (PR #87380)')
+    Text('Set syncLoad(false) to enable frame-split optimization; default is synchronous loading.')
       .fontSize(12)
       .fontColor(Color.Gray)
       .width('100%')
@@ -236,7 +244,7 @@ struct SyncLoadDemo {
         .fontWeight(FontWeight.Bold)
         .margin({ top: 12, bottom: 4 })
 
-      Text('After whitelist sunset, syncLoad defaults to true (synchronous).\nSet syncLoad(false) to enable frame-split optimization.')
+      Text('By default syncLoad is true (synchronous).\nSet syncLoad(false) to enable frame-split optimization.')
         .fontSize(12)
         .fontColor(Color.Gray)
         .textAlign(TextAlign.Center)
@@ -247,7 +255,6 @@ struct SyncLoadDemo {
       // List with conditional syncLoad
       if (this.useSyncLoad) {
         // Default behavior: syncLoad is not set, defaults to true (synchronous loading).
-        // After PR #87380, this no longer depends on FeatureParam whitelist config.
         List({ scroller: this.scroller }) {
           ListItem() {
             this.HeaderBuilder()
