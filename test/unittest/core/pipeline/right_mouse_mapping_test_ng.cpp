@@ -25,7 +25,6 @@
 #include "core/common/event_manager.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/event/event_info_convertor.h"
-#include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 #include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
@@ -42,7 +41,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const char CONTEXT_MENU_OPTIONS[] = "contextMenuOptions";
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t TEST_LONG_PRESS_DURATION = 3000;
 constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
@@ -139,7 +137,6 @@ public:
         context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>(DEFAULT_INSTANCE_ID);
         context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
         context_->fontManager_ = FontManager::Create();
-        context_->imageCache_ = ImageCache::Create();
         MockContainer::SetUp();
         MockContainer::Current()->pipelineContext_ = context_;
     }
