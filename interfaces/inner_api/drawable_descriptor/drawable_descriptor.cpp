@@ -379,6 +379,7 @@ void DrawableDescriptor::SetSVGResourceLimitLevel(const int32_t id)
         svgLimitsId_ = 0;
         return;
     }
+    HILOGD("SetSVGResourceLimitLevel svgResourceLimitLevel=%{public}d", id);
     svgLimitsId_ = id;
 }
 
@@ -466,6 +467,7 @@ void LayeredDrawableDescriptor::InitLayeredParam(
 {
     Media::SourceOptions opts;
     opts.svgResourceLimitLevel = static_cast<Media::SVGResourceLimitLevel>(svgLimitsId);
+    HILOGD("InitLayeredParam svgResourceLimitLevel=%{public}d", svgLimitsId);
     uint32_t errorCode = 0;
     auto foreground =
         Media::ImageSource::CreateImageSource(foregroundInfo.first.get(), foregroundInfo.second, opts, errorCode);
