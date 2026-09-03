@@ -11994,15 +11994,19 @@ bool RichEditorPattern::IsTouchInFrameArea(const PointF& touchPoint)
     return viewPort.IsInRegion(touchPoint);
 }
 
+void RichEditorPattern::ClearPlaceholderImageNode()
+{
+    CHECK_NULL_VOID(!placeholderImageNodes_.empty());
+    auto host = GetContentHost();
+    CHECK_NULL_VOID(host);
+    host->Clean();
+    placeholderImageNodes_.clear();
+}
+
 void RichEditorPattern::MountPlaceholderImageNode(const std::list<RefPtr<NG::SpanItem>>& spans)
 {
     // Clear existing placeholder image nodes.
-    if (!placeholderImageNodes_.empty()) {
-        auto host = GetContentHost();
-        CHECK_NULL_VOID(host);
-        host->Clean();
-        placeholderImageNodes_.clear();
-    }
+    ClearPlaceholderImageNode();
     // Mount new placeholder image nodes.
     for (const auto& span : spans) {
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
@@ -12014,11 +12018,11 @@ void RichEditorPattern::MountPlaceholderImageNode(const std::list<RefPtr<NG::Spa
 bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
 {
     if (!spans_.empty()) {
+        OnPlaceholderSourceTextChanged();
         bool placeholderWithLpx = isShowPlaceholder_ && hasPlaceholderLpxUnitStyle_;
         isShowPlaceholder_ = false;
         hasPlaceholderLpxUnitStyle_ = false;
         IF_TRUE(placeholderWithLpx, UpdateLpxUnitFlag());
-        OnPlaceholderSourceTextChanged();
         return false;
     }
     bool setSuccess = styledPlaceholder_ ? SetStyledPlaceholder(spanItemList) : SetStringPlaceholder(spanItemList);
@@ -15502,8 +15506,7 @@ void RichEditorPattern::ReportPageTranslatePlaceholderDrawn()
 void RichEditorPattern::OnPlaceholderSourceTextChanged()
 {
 #ifndef CROSS_PLATFORM
-    bool hasTranslateState = pageTranslatedContent_.has_value() ||
-        !lastDrawnPageTranslateContent_.empty();
+    bool hasTranslateState = pageTranslatedContent_.has_value() || isShowPlaceholder_;
     lastDrawnPageTranslateContent_.clear();
     ResetPageTranslate();
     CHECK_NULL_VOID(hasTranslateState);
@@ -15555,6 +15558,7 @@ bool RichEditorPattern::SetTranslatedStyledPlaceholder(
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    ClearPlaceholderImageNode();
     auto placeholderNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(placeholderNode, false);
     UpdatePlaceholderByTheme(placeholderNode);

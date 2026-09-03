@@ -608,12 +608,18 @@ HWTEST_F(TextThirteenTestNg, PageTranslate_ApplyAndReset, TestSize.Level1)
     ASSERT_TRUE(pattern->GetPageTranslatedText().has_value());
     EXPECT_EQ(pattern->GetPageTranslatedText().value(), u"translated");
 
+    // NeedShowAIDetect returns false when translation is active
+    EXPECT_FALSE(pattern->NeedShowAIDetect());
+
     // ApplyPageTranslateResult with same result and version returns true without change
     EXPECT_TRUE(pattern->ApplyPageTranslateResult("translated", 1));
 
     // ResetPageTranslate clears translated text and version
     pattern->ResetPageTranslate();
     EXPECT_FALSE(pattern->GetPageTranslatedText().has_value());
+
+    // NeedShowAIDetect no longer blocked by translation after reset
+    EXPECT_FALSE(pattern->NeedShowAIDetect());
 
     // ResetPageTranslate again when already clean is a no-op
     pattern->ResetPageTranslate();
@@ -644,6 +650,57 @@ HWTEST_F(TextThirteenTestNg, PageTranslate_GetPageTranslateTextForReport, TestSi
     // lastDrawn == textForDisplay_ returns the text
     pattern->MarkPageTranslateTextDrawn();
     EXPECT_EQ(pattern->GetPageTranslateTextForReport(), "hello");
+}
+
+/**
+ * @tc.name: PageTranslate_IsTextFieldPlaceholderTextNode
+ * @tc.desc: Test IsTextFieldPlaceholderTextNode guard for all TextField parent tags
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, PageTranslate_IsTextFieldPlaceholderTextNode, TestSize.Level1)
+{
+    // Branch: parent is TextInput → guard returns true → GetPageTranslateTextForReport returns ""
+    auto textInputParent = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto textChildA = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, AceType::MakeRefPtr<TextPattern>());
+    textInputParent->AddChild(textChildA);
+    auto patternA = textChildA->GetPattern<TextPattern>();
+    patternA->textForDisplay_ = u"placeholder";
+    patternA->MarkPageTranslateTextDrawn();
+    EXPECT_TRUE(patternA->GetPageTranslateTextForReport().empty());
+
+    // Branch: parent is TextArea → guard returns true
+    auto textAreaParent = FrameNode::CreateFrameNode(V2::TEXTAREA_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
+    auto textChildB = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>());
+    textAreaParent->AddChild(textChildB);
+    auto patternB = textChildB->GetPattern<TextPattern>();
+    patternB->textForDisplay_ = u"placeholder";
+    patternB->MarkPageTranslateTextDrawn();
+    EXPECT_TRUE(patternB->GetPageTranslateTextForReport().empty());
+
+    // Branch: parent is SearchField (Search internal TextField) → guard returns true
+    auto searchFieldParent = FrameNode::CreateFrameNode(V2::SEARCH_Field_ETS_TAG, 5, AceType::MakeRefPtr<Pattern>());
+    auto textChildC = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>());
+    searchFieldParent->AddChild(textChildC);
+    auto patternC = textChildC->GetPattern<TextPattern>();
+    patternC->textForDisplay_ = u"placeholder";
+    patternC->MarkPageTranslateTextDrawn();
+    EXPECT_TRUE(patternC->GetPageTranslateTextForReport().empty());
+
+    // Branch: parent is Search (outer node, not internal TextField) → guard returns false → report succeeds
+    auto searchParent = FrameNode::CreateFrameNode(V2::SEARCH_ETS_TAG, 7, AceType::MakeRefPtr<Pattern>());
+    auto textChildD = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 8, AceType::MakeRefPtr<TextPattern>());
+    searchParent->AddChild(textChildD);
+    auto patternD = textChildD->GetPattern<TextPattern>();
+    patternD->textForDisplay_ = u"placeholder";
+    patternD->MarkPageTranslateTextDrawn();
+    EXPECT_EQ(patternD->GetPageTranslateTextForReport(), "placeholder");
+
+    // Branch: no parent → guard returns false
+    auto orphanText = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 9, AceType::MakeRefPtr<TextPattern>());
+    auto patternE = orphanText->GetPattern<TextPattern>();
+    patternE->textForDisplay_ = u"standalone";
+    patternE->MarkPageTranslateTextDrawn();
+    EXPECT_EQ(patternE->GetPageTranslateTextForReport(), "standalone");
 }
 
 /**
@@ -682,5 +739,44 @@ HWTEST_F(TextThirteenTestNg, PageTranslate_GetPageTranslateNodeId, TestSize.Leve
     auto pattern = textNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->GetPageTranslateNodeId(), 100);
+}
+
+/**
+ * @tc.name: PageTranslate_RestoreLastDrawnBeforeRegister
+ * @tc.desc: Test lastDrawn restoration condition in OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, PageTranslate_RestoreLastDrawnBeforeRegister, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Branch: lastDrawn empty + textForDisplay_ non-empty → restore lastDrawn
+    pattern->textForDisplay_ = u"hello";
+    pattern->OnPageTranslateSourceTextChanged();
+    EXPECT_TRUE(pattern->lastDrawnPageTranslateContent_.empty());
+    if (pattern->lastDrawnPageTranslateContent_.empty() && !pattern->textForDisplay_.empty()) {
+        pattern->MarkPageTranslateTextDrawn();
+    }
+    EXPECT_EQ(pattern->lastDrawnPageTranslateContent_, u"hello");
+    EXPECT_EQ(pattern->GetPageTranslateTextForReport(), "hello");
+
+    // Branch: lastDrawn non-empty → skip restore
+    pattern->textForDisplay_ = u"world";
+    pattern->MarkPageTranslateTextDrawn();
+    if (pattern->lastDrawnPageTranslateContent_.empty() && !pattern->textForDisplay_.empty()) {
+        pattern->MarkPageTranslateTextDrawn();
+    }
+    EXPECT_EQ(pattern->lastDrawnPageTranslateContent_, u"world");
+
+    // Branch: textForDisplay_ empty → skip restore
+    pattern->textForDisplay_ = u"";
+    pattern->lastDrawnPageTranslateContent_ = u"";
+    if (pattern->lastDrawnPageTranslateContent_.empty() && !pattern->textForDisplay_.empty()) {
+        pattern->MarkPageTranslateTextDrawn();
+    }
+    EXPECT_TRUE(pattern->lastDrawnPageTranslateContent_.empty());
 }
 } // namespace OHOS::Ace::NG

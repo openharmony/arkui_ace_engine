@@ -4809,9 +4809,12 @@ void TextPattern::OnModifyDone()
     if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         dataDetectorAdapter_->GetAIEntityMenu();
     }
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    context->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
+    CHECK_NULL_VOID(pipeline);
+    // lastDrawn was cleared by OnPageTranslateSourceTextChanged, restore before registering
+    if (lastDrawnPageTranslateContent_.empty() && !textForDisplay_.empty()) {
+        MarkPageTranslateTextDrawn();
+    }
+    pipeline->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
 }
 
 void TextPattern::UpdateMarqueeStartPolicy()
@@ -5479,7 +5482,7 @@ bool IsTextFieldPlaceholderTextNode(const RefPtr<FrameNode>& host)
     CHECK_NULL_RETURN(parent, false);
     auto parentTag = parent->GetTag();
     return parentTag == V2::TEXTINPUT_ETS_TAG || parentTag == V2::TEXTAREA_ETS_TAG ||
-           parentTag == V2::SEARCH_ETS_TAG;
+           parentTag == V2::SEARCH_Field_ETS_TAG;
 }
 
 void TextPattern::MarkPageTranslateDirty()
@@ -7230,7 +7233,9 @@ bool TextPattern::CanStartAITask() const
 
 bool TextPattern::NeedShowAIDetect()
 {
-    return CanStartAITask() && !GetDataDetectorAdapter()->aiSpanMap_.empty();
+    // AI spans are positioned against original text; translated text differs in content/length.
+    return !GetPageTranslatedText().has_value() && CanStartAITask() &&
+           !GetDataDetectorAdapter()->aiSpanMap_.empty();
 }
 
 bool TextPattern::MaybeNeedShowSelectAIDetect()

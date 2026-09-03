@@ -805,6 +805,7 @@ public:
     bool IsShowPlaceholder() const;
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
     void MountPlaceholderImageNode(const std::list<RefPtr<NG::SpanItem>>& spans);
+    void ClearPlaceholderImageNode();
     bool SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
     bool SetStringPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
     void UpdatePlaceholderByTheme(RefPtr<SpanNode> placeholderNode);
