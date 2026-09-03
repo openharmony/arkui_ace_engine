@@ -430,7 +430,7 @@ private:
     void UpdateDragFrameNode();
     void UpdateDragPointNode();
     void UpdateBlurCoverNode();
-    void UpdateSelectedTrackFrameNode(float centerX, float centerY);
+    void UpdateSelectedTrackFrameNode();
     void UpdateParticleFrameNode(float centerX, float centerY);
     void UpdateParticleFrameOffset(Axis direction, bool reverse);
     void UpdateEmitterProperties(float centerX, float centerY, Axis direction, bool reverse);
@@ -451,6 +451,7 @@ private:
     AnimationOption CreateDragAnimationOption() const;
     AnimationOption CreateLowGradeSpringOption() const;
     float GetBlockRadius() const;
+    OffsetF GetRealPosition(float x, float y);
     float GetDragFrameBaseScale() const;
     void StartLongPressTimer();
     void HandleLongPress();

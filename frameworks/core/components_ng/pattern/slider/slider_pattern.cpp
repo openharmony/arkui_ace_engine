@@ -3485,6 +3485,18 @@ float SliderPattern::GetBlockRadius() const
     return std::min(blockSize_.Width(), blockSize_.Height()) * HALF;
 }
 
+OffsetF SliderPattern::GetRealPosition(float x, float y)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    const auto& content = host->GetGeometryNode()->GetContent();
+    auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    auto padding = sliderLayoutProperty ? sliderLayoutProperty->CreatePaddingWithoutBorder() : PaddingPropertyF();
+    return OffsetF(x + contentOffset.GetX() - padding.left.value_or(0.0f),
+        y + contentOffset.GetY() - padding.top.value_or(0.0f));
+}
+
 float SliderPattern::GetDragFrameBaseScale() const
 {
     auto host = GetHost();
@@ -3642,7 +3654,7 @@ void SliderPattern::CreateSelectedTrackFrameNode()
         trackRC->SetClipToBounds(true);
     }
 
-    UpdateSelectedTrackFrameNode(circleCenter_.GetX(), circleCenter_.GetY());
+    UpdateSelectedTrackFrameNode();
 }
 
 void SliderPattern::CalculateEmitterPosition(float& emitterNodeX, float& emitterNodeY, float& emitterLength)
@@ -3724,7 +3736,7 @@ void SliderPattern::CreateParticleFrameNode()
     particleRC->UpdateParticleOptionArray(particleOptions);
 }
 
-void SliderPattern::UpdateSelectedTrackFrameNode(float centerX, float centerY)
+void SliderPattern::UpdateSelectedTrackFrameNode()
 {
     CHECK_NULL_VOID(selectedTrackFrameNode_);
     CHECK_NULL_VOID(sliderContentModifier_);
@@ -3735,13 +3747,13 @@ void SliderPattern::UpdateSelectedTrackFrameNode(float centerX, float centerY)
     auto rect = sliderContentModifier_->GetSelectedTrackRect();
     float borderRadiusValue = sliderContentModifier_->GetSelectedBorderRadius();
 
-    const auto& content = host->GetGeometryNode()->GetContent();
-    auto contentOffsetF = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    auto padding = sliderLayoutProperty ? sliderLayoutProperty->CreatePaddingWithoutBorder() : PaddingPropertyF();
 
     float width = rect.GetWidth();
     float height = rect.GetHeight();
-    float x = rect.GetLeft() - contentOffsetF.GetX();
-    float y = rect.GetTop() - contentOffsetF.GetY();
+    float x = rect.GetLeft() - padding.left.value_or(0.0f);
+    float y = rect.GetTop() - padding.top.value_or(0.0f);
 
     selectedTrackFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(width), CalcLength(height)));
@@ -3860,13 +3872,14 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     
     const auto& content = host->GetGeometryNode()->GetContent();
     auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    float contentAreaX = isRealPosition ? centerX - contentOffset.GetX() : centerX;
+    float contentAreaY = isRealPosition ? centerY - contentOffset.GetY() : centerY;
+    auto realPosition = GetRealPosition(contentAreaX, contentAreaY);
     
     auto blockDiameter = blockRadius * NUMBER_TWO;
     auto frameSize = blockDiameter * GetDragFrameBaseScale();
-    auto realCenterX = isRealPosition ? centerX - contentOffset.GetX() : centerX;
-    auto realCenterY = isRealPosition ? centerY - contentOffset.GetY() : centerY;
-    float frameNodeX = realCenterX - frameSize / NUMBER_TWO;
-    float frameNodeY = realCenterY - frameSize / NUMBER_TWO;
+    float frameNodeX = realPosition.GetX() - frameSize / NUMBER_TWO;
+    float frameNodeY = realPosition.GetY() - frameSize / NUMBER_TWO;
     
     UpdateMaterialFrameNode(dragFrameNode_, frameSize, frameNodeX, frameNodeY, frameSize / NUMBER_TWO);
 
@@ -3876,17 +3889,18 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
             CalcSize(CalcLength(trackRect.GetWidth()), CalcLength(trackRect.GetHeight())));
         auto blurRC = blurCoverNode_->GetRenderContext();
         if (blurRC) {
+            auto blurPosition = GetRealPosition(
+                trackRect.GetLeft() - contentOffset.GetX(), trackRect.GetTop() - contentOffset.GetY());
             blurRC->UpdatePosition(OffsetT<Dimension>(
-                Dimension(trackRect.GetLeft() - contentOffset.GetX()),
-                Dimension(trackRect.GetTop() - contentOffset.GetY())));
+                Dimension(blurPosition.GetX()), Dimension(blurPosition.GetY())));
         }
     }
 
-    float pointNodeX = realCenterX - blockRadius;
-    float pointNodeY = realCenterY - blockRadius;
+    float pointNodeX = realPosition.GetX() - blockRadius;
+    float pointNodeY = realPosition.GetY() - blockRadius;
     UpdateMaterialFrameNode(dragPointNode_, blockDiameter, pointNodeX, pointNodeY, blockRadius);
     
-    UpdateSelectedTrackFrameNode(realCenterX, realCenterY);
+    UpdateSelectedTrackFrameNode();
     UpdateParticleFrameNode(centerX, centerY);
 }
 
@@ -3949,11 +3963,9 @@ void SliderPattern::ShowMaterialNode()
     auto blurRC = blurCoverNode_->GetRenderContext();
     CHECK_NULL_VOID(blurRC);
     auto blockRadius = GetBlockRadius();
-    const auto& content = host->GetGeometryNode()->GetContent();
-    auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
-    float pointNodeX = circleCenter_.GetX() - contentOffset.GetX() - blockRadius;
-    float pointNodeY = circleCenter_.GetY() - contentOffset.GetY() - blockRadius;
-    pointRC->UpdatePosition(OffsetT<Dimension>(Dimension(pointNodeX), Dimension(pointNodeY)));
+    auto realPosition = GetRealPosition(circleCenter_.GetX(), circleCenter_.GetY());
+    auto pointPosition = realPosition - OffsetF(blockRadius, blockRadius);
+    pointRC->UpdatePosition(OffsetT<Dimension>(Dimension(pointPosition.GetX()), Dimension(pointPosition.GetY())));
 
     host->AddChild(dragPointNode_);
     host->AddChild(blurCoverNode_);
