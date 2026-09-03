@@ -25,6 +25,7 @@
 #include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
@@ -63,14 +64,23 @@ static RefPtr<LayoutWrapper> GetListItemWithEmptyBranch(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    // Scroll placeholder load observation at the List child build call point: predict before
+    // the real builder runs on an unbuilt index and sample its duration afterwards. Observation
+    // only; the dummy empty-branch fallback is reported after the acquisition so it never feeds
+    // the cost model.
+    ScrollPlaceholderItemBuildScope buildScope(
+        ScrollPlaceholderComponentType::LIST, layoutWrapper, index, isCache);
     if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        buildScope.SetAcquiredWrapper(wrapper);
         if (!wrapper) {
             wrapper = CreateDummyListItemChild();
         }
         return wrapper;
     }
-    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    buildScope.SetAcquiredWrapper(wrapper);
+    return wrapper;
 }
 } // namespace
 

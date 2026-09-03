@@ -15,15 +15,23 @@
 
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
 
 #include "base/utils/time_util.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_cost_model.h"
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -654,5 +662,109 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, ObservationFeedsCostModel001, TestSize.
     // Duration sampling reaches the component bucket of the cost model.
     EXPECT_GE(manager_->EstimateRealBuildDuration(params), LARGE_DURATION_NS);
     EXPECT_EQ(manager_->GetDiagnostics().observedRealBuilds, 4u);
+}
+
+// Observer scope tests exercise the List/Grid/WaterFlow call point glue: the cache gate that
+// keeps already built items out of the observation, and the empty-acquisition skip that keeps
+// zero-cost samples away from the cost model. The end-to-end sampling semantics of the
+// manager hooks are covered by the cases above.
+class ScrollPlaceholderObserverTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineContext::SetUp();
+    }
+
+    static void TearDownTestSuite()
+    {
+        MockPipelineContext::TearDown();
+    }
+};
+
+namespace {
+RefPtr<FrameNode> CreateObserverHost(int32_t nodeId, bool withChild)
+{
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    if (withChild) {
+        host->AddChild(FrameNode::CreateFrameNode("observer_child", nodeId + 1, AceType::MakeRefPtr<Pattern>()));
+    }
+    return host;
+}
+
+uint64_t CurrentObservedRealBuilds()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::numeric_limits<uint64_t>::max());
+    const auto& manager = context->GetOrCreateScrollPlaceholderManager();
+    CHECK_NULL_RETURN(manager, std::numeric_limits<uint64_t>::max());
+    return manager->GetDiagnostics().observedRealBuilds;
+}
+} // namespace
+
+/**
+ * @tc.name: ObserverScopeSkipsBuiltItem001
+ * @tc.desc: An index that resolves without running the real builder is not observed at all.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderObserverTestNg, ObserverScopeSkipsBuiltItem001, TestSize.Level1)
+{
+    auto host = CreateObserverHost(2001, true);
+    auto wrapper = host->CreateLayoutWrapper();
+    auto before = CurrentObservedRealBuilds();
+    {
+        ScrollPlaceholderItemBuildScope buildScope(
+            ScrollPlaceholderComponentType::LIST, AceType::RawPtr(wrapper), 0, false);
+        auto acquired = wrapper->GetOrCreateChildByIndex(0, true, false);
+        buildScope.SetAcquiredWrapper(acquired);
+        EXPECT_TRUE(acquired); // the built child resolves from the wrapper cache
+    }
+    EXPECT_EQ(CurrentObservedRealBuilds(), before); // cache gate: no observation
+}
+
+/**
+ * @tc.name: ObserverScopeSkipsEmptyAcquisition001
+ * @tc.desc: A null acquisition result (out of range / empty branch) never samples the model.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderObserverTestNg, ObserverScopeSkipsEmptyAcquisition001, TestSize.Level1)
+{
+    auto host = CreateObserverHost(2021, false);
+    auto wrapper = host->CreateLayoutWrapper();
+    auto before = CurrentObservedRealBuilds();
+    {
+        ScrollPlaceholderItemBuildScope buildScope(
+            ScrollPlaceholderComponentType::LIST, AceType::RawPtr(wrapper), 0, false);
+        auto acquired = wrapper->GetOrCreateChildByIndex(0, true, false);
+        buildScope.SetAcquiredWrapper(acquired);
+        EXPECT_FALSE(acquired); // nothing to build for this index
+    }
+    EXPECT_EQ(CurrentObservedRealBuilds(), before); // no zero-cost sample
+}
+
+/**
+ * @tc.name: ObserverScopeObservesRealAcquisition001
+ * @tc.desc: An unbuilt index with a non-null acquisition result is observed and sampled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderObserverTestNg, ObserverScopeObservesRealAcquisition001, TestSize.Level1)
+{
+    auto host = CreateObserverHost(2041, false);
+    auto wrapper = host->CreateLayoutWrapper();
+    // Stand-in wrapper for the item the real builder would produce for the unbuilt index.
+    RefPtr<LayoutWrapper> builtElsewhere = CreateObserverHost(2061, false)->CreateLayoutWrapper();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_TRUE(context);
+    const auto& manager = context->GetOrCreateScrollPlaceholderManager();
+    ASSERT_TRUE(manager);
+    auto before = CurrentObservedRealBuilds();
+    {
+        ScrollPlaceholderItemBuildScope buildScope(
+            ScrollPlaceholderComponentType::LIST, AceType::RawPtr(wrapper), 0, false);
+        buildScope.SetAcquiredWrapper(builtElsewhere);
+    }
+    EXPECT_EQ(CurrentObservedRealBuilds(), before + 1); // sampled through NotifyRealBuildEnd
+    // The tiny measured duration replaced the 5ms cold start estimate.
+    auto probe = MakeParams(ScrollPlaceholderComponentType::LIST, std::string(), 0, 0);
+    EXPECT_LT(manager->EstimateRealBuildDuration(probe), COLD_START_NS);
 }
 } // namespace OHOS::Ace::NG

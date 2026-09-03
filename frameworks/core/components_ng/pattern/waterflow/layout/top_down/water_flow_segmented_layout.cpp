@@ -24,6 +24,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
@@ -592,7 +593,11 @@ void WaterFlowSegmentedLayout::MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>
 RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, std::optional<int64_t> deadline) const
 {
+    // Scroll placeholder load observation at the WaterFlow child build call point.
+    ScrollPlaceholderItemBuildScope buildScope(
+        ScrollPlaceholderComponentType::WATER_FLOW, wrapper_, idx, deadline.has_value());
     auto item = wrapper_->GetOrCreateChildByIndex(idx, !deadline.has_value(), deadline.has_value());
+    buildScope.SetAcquiredWrapper(item);
     CHECK_NULL_RETURN(item, nullptr);
     // override user-defined main size
     if (NonNegative(userDefMainSize)) {
