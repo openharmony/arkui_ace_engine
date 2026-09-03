@@ -2330,7 +2330,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
             if (isFormUser) {
                 pattern->HandleAnimateFromUserStop();
             }
-            if (pattern->GetScrollEdgeType() != ScrollEdgeType::SCROLL_NONE && pattern->IsScrollReachEdge()) {
+            if (pattern->GetScrollEdgeType() != ScrollEdgeType::SCROLL_NONE && pattern->IsScrollEdgeFinish()) {
                 pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
             }
         });
