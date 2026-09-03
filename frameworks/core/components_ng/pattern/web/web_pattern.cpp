@@ -48,6 +48,7 @@
 #include "base/log/event_report.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/ressched/ressched_click_optimizer.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
@@ -167,6 +168,8 @@ constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
 constexpr int32_t LONG_PRESS_DURATION_MS = 650;
 constexpr int32_t LONG_PRESS_DURATION_STEP_UNIT = 8;
+constexpr int32_t MIN_REPORT_TIME = 100;
+constexpr float TEXT_CONTENT_RATIO = 0.15f;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -11564,24 +11567,12 @@ void WebPattern::EnableAgentManager()
         TAG_LOGE(AceLogTag::ACE_WEB, "EnableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
         return;
     }
-    agentManager->SetContentChangeDetectionConfig(
-        contentChangeConfig_.minReportTime, contentChangeConfig_.textContentRatio);
-    agentManager->SetDomExtractionConfig(contentChangeConfig_.reportDomTree);
+    agentManager->SetContentChangeDetectionConfig(MIN_REPORT_TIME, TEXT_CONTENT_RATIO);
+    agentManager->SetDomExtractionConfig(true);
     agentManager->SetAgentEnabled(true);
 }
 
-void WebPattern::DisableAgentManager()
-{
-    CHECK_NULL_VOID(delegate_);
-    auto agentManager = delegate_->GetNWebAgentManager();
-    if (!agentManager) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "DisableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
-        return;
-    }
-    agentManager->SetAgentEnabled(false);
-}
-
-bool WebPattern::IsAgentManagerEnabled()
+bool WebPattern::ShouldEnableAgentManager()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

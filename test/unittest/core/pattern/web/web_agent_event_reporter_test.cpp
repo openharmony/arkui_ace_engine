@@ -24,6 +24,7 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/ressched/ressched_click_optimizer.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -106,6 +107,11 @@ void WebAgentEventReporterTest::SetUpTestCase()
     g_webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(g_webPattern);
     g_webPattern->OnModifyDone();
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        pipelineContext->clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    }
 
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
     if (pipelineContext) {
@@ -1070,7 +1076,7 @@ HWTEST_F(WebAgentEventReporterTest, AddTapEvent_ClickOptimizer, TestSize.Level0)
 
     /**
      * @tc.steps: step2. set clickExtEnabled to false and call AddTapEvent
-     * @tc.expected: step1. ReportClickWithExtData is not called
+     * @tc.expected: step2. ReportClickWithExtData is not called
      */
     clickOptimizer->SetClickExtEnabled(false);
     reporter->AddTapEvent(tapEventJson);

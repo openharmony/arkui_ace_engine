@@ -18,6 +18,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/ressched/ressched_click_optimizer.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -81,9 +82,9 @@ void WebAgentEventReporter::AddTapEvent(const std::unique_ptr<JsonValue>& tapEve
     ReportEventImediately(jsonValue);
 
     auto pattern = DynamicCast<WebPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(pattern, void());
+    CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
-    auto pipelineContext = host ? host->GetContent() : nullptr;
+    auto pipelineContext = host ? host->GetContext() : nullptr;
     auto clickOptimizer = pipelineContext ? pipelineContext->GetClickOptimizer() : nullptr;
     if (clickOptimizer && clickOptimizer->GetClickExtEnabled()) {
         clickOptimizer->ReportClickWithExtData(

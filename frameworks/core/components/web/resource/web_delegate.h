@@ -1762,7 +1762,7 @@ public:
     bool HideMagnifier();
     void UpdateSingleHandleVisible(bool isVisible);
     void SetTouchHandleExistState(bool touchHandleExist);
-    void SetClickExtEnabled(bool enable);
+    void SetClickExtEnabled();
 
     void SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomLeft,
         double borderRadiusBottomRight);

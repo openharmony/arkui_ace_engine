@@ -37,6 +37,7 @@
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_click_optimizer.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -3180,12 +3181,7 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
-            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(delegate->context_.Upgrade());
-            CHECK_NULL_VOID(pipeline);
-            auto clickOptimizer = pipeline->GetClickOptimizer();
-            if (clickOptimizer) {
-                delegate->SetClickExtEnabled(clickOptimizer->GetClickExtEnabled());
-            }
+            delegate->SetClickExtEnabled();
 
             delegate->JavaScriptOnDocumentStartByOrder();
             delegate->JavaScriptOnDocumentEndByOrder();
@@ -3764,12 +3760,7 @@ void WebDelegate::InitWebViewWithSurface()
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
-            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context.Upgrade());
-            CHECK_NULL_VOID(pipeline);
-            auto clickOptimizer = pipeline->GetClickOptimizer();
-            if (clickOptimizer) {
-                delegate->SetClickExtEnabled(clickOptimizer->GetClickExtEnabled());
-            }
+            delegate->SetClickExtEnabled();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             CHECK_NULL_VOID(delegate->cookieManager_);
             auto nweb_handler = std::make_shared<WebClientImpl>();
@@ -5706,7 +5697,7 @@ void WebDelegate::OnLoadStarted(const std::string& param)
             CHECK_NULL_VOID(webEventHub);
             webEventHub->FireOnLoadStartedEvent(std::make_shared<LoadStartedEvent>(param));
             delegate->RecordWebEvent(Recorder::EventType::LOAD_STARTED, param);
-            if (webPattern->IsAgentManagerEnabled()) {
+            if (webPattern->ShouldEnableAgentManager()) {
                 auto agentManager = delegate->GetNWebAgentManager();
                 if (agentManager && !agentManager->IsAgentEnabled()) {
                     webPattern->EnableAgentManager();
@@ -10219,11 +10210,17 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist)
     nweb_->SetTouchHandleExistState(touchHandleExist);
 }
 
-void WebDelegate::SetClickExtEnabled(bool enable)
+void WebDelegate::SetClickExtEnabled()
 {
     CHECK_NULL_VOID(nweb_);
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::SetClickExtEnabled enable: %{public}d", enable);
-    nweb_->SetClickExtEnabled(enable);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(pipeline);
+    auto clickOptimizer = pipeline->GetClickOptimizer();
+    if (clickOptimizer) {
+        auto enable = clickOptimizer->GetClickExtEnabled();
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::SetClickExtEnabled enable: %{public}d", enable);
+        nweb_->SetClickExtEnabled(enable);
+    }
 }
 
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,

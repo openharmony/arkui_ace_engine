@@ -1143,8 +1143,7 @@ public:
         MultiImageQueryErrorCode)>& arkWebfinishCallback);
     
     void EnableAgentManager();
-    void DisableAgentManager();
-    bool IsAgentManagerEnabled();
+    bool ShouldEnableAgentManager();
 
     void GetWebInfoByRequest(
         uint32_t windowId,
@@ -1776,7 +1775,6 @@ private:
     std::vector<uint32_t> pipController_;
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
     bool isRegisterJsObject_ = false;
-    ContentChangeConfig contentChangeConfig_ = {};
 
     MouseInfo mouseInfo_;
 
