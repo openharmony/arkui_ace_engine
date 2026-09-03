@@ -29,6 +29,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -98,6 +99,7 @@ public:
 
     uint32_t copiedNodeCount = 0;
     bool copyProtocolEnabled = true;
+    bool useDefaultCopyProtocol = false;
 
 protected:
     void SubmitBackgroundCloneTask(std::function<void()> task) override
@@ -107,6 +109,9 @@ protected:
 
     RefPtr<UINode> CreatePlaceholderNodeCopy(const RefPtr<UINode>& node) override
     {
+        if (useDefaultCopyProtocol) {
+            return ScrollPlaceholderManager::CreatePlaceholderNodeCopy(node);
+        }
         if (!copyProtocolEnabled) {
             return nullptr;
         }
@@ -469,6 +474,45 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolCloneWithoutProtocolDegr
     EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u); // clone dropped
     EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 0u);   // slot released
     EXPECT_TRUE(manager_->AcquireTemplateInstance("tpl"));  // UI-thread fallback still serves
+}
+
+/**
+ * @tc.name: PlaceholderPoolDefaultCopyCreatesSameTypeNodes001
+ * @tc.desc: The production copy protocol creates a same-type node per visited source node
+ *           and copies the layout property over; plain frame node subtrees clone fully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolDefaultCopyCreatesSameTypeNodes001, TestSize.Level1)
+{
+    manager_->useDefaultCopyProtocol = true;
+    auto builder = []() -> RefPtr<UINode> {
+        auto root = FrameNode::CreateFrameNode(
+            "placeholder_root", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        auto child = FrameNode::CreateFrameNode(
+            "placeholder_child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        child->GetLayoutProperty()->UpdateAspectRatio(1.5f);
+        root->AddChild(child);
+        return root;
+    };
+    manager_->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder));
+    auto source = manager_->GetTemplateSourceInstance("tpl");
+    ASSERT_TRUE(source);
+    manager_->RunCapturedTasks();
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
+
+    auto acquired = manager_->AcquireTemplateInstance("tpl");
+    ASSERT_TRUE(acquired);
+    EXPECT_NE(acquired, source); // same-type copies, not the resident source
+    auto copyRoot = AceType::DynamicCast<FrameNode>(acquired);
+    ASSERT_TRUE(copyRoot);
+    EXPECT_EQ(copyRoot->GetTag(), "placeholder_root");
+    EXPECT_NE(copyRoot->GetId(), AceType::DynamicCast<FrameNode>(source)->GetId());
+    const auto& copyChildren = copyRoot->GetChildren();
+    ASSERT_EQ(copyChildren.size(), 1u);
+    auto copyChild = AceType::DynamicCast<FrameNode>(copyChildren.front());
+    ASSERT_TRUE(copyChild);
+    EXPECT_EQ(copyChild->GetTag(), "placeholder_child");
+    EXPECT_FLOAT_EQ(copyChild->GetLayoutProperty()->GetAspectRatio(), 1.5f); // property copied
 }
 
 /**

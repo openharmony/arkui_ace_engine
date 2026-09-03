@@ -23,7 +23,10 @@
 #include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/time_util.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_node_clone.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -208,8 +211,11 @@ void ScrollPlaceholderManager::RunBackgroundClone(const std::string& templateId,
 {
     // Runs off the UI thread through the BackgroundTaskExecutor and never invokes the
     // template builder (JS VM bound). The resident, immutable source instance is traversed
-    // top-down and copied node by node; without a copy protocol the clone fails and the pool
-    // keeps serving through the UI-thread paths. Every exit path releases the pending slot.
+    // top-down; each visited node is re-created through the node creation interface as a
+    // same-type node with the source properties copied over. The traversal runs inside a
+    // thread-safe node scope, so the created nodes register into the mutex-guarded
+    // multi-thread registry instead of racing the global element register. Every exit path
+    // releases the pending slot.
     do {
         if (destroyed_.load(std::memory_order_relaxed)) {
             break;
@@ -218,8 +224,11 @@ void ScrollPlaceholderManager::RunBackgroundClone(const std::string& templateId,
         if (!source) {
             break;
         }
+        bool previousScope = MultiThreadBuildManager::IsThreadSafeNodeScope();
+        MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
         auto instance = CloneScrollPlaceholderSubtreeTopDown(
             source, [this](const RefPtr<UINode>& node) { return CreatePlaceholderNodeCopy(node); });
+        MultiThreadBuildManager::SetIsThreadSafeNodeScope(previousScope);
         if (!instance) {
             break;
         }
@@ -259,11 +268,24 @@ void ScrollPlaceholderManager::SubmitBackgroundCloneTask(std::function<void()> t
 
 RefPtr<UINode> ScrollPlaceholderManager::CreatePlaceholderNodeCopy(const RefPtr<UINode>& node)
 {
-    // No copy protocol in this stage: background clones fail, their pending slots are
-    // released, and the pool keeps serving through the UI-thread paths (register-time source,
-    // acquire-time synchronous creation). The compiler restricted factory contract plugs the
-    // real per-node copy protocol in here.
-    return nullptr;
+    // Same-type creation through the frame node creation interface, then property copy from
+    // the source node. The caller runs this inside a thread-safe node scope, so the created
+    // node registers into the mutex-guarded multi-thread registry instead of racing the
+    // global element register; no JS VM is involved. Stage scope: plain frame nodes of the
+    // restricted render-only placeholder subtree copy their (concrete) layout property —
+    // pattern-specific paint state and JS custom nodes are covered by the compiler
+    // restricted factory contract (step2) plugging into this hook; until then such nodes
+    // make the whole clone fail and the pool degrades to the UI-thread paths.
+    auto source = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(source, nullptr);
+    auto copy = FrameNode::CreateFrameNode(
+        source->GetTag(), ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<Pattern>());
+    CHECK_NULL_RETURN(copy, nullptr);
+    const auto& layoutProperty = source->GetLayoutProperty();
+    if (layoutProperty) {
+        copy->SetLayoutProperty(layoutProperty->Clone());
+    }
+    return copy;
 }
 
 ScrollPlaceholderPredictResult ScrollPlaceholderManager::Predict(

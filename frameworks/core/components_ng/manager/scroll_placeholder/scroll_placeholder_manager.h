@@ -158,11 +158,12 @@ protected:
     virtual void SubmitBackgroundCloneTask(std::function<void()> task);
 
     // Materializes one node of the immutable source subtree during a background traversal
-    // clone. The template builder itself is a JS function bound to the JS VM and must only
-    // run on the UI thread, so the background copy never calls it. The default stage
-    // implementation returns nullptr (no copy protocol yet): the clone fails, the pool keeps
-    // running on the UI-thread paths, and the compiler restricted factory contract (step2)
-    // plugs the real protocol in here.
+    // clone: creates a same-type node through the node creation interface and copies the
+    // source properties over. The template builder itself is a JS function bound to the JS VM
+    // and must only run on the UI thread, so the background copy never calls it; the caller
+    // wraps the traversal in a thread-safe node scope so created nodes register into the
+    // mutex-guarded multi-thread registry. The compiler restricted factory contract (step2)
+    // extends this hook for pattern-specific state and JS custom nodes.
     virtual RefPtr<UINode> CreatePlaceholderNodeCopy(const RefPtr<UINode>& node);
 
 private:
