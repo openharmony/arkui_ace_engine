@@ -1463,6 +1463,14 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
     bgLoadingCtx_->LoadImageData();
 }
 
+void RosenRenderContext::ReloadBackgroundImage()
+{
+    auto bgImage = GetBackgroundImage();
+    if (bgImage.has_value()) {
+        OnBackgroundImageUpdate(bgImage.value());
+    }
+}
+
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat)
 {
     FREE_RS_CONTEXT_CHECK(OnBackgroundImageRepeatUpdate, imageRepeat);

@@ -716,6 +716,15 @@ public:
 
     virtual void OnMaterialDisable() {}
 
+    virtual void OnSkinConfigurationUpdate()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto rsContext = host->GetRenderContext();
+        CHECK_NULL_VOID(rsContext);
+        rsContext->ReloadBackgroundImage();
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
