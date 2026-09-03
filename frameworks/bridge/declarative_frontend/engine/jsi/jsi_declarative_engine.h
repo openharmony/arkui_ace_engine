@@ -39,7 +39,7 @@
 struct OH_NativeXComponent;
 namespace OHOS::Ace {
 class NativeXComponentImpl;
-}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -565,6 +565,11 @@ private:
     void TimerCallJs(const std::string& callbackId) const;
 
     void InitXComponent(const std::string& componentId);
+
+#ifdef XCOMPONENT_SUPPORTED
+    bool LoadNativeXComponentModule(ArkNativeEngine* arkNativeEngine, OH_NativeXComponent* nativeXComponent,
+        const std::string& libraryName, const std::string& componentId, const std::string& soPath);
+#endif
 
     void RegisterWorker();
     void RegisterInitWorkerFunc();
