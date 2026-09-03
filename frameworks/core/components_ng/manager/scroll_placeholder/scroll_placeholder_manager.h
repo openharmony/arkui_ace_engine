@@ -80,10 +80,14 @@ public:
     bool UnregisterTemplate(const std::string& templateId);
     bool IsTemplateRegistered(const std::string& templateId) const;
     std::optional<ScrollPlaceholderTemplateSnapshot> LookupTemplateForCreate(const std::string& templateId);
+    // Resident copy source of the template (built by the builder on the UI thread); never
+    // handed out, only traversed and copied by background clone tasks.
+    void SetTemplateSourceInstance(const std::string& templateId, const RefPtr<UINode>& instance);
+    RefPtr<UINode> GetTemplateSourceInstance(const std::string& templateId) const;
     void CacheTemplateInstance(const std::string& templateId, const RefPtr<UINode>& instance);
-    // Takes a cached instance when the pool still holds one; on an empty pool synchronously
-    // creates one instance from the current template to serve the request. Either way the
-    // pool is replenished back to capacity by background clone tasks.
+    // Takes a spare copy when the pool still holds one; with no spare the instance is
+    // synchronously created from the current template on the UI thread. Either way the pool
+    // is replenished by background clones of the resident source.
     RefPtr<UINode> AcquireTemplateInstance(const std::string& templateId);
     size_t GetCachedInstanceCount(const std::string& templateId) const;
     size_t GetHotTemplateCount() const;
@@ -153,6 +157,14 @@ protected:
     // user-visible work). Virtual so tests can capture and drain tasks deterministically.
     virtual void SubmitBackgroundCloneTask(std::function<void()> task);
 
+    // Materializes one node of the immutable source subtree during a background traversal
+    // clone. The template builder itself is a JS function bound to the JS VM and must only
+    // run on the UI thread, so the background copy never calls it. The default stage
+    // implementation returns nullptr (no copy protocol yet): the clone fails, the pool keeps
+    // running on the UI-thread paths, and the compiler restricted factory contract (step2)
+    // plugs the real protocol in here.
+    virtual RefPtr<UINode> CreatePlaceholderNodeCopy(const RefPtr<UINode>& node);
+
 private:
     struct RealBuildTask {
         ScrollPlaceholderPredictParams params;
@@ -167,11 +179,13 @@ private:
     static size_t ComponentIndex(ScrollPlaceholderComponentType componentType);
 
     // Placeholder instance pool policy: submit as many background clone tasks as needed to
-    // bring cached + in-flight instances back to SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY.
+    // bring spare copies + in-flight clones back to SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1.
+    // UI-thread only: re-seeds the resident copy source from the template builder when the
+    // entry lost it (re-register or LRU demotion).
     void ScheduleBackgroundReplenish(const std::string& templateId);
-    // Task body running off the UI thread; every exit path releases its pending slot.
-    void RunBackgroundClone(const std::string& templateId, uint64_t generation,
-        const ScrollPlaceholderBuilder& builder);
+    // Task body running off the UI thread; never invokes the builder. Every exit path
+    // releases its pending slot.
+    void RunBackgroundClone(const std::string& templateId, uint64_t generation);
     void ReleasePendingCloneSlot(const std::string& templateId);
     // Re-register/unregister invalidates in-flight clone slots of the previous generation;
     // their late releases are floor-guarded, worst case one extra clone that the pool cap

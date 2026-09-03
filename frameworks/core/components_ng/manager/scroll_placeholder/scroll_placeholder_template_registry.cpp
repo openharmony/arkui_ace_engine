@@ -38,9 +38,11 @@ uint64_t ScrollPlaceholderTemplateRegistry::Register(
         it = entries_.emplace(templateId, std::move(entry)).first;
     } else {
         // Re-register publishes a new generation atomically: in-flight results of the old
-        // generation become stale, previously cached instances are dropped.
+        // generation become stale, previously cached instances and the copy source are
+        // dropped (the new source is seeded by the registration path on the UI thread).
         it->second.generation = generation;
         it->second.builder = std::move(builder);
+        it->second.sourceInstance = nullptr;
         it->second.cachedInstances.clear();
         it->second.cachedInstances.shrink_to_fit();
     }
@@ -122,6 +124,31 @@ uint64_t ScrollPlaceholderTemplateRegistry::GetCurrentGeneration(const std::stri
     return it == generationIndex_.end() ? 0 : it->second;
 }
 
+void ScrollPlaceholderTemplateRegistry::SetTemplateSourceInstance(
+    const std::string& templateId, const RefPtr<UINode>& instance)
+{
+    if (templateId.empty() || !instance) {
+        return;
+    }
+    std::lock_guard<std::mutex> guard(mutex_);
+    auto it = entries_.find(templateId);
+    if (it == entries_.end()) {
+        return;
+    }
+    it->second.sourceInstance = instance;
+}
+
+RefPtr<UINode> ScrollPlaceholderTemplateRegistry::GetTemplateSourceInstance(
+    const std::string& templateId) const
+{
+    if (templateId.empty()) {
+        return nullptr;
+    }
+    std::lock_guard<std::mutex> guard(mutex_);
+    auto it = entries_.find(templateId);
+    return it == entries_.end() ? nullptr : it->second.sourceInstance;
+}
+
 void ScrollPlaceholderTemplateRegistry::CacheTemplateInstance(
     const std::string& templateId, const RefPtr<UINode>& instance)
 {
@@ -134,9 +161,10 @@ void ScrollPlaceholderTemplateRegistry::CacheTemplateInstance(
         return;
     }
     // Cold (LRU-demoted) entries keep only their registration relation; and the pool never
-    // holds more than the policy capacity per template, so concurrent background commits
-    // cannot overfill it.
-    if (!it->second.hot || it->second.cachedInstances.size() >= SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY) {
+    // holds more than capacity - 1 spare copies (the resident source takes one slot), so
+    // concurrent background commits cannot overfill it.
+    if (!it->second.hot ||
+        it->second.cachedInstances.size() >= SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1) {
         return;
     }
     it->second.cachedInstances.emplace_back(instance);
@@ -209,8 +237,9 @@ void ScrollPlaceholderTemplateRegistry::EvictOverCapacityLocked()
         auto lastIt = std::prev(lruOrder_.end());
         auto entryIt = entries_.find(*lastIt);
         if (entryIt != entries_.end()) {
-            // Demote to a cold entry: release all unmounted instances, keep the registration
-            // relation and generation semantics untouched.
+            // Demote to a cold entry: release the copy source and all unmounted instances,
+            // keep the registration relation and generation semantics untouched.
+            entryIt->second.sourceInstance = nullptr;
             entryIt->second.cachedInstances.clear();
             entryIt->second.cachedInstances.shrink_to_fit();
             entryIt->second.hot = false;

@@ -75,7 +75,9 @@ public:
 
 // Captures background clone tasks instead of handing them to the BackgroundTaskExecutor, so
 // the pool policy is tested deterministically: the synchronous seed is observed immediately
-// and the replenish tasks run only when the test drains them.
+// and the replenish tasks run only when the test drains them. The per-node copy protocol
+// stands in for the compiler restricted factory: a structural TestPlaceholderNode copy with
+// a fresh id, counted for traversal assertions.
 class TestableScrollPlaceholderManager : public ScrollPlaceholderManager {
 public:
     explicit TestableScrollPlaceholderManager(int32_t instanceId) : ScrollPlaceholderManager(instanceId) {}
@@ -94,15 +96,37 @@ public:
         return capturedTasks_.size();
     }
 
+    uint32_t copiedNodeCount = 0;
+    bool copyProtocolEnabled = true;
+
 protected:
     void SubmitBackgroundCloneTask(std::function<void()> task) override
     {
         capturedTasks_.emplace_back(std::move(task));
     }
 
+    RefPtr<UINode> CreatePlaceholderNodeCopy(const RefPtr<UINode>& node) override
+    {
+        if (!copyProtocolEnabled) {
+            return nullptr;
+        }
+        copiedNodeCount++;
+        return TestPlaceholderNode::CreateTestNode(node->GetId() + 1000);
+    }
+
 private:
     std::vector<std::function<void()>> capturedTasks_;
 };
+
+// Builder producing a two-level immutable source subtree for traversal assertions.
+ScrollPlaceholderBuilder MakeTreeBuilder(int32_t baseId)
+{
+    return ScrollPlaceholderBuilder([baseId]() -> RefPtr<UINode> {
+        auto root = TestPlaceholderNode::CreateTestNode(baseId);
+        root->AddChild(TestPlaceholderNode::CreateTestNode(baseId + 1));
+        return root;
+    });
+}
 
 class ScrollPlaceholderManagerTestNg : public testing::Test {
 public:
@@ -245,21 +269,23 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, TemplateGenerationMonotonic001, TestSiz
  */
 HWTEST_F(ScrollPlaceholderManagerTestNg, TemplateInstanceCache001, TestSize.Level1)
 {
-    manager_->RegisterTemplate("tpl", []() -> RefPtr<UINode> { return TestPlaceholderNode::CreateTestNode(1); });
+    manager_->RegisterTemplate("tpl", MakeTreeBuilder(1));
     auto first = TestPlaceholderNode::CreateTestNode(11);
     auto second = TestPlaceholderNode::CreateTestNode(12);
     manager_->CacheTemplateInstance("tpl", first);
-    manager_->CacheTemplateInstance("tpl", second); // over capacity, dropped
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 2u); // registration seed + first
+    manager_->CacheTemplateInstance("tpl", second); // over the spare capacity, dropped
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 1u); // spares only; source is resident
+    ASSERT_TRUE(manager_->GetTemplateSourceInstance("tpl"));
 
     auto acquired = manager_->AcquireTemplateInstance("tpl");
     ASSERT_TRUE(acquired);
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 1u);
-    EXPECT_TRUE(manager_->AcquireTemplateInstance("tpl"));
+    EXPECT_EQ(acquired, first);
     EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u);
-    // Empty pool with a working template: acquire never fails, it creates one synchronously.
-    EXPECT_TRUE(manager_->AcquireTemplateInstance("tpl"));
+    // No spare with a working template: acquire never fails, it creates one on the UI thread.
+    auto synced = manager_->AcquireTemplateInstance("tpl");
+    EXPECT_TRUE(synced);
     EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u); // created for use, not cached
+    EXPECT_TRUE(manager_->GetTemplateSourceInstance("tpl")); // source never leaves the pool
 }
 
 /**
@@ -277,7 +303,7 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, TemplateLruEvictionAndRebuild001, TestS
         manager_->RegisterTemplate("tpl" + std::to_string(i), ScrollPlaceholderBuilder(builder));
     }
     manager_->CacheTemplateInstance("tpl0", evictedInstance);
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl0"), 2u); // registration seed + cached
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl0"), 1u); // single spare slot; source is resident
     EXPECT_EQ(manager_->GetHotTemplateCount(), 20u);
 
     // Promoting tpl19 (the MRU entry) keeps tpl0 at the LRU end; the 21st registration evicts it.
@@ -313,95 +339,101 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, TemplateLruQueryDoesNotPromote001, Test
     EXPECT_TRUE(manager_->IsTemplateRegistered("tpl0"));
     manager_->CacheTemplateInstance("tpl1", retained);
     manager_->RegisterTemplate("tpl20", ScrollPlaceholderBuilder(builder));
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl1"), 2u); // seed + retained; tpl0 evicted
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl1"), 1u); // spare survived; tpl0 evicted
     retained = nullptr;
 }
 
 /**
  * @tc.name: PlaceholderPoolRegisterSeedAndReplenish001
- * @tc.desc: Registration builds one instance synchronously, then one background clone task
- *           replenishes the pool to the capacity of two.
+ * @tc.desc: Registration builds the resident source synchronously on the UI thread; one
+ *           background task then traverses and copies it into the single spare slot.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolRegisterSeedAndReplenish001, TestSize.Level1)
 {
-    auto builder = []() -> RefPtr<UINode> { return TestPlaceholderNode::CreateTestNode(1); };
-    EXPECT_EQ(manager_->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder)), 1u);
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 1u); // synchronous seed at registration
-    EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 1u);   // one clone in flight
+    EXPECT_EQ(manager_->RegisterTemplate("tpl", MakeTreeBuilder(1)), 1u);
+    auto source = manager_->GetTemplateSourceInstance("tpl");
+    ASSERT_TRUE(source);                       // synchronous source build at registration
+    EXPECT_EQ(source->GetChildren().size(), 1u);
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u); // no spare yet
+    EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 1u);
     EXPECT_EQ(manager_->CapturedTaskCount(), 1u);
 
     manager_->RunCapturedTasks();
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY);
+    EXPECT_EQ(manager_->copiedNodeCount, 2u);  // top-down copy visited root and child
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
     EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 0u);
     EXPECT_EQ(manager_->CapturedTaskCount(), 0u); // no extra tasks once at capacity
+    EXPECT_EQ(manager_->GetTemplateSourceInstance("tpl"), source); // source untouched by clones
 }
 
 /**
  * @tc.name: PlaceholderPoolAcquireTakesAndReplenishes001
- * @tc.desc: Acquire takes a cached instance and schedules the pool refill back to capacity.
+ * @tc.desc: Acquire hands out a spare copy (never the source) and the background clone
+ *           refills the spare slot from the resident source.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolAcquireTakesAndReplenishes001, TestSize.Level1)
 {
-    auto builder = []() -> RefPtr<UINode> { return TestPlaceholderNode::CreateTestNode(1); };
-    manager_->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder));
+    manager_->RegisterTemplate("tpl", MakeTreeBuilder(1));
     manager_->RunCapturedTasks();
-    ASSERT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY);
+    auto source = manager_->GetTemplateSourceInstance("tpl");
+    ASSERT_TRUE(source);
+    ASSERT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
 
     auto acquired = manager_->AcquireTemplateInstance("tpl");
     ASSERT_TRUE(acquired);
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 1u);
+    EXPECT_NE(acquired, source);               // a spare copy, not the resident source
+    EXPECT_EQ(acquired->GetChildren().size(), 1u); // structural copy kept the subtree
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u);
     EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 1u);
     manager_->RunCapturedTasks();
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY);
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
     EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 0u);
+    EXPECT_EQ(manager_->GetTemplateSourceInstance("tpl"), source);
 }
 
 /**
  * @tc.name: PlaceholderPoolSyncCreateWhenEmpty001
- * @tc.desc: On an empty pool acquire synchronously creates one instance to serve the request;
- *           the created instance is used, not cached, and the pending clone refills the pool.
+ * @tc.desc: With no spare the acquire path synchronously builds from the template on the UI
+ *           thread; the pending clone refills the spare afterwards.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolSyncCreateWhenEmpty001, TestSize.Level1)
 {
-    auto builder = []() -> RefPtr<UINode> { return TestPlaceholderNode::CreateTestNode(1); };
-    manager_->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder));
+    manager_->RegisterTemplate("tpl", MakeTreeBuilder(1));
     EXPECT_EQ(manager_->CapturedTaskCount(), 1u); // replenish pending, not run yet
-    EXPECT_TRUE(manager_->AcquireTemplateInstance("tpl")); // takes the seed
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u);
-    // cached(0) + pending(1) leaves one slot to the capacity: one more clone is scheduled.
-    EXPECT_EQ(manager_->CapturedTaskCount(), 2u);
-    EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 2u);
 
-    auto synced = manager_->AcquireTemplateInstance("tpl"); // empty pool path
+    auto synced = manager_->AcquireTemplateInstance("tpl"); // no spare path
     ASSERT_TRUE(synced);
+    EXPECT_EQ(synced->GetChildren().size(), 1u);  // built by the builder on the UI thread
     EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u); // served directly, not cached
-    EXPECT_EQ(manager_->CapturedTaskCount(), 2u); // pool already fully in flight
+    EXPECT_EQ(manager_->CapturedTaskCount(), 1u); // spare slot already in flight
     manager_->RunCapturedTasks();
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY);
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
     EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 0u);
 }
 
 /**
  * @tc.name: PlaceholderPoolStaleCloneDroppedOnReRegister001
  * @tc.desc: A clone carrying the previous generation is dropped after re-register; the clone
- *           of the current generation still fills the pool.
+ *           of the current generation still fills the spare slot from the rebuilt source.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolStaleCloneDroppedOnReRegister001, TestSize.Level1)
 {
-    auto builder = []() -> RefPtr<UINode> { return TestPlaceholderNode::CreateTestNode(1); };
-    uint64_t first = manager_->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder));
-    uint64_t second = manager_->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder));
+    uint64_t first = manager_->RegisterTemplate("tpl", MakeTreeBuilder(1));
+    auto firstSource = manager_->GetTemplateSourceInstance("tpl");
+    uint64_t second = manager_->RegisterTemplate("tpl", MakeTreeBuilder(2));
     EXPECT_GT(second, first);
-    // Re-register drops the old instances, re-seeds and schedules a fresh clone.
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 1u);
+    auto secondSource = manager_->GetTemplateSourceInstance("tpl");
+    ASSERT_TRUE(secondSource);
+    EXPECT_NE(secondSource, firstSource);      // re-register rebuilt the source on the UI thread
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u);
     EXPECT_EQ(manager_->CapturedTaskCount(), 2u); // stale clone + current clone
 
     manager_->RunCapturedTasks();
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY);
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
     EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 0u); // late stale release is floor-guarded
 }
 
@@ -412,29 +444,45 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolStaleCloneDroppedOnReReg
  */
 HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolDestroyDropsInFlight001, TestSize.Level1)
 {
-    auto builder = []() -> RefPtr<UINode> { return TestPlaceholderNode::CreateTestNode(1); };
-    manager_->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder));
+    manager_->RegisterTemplate("tpl", MakeTreeBuilder(1));
     ASSERT_EQ(manager_->CapturedTaskCount(), 1u);
     manager_->Destroy();
     manager_->RunCapturedTasks();
-    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u); // registry cleared, clone dropped
+    EXPECT_FALSE(manager_->GetTemplateSourceInstance("tpl")); // registry cleared
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u);
     EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 0u);
 }
 
 /**
+ * @tc.name: PlaceholderPoolCloneWithoutProtocolDegrades001
+ * @tc.desc: Without a per-node copy protocol the background clone fails harmlessly and the
+ *           pool keeps serving through the UI-thread paths.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolCloneWithoutProtocolDegrades001, TestSize.Level1)
+{
+    manager_->copyProtocolEnabled = false;
+    manager_->RegisterTemplate("tpl", MakeTreeBuilder(1));
+    ASSERT_TRUE(manager_->GetTemplateSourceInstance("tpl"));
+    manager_->RunCapturedTasks();
+    EXPECT_EQ(manager_->copiedNodeCount, 0u);
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u); // clone dropped
+    EXPECT_EQ(manager_->GetPendingCloneCount("tpl"), 0u);   // slot released
+    EXPECT_TRUE(manager_->AcquireTemplateInstance("tpl"));  // UI-thread fallback still serves
+}
+
+/**
  * @tc.name: PlaceholderPoolDefaultSubmitterSmoke001
- * @tc.desc: The production submitter path (BackgroundTaskExecutor) registers and seeds; the
- *           background clone may land concurrently but never overfills the pool.
+ * @tc.desc: The production submitter path (BackgroundTaskExecutor) registers the source on
+ *           the UI thread; the background clone never overfills the pool.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolDefaultSubmitterSmoke001, TestSize.Level1)
 {
     auto real = AceType::MakeRefPtr<ScrollPlaceholderManager>(TEST_INSTANCE_ID + 2);
-    auto builder = []() -> RefPtr<UINode> { return TestPlaceholderNode::CreateTestNode(1); };
-    EXPECT_GT(real->RegisterTemplate("tpl", ScrollPlaceholderBuilder(builder)), 0u);
-    size_t cached = real->GetCachedInstanceCount("tpl");
-    EXPECT_GE(cached, 1u); // synchronous seed is guaranteed
-    EXPECT_LE(cached, SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY);
+    EXPECT_GT(real->RegisterTemplate("tpl", MakeTreeBuilder(1)), 0u);
+    EXPECT_TRUE(real->GetTemplateSourceInstance("tpl")); // synchronous source is guaranteed
+    EXPECT_LE(real->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
     real->Destroy();
 }
 

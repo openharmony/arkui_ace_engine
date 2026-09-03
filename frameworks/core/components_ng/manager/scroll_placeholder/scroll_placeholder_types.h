@@ -33,9 +33,10 @@ enum class ScrollPlaceholderComponentType : int32_t {
     WATER_FLOW = 2,
 };
 
-// Placeholder instance pool policy: per template id at most this many built instances stay
-// cached at any time; the manager seeds one synchronously at registration and replenishes the
-// pool back to this size with background clone tasks after every take.
+// Placeholder instance pool policy: per template id the pool totals at most this many
+// instances — one resident, immutable copy source built by the builder on the UI thread at
+// registration, plus capacity - 1 spare copies handed out on acquire and refilled by
+// background traversal clones of the source.
 inline constexpr size_t SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY = 2;
 
 // Prediction result decided before the real item builder runs:

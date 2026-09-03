@@ -23,6 +23,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_node_clone.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -73,13 +74,14 @@ uint64_t ScrollPlaceholderManager::RegisterTemplate(
     if (generation == 0) {
         return 0;
     }
-    // Registration builds one placeholder instance synchronously (the framework generates the
-    // read-only template subtree in its container at registration time), so the first acquire
-    // is served from the pool; background clones then refill it to capacity.
+    // Registration builds the resident copy source synchronously on the UI thread (the
+    // framework generates the read-only template subtree in its container at registration
+    // time). The builder is a JS function bound to the JS VM and never leaves this thread;
+    // background tasks only traverse and copy the already built source.
     auto snapshot = registry_.LookupForCreate(templateId);
     if (snapshot.has_value() && snapshot->builder) {
         ResetPendingCloneSlots(templateId);
-        registry_.CacheTemplateInstance(templateId, snapshot->builder());
+        registry_.SetTemplateSourceInstance(templateId, snapshot->builder());
         ScheduleBackgroundReplenish(templateId);
     }
     return generation;
@@ -110,6 +112,17 @@ std::optional<ScrollPlaceholderTemplateSnapshot> ScrollPlaceholderManager::Looku
     return registry_.LookupForCreate(templateId);
 }
 
+void ScrollPlaceholderManager::SetTemplateSourceInstance(
+    const std::string& templateId, const RefPtr<UINode>& instance)
+{
+    registry_.SetTemplateSourceInstance(templateId, instance);
+}
+
+RefPtr<UINode> ScrollPlaceholderManager::GetTemplateSourceInstance(const std::string& templateId) const
+{
+    return registry_.GetTemplateSourceInstance(templateId);
+}
+
 void ScrollPlaceholderManager::CacheTemplateInstance(
     const std::string& templateId, const RefPtr<UINode>& instance)
 {
@@ -126,8 +139,9 @@ RefPtr<UINode> ScrollPlaceholderManager::AcquireTemplateInstance(const std::stri
         ScheduleBackgroundReplenish(templateId);
         return cached;
     }
-    // Empty pool: synchronously create one instance from the current template so the request
-    // is served right away; background clones refill the pool afterwards.
+    // No spare copy: synchronously create one instance from the current template on the UI
+    // thread (the builder only ever runs here) so the request is served right away;
+    // background clones of the resident source refill the spares afterwards.
     auto snapshot = registry_.LookupForCreate(templateId);
     if (!snapshot.has_value() || !snapshot->builder) {
         return nullptr;
@@ -163,38 +177,49 @@ void ScrollPlaceholderManager::ScheduleBackgroundReplenish(const std::string& te
     if (!snapshot.has_value() || !snapshot->builder) {
         return;
     }
+    // UI thread only: an entry that lost its source (re-register or LRU demotion) gets it
+    // rebuilt from the template builder right here, so a resident source always exists for
+    // the background traversal clones.
+    if (!registry_.GetTemplateSourceInstance(templateId)) {
+        registry_.SetTemplateSourceInstance(templateId, snapshot->builder());
+    }
     size_t toSubmit = 0;
     {
         std::lock_guard<std::mutex> guard(cloneMutex_);
         size_t held = registry_.GetCachedInstanceCount(templateId) + pendingCloneCount_[templateId];
-        if (held < SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY) {
-            toSubmit = SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - held;
+        size_t spareTarget = SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1;
+        if (held < spareTarget) {
+            toSubmit = spareTarget - held;
             pendingCloneCount_[templateId] += static_cast<uint32_t>(toSubmit);
         }
     }
-    // The RefPtr keeps the manager alive until every submitted task finishes; the task itself
-    // only touches atomics, the mutex-guarded registry and the immutable builder handle.
+    // The RefPtr keeps the manager alive until every submitted task finishes; the task never
+    // touches the JS VM — it only reads the immutable source subtree and the mutex-guarded
+    // registry state.
     auto self = AceType::Claim(this);
     for (size_t i = 0; i < toSubmit; i++) {
-        ScrollPlaceholderBuilder builderCopy = snapshot->builder;
-        SubmitBackgroundCloneTask([self, templateId, generation = snapshot->generation, builderCopy]() {
-            self->RunBackgroundClone(templateId, generation, builderCopy);
+        SubmitBackgroundCloneTask([self, templateId, generation = snapshot->generation]() {
+            self->RunBackgroundClone(templateId, generation);
         });
     }
 }
 
-void ScrollPlaceholderManager::RunBackgroundClone(
-    const std::string& templateId, uint64_t generation, const ScrollPlaceholderBuilder& builder)
+void ScrollPlaceholderManager::RunBackgroundClone(const std::string& templateId, uint64_t generation)
 {
-    // Runs off the UI thread through the BackgroundTaskExecutor. Invoking the restricted
-    // immutable builder yields a fresh equivalent instance (the deep template subtree clone
-    // swaps in with the compiler restricted factory contract). Every exit path must release
-    // the pending slot this task occupies.
+    // Runs off the UI thread through the BackgroundTaskExecutor and never invokes the
+    // template builder (JS VM bound). The resident, immutable source instance is traversed
+    // top-down and copied node by node; without a copy protocol the clone fails and the pool
+    // keeps serving through the UI-thread paths. Every exit path releases the pending slot.
     do {
-        if (destroyed_.load(std::memory_order_relaxed) || !builder) {
+        if (destroyed_.load(std::memory_order_relaxed)) {
             break;
         }
-        auto instance = builder();
+        auto source = registry_.GetTemplateSourceInstance(templateId);
+        if (!source) {
+            break;
+        }
+        auto instance = CloneScrollPlaceholderSubtreeTopDown(
+            source, [this](const RefPtr<UINode>& node) { return CreatePlaceholderNodeCopy(node); });
         if (!instance) {
             break;
         }
@@ -230,6 +255,15 @@ void ScrollPlaceholderManager::ResetPendingCloneSlots(const std::string& templat
 void ScrollPlaceholderManager::SubmitBackgroundCloneTask(std::function<void()> task)
 {
     BackgroundTaskExecutor::GetInstance().PostTask(std::move(task), BgTaskPriority::LOW);
+}
+
+RefPtr<UINode> ScrollPlaceholderManager::CreatePlaceholderNodeCopy(const RefPtr<UINode>& node)
+{
+    // No copy protocol in this stage: background clones fail, their pending slots are
+    // released, and the pool keeps serving through the UI-thread paths (register-time source,
+    // acquire-time synchronous creation). The compiler restricted factory contract plugs the
+    // real per-node copy protocol in here.
+    return nullptr;
 }
 
 ScrollPlaceholderPredictResult ScrollPlaceholderManager::Predict(

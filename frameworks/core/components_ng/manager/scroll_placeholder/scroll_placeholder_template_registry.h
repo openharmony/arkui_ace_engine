@@ -40,9 +40,10 @@ struct ScrollPlaceholderTemplateSnapshot {
 // Per container template registry (design ADR-3/ADR-12):
 // - registration relation (id + builder handle + generation) persists without bound;
 // - built placeholder instances are retained per template entry under an LRU of hot entries
-//   (capacity 20), each hot entry holding at most SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY
-//   instances: eviction releases all unmounted instances of the least recently used entry
-//   and demotes it to a cold entry keeping only the registration relation;
+//   (capacity 20), each hot entry holding one resident copy source plus at most
+//   SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1 spare copies: eviction releases the source
+//   and all unmounted instances of the least recently used entry and demotes it to a cold
+//   entry keeping only the registration relation;
 // - generation is monotonically increasing per id across re-register and unregister, so any
 //   in-flight result carrying an older generation is stale by comparison;
 // - heat is promoted only by register and by create-path lookup; isRegistered never promotes.
@@ -64,7 +65,12 @@ public:
     // Latest issued generation for the id (0 when never registered); survives removal.
     uint64_t GetCurrentGeneration(const std::string& templateId) const;
 
-    // Instance retention of built (unmounted) placeholder nodes, owned by hot entries.
+    // Instance pool of built placeholder nodes. The source instance is the resident,
+    // immutable subtree built by the template builder on the UI thread at registration; it is
+    // never handed out and serves as the traversal/copy source for background clones. Spare
+    // copies (at most capacity - 1) are what acquire consumes.
+    void SetTemplateSourceInstance(const std::string& templateId, const RefPtr<UINode>& instance);
+    RefPtr<UINode> GetTemplateSourceInstance(const std::string& templateId) const;
     void CacheTemplateInstance(const std::string& templateId, const RefPtr<UINode>& instance);
     RefPtr<UINode> AcquireTemplateInstance(const std::string& templateId);
     size_t GetCachedInstanceCount(const std::string& templateId) const;
@@ -79,6 +85,8 @@ private:
         std::string templateId;
         uint64_t generation = 0;
         ScrollPlaceholderBuilder builder;
+        // Resident immutable copy source built on the UI thread; never handed out.
+        RefPtr<UINode> sourceInstance;
         std::vector<RefPtr<UINode>> cachedInstances;
         bool hot = false;
         std::list<std::string>::iterator lruIt;
