@@ -246,6 +246,7 @@ void EnvelopedDragData(
         dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag, materialInfo.materialId };
     dragData->isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
     dragData->materialFilter = materialInfo.materialFilter;
+    dragData->filenameExtensions = dragSummaryInfo.filenameExtensions;
 }
 
 void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -1741,7 +1742,7 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetSummaryMap(dragSummaryInfo.summary);
+    dragDropManager->SetSummaryInfo(dragSummaryInfo);
 }
 
 RefPtr<UINode> DragDropFuncWrapper::FindWindowScene(RefPtr<FrameNode>& targetNode)

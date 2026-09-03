@@ -22,6 +22,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/common/udmf/data_load_params.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/drag_constants.h"
@@ -84,6 +85,8 @@ public:
 
     void SetSummary(std::map<std::string, int64_t>& summary);
     std::map<std::string, int64_t>& GetSummary();
+    void SetSummaryInfo(const DragSummaryInfo& summaryInfo);
+    const DragSummaryInfo& GetSummaryInfo() const;
 
     void SetResult(DragRet dragRet);
     DragRet GetResult();
@@ -188,7 +191,7 @@ private:
     double globalDisplayY_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
-    std::map<std::string, int64_t> summary_;
+    DragSummaryInfo summaryInfo_;
     std::string udKey_ = "";
     DragRet dragRet_ = DragRet::DRAG_DEFAULT;
     SourceTool sourceTool_ = { SourceTool::UNKNOWN };

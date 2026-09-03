@@ -936,6 +936,7 @@ std::optional<Msdp::DeviceStatus::DragData> EnvelopedDragData(std::shared_ptr<Dr
         materialInfo.materialId };
     dragData.isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
     dragData.materialFilter = materialInfo.materialFilter;
+    dragData.filenameExtensions = dragSummaryInfo.filenameExtensions;
     return dragData;
 }
 
@@ -1026,6 +1027,7 @@ int32_t StartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Msdp::
         dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
         dragData.summaryFormat, dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag,
         dragData.materialId, dragData.dragAnimationType, dragData.isSetMaterialFilter, dragData.materialFilter };
+    dragDataCore.filenameExtensions = dragData.filenameExtensions;
     for (const auto& shadowInfo : dragData.shadowInfos) {
         auto pixelMap = shadowInfo.pixelMap;
         if (pixelMap) {

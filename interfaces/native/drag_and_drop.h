@@ -40,6 +40,8 @@
 #include "native_type.h"
 #include "ui_input_event.h"
 
+typedef struct OH_UdmfSummary OH_UdmfSummary;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -353,6 +355,19 @@ int32_t OH_ArkUI_DragEvent_GetDataTypeCount(ArkUI_DragEvent* event, int32_t* cou
  */
 int32_t OH_ArkUI_DragEvent_GetDataTypes(
     ArkUI_DragEvent *event, char *eventTypeArray[], int32_t length, int32_t maxStrLen);
+
+/**
+ * @brief Obtains the unified data summary from a drag event.
+ *
+ * @param event Pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param summary Pointer to an <b>OH_UdmfSummary</b> object used to receive the summary.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if an internal error occurs.
+ * @since 26
+ */
+int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UdmfSummary* summary);
 
 /**
  * @brief Obtains the drag result from a drag event.

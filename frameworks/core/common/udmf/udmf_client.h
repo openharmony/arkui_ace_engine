@@ -46,6 +46,7 @@ struct DragSummaryInfo {
     int32_t version { 0 };
     int64_t totalSize { -1 };
     std::string tag;
+    std::vector<std::string> filenameExtensions;
 };
 
 class ACE_FORCE_EXPORT UdmfClient : public AceType {
@@ -61,6 +62,11 @@ public:
     virtual std::shared_ptr<void> TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl) = 0;
     virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
     virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
+    virtual napi_value TransformSummary(const DragSummaryInfo& summaryInfo)
+    {
+        auto summary = summaryInfo.summary;
+        return TransformSummary(summary);
+    }
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
     virtual int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) = 0;
     virtual int32_t SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std::string& key) = 0;
@@ -103,6 +109,11 @@ public:
     virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
     virtual RefPtr<DataLoadParams> TransformDataLoadParamsFromANI(void* rawData) = 0;
     virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr) = 0;
+    virtual void TransformSummaryANI(const DragSummaryInfo& summaryInfo, std::shared_ptr<void> summaryPtr)
+    {
+        auto summary = summaryInfo.summary;
+        TransformSummaryANI(summary, summaryPtr);
+    }
 };
 } // namespace OHOS::Ace
 #endif

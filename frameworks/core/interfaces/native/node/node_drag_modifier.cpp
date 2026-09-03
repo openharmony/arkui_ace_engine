@@ -311,6 +311,7 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         }
         event.dragEvent.dataTypes = strList.data();
         event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
+        event.dragEvent.key = info->GetUdKey().c_str();
 
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
 

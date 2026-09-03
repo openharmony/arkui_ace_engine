@@ -1817,9 +1817,7 @@ bool DragDropManager::InterruptFollowHandMorphDropAnimation()
 void DragDropManager::RequireSummary()
 {
     DragSummaryInfo dragSummaryInfo;
-    int32_t ret =
-        InteractionInterface::GetInstance()->GetDragSummary(dragSummaryInfo.summary, dragSummaryInfo.detailedSummary,
-            dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag);
+    int32_t ret = InteractionInterface::GetInstance()->GetDragSummary(dragSummaryInfo);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
     } else {
@@ -2329,7 +2327,7 @@ void DragDropManager::UpdateNotifyDragEvent(
         if (dragEventType != DragEventType::DROP) {
             notifyEvent->SetVelocity(velocityTracker_.GetVelocity());
         }
-        notifyEvent->SetSummary(summaryMap_);
+        notifyEvent->SetSummaryInfo(dragSummaryInfo_);
         notifyEvent->SetPreviewRect(GetDragWindowRect(point));
     }
 }
@@ -2347,7 +2345,7 @@ void DragDropManager::UpdateDragEvent(
     event->SetGlobalDisplayX(pointerEvent.GetGlobalDisplayX());
     event->SetGlobalDisplayY(pointerEvent.GetGlobalDisplayY());
     event->SetVelocity(velocityTracker_.GetVelocity());
-    event->SetSummary(summaryMap_);
+    event->SetSummaryInfo(dragSummaryInfo_);
     event->SetPreviewRect(GetDragWindowRect(point));
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
     event->SetSourceTool(pointerEvent.sourceTool);

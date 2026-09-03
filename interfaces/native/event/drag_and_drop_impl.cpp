@@ -25,6 +25,8 @@
 #include "securec.h"
 #include "udmf_async_client.h"
 #include "udmf_client.h"
+#include "udmf.h"
+#include "udmf_err_code.h"
 #include "unified_types.h"
 
 #ifdef __cplusplus
@@ -164,6 +166,29 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
         }
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UdmfSummary* summary)
+{
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (!dragEvent || !dragEvent->key || !summary) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto options = OH_UdmfOptions_Create();
+    if (!options) {
+        return ARKUI_ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto setKeyResult = OH_UdmfOptions_SetKey(options, dragEvent->key);
+    auto setIntentionResult = OH_UdmfOptions_SetIntention(options, UDMF_INTENTION_DRAG);
+    auto getSummaryResult = (setKeyResult == UDMF_E_OK && setIntentionResult == UDMF_E_OK) ?
+        OH_Udmf_GetSummary(options, summary) : UDMF_E_INVALID_PARAM;
+    OH_UdmfOptions_Destroy(options);
+    if (getSummaryResult == UDMF_E_OK) {
+        return ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    return getSummaryResult == UDMF_E_INVALID_PARAM ?
+        ARKUI_ERROR_CODE_PARAM_INVALID : ARKUI_ERROR_CODE_INTERNAL_ERROR;
 }
 
 ArkUI_DragAction* OH_ArkUI_CreateDragActionWithNode(ArkUI_NodeHandle node)
