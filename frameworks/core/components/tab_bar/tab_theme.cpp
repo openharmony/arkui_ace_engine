@@ -172,6 +172,14 @@ void TabTheme::Builder::ParsePattern2(const RefPtr<TabTheme>& theme, const RefPt
         pattern->GetAttr<Color>("sidebar_unselected_icon_color", Color(0x99182431));
     theme->sideBarUnselectedTextColor_ =
         pattern->GetAttr<Color>("sidebar_unselected_text_color", Color(0x99182431));
+    theme->sideBarPaddingLevel4_ =
+        pattern->GetAttr<Dimension>("side_bar_padding_level4", 8.0_vp);
+    theme->sideBarPaddingLevel8_ =
+        pattern->GetAttr<Dimension>("side_bar_padding_level8", 16.0_vp);
+    theme->sideBarPaddingLevel10_ =
+        pattern->GetAttr<Dimension>("side_bar_padding_level10", 20.0_vp);
+    theme->sideBarTextFontSize_ =
+        pattern->GetAttr<Dimension>("side_bar_text_font_size", 16.0_fp);
 }
 
 } // namespace OHOS::Ace
