@@ -111,11 +111,6 @@ void WebAgentEventReporterTest::SetUpTestCase()
     if (pipelineContext) {
         pipelineContext->clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     }
-
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        pipelineContext->clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
-    }
 #endif
 }
 
