@@ -19,7 +19,7 @@
 #include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/badge/badge_theme.h"
-#include "core/components_ng/pattern/badge/badge_model_ng.h"
+#include "core/components_ng/pattern/badge/badge_model.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
 using namespace OHOS::Ace;
@@ -153,15 +153,15 @@ BadgeParameters CreateBaseV3(CJBadgeStyleV3 style, int32_t position)
 
 namespace OHOS::Ace {
 // Should use CJUIModifier API later
-NG::BadgeModelNG* GetBadgeModel()
+BadgeModel* GetBadgeModel()
 {
-    static NG::BadgeModelNG* model = nullptr;
+    static BadgeModel* model = nullptr;
     if (model == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Badge");
         if (module == nullptr) {
             LOGF_ABORT("Can't find badge dynamic module");
         }
-        model = reinterpret_cast<NG::BadgeModelNG*>(module->GetModel());
+        model = reinterpret_cast<BadgeModel*>(module->GetModel());
     }
     return model;
 }

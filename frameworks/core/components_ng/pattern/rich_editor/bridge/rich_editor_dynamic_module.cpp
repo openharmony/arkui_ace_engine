@@ -73,7 +73,7 @@ const void* RichEditorDynamicModule::GetCjModifier()
 void* RichEditorDynamicModule::GetModel()
 {
     static NG::RichEditorModelNG model;
-    return &model;
+    return static_cast<RichEditorModel*>(&model);
 }
 
 const void* RichEditorDynamicModule::GetCustomModifier(const std::string& name)

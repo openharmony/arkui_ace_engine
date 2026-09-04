@@ -75,7 +75,7 @@ const void* LoadingProgressDynamicModule::GetCjModifier()
 void* LoadingProgressDynamicModule::GetModel()
 {
     static NG::LoadingProgressModelNG model;
-    return &model;
+    return static_cast<LoadingProgressModel*>(&model);
 }
 
 const void* LoadingProgressDynamicModule::GetCustomModifier(const std::string& name)

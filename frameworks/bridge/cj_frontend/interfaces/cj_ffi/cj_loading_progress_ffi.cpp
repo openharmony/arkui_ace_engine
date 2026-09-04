@@ -18,21 +18,20 @@
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
 using namespace OHOS::Ace;
 
 namespace OHOS::Ace {
 // Should use CJUIModifier API later
-NG::LoadingProgressModelNG* GetLoadingProgressModel()
+LoadingProgressModel* GetLoadingProgressModel()
 {
-    static NG::LoadingProgressModelNG* model = nullptr;
+    static LoadingProgressModel* model = nullptr;
     if (model == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LoadingProgress");
         if (module == nullptr) {
             LOGF_ABORT("Can't find loading progress dynamic module");
         }
-        model = reinterpret_cast<NG::LoadingProgressModelNG*>(module->GetModel());
+        model = reinterpret_cast<LoadingProgressModel*>(module->GetModel());
     }
     return model;
 }

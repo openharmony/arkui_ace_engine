@@ -561,7 +561,9 @@ ArkUINativeModuleValue TextTimerBridge::SetTextTimerOnTimer(ArkUIRuntimeCallInfo
         [frameNode = AceType::WeakClaim(frameNode), isJsView, func = panda::CopyableGlobal(vm, func)](
             const int64_t first, const int64_t last) {
         auto vm = func.GetEcmaVM();
-        ACE_SCORING_EVENT("TextTimer.onTimer");
+        if (isJsView) {
+            ACE_SCORING_EVENT("TextTimer.onTimer");
+        }
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(frameNode);

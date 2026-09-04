@@ -899,7 +899,7 @@ RefPtr<ResourceObject> GetResourceObjectWithId(const EcmaVM* vm, const Local<pan
     }
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
     std::vector<ResourceObjectParams> resObjParamsList;
-    auto size = static_cast<int32_t>(params->Length(vm));
+    auto size = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, params));
     for (int32_t i = 0; i < size; i++) {
         auto item = panda::ArrayRef::GetValueAt(vm, params, i);
 
