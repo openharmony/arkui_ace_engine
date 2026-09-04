@@ -2370,6 +2370,10 @@ export class ComposeListItemV2 extends ViewV2 {
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
         this.callbackId = undefined;
+        this.wrapTextCb = undefined;
+        this.canFocusCb = undefined;
+        this.canHoverCb = undefined;
+        this.frontColorCb = undefined;
         this.accessibilityTextBuilder = '';
         this.isFocus = false;
         this.isWrapText = false;
@@ -2570,26 +2574,30 @@ export class ComposeListItemV2 extends ViewV2 {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
             this.onFontSizeScaleChange();
         }
-        emitter.on({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, (i1) => {
+        this.wrapTextCb = (i1) => {
             if (i1.data && i1.data.isWrapText !== undefined) {
                 this.isWrapText = i1.data.isWrapText;
             }
-        });
-        emitter.on({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, (h1) => {
+        };
+        this.canFocusCb = (h1) => {
             if (h1.data && h1.data.canFocus !== undefined) {
                 this.canFocus = h1.data.canFocus;
             }
-        });
-        emitter.on({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, (g1) => {
+        };
+        this.canHoverCb = (g1) => {
             if (g1.data && g1.data.canHover !== undefined) {
                 this.canHover = g1.data.canHover;
             }
-        });
-        emitter.on({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, (f1) => {
+        };
+        this.frontColorCb = (f1) => {
             if (f1.data && f1.data.frontColor !== undefined) {
                 this.frontColor = f1.data.frontColor;
             }
-        });
+        };
+        emitter.on({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, this.wrapTextCb);
+        emitter.on({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, this.canFocusCb);
+        emitter.on({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, this.canHoverCb);
+        emitter.on({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, this.frontColorCb);
     }
 
     aboutToDisappear() {
@@ -2600,10 +2608,10 @@ export class ComposeListItemV2 extends ViewV2 {
             ?.off('environment', this.callbackId);
             this.callbackId = void (0);
         }
-        emitter.off(EVENT_IS_WRAP_TEXT_CHANGE);
-        emitter.off(EVENT_PARENT_CAN_FOCUS_CHANGE);
-        emitter.off(EVENT_PARENT_CAN_HOVER_CHANGE);
-        emitter.off(EVENT_PARENT_FRONT_COLOR_CHANGE);
+        emitter.off(EVENT_IS_WRAP_TEXT_CHANGE, this.wrapTextCb);
+        emitter.off(EVENT_PARENT_CAN_FOCUS_CHANGE, this.canFocusCb);
+        emitter.off(EVENT_PARENT_CAN_HOVER_CHANGE, this.canHoverCb);
+        emitter.off(EVENT_PARENT_FRONT_COLOR_CHANGE, this.frontColorCb);
     }
 
     calculatedRightWidth() {

@@ -10,6 +10,7 @@
     "pages/scrollable/RefreshNestedScrollIssueDemo",
     "pages/scrollable/ScrollEventObserver",
     "pages/scrollable/FreeScroll",
+    "pages/scrollable/ComposeListItemV2EmitterOffIssueDemo",
     "pages/Tabs/TabsMainPage",
     "pages/Tabs/BarBackgroundBlurStyle",
     "pages/Tabs/OnContentWillChange",
