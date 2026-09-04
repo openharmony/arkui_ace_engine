@@ -151,7 +151,8 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusNode(
         auto nextMaxCrossCount = info_.crossCount_;
         auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
         // A regular item (1x1) has neither irregularInfo nor explicit rowStart, so its mainStart is
-        // -1 while mainIndex equals mainStart/mainEnd. Fall back to mainIndex as the search start row.
+        // -1. mainIndex equals the actual row index (for a 1x1 item, start == end == index), so
+        // fall back to mainIndex as the search start row.
         auto curMainStart = curFocusIndexInfo_.mainStart < 0 ? curFocusIndexInfo_.mainIndex
                                                              : curFocusIndexInfo_.mainStart;
         auto nextMain = (step == FocusStep::RIGHT_END && curFocusIndexInfo_.mainSpan > 1)
