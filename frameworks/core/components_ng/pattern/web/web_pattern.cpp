@@ -48,7 +48,6 @@
 #include "base/log/event_report.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/ressched/ressched_click_optimizer.h"
-#include "base/ressched/ressched_click_optimizer.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
