@@ -154,8 +154,9 @@ public:
 protected:
     // Schedules one clone task through the shared BackgroundTaskExecutor (low priority: on an
     // empty pool the acquire path degrades to synchronous creation, so a clone never blocks
-    // user-visible work). Virtual so tests can capture and drain tasks deterministically.
-    virtual void SubmitBackgroundCloneTask(std::function<void()> task);
+    // user-visible work). Returns false when the executor rejected the task; the caller then
+    // releases the pending slot. Virtual so tests can capture and drain tasks deterministically.
+    virtual bool SubmitBackgroundCloneTask(std::function<void()> task);
 
     // Materializes one node of the immutable source subtree during a background traversal
     // clone: creates a same-type node through the node creation interface and copies the

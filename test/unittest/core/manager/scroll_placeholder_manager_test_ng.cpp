@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
+#include <chrono>
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <set>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -30,6 +33,7 @@
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline/base/element_register_multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -100,11 +104,18 @@ public:
     uint32_t copiedNodeCount = 0;
     bool copyProtocolEnabled = true;
     bool useDefaultCopyProtocol = false;
+    // False routes submissions to the real BackgroundTaskExecutor so the parallel clone flow
+    // (worker thread + thread-safe node scope + free-node registration) runs for real.
+    bool captureTasks = true;
 
 protected:
-    void SubmitBackgroundCloneTask(std::function<void()> task) override
+    bool SubmitBackgroundCloneTask(std::function<void()> task) override
     {
+        if (!captureTasks) {
+            return ScrollPlaceholderManager::SubmitBackgroundCloneTask(std::move(task));
+        }
         capturedTasks_.emplace_back(std::move(task));
+        return true;
     }
 
     RefPtr<UINode> CreatePlaceholderNodeCopy(const RefPtr<UINode>& node) override
@@ -131,6 +142,35 @@ ScrollPlaceholderBuilder MakeTreeBuilder(int32_t baseId)
         root->AddChild(TestPlaceholderNode::CreateTestNode(baseId + 1));
         return root;
     });
+}
+
+// Builder producing a frame-node placeholder subtree for the production copy protocol.
+ScrollPlaceholderBuilder MakeFrameTreeBuilder()
+{
+    return ScrollPlaceholderBuilder([]() -> RefPtr<UINode> {
+        auto root = FrameNode::CreateFrameNode(
+            "placeholder_root", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        auto child = FrameNode::CreateFrameNode(
+            "placeholder_child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        child->GetLayoutProperty()->UpdateAspectRatio(1.5f);
+        root->AddChild(child);
+        return root;
+    });
+}
+
+// Waits until every submitted clone task has finished (each releases its pending slot at the
+// end), so pool assertions after it are stable without pinning worker scheduling.
+bool WaitForPendingClones(const RefPtr<TestableScrollPlaceholderManager>& manager, const std::string& templateId,
+    uint32_t timeoutMs = 3000)
+{
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
+    while (std::chrono::steady_clock::now() < deadline) {
+        if (manager->GetPendingCloneCount(templateId) == 0 && manager->CapturedTaskCount() == 0) {
+            return true;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    }
+    return manager->GetPendingCloneCount(templateId) == 0 && manager->CapturedTaskCount() == 0;
 }
 
 class ScrollPlaceholderManagerTestNg : public testing::Test {
@@ -513,6 +553,99 @@ HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolDefaultCopyCreatesSameTy
     ASSERT_TRUE(copyChild);
     EXPECT_EQ(copyChild->GetTag(), "placeholder_child");
     EXPECT_FLOAT_EQ(copyChild->GetLayoutProperty()->GetAspectRatio(), 1.5f); // property copied
+}
+
+/**
+ * @tc.name: PlaceholderPoolParallelCloneFillsPool001
+ * @tc.desc: With the real BackgroundTaskExecutor a worker thread clones the resident source:
+ *           same-type creation, property copy and free-node registration all run off-thread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolParallelCloneFillsPool001, TestSize.Level1)
+{
+    manager_->captureTasks = false;            // real executor, real worker thread
+    manager_->useDefaultCopyProtocol = true;   // production copy: create same type + copy property
+    manager_->RegisterTemplate("tpl", MakeFrameTreeBuilder());
+    ASSERT_TRUE(WaitForPendingClones(manager_, "tpl"));
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
+
+    auto source = AceType::DynamicCast<FrameNode>(manager_->GetTemplateSourceInstance("tpl"));
+    ASSERT_TRUE(source);
+    auto acquired = manager_->AcquireTemplateInstance("tpl"); // main thread takes worker output
+    ASSERT_TRUE(acquired);
+    auto copyRoot = AceType::DynamicCast<FrameNode>(acquired);
+    ASSERT_TRUE(copyRoot);
+    EXPECT_EQ(copyRoot->GetTag(), source->GetTag());   // same type
+    EXPECT_NE(copyRoot->GetId(), source->GetId());     // fresh node, not the resident source
+    ASSERT_EQ(copyRoot->GetChildren().size(), 1u);
+    auto copyChild = AceType::DynamicCast<FrameNode>(copyRoot->GetChildren().front());
+    ASSERT_TRUE(copyChild);
+    EXPECT_FLOAT_EQ(copyChild->GetLayoutProperty()->GetAspectRatio(), 1.5f); // property copied
+    // Created under the thread-safe node scope on the worker: registered as a free node in
+    // the mutex-guarded registry instead of the global element register.
+    EXPECT_EQ(ElementRegisterMultiThread::GetInstance()->GetThreadSafeNodeById(copyRoot->GetId()), acquired);
+}
+
+/**
+ * @tc.name: PlaceholderPoolParallelReplenishLoop001
+ * @tc.desc: Repeated acquire on the UI thread interleaves with worker refills; every handed
+ *           out instance is unique and the pool returns to capacity after each cycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolParallelReplenishLoop001, TestSize.Level1)
+{
+    manager_->captureTasks = false;
+    manager_->useDefaultCopyProtocol = true;
+    manager_->RegisterTemplate("tpl", MakeFrameTreeBuilder());
+    ASSERT_TRUE(WaitForPendingClones(manager_, "tpl"));
+
+    std::set<int32_t> seenIds;
+    std::vector<RefPtr<UINode>> held;
+    for (int i = 0; i < 6; i++) {
+        auto instance = manager_->AcquireTemplateInstance("tpl");
+        ASSERT_TRUE(instance); // spare taken, or built synchronously while the worker refills
+        auto frame = AceType::DynamicCast<FrameNode>(instance);
+        ASSERT_TRUE(frame);
+        EXPECT_EQ(seenIds.count(frame->GetId()), 0u); // unique instance every time
+        seenIds.insert(frame->GetId());
+        held.push_back(instance);
+        ASSERT_TRUE(WaitForPendingClones(manager_, "tpl"));
+    }
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
+}
+
+/**
+ * @tc.name: PlaceholderPoolParallelStaleDrop001
+ * @tc.desc: A re-register racing an in-flight worker clone leaves exactly one spare of the
+ *           current generation; stale clones are dropped by the generation guard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolParallelStaleDrop001, TestSize.Level1)
+{
+    manager_->captureTasks = false;
+    manager_->useDefaultCopyProtocol = true;
+    uint64_t first = manager_->RegisterTemplate("tpl", MakeFrameTreeBuilder());
+    uint64_t second = manager_->RegisterTemplate("tpl", MakeFrameTreeBuilder()); // may race the clone
+    EXPECT_GT(second, first);
+    ASSERT_TRUE(WaitForPendingClones(manager_, "tpl"));
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), SCROLL_PLACEHOLDER_INSTANCE_CACHE_CAPACITY - 1);
+    EXPECT_TRUE(manager_->AcquireTemplateInstance("tpl"));
+}
+
+/**
+ * @tc.name: PlaceholderPoolParallelDestroy001
+ * @tc.desc: Destroy while a worker clone is in flight drops it safely: no crash, slots drain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPlaceholderManagerTestNg, PlaceholderPoolParallelDestroy001, TestSize.Level1)
+{
+    manager_->captureTasks = false;
+    manager_->useDefaultCopyProtocol = true;
+    manager_->RegisterTemplate("tpl", MakeFrameTreeBuilder());
+    manager_->Destroy(); // task may still be executing on the worker
+    ASSERT_TRUE(WaitForPendingClones(manager_, "tpl"));
+    EXPECT_EQ(manager_->GetCachedInstanceCount("tpl"), 0u);
+    EXPECT_FALSE(manager_->GetTemplateSourceInstance("tpl"));
 }
 
 /**

@@ -201,9 +201,13 @@ void ScrollPlaceholderManager::ScheduleBackgroundReplenish(const std::string& te
     // registry state.
     auto self = AceType::Claim(this);
     for (size_t i = 0; i < toSubmit; i++) {
-        SubmitBackgroundCloneTask([self, templateId, generation = snapshot->generation]() {
-            self->RunBackgroundClone(templateId, generation);
-        });
+        if (!SubmitBackgroundCloneTask([self, templateId, generation = snapshot->generation]() {
+                self->RunBackgroundClone(templateId, generation);
+            })) {
+            // Executor rejected the task: release the slot booked for it, otherwise the pool
+            // would consider it in flight forever.
+            ReleasePendingCloneSlot(templateId);
+        }
     }
 }
 
@@ -261,9 +265,9 @@ void ScrollPlaceholderManager::ResetPendingCloneSlots(const std::string& templat
     pendingCloneCount_.erase(templateId);
 }
 
-void ScrollPlaceholderManager::SubmitBackgroundCloneTask(std::function<void()> task)
+bool ScrollPlaceholderManager::SubmitBackgroundCloneTask(std::function<void()> task)
 {
-    BackgroundTaskExecutor::GetInstance().PostTask(std::move(task), BgTaskPriority::LOW);
+    return BackgroundTaskExecutor::GetInstance().PostTask(std::move(task), BgTaskPriority::LOW);
 }
 
 RefPtr<UINode> ScrollPlaceholderManager::CreatePlaceholderNodeCopy(const RefPtr<UINode>& node)
