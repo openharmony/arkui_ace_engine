@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CODEC_BYTE_BUFFER_OPERATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CODEC_BYTE_BUFFER_OPERATOR_H
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <set>
@@ -73,8 +74,8 @@ private:
     template<class T>
     bool ReadValue(T& value) const
     {
-        if (readPos_ + sizeof(T) > buffer_.size()) {
-            LOGW("Exceed buffer size, readPos = %{public}u, buffer size = %{public}zu", readPos_, buffer_.size());
+        if (readPos_ > buffer_.size() || sizeof(T) > buffer_.size() - readPos_) {
+            LOGW("Exceed buffer size, readPos = %{public}zu, buffer size = %{public}zu", readPos_, buffer_.size());
             return false;
         }
         value = *reinterpret_cast<const T*>(buffer_.data() + readPos_);
@@ -86,19 +87,25 @@ private:
     bool ReadArray(T& dst) const
     {
         int32_t length = -1;
-        if (!ReadData(length) || length < 0 ||
-            readPos_ + static_cast<uint32_t>(sizeof(typename T::value_type) * length) > buffer_.size()) {
+        if (!ReadData(length) || length < 0) {
             LOGW("Could not read array length or array length is invalid");
             return false;
         }
+        const auto arrayLength = static_cast<size_t>(length);
+        constexpr auto elementSize = sizeof(typename T::value_type);
+        if (readPos_ > buffer_.size() || arrayLength > (buffer_.size() - readPos_) / elementSize) {
+            LOGW("Array data exceeds buffer size");
+            return false;
+        }
+        const auto byteLength = elementSize * arrayLength;
         auto data = reinterpret_cast<const typename T::value_type*>(buffer_.data() + readPos_);
-        dst.assign(data, data + length);
-        readPos_ += static_cast<uint32_t>(sizeof(typename T::value_type) * length);
+        dst.assign(data, data + arrayLength);
+        readPos_ += byteLength;
         return true;
     }
 
     const std::vector<uint8_t>& buffer_;
-    mutable uint32_t readPos_ = 0;
+    mutable size_t readPos_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ByteBufferReader);
 };
