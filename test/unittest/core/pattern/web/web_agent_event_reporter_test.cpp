@@ -24,7 +24,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/ressched/ressched_click_optimizer.h"
-#include "base/ressched/ressched_click_optimizer.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
