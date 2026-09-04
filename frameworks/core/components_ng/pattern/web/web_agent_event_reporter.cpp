@@ -18,7 +18,6 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/ressched/ressched_click_optimizer.h"
-#include "base/ressched/ressched_click_optimizer.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 
 namespace OHOS::Ace::NG {
