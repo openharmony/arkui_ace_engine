@@ -52,6 +52,7 @@ ohos_unittest("arkui_feature_param_manager_test") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock",
