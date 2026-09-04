@@ -340,9 +340,8 @@ void SetBuilder(ArkUINodeHandle node, void* callback)
             NG::ScopedViewStackProcessor scopedViewStackProcessor;
             (*builderFunc)();
             auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
-            if (customFrameNode) {
-                RefreshModelNG::SetCustomBuilder(frameNode, AceType::RawPtr(customFrameNode));
+            if (customNode) {
+                RefreshModelNG::SetCustomBuilderNode(frameNode, customNode);
             }
         }
     }
@@ -352,7 +351,7 @@ void ResetBuilder(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    RefreshModelNG::SetCustomBuilder(frameNode, nullptr);
+    RefreshModelNG::SetCustomBuilderNode(frameNode, nullptr);
 }
 
 void SetIsCustomBuilderExist(ArkUINodeHandle node, ArkUI_Bool isExist)
