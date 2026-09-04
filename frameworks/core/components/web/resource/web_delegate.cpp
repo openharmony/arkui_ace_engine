@@ -37,7 +37,6 @@
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_click_optimizer.h"
-#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
