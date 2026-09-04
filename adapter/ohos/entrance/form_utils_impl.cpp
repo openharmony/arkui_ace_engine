@@ -177,6 +177,12 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         return -1;
     }
 
+    auto executeMode = static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND);
+    auto executeModeJson = eventAction->GetValue("executeMode");
+    if (executeModeJson->IsString() && executeModeJson->GetString() == "background") {
+        executeMode = static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND);
+    }
+
     AAFwk::WantParams wantParams;
     auto intentParams = eventAction->GetValue("intentParams");
     if (intentParams->IsValid()) {
@@ -204,9 +210,10 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     // intentId 由 AMS 侧按名称查表覆盖，此处占位 "0"（GenerateFromWant 要求可解析为 uint64，不能为空）。
     executeWantParams.SetParam(
         AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("0"));
-    // 卡片点击拉起前台 UIAbility，实际支持的 executeMode 由 AMS 校验。
+    // 卡片点击默认前台拉起，提供方可通过 action 中 executeMode 指定后台执行，
+    // 实际支持的 executeMode 由 AMS 按意图注册信息校验。
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE,
-        AAFwk::Integer::Box(static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND)));
+        AAFwk::Integer::Box(executeMode));
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
         AAFwk::WantParamWrapper::Box(wantParams));
     want.SetParams(executeWantParams);
