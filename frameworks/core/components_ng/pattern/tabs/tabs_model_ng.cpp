@@ -187,7 +187,21 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     if (auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>(); tabBarPattern) {
         tabBarPattern->SetController(GetSwiperController(swiperNode, swiperController));
     }
-
+    // Sync current barDisplayMode to the new controller - controller is recreated
+    // every time JSTabs::Create runs, so the new instance has default mode=0.
+    do {
+        auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+        CHECK_NULL_BREAK(tabsPattern);
+        auto currentMode = tabsPattern->GetCurrentBarDisplayMode();
+        if (!currentMode.has_value()) {
+            break;
+        }
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_BREAK(swiperPattern);
+        auto tabsController = AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
+        CHECK_NULL_BREAK(tabsController);
+        tabsController->SetBarDisplayMode(currentMode.value());
+    } while (false);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     if (tabBarLayoutProperty->GetPixelRound() == static_cast<uint16_t>(PixelRoundPolicy::ALL_FORCE_ROUND)) {
