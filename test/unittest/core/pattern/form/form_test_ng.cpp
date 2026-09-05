@@ -1215,7 +1215,7 @@ HWTEST_F(FormTestNg, FormPatternTest003, TestSize.Level1)
     ASSERT_NE(host, nullptr);
 
     int32_t delayTime = 0;
-    pattern->HandleSnapshot(delayTime, "1");
+    pattern->HandleSnapshot(delayTime);
     ASSERT_EQ(delayTime, 0);
 }
 
