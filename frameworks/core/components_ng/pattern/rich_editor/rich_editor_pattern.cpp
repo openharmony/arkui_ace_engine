@@ -1782,6 +1782,12 @@ bool RichEditorPattern::ProcessCommand(const std::string& cmd, const std::unique
     return true;
 }
 
+void RichEditorPattern::RequestKeyboardForStylus()
+{
+    // just for stylus scene: viewFocused but need Show stylus Keyboard
+    RequestKeyboard(false, true, true);
+}
+
 bool RichEditorPattern::ParseCommand(const std::string& command)
 {
     auto host = GetHost();
