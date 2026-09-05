@@ -163,6 +163,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
     if (frameNode) {
         patternName = frameNode->GetTag();
     }
+    eventInfo.SetTouchEventId(lastPoint.touchEventId);
     eventInfo.SetPatternName(patternName.c_str());
     eventInfo.SetSourceDevice(lastPoint.sourceType);
     eventInfo.SetForce(lastPoint.force);
