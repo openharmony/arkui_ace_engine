@@ -102,5 +102,4 @@ bool FormTaskExecutor::IsRunOnUIThread() const
     return taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
 }
 
-
 } // namespace OHOS::Ace::NG

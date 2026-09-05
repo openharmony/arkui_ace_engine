@@ -1646,8 +1646,6 @@ void FormPattern::InitFormManagerDelegate()
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
     CHECK_NULL_VOID(formManagerBridge_);
     formManagerBridge_->AddRenderDelegate();
@@ -2066,8 +2064,7 @@ void FormPattern::OnActionEvent(const std::string& action)
         return;
     }
 
-    ContainerScope containerScope(scopeId_);
-    PostUITask([weak = WeakClaim(this)] {
+    formTaskExecutor_->PostUITask([weak = WeakClaim(this)] {
                 auto formPattern = weak.Upgrade();
                 CHECK_NULL_VOID(formPattern);
                 formPattern->RemoveDelayResetManuallyClickFlagTask();
@@ -2085,8 +2082,6 @@ void FormPattern::OnActionEvent(const std::string& action)
 
     if ("router" == type) {
         isManuallyClick_ = false;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         if (formTaskExecutor_->IsRunOnUIThread()) {
             FireOnRouterEvent(eventAction);
         } else {
@@ -2958,7 +2953,7 @@ void FormPattern::ReAddStaticFormSnapshotTimer()
     HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
 }
 
-void FormPattern::FireOnUpdateFormDone(int64_t id) const
+void FormPattern::FireOnUpdateFormDone(int64_t id)
 {
     TAG_LOGD(AceLogTag::ACE_FORM, "fire form update done:%{public}" PRId64, id);
     auto host = GetHost();
@@ -2970,6 +2965,7 @@ void FormPattern::FireOnUpdateFormDone(int64_t id) const
     json->Put("id", std::to_string(onUpdateFormId).c_str());
     json->Put("idString", std::to_string(id).c_str());
     eventHub->FireOnUpdate(json->ToString());
+    ReAddStaticFormSnapshotTimer();
 }
 
 void FormPattern::GetRSUIContext()

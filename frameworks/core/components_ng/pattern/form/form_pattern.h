@@ -232,7 +232,7 @@ private:
     void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void FireFormSurfaceChangeCallback(float width, float height, float borderWidth = 0.0);
     void FireFormSurfaceDetachCallback();
-    void FireOnUpdateFormDone(int64_t id) const;
+    void FireOnUpdateFormDone(int64_t id);
     void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;

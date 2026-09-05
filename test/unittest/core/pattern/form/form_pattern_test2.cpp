@@ -1456,7 +1456,7 @@ HWTEST_F(FormPatternTest2, FormPatternTest_HandleSnapshot_002, TestSize.Level1)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     // isDynamic_ = true + FORM_STATIC_IMAGE_NODE exists -> should post RemoveFrsNode task
     pattern->isDynamic_ = true;
@@ -1464,7 +1464,6 @@ HWTEST_F(FormPatternTest2, FormPatternTest_HandleSnapshot_002, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->HandleSnapshot(0);
-    EXPECT_NE(pattern, nullptr);
     // After this, the task is posted, isSnapshot_ should still be false (it's set in the delayed task)
     EXPECT_TRUE(pattern->isSnapshot_);
 }

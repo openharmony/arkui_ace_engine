@@ -26,6 +26,29 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
+namespace {
+// RAII guard: temporarily overrides the global mock pipeline to reproduce the production
+// invalid-id path (no pipeline context -> GetTaskExecutor() returns nullptr). Restores the
+// suite-level mock pipeline on destruction even if an assertion fails (stack unwinding),
+// keeping test environment isolated.
+class ScopedPipelineOverride {
+public:
+    explicit ScopedPipelineOverride(const RefPtr<MockPipelineContext>& pipeline)
+        : oldPipeline_(MockPipelineContext::pipeline_)
+    {
+        MockPipelineContext::pipeline_ = pipeline;
+    }
+
+    ~ScopedPipelineOverride()
+    {
+        MockPipelineContext::pipeline_ = oldPipeline_;
+    }
+
+private:
+    RefPtr<MockPipelineContext> oldPipeline_;
+};
+} // namespace
+
 class FormTaskExecutorTest : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -149,30 +172,98 @@ HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_IsRunOnUIThread_001, TestSize.Le
 }
 
 /**
- * @tc.name: FormTaskExecutor_InvalidInstanceId_001
- * @tc.desc: Verify all methods handle invalid instanceId gracefully
+ * @tc.name: FormTaskExecutor_InvalidInstanceId_PostUITask_001
+ * @tc.desc: Verify PostUITask with invalid instanceId (no pipeline) does not execute the task
  * @tc.type: FUNC
  */
-HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_001, TestSize.Level1)
+HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_PostUITask_001, TestSize.Level1)
 {
-    // Create executor with invalid instanceId — GetContextByContainerId returns nullptr
+    // GetContextByContainerId ignores containerId and always returns the global mock pipeline,
+    // so the pipeline is temporarily overridden with nullptr to hit the production invalid-id
+    // path (no pipeline -> GetTaskExecutor() returns nullptr).
+    ScopedPipelineOverride guard(nullptr);
+
     auto executor = AceType::MakeRefPtr<FormTaskExecutor>(-1);
     ASSERT_NE(executor, nullptr);
 
     bool taskExecuted = false;
     executor->PostUITask([&taskExecuted]() { taskExecuted = true; }, "InvalidIdTest");
     EXPECT_FALSE(taskExecuted);
+}
 
-    taskExecuted = false;
+/**
+ * @tc.name: FormTaskExecutor_InvalidInstanceId_PostBgTask_001
+ * @tc.desc: Verify PostBgTask with invalid instanceId (no pipeline) does not execute the task
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_PostBgTask_001, TestSize.Level1)
+{
+    ScopedPipelineOverride guard(nullptr);
+
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(-1);
+    ASSERT_NE(executor, nullptr);
+
+    bool taskExecuted = false;
     executor->PostBgTask([&taskExecuted]() { taskExecuted = true; }, "InvalidIdTest");
     EXPECT_FALSE(taskExecuted);
+}
 
-    taskExecuted = false;
+/**
+ * @tc.name: FormTaskExecutor_InvalidInstanceId_PostDelayedUITask_001
+ * @tc.desc: Verify PostDelayedUITask with invalid instanceId (no pipeline) does not execute task
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_PostDelayedUITask_001, TestSize.Level1)
+{
+    ScopedPipelineOverride guard(nullptr);
+
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(-1);
+    ASSERT_NE(executor, nullptr);
+
+    bool taskExecuted = false;
     executor->PostDelayedUITask([&taskExecuted]() { taskExecuted = true; }, 0, "InvalidIdTest");
     EXPECT_FALSE(taskExecuted);
+}
 
-    executor->RemoveUITask("InvalidIdTest");
+/**
+ * @tc.name: FormTaskExecutor_InvalidInstanceId_RemoveUITask_001
+ * @tc.desc: Verify RemoveUITask with invalid instanceId (no pipeline) does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_RemoveUITask_001, TestSize.Level1)
+{
+    ScopedPipelineOverride guard(nullptr);
+
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(-1);
+    ASSERT_NE(executor, nullptr);
+    EXPECT_NO_FATAL_FAILURE(executor->RemoveUITask("InvalidIdTest"));
+}
+
+/**
+ * @tc.name: FormTaskExecutor_InvalidInstanceId_IsRunOnUIThread_001
+ * @tc.desc: Verify IsRunOnUIThread with invalid instanceId (no pipeline) returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_IsRunOnUIThread_001, TestSize.Level1)
+{
+    ScopedPipelineOverride guard(nullptr);
+
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(-1);
+    ASSERT_NE(executor, nullptr);
     EXPECT_FALSE(executor->IsRunOnUIThread());
+}
+
+/**
+ * @tc.name: FormTaskExecutor_InvalidInstanceId_PostSyncUITask_001
+ * @tc.desc: Verify PostSyncUITask with invalid instanceId (no pipeline) returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_PostSyncUITask_001, TestSize.Level1)
+{
+    ScopedPipelineOverride guard(nullptr);
+
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(-1);
+    ASSERT_NE(executor, nullptr);
     EXPECT_FALSE(executor->PostSyncUITask([]() {}, "InvalidIdTest"));
 }
 
