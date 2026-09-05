@@ -15,6 +15,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/bottom_tab_bar_style_peer.h"
@@ -328,6 +329,24 @@ void SetOnWillHideImpl(Ark_NativePointer node,
     auto onWillHide = GetSyncInvoker(*optValue);
     TabContentModelStatic::SetOnWillHide(frameNode, std::move(onWillHide));
 }
+void SetTabBarVisibilityImpl(Ark_NativePointer node,
+                             Ark_TabVisibility visibility,
+                             const Opt_TabBarDisplayMode* displayMode)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentDefaultVisibility defaultVisibility;
+    if (visibility >= ARK_TAB_VISIBILITY_VISIBLE && visibility <= ARK_TAB_VISIBILITY_HIDDEN) {
+        defaultVisibility.visibility = static_cast<TabVisibility>(visibility);
+        defaultVisibility.isNull = false;
+    }
+    auto displayModeConvValue = Converter::OptConvertPtr<TabBarDisplayMode>(displayMode);
+    if (displayModeConvValue.has_value()) {
+        defaultVisibility.displayMode = displayModeConvValue.value();
+        defaultVisibility.isNull = false;
+    }
+    TabContentModelNG::SetDefaultVisibility(frameNode, defaultVisibility);
+}
 } // TabContentAttributeModifier
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
 {
@@ -337,6 +356,7 @@ const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
         TabContentAttributeModifier::SetTabBarImpl,
         TabContentAttributeModifier::SetOnWillShowImpl,
         TabContentAttributeModifier::SetOnWillHideImpl,
+        TabContentAttributeModifier::SetTabBarVisibilityImpl,
     };
     return &ArkUITabContentModifierImpl;
 }

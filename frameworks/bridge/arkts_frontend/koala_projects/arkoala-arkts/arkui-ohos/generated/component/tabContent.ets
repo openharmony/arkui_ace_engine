@@ -34,6 +34,7 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
 import { CustomBuilder } from './builder'
+import { TabBarDisplayMode } from './tabs'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
@@ -581,6 +582,18 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabContentAttribute_setOnWillHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTabBarVisibilityAttribute(visibility: TabVisibility, displayMode: TabBarDisplayMode | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (displayMode !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const displayModeTmpValue = (displayMode as TabBarDisplayMode)
+            thisSerializer.writeInt32(displayModeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabContentAttribute_setTabBarVisibility(this.peer.ptr, visibility.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SelectedMode {
     INDICATOR = 0,
@@ -626,6 +639,10 @@ export interface TabBarOptions {
     icon?: string | arkui_component_units_Resource;
     text?: string | arkui_component_units_Resource;
 }
+export enum TabVisibility {
+    VISIBLE = 0,
+    HIDDEN = 1
+}
 export interface TabContentAttribute extends CommonMethod {
     setTabContentOptions(): this {
         throw new Error('Unimplemented method setTabContentOptions')
@@ -638,6 +655,9 @@ export interface TabContentAttribute extends CommonMethod {
     }
     onWillHide(value: VoidCallback | undefined): this {
         throw new Error('Unimplemented method onWillHide')
+    }
+    tabBarVisibility(visibility: TabVisibility, displayMode: TabBarDisplayMode | undefined): this {
+        throw new Error('Unimplemented method tabBarVisibility')
     }
     attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -666,6 +686,12 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
     public onWillHide(value: VoidCallback | undefined): this {
         const value_casted = value as (VoidCallback | undefined)
         this.getPeer()?.setOnWillHideAttribute(value_casted)
+        return this
+    }
+    public tabBarVisibility(visibility: TabVisibility, displayMode: TabBarDisplayMode | undefined): this {
+        const visibility_casted = visibility as (TabVisibility)
+        const displayMode_casted = displayMode as (TabBarDisplayMode | undefined)
+        this.getPeer()?.setTabBarVisibilityAttribute(visibility_casted, displayMode_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
