@@ -35,7 +35,6 @@ struct NodeMaps {
 class SecurityComponentHandler {
 public:
     static int32_t RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId);
-    static int32_t UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId);
     static int32_t UnregisterSecurityComponent(int32_t& scId);
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, GestureEvent& event,
