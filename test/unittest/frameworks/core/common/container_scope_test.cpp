@@ -1615,4 +1615,75 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest_ConcurrentRecentActiveId001, Tes
     ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
     EXPECT_FALSE(failed.load(std::memory_order_acquire));
 }
+
+/**
+ * @tc.name: ContainerScopeTest_RemoveAndCheckNonIsolatedNoMatch001
+ * @tc.desc: On a non-isolated thread, RemoveAndCheck does not reset recentActiveId/
+ *           recentForegroundId when the removed id does not match them.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_RemoveAndCheckNonIsolatedNoMatch001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add a container and set recent active/foreground to a different id
+     */
+    constexpr int32_t removedId = TEST_INSTANCE_ID_CONTAINER;      // 100000
+    constexpr int32_t activeId = TEST_INSTANCE_ID_SUB_CONTAINER;  // 1000000
+    ContainerScope::Add(removedId);
+    ContainerScope::UpdateRecentActive(activeId);
+    ContainerScope::UpdateRecentForeground(activeId);
+
+    /**
+     * @tc.steps: step2. RemoveAndCheck with an id that does not match active/foreground
+     * @tc.expected: recentActiveId and recentForegroundId remain unchanged
+     */
+    ContainerScope::RemoveAndCheck(removedId);
+    EXPECT_EQ(ContainerScope::RecentActiveId(), activeId);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), activeId);
+    EXPECT_EQ(ContainerScope::ContainerCount(), 0);
+
+    /**
+     * @tc.steps: step3. Cleanup
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest_RemoveAndCheckIsolatedNoMatch001
+ * @tc.desc: On an isolated thread, RemoveAndCheck does not reset localRecentActiveId/
+ *           localRecentForegroundId when the removed id does not match them.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_RemoveAndCheckIsolatedNoMatch001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Mark isolated, add a local container, set local active/foreground
+     *           to a different id
+     */
+    constexpr int32_t removedId = TEST_INSTANCE_ID_CONTAINER;      // 100000
+    constexpr int32_t activeId = TEST_INSTANCE_ID_SUB_CONTAINER;  // 1000000
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(removedId);
+    ContainerScope::UpdateRecentActive(activeId);
+    ContainerScope::UpdateRecentForeground(activeId);
+
+    /**
+     * @tc.steps: step2. RemoveAndCheck with an id that does not match local active/foreground
+     * @tc.expected: localRecentActiveId and localRecentForegroundId remain unchanged
+     */
+    ContainerScope::RemoveAndCheck(removedId);
+    EXPECT_EQ(ContainerScope::RecentActiveId(), activeId);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), activeId);
+    // RemoveAndCheck does not touch the thread-local container set.
+    EXPECT_EQ(ContainerScope::ContainerCount(), 1);
+
+    /**
+     * @tc.steps: step3. Cleanup
+     */
+    ContainerScope::RemoveLocal(removedId);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    ContainerScope::ResetIsolatedThread();
+}
 } // namespace OHOS::Ace
