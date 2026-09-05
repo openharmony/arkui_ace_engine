@@ -1076,7 +1076,8 @@ public:
 
     virtual void UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) {}
 
-    virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
+    virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED) {}
 
     virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
 

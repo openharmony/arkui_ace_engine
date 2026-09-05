@@ -472,7 +472,8 @@ public:
     
     void UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) override;
 
-    void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
+    void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason) override;
 
     float GetPageAvoidOffset() override;
 

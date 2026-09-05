@@ -2978,11 +2978,12 @@ void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
 
-void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(uiExtensionManager_);
-    uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type);
+    uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type, reason);
 #endif
 }
 

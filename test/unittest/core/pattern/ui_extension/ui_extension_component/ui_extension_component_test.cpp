@@ -1481,7 +1481,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest005, TestSize.Level
      * @tc.steps: step5. Test DispatchOriginAvoidArea
      */
     Rosen::AvoidArea avoidArea;
-    pattern->DispatchOriginAvoidArea(avoidArea, 1);
+    pattern->DispatchOriginAvoidArea(avoidArea, 1, WindowSizeChangeReason::UNDEFINED);
     pattern->OnColorConfigurationUpdate();
     pattern->OnLanguageConfigurationUpdate();
 #endif
