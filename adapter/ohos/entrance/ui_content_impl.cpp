@@ -598,7 +598,8 @@ std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> ParseAvoidAreasToMap(
 }
 
 void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
-    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    OHOS::Rosen::WindowSizeChangeReason reason = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED)
 {
     if (avoidAreas.empty()) {
         return;
@@ -606,7 +607,8 @@ void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
     CHECK_NULL_VOID(context);
     // for ui extension component
     for (auto& avoidArea : avoidAreas) {
-        context->UpdateOriginAvoidArea(avoidArea.second, static_cast<uint32_t>(avoidArea.first));
+        context->UpdateOriginAvoidArea(avoidArea.second, static_cast<uint32_t>(avoidArea.first),
+            static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
     }
 }
 
@@ -631,13 +633,14 @@ void AvoidAreasUpdateOnDynamicComponent(const RefPtr<NG::PipelineContext>& conte
 }
 
 std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
-    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    OHOS::Rosen::WindowSizeChangeReason reason)
 {
     CHECK_NULL_RETURN(pipelineContext, {});
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_RETURN(context, {});
     auto safeAreaMap = ParseAvoidAreasToMap(avoidAreas);
-    AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+    AvoidAreasUpdateOnUIExtension(context, avoidAreas, reason);
     return safeAreaMap;
 }
 
@@ -4255,7 +4258,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                     taskId, weak = WeakPtr(viewportConfigMgr_), beforeConfig = config]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
-        auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas);
+        auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas, reason);
         if (pipelineContext) {
             if (reason != OHOS::Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE) {
                 pipelineContext->SetDisplayWindowRectInfo(

@@ -137,7 +137,8 @@ public:
     virtual void NotifyDisplayArea(const RectF& displayArea) = 0;
     virtual void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
-    virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
+    virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason) const = 0;
     virtual bool NotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout = false) = 0;
     virtual void SetDensityDpiImpl(bool densityDpi) {}

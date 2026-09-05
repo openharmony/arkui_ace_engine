@@ -102,7 +102,8 @@ public:
     int32_t GetUiExtensionId() override;
     void DispatchDisplayArea(bool isForce = false);
     void RegisterVisibleAreaChange();
-    void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason);
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void FireOnErrorCallback(
         int32_t code, const std::string& name, const std::string& message) override;

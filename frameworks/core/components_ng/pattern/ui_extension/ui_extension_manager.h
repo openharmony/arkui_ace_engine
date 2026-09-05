@@ -121,7 +121,8 @@ public:
      * @param avoidArea The original avoid area
      * @param type The original aovid areatype
      */
-    void TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    void TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason);
 
     bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
 

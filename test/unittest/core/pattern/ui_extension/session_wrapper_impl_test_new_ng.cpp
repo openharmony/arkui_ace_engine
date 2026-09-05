@@ -77,6 +77,13 @@ namespace {
         "ohos.ace.uiextension.allowCrossProcessNesting";
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class SessionWrapperImplNewTestNg : public testing::Test {
 public:
     void SetUp() override;

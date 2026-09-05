@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_safe_info.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "frameworks/core/common/window_animation_config.h"
@@ -45,6 +46,13 @@ namespace {
     const std::string TAG = "Test node tag";
     int32_t platformId = 1;
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class UIExtensionManagerNg : public testing::Test {
 public:
@@ -530,7 +538,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager008, TestSize.Level1)
      */
     Rosen::AvoidArea avoidArea;
     uint32_t type = 1;
-    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type);
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::UNDEFINED);
 
     /**
      * @tc.steps: step5. test NotifyOccupiedAreaChangeInfo.
@@ -682,7 +690,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager012, TestSize.Level1)
     EXPECT_FALSE(uiExtensionManager->IsShowPlaceholder(1));
     Rosen::AvoidArea avoidArea;
     uint32_t type = 1;
-    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type);
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::UNDEFINED);
     std::shared_ptr<Rosen::RSTransaction> rsTransaction;
     uiExtensionManager->NotifySizeChangeReason(WindowSizeChangeReason::RESIZE, rsTransaction);
     auto info = sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
@@ -834,6 +842,271 @@ HWTEST_F(UIExtensionManagerNg, TestUpdateWMSUIExtPropertyByPersistentId, TestSiz
     RSSubsystemId subSystemId = RSSubsystemId::WM_UIEXT;
     uiExtensionManager->UpdateWMSUIExtPropertyByPersistentId(code, data, persistentIds, subSystemId);
     EXPECT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionSafeInfoTest001
+ * @tc.desc: Test UIExtensionSafeInfo SetAvoidArea/GetAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, UIExtensionSafeInfoTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto safeManager = AceType::MakeRefPtr<UIExtensionSafeInfo>();
+    ASSERT_NE(safeManager, nullptr);
+
+    Rosen::AvoidArea avoidArea;
+    avoidArea.topRect_ = { 0, 0, 1080, 100 };
+    avoidArea.bottomRect_ = { 0, 1800, 1080, 120 };
+    Rosen::AvoidAreaType type = Rosen::AvoidAreaType::TYPE_SYSTEM;
+    safeManager->SetAvoidArea(avoidArea, type);
+
+    auto result = safeManager->GetAvoidArea();
+    ASSERT_EQ(result.size(), 1);
+    ASSERT_EQ(result.count(type), 1);
+    auto& stored = result.at(type);
+    EXPECT_EQ(stored.topRect_.posX_, 0);
+    EXPECT_EQ(stored.topRect_.posY_, 0);
+    EXPECT_EQ(stored.topRect_.width_, 1080);
+    EXPECT_EQ(stored.topRect_.height_, 100);
+    EXPECT_EQ(stored.bottomRect_.posX_, 0);
+    EXPECT_EQ(stored.bottomRect_.posY_, 1800);
+    EXPECT_EQ(stored.bottomRect_.width_, 1080);
+    EXPECT_EQ(stored.bottomRect_.height_, 120);
+
+    Rosen::AvoidAreaType type2 = Rosen::AvoidAreaType::TYPE_CUTOUT;
+    safeManager->SetAvoidArea(avoidArea, type2);
+    result = safeManager->GetAvoidArea();
+    ASSERT_EQ(result.size(), 2);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionSafeInfoTest002
+ * @tc.desc: Test UIExtensionSafeInfo GetAvoidArea when empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, UIExtensionSafeInfoTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto safeManager = AceType::MakeRefPtr<UIExtensionSafeInfo>();
+    ASSERT_NE(safeManager, nullptr);
+
+    auto result = safeManager->GetAvoidArea();
+    EXPECT_EQ(result.size(), 0);
+#endif
+}
+
+/**
+ * @tc.name: TransferOriginAvoidAreaTest001
+ * @tc.desc: Test TransferOriginAvoidArea with ROTATION reason
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, TransferOriginAvoidAreaTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+
+    Rosen::AvoidArea avoidArea;
+    avoidArea.topRect_ = { 0, 0, 1080, 100 };
+    uint32_t type = static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM);
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 0);
+#endif
+}
+
+/**
+ * @tc.name: TransferOriginAvoidAreaTest002
+ * @tc.desc: Test TransferOriginAvoidArea with SNAPSHOT_ROTATION reason
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, TransferOriginAvoidAreaTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+
+    Rosen::AvoidArea avoidArea;
+    avoidArea.bottomRect_ = { 0, 1800, 1080, 120 };
+    uint32_t type = static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::SNAPSHOT_ROTATION);
+    EXPECT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+    EXPECT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 0);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
+#endif
+}
+
+/**
+ * @tc.name: TransferOriginAvoidAreaTest003
+ * @tc.desc: Test TransferOriginAvoidArea with UNDEFINED reason (non-rotation path)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, TransferOriginAvoidAreaTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+
+    Rosen::AvoidArea avoidArea;
+    avoidArea.topRect_ = { 0, 0, 1080, 50 };
+    uint32_t type = static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM);
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::UNDEFINED);
+    EXPECT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 0);
+#endif
+}
+
+/**
+ * @tc.name: NotifyOriginAvoidAreaTest001
+ * @tc.desc: Test SessionWrapperImpl NotifyOriginAvoidArea stores avoidArea and returns early on ROTATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, NotifyOriginAvoidAreaTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ValidSession(pattern);
+
+    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    ASSERT_NE(sessionWrapper, nullptr);
+    ASSERT_NE(sessionWrapper->session_, nullptr);
+    ASSERT_NE(sessionWrapper->uiExtensionSafeInfo_, nullptr);
+
+    Rosen::AvoidArea avoidArea;
+    avoidArea.topRect_ = { 0, 0, 1080, 100 };
+    uint32_t type = static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM);
+    sessionWrapper->NotifyOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::ROTATION);
+
+    auto storedAvoidAreas = sessionWrapper->uiExtensionSafeInfo_->GetAvoidArea();
+    ASSERT_EQ(storedAvoidAreas.size(), 1);
+    ASSERT_EQ(storedAvoidAreas.count(Rosen::AvoidAreaType::TYPE_SYSTEM), 1);
+    auto& stored = storedAvoidAreas.at(Rosen::AvoidAreaType::TYPE_SYSTEM);
+    EXPECT_EQ(stored.topRect_.width_, 1080);
+    EXPECT_EQ(stored.topRect_.height_, 100);
+#endif
+}
+
+/**
+ * @tc.name: NotifyOriginAvoidAreaTest002
+ * @tc.desc: Test SessionWrapperImpl NotifyOriginAvoidArea stores avoidArea and returns early on SNAPSHOT_ROTATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, NotifyOriginAvoidAreaTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ValidSession(pattern);
+
+    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    ASSERT_NE(sessionWrapper, nullptr);
+    ASSERT_NE(sessionWrapper->uiExtensionSafeInfo_, nullptr);
+
+    Rosen::AvoidArea avoidArea;
+    avoidArea.bottomRect_ = { 0, 1800, 1080, 120 };
+    uint32_t type = static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    sessionWrapper->NotifyOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::SNAPSHOT_ROTATION);
+
+    auto storedAvoidAreas = sessionWrapper->uiExtensionSafeInfo_->GetAvoidArea();
+    ASSERT_EQ(storedAvoidAreas.size(), 1);
+    ASSERT_EQ(storedAvoidAreas.count(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR), 1);
+    auto& stored = storedAvoidAreas.at(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    EXPECT_EQ(stored.bottomRect_.width_, 1080);
+    EXPECT_EQ(stored.bottomRect_.height_, 120);
+#endif
+}
+
+/**
+ * @tc.name: NotifyOriginAvoidAreaTest003
+ * @tc.desc: Test SessionWrapperImpl NotifyOriginAvoidArea with non-rotation reason stores avoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, NotifyOriginAvoidAreaTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ValidSession(pattern);
+
+    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    ASSERT_NE(sessionWrapper, nullptr);
+    ASSERT_NE(sessionWrapper->uiExtensionSafeInfo_, nullptr);
+
+    Rosen::AvoidArea avoidArea;
+    avoidArea.topRect_ = { 0, 0, 720, 80 };
+    avoidArea.leftRect_ = { 0, 0, 50, 1920 };
+    uint32_t type = static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_CUTOUT);
+    sessionWrapper->NotifyOriginAvoidArea(avoidArea, type, WindowSizeChangeReason::UNDEFINED);
+
+    auto storedAvoidAreas = sessionWrapper->uiExtensionSafeInfo_->GetAvoidArea();
+    ASSERT_EQ(storedAvoidAreas.size(), 1);
+    ASSERT_EQ(storedAvoidAreas.count(Rosen::AvoidAreaType::TYPE_CUTOUT), 1);
+    auto& stored = storedAvoidAreas.at(Rosen::AvoidAreaType::TYPE_CUTOUT);
+    EXPECT_EQ(stored.topRect_.width_, 720);
+    EXPECT_EQ(stored.topRect_.height_, 80);
+    EXPECT_EQ(stored.leftRect_.width_, 50);
+    EXPECT_EQ(stored.leftRect_.height_, 1920);
 #endif
 }
 }

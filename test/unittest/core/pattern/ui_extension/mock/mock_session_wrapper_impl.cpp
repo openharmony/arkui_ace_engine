@@ -49,6 +49,7 @@ SessionWrapperImpl::SessionWrapperImpl(const WeakPtr<UIExtensionPattern>& hostPa
     auto pattern = hostPattern.Upgrade();
     uiExtensionId_ = pattern ? pattern->GetUiExtensionId() : 0;
     taskExecutor_ = Container::CurrentTaskExecutor();
+    uiExtensionSafeInfo_ = AceType::MakeRefPtr<UIExtensionSafeInfo>();
     Rosen::SessionInfo sessionInfo = {
         .bundleName_ = "123",
         .abilityName_ = "123",
@@ -246,8 +247,12 @@ void SessionWrapperImpl::NotifySizeChangeReason(
 {
 }
 
-void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
+void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason) const
 {
+    if (uiExtensionSafeInfo_) {
+        uiExtensionSafeInfo_->SetAvoidArea(avoidArea, static_cast<Rosen::AvoidAreaType>(type));
+    }
 }
 
 bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
