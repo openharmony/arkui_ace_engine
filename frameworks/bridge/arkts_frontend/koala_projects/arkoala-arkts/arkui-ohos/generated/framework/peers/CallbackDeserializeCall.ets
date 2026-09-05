@@ -42,7 +42,7 @@ import { NavDestinationContext_serializer, NavDestinationTransition_serializer, 
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, InterceptionCallback, NavPathInfo_serializer, NavPathStack_serializer, InterceptionModeCallback, InterceptionShowCallback, NavContentInfo_serializer, UpdateTransitionCallback, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, NavPathInfo, NavBar, NavPathStack, NavigationOperation, NavContentInfo } from './../../component/navigation'
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnDidZoomCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, OnScrollFrameBeginHandlerResult, OffsetResult } from './../../component/scroll'
 import { DrawingRenderingContext_serializer, DrawingRenderingContext } from './../../component/canvas'
-import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, OnTabsAnimationEndCallback, TabsAnimationEvent_serializer, OnTabsAnimationStartCallback, OnTabsContentDidScrollCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback, TabContentAnimatedTransition, TabContentTransitionProxy, TabsAnimationEvent } from './../../component/tabs'
+import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, OnTabsAnimationEndCallback, TabsAnimationEvent_serializer, OnTabsAnimationStartCallback, OnTabsContentDidScrollCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback, TabsSidebarSearchFilterCallback, TabContentAnimatedTransition, TabBarDisplayMode, TabContentTransitionProxy, TabsAnimationEvent } from './../../component/tabs'
 import { TextPickerResult_serializer, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, TextPickerResult } from './../../component/textPicker'
 import { TimePickerResult_serializer, OnTimePickerChangeCallback, TimePickerResult } from './../../component/timePicker'
 import { UIExtensionProxy_serializer, UIExtensionProxy } from './../../component/uiExtensionComponent'
@@ -1953,6 +1953,12 @@ export function deserializeAndCallCallback_SwiperContentTransitionProxy_Void(thi
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<SwiperContentTransitionProxy, void>)
     let data: SwiperContentTransitionProxy = (SwiperContentTransitionProxy_serializer.read(thisDeserializer) as SwiperContentTransitionProxy)
+    call(data)
+}
+export function deserializeAndCallCallback_TabBarDisplayMode_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<TabBarDisplayMode, void>)
+    let data: TabBarDisplayMode = TabBarDisplayMode.fromValue(thisDeserializer.readInt32())
     call(data)
 }
 export function deserializeAndCallCallback_TabContentTransitionProxy_Void(thisDeserializer: DeserializerBase): void {
@@ -4113,6 +4119,29 @@ export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeseri
     const callResult = call(from, to)
     continuationResult(callResult)
 }
+export function deserializeAndCallTabsSidebarSearchFilterCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as TabsSidebarSearchFilterCallback)
+    let tabIndex: int32 = thisDeserializer.readInt32()
+    let text: string = (thisDeserializer.readString() as string)
+    const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
+    const continuationBufferClosure = (isSelected: boolean):void => {
+        const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeBoolean(isSelected);
+        InteropNativeModule._CallCallbackSync(10, -2127714345, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult: ((isSelected: boolean) => void) = continuationBufferClosure
+    const callResult = call(tabIndex, text)
+    continuationResult(callResult)
+}
 export function deserializeAndCallTextAreaSubmitCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as TextAreaSubmitCallback)
@@ -4662,6 +4691,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_STYLEDSTRINGCHANGEVALUE_BOOLEAN: return deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_SWIPEACTIONSTATE_VOID: return deserializeAndCallCallback_SwipeActionState_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_SWIPERCONTENTTRANSITIONPROXY_VOID: return deserializeAndCallCallback_SwiperContentTransitionProxy_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_TABBARDISPLAYMODE_VOID: return deserializeAndCallCallback_TabBarDisplayMode_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TABCONTENTTRANSITIONPROXY_VOID: return deserializeAndCallCallback_TabContentTransitionProxy_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TERMINATIONINFO: return deserializeAndCallCallback_TerminationInfo(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TEXTPICKERRESULT_VOID: return deserializeAndCallCallback_TextPickerResult_Void(thisDeserializer);
@@ -4835,6 +4865,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_SYNTHETIC_CALLBACK_TIMEPICKERRESULT_VOID: return deserializeAndCallsynthetic_Callback_TimePickerResult_Void(thisDeserializer);
         case CallbackKind.KIND_SYNTHETIC_CALLBACK_VOID: return deserializeAndCallsynthetic_Callback_Void(thisDeserializer);
         case CallbackKind.KIND_TABSCUSTOMCONTENTTRANSITIONCALLBACK: return deserializeAndCallTabsCustomContentTransitionCallback(thisDeserializer);
+        case CallbackKind.KIND_TABSSIDEBARSEARCHFILTERCALLBACK: return deserializeAndCallTabsSidebarSearchFilterCallback(thisDeserializer);
         case CallbackKind.KIND_TEXTAREASUBMITCALLBACK: return deserializeAndCallTextAreaSubmitCallback(thisDeserializer);
         case CallbackKind.KIND_TEXTCLOCKMODIFIERBUILDER: return deserializeAndCallTextClockModifierBuilder(thisDeserializer);
         case CallbackKind.KIND_TEXTFIELDVALUECALLBACK: return deserializeAndCallTextFieldValueCallback(thisDeserializer);

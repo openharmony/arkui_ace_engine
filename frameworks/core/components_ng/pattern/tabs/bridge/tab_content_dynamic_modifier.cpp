@@ -308,10 +308,10 @@ void ResetTabContentOnWillHideImpl(ArkUINodeHandle node)
     tabContentModelImpl->SetOnWillHide(nullptr);
 }
 
-void SetDefaultVisibilityImpl(
+void SetTabBarVisibilityImpl(
     ArkUINodeHandle node, ArkUI_Int32 visibility, ArkUI_Int32 displayMode, ArkUI_Bool hasDisplayMode) {}
 
-void ResetDefaultVisibilityImpl(ArkUINodeHandle node) {}
+void ResetTabBarVisibilityImpl(ArkUINodeHandle node) {}
 #endif
 } // namespace
 
@@ -606,7 +606,7 @@ void ResetTabContentOnWillHide(ArkUINodeHandle node)
     TabContentModelNG::SetOnWillHide(frameNode, nullptr);
 }
 
-void SetDefaultVisibility(
+void SetTabBarVisibility(
     ArkUINodeHandle node, ArkUI_Int32 visibility, ArkUI_Int32 displayMode, ArkUI_Bool hasDisplayMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -620,7 +620,7 @@ void SetDefaultVisibility(
     TabContentModelNG::SetDefaultVisibility(frameNode, defaultVisibility);
 }
 
-void ResetDefaultVisibility(ArkUINodeHandle node)
+void ResetTabBarVisibility(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -667,8 +667,8 @@ const ArkUITabContentModifier* GetTabContentDynamicModifier()
             .setIconSelectedColorByUser = SetIconSelectedColorByUser,
             .setId = SetId,
             .setTabBar = SetTabBar,
-            .setDefaultVisibility = SetDefaultVisibility,
-            .resetDefaultVisibility = ResetDefaultVisibility,
+            .setTabBarVisibility = SetTabBarVisibility,
+            .resetTabBarVisibility = ResetTabBarVisibility,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -707,8 +707,8 @@ const ArkUITabContentModifier* GetTabContentDynamicModifier()
         .setIconSelectedColorByUser = SetIconSelectedColorByUserImpl,
         .setId = SetIdImpl,
         .setTabBar = SetTabBarImpl,
-        .setDefaultVisibility = SetDefaultVisibilityImpl,
-        .resetDefaultVisibility = ResetDefaultVisibilityImpl,
+        .setTabBarVisibility = SetTabBarVisibilityImpl,
+        .resetTabBarVisibility = ResetTabBarVisibilityImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

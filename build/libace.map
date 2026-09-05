@@ -1250,6 +1250,7 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_ShadowOptions&, OHOS::Ace::Shadow const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_SliderChangeMode&, OHOS::Ace::SliderModel::SliderChangeMode const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_StrokeJoinStyle&, OHOS::Ace::StrokeJoinStyle const&)";
+      "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TabBarDisplayMode&, OHOS::Ace::NG::TabBarDisplayMode const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextBackgroundStyle&, OHOS::Ace::TextBackgroundStyle const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextChangeOptions&, OHOS::Ace::ChangeValueInfo const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextChangeReason&, OHOS::Ace::TextChangeReason const&)";
@@ -4035,6 +4036,7 @@
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::RefPtr<OHOS::Ace::Curve>, InteropString>(std::__h::optional<OHOS::Ace::RefPtr<OHOS::Ace::Curve> >&, InteropString const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::RefPtr<OHOS::Ace::Curve>, InteropString>(std::__h::optional<OHOS::Ace::RefPtr<OHOS::Ace::Curve>>&, InteropString const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TabBarMode, Ark_BarMode>(std::__h::optional<OHOS::Ace::TabBarMode>&, Ark_BarMode const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::NG::TabBarDisplayMode, Ark_TabBarDisplayMode>(std::__h::optional<OHOS::Ace::NG::TabBarDisplayMode>&, Ark_TabBarDisplayMode const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TabAnimateMode, Ark_AnimationMode>(std::__h::optional<OHOS::Ace::TabAnimateMode>&, Ark_AnimationMode const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<int, Ark_PageFlipMode>(std::__h::optional<int>&, Ark_PageFlipMode const&)";
       "OHOS::Ace::NG::FrameNodeBridge::CreateEventTargetObject(panda::ecmascript::EcmaVM*, OHOS::Ace::BaseEventInfo const&)";

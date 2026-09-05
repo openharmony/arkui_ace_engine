@@ -123,6 +123,7 @@ enum class SuperscriptStyle;
 enum class SwipeActionState : uint32_t;
 enum class TabAnimateMode;
 enum class TabBarMode;
+enum class TabBarDisplayMode;
 enum class TextAlign;
 enum class TextDecoration;
 enum class TextDecorationStyle;
@@ -321,6 +322,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
     void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_TabBarDisplayMode& dst, const TabBarDisplayMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
