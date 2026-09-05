@@ -120,6 +120,36 @@ void TabsLayoutAlgorithm::UpdateTabBarAndDividerVisibility(LayoutWrapper* layout
     tabBarPattern->ApplyDefaultVisibility();
 }
 
+void TabsLayoutAlgorithm::UpdateEffectNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(host);
+    if (!host->HasEffectNode()) {
+        return;
+    }
+    auto effectNode = AceType::DynamicCast<FrameNode>(host->GetEffectNode());
+    CHECK_NULL_VOID(effectNode);
+    auto property = effectNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+}
+
+void TabsLayoutAlgorithm::UpdateBgMaskNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(host);
+    if (!host->HasBackgroundMaskNode()) {
+        return;
+    }
+    auto bgMaskNode = AceType::DynamicCast<FrameNode>(host->GetBackgroundMask());
+    CHECK_NULL_VOID(bgMaskNode);
+    auto property = bgMaskNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+}
+
 float TabsLayoutAlgorithm::MeasureSideBar(
     LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize)
 {
@@ -284,6 +314,8 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (displayModeChanged) {
         UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::SIDEBAR);
         UpdateTabBarAndDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+        UpdateEffectNodeVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+        UpdateBgMaskNodeVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
         auto context = tabsNode->GetContext();
         CHECK_NULL_VOID(context);
         context->AddAfterLayoutTask([weakTabsPattern = WeakPtr<TabsPattern>(tabsPattern), curDisplayMode]() {

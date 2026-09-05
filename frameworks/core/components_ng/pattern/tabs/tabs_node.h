@@ -81,6 +81,11 @@ public:
         return indicatorId_.has_value();
     }
 
+    bool HasEffectNode() const
+    {
+        return effectId_.has_value();
+    }
+
     bool HasTabBarChildNodes() const
     {
         return tabBarChildNodesInitialized_;
