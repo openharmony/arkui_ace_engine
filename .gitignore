@@ -2,6 +2,7 @@
 .vscode/
 *.iml
 .idea/
+.teamai/
 adapter/*
 !adapter/ohos/
 !adapter/preview/
