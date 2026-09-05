@@ -1320,7 +1320,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetAttr001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     auto weakTab = AceType::WeakClaim(AceType::RawPtr(swiperNode_));
-    auto elmtId = GetElmtId();
+    auto elmtId = ElementRegister::GetInstance()->MakeUniqueId();
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
     TabContentModelNG tabContentModel1;
     auto frameNode = tabContentModel1.CreateFrameNode(elmtId);
