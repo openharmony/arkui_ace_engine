@@ -1341,13 +1341,8 @@ void FormManagerDelegate::OnInsightIntentActionEvent(const std::string& action)
         TAG_LOGE(AceLogTag::ACE_FORM, "insightIntent action parse failed, detail action:%{public}s", action.c_str());
         return;
     }
-    // insightIntent 仅开放给系统应用的卡片提供方。
-    const auto providerBundleName = wantCache_.GetElement().GetBundleName();
-    if (!OHOS::AppExecFwk::FormMgr::GetInstance().IsSystemAppForm(providerBundleName)) {
-        TAG_LOGW(AceLogTag::ACE_FORM,
-            "insightIntent rejected: provider %{public}s is not system app", providerBundleName.c_str());
-        return;
-    }
+    // 提供方系统应用校验统一在 FMS 侧 FormEventAdapter::InsightIntentEvent 完成
+    // （预置系统应用 + 系统签名应用），宿主侧不再重复拦截。
     CHECK_NULL_VOID(formUtils_);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);

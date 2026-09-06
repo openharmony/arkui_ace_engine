@@ -26,6 +26,7 @@
 #include "string_wrapper.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -162,18 +163,27 @@ int32_t FormUtilsImpl::BackgroundEvent(const int64_t formId, const std::string& 
 int32_t FormUtilsImpl::InsightIntentEvent(
     const int64_t formId, const std::string& action, const int32_t containerId)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "InsightIntentEvent enter, formId: %{public}" PRId64 ", containerId: %{public}d", formId, containerId);
     ContainerScope scope(containerId);
     auto container = Container::Current();
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
-    CHECK_NULL_RETURN(aceContainer, -1);
+    if (aceContainer == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent aceContainer is null");
+        return -1;
+    }
     // 权限校验已在宿主侧 OnInsightIntentActionEvent 完成，此处不重复。
     auto token = aceContainer->GetToken();
-    CHECK_NULL_RETURN(token, -1);
+    if (token == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent token is null");
+        return -1;
+    }
 
     auto eventAction = JsonUtil::ParseJsonString(action);
     auto intentNameJson = eventAction->GetValue("intentName");
     const auto intentName = intentNameJson->GetString();
     if (intentName.empty()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent intentName is empty");
         return -1;
     }
 
@@ -217,6 +227,10 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
         AAFwk::WantParamWrapper::Box(wantParams));
     want.SetParams(executeWantParams);
-    return AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
+    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent send IPC, intentName: %{public}s, executeMode: %{public}d",
+        intentName.c_str(), executeMode);
+    auto ret = AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
+    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent IPC result: %{public}d", ret);
+    return ret;
 }
 } // namespace OHOS::Ace
