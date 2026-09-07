@@ -34,11 +34,10 @@ namespace OHOS::Ace::NG {
 // samples the acquisition duration into the per-pipeline cost model afterwards. Observation
 // only: the item is still acquired synchronously with unchanged behavior.
 //
-// Usage at the component child-build call point:
-//   ScrollPlaceholderItemBuildScope buildScope(
-//       ScrollPlaceholderComponentType::LIST, layoutWrapper, index, isCache);
-//   auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
-//   buildScope.SetAcquiredWrapper(wrapper);
+// Call protocol at the component child-build call point: construct the scope before the
+// child acquisition with the component type, layout wrapper, item index and cache flag, then
+// after the acquisition report the acquired wrapper through SetAcquiredWrapper so an empty
+// lazy branch can close the observation without feeding a zero-cost sample.
 class ScrollPlaceholderItemBuildScope {
 public:
     ScrollPlaceholderItemBuildScope(ScrollPlaceholderComponentType componentType,
