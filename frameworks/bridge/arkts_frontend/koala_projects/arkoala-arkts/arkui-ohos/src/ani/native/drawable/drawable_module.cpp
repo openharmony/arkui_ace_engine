@@ -804,6 +804,31 @@ void DrawableSetBlendMode(
     modifier->setBlendMode(native, static_cast<int32_t>(mode));
 }
 
+void DrawableSetSVGResourceLimitLevel(
+    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_enum_item limit)
+{
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
+
+    auto* modifier = GetDrawableDescriptorModifier();
+    CHECK_NULL_VOID(modifier);
+
+    auto* native = reinterpret_cast<void*>(nativeObj);
+    CHECK_NULL_VOID(native);
+
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(limit, &isUndefined);
+    ani_int level = 0;
+    if (isUndefined) {
+        return;
+    }
+    if (ANI_OK != env->EnumItem_GetValue_Int(limit, &level)) {
+        return;
+    }
+
+    modifier->setSVGResourceLimitLevel(native, static_cast<int32_t>(level));
+}
+
 int32_t ConvertLengthToPx(ani_env* env, ani_ref value)
 {
     ani_boolean isUndefined = true;

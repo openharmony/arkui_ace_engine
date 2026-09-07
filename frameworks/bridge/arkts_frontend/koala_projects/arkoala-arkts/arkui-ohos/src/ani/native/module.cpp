@@ -863,6 +863,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "_Drawable_SetBlendMode", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetBlendMode)
         },
+        ani_native_function { "_Drawable_SetSVGResourceLimitLevel", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetSVGResourceLimitLevel)
+        },
         ani_native_function { "_Drawable_SetHdrComposition", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetHdrComposition)
         },
