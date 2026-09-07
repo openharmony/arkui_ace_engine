@@ -35,6 +35,13 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t ITEM_COUNT = 10;
 constexpr int32_t TEST_NODE_ID = 2;
+constexpr float FAR_FINGER_GLOBAL_X = WIDTH * 2.0f;
+constexpr int32_t SINGLE_FINGER = 1;
+constexpr int32_t TWO_FINGERS = 2;
+constexpr int32_t FIRST_ITEM_INDEX = 0;
+constexpr int32_t SECOND_ITEM_INDEX = 1;
+constexpr int32_t THIRD_ITEM_INDEX = 2;
+constexpr int32_t FOURTH_ITEM_INDEX = 3;
 
 std::vector<RefPtr<FrameNode>> GetFlatListItems(const RefPtr<FrameNode>& listNode)
 {
@@ -106,6 +113,76 @@ std::shared_ptr<PanGestureEvent> CreatePanGestureEvent(
     }
     event->SetFingerList(fingers);
     return event;
+}
+
+std::shared_ptr<PanGestureEvent> CreateFarPanGestureEvent()
+{
+    auto event = std::make_shared<PanGestureEvent>();
+    std::list<FingerInfo> fingers(TWO_FINGERS);
+    auto fingerIter = fingers.begin();
+    fingerIter->fingerId_ = 0;
+    fingerIter->globalLocation_ = Offset();
+    ++fingerIter;
+    fingerIter->fingerId_ = 1;
+    fingerIter->globalLocation_ = Offset(FAR_FINGER_GLOBAL_X, 0.0f);
+    event->SetFingerList(fingers);
+    return event;
+}
+
+void VerifyPanGestureNonEditModeBranches(const RefPtr<ListPattern>& pattern)
+{
+    auto panInfo = CreateGestureInfo(GestureTypeName::PAN_GESTURE, InputEventType::TOUCH_SCREEN);
+    pattern->enableEditMode_ = false;
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern->SetEditModeOptions(options);
+    EXPECT_EQ(pattern->JudgeSwipeSelectGesture(
+        panInfo, CreatePanGestureEvent(TWO_FINGERS, InputEventType::TOUCH_SCREEN)), GestureJudgeResult::REJECT);
+    EXPECT_EQ(pattern->JudgeSwipeSelectGesture(
+        panInfo, CreatePanGestureEvent(SINGLE_FINGER, InputEventType::TOUCH_SCREEN)), GestureJudgeResult::CONTINUE);
+
+    options.enableFingerMultiSelect = false;
+    pattern->SetEditModeOptions(options);
+    EXPECT_EQ(pattern->JudgeSwipeSelectGesture(
+        panInfo, CreatePanGestureEvent(TWO_FINGERS, InputEventType::TOUCH_SCREEN)), GestureJudgeResult::CONTINUE);
+}
+
+void CreateTouchGestureEventAt(GestureEvent& event, const PointF& point, InputEventType type)
+{
+    event.SetInputEventType(type);
+    event.SetLocalLocation(Offset(point.GetX(), point.GetY()));
+}
+
+void VerifyTwoFingerMidpointUpdate(const RefPtr<ListPattern>& pattern, GestureEvent& updateEvent,
+    const PointF& firstPoint, const PointF& thirdPoint,
+    const std::vector<RefPtr<ListItemPattern>>& itemPatterns)
+{
+    updateEvent.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    updateEvent.SetLocalLocation(Offset(firstPoint.GetX(), firstPoint.GetY()));
+    updateEvent.SetGlobalLocation(Offset(WIDTH / 2.0f, HEIGHT / 2.0f));
+    std::list<FingerInfo> fingers(TWO_FINGERS);
+    auto fingerIter = fingers.begin();
+    fingerIter->localLocation_ = Offset(thirdPoint.GetX() - 10.0f, thirdPoint.GetY());
+    fingerIter->globalLocation_ = fingerIter->localLocation_;
+    ++fingerIter;
+    fingerIter->localLocation_ = Offset(thirdPoint.GetX() + 10.0f, thirdPoint.GetY());
+    fingerIter->globalLocation_ = fingerIter->localLocation_;
+    updateEvent.SetFingerList(fingers);
+    pattern->HandleSwipeSelectUpdate(updateEvent);
+    EXPECT_TRUE(itemPatterns[FIRST_ITEM_INDEX]->IsSelected());
+    EXPECT_TRUE(itemPatterns[SECOND_ITEM_INDEX]->IsSelected());
+    EXPECT_TRUE(itemPatterns[THIRD_ITEM_INDEX]->IsSelected());
+    EXPECT_NEAR(pattern->lastSwipeSelectLocalX_, thirdPoint.GetX(), 0.001f);
+
+    pattern->UpdateSwipeSelection();
+    EXPECT_TRUE(itemPatterns[THIRD_ITEM_INDEX]->IsSelected());
+}
+
+void VerifyAllItemsDeselected(const std::vector<RefPtr<ListItemPattern>>& itemPatterns)
+{
+    for (const auto& itemPattern : itemPatterns) {
+        EXPECT_FALSE(itemPattern->IsSelected());
+    }
 }
 } // namespace
 
@@ -2056,6 +2133,289 @@ HWTEST_F(ListGeneratedTestNg, ListSwipeSelectMarkGroupItem001, TestSize.Level1)
     EXPECT_TRUE(listItems[0]->GetPattern<ListItemPattern>()->IsSelected());
     EXPECT_FALSE(listItems[1]->GetPattern<ListItemPattern>()->IsSelected());
     EXPECT_FALSE(listItems[2]->GetPattern<ListItemPattern>()->IsSelected());
+}
+
+/**
+ * @tc.name: ListSwipeSelectGestureJudgeBranches001
+ * @tc.desc: Test uncovered swipe-select gesture judge branches in and out of edit mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectGestureJudgeBranches001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    model.SetLanes(1);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->JudgeSwipeSelectGesture(nullptr, nullptr), GestureJudgeResult::CONTINUE);
+
+    auto mouseInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::MOUSE_BUTTON);
+    EXPECT_TRUE(pattern_->isMouseEventInit_);
+    EXPECT_EQ(pattern_->JudgeSwipeSelectGesture(mouseInfo, nullptr), GestureJudgeResult::CONTINUE);
+
+    VerifyPanGestureNonEditModeBranches(pattern_);
+
+    auto boxInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto farEvent = CreateFarPanGestureEvent();
+    EXPECT_EQ(pattern_->JudgeSwipeSelectGesture(boxInfo, farEvent), GestureJudgeResult::REJECT);
+
+    pattern_->enableEditMode_ = true;
+    const Offset hotZonePoint(WIDTH - 1.0f, ITEM_MAIN_SIZE / 2.0f);
+    const Offset normalPoint(WIDTH / 2.0f, ITEM_MAIN_SIZE / 2.0f);
+    EXPECT_EQ(pattern_->JudgeSwipeSelectGesture(
+        boxInfo, CreatePanGestureEvent(SINGLE_FINGER, InputEventType::TOUCH_SCREEN, hotZonePoint)),
+        GestureJudgeResult::CONTINUE);
+    EXPECT_EQ(pattern_->JudgeSwipeSelectGesture(
+        boxInfo, CreatePanGestureEvent(SINGLE_FINGER, InputEventType::TOUCH_SCREEN, normalPoint)),
+        GestureJudgeResult::REJECT);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLanes(2);
+    EXPECT_FALSE(pattern_->NeedJudgeWithHotZone());
+    EXPECT_EQ(pattern_->JudgeSwipeSelectGesture(
+        boxInfo, CreatePanGestureEvent(SINGLE_FINGER, InputEventType::TOUCH_SCREEN, normalPoint)),
+        GestureJudgeResult::CONTINUE);
+
+    auto swipeInfo = CreateGestureInfo(GestureTypeName::SWIPE_GESTURE, InputEventType::TOUCH_SCREEN);
+    EXPECT_EQ(pattern_->JudgeSwipeSelectGesture(swipeInfo, nullptr), GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: ListSwipeSelectEditModeAndEventLifecycle001
+ * @tc.desc: Test entering edit mode and restoring the mouse gesture judge when swipe select is unregistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectEditModeAndEventLifecycle001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    int32_t callbackCount = 0;
+    pattern_->SetEnableEditModeChangeEvent([&callbackCount](bool enable) {
+        if (enable) {
+            ++callbackCount;
+        }
+    });
+    pattern_->enableEditMode_ = false;
+    pattern_->TryEnterEditModeForSwipeSelect();
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_TRUE(pattern_->editModeChanged_);
+    EXPECT_EQ(callbackCount, 1);
+
+    pattern_->TryEnterEditModeForSwipeSelect();
+    EXPECT_EQ(callbackCount, 1);
+
+    pattern_->InitSwipeSelectEvent();
+    ASSERT_NE(pattern_->swipeSelectPanEvent_, nullptr);
+    pattern_->UninitSwipeSelectEvent();
+    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+    auto boxTouchInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto boxMouseInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::MOUSE_BUTTON);
+    EXPECT_EQ(callback(boxTouchInfo, nullptr), GestureJudgeResult::REJECT);
+    EXPECT_EQ(callback(boxMouseInfo, nullptr), GestureJudgeResult::CONTINUE);
+
+    pattern_->isMouseEventInit_ = false;
+    pattern_->InitSwipeSelectEvent();
+    pattern_->UninitSwipeSelectEvent();
+    EXPECT_EQ(GetGestureJudgeCallback(pattern_), nullptr);
+}
+
+/**
+ * @tc.name: ListSwipeSelectStartEndCancel001
+ * @tc.desc: Test start, deselect, cancel, end, invalid hit and mouse-input branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectStartEndCancel001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_FALSE(listItems.empty());
+    auto itemPattern = listItems[FIRST_ITEM_INDEX]->GetPattern<ListItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemPoint = ConvertItemCenterToListLocal(frameNode_, listItems[FIRST_ITEM_INDEX]);
+
+    GestureEvent event;
+    event.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    event.SetLocalLocation(Offset(itemPoint.GetX(), itemPoint.GetY()));
+    pattern_->HandleSwipeSelectStart(event);
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
+
+    event.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    itemPattern->SetSelectable(false);
+    event.SetLocalLocation(Offset(itemPoint.GetX(), itemPoint.GetY()));
+    pattern_->HandleSwipeSelectStart(event);
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
+
+    itemPattern->SetSelectable(true);
+    event.SetLocalLocation(Offset(itemPoint.GetX(), itemPoint.GetY()));
+    pattern_->HandleSwipeSelectStart(event);
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::SELECTING);
+    EXPECT_TRUE(itemPattern->IsSelected());
+
+    pattern_->lastSwipeSelectLocalX_ = itemPoint.GetX();
+    pattern_->HandleSwipeSelectCancel();
+    EXPECT_FALSE(itemPattern->IsSelected());
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
+    EXPECT_FALSE(pattern_->swipeStartStateKey_.IsValid());
+    EXPECT_TRUE(pattern_->swipeOriginalStates_.empty());
+    EXPECT_EQ(pattern_->lastSwipeSelectLocalX_, -1.0f);
+
+    itemPattern->MarkIsSelected(true);
+    pattern_->HandleSwipeSelectStart(event);
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::DESELECTING);
+    EXPECT_FALSE(itemPattern->IsSelected());
+    pattern_->HandleSwipeSelectEnd();
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
+    EXPECT_FALSE(pattern_->swipeCurrentStateKey_.IsValid());
+}
+
+/**
+ * @tc.name: ListSwipeSelectTwoFingerUpdateDelta001
+ * @tc.desc: Test two-finger midpoint, range expansion, range reduction and original-state restoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectTwoFingerUpdateDelta001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_GE(static_cast<int32_t>(listItems.size()), 4);
+    std::vector<RefPtr<ListItemPattern>> itemPatterns;
+    for (int32_t index = 0; index < 4; ++index) {
+        itemPatterns.emplace_back(listItems[index]->GetPattern<ListItemPattern>());
+        ASSERT_NE(itemPatterns.back(), nullptr);
+    }
+    auto firstPoint = ConvertItemCenterToListLocal(frameNode_, listItems[FIRST_ITEM_INDEX]);
+    auto secondPoint = ConvertItemCenterToListLocal(frameNode_, listItems[SECOND_ITEM_INDEX]);
+    auto thirdPoint = ConvertItemCenterToListLocal(frameNode_, listItems[THIRD_ITEM_INDEX]);
+    auto fourthPoint = ConvertItemCenterToListLocal(frameNode_, listItems[FOURTH_ITEM_INDEX]);
+
+    GestureEvent startEvent;
+    CreateTouchGestureEventAt(startEvent, firstPoint, InputEventType::TOUCH_SCREEN);
+    pattern_->HandleSwipeSelectStart(startEvent);
+    ASSERT_TRUE(itemPatterns[FIRST_ITEM_INDEX]->IsSelected());
+
+    GestureEvent updateEvent;
+    VerifyTwoFingerMidpointUpdate(pattern_, updateEvent, firstPoint, thirdPoint, itemPatterns);
+
+    updateEvent.SetFingerList({});
+    updateEvent.SetLocalLocation(Offset(secondPoint.GetX(), secondPoint.GetY()));
+    updateEvent.SetGlobalLocation(Offset(WIDTH / 2.0f, HEIGHT / 2.0f));
+    pattern_->HandleSwipeSelectUpdate(updateEvent);
+    EXPECT_TRUE(itemPatterns[FIRST_ITEM_INDEX]->IsSelected());
+    EXPECT_TRUE(itemPatterns[SECOND_ITEM_INDEX]->IsSelected());
+    EXPECT_FALSE(itemPatterns[THIRD_ITEM_INDEX]->IsSelected());
+
+    updateEvent.SetLocalLocation(Offset(fourthPoint.GetX(), fourthPoint.GetY()));
+    pattern_->HandleSwipeSelectUpdate(updateEvent);
+    EXPECT_TRUE(itemPatterns[THIRD_ITEM_INDEX]->IsSelected());
+    EXPECT_TRUE(itemPatterns[FOURTH_ITEM_INDEX]->IsSelected());
+
+    updateEvent.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    updateEvent.SetLocalLocation(Offset(firstPoint.GetX(), firstPoint.GetY()));
+    pattern_->HandleSwipeSelectUpdate(updateEvent);
+    EXPECT_TRUE(itemPatterns[FOURTH_ITEM_INDEX]->IsSelected());
+
+    pattern_->HandleSwipeSelectCancel();
+    VerifyAllItemsDeselected(itemPatterns);
+}
+
+/**
+ * @tc.name: ListSwipeSelectBuildStateKeyRange001
+ * @tc.desc: Test invalid and reversed state-key ranges for plain and grouped list items
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectBuildStateKeyRange001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    using StateKey = SelectableContainerPattern::SwipeSelectStateKey;
+    std::vector<StateKey> keys;
+    pattern_->BuildSwipeSelectStateKeysInRange(StateKey {}, StateKey { 2, -1 }, keys);
+    EXPECT_TRUE(keys.empty());
+
+    pattern_->BuildSwipeSelectStateKeysInRange(StateKey { 2, -1 }, StateKey { 0, -1 }, keys);
+    ASSERT_EQ(keys.size(), 3);
+    EXPECT_EQ(keys[0], (StateKey { 0, -1 }));
+    EXPECT_EQ(keys[1], (StateKey { 1, -1 }));
+    EXPECT_EQ(keys[2], (StateKey { 2, -1 }));
+}
+
+/**
+ * @tc.name: ListSwipeSelectBuildGroupStateKeyRange001
+ * @tc.desc: Test a reversed state-key range for items inside ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectBuildGroupStateKeyRange001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone();
+
+    using StateKey = SelectableContainerPattern::SwipeSelectStateKey;
+    std::vector<StateKey> keys;
+    pattern_->BuildSwipeSelectStateKeysInRange(StateKey { 0, 2 }, StateKey { 0, 0 }, keys);
+    ASSERT_EQ(keys.size(), 3);
+    EXPECT_EQ(keys[0], (StateKey { 0, 0 }));
+    EXPECT_EQ(keys[1], (StateKey { 0, 1 }));
+    EXPECT_EQ(keys[2], (StateKey { 0, 2 }));
+}
+
+/**
+ * @tc.name: ListSwipeSelectAutoScrollStateKey001
+ * @tc.desc: Test auto-scroll state-key updates at both list edges and the no-hot-zone early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectAutoScrollStateKey001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SwipeSelectAutoScroll(PointF(WIDTH / 2.0f, HEIGHT / 2.0f));
+    EXPECT_EQ(pattern_->hotZoneScrollCallback_, nullptr);
+
+    using StateKey = SelectableContainerPattern::SwipeSelectStateKey;
+    pattern_->swipeCurrentStateKey_ = StateKey { 1, -1 };
+    pattern_->lastSwipeSelectLocalX_ = -1.0f;
+    pattern_->UpdateSwipeSelectStateKeyForAutoScroll(1.0f);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_, (StateKey { 0, -1 }));
+    EXPECT_EQ(pattern_->swipeOriginalStates_.count(StateKey { 0, -1 }), 1);
+
+    auto originalStateCount = pattern_->swipeOriginalStates_.size();
+    pattern_->UpdateSwipeSelectStateKeyForAutoScroll(1.0f);
+    EXPECT_EQ(pattern_->swipeOriginalStates_.size(), originalStateCount);
+
+    pattern_->lastSwipeSelectLocalX_ = WIDTH;
+    pattern_->UpdateSwipeSelectStateKeyForAutoScroll(-1.0f);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_, (StateKey { 3, -1 }));
+    EXPECT_EQ(pattern_->swipeOriginalStates_.count(StateKey { 3, -1 }), 1);
 }
 
 /**
