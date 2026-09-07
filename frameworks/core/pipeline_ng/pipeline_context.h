@@ -1662,9 +1662,6 @@ private:
     RefPtr<DragDropManager> dragDropManager_;
     RefPtr<FocusManager> focusManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
-#ifdef WINDOW_SCENE_SUPPORTED
-    RefPtr<UIExtensionManager> uiExtensionManager_;
-#endif
     RefPtr<SafeAreaManager> safeAreaManager_;
     RefPtr<FrameRateManager> frameRateManager_;
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_;
@@ -1816,6 +1813,9 @@ private:
     std::list<TouchEvent> compatibleTouchEvents_;
     RefPtr<BackPressHandlerManager> backPressHandlerManager_;
     RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
+#ifdef WINDOW_SCENE_SUPPORTED
+    RefPtr<UIExtensionManager> uiExtensionManager_;
+#endif
 };
 
 /**
