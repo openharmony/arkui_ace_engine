@@ -1590,4 +1590,47 @@ HWTEST_F(XComponentTestTwoNg, SendAccessibilityAsyncEventTest3, TestSize.Level1)
     int32_t ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, callback);
     EXPECT_EQ(ret, -1);
 }
+
+/**
+ * @tc.name: XcomponentReportChangeEventTest001
+ * @tc.desc: Test ReportChangeEvent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, XcomponentReportChangeEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent and XComponentAccessibilityProvider
+     * @tc.expected: Create XComponent and XComponentAccessibilityProvider Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto xComponentAccessibilityProvider = std::make_shared<XComponentAccessibilityProvider>(pattern);
+    ASSERT_TRUE(xComponentAccessibilityProvider);
+
+    /**
+     * @tc.step2: build TouchEventInfo and TouchLocalLocationInfo
+     */
+    TouchEventInfo touchEventInfo("touch");
+    Offset offset= {0, 0};
+    TouchLocationInfo touchInfo(1);
+    touchEventInfo.deviceType_ = SourceType::MOUSE;
+
+    /**
+     * @tc.step3: Call ReportChangeEvent Func
+     */
+    pattern->ReportChangeEvent(touchEventInfo, offset, touchInfo);
+
+    touchEventInfo.deviceType_ = SourceType::TOUCH;
+    pattern->ReportChangeEvent(touchEventInfo, offset, touchInfo);
+
+    touchInfo.touchType_ = TouchType::UP;
+    EXPECT_NE(pattern->GetHost(), nullptr);
+    pattern->ReportChangeEvent(touchEventInfo, offset, touchInfo);
+
+    pattern->frameNode_ = nullptr;
+    pattern->ReportChangeEvent(touchEventInfo, offset, touchInfo);
+}
 } // namespace OHOS::Ace::NG
