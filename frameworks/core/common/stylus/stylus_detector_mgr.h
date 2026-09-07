@@ -51,6 +51,7 @@ public:
         const std::string& bundleName, const std::shared_ptr<IStylusDetectorCallback>& callback) override;
     void UnRegisterStylusInteractionListener(const std::string& bundleName) override;
     bool Notify(const NotifyInfo& notifyInfo) override;
+    void InitImfHook() override;
 
     RefPtr<NG::FrameNode> FindHitFrameNode(const TouchEvent& touchEvent, const TouchTestResult& touchTestResult);
     bool IsNeedInterceptedTouchEvent(

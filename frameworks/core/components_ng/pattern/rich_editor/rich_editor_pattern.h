@@ -462,6 +462,7 @@ public:
     void HandleRequestKeyboardCommand(int32_t hostId);
     void HandleCopyOrCutCommand(const std::string& cmd, int32_t hostId);
     bool ProcessCommand(const std::string& cmd, const std::unique_ptr<JsonValue>& json, int32_t hostId);
+    void RequestKeyboardForStylus();
 
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);

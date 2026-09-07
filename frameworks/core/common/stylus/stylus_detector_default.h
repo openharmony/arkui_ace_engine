@@ -35,6 +35,8 @@ public:
 
     bool Notify(const NotifyInfo& notifyInfo) override;
 
+    void InitImfHook() override;
+
     void ExecuteCommand(const std::vector<std::string>& params);
 
 private:

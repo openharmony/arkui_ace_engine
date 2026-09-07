@@ -162,6 +162,15 @@ std::optional<float> GetEnvFontScale(RefPtr<NG::RichEditorBaseController> contro
     return controller->GetEnvFontScale();
 }
 
+void RequestRichEditorKeyboardForStylus(const RefPtr<NG::FrameNode>& frameNode, int32_t& resultCode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NG::RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestKeyboardForStylus();
+    resultCode = 0;
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorCustomModifier* GetRichEditorCustomModifier()
 {
@@ -182,6 +191,7 @@ const ArkUIRichEditorCustomModifier* GetRichEditorCustomModifier()
         .getEnvFontScale = GetEnvFontScale,
         .buildRichEditorTheme = BuildRichEditorTheme,
         .buildRichEditorThemeWrapper = BuildRichEditorThemeWrapper,
+        .requestRichEditorKeyboardForStylus = RequestRichEditorKeyboardForStylus,
     };
     return &modifier;
 }

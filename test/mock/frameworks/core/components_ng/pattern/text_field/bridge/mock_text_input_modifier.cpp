@@ -129,9 +129,7 @@ void RequestTextFieldKeyboardForStylus(const RefPtr<FrameNode>& frameNode, int32
 {
     auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (!pattern->NeedToRequestKeyboardOnFocus()) {
-        pattern->RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::STYLUS_DETECTOR);
-    }
+    pattern->RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::STYLUS_DETECTOR);
     resultCode = 0;
 }
 

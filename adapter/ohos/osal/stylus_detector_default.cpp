@@ -56,6 +56,11 @@ bool StylusDetectorDefault::Notify(const NotifyInfo& notifyInfo)
     return true;
 }
 
+void StylusDetectorDefault::InitImfHook()
+{
+    LOGI("Stylus default InitImfHook");
+}
+
 void StylusDetectorDefault::ExecuteCommand(const std::vector<std::string>& params)
 {
     if (params.size() > MAX_PARAMS_SIZE || params.size() < PARAMS_ENABLE_INDEX) {
