@@ -5759,6 +5759,8 @@ struct ArkUITabsModifier {
     void (*resetBarDisplayModeBreakpoint)(ArkUINodeHandle node);
     void (*setOnBarDisplayModeChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnBarDisplayModeChange)(ArkUINodeHandle node);
+    void (*setSidebarDisplayStyle)(ArkUINodeHandle node, ArkUI_Int32 sidebarDisplayStyle);
+    void (*resetSidebarDisplayStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {

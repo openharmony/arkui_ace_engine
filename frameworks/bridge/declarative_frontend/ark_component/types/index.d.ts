@@ -1577,6 +1577,10 @@ declare enum TabBarStyle {
   SIDEBAR = 1,
   SIDEBAR_ADAPTABLE = 2,
 }
+declare enum SidebarDisplayStyle {
+  EMBED = 0,
+  DISPLACE = 1,
+}
 declare type TabsSidebarSearchFilterCallback = (tabIndex: number, text: string) => boolean;
 declare interface TabsSidebarSearchableOptions {
   searchText?: ResourceStr;

@@ -57,6 +57,11 @@ class LazyArkTabsComponent extends ArkComponent {
     return this;
   }
 
+  sidebarDisplayStyle(value: SidebarDisplayStyle): this {
+    this.lazyComponent.sidebarDisplayStyle(value);
+    return this;
+  }
+
   barPosition(value: BarPosition): this {
     this.lazyComponent.barPosition(value);
     return this;
