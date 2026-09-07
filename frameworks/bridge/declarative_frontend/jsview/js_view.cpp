@@ -59,26 +59,20 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<ViewFullUpdateModel> ViewFullUpdateModel::instance_ = nullptr;
-std::mutex ViewFullUpdateModel::mutex_;
-
 ViewFullUpdateModel* ViewFullUpdateModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ViewFullUpdateModelNG());
+    static NG::ViewFullUpdateModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ViewFullUpdateModelNG());
-            } else {
-                instance_.reset(new Framework::ViewFullUpdateModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ViewFullUpdateModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ViewFullUpdateModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
