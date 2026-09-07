@@ -83,6 +83,11 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId,
     dragData.isSetMaterialFilter, dragData.materialFilter, dragData.dragAnimationType };
     msdpDragData.filenameExtensions = dragData.filenameExtensions;
+    TAG_LOGI(AceLogTag::ACE_DRAG, "StartDrag to MSDP, filename extension count: %{public}zu",
+        msdpDragData.filenameExtensions.size());
+    for (const auto& extension : msdpDragData.filenameExtensions) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "StartDrag to MSDP, filename extension: %{public}s", extension.c_str());
+    }
     for (auto& shadowInfo: dragData.shadowInfos) {
         auto pixelSharedPtr = shadowInfo.GetPixelMapSharedPtr();
         msdpDragData.shadowInfos.push_back({ pixelSharedPtr, shadowInfo.x, shadowInfo.y });
@@ -155,6 +160,11 @@ int32_t InteractionImpl::GetDragSummary(DragSummaryInfo& summaryInfo)
 {
     Msdp::DeviceStatus::DragSummaryInfo dragSummary;
     auto ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummary);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "GetDragSummary from MSDP result: %{public}d, filename extension count: %{public}zu",
+        ret, dragSummary.filenameExtensions.size());
+    for (const auto& extension : dragSummary.filenameExtensions) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "GetDragSummary from MSDP, filename extension: %{public}s", extension.c_str());
+    }
     if (ret != 0) {
         return ret;
     }

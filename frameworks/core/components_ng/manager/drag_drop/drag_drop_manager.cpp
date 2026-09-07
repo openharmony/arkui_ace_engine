@@ -1818,6 +1818,12 @@ void DragDropManager::RequireSummary()
 {
     DragSummaryInfo dragSummaryInfo;
     int32_t ret = InteractionInterface::GetInstance()->GetDragSummary(dragSummaryInfo);
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "RequireSummary received MSDP summary, result: %{public}d, filename extension count: %{public}zu",
+        ret, dragSummaryInfo.filenameExtensions.size());
+    for (const auto& extension : dragSummaryInfo.filenameExtensions) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary filename extension: %{public}s", extension.c_str());
+    }
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
     } else {
@@ -2346,6 +2352,12 @@ void DragDropManager::UpdateDragEvent(
     event->SetGlobalDisplayY(pointerEvent.GetGlobalDisplayY());
     event->SetVelocity(velocityTracker_.GetVelocity());
     event->SetSummaryInfo(dragSummaryInfo_);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "UpdateDragEvent to application, filename extension count: %{public}zu",
+        dragSummaryInfo_.filenameExtensions.size());
+    for (const auto& extension : dragSummaryInfo_.filenameExtensions) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UpdateDragEvent to application, filename extension: %{public}s",
+            extension.c_str());
+    }
     event->SetPreviewRect(GetDragWindowRect(point));
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
     event->SetSourceTool(pointerEvent.sourceTool);

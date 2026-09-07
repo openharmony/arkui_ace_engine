@@ -161,6 +161,11 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
 
 napi_value UdmfClientImpl::TransformSummary(const DragSummaryInfo& summaryInfo)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "TransformSummary to ArkTS, filename extension count: %{public}zu",
+        summaryInfo.filenameExtensions.size());
+    for (const auto& extension : summaryInfo.filenameExtensions) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "TransformSummary to ArkTS, filename extension: %{public}s", extension.c_str());
+    }
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, nullptr);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -235,6 +240,11 @@ int32_t UdmfClientImpl::GetSummary(std::string& key, DragSummaryInfo& dragSummar
     UDMF::QueryOption queryOption;
     queryOption.key = key;
     int32_t ret = client.GetSummary(queryOption, summary);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF GetSummary result: %{public}d, filename extension count: %{public}zu",
+        ret, summary.filenameExtensions.size());
+    for (const auto& extension : summary.filenameExtensions) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF GetSummary filename extension: %{public}s", extension.c_str());
+    }
     if (ret != 0) {
         return ret;
     }
