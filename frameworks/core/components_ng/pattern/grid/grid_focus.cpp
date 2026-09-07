@@ -150,9 +150,14 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusNode(
         }
         auto nextMaxCrossCount = info_.crossCount_;
         auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
+        // A regular item (1x1) has neither irregularInfo nor explicit rowStart, so its mainStart is
+        // -1. mainIndex equals the actual row index (for a 1x1 item, start == end == index), so
+        // fall back to mainIndex as the search start row.
+        auto curMainStart = curFocusIndexInfo_.mainStart < 0 ? curFocusIndexInfo_.mainIndex
+                                                             : curFocusIndexInfo_.mainStart;
         auto nextMain = (step == FocusStep::RIGHT_END && curFocusIndexInfo_.mainSpan > 1)
                             ? curFocusIndexInfo_.mainEnd
-                            : curFocusIndexInfo_.mainStart;
+                            : curMainStart;
         auto weakChild = info_.hasBigItem_
                              ? (GetFocusWrapMode() == FocusWrapMode::WRAP_WITH_ARROW && CheckIsCrossDirectionFocus(step)
                                        ? SearchBigItemFocusableChildInCross(
@@ -453,7 +458,7 @@ WeakPtr<FocusHub> GridFocus::SearchBigItemFocusableChildInCross(
                 tarCrossIndex++;
             }
             if (main->second.find(tarCrossIndex) == main->second.end()) {
-                tarCrossIndex = main->second.size() - tarCrossIndex;
+                tarCrossIndex = static_cast<int32_t>(main->second.size()) - tarCrossIndex;
                 break;
             }
             cross = main->second.find(tarCrossIndex);

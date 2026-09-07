@@ -533,6 +533,139 @@ HWTEST_F(GridCommonTestTwoNg, FocusWrapMode008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusWrapMode009
+ * @tc.desc: Test GetNextFocusNode func in the grid with a big item and regular flow items. A regular item has no
+ * irregularInfo and no explicit rowStart, so its mainStart is -1. Cross-direction focus search must fall back to its
+ * mainIndex as the search start row.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestTwoNg, FocusWrapMode009, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2]
+     * 1: [0], [3], [4]
+     * 2: [5], [6]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateFocusableBigItem(0, 1, 0, 0);
+    CreateFocusableGridItems(6, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the regular node with index 1
+     */
+    int32_t currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
+
+    /**
+     * @tc.steps: step3. Press the left arrow key from the regular node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 1));
+
+    /**
+     * @tc.steps: step4. Press the right arrow key from the regular node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
+
+    /**
+     * @tc.steps: step5. Press the left arrow key from the regular node with index 4
+     */
+    currentIndex = 4;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 3));
+
+    /**
+     * @tc.steps: step6. Press the right arrow key from the node with index 5 on the row without big item
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+
+    /**
+     * @tc.steps: step7. Press the left arrow key from the node with index 6 on the row without big item
+     */
+    currentIndex = 6;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
+
+    /**
+     * @tc.steps: step8. Press the right arrow key from the tail node with index 6, no row exists below
+     * @tc.expected: The focus does not move
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
+}
+
+/**
+ * @tc.name: FocusWrapMode010
+ * @tc.desc: Test GetNextFocusNode func in the grid with a big item and regular flow items after columnsTemplate
+ * switches from four columns to three columns
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestTwoNg, FocusWrapMode010, TestSize.Level1)
+{
+    /**
+     * 0: [0], [1], [2], [3]
+     * 1: [0], [4], [5], [6]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableBigItem(0, 1, 0, 0);
+    CreateFocusableGridItems(6, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step1. Set the focusWrapMode property to allow wrap directional keys
+     */
+    model.SetFocusWrapMode(AceType::RawPtr(frameNode_), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Press the right arrow key from the regular node with index 1
+     */
+    int32_t currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
+
+    /**
+     * @tc.steps: step3. Press the left arrow key from the regular node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
+
+    /**
+     * @tc.steps: step4. Switch the columnsTemplate from four columns to three columns
+     * 0: [0], [1], [2]
+     * 1: [0], [3], [4]
+     * 2: [5], [6]
+     */
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step5. Press the right arrow key from the regular node with index 1
+     */
+    currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 2));
+
+    /**
+     * @tc.steps: step6. Press the right arrow key from the node with index 5 on the row without big item
+     */
+    currentIndex = 5;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
+
+    /**
+     * @tc.steps: step7. Press the left arrow key from the node with index 6 on the row without big item
+     */
+    currentIndex = 6;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
+}
+
+/**
  * @tc.name: Focus001
  * @tc.desc: Test Foucus
  * @tc.type: FUNC
