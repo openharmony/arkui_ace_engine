@@ -110,10 +110,26 @@ jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcommon_obj_path = base_output_path + "/arkCommon.o"
 arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.o"
 
+action("state_mgmt_npm_install") {
+  script = "$ace_root/frameworks/bridge/declarative_frontend/state_mgmt/npm_install_guard.py"
+  stamp_file = "$target_gen_dir/state_mgmt_npm_install.stamp"
+  outputs = [ stamp_file ]
+  inputs = [
+    "$ace_root/frameworks/bridge/declarative_frontend/state_mgmt/package.json",
+  ]
+  args = [
+    rebase_path("$ace_root/frameworks/bridge/declarative_frontend/state_mgmt"),
+    rebase_path(stamp_file),
+  ]
+}
+
 action("run_state_mgmt_build") {
   script = "state_mgmt/build.py"
   inputs = state_mgmt_release_files_to_watch
   outputs = [ "$target_out_dir/stateMgmt.js" ]
+  deps = [
+    ":state_mgmt_npm_install($host_toolchain)",
+  ]
   args = [
     # Paths: 1 StateMgmt root folder. 2. Folder to check need of npm install. 3. stateMgmt.js output path.
     rebase_path("$ace_root/frameworks/bridge/declarative_frontend/state_mgmt"),
