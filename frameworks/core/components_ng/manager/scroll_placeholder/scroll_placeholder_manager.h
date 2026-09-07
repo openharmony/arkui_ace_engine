@@ -64,7 +64,10 @@ struct ScrollPlaceholderPredictResult {
 // - template registry lifecycle (register/unregister/query + instance LRU) and diagnostics
 //   counters are surfaced through this facade.
 // Threading: created, called and destroyed on the UI thread only.
-class ScrollPlaceholderManager : public virtual AceType {
+// ACE_FORCE_EXPORT: the List/Grid/WaterFlow split .so libraries reference
+// NotifyRealBuildStart/End through the observation scope header, so the class
+// must keep default visibility to be exportable via build/libace.map.
+class ACE_FORCE_EXPORT ScrollPlaceholderManager : public virtual AceType {
     DECLARE_ACE_TYPE(ScrollPlaceholderManager, AceType);
 
 public:
