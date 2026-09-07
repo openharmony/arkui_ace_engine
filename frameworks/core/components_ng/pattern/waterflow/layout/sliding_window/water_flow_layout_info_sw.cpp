@@ -896,6 +896,11 @@ void WaterFlowLayoutInfoSW::ClearData()
     endIndex_ = -1;
     reportStartIndex_ = 0;
     reportEndIndex_ = -1;
+    itemStart_ = false;
+    itemEnd_ = false;
+    offsetEnd_ = false;
+    startPos_ = 0.0f;
+    endPos_ = 0.0f;
 }
 
 float WaterFlowLayoutInfoSW::GetAverageItemHeight() const

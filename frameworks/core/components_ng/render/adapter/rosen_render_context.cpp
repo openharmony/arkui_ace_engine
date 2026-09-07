@@ -1463,6 +1463,14 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
     bgLoadingCtx_->LoadImageData();
 }
 
+void RosenRenderContext::ReloadBackgroundImage()
+{
+    auto bgImage = GetBackgroundImage();
+    if (bgImage.has_value()) {
+        OnBackgroundImageUpdate(bgImage.value());
+    }
+}
+
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat)
 {
     FREE_RS_CONTEXT_CHECK(OnBackgroundImageRepeatUpdate, imageRepeat);
@@ -5710,6 +5718,7 @@ void RosenRenderContext::UpdateBackBlur(
     FREE_RS_CONTEXT_CHECK_MULTI_THREAD(UpdateBackBlur, radius, blurOption, sysOptions);
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBackdropBlurOption = blurOption;
     if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         // Same with previous value
         return;

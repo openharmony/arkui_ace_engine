@@ -141,6 +141,7 @@ SecuritySessionWrapperImpl::SecuritySessionWrapperImpl(
     auto pattern = hostPattern.Upgrade();
     platformId_ = pattern ? pattern->GetUiExtensionId() : 0;
     taskExecutor_ = Container::CurrentTaskExecutor();
+    uiExtensionSafeInfo_ = AceType::MakeRefPtr<UIExtensionSafeInfo>();
 }
 
 SecuritySessionWrapperImpl::~SecuritySessionWrapperImpl() {}
@@ -743,6 +744,13 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     }
     bool isNeedSyncTransaction = reason == Rosen::SizeChangeReason::ROTATION ||
         reason == Rosen::SizeChangeReason::SNAPSHOT_ROTATION;
+    auto avoidAreas = uiExtensionSafeInfo_ ? uiExtensionSafeInfo_->GetAvoidArea() :
+        std::map<Rosen::AvoidAreaType, Rosen::AvoidArea>();
+    if (isNeedSyncTransaction) {
+        PLATFORM_LOGI("SecurityUIExtension safe area merge path, reason=%{public}d, "
+            "avoidAreasCount=%{public}zu, persistentId=%{public}d.",
+            static_cast<int32_t>(reason), avoidAreas.size(), persistentId);
+    }
     if (!rsUIDirector) {
         if (isNeedSyncTransaction) {
             if (auto temp = transaction_.lock()) {
@@ -755,9 +763,9 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
                 transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
             }
         }
-        session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+        session_->UpdateRectWithLayoutInfo({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
             std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
-            reason, "NotifyDisplayArea", transaction);
+            reason, "NotifyDisplayArea", transaction, avoidAreas);
     } else {
         auto rsUIContext = rsUIDirector->GetRSUIContext();
         if (isNeedSyncTransaction) {
@@ -779,9 +787,9 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
                 transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
             }
         }
-        session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+        session_->UpdateRectWithLayoutInfo({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
             std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
-            reason, "NotifyDisplayArea", transaction);
+            reason, "NotifyDisplayArea", transaction, avoidAreas);
     }
 }
 
@@ -798,12 +806,29 @@ void SecuritySessionWrapperImpl::NotifySizeChangeReason(
 }
 
 void SecuritySessionWrapperImpl::NotifyOriginAvoidArea(
-    const Rosen::AvoidArea& avoidArea, uint32_t type) const
+    const Rosen::AvoidArea& avoidArea, uint32_t type, WindowSizeChangeReason reason) const
 {
     CHECK_NULL_VOID(session_);
+    if (uiExtensionSafeInfo_) {
+        uiExtensionSafeInfo_->SetAvoidArea(avoidArea, static_cast<Rosen::AvoidAreaType>(type));
+    }
+    bool isNeedSyncTransaction = reason == WindowSizeChangeReason::ROTATION ||
+        reason == WindowSizeChangeReason::SNAPSHOT_ROTATION;
+    if (isNeedSyncTransaction) {
+        PLATFORM_LOGD("SecurityUIExtension safe area skipped, reason=%{public}d, type=%{public}u, "
+            "persistentId=%{public}d.", static_cast<int32_t>(reason), type, GetSessionId());
+        return;
+    }
     PLATFORM_LOGI("The avoid area is notified to the provider.");
-    session_->UpdateAvoidArea(
-        sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
+    auto avoidAreas = uiExtensionSafeInfo_ ? uiExtensionSafeInfo_->GetAvoidArea() :
+        std::map<Rosen::AvoidAreaType, Rosen::AvoidArea>();
+    PLATFORM_LOGD("SecurityUIExtension safe area separate path, reason=%{public}d, "
+        "avoidAreasCount=%{public}zu, type=%{public}u, persistentId=%{public}d.",
+        static_cast<int32_t>(reason), avoidAreas.size(), type, GetSessionId());
+    session_->UpdateRectWithLayoutInfo({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+        Rosen::SizeChangeReason::AVOID_AREA_CHANGE, "NotifyOriginAvoidArea",
+        nullptr, avoidAreas);
 }
 
 bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(

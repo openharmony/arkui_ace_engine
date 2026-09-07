@@ -864,11 +864,11 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsScrollReachEdge001
- * @tc.desc: Test IsScrollReachEdge returns true when scroll reaches bottom edge
+ * @tc.name: IsScrollEdgeFinish001
+ * @tc.desc: Test IsScrollEdgeFinish returns true when scroll reaches bottom edge
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge001, TestSize.Level1)
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     MockAnimationManager::GetInstance().SetTicks(TICK);
@@ -883,16 +883,15 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtBottom());
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_BOTTOM;
-    EXPECT_TRUE(pattern_->IsScrollReachEdge());
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
 }
 
 /**
- * @tc.name: IsScrollReachEdge002
- * @tc.desc: Test IsScrollReachEdge returns false when scroll has not reached bottom edge
- *           (content dynamically grows during scroll-to-edge animation)
+ * @tc.name: IsScrollEdgeFinish002
+ * @tc.desc: Test IsScrollEdgeFinish returns true for non-lazy child regardless of scroll position
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge002, TestSize.Level1)
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     MockAnimationManager::GetInstance().SetTicks(TICK);
@@ -908,16 +907,15 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge002, TestSize.Level1)
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
     FlushUITasks();
-    EXPECT_FALSE(pattern_->IsScrollReachEdge());
-    EXPECT_NE(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
 }
 
 /**
- * @tc.name: IsScrollReachEdge003
- * @tc.desc: Test IsScrollReachEdge returns true when scroll reaches top edge
+ * @tc.name: IsScrollEdgeFinish003
+ * @tc.desc: Test IsScrollEdgeFinish returns true when scroll reaches top edge
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge003, TestSize.Level1)
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish003, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
 
@@ -925,15 +923,15 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge003, TestSize.Level1)
     CreateScrollDone();
     EXPECT_TRUE(pattern_->IsAtTop());
     pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_TOP;
-    EXPECT_TRUE(pattern_->IsScrollReachEdge());
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
 }
 
 /**
- * @tc.name: IsScrollReachEdge004
- * @tc.desc: Test IsScrollReachEdge with contentEndOffset at bottom edge
+ * @tc.name: IsScrollEdgeFinish004
+ * @tc.desc: Test IsScrollEdgeFinish with contentEndOffset at bottom edge
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge004, TestSize.Level1)
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish004, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
@@ -944,16 +942,16 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge004, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
     pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_BOTTOM;
-    EXPECT_TRUE(pattern_->IsScrollReachEdge());
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
 }
 
 /**
- * @tc.name: IsScrollReachEdge005
+ * @tc.name: IsScrollEdgeFinish005
  * @tc.desc: Test spring animation preserves scrollEdgeType when scroll has not reached edge
  *           (core bug fix: LazyVGrid dynamic growth scenario)
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge005, TestSize.Level1)
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish005, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     MockAnimationManager::GetInstance().SetTicks(TICK);
@@ -981,11 +979,11 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge005, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsScrollReachEdge006
- * @tc.desc: Test IsScrollReachEdge returns true at right edge (horizontal scroll)
+ * @tc.name: IsScrollEdgeFinish006
+ * @tc.desc: Test IsScrollEdgeFinish returns true at right edge (horizontal scroll)
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge006, TestSize.Level1)
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish006, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
@@ -1001,16 +999,15 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge006, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtBottom());
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_RIGHT;
-    EXPECT_TRUE(pattern_->IsScrollReachEdge());
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
 }
 
 /**
- * @tc.name: IsScrollReachEdge007
- * @tc.desc: Test IsScrollReachEdge with contentStartOffset at middle position
- *           (bug fix: old impl returned true for any position when contentStartOffset > 0)
+ * @tc.name: IsScrollEdgeFinish007
+ * @tc.desc: Test IsScrollEdgeFinish returns true for non-lazy child at middle position
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge007, TestSize.Level1)
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish007, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
@@ -1023,8 +1020,78 @@ HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge007, TestSize.Level1)
     FlushUITasks();
     EXPECT_FALSE(pattern_->IsAtTop());
     pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_TOP;
-    EXPECT_FALSE(pattern_->IsScrollReachEdge());
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
     pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
+}
+
+/**
+ * @tc.name: IsScrollEdgeFinish008
+ * @tc.desc: Test IsScrollEdgeFinish with lazy child at bottom edge returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish008, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, 20);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    EXPECT_TRUE(gridNode->IsNeedLazyLayout());
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_BOTTOM;
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
+}
+
+/**
+ * @tc.name: IsScrollEdgeFinish009
+ * @tc.desc: Test IsScrollEdgeFinish with lazy child not at bottom returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish009, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, 20);
+    CreateScrollDone();
+
+    EXPECT_FALSE(pattern_->IsAtBottom());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_BOTTOM;
+    EXPECT_FALSE(pattern_->IsScrollEdgeFinish());
+}
+
+/**
+ * @tc.name: IsScrollEdgeFinish010
+ * @tc.desc: Test IsScrollEdgeFinish with lazy child at top edge returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish010, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, 20);
+    CreateScrollDone();
+
+    EXPECT_TRUE(pattern_->IsAtTop());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_TOP;
+    EXPECT_TRUE(pattern_->IsScrollEdgeFinish());
+}
+
+/**
+ * @tc.name: IsScrollEdgeFinish011
+ * @tc.desc: Test IsScrollEdgeFinish with lazy child not at top returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollEdgeFinish011, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, 20);
+    CreateScrollDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_FALSE(pattern_->IsAtTop());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_TOP;
+    EXPECT_FALSE(pattern_->IsScrollEdgeFinish());
 }
 
 /**

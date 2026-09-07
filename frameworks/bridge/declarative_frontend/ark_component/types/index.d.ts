@@ -1592,7 +1592,7 @@ declare enum TabVisibility {
   VISIBLE = 0,
   HIDDEN = 1,
 }
-declare interface TabContentDefaultVisibility {
+declare interface TabContentTabBarVisibility {
   visibility?: TabVisibility;
   displayMode?: TabBarDisplayMode;
 }

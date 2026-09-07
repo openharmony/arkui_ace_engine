@@ -66,7 +66,7 @@ struct TabBarDisplayModeBreakpoint {
     TabBarDisplayMode sm = TabBarDisplayMode::BOTTOMTABBAR;
     TabBarDisplayMode md = TabBarDisplayMode::BOTTOMTABBAR;
     TabBarDisplayMode lg = TabBarDisplayMode::SIDEBAR;
-    bool isNull = false;
+    bool isNull = true;
 
     bool operator==(const TabBarDisplayModeBreakpoint& other) const
     {

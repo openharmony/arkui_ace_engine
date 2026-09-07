@@ -59,6 +59,7 @@ public:
     MOCK_METHOD0(OnWindowFocused, void());
     MOCK_METHOD0(OnWindowUnfocused, void());
     MOCK_METHOD1(OnNotifyMemoryLevel, void(int32_t level));
+    MOCK_METHOD0(OnSkinConfigurationUpdate, void());
     MOCK_METHOD0(OnAttachToFrameNode, void());
     MOCK_METHOD1(OnDetachFromFrameNode, void(FrameNode* frameNode));
     MOCK_CONST_METHOD2(ToJsonValue, void(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter));

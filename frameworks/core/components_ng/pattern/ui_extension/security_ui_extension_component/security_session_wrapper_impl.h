@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_safe_info.h"
 
 namespace OHOS::Ace::NG {
 class SecuritySessionWrapperImpl : public SessionWrapper {
@@ -90,7 +91,8 @@ public:
     void NotifyDisplayArea(const RectF& displayArea) override;
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
-    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
+    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason) const override;
     bool NotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout) override;
     void SetDensityDpiImpl(bool isDensityDpi) override;
@@ -137,6 +139,7 @@ private:
     std::weak_ptr<Rosen::RSTransaction> transaction_;
     std::shared_ptr<AAFwk::Want> customWant_;
     OHOS::Rosen::SubSystemId subSystemId_ = OHOS::Rosen::SubSystemId::ARKUI_UIEXT;
+    RefPtr<UIExtensionSafeInfo> uiExtensionSafeInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SUEC_SECURITY_SESSION_WRAPPER_IMPL_H

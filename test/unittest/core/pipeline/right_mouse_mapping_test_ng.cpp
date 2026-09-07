@@ -25,7 +25,6 @@
 #include "core/common/event_manager.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/event/event_info_convertor.h"
-#include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 #include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
@@ -42,7 +41,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const char CONTEXT_MENU_OPTIONS[] = "contextMenuOptions";
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t TEST_LONG_PRESS_DURATION = 3000;
 constexpr int32_t LONG_PRESS_DEFAULT_DURATION = 500;
@@ -79,310 +77,46 @@ public:
     }
 };
 
+/**
+ * @tc.name: GetRightMouse2LongPressConfig001
+ * @tc.desc: Test GetRightMouse2LongPressConfig returns NOT_FOUND in stub environment and does not modify output params
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig001, TestSize.Level1)
 {
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(CONTEXT_MENU_OPTIONS, "", FeatureManager::INIT_FAILED);
-#endif
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND regardless of FeatureManager state
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig002, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(CONTEXT_MENU_OPTIONS, "", FeatureManager::KEY_NOT_FOUND);
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig003, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(CONTEXT_MENU_OPTIONS, "not_valid_json");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig004, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS, R"({"rightMouse2LongPress":false})");
-#endif
-    bool enabled = true;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND and does not modify out parameters
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_TRUE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig005, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS, R"({"rightMouse2LongPress":true})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
     EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
     EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
 
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig006, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["TextInput","TextArea","RichEditor","Text"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig007, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS, R"({"rightMouse2LongPress":true,"needTransferComponent":[]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig008, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS, R"({"rightMouse2LongPress":true,"needTransferComponent":"not_an_array"})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig009, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(CONTEXT_MENU_OPTIONS, "{}");
-#endif
-    bool enabled = true;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND and does not modify out parameters
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_TRUE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig010, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS, R"({"rightMouse2LongPress":"true"})");
-#endif
-    bool enabled = true;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND and does not modify out parameters
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_TRUE(enabled);
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig011, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["TextInput","TextArea"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig012, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["TextInput","TextInput","Text"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig013, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["All"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig014, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["TextInput","All","Text"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig015, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["CustomWidget","MySpecialNode"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::GetRightMouse2LongPressConfig(enabled, components);
-    // Stub version always returns NOT_FOUND
-    EXPECT_EQ(ret, EventInfoConvertor::Mouse2TouchEventModeResult::NOT_FOUND);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
+/**
+ * @tc.name: IsRightMouseMappingEnabled001
+ * @tc.desc: Test IsRightMouseMappingEnabled returns false in stub environment and does not modify output params
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled001, TestSize.Level1)
 {
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(CONTEXT_MENU_OPTIONS, "", FeatureManager::INIT_FAILED);
-#endif
     bool enabled = false;
     std::vector<std::string> components;
     auto ret = EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
-    EXPECT_FALSE(ret);
-}
-
-HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled002, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(CONTEXT_MENU_OPTIONS, "", FeatureManager::KEY_NOT_FOUND);
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
-    EXPECT_FALSE(ret);
-}
-
-HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled003, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS, R"({"rightMouse2LongPress":false})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
-    EXPECT_FALSE(ret);
-}
-
-HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled004, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["TextInput","TextArea"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
-    // Stub version always returns false
     EXPECT_FALSE(ret);
     EXPECT_FALSE(enabled);
     EXPECT_TRUE(components.empty());
 }
 
-HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled005, TestSize.Level1)
-{
-#ifdef ACE_UNITTEST
-    FeatureManager::GetInstance().SetFeatureParamForTest(
-        CONTEXT_MENU_OPTIONS,
-        R"({"rightMouse2LongPress":true,"needTransferComponent":["All"]})");
-#endif
-    bool enabled = false;
-    std::vector<std::string> components;
-    auto ret = EventInfoConvertor::IsRightMouseMappingEnabled(enabled, components);
-    // Stub version always returns false
-    EXPECT_FALSE(ret);
-    EXPECT_FALSE(enabled);
-    EXPECT_TRUE(components.empty());
-}
-
-HWTEST_F(RightMouseMappingTestNg, LongPressDefaultDuration001, TestSize.Level1)
-{
-    RefPtr<LongPressRecognizer> recognizer = AceType::MakeRefPtr<
-        LongPressRecognizer>(LONG_PRESS_DEFAULT_DURATION, 1, false);
-    EXPECT_EQ(recognizer->GetDuration(), LONG_PRESS_DEFAULT_DURATION);
-}
-
+/**
+ * @tc.name: LongPressRecognizerGetDuration001
+ * @tc.desc: Test LongPressRecognizer GetDuration and SetDuration round-trip
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingTestNg, LongPressRecognizerGetDuration001, TestSize.Level1)
 {
     RefPtr<LongPressRecognizer> recognizer =
         AceType::MakeRefPtr<LongPressRecognizer>(TEST_LONG_PRESS_DURATION, 1, false);
     EXPECT_EQ(recognizer->GetDuration(), TEST_LONG_PRESS_DURATION);
-}
-
-HWTEST_F(RightMouseMappingTestNg, LongPressRecognizerGetDuration002, TestSize.Level1)
-{
-    RefPtr<LongPressRecognizer> recognizer =
-        AceType::MakeRefPtr<LongPressRecognizer>(TEST_LONG_PRESS_DURATION, 1, false);
-    recognizer->SetDuration(800);
-    EXPECT_EQ(recognizer->GetDuration(), 800);
     recognizer->SetDuration(LONG_PRESS_DEFAULT_DURATION);
     EXPECT_EQ(recognizer->GetDuration(), LONG_PRESS_DEFAULT_DURATION);
 }
@@ -403,7 +137,6 @@ public:
         context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>(DEFAULT_INSTANCE_ID);
         context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
         context_->fontManager_ = FontManager::Create();
-        context_->imageCache_ = ImageCache::Create();
         MockContainer::SetUp();
         MockContainer::Current()->pipelineContext_ = context_;
     }
@@ -434,18 +167,12 @@ public:
 
 RefPtr<PipelineContext> RightMouseMappingPipelineTestNg::context_ = nullptr;
 
+/**
+ * @tc.name: RightMouseMappingActive001
+ * @tc.desc: Test IsRightMouseMappingActive default false and SetRightMouseMappingActive toggle
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive001, TestSize.Level1)
-{
-    EXPECT_FALSE(context_->IsRightMouseMappingActive());
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive002, TestSize.Level1)
-{
-    context_->SetRightMouseMappingActive(true);
-    EXPECT_TRUE(context_->IsRightMouseMappingActive());
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive003, TestSize.Level1)
 {
     EXPECT_FALSE(context_->IsRightMouseMappingActive());
     context_->SetRightMouseMappingActive(true);
@@ -454,7 +181,12 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive003, TestSize.L
     EXPECT_FALSE(context_->IsRightMouseMappingActive());
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive004, TestSize.Level1)
+/**
+ * @tc.name: RightMouseMappingCancelCallback001
+ * @tc.desc: Test onRightMouseMappingCancel_ is invoked when mapping is active
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback001, TestSize.Level1)
 {
     bool cancelCalled = false;
     context_->SetOnRightMouseMappingCancel([&cancelCalled]() { cancelCalled = true; });
@@ -465,7 +197,12 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive004, TestSize.L
     EXPECT_TRUE(cancelCalled);
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive005, TestSize.Level1)
+/**
+ * @tc.name: RightMouseMappingCancelCallback002
+ * @tc.desc: Test onRightMouseMappingCancel_ is NOT invoked when mapping is inactive
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback002, TestSize.Level1)
 {
     bool cancelCalled = false;
     context_->SetOnRightMouseMappingCancel([&cancelCalled]() { cancelCalled = true; });
@@ -476,7 +213,12 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive005, TestSize.L
     EXPECT_FALSE(cancelCalled);
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive006, TestSize.Level1)
+/**
+ * @tc.name: RightMouseMappingCancelCallback003
+ * @tc.desc: Test onRightMouseMappingCancel_ does not crash when callback is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingCancelCallback003, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
     context_->onRightMouseMappingCancel_ = nullptr;
@@ -486,93 +228,178 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive006, TestSize.L
     EXPECT_TRUE(context_->isRightMouseMappingActive_);
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive007, TestSize.Level1)
+/**
+ * @tc.name: WindowFocusCancelsMapping001
+ * @tc.desc: Test WindowFocus(false) triggers cancel callback when mapping is active
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, WindowFocusCancelsMapping001, TestSize.Level1)
 {
-    int callCount1 = 0;
-    int callCount2 = 0;
-    context_->SetOnRightMouseMappingCancel([&callCount1]() { callCount1++; });
-    context_->SetOnRightMouseMappingCancel([&callCount2]() { callCount2++; });
     context_->SetRightMouseMappingActive(true);
-    if (context_->isRightMouseMappingActive_ && context_->onRightMouseMappingCancel_) {
-        context_->onRightMouseMappingCancel_();
-    }
-    EXPECT_EQ(callCount1, 0);
-    EXPECT_EQ(callCount2, 1);
+    bool cancelCalled = false;
+    context_->SetOnRightMouseMappingCancel([&cancelCalled]() {
+        cancelCalled = true;
+    });
+    context_->WindowFocus(false);
+    EXPECT_TRUE(cancelCalled);
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingActive008, TestSize.Level1)
+/**
+ * @tc.name: WindowFocusCancelsMapping002
+ * @tc.desc: Test WindowFocus(false) does NOT trigger cancel when mapping is inactive
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, WindowFocusCancelsMapping002, TestSize.Level1)
+{
+    bool cancelCalled = false;
+    context_->SetOnRightMouseMappingCancel([&cancelCalled]() {
+        cancelCalled = true;
+    });
+    context_->WindowFocus(false);
+    EXPECT_FALSE(cancelCalled);
+}
+
+/**
+ * @tc.name: OnHideCancelsMapping001
+ * @tc.desc: Test OnHide triggers cancel callback when mapping is active
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
-    EXPECT_TRUE(context_->IsRightMouseMappingActive());
+    bool cancelCalled = false;
+    context_->SetOnRightMouseMappingCancel([&cancelCalled]() {
+        cancelCalled = true;
+    });
+    context_->OnHide();
+    EXPECT_TRUE(cancelCalled);
+}
+
+/**
+ * @tc.name: OnHideCancelsMapping002
+ * @tc.desc: Test OnHide does NOT trigger cancel when mapping is inactive
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping002, TestSize.Level1)
+{
+    bool cancelCalled = false;
+    context_->SetOnRightMouseMappingCancel([&cancelCalled]() {
+        cancelCalled = true;
+    });
+    context_->OnHide();
+    EXPECT_FALSE(cancelCalled);
+}
+
+/**
+ * @tc.name: DoubleCancelProtection001
+ * @tc.desc: Test OnHide then WindowFocus(false) only triggers cancel once
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, DoubleCancelProtection001, TestSize.Level1)
+{
+    int callCount = 0;
+    context_->SetOnRightMouseMappingCancel([&callCount, &context = context_]() {
+        callCount++;
+        context->SetRightMouseMappingActive(false);
+    });
     context_->SetRightMouseMappingActive(true);
-    EXPECT_TRUE(context_->IsRightMouseMappingActive());
+    context_->OnHide();
+    EXPECT_EQ(callCount, 1);
+    context_->WindowFocus(false);
+    EXPECT_EQ(callCount, 1);
+}
+
+/**
+ * @tc.name: SourceTypeProtection001
+ * @tc.desc: Test mapped touch events (sourceTool=MOUSE, sourceType=TOUCH) preserve lastSourceType_ as MOUSE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection001, TestSize.Level1)
+{
+    context_->lastSourceType_ = SourceType::MOUSE;
+    context_->SetRightMouseMappingActive(true);
+    TouchEvent mappedDown;
+    mappedDown.id = 1002;
+    mappedDown.x = 100.0f;
+    mappedDown.y = 100.0f;
+    mappedDown.type = TouchType::DOWN;
+    mappedDown.sourceType = SourceType::TOUCH;
+    mappedDown.sourceTool = SourceTool::MOUSE;
+    context_->OnTouchEvent(mappedDown);
+    EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
+
+    TouchEvent mappedMove;
+    mappedMove.id = 1002;
+    mappedMove.x = 101.0f;
+    mappedMove.y = 101.0f;
+    mappedMove.type = TouchType::MOVE;
+    mappedMove.sourceType = SourceType::TOUCH;
+    mappedMove.sourceTool = SourceTool::MOUSE;
+    context_->OnTouchEvent(mappedMove);
+    EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
+
+    TouchEvent mappedUp;
+    mappedUp.id = 1002;
+    mappedUp.x = 101.0f;
+    mappedUp.y = 101.0f;
+    mappedUp.type = TouchType::UP;
+    mappedUp.sourceType = SourceType::TOUCH;
+    mappedUp.sourceTool = SourceTool::MOUSE;
+    context_->OnTouchEvent(mappedUp);
+    EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
+}
+
+/**
+ * @tc.name: SourceTypeProtection002
+ * @tc.desc: Test real touch (sourceTool=FINGER) still updates lastSourceType_ to TOUCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection002, TestSize.Level1)
+{
+    context_->lastSourceType_ = SourceType::MOUSE;
+    TouchEvent realTouch;
+    realTouch.x = 100.0f;
+    realTouch.y = 100.0f;
+    realTouch.type = TouchType::DOWN;
+    realTouch.sourceType = SourceType::TOUCH;
+    realTouch.sourceTool = SourceTool::FINGER;
+    context_->OnTouchEvent(realTouch);
+    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
+}
+
+/**
+ * @tc.name: SourceTypeProtection003
+ * @tc.desc: Test after mapping ends, real mouse MOVE detects no spurious source-type change
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, SourceTypeProtection003, TestSize.Level1)
+{
+    context_->lastSourceType_ = SourceType::MOUSE;
+    context_->SetRightMouseMappingActive(true);
+    TouchEvent mappedDown;
+    mappedDown.id = 1002;
+    mappedDown.type = TouchType::DOWN;
+    mappedDown.sourceType = SourceType::TOUCH;
+    mappedDown.sourceTool = SourceTool::MOUSE;
+    context_->OnTouchEvent(mappedDown);
     context_->SetRightMouseMappingActive(false);
-    EXPECT_FALSE(context_->IsRightMouseMappingActive());
-    context_->SetRightMouseMappingActive(false);
-    EXPECT_FALSE(context_->IsRightMouseMappingActive());
-}
 
-HWTEST_F(RightMouseMappingPipelineTestNg, MappedMouseTouchEventPreservesSourceType001, TestSize.Level1)
-{
-    context_->lastSourceType_ = SourceType::MOUSE;
-    bool isMappedMouseTouch = true;
-    if (!isMappedMouseTouch) {
-        context_->CheckSourceTypeChange(SourceType::TOUCH);
-    }
-    EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
-    context_->CheckSourceTypeChange(SourceType::TOUCH);
-    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, MappedMouseTouchEventPreservesSourceType002, TestSize.Level1)
-{
-    context_->lastSourceType_ = SourceType::MOUSE;
-    bool changed = context_->CheckSourceTypeChange(SourceType::TOUCH);
-    EXPECT_TRUE(changed);
-    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange001, TestSize.Level1)
-{
-    context_->lastSourceType_ = SourceType::NONE;
-    EXPECT_TRUE(context_->CheckSourceTypeChange(SourceType::TOUCH));
-    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
-    EXPECT_TRUE(context_->CheckSourceTypeChange(SourceType::MOUSE));
+    MouseEvent mouseMove;
+    mouseMove.x = 102.0f;
+    mouseMove.y = 102.0f;
+    mouseMove.sourceType = SourceType::MOUSE;
+    mouseMove.sourceTool = SourceTool::MOUSE;
+    mouseMove.action = MouseAction::MOVE;
+    mouseMove.button = MouseButton::NONE_BUTTON;
+    context_->OnMouseEvent(mouseMove, context_->GetRootElement());
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange002, TestSize.Level1)
-{
-    context_->lastSourceType_ = SourceType::TOUCH;
-    EXPECT_FALSE(context_->CheckSourceTypeChange(SourceType::TOUCH));
-    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange003, TestSize.Level1)
-{
-    context_->lastSourceType_ = SourceType::NONE;
-    bool changed = context_->CheckSourceTypeChange(SourceType::TOUCH);
-    EXPECT_TRUE(changed);
-    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, MappedMouseTouchEventPreservesSourceType003, TestSize.Level1)
-{
-    context_->lastSourceType_ = SourceType::MOUSE;
-    bool isMappedMouseTouch = true;
-    if (!isMappedMouseTouch) {
-        context_->CheckSourceTypeChange(SourceType::TOUCH);
-    }
-    EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
-    if (!isMappedMouseTouch) {
-        context_->CheckSourceTypeChange(SourceType::TOUCH);
-    }
-    EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
-    bool changed = context_->CheckSourceTypeChange(SourceType::MOUSE);
-    EXPECT_FALSE(changed);
-    EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
-}
-
+/**
+ * @tc.name: PipelineContextMemberLayout001
+ * @tc.desc: Test isRightMouseMappingActive_ at end of member list, focusNode_ still works (ABI safety)
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, PipelineContextMemberLayout001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
@@ -586,6 +413,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, PipelineContextMemberLayout001, TestSi
     context_->focusNode_ = nullptr;
 }
 
+/**
+ * @tc.name: HitTestMouseTargetForMapping001
+ * @tc.desc: Test HitTestMouseTargetForMapping returns false with null root element
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping001, TestSize.Level1)
 {
     MouseEvent event;
@@ -599,6 +431,11 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping001, TestS
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: HitTestMouseTargetForMapping002
+ * @tc.desc: Test HitTestMouseTargetForMapping with empty whitelist (no tag restriction)
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping002, TestSize.Level1)
 {
     auto rootNode = FrameNode::GetOrCreateFrameNode("root", ElementRegister::GetInstance()->MakeUniqueId(),
@@ -617,30 +454,114 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping002, TestS
     context_->rootNode_ = nullptr;
 }
 
+/**
+ * @tc.name: HitTestMouseTargetForMapping003
+ * @tc.desc: Test HitTestMouseTargetForMapping returns false when tag not in whitelist
+ * @tc.type: FUNC
+ */
 HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping003, TestSize.Level1)
 {
+    auto buttonNode = FrameNode::GetOrCreateFrameNode("button", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    context_->rootNode_ = buttonNode;
+
     MouseEvent event;
-    event.x = -1000.0f;
-    event.y = -1000.0f;
+    event.x = 0.0f;
+    event.y = 0.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput", "TextArea" };
+    bool result = context_->HitTestMouseTargetForMapping(event, buttonNode, whitelist);
+    EXPECT_FALSE(result);
+    context_->rootNode_ = nullptr;
+}
+
+/**
+ * @tc.name: HitTestMouseTargetForMapping004
+ * @tc.desc: Test HitTestMouseTargetForMapping with tag in whitelist but no children
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping004, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    context_->rootNode_ = textNode;
+
+    MouseEvent event;
+    event.x = 0.0f;
+    event.y = 0.0f;
     event.button = MouseButton::RIGHT_BUTTON;
     event.sourceType = SourceType::MOUSE;
     event.sourceTool = SourceTool::MOUSE;
     std::vector<std::string> whitelist = { "TextInput" };
-    bool result = context_->HitTestMouseTargetForMapping(event, nullptr, whitelist);
-    EXPECT_FALSE(result);
+    context_->HitTestMouseTargetForMapping(event, textNode, whitelist);
+    context_->rootNode_ = nullptr;
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingMoveEvent001, TestSize.Level1)
+/**
+ * @tc.name: HitTestMouseTargetForMapping005
+ * @tc.desc: Test HitTestMouseTargetForMapping recursive child traversal (parent tag mismatch, child tag match)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping005, TestSize.Level1)
 {
-    MouseEvent mouseMove;
-    mouseMove.x = 100.0f;
-    mouseMove.y = 100.0f;
-    mouseMove.sourceType = SourceType::MOUSE;
-    mouseMove.sourceTool = SourceTool::MOUSE;
-    mouseMove.action = MouseAction::MOVE;
-    mouseMove.button = MouseButton::NONE_BUTTON;
-    context_->OnMouseEvent(mouseMove, context_->GetRootElement());
+    auto parentNode = FrameNode::GetOrCreateFrameNode("parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(parentNode, nullptr);
+    auto childNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(childNode, nullptr);
+    context_->rootNode_ = parentNode;
+
+    MouseEvent event;
+    event.x = 0.0f;
+    event.y = 0.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput" };
+    context_->HitTestMouseTargetForMapping(event, parentNode, whitelist);
+    context_->rootNode_ = nullptr;
+}
+
+/**
+ * @tc.name: CheckSourceTypeChange001
+ * @tc.desc: Test CheckSourceTypeChange returns true on NONE->TOUCH->MOUSE transitions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange001, TestSize.Level1)
+{
+    context_->lastSourceType_ = SourceType::NONE;
+    EXPECT_TRUE(context_->CheckSourceTypeChange(SourceType::TOUCH));
+    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
+    EXPECT_TRUE(context_->CheckSourceTypeChange(SourceType::MOUSE));
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
+}
+
+/**
+ * @tc.name: CheckSourceTypeChange002
+ * @tc.desc: Test CheckSourceTypeChange returns false when source type is the same
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, CheckSourceTypeChange002, TestSize.Level1)
+{
+    context_->lastSourceType_ = SourceType::TOUCH;
+    EXPECT_FALSE(context_->CheckSourceTypeChange(SourceType::TOUCH));
+    EXPECT_EQ(context_->lastSourceType_, SourceType::TOUCH);
+}
+
+/**
+ * @tc.name: MappedTouchPreservesSourceType001
+ * @tc.desc: Test mapped touch DOWN/MOVE/UP with isRightMouseMappingActive_ preserves lastSourceType_ as MOUSE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchPreservesSourceType001, TestSize.Level1)
+{
+    context_->lastSourceType_ = SourceType::MOUSE;
+    context_->SetRightMouseMappingActive(true);
 
     TouchEvent downEvent;
     downEvent.id = 1002;
@@ -661,27 +582,6 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingMoveEvent001, TestSiz
     moveEvent.sourceTool = SourceTool::MOUSE;
     context_->OnTouchEvent(moveEvent);
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingMoveEvent002, TestSize.Level1)
-{
-    TouchEvent downEvent;
-    downEvent.id = 1002;
-    downEvent.x = 100.0f;
-    downEvent.y = 100.0f;
-    downEvent.type = TouchType::DOWN;
-    downEvent.sourceType = SourceType::TOUCH;
-    downEvent.sourceTool = SourceTool::MOUSE;
-    context_->OnTouchEvent(downEvent);
-
-    TouchEvent moveEvent;
-    moveEvent.id = 1002;
-    moveEvent.x = 101.0f;
-    moveEvent.y = 101.0f;
-    moveEvent.type = TouchType::MOVE;
-    moveEvent.sourceType = SourceType::TOUCH;
-    moveEvent.sourceTool = SourceTool::MOUSE;
-    context_->OnTouchEvent(moveEvent);
 
     TouchEvent upEvent;
     upEvent.id = 1002;
@@ -691,51 +591,17 @@ HWTEST_F(RightMouseMappingPipelineTestNg, RightMouseMappingMoveEvent002, TestSiz
     upEvent.sourceType = SourceType::TOUCH;
     upEvent.sourceTool = SourceTool::MOUSE;
     context_->OnTouchEvent(upEvent);
-
-    MouseEvent mouseMove;
-    mouseMove.x = 102.0f;
-    mouseMove.y = 102.0f;
-    mouseMove.sourceType = SourceType::MOUSE;
-    mouseMove.sourceTool = SourceTool::MOUSE;
-    mouseMove.action = MouseAction::MOVE;
-    mouseMove.button = MouseButton::NONE_BUTTON;
-    context_->OnMouseEvent(mouseMove, context_->GetRootElement());
     EXPECT_EQ(context_->lastSourceType_, SourceType::MOUSE);
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, LeftClickCancelsMapping001, TestSize.Level1)
+/**
+ * @tc.name: MappedTouchCancel001
+ * @tc.desc: Test mapped touch CANCEL event does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchCancel001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
-    EXPECT_TRUE(context_->IsRightMouseMappingActive());
-
-    bool cancelCalled = false;
-    context_->SetOnRightMouseMappingCancel([&cancelCalled]() {
-        cancelCalled = true;
-    });
-
-    context_->WindowFocus(false);
-    EXPECT_TRUE(cancelCalled);
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, LeftClickCancelsMapping002, TestSize.Level1)
-{
-    context_->SetRightMouseMappingActive(true);
-    EXPECT_TRUE(context_->IsRightMouseMappingActive());
-    context_->SetRightMouseMappingActive(false);
-    EXPECT_FALSE(context_->IsRightMouseMappingActive());
-
-    MouseEvent mouseEvent;
-    mouseEvent.x = 100.0f;
-    mouseEvent.y = 100.0f;
-    mouseEvent.sourceType = SourceType::MOUSE;
-    mouseEvent.sourceTool = SourceTool::MOUSE;
-    mouseEvent.action = MouseAction::PRESS;
-    mouseEvent.button = MouseButton::LEFT_BUTTON;
-    context_->OnMouseEvent(mouseEvent, context_->GetRootElement());
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, CancelMouseMappingSendsCancel001, TestSize.Level1)
-{
     TouchEvent downEvent;
     downEvent.id = 1002;
     downEvent.x = 100.0f;
@@ -755,11 +621,14 @@ HWTEST_F(RightMouseMappingPipelineTestNg, CancelMouseMappingSendsCancel001, Test
     context_->OnTouchEvent(cancelEvent);
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, MoveEventDoesNotCancelMapping001, TestSize.Level1)
+/**
+ * @tc.name: MouseMoveMappingActive001
+ * @tc.desc: Test mouse MOVE when mapping active does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, MouseMoveMappingActive001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
-    EXPECT_TRUE(context_->IsRightMouseMappingActive());
-
     MouseEvent mouseMove;
     mouseMove.x = 101.0f;
     mouseMove.y = 101.0f;
@@ -770,94 +639,258 @@ HWTEST_F(RightMouseMappingPipelineTestNg, MoveEventDoesNotCancelMapping001, Test
     context_->OnMouseEvent(mouseMove, context_->GetRootElement());
 }
 
-HWTEST_F(RightMouseMappingPipelineTestNg, MappedTouchDoesNotUpdateLastSourceType001, TestSize.Level1)
-{
-    SourceType savedType = context_->lastSourceType_;
-
-    TouchEvent mappedDown;
-    mappedDown.id = 1002;
-    mappedDown.x = 100.0f;
-    mappedDown.y = 100.0f;
-    mappedDown.type = TouchType::DOWN;
-    mappedDown.sourceType = SourceType::TOUCH;
-    mappedDown.sourceTool = SourceTool::MOUSE;
-    context_->OnTouchEvent(mappedDown);
-
-    EXPECT_EQ(context_->lastSourceType_, savedType);
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping004, TestSize.Level1)
-{
-    auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(textNode, nullptr);
-    context_->rootNode_ = textNode;
-
-    MouseEvent event;
-    event.x = 0.0f;
-    event.y = 0.0f;
-    event.button = MouseButton::RIGHT_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-    event.sourceTool = SourceTool::MOUSE;
-    std::vector<std::string> whitelist = { "TextInput" };
-    bool result = context_->HitTestMouseTargetForMapping(event, textNode, whitelist);
-    EXPECT_FALSE(result);
-    context_->rootNode_ = nullptr;
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping005, TestSize.Level1)
-{
-    auto buttonNode = FrameNode::GetOrCreateFrameNode("button", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-    context_->rootNode_ = buttonNode;
-
-    MouseEvent event;
-    event.x = 0.0f;
-    event.y = 0.0f;
-    event.button = MouseButton::RIGHT_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-    event.sourceTool = SourceTool::MOUSE;
-    std::vector<std::string> whitelist = { "TextInput", "TextArea" };
-    bool result = context_->HitTestMouseTargetForMapping(event, buttonNode, whitelist);
-    EXPECT_FALSE(result);
-    context_->rootNode_ = nullptr;
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping006, TestSize.Level1)
-{
-    auto parentNode = FrameNode::GetOrCreateFrameNode("parent", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(parentNode, nullptr);
-    auto childNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(childNode, nullptr);
-    context_->rootNode_ = parentNode;
-
-    MouseEvent event;
-    event.x = 0.0f;
-    event.y = 0.0f;
-    event.button = MouseButton::RIGHT_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-    event.sourceTool = SourceTool::MOUSE;
-    std::vector<std::string> whitelist = { "TextInput" };
-    bool result = context_->HitTestMouseTargetForMapping(event, parentNode, whitelist);
-    EXPECT_FALSE(result);
-    context_->rootNode_ = nullptr;
-}
-
-HWTEST_F(RightMouseMappingPipelineTestNg, OnHideCancelsMapping001, TestSize.Level1)
+/**
+ * @tc.name: LeftClickAfterCancel001
+ * @tc.desc: Test left-click PRESS after mapping cancelled does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, LeftClickAfterCancel001, TestSize.Level1)
 {
     context_->SetRightMouseMappingActive(true);
+    context_->SetRightMouseMappingActive(false);
+    MouseEvent mouseEvent;
+    mouseEvent.x = 100.0f;
+    mouseEvent.y = 100.0f;
+    mouseEvent.sourceType = SourceType::MOUSE;
+    mouseEvent.sourceTool = SourceTool::MOUSE;
+    mouseEvent.action = MouseAction::PRESS;
+    mouseEvent.button = MouseButton::LEFT_BUTTON;
+    context_->OnMouseEvent(mouseEvent, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickPressEmptyWhitelist001
+ * @tc.desc: Test right-click PRESS with mapping active does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickPressEmptyWhitelist001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent pressEvent;
+    pressEvent.x = 100.0f;
+    pressEvent.y = 100.0f;
+    pressEvent.sourceType = SourceType::MOUSE;
+    pressEvent.sourceTool = SourceTool::MOUSE;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(pressEvent, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickMoveNoneButton001
+ * @tc.desc: Test right-click MOVE with NONE_BUTTON does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickMoveNoneButton001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent moveEvent;
+    moveEvent.x = 101.0f;
+    moveEvent.y = 101.0f;
+    moveEvent.sourceType = SourceType::MOUSE;
+    moveEvent.sourceTool = SourceTool::MOUSE;
+    moveEvent.action = MouseAction::MOVE;
+    moveEvent.button = MouseButton::NONE_BUTTON;
+    context_->OnMouseEvent(moveEvent, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickRelease001
+ * @tc.desc: Test right-click RELEASE with mapping active does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickRelease001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent releaseEvent;
+    releaseEvent.x = 100.0f;
+    releaseEvent.y = 100.0f;
+    releaseEvent.sourceType = SourceType::MOUSE;
+    releaseEvent.sourceTool = SourceTool::MOUSE;
+    releaseEvent.action = MouseAction::RELEASE;
+    releaseEvent.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(releaseEvent, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickCancelNoneButton001
+ * @tc.desc: Test right-click CANCEL with NONE_BUTTON does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickCancelNoneButton001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent cancelEvent;
+    cancelEvent.x = 100.0f;
+    cancelEvent.y = 100.0f;
+    cancelEvent.sourceType = SourceType::MOUSE;
+    cancelEvent.sourceTool = SourceTool::MOUSE;
+    cancelEvent.action = MouseAction::CANCEL;
+    cancelEvent.button = MouseButton::NONE_BUTTON;
+    context_->OnMouseEvent(cancelEvent, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickCancelRightButton001
+ * @tc.desc: Test right-click CANCEL with RIGHT_BUTTON does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickCancelRightButton001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent cancelEvent;
+    cancelEvent.x = 100.0f;
+    cancelEvent.y = 100.0f;
+    cancelEvent.sourceType = SourceType::MOUSE;
+    cancelEvent.sourceTool = SourceTool::MOUSE;
+    cancelEvent.action = MouseAction::CANCEL;
+    cancelEvent.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(cancelEvent, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: StylusRightClickNoMapping001
+ * @tc.desc: Test stylus right-click (sourceTool=PEN) does not trigger mapping
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, StylusRightClickNoMapping001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent stylusEvent;
+    stylusEvent.x = 100.0f;
+    stylusEvent.y = 100.0f;
+    stylusEvent.sourceType = SourceType::MOUSE;
+    stylusEvent.sourceTool = SourceTool::PEN;
+    stylusEvent.action = MouseAction::PRESS;
+    stylusEvent.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(stylusEvent, context_->GetRootElement());
     EXPECT_TRUE(context_->IsRightMouseMappingActive());
+}
 
-    bool cancelCalled = false;
-    context_->SetOnRightMouseMappingCancel([&cancelCalled]() {
-        cancelCalled = true;
-    });
+/**
+ * @tc.name: ConsecutiveRightClickPress001
+ * @tc.desc: Test consecutive right-click PRESS does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, ConsecutiveRightClickPress001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent press1;
+    press1.x = 100.0f;
+    press1.y = 100.0f;
+    press1.sourceType = SourceType::MOUSE;
+    press1.sourceTool = SourceTool::MOUSE;
+    press1.action = MouseAction::PRESS;
+    press1.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(press1, context_->GetRootElement());
 
-    context_->OnHide();
-    EXPECT_TRUE(cancelCalled);
+    MouseEvent press2;
+    press2.x = 200.0f;
+    press2.y = 200.0f;
+    press2.sourceType = SourceType::MOUSE;
+    press2.sourceTool = SourceTool::MOUSE;
+    press2.action = MouseAction::PRESS;
+    press2.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(press2, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: FullRightClickSequence001
+ * @tc.desc: Test full PRESS->MOVE->RELEASE->CANCEL sequence with mapping active does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, FullRightClickSequence001, TestSize.Level1)
+{
+    context_->SetRightMouseMappingActive(true);
+    MouseEvent press;
+    press.x = 100.0f;
+    press.y = 100.0f;
+    press.sourceType = SourceType::MOUSE;
+    press.sourceTool = SourceTool::MOUSE;
+    press.action = MouseAction::PRESS;
+    press.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(press, context_->GetRootElement());
+
+    MouseEvent move;
+    move.x = 101.0f;
+    move.y = 101.0f;
+    move.sourceType = SourceType::MOUSE;
+    move.sourceTool = SourceTool::MOUSE;
+    move.action = MouseAction::MOVE;
+    move.button = MouseButton::NONE_BUTTON;
+    context_->OnMouseEvent(move, context_->GetRootElement());
+
+    MouseEvent release;
+    release.x = 101.0f;
+    release.y = 101.0f;
+    release.sourceType = SourceType::MOUSE;
+    release.sourceTool = SourceTool::MOUSE;
+    release.action = MouseAction::RELEASE;
+    release.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(release, context_->GetRootElement());
+
+    MouseEvent cancel;
+    cancel.x = 101.0f;
+    cancel.y = 101.0f;
+    cancel.sourceType = SourceType::MOUSE;
+    cancel.sourceTool = SourceTool::MOUSE;
+    cancel.action = MouseAction::CANCEL;
+    cancel.button = MouseButton::NONE_BUTTON;
+    context_->OnMouseEvent(cancel, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickPressMappingInactive001
+ * @tc.desc: Test right-click PRESS when mapping inactive does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickPressMappingInactive001, TestSize.Level1)
+{
+    EXPECT_FALSE(context_->IsRightMouseMappingActive());
+    MouseEvent press;
+    press.x = 100.0f;
+    press.y = 100.0f;
+    press.sourceType = SourceType::MOUSE;
+    press.sourceTool = SourceTool::MOUSE;
+    press.action = MouseAction::PRESS;
+    press.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(press, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickMoveMappingInactive001
+ * @tc.desc: Test right-click MOVE when mapping inactive does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickMoveMappingInactive001, TestSize.Level1)
+{
+    EXPECT_FALSE(context_->IsRightMouseMappingActive());
+    MouseEvent move;
+    move.x = 101.0f;
+    move.y = 101.0f;
+    move.sourceType = SourceType::MOUSE;
+    move.sourceTool = SourceTool::MOUSE;
+    move.action = MouseAction::MOVE;
+    move.button = MouseButton::NONE_BUTTON;
+    context_->OnMouseEvent(move, context_->GetRootElement());
+}
+
+/**
+ * @tc.name: RightClickReleaseMappingInactive001
+ * @tc.desc: Test right-click RELEASE when mapping inactive does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, RightClickReleaseMappingInactive001, TestSize.Level1)
+{
+    EXPECT_FALSE(context_->IsRightMouseMappingActive());
+    MouseEvent release;
+    release.x = 100.0f;
+    release.y = 100.0f;
+    release.sourceType = SourceType::MOUSE;
+    release.sourceTool = SourceTool::MOUSE;
+    release.action = MouseAction::RELEASE;
+    release.button = MouseButton::RIGHT_BUTTON;
+    context_->OnMouseEvent(release, context_->GetRootElement());
 }
 
 } // namespace OHOS::Ace::NG

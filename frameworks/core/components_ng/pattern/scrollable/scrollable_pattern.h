@@ -685,7 +685,7 @@ public:
 
     virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
 
-    virtual bool IsScrollReachEdge() const
+    virtual bool IsScrollEdgeFinish() const
     {
         return true;
     }

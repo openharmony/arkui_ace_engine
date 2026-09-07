@@ -2199,15 +2199,9 @@ void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::R
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(rsUIDirector);
-    if (SystemProperties::GetMultiInstanceEnabled()) {
-        auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
-        CHECK_NULL_VOID(surfaceNode);
-        auto shadowSurface = surfaceNode->CreateShadowSurfaceNode();
-        CHECK_NULL_VOID(shadowSurface);
-        shadowSurface->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-    } else {
-        rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-    }
+    auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    surfaceNode->SetAbilityBGAlpha(appBgColor_.GetAlpha());
 #endif
 }
 
@@ -2989,11 +2983,12 @@ void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
 
-void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(uiExtensionManager_);
-    uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type);
+    uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type, reason);
 #endif
 }
 
@@ -3833,8 +3828,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     HandlePenHoverOut(point);
-    bool isMappedMouseTouch = point.sourceTool == SourceTool::MOUSE && point.sourceType == SourceType::TOUCH;
-    if (!isMappedMouseTouch && CheckSourceTypeChange(point.sourceType)) {
+    if (!isRightMouseMappingActive_ && CheckSourceTypeChange(point.sourceType)) {
         HandleTouchHoverOut(point);
     }
 

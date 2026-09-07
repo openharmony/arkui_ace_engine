@@ -1976,10 +1976,11 @@ int32_t UIExtensionPattern::GetInstanceIdFromHost() const
     return instanceId;
 }
 
-void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason)
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
+    sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type, reason);
 }
 
 void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)

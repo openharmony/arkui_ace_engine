@@ -78,6 +78,7 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/pattern/common_text/counter_constants.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -85,7 +86,6 @@ const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
-constexpr Dimension OVER_COUNT_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension INLINE_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
 constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
@@ -98,11 +98,6 @@ constexpr double UNDERLINE_COLOR_ALPHA = 0.5;
 constexpr Dimension AVOID_OFFSET = 24.0_vp;
 #endif
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
-constexpr int32_t ILLEGAL_VALUE = 0;
-constexpr double VELOCITY = -1000;
-constexpr double MASS = 1.0;
-constexpr double STIFFNESS = 428.0;
-constexpr double DAMPING = 10.0;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
@@ -127,7 +122,6 @@ constexpr std::string_view HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
 constexpr std::string_view FIELD_TEXT_CHANGE_EVENT = "textChange";
 constexpr std::string_view FIELD_BLUR_EVENT = "blur";
 constexpr std::string_view FIELD_FOCUS_EVENT = "focus";
-constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
 constexpr std::string_view PREVIEW_STYLE_NORMAL = "normal";
 constexpr std::string_view PREVIEW_STYLE_UNDERLINE = "underline";
@@ -4370,16 +4364,16 @@ void TextFieldPattern::HandleCountStyle()
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
+    auto inputValue = layoutProperty->GetSetCounterValue(COUNTER_DEFAULT_MODE);
     auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
-    if (inputValue == DEFAULT_MODE) {
+    if (inputValue == COUNTER_DEFAULT_MODE) {
         if (showBorder) {
             HandleCounterBorder();
         }
         if (showCountBorderStyle_ && !showBorder) {
             UltralimitShake();
         }
-    } else if (inputValue != ILLEGAL_VALUE) {
+    } else if (inputValue != COUNTER_ILLEGAL_VALUE) {
         if (showBorder) {
             HandleCounterBorder();
         }
@@ -4395,12 +4389,12 @@ void TextFieldPattern::ProcessUnderlineColorOnModifierDone()
         return;
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    if (inputValue == ILLEGAL_VALUE) {
+    auto inputValue = layoutProperty->GetSetCounterValue(COUNTER_DEFAULT_MODE);
+    if (inputValue == COUNTER_ILLEGAL_VALUE) {
         return;
     }
     auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
-    if (inputValue != DEFAULT_MODE && !showBorder) {
+    if (inputValue != COUNTER_DEFAULT_MODE && !showBorder) {
         return;
     }
     if (showCountBorderStyle_ && IsUnderlineMode() && HasFocus()) {
@@ -6666,27 +6660,9 @@ void TextFieldPattern::InsertValue(const std::string& insertValue, bool isIME)
 
 void TextFieldPattern::UltralimitShake()
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    ACE_UINODE_TRACE(frameNode);
-    auto context = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    AnimationOption option;
-    context->UpdateTranslateInXY({ -1.0, 0.0 });
-    const RefPtr<InterpolatingSpring> curve =
-        AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-    option.SetCurve(curve);
-    option.SetFillMode(FillMode::FORWARDS);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    AnimationUtils::Animate(
-        option,
-        [weak = WeakClaim(Referenced::RawPtr(context))]() {
-            auto context = weak.Upgrade();
-            CHECK_NULL_VOID(context);
-            context->UpdateTranslateInXY({ 0.0f, 0.0f });
-        },
-        option.GetOnFinishEvent());
+    auto counterDec = DynamicCast<CounterDecorator>(counterDecorator_);
+    CHECK_NULL_VOID(counterDec);
+    counterDec->UltralimitShake();
 }
 
 void TextFieldPattern::AdjustFloatingCaretInfo(const Offset& localOffset,
@@ -9671,7 +9647,7 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     auto jsonShowCounter = JsonUtil::Create(true);
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
-    jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(DEFAULT_MODE));
+    jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(COUNTER_DEFAULT_MODE));
     jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
@@ -9691,7 +9667,7 @@ void TextFieldPattern::ToJsonValueForApi22(std::unique_ptr<JsonValue>& json, con
     auto jsonShowCounterOptions = JsonUtil::Create(true);
     auto counterTextColor = layoutProperty->GetCounterTextColor();
     auto counterTextOverflowColor = layoutProperty->GetCounterTextOverflowColor();
-    jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(DEFAULT_MODE));
+    jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(COUNTER_DEFAULT_MODE));
     jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
     jsonShowCounterOptions->Put("counterTextColor", counterTextColor->ColorToString().c_str());
     jsonShowCounterOptions->Put("counterTextOverflowColor", counterTextOverflowColor->ColorToString().c_str());

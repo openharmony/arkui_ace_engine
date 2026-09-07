@@ -1761,6 +1761,8 @@ typedef struct Callback_SwipeActionState_Void Callback_SwipeActionState_Void;
 typedef struct Opt_Callback_SwipeActionState_Void Opt_Callback_SwipeActionState_Void;
 typedef struct Callback_SwiperContentTransitionProxy_Void Callback_SwiperContentTransitionProxy_Void;
 typedef struct Opt_Callback_SwiperContentTransitionProxy_Void Opt_Callback_SwiperContentTransitionProxy_Void;
+typedef struct Callback_TabBarDisplayMode_Void Callback_TabBarDisplayMode_Void;
+typedef struct Opt_Callback_TabBarDisplayMode_Void Opt_Callback_TabBarDisplayMode_Void;
 typedef struct Callback_TabContentTransitionProxy_Void Callback_TabContentTransitionProxy_Void;
 typedef struct Opt_Callback_TabContentTransitionProxy_Void Opt_Callback_TabContentTransitionProxy_Void;
 typedef struct Callback_TerminationInfo Callback_TerminationInfo;
@@ -2125,6 +2127,8 @@ typedef struct synthetic_Callback_Void synthetic_Callback_Void;
 typedef struct Opt_synthetic_Callback_Void Opt_synthetic_Callback_Void;
 typedef struct TabsCustomContentTransitionCallback TabsCustomContentTransitionCallback;
 typedef struct Opt_TabsCustomContentTransitionCallback Opt_TabsCustomContentTransitionCallback;
+typedef struct TabsSidebarSearchFilterCallback TabsSidebarSearchFilterCallback;
+typedef struct Opt_TabsSidebarSearchFilterCallback Opt_TabsSidebarSearchFilterCallback;
 typedef struct TextAreaSubmitCallback TextAreaSubmitCallback;
 typedef struct Opt_TextAreaSubmitCallback Opt_TextAreaSubmitCallback;
 typedef struct TextClockModifierBuilder TextClockModifierBuilder;
@@ -2753,6 +2757,8 @@ typedef struct Ark_SystemAdaptiveOptions Ark_SystemAdaptiveOptions;
 typedef struct Opt_SystemAdaptiveOptions Opt_SystemAdaptiveOptions;
 typedef struct Ark_TabContentAnimatedTransition Ark_TabContentAnimatedTransition;
 typedef struct Opt_TabContentAnimatedTransition Opt_TabContentAnimatedTransition;
+typedef struct Ark_TabsBreakpointType_TabBarDisplayMode Ark_TabsBreakpointType_TabBarDisplayMode;
+typedef struct Opt_TabsBreakpointType_TabBarDisplayMode Opt_TabsBreakpointType_TabBarDisplayMode;
 typedef struct Ark_TargetInfo Ark_TargetInfo;
 typedef struct Opt_TargetInfo Opt_TargetInfo;
 typedef struct Ark_TerminationInfo Ark_TerminationInfo;
@@ -3255,6 +3261,8 @@ typedef struct Ark_TabBarOptions Ark_TabBarOptions;
 typedef struct Opt_TabBarOptions Opt_TabBarOptions;
 typedef struct Ark_TabsOptions Ark_TabsOptions;
 typedef struct Opt_TabsOptions Opt_TabsOptions;
+typedef struct Ark_TabsSidebarSearchableOptions Ark_TabsSidebarSearchableOptions;
+typedef struct Opt_TabsSidebarSearchableOptions Opt_TabsSidebarSearchableOptions;
 typedef struct Ark_text_Decoration Ark_text_Decoration;
 typedef struct Opt_text_Decoration Opt_text_Decoration;
 typedef struct Ark_text_TextShadow Ark_text_TextShadow;
@@ -7395,6 +7403,23 @@ typedef struct Opt_SystemProperties {
     Ark_Tag tag;
     Ark_SystemProperties value;
 } Opt_SystemProperties;
+typedef enum Ark_TabBarDisplayMode {
+    ARK_TAB_BAR_DISPLAY_MODE_BOTTOM_TABBAR = 0,
+    ARK_TAB_BAR_DISPLAY_MODE_SIDEBAR = 1,
+} Ark_TabBarDisplayMode;
+typedef struct Opt_TabBarDisplayMode {
+    Ark_Tag tag;
+    Ark_TabBarDisplayMode value;
+} Opt_TabBarDisplayMode;
+typedef enum Ark_TabBarStyle {
+    ARK_TAB_BAR_STYLE_BOTTOM = 0,
+    ARK_TAB_BAR_STYLE_SIDEBAR = 1,
+    ARK_TAB_BAR_STYLE_SIDEBAR_ADAPTABLE = 2,
+} Ark_TabBarStyle;
+typedef struct Opt_TabBarStyle {
+    Ark_Tag tag;
+    Ark_TabBarStyle value;
+} Opt_TabBarStyle;
 typedef enum Ark_TabsCacheMode {
     ARK_TABS_CACHE_MODE_CACHE_BOTH_SIDE = 0,
     ARK_TABS_CACHE_MODE_CACHE_LATEST_SWITCHED = 1,
@@ -7411,6 +7436,14 @@ typedef struct Opt_TabsNestedScrollMode {
     Ark_Tag tag;
     Ark_TabsNestedScrollMode value;
 } Opt_TabsNestedScrollMode;
+typedef enum Ark_TabVisibility {
+    ARK_TAB_VISIBILITY_VISIBLE = 0,
+    ARK_TAB_VISIBILITY_HIDDEN = 1,
+} Ark_TabVisibility;
+typedef struct Opt_TabVisibility {
+    Ark_Tag tag;
+    Ark_TabVisibility value;
+} Opt_TabVisibility;
 typedef enum Ark_text_Affinity {
     ARK_TEXT_AFFINITY_UPSTREAM = 0,
     ARK_TEXT_AFFINITY_DOWNSTREAM = 1,
@@ -13147,6 +13180,16 @@ typedef struct Opt_Callback_SwiperContentTransitionProxy_Void {
     Ark_Tag tag;
     Callback_SwiperContentTransitionProxy_Void value;
 } Opt_Callback_SwiperContentTransitionProxy_Void;
+typedef struct Callback_TabBarDisplayMode_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_TabBarDisplayMode data);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_TabBarDisplayMode data);
+} Callback_TabBarDisplayMode_Void;
+typedef struct Opt_Callback_TabBarDisplayMode_Void {
+    Ark_Tag tag;
+    Callback_TabBarDisplayMode_Void value;
+} Opt_Callback_TabBarDisplayMode_Void;
 typedef struct Callback_TabContentTransitionProxy_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14965,6 +15008,16 @@ typedef struct Opt_TabsCustomContentTransitionCallback {
     Ark_Tag tag;
     TabsCustomContentTransitionCallback value;
 } Opt_TabsCustomContentTransitionCallback;
+typedef struct TabsSidebarSearchFilterCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 tabIndex, const Ark_String text, const synthetic_Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 tabIndex, const Ark_String text, const synthetic_Callback_Boolean_Void continuation);
+} TabsSidebarSearchFilterCallback;
+typedef struct Opt_TabsSidebarSearchFilterCallback {
+    Ark_Tag tag;
+    TabsSidebarSearchFilterCallback value;
+} Opt_TabsSidebarSearchFilterCallback;
 typedef struct TextAreaSubmitCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -18140,6 +18193,16 @@ typedef struct Opt_TabContentAnimatedTransition {
     Ark_Tag tag;
     Ark_TabContentAnimatedTransition value;
 } Opt_TabContentAnimatedTransition;
+typedef struct Ark_TabsBreakpointType_TabBarDisplayMode {
+    /* kind: Interface */
+    Opt_TabBarDisplayMode sm;
+    Opt_TabBarDisplayMode md;
+    Opt_TabBarDisplayMode lg;
+} Ark_TabsBreakpointType_TabBarDisplayMode;
+typedef struct Opt_TabsBreakpointType_TabBarDisplayMode {
+    Ark_Tag tag;
+    Ark_TabsBreakpointType_TabBarDisplayMode value;
+} Opt_TabsBreakpointType_TabBarDisplayMode;
 typedef struct Ark_TargetInfo {
     /* kind: Interface */
     Ark_Union_String_I32 id;
@@ -20956,6 +21019,17 @@ typedef struct Opt_TabsOptions {
     Ark_Tag tag;
     Ark_TabsOptions value;
 } Opt_TabsOptions;
+typedef struct Ark_TabsSidebarSearchableOptions {
+    /* kind: Interface */
+    Opt_ResourceStr searchText;
+    Opt_ResourceStr placeholder;
+    Opt_Callback_String_Void searchCallback;
+    Opt_TabsSidebarSearchFilterCallback searchFilter;
+} Ark_TabsSidebarSearchableOptions;
+typedef struct Opt_TabsSidebarSearchableOptions {
+    Ark_Tag tag;
+    Ark_TabsSidebarSearchableOptions value;
+} Opt_TabsSidebarSearchableOptions;
 typedef struct Ark_text_Decoration {
     /* kind: Interface */
     Opt_text_TextDecorationType textDecoration;
@@ -27587,6 +27661,9 @@ typedef struct GENERATED_ArkUITabContentModifier {
                           const Opt_VoidCallback* value);
     void (*setOnWillHide)(Ark_NativePointer node,
                           const Opt_VoidCallback* value);
+    void (*setTabBarVisibility)(Ark_NativePointer node,
+                                Ark_TabVisibility visibility,
+                                const Opt_TabBarDisplayMode* displayMode);
 } GENERATED_ArkUITabContentModifier;
 
 typedef struct GENERATED_ArkUITabsModifier {
@@ -27652,6 +27729,28 @@ typedef struct GENERATED_ArkUITabsModifier {
                                   const Opt_OnTabsContentDidScrollCallback* value);
     void (*setBarFloatingStyle)(Ark_NativePointer node,
                                 const Opt_FloatingTabBarStyle* value);
+    void (*setBarStyle)(Ark_NativePointer node,
+                        const Opt_TabBarStyle* value);
+    void (*setSidebarPosition)(Ark_NativePointer node,
+                               const Opt_BarPosition* value);
+    void (*setSidebarHeader)(Ark_NativePointer node,
+                             const Opt_ComponentContentBase* value);
+    void (*setSidebarSearchable)(Ark_NativePointer node,
+                                 const Opt_TabsSidebarSearchableOptions* value);
+    void (*setBarDisplayModeBreakpoint)(Ark_NativePointer node,
+                                        const Opt_TabsBreakpointType_TabBarDisplayMode* value);
+    void (*setOnBarDisplayModeChange)(Ark_NativePointer node,
+                                      const Opt_Callback_TabBarDisplayMode_Void* value);
+    void (*setSidebarSelectedIconColor)(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value);
+    void (*setSidebarSelectedTextColor)(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value);
+    void (*setSidebarUnselectedIconColor)(Ark_NativePointer node,
+                                          const Opt_ResourceColor* value);
+    void (*setSidebarUnselectedTextColor)(Ark_NativePointer node,
+                                          const Opt_ResourceColor* value);
+    void (*setSidebarSelectedBoardColor)(Ark_NativePointer node,
+                                         const Opt_ResourceColor* value);
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);
@@ -32386,6 +32485,7 @@ typedef struct GENERATED_ArkUITabsControllerAccessor {
                                const Ark_TranslateOptions* translate);
     void (*setTabBarOpacity)(Ark_TabsController peer,
                              Ark_Float64 opacity);
+    Ark_TabBarDisplayMode (*getBarDisplayMode)(Ark_TabsController peer);
 } GENERATED_ArkUITabsControllerAccessor;
 
 typedef struct GENERATED_ArkUITabsExtenderAccessor {

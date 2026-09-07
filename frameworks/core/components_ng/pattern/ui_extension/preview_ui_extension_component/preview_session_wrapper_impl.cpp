@@ -736,7 +736,7 @@ void PreviewSessionWrapperImpl::NotifySizeChangeReason(
 }
     
 void PreviewSessionWrapperImpl::NotifyOriginAvoidArea(
-    const Rosen::AvoidArea& avoidArea, uint32_t type) const
+    const Rosen::AvoidArea& avoidArea, uint32_t type, WindowSizeChangeReason reason) const
 {
     CHECK_NULL_VOID(session_);
     PLATFORM_LOGI("PreviewUIExtension The avoid area is notified to the provider.");

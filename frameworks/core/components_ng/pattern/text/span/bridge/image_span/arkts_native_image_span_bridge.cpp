@@ -25,8 +25,9 @@
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/ace_scoring_log.h"
+#ifndef CROSS_PLATFORM
 #include "lattice_napi/js_lattice.h"
-
+#endif
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -669,6 +670,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetResizableLattice(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+#ifndef CROSS_PLATFORM
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -688,6 +690,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetResizableLattice(ArkUIRuntimeCallInfo
     } else {
         GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanResizableLattice(nativeNode);
     }
+#endif
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue ImageSpanBridge::ResetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo)

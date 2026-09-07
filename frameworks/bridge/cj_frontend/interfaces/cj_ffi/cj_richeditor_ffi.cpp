@@ -16,9 +16,9 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_ffi.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_abstract_span_result.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_value.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 
 #include "cj_lambda.h"
 #include "securec.h"
@@ -29,13 +29,13 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
 // Should use CJUIModifier API later
-NG::RichEditorModelNG* GetRichEditorModel()
+RichEditorModel* GetRichEditorModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Richeditor");
     if (module == nullptr) {
         LOGF_ABORT("Can't find richeditor dynamic module");
     }
-    return reinterpret_cast<NG::RichEditorModelNG*>(module->GetModel());
+    return reinterpret_cast<RichEditorModel*>(module->GetModel());
 }
 }
 

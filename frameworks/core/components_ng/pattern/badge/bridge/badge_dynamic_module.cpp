@@ -72,7 +72,7 @@ const void* BadgeDynamicModule::GetCjModifier()
 void* BadgeDynamicModule::GetModel()
 {
     static NG::BadgeModelNG model;
-    return &model;
+    return static_cast<BadgeModel*>(&model);
 }
 
 } // namespace OHOS::Ace

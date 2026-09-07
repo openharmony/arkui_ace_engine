@@ -39,8 +39,23 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension DEFAULT_TAB_BAR_ITEM_HEIGHT = 56.0_vp;
-const Dimension SIDEBAR_TAB_ICON_TEXT_GAP = 16.0_vp;
-const Dimension SIDEBAR_TAB_LEFT_RIGHT_PADDING = 8.0_vp;
+const Dimension SIDEBAR_TAB_ITEM_MARGIN = 8.0_vp;
+constexpr float SIDEBAR_TAB_MAX_FONT_SCALE = 2.0f;
+constexpr float SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL8 = 1.75f;
+constexpr float SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL10 = 2.0f;
+
+// Get vertical margin for text node based on font scale.
+// Default: padding_level4, >=1.75: padding_level8, >=2.0: padding_level10
+Dimension GetVerticalMarginForFontScale(float fontScale, const RefPtr<TabTheme>& tabTheme)
+{
+    if (GreatOrEqual(fontScale, SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL10)) {
+        return tabTheme->GetSideBarPaddingLevel10();
+    } else if (GreatOrEqual(fontScale, SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL8)) {
+        return tabTheme->GetSideBarPaddingLevel8();
+    }
+    return tabTheme->GetSideBarPaddingLevel4();
+}
+
 std::u16string ToLowerU16Str(std::u16string str)
 {
     for (auto& ch : str) {
@@ -55,6 +70,48 @@ std::u16string ToLowerU16Str(std::u16string str)
 void TabsSideBarTabListPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+}
+
+void TabsSideBarTabListPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    auto columnNode = GetTabItemContainerNode();
+    CHECK_NULL_VOID(columnNode);
+    auto fontScale = context->GetFontScaleFromEnv(host);
+    auto verticalMargin = GetVerticalMarginForFontScale(fontScale, tabTheme);
+    for (const auto& child : columnNode->GetChildren()) {
+        auto tabItemNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(tabItemNode);
+        // Only update icon+text type tab items (Button > Row > Image + Text).
+        // Skip custom builder/content tab items — their layout is user-defined.
+        const auto& itemChild = tabItemNode->GetChildren();
+        if (itemChild.empty() || itemChild.front()->GetTag() != V2::ROW_ETS_TAG) {
+            continue;
+        }
+        // Update text node top/bottom margin based on current font scale
+        auto rowNode = AceType::DynamicCast<FrameNode>(itemChild.front());
+        CHECK_NULL_CONTINUE(rowNode);
+        constexpr size_t ICON_AND_TEXT_SIZE = 2;
+        if (rowNode->GetChildren().size() < ICON_AND_TEXT_SIZE) {
+            continue;
+        }
+        auto textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
+        CHECK_NULL_CONTINUE(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_CONTINUE(textLayoutProperty);
+        MarginProperty textMargin;
+        textMargin.left = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+        textMargin.right = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+        textMargin.top = CalcLength(verticalMargin);
+        textMargin.bottom = CalcLength(verticalMargin);
+        textLayoutProperty->UpdateMargin(textMargin);
+        tabItemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void TabsSideBarTabListPattern::SetCurrentIndex(int32_t index)
@@ -323,6 +380,10 @@ void TabsSideBarTabListPattern::CreateOrUpdateTabItemTextAndIcon(
     CHECK_NULL_VOID(tabContentPattern);
     auto tabItemContainerNode = GetTabItemContainerNode();
     CHECK_NULL_VOID(tabItemContainerNode);
+    auto tabTheme = tabItemNode->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    auto context = tabItemNode->GetContext();
+    CHECK_NULL_VOID(context);
     RefPtr<FrameNode> rowNode = nullptr;
     if (tabItemNode->GetChildren().size() != 1 || !tabItemNode->GetChildren().front() ||
         tabItemNode->GetChildren().front()->GetTag() != V2::ROW_ETS_TAG) {
@@ -335,8 +396,12 @@ void TabsSideBarTabListPattern::CreateOrUpdateTabItemTextAndIcon(
         linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         linearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
         linearLayoutProperty->SetIsVertical(false);
-        // Row fills TabItem width & height so icon+text content area covers the full item
-        linearLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        // Row fills TabItem width (100%) so icon+text content area covers the full item width.
+        // Height is WRAP content — do NOT use MATCH_PARENT for height because TabItem
+        // itself has WRAP height with minHeight=56vp; MATCH_PARENT on Row would cause
+        // circular expansion in an unconstrained Scroll container.
+        linearLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), std::nullopt));
         rowNode->MountToParent(tabItemNode);
     } else {
         rowNode = AceType::DynamicCast<FrameNode>(tabItemNode->GetChildren().front());
@@ -360,50 +425,56 @@ void TabsSideBarTabListPattern::CreateOrUpdateTabItemTextAndIcon(
         }
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(iconNode);
-        // Text uses layoutWeight(1) to fill remaining Row width after icon+margin,
-        // so it won't overflow Row and ellipsis works when text is too long.
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty) {
-            textLayoutProperty->UpdateLayoutWeight(1);
-        }
-        // Set margin-right on icon to create gap between icon and text
-        auto iconLayoutProperty = iconNode->GetLayoutProperty();
-        if (iconLayoutProperty) {
-            MarginProperty margin;
-            margin.right = CalcLength(SIDEBAR_TAB_ICON_TEXT_GAP);
-            iconLayoutProperty->UpdateMargin(margin);
-        }
         iconNode->MountToParent(rowNode);
         textNode->MountToParent(rowNode);
         // Row mounts to ColumnNode (not directly to tabListNode)
         auto index = std::clamp(position, 0, static_cast<int32_t>(tabItemContainerNode->GetChildren().size()));
         tabItemNode->MountToParent(tabItemContainerNode, index);
-        return;
+    } else {
+        if (isFrameNode) {
+            auto builderNode = tabContentPattern->FireCustomStyleNode();
+            rowNode->ReplaceChild(AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back()), builderNode);
+        }
+        auto oldIcon = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
+        CHECK_NULL_VOID(oldIcon);
+        if (tabBarParam.GetSymbol().has_value() && oldIcon->GetTag() != V2::SYMBOL_ETS_TAG) {
+            auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+            rowNode->ReplaceChild(oldIcon, icon);
+        } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
+            auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+            rowNode->ReplaceChild(oldIcon, icon);
+        }
+        iconNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
+        textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
     }
-    if (isFrameNode) {
-        auto builderNode = tabContentPattern->FireCustomStyleNode();
-        rowNode->ReplaceChild(AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back()), builderNode);
-    }
-    auto oldIcon = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
-    CHECK_NULL_VOID(oldIcon);
-    if (tabBarParam.GetSymbol().has_value() && oldIcon->GetTag() != V2::SYMBOL_ETS_TAG) {
-        auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        rowNode->ReplaceChild(oldIcon, icon);
-    } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
-        auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
-        rowNode->ReplaceChild(oldIcon, icon);
-    }
-    iconNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
-    textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
-    // Set margin-right on icon for icon-text gap
+    // Set left/right margin on icon for edge spacing and half of the icon-text gap
     if (iconNode) {
         auto iconLayoutProperty = iconNode->GetLayoutProperty();
         if (iconLayoutProperty) {
-            MarginProperty margin;
-            margin.right = CalcLength(SIDEBAR_TAB_ICON_TEXT_GAP);
-            iconLayoutProperty->UpdateMargin(margin);
+            MarginProperty iconMargin;
+            iconMargin.left = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            iconMargin.right = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            iconLayoutProperty->UpdateMargin(iconMargin);
+        }
+    }
+    // Set left/right + top/bottom margin on text for edge spacing, icon-text gap, and vertical spacing
+    if (textNode) {
+        auto textLayoutProperty = textNode->GetLayoutProperty();
+        if (textLayoutProperty) {
+            // Text uses layoutWeight(1) to fill remaining Row width after icon+margin
+            textLayoutProperty->UpdateLayoutWeight(1);
+            // Text margin: left/right for edge spacing + icon-text gap,
+            // top/bottom for vertical spacing (default padding_level4)
+            MarginProperty textMargin;
+            textMargin.left = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            textMargin.right = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            auto fontScale = context->GetFontScaleFromEnv(textNode);
+            auto verticalMargin = GetVerticalMarginForFontScale(fontScale, tabTheme);
+            textMargin.top = CalcLength(verticalMargin);
+            textMargin.bottom = CalcLength(verticalMargin);
+            textLayoutProperty->UpdateMargin(textMargin);
         }
     }
     rowNode->MarkModifyDone();
@@ -433,13 +504,10 @@ void TabsSideBarTabListPattern::UpdateTabBarItemTextProperties(
     textRenderContext->UpdateClipEdge(true);
     if (!isFrameNode) {
         textLayoutProperty->UpdateContent(tabBarParam.GetText());
-        textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
+        textLayoutProperty->UpdateFontSize(tabTheme->GetSideBarTextFontSize());
         textLayoutProperty->UpdateTextAlign(TextAlign::START); // Left-aligned (Row layout)
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    }
-    if (!tabBarParam.GetIcon().empty()) {
-        textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabTextSize());
+        textLayoutProperty->UpdateMaxFontScale(SIDEBAR_TAB_MAX_FONT_SCALE);
+        textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     }
     if (!isFrameNode) {
         TabContentModelNG::UpdateLabelStyle(labelStyle, textLayoutProperty);
@@ -524,16 +592,6 @@ void TabsSideBarTabListPattern::AddOrUpdateTabItemWithIconAndText(
     CHECK_NULL_VOID(tabContentPattern);
     auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
     CHECK_NULL_VOID(tabsNode);
-    auto tabItemNodeProperty = tabItemNode->GetLayoutProperty();
-    CHECK_NULL_VOID(tabItemNodeProperty);
-    tabItemNodeProperty->MarkUserDefinedHeightConfigured();
-    std::optional<CalcLength> width = std::nullopt;
-    auto&& layoutConstraint = tabItemNodeProperty->GetCalcLayoutConstraint();
-    if (layoutConstraint && layoutConstraint->selfIdealSize) {
-        width = layoutConstraint->selfIdealSize->Width();
-    }
-    std::optional<CalcLength> height = CalcLength(DEFAULT_TAB_BAR_ITEM_HEIGHT);
-    tabItemNodeProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 
     auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabLayoutProperty);
@@ -594,11 +652,10 @@ RefPtr<FrameNode> TabsSideBarTabListPattern::GetOrCreateTabItemNode(int32_t id)
     buttonModifier->setButtonBorderRadius(nodeHandle, radius, radius, radius, radius);
     auto property = tabItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, nullptr);
-    PaddingProperty padding;
-    padding.left = CalcLength(SIDEBAR_TAB_LEFT_RIGHT_PADDING);
-    padding.right = CalcLength(SIDEBAR_TAB_LEFT_RIGHT_PADDING);
-    property->UpdatePadding(padding);
+    // Width: 100% of parent; Height: match-content with minimum 56vp
     property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), std::nullopt));
+    property->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(DEFAULT_TAB_BAR_ITEM_HEIGHT)));
+    property->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
     return tabItemNode;
 }
 

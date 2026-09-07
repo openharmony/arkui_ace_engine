@@ -2961,7 +2961,7 @@ void WebModelNG::SetAiSessionOptions(FrameNode* frameNode, uint32_t type, AISess
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
         std::move(onExecuteAIAction), std::move(onDestroyAISession));

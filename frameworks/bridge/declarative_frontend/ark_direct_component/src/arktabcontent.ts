@@ -46,8 +46,8 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabContentOnWillHideModifier.identity, TabContentOnWillHideModifier, event);
         return this;
       }
-      defaultVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): TabContent {
-        modifierWithKey(this._modifiersWithKeys, TabContentDefaultVisibilityModifier.identity, TabContentDefaultVisibilityModifier, { visibility, displayMode });
+      tabBarVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): TabContent {
+        modifierWithKey(this._modifiersWithKeys, TabContentTabBarVisibilityModifier.identity, TabContentTabBarVisibilityModifier, { visibility, displayMode });
         return this;
       }
     }
@@ -153,16 +153,16 @@ function loadComponent(): ComponentObj | undefined {
       }
     }
 
-    class TabContentDefaultVisibilityModifier extends ModifierWithKey<TabContentDefaultVisibility> {
-      constructor(value: TabContentDefaultVisibility) {
+    class TabContentTabBarVisibilityModifier extends ModifierWithKey<TabContentTabBarVisibility> {
+      constructor(value: TabContentTabBarVisibility) {
         super(value);
       }
-      static identity: Symbol = Symbol('tabcontentdefaultvisibility');
+      static identity: Symbol = Symbol('tabcontenttabbarvisibility');
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
-          getUINativeModule().tabContent.resetDefaultVisibility(node);
+          getUINativeModule().tabContent.resetTabBarVisibility(node);
         } else {
-          getUINativeModule().tabContent.setDefaultVisibility(node, this.value.visibility, this.value.displayMode);
+          getUINativeModule().tabContent.setTabBarVisibility(node, this.value.visibility, this.value.displayMode);
         }
       }
     
@@ -227,8 +227,8 @@ class JSTabContent extends JSContainerBase {
     getUINativeModule().tabContent.setTabContentOnWillHide(true, value);
   }
 
-  static defaultVisibility(visibility: any, displayMode?: any): void {
-    getUINativeModule().tabContent.setDefaultVisibility(true, visibility, displayMode);
+  static tabBarVisibility(visibility: any, displayMode?: any): void {
+    getUINativeModule().tabContent.setTabBarVisibility(true, visibility, displayMode);
   }
 
   static attributeModifier(modifier: any): void {

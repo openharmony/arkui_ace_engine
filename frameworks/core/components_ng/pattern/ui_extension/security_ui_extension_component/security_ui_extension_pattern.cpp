@@ -855,10 +855,10 @@ int32_t SecurityUIExtensionPattern::GetInstanceId()
 }
 
 void SecurityUIExtensionPattern::DispatchOriginAvoidArea(
-    const Rosen::AvoidArea& avoidArea, uint32_t type)
+    const Rosen::AvoidArea& avoidArea, uint32_t type, WindowSizeChangeReason reason)
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
+    sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type, reason);
 }
 
 void SecurityUIExtensionPattern::SetWantWrap(

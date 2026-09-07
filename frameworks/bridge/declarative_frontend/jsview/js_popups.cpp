@@ -17,6 +17,8 @@
 #include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+#include "interfaces/napi/kits/ui_material/ui_material_napi.h"
+
 #include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -340,7 +342,8 @@ void SetPopupSystemMaterial(const JSRef<JSObject>& popupObj, const RefPtr<PopupP
 {
     auto systemMaterialValue = popupObj->GetProperty("systemMaterial");
     if (systemMaterialValue->IsObject()) {
-        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        auto systemUiMaterial =
+            static_cast<UiMaterial*>(UnwrapNapiValueWithType(systemMaterialValue, &Napi::UI_MATERIAL_TYPE_TAG));
         popupParam->SetSystemMaterial(systemUiMaterial ? systemUiMaterial->Copy() : nullptr);
     }
 }
@@ -964,7 +967,8 @@ void ParseTipsParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& ti
     }
     auto systemMaterialValue = tipsObj->GetProperty("systemMaterial");
     if (systemMaterialValue->IsObject()) {
-        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        auto systemUiMaterial =
+            static_cast<UiMaterial*>(UnwrapNapiValueWithType(systemMaterialValue, &Napi::UI_MATERIAL_TYPE_TAG));
         tipsParam->SetSystemMaterial(systemUiMaterial->Copy());
     }
     tipsParam->SetBlockEvent(false);
@@ -1495,7 +1499,8 @@ void JSViewPopups::ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, N
 {
     auto systemMaterialValue = menuOptions->GetProperty("systemMaterial");
     if (systemMaterialValue->IsObject()) {
-        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        auto systemUiMaterial =
+            static_cast<UiMaterial*>(UnwrapNapiValueWithType(systemMaterialValue, &Napi::UI_MATERIAL_TYPE_TAG));
         menuParam.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
     }
 }

@@ -442,12 +442,13 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEv
     // a concrete action successfully; false means the gesture should be treated as unhandled,
     // including monitor veto, invalid proposal, or a final NONE_ACTION proposal.
     auto fallbackProposal = defaultProposal.value_or(BuildNoneActionProposal(trigger));
+    bool hasMonitor = static_cast<bool>(GetMonitorHandle());
     auto proposal = ResolveProposal(fallbackProposal);
     bool executeResult = false;
     if (proposal.has_value()) {
         executeResult = ExecuteProposal(proposal.value(), event);
     }
-    RecordExecutionSnapshot(trigger, static_cast<bool>(GetMonitorHandle()), fallbackProposal, proposal, executeResult);
+    RecordExecutionSnapshot(trigger, hasMonitor, fallbackProposal, proposal, executeResult);
     return executeResult;
 }
 

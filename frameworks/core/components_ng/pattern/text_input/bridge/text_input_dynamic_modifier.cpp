@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/common_text/text_margin_utils.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
@@ -2645,78 +2646,10 @@ void ResetTextInputLineBreakStrategy(ArkUINodeHandle node)
     TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
 }
 
-void RegisterMarginResource(FrameNode* frameNode, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
-    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
-{
-    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (marginRes && marginRes->topObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->topObj));
-        pattern->RegisterResource<CalcDimension>("marginTop", resObj,
-        CalcDimension(top->value, static_cast<DimensionUnit>(top->unit)));
-    } else {
-        pattern->UnRegisterResource("marginTop");
-    }
-    if (marginRes && marginRes->bottomObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->bottomObj));
-        pattern->RegisterResource<CalcDimension>("marginBottom", resObj,
-        CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit)));
-    } else {
-        pattern->UnRegisterResource("marginBottom");
-    }
-    if (marginRes && marginRes->leftObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->leftObj));
-        pattern->RegisterResource<CalcDimension>("marginLeft", resObj,
-        CalcDimension(left->value, static_cast<DimensionUnit>(left->unit)));
-    } else {
-        pattern->UnRegisterResource("marginLeft");
-    }
-    if (marginRes && marginRes->rightObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->rightObj));
-        pattern->RegisterResource<CalcDimension>("marginRight", resObj,
-        CalcDimension(right->value, static_cast<DimensionUnit>(right->unit)));
-    } else {
-        pattern->UnRegisterResource("marginRight");
-    }
-}
-
 void SetTextInputMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CalcLength topDimen;
-    CalcLength rightDimen;
-    CalcLength bottomDimen;
-    CalcLength leftDimen;
-    if (top->string != nullptr) {
-        topDimen = CalcLength(top->string);
-    } else {
-        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
-    }
-    if (right->string != nullptr) {
-        rightDimen = CalcLength(right->string);
-    } else {
-        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
-    }
-    if (bottom->string != nullptr) {
-        bottomDimen = CalcLength(bottom->string);
-    } else {
-        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
-    }
-    if (left->string != nullptr) {
-        leftDimen = CalcLength(left->string);
-    } else {
-        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
-    }
-    NG::PaddingProperty paddings;
-    paddings.top = std::optional<CalcLength>(topDimen);
-    paddings.bottom = std::optional<CalcLength>(bottomDimen);
-    paddings.left = std::optional<CalcLength>(leftDimen);
-    paddings.right = std::optional<CalcLength>(rightDimen);
-    TextFieldModelNG::SetMargin(frameNode, paddings);
-    RegisterMarginResource(frameNode, top, right, bottom, left, marginRes);
+    SetMarginCommon(node, { top, right, bottom, left }, marginRes, TextFieldModelNG::SetMargin);
 }
 
 void SetTextInputMarginJS(ArkUINodeHandle node)
@@ -2728,33 +2661,12 @@ void SetTextInputMarginJS(ArkUINodeHandle node)
 
 void ResetTextInputMargin(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NG::PaddingProperty paddings;
-    paddings.top = NG::CalcLength(0.0);
-    paddings.bottom = NG::CalcLength(0.0);
-    paddings.left = NG::CalcLength(0.0);
-    paddings.right = NG::CalcLength(0.0);
-    TextFieldModelNG::SetMargin(frameNode, paddings);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("marginTop");
-        pattern->UnRegisterResource("marginBottom");
-        pattern->UnRegisterResource("marginLeft");
-        pattern->UnRegisterResource("marginRight");
-    }
+    ResetMarginCommon(node, TextFieldModelNG::SetMargin);
 }
 
 void GetTextInputMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto margin = TextFieldModelNG::GetMargin(frameNode);
-    (*values)[CALL_ARG_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[CALL_ARG_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[CALL_ARG_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[CALL_ARG_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    GetMarginCommon(node, values, length, unit, TextFieldModelNG::GetMargin);
 }
 
 void SetTextInputCaret(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)

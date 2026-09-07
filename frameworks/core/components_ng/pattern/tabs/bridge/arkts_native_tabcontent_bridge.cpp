@@ -864,7 +864,7 @@ void TabContentBridge::RegisterTabContentAttributes(panda::Local<panda::ObjectRe
         "setTabContentSize", "resetTabContentSize",
         "setTabContentOnWillShow", "resetTabContentOnWillShow",
         "setTabContentOnWillHide", "resetTabContentOnWillHide",
-        "setDefaultVisibility", "resetDefaultVisibility",
+        "setTabBarVisibility", "resetTabBarVisibility",
     };
     Local<panda::JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::Create),
@@ -881,8 +881,8 @@ void TabContentBridge::RegisterTabContentAttributes(panda::Local<panda::ObjectRe
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillShow),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabContentOnWillHide),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillHide),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetDefaultVisibility),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetDefaultVisibility),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabBarVisibility),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabBarVisibility),
     };
     auto tabContent = panda::ObjectRef::NewWithNamedProperties(
         vm, ArraySize(functionNames), functionNames, funcValues);
@@ -1177,7 +1177,7 @@ ArkUINativeModuleValue TabContentBridge::ResetTabContentOnWillHide(ArkUIRuntimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TabContentBridge::SetDefaultVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue TabContentBridge::SetTabBarVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1202,19 +1202,19 @@ ArkUINativeModuleValue TabContentBridge::SetDefaultVisibility(ArkUIRuntimeCallIn
             hasDisplayMode = true;
         }
     }
-    GetArkUINodeModifiers()->getTabContentModifier()->setDefaultVisibility(
+    GetArkUINodeModifiers()->getTabContentModifier()->setTabBarVisibility(
         nativeNode, visibility, displayMode, hasDisplayMode);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TabContentBridge::ResetDefaultVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue TabContentBridge::ResetTabBarVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTabContentModifier()->resetDefaultVisibility(nativeNode);
+    GetArkUINodeModifiers()->getTabContentModifier()->resetTabBarVisibility(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

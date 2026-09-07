@@ -1828,6 +1828,7 @@ private:
     void InitWebEvent();
     void RegisterWebEvent();
     void ReleasePlatformResource();
+    void DestroyNWeb();
     void Stop();
     void UnregisterEvent();
     std::string GetUrlStringParam(const std::string& param, const std::string& name) const;

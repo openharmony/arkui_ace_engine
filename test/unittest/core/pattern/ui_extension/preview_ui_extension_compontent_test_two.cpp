@@ -501,7 +501,8 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperNotifyOrigin
     auto wrapper = CreatePreviewSessionWrapperImpl(pattern);
     ASSERT_NE(wrapper, nullptr);
     Rosen::AvoidArea avoidArea;
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM));
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM),
+        WindowSizeChangeReason::UNDEFINED);
     EXPECT_FALSE(wrapper->IsSessionValid());
 #endif
 }
@@ -1073,8 +1074,10 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperNotifyOrigin
     ASSERT_NE(wrapper, nullptr);
     AttachValidSession(wrapper);
     Rosen::AvoidArea avoidArea;
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM));
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_CUTOUT));
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM),
+        WindowSizeChangeReason::UNDEFINED);
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_CUTOUT),
+        WindowSizeChangeReason::UNDEFINED);
     EXPECT_NE(wrapper->session_, nullptr);
 #endif
 }
@@ -1741,8 +1744,10 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperBulk012, Tes
     auto wrapper = CreatePreviewSessionWrapperImpl(pattern);
     ASSERT_NE(wrapper, nullptr);
     Rosen::AvoidArea avoidArea;
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM));
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM),
+        WindowSizeChangeReason::UNDEFINED);
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR),
+        WindowSizeChangeReason::UNDEFINED);
     EXPECT_NE(wrapper, nullptr);
 #endif
 }

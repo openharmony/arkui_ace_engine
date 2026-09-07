@@ -119,6 +119,8 @@ private:
 
     void UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
     void UpdateTabBarAndDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
+    void UpdateEffectNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
+    void UpdateBgMaskNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
     void MeasureInSideBarMode(
         LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize);
     float MeasureSideBar(

@@ -67,6 +67,13 @@ namespace {
 const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class SecuritySessionWrapperImplTestNg : public testing::Test {
 public:
     void SetUp() override;

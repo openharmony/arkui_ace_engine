@@ -17,7 +17,7 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -25,15 +25,15 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
 // Should use CJUIModifier API later
-NG::TextFieldModelNG* GetTextAreaTextFieldModel()
+TextFieldModel* GetTextAreaTextFieldModel()
 {
-    static NG::TextFieldModelNG* cachedModel = nullptr;
+    static TextFieldModel* cachedModel = nullptr;
     if (cachedModel == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextArea");
         if (module == nullptr) {
             LOGF_ABORT("Can't find textarea dynamic module");
         }
-        cachedModel = reinterpret_cast<NG::TextFieldModelNG*>(module->GetModel());
+        cachedModel = reinterpret_cast<TextFieldModel*>(module->GetModel());
     }
     return cachedModel;
 }

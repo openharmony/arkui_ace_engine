@@ -36,6 +36,8 @@
 #include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_input_response_area.h"
+#include "core/components_ng/pattern/common_text/text_border_utils.h"
+#include "core/components_ng/pattern/common_text/text_margin_utils.h"
 
 namespace OHOS::Ace::NG {
 void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
@@ -58,7 +60,6 @@ constexpr int NUM_10 = 10;
 constexpr int NUM_16 = 16;
 constexpr int NUM_24 = 24;
 constexpr int NUM_36 = 36;
-constexpr int DEFAULT_LENGTH = 4;
 constexpr InputStyle DEFAULT_TEXT_AREA_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr uint32_t DEFAULT_MAX_VIEW_LINE = 3;
@@ -94,45 +95,6 @@ const std::vector<EllipsisMode> ELLIPSIS_MODES = { EllipsisMode::HEAD, EllipsisM
     EllipsisMode::MULTILINE_HEAD, EllipsisMode::MULTILINE_MIDDLE };
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::INHERIT,
     TextDirection::AUTO };
-
-void ParseBorderColor(NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& topResObj,
-    const RefPtr<ResourceObject>& rightResObj, const RefPtr<ResourceObject>& bottomResObj,
-    const RefPtr<ResourceObject>& leftResObj)
-{
-    borderColors.resMap_.clear();
-    if (topResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.topColor = result;
-        };
-        borderColors.AddResource("borderColor.top", topResObj, std::move(updateFunc));
-    }
-    if (rightResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.rightColor = result;
-        };
-        borderColors.AddResource("borderColor.right", rightResObj, std::move(updateFunc));
-    }
-    if (bottomResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.bottomColor = result;
-        };
-        borderColors.AddResource("borderColor.bottom", bottomResObj, std::move(updateFunc));
-    }
-    if (leftResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.leftColor = result;
-        };
-        borderColors.AddResource("borderColor.left", leftResObj, std::move(updateFunc));
-    }
-}
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
@@ -2089,15 +2051,6 @@ void ResetTextAreaEnableAutoFill(ArkUINodeHandle node)
     TextFieldModelNG::SetEnableAutoFill(frameNode, DEFAULT_ENABLE_AUTO_FILL);
 }
 
-BorderStyle ConvertBorderStyle(int32_t value)
-{
-    auto style = static_cast<BorderStyle>(value);
-    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
-        style = BorderStyle::SOLID;
-    }
-    return style;
-}
-
 void SetOptionalBorder(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
     ArkUI_Int32& offset)
 {
@@ -2365,146 +2318,57 @@ void ResetTextAreaBorder(ArkUINodeHandle node)
 void SetTextAreaBorderWidth(ArkUINodeHandle node, const ArkUI_Float32* values,
     const ArkUI_Int32* units, ArkUI_Int32 length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (length != DEFAULT_LENGTH) {
-        return;
-    }
-    std::optional<CalcDimension> topDimen;
-    std::optional<CalcDimension> rightDimen;
-    std::optional<CalcDimension> bottomDimen;
-    std::optional<CalcDimension> leftDimen;
-
-    if (values[NUM_0] != -1 &&
-        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]) != OHOS::Ace::DimensionUnit::INVALID) {
-        topDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-    }
-    if (values[NUM_1] != -1 &&
-        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]) != OHOS::Ace::DimensionUnit::INVALID) {
-        rightDimen = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
-    }
-    if (values[NUM_2] != -1 &&
-        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]) != OHOS::Ace::DimensionUnit::INVALID) {
-        bottomDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
-    }
-    if (values[NUM_3] != -1 &&
-        static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]) != OHOS::Ace::DimensionUnit::INVALID) {
-        leftDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
-    }
-
-    NG::BorderWidthProperty borderWidth;
-    borderWidth.leftDimen = leftDimen;
-    borderWidth.rightDimen = rightDimen;
-    borderWidth.topDimen = topDimen;
-    borderWidth.bottomDimen = bottomDimen;
-    borderWidth.multiValued = true;
-    TextFieldModelNG::SetBorderWidth(frameNode, borderWidth);
+    SetBorderWidthCommon(node, values, units, length, [](FrameNode* fn, const BorderWidthProperty& bw) {
+        TextFieldModelNG::SetBorderWidth(fn, bw);
+    });
 }
 
 void ResetTextAreaBorderWidth(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(Dimension(0));
-    TextFieldModelNG::SetBorderWidth(frameNode, borderWidth);
+    ResetBorderWidthCommon(node, [](FrameNode* fn, const BorderWidthProperty& bw) {
+        TextFieldModelNG::SetBorderWidth(fn, bw);
+    });
 }
 
 void SetTextAreaBorderColor(ArkUINodeHandle node, uint32_t topColorInt, uint32_t rightColorInt, uint32_t bottomColorInt,
     uint32_t leftColorInt, void* rawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetResObj(frameNode, "borderColor");
-    NG::BorderColorProperty borderColors;
-    borderColors.topColor = Color(topColorInt);
-    borderColors.rightColor = Color(rightColorInt);
-    borderColors.bottomColor = Color(bottomColorInt);
-    borderColors.leftColor = Color(leftColorInt);
-    borderColors.multiValued = true;
-    if (SystemProperties::ConfigChangePerform()) {
-        std::vector<RefPtr<ResourceObject>> objs;
-        if (rawPtr) {
-            objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-        }
-        if (objs.empty()) {
-            objs.resize(NUM_4);
-            NodeInfo nodeInfo = ResourceParseUtils::MakeNativeNodeInfo(frameNode);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), nodeInfo);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), nodeInfo);
-            ResourceParseUtils::CompleteResourceObjectFromColor(
-                objs[NUM_2], borderColors.bottomColor.value(), nodeInfo);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), nodeInfo);
-        }
-        ParseBorderColor(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
-    }
-    TextFieldModelNG::SetBorderColor(frameNode, borderColors);
+    const uint32_t colors[] = { topColorInt, rightColorInt, bottomColorInt, leftColorInt };
+    SetBorderColorCommon(node, colors, rawPtr, [](FrameNode* fn, const BorderColorProperty& bc) {
+        TextFieldModelNG::SetBorderColor(fn, bc);
+    });
 }
 
 void ResetTextAreaBorderColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetResObj(frameNode, "borderColor");
-    BorderColorProperty borderColor;
-    borderColor.SetColor(Color::BLACK);
-    TextFieldModelNG::SetBorderColor(frameNode, borderColor);
+    ResetBorderColorCommon(node, [](FrameNode* fn, const BorderColorProperty& bc) {
+        TextFieldModelNG::SetBorderColor(fn, bc);
+    });
 }
 
 void SetTextAreaBorderStyle(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (length == NUM_1) {
-        BorderStyleProperty borderStyle;
-        borderStyle.SetBorderStyle(ConvertBorderStyle(styles[NUM_0]));
-        TextFieldModelNG::SetBorderStyle(frameNode, borderStyle);
-        return;
-    }
-    if (length == NUM_4) {
-        NG::BorderStyleProperty borderStyles;
-        borderStyles.styleLeft = ConvertBorderStyle(styles[NUM_3]);
-        borderStyles.styleRight = ConvertBorderStyle(styles[NUM_1]);
-        borderStyles.styleTop = ConvertBorderStyle(styles[NUM_0]);
-        borderStyles.styleBottom = ConvertBorderStyle(styles[NUM_2]);
-        borderStyles.multiValued = true;
-        TextFieldModelNG::SetBorderStyle(frameNode, borderStyles);
-    }
+    SetBorderStyleCommon(node, styles, length, TextFieldModelNG::SetBorderStyle);
 }
 
 void ResetTextAreaBorderStyle(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BorderStyleProperty borderStyle;
-    borderStyle.SetBorderStyle(BorderStyle::SOLID);
-    TextFieldModelNG::SetBorderStyle(frameNode, borderStyle);
+    ResetBorderStyleCommon(node, TextFieldModelNG::SetBorderStyle);
 }
 
 void SetTextAreaBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values,
     const ArkUI_Int32* units, ArkUI_Int32 length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (length != DEFAULT_LENGTH) {
-        return;
-    }
-    NG::BorderRadiusProperty borderRadius;
-    borderRadius.radiusTopLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-    borderRadius.radiusTopRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
-    borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
-    borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
-    borderRadius.multiValued = true;
-    TextFieldModelNG::SetBorderRadius(frameNode, borderRadius);
+    SetBorderRadiusCommon(node, values, units, length, [](FrameNode* fn, const BorderRadiusProperty& br) {
+        TextFieldModelNG::SetBorderRadius(fn, br);
+    });
 }
 
 void ResetTextAreaBorderRadius(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(Dimension(0));
-    TextFieldModelNG::SetBorderRadius(frameNode, borderRadius);
+    ResetBorderRadiusCommon(node, [](FrameNode* fn, const BorderRadiusProperty& br) {
+        TextFieldModelNG::SetBorderRadius(fn, br);
+    });
 }
 
 void ResetTextAreaBorderRadiusJS(ArkUINodeHandle node)
@@ -2523,98 +2387,15 @@ void ResetTextAreaBorderRadiusJS(ArkUINodeHandle node)
     ViewAbstract::SetBorderRadius(defaultBorderRadius);
 }
 
-void RegisterMarginResource(FrameNode* frameNode, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
-    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
-{
-    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (marginRes && marginRes->topObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->topObj));
-        pattern->RegisterResource<CalcDimension>("marginTop", resObj,
-        CalcDimension(top->value, static_cast<DimensionUnit>(top->unit)));
-    } else {
-        pattern->UnRegisterResource("marginTop");
-    }
-    if (marginRes && marginRes->bottomObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->bottomObj));
-        pattern->RegisterResource<CalcDimension>("marginBottom", resObj,
-        CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit)));
-    } else {
-        pattern->UnRegisterResource("marginBottom");
-    }
-    if (marginRes && marginRes->leftObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->leftObj));
-        pattern->RegisterResource<CalcDimension>("marginLeft", resObj,
-        CalcDimension(left->value, static_cast<DimensionUnit>(left->unit)));
-    } else {
-        pattern->UnRegisterResource("marginLeft");
-    }
-    if (marginRes && marginRes->rightObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->rightObj));
-        pattern->RegisterResource<CalcDimension>("marginRight", resObj,
-        CalcDimension(right->value, static_cast<DimensionUnit>(right->unit)));
-    } else {
-        pattern->UnRegisterResource("marginRight");
-    }
-}
-
 void SetTextAreaMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CalcLength topDimen;
-    CalcLength rightDimen;
-    CalcLength bottomDimen;
-    CalcLength leftDimen;
-    if (top->string != nullptr) {
-        topDimen = CalcLength(top->string);
-    } else {
-        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
-    }
-    if (right->string != nullptr) {
-        rightDimen = CalcLength(right->string);
-    } else {
-        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
-    }
-    if (bottom->string != nullptr) {
-        bottomDimen = CalcLength(bottom->string);
-    } else {
-        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
-    }
-    if (left->string != nullptr) {
-        leftDimen = CalcLength(left->string);
-    } else {
-        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
-    }
-    NG::PaddingProperty paddings;
-    paddings.top = std::optional<CalcLength>(topDimen);
-    paddings.bottom = std::optional<CalcLength>(bottomDimen);
-    paddings.left = std::optional<CalcLength>(leftDimen);
-    paddings.right = std::optional<CalcLength>(rightDimen);
-    TextFieldModelNG::SetMargin(frameNode, paddings);
-    RegisterMarginResource(frameNode, top, right, bottom, left, marginRes);
+    SetMarginCommon(node, { top, right, bottom, left }, marginRes, TextFieldModelNG::SetMargin);
 }
 
 void ResetTextAreaMargin(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NG::PaddingProperty paddings;
-    paddings.top = NG::CalcLength(0.0);
-    paddings.bottom = NG::CalcLength(0.0);
-    paddings.left = NG::CalcLength(0.0);
-    paddings.right = NG::CalcLength(0.0);
-    TextFieldModelNG::SetMargin(frameNode, paddings);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("marginTop");
-        pattern->UnRegisterResource("marginBottom");
-        pattern->UnRegisterResource("marginLeft");
-        pattern->UnRegisterResource("marginRight");
-    }
+    ResetMarginCommon(node, TextFieldModelNG::SetMargin);
 }
 
 void SetTextAreaMarginJs(ArkUINodeHandle node)
@@ -2626,13 +2407,7 @@ void SetTextAreaMarginJs(ArkUINodeHandle node)
 
 void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto margin = TextFieldModelNG::GetMargin(frameNode);
-    (*values)[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    GetMarginCommon(node, values, length, unit, TextFieldModelNG::GetMargin);
 }
 
 void SetTextAreaOnWillChange(ArkUINodeHandle node, ArkUI_Int64 callback)

@@ -1698,6 +1698,8 @@ void WebClientImpl::OnExtensionDisconnect(int32_t connectId)
 std::string WebClientImpl::OnWebNativeMessage(std::shared_ptr<OHOS::NWeb::NWebRuntimeConnectInfo> info,
     std::shared_ptr<OHOS::NWeb::NWebNativeMessageCallback> callback)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnWebNativeMessage in, bundleName: %{public}s",
+        info ? info->GetBundleName().c_str() : "null");
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return "";

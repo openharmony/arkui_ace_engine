@@ -2919,6 +2919,28 @@ void JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
 #endif
 }
 
+#ifdef XCOMPONENT_SUPPORTED
+bool JsiDeclarativeEngine::LoadNativeXComponentModule(ArkNativeEngine* arkNativeEngine,
+    OH_NativeXComponent* nativeXComponent, const std::string& libraryName, const std::string& componentId,
+    const std::string& soPath)
+{
+    std::string arguments;
+    auto runtime = engineInstance_->GetJsRuntime();
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    LocalScope scope(pandaRuntime->GetEcmaVm());
+    auto objXComp = arkNativeEngine->LoadModuleByName(
+        libraryName, true, arguments, OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent), soPath);
+    if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+        return false;
+    }
+
+    auto objContext = JsiObject(objXComp);
+    XComponentClient::GetInstance().AddJsValToJsValMap(
+        const_cast<EcmaVM*>(pandaRuntime->GetEcmaVm()), componentId, objContext.GetLocalHandle());
+    return true;
+}
+#endif
+
 void JsiDeclarativeEngine::FireExternalEvent(
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
@@ -2956,23 +2978,14 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
-        std::string arguments;
         CHECK_NULL_VOID(xcomponentModifier->getSoPath);
         auto soPath = std::string(xcomponentModifier->getSoPath(frameNode));
-        auto runtime = engineInstance_->GetJsRuntime();
-        shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-        LocalScope scope(pandaRuntime->GetEcmaVm());
-        auto objXComp = arkNativeEngine->LoadModuleByName(libraryName, true, arguments,
-            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent), soPath);
-        if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
-            napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
+        auto loadSuccess =
+            LoadNativeXComponentModule(arkNativeEngine, nativeXComponent, libraryName, componentId, soPath);
+        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
+        if (!loadSuccess) {
             return;
         }
-
-        auto objContext = JsiObject(objXComp);
-        OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(
-            const_cast<EcmaVM*>(pandaRuntime->GetEcmaVm()), componentId, objContext.GetLocalHandle());
-        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
         CHECK_NULL_VOID(xcomponentModifier->getXComponentType);
         auto type = static_cast<XComponentType>(xcomponentModifier->getXComponentType(frameNode));
@@ -3044,22 +3057,13 @@ void JsiDeclarativeEngine::FireExternalEvent(
     if (status != napi_ok) {
         return;
     }
-    std::string arguments;
     auto soPath = xcomponent->GetSoPath().value_or("");
-    auto runtime = engineInstance_->GetJsRuntime();
-    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    LocalScope scope(pandaRuntime->GetEcmaVm());
-    auto objXComp = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
-        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
-    if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
-        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
+    auto loadSuccess = LoadNativeXComponentModule(
+        arkNativeEngine, nativeXComponent_, xcomponent->GetLibraryName(), componentId, soPath);
+    napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
+    if (!loadSuccess) {
         return;
     }
-
-    auto objContext = JsiObject(objXComp);
-    XComponentClient::GetInstance().AddJsValToJsValMap(
-        const_cast<EcmaVM*>(pandaRuntime->GetEcmaVm()), componentId, objContext.GetLocalHandle());
-    napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();

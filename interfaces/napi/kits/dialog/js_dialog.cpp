@@ -139,11 +139,7 @@ napi_value JSPresentDialog(napi_env env, napi_callback_info info)
             auto dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProps, nullptr, std::move(callback));
             CHECK_NULL_VOID(dialog);
             if (dialogProps.isModal && !container->IsUIExtensionWindow()) {
-                DialogProperties maskProps = {
-                    .autoCancel = dialogProps.autoCancel,
-                    .isMask = true,
-                };
-                auto mask = overlayManager->ShowDialog(maskProps, nullptr, false);
+                auto mask = overlayManager->SetDialogMask(dialogProps);
                 CHECK_NULL_VOID(mask);
                 overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
             }
@@ -254,12 +250,7 @@ napi_value JSPresentCustomDialog(napi_env env, napi_callback_info info)
                 auto dialog = SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProps, std::move(callback));
                 CHECK_NULL_VOID(dialog);
                 if (dialogProps.isModal && !container->IsUIExtensionWindow()) {
-                    DialogProperties maskProps = {
-                        .autoCancel = dialogProps.autoCancel,
-                        .isMask = true,
-                        .maskColor = dialogProps.maskColor,
-                    };
-                    auto mask = overlayManager->ShowDialog(maskProps, nullptr, false);
+                    auto mask = overlayManager->SetDialogMask(dialogProps);
                     CHECK_NULL_VOID(mask);
                     overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                 }

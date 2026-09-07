@@ -100,6 +100,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    void OnFontScaleConfigurationUpdate() override;
     void UpdateTabItemStyle(int32_t index, bool selected);
     RefPtr<FrameNode> GetOrCreateTabItemNode(int32_t id);
     void UpdateTabItemTextAndIconColor(int32_t selectedIndex);

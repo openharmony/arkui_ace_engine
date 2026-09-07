@@ -62,8 +62,8 @@ class LazyArkTabContentComponent extends ArkComponent {
       return this;
     }
 
-    defaultVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): this {
-      this.lazyComponent.defaultVisibility(visibility, displayMode);
+    tabBarVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): this {
+      this.lazyComponent.tabBarVisibility(visibility, displayMode);
       return this;
     }
   }

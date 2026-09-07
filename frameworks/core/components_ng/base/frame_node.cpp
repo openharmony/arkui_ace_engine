@@ -2028,6 +2028,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.skinUpdate) {
+        if (pattern_) {
+            pattern_->OnSkinConfigurationUpdate();
+        }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -2519,10 +2522,10 @@ void FrameNode::ThrottledAreaChangeTask()
     }
     auto currParentOffsetToWindow =
         CalculateOffsetRelativeToWindow(pipeline->GetVsyncTime(), false) - currFrameRect.GetOffset();
-    eventHub_->HandleOnAreaChange(lastFrameRect_, lastParentOffsetToWindow_,
+    bool areaChanged = eventHub_->HandleOnAreaChange(lastFrameRect_, lastParentOffsetToWindow_,
         currFrameRect, currParentOffsetToWindow);
     throttledAreaChangeCallbackOnTheWay_ = false;
-    lastAreaChangeTriggerTime_ = GetCurrentTimestamp();
+    lastAreaChangeTriggerTime_ = areaChanged ? GetCurrentTimestamp() : lastAreaChangeTriggerTime_;
 }
 
 void FrameNode::ProcessThrottledAreaChangeCallback()
@@ -2548,7 +2551,7 @@ void FrameNode::ProcessThrottledAreaChangeCallback()
         auto delay = static_cast<uint32_t>(static_cast<int64_t>(onAreaChangeMinInterval_) - interval);
         executor->PostDelayedTask(
             std::move(task), TaskExecutor::TaskType::UI, delay < 0 ? 0 : delay, "ThrottledAreaChangeCallback",
-            PriorityType::IDLE);
+            PriorityType::LOW);
     } else {
         ThrottledAreaChangeTask();
     }
@@ -3982,30 +3985,36 @@ bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& global
     if (!isActive_) {
         return false;
     }
+
     auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
-    auto paintRect = cacheMatrixInfo.paintRectWithTransform;
-    auto origRect = renderContext_->GetPaintRectWithoutTransform();
     localMat_ = cacheMatrixInfo.localMatrix;
 
-    bool isOutOfRegion = false;
-    bool ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion);
+    bool ret = false;
+    if (!frameChildren_.empty()) {
+        auto paintRect = cacheMatrixInfo.paintRectWithTransform;
+        auto origRect = renderContext_->GetPaintRectWithoutTransform();
 
-    auto localPoint = parentLocalPoint - paintRect.GetOffset();
-    renderContext_->GetPointWithTransform(localPoint);
-    auto revertPoint = parentRevertPoint;
-    MapPointTo(revertPoint, cacheMatrixInfo.revertMatrix);
-    auto subRevertPoint = revertPoint - origRect.GetOffset();
+        auto localPoint = parentLocalPoint - paintRect.GetOffset();
+        renderContext_->GetPointWithTransform(localPoint);
+        auto revertPoint = parentRevertPoint;
+        MapPointTo(revertPoint, cacheMatrixInfo.revertMatrix);
+        auto subRevertPoint = revertPoint - origRect.GetOffset();
 
-    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        auto child = iter->Upgrade();
-        if (!child) {
-            continue;
+        for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+            auto child = iter->Upgrade();
+            if (!child) {
+                continue;
+            }
+            if (child->HitTestMouseTarget(event, globalPoint, localPoint, subRevertPoint,
+                tagWhitelist)) {
+                ret = true;
+                break;
+            }
         }
-        if (child->HitTestMouseTarget(event, globalPoint, localPoint, subRevertPoint,
-            tagWhitelist)) {
-            ret = true;
-            break;
-        }
+    }
+    if (!ret) {
+        bool isOutOfRegion = false;
+        ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion);
     }
     return ret;
 }

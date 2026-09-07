@@ -2778,6 +2778,7 @@ void TitleBarPattern::ResetTitleBarMaskNodes()
 
 void TitleBarPattern::EnsureTitleBarEffectComponent()
 {
+#ifndef PREVIEW
     // The EffectComponent is only created when material is enabled for this titleBar.
     if (!IsMaterialEnabled()) {
         return;
@@ -2792,6 +2793,7 @@ void TitleBarPattern::EnsureTitleBarEffectComponent()
         RemoveTitleBarEffectNodeFromParent(titleBarEffectNode_);
         host->AddChild(titleBarEffectNode_);
     }
+#endif
 }
 
 bool TitleBarPattern::IsMaterialEnabled() const

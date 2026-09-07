@@ -477,6 +477,22 @@ public:
     {
         return sideBarUnselectedTextColor_;
     }
+    const Dimension& GetSideBarPaddingLevel4() const
+    {
+        return sideBarPaddingLevel4_;
+    }
+    const Dimension& GetSideBarPaddingLevel8() const
+    {
+        return sideBarPaddingLevel8_;
+    }
+    const Dimension& GetSideBarPaddingLevel10() const
+    {
+        return sideBarPaddingLevel10_;
+    }
+    const Dimension& GetSideBarTextFontSize() const
+    {
+        return sideBarTextFontSize_;
+    }
 
 protected:
     TabTheme() = default;
@@ -573,6 +589,10 @@ protected:
     Color sideBarUnselectedTextColor_;
     Dimension sideBarListItemFocusWidth_;
     Dimension sideBarListItemLeftRightPadding_ = 8.0_vp;
+    Dimension sideBarPaddingLevel4_ = 8.0_vp;
+    Dimension sideBarPaddingLevel8_ = 16.0_vp;
+    Dimension sideBarPaddingLevel10_ = 20.0_vp;
+    Dimension sideBarTextFontSize_ = 16.0_fp;
 };
 
 } // namespace OHOS::Ace

@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/date_picker/picker_date.h"
 #include "core/components_ng/pattern/date_picker/picker_time.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/property/union_effect_container_options.h"
@@ -4680,5 +4681,15 @@ std::optional<Color> OptConvertColorForMaterial(const Ark_ResourceColor& value)
         }
     }
     return result;
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<TabBarDisplayMode>& dst, const Ark_TabBarDisplayMode& src)
+{
+    switch (src) {
+        case ARK_TAB_BAR_DISPLAY_MODE_BOTTOM_TABBAR: dst = TabBarDisplayMode::BOTTOMTABBAR; break;
+        case ARK_TAB_BAR_DISPLAY_MODE_SIDEBAR: dst = TabBarDisplayMode::SIDEBAR; break;
+        default: LOGE("Unexpected enum value in Ark_TabBarDisplayMode: %{public}d", src);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter

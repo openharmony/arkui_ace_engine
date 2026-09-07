@@ -108,7 +108,7 @@ public:
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
-    virtual int32_t GetTextContentLength();
+    virtual int32_t GetTextContentLength() const;
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
     RefPtr<LayoutProperty> CreateLayoutProperty() override;
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;

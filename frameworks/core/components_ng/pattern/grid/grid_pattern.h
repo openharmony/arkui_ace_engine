@@ -43,17 +43,36 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
+    // Scrollable branch of CreateLayoutAlgorithm (custom / irregular /
+    // regular selection), split out to keep both functions small.
+    RefPtr<LayoutAlgorithm> CreateScrollableLayoutAlgorithm(bool disableSkip, bool canOverScrollStart,
+        bool canOverScrollEnd);
+
+    // SAFE_AREA two-pass intermediate-pass detection (ADR-5/F-2): true when
+    // the layout pass's algorithm snapshot is missing or differs from the
+    // system's current accumulated safe-area value. Always false for
+    // non-SAFE_AREA algorithms.
+    bool IsSafeAreaIntermediatePass(const RefPtr<GridLayoutBaseAlgorithm>& algorithm);
+
+    // endHeight_ refresh when the view re-enters the bottom-anchored state
+    // (offsetEnd newly reached or the main size changed while anchored).
+    void UpdateEndHeightOnOffsetEnd(bool prevOffsetEnd);
+
     void BeforeCreateLayoutWrapper() override;
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
-
+    // SAFE_AREA contentClip two-pass layout (ADR-5): the customized
+    // PostponedTaskForIgnore handles the CONTENT_CLIP_SAFE_AREA bundle; the
+    // safeAreaPad_ equality check terminates the two-pass loop.
     bool PostponedTaskForIgnoreCustomized() override
     {
         return true;
     }
+
     void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) override;
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
@@ -377,8 +396,6 @@ private:
     std::string GetLayoutMode() const;
 
     void SetLayoutAlgorithmContentClip(const RefPtr<GridLayoutBaseAlgorithm>& algorithm);
-    RefPtr<LayoutAlgorithm> CreateScrollLayoutAlgorithm(
-        bool hasLayoutOptions, bool disableSkip, bool canOverScrollStart, bool canOverScrollEnd);
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

@@ -2064,7 +2064,7 @@ declare class ArkTabContentComponent extends ArkComponent implements TabContentA
     size(value: SizeOptions): this;
     width(value: Length): this;
     height(value: Length): this;
-    defaultVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): this;
+    tabBarVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): this;
 }
 declare class ArkUIExtensionComponentComponent extends ArkComponent implements UIExtensionComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

@@ -152,6 +152,18 @@ void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src)
     }
 }
 
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TabBarDisplayMode& dst, const TabBarDisplayMode& src)
+{
+    switch (src) {
+        case TabBarDisplayMode::BOTTOMTABBAR: dst = ARK_TAB_BAR_DISPLAY_MODE_BOTTOM_TABBAR; break;
+        case TabBarDisplayMode::SIDEBAR: dst = ARK_TAB_BAR_DISPLAY_MODE_SIDEBAR; break;
+        default:
+            dst = static_cast<Ark_TabBarDisplayMode>(-1);
+            LOGE("Unexpected enum value in TabBarDisplayMode: %{public}d", static_cast<int32_t>(src));
+            break;
+    }
+}
+
 void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src)
 {
     switch (src) {

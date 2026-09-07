@@ -89,7 +89,8 @@ public:
     void NotifyDisplayArea(const RectF& displayArea) override;
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
-    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
+    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason) const override;
     bool NotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout) override;
     void SetDensityDpiImpl(bool isDensityDpi) override;
