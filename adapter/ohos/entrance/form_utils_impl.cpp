@@ -52,6 +52,28 @@ namespace {
         element.SetAbilityName(abilityName);
         want.SetElement(element);
     }
+
+    // postCardAction 可选透传 executeMode（取值见 AppExecFwk::ExecuteMode，0-3）；
+    // 缺省回退前台执行，传入非法值（非数字/超范围）返回 false 由调用方拒绝。
+    bool GetIntentExecuteMode(const std::unique_ptr<JsonValue>& eventAction, int32_t& executeMode)
+    {
+        executeMode = static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND);
+        auto executeModeJson = eventAction->GetValue("executeMode");
+        if (!executeModeJson->IsValid()) {
+            return true;
+        }
+        if (!executeModeJson->IsNumber()) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent executeMode is not a number");
+            return false;
+        }
+        executeMode = executeModeJson->GetInt();
+        if (executeMode < static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND)
+            || executeMode > static_cast<int32_t>(AppExecFwk::ExecuteMode::SERVICE_EXTENSION_ABILITY)) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent executeMode out of range: %{public}d", executeMode);
+            return false;
+        }
+        return true;
+    }
 }
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
@@ -207,6 +229,11 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent intentName is empty");
         return -1;
     }
+    // executeMode 缺省回退前台执行；用户显式传入时透传（含后台/扩展模式），非法值拒绝。
+    int32_t executeMode = 0;
+    if (!GetIntentExecuteMode(eventAction, executeMode)) {
+        return -1;
+    }
 
     AAFwk::WantParams wantParams;
     auto intentParams = eventAction->GetValue("intentParams");
@@ -235,9 +262,8 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     // intentId 由 AMS 侧按名称查表覆盖，此处占位 "0"（GenerateFromWant 要求可解析为 uint64，不能为空）。
     executeWantParams.SetParam(
         AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("0"));
-    // 卡片点击仅支持前台拉起，action 中的 executeMode 字段不再解析（后台执行已不支持）。
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE,
-        AAFwk::Integer::Box(static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND)));
+        AAFwk::Integer::Box(executeMode));
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
         AAFwk::WantParamWrapper::Box(wantParams));
     want.SetParams(executeWantParams);
