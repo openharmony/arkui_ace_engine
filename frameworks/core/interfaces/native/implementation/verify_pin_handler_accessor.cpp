@@ -35,7 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 void ConfirmImpl(Ark_VerifyPinHandler peer,
                  Ark_PinVerifyResult result)
 {
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer && peer->verifyPinHandler);
     int32_t pinVerifyResult = static_cast<int32_t>(result);
     peer->verifyPinHandler->HandleConfirm(pinVerifyResult);
 }
