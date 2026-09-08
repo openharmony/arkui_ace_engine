@@ -1508,4 +1508,372 @@ HWTEST_F(ScrollBarTestNg, IsFreeScrollTest002, TestSize.Level1)
 
     EXPECT_FALSE(scrollBarProxy->IsFreeScroll());
 }
+
+/**
+ * @tc.name: ScrollBarInteractiveBranch001
+ * @tc.desc: Rect ScrollBar GetScrollBarInteractive returns true/false purely from scrollBarInteractive_, covering
+ *           the shapeMode_ == ShapeMode::ROUND false branch of the || expression.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarInteractiveBranch001, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+
+    // scrollBarInteractive_=true, shapeMode!=ROUND -> true
+    scrollBar->SetScrollBarInteractive(true);
+    EXPECT_TRUE(scrollBar->GetScrollBarInteractive());
+
+    // scrollBarInteractive_=false, shapeMode!=ROUND -> false (the ROUND-branch is not taken)
+    scrollBar->SetScrollBarInteractive(false);
+    EXPECT_FALSE(scrollBar->GetScrollBarInteractive());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectLongPressTargetRect001
+ * @tc.desc: Rect ScrollBar OnCollectLongPressTarget does not collect when GetScrollBarInteractive() returns false,
+ *           covering the false branch of the if condition via the interactive short-circuit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectLongPressTargetRect001, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->SetScrollBarInteractive(false);
+    EXPECT_FALSE(scrollBar->GetScrollBarInteractive());
+    scrollBar->SetScrollable(true);
+    scrollBar->InitLongPressEvent();
+    ASSERT_NE(scrollBar->GetLongPressRecognizer(), nullptr);
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectLongPressTarget(
+        OffsetF(), getEventTargetImpl, result, frameNode_, responseLinkResult);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(responseLinkResult.empty());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectLongPressTargetRect002
+ * @tc.desc: Rect ScrollBar OnCollectLongPressTarget collects the recognizer when interactive=true and scrollable,
+ *           covering the true branch of the if condition for the rect scroll bar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectLongPressTargetRect002, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->SetScrollBarInteractive(true);
+    scrollBar->SetScrollable(true);
+    scrollBar->InitLongPressEvent();
+    ASSERT_NE(scrollBar->GetLongPressRecognizer(), nullptr);
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectLongPressTarget(
+        OffsetF(), getEventTargetImpl, result, frameNode_, responseLinkResult);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(responseLinkResult.size(), 1);
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectLongPressTargetRect003
+ * @tc.desc: Rect ScrollBar OnCollectLongPressTarget short-circuits when longPressRecognizer_ is null, covering
+ *           branch1 (longPressRecognizer_ false → skip).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectLongPressTargetRect003, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    // Reset the recognizer to null to cover the null-recognizer branch.
+    // (At VERSION_TWELVE, OnModifyDone auto-initializes it via SetMouseEvent.)
+    scrollBar->SetLongPressRecognizer(nullptr);
+    ASSERT_EQ(scrollBar->GetLongPressRecognizer(), nullptr);
+    scrollBar->SetScrollable(true);
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectLongPressTarget(
+        OffsetF(), getEventTargetImpl, result, frameNode_, responseLinkResult);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(responseLinkResult.empty());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectLongPressTargetRect004
+ * @tc.desc: Rect ScrollBar OnCollectLongPressTarget short-circuits when isScrollable_ is false (recognizer exists),
+ *           covering branch3 (isScrollable_ false → skip).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectLongPressTargetRect004, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->InitLongPressEvent();
+    ASSERT_NE(scrollBar->GetLongPressRecognizer(), nullptr);
+    // Toggle to true first, then back to false (SetScrollable guards against same-value).
+    scrollBar->SetScrollable(true);
+    scrollBar->SetScrollable(false);
+    ASSERT_FALSE(scrollBar->IsScrollable());
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectLongPressTarget(
+        OffsetF(), getEventTargetImpl, result, frameNode_, responseLinkResult);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(responseLinkResult.empty());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectTouchTargetRect001
+ * @tc.desc: Rect ScrollBar OnCollectTouchTarget does not collect when GetScrollBarInteractive() returns false,
+ *           covering the false branch of the if condition via the interactive short-circuit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectTouchTargetRect001, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->SetScrollBarInteractive(false);
+    EXPECT_FALSE(scrollBar->GetScrollBarInteractive());
+    scrollBar->SetScrollable(true);
+    scrollBar->SetGestureEvent();
+    ASSERT_NE(scrollBar->GetPanRecognizer(), nullptr);
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectTouchTarget(OffsetF(), getEventTargetImpl, result, frameNode_, responseLinkResult);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(responseLinkResult.empty());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectTouchTargetRect002
+ * @tc.desc: Rect ScrollBar OnCollectTouchTarget collects the pan recognizer with inBarRect true/false, covering
+ *           both inner if branches (sysJudge set vs null) for the rect scroll bar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectTouchTargetRect002, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->SetScrollBarInteractive(true);
+    scrollBar->SetScrollable(true);
+    scrollBar->SetGestureEvent();
+    ASSERT_NE(scrollBar->GetPanRecognizer(), nullptr);
+
+    // inBarRect=true: sysJudge is set (non-null)
+    TouchTestResult resultInBar;
+    ResponseLinkResult responseLinkInBar;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectTouchTarget(
+        OffsetF(), getEventTargetImpl, resultInBar, frameNode_, responseLinkInBar, true);
+    EXPECT_EQ(resultInBar.size(), 1);
+    EXPECT_EQ(responseLinkInBar.size(), 1);
+
+    // inBarRect=false: sysJudge is nullptr
+    TouchTestResult resultOutBar;
+    ResponseLinkResult responseLinkOutBar;
+    scrollBar->OnCollectTouchTarget(
+        OffsetF(), getEventTargetImpl, resultOutBar, frameNode_, responseLinkOutBar, false);
+    EXPECT_EQ(resultOutBar.size(), 1);
+    EXPECT_EQ(responseLinkOutBar.size(), 1);
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: SetUseInnerScrollBarSameValue001
+ * @tc.desc: Rect ScrollBar SetUseInnerScrollBar with the same value early-returns without updating theme values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetUseInnerScrollBarSameValue001, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(scrollBarTheme, nullptr);
+    auto oldHeight = scrollBarTheme->scrollBarHeight_;
+    scrollBarTheme->scrollBarHeight_ = 99.0_vp;
+
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    ASSERT_TRUE(scrollBar->GetUseInnerScrollBar());
+    auto heightBefore = scrollBar->GetScrollBarHeight();
+    // calling with the same value (true) should early-return and NOT apply the new theme height
+    scrollBar->SetUseInnerScrollBar(true);
+    EXPECT_EQ(scrollBar->GetScrollBarHeight(), heightBefore);
+
+    scrollBarTheme->scrollBarHeight_ = oldHeight;
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectTouchTargetRect003
+ * @tc.desc: Rect ScrollBar OnCollectTouchTarget short-circuits when panRecognizer_ is null, covering
+ *           branch1 (panRecognizer_ false → skip).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectTouchTargetRect003, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->SetScrollBarInteractive(true);
+    scrollBar->SetScrollable(true);
+    // Reset panRecognizer_ to null to cover the null-recognizer branch
+    scrollBar->SetPanRecognizer(nullptr);
+    ASSERT_EQ(scrollBar->GetPanRecognizer(), nullptr);
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectTouchTarget(OffsetF(), getEventTargetImpl, result, frameNode_, responseLinkResult);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(responseLinkResult.empty());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: OnCollectTouchTargetRect004
+ * @tc.desc: Rect ScrollBar OnCollectTouchTarget short-circuits when isScrollable_ is false (panRecognizer exists),
+ *           covering branch3 (isScrollable_ false → skip).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, OnCollectTouchTargetRect004, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->SetScrollBarInteractive(true);
+    scrollBar->SetGestureEvent();
+    ASSERT_NE(scrollBar->GetPanRecognizer(), nullptr);
+    // Toggle to true first, then back to false (SetScrollable guards against same-value).
+    scrollBar->SetScrollable(true);
+    scrollBar->SetScrollable(false);
+    ASSERT_FALSE(scrollBar->IsScrollable());
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    GetEventTargetImpl getEventTargetImpl;
+    scrollBar->OnCollectTouchTarget(OffsetF(), getEventTargetImpl, result, frameNode_, responseLinkResult);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(responseLinkResult.empty());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
 } // namespace OHOS::Ace::NG
