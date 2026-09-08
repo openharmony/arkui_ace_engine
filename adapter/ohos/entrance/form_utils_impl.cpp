@@ -31,6 +31,27 @@
 namespace OHOS::Ace {
 namespace {
     constexpr int32_t ERR_OK = 0;
+
+    // postCardAction 可选透传意图目标三元组（bundleName/moduleName/abilityName），
+    // 塞入 want element（FMS/AMS 的 GenerateFromWant 从 element 解析三元组）；
+    // 全缺省时不设置 element，任一字段缺失由 FMS 按 FormRecord 逐项补齐。
+    void SetIntentTargetElement(const std::unique_ptr<JsonValue>& eventAction, AAFwk::Want& want)
+    {
+        const auto bundleName = eventAction->GetValue("bundleName")->GetString();
+        const auto moduleName = eventAction->GetValue("moduleName")->GetString();
+        const auto abilityName = eventAction->GetValue("abilityName")->GetString();
+        if (bundleName.empty() && moduleName.empty() && abilityName.empty()) {
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_FORM,
+            "InsightIntentEvent passthrough target, bundleName: %{public}s, moduleName: %{public}s, "
+            "abilityName: %{public}s", bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+        AppExecFwk::ElementName element;
+        element.SetBundleName(bundleName);
+        element.SetModuleName(moduleName);
+        element.SetAbilityName(abilityName);
+        want.SetElement(element);
+    }
 }
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
@@ -220,6 +241,8 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
         AAFwk::WantParamWrapper::Box(wantParams));
     want.SetParams(executeWantParams);
+    // postCardAction 显式传入的目标三元组优先，缺失字段由 FMS 按 FormRecord 补齐。
+    SetIntentTargetElement(eventAction, want);
     TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent send IPC, intentName: %{public}s", intentName.c_str());
     auto ret = AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
     TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent IPC result: %{public}d", ret);
