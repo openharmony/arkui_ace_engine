@@ -1870,6 +1870,7 @@
       "OHOS::Ace::NG::TextPattern::GetContentModifier()";
       "OHOS::Ace::NG::ScrollPattern::TriggerModifyDone()";
       "OHOS::Ace::NG::ScrollPlaceholderManager::NotifyRealBuildEnd(OHOS::Ace::NG::ScrollPlaceholderPredictParams const&, long long)";
+      "OHOS::Ace::NG::ScrollPlaceholderManager::NotifyRealBuildEnd(OHOS::Ace::NG::ScrollPlaceholderPredictParams const&, long)";
       "OHOS::Ace::NG::ScrollPlaceholderManager::NotifyRealBuildStart(OHOS::Ace::NG::ScrollPlaceholderPredictParams const&)";
       "OHOS::Ace::SelectComponent::SelectComponent()";
       "OHOS::Ace::SelectComponent::GetPopup() const";
