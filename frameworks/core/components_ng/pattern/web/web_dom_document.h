@@ -48,6 +48,7 @@ constexpr int32_t WEB_NATIVE_PARAM_SIZE = 1;
 constexpr int32_t WEB_NATIVE_PARAM_INDEX = 0;
 
 constexpr char WEB_INTERFACE_REQUEST_DOM_TREE[] = "RequestArkWebDomTree";
+constexpr char WEB_INTERFACE_REQUEST_DOM_TREE_VIEWPORT[] = "RequestArkWebDomTreeViewport";
 
 struct ActiveNode {
     int32_t id;
