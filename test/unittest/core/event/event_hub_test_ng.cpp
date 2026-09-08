@@ -2121,4 +2121,155 @@ HWTEST_F(EventHubTestNg, EventHubTest055, TestSize.Level1)
     EXPECT_TRUE(flag);
     SystemProperties::debugEnabled_ = false;
 }
+
+/**
+ * @tc.name: EventHubTest056
+ * @tc.desc: FireInnerOnAreaChanged when a callback removes itself during invocation; the map copy keeps iteration safe
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest056, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub and register two inner on-area-changed callbacks.
+     * @tc.steps: step2. The first callback removes its own entry during invocation.
+     * @tc.expected: No crash occurs and both callbacks are invoked because the callback map is copied before iteration.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool flag1 = false;
+    bool flag2 = false;
+    OnAreaChangedFunc cb1 = [&eventHub, &flag1](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag1 = true;
+        eventHub->RemoveInnerOnAreaChangedCallback(1);
+    };
+    OnAreaChangedFunc cb2 = [&flag2](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag2 = true;
+    };
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(cb1));
+    eventHub->AddInnerOnAreaChangedCallback(2, std::move(cb2));
+    eventHub->FireInnerOnAreaChanged(OLD_RECT, OLD_ORIGIN, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(flag1);
+    EXPECT_TRUE(flag2);
+    EXPECT_EQ(eventHub->onAreaChangedInnerCallbacks_.count(1), 0u);
+    EXPECT_EQ(eventHub->onAreaChangedInnerCallbacks_.count(2), 1u);
+    eventHub->ClearOnAreaChangedInnerCallbacks();
+}
+
+/**
+ * @tc.name: EventHubTest057
+ * @tc.desc: FireInnerOnAreaChanged does not invoke a callback that is added during invocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub and register one inner on-area-changed callback.
+     * @tc.steps: step2. The callback inserts a new entry into onAreaChangedInnerCallbacks_ during invocation.
+     * @tc.expected: No crash; the new callback is not invoked this pass because the map is copied before iteration.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool flag1 = false;
+    bool flag2 = false;
+    OnAreaChangedFunc cb2 = [&flag2](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag2 = true;
+    };
+    OnAreaChangedFunc cb1 = [&eventHub, &flag1, cb2](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag1 = true;
+        eventHub->onAreaChangedInnerCallbacks_[2] = cb2;
+    };
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(cb1));
+    eventHub->FireInnerOnAreaChanged(OLD_RECT, OLD_ORIGIN, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(flag1);
+    EXPECT_FALSE(flag2);
+    EXPECT_EQ(eventHub->onAreaChangedInnerCallbacks_.count(2), 1u);
+    eventHub->ClearOnAreaChangedInnerCallbacks();
+}
+
+/**
+ * @tc.name: EventHubTest058
+ * @tc.desc: FireInnerOnAreaChanged still invokes pre-existing callbacks when one clears all during invocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest058, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub and register two inner on-area-changed callbacks.
+     * @tc.steps: step2. The first callback calls ClearOnAreaChangedInnerCallbacks during invocation.
+     * @tc.expected: No crash; both pre-existing callbacks are invoked because the map is copied before iteration.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool flag1 = false;
+    bool flag2 = false;
+    OnAreaChangedFunc cb1 = [&eventHub, &flag1](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag1 = true;
+        eventHub->ClearOnAreaChangedInnerCallbacks();
+    };
+    OnAreaChangedFunc cb2 = [&flag2](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag2 = true;
+    };
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(cb1));
+    eventHub->AddInnerOnAreaChangedCallback(2, std::move(cb2));
+    eventHub->FireInnerOnAreaChanged(OLD_RECT, OLD_ORIGIN, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(flag1);
+    EXPECT_TRUE(flag2);
+    EXPECT_FALSE(eventHub->HasInnerOnAreaChanged());
+}
+
+/**
+ * @tc.name: EventHubTest059
+ * @tc.desc: FireInnerOnAreaChanged skips a null callback and invokes all valid callbacks without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub and directly insert a null callback plus two valid callbacks into the map.
+     * @tc.steps: step2. Call FireInnerOnAreaChanged.
+     * @tc.expected: The null callback is skipped by the guard and valid callbacks are invoked without crash.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool flag2 = false;
+    bool flag3 = false;
+    OnAreaChangedFunc nullCb = nullptr;
+    OnAreaChangedFunc cb2 = [&flag2](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag2 = true;
+    };
+    OnAreaChangedFunc cb3 = [&flag3](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {
+        flag3 = true;
+    };
+    eventHub->onAreaChangedInnerCallbacks_[1] = std::move(nullCb);
+    eventHub->onAreaChangedInnerCallbacks_[2] = std::move(cb2);
+    eventHub->onAreaChangedInnerCallbacks_[3] = std::move(cb3);
+    eventHub->FireInnerOnAreaChanged(OLD_RECT, OLD_ORIGIN, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(flag2);
+    EXPECT_TRUE(flag3);
+    eventHub->ClearOnAreaChangedInnerCallbacks();
+}
+
+/**
+ * @tc.name: EventHubTest060
+ * @tc.desc: FireInnerOnAreaChanged with an empty callback map does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub without registering any inner on-area-changed callback.
+     * @tc.steps: step2. Call FireInnerOnAreaChanged on the empty map.
+     * @tc.expected: No crash occurs and HasInnerOnAreaChanged stays false.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->HasInnerOnAreaChanged());
+    eventHub->FireInnerOnAreaChanged(OLD_RECT, OLD_ORIGIN, NEW_RECT, NEW_ORIGIN);
+    EXPECT_FALSE(eventHub->HasInnerOnAreaChanged());
+}
 } // namespace OHOS::Ace::NG
