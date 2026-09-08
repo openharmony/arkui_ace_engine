@@ -11,6 +11,7 @@
     "pages/scrollable/ScrollEventObserver",
     "pages/scrollable/FreeScroll",
     "pages/scrollable/ComposeListItemV2EmitterOffIssueDemo",
+    "pages/scrollable/HorizontalListSnapStartBottomDemo",
     "pages/Tabs/TabsMainPage",
     "pages/Tabs/BarBackgroundBlurStyle",
     "pages/Tabs/OnContentWillChange",

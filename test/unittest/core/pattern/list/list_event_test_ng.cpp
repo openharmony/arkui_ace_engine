@@ -1825,4 +1825,47 @@ HWTEST_F(ListEventTestNg, GetOutOfScrollableOffset002, TestSize.Level1)
 
     EXPECT_FLOAT_EQ(outOffset, -10.f);
 }
+
+/**
+ * @tc.name: ScrollSnapAlignStartAtBottom001
+ * @tc.desc: Test SnapAlign::START does not snap items to position 0 when List is at bottom
+ *           and canOverScrollEnd_ is true (simulating touch-triggered layout during scroll).
+ *           Old code used !canOverScrollStart_ which fired even when canOverScrollEnd_ was true,
+ *           causing items to jump to position 0 without currentOffset_ adjustment.
+ *           Fix: !(canOverScrollStart_ || canOverScrollEnd_) prevents snap when either can over-scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlignStartAtBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SnapAlign::START and items exceeding viewport
+     */
+    ListModelNG model = CreateList();
+    ViewAbstract::SetHeight(CalcLength(HEIGHT - DEVIATION_HEIGHT));
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to bottom
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    float offsetAfterScroll = pattern_->GetTotalOffset();
+
+    /**
+     * @tc.steps: step3. Simulate touch state where canOverScrollEnd_ is true.
+     *           Set animateOverScrollEnd_ to make ScrollableIdle() return false,
+     *           causing CanOverScrollEnd() to return true and canOverScrollEnd_ = true.
+     */
+    pattern_->animateOverScrollEnd_ = true;
+
+    /**
+     * @tc.steps: step4. Flush layout (simulates touch-triggered layout during scroll)
+     * @tc.expected: Total offset should not change. With fix, GetSnapStartIndexAndPos uses
+     *               !(canOverScrollStart_ || canOverScrollEnd_) which is false when
+     *               canOverScrollEnd_ is true, preventing the snap-to-start jump.
+     */
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), offsetAfterScroll);
+}
 } // namespace OHOS::Ace::NG
