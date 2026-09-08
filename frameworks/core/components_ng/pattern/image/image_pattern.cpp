@@ -864,10 +864,21 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
                                  ? renderProp->GetContentTransition().value_or(ContentTransitionType::IDENTITY)
                                  : ContentTransitionType::IDENTITY;
 
+    bool forcePixelCap = false;
+    if (!autoResizeExplicitlySet && loadingCtx_) {
+        auto originImageSize = loadingCtx_->GetOriginImageSize();
+        if (originImageSize.IsPositive() &&
+            static_cast<double>(originImageSize.Width()) * static_cast<double>(originImageSize.Height()) >
+                IMAGE_PIXEL_COUNT_THRESHOLD) {
+            forcePixelCap = true;
+        }
+    }
+
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         loadingCtx_->SetImageQuality(GetImageQuality());
         loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
+        loadingCtx_->SetForcePixelCap(forcePixelCap);
         loadingCtx_->MakeCanvasImageIfNeed(
             dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, loadingCtx_), imageFit, sourceSize,
             hasValidSlice);
@@ -876,6 +887,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         altErrorCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altErrorCtx_->SetImageQuality(GetImageQuality());
         altErrorCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
+        altErrorCtx_->SetForcePixelCap(forcePixelCap);
         altErrorCtx_->MakeCanvasImageIfNeed(
             dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, altErrorCtx_), imageFit, sourceSize,
             hasValidSlice);
@@ -884,6 +896,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
         altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
+        altLoadingCtx_->SetForcePixelCap(forcePixelCap);
         altLoadingCtx_->MakeCanvasImageIfNeed(
             dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, altLoadingCtx_), imageFit, sourceSize,
             hasValidSlice);
@@ -914,7 +927,6 @@ bool ImagePattern::GetAutoResizeForCtx(
     }
     CHECK_NULL_RETURN(ctx, autoResize);
     // Memory protection for large images: force autoResize when pixel count exceeds this threshold
-    static constexpr double IMAGE_PIXEL_COUNT_THRESHOLD = 50000000.0;
     auto originImageSize = ctx->GetOriginImageSize();
     if (originImageSize.IsPositive() &&
         static_cast<double>(originImageSize.Width()) * static_cast<double>(originImageSize.Height()) >

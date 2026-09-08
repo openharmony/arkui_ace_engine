@@ -31,6 +31,18 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+void CapToPixelLimit(SizeF& targetSize)
+{
+    if (!targetSize.IsPositive()) {
+        return;
+    }
+    double pixelCount = static_cast<double>(targetSize.Width()) * static_cast<double>(targetSize.Height());
+    double scale = std::sqrt(IMAGE_PIXEL_COUNT_THRESHOLD / pixelCount);
+    targetSize.ApplyScale(scale);
+}
+} // namespace
+
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad,
     bool isSceneBoardWindow, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
@@ -195,12 +207,15 @@ void ImageLoadingContext::OnMakeCanvasImage()
         bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == GetSourceInfo().GetSrcType());
         if (autoResize_ && !isPixelMapResource) {
             targetSize = CalculateTargetSize(srcRect_.GetSize(), dstRect_.GetSize(), imageSize);
+            if (forcePixelCap_) {
+                CapToPixelLimit(targetSize);
+            }
             // calculate real srcRect used for paint based on resized image size
             ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
         }
 
         // upscale targetSize if size level is mapped
-        if (targetSize.IsPositive() && sizeLevel_ > targetSize.Width()) {
+        if (!forcePixelCap_ && targetSize.IsPositive() && sizeLevel_ > targetSize.Width()) {
             targetSize.ApplyScale(sizeLevel_ / targetSize.Width());
         }
     }
@@ -226,6 +241,9 @@ void ImageLoadingContext::ResizableCalcDstSize()
     bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == GetSourceInfo().GetSrcType());
     if (autoResize_ && !isPixelMapResource) {
         SizeF targetSize = CalculateTargetSize(srcRect_.GetSize(), dstRect_.GetSize(), imageSize);
+        if (forcePixelCap_) {
+            CapToPixelLimit(targetSize);
+        }
         // calculate real srcRect used for paint based on resized image size
         ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
     }
