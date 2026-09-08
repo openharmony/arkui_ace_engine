@@ -2526,7 +2526,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
 
 int32_t RichEditorPattern::GetCaretPosition()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetCaretPosition");
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetCaretPosition");
     return caretPosition_;
 }
 
@@ -2716,7 +2716,6 @@ void RichEditorPattern::OnWindowHide()
 
 void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetUpdateSpanStyle");
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle=%{public}s", updateSpanStyle.ToString().c_str());
     updateSpanStyle_ = updateSpanStyle;
 }
