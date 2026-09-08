@@ -28,8 +28,8 @@ void EventManager::PenHoverTest(
     const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     CHECK_NULL_VOID(frameNode);
-    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "PenHoverTest type:%{public}d id:%{public}d x:%{public}f y:%{public}f "
-        "deviceId:%{public}d sourceTool:%{public}d", static_cast<int32_t>(event.type), event.id, event.x, event.y,
+    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "PenHoverTest type:%{public}d id:%{public}d "
+        "deviceId:%{public}d sourceTool:%{public}d", static_cast<int32_t>(event.type), event.id,
         static_cast<int32_t>(event.deviceId), static_cast<int32_t>(event.sourceTool));
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
