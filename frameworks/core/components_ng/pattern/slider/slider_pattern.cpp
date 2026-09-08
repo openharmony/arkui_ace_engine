@@ -3071,6 +3071,14 @@ bool SliderPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return result;
 }
 
+void SliderPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
+}
+
 void SliderPattern::DumpInfo()
 {
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
@@ -3131,6 +3139,7 @@ void SliderPattern::DumpInfo()
     }
 
     DumpSubInfo(paintProperty);
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(HasSystemMaterial() ? "true" : "false"));
 }
 
 void SliderPattern::DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty)

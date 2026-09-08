@@ -1659,6 +1659,14 @@ bool SwitchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return result;
 }
 
+void SwitchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
+}
+
 void SwitchPattern::DumpInfo()
 {
     auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
@@ -1682,6 +1690,7 @@ void SwitchPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc(
             "TrackBorderRadius: " + paintProperty->GetTrackBorderRadius().value().ToString());
     }
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(HasSystemMaterial() ? "true" : "false"));
 }
 
 void SwitchPattern::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)

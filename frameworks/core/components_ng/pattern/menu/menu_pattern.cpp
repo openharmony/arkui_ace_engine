@@ -1870,6 +1870,7 @@ void MenuPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
         EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str(), filter);
     json->PutExtAttr("distortionEnabled", IsUseDistortionAnimation() ? "true" : "false", filter);
     json->PutExtAttr("edgeLightEnabled", IsUseEdgeLightAnimation() ? "true" : "false", filter);
+    json->PutExtAttr("systemMaterial", menuParam.systemMaterial ? "set" : "unset", filter);
 }
 
 OffsetF MenuPattern::GetDistortionMenuOffset(Placement placement) const
@@ -3538,6 +3539,13 @@ void MenuPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("MenuType: ").append(std::to_string(static_cast<int32_t>(GetMenuType()))));
+    auto menuParam = GetMenuParam();
+    DumpLog::GetInstance().AddDesc("SystemMaterial: " + std::string(menuParam.systemMaterial ? "set" : "unset"));
+    DumpLog::GetInstance().AddDesc(
+        "DistortionMode: " +
+        DistortionModeToString(menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)));
+    DumpLog::GetInstance().AddDesc(
+        "EdgeLightMode: " + EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)));
 }
 
 float MenuPattern::GetSelectMenuWidth()
@@ -3760,6 +3768,12 @@ bool MenuPattern::IsMenuScrollable() const
 void MenuPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("MenuType", static_cast<int32_t>(GetMenuType()));
+    auto menuParam = GetMenuParam();
+    json->Put("SystemMaterial", menuParam.systemMaterial ? "set" : "unset");
+    json->Put("DistortionMode",
+        DistortionModeToString(menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)).c_str());
+    json->Put("EdgeLightMode",
+        EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str());
 }
 
 OffsetF MenuPattern::GetPreviewMenuAnimationOffset(

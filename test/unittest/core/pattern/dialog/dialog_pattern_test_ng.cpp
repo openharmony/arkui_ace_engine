@@ -196,6 +196,109 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump002, Te
 }
 
 /**
+ * @tc.name: DialogPatternToJsonValueSystemMaterial001
+ * @tc.desc: Test DialogPattern::ToJsonValue outputs systemMaterial(distortionMode/edgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternToJsonValueSystemMaterial001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    frameNode->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("systemMaterial"), "unset");
+    EXPECT_FALSE(json->GetString("distortionMode").empty());
+    EXPECT_FALSE(json->GetString("edgeLightMode").empty());
+}
+
+/**
+ * @tc.name: DialogPatternDumpInfoMaterial001
+ * @tc.desc: Test DialogPattern::DumpInfo(text) outputs SystemMaterial/DistortionMode/EdgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternDumpInfoMaterial001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    bool hasSystemMaterial = false;
+    bool hasDistortion = false;
+    bool hasEdgeLight = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("SystemMaterial") != std::string::npos) hasSystemMaterial = true;
+        if (desc.find("DistortionMode") != std::string::npos) hasDistortion = true;
+        if (desc.find("EdgeLightMode") != std::string::npos) hasEdgeLight = true;
+    }
+    EXPECT_TRUE(hasSystemMaterial);
+    EXPECT_TRUE(hasDistortion);
+    EXPECT_TRUE(hasEdgeLight);
+}
+
+/**
+ * @tc.name: DialogPatternToJsonValueSystemMaterial002
+ * @tc.desc: Test DialogPattern::ToJsonValue outputs systemMaterial "set" when material configured
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternToJsonValueSystemMaterial002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    frameNode->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("systemMaterial"), "set");
+}
+
+/**
+ * @tc.name: DialogPatternDumpInfoMaterial002
+ * @tc.desc: Test DialogPattern::DumpInfo(text) outputs "SystemMaterial: set" when material configured
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternDumpInfoMaterial002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+
+    pattern->DumpInfo();
+    bool hasSet = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("SystemMaterial: set") != std::string::npos) {
+            hasSet = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasSet);
+}
+
+/**
  * @tc.name: DialogPatternAdditionalTestNgDump003
  * @tc.desc: Test DialogPattern Dump
  * @tc.type: FUNC

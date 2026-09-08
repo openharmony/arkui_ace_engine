@@ -1747,6 +1747,7 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         filter);
     json->PutExtAttr("distortionEnabled", needDistortion_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("edgeLightEnabled", needFlowLight_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("systemMaterial", dialogProperties_.systemMaterial ? "set" : "unset", filter);
 }
 
 void DialogPattern::OnColorConfigurationUpdate()
@@ -2440,6 +2441,14 @@ void DialogPattern::DumpInfo()
     }
     DumpBoolProperty();
     DumpObjectProperty();
+    DumpLog::GetInstance().AddDesc(
+        "SystemMaterial: " + std::string(dialogProperties_.systemMaterial ? "set" : "unset"));
+    DumpLog::GetInstance().AddDesc(
+        "DistortionMode: " +
+        DistortionModeToString(dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)));
+    DumpLog::GetInstance().AddDesc(
+        "EdgeLightMode: " +
+        EdgeLightModeToString(dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)));
 }
 
 void DialogPattern::DumpBoolProperty()
@@ -2676,6 +2685,11 @@ void DialogPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     }
     DumpBoolProperty(json);
     DumpObjectProperty(json);
+    json->Put("SystemMaterial", dialogProperties_.systemMaterial ? "set" : "unset");
+    json->Put("DistortionMode",
+        DistortionModeToString(dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)).c_str());
+    json->Put("EdgeLightMode",
+        EdgeLightModeToString(dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str());
 }
 
 void DialogPattern::DumpBoolProperty(std::unique_ptr<JsonValue>& json)

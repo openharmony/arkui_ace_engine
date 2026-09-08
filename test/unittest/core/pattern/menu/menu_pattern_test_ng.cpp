@@ -335,6 +335,122 @@ HWTEST_F(MenuPatternTestNg, MenuToJsonValueDistortion001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuToJsonValueSystemMaterial001
+ * @tc.desc: Test MenuPattern::ToJsonValue dumps systemMaterial as "unset" when none configured
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuToJsonValueSystemMaterial001, TestSize.Level1)
+{
+    auto wrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menu, nullptr);
+    menu->MountToParent(wrapper);
+    auto wrapperPattern = wrapper ? wrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    ASSERT_NE(wrapperPattern, nullptr);
+    MenuParam menuParam;
+    wrapperPattern->SetMenuParam(menuParam);
+    auto pattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("systemMaterial"), "unset");
+}
+
+/**
+ * @tc.name: MenuDumpInfoSystemMaterial001
+ * @tc.desc: Test MenuPattern::DumpInfo(text) outputs SystemMaterial/DistortionMode/EdgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuDumpInfoSystemMaterial001, TestSize.Level1)
+{
+    auto wrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menu, nullptr);
+    menu->MountToParent(wrapper);
+    auto wrapperPattern = wrapper ? wrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->SetMenuParam(MenuParam());
+    auto pattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    bool hasSystemMaterial = false;
+    bool hasDistortion = false;
+    bool hasEdgeLight = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("SystemMaterial") != std::string::npos) hasSystemMaterial = true;
+        if (desc.find("DistortionMode") != std::string::npos) hasDistortion = true;
+        if (desc.find("EdgeLightMode") != std::string::npos) hasEdgeLight = true;
+    }
+    EXPECT_TRUE(hasSystemMaterial);
+    EXPECT_TRUE(hasDistortion);
+    EXPECT_TRUE(hasEdgeLight);
+}
+
+/**
+ * @tc.name: MenuToJsonValueSystemMaterial002
+ * @tc.desc: Test MenuPattern::ToJsonValue outputs systemMaterial "set" when material configured
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuToJsonValueSystemMaterial002, TestSize.Level1)
+{
+    auto wrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menu, nullptr);
+    menu->MountToParent(wrapper);
+    auto wrapperPattern = wrapper ? wrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    ASSERT_NE(wrapperPattern, nullptr);
+    MenuParam menuParam;
+    menuParam.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    wrapperPattern->SetMenuParam(menuParam);
+    auto pattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("systemMaterial"), "set");
+}
+
+/**
+ * @tc.name: MenuDumpInfoSystemMaterial002
+ * @tc.desc: Test MenuPattern::DumpInfo(text) outputs "SystemMaterial: set" when material configured
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuDumpInfoSystemMaterial002, TestSize.Level1)
+{
+    auto wrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menu, nullptr);
+    menu->MountToParent(wrapper);
+    auto wrapperPattern = wrapper ? wrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    ASSERT_NE(wrapperPattern, nullptr);
+    MenuParam menuParam;
+    menuParam.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    wrapperPattern->SetMenuParam(menuParam);
+    auto pattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    bool hasSet = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("SystemMaterial: set") != std::string::npos) {
+            hasSet = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasSet);
+}
+
+/**
  * @tc.name: MenuToJsonValueDistortion002
  * @tc.desc: Test MenuPattern::ToJsonValue defaults (AUTO mode, enabled=false) when nothing is set
  * @tc.type: FUNC

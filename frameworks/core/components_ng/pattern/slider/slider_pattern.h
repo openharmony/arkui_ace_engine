@@ -179,6 +179,7 @@ public:
     }
     void PlayHapticFeedback(bool isShowSteps);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void DumpInfo() override;
 
     void InitPrefixSuffixRow();
