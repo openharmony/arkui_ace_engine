@@ -25,6 +25,9 @@ import { PuSyncedPropertyTwoWayTests } from '../../v1_tests/pu_synced_property_t
 import { ObservedPropertyAbstractPUTestsV1 } from '../../v1_tests/pu_observed_property_abstract_tests_v1'
 import { PuObservedPropertyTests } from '../../v1_tests/pu_observed_property_tests_v1'
 import { ObservedObjectNameTestsV1 } from '../../v1_tests/pu_observed_object_name_tests_v1'
+import { SubscriberManagerTestsV1 } from '../../v1_tests/subscriber_manager_tests_v1'
+import { SubscribableAbstractTestsV1 } from '../../v1_tests/subscribable_abstract_tests_v1'
+import { PuSyncedPropertyObjectNestedTestsV1 } from '../../v1_tests/pu_synced_property_object_nested_tests_v1'
 import router from '@system.router'
 
 const storage = new LocalStorage();
@@ -127,6 +130,9 @@ struct Parent {
       TestRunner.bind(this)(new ObservedPropertyAbstractPUTestsV1('V1_pu_observed_property_abstract'));
       TestRunner.bind(this)(new PuObservedPropertyTests('V1_pu_observed_property'));
       TestRunner.bind(this)(new ObservedObjectNameTestsV1('V1_pu_observed_object_name'));
+      TestRunner.bind(this)(new SubscriberManagerTestsV1('V1_subscriber_manager'));
+      TestRunner.bind(this)(new SubscribableAbstractTestsV1('V1_subscribable_abstract'));
+      TestRunner.bind(this)(new PuSyncedPropertyObjectNestedTestsV1('V1_pu_synced_property_object_nested'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
