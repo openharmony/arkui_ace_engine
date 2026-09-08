@@ -41,6 +41,7 @@ import { InteropStorageDeepTestsV2 } from '../../v2_tests/interopStorageDeepTest
 import { InteropBuilderDeepTestsV2 } from '../../v2_tests/interopBuilderDeepTestsV2'
 import { V2DecoratorsTestsV2 } from '../../v2_tests/v2DecoratorsTestsV2'
 import { V2MakeObservedTestsV2 } from '../../v2_tests/v2MakeObservedTestsV2'
+import { UpdateFuncsByElmtIdTestsV2 } from '../../v2_tests/updateFuncsByElmtIdTestsV2'
 
 import router from '@system.router'
 
@@ -80,6 +81,7 @@ struct Parent {
       TestRunner.bind(this)(new InteropBuilderDeepTestsV2('V2_interop_builder_deep'));
       TestRunner.bind(this)(new V2DecoratorsTestsV2('V2_v2Decorators'));
       TestRunner.bind(this)(new V2MakeObservedTestsV2('V2_v2MakeObserved'));
+      TestRunner.bind(this)(new UpdateFuncsByElmtIdTestsV2('V2_updateFuncsByElmtId'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
