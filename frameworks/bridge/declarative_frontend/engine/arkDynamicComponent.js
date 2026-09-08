@@ -14,6 +14,9 @@
  */
 function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
   getUINativeModule().loadNativeModule(componentName);
+  if (abcName === '') {
+    return;
+  }
   let module = globalThis.requireNapi(abcName);
   if (componentName === 'CalendarPickerDialog' || componentName === 'TimePickerDialog' || componentName === 'DatePickerDialog') {
     module.exportViewDialog();
