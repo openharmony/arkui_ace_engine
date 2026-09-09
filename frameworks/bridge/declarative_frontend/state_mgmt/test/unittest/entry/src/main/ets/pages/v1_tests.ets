@@ -28,6 +28,7 @@ import { ObservedObjectNameTestsV1 } from '../../v1_tests/pu_observed_object_nam
 import { SubscriberManagerTestsV1 } from '../../v1_tests/subscriber_manager_tests_v1'
 import { SubscribableAbstractTestsV1 } from '../../v1_tests/subscribable_abstract_tests_v1'
 import { PuSyncedPropertyObjectNestedTestsV1 } from '../../v1_tests/pu_synced_property_object_nested_tests_v1'
+import { PuTrackedObjectTestsV1 } from '../../v1_tests/pu_tracked_object_tests_v1'
 import router from '@system.router'
 
 const storage = new LocalStorage();
@@ -133,6 +134,7 @@ struct Parent {
       TestRunner.bind(this)(new SubscriberManagerTestsV1('V1_subscriber_manager'));
       TestRunner.bind(this)(new SubscribableAbstractTestsV1('V1_subscribable_abstract'));
       TestRunner.bind(this)(new PuSyncedPropertyObjectNestedTestsV1('V1_pu_synced_property_object_nested'));
+      TestRunner.bind(this)(new PuTrackedObjectTestsV1('V1_pu_tracked_object'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)

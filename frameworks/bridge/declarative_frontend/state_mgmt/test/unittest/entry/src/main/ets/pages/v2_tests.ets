@@ -42,6 +42,7 @@ import { InteropBuilderDeepTestsV2 } from '../../v2_tests/interopBuilderDeepTest
 import { V2DecoratorsTestsV2 } from '../../v2_tests/v2DecoratorsTestsV2'
 import { V2MakeObservedTestsV2 } from '../../v2_tests/v2MakeObservedTestsV2'
 import { UpdateFuncsByElmtIdTestsV2 } from '../../v2_tests/updateFuncsByElmtIdTestsV2'
+import { ObservedUtilTestsV2 } from '../../v2_tests/observedUtilTestsV2'
 
 import router from '@system.router'
 
@@ -82,6 +83,7 @@ struct Parent {
       TestRunner.bind(this)(new V2DecoratorsTestsV2('V2_v2Decorators'));
       TestRunner.bind(this)(new V2MakeObservedTestsV2('V2_v2MakeObserved'));
       TestRunner.bind(this)(new UpdateFuncsByElmtIdTestsV2('V2_updateFuncsByElmtId'));
+      TestRunner.bind(this)(new ObservedUtilTestsV2('V2_observedUtil'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
