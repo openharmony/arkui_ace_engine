@@ -23,6 +23,7 @@
 #include <chrono>
 #include <cstddef>
 #include <string_view>
+#include <cinttypes>
 #include <cstdint>
 #include <functional>
 #include <future>
@@ -587,6 +588,7 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     CHECK_NULL_RETURN(eventHub->HasOnStyledStringWillChange(), true);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "BeforeSSChange, start=%{public}d, len=%{public}d", start, length);
     auto replaceMentString = AceType::MakeRefPtr<MutableSpanString>(u"");
     replaceMentString->AppendSpanString(styledString);
     StyledStringChangeValue changeValue;
@@ -607,6 +609,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
     CHECK_NULL_VOID(eventHub);
     ReportTextChange();
     if (eventHub->HasOnStyledStringDidChange()){
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AfterSSChange, start=%{public}d, len=%{public}d", start, length);
         StyledStringChangeValue changeValue;
         auto changeStart = std::clamp(start, 0, GetTextContentLength());
         auto changeEnd = changeStart + length;
@@ -10518,6 +10521,17 @@ void RichEditorPattern::DumpInfo()
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     dumpLog.AddDesc(std::string("keyboardAppearance: ")
             .append(std::to_string(static_cast<int32_t>(keyboardAppearance_))));
+    DumpPageTranslateInfo();
+}
+
+void RichEditorPattern::DumpPageTranslateInfo()
+{
+    CHECK_NULL_VOID(pageTranslatedContent_.has_value());
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("PageTranslatedLen: ")
+        .append(std::to_string(pageTranslatedContent_->length())));
+    dumpLog.AddDesc(std::string("PageTranslateVersion: ")
+        .append(std::to_string(pageTranslateVersion_)));
 }
 
 void RichEditorPattern::RichEditorErrorReport(RichEditorInfo& info)
@@ -15487,6 +15501,9 @@ std::string RichEditorPattern::GetPageTranslateTextForReport() const
 bool RichEditorPattern::ApplyPageTranslateResult(const std::string& result, int64_t version)
 {
     if (!ApplyTranslateResultCommon(result, version)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "ApplyPageTranslateResult skipped currentVersion:%{public}" PRId64
+            " hasContent:%{public}d", pageTranslateVersion_, pageTranslatedContent_.has_value());
         return true;
     }
     auto host = GetHost();
@@ -15500,6 +15517,7 @@ void RichEditorPattern::ResetPageTranslate()
     if (!ResetTranslateCommon()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetPageTranslate");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -15530,6 +15548,8 @@ void RichEditorPattern::OnPlaceholderSourceTextChanged()
     CHECK_NULL_VOID(hasTranslateState);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "OnPlaceholderSourceChanged nodeId:%{public}d", host->GetId());
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
