@@ -40,6 +40,7 @@
 #include "page_node_info.h"
 
 #include "adapter/ohos/capability/html/span_to_html.h"
+#include "base/base64/base64_util.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -163,6 +164,9 @@ constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t MOUSE_EVENT_MAX_SIZE = 10;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 constexpr int32_t MAXIMUM_ROTATION_DELAY_TIME = 800;
+// SerializeWebState serializes the web back-forward navigation history (access stack).
+// The official @ohos.web.webview API documentation recommends not restoring state > 512KB.
+constexpr size_t MAX_WEB_STATE_SIZE = 512 * 1024; // 512KB, per SDK restoreWebState recommendation
 constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
 constexpr int32_t LONG_PRESS_DURATION_MS = 650;
@@ -1534,6 +1538,7 @@ void WebPattern::OnAttachToMainTree()
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
+    RegisterRecoverable();
 
     if (delegate_->GetPageFinishedState()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnAttachToMainTree delegate_ pageFinishedState is true");
@@ -1560,6 +1565,7 @@ void WebPattern::OnDetachFromMainTree()
     isAttachedToMainTree_ = false;
     // report component is in background.
     delegate_->OnRenderToBackground();
+    UnregisterRecoverable();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1580,6 +1586,7 @@ void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SetRecoverableViewHostNode(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     SetRotation(pipeline->GetTransformHint());
@@ -1662,6 +1669,94 @@ void WebPattern::SetRotation(uint32_t rotation)
     renderSurface_->SetTransformHint(rotation);
     CHECK_NULL_VOID(delegate_);
     delegate_->SetTransformHint(rotation);
+}
+
+void WebPattern::RegisterRecoverable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& inspectorId = host->GetInspectorId();
+    if (inspectorId.has_value() && !inspectorId->empty()) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebPattern::RegisterRecoverable id: %{public}s "
+            "duplicate id may cause restore conflict",
+            inspectorId->c_str());
+        RecoverableView::RegisterRecoverable(inspectorId.value());
+        return;
+    }
+    std::string path = host->GetPath();
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterRecoverable: src path: %{public}s", path.c_str());
+    auto pos = path.rfind("Navigation");
+    if (pos != std::string::npos) {
+        pos = path.find("NavDestination", pos);
+    }
+    if (pos == std::string::npos) {
+        pos = path.find("page");
+    }
+    if (pos != std::string::npos) {
+        pos = path.find("/", pos);
+        if (pos != std::string::npos) {
+            path = path.substr(pos);
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterRecoverable: dst path: %{public}s", path.c_str());
+
+    RecoverableView::RegisterRecoverable(path);
+}
+
+bool WebPattern::OnSaveData(std::string& data)
+{
+    CHECK_NULL_RETURN(delegate_, false);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnSaveData: WebId %{public}d", GetWebId());
+    auto state = delegate_->SerializeWebState();
+    if (state.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::OnSaveData state is empty: WebId %{public}d", GetWebId());
+        return false;
+    }
+    if (state.size() > MAX_WEB_STATE_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::OnSaveData: state too large: %{public}zu", state.size());
+        return false;
+    }
+    data = Base64Util::Encode(state.data(), state.size());
+
+    return true;
+}
+
+void WebPattern::RestoreWebState()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: WebId %{public}d", GetWebId());
+    if (isUrlLoaded_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState GetRestoreInfo isUrlLoaded failed");
+        return;
+    }
+    CHECK_NULL_VOID(delegate_);
+    std::string result;
+    if (!GetRestoreInfo(result)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState GetRestoreInfo failed, WebId %{public}d", GetWebId());
+        return;
+    }
+    if (result.size() > MAX_WEB_STATE_SIZE * 2) { // base64 is ~4/3 of raw size
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: base64 data too large: %{public}zu", result.size());
+        return;
+    }
+    std::string decoded;
+    if (!Base64Util::Decode(result, decoded)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState Decode failed: WebId %{public}d", GetWebId());
+        return;
+    }
+    if (decoded.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState Decode empty: WebId %{public}d", GetWebId());
+        return;
+    }
+    if (decoded.size() > MAX_WEB_STATE_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: decoded data too large: %{public}zu", decoded.size());
+        return;
+    }
+    std::vector<uint8_t> state(decoded.begin(), decoded.end());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: %{public}zu WebId %{public}d", state.size(), GetWebId());
+    if (delegate_->RestoreWebState(state)) {
+        isUrlLoaded_ = true;
+    }
 }
 
 void WebPattern::InitEventAfterUpdate()
@@ -3801,6 +3896,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         offlineWebRendered_ = true;
         SetActiveStatusInner(true);
     }
+    RestoreWebState();
 
     // first update size to load url.
     if (!isUrlLoaded_) {

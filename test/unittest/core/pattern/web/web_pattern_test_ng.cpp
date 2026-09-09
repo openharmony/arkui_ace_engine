@@ -22,6 +22,9 @@
 #define protected public
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/manager/recoverable/recoverable_view.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/page_info.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #undef protected
 #undef private
@@ -29,6 +32,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
+#include "base/base64/base64_util.h"
 #include "nweb_handler.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -5615,6 +5619,321 @@ HWTEST_F(WebPatternTestNg, SnapshotTouchReporter_001, TestSize.Level1)
     reporter->OnDisappear();
     EXPECT_FALSE(reporter->appearTime_.has_value());
     EXPECT_TRUE(reporter->infos_ == nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RegisterRecoverable001
+ * @tc.desc: Test RegisterRecoverable with a Navigation/NavDestination path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RegisterRecoverable001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    // RegisterRecoverable calls GetHost()->GetPath() internally.
+    // If host exists but path does not contain Navigation/page, it still calls
+    // RecoverableView::RegisterRecoverable with the original path.
+    EXPECT_NO_FATAL_FAILURE(webPattern->RegisterRecoverable());
+#endif
+}
+
+/**
+ * @tc.name: OnSaveData001
+ * @tc.desc: Test OnSaveData returns false when delegate_ is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnSaveData001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    // delegate_ is null by default after creation
+    webPattern->delegate_ = nullptr;
+    std::string data;
+    auto result = webPattern->OnSaveData(data);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(data.empty());
+#endif
+}
+
+/**
+ * @tc.name: OnSaveData002
+ * @tc.desc: Test OnSaveData returns true and populates data when SerializeWebState returns non-empty state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnSaveData002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    // Force the mock SerializeWebState to return non-empty state so OnSaveData exercises the success path
+    // (Base64Util::Encode of the state). The production code returns false when state is empty.
+    SetMockSerializeWebState({ 0x01, 0x02, 0x03, 0x04 });
+    std::string data;
+    auto result = webPattern->OnSaveData(data);
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(data.empty());
+    ResetMockSerializeWebState();
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: OnSaveData003
+ * @tc.desc: Test OnSaveData returns false when SerializeWebState returns empty state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnSaveData003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    // Mock SerializeWebState returns empty by default; production OnSaveData returns false for empty state
+    // and leaves the output data unchanged (empty).
+    std::string data;
+    auto result = webPattern->OnSaveData(data);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(data.empty());
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: RestoreWebState001
+ * @tc.desc: Test RestoreWebState returns early when isUrlLoaded_ is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RestoreWebState001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->isUrlLoaded_ = true;
+    // Should return early without calling GetRestoreInfo or RestoreWebState
+    EXPECT_NO_FATAL_FAILURE(webPattern->RestoreWebState());
+    // isUrlLoaded_ remains true
+    EXPECT_TRUE(webPattern->isUrlLoaded_);
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: RestoreWebState002
+ * @tc.desc: Test RestoreWebState when GetRestoreInfo returns false (no restore data).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RestoreWebState002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->isUrlLoaded_ = false;
+    // GetRestoreInfo returns false when no restore data has been registered
+    EXPECT_NO_FATAL_FAILURE(webPattern->RestoreWebState());
+    // isUrlLoaded_ should remain false since no state was restored
+    EXPECT_FALSE(webPattern->isUrlLoaded_);
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: RestoreWebState003
+ * @tc.desc: Test RestoreWebState when isUrlLoaded_ is false and delegate is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RestoreWebState003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    webPattern->isUrlLoaded_ = false;
+    // RestoreWebState calls GetRestoreInfo which needs host node
+    EXPECT_NO_FATAL_FAILURE(webPattern->RestoreWebState());
+    EXPECT_FALSE(webPattern->isUrlLoaded_);
+#endif
+}
+
+/**
+ * @tc.name: RestoreWebState004
+ * @tc.desc: Test RestoreWebState succeeds with valid base64-encoded restore data and sets isUrlLoaded_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RestoreWebState004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->isUrlLoaded_ = false;
+
+    // Make SerializeWebState return non-empty state so OnSaveData produces valid base64 data.
+    const std::vector<uint8_t> webState = { 0x01, 0x02, 0x03, 0x04 };
+    SetMockSerializeWebState(webState);
+    std::string savedData;
+    bool saveResult = webPattern->OnSaveData(savedData);
+    ASSERT_TRUE(saveResult);
+    ASSERT_FALSE(savedData.empty());
+    ResetMockSerializeWebState();
+
+    // The router (non-navigation) restore path resolves restore data via PagePattern::GetComponentInfo,
+    // which looks up restoreInfo_ by the component's globalComponentId. Create a page FrameNode that
+    // GetRestoreByComponent can find by pageId, and seed its restoreInfo_ with the base64 data under the
+    // same globalComponentId the web pattern will query with.
+    // IMPORTANT: Use MakeUniqueId() instead of ClaimNodeId() to get a valid ElementRegister ID.
+    // ClaimNodeId() may return -1 (UndefinedElementId) when reservedNodeId_ is not set, and
+    // ElementRegister::AddUINode refuses to register nodes with ID -1. GetRestoreByComponent uses
+    // FrameNode::GetFrameNodeOnly to look up the page node, which queries ElementRegister.
+    const std::string globalComponentId = "web-test-restore";
+    int32_t pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    ASSERT_NE(pagePattern, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, pagePattern);
+    ASSERT_NE(pageNode, nullptr);
+    pagePattern->restoreInfo_.insert(std::make_pair(globalComponentId, savedData));
+
+    // Simulate a registered RecoverableView: GetRestoreInfo returns false unless pageId_/callbackId_ are set.
+    webPattern->pageId_ = pageNodeId;
+    webPattern->callbackId_ = 0;
+    webPattern->globalComponentId_ = globalComponentId;
+    webPattern->isNavigationType_ = false;
+    webPattern->hostNode_ = WeakPtr<FrameNode>(frameNode);
+
+    // RestoreWebState must return true from NWeb delegate so isUrlLoaded_ flips to true.
+    SetMockRestoreWebState(true);
+    EXPECT_NO_FATAL_FAILURE(webPattern->RestoreWebState());
+    EXPECT_TRUE(webPattern->isUrlLoaded_);
+    ResetMockRestoreWebState();
+
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: RestoreWebState005
+ * @tc.desc: Test RestoreWebState is a no-op after a successful restore (isUrlLoaded_ guards re-entry).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RestoreWebState005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // Establish a registered recoverable view and seed page restore info so the first RestoreWebState
+    // completes the success path and sets isUrlLoaded_ = true.
+    const std::vector<uint8_t> webState = { 0x10, 0x20, 0x30 };
+    SetMockSerializeWebState(webState);
+    std::string savedData;
+    ASSERT_TRUE(webPattern->OnSaveData(savedData));
+    ASSERT_FALSE(savedData.empty());
+    ResetMockSerializeWebState();
+
+    const std::string globalComponentId = "web-test-idempotent";
+    int32_t pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    ASSERT_NE(pagePattern, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, pagePattern);
+    ASSERT_NE(pageNode, nullptr);
+    pagePattern->restoreInfo_.insert(std::make_pair(globalComponentId, savedData));
+
+    webPattern->pageId_ = pageNodeId;
+    webPattern->callbackId_ = 0;
+    webPattern->globalComponentId_ = globalComponentId;
+    webPattern->isNavigationType_ = false;
+    webPattern->hostNode_ = WeakPtr<FrameNode>(frameNode);
+
+    SetMockRestoreWebState(true);
+    EXPECT_NO_FATAL_FAILURE(webPattern->RestoreWebState());
+    EXPECT_TRUE(webPattern->isUrlLoaded_);
+
+    // Second call must early-return on isUrlLoaded_ and not touch the delegate again. isUrlLoaded_ stays true.
+    // Force the delegate restore to return false so a non-guarded path would observable flip state back.
+    SetMockRestoreWebState(false);
+    EXPECT_NO_FATAL_FAILURE(webPattern->RestoreWebState());
+    EXPECT_TRUE(webPattern->isUrlLoaded_);
+    ResetMockRestoreWebState();
+
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::TearDown();
 #endif
 }
 } // namespace OHOS::Ace::NG

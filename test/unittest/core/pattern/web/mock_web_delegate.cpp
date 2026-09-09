@@ -28,6 +28,12 @@ static std::string g_setReturnStatus = "";
 const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
+// Configurable return values for WebDelegate::SerializeWebState / RestoreWebState.
+// Default behavior is preserved: SerializeWebState returns empty, RestoreWebState returns false.
+// Tests opt in via SetMockSerializeWebState / SetMockRestoreWebState.
+static bool g_serializeWebStateConfigurable = false;
+static std::vector<uint8_t> g_serializeWebStateResult;
+static bool g_restoreWebStateResult = false;
 std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
 std::shared_ptr<NWeb::NWebAgentManager> g_nwebAgentManager = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
@@ -1433,6 +1439,24 @@ void SetComponentType(const std::string& type)
 {
     g_setComponentType = type;
 }
+void SetMockSerializeWebState(const std::vector<uint8_t>& result)
+{
+    g_serializeWebStateConfigurable = true;
+    g_serializeWebStateResult = result;
+}
+void ResetMockSerializeWebState()
+{
+    g_serializeWebStateConfigurable = false;
+    g_serializeWebStateResult.clear();
+}
+void SetMockRestoreWebState(bool result)
+{
+    g_restoreWebStateResult = result;
+}
+void ResetMockRestoreWebState()
+{
+    g_restoreWebStateResult = false;
+}
 int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction)
 {
     return -1;
@@ -1527,6 +1551,17 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
 void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
 void WebDelegate::SetIsSystemRtlEnable(bool enable) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
+std::vector<uint8_t> WebDelegate::SerializeWebState()
+{
+    if (g_serializeWebStateConfigurable) {
+        return g_serializeWebStateResult;
+    }
+    return {};
+}
+bool WebDelegate::RestoreWebState(const std::vector<uint8_t>& state)
+{
+    return g_restoreWebStateResult;
+}
 void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
 void WebDelegate::SetEnableDrag(bool isEnabled) {}
 void WebDelegate::UpdateWebMediaNetworkProxyEnabled(bool isEnabled) {}

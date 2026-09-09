@@ -43,6 +43,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/manager/recoverable/recoverable_view.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_event_report.h"
@@ -195,13 +196,14 @@ enum class VideoPlaybackNotificationType {
 
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
 class WebPattern : public NestableScrollContainer,
+                   public virtual RecoverableView,
                    public TextBase,
                    public Magnifier,
                    public PageTranslateNode,
                    public virtual StatusBarClickListener,
                    public Recorder::WebEventRecorder {
     DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, PageTranslateNode,
-        Recorder::WebEventRecorder);
+        Recorder::WebEventRecorder, RecoverableView);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -1224,6 +1226,9 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void CleanupWebPatternResource();
+    void RegisterRecoverable();
+    bool OnSaveData(std::string& data) override;
+    void RestoreWebState();
 
     void OnWindowShow() override;
     void OnWindowHide() override;
