@@ -9688,7 +9688,13 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
             CHECK_NULL_VOID(richEditor);
             ACE_SCOPED_TRACE("RichEditorAsyncHandleOnCopy");
             RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
+#if defined(IOS_PLATFORM)
+            // iOS UIPasteboard stores records in insertion order (append).
+            // Use forward iteration to preserve correct text order.
+            for (auto resultObj = copyResultObjects.begin(); resultObj != copyResultObjects.end(); ++resultObj) {
+#else
             for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
+#endif
                 richEditor->ProcessResultObject(pasteData, *resultObj, copySpans);
             }
             auto uiTaskExecutor = task.Upgrade();
