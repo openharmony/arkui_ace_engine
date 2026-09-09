@@ -4088,6 +4088,7 @@ void OverlayManager::UpdateSheetRender(
 
     sheetPatternModifier->sheetSetSheetRenderMaterial(sheetPageNode);
     sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, isPartialUpdate);
+    sheetPatternModifier->sheetUpdateSheetScrollBar(sheetPageNode, sheetStyle);
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -5086,6 +5087,7 @@ void OverlayManager::UpdateCustomKeyboardPosition()
         renderContext->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.finalOffset, 0.0f });
     }
 }
+
 
 CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard)
 {
