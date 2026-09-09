@@ -6582,6 +6582,7 @@ struct ArkUITextInputModifier {
     void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
     void (*setTextInputCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
+    void (*setTextInputCaretColorJS)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetTextInputCaretColor)(ArkUINodeHandle node);
     void (*setTextInputType)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextInputType)(ArkUINodeHandle node);
