@@ -64,6 +64,7 @@ public:
         ACE_SCOPED_TRACE("RichEditorParagraphManager::CalPosyRange");
         float cumHeight = 0;
         for (auto& paragraphInfo : paragraphs_) {
+            CHECK_NULL_VOID(paragraphInfo.paragraph);
             paragraphInfo.topPos = cumHeight;
             cumHeight += paragraphInfo.paragraph->GetHeight();
             paragraphInfo.bottomPos = cumHeight;
@@ -77,6 +78,7 @@ public:
         ACE_SCOPED_TRACE("RichEditorParagraphManager::CalLineIndex");
         size_t lineIndex = 0;
         for (auto& paragraphInfo : paragraphs_) {
+            CHECK_NULL_VOID(paragraphInfo.paragraph);
             paragraphInfo.topLineIndex = lineIndex;
             lineIndex += paragraphInfo.paragraph->GetLineCount();
             paragraphInfo.bottomLineIndex = lineIndex - 1;
@@ -94,6 +96,7 @@ public:
         for (auto&& info : paragraphs_) {
             std::vector<RectF> rects;
             CHECK_NULL_BREAK(info.start <= end);
+            CHECK_NULL_CONTINUE(info.paragraph);
             if (info.end <= start) {
                 y += info.paragraph->GetHeight();
                 continue;
