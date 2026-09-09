@@ -154,7 +154,7 @@ void SheetPresentationPattern::RefreshTitleBarBlurByCurrentOffset()
     CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
-    double totalOffset = scrollPattern->GetTotalOffset();
+    double totalOffset = GetTitleBlurNestedScrollOffset() + scrollPattern->GetTotalOffset();
     const auto& options = sheetStyle.titleBarBackgroundBlur.value();
     auto progress = CalculateTitleBarBlurProgress(totalOffset, options);
     UpdateTitleEffectBlurAndMaskColorProgress(progress);
@@ -164,6 +164,7 @@ void SheetPresentationPattern::ResetTitleBarEffectNode()
 {
     isTitleBarBlurDisabledByFling_ = false;
     UnRegisterTitleBarScrollObserver();
+    UnRegisterTitleBlurNestedScroll();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (titleBarEffectNode_) {
@@ -204,7 +205,7 @@ void SheetPresentationPattern::ApplyTitleBarBackgroundBlur()
     CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
-    double totalOffset = scrollPattern->GetTotalOffset();
+    double totalOffset = GetTitleBlurNestedScrollOffset() + scrollPattern->GetTotalOffset();
     const auto& options = sheetStyle.titleBarBackgroundBlur.value();
     auto progress = CalculateTitleBarBlurProgress(totalOffset, options);
     UpdateTitleEffectBlurAndMaskColorProgress(progress);
@@ -324,6 +325,94 @@ void SheetPresentationPattern::UpdateStackModeZIndex()
     }
 }
 
+void SheetPresentationPattern::RegisterTitleBlurNestedScroll(WeakPtr<NestableScrollContainer> sourceScrollNode)
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (!CheckTitleIsHasEffectNode(sheetStyle)) {
+        return;
+    }
+
+    UnRegisterTitleBlurNestedScroll();
+    auto scrollNode = GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollNodeId = scrollNode->GetId();
+    auto currentContainer = sourceScrollNode.Upgrade();
+    CHECK_NULL_VOID(currentContainer);
+
+    while (currentContainer) {
+        auto currentNode = currentContainer->GetHost();
+        CHECK_NULL_VOID(currentNode);
+        auto currentNodeId = currentNode->GetId();
+        if (currentNodeId == scrollNodeId) {
+            return;
+        }
+        nestedScrollNodeList_.push_back(WeakClaim(AceType::RawPtr(currentNode)));
+
+        auto currentPattern = currentNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(currentPattern);
+        {
+            auto controller = currentPattern->GetOrCreatePositionController();
+            CHECK_NULL_VOID(controller);
+            auto obsMgr = controller->GetObserverManager();
+            if (!obsMgr) {
+                obsMgr = AceType::MakeRefPtr<ScrollerObserverManager>();
+                controller->SetObserverManager(obsMgr);
+            }
+            ScrollerObserver observer;
+            observer.onDidScrollEvent = [weakSheet = WeakClaim(this), weakScrollNode = WeakClaim(RawPtr(currentNode))](
+                                            Dimension frameDelta, ScrollSource source, bool isAtTop, bool isAtBottom) {
+                auto sheet = weakSheet.Upgrade();
+                CHECK_NULL_VOID(sheet);
+                auto sheetScrollNode = sheet->GetSheetScrollNode();
+                CHECK_NULL_VOID(sheetScrollNode);
+                auto sheetScrollPattern = sheetScrollNode->GetPattern<ScrollablePattern>();
+                CHECK_NULL_VOID(sheetScrollPattern);
+                auto scrollNode = weakScrollNode.Upgrade();
+                CHECK_NULL_VOID(scrollNode);
+                double totalOffset = sheet->GetTitleBlurNestedScrollOffset() + sheetScrollPattern->GetTotalOffset();
+                bool isFling = source == ScrollSource::FLING;
+                sheet->OnContentScrollUpdate(totalOffset, frameDelta.ConvertToPx(), isFling);
+            };
+            obsMgr->AddObserver(observer, currentNodeId);
+        }
+        currentContainer = currentPattern->GetNestedScrollParent();
+    }
+}
+
+void SheetPresentationPattern::UnRegisterTitleBlurNestedScroll()
+{
+    for (auto weakNode : nestedScrollNodeList_) {
+        auto scrollableNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(scrollableNode);
+        auto currentPattern = scrollableNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(currentPattern);
+        auto controller = currentPattern->GetOrCreatePositionController();
+        CHECK_NULL_VOID(controller);
+        auto obsMgr = controller->GetObserverManager();
+        if (!obsMgr) {
+            continue;
+        }
+        obsMgr->RemoveObserver(scrollableNode->GetId());
+    }
+    nestedScrollNodeList_.clear();
+}
+
+float SheetPresentationPattern::GetTitleBlurNestedScrollOffset()
+{
+    float totalOffset = 0.0f;
+    for (auto weakNode : nestedScrollNodeList_) {
+        auto scrollNode = weakNode.Upgrade();
+        CHECK_NULL_RETURN(scrollNode, 0.0f);
+        auto currentPattern = scrollNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_RETURN(currentPattern, 0.0f);
+        double currentOffset = currentPattern->GetTotalOffset();
+        totalOffset += currentOffset;
+    }
+    return totalOffset;
+}
+
 void SheetPresentationPattern::RegisterTitleBarScrollObserver()
 {
     if (hasTitleBarScrollObs_) {
@@ -349,7 +438,7 @@ void SheetPresentationPattern::RegisterTitleBarScrollObserver()
         CHECK_NULL_VOID(scrollNode);
         auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
         CHECK_NULL_VOID(scrollPattern);
-        double totalOffset = scrollPattern->GetTotalOffset();
+        double totalOffset = sheet->GetTitleBlurNestedScrollOffset() + scrollPattern->GetTotalOffset();
         bool isFling = source == ScrollSource::FLING;
         sheet->OnContentScrollUpdate(totalOffset, frameDelta.ConvertToPx(), isFling);
     };
@@ -364,7 +453,7 @@ void SheetPresentationPattern::RegisterTitleBarScrollObserver()
         CHECK_NULL_VOID(scrollNode);
         auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
         CHECK_NULL_VOID(scrollPattern);
-        double totalOffset = scrollPattern->GetTotalOffset();
+        double totalOffset = sheet->GetTitleBlurNestedScrollOffset() + scrollPattern->GetTotalOffset();
         sheet->OnFlingEnd(totalOffset);
     };
 

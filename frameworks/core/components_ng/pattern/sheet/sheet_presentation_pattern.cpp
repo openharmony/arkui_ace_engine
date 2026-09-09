@@ -3340,6 +3340,7 @@ bool SheetPresentationPattern::IsScrollOutOfBoundary()
 void SheetPresentationPattern::OnScrollStartRecursive(
     WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
+    RegisterTitleBlurNestedScroll(child);
     return sheetObject_->OnScrollStartRecursive(position, velocity);
 }
 
