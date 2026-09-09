@@ -888,6 +888,7 @@ void GridFocus::ProcessFocusEvent(const KeyEvent& event, bool indexChanged)
             auto child = host->GetOrCreateChildByIndex(focusIndex_.value());
             CHECK_NULL_VOID(child);
             auto childNode = child->GetHostNode();
+            CHECK_NULL_VOID(childNode);
             auto childFocusHub = childNode->GetFocusHub();
             if (childFocusHub && !childFocusHub->IsCurrentFocus()) {
                 childFocusHub->RequestFocusImmediately();
