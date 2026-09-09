@@ -53,12 +53,16 @@ namespace {
         want.SetElement(element);
     }
 
-    // postCardAction 可选透传 executeMode（取值见 AppExecFwk::ExecuteMode，0-3）；
-    // 缺省回退前台执行，传入非法值（非数字/超范围）返回 false 由调用方拒绝。
-    bool GetIntentExecuteMode(const std::unique_ptr<JsonValue>& eventAction, int32_t& executeMode)
+    // postCardAction 可选透传 executeMode（取值见 AppExecFwk::ExecuteMode，0-3），
+    // 作为 params 内保留键（与 intentParams 并列）解析；缺省回退前台执行，
+    // 传入非法值（非数字/超范围）返回 false 由调用方拒绝。
+    bool GetIntentExecuteMode(const std::unique_ptr<JsonValue>& params, int32_t& executeMode)
     {
         executeMode = static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND);
-        auto executeModeJson = eventAction->GetValue("executeMode");
+        if (!params->IsValid()) {
+            return true;
+        }
+        auto executeModeJson = params->GetValue("executeMode");
         if (!executeModeJson->IsValid()) {
             return true;
         }
@@ -229,29 +233,34 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent intentName is empty");
         return -1;
     }
-    // executeMode 缺省回退前台执行；用户显式传入时透传（含后台/扩展模式），非法值拒绝。
+    // params 为透传信封：内含 intentParams（业务意图参数）与保留键 executeMode，
+    // 业务参数整体隔离在子对象中，与保留键无同名冲突；
+    // executeMode 缺省回退前台执行，非法值整体拒绝。
+    auto params = eventAction->GetValue("params");
     int32_t executeMode = 0;
-    if (!GetIntentExecuteMode(eventAction, executeMode)) {
+    if (!GetIntentExecuteMode(params, executeMode)) {
         return -1;
     }
 
     AAFwk::WantParams wantParams;
-    auto intentParams = eventAction->GetValue("intentParams");
-    if (intentParams->IsValid()) {
-        auto child = intentParams->GetChild();
-        while (child->IsValid()) {
-            auto key = child->GetKey();
-            // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
-            if (child->IsString()) {
-                wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
-            } else if (child->IsNumber()) {
-                wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
-            } else if (child->IsBool()) {
-                wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
-            } else {
-                wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+    if (params->IsValid()) {
+        auto intentParams = params->GetValue("intentParams");
+        if (intentParams->IsValid()) {
+            auto child = intentParams->GetChild();
+            while (child->IsValid()) {
+                auto key = child->GetKey();
+                // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
+                if (child->IsString()) {
+                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+                } else if (child->IsNumber()) {
+                    wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
+                } else if (child->IsBool()) {
+                    wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
+                } else {
+                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+                }
+                child = child->GetNext();
             }
-            child = child->GetNext();
         }
     }
 

@@ -1335,7 +1335,7 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action, bool isMa
 void FormManagerDelegate::OnInsightIntentActionEvent(const std::string& action)
 {
     // 不复用 ParseAction：其强制要求 abilityName（router/call 语义），
-    // intentName/intentParams 在 FormUtilsImpl::InsightIntentEvent 内解析。
+    // intentName/params 在 FormUtilsImpl::InsightIntentEvent 内解析。
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid() || !eventAction->GetValue("intentName")->IsValid()) {
         TAG_LOGE(AceLogTag::ACE_FORM, "insightIntent action parse failed, detail action:%{public}s", action.c_str());
