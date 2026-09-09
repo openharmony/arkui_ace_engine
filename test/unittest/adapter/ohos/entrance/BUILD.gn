@@ -379,7 +379,6 @@ ohos_unittest("right_mouse_mapping_config_test_ng") {
     "data_share:datashare_consumer",
     "hilog:libhilog",
     "bounds_checking_function:libsec_shared",
-    "ipc:ipc_single",
     "resource_management:global_resmgr",
   ]
 }
