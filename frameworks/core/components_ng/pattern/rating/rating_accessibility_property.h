@@ -33,11 +33,18 @@ public:
         return true;
     }
 
+    bool IsScrollable() const override
+    {
+        return true;
+    }
+
     AccessibilityValue GetAccessibilityValue() const override;
 
     std::string GetText() const override;
 
     bool IsEditable() const override;
+
+    void SetSpecificSupportAction() override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RatingAccessibilityProperty);

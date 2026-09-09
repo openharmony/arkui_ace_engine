@@ -35,6 +35,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
@@ -786,6 +787,55 @@ void RatingPattern::UpdateRatingScore(double ratingScore)
     FireBuilder();
 }
 
+void RatingPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleActionScroll(1);
+    });
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleActionScroll(-1);
+    });
+}
+
+void RatingPattern::HandleActionScroll(int32_t scrollDirection)
+{
+    // Indicator mode is readonly, silently ignore accessibility scroll actions.
+    CHECK_NULL_VOID(!IsIndicator());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(ratingLayoutProperty);
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    const int32_t scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
+    const double stepSize = ratingRenderProperty->GetStepSizeValue(themeStepSize_);
+    const int32_t starNum = ratingLayoutProperty->GetStarsValue(themeStarNum_);
+    const double ratingScore = ratingRenderProperty->GetRatingScoreValue(0.0);
+    double newScore = ratingScore + scrollDirection * scrollStep * stepSize;
+    newScore = fmin(fmax(newScore, 0.0), static_cast<double>(starNum));
+    CHECK_NULL_VOID(!NearEqual(newScore, ratingScore));
+    std::ostringstream oldScore;
+    std::ostringstream newScoreString;
+    oldScore << std::fixed << std::setprecision(1) << ratingScore;
+    newScoreString << std::fixed << std::setprecision(1) << newScore;
+    UpdateRatingScore(newScore);
+    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, oldScore.str(), newScoreString.str());
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    FireChangeEvent();
+}
+
 void RatingPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!(mouseEvent_ && hoverEvent_));
@@ -984,6 +1034,7 @@ void RatingPattern::OnModifyDone()
     imageSuccessStateCode_ = 0;
     // Constrains ratingScore and starNum in case of the illegal input.
     ConstrainsRatingScore(layoutProperty);
+    SetAccessibilityAction();
 
     LoadForeground(layoutProperty, ratingTheme, iconTheme);
     LoadSecondary(layoutProperty, ratingTheme, iconTheme);

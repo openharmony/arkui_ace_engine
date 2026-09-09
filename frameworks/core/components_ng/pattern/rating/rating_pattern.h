@@ -133,6 +133,12 @@ public:
         const RefPtr<IconTheme>& iconTheme);
     int32_t OnInjectionEvent(const std::string& command) override;
 
+    // Theme star count, used as accessibility range fallback when stars property is not set.
+    int32_t GetThemeStarNum() const
+    {
+        return themeStarNum_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);
@@ -161,6 +167,10 @@ private:
 
     // Init touch event, update render when click.
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    // Register accessibility scroll actions, update score by stepSize when accessibility swipes.
+    void SetAccessibilityAction();
+    void HandleActionScroll(int32_t scrollDirection);
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
 
