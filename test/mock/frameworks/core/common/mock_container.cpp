@@ -60,6 +60,7 @@ RefPtr<MockContainer> MockContainer::container_;
 ColorMode MockContainer::mockColorMode_ = ColorMode::LIGHT;
 bool MockContainer::mockIsNeedModifySize_ = false;
 Rect MockContainer::mockDisplayAvailableRect_;
+MockContainer::GetContainerCallback MockContainer::getContainerCallback_;
 
 int32_t Container::CurrentId()
 {
@@ -134,16 +135,19 @@ FrontendType Container::GetFrontendType() const
 
 void MockContainer::SetUp()
 {
+    getContainerCallback_ = nullptr;
     container_ = AceType::MakeRefPtr<::testing::NiceMock<MockContainer>>();
 }
 
 void MockContainer::SetUp(RefPtr<PipelineBase> pipelineContext)
 {
+    getContainerCallback_ = nullptr;
     container_ = AceType::MakeRefPtr<::testing::NiceMock<MockContainer>>(pipelineContext);
 }
 
 void MockContainer::TearDown()
 {
+    getContainerCallback_ = nullptr;
     container_ = nullptr;
 }
 
@@ -154,7 +158,15 @@ RefPtr<MockContainer> MockContainer::Current()
 
 RefPtr<Container> Container::GetContainer(int32_t containerId)
 {
+    if (MockContainer::getContainerCallback_) {
+        return MockContainer::getContainerCallback_(containerId);
+    }
     return MockContainer::Current();
+}
+
+void MockContainer::SetGetContainerCallback(GetContainerCallback&& callback)
+{
+    getContainerCallback_ = std::move(callback);
 }
 
 ColorMode Container::CurrentColorMode()
@@ -353,6 +365,10 @@ sptr<IRemoteObject> Container::GetToken()
 
 Window* Container::GetWindow() const
 {
+    auto mockContainer = AceType::DynamicCast<MockContainer>(this);
+    if (mockContainer && mockContainer->GetMockWindow()) {
+        return mockContainer->GetMockWindow();
+    }
     auto context = GetPipelineContext();
     return context ? context->GetWindow() : nullptr;
 }

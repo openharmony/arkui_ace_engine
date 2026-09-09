@@ -214,6 +214,8 @@ private:
     };
     void RemoveVsyncTimeoutDFXTask(uint64_t frameCount);
     void PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecutor);
+    bool TryRegisterToParentWindow();
+    void UnregisterFromParentWindow();
 
     bool IsWindowDetached() const
     {
@@ -235,6 +237,7 @@ private:
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
+    int32_t registeredParentId_ = -1;
     bool isFirstRequestVsync_ = true;
     bool directorFromWindow_ = false;
     // Window render node attach status, managed by NotifyWindowAttachStateChange:
