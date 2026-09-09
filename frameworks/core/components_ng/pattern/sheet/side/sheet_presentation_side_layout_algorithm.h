@@ -46,10 +46,12 @@ public:
     void MeasureOperation(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
     void MeasureCloseIcon(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
     void MeasureScrollNode(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
+    void MeasureTitleBarEffect(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     void LayoutTitleBuilder(LayoutWrapper* layoutWrapper);
     void LayoutScrollNode(LayoutWrapper* layoutWrapper);
+    void LayoutTitleBarEffect(LayoutWrapper* layoutWrapper);
     void LayoutCloseIcon(LayoutWrapper* layoutWrapper);
     float GetSheetDefaultWidth(const RefPtr<SheetPresentationPattern>& sheetPattern);
 

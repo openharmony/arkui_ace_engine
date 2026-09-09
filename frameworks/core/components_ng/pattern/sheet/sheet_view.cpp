@@ -314,7 +314,7 @@ RefPtr<FrameNode> SheetView::CreateScrollNode(const NG::SheetStyle& sheetStyle)
     props->UpdateAxis(Axis::VERTICAL);
     auto paintProps = scroll->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProps, nullptr);
-    paintProps->UpdateScrollBarMode(DisplayMode::OFF);
+    paintProps->UpdateScrollBarMode(sheetStyle.scrollBarState.value_or(DisplayMode::OFF));
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (sheetStyle.sheetEffectEdge.has_value() && sheetStyle.sheetEffectEdge.value() == NG::SheetEffectEdge::NONE) {

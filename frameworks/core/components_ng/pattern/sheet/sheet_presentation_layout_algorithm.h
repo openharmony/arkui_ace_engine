@@ -80,6 +80,7 @@ public:
     void LayoutScrollNode(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
     void LayoutCloseIcon(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
     void LayoutDragBar(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+    void LayoutTitleBarEffect(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
 
 private:
     float GetWidthByScreenSizeType(const float maxWidth, LayoutWrapper* layoutWrapper) const;
@@ -107,6 +108,7 @@ private:
     void MeasureOperation(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
     void MeasureDragBar(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
     void MeasureCloseIcon(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
+    void MeasureTitleBarEffect(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
 
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;
