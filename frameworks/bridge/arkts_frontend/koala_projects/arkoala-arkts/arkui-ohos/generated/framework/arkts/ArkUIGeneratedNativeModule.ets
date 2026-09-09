@@ -1194,7 +1194,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyVGridLayoutInterface_setLazyVGridLayoutOptions(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _LazyVGridLayoutAttribute_setColumnsTemplate(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _LazyVGridLayoutAttribute_setColumnsTemplate0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyVGridLayoutAttribute_setColumnsTemplate1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Line_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
