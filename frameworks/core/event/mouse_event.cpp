@@ -76,9 +76,10 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
         if (node) {
             TAG_LOGD(AceLogTag::ACE_MOUSE,
                 "HandlePenHoverEvent_node(%{public}s/%{public}d/%{public}s/%{public}s) isHovered:%{public}d "
-                "type:%{public}d",
+                "type:%{public}d x:" SEC_PLD(%{public}f) " y:" SEC_PLD(%{public}f),
                 node->GetTag().c_str(), node->GetId(), std::to_string(node->GetAccessibilityId()).c_str(),
-                node->GetInspectorId().value_or("").c_str(), isHovered, static_cast<int32_t>(event.type));
+                node->GetInspectorId().value_or("").c_str(), isHovered, static_cast<int32_t>(event.type),
+                SEC_PARAM(event.x), SEC_PARAM(event.y));
             ACE_SCOPED_TRACE("HandlePenHoverEvent_node(%s/%d/%s/%s) isHovered:%d type:%d",
                 node->GetTag().c_str(), node->GetId(), std::to_string(node->GetAccessibilityId()).c_str(),
                 node->GetInspectorId().value_or("").c_str(), isHovered, static_cast<int32_t>(event.type));
@@ -124,9 +125,10 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
         auto node = GetAttachedNode().Upgrade();
         if (node) {
             TAG_LOGD(AceLogTag::ACE_MOUSE,
-                "HandlePenHoverMoveEvent_node(%{public}s/%{public}d/%{public}s/%{public}s)",
+                "HandlePenHoverMoveEvent_node(%{public}s/%{public}d/%{public}s/%{public}s) x:" SEC_PLD(%{public}f)
+                " y:" SEC_PLD(%{public}f),
                 node->GetTag().c_str(), node->GetId(), std::to_string(node->GetAccessibilityId()).c_str(),
-                node->GetInspectorId().value_or("").c_str());
+                node->GetInspectorId().value_or("").c_str(), SEC_PARAM(event.x), SEC_PARAM(event.y));
             ACE_SCOPED_TRACE("HandlePenHoverMoveEvent_node(%s/%d/%s/%s)",
                 node->GetTag().c_str(), node->GetId(), std::to_string(node->GetAccessibilityId()).c_str(),
                 node->GetInspectorId().value_or("").c_str());
