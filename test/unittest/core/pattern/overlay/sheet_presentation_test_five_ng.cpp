@@ -1870,7 +1870,7 @@ HWTEST_F(SheetPresentationTestFiveNg, SetSheetCloseIconMaterial001, TestSize.Lev
      * @tc.steps: step4. call SetSheetCloseIconMaterial and verify systemMaterial.
      * @tc.expected: systemMaterial should be set on sheetCloseIcon renderContext.
      */
-    sheetPattern->SetSheetCloseIconMaterial();
+    sheetPattern->SetSheetCloseIconMaterial(nullptr);
     auto renderContext = buttonNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     auto systemMaterial = renderContext->GetSystemMaterial();
@@ -1967,7 +1967,7 @@ HWTEST_F(SheetPresentationTestFiveNg, SetSheetCloseIconMaterial002_SMOOTH, TestS
     sheetTheme->closeIconColor_ = Color(0x0c182431);
     SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
 
-    sheetPattern->SetSheetCloseIconMaterial();
+    sheetPattern->SetSheetCloseIconMaterial(nullptr);
     auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(buttonEventHub, nullptr);
     EXPECT_TRUE(buttonEventHub->GetStateEffect());
@@ -2007,7 +2007,7 @@ HWTEST_F(SheetPresentationTestFiveNg, SetSheetCloseIconMaterial003_NonSMOOTH, Te
     sheetTheme->closeIconColor_ = Color(0x0c182431);
     SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
 
-    sheetPattern->SetSheetCloseIconMaterial();
+    sheetPattern->SetSheetCloseIconMaterial(nullptr);
     auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(buttonEventHub, nullptr);
     EXPECT_FALSE(buttonEventHub->GetStateEffect());
@@ -2047,7 +2047,7 @@ HWTEST_F(SheetPresentationTestFiveNg, ClearSheetCloseIconMaterial002_StateEffect
     sheetTheme->closeIconColor_ = Color(0x0c182431);
     SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
 
-    sheetPattern->SetSheetCloseIconMaterial();
+    sheetPattern->SetSheetCloseIconMaterial(nullptr);
     auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(buttonEventHub, nullptr);
     EXPECT_FALSE(buttonEventHub->GetStateEffect());

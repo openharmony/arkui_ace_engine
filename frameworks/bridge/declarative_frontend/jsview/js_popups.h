@@ -63,6 +63,15 @@ public:
     static void ParseSheetBlurSnapshotOptions(
         const JSRef<JSVal>& blurSnapshotOptions, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     static void ParseMenuScrollBar(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+
+    static bool ParseSheetTitleBarBlurStyle(const JSRef<JSVal>& value, NG::SheetTitleBarBackgroundBlur& blurStyle);
+    static void ParseSheetTitleBarBackgroundBlurOptions(
+        const JSRef<JSObject>& object, NG::SheetTitleBarBackgroundBlurOptions& options, NG::SheetStyle& sheetStyle);
+    static void ParseSheetTitleBarBackgroundBlur(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle);
+    static void ParseSheetTitleBarHoverMode(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle);
+    static void ParseSheetScrollBarState(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle);
+    static void ParseSheetCloseButtonMaterial(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle);
+
 private:
     static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
         NG::BorderColorProperty& outlineColor);

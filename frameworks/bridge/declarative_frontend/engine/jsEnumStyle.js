@@ -2142,6 +2142,18 @@ let SheetKeyboardAvoidMode;
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.POPUP_SHEET = 4] = 'POPUP_SHEET';
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
+let SheetTitleBarHoverMode;
+(function (SheetTitleBarHoverMode) {
+  SheetTitleBarHoverMode[SheetTitleBarHoverMode.STANDARD = 0] = 'STANDARD';
+  SheetTitleBarHoverMode[SheetTitleBarHoverMode.STACK = 1] = 'STACK';
+})(SheetTitleBarHoverMode || (SheetTitleBarHoverMode = {}));
+
+let SheetTitleBarBackgroundBlur;
+(function (SheetTitleBarBackgroundBlur) {
+  SheetTitleBarBackgroundBlur[SheetTitleBarBackgroundBlur.NONE = 0] = 'NONE';
+  SheetTitleBarBackgroundBlur[SheetTitleBarBackgroundBlur.GRADIENT = 1] = 'GRADIENT';
+})(SheetTitleBarBackgroundBlur || (SheetTitleBarBackgroundBlur = {}));
+
 let FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey.ESC = 0] = 'ESC';
