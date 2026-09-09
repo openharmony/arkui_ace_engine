@@ -1212,9 +1212,13 @@ struct SimpleSegmentButtonV2 {
 
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
       this.$selectedIndex?.(selectedIndex);
+      const targetRect = this.itemRects[selectedIndex];
+      if (!targetRect) {
+        return;
+      }
       this.backplatePosition = {
-        x: this.itemRects[selectedIndex].position.x,
-        y: this.itemRects[selectedIndex].position.y
+        x: targetRect.position.x,
+        y: targetRect.position.y
       }
     });
 
