@@ -844,6 +844,7 @@ struct ArkUIProgressStyleResource {
     void* contentRawPtr;
     void* fontColorRawPtr;
     ArkUIFontResourceStruct fontResource;
+    void* strokeRadiusRawPtr;
 };
 
 struct ArkUIProgressStyle {
