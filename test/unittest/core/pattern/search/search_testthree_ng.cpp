@@ -316,6 +316,208 @@ HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleBackgroundColor_004
+ * @tc.desc: Test SearchPattern HandleBackgroundColor when renderContext already has a background color.
+ *           The function should not override the user-set background color with the theme default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Search node and get renderContext
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(searchNode, nullptr);
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = searchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set a user-defined background color on renderContext
+     * @tc.expected: renderContext HasBackgroundColor returns true
+     */
+    const Color userBgColor = Color::BLUE;
+    renderContext->ResetBackgroundColor();
+    renderContext->UpdateBackgroundColor(userBgColor);
+    ASSERT_TRUE(renderContext->HasBackgroundColor());
+
+    /**
+     * @tc.steps: step3. Call HandleBackgroundColor
+     * @tc.expected: The user-set background color is not overridden by the theme default
+     */
+    pattern->HandleBackgroundColor();
+
+    /**
+     * @tc.steps: step4. Verify background color unchanged and pre-background color not set
+     */
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), userBgColor);
+    EXPECT_FALSE(renderContext->HasPreBackgroundColor());
+}
+
+/**
+ * @tc.name: HandleBackgroundColor_005
+ * @tc.desc: Test SearchPattern HandleBackgroundColor without system material. When renderContext has no
+ *           background color and no IMMERSIVE material, should update backgroundColor from theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Search node and get renderContext
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(searchNode, nullptr);
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = searchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Ensure no background color and no system material on renderContext
+     */
+    renderContext->ResetBackgroundColor();
+    renderContext->ResetPreBackgroundColor();
+    ASSERT_FALSE(renderContext->HasBackgroundColor());
+    ASSERT_EQ(renderContext->GetSystemMaterial(), nullptr);
+
+    /**
+     * @tc.steps: step3. Get the expected theme background color
+     */
+    auto textFieldTheme = searchNode->GetTheme<TextFieldTheme>(true);
+    ASSERT_NE(textFieldTheme, nullptr);
+    Color expectedBgColor = textFieldTheme->GetBgColor();
+
+    /**
+     * @tc.steps: step4. Call HandleBackgroundColor
+     * @tc.expected: renderContext backgroundColor is updated to the theme bg color
+     */
+    pattern->HandleBackgroundColor();
+
+    /**
+     * @tc.steps: step5. Verify backgroundColor equals theme bg color and pre-background color is not set
+     */
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), expectedBgColor);
+    EXPECT_FALSE(renderContext->HasPreBackgroundColor());
+}
+
+/**
+ * @tc.name: HandleBackgroundColor_006
+ * @tc.desc: Test SearchPattern HandleBackgroundColor with IMMERSIVE system material. When renderContext has
+ *           no background color but an IMMERSIVE material, should update preBackgroundColor (not backgroundColor)
+ *           so that the immersive material effect is preserved.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Search node and get renderContext
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(searchNode, nullptr);
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = searchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Ensure no background color, then set an IMMERSIVE system material
+     */
+    renderContext->ResetBackgroundColor();
+    renderContext->ResetPreBackgroundColor();
+    ASSERT_FALSE(renderContext->HasBackgroundColor());
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    renderContext->SetSystemMaterial(material);
+    ASSERT_NE(renderContext->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContext->GetSystemMaterial()->GetType(),
+        static_cast<int32_t>(MaterialType::IMMERSIVE));
+
+    /**
+     * @tc.steps: step3. Get the expected theme background color
+     */
+    auto textFieldTheme = searchNode->GetTheme<TextFieldTheme>(true);
+    ASSERT_NE(textFieldTheme, nullptr);
+    Color expectedBgColor = textFieldTheme->GetBgColor();
+
+    /**
+     * @tc.steps: step4. Call HandleBackgroundColor
+     * @tc.expected: preBackgroundColor is updated to the theme bg color; backgroundColor is NOT set
+     */
+    pattern->HandleBackgroundColor();
+
+    /**
+     * @tc.steps: step5. Verify preBackgroundColor equals theme bg color and backgroundColor is not set
+     */
+    EXPECT_EQ(renderContext->GetPreBackgroundColor().value_or(Color::TRANSPARENT), expectedBgColor);
+    EXPECT_FALSE(renderContext->HasBackgroundColor());
+}
+
+/**
+ * @tc.name: HandleBackgroundColor_007
+ * @tc.desc: Test SearchPattern HandleBackgroundColor with a non-IMMERSIVE system material. When renderContext
+ *           has no background color and a material whose type is not IMMERSIVE, should update backgroundColor
+ *           (not preBackgroundColor).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Search node and get renderContext
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(searchNode, nullptr);
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = searchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Ensure no background color, then set a non-IMMERSIVE (SEMI_TRANSPARENT) material
+     */
+    renderContext->ResetBackgroundColor();
+    renderContext->ResetPreBackgroundColor();
+    ASSERT_FALSE(renderContext->HasBackgroundColor());
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    renderContext->SetSystemMaterial(material);
+    ASSERT_NE(renderContext->GetSystemMaterial(), nullptr);
+    EXPECT_NE(renderContext->GetSystemMaterial()->GetType(),
+        static_cast<int32_t>(MaterialType::IMMERSIVE));
+
+    /**
+     * @tc.steps: step3. Get the expected theme background color
+     */
+    auto textFieldTheme = searchNode->GetTheme<TextFieldTheme>(true);
+    ASSERT_NE(textFieldTheme, nullptr);
+    Color expectedBgColor = textFieldTheme->GetBgColor();
+
+    /**
+     * @tc.steps: step4. Call HandleBackgroundColor
+     * @tc.expected: backgroundColor is updated to the theme bg color; preBackgroundColor is NOT set
+     */
+    pattern->HandleBackgroundColor();
+
+    /**
+     * @tc.steps: step5. Verify backgroundColor equals theme bg color and pre-background color is not set
+     */
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), expectedBgColor);
+    EXPECT_FALSE(renderContext->HasPreBackgroundColor());
+}
+
+/**
  * @tc.name: HandleEnabled_003
  * @tc.desc: Test SearchPattern HandleEnabled with false
  * @tc.type: FUNC
