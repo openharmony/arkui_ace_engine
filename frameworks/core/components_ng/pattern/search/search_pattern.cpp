@@ -488,6 +488,11 @@ void SearchPattern::HandleBackgroundColor()
     }
 }
 
+void SearchPattern::OnMaterialDisable()
+{
+    HandleBackgroundColor();
+}
+
 void SearchPattern::HandleEnabled()
 {
     auto host = GetHost();

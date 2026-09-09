@@ -1452,6 +1452,16 @@ void LayoutProperty::UpdateChainWeight(const ChainWeightPair& value)
 
 void LayoutProperty::UpdateBorderWidth(const BorderWidthProperty& value)
 {
+    UpdateMaterialBorderWidth(value);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePreBorderWidth(value);
+}
+
+void LayoutProperty::UpdateMaterialBorderWidth(const BorderWidthProperty& value)
+{
     if (!borderWidth_) {
         borderWidth_ = std::make_unique<BorderWidthProperty>();
     }
