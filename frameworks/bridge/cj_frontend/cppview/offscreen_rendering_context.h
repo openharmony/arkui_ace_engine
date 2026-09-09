@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::Framework {
 class ACE_EXPORT CJOffscreenRenderingContext : public NativeCanvasRenderer {
+    DECL_TYPE(CJOffscreenRenderingContext, NativeCanvasRenderer)
 public:
     CJOffscreenRenderingContext(double width, double height, bool antialias, int32_t unit);
     CJOffscreenRenderingContext();

@@ -24,6 +24,7 @@
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeImageData : public OHOS::FFI::FFIData {
+    DECL_TYPE(NativeImageData, OHOS::FFI::FFIData)
 public:
     NativeImageData();
     ~NativeImageData() override;
