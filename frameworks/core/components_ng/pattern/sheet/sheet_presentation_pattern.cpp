@@ -81,6 +81,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t SHEET_TITLE_STACK_Z_INDEX = 2;
 constexpr char NAVDESTINATION_VIEW_TAG[] = "NavDestination";
 constexpr char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 constexpr int32_t SHEET_DETENTS_ZERO = 0;
@@ -163,6 +164,7 @@ void SheetPresentationPattern::OnModifyDone()
     InitSheetMode();
     sheetObject_->InitScrollProps();
     InitFoldCreaseRegion();
+    UpdateZIndexAndTitleEffectNode();
 }
 
 bool SheetPresentationPattern::IsBreakpointMatch()
@@ -585,6 +587,7 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
 
 RefPtr<FrameNode> SheetPresentationPattern::GetParentSkipEffectComponent(const RefPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node, nullptr);
     // get parent node, if effectComponent exist then skip.
     auto parentNode = AceType::DynamicCast<FrameNode>(node->GetParent());
     CHECK_NULL_RETURN(parentNode, nullptr);
@@ -595,20 +598,26 @@ RefPtr<FrameNode> SheetPresentationPattern::GetParentSkipEffectComponent(const R
     return parentNode;
 }
 
-void SheetPresentationPattern::SetSheetCloseIconMaterial()
+void SheetPresentationPattern::SetSheetCloseIconMaterial(RefPtr<UiMaterial> closeButtonNodeMaterial)
 {
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
-    ImmersiveOptions options { .style = UiMaterialStyle::ULTRA_THIN, .applyShadow = true, .interactive = true };
-    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
-        options.colorInvert = true;
-        LightEffectOptions lightEffectOptions {};
-        options.lightEffectOptions = lightEffectOptions;
-    }
-    material->SetImmersiveOptions(options);
-
     auto sheetCloseIcon = GetSheetCloseIcon();
     CHECK_NULL_VOID(sheetCloseIcon);
+    auto material = closeButtonNodeMaterial ? closeButtonNodeMaterial->Copy() : nullptr;
+    if (!material) {
+        material = AceType::MakeRefPtr<UiMaterial>();
+        material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+        ImmersiveOptions options { .style = UiMaterialStyle::ULTRA_THIN, .applyShadow = true, .interactive = true };
+        if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+            options.colorInvert = true;
+            LightEffectOptions lightEffectOptions {};
+            options.lightEffectOptions = lightEffectOptions;
+        }
+        material->SetImmersiveOptions(options);
+    }
+
+    UpdateCloseIconMaterialByLevel(material);
+    ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(sheetCloseIcon), AceType::RawPtr(material));
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto sheetTheme = host->GetTheme<SheetTheme>(true);
@@ -619,11 +628,11 @@ void SheetPresentationPattern::SetSheetCloseIconMaterial()
     CHECK_NULL_VOID(iconSymbol);
     auto symbolLayoutProperty = iconSymbol->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolLayoutProperty);
-    symbolLayoutProperty->UpdateSymbolColorList({closeIconSymbolColor});
-    ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(sheetCloseIcon), AceType::RawPtr(material));
+    symbolLayoutProperty->UpdateSymbolColorList({ closeIconSymbolColor });
     auto buttonEventHub = sheetCloseIcon->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH ||
+        material->GetType() == static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT)) {
         buttonEventHub->SetStateEffect(true);
     } else {
         buttonEventHub->SetStateEffect(false);
@@ -648,6 +657,24 @@ void SheetPresentationPattern::ClearSheetCloseIconMaterial()
     renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
 }
 
+void SheetPresentationPattern::UpdateCloseIconMaterialByLevel(const RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_VOID(material);
+    if (material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return;
+    }
+    auto immersiveOptions = material->CopyImmersiveOptions();
+    CHECK_NULL_VOID(immersiveOptions);
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel == UiMaterialLevel::GENTLE) {
+        immersiveOptions->colorInvert = false;
+    } else if (materialLevel == UiMaterialLevel::SMOOTH) {
+        immersiveOptions->colorInvert = false;
+        immersiveOptions->DisableLightEffect();
+    }
+    material->SetImmersiveOptions(*immersiveOptions);
+}
+
 void SheetPresentationPattern::SetSheetRenderMaterial()
 {
     auto host = GetHost();
@@ -667,7 +694,9 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
             ViewAbstract::SetSystemMaterialForOverlay(
                 AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
         }
-        SetSheetCloseIconMaterial();
+    }
+    if (sheetStyle.systemMaterial || sheetStyle.closeButtonMaterial) {
+        SetSheetCloseIconMaterial(sheetStyle.closeButtonMaterial);
     }
 }
 
@@ -709,6 +738,8 @@ void SheetPresentationPattern::ClearSheetRenderMaterial()
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (!sheetStyle.systemMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), nullptr);
+    }
+    if (!sheetStyle.systemMaterial && !sheetStyle.closeButtonMaterial) {
         ClearSheetCloseIconMaterial();
     }
 }
@@ -1475,17 +1506,18 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     CHECK_NULL_VOID(scrollNode);
     auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollProps);
-    auto scrollHeight = height - GetTitleBuilderHeight() - resizeDecreasedHeight_;
+    auto scrollHeight = height - GetTitleBuilderHeightStackMode() - resizeDecreasedHeight_;
     auto sheetType = GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP || sheetType == SheetType::SHEET_CENTER ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
-        scrollHeight = sheetHeight - GetTitleBuilderHeight() - resizeDecreasedHeight_;
+        scrollHeight = sheetHeight - GetTitleBuilderHeightStackMode() - resizeDecreasedHeight_;
     }
     if (sheetType == SheetType::SHEET_MINIMIZE) {
         scrollHeight = geometryNode->GetFrameSize().Height();
     }
     scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
+    preScrollSelfHeight_ = scrollHeight;
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1545,6 +1577,9 @@ void SheetPresentationPattern::UpdateDragBarStatus()
         }
     }
     int32_t zIndex = sheetStyle.enableFloatingDragBar.value_or(false) ? INT32_MAX : 0;
+    if (CheckTitleIsStackMode(sheetStyle) || CheckTitleIsHasEffectNode(sheetStyle)) {
+        zIndex = std::max(zIndex, SHEET_TITLE_STACK_Z_INDEX);
+    }
     auto dragBarRenderContext = sheetDragBar->GetRenderContext();
     CHECK_NULL_VOID(dragBarRenderContext);
     dragBarRenderContext->UpdateZIndex(zIndex);
@@ -2874,8 +2909,10 @@ void SheetPresentationPattern::ScrollTo(float height)
             maxScrollDecreaseHeight > maxAvoidSize - sheetHeightUp_) {
             maxScrollDecreaseHeight = maxAvoidSize - sheetHeightUp_;
         }
+        auto scrollSelfHeight = GetScrollHeight() - maxScrollDecreaseHeight;
         layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
-            CalcLength(GetScrollHeight() - maxScrollDecreaseHeight)));
+            CalcLength(scrollSelfHeight)));
+        preScrollSelfHeight_ = scrollSelfHeight;
         auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
         // ScrollTo is only invoked from keyboard-avoid / rotation paths (user-triggered), classify as USER
         scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
@@ -2915,8 +2952,9 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     CHECK_NULL_RETURN(scrollPattern, false);
     // Scroll first shrinks to the same size as childHeight, then reduces the height to allow it to scroll
     scrollHeight_ = scrollHeight - childHeight + height;
-    layoutProp->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(GetScrollHeight() - (scrollHeight - childHeight + height))));
+    auto scrollSelfHeight = GetScrollHeight() - (scrollHeight - childHeight + height);
+    layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollSelfHeight)));
+    preScrollSelfHeight_ = scrollSelfHeight;
     // And then scroll move the content with '-height' offset
     auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
     // Same passive keyboard-avoid pan as ScrollTo — only reached from internal ScrollTo call, classify as USER
@@ -3066,6 +3104,20 @@ float SheetPresentationPattern::GetFitContentHeight()
     CHECK_NULL_RETURN(builderNode, 0.0f);
     auto builderGeometryNode = builderNode->GetGeometryNode();
     return builderGeometryNode->GetMarginFrameSize().Height() + GetTitleBuilderHeight();
+}
+
+float SheetPresentationPattern::GetTitleBuilderHeightStackMode() const
+{
+    float result = GetTitleBuilderHeight();
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, result);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    auto titleBarHoverMode = sheetStyle.titleBarHoverMode.value_or(SheetTitleBarHoverMode::STANDARD);
+
+    if (titleBarHoverMode == SheetTitleBarHoverMode::STACK) {
+        result = 0.0f;
+    }
+    return result;
 }
 
 float SheetPresentationPattern::GetTitleBuilderHeight() const
@@ -3663,7 +3715,9 @@ void SheetPresentationPattern::DecreaseScrollHeightInSheet(float decreaseHeight)
     isScrolling_ = (decreaseHeight > 0);
 
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, Scroll Height reduces by height %{public}f.", decreaseHeight);
-    layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight() - decreaseHeight)));
+    auto scrollSelfHeight = GetScrollHeight() - decreaseHeight;
+    layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollSelfHeight)));
+    preScrollSelfHeight_ = scrollSelfHeight;
     resizeDecreasedHeight_ = decreaseHeight;
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -4195,7 +4249,9 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
     CHECK_NULL_VOID(scroll);
     auto layoutProp = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
-    layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight())));
+    auto scrollSelfHeight = GetScrollHeight();
+    layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollSelfHeight)));
+    preScrollSelfHeight_ = scrollSelfHeight;
     resizeDecreasedHeight_ = 0.f;
     scrollHeight_ = 0.f;
     ScrollTo(0.f);
@@ -5131,6 +5187,14 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
     }
     if (sheetStyle.shadow.has_value()) {
         RegisterShadowRes(sheetNode);
+    }
+    if (sheetStyle.titleBarBackgroundBlur.has_value()) {
+        auto maskColorResObj = sheetStyle.GetTitleBarMaskColorResObj();
+        RegisterTitleBarMaskColorRes(sheetNode, maskColorResObj);
+        auto maskExtraHeightResObj = sheetStyle.GetTitleBarMaskExtraHeightResObj();
+        RegisterTitleBarMaskExtraHeightRes(sheetNode, maskExtraHeightResObj);
+        auto effectiveDistanceResObj = sheetStyle.GetTitleBarEffectiveDistanceResObj();
+        RegisterTitleBarEffectiveDistanceRes(sheetNode, effectiveDistanceResObj);
     }
     RemoveSheetResourceByMaterial(sheetNode, sheetStyle);
 }
