@@ -22,6 +22,8 @@
 #include "drag_and_drop.h"
 #include "event_converter.h"
 #include "udmf.h"
+#include "udmf_err_code.h"
+#include "uds.h"
 #include "native_interface.h"
 #include "native_node.h"
 #include "native_type.h"
@@ -2130,5 +2132,120 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0067, TestSize.Level1)
      * @tc.steps: step3.dispose dragAction (should free pixelmapNativeList and delete dragAction).
      */
     OH_ArkUI_DragAction_Dispose(dragAction);
+}
+
+/**
+ * @tc.name: OH_ArkUI_DragEvent_GetSummary_001
+ * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with invalid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_001, TestSize.Level1)
+{
+    auto summary = OH_UdmfSummary_Create();
+    ASSERT_NE(summary, nullptr);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(nullptr, summary), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUIDragEvent dragEvent;
+    dragEvent.key = "test_key";
+    auto event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    dragEvent.key = nullptr;
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_UdmfSummary_Destroy(summary);
+}
+
+/**
+ * @tc.name: OH_ArkUI_DragEvent_GetSummary_002
+ * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with invalid UDMF keys.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_002, TestSize.Level1)
+{
+    auto summary = OH_UdmfSummary_Create();
+    ASSERT_NE(summary, nullptr);
+    ArkUIDragEvent dragEvent;
+    auto event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+
+    dragEvent.key = "";
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_PARAM_INVALID);
+    dragEvent.key = "udmf://Drag/com.example.notexist/0123456789";
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_INTERNAL_ERROR);
+    OH_UdmfSummary_Destroy(summary);
+}
+
+/**
+ * @tc.name: OH_ArkUI_DragEvent_GetSummary_003
+ * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with data stored in UDMF.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_003, TestSize.Level1)
+{
+    auto data = OH_UdmfData_Create();
+    auto record = OH_UdmfRecord_Create();
+    auto plainText = OH_UdsPlainText_Create();
+    ASSERT_NE(data, nullptr);
+    ASSERT_NE(record, nullptr);
+    ASSERT_NE(plainText, nullptr);
+    EXPECT_EQ(OH_UdsPlainText_SetContent(plainText, "summary test"), UDMF_E_OK);
+    EXPECT_EQ(OH_UdmfRecord_AddPlainText(record, plainText), UDMF_E_OK);
+    EXPECT_EQ(OH_UdmfData_AddRecord(data, record), UDMF_E_OK);
+    char key[UDMF_KEY_BUFFER_LEN] = { 0 };
+    ASSERT_EQ(OH_Udmf_SetUnifiedData(UDMF_INTENTION_DRAG, data, key, UDMF_KEY_BUFFER_LEN), UDMF_E_OK);
+
+    ArkUIDragEvent dragEvent;
+    dragEvent.key = key;
+    auto summary = OH_UdmfSummary_Create();
+    ASSERT_NE(summary, nullptr);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), summary),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    const char* const* extensions = nullptr;
+    unsigned int count = 0;
+    EXPECT_EQ(OH_UdmfSummary_GetFilenameExtensions(summary, &extensions, &count), UDMF_E_OK);
+    EXPECT_EQ(extensions, nullptr);
+    EXPECT_EQ(count, 0u);
+
+    OH_UdmfSummary_Destroy(summary);
+    OH_UdsPlainText_Destroy(plainText);
+    OH_UdmfRecord_Destroy(record);
+    OH_UdmfData_Destroy(data);
+}
+
+/**
+ * @tc.name: OH_ArkUI_DragEvent_GetSummary_004
+ * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with file URI data stored in UDMF.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_004, TestSize.Level1)
+{
+    auto data = OH_UdmfData_Create();
+    auto record = OH_UdmfRecord_Create();
+    auto fileUri = OH_UdsFileUri_Create();
+    ASSERT_NE(data, nullptr);
+    ASSERT_NE(record, nullptr);
+    ASSERT_NE(fileUri, nullptr);
+    EXPECT_EQ(OH_UdsFileUri_SetFileUri(fileUri, "file:///data/storage/el2/base/haps/test.png"), UDMF_E_OK);
+    EXPECT_EQ(OH_UdmfRecord_AddFileUri(record, fileUri), UDMF_E_OK);
+    EXPECT_EQ(OH_UdmfData_AddRecord(data, record), UDMF_E_OK);
+    char key[UDMF_KEY_BUFFER_LEN] = { 0 };
+    ASSERT_EQ(OH_Udmf_SetUnifiedData(UDMF_INTENTION_DRAG, data, key, UDMF_KEY_BUFFER_LEN), UDMF_E_OK);
+
+    ArkUIDragEvent dragEvent;
+    dragEvent.key = key;
+    auto summary = OH_UdmfSummary_Create();
+    ASSERT_NE(summary, nullptr);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), summary),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    const char* const* extensions = nullptr;
+    unsigned int count = 0;
+    EXPECT_EQ(OH_UdmfSummary_GetFilenameExtensions(summary, &extensions, &count), UDMF_E_OK);
+    ASSERT_NE(extensions, nullptr);
+    ASSERT_EQ(count, 1u);
+    EXPECT_STREQ(extensions[0], ".png");
+
+    OH_UdmfSummary_Destroy(summary);
+    OH_UdsFileUri_Destroy(fileUri);
+    OH_UdmfRecord_Destroy(record);
+    OH_UdmfData_Destroy(data);
 }
 } // namespace OHOS::Ace
