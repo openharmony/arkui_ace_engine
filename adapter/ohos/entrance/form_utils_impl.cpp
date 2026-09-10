@@ -227,6 +227,10 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     }
 
     auto eventAction = JsonUtil::ParseJsonString(action);
+    if (!eventAction->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent action is not valid json");
+        return -1;
+    }
     auto intentNameJson = eventAction->GetValue("intentName");
     const auto intentName = intentNameJson->GetString();
     if (intentName.empty()) {
@@ -257,6 +261,13 @@ int32_t FormUtilsImpl::InsightIntentEvent(
                 } else if (child->IsBool()) {
                     wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
                 } else {
+                    // Non string/number/bool values (null/object/array) degrade to string;
+                    // GetString returns "" for object/array, so warn to expose the data loss.
+                    if (child->IsObject() || child->IsArray()) {
+                        TAG_LOGW(AceLogTag::ACE_FORM,
+                            "InsightIntentEvent intentParams contains object/array value, "
+                            "downgrade to empty string, key: %{public}s", key.c_str());
+                    }
                     wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
                 }
                 child = child->GetNext();
@@ -278,9 +289,9 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     want.SetParams(executeWantParams);
     // postCardAction 显式传入的目标三元组优先，缺失字段由 FMS 按 FormRecord 补齐。
     SetIntentTargetElement(eventAction, want);
-    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent send IPC, intentName: %{public}s", intentName.c_str());
     auto ret = AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
-    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent IPC result: %{public}d", ret);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "InsightIntentEvent IPC done, intentName: %{public}s, result: %{public}d", intentName.c_str(), ret);
     return ret;
 }
 } // namespace OHOS::Ace
