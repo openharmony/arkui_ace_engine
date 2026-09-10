@@ -521,8 +521,8 @@ bool AceViewOhos::HandleMappedButtonRelease(const MouseEvent& event, const Touch
     CHECK_NULL_RETURN(touchEventCallback_, false);
     if (touchEvent.type == TouchType::CANCEL) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "MouseMapping: RELEASE/CANCEL converted to touch CANCEL, tag=%{public}s nodeId=%{public}d",
-            node ? node->GetTag().c_str() : "null", node ? node->GetId() : -1);
+            "MouseMapping: RELEASE/CANCEL converted to touch CANCEL, tag=%{public}s",
+            node ? node->GetTag().c_str() : "null");
         auto cancelEvent = touchEvent;
         cancelEvent.type = TouchType::CANCEL;
         cancelEvent.sourceType = SourceType::TOUCH;
@@ -607,10 +607,8 @@ bool AceViewOhos::DispatchRightMouseTouch(const MouseEvent& event, TouchEvent& t
         mouseLastTouchEvent_ = touchEvent;
         mouseTouchSessionActive_ = true;
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "MouseMapping: DOWN converted to touch DOWN, point=(%{public}f,%{public}f) tag=%{public}s "
-            "nodeId=%{public}d touchId=%{public}d duration=%{public}d",
-            event.x, event.y, node ? node->GetTag().c_str() : "null", node ? node->GetId() : -1,
-            touchEvent.id, mouseLongPressDuration_);
+            "MouseMapping: DOWN converted to touch DOWN, tag=%{public}s touchId=%{public}d duration=%{public}d",
+            node ? node->GetTag().c_str() : "null", touchEvent.id, mouseLongPressDuration_);
     } else if (touchEvent.type == TouchType::MOVE) {
         mouseLastTouchEvent_ = touchEvent;
         if (markProcess) {
