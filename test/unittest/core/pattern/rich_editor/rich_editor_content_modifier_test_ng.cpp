@@ -585,4 +585,71 @@ HWTEST_F(RichEditorContentModifierTestNg, RefreshRichTextRect001, TestSize.Level
     EXPECT_FLOAT_EQ(contentMod->GetRichTextRectX(), expectedX);
 }
 
+/**
+ * @tc.name: onDraw002
+ * @tc.desc: Test onDraw with null paragraph, should skip without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorContentModifierTestNg, onDraw002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
+    auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
+    ASSERT_NE(testContentModifier, nullptr);
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = nullptr;
+    info.start = 0;
+    info.end = 2;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    testContentModifier->onDraw(context);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.size(), 1);
+    EXPECT_FALSE(richEditorPattern->paragraphs_.hasPosyRange);
+    EXPECT_FALSE(richEditorPattern->paragraphs_.hasLineIndex);
+}
+
+/**
+ * @tc.name: onDraw003
+ * @tc.desc: Test onDraw with mixed null and valid paragraphs, should skip null and paint valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorContentModifierTestNg, onDraw003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
+    auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
+    ASSERT_NE(testContentModifier, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).Times(AtLeast(1)).WillRepeatedly(Return(100.0f));
+    EXPECT_CALL(*paragraph, GetLineCount()).Times(AtLeast(1)).WillRepeatedly(Return(1));
+    ParagraphManager::ParagraphInfo info1;
+    info1.paragraph = paragraph;
+    info1.start = 0;
+    info1.end = 2;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info1);
+
+    ParagraphManager::ParagraphInfo info2;
+    info2.paragraph = nullptr;
+    info2.start = 2;
+    info2.end = 4;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info2);
+
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    testContentModifier->onDraw(context);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.size(), 2);
+    EXPECT_FALSE(richEditorPattern->paragraphs_.hasPosyRange);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.front().topPos, 0.0f);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.front().bottomPos, 100.0f);
+}
+
 } // namespace OHOS::Ace::NG
