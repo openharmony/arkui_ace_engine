@@ -947,4 +947,64 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene013, Tes
     ASSERT_TRUE(nodeJson);
     EXPECT_TRUE(nodeJson->GetValue("rect")->IsNull());
 }
+
+/**
+ * @tc.name: PageSceneRuleManager_MatchPageScene015
+ * @tc.desc: Test enableAutoFill is carried by default for TextInput/TextArea without rule config,
+ *           omitted when unset, and never carried for Search.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene015, TestSize.Level1)
+{
+    auto pageRoot = CreatePageRoot();
+    auto textInputNode = CreateTextFieldNode(V2::TEXTINPUT_ETS_TAG, TEST_TEXT_INPUT_ID,
+        RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), FIRST_INPUT_TEXT);
+    ASSERT_NE(textInputNode, nullptr);
+    textInputNode->GetLayoutProperty<TextFieldLayoutProperty>()->UpdateEnableAutoFill(false);
+    AddChild(pageRoot, textInputNode);
+    AddChild(pageRoot, CreateTextFieldNode(V2::TEXTAREA_ETS_TAG, TEST_TEXT_AREA_ID,
+        RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), SECOND_INPUT_TEXT));
+    auto searchNode = CreateTestNode(
+        V2::SEARCH_ETS_TAG, TEST_SEARCH_ID, RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    auto searchFieldNode = CreateTextFieldNode(V2::SEARCH_Field_ETS_TAG, TEST_SEARCH_FIELD_ID,
+        RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), FIRST_INPUT_TEXT);
+    ASSERT_NE(searchFieldNode, nullptr);
+    searchFieldNode->GetLayoutProperty<TextFieldLayoutProperty>()->UpdateEnableAutoFill(true);
+    AddChild(searchNode, searchFieldNode);
+    AddChild(pageRoot, searchNode);
+
+    PageSceneRuleManager manager;
+    // includeText is false here: enableAutoFill is carried by default without extra rule configuration.
+    auto result = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(), BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(result->matched);
+    EXPECT_EQ(result->matchedCount, THREE_MATCHED_NODES);
+
+    auto sceneJson = JsonUtil::ParseJsonString(result->sceneJson);
+    ASSERT_TRUE(sceneJson);
+    auto nodesJson = sceneJson->GetValue("nodes");
+    ASSERT_TRUE(nodesJson);
+    ASSERT_EQ(nodesJson->GetArraySize(), THREE_MATCHED_NODES);
+
+    auto firstNode = nodesJson->GetArrayItem(0);
+    ASSERT_TRUE(firstNode);
+    EXPECT_EQ(firstNode->GetInt("nodeId"), TEST_TEXT_INPUT_ID);
+    EXPECT_TRUE(firstNode->GetValue("enableAutoFill")->IsBool());
+    EXPECT_FALSE(firstNode->GetBool("enableAutoFill"));
+    EXPECT_TRUE(firstNode->GetValue("text")->IsNull());
+
+    auto secondNode = nodesJson->GetArrayItem(1);
+    ASSERT_TRUE(secondNode);
+    EXPECT_EQ(secondNode->GetInt("nodeId"), TEST_TEXT_AREA_ID);
+    EXPECT_TRUE(secondNode->GetValue("enableAutoFill")->IsNull());
+
+    // Search has no enableAutoFill API: even if its internal SearchField property is set,
+    // the Search node does not carry the field.
+    auto thirdNode = nodesJson->GetArrayItem(2);
+    ASSERT_TRUE(thirdNode);
+    EXPECT_EQ(thirdNode->GetInt("nodeId"), TEST_SEARCH_ID);
+    EXPECT_TRUE(thirdNode->GetValue("enableAutoFill")->IsNull());
+}
 } // namespace OHOS::Ace::NG
