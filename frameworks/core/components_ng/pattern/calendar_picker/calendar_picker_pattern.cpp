@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
+#include "core/components/common/properties/ui_material.h"
 
 #include <algorithm>
 
@@ -76,6 +77,7 @@ void CalendarPickerPattern::OnModifyDone()
     UpdateEntryButtonBorderWidth();
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         UpdateHostEntryBorderColor();
+        UpdateHostEntryBorderWidth();
     }
     UpdateAccessibilityText();
 }
@@ -225,7 +227,29 @@ void CalendarPickerPattern::UpdateHostEntryBorderColor()
     CHECK_NULL_VOID(renderContext);
     BorderColorProperty borderColor;
     borderColor.SetColor(theme->GetEntryBorderColor());
+    auto material = renderContext->GetSystemMaterial();
+    if (material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        renderContext->UpdatePreBorderColor(borderColor);
+    }
     renderContext->UpdateBorderColor(borderColor);
+}
+
+void CalendarPickerPattern::UpdateHostEntryBorderWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    auto material = renderContext->GetSystemMaterial();
+    if (material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        renderContext->UpdatePreBorderWidth(borderWidth);
+    }
+    host->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderWidth(borderWidth);
 }
 
 void CalendarPickerPattern::UpdateEdgeAlign()
