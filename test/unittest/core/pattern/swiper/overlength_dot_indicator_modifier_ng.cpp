@@ -1542,6 +1542,10 @@ HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone001, TestSize.Level1)
 HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone002, TestSize.Level1)
 {
     OverlengthDotIndicatorModifier modifier;
+    auto indicatorNode = FrameNode::CreateFrameNode(
+        V2::INDICATOR_ETS_TAG, -1, AceType::MakeRefPtr<IndicatorPattern>());
+    ASSERT_NE(indicatorNode, nullptr);
+    modifier.SetIndicatorHost(AceType::WeakClaim(AceType::RawPtr(indicatorNode)));
     modifier.isBindIndicator_ = false;
     modifier.gestureState_ = GestureState::GESTURE_STATE_INIT;
     EXPECT_TRUE(modifier.NotInDraggingWithUseAlone());
@@ -1555,6 +1559,10 @@ HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone002, TestSize.Level1)
 HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone003, TestSize.Level1)
 {
     OverlengthDotIndicatorModifier modifier;
+    auto indicatorNode = FrameNode::CreateFrameNode(
+        V2::INDICATOR_ETS_TAG, -1, AceType::MakeRefPtr<IndicatorPattern>());
+    ASSERT_NE(indicatorNode, nullptr);
+    modifier.SetIndicatorHost(AceType::WeakClaim(AceType::RawPtr(indicatorNode)));
     modifier.isBindIndicator_ = false;
     modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
     EXPECT_TRUE(modifier.NotInDraggingWithUseAlone());

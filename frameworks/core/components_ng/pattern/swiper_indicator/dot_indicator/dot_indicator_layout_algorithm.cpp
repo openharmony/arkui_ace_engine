@@ -239,6 +239,7 @@ void DotIndicatorLayoutAlgorithm::LayoutCustomIconChildren(
         CHECK_NULL_VOID(childGeometry);
         auto childSize = childGeometry->GetMarginFrameSize();
         float pointCenter = context.pointCenters[item.slotIndex];
+        auto prevFrameOffset = childGeometry->GetMarginFrameOffset();
         OffsetF childOffset;
         if (context.direction == Axis::HORIZONTAL) {
             childOffset = OffsetF(pointCenter - childSize.Width() * HALF_FLOAT,
@@ -248,6 +249,14 @@ void DotIndicatorLayoutAlgorithm::LayoutCustomIconChildren(
                 pointCenter - childSize.Height() * HALF_FLOAT);
         }
         childGeometry->SetMarginFrameOffset(childOffset);
+        bool baseMoved = !NearEqual(prevFrameOffset.GetX(), childOffset.GetX()) ||
+                        !NearEqual(prevFrameOffset.GetY(), childOffset.GetY());
+        auto wrapperNode = AceType::DynamicCast<FrameNode>(child->GetHostNode());
+        auto renderContext = wrapperNode ? wrapperNode->GetRenderContext() : nullptr;
+        if (baseMoved && renderContext) {
+            renderContext->UpdateOffset(OffsetT<Dimension>(Dimension(0.0f, DimensionUnit::PX),
+                                                        Dimension(0.0f, DimensionUnit::PX)));
+        }
         child->Layout();
     }
 }

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -269,7 +270,9 @@ void OverlengthDotIndicatorModifier::UpdateCustomIconOffsets(const ContentProper
         if (!wrapperNode) {
             continue;
         }
-        int32_t slotIndex = activeInfos[index].slotIndex;
+        int32_t itemIndex = activeInfos[index].itemIndex;
+        auto slotOpt = indicatorPattern->GetCustomIconVisibleIndex(itemIndex);
+        int32_t slotIndex = slotOpt.has_value() ? slotOpt.value() : activeInfos[index].slotIndex;
         if (slotIndex < 0 || static_cast<size_t>(slotIndex) >= contentProperty.vectorBlackPointCenterX.size()) {
             continue;
         }
@@ -471,17 +474,34 @@ bool OverlengthDotIndicatorModifier::IsIndicatorIconFadeInSlot(int32_t slot) con
     return false;
 }
 
+std::vector<int32_t> OverlengthDotIndicatorModifier::GetLiveCustomIconSlots() const
+{
+    std::vector<int32_t> slots;
+    auto host = indicatorHost_.Upgrade();
+    auto iconPattern = host ? host->GetPattern<SwiperIndicatorPattern>() : nullptr;
+    if (!hasCustomIcon_ || !iconPattern) {
+        return slots;
+    }
+    for (const auto& info : iconPattern->GetActiveCustomIconInfos()) {
+        auto slotOpt = iconPattern->GetCustomIconVisibleIndex(info.itemIndex);
+        slots.emplace_back(slotOpt.has_value() ? slotOpt.value() : info.slotIndex);
+    }
+    return slots;
+}
+
 void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty)
 {
     RSCanvas& canvas = context.canvas;
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
+    auto liveIconSlots = GetLiveCustomIconSlots();
     for (size_t i = 0; i < totalCount; ++i) {
         if (i >= contentProperty.unselectedIndicatorWidth.size() ||
             i >= contentProperty.unselectedIndicatorHeight.size()) {
             break;
         }
 
-        bool hasCustomIcon = HasCustomIconAtIndex(static_cast<int32_t>(i));
+        bool hasCustomIcon = std::find(liveIconSlots.begin(), liveIconSlots.end(),
+            static_cast<int32_t>(i)) != liveIconSlots.end();
         bool isIndicatorIconFadeInSlot = hasCustomIcon && IsIndicatorIconFadeInSlot(static_cast<int32_t>(i));
         if (hasCustomIcon && !isIndicatorIconFadeInSlot) {
             continue;
@@ -1001,6 +1021,14 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
         firstPointOpacity_->Set(firstPointOpacity);
         newPointOpacity_->Set(newPointOpacity);
     }
+}
+
+bool OverlengthDotIndicatorModifier::NotInDraggingWithUseAlone()
+{
+    auto host = indicatorHost_.Upgrade();
+    bool isExternal = host && host->GetPattern<IndicatorPattern>() != nullptr;
+    return !isBindIndicator_ && isExternal &&
+        (gestureState_ == GestureState::GESTURE_STATE_INIT || gestureState_ == GestureState::GESTURE_STATE_NONE);
 }
 
 void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<float>& itemHalfSizes)
