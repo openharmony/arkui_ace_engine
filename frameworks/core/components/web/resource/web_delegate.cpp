@@ -6300,6 +6300,9 @@ void WebDelegate::OnAccessibilityEvent(
             CHECK_NULL_VOID(report);
             report->ReportEvent(eventType, accessibilityId);
         }
+        if (eventType == AccessibilityEventType::TEXT_CHANGE) {
+            FillTextChangeExtraInfo(event, accessibilityId);
+        }
         event.nodeId = accessibilityId;
         event.type = eventType;
         accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
@@ -6310,6 +6313,20 @@ void WebDelegate::OnAccessibilityEvent(
         event.type = eventType;
         accessibilityManager->SendAccessibilityAsyncEvent(event);
     }
+}
+
+void WebDelegate::FillTextChangeExtraInfo(AccessibilityEvent& event, int64_t accessibilityId)
+{
+    auto nWebAccessibilityNodeInfo = GetAccessibilityNodeInfoById(accessibilityId);
+    CHECK_NULL_VOID(nWebAccessibilityNodeInfo);
+    std::string addText = nWebAccessibilityNodeInfo->GetAddText();
+    std::string removeText = nWebAccessibilityNodeInfo->GetRemoveText();
+    event.extraEventInfo["addText"] = addText;
+    event.extraEventInfo["removeText"] = removeText;
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebDelegate::OnAccessibilityEvent FillTextChangeExtraInfo addText: %{private}s, removeText: %{private}s, "
+        "accessibilityId: %{public}" PRId64,
+        addText.c_str(), removeText.c_str(), accessibilityId);
 }
 
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
