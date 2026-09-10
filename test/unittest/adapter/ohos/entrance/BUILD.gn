@@ -361,14 +361,14 @@ ohos_unittest("right_mouse_mapping_config_test_ng") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
-    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_feature_manager.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_ace_application_info.cpp",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
+ 
   external_deps = [
     "googletest:gmock_main",
     "googletest:gtest_main",
@@ -379,6 +379,7 @@ ohos_unittest("right_mouse_mapping_config_test_ng") {
     "data_share:datashare_consumer",
     "hilog:libhilog",
     "bounds_checking_function:libsec_shared",
+    "ipc:ipc_single",
     "resource_management:global_resmgr",
   ]
 }
