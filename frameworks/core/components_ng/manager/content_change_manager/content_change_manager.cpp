@@ -617,9 +617,10 @@ void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
     NotifyPageSceneContentChanged(true);
 }
 
-void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
+void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode, uint32_t type)
 {
     CHECK_NULL_VOID(keyNode);
+    bool ignored = IsIgnoringEventType(type);
     bool contentChangeEnabled = IsContentChangeDetectEnable();
     bool pageSceneEnabled = NeedPageSceneDetect();
     if (!contentChangeEnabled && !pageSceneEnabled) {
@@ -636,8 +637,11 @@ void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
     if (!scrollingNodes_.empty()) {
         return;
     }
-    if (contentChangeEnabled) {
-        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::SCROLL, "");
+    if (contentChangeEnabled && !ignored) {
+        auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
+        simpleTree->Put("scrollReason", type == SCROLL_TO ? "scrollTo" :
+            (type == SCROLL_TO_INDEX ? "scrollToIndex" : "scrollEnd"));
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::SCROLL, simpleTree->ToString());
 #ifndef IS_RELEASE_VERSION
         dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::SCROLL, keyNode->GetId(), keyNode->GetTag()));
 #endif

@@ -315,6 +315,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
         if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component change event failed, process id:%{public}d", pair.first);
@@ -341,6 +342,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             if (isClickGestureEvent) {
                 LOGI("[UiSessionManagerOhos] ReportComponentChangeEvent gesture eventType:%{public}u nodeId:%{public}d",
                     eventType, nodeId);
