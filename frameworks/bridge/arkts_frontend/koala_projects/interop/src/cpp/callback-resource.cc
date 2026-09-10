@@ -70,6 +70,10 @@ void impl_UnblockCallbackWait(KNativePointer waitContext) {
 KOALA_INTEROP_V1(UnblockCallbackWait, KNativePointer)
 
 void enqueueCallback(int apiKind, const CallbackBuffer* event) {
+    if (event == nullptr) {
+        LOGE("enqueueCallback: event is nullptr, apiKind: %d", apiKind);
+        return;
+    }
     {
         std::lock_guard<std::recursive_mutex> _lock {g_eventQueueMutex};
         callbackEventsQueue.push_back(Event_CallCallback);
