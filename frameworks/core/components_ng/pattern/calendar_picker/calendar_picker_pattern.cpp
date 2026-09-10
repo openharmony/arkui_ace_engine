@@ -77,7 +77,7 @@ void CalendarPickerPattern::OnModifyDone()
     UpdateEntryButtonBorderWidth();
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         UpdateHostEntryBorderColor();
-        UpdateHostEntryBorderWidth()
+        UpdateHostEntryBorderWidth();
     }
     UpdateAccessibilityText();
 }
