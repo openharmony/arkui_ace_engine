@@ -180,7 +180,9 @@ bool setKoalaANICallbackDispatcher(
     const char* dispatcherMethodName,
     const char* dispatcherMethodSig
 ) {
-    g_koalaANICallbackDispatcher.clazz = clazz;
+    ani_ref clazzGlobalRef = nullptr;
+    CHECK_ANI_FATAL(aniEnv->GlobalReference_Create(static_cast<ani_ref>(clazz), &clazzGlobalRef));
+    g_koalaANICallbackDispatcher.clazz = static_cast<ani_class>(clazzGlobalRef);
     CHECK_ANI_FATAL(aniEnv->Class_FindStaticMethod(
         clazz, dispatcherMethodName, dispatcherMethodSig,
         &g_koalaANICallbackDispatcher.method
