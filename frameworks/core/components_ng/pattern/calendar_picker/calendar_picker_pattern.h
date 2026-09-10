@@ -240,6 +240,7 @@ private:
     void UpdateEntryButtonColor();
     void UpdateEntryButtonBorderWidth();
     void UpdateHostEntryBorderColor();
+    void UpdateHostEntryBorderWidth();
     void UpdateEdgeAlign();
     void UpdateAccessibilityText();
     void FlushAddAndSubButton();
