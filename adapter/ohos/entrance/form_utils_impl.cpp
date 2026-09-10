@@ -78,6 +78,47 @@ namespace {
         }
         return true;
     }
+
+    // 将单个 intentParams 子项按类型写入 WantParams：
+    // string/number/bool 直接映射；null/object/array 降级为空字符串
+    // （GetString 对 object/array 返回 ""），object/array 加告警暴露数据丢失。
+    void SetWantParamByType(const std::unique_ptr<JsonValue>& child, AAFwk::WantParams& wantParams)
+    {
+        auto key = child->GetKey();
+        // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
+        if (child->IsString()) {
+            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+        } else if (child->IsNumber()) {
+            wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
+        } else if (child->IsBool()) {
+            wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
+        } else {
+            if (child->IsObject() || child->IsArray()) {
+                TAG_LOGW(AceLogTag::ACE_FORM,
+                    "InsightIntentEvent intentParams contains object/array value, "
+                    "downgrade to empty string, key: %{public}s", key.c_str());
+            }
+            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+        }
+    }
+
+    // 遍历 params.intentParams（业务意图参数信封），将各键值按类型写入 wantParams；
+    // params 或 intentParams 缺失时保持 wantParams 为空。
+    void ParseIntentParams(const std::unique_ptr<JsonValue>& params, AAFwk::WantParams& wantParams)
+    {
+        if (!params->IsValid()) {
+            return;
+        }
+        auto intentParams = params->GetValue("intentParams");
+        if (!intentParams->IsValid()) {
+            return;
+        }
+        auto child = intentParams->GetChild();
+        while (child->IsValid()) {
+            SetWantParamByType(child, wantParams);
+            child = child->GetNext();
+        }
+    }
 }
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
@@ -247,33 +288,7 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     }
 
     AAFwk::WantParams wantParams;
-    if (params->IsValid()) {
-        auto intentParams = params->GetValue("intentParams");
-        if (intentParams->IsValid()) {
-            auto child = intentParams->GetChild();
-            while (child->IsValid()) {
-                auto key = child->GetKey();
-                // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
-                if (child->IsString()) {
-                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
-                } else if (child->IsNumber()) {
-                    wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
-                } else if (child->IsBool()) {
-                    wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
-                } else {
-                    // Non string/number/bool values (null/object/array) degrade to string;
-                    // GetString returns "" for object/array, so warn to expose the data loss.
-                    if (child->IsObject() || child->IsArray()) {
-                        TAG_LOGW(AceLogTag::ACE_FORM,
-                            "InsightIntentEvent intentParams contains object/array value, "
-                            "downgrade to empty string, key: %{public}s", key.c_str());
-                    }
-                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
-                }
-                child = child->GetNext();
-            }
-        }
-    }
+    ParseIntentParams(params, wantParams);
 
     AAFwk::Want want;
     AAFwk::WantParams executeWantParams;
