@@ -1144,6 +1144,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         session_->GetLayoutRect().width_, session_->GetLayoutRect().height_, session_->GetBlank());
     if (NearEqual(size.Width(), session_->GetLayoutRect().width_, 1.0f) &&
         NearEqual(size.Height(), session_->GetLayoutRect().height_, 1.0f) && !session_->GetBlank()) {
+        needReplaceBlankWithStarting_ = false;
         return false;
     }
     session_->SetBlank(false);
@@ -1159,17 +1160,30 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (surfaceNode) {
         surfaceNode->SetVisible(false);
     }
-    if (!blankWindow_) {
-        CreateBlankWindow(blankWindow_);
-        AddChild(host, blankWindow_, blankWindowName_);
-        auto blankWindowContext = blankWindow_->GetRenderContext();
-        CHECK_NULL_RETURN(blankWindowContext, false);
-        blankWindowContext->SyncGeometryProperties(RectF(0, 0, size.Width(), size.Height()));
-        blankWindow_->SetActive(true);
-        CleanBlankWindow();
+    if (!blankWindow_ && !CreateAndAttachBlankWindow(host, size)) {
+        return false;
     }
     host->RebuildRenderContextTree();
     return false;
+}
+
+bool WindowScene::CreateAndAttachBlankWindow(const RefPtr<FrameNode>& host, const SizeF& size)
+{
+    if (needReplaceBlankWithStarting_) {
+        CreateStartingWindow();
+        startingWindow_.Swap(blankWindow_);
+        needReplaceBlankWithStarting_ = false;
+    } else {
+        CreateBlankWindow(blankWindow_);
+    }
+    CHECK_NULL_RETURN(blankWindow_, false);
+    AddChild(host, blankWindow_, blankWindowName_);
+    auto blankWindowContext = blankWindow_->GetRenderContext();
+    CHECK_NULL_RETURN(blankWindowContext, false);
+    blankWindowContext->SyncGeometryProperties(RectF(0, 0, size.Width(), size.Height()));
+    blankWindow_->SetActive(true);
+    CleanBlankWindow();
+    return true;
 }
 
 void WindowScene::CleanBlankWindow()

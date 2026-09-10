@@ -613,11 +613,17 @@ void ParseStrokeRadius(const EcmaVM* vm,
             return;
         }
     }
-    if (strokeRadiusArg->IsNull() ||
-        !ArkTSUtils::ParseJsDimension(vm, strokeRadiusArg, strokeRadius, DimensionUnit::VP, true)) {
+    RefPtr<ResourceObject> strokeRadiusResObj;
+    bool strokeRadiusParseOk = !strokeRadiusArg->IsNull() &&
+        ArkTSUtils::ParseJsDimension(vm, strokeRadiusArg, strokeRadius, DimensionUnit::VP, strokeRadiusResObj);
+    if (!strokeRadiusParseOk) {
         if (isJsView) {
             strokeRadius.SetUnit(DimensionUnit::PERCENT);
         }
+    }
+    if (strokeRadiusResObj) {
+        progressStyle.styleResource.strokeRadiusRawPtr = AceType::RawPtr(strokeRadiusResObj);
+        strokeRadiusResObj->IncRefCount();
     }
 
     if (isJsView && (LessNotEqual(strokeRadius.Value(), 0.0f) || strokeRadius.Unit() == DimensionUnit::PERCENT)) {
@@ -779,8 +785,13 @@ void ParseCapsuleFontWeight(
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
-        } else if (weightArg->IsString(vm)) {
-            weight = weightArg->ToString(vm)->ToString(vm);
+        } else {
+            RefPtr<ResourceObject> weightResObj;
+            ArkTSUtils::ParseJsString(vm, weightArg, weight, weightResObj);
+            if (weightResObj) {
+                progressStyle.styleResource.fontResource.fontWeightRawPtr = AceType::RawPtr(weightResObj);
+                weightResObj->IncRefCount();
+            }
         }
         progressStyle.fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
     } else {
@@ -976,19 +987,11 @@ ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCa
     auto nodeInfo = MakeProgressNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj, nodeInfo)) {
         if (ArkTSUtils::IsJsView(vm, nativeNodeArg)) {
-            auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
-            CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
                 SystemProperties::ConfigChangePerform()) {
                 nodeModifiers->getProgressModifier()->resetProgressBackgroundColorWithColorSpace(nativeNode);
             } else {
-                color = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
-                        : (g_progressType == ProgressType::RING)  ? theme->GetRingProgressBgColor()
-                                                                  : theme->GetTrackBgColor();
-                // nullptr is passed to indicate that the background color is not set by user,
-                // and it will be handled according to the default value from theme.
-                nodeModifiers->getProgressModifier()->setProgressBackgroundColorWithColorSpace(
-                    nativeNode, color.GetValue(), color.GetColorSpace(), nullptr);
+                nodeModifiers->getProgressModifier()->resetProgressBackgroundColor(nativeNode);
             }
         } else {
             nodeModifiers->getProgressModifier()->resetProgressBackgroundColor(nativeNode);

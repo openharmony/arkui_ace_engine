@@ -985,4 +985,43 @@ HWTEST_F(ScrollBarEventTestNg, IsScrollSnapTrigger002, TestSize.Level1)
     pattern_->HandleDragEnd(info);
     EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
 }
+
+/**
+ * @tc.name: HandleLongPress004
+ * @tc.desc: HandleLongPress early-returns when GetScrollBarInteractive() is false (rect scroll bar with
+ *           scrollBarInteractive_=false), so the scroll page callback is never invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleLongPress004, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    auto scrollBar = pattern_->scrollBar_;
+    EXPECT_EQ(scrollBar->GetShapeMode(), ShapeMode::RECT);
+    scrollBar->SetScrollBarInteractive(false);
+    EXPECT_FALSE(scrollBar->GetScrollBarInteractive());
+
+    bool callbackCalled = false;
+    scrollBar->SetScrollPageCallback(
+        [&callbackCalled](bool reverse, bool smooth) {
+            callbackCalled = true;
+        });
+    scrollBar->SetIsMousePressed(true);
+    // location below the bar so AnalysisUpOrDown would return true if reached
+    scrollBar->SetLocationInfo(Offset(-100.f, SCROLL_BAR_CHILD_HEIGHT + 1.f));
+
+    scrollBar->HandleLongPress(true);
+    // CHECK_NULL_VOID(GetScrollBarInteractive()) early-returns, callback must NOT be called
+    EXPECT_FALSE(callbackCalled);
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
 } // namespace OHOS::Ace::NG

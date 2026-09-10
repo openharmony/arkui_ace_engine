@@ -28,6 +28,7 @@
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeOffscreenCanvas : public OHOS::FFI::FFIData {
+    DECL_TYPE(NativeOffscreenCanvas, OHOS::FFI::FFIData)
 public:
     NativeOffscreenCanvas(double height, double width, int32_t unit);
     ~NativeOffscreenCanvas() override;

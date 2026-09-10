@@ -47,6 +47,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
@@ -166,6 +167,8 @@ constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
 constexpr int32_t LONG_PRESS_DURATION_MS = 650;
 constexpr int32_t LONG_PRESS_DURATION_STEP_UNIT = 8;
+constexpr int32_t MIN_REPORT_TIME = 100;
+constexpr float TEXT_CONTENT_RATIO = 0.15f;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -11553,6 +11556,32 @@ void SnapshotTouchReporter::OnPan()
     item->Put("time", static_cast<int64_t>(GetMilliseconds()));
     item->Put("type", static_cast<uint8_t>(GestureType::PAN));
     infos_->Put(item);
+}
+
+void WebPattern::EnableAgentManager()
+{
+    CHECK_NULL_VOID(delegate_);
+    auto agentManager = delegate_->GetNWebAgentManager();
+    if (!agentManager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "EnableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
+        return;
+    }
+    agentManager->SetContentChangeDetectionConfig(MIN_REPORT_TIME, TEXT_CONTENT_RATIO);
+    agentManager->SetDomExtractionConfig(true);
+    agentManager->SetAgentEnabled(true);
+}
+
+bool WebPattern::ShouldEnableAgentManager()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto clickOptimizer = pipelineContext->GetClickOptimizer();
+    if (clickOptimizer && clickOptimizer->GetClickExtEnabled()) {
+        return true;
+    }
+    return false;
 }
 
 namespace {

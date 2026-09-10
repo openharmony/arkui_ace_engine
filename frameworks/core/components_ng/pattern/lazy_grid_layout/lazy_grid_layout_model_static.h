@@ -53,6 +53,7 @@ public:
 class ACE_EXPORT LazyVGridLayoutModelStatic : public LazyGridLayoutModelStatic {
 public:
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
+    static void SetItemFillPolicy(FrameNode* frameNode, const std::optional<PresetFillType>& policy);
 };
 
 } // namespace OHOS::Ace::NG

@@ -179,6 +179,25 @@ void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colo
     TextFieldModelNG::SetCaretColor(frameNode, result);
 }
 
+void SetTextInputCaretColorJS(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resObj) {
+            pattern->RegisterResource<Color>("caretColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("caretColor");
+        }
+    }
+    TextFieldModelNG::SetCaretColor(frameNode, result);
+}
+
 void ResetTextInputCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3722,6 +3741,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .getSelectDetectorEnable = nullptr,
             .resetSelectDetectorEnable = nullptr,
             .setTextInputCaretColor = SetTextInputCaretColorImpl,
+            .setTextInputCaretColorJS = SetTextInputCaretColorImpl,
             .resetTextInputCaretColor = nullptr,
             .setTextInputType = SetTextInputTypeImpl,
             .resetTextInputType = nullptr,
@@ -4046,6 +4066,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
         .setTextInputCaretColor = SetTextInputCaretColor,
+        .setTextInputCaretColorJS = SetTextInputCaretColorJS,
         .resetTextInputCaretColor = ResetTextInputCaretColor,
         .setTextInputType = SetTextInputType,
         .resetTextInputType = ResetTextInputType,

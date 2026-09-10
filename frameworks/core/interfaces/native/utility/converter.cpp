@@ -18,6 +18,7 @@
 
 #include "arkoala_api_generated.h"
 #include "converter.h"
+#include "converter_primitives.h"
 
 // SORTED_SECTION
 #include "base/geometry/response_region.h"
@@ -916,14 +917,7 @@ std::u16string Convert(const Ark_String& src)
 template<>
 std::string Convert(const Ark_String& src)
 {
-    if (src.chars == nullptr || src.length == 0) return "";
-    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
-    if (src.length >= sizeof(data[0]) && data[0] == UTF16_BOM) {
-        // Handle utf16 strings
-        ++data;
-        return UtfUtils::Str16ToStr8(std::u16string(data, src.length - sizeof(data[0])));
-    }
-    return std::string(src.chars, src.length);
+    return ConvertArkString(src);
 }
 
 template<>

@@ -443,6 +443,40 @@ ohos_unittest("background_force_flush_vsync_test") {
   ]
 }
 
+ohos_unittest("rosen_window_test") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_window.cpp",
+    "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
+    "rosen_window_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  defines = [
+    "OHOS_PLATFORM",
+    "USE_ROSEN_DRAWING",
+  ]
+
+  deps = [
+    ":background_force_flush_vsync_test_support",
+    "$ace_root/test/mock/ohos_mock/rosen:mock_render_service",
+    "$ace_root/test/mock/ohos_mock/window_manager:mock_window_manager",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+
 group("entrance_unittest") {
   testonly = true
   deps = [
@@ -452,6 +486,7 @@ group("entrance_unittest") {
     ":layout_inspector_test",
     ":rs_adapter_test",
     ":mmi_event_converter_test",
-    ":right_mouse_mapping_config_test_ng",
+    ":rosen_window_test",
+    ":right_mouse_mapping_config_test_ng"
   ]
 }

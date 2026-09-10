@@ -242,6 +242,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(scrollNode);
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
+        MeasureTitleBarEffect(layoutWrapper, childConstraint);
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP ||
             (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET))
             && (sheetStyle_.sheetHeight.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
@@ -502,9 +503,17 @@ void SheetPresentationLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& trans
     CHECK_NULL_VOID(scrollWrapper);
 
     auto offset = translate;
+    auto titleBarHoverMode = sheetStyle_.titleBarHoverMode.value_or(SheetTitleBarHoverMode::STANDARD);
     auto titleBuilder = sheetPattern->GetTitleBuilderNode();
     auto dragBarNode = sheetPattern->GetDragBarNode();
     if (titleBuilder) {
+        if (titleBarHoverMode == SheetTitleBarHoverMode::STACK && sheetStyle_.isTitleBuilder.has_value()) {
+            auto geometryNode = scrollWrapper->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            geometryNode->SetMarginFrameOffset(offset);
+            scrollWrapper->Layout();
+            return;
+        }
         auto titleBuilderNode = titleBuilder->GetGeometryNode();
         CHECK_NULL_VOID(titleBuilderNode);
         float titleHeight =
@@ -518,6 +527,7 @@ void SheetPresentationLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& trans
         }
     }
     auto geometryNode = scrollWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(offset);
     scrollWrapper->Layout();
 }
@@ -580,6 +590,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutCloseIcon(translate, layoutWrapper);
     LayoutDragBar(translate, layoutWrapper);
     LayoutTitleBuilder(translate, layoutWrapper);
+    LayoutTitleBarEffect(translate, layoutWrapper);
     LayoutScrollNode(translate, layoutWrapper);
 }
 
@@ -804,7 +815,10 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
         ((sheetType_ == SheetType::SHEET_CENTER) || (sheetType_ == SheetType::SHEET_POPUP))) {
         auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, childConstraint);
-        maxHeight -= sheetPattern->GetTitleBuilderHeight();
+        if (sheetStyle_.titleBarHoverMode.value_or(SheetTitleBarHoverMode::STANDARD) !=
+            SheetTitleBarHoverMode::STACK) {
+            maxHeight -= sheetPattern->GetTitleBuilderHeight();
+        }
     }
     auto maxWidth = sheetWidth_;
     if (sheetType_ == SheetType::SHEET_POPUP) {
@@ -973,17 +987,67 @@ void SheetPresentationLayoutAlgorithm::RemeasureForPopup(const RefPtr<LayoutWrap
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
         auto childConstraint = CreateSheetChildConstraint(layoutProperty, Referenced::RawPtr(layoutWrapper));
         layoutConstraint.percentReference = SizeF(sheetWidth_, sheetHeight_);
-        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-            child->Measure(childConstraint);
-        }
+
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
+        auto effectNode = sheetPattern->GetTitleBarEffectNode();
+        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            if (effectNode && child->GetHostNode() == effectNode) {
+                continue;
+            }
+            child->Measure(childConstraint);
+        }
         auto scrollNode = sheetPattern->GetSheetScrollNode();
         CHECK_NULL_VOID(scrollNode);
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
+        MeasureTitleBarEffect(RawPtr(layoutWrapper), childConstraint);
     }
 }
+
+void SheetPresentationLayoutAlgorithm::MeasureTitleBarEffect(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto effectNode = sheetPattern->GetTitleBarEffectNode();
+    CHECK_NULL_VOID(effectNode);
+    auto index = host->GetChildIndexById(effectNode->GetId());
+    auto effectNodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(effectNodeWrapper);
+    auto titleBuilderNode = sheetPattern->GetTitleBuilderNode();
+    CHECK_NULL_VOID(titleBuilderNode);
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto titleBuilderGeometry = titleBuilderNode->GetGeometryNode();
+    CHECK_NULL_VOID(titleBuilderGeometry);
+    auto dragBarGeometry = dragBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(dragBarGeometry);
+
+    float titleHeight = titleBuilderGeometry->GetFrameSize().Height();
+    float dragBarHeight = dragBarGeometry->GetFrameSize().Height();
+    bool isFloatingDragBar = sheetStyle_.enableFloatingDragBar.value_or(false);
+    auto titleBarHeight = isFloatingDragBar ? titleHeight : titleHeight + dragBarHeight;
+    auto effectHeight = static_cast<float>(sheetPattern->GetTitleBarEffectHeight(sheetStyle_, titleBarHeight));
+    constraint.selfIdealSize.SetHeight(effectHeight);
+    effectNodeWrapper->Measure(constraint);
+}
+
+void SheetPresentationLayoutAlgorithm::LayoutTitleBarEffect(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto effectNode = sheetPattern->GetTitleBarEffectNode();
+    CHECK_NULL_VOID(effectNode);
+    auto effectGeometry = effectNode->GetGeometryNode();
+    CHECK_NULL_VOID(effectGeometry);
+    effectGeometry->SetMarginFrameOffset(translate);
+    effectNode->Layout();
+}
+
 } // namespace OHOS::Ace::NG

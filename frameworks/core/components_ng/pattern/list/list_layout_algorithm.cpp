@@ -3216,7 +3216,8 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
             break;
         } else if (GreatNotEqual(pos.second.startPos, prevContentStartOffset_)) {
             if ((GetEndIndex() == totalItemCount_ - 1) &&
-                NearEqual(GetEndPosition(), prevContentMainSize_ - prevContentEndOffset_) && !canOverScrollStart_) {
+                NearEqual(GetEndPosition(), prevContentMainSize_ - prevContentEndOffset_) &&
+                !(canOverScrollStart_ || canOverScrollEnd_)) {
                 startIndex = pos.first;
                 startPos = contentStartOffset_;
                 adjustOffset_ = pos.second.startPos - prevContentStartOffset_;

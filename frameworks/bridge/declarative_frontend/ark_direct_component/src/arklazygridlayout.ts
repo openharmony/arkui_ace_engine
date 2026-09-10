@@ -53,7 +53,7 @@ function loadComponent(): ComponentObj | undefined {
       constructor(nativePtr: any, classType: any) {
         super(nativePtr, classType);
       }
-      columnsTemplate(value: string): this {
+      columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         modifierWithKey(this._modifiersWithKeys, LazyGridColumnsTemplateModifier.identity, LazyGridColumnsTemplateModifier, value);
         return this;
       }
@@ -149,12 +149,12 @@ function loadComponent(): ComponentObj | undefined {
     }
     (LazyGridOnVisibleIndexesChangeModifier as any).identity = Symbol('lazyGridOnVisibleIndexesChange');
 
-    class LazyGridColumnsTemplateModifier extends ModifierWithKey<string> {
-      constructor(value: string) {
+    class LazyGridColumnsTemplateModifier extends ModifierWithKey<string | ItemFillPolicy> {
+      constructor(value: string | ItemFillPolicy) {
         super(value);
       }
       applyPeer(node: KNode, reset: boolean): void {
-        if (reset || !isString(this.value)) {
+        if (reset || (!isString(this.value) && !isObject(this.value))) {
           getUINativeModule().lazyVGridLayout.resetColumnsTemplate(node);
         } else {
           getUINativeModule().lazyVGridLayout.setColumnsTemplate(node, this.value);
@@ -169,6 +169,7 @@ function loadComponent(): ComponentObj | undefined {
 
 class JSLazyVGridLayout extends JSContainerBase {
   static create(): void {
+    getUINativeModule().loadNativeModule('LazyVGridLayout');
     getUINativeModule().lazyVGridLayout.create();
   }
   static rowsGap(value: any): void {

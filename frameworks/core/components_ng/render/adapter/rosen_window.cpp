@@ -43,17 +43,38 @@ constexpr char VSYNC_RECOVER_TASKNAME[] = "ArkUIVsyncRecover";
 constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 #endif
 
-std::shared_ptr<OHOS::Rosen::RSUIContext> GetRSUIContextByContainerId(int32_t instanceId)
+std::shared_ptr<OHOS::Ace::Window> GetSharedParentWindow(
+    int32_t instanceId, int32_t parentInstanceId, const std::shared_ptr<OHOS::Rosen::RSUIContext>& rsUIContext)
 {
-    auto container = OHOS::Ace::Container::GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, nullptr);
+    CHECK_NULL_RETURN(rsUIContext, nullptr);
+    auto parentContainer = OHOS::Ace::Container::GetContainer(parentInstanceId);
+    CHECK_NULL_RETURN(parentContainer, nullptr);
+    auto parentWindow = parentContainer->GetWindow();
+    CHECK_NULL_RETURN(parentWindow, nullptr);
+    auto parentRsUIDirector = parentWindow->GetRSUIDirector();
+    CHECK_NULL_RETURN(parentRsUIDirector, nullptr);
+    auto parentRsUIContext = parentRsUIDirector->GetRSUIContext();
+    CHECK_NULL_RETURN(parentRsUIContext, nullptr);
+    if (parentRsUIContext != rsUIContext) {
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_SUB_WINDOW,
+            "Parent and child use different RSUIContext, childContainerId=%{public}d, parentContainerId=%{public}d",
+            instanceId, parentInstanceId);
+        return nullptr;
+    }
+    return parentWindow->weak_from_this().lock();
+}
+
+void RequestSubWindowFrame(int32_t subWindowId)
+{
+    auto container = OHOS::Ace::Container::GetContainer(subWindowId);
+    if (!container) {
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_SUB_WINDOW,
+            "Subwindow container is unavailable when flushing VSync, subWindowId=%{public}d", subWindowId);
+        return;
+    }
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto pipelineWindow = pipeline->GetWindow();
-    CHECK_NULL_RETURN(pipelineWindow, nullptr);
-    auto rsUIDirector = pipelineWindow->GetRSUIDirector();
-    CHECK_NULL_RETURN(rsUIDirector, nullptr);
-    return rsUIDirector->GetRSUIContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 bool IsDisabledGoStopAndGoResume(const OHOS::Ace::RefPtr<OHOS::Ace::Container>& container)
@@ -160,18 +181,8 @@ void RosenWindow::Init()
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto container = Container::GetContainer(id_);
         CHECK_NULL_VOID(container);
-        if (container->IsSubContainer()) {
-            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(id_);
-            auto parentRsUIContext = GetRSUIContextByContainerId(parentContainerId);
-            auto parentContainer = Container::GetContainer(parentContainerId);
-            CHECK_NULL_VOID(parentContainer);
-            auto parentPipeline = parentContainer->GetPipelineContext();
-            CHECK_NULL_VOID(parentPipeline);
-            auto pipelineWindow = parentPipeline->GetWindow();
-            if (pipelineWindow && parentRsUIContext && parentRsUIContext == rsUIDirector_->GetRSUIContext()) {
-                pipelineWindow->RegisterSubWindow(id_);
-                return;
-            }
+        if (container->IsSubContainer() && TryRegisterToParentWindow()) {
+            return;
         }
     }
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
@@ -181,14 +192,23 @@ void RosenWindow::Init()
         if (SystemProperties::GetMultiInstanceEnabled()) {
             auto subWindowIds = self->GetSubWindowIds();
             for (auto subWindowId : subWindowIds) {
-                auto container = Container::GetContainer(subWindowId);
-                CHECK_NULL_VOID(container);
-                auto pipeline = container->GetPipelineContext();
-                CHECK_NULL_VOID(pipeline);
-                pipeline->RequestFrame();
+                RequestSubWindowFrame(subWindowId);
             }
         }
     });
+}
+
+bool RosenWindow::TryRegisterToParentWindow()
+{
+    UnregisterFromParentWindow();
+    auto parentInstanceId = SubwindowManager::GetInstance()->GetParentContainerId(id_);
+    CHECK_NULL_RETURN(rsUIDirector_, false);
+    CHECK_NULL_RETURN(parentInstanceId >= 0, false);
+    auto parentWindow = GetSharedParentWindow(id_, parentInstanceId, rsUIDirector_->GetRSUIContext());
+    CHECK_NULL_RETURN(parentWindow, false);
+    parentWindow->RegisterSubWindow(id_);
+    registeredParentId_ = parentInstanceId;
+    return true;
 }
 
 void RosenWindow::InitArkUI_X()
@@ -349,25 +369,13 @@ void RosenWindow::Destroy()
     LOGI("RosenWindow destroyed");
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
+    UnregisterFromParentWindow();
+    if (!rsUIDirector_) {
+        callbacks_.clear();
+        return;
+    }
     rsUIDirector_->SendMessages();
     auto rsUIContext = rsUIDirector_->GetRSUIContext();
-    // Unregister from parent window before detaching from UI
-    if (SystemProperties::GetMultiInstanceEnabled()) {
-        auto container = Container::GetContainer(id_);
-        CHECK_NULL_VOID(container);
-        if (container->IsSubContainer()) {
-            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(id_);
-            auto parentRsUIContext = GetRSUIContextByContainerId(parentContainerId);
-            auto parentContainer = Container::GetContainer(parentContainerId);
-            CHECK_NULL_VOID(parentContainer);
-            auto parentPipeline = parentContainer->GetPipelineContext();
-            CHECK_NULL_VOID(parentPipeline);
-            auto pipelineWindow = parentPipeline->GetWindow();
-            if (pipelineWindow && parentRsUIContext && parentRsUIContext == rsUIContext) {
-                pipelineWindow->UnregisterSubWindow(id_);
-            }
-        }
-    }
     if (rsUIContext) {
         rsUIContext->DetachFromUI();
     }
@@ -376,6 +384,18 @@ void RosenWindow::Destroy()
     }
     rsUIDirector_.reset();
     callbacks_.clear();
+}
+
+void RosenWindow::UnregisterFromParentWindow()
+{
+    auto parentInstanceId = registeredParentId_;
+    registeredParentId_ = -1;
+    CHECK_NULL_VOID(parentInstanceId >= 0);
+    auto parentContainer = Container::GetContainer(parentInstanceId);
+    CHECK_NULL_VOID(parentContainer);
+    auto parentWindow = parentContainer->GetWindow();
+    CHECK_NULL_VOID(parentWindow);
+    parentWindow->UnregisterSubWindow(id_);
 }
 
 void RosenWindow::SetDrawTextAsBitmap(bool useBitmap)

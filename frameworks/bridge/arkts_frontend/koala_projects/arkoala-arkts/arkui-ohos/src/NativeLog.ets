@@ -48,7 +48,7 @@ export class NativeLog {
 
         let result = new StringBuilder("")
         for (let i = 0; i < length; i++) {
-            result.append(String.fromCharCode(data[i])) // Attention. This code causes native crash in arm64.
+            result.append(String.fromCharCode(data[i]))
         }
         return result.toString()
     }

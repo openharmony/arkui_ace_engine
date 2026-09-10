@@ -791,14 +791,20 @@ ArkUINativeModuleValue TextInputBridge::SetCaretColor(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     Color color;
     RefPtr<ResourceObject> resourceObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputCaretColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+        if (isJsView) {
+            GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretColorJS(
+                nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+        } else {
+            GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
+                nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }

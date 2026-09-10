@@ -277,6 +277,8 @@ void SetLinearStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
         ProgressModelNG::SetStrokeRadius(
             node, Dimension(value->strokeRadiusValue, static_cast<DimensionUnit>(value->strokeRadiusUnit)));
     }
+    CreateWithResourceObjIfNeeded(
+        node, JsProgressResourceType::LSStrokeRadius, value->styleResource.strokeRadiusRawPtr);
 }
 
 void SetRingStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
@@ -318,21 +320,27 @@ void SetProgressStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     }
 }
 
-void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
+std::vector<std::string> ParseCapsuleFontFamilies(ArkUIProgressStyle* value)
 {
-    double fontSizeNumber = value->fontInfo.fontSizeNumber;
-    int8_t fontSizeUnit = value->fontInfo.fontSizeUnit;
-    uint8_t fontStyle = static_cast<uint8_t>(value->fontInfo.fontStyle);
-    uint8_t fontWeight = static_cast<uint8_t>(value->fontInfo.fontWeight);
+    std::vector<std::string> families;
     const char** fontFamilies = value->fontInfo.fontFamilies;
     uint32_t familyLength = value->fontInfo.familyLength;
-    std::vector<std::string> families;
     if (fontFamilies && familyLength > 0 && familyLength <= MAX_FONT_FAMILY_LENGTH) {
         families.resize(familyLength);
         for (uint32_t i = 0; i < familyLength; i++) {
             families.at(i) = std::string(*(fontFamilies + i));
         }
     }
+    return families;
+}
+
+void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
+{
+    double fontSizeNumber = value->fontInfo.fontSizeNumber;
+    int8_t fontSizeUnit = value->fontInfo.fontSizeUnit;
+    uint8_t fontStyle = static_cast<uint8_t>(value->fontInfo.fontStyle);
+    uint8_t fontWeight = static_cast<uint8_t>(value->fontInfo.fontWeight);
+    std::vector<std::string> families = ParseCapsuleFontFamilies(value);
     if ((value->borderWidthValue < 0) ||
         (static_cast<DimensionUnit>(value->borderWidthUnit) == DimensionUnit::PERCENT)) {
         ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
@@ -359,6 +367,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     ProgressModelNG::SetFontSize(node, Dimension(fontSizeNumber, static_cast<DimensionUnit>(fontSizeUnit)));
     CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontSize, styleRes.fontResource.fontSizeRawPtr);
     ProgressModelNG::SetFontWeight(node, static_cast<FontWeight>(fontWeight));
+    CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontWeight, styleRes.fontResource.fontWeightRawPtr);
     ProgressModelNG::SetFontFamily(node, families);
     ProgressModelNG::SetItalicFontStyle(node, static_cast<Ace::FontStyle>(fontStyle));
     if (Negative(value->borderRadiusValue) ||
@@ -399,6 +408,7 @@ void SetLinearStyleOptions(FrameNode* node)
     if (SystemProperties::ConfigChangePerform()) {
         CreateWithResourceObjIfNeeded(node, JsProgressResourceType::LSStrokeWidth, nullptr);
         CreateWithResourceObjIfNeeded(node, JsProgressResourceType::LSSweepingEffect, nullptr);
+        CreateWithResourceObjIfNeeded(node, JsProgressResourceType::LSStrokeRadius, nullptr);
     }
 }
 
@@ -460,6 +470,7 @@ void SetCapsuleStyleOptions(FrameNode* node)
         CreateWithResourceObjIfNeeded(node, JsProgressResourceType::Text, nullptr);
         CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontColor, nullptr);
         CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontSize, nullptr);
+        CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontWeight, nullptr);
     }
 }
 
