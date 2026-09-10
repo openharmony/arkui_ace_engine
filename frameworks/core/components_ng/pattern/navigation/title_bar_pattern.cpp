@@ -2748,7 +2748,11 @@ void TitleBarPattern::ResetTitleBarMaskBlendEffect()
 void TitleBarPattern::UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType)
 {
     CHECK_NULL_VOID(titleBarMaskNode_);
-    if (scrollEffectType != ScrollEffectType::COMMON_BLUR || !IsBrightnessBlendEnabled()) {
+    // The backplate brightness blend applies for COMMON_BLUR when the UI material level is
+    // EXQUISITE or GENTL.
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (scrollEffectType != ScrollEffectType::COMMON_BLUR ||
+        (materialLevel != UiMaterialLevel::EXQUISITE && materialLevel != UiMaterialLevel::GENTLE)) {
         ResetTitleBarMaskBlendEffect();
         return;
     }
@@ -3098,7 +3102,7 @@ void TitleBarPattern::UpdateBackgroundBlurStyle()
         return;
     }
 
-    maskRenderContext->UpdateBackgroundColor(bgStyle.backgroundColor);
+    maskRenderContext->UpdateBackgroundColor(bgStyle.backgroundColor.ChangeOpacity(opacity));
     auto startBlurRadius = originalBgStyle_.backgroundStyle.blurRadius;
     auto endBlurRadius = scrollEffectBgStyle_.backgroundStyle.blurRadius;
     auto blurRadius = startBlurRadius.Value() + scrollScale_ * (endBlurRadius.Value() - startBlurRadius.Value());
