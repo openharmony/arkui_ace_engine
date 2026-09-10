@@ -2158,7 +2158,9 @@ void FormPattern::OnActionEvent(const std::string& action)
             return;
         }
     }
-
+    if ("insightIntent" == type) {
+        isManuallyClick_ = false;
+    }
     if ("router" == type) {
         isManuallyClick_ = false;
         auto host = GetHost();
