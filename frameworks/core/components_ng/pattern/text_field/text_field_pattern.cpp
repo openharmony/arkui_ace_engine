@@ -1495,6 +1495,21 @@ void TextFieldPattern::HandleFocusEvent()
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
 
+void TextFieldPattern::UpdateBackgroundColorForMaterial(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    if (material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        // Keep the latest component background for restoration without replacing the material.
+        renderContext->UpdatePreBackgroundColor(color);
+    } else {
+        renderContext->UpdateBackgroundColor(color);
+    }
+}
+
 void TextFieldPattern::SetFocusStyle()
 {
     if (IsTV()) {
@@ -1518,7 +1533,7 @@ void TextFieldPattern::SetFocusStyle()
     if (!paintProperty->HasBackgroundColor()) {
         auto defaultBGColor = textFieldTheme->GetBgColor();
         if (paintProperty->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
-            renderContext->UpdateBackgroundColor(textFieldTheme->GetFocusBgColor());
+            UpdateBackgroundColorForMaterial(textFieldTheme->GetFocusBgColor());
             isFocusBGColorSet_ = true;
         }
     }
@@ -1555,7 +1570,7 @@ void TextFieldPattern::ClearFocusStyle()
     CHECK_NULL_VOID(textFieldTheme);
 
     if (isFocusBGColorSet_ && !paintProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        UpdateBackgroundColorForMaterial(textFieldTheme->GetBgColor());
     }
     if (isFocusTextColorSet_ && !paintProperty->HasTextColorFlagByUser()) {
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
@@ -4480,7 +4495,9 @@ void TextFieldPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto textFieldPaintProperty = host->GetPaintPropertyPtr<TextFieldPaintProperty>();
-    if (textFieldPaintProperty && textFieldPaintProperty->HasBorderColorFlagByUser()) {
+    auto material = renderContext->GetSystemMaterial();
+    bool hasImmersiveMaterial = material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE);
+    if (textFieldPaintProperty && textFieldPaintProperty->HasBorderColorFlagByUser() && !hasImmersiveMaterial) {
         textFieldPaintProperty->UpdateBorderColorFlagByUser(
             renderContext->GetBorderColorValue(BorderColorProperty {}));
     }
@@ -6350,7 +6367,7 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, result);
         auto bgColor = IsInlineMode() ? textFieldTheme->GetInlineBgColor() : textFieldTheme->GetBgColor();
-        renderContext->UpdateBackgroundColor(bgColor);
+        UpdateBackgroundColorForMaterial(bgColor);
         result = true;
     }
 
@@ -11402,15 +11419,21 @@ void TextFieldPattern::SetThemeBorderAttr()
     CHECK_NULL_VOID(paintProperty);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-
     paintProperty->ResetInnerBorderColor();
     paintProperty->ResetInnerBorderWidth();
+    auto material = renderContext->GetSystemMaterial();
+    bool hasImmersiveMaterial = material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE);
+    BorderColorProperty borderColor;
     if (!paintProperty->HasBorderColorFlagByUser()) {
-        BorderColorProperty borderColor;
         borderColor.SetColor(theme->GetTextInputColor());
-        renderContext->UpdateBorderColor(borderColor);
     } else {
-        renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
+        borderColor = paintProperty->GetBorderColorFlagByUserValue();
+    }
+    // Keep the current effect determined by the attribute order while material is active.
+    if (hasImmersiveMaterial) {
+        renderContext->UpdatePreBorderColor(borderColor);
+    } else {
+        renderContext->UpdateBorderColor(borderColor);
     }
 
     if (!paintProperty->HasBorderRadiusFlagByUser()) {
@@ -11422,18 +11445,18 @@ void TextFieldPattern::SetThemeBorderAttr()
         renderContext->UpdateBorderRadius(paintProperty->GetBorderRadiusFlagByUserValue());
     }
 
+    BorderWidthProperty borderWidth;
     if (!paintProperty->HasBorderWidthFlagByUser()) {
-        BorderWidthProperty borderWidth;
-        if (IsTextArea() || IsUnderlineMode()) {
-            borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
-        } else {
-            borderWidth.SetBorderWidth(theme->GetTextInputWidth());
-        }
+        borderWidth.SetBorderWidth(IsTextArea() || IsUnderlineMode() ?
+            BORDER_DEFAULT_WIDTH : theme->GetTextInputWidth());
+    } else {
+        borderWidth = paintProperty->GetBorderWidthFlagByUserValue();
+    }
+    if (hasImmersiveMaterial) {
+        renderContext->UpdatePreBorderWidth(borderWidth);
+    } else {
         renderContext->UpdateBorderWidth(borderWidth);
         layoutProperty->UpdateBorderWidth(borderWidth);
-    } else {
-        renderContext->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
-        layoutProperty->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
     }
 }
 
@@ -11478,13 +11501,13 @@ void TextFieldPattern::SetThemeAttr()
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     SetThemeBorderAttr();
+    auto backgroundColor = isFocusBGColorSet_ ? theme->GetFocusBgColor() : theme->GetBgColor();
     if (!paintProperty->HasBackgroundColor()) {
-        auto backgroundColor = isFocusBGColorSet_ ? theme->GetFocusBgColor() : theme->GetBgColor();
         backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : backgroundColor;
-        renderContext->UpdateBackgroundColor(backgroundColor);
     } else {
-        renderContext->UpdateBackgroundColor(paintProperty->GetBackgroundColorValue());
+        backgroundColor = paintProperty->GetBackgroundColorValue();
     }
+    UpdateBackgroundColorForMaterial(backgroundColor);
 
     if (!paintProperty->HasMarginByUser()) {
         MarginProperty margin;
@@ -14208,13 +14231,18 @@ void TextFieldPattern::UpdateBorderResource()
     if (renderContext->HasBorderRadius()) {
         SetBackBorderRadius();
     }
-    if (renderContext->HasBorderColor()) {
+    auto material = renderContext->GetSystemMaterial();
+    bool hasImmersiveMaterial = material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE);
+    // Material values are visual overrides, not user border settings.
+    auto borderColor = hasImmersiveMaterial ? renderContext->GetPreBorderColor() : renderContext->GetBorderColor();
+    auto borderWidth = hasImmersiveMaterial ? renderContext->GetPreBorderWidth() : renderContext->GetBorderWidth();
+    if (borderColor.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderColorFlagByUser, renderContext->GetBorderColor().value(), frameNode);
+            TextFieldPaintProperty, BorderColorFlagByUser, borderColor.value(), frameNode);
     }
-    if (renderContext->HasBorderWidth()) {
+    if (borderWidth.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value(), frameNode);
+            TextFieldPaintProperty, BorderWidthFlagByUser, borderWidth.value(), frameNode);
     }
     if (renderContext->HasBorderStyle()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(
@@ -14513,9 +14541,9 @@ void TextFieldPattern::SetFocusStyleForTV()
         auto defaultBGColor = textFieldTheme->GetBgColor();
         if (paintProperty->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
             if(IsUnderlineMode()) {
-                renderContext->UpdateBackgroundColor(textFieldTheme->GetUnderlineFocusBgColor());
+                UpdateBackgroundColorForMaterial(textFieldTheme->GetUnderlineFocusBgColor());
             } else {
-                renderContext->UpdateBackgroundColor(
+                UpdateBackgroundColorForMaterial(
                     textFieldTheme->GetTextInputNormalBgColor().BlendColor(textFieldTheme->GetFocusBgColor()));
                 isFocusBGColorSet_ = true;
             }
@@ -14554,7 +14582,7 @@ void TextFieldPattern::ClearFocusStyleForTV()
     CHECK_NULL_VOID(textFieldTheme);
 
     if (isFocusBGColorSet_ && !paintProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        UpdateBackgroundColorForMaterial(textFieldTheme->GetBgColor());
     }
     if (isFocusTextColorSet_ && !paintProperty->HasTextColorFlagByUser()) {
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
@@ -14566,7 +14594,7 @@ void TextFieldPattern::ClearFocusStyleForTV()
     isFocusTextColorSet_ = false;
     isFocusPlaceholderColorSet_ = false;
     if(IsUnderlineMode() && !paintProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        UpdateBackgroundColorForMaterial(Color::TRANSPARENT);
     }
 }
 
@@ -14709,9 +14737,9 @@ void TextFieldPattern::SetThemeAttrForTV()
         if(IsDisabled()) {
             backgroundColor = backgroundColor.BlendOpacity(theme->GetDisableOpacityRatio());
         }
-        renderContext->UpdateBackgroundColor(backgroundColor);
+        UpdateBackgroundColorForMaterial(backgroundColor);
     } else {
-        renderContext->UpdateBackgroundColor(paintProperty->GetBackgroundColorValue());
+        UpdateBackgroundColorForMaterial(paintProperty->GetBackgroundColorValue());
     }
 
     if (!paintProperty->HasMarginByUser()) {
@@ -14912,6 +14940,9 @@ void TextFieldPattern::SetThemeBorderAttrForTV()
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
 
+    auto material = renderContext->GetSystemMaterial();
+    bool hasImmersiveMaterial = material &&
+        material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE);
     paintProperty->ResetInnerBorderColor();
     paintProperty->ResetInnerBorderWidth();
     if (!paintProperty->HasBorderColorFlagByUser()) {
@@ -14920,9 +14951,17 @@ void TextFieldPattern::SetThemeBorderAttrForTV()
         if(IsDisabled()) {
             borderColor.SetColor(theme->GetTextInputColor().BlendOpacity(theme->GetDisableOpacityRatio()));
         }
-        renderContext->UpdateBorderColor(borderColor);
+        if (hasImmersiveMaterial) {
+            renderContext->UpdatePreBorderColor(borderColor);
+        } else {
+            renderContext->UpdateBorderColor(borderColor);
+        }
     } else {
-        renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
+        if (hasImmersiveMaterial) {
+            renderContext->UpdatePreBorderColor(paintProperty->GetBorderColorFlagByUserValue());
+        } else {
+            renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
+        }
     }
 
     if (!paintProperty->HasBorderRadiusFlagByUser()) {
@@ -14941,26 +14980,25 @@ void TextFieldPattern::SetThemeBorderAttrForTV()
         } else {
             borderWidth.SetBorderWidth(theme->GetTextInputWidth());
         }
-        renderContext->UpdateBorderWidth(borderWidth);
-        layoutProperty->UpdateBorderWidth(borderWidth);
+        if (hasImmersiveMaterial) {
+            renderContext->UpdatePreBorderWidth(borderWidth);
+        } else {
+            renderContext->UpdateBorderWidth(borderWidth);
+            layoutProperty->UpdateBorderWidth(borderWidth);
+        }
     } else {
-        renderContext->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
-        layoutProperty->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
+        if (hasImmersiveMaterial) {
+            renderContext->UpdatePreBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
+        } else {
+            renderContext->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
+            layoutProperty->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
+        }
     }
 }
 
 bool TextFieldPattern::IsPreviewTextInputting() const
 {
     return GetIsPreviewText() && 0 <= previewTextStart_ && previewTextStart_ <= previewTextEnd_;
-}
-
-void TextFieldPattern::OnUiMaterialParamUpdate(const UiMaterialParam& params)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, params.backgroundColor, host);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderWidthFlagByUser, params.borderWidth, host);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderColorFlagByUser, params.borderColor, host);
 }
 
 int32_t TextFieldPattern::GetPageTranslateNodeId() const

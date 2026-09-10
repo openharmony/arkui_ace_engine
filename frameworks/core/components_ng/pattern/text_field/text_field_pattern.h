@@ -453,7 +453,6 @@ public:
     void HandleOnPageUp() override;
     void HandleOnPageDown() override;
     void CreateHandles() override;
-    void OnUiMaterialParamUpdate(const UiMaterialParam& params) override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
     EmojiRelation GetEmojiRelation(int index);
 
@@ -1138,6 +1137,7 @@ public:
     bool IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager);
     void HandleFocusEvent();
     void CheckAndUpdateInputTypeForOTP();
+    void UpdateBackgroundColorForMaterial(const Color& color);
     void SetFocusStyle();
     void ClearFocusStyle();
     void ProcessFocusStyle();
