@@ -75,6 +75,7 @@ using PredictScanParam = std::tuple<int32_t, bool, PredictScanState>;
 constexpr float SCAN_START = 100.0f;
 constexpr float SCAN_END = 200.0f;
 constexpr float SCAN_SPACE = 7.0f;
+constexpr int32_t SCAN_ITEM_COUNT = 3;
 
 // LayoutWrapperNode intentionally has no GetChildByIndex implementation.
 class PredictScanWrapper : public LayoutWrapperNode {
@@ -116,11 +117,11 @@ void ListPredictScanTestNg::PrepareScan()
     nodes_.push_back(list);
     list->GetGeometryNode()->SetFrameSize(SizeF(240.0f, 400.0f));
     parent_ = AceType::MakeRefPtr<PredictScanWrapper>(list);
-    algorithm_->totalItemCount_ = 3;
+    algorithm_->totalItemCount_ = SCAN_ITEM_COUNT;
     algorithm_->contentMainSize_ = 400.0f;
     algorithm_->spaceWidth_ = SCAN_SPACE;
     algorithm_->itemPosition_[1] = { -1, SCAN_START, SCAN_END, false };
-    target_ = forward ? 2 : 0;
+    target_ = forward ? SCAN_ITEM_COUNT - 1 : 0;
     for (int32_t index = 0; index < algorithm_->totalItemCount_; ++index) {
         auto node = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, GetElmtId(),
             AceType::MakeRefPtr<ListItemPattern>(nullptr));

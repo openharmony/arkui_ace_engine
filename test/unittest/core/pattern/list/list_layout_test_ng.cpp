@@ -601,13 +601,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset003, TestSize.Level1)
     /**
      * @tc.steps: step1. create List
      */
-    const int32_t GroupNumber = 5;
+    const int32_t groupNumber = 5;
     const float contentStartOffset = 100;
     const float contentEndOffset = 50;
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    CreateListItemGroups(GroupNumber);
+    CreateListItemGroups(groupNumber);
     CreateDone();
 
     /**
@@ -630,13 +630,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset003, TestSize.Level1)
      * @tc.expected: check whether the offset is correct.
      */
     for (int32_t i = 0; i < 3; i++) {
-        int32_t index = GroupNumber - i - 1;
+        int32_t index = groupNumber - i - 1;
         ScrollToIndex(index, false, ScrollAlign::END);
         auto rect = GetChildRect(frameNode_, index);
         EXPECT_EQ(rect.Bottom(), HEIGHT - contentEndOffset);
     }
     for (int32_t i = 0; i < 3; i++) {
-        int32_t index = GroupNumber - i - 1;
+        int32_t index = groupNumber - i - 1;
         ScrollToIndex(index, true, ScrollAlign::END);
         MockAnimationManager::GetInstance().Tick();
         FlushUITasks();
@@ -3627,9 +3627,9 @@ HWTEST_P(ListPredictCacheTestNg, PositionedDirtyItemKeepsVisibility, TestSize.Le
     ASSERT_NE(item, nullptr);
     ASSERT_TRUE(item->IsLayoutComplete());
     const auto offset = item->GetGeometryNode()->GetFrameOffset();
-    constexpr float NEW_MAIN_SIZE = 150.0f;
+    constexpr float newMainSize = 150.0f;
     item->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FILL_LENGTH), CalcLength(NEW_MAIN_SIZE)));
+        CalcSize(CalcLength(FILL_LENGTH), CalcLength(newMainSize)));
     item->SetLayoutDirtyMarked(true);
     FlushUITasks();
     ASSERT_NO_FATAL_FAILURE(CheckPrediction(false));
@@ -3638,9 +3638,9 @@ HWTEST_P(ListPredictCacheTestNg, PositionedDirtyItemKeepsVisibility, TestSize.Le
     EXPECT_EQ(GetCachedItem(), item);
     EXPECT_EQ(item->IsActive(), show_);
     EXPECT_EQ(item->GetGeometryNode()->GetFrameOffset(), offset);
-    EXPECT_FLOAT_EQ(item->GetGeometryNode()->GetFrameSize().Height(), NEW_MAIN_SIZE);
+    EXPECT_FLOAT_EQ(item->GetGeometryNode()->GetFrameSize().Height(), newMainSize);
     FlushUITasks();
-    ASSERT_NO_FATAL_FAILURE(CheckPosition(NEW_MAIN_SIZE));
+    ASSERT_NO_FATAL_FAILURE(CheckPosition(newMainSize));
 }
 
 INSTANTIATE_TEST_SUITE_P(CacheLifecycle, ListPredictCacheTestNg,
@@ -3674,12 +3674,14 @@ void ListPredictContainerTestNg::CreatePredictContainer()
     model.SetCachedCount(1, show);
     model.SetStackFromEnd(stackFromEnd);
     if (group) {
-        CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 10);
+        constexpr int32_t groupItemCount = 10;
+        CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, groupItemCount);
     } else {
         LazyVGridLayoutModel grid;
         grid.Create();
         grid.SetColumnsTemplate("1fr 1fr");
-        for (int32_t index = 0; index < 20; ++index) {
+        constexpr int32_t gridItemCount = 20;
+        for (int32_t index = 0; index < gridItemCount; ++index) {
             StackModelNG stack;
             stack.Create();
             ViewAbstract::SetWidth(CalcLength(ITEM_MAIN_SIZE));
@@ -3713,7 +3715,7 @@ ListPredictLayoutParamV2 ListPredictContainerTestNg::MakePrediction()
 
 /**
  * @tc.name: PreservesContainerPredictionContract
- * @tc.desc: Group and nested lazy dispatch honor the render intent without losing reference or direction.
+ * @tc.desc: Group and nested lazy dispatch preserve cache visibility, reference position, and layout direction.
  * @tc.type: FUNC
  */
 HWTEST_P(ListPredictContainerTestNg, PreservesContainerPredictionContract, TestSize.Level1)
@@ -3826,13 +3828,14 @@ HWTEST_P(ListPredictGroupCacheTestNg, GroupScanPositionsRootBeforePrediction, Te
         multi->SetLanes(lanes);
         algorithm = multi;
     }
-    constexpr float START = 100.0f;
-    constexpr float END = 200.0f;
-    algorithm->totalItemCount_ = 3;
+    constexpr float startPos = 100.0f;
+    constexpr float endPos = 200.0f;
+    constexpr int32_t itemCount = 3;
+    algorithm->totalItemCount_ = itemCount;
     algorithm->contentMainSize_ = HEIGHT;
     algorithm->spaceWidth_ = SPACE;
-    algorithm->itemPosition_[1] = { -1, START, END, true };
-    const int32_t index = forward ? 2 : 0;
+    algorithm->itemPosition_[1] = { -1, startPos, endPos, true };
+    const int32_t index = forward ? itemCount - 1 : 0;
     auto group = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(index));
     ASSERT_NE(group, nullptr);
     const float groupSize = group->GetGeometryNode()->GetFrameSize().Height();
@@ -3849,7 +3852,7 @@ HWTEST_P(ListPredictGroupCacheTestNg, GroupScanPositionsRootBeforePrediction, Te
     EXPECT_EQ(predictions.front().forwardCacheCount, forward ? 0 : -1);
     EXPECT_EQ(predictions.front().backwardCacheCount, forward ? -1 : 0);
     EXPECT_FLOAT_EQ(group->GetGeometryNode()->GetFrameOffset().GetY(),
-        forward ? END + SPACE : START - SPACE - groupSize);
+        forward ? endPos + SPACE : startPos - SPACE - groupSize);
 }
 
 INSTANTIATE_TEST_SUITE_P(CacheGroupScan, ListPredictGroupCacheTestNg,
@@ -6468,13 +6471,13 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithLanes001, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithLanes002, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 2;
+    constexpr int32_t testLane = 2;
     /**
      * @tc.steps: step1. Create List with lanes property
      * @tc.expected: CanSupportNestedLazy returns false
      */
     ListModelNG listModel = CreateList();
-    listModel.SetLanes(TEST_LANE);
+    listModel.SetLanes(testLane);
     CreateListItems(5);
     CreateDone();
 
@@ -6498,7 +6501,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithLanes002, TestSize.Level1)
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
-    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, TEST_LANE);
+    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, testLane);
     EXPECT_FALSE(canSupport);
 }
 
@@ -6715,7 +6718,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlignEnd001, TestSi
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyNonLazyChild001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with normal ListItem child
      * @tc.expected: CanSupportNestedLazy returns false
@@ -6736,7 +6739,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyNonLazyChild001, TestSize.Level1)
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
-    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(listItemNode, frameNode_, TEST_LANE);
+    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(listItemNode, frameNode_, testLane);
     EXPECT_FALSE(canSupport);
 }
 
