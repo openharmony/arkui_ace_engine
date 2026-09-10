@@ -35,7 +35,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
-#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -541,10 +541,16 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping006, TestS
     auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(textNode, nullptr);
-    auto rc = AceType::MakeRefPtr<MockRenderContext>();
-    rc->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
-    textNode->renderContext_ = rc;
     textNode->isActive_ = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    textNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(textNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    textNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
 
     MouseEvent event;
     event.x = 100.0f;
@@ -567,10 +573,16 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping007, TestS
     auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(textNode, nullptr);
-    auto rc = AceType::MakeRefPtr<MockRenderContext>();
-    rc->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
-    textNode->renderContext_ = rc;
     textNode->isActive_ = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    textNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(textNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    textNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
 
     MouseEvent event;
     event.x = 300.0f;
@@ -593,10 +605,16 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping008, TestS
     auto buttonNode = FrameNode::GetOrCreateFrameNode("button", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(buttonNode, nullptr);
-    auto rc = AceType::MakeRefPtr<MockRenderContext>();
-    rc->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
-    buttonNode->renderContext_ = rc;
     buttonNode->isActive_ = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    buttonNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(buttonNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    buttonNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
 
     MouseEvent event;
     event.x = 100.0f;
@@ -619,10 +637,16 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping009, TestS
     auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(textNode, nullptr);
-    auto rc = AceType::MakeRefPtr<MockRenderContext>();
-    rc->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
-    textNode->renderContext_ = rc;
     textNode->isActive_ = false;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    textNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(textNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    textNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
 
     MouseEvent event;
     event.x = 100.0f;
