@@ -156,6 +156,8 @@ if (globalThis.Button === undefined) {
       module.loadComponent();
       getUINativeModule().button.createWithChild(...args);
     },
+    pop: function() {
+    },
     name: 'JSButton'
   };
 }
@@ -169,6 +171,8 @@ if (globalThis.Video === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().video.create(params);
+    },
+    pop: function() {
     },
     name: 'JSVideo'
   };
@@ -276,6 +280,8 @@ if (globalThis.Refresh === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().refresh.create(params);
+    },
+    pop: function() {
     },
     name: 'JSRefresh'
   }
@@ -395,6 +401,8 @@ if (globalThis.Shape === undefined) {
       module.loadComponent();
       getUINativeModule().shape.create(value);
     },
+    pop: function() {
+    },
     name: 'JSShape'
   }
 }
@@ -426,6 +434,8 @@ if (globalThis.Line === undefined) {
       module.loadComponent();
       getUINativeModule().line.create(value);
     },
+    pop: function() {
+    },
     name: 'JSLine'
   }
 }
@@ -439,6 +449,8 @@ if (globalThis.Polyline === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().polyline.create(value);
+    },
+    pop: function() {
     },
     name: 'JSPolyline'
   }
@@ -471,6 +483,8 @@ if (globalThis.Polygon === undefined) {
       module.loadComponent();
       getUINativeModule().polygon.create(params);
     },
+    pop: function() {
+    },
     name: 'JSPolygon'
   }
 }
@@ -485,6 +499,8 @@ if (globalThis.GridRow === undefined) {
       module.loadComponent();
       globalThis.GridRow.create(params);
     },
+    pop: function() {
+    },
     name: 'JSGridRow'
   }
 }
@@ -498,6 +514,8 @@ if (globalThis.GridCol === undefined) {
       module.exportView();
       module.loadComponent();
       globalThis.GridCol.create(params);
+    },
+    pop: function() {
     },
     name: 'JSGridCol'
   }
@@ -552,6 +570,8 @@ if (globalThis.TextPicker === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().textpicker.create(params);
+    },
+    pop: function() {
     },
  	name: 'JSTextPicker'
   }
@@ -675,6 +695,8 @@ if (globalThis.Blank === undefined) {
       module.loadComponent();
       getUINativeModule().blank.create(value);
     },
+    pop: function() {
+    },
     name: 'JSBlank'
   }
 }
@@ -689,6 +711,8 @@ if (globalThis.Divider === undefined) {
       module.loadComponent();
       getUINativeModule().divider.create(params);
     },
+    pop: function() {
+    },
     name: 'JSDivider'
   }
 }
@@ -702,6 +726,8 @@ if (globalThis.RelativeContainer === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().relativeContainer.create();
+    },
+    pop: function() {
     },
     name: 'JSRelativeContainer'
   }
@@ -1050,6 +1076,8 @@ if (globalThis.Canvas === undefined) {
       module.loadComponent();
       getUINativeModule().canvas.create(params);
     },
+    pop: function() {
+    },
     name: 'JSCanvas'
   }
 }
@@ -1063,6 +1091,8 @@ if (globalThis.ImageAnimator === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().imageAnimator.create();
+    },
+    pop: function() {
     },
     name: 'JSImageAnimator'
   }
@@ -1078,6 +1108,8 @@ if (globalThis.Grid === undefined) {
       module.loadComponent();
       getUINativeModule().grid.create(scroller, options);
     },
+    pop: function() {
+    },
     name: 'Grid'
   }
 }
@@ -1092,6 +1124,8 @@ if (globalThis.GridItem === undefined) {
       module.loadComponent();
       getUINativeModule().gridItem.create(func, isLazy, style);
     },
+    pop: function() {
+    },
     name: 'GridItem'
   }
 }
@@ -1105,6 +1139,8 @@ if (globalThis.DatePicker === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().datePicker.create(params);
+    },
+    pop: function() {
     },
     name: 'JSDatePicker'
   }
@@ -1134,6 +1170,8 @@ if (globalThis.LazyVGridLayout === undefined) {
       module.loadComponent();
       getUINativeModule().lazyVGridLayout.create();
     },
+    pop: function() {
+    },
     name: 'JSLazyVGridLayout'
   };
 }
@@ -1147,6 +1185,8 @@ if (globalThis.Select === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().select.create(params);
+    },
+    pop: function() {
     },
     name: 'JSSelect'
   }

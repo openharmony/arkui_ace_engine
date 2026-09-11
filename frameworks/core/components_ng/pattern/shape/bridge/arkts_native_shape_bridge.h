@@ -24,6 +24,8 @@ public:
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static ArkUINativeModuleValue CreateShape(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CreateShapeDetached(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetShapeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetShapeHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue PopShape(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetViewPort(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetViewPort(ArkUIRuntimeCallInfo* runtimeCallInfo);

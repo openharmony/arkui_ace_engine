@@ -210,10 +210,12 @@ class JSShape extends JSContainerBase {
         getUINativeModule().commonShape.setStrokeMiterLimit(true, value);
     }
     static width(value: any): void {
-        getUINativeModule().commonShape.setWidth(true, value);
+        JSViewAbstract.width(value);
+        getUINativeModule().shape.setShapeWidth(true, value);
     }
     static height(value: any): void {
-        getUINativeModule().commonShape.setHeight(true, value);
+        JSViewAbstract.height(value);
+        getUINativeModule().shape.setShapeHeight(true, value);
     }
     static foregroundColor(value: any): void {
         getUINativeModule().commonShape.setForegroundColor(true, value);

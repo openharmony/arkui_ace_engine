@@ -25,6 +25,11 @@ class LazyArkRelativeContainerComponent extends ArkComponent {
     this.lazyComponent = LazyArkRelativeContainerComponent.module.createComponent(nativePtr, classType);
   }
 
+  initialize(value: any): this {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+
   setMap(): void {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }

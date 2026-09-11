@@ -29,6 +29,11 @@ class LazyArkBlankComponent extends ArkComponent {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
 
+  initialize(value: any): this {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+
   color(value: ResourceColor): this {
     this.lazyComponent.color(value);
     return this;

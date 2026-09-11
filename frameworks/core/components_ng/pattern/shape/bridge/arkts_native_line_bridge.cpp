@@ -58,9 +58,8 @@ ArkUINativeModuleValue LineBridge::CreateLine(ArkUIRuntimeCallInfo* runtimeCallI
         CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
         auto paramObj = firstArg->ToObject(vm);
         auto widthVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
-        if (!widthVal->IsUndefined()) {
-            RefPtr<ResourceObject> widthResObj;
-            CommonShapeBridge::ParseJsValue(vm, widthVal, width, widthResObj, true);
+        RefPtr<ResourceObject> widthResObj;
+        if (CommonShapeBridge::ParseJsValue(vm, widthVal, width, widthResObj, true)) {
             if (LessNotEqual(width.Value(), 0.0)) {
                 width.SetValue(0.0);
             }
@@ -68,9 +67,8 @@ ArkUINativeModuleValue LineBridge::CreateLine(ArkUIRuntimeCallInfo* runtimeCallI
                 nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), AceType::RawPtr(widthResObj));
         }
         auto heightVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
-        if (!heightVal->IsUndefined()) {
-            RefPtr<ResourceObject> heightResObj;
-            CommonShapeBridge::ParseJsValue(vm, heightVal, height, heightResObj, false);
+        RefPtr<ResourceObject> heightResObj;
+        if (CommonShapeBridge::ParseJsValue(vm, heightVal, height, heightResObj, false)) {
             if (LessNotEqual(height.Value(), 0.0)) {
                 height.SetValue(0.0);
             }

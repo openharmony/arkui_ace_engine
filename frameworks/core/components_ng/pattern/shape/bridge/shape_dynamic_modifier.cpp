@@ -17,6 +17,7 @@
 #include "core/common/container.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/bridge/shape_model_impl.h"
@@ -35,6 +36,11 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t VIEW_PORT_SIZE = 4;
 
+FrameNode* GetFrameNode(ArkUINodeHandle node)
+{
+    return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
+}
+
 void CreateShape()
 {
     ShapeModelNG model;
@@ -44,7 +50,7 @@ void CreateShape()
 void SetShapeViewPort(
     ArkUINodeHandle node, const ArkUI_Float32* dimValues, const ArkUI_Int32* dimUnits, void* resObjArray)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -69,9 +75,23 @@ void SetShapeViewPort(
     ShapeModelNG::SetViewPort(frameNode, dimLeft, dimTop, dimWidth, dimHeight);
 }
 
+void SetShapeWidth(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelNG::SetWidth(frameNode);
+}
+
+void SetShapeHeight(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelNG::SetHeight(frameNode);
+}
+
 void ResetShapeViewPort(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension dimLeft = CalcDimension(0.0, DimensionUnit::PX);
     CalcDimension dimTop = CalcDimension(0.0, DimensionUnit::PX);
@@ -86,7 +106,7 @@ void ResetShapeViewPort(ArkUINodeHandle node)
 void SetShapeMesh(
     ArkUINodeHandle node, const ArkUI_Float32* mesh, ArkUI_Uint32 arrayItemCount, ArkUI_Int32 column, ArkUI_Int32 row)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<float> meshValues(mesh, mesh + arrayItemCount);
     ShapeModelNG::SetBitmapMesh(frameNode, meshValues, column, row);
@@ -94,7 +114,7 @@ void SetShapeMesh(
 
 void ResetShapeMesh(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<float> meshValues;
     int32_t column = 0;
@@ -141,6 +161,16 @@ void ResetShapeMeshImpl(ArkUINodeHandle node)
     int32_t row = 0;
     GetShapeModelImpl()->SetBitmapMesh(meshValues, column, row);
 }
+
+void SetShapeWidthImpl(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit)
+{
+    GetShapeModelImpl()->SetWidth();
+}
+
+void SetShapeHeightImpl(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit)
+{
+    GetShapeModelImpl()->SetHeight();
+}
 #endif
 
 } // namespace
@@ -158,6 +188,8 @@ const ArkUIShapeModifier* GetShapeDynamicModifier()
             .resetShapeViewPort = ResetShapeViewPortImpl,
             .setShapeMesh = SetShapeMeshImpl,
             .resetShapeMesh = ResetShapeMeshImpl,
+            .setShapeWidth = SetShapeWidthImpl,
+            .setShapeHeight = SetShapeHeightImpl,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -170,6 +202,8 @@ const ArkUIShapeModifier* GetShapeDynamicModifier()
         .resetShapeViewPort = ResetShapeViewPort,
         .setShapeMesh = SetShapeMesh,
         .resetShapeMesh = ResetShapeMesh,
+        .setShapeWidth = SetShapeWidth,
+        .setShapeHeight = SetShapeHeight,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -57,21 +57,22 @@ ArkUINativeModuleValue PolylineBridge::CreatePolyline(ArkUIRuntimeCallInfo* runt
         auto paramObj = firstArg->ToObject(vm);
         auto widthVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
         RefPtr<ResourceObject> widthResObj;
-        CommonShapeBridge::ParseJsValue(vm, widthVal, width, widthResObj, true);
+        if (CommonShapeBridge::ParseJsValue(vm, widthVal, width, widthResObj, true)) {
+            if (LessNotEqual(width.Value(), 0.0)) {
+                width.SetValue(0.0);
+            }
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeWidth(
+                nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), AceType::RawPtr(widthResObj));
+        }
         auto heightVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
         RefPtr<ResourceObject> heightResObj;
-        CommonShapeBridge::ParseJsValue(vm, heightVal, height, heightResObj, false);
-
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width.SetValue(0.0);
+        if (CommonShapeBridge::ParseJsValue(vm, heightVal, height, heightResObj, false)) {
+            if (LessNotEqual(height.Value(), 0.0)) {
+                height.SetValue(0.0);
+            }
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeHeight(
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), AceType::RawPtr(heightResObj));
         }
-        if (LessNotEqual(height.Value(), 0.0)) {
-            height.SetValue(0.0);
-        }
-        GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeWidth(
-            nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), AceType::RawPtr(widthResObj));
-        GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeHeight(
-            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), AceType::RawPtr(heightResObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -106,13 +107,20 @@ ArkUINativeModuleValue PolylineBridge::SetPoints(ArkUIRuntimeCallInfo* runtimeCa
     std::vector<ArkUI_Float32> yPointValues;
     std::vector<RefPtr<ResourceObject>> xResObjArray;
     std::vector<RefPtr<ResourceObject>> yResObjArray;
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     for (size_t i = 0; i < xlength; i++) {
         Local<JSValueRef> xValue = panda::ArrayRef::GetValueAt(vm, xPointArray, i);
         Local<JSValueRef> yValue = panda::ArrayRef::GetValueAt(vm, yPointArray, i);
         RefPtr<ResourceObject> xResObj;
         RefPtr<ResourceObject> yResObj;
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, xValue, x, xResObj, false) ||
-            !ArkTSUtils::ParseJsDimensionVpNG(vm, yValue, y, yResObj, false)) {
+        if (isJsView) {
+            if (!ArkTSUtils::ParseJsDimensionVpNG(vm, xValue, x, xResObj, true) ||
+                !ArkTSUtils::ParseJsDimensionVpNG(vm, yValue, y, yResObj, true)) {
+                flag = false;
+                break;
+            }
+        } else if (!ArkTSUtils::ParseJsDimensionVpNG(vm, xValue, x, xResObj, false) ||
+                   !ArkTSUtils::ParseJsDimensionVpNG(vm, yValue, y, yResObj, false)) {
             flag = false;
             break;
         }

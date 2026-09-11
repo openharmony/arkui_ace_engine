@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 constexpr char SHAPE_ETS_TAG[] = "Shape";
-constexpr char SHAPE_CONTAINER_ETS_TAG[] = "ShapeContainer";
+constexpr char SHAPE_CONTAINER_ETS_TAG[] = "Shape";
 class ShapeModel {
 public:
     static ShapeModel* GetInstance();

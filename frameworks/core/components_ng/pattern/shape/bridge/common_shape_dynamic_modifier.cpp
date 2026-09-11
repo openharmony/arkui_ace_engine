@@ -48,6 +48,11 @@ constexpr int DEFAULT_STROKE_LINE_JOIN = 0;
 
 using NodeModifier::ShapeColorModifierPayload;
 
+FrameNode* GetFrameNode(ArkUINodeHandle node)
+{
+    return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
+}
+
 RefPtr<ShapeColorModifierPayload> GetShapeColorPayload(uint32_t colorValue, void* payloadPtr)
 {
     if (!payloadPtr) {
@@ -223,7 +228,7 @@ void ResetShapeForegroundColorImpl(ArkUINodeHandle node)
 
 void SetStrokeMiterLimit(ArkUINodeHandle node, ArkUI_Float32 miterLimit, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeMiterLimit(frameNode, miterLimit);
     auto pattern = frameNode->GetPattern();
@@ -237,7 +242,7 @@ void SetStrokeMiterLimit(ArkUINodeHandle node, ArkUI_Float32 miterLimit, void* r
 
 void ResetStrokeMiterLimit(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeMiterLimit(frameNode, DEFAULT_MITER_LIMIT);
     auto pattern = frameNode->GetPattern();
@@ -249,7 +254,7 @@ void ResetStrokeMiterLimit(ArkUINodeHandle node)
 
 void SetFillOpacity(ArkUINodeHandle node, ArkUI_Float32 fillOpacity, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetFillOpacity(frameNode, fillOpacity);
     auto pattern = frameNode->GetPattern();
@@ -265,7 +270,7 @@ void SetFillOpacity(ArkUINodeHandle node, ArkUI_Float32 fillOpacity, void* resOb
 
 void ResetFillOpacity(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetFillOpacity(frameNode, DEFAULT_FILL_OPACITY);
     auto pattern = frameNode->GetPattern();
@@ -278,7 +283,7 @@ void ResetFillOpacity(ArkUINodeHandle node)
 
 void SetStrokeOpacity(ArkUINodeHandle node, ArkUI_Float32 strokeOpacity, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity);
     auto pattern = frameNode->GetPattern();
@@ -294,7 +299,7 @@ void SetStrokeOpacity(ArkUINodeHandle node, ArkUI_Float32 strokeOpacity, void* r
 
 void ResetStrokeOpacity(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeOpacity(frameNode, DEFAULT_STROKE_OPACITY);
     auto pattern = frameNode->GetPattern();
@@ -307,7 +312,7 @@ void ResetStrokeOpacity(ArkUINodeHandle node)
 
 void SetStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     auto lineWidth = Dimension(value, unitEnum);
@@ -325,7 +330,7 @@ void SetStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit, void* r
 
 void ResetStrokeWidth(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeWidth(frameNode, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
     auto pattern = frameNode->GetPattern();
@@ -338,21 +343,21 @@ void ResetStrokeWidth(ArkUINodeHandle node)
 
 void SetAntiAlias(ArkUINodeHandle node, ArkUI_Bool antiAlias)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetAntiAlias(frameNode, antiAlias);
 }
 
 void ResetAntiAlias(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetAntiAlias(frameNode, true);
 }
 
 void SetStroke(ArkUINodeHandle node, uint32_t stroke, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto payload = GetShapeColorPayload(stroke, resObjPtr);
     auto strokeColor = payload ? payload->GetColor() : Color(stroke);
@@ -374,7 +379,7 @@ void SetStroke(ArkUINodeHandle node, uint32_t stroke, void* resObjPtr)
 
 void ResetStroke(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStroke(frameNode, Color::TRANSPARENT);
     auto pattern = frameNode->GetPattern();
@@ -387,7 +392,7 @@ void ResetStroke(ArkUINodeHandle node)
 
 void SetFill(ArkUINodeHandle node, uint32_t fill, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto payload = GetShapeColorPayload(fill, resObjPtr);
     auto fillColor = payload ? payload->GetColor() : Color(fill);
@@ -409,7 +414,7 @@ void SetFill(ArkUINodeHandle node, uint32_t fill, void* resObjPtr)
 
 void ResetFill(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetFill(frameNode, Color::BLACK);
     auto pattern = frameNode->GetPattern();
@@ -422,7 +427,7 @@ void ResetFill(ArkUINodeHandle node)
 
 void SetStrokeDashOffset(ArkUINodeHandle node, ArkUI_Float32 value, int unit, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     ShapeModelNG::SetStrokeDashOffset(frameNode, Dimension(value, unitEnum));
@@ -437,7 +442,7 @@ void SetStrokeDashOffset(ArkUINodeHandle node, ArkUI_Float32 value, int unit, vo
 
 void ResetStrokeDashOffset(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeDashOffset(frameNode, Dimension(DEFAULT_STROKE_DASH_OFFSET));
     auto pattern = frameNode->GetPattern();
@@ -449,28 +454,28 @@ void ResetStrokeDashOffset(ArkUINodeHandle node)
 
 void SetStrokeLineCap(ArkUINodeHandle node, int strokeLineCap)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineCap(frameNode, strokeLineCap);
 }
 
 void ResetStrokeLineCap(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineCap(frameNode, DEFAULT_STROKE_LINE_CAPS);
 }
 
 void SetStrokeLineJoin(ArkUINodeHandle node, int lineJoinStyle)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineJoin(frameNode, lineJoinStyle);
 }
 
 void ResetStrokeLineJoin(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineJoin(frameNode, DEFAULT_STROKE_LINE_JOIN);
 }
@@ -478,7 +483,7 @@ void ResetStrokeLineJoin(ArkUINodeHandle node)
 void SetStrokeDashArray(
     ArkUINodeHandle node, const ArkUI_Float32* dashArrayArray, int32_t* dimUnits, int32_t size, void* resObjArray)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -505,7 +510,7 @@ void SetStrokeDashArray(
 
 void ResetStrokeDashArray(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Dimension> dashArray;
     ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
@@ -517,7 +522,7 @@ void ResetStrokeDashArray(ArkUINodeHandle node)
 
 void SetShapeWidth(ArkUINodeHandle node, ArkUI_Float64 value, int32_t unit, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     DimensionUnit unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     Dimension width = Dimension(value, unitEnum);
@@ -533,7 +538,7 @@ void SetShapeWidth(ArkUINodeHandle node, ArkUI_Float64 value, int32_t unit, void
 
 void ResetShapeWidth(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeAbstractModelNG::ResetWidth(frameNode);
     auto pattern = frameNode->GetPattern();
@@ -545,7 +550,7 @@ void ResetShapeWidth(ArkUINodeHandle node)
 
 void SetShapeHeight(ArkUINodeHandle node, ArkUI_Float64 value, int32_t unit, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     DimensionUnit unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     Dimension height = Dimension(value, unitEnum);
@@ -561,7 +566,7 @@ void SetShapeHeight(ArkUINodeHandle node, ArkUI_Float64 value, int32_t unit, voi
 
 void ResetShapeHeight(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ShapeAbstractModelNG::ResetHeight(frameNode);
     auto pattern = frameNode->GetPattern();
@@ -573,7 +578,7 @@ void ResetShapeHeight(ArkUINodeHandle node)
 
 void SetShapeForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color, void* resObjPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     if (isColor) {
         auto foregroundColor = Color(color);
@@ -597,7 +602,7 @@ void SetShapeForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t 
 
 void ResetShapeForegroundColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
