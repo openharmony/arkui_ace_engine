@@ -28,7 +28,7 @@ import { ArcSwiperContentTransitionProxy_serializer } from './../ohos.arkui.ArcS
 import { global_resource_Resource_serializer } from './../resource'
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, IMEClient_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, EditableTextOnChangeCallback, PreviewText_serializer, TextChangeOptions_serializer, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback, OnPrepareMenuCallback, TextMenuItem, DeleteValue, EditableTextChangeValue, IMEClient, InsertValue, StyledStringChangeValue, TextRange, PreviewText, TextChangeOptions } from './../../component/textCommon'
 import { ComputedBarAttribute_serializer, StartLineInfo_serializer, OnGetStartIndexByIndexCallback, OnGetStartIndexByOffsetCallback, OnGridScrollIndexCallback, ComputedBarAttribute, StartLineInfo } from './../../component/grid'
-import { CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serializer, RichEditorDeleteValue_serializer, RichEditorInsertValue_serializer, RichEditorRange_serializer, RichEditorSelection_serializer, RichEditorTextSpanResult_serializer, PasteEvent_serializer, MenuCallback, MenuOnAppearCallback, OnHoverCallback, PasteEventCallback, SubmitCallback, CopyEvent, CutEvent, RichEditorChangeValue, RichEditorDeleteValue, RichEditorInsertValue, RichEditorRange, RichEditorSelection, RichEditorTextSpanResult, PasteEvent } from './../../component/richEditor'
+import { BuilderSpanInfo_serializer, CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serializer, RichEditorDeleteValue_serializer, RichEditorInsertValue_serializer, RichEditorRange_serializer, RichEditorSelection_serializer, RichEditorTextSpanResult_serializer, PasteEvent_serializer, MenuCallback, MenuOnAppearCallback, OnHoverCallback, PasteEventCallback, SubmitCallback, BuilderSpanInfo, CopyEvent, CutEvent, RichEditorChangeValue, RichEditorDeleteValue, RichEditorInsertValue, RichEditorRange, RichEditorSelection, RichEditorTextSpanResult, PasteEvent } from './../../component/richEditor'
 import { CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, LeadingMarginSpanDrawInfo_serializer, StyledString_serializer, StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, LeadingMarginSpanDrawInfo, StyledString, StyledStringMarshallingValue, UserDataSpan } from './../../component/styledString'
 import { DismissDialogAction_serializer, DismissDialogAction } from './../../component/actionSheet'
 import { dragController_SpringLoadingContext_serializer } from './../ohos.arkui.dragController'
@@ -345,6 +345,12 @@ export function deserializeAndCallCallback_Buffer_Void(thisDeserializer: Deseria
     const call = (ResourceHolder.instance().get(resourceId) as ((value: ArrayBuffer) => void))
     let value: ArrayBuffer = (thisDeserializer.readBuffer() as ArrayBuffer)
     call(value)
+}
+export function deserializeAndCallCallback_BuilderSpanInfo_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<BuilderSpanInfo, void>)
+    let data: BuilderSpanInfo = BuilderSpanInfo_serializer.read(thisDeserializer)
+    call(data)
 }
 export function deserializeAndCallCallback_ClearCache(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4529,6 +4535,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_BOOLEAN_HOVEREVENT_VOID: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_BOOLEAN_VOID: return deserializeAndCallCallback_Boolean_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_BUFFER_VOID: return deserializeAndCallCallback_Buffer_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_BUILDERSPANINFO_VOID: return deserializeAndCallCallback_BuilderSpanInfo_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_CLEARCACHE: return deserializeAndCallCallback_ClearCache(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_CLICKEVENT_VOID: return deserializeAndCallCallback_ClickEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_COMPUTEDBARATTRIBUTE_VOID: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisDeserializer);
