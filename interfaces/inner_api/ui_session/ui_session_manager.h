@@ -334,7 +334,7 @@ protected:
     std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
-    uint32_t componentChangeEventMask_ = 0;
+    std::atomic<uint32_t> componentChangeEventMask_ { 0 };
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
     std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
@@ -396,6 +396,7 @@ protected:
     PageTranslateResultFunction sendArkUIPageTranslateResultFunction_;
     std::mutex arkUIPageTranslateFunctionMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
+    std::mutex relaxedCommandFunctionMutex_;
     PageSceneDetectFunction pageSceneDetectFunction_;
     std::mutex pageSceneDetectFunctionMutex_;
     WebPageSceneFunction webPageSceneFunction_;

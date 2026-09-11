@@ -1051,7 +1051,7 @@ void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
 
 void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
 {
-    componentChangeEventMask_ = mask;
+    componentChangeEventMask_.store(mask);
     LOGI("SetComponentChangeEventMask mask:%{public}u", mask);
 }
 
@@ -1111,7 +1111,7 @@ bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 
 bool UiSessionManagerOhos::NeedComponentChangeTypeReporting(uint32_t eventType)
 {
-    return (componentChangeEventMask_ & eventType) != 0;
+    return (componentChangeEventMask_.load() & eventType) != 0;
 }
 
 bool UiSessionManagerOhos::GetScrollEventRegistered()
@@ -1972,11 +1972,21 @@ void UiSessionManagerOhos::SendCommand(const std::string& command)
     }
 
     auto value = json->GetValue("cmd");
-    if (sendCommandFunction_ && value && value->IsNumber()) {
+    SendCommandFunction sendCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(sendCommandFunctionMutex_);
+        sendCommandFunction = sendCommandFunction_;
+    }
+    RelaxedCommandFunction relaxedCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
+        relaxedCommandFunction = relaxedCommandFunction_;
+    }
+    if (sendCommandFunction && value && value->IsNumber()) {
         int32_t cmdNumber = value->GetInt();
-        sendCommandFunction_(cmdNumber);
-    } else if (relaxedCommandFunction_) {
-        relaxedCommandFunction_(command);
+        sendCommandFunction(cmdNumber);
+    } else if (relaxedCommandFunction) {
+        relaxedCommandFunction(command);
     } else {
         LOGW("SendCommand failed");
     }
@@ -1990,6 +2000,7 @@ void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& functio
 
 void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
     relaxedCommandFunction_ = std::move(function);
 }
 
