@@ -406,6 +406,8 @@ sptr<Ace::IUiContentService> UiSaService::getArkUIService(int32_t windowId)
         LOGW("through uiSa, agent window dead, windowId:%{public}d", windowId);
         this->uiContentRemoteObjMap_.erase(windowId);
     });
+    // In this sample SA, tmpRemoteObj refers to the application-side UiContentStub.
+    // Listen for remote application death through this proxy and remove the local cached service.
     tmpRemoteObj->AddDeathRecipient(uiContentProxyRecipient);
     service = iface_cast<Ace::IUiContentService>(tmpRemoteObj);
     if (service == nullptr) {
