@@ -912,7 +912,6 @@ public:
         return updateNodeConfig_;
     }
 
-    virtual void GetInspectorValue();
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::u16string& text);
 
