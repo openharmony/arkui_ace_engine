@@ -351,6 +351,39 @@ ohos_unittest("mmi_event_converter_test") {
   ]
 }
 
+ohos_unittest("right_mouse_mapping_config_test_ng") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "right_mouse_mapping_config_test_ng.cpp",
+    "$ace_root/adapter/ohos/entrance/event_convertor/event_info_convertor.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/event_compatible/mock_compatible_interface.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/log/log_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_feature_manager.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_ace_application_info.cpp",
+  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+ 
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "data_share:datashare_consumer",
+    "hilog:libhilog",
+    "bounds_checking_function:libsec_shared",
+    "ipc:ipc_single",
+    "resource_management:global_resmgr",
+  ]
+}
+
 ohos_source_set("background_force_flush_vsync_test_support") {
   testonly = true
   sources = [
@@ -455,5 +488,6 @@ group("entrance_unittest") {
     ":rs_adapter_test",
     ":mmi_event_converter_test",
     ":rosen_window_test",
+    ":right_mouse_mapping_config_test_ng"
   ]
 }
