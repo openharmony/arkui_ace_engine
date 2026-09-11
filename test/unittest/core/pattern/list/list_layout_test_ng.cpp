@@ -5871,7 +5871,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutVertical001, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutNestedLazy001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create default List without special properties
      * @tc.expected: CanSupportNestedLazy returns true
@@ -5902,7 +5902,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutNestedLazy001, TestSize.Level1
     auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
     ASSERT_NE(lazyVGridNode, nullptr);
 
-    EXPECT_TRUE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, TEST_LANE));
+    EXPECT_TRUE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, testLane));
 }
 
 /**
@@ -5912,13 +5912,13 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutNestedLazy001, TestSize.Level1
  */
 HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithLanes001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 2;
+    constexpr int32_t testLane = 2;
     /**
      * @tc.steps: step1. Create List with lanes property
      * @tc.expected: CanSupportNestedLazy returns false
      */
     ListModelNG listModel = CreateList();
-    listModel.SetLanes(TEST_LANE);
+    listModel.SetLanes(testLane);
     LazyVGridLayoutModel gridModel;
     gridModel.Create();
     gridModel.SetColumnsTemplate("1fr 1fr");
@@ -5944,7 +5944,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithLanes001, TestSize.Level1)
     auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
     ASSERT_NE(lazyVGridNode, nullptr);
 
-    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, TEST_LANE));
+    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, testLane));
 }
 
 /**
@@ -5954,7 +5954,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithLanes001, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithChainAnimation001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with chainAnimation property
      * @tc.expected: CanSupportNestedLazy returns false
@@ -5991,7 +5991,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithChainAnimation001, TestSiz
     auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
     ASSERT_NE(lazyVGridNode, nullptr);
 
-    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, TEST_LANE));
+    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, testLane));
 }
 
 /**
@@ -6001,7 +6001,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithChainAnimation001, TestSiz
  */
 HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithScrollSnapAlign001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with scrollSnapAlign property
      * @tc.expected: CanSupportNestedLazy returns false
@@ -6034,7 +6034,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutWithScrollSnapAlign001, TestSi
     auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
     ASSERT_NE(lazyVGridNode, nullptr);
 
-    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, TEST_LANE));
+    EXPECT_FALSE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, testLane));
 }
 
 /**
@@ -6429,13 +6429,13 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutCacheRange001, TestSize.Level1
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithLanes001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with lanes property
      * @tc.expected: CanSupportNestedLazy returns true
      */
     ListModelNG listModel = CreateList();
-    listModel.SetLanes(TEST_LANE);
+    listModel.SetLanes(testLane);
     LazyVGridLayoutModel gridModel;
     gridModel.Create();
     gridModel.SetColumnsTemplate("1fr 1fr");
@@ -6461,7 +6461,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithLanes001, TestSize.Level1)
     auto lazyVGridNode = AceType::DynamicCast<FrameNode>(children.front());
     ASSERT_NE(lazyVGridNode, nullptr);
 
-    EXPECT_TRUE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, TEST_LANE));
+    EXPECT_TRUE(listLayoutAlgorithm->CanSupportNestedLazy(lazyVGridNode, frameNode_, testLane));
 }
 
 /**
@@ -6512,7 +6512,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithLanes002, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithChainAnimation001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with chainAnimation enabled
      * @tc.expected: CanSupportNestedLazy returns false
@@ -6542,7 +6542,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithChainAnimation001, TestSize.L
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
-    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, TEST_LANE);
+    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, testLane);
     EXPECT_FALSE(canSupport);
 }
 
@@ -6553,7 +6553,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithChainAnimation001, TestSize.L
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlign001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with scrollSnapAlign set to CENTER
      * @tc.expected: CanSupportNestedLazy returns false
@@ -6583,7 +6583,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlign001, TestSize.
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
-    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, TEST_LANE);
+    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, testLane);
     EXPECT_FALSE(canSupport);
 }
 
@@ -6594,7 +6594,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlign001, TestSize.
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyNormal001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List without special properties
      * @tc.expected: CanSupportNestedLazy returns true for LazyVGrid node
@@ -6625,7 +6625,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyNormal001, TestSize.Level1)
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
     // Test: should return true when List has no restricting properties
-    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, TEST_LANE);
+    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, testLane);
     EXPECT_TRUE(canSupport);
 }
 
@@ -6636,7 +6636,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyNormal001, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlignStart001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with scrollSnapAlign START
      * @tc.expected: CanSupportNestedLazy returns false
@@ -6666,7 +6666,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlignStart001, Test
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
-    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, TEST_LANE);
+    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, testLane);
     EXPECT_FALSE(canSupport);
 }
 
@@ -6677,7 +6677,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlignStart001, Test
  */
 HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlignEnd001, TestSize.Level1)
 {
-    constexpr int32_t TEST_LANE = 1;
+    constexpr int32_t testLane = 1;
     /**
      * @tc.steps: step1. Create List with scrollSnapAlign END
      * @tc.expected: CanSupportNestedLazy returns false
@@ -6707,7 +6707,7 @@ HWTEST_F(ListLayoutTestNg, CanSupportNestedLazyWithScrollSnapAlignEnd001, TestSi
     auto listLayoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(layoutAlgorithm);
     ASSERT_NE(listLayoutAlgorithm, nullptr);
 
-    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, TEST_LANE);
+    bool canSupport = listLayoutAlgorithm->CanSupportNestedLazy(gridNode, frameNode_, testLane);
     EXPECT_FALSE(canSupport);
 }
 
