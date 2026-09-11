@@ -21,9 +21,9 @@
 #define protected public
 #include "drag_and_drop.h"
 #include "event_converter.h"
+#include "core/common/udmf/udmf_client.h"
 #include "udmf.h"
 #include "udmf_err_code.h"
-#include "uds.h"
 #include "native_interface.h"
 #include "native_node.h"
 #include "native_type.h"
@@ -2136,41 +2136,27 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0067, TestSize.Level1)
 
 /**
  * @tc.name: OH_ArkUI_DragEvent_GetSummary_001
- * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with invalid parameters.
+ * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with the summary stored in drag event.
  * @tc.type: FUNC
  */
 HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_001, TestSize.Level1)
 {
+    DragSummaryInfo summaryInfo;
+    summaryInfo.summary["general.file-uri"] = 100;
+    summaryInfo.totalSize = 100;
+    summaryInfo.filenameExtensions = { ".png" };
+    ArkUIDragEvent dragEvent {};
+    dragEvent.unifiedDataSummary = &summaryInfo;
+    auto event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
     auto summary = OH_UdmfSummary_Create();
     ASSERT_NE(summary, nullptr);
-    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(nullptr, summary), ARKUI_ERROR_CODE_PARAM_INVALID);
-
-    ArkUIDragEvent dragEvent;
-    dragEvent.key = "test_key";
-    auto event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
-    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
-
-    dragEvent.key = nullptr;
-    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_PARAM_INVALID);
-    OH_UdmfSummary_Destroy(summary);
-}
-
-/**
- * @tc.name: OH_ArkUI_DragEvent_GetSummary_002
- * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with invalid UDMF keys.
- * @tc.type: FUNC
- */
-HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_002, TestSize.Level1)
-{
-    auto summary = OH_UdmfSummary_Create();
-    ASSERT_NE(summary, nullptr);
-    ArkUIDragEvent dragEvent;
-    auto event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
-
-    dragEvent.key = "";
-    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_PARAM_INVALID);
-    dragEvent.key = "udmf://Drag/com.example.notexist/0123456789";
-    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_NO_ERROR);
+    const char* const* extensions = nullptr;
+    unsigned int count = 0;
+    EXPECT_EQ(OH_UdmfSummary_GetFilenameExtensions(summary, &extensions, &count), UDMF_E_OK);
+    ASSERT_NE(extensions, nullptr);
+    ASSERT_EQ(count, 1u);
+    EXPECT_STREQ(extensions[0], ".png");
     OH_UdmfSummary_Destroy(summary);
 }
 } // namespace OHOS::Ace
