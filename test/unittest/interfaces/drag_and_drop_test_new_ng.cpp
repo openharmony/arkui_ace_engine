@@ -19,8 +19,6 @@
 #include "drag_and_drop.h"
 #include "event_converter.h"
 #include "udmf.h"
-#include "udmf_err_code.h"
-#include "uds.h"
 #include "native_interface.h"
 #include "native_node.h"
 #include "native_type.h"
