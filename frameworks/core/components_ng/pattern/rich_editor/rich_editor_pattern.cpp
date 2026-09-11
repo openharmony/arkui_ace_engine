@@ -769,7 +769,7 @@ void RichEditorPattern::OnModifyDone()
     if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         dataDetectorAdapter_->GetAIEntityMenu();
     }
-    context->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
+    RegisterTranslateListener();
 }
 
 void RichEditorPattern::InitGestureEvents()
@@ -1402,7 +1402,6 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     ClearOnFocusTextField(node);
     auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
-    IF_PRESENT(context, UnRegisterListenerForTranslate(node->GetId()));
     CHECK_NULL_VOID(keyboardOverlay_);
     keyboardOverlay_->CloseKeyboard(node->GetId());
 }

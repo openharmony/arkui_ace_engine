@@ -229,7 +229,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveVisibleAreaChangeNode(node->GetId());
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     RemoveFormVisibleChangeCallback(node->GetId());
-    pipeline->UnRegisterListenerForTranslate(node->GetId());
+    UnRegisterTranslateListener(node->GetId());
 }
 
 void TextPattern::OnAttachToMainTree()
@@ -4814,7 +4814,24 @@ void TextPattern::OnModifyDone()
     if (lastDrawnPageTranslateContent_.empty() && !textForDisplay_.empty()) {
         MarkPageTranslateTextDrawn();
     }
+    RegisterTranslateListener();
+}
+
+void TextPattern::RegisterTranslateListener()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    translatePipeline_ = pipeline;
     pipeline->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
+}
+
+void TextPattern::UnRegisterTranslateListener(int32_t nodeId)
+{
+    auto translatePipeline = translatePipeline_.Upgrade();
+    CHECK_NULL_VOID(translatePipeline);
+    translatePipeline->UnRegisterListenerForTranslate(nodeId);
 }
 
 void TextPattern::UpdateMarqueeStartPolicy()
