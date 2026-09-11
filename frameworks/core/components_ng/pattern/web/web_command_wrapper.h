@@ -52,6 +52,7 @@ enum class WebCommandEventType {
     INPUT_COPY,
     INPUT_FOCUS,
     INPUT_SET_CURSOR,
+    INPUT_AUTO_FILL,
     EVENT_TYPE_SCROLL_GESTURE,
     EVENT_TYPE_TAP_GESTURE,
     EVENT_TYPE_PINCH_GESTURE,
@@ -139,6 +140,10 @@ public:
         const std::string& eventTypeStr,
         std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo);
 
+    static int BuildAutoFillActionInfo(
+        const std::unique_ptr<JsonValue>& comJson,
+        std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo);
+
     static bool IsGestureCommandType(WebCommandEventType eventType)
     {
         return eventType == WebCommandEventType::EVENT_TYPE_TAP_GESTURE ||
@@ -219,6 +224,13 @@ private:
     static int ValidateInputSetCursorParameters(
         const std::unique_ptr<JsonValue>& comJson,
         int32_t& outIndex);
+
+    static int ParseAutoFillDefaultMode(
+        const std::unique_ptr<JsonValue>& comJson,
+        OHOS::NWeb::AutoFillMode& outDefaultMode);
+
+    static OHOS::NWeb::AutoFillMode ParseAutoFillItemMode(
+        const std::unique_ptr<JsonValue>& itemValue);
 };
 
 } // namespace Ace

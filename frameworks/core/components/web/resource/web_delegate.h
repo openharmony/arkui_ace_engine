@@ -1003,12 +1003,19 @@ enum class WebCommandResult : int32_t {
     // common execution error (160-199)
     PAGE_NOT_READY = 160,
     ELEMENT_TYPE_MISMATCH = 161,
+    ELEMENT_NOT_INTERACTABLE = 162,
     // input command error (200-229)
     JSON_INVALID_INPUT_XPATH = 200,
     JSON_INVALID_INPUT_VALUE = 201,
     INPUT_TYPE_INVALID = 202,
     INPUT_VALUE_FORMAT_INVALID = 203,
     INPUT_EVENT_TYPE_MISMATCH = 204,
+    JSON_INVALID_ITEMS = 205,
+    JSON_INVALID_ITEM_XPATH = 206,
+    JSON_INVALID_ITEM_CONTENT = 207,
+    JSON_INVALID_ITEM_INDEX = 208,
+    JSON_INVALID_ITEM_OPTIONS = 209,
+    JSON_INVALID_DEFAULT_MODE = 210,
     // json inputmethod error (230-249)
     JSON_INVALID_CONTENT = 230,
     JSON_INVALID_INDEX = 231,
@@ -1103,6 +1110,14 @@ public:
             new NWebCommandActionInfoImpl(event_type, x, y, distanceX, distanceY, scale, duration, tapCount, speed));
     }
 
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateAutoFillInfo(
+        const std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>>& items,
+        OHOS::NWeb::AutoFillMode defaultMode = OHOS::NWeb::AutoFillMode::Overwrite)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(items, defaultMode));
+    }
+
     ~NWebCommandActionInfoImpl() override = default;
 
     std::string GetEventType() const override { return event_type_; }
@@ -1118,6 +1133,10 @@ public:
     int32_t GetDuration() const override { return duration_; }
     int32_t GetTapCount() const override { return tapCount_; }
     int32_t GetSpeed() const override { return speed_; }
+
+    // inputAutoFill getters
+    std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>> GetAutoFillItems() const override { return autofill_items_; }
+    OHOS::NWeb::AutoFillMode GetDefaultMode() const override { return default_mode_; }
 private:
     NWebCommandActionInfoImpl(const std::string& event_type,
                               const std::string& value,
@@ -1137,6 +1156,10 @@ private:
         : event_type_(event_type), x_(x), y_(y), distanceX_(distanceX), distanceY_(distanceY),
           scale_(scale), duration_(duration), tapCount_(tapCount), speed_(speed) {}
 
+    NWebCommandActionInfoImpl(const std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>>& items,
+        OHOS::NWeb::AutoFillMode defaultMode)
+        : event_type_("inputAutoFill"), autofill_items_(items), default_mode_(defaultMode) {}
+
     std::string event_type_ = "";
     std::string input_value_ = "";
     std::string xpath_ = "";
@@ -1150,6 +1173,8 @@ private:
     int32_t duration_ = 0;
     int32_t tapCount_ = 1;
     int32_t speed_ = 0;
+    std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>> autofill_items_;
+    OHOS::NWeb::AutoFillMode default_mode_ = OHOS::NWeb::AutoFillMode::Overwrite;
 };
 
 class WebDelegate : public WebResource {
