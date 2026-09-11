@@ -67,6 +67,7 @@ struct PredictLayoutItem {
     int32_t forwardCacheCount;
     int32_t backwardCacheCount;
     bool forceCache = true;
+    bool needParentLayout = false;
     float referencePos = 0.0f;
 };
 
