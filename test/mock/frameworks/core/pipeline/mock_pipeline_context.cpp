@@ -632,7 +632,7 @@ void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
@@ -1526,7 +1526,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount) {}
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {}
 
 bool PipelineBase::ReachResponseDeadline() const
 {

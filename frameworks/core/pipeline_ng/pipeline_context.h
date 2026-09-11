@@ -1327,7 +1327,7 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
 
-    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
+    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime = -1) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
     void FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope);

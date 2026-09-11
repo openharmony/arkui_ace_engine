@@ -87,7 +87,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
-            window->OnVsync(timeStampNanos, frameCount);
+            window->OnVsync(timeStampNanos, frameCount, ts);
             ArkUIPerfMonitor::GetInstance().FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
@@ -485,10 +485,10 @@ void RosenWindow::RemoveVsyncTimeoutDFXTask(uint64_t frameCount)
 #endif
 }
 
-void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount)
+void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime)
 {
     RemoveVsyncTimeoutDFXTask(frameCount);
-    Window::OnVsync(nanoTimestamp, frameCount);
+    Window::OnVsync(nanoTimestamp, frameCount, vsyncStartTime);
 }
 
 uint32_t RosenWindow::GetStatusBarHeight() const

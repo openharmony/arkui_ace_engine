@@ -23,7 +23,9 @@ namespace OHOS::Ace {
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow))
 {
     CHECK_NULL_VOID(platformWindow_);
-    auto&& callback = [this](uint64_t nanoTimestamp, uint64_t frameCount) { OnVsync(nanoTimestamp, frameCount); };
+    auto&& callback = [this](uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {
+        OnVsync(nanoTimestamp, frameCount, vsyncStartTime);
+    };
     platformWindow_->RegisterVsyncCallback(callback);
     LOGI("Window Created success.");
 }
@@ -45,7 +47,7 @@ void Window::SetRootRenderNode(const RefPtr<RenderNode>& root)
     platformWindow_->SetRootRenderNode(root);
 }
 
-void Window::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount)
+void Window::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime)
 {
     isRequestVsync_ = false;
 
@@ -53,7 +55,7 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         if (callback.callback_ == nullptr) {
             continue;
         }
-        callback.callback_(nanoTimestamp, frameCount);
+        callback.callback_(nanoTimestamp, frameCount, vsyncStartTime);
     }
 }
 
