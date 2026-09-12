@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -50,6 +50,7 @@ ohos_unittest("ui_content_stub_unittest") {
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_batch_command.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_session_ipc_util.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_translate_request_util.cpp",
@@ -61,6 +62,7 @@ ohos_unittest("ui_content_stub_unittest") {
 
     # test source file
     "ui_content_stub_test.cpp",
+    "ui_session_batch_command_test.cpp",
   ]
 
   configs = [ ":ui_session_test_config" ]

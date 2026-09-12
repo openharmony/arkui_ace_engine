@@ -2176,6 +2176,410 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest030, TestSize.Level
 }
 
 /**
+ * @tc.name: ContentChangeManagerStartEventTest001
+ * @tc.desc: Test START reporting is disabled by default and deduplicated until normal END.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerStartEventTest001, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto node = FrameNode::CreateFrameNode("Page", 301, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+
+    ContentChangeConfig config;
+    contentChangeMgr->StartContentChangeReport(config);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::PAGE_START, _)).Times(NEVER_ONCE);
+    contentChangeMgr->OnContentChangeStart(node, ChangeType::PAGE);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::PAGE_START, Truly([&](const auto& json) {
+        auto value = JsonUtil::ParseJsonString(json);
+        return value && value->IsValid() && value->GetString("$type") == node->GetTag() &&
+               value->GetInt("$ID") == node->GetId() && value->GetInt64("startTimestamp", -1) > 0 &&
+               value->GetString("endReason").empty();
+    }))).Times(1);
+    contentChangeMgr->OnContentChangeStart(node, ChangeType::PAGE);
+    contentChangeMgr->OnContentChangeStart(node, ChangeType::PAGE);
+    EXPECT_EQ(contentChangeMgr->activeContentChanges_.size(), 1);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::PAGE, _)).Times(1);
+    contentChangeMgr->OnPageTransitionEnd(node);
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->StopContentChangeReport();
+}
+
+/**
+ * @tc.name: ContentChangeManagerStartEventTest002
+ * @tc.desc: Test PAGE, SCROLL, SWIPER and TABS START event types and payload identities.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerStartEventTest002, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    ContentChangeConfig config;
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+
+    const std::vector<std::tuple<ChangeType, ChangeType, RefPtr<FrameNode>>> cases = {
+        { ChangeType::PAGE, ChangeType::PAGE_START,
+            FrameNode::CreateFrameNode("Page", 311, AceType::MakeRefPtr<Pattern>(), true) },
+        { ChangeType::SCROLL, ChangeType::SCROLL_START,
+            FrameNode::CreateFrameNode("List", 312, AceType::MakeRefPtr<Pattern>(), true) },
+        { ChangeType::SWIPER, ChangeType::SWIPER_START,
+            FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 313, AceType::MakeRefPtr<SwiperPattern>(), true) },
+        { ChangeType::TABS, ChangeType::TABS_START,
+            FrameNode::CreateFrameNode(V2::TABS_ETS_TAG, 314, AceType::MakeRefPtr<Pattern>(), true) },
+    };
+    for (const auto& [endType, startType, node] : cases) {
+        ASSERT_NE(node, nullptr);
+        auto expectedNode = node;
+        EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(startType, Truly([&](const auto& json) {
+            auto value = JsonUtil::ParseJsonString(json);
+            return value && value->IsValid() && value->GetString("$type") == expectedNode->GetTag() &&
+                   value->GetInt("$ID") == expectedNode->GetId() && value->GetInt64("startTimestamp", -1) > 0;
+        }))).Times(1);
+        contentChangeMgr->OnContentChangeStart(node, endType);
+        Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    }
+    EXPECT_EQ(contentChangeMgr->activeContentChanges_.size(), cases.size());
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    contentChangeMgr->StopContentChangeReport();
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+}
+
+/**
+ * @tc.name: ContentChangeManagerStartEventTest003
+ * @tc.desc: Test terminal normal END, destroyed END and unregister lifecycle closure semantics.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerStartEventTest003, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto node = FrameNode::CreateFrameNode("List", 321, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    ContentChangeConfig config;
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::PAGE_START, _)).Times(1);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL_START, _)).Times(1);
+    contentChangeMgr->OnContentChangeStart(node, ChangeType::PAGE);
+    contentChangeMgr->OnContentChangeStart(node, ChangeType::SCROLL);
+    contentChangeMgr->OnTransitionAdded(node->GetId());
+    contentChangeMgr->OnScrollChangeStart(node);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::PAGE, Truly([&](const auto& json) {
+        auto value = JsonUtil::ParseJsonString(json);
+        return value && value->GetString("$type") == node->GetTag() && value->GetInt("$ID") == node->GetId() &&
+               value->GetString("endReason").empty();
+    }))).Times(1);
+    contentChangeMgr->OnContentChangeInterrupted(node, ChangeType::PAGE);
+    contentChangeMgr->OnContentChangeInterrupted(node, ChangeType::PAGE);
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL, Truly([&](const auto& json) {
+        auto value = JsonUtil::ParseJsonString(json);
+        return value && value->GetString("$type") == node->GetTag() && value->GetInt("$ID") == node->GetId() &&
+               value->GetString("endReason") == "destroyed";
+    }))).Times(1);
+    contentChangeMgr->OnContentChangeNodeDestroyed(node->GetId());
+    contentChangeMgr->OnContentChangeNodeDestroyed(node->GetId());
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER_START, _)).Times(1);
+    contentChangeMgr->OnContentChangeStart(node, ChangeType::SWIPER);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->scrollingNodes_.emplace(node->GetId());
+    contentChangeMgr->transitioningNodes_.emplace(node->GetId());
+    contentChangeMgr->scrollingSwiperNodes_.emplace(node->GetId());
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    contentChangeMgr->StopContentChangeReport();
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+    EXPECT_TRUE(contentChangeMgr->scrollingSwiperNodes_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+}
+
+/**
+ * @tc.name: ContentChangeManagerStartEventTest004
+ * @tc.desc: Test Swiper normal END stays pending until the existing Vsync report point.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerStartEventTest004, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 331, swiperPattern, true);
+    auto itemNode = FrameNode::CreateFrameNode("Item", 332, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(swiperNode, nullptr);
+    ASSERT_NE(itemNode, nullptr);
+    SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.node = itemNode;
+    swiperPattern->itemPosition_.emplace(itemNode->GetId(), swiperItemInfo);
+    swiperNode->AddChild(itemNode);
+
+    ContentChangeConfig config;
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER_START, _)).Times(1);
+    contentChangeMgr->OnContentChangeStart(swiperNode, ChangeType::SWIPER);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER, _)).Times(NEVER_ONCE);
+    contentChangeMgr->OnSwiperChangeEnd(swiperNode, false);
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.at(swiperNode->GetId())
+        .at(ChangeType::SWIPER).normalEndPending);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER, _)).Times(1);
+    contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->StopContentChangeReport();
+}
+
+/**
+ * @tc.name: ContentChangeManagerStartEventTest005
+ * @tc.desc: Test FrameNode detach reports destroyed END once and clears active state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerStartEventTest005, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto contentChangeMgr = pipeline->GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto node = FrameNode::CreateFrameNode("List", 341, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    ContentChangeConfig config;
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL_START, _)).Times(1);
+    contentChangeMgr->OnContentChangeStart(node, ChangeType::SCROLL);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL, Truly([&](const auto& json) {
+        auto value = JsonUtil::ParseJsonString(json);
+        return value && value->GetInt("$ID") == node->GetId() && value->GetString("endReason") == "destroyed";
+    }))).Times(1);
+    node->OnDetachFromMainTree(false, AceType::RawPtr(pipeline));
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->StopContentChangeReport();
+}
+
+/**
+ * @tc.name: ContentChangeManagerStartEventTest006
+ * @tc.desc: Test destroying a pending Swiper report node clears active and pending state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerStartEventTest006, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto swiperNode = FrameNode::CreateFrameNode(
+        V2::SWIPER_ETS_TAG, 351, AceType::MakeRefPtr<SwiperPattern>(), true);
+    ASSERT_NE(swiperNode, nullptr);
+    ContentChangeConfig config;
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER_START, _)).Times(1);
+    contentChangeMgr->OnContentChangeStart(swiperNode, ChangeType::SWIPER);
+    contentChangeMgr->OnSwiperChangeEnd(swiperNode, false);
+    ASSERT_FALSE(contentChangeMgr->pendingSwiperChanges_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager,
+        ReportContentChangeEvent(ChangeType::SWIPER, HasSubstr("\"endReason\":\"destroyed\""))).Times(1);
+    contentChangeMgr->OnContentChangeNodeDestroyed(swiperNode->GetId());
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->pendingSwiperChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER, _)).Times(NEVER_ONCE);
+    contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    auto tabsNode = FrameNode::CreateFrameNode(V2::TABS_ETS_TAG, 352, AceType::MakeRefPtr<Pattern>(), true);
+    auto tabsSwiperNode = FrameNode::CreateFrameNode(
+        V2::SWIPER_ETS_TAG, 353, AceType::MakeRefPtr<SwiperPattern>(), true);
+    ASSERT_NE(tabsNode, nullptr);
+    ASSERT_NE(tabsSwiperNode, nullptr);
+    tabsSwiperNode->MountToParent(tabsNode);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::TABS_START, _)).Times(1);
+    contentChangeMgr->OnContentChangeStart(tabsNode, ChangeType::TABS);
+    contentChangeMgr->OnSwiperChangeEnd(tabsSwiperNode, true);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::TABS, Truly([&](const auto& json) {
+        auto value = JsonUtil::ParseJsonString(json);
+        return value && value->GetInt("$ID") == tabsNode->GetId() &&
+               value->GetString("endReason") == "destroyed";
+    }))).Times(1);
+    contentChangeMgr->OnContentChangeNodeDestroyed(tabsSwiperNode->GetId());
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->pendingSwiperChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->StopContentChangeReport();
+}
+
+/**
+ * @tc.name: ConcurrentScrollInterruptionWaitsForLastNode
+ * @tc.desc: A scroll abort clears its active state without ending another node's ongoing scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ConcurrentScrollInterruptionWaitsForLastNode, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto first = FrameNode::CreateFrameNode("List", 361, AceType::MakeRefPtr<Pattern>(), true);
+    auto second = FrameNode::CreateFrameNode("Scroll", 362, AceType::MakeRefPtr<Pattern>(), true);
+    ContentChangeConfig config;
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL_START, _)).Times(2);
+    for (const auto& node : { first, second }) {
+        contentChangeMgr->OnScrollChangeStart(node);
+        contentChangeMgr->OnContentChangeStart(node, ChangeType::SCROLL);
+    }
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    contentChangeMgr->OnContentChangeInterrupted(first, ChangeType::SCROLL);
+    contentChangeMgr->OnContentChangeInterrupted(first, ChangeType::SCROLL);
+    EXPECT_EQ(contentChangeMgr->scrollingNodes_.size(), 1u);
+    EXPECT_EQ(contentChangeMgr->scrollingNodes_.count(second->GetId()), 1u);
+    EXPECT_EQ(contentChangeMgr->activeContentChanges_.count(first->GetId()), 0u);
+    EXPECT_EQ(contentChangeMgr->activeContentChanges_.count(second->GetId()), 1u);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL, "")).Times(1);
+    contentChangeMgr->OnScrollChangeEnd(second);
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL_START, _)).Times(1);
+    contentChangeMgr->OnScrollChangeStart(first);
+    contentChangeMgr->OnContentChangeStart(first, ChangeType::SCROLL);
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL, Truly([&](const auto& json) {
+        auto value = JsonUtil::ParseJsonString(json);
+        return value && value->GetInt("$ID") == first->GetId() && value->GetString("endReason").empty();
+    }))).Times(1);
+    contentChangeMgr->OnContentChangeInterrupted(first, ChangeType::SCROLL);
+    contentChangeMgr->OnContentChangeInterrupted(first, ChangeType::SCROLL);
+    EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+    EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->StopContentChangeReport();
+}
+
+/**
+ * @tc.name: DetachedSwiperWithoutStartClearsDeferredEnd
+ * @tc.desc: Detach clears the deferred Swiper END even when no START created a pending entry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, DetachedSwiperWithoutStartClearsDeferredEnd, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto contentChangeMgr = GetContentChangeManager();
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(pipeline, nullptr);
+    ASSERT_NE(contentChangeMgr, nullptr);
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto swiper = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 371, AceType::MakeRefPtr<SwiperPattern>(), true);
+    ContentChangeConfig config;
+    config.reportStartEvent = true;
+    contentChangeMgr->StartContentChangeReport(config);
+
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    contentChangeMgr->OnSwiperChangeEnd(swiper, false);
+    ASSERT_EQ(contentChangeMgr->changedSwiperNodes_.size(), 1u);
+    ASSERT_TRUE(contentChangeMgr->pendingSwiperChanges_.empty());
+    swiper->OnDetachFromMainTree(false, AceType::RawPtr(pipeline));
+    EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
+    contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->StopContentChangeReport();
+}
+
+/**
+ * @tc.name: DestroyedTabsClearsDeferredEnd
+ * @tc.desc: Destroying the logical Tabs node clears deferred and pending state with or without START.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, DestroyedTabsClearsDeferredEnd, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    ASSERT_NE(mockUiSessionManager, nullptr);
+    auto tabs = FrameNode::CreateFrameNode(V2::TABS_ETS_TAG, 381, AceType::MakeRefPtr<Pattern>(), true);
+    auto swiper = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 382, AceType::MakeRefPtr<SwiperPattern>(), true);
+    swiper->MountToParent(tabs);
+
+    for (bool reportStartEvent : { false, true }) {
+        ContentChangeConfig config;
+        config.reportStartEvent = reportStartEvent;
+        contentChangeMgr->StartContentChangeReport(config);
+        EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::TABS_START, _))
+            .Times(reportStartEvent ? 1 : 0);
+        contentChangeMgr->OnSwiperChangeStart(swiper, true);
+        contentChangeMgr->OnSwiperChangeEnd(swiper, true);
+        ASSERT_EQ(contentChangeMgr->changedSwiperNodes_.size(), 1u);
+        Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+        EXPECT_CALL(*mockUiSessionManager,
+            ReportContentChangeEvent(ChangeType::TABS, HasSubstr("\"endReason\":\"destroyed\"")))
+            .Times(reportStartEvent ? 1 : 0);
+        contentChangeMgr->OnContentChangeNodeDestroyed(tabs->GetId());
+        EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
+        EXPECT_TRUE(contentChangeMgr->pendingSwiperChanges_.empty());
+        EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
+        Mock::VerifyAndClearExpectations(mockUiSessionManager);
+
+        EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+        contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+        Mock::VerifyAndClearExpectations(mockUiSessionManager);
+        contentChangeMgr->StopContentChangeReport();
+    }
+}
+
+/**
  * @tc.name: ContentChangeManagerTest031
  * @tc.desc: Test IsContentChanging
  * @tc.type: FUNC

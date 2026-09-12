@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -299,6 +300,8 @@ void ContentChangeManager::UpdateContentChangeParameters()
 
 void ContentChangeManager::ResetContentChangeState()
 {
+    activeContentChanges_.clear();
+    pendingSwiperChanges_.clear();
     changedSwiperNodes_.clear();
     scrollingNodes_.clear();
     transitioningNodes_.clear();
@@ -326,6 +329,16 @@ void ContentChangeManager::StopContentChangeReport()
     ACE_SCOPED_TRACE("[ContentChangeManager] StopContentChangeReport");
     LOGI("[ContentChangeManager] StopContentChangeReport");
     currentContentChangeConfig_.reset();
+    activeContentChanges_.clear();
+    pendingSwiperChanges_.clear();
+    changedSwiperNodes_.clear();
+    scrollingNodes_.clear();
+    transitioningNodes_.clear();
+    scrollingSwiperNodes_.clear();
+    textAABB_.Reset();
+    textCollecting_ = false;
+    imageChangeList_.clear();
+    RemoveImageReportTask();
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
@@ -339,6 +352,256 @@ void ContentChangeManager::StopContentChangeReport()
 #ifndef IS_RELEASE_VERSION
     dumpMgr_->AddRegisterRecord(DumpEvent::UNREGISTER, currentContentChangeConfig_);
 #endif
+}
+
+std::optional<ChangeType> ContentChangeManager::GetStartChangeType(ChangeType type) const
+{
+    switch (type) {
+        case ChangeType::PAGE:
+            return ChangeType::PAGE_START;
+        case ChangeType::SCROLL:
+            return ChangeType::SCROLL_START;
+        case ChangeType::SWIPER:
+            return ChangeType::SWIPER_START;
+        case ChangeType::TABS:
+            return ChangeType::TABS_START;
+        default:
+            return std::nullopt;
+    }
+}
+
+void ContentChangeManager::OnContentChangeStart(const RefPtr<FrameNode>& keyNode, ChangeType type)
+{
+    if (!keyNode || !currentContentChangeConfig_.has_value() || !currentContentChangeConfig_->reportStartEvent) {
+        return;
+    }
+    auto startType = GetStartChangeType(type);
+    if (!startType.has_value()) {
+        return;
+    }
+    auto nodeId = keyNode->GetId();
+    auto& nodeChanges = activeContentChanges_[nodeId];
+    if (nodeChanges.find(type) != nodeChanges.end()) {
+        return;
+    }
+
+    ActiveContentChange activeChange;
+    activeChange.endType = type;
+    activeChange.tag = keyNode->GetTag();
+    activeChange.nodeId = nodeId;
+    activeChange.startTimestamp = GetCurrentTimestamp();
+    nodeChanges.emplace(type, activeChange);
+
+    auto startJson = JsonUtil::CreateSharedPtrJson(true);
+    startJson->Put("$type", activeChange.tag.c_str());
+    startJson->Put("$ID", activeChange.nodeId);
+    startJson->Put("startTimestamp", activeChange.startTimestamp);
+    UiSessionManager::GetInstance()->ReportContentChangeEvent(startType.value(), startJson->ToString());
+}
+
+void ContentChangeManager::CancelPendingSwiperEnd(const ActiveContentChange& activeChange)
+{
+    if (!activeChange.normalEndPending || activeChange.pendingReportNodeId < 0) {
+        return;
+    }
+    auto reportNodeIter = pendingSwiperChanges_.find(activeChange.pendingReportNodeId);
+    if (reportNodeIter == pendingSwiperChanges_.end()) {
+        return;
+    }
+    auto typeIter = reportNodeIter->second.find(activeChange.endType);
+    if (typeIter != reportNodeIter->second.end()) {
+        typeIter->second.canceled = true;
+    }
+}
+
+void ContentChangeManager::ReportContentChangeEnd(const ActiveContentChange& activeChange, const char* endReason)
+{
+    auto endJson = JsonUtil::CreateSharedPtrJson(true);
+    endJson->Put("$type", activeChange.tag.c_str());
+    endJson->Put("$ID", activeChange.nodeId);
+    if (endReason) {
+        endJson->Put("endReason", endReason);
+    }
+    UiSessionManager::GetInstance()->ReportContentChangeEvent(activeChange.endType, endJson->ToString());
+}
+
+void ContentChangeManager::OnContentChangeInterrupted(const RefPtr<FrameNode>& keyNode, ChangeType type)
+{
+    CHECK_NULL_VOID(keyNode);
+    bool shouldReportEnd = true;
+    if (type == ChangeType::PAGE) {
+        transitioningNodes_.erase(keyNode->GetId());
+    } else if (type == ChangeType::SCROLL) {
+        scrollingNodes_.erase(keyNode->GetId());
+        // A scroll END is emitted globally when the last scrolling node stops.  Do not emit a
+        // second node-level END while another scroll is still active.
+        shouldReportEnd = scrollingNodes_.empty();
+    }
+    auto nodeIter = activeContentChanges_.find(keyNode->GetId());
+    if (nodeIter == activeContentChanges_.end()) {
+        return;
+    }
+    auto typeIter = nodeIter->second.find(type);
+    if (typeIter == nodeIter->second.end()) {
+        return;
+    }
+    auto activeChange = typeIter->second;
+    CancelPendingSwiperEnd(activeChange);
+    nodeIter->second.erase(typeIter);
+    if (nodeIter->second.empty()) {
+        activeContentChanges_.erase(nodeIter);
+    }
+    if (shouldReportEnd) {
+        ReportContentChangeEnd(activeChange);
+    }
+}
+
+void ContentChangeManager::OnContentChangeNodeDestroyed(int32_t nodeId)
+{
+    scrollingNodes_.erase(nodeId);
+    transitioningNodes_.erase(nodeId);
+    scrollingSwiperNodes_.erase(nodeId);
+    for (auto iter = changedSwiperNodes_.begin(); iter != changedSwiperNodes_.end();) {
+        auto node = iter->first.Upgrade();
+        bool remove = !node || node->GetId() == nodeId;
+        if (!remove && iter->second) {
+            auto pendingReportIter = pendingSwiperChanges_.find(node->GetId());
+            auto pendingType = iter->second ? ChangeType::TABS : ChangeType::SWIPER;
+            if (pendingReportIter != pendingSwiperChanges_.end()) {
+                auto pendingTypeIter = pendingReportIter->second.find(pendingType);
+                remove = pendingTypeIter != pendingReportIter->second.end() &&
+                    pendingTypeIter->second.logicalNodeId == nodeId;
+            }
+        }
+        if (!remove && iter->second) {
+            auto parent = node->GetParent();
+            while (parent) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+                if (frameNode && frameNode->GetTag() == V2::TABS_ETS_TAG) {
+                    remove = frameNode->GetId() == nodeId;
+                    break;
+                }
+                parent = parent->GetParent();
+            }
+        }
+        if (remove) {
+            iter = changedSwiperNodes_.erase(iter);
+            continue;
+        }
+        ++iter;
+    }
+    for (auto pendingIter = pendingSwiperChanges_.begin(); pendingIter != pendingSwiperChanges_.end();) {
+        auto reportNodeId = pendingIter->first;
+        auto& pendingChanges = pendingIter->second;
+        for (auto changeIter = pendingChanges.begin(); changeIter != pendingChanges.end();) {
+            auto type = changeIter->first;
+            auto pendingChange = changeIter->second;
+            if (reportNodeId != nodeId && pendingChange.logicalNodeId != nodeId) {
+                ++changeIter;
+                continue;
+            }
+            changeIter = pendingChanges.erase(changeIter);
+            if (pendingChange.logicalNodeId == nodeId) {
+                continue;
+            }
+            auto logicalNodeIter = activeContentChanges_.find(pendingChange.logicalNodeId);
+            if (logicalNodeIter == activeContentChanges_.end()) {
+                continue;
+            }
+            auto typeIter = logicalNodeIter->second.find(type);
+            if (typeIter == logicalNodeIter->second.end()) {
+                continue;
+            }
+            auto activeChange = typeIter->second;
+            logicalNodeIter->second.erase(typeIter);
+            if (logicalNodeIter->second.empty()) {
+                activeContentChanges_.erase(logicalNodeIter);
+            }
+            ReportContentChangeEnd(activeChange, "destroyed");
+        }
+        if (pendingChanges.empty()) {
+            pendingIter = pendingSwiperChanges_.erase(pendingIter);
+        } else {
+            ++pendingIter;
+        }
+    }
+    auto nodeIter = activeContentChanges_.find(nodeId);
+    if (nodeIter == activeContentChanges_.end()) {
+        return;
+    }
+    auto activeChanges = std::move(nodeIter->second);
+    activeContentChanges_.erase(nodeIter);
+    for (const auto& entry : activeChanges) {
+        const auto& activeChange = entry.second;
+        CancelPendingSwiperEnd(activeChange);
+        ReportContentChangeEnd(activeChange, "destroyed");
+    }
+}
+
+void ContentChangeManager::CompleteContentChange(int32_t nodeId, ChangeType type)
+{
+    auto nodeIter = activeContentChanges_.find(nodeId);
+    if (nodeIter == activeContentChanges_.end()) {
+        return;
+    }
+    nodeIter->second.erase(type);
+    if (nodeIter->second.empty()) {
+        activeContentChanges_.erase(nodeIter);
+    }
+}
+
+void ContentChangeManager::MarkSwiperNormalEndPending(
+    const RefPtr<FrameNode>& reportNode, const RefPtr<FrameNode>& logicalNode, ChangeType type)
+{
+    CHECK_NULL_VOID(reportNode);
+    CHECK_NULL_VOID(logicalNode);
+    auto nodeIter = activeContentChanges_.find(logicalNode->GetId());
+    if (nodeIter == activeContentChanges_.end()) {
+        return;
+    }
+    auto typeIter = nodeIter->second.find(type);
+    if (typeIter == nodeIter->second.end()) {
+        return;
+    }
+    typeIter->second.normalEndPending = true;
+    typeIter->second.pendingReportNodeId = reportNode->GetId();
+    pendingSwiperChanges_[reportNode->GetId()][type] = { logicalNode->GetId(), false };
+}
+
+bool ContentChangeManager::ConsumeCanceledSwiperEnd(int32_t reportNodeId, ChangeType type)
+{
+    auto reportNodeIter = pendingSwiperChanges_.find(reportNodeId);
+    if (reportNodeIter == pendingSwiperChanges_.end()) {
+        return false;
+    }
+    auto typeIter = reportNodeIter->second.find(type);
+    if (typeIter == reportNodeIter->second.end() || !typeIter->second.canceled) {
+        return false;
+    }
+    reportNodeIter->second.erase(typeIter);
+    if (reportNodeIter->second.empty()) {
+        pendingSwiperChanges_.erase(reportNodeIter);
+    }
+    return true;
+}
+
+void ContentChangeManager::CompleteSwiperContentChange(int32_t reportNodeId, ChangeType type)
+{
+    auto reportNodeIter = pendingSwiperChanges_.find(reportNodeId);
+    int32_t logicalNodeId = -1;
+    if (reportNodeIter != pendingSwiperChanges_.end()) {
+        auto typeIter = reportNodeIter->second.find(type);
+        if (typeIter != reportNodeIter->second.end()) {
+            logicalNodeId = typeIter->second.logicalNodeId;
+            reportNodeIter->second.erase(typeIter);
+        }
+        if (reportNodeIter->second.empty()) {
+            pendingSwiperChanges_.erase(reportNodeIter);
+        }
+    }
+    if (logicalNodeId >= 0) {
+        CompleteContentChange(logicalNodeId, type);
+    }
 }
 
 #ifndef IS_RELEASE_VERSION
@@ -609,6 +872,7 @@ void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
         auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
         keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
         UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::PAGE, simpleTree->ToString());
+        CompleteContentChange(keyNode->GetId(), ChangeType::PAGE);
         lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
         dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::PAGE, keyNode->GetId(), keyNode->GetTag()));
@@ -628,6 +892,9 @@ void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnScrollChangeEnd");
     scrollingNodes_.erase(keyNode->GetId());
+    if (contentChangeEnabled) {
+        CompleteContentChange(keyNode->GetId(), ChangeType::SCROLL);
+    }
 #ifndef IS_RELEASE_VERSION
     if (contentChangeEnabled) {
         dumpMgr_->AddScrollRecord(std::make_tuple(false, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
@@ -645,6 +912,36 @@ void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
     NotifyPageSceneContentChanged(true);
 }
 
+namespace {
+RefPtr<FrameNode> GetSwiperContentChangeNode(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
+{
+    if (hasTabsAncestor) {
+        auto parent = keyNode->GetParent();
+        while (parent) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+            if (frameNode && frameNode->GetTag() == V2::TABS_ETS_TAG) {
+                return frameNode;
+            }
+            parent = parent->GetParent();
+        }
+    }
+    return keyNode;
+}
+} // namespace
+
+void ContentChangeManager::OnSwiperChangeStart(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
+{
+    if (!keyNode || !IsStartEventReportEnabled()) {
+        return;
+    }
+    auto paintProperty = keyNode->GetPaintProperty<SwiperPaintProperty>();
+    if (paintProperty && paintProperty->GetAutoPlay().value_or(false)) {
+        return;
+    }
+    OnContentChangeStart(
+        GetSwiperContentChangeNode(keyNode, hasTabsAncestor), hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER);
+}
+
 void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
 {
     CHECK_NULL_VOID(keyNode);
@@ -658,8 +955,38 @@ void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, b
     ACE_SCOPED_TRACE("[ContentChangeManager] OnSwiperChangeEnd");
     if (contentChangeEnabled) {
         changedSwiperNodes_.emplace(std::make_pair(WeakPtr(keyNode), hasTabsAncestor));
+        auto type = hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER;
+        MarkSwiperNormalEndPending(keyNode, GetSwiperContentChangeNode(keyNode, hasTabsAncestor), type);
     }
     NotifyPageSceneContentChanged(false);
+}
+
+void ContentChangeManager::OnSwiperChangeCancel(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
+{
+    if (!keyNode || !IsStartEventReportEnabled()) {
+        return;
+    }
+    auto type = hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER;
+    auto logicalNode = GetSwiperContentChangeNode(keyNode, hasTabsAncestor);
+    auto nodeIter = activeContentChanges_.find(logicalNode->GetId());
+    if (nodeIter == activeContentChanges_.end()) {
+        return;
+    }
+    auto typeIter = nodeIter->second.find(type);
+    if (typeIter == nodeIter->second.end()) {
+        return;
+    }
+    auto activeChange = typeIter->second;
+    CancelPendingSwiperEnd(activeChange);
+    nodeIter->second.erase(typeIter);
+    if (nodeIter->second.empty()) {
+        activeContentChanges_.erase(nodeIter);
+    }
+    auto cancelType = hasTabsAncestor ? ChangeType::TABS_START_CANCEL : ChangeType::SWIPER_START_CANCEL;
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    json->Put("$type", activeChange.tag.c_str());
+    json->Put("$ID", activeChange.nodeId);
+    UiSessionManager::GetInstance()->ReportContentChangeEvent(cancelType, json->ToString());
 }
 
 void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow)
@@ -741,6 +1068,10 @@ void ContentChangeManager::ProcessSwiperNodes()
 
 void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor)
 {
+    auto type = hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER;
+    if (ConsumeCanceledSwiperEnd(node->GetId(), type)) {
+        return;
+    }
     auto pattern = node->GetPattern();
     CHECK_NULL_VOID(pattern);
 
@@ -789,8 +1120,8 @@ void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode>& node, bool
     }
 
     ACE_SCOPED_TRACE("[ContentChangeManager] On%sChanged Reporting", hasTabsAncestor ? "Tabs" : "Swiper");
-    UiSessionManager::GetInstance()->ReportContentChangeEvent(
-        hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, rootNode->ToString());
+    UiSessionManager::GetInstance()->ReportContentChangeEvent(type, rootNode->ToString());
+    CompleteSwiperContentChange(node->GetId(), type);
     lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
     dumpMgr_->AddReportRecord(
@@ -882,11 +1213,12 @@ void ContentChangeManager::OnSwiperScrollEnd(const RefPtr<FrameNode>& keyNode)
     scrollingSwiperNodes_.erase(keyNode->GetId());
 }
 
-void ContentChangeManager::OnSwiperScrollStart(const RefPtr<FrameNode>& keyNode)
+void ContentChangeManager::OnSwiperScrollStart(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
 {
     CHECK_NULL_VOID(keyNode);
     ACE_SCOPED_TRACE("[ContentChangeManager] OnSwiperScrollStart");
     scrollingSwiperNodes_.emplace(keyNode->GetId());
+    OnSwiperChangeStart(keyNode, hasTabsAncestor);
 }
 
 bool ContentChangeManager::IsSwiperScrolling() const

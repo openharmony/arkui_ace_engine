@@ -327,7 +327,18 @@ ace_unittest("content_change_manager_test_ng") {
     type = "host_components"
     cflags = [ "-fno-access-control" ]
   }
-  sources = [ "content_change_manager_test_ng.cpp" ]
+
+  # ContentChangeConfigImpl Parcelable compatibility tests must run against the REAL
+  # c_utils Parcel (trailing-field guard relies on GetReadableBytes/strict read-failure
+  # semantics). The adapter suite ui_content_stub_unittest is bound to the functional
+  # mock Parcel (test/mock/ohos_mock/c_utils), where these semantics differ, so the
+  # config impl sources are hosted here on purpose (Feat-01 plan Revision 1).
+  external_deps = [ "c_utils:utils" ]
+  sources = [
+    "$ace_root/adapter/ohos/entrance/ui_session/content_change_config_impl.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/ui_session/content_change_config_impl_test.cpp",
+    "content_change_manager_test_ng.cpp",
+  ]
 }
 
 ace_unittest("recoverable_manager_test_ng") {

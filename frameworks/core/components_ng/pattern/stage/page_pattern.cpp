@@ -162,7 +162,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
-    FirePageTransitionStart();
+    FirePageTransitionStart(type);
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_, type]() {
         auto pattern = weak.Upgrade();
@@ -569,6 +569,11 @@ void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
 
 void PagePattern::FirePageTransitionStart()
 {
+    FirePageTransitionStart(PageTransitionType::NONE);
+}
+
+void PagePattern::FirePageTransitionStart(PageTransitionType type)
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
@@ -578,6 +583,9 @@ void PagePattern::FirePageTransitionStart()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnTransitionAdded(host->GetId());
+    if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
+        mgr->OnContentChangeStart(host, ChangeType::PAGE);
+    }
 #endif
 }
 
