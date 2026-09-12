@@ -709,10 +709,6 @@ public:
     // process default lightEffectOptions and interactive behavior. If the user does not set related parameters
     // or disable the ability, the default behavior of the component needs to be processed if it has.
     virtual void ProcessDefaultImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options) {}
-    virtual bool EnableCachePredictNodes() const
-    {
-        return false;
-    }
 
     virtual void OnMaterialDisable() {}
 
