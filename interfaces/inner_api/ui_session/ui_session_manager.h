@@ -43,7 +43,6 @@ class PixelMap;
 } // namespace Media
 } // namespace OHOS
 namespace OHOS::Ace {
-class InspectorJsonValue;
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
     using InspectorFunction = std::function<void(bool onlyNeedVisible, ParamConfig config)>;
@@ -139,8 +138,6 @@ public:
      * @description: get current page inspector tree value
      */
     virtual void GetInspectorTree(ParamConfig config = ParamConfig()) {};
-    virtual void AddValueForTree(int32_t id, const std::string& value) {};
-    virtual void WebTaskNumsChange(int32_t num) {};
     virtual void ReportInspectorTreeValue(const std::string& value) {};
     virtual void SaveForSendCommandFunction(NotifySendCommandFunction&& function) {};
     virtual void SaveForSendCommandSyncFunction(NotifySendCommandSyncFunction&& function) {};
@@ -357,9 +354,6 @@ protected:
     std::mutex notifySendCommandSyncFunctionMutex_;
     GetStateMgmtInfoFunction getStateMgmtInfoFunction_ = 0;
     std::mutex getStateMgmtInfoFunctionMutex_;
-    std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
-    std::mutex jsonValueMutex_;
-    std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
     std::mutex baseInfoMutex_;
     std::map<int32_t, std::shared_ptr<UiTranslateManager>> translateManagerMap_;

@@ -8080,23 +8080,6 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
     return total;
 }
 
-void FrameNode::GetInspectorValue()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED) && defined(OHOS_PLATFORM)
-    if (tag_ == V2::WEB_ETS_TAG) {
-        UiSessionManager::GetInstance()->WebTaskNumsChange(1);
-        auto pattern = GetPattern<NG::WebPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
-            UiSessionManager::GetInstance()->AddValueForTree(webId, value->ToString());
-            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-        };
-        pattern->GetAllWebAccessibilityNodeInfos(cb, nodeId_);
-    }
-#endif
-    UINode::GetInspectorValue();
-}
-
 void FrameNode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
 {
     // return when reaches a child that has no layoutAlgorithm and no need to clear the entire tree

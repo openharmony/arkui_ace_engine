@@ -21,7 +21,6 @@
 
 namespace OHOS::Ace {
 class UiSessionManagerPreview : public UiSessionManager {
-    void AddValueForTree(int32_t id, const std::string& value) override;
     void ReportInspectorTreeValue(const std::string& value) override;
 };
 } // namespace OHOS::Ace

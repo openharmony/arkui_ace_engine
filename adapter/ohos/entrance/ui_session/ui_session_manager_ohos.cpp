@@ -1131,13 +1131,6 @@ bool UiSessionManagerOhos::GetSelectTextEventRegistered()
 
 void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)
 {
-    webTaskNums_.store(0);
-    WebTaskNumsChange(1);
-    {
-        std::lock_guard<std::mutex> lock(jsonValueMutex_);
-        jsonValue_ = InspectorJsonUtil::Create(true);
-    }
-
     InspectorFunction inspectorFunction;
     {
         std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
@@ -1164,38 +1157,6 @@ void UiSessionManagerOhos::SaveInspectorTreeFunction(InspectorFunction&& functio
 {
     std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
     inspectorFunction_ = std::move(function);
-}
-
-void UiSessionManagerOhos::AddValueForTree(int32_t id, const std::string& value)
-{
-    std::lock_guard<std::mutex> lock(jsonValueMutex_);
-    if (!jsonValue_) {
-        LOGW("AddValueForTree jsonValue is nullptr");
-        return;
-    }
-    std::string key = std::to_string(id);
-    if (jsonValue_->Contains(key)) {
-        jsonValue_->Replace(key.c_str(), value.c_str());
-    } else {
-        jsonValue_->Put(key.c_str(), value.c_str());
-    }
-}
-
-void UiSessionManagerOhos::WebTaskNumsChange(int32_t num)
-{
-    webTaskNums_.fetch_add(num);
-    if (webTaskNums_.load() == 0) {
-        std::string data;
-        {
-            std::lock_guard<std::mutex> lock(jsonValueMutex_);
-            if (!jsonValue_) {
-                LOGW("WebTaskNumsChange jsonValue is nullptr");
-                return;
-            }
-            data = jsonValue_->ToString();
-        }
-        ReportInspectorTreeValue(data);
-    }
 }
 
 void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)

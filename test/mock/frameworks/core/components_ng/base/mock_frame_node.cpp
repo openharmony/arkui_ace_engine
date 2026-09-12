@@ -454,7 +454,6 @@ RefPtr<UINode> FrameNode::GetFrameChildByIndexWithoutExpanded(uint32_t)
 {
     return nullptr;
 }
-void FrameNode::GetInspectorValue() {}
 bool FrameNode::HasVirtualNodeAccessibilityProperty()
 {
     return false;
