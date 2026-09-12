@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components_ng/manager/recoverable/recoverable_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -27,6 +28,8 @@
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event_hub.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -242,10 +245,41 @@ public:
         searchableOptions_ = options;
     }
 
+    void SetBarModifierApply(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply)
+    {
+        barModifierApply_ = std::move(onApply);
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)> GetBarModifierApply() const
+    {
+        return barModifierApply_;
+    }
+
+    void SetBarBlurStyleOption(const BlurStyleOption& option)
+    {
+        hasBarBlurStyle_ = true;
+        barBlurStyleOption_ = option;
+    }
+
+    const BlurStyleOption& GetBarBlurStyleOption() const
+    {
+        return barBlurStyleOption_;
+    }
+
     void AddTabContentNode(const RefPtr<TabContentNode>& tabContentNode);
     void RemoveTabContentNode(const RefPtr<TabContentNode>& tabContentNode);
     bool IsColorInvertEnabled();
     ColorMode GetColorInvertColorMode();
+
+    float GetRealSideBarWidthPx() const
+    {
+        return realSideBarWidthPx_;
+    }
+
+    // Sync bar* attributes to the sidebar (no-op when sidebar does not exist).
+    void UpdateSideBarDivider();
+    void UpdateSideBarBackgroundColor();
+    void UpdateSideBarBackgroundBlurStyle();
 
 private:
     void OnAttachToFrameNode() override;
@@ -253,6 +287,7 @@ private:
     void OnUpdateShowDivider();
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     void BeforeCreateLayoutWrapper() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::string GetTabBarTextByIndex(int32_t index) const;
     void UpdateSwiperDisableSwipe(bool disableSwipe);
     void SetSwiperPaddingAndBorder();
@@ -318,6 +353,21 @@ private:
     RefPtr<FrameNode> CreateSideBarNode();
     RefPtr<FrameNode> CreateSideBarDividerNode();
 
+    // Divider drag
+    void InitDividerDragEvent();
+    void ClearDividerDragEvent();
+    void InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDividerDragStart();
+    void HandleDividerDragUpdate(float xOffset);
+    void HandleDividerDragEnd();
+    void HandleDividerDragCancel();
+    void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void OnDividerHover(bool isHover);
+    void OnDividerMouseEvent(MouseInfo& info);
+    void SetMouseStyle(MouseFormat format);
+    void AddDividerHotZoneRect();
+    bool IsDividerDraggable() const;
+
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
@@ -352,10 +402,23 @@ private:
     RefPtr<FrameNode> sideBarDividerNode_ = nullptr;
     RefPtr<NG::UINode> sidebarHeaderNode_;
     TabsSidebarSearchableOptions searchableOptions_;
+    std::function<void(WeakPtr<NG::FrameNode>)> barModifierApply_;
+    bool hasBarBlurStyle_ = false;
+    BlurStyleOption barBlurStyleOption_;
     std::vector<WeakPtr<TabContentNode>> tabContentNodes_;
     // Color invert state for auto-inversion
     std::optional<bool> isColorPickerDark_;
     bool hasRegisterColorPicker_ = false;
+
+    // Divider drag state
+    RefPtr<PanEvent> dividerPanEvent_;
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<InputEvent> dividerMouseEvent_;
+    bool isInDividerDrag_ = false;
+    float realSideBarWidthPx_ = 0.0f;
+    float preSideBarWidthPx_ = 0.0f;
+    float minSideBarWidth_ = -1.0f;
+    float maxSideBarWidth_ = -1.0f;
 };
 
 } // namespace OHOS::Ace::NG

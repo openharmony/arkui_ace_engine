@@ -57,7 +57,10 @@ const Dimension FLOATING_BAR_PADDING_4 = Dimension(4, Ace::DimensionUnit::VP);
 const Dimension FLOATING_BAR_PADDING_12 = Dimension(12, Ace::DimensionUnit::VP);
 
 const Dimension SIDE_BAR_DEFAULT_WIDTH = 240.0_vp;
-const Dimension SIDE_BAR_DIVIDER_DEFAULT_WIDTH = 1.0_vp;
+
+constexpr int32_t SWIPER_INDEX = 0;
+constexpr int32_t SIDEBAR_DIVIDER_INDEX = 1;
+constexpr int32_t SIDEBAR_INDEX = 2;
 } // namespace
 
 void TabsLayoutAlgorithm::UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
@@ -169,7 +172,30 @@ float TabsLayoutAlgorithm::MeasureSideBar(
     auto geometryNode = sideBarWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize.SetWidth(SIDE_BAR_DEFAULT_WIDTH.ConvertToPx());
+    // Sidebar width: if barWidth is set to a valid non-negative value, use it (fixed, no drag).
+    // Otherwise use dragged width if available, else default width.
+    float sideBarWidthPx = SIDE_BAR_DEFAULT_WIDTH.ConvertToPx();
+    bool hasValidBarWidth = false;
+    if (layoutProperty->HasBarWidth()) {
+        auto barWidth = layoutProperty->GetBarWidthValue();
+        if (barWidth.IsNonNegative()) {
+            auto barWidthPx = ConvertToPx(barWidth, childLayoutConstraint.scaleProperty, idealSize.Width());
+            if (barWidthPx.has_value() && GreatOrEqual(barWidthPx.value(), 0.0f)) {
+                sideBarWidthPx = barWidthPx.value();
+                hasValidBarWidth = true;
+            }
+        }
+    }
+    if (!hasValidBarWidth) {
+        float realSideBarWidthPx = tabsPattern->GetRealSideBarWidthPx();
+        if (GreatNotEqual(realSideBarWidthPx, 0.0f)) {
+            sideBarWidthPx = realSideBarWidthPx;
+        }
+    }
+    // Clamp to container width to prevent overflow on rotation/resize.
+    // realSideBarWidthPx_ is NOT modified, so rotating back restores the original width.
+    sideBarWidthPx = std::min(sideBarWidthPx, idealSize.Width());
+    childLayoutConstraint.selfIdealSize.SetWidth(sideBarWidthPx);
     childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
     sideBarWrapper->Measure(childLayoutConstraint);
     return geometryNode->GetFrameSize().Width();
@@ -194,8 +220,35 @@ float TabsLayoutAlgorithm::MeasureSideBarDivider(
     auto geometryNode = sideBarDividerWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize.SetWidth(SIDE_BAR_DIVIDER_DEFAULT_WIDTH.ConvertToPx());
-    childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+    // Sidebar divider spec:
+    // - not set / undefined / null → not shown (width 0)
+    // - valid DividerStyle (strokeWidth is required) → width = strokeWidth
+    // - strokeWidth <= 0 or percent → effective width = 0
+    // startMargin maps to top margin, endMargin maps to bottom margin.
+    float dividerWidthPx = 0.0f;
+    float startMarginPx = 0.0f;
+    float endMarginPx = 0.0f;
+    do {
+        if (!layoutProperty->HasDivider()) {
+            break;
+        }
+        auto divider = layoutProperty->GetDividerValue();
+        if (divider.isNull) {
+            break;
+        }
+        if (divider.strokeWidth.Value() > 0.0f && divider.strokeWidth.Unit() != DimensionUnit::PERCENT) {
+            dividerWidthPx = divider.strokeWidth.ConvertToPx();
+        }
+        if (divider.startMargin.Value() > 0.0f && divider.startMargin.Unit() != DimensionUnit::PERCENT) {
+            startMarginPx = divider.startMargin.ConvertToPx();
+        }
+        if (divider.endMargin.Value() > 0.0f && divider.endMargin.Unit() != DimensionUnit::PERCENT) {
+            endMarginPx = divider.endMargin.ConvertToPx();
+        }
+    } while (false);
+    childLayoutConstraint.selfIdealSize.SetWidth(dividerWidthPx);
+    float dividerHeight = idealSize.Height() - startMarginPx - endMarginPx;
+    childLayoutConstraint.selfIdealSize.SetHeight(dividerHeight > 0.0f ? dividerHeight : 0.0f);
     sideBarDividerWrapper->Measure(childLayoutConstraint);
     return geometryNode->GetFrameSize().Width();
 }
@@ -439,9 +492,6 @@ void TabsLayoutAlgorithm::LayoutInSideBarMode(LayoutWrapper* layoutWrapper)
         offsetList = LayoutOffsetListInSideBarMode(layoutWrapper, sideBarWrapper, frameSize);
     }
 
-    constexpr int32_t SWIPER_INDEX = 0;
-    constexpr int32_t SIDEBAR_DIVIDER_INDEX = 1;
-    constexpr int32_t SIDEBAR_INDEX = 2;
     auto swiperGeo = swiperWrapper->GetGeometryNode();
     if (swiperGeo) {
         swiperGeo->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
@@ -605,41 +655,65 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(
     LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarWrapper,
     const SizeF& frameSize) const
 {
-    std::vector<OffsetF> offsetList;
-    OffsetF swiperOffset;
-    OffsetF sideBarDividerOffset;
-    OffsetF sideBarOffset;
+    constexpr int32_t OFFSET_COUNT = 3;
+    std::vector<OffsetF> offsetList(OFFSET_COUNT, OffsetF());
+    CHECK_NULL_RETURN(layoutWrapper, offsetList);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_RETURN(tabsNode, offsetList);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, offsetList);
     auto sideBarGeometryNode = sideBarWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(sideBarGeometryNode, offsetList);
     auto sideBarFrameSize = sideBarGeometryNode->GetMarginFrameSize();
-    auto dividerStrokeWidth = SIDE_BAR_DIVIDER_DEFAULT_WIDTH.ConvertToPx();
     auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, offsetList);
+    // Use the measured side bar divider width (driven by Divider property).
+    // Default is 0: when divider is not set/undefined/null, the sidebar divider is not shown.
+    float dividerStrokeWidth = 0.0f;
+    do {
+        auto sideBarDivider = tabsPattern->GetSideBarDividerNode();
+        CHECK_NULL_BREAK(sideBarDivider);
+        auto sideBarDividerIndex = tabsNode->GetChildIndexById(sideBarDivider->GetId());
+        if (sideBarDividerIndex < 0) {
+            break;
+        }
+        auto sideBarDividerWrapper = layoutWrapper->GetOrCreateChildByIndex(sideBarDividerIndex);
+        CHECK_NULL_BREAK(sideBarDividerWrapper);
+        auto geo = sideBarDividerWrapper->GetGeometryNode();
+        CHECK_NULL_BREAK(geo);
+        dividerStrokeWidth = geo->GetMarginFrameSize().Width();
+    } while (false);
     auto sideBarPosition = layoutProperty->GetSidebarPositionValue(BarPosition::START);
     auto paddingOffset = layoutProperty->CreatePaddingAndBorder().Offset();
+    // Apply the divider startMargin (top margin) to the vertical sidebar divider's Y offset.
+    float dividerStartMarginPx = 0.0f;
+    if (layoutProperty->HasDivider()) {
+        auto divider = layoutProperty->GetDividerValue();
+        if (!divider.isNull && divider.startMargin.Value() > 0.0f &&
+            divider.startMargin.Unit() != DimensionUnit::PERCENT) {
+            dividerStartMarginPx = divider.startMargin.ConvertToPx();
+        }
+    }
     bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if ((!isRTL && sideBarPosition == BarPosition::START) || (isRTL && sideBarPosition == BarPosition::END)) {
-        sideBarOffset = paddingOffset;
-        sideBarDividerOffset = OffsetF(sideBarFrameSize.Width() + paddingOffset.GetX(), paddingOffset.GetY());
-        swiperOffset = OffsetF(paddingOffset.GetX() + sideBarFrameSize.Width() + dividerStrokeWidth,
+        offsetList[SIDEBAR_INDEX] = paddingOffset;
+        offsetList[SIDEBAR_DIVIDER_INDEX] = OffsetF(sideBarFrameSize.Width() + paddingOffset.GetX(),
+            paddingOffset.GetY() + dividerStartMarginPx);
+        offsetList[SWIPER_INDEX] = OffsetF(paddingOffset.GetX() + sideBarFrameSize.Width() + dividerStrokeWidth,
             paddingOffset.GetY());
     } else {
         auto style = layoutProperty->GetSidebarDisplayStyle().value_or(SidebarDisplayStyle::EMBED);
         if (style == SidebarDisplayStyle::DISPLACE) {
-            swiperOffset = OffsetF(paddingOffset.GetX() - sideBarFrameSize.Width() - dividerStrokeWidth,
+            offsetList[SWIPER_INDEX] = OffsetF(paddingOffset.GetX() - sideBarFrameSize.Width() - dividerStrokeWidth,
                 paddingOffset.GetY());
         } else {
-            swiperOffset = paddingOffset;
+            offsetList[SWIPER_INDEX] = paddingOffset;
         }
-        sideBarOffset = OffsetF(frameSize.Width() - sideBarFrameSize.Width() + paddingOffset.GetX(),
+        offsetList[SIDEBAR_INDEX] = OffsetF(frameSize.Width() - sideBarFrameSize.Width() + paddingOffset.GetX(),
             paddingOffset.GetY());
-        sideBarDividerOffset = OffsetF(frameSize.Width() - sideBarFrameSize.Width() - dividerStrokeWidth +
-            paddingOffset.GetX(), paddingOffset.GetY());
+        offsetList[SIDEBAR_DIVIDER_INDEX] = OffsetF(frameSize.Width() - sideBarFrameSize.Width() - dividerStrokeWidth +
+            paddingOffset.GetX(), paddingOffset.GetY() + dividerStartMarginPx);
     }
-
-    offsetList.emplace_back(swiperOffset);
-    offsetList.emplace_back(sideBarDividerOffset);
-    offsetList.emplace_back(sideBarOffset);
     return offsetList;
 }
 
