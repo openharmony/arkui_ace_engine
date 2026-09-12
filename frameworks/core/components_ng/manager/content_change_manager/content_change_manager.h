@@ -73,7 +73,7 @@ public:
     void OnContentChangeInterrupted(const RefPtr<FrameNode>& keyNode, ChangeType type);
     void OnContentChangeNodeDestroyed(int32_t nodeId);
     void OnScrollChangeStart(const RefPtr<FrameNode>& keyNode);
-    void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode);
+    void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode, uint32_t type = NONE);
     void OnSwiperChangeStart(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
     void OnSwiperChangeCancel(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
     void OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);

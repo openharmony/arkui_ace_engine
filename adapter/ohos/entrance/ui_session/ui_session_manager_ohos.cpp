@@ -315,6 +315,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
         if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component change event failed, process id:%{public}d", pair.first);
@@ -341,6 +342,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             if (isClickGestureEvent) {
                 LOGI("[UiSessionManagerOhos] ReportComponentChangeEvent gesture eventType:%{public}u nodeId:%{public}d",
                     eventType, nodeId);
@@ -1051,7 +1053,7 @@ void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
 
 void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
 {
-    componentChangeEventMask_ = mask;
+    componentChangeEventMask_.store(mask);
     LOGI("SetComponentChangeEventMask mask:%{public}u", mask);
 }
 
@@ -1111,7 +1113,7 @@ bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 
 bool UiSessionManagerOhos::NeedComponentChangeTypeReporting(uint32_t eventType)
 {
-    return (componentChangeEventMask_ & eventType) != 0;
+    return (componentChangeEventMask_.load() & eventType) != 0;
 }
 
 bool UiSessionManagerOhos::GetScrollEventRegistered()
@@ -1131,13 +1133,6 @@ bool UiSessionManagerOhos::GetSelectTextEventRegistered()
 
 void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)
 {
-    webTaskNums_.store(0);
-    WebTaskNumsChange(1);
-    {
-        std::lock_guard<std::mutex> lock(jsonValueMutex_);
-        jsonValue_ = InspectorJsonUtil::Create(true);
-    }
-
     InspectorFunction inspectorFunction;
     {
         std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
@@ -1164,38 +1159,6 @@ void UiSessionManagerOhos::SaveInspectorTreeFunction(InspectorFunction&& functio
 {
     std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
     inspectorFunction_ = std::move(function);
-}
-
-void UiSessionManagerOhos::AddValueForTree(int32_t id, const std::string& value)
-{
-    std::lock_guard<std::mutex> lock(jsonValueMutex_);
-    if (!jsonValue_) {
-        LOGW("AddValueForTree jsonValue is nullptr");
-        return;
-    }
-    std::string key = std::to_string(id);
-    if (jsonValue_->Contains(key)) {
-        jsonValue_->Replace(key.c_str(), value.c_str());
-    } else {
-        jsonValue_->Put(key.c_str(), value.c_str());
-    }
-}
-
-void UiSessionManagerOhos::WebTaskNumsChange(int32_t num)
-{
-    webTaskNums_.fetch_add(num);
-    if (webTaskNums_.load() == 0) {
-        std::string data;
-        {
-            std::lock_guard<std::mutex> lock(jsonValueMutex_);
-            if (!jsonValue_) {
-                LOGW("WebTaskNumsChange jsonValue is nullptr");
-                return;
-            }
-            data = jsonValue_->ToString();
-        }
-        ReportInspectorTreeValue(data);
-    }
 }
 
 void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
@@ -1972,11 +1935,21 @@ void UiSessionManagerOhos::SendCommand(const std::string& command)
     }
 
     auto value = json->GetValue("cmd");
-    if (sendCommandFunction_ && value && value->IsNumber()) {
+    SendCommandFunction sendCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(sendCommandFunctionMutex_);
+        sendCommandFunction = sendCommandFunction_;
+    }
+    RelaxedCommandFunction relaxedCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
+        relaxedCommandFunction = relaxedCommandFunction_;
+    }
+    if (sendCommandFunction && value && value->IsNumber()) {
         int32_t cmdNumber = value->GetInt();
-        sendCommandFunction_(cmdNumber);
-    } else if (relaxedCommandFunction_) {
-        relaxedCommandFunction_(command);
+        sendCommandFunction(cmdNumber);
+    } else if (relaxedCommandFunction) {
+        relaxedCommandFunction(command);
     } else {
         LOGW("SendCommand failed");
     }
@@ -1990,6 +1963,7 @@ void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& functio
 
 void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
     relaxedCommandFunction_ = std::move(function);
 }
 

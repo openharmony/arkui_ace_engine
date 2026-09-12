@@ -496,11 +496,6 @@ public:
         isCardStyleInitialized_ = isCardStyleInitialized;
     }
 
-    bool EnableCachePredictNodes() const override
-    {
-        return true;
-    }
-
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToMainTree() override;

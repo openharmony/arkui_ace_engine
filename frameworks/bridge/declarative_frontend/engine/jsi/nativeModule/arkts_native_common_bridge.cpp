@@ -10243,6 +10243,9 @@ NG::GestureCollectIntervention CommonBridge::ProcessOnGestureCollectIntercept(Ec
     panda::Local<panda::JSValueRef> params[2] = { recognizersArr, touchRecognizersArr };
     auto returnValue = NG::GestureCollectIntervention::CONTINUE;
     auto result = func->Call(vm, func, params, 2);
+    if (result.IsEmpty()) {
+        return returnValue;
+    }
     if (result->IsNumber()) {
         auto interventionValue = result->Int32Value(vm);
         if (interventionValue >= 0 &&

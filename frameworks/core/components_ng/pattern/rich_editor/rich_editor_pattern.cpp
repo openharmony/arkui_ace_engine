@@ -769,7 +769,7 @@ void RichEditorPattern::OnModifyDone()
     if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         dataDetectorAdapter_->GetAIEntityMenu();
     }
-    context->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
+    RegisterTranslateListener();
 }
 
 void RichEditorPattern::InitGestureEvents()
@@ -1402,7 +1402,6 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     ClearOnFocusTextField(node);
     auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
-    IF_PRESENT(context, UnRegisterListenerForTranslate(node->GetId()));
     CHECK_NULL_VOID(keyboardOverlay_);
     keyboardOverlay_->CloseKeyboard(node->GetId());
 }
@@ -5819,32 +5818,44 @@ bool RichEditorPattern::SelectOverlayIsOn()
     return selectOverlay_->SelectOverlayIsOn();
 }
 
+void RichEditorPattern::HandleEditingDeleteEvent(const std::shared_ptr<TextEditingValue>& value)
+{
+#ifdef CROSS_PLATFORM
+    if (!value->compose.IsValid()) {
+        HandleOnDelete(true);
+        return;
+    }
+    if (value->unmarkText && value->selection.GetStart() == value->selection.GetEnd() &&
+        value->selection.GetEnd() == value->compose.GetStart() &&
+        value->compose.GetEnd() > value->compose.GetStart() + 1) {
+        DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+        value->compose.Update(-1);
+    } else {
+        EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+        if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+            relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+            HandleOnDelete(true);
+        } else {
+            if (value->compose.GetStart() == 0 && value->text.empty()) {
+                DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+            } else {
+                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+            }
+            value->compose.Update(-1);
+        }
+    }
+#else
+    HandleOnDelete(true);
+#endif
+}
+
 void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
 #ifdef ENABLE_STANDARD_INPUT
     InsertValue(UtfUtils::Str8ToStr16(value->text), true);
 #else
     if (value->isDelete) {
-#ifdef CROSS_PLATFORM
-        if (value->compose.IsValid()) {
-            EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
-            if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
-                relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
-                HandleOnDelete(true);
-            } else {
-                if (value->compose.GetStart() == 0 && value->text.empty()) {
-                    DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
-                } else {
-                    DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
-                }
-                value->compose.Update(-1);
-            }
-        } else {
-            HandleOnDelete(true);
-        }
-#else
-        HandleOnDelete(true);
-#endif
+        HandleEditingDeleteEvent(value);
     } else {
 #ifdef CROSS_PLATFORM
         editingValue_ = value;

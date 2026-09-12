@@ -449,6 +449,41 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateConnectPrelaunchNoBuffer, T
 }
 
 /**
+ * @tc.name: OnAttachToFrameNode_StateConnectPrelaunchPending
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_CONNECT (prelaunch) and frameNum_ < 0,
+ *           starting window creation is delayed and replace flag is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateConnectPrelaunchPending, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->EditSessionInfo().isPrelaunch_ = true;
+    sceneSession_->state_ = Rosen::SessionState::STATE_CONNECT;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = false;
+
+    /**
+     * @tc.steps: step1. frameNum_ < 0 → set needReplaceBlankWithStarting_, no starting window now.
+     */
+    sceneSession_->EditSessionInfo().frameNum_ = -1;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_EQ(windowScene_->needReplaceBlankWithStarting_, true);
+    EXPECT_EQ(windowScene_->startingWindow_, nullptr);
+
+    /**
+     * @tc.steps: step2. frameNum_ > 0 → neither branch taken, replace flag keeps false.
+     */
+    windowScene_->needReplaceBlankWithStarting_ = false;
+    sceneSession_->EditSessionInfo().frameNum_ = 1;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->needReplaceBlankWithStarting_, false);
+    EXPECT_EQ(windowScene_->startingWindow_, nullptr);
+}
+
+/**
  * @tc.name: OnAttachToFrameNode_StateActive
  * @tc.desc: Test OnAttachToFrameNode when state is STATE_ACTIVE with different scenarios
  * @tc.type: FUNC
@@ -547,6 +582,27 @@ HWTEST_F(WindowPatternTest, AddSnapshot, TestSize.Level0)
     sceneSession_->scenePersistence_->hasSnapshot_[key] = true;
     mirrorWindowScene_->AddSnapshot();
     EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, false);
+}
+
+/**
+ * @tc.name: CreateStartingWindow_RetainAndInvisibleWithPendingReplace
+ * @tc.desc: Test CreateStartingWindow skips RETAIN_AND_INVISIBLE hiding when replacing blank window
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow_RetainAndInvisibleWithPendingReplace, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step1. RETAIN_AND_INVISIBLE + needReplaceBlankWithStarting_ → visible starting window.
+     */
+    sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE;
+    windowScene_->needReplaceBlankWithStarting_ = true;
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(sceneSession_->hidingStartWindow_, false);
+    EXPECT_NE(windowScene_->startingWindow_, nullptr);
 }
 
 /**
@@ -680,6 +736,42 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_PreloadingStartingWindow_False,
     windowScene_->WindowPattern::CreateStartingWindow();
     EXPECT_EQ(sceneSession_->GetPreloadingStartingWindow(), false);
     ASSERT_NE(windowScene_->startingWindow_, nullptr);
+}
+
+/**
+ * @tc.name: CreateStartingWindow_PreloadingWithPendingReplace
+ * @tc.desc: Test CreateStartingWindow takes icon source when preloading starting window with pending replace flag
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow_PreloadingWithPendingReplace, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step1. Preloading + pending replace → icon source branch is taken.
+     */
+    sceneSession_->ResetPreloadStartingWindow();
+    sceneSession_->SetPreloadingStartingWindow(true);
+    windowScene_->needReplaceBlankWithStarting_ = true;
+    windowScene_->WindowPattern::CreateStartingWindow();
+    ASSERT_NE(windowScene_->startingWindow_, nullptr);
+    auto layoutProperty = windowScene_->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo()).GetBundleName(), BUNDLE_NAME);
+    EXPECT_EQ(layoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo()).GetModuleName(), MODULE_NAME);
+
+    /**
+     * @tc.steps: step2. Preloading without pending replace → icon source branch is skipped.
+     */
+    sceneSession_->SetPreloadingStartingWindow(true);
+    windowScene_->needReplaceBlankWithStarting_ = false;
+    windowScene_->WindowPattern::CreateStartingWindow();
+    ASSERT_NE(windowScene_->startingWindow_, nullptr);
+    layoutProperty = windowScene_->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo()).GetBundleName().empty());
 }
 
 /**

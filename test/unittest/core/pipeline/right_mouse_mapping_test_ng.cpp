@@ -35,6 +35,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -78,11 +79,13 @@ public:
 };
 
 /**
- * @tc.name: GetRightMouse2LongPressConfig001
- * @tc.desc: Test GetRightMouse2LongPressConfig returns NOT_FOUND in stub environment and does not modify output params
+ * @tc.name: GetRightMouse2LongPressConfigStubFallback001
+ * @tc.desc: Host stub returns NOT_FOUND and does not parse config; real parsing logic is covered by the
+ *           ohos_unittest target linking adapter/ohos/.../event_info_convertor.cpp. This case only asserts
+ *           the host stub fallback so it is not mistaken for parsing coverage.
  * @tc.type: FUNC
  */
-HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig001, TestSize.Level1)
+HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfigStubFallback001, TestSize.Level1)
 {
     bool enabled = false;
     std::vector<std::string> components;
@@ -93,11 +96,12 @@ HWTEST_F(RightMouseMappingTestNg, GetRightMouse2LongPressConfig001, TestSize.Lev
 }
 
 /**
- * @tc.name: IsRightMouseMappingEnabled001
- * @tc.desc: Test IsRightMouseMappingEnabled returns false in stub environment and does not modify output params
+ * @tc.name: IsRightMouseMappingEnabledStubFallback001
+ * @tc.desc: Host stub returns false and does not parse config; real parsing logic is covered by the
+ *           ohos_unittest target. This case only asserts the host stub fallback.
  * @tc.type: FUNC
  */
-HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabled001, TestSize.Level1)
+HWTEST_F(RightMouseMappingTestNg, IsRightMouseMappingEnabledStubFallback001, TestSize.Level1)
 {
     bool enabled = false;
     std::vector<std::string> components;
@@ -525,6 +529,134 @@ HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping005, TestS
     std::vector<std::string> whitelist = { "TextInput" };
     context_->HitTestMouseTargetForMapping(event, parentNode, whitelist);
     context_->rootNode_ = nullptr;
+}
+
+/**
+ * @tc.name: HitTestMouseTargetForMapping006
+ * @tc.desc: Positive path — whitelist tag node with mounted RenderContext + in-region point returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping006, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->isActive_ = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    textNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(textNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    textNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+
+    MouseEvent event;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput" };
+    bool result = context_->HitTestMouseTargetForMapping(event, textNode, whitelist);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HitTestMouseTargetForMapping007
+ * @tc.desc: Whitelist tag node but event point out of paintRect returns false (out of region)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping007, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->isActive_ = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    textNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(textNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    textNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+
+    MouseEvent event;
+    event.x = 300.0f;
+    event.y = 300.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput" };
+    bool result = context_->HitTestMouseTargetForMapping(event, textNode, whitelist);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HitTestMouseTargetForMapping008
+ * @tc.desc: In-region point but tag not in whitelist returns false (tag not allowed)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping008, TestSize.Level1)
+{
+    auto buttonNode = FrameNode::GetOrCreateFrameNode("button", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    buttonNode->isActive_ = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    buttonNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(buttonNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    buttonNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+
+    MouseEvent event;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput", "TextArea" };
+    bool result = context_->HitTestMouseTargetForMapping(event, buttonNode, whitelist);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HitTestMouseTargetForMapping009
+ * @tc.desc: Whitelist tag + in-region point but node inactive returns false (active guard)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RightMouseMappingPipelineTestNg, HitTestMouseTargetForMapping009, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode("TextInput", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->isActive_ = false;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    textNode->eventHub_ = eventHub;
+    eventHub->enabled_ = true;
+    auto rc = AceType::DynamicCast<MockRenderContext>(textNode->renderContext_);
+    ASSERT_NE(rc, nullptr);
+    rc->paintRect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    rc->rect_ = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+    textNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = RectF(0.0f, 0.0f, 200.0f, 200.0f);
+
+    MouseEvent event;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    std::vector<std::string> whitelist = { "TextInput" };
+    bool result = context_->HitTestMouseTargetForMapping(event, textNode, whitelist);
+    EXPECT_FALSE(result);
 }
 
 /**

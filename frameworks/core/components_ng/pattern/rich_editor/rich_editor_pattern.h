@@ -424,6 +424,7 @@ public:
     void HandleContentSizeChange(const RectF& textRect);
     void UpdateRichTextRect(const std::optional<RectF>& richTextRectOpt);
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void HandleEditingDeleteEvent(const std::shared_ptr<TextEditingValue>& value);
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     bool IsIMEOperation(OperationType operationType);
     void InsertValue(const std::string& insertValue, bool isIME = false) override;

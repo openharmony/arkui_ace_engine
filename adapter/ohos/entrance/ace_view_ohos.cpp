@@ -520,6 +520,9 @@ bool AceViewOhos::HandleMappedButtonRelease(const MouseEvent& event, const Touch
 {
     CHECK_NULL_RETURN(touchEventCallback_, false);
     if (touchEvent.type == TouchType::CANCEL) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "MouseMapping: RELEASE/CANCEL converted to touch CANCEL, tag=%{public}s",
+            node ? node->GetTag().c_str() : "null");
         auto cancelEvent = touchEvent;
         cancelEvent.type = TouchType::CANCEL;
         cancelEvent.sourceType = SourceType::TOUCH;
@@ -536,6 +539,9 @@ bool AceViewOhos::HandleMappedButtonRelease(const MouseEvent& event, const Touch
     if (delayMs < 0) {
         delayMs = DELAYED_UP_BUFFER_MS;
     }
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        "MouseMapping: RELEASE converted to delayed touch UP, elapsed=%{public}lldms delayMs=%{public}d",
+        static_cast<long long>(elapsedMs), delayMs);
     ScheduleDelayedUp(touchEvent, node, markProcess, delayMs);
     return true;
 }
@@ -563,6 +569,7 @@ void AceViewOhos::ScheduleDelayedUp(const TouchEvent& touchEvent, const RefPtr<O
             return;
         }
         self->touchEventCallback_(touchEvent, nullptr, node);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "MouseMapping: delayed UP fired, session closed");
         self->ResetMouseMappingState();
     };
     mouseDelayedUpTask_.Reset(std::move(callback));
@@ -599,8 +606,15 @@ bool AceViewOhos::DispatchRightMouseTouch(const MouseEvent& event, TouchEvent& t
     if (touchEvent.type == TouchType::DOWN) {
         mouseLastTouchEvent_ = touchEvent;
         mouseTouchSessionActive_ = true;
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "MouseMapping: DOWN converted to touch DOWN, tag=%{public}s touchId=%{public}d duration=%{public}d",
+            node ? node->GetTag().c_str() : "null", touchEvent.id, mouseLongPressDuration_);
     } else if (touchEvent.type == TouchType::MOVE) {
         mouseLastTouchEvent_ = touchEvent;
+        if (markProcess) {
+            markProcess();
+        }
+        return true;
     }
     if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         return HandleMappedButtonRelease(event, touchEvent, node, markProcess);
@@ -653,6 +667,9 @@ bool AceViewOhos::IsRightMouseMappingSwitchOn()
             rightMouseMappingSwitchEnabled_, rightMouseMappingComponents_);
         rightMouseMappingSwitchCached_ = true;
     }
+    if (!rightMouseMappingSwitchEnabled_) {
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "MouseMapping: switch off, mapping not started");
+    }
     return rightMouseMappingSwitchEnabled_;
 }
 
@@ -662,6 +679,7 @@ bool AceViewOhos::StartNewMapping(const MouseEvent& event, const RefPtr<OHOS::Ac
         return false;
     }
     if (!CheckMouseMappingWhitelist(event, node)) {
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "MouseMapping: whitelist miss, mapping not started");
         return false;
     }
     mousePressedConverted_ = true;

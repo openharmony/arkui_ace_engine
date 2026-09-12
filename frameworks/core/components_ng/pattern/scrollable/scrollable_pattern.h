@@ -1049,11 +1049,6 @@ public:
 
     ACE_FORCE_EXPORT void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
-    bool EnableCachePredictNodes() const override
-    {
-        return true;
-    }
-
 protected:
     ACE_FORCE_EXPORT void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;

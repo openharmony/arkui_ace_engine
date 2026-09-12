@@ -5225,8 +5225,7 @@ void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, ui
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    CHECK_EQUAL_VOID(mgr->IsIgnoringEventType(type), true);
-    mgr->OnScrollChangeEnd(keyNode);
+    mgr->OnScrollChangeEnd(keyNode, type);
 #endif
 }
 

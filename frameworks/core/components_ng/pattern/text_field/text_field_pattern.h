@@ -2481,6 +2481,9 @@ private:
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
     bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
+#if defined(CROSS_PLATFORM)
+    bool HandleCrossPlatformDeleteEvent(const std::shared_ptr<TextEditingValue>& value);
+#endif
     void ApplyInnerBorderColor();
     void GetSelectRectWithBlank(std::vector<RectF>& selectedRects);
     void ScrollToVisible(const TextScrollOptions& options);

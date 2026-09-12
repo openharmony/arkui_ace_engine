@@ -7572,15 +7572,12 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
     CHECK_NULL_VOID(rootNode_);
     auto root = JsonUtil::CreateSharedPtrJson(true);
     GetAppInfo(root);
-    auto cb = [root, onlyNeedVisible]() {
+    auto cb = [root]() {
         auto json = root->ToString();
         auto res = JsonUtil::Create(true);
         res->Put("0", json.c_str());
 #ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
-        if (!onlyNeedVisible) {
-            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-        }
 #endif
     };
     ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
