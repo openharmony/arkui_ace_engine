@@ -119,7 +119,10 @@ ace_unittest("full_screen_manager_test_ng") {
 ace_unittest("json_report_test_ng") {
   module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
-  sources = [ "json_report_test_ng.cpp" ]
+  sources = [
+    "json_report_test_ng.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/manager/event/json_child_report.cpp",
+  ]
 }
 
 ace_unittest("post_event_manager_test_ng") {
