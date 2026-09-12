@@ -2083,6 +2083,7 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+    uint32_t rotation_ = 0;
 
     // autofill sync state
     std::string pendingAutoFillJsonStr_;
