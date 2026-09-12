@@ -893,6 +893,10 @@ void CreateWithResourceObjImpl(ArkUINodeHandle node, void* paramRawPtr)
     tabsModelImpl->CreateWithResourceObj(param->jsResourceType, AceType::Claim(param->resourceObj));
 }
 
+void SetSidebarDisplayStyleImpl(ArkUINodeHandle node, ArkUI_Int32 sidebarDisplayStyle) {}
+
+void ResetSidebarDisplayStyleImpl(ArkUINodeHandle node) {}
+
 void SetBarStyleImpl(ArkUINodeHandle node, ArkUI_Int32 barStyle) {}
 
 void ResetBarStyleImpl(ArkUINodeHandle node) {}
@@ -1967,6 +1971,20 @@ void CreateWithResourceObj(ArkUINodeHandle node, void* paramRawPtr)
     TabsModelNG::CreateWithResourceObj(frameNode, param->jsResourceType, resObj);
 }
 
+void SetSidebarDisplayStyle(ArkUINodeHandle node, ArkUI_Int32 sidebarDisplayStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, static_cast<SidebarDisplayStyle>(sidebarDisplayStyle));
+}
+
+void ResetSidebarDisplayStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, SidebarDisplayStyle::EMBED);
+}
+
 void SetBarStyle(ArkUINodeHandle node, ArkUI_Int32 barLayoutStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2222,6 +2240,8 @@ const ArkUITabsModifier* GetTabsModifier()
             .setTabsBarFloatingStyle = SetTabsBarFloatingStyle,
             .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyle,
             .createWithResourceObj = CreateWithResourceObj,
+            .setSidebarDisplayStyle = SetSidebarDisplayStyle,
+            .resetSidebarDisplayStyle = ResetSidebarDisplayStyle,
             .setBarStyle = SetBarStyle,
             .resetBarStyle = ResetBarStyle,
             .setSidebarPosition = SetSidebarPosition,
@@ -2351,6 +2371,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabsBarFloatingStyle = SetTabsBarFloatingStyleImpl,
         .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyleImpl,
         .createWithResourceObj = CreateWithResourceObjImpl,
+        .setSidebarDisplayStyle = SetSidebarDisplayStyleImpl,
+        .resetSidebarDisplayStyle = ResetSidebarDisplayStyleImpl,
         .setBarStyle = SetBarStyleImpl,
         .resetBarStyle = ResetBarStyleImpl,
         .setSidebarPosition = SetSidebarPositionImpl,

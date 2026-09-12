@@ -24,6 +24,10 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
 {
 }
 
+void ResSchedClickOptimizer::ReportClickWithExtData(const std::string& text, const std::string& xpath)
+{
+}
+
 void ResSchedClickOptimizer::GetComponentTextRecursive(
     const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, int32_t& maxNodes)
 {

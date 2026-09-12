@@ -75,6 +75,29 @@ public:
         return result;
     }
 
+    int32_t AddRichEditorBuilderSpanImpl(
+        RefPtr<UINode> customNode, const SpanOptionBase& options, const BuilderSpanRecord& builderSpanRecord)
+    {
+        int32_t result = 0;
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->AddPlaceholderSpan(customNode, options, builderSpanRecord);
+        }
+        return result;
+    }
+
+    std::vector<BuilderSpanInfo> GetRichEditorBuilderSpansImpl(int32_t start, int32_t end)
+    {
+        std::vector<BuilderSpanInfo> result;
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->GetRichEditorBuilderSpans(start, end);
+        }
+        return result;
+    }
+
     int32_t AddSymbolSpanImpl(const SymbolSpanOptions& options)
     {
         int32_t result = 0;

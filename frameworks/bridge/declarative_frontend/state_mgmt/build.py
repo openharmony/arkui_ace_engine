@@ -17,7 +17,8 @@
 #
 # This script is invoked by the build system and does not need to be executed directly by the developer.
 # First, it checks if --release is provided as an argument. This is the only allowed type for stateMgmt that is included in the build image.
-# It then verifies if the node_modules folder exists. If not, npm install is executed.
+# It then verifies that the node_modules folder exists (npm install is performed beforehand by the
+# state_mgmt_npm_install action, declared as a dep of run_state_mgmt_build in BUILD.gn).
 # Afterward, npm run build_release is performed, which also generates generateGni.js
 # The files_to_watch.gni file contains a list of input files from tsconfig.base.json.
 # When any of these files are modified, the build system triggers this script to regenerate stateMgmt.js.
@@ -27,29 +28,6 @@ import sys
 import time
 import shutil
 import subprocess
-import re
-
-
-def is_tsc_available(node_modules_path):
-    tsc_path = os.path.join(node_modules_path, "typescript", "lib", "tsc.js")
-    if os.path.exists(tsc_path):
-        print(f"StateMgmt: tsc found at {tsc_path}")
-        return True
-    print(f"StateMgmt: tsc not found at {tsc_path}")
-    return False
-
-
-def run_npm_install(project_path):
-    secondary_npm_registry = "https://cmc.centralrepo.rnd.huawei.com/artifactory/api/npm/npm-central-repo/"
-    try:
-        subprocess.check_call(["npm", "install"])
-    except subprocess.CalledProcessError as e:
-        print(f"Warning: npm install failed with exit code {e.returncode}. Retry with secondary registry...")
-        try:
-            subprocess.check_call(["npm", "install", "--registry", secondary_npm_registry, "--loglevel=verbose"])
-        except subprocess.CalledProcessError as e2:
-            print(f"Error: npm install retry failed: {e2.stderr}")
-            sys.exit(e2.returncode)
 
 
 def main(argv):
@@ -75,10 +53,11 @@ def main(argv):
     print(f"StateMgmt: Changing directory to {project_path}. Out dir = {js_output_path}")
     os.chdir(project_path)
 
-    # Check if `node_modules` exists. If yes skip npm install
     if not os.path.exists(node_modules_path):
-        print(f"StateMgmt: node_modules directory not found at {node_modules_path}, running npm install")
-        run_npm_install(project_path)
+        print(f"ERROR: node_modules directory not found at {node_modules_path}")
+        print("This should have been created by state_mgmt_npm_install action.")
+        print("Check that :state_mgmt_npm_install is in the deps of :run_state_mgmt_build")
+        sys.exit(1)
     else:
         print(f"StateMgmt: node_modules directory exists at {node_modules_path}")
 
@@ -89,19 +68,9 @@ def main(argv):
     try:
         subprocess.check_call(["npm", "run", script])
     except subprocess.CalledProcessError as e:
-        if not is_tsc_available(node_modules_path):
-            print(f"Warning: npm run {script} failed and tsc is missing. Retrying npm install...")
-            run_npm_install(project_path)
-            try:
-                subprocess.check_call(["npm", "run", script])
-            except subprocess.CalledProcessError as e2:
-                print(f"Error: npm run {script} failed with exit code {e2.returncode}.")
-                print("Error: State management build failed. See log output for failing .ts files")
-                sys.exit(e2.returncode)
-        else:
-            print(f"Error: npm run {script} failed with exit code {e.returncode}.")
-            print("Error: State management build failed. See log output for failing .ts files")
-            sys.exit(e.returncode)
+        print(f"Error: npm run {script} failed with exit code {e.returncode}.")
+        print("Error: State management build failed. See log output for failing .ts files")
+        sys.exit(e.returncode)
 
     source_folder = "distRelease"
     built_file = os.path.join(project_path, source_folder, "stateMgmt.js")

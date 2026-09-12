@@ -915,7 +915,8 @@ void ListItemGroupPattern::ApplyHeaderFooterStyle(const RefPtr<FrameNode>& node)
         .style = UiMaterialStyle::THICK
     };
     material->SetImmersiveOptions(options);
-    if (MaterialUtils::IsMaterialDisabled()) {
+    if (MaterialUtils::IsMaterialDisabled() || !MaterialUtils::IsSystemApp()) {
+        ACE_SCOPED_TRACE("ListItemGroup ApplyLowEndHeaderFooterMaterial");
         ApplyLowEndHeaderFooterMaterial(node, material);
         return;
     }

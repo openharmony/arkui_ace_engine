@@ -1074,6 +1074,12 @@ let TabBarStyle;
   TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 2] = 'SIDEBAR_ADAPTABLE';
 })(TabBarStyle || (TabBarStyle = {}));
 
+let SidebarDisplayStyle;
+(function (SidebarDisplayStyle) {
+  SidebarDisplayStyle[SidebarDisplayStyle.EMBED = 0] = 'EMBED';
+  SidebarDisplayStyle[SidebarDisplayStyle.DISPLACE = 1] = 'DISPLACE';
+})(SidebarDisplayStyle || (SidebarDisplayStyle = {}));
+
 let TabBarDisplayMode;
 (function (TabBarDisplayMode) {
   TabBarDisplayMode[TabBarDisplayMode.BOTTOM_TABBAR = 0] = 'BOTTOM_TABBAR';
@@ -2135,6 +2141,18 @@ let SheetKeyboardAvoidMode;
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL = 3] = 'TRANSLATE_AND_SCROLL';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.POPUP_SHEET = 4] = 'POPUP_SHEET';
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
+
+let SheetTitleBarHoverMode;
+(function (SheetTitleBarHoverMode) {
+  SheetTitleBarHoverMode[SheetTitleBarHoverMode.STANDARD = 0] = 'STANDARD';
+  SheetTitleBarHoverMode[SheetTitleBarHoverMode.STACK = 1] = 'STACK';
+})(SheetTitleBarHoverMode || (SheetTitleBarHoverMode = {}));
+
+let SheetTitleBarBackgroundBlur;
+(function (SheetTitleBarBackgroundBlur) {
+  SheetTitleBarBackgroundBlur[SheetTitleBarBackgroundBlur.NONE = 0] = 'NONE';
+  SheetTitleBarBackgroundBlur[SheetTitleBarBackgroundBlur.GRADIENT = 1] = 'GRADIENT';
+})(SheetTitleBarBackgroundBlur || (SheetTitleBarBackgroundBlur = {}));
 
 let FunctionKey;
 (function (FunctionKey) {

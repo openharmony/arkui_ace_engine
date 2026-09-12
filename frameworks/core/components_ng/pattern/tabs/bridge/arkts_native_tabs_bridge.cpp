@@ -73,6 +73,8 @@ constexpr int32_t SIDEBAR_POSITION_START = static_cast<int32_t>(BarPosition::STA
 constexpr int32_t SIDEBAR_POSITION_END = static_cast<int32_t>(BarPosition::END);
 constexpr int32_t BAR_DISPLAY_MODE_BOTTOMTABBAR = static_cast<int32_t>(TabBarDisplayMode::BOTTOMTABBAR);
 constexpr int32_t BAR_DISPLAY_MODE_SIDEBAR = static_cast<int32_t>(TabBarDisplayMode::SIDEBAR);
+constexpr int32_t SIDEBAR_DISPLAY_STYLE_EMBED = static_cast<int32_t>(SidebarDisplayStyle::EMBED);
+constexpr int32_t SIDEBAR_DISPLAY_STYLE_DISPLACE = static_cast<int32_t>(SidebarDisplayStyle::DISPLACE);
 namespace {
 constexpr int NUM_2 = 2;
 #ifndef NG_BUILD
@@ -283,7 +285,8 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         "resetTabsBarFloatingStyle", "setBarStyle", "resetBarStyle", "setSidebarPosition",
         "resetSidebarPosition", "setSidebarHeader", "resetSidebarHeader", "setSidebarSearchable",
         "resetSidebarSearchable", "setBarDisplayModeBreakpoint", "resetBarDisplayModeBreakpoint",
-        "setOnBarDisplayModeChange", "resetOnBarDisplayModeChange"
+        "setOnBarDisplayModeChange", "resetOnBarDisplayModeChange", "setSidebarDisplayStyle",
+        "resetSidebarDisplayStyle"
     };
     Local<JSValueRef> functionValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::Create),
@@ -392,6 +395,8 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarDisplayModeBreakpoint),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetOnBarDisplayModeChange),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetOnBarDisplayModeChange),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetSidebarDisplayStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetSidebarDisplayStyle),
     };
     auto tabs = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
@@ -3054,6 +3059,37 @@ ArkUINativeModuleValue TabsBridge::ResetTabsBarFloatingStyle(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetSidebarDisplayStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    int32_t sidebarDisplayStyle = SIDEBAR_DISPLAY_STYLE_EMBED;
+    if (runtimeCallInfo->GetArgsNumber() > TABS_ARG_INDEX_1 && !styleArg.IsNull() && !styleArg->IsUndefined() &&
+        styleArg->IsNumber()) {
+        auto sidebarDisplayStyleVal = styleArg->Int32Value(vm);
+        if (sidebarDisplayStyleVal >= SIDEBAR_DISPLAY_STYLE_EMBED &&
+            sidebarDisplayStyleVal <= SIDEBAR_DISPLAY_STYLE_DISPLACE) {
+            sidebarDisplayStyle = sidebarDisplayStyleVal;
+        }
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setSidebarDisplayStyle(nativeNode, sidebarDisplayStyle);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetSidebarDisplayStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetSidebarDisplayStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue TabsBridge::SetBarStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

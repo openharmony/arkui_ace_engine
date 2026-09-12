@@ -2262,9 +2262,11 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
             context->UnRegisterLpxDirtyNode(WeakClaim(this));
         }
     }
-    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->OnAccessibilityDetachFromMainTree();
+    if (isAccessibilityPropertyInitialized_ || AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->OnAccessibilityDetachFromMainTree();
+    }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
     UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, false);
 #endif

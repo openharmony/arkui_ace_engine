@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <type_traits>
+#include <unistd.h>
 
 #include "test/mock/ohos_mock/rosen/render_service_client/core/ui/rs_mock.h"
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
@@ -285,6 +286,53 @@ HWTEST_F(PipelineContextTestNg, FrameMetricsExistingContract, TestSize.Level1)
     context_->onFocus_ = originalOnFocus;
     context_->backgroundColorModeUpdated_ = originalBackgroundColorModeUpdated;
     ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(nullptr));
+}
+
+/**
+ * @tc.name: FrameMetricsCoversRSSubmission
+ * @tc.desc: Verify totalDuration covers the RS submission phase. Inject a known delay inside
+ *           window_->FlushVsync() and assert totalDuration includes it, confirming submitEndTime
+ *           is captured after (not before) the actual RS submission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsCoversRSSubmission, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto originalWindow = context_->window_;
+    ASSERT_NE(originalWindow, nullptr);
+
+    constexpr int32_t DELAY_US = 30000;
+    class FrameMetricsSubmissionWindow : public NiceMock<MockWindow> {
+    public:
+        explicit FrameMetricsSubmissionWindow(int32_t delayUs) : delayUs_(delayUs) {}
+        void FlushVsync() override
+        {
+            beforeFlushVsync = GetSysTimestamp();
+            usleep(delayUs_);
+            afterFlushVsync = GetSysTimestamp();
+        }
+        int64_t beforeFlushVsync = 0;
+        int64_t afterFlushVsync = 0;
+
+    private:
+        int32_t delayUs_;
+    };
+    auto delayWindow = std::make_shared<FrameMetricsSubmissionWindow>(DELAY_US);
+    ASSERT_NE(delayWindow, nullptr);
+    context_->window_ = delayWindow;
+
+    FrameMetrics observedMetrics;
+    context_->SetFrameMetricsCallBack([&observedMetrics](FrameMetrics info) { observedMetrics = info; });
+
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+
+    EXPECT_GT(delayWindow->beforeFlushVsync, 0);
+    EXPECT_GT(delayWindow->afterFlushVsync, 0);
+    EXPECT_GE(observedMetrics.totalDuration,
+        static_cast<uint64_t>(delayWindow->afterFlushVsync - delayWindow->beforeFlushVsync));
+
+    context_->frameMetricsCallBack_ = nullptr;
+    context_->window_ = originalWindow;
 }
 
 /**

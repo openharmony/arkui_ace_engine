@@ -492,6 +492,8 @@ private:
     void HandleFocusEvent();
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleBlurEvent();
+    void ReportChangeEvent(const TouchEventInfo& info, const Offset& screenOffset,
+        const TouchLocationInfo& touchInfo);
     ExternalEvent CreateExternalEvent();
 
     void SetTouchPoint(

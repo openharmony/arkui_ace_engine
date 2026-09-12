@@ -1326,9 +1326,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, in
     } else {
         FlushMessages();
     }
-    const int64_t submitEndTime = GetSysTimestamp();
-    frameMetrics.totalDuration = (submitEndTime > actualStartTime)
-        ? static_cast<uint64_t>(submitEndTime - actualStartTime) : 0;
     FlushWindowPatternInfo();
     InspectDrew();
     InspectLayoutChildren();
@@ -1367,6 +1364,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, in
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
     window_->FlushVsync();
+    const int64_t submitEndTime = GetSysTimestamp();
+    frameMetrics.totalDuration = (submitEndTime > actualStartTime)
+        ? static_cast<uint64_t>(submitEndTime - actualStartTime) : 0;
     if (IsFocusWindowIdSetted()) {
         FireAllUIExtensionEvents();
     }

@@ -23,6 +23,7 @@
 #include <chrono>
 #include <cstddef>
 #include <string_view>
+#include <cinttypes>
 #include <cstdint>
 #include <functional>
 #include <future>
@@ -587,6 +588,7 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     CHECK_NULL_RETURN(eventHub->HasOnStyledStringWillChange(), true);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "BeforeSSChange, start=%{public}d, len=%{public}d", start, length);
     auto replaceMentString = AceType::MakeRefPtr<MutableSpanString>(u"");
     replaceMentString->AppendSpanString(styledString);
     StyledStringChangeValue changeValue;
@@ -607,6 +609,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
     CHECK_NULL_VOID(eventHub);
     ReportTextChange();
     if (eventHub->HasOnStyledStringDidChange()){
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AfterSSChange, start=%{public}d, len=%{public}d", start, length);
         StyledStringChangeValue changeValue;
         auto changeStart = std::clamp(start, 0, GetTextContentLength());
         auto changeEnd = changeStart + length;
@@ -766,7 +769,7 @@ void RichEditorPattern::OnModifyDone()
     if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         dataDetectorAdapter_->GetAIEntityMenu();
     }
-    context->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
+    RegisterTranslateListener();
 }
 
 void RichEditorPattern::InitGestureEvents()
@@ -1399,7 +1402,6 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     ClearOnFocusTextField(node);
     auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
-    IF_PRESENT(context, UnRegisterListenerForTranslate(node->GetId()));
     CHECK_NULL_VOID(keyboardOverlay_);
     keyboardOverlay_->CloseKeyboard(node->GetId());
 }
@@ -1780,6 +1782,12 @@ bool RichEditorPattern::ProcessCommand(const std::string& cmd, const std::unique
         return false;
     }
     return true;
+}
+
+void RichEditorPattern::RequestKeyboardForStylus()
+{
+    // just for stylus scene: viewFocused but need Show stylus Keyboard
+    RequestKeyboard(false, true, true);
 }
 
 bool RichEditorPattern::ParseCommand(const std::string& command)
@@ -2520,7 +2528,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
 
 int32_t RichEditorPattern::GetCaretPosition()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetCaretPosition");
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetCaretPosition");
     return caretPosition_;
 }
 
@@ -2710,7 +2718,6 @@ void RichEditorPattern::OnWindowHide()
 
 void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetUpdateSpanStyle");
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle=%{public}s", updateSpanStyle.ToString().c_str());
     updateSpanStyle_ = updateSpanStyle;
 }
@@ -5812,32 +5819,44 @@ bool RichEditorPattern::SelectOverlayIsOn()
     return selectOverlay_->SelectOverlayIsOn();
 }
 
+void RichEditorPattern::HandleEditingDeleteEvent(const std::shared_ptr<TextEditingValue>& value)
+{
+#ifdef CROSS_PLATFORM
+    if (!value->compose.IsValid()) {
+        HandleOnDelete(true);
+        return;
+    }
+    if (value->unmarkText && value->selection.GetStart() == value->selection.GetEnd() &&
+        value->selection.GetEnd() == value->compose.GetStart() &&
+        value->compose.GetEnd() > value->compose.GetStart() + 1) {
+        DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+        value->compose.Update(-1);
+    } else {
+        EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+        if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+            relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+            HandleOnDelete(true);
+        } else {
+            if (value->compose.GetStart() == 0 && value->text.empty()) {
+                DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+            } else {
+                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+            }
+            value->compose.Update(-1);
+        }
+    }
+#else
+    HandleOnDelete(true);
+#endif
+}
+
 void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
 #ifdef ENABLE_STANDARD_INPUT
     InsertValue(UtfUtils::Str8ToStr16(value->text), true);
 #else
     if (value->isDelete) {
-#ifdef CROSS_PLATFORM
-        if (value->compose.IsValid()) {
-            EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
-            if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
-                relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
-                HandleOnDelete(true);
-            } else {
-                if (value->compose.GetStart() == 0 && value->text.empty()) {
-                    DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
-                } else {
-                    DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
-                }
-                value->compose.Update(-1);
-            }
-        } else {
-            HandleOnDelete(true);
-        }
-#else
-        HandleOnDelete(true);
-#endif
+        HandleEditingDeleteEvent(value);
     } else {
 #ifdef CROSS_PLATFORM
         editingValue_ = value;
@@ -9688,7 +9707,13 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
             CHECK_NULL_VOID(richEditor);
             ACE_SCOPED_TRACE("RichEditorAsyncHandleOnCopy");
             RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
+#if defined(IOS_PLATFORM)
+            // iOS UIPasteboard stores records in insertion order (append).
+            // Use forward iteration to preserve correct text order.
+            for (auto resultObj = copyResultObjects.begin(); resultObj != copyResultObjects.end(); ++resultObj) {
+#else
             for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
+#endif
                 richEditor->ProcessResultObject(pasteData, *resultObj, copySpans);
             }
             auto uiTaskExecutor = task.Upgrade();
@@ -10512,6 +10537,17 @@ void RichEditorPattern::DumpInfo()
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     dumpLog.AddDesc(std::string("keyboardAppearance: ")
             .append(std::to_string(static_cast<int32_t>(keyboardAppearance_))));
+    DumpPageTranslateInfo();
+}
+
+void RichEditorPattern::DumpPageTranslateInfo()
+{
+    CHECK_NULL_VOID(pageTranslatedContent_.has_value());
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("PageTranslatedLen: ")
+        .append(std::to_string(pageTranslatedContent_->length())));
+    dumpLog.AddDesc(std::string("PageTranslateVersion: ")
+        .append(std::to_string(pageTranslateVersion_)));
 }
 
 void RichEditorPattern::RichEditorErrorReport(RichEditorInfo& info)
@@ -15481,6 +15517,9 @@ std::string RichEditorPattern::GetPageTranslateTextForReport() const
 bool RichEditorPattern::ApplyPageTranslateResult(const std::string& result, int64_t version)
 {
     if (!ApplyTranslateResultCommon(result, version)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "ApplyPageTranslateResult skipped currentVersion:%{public}" PRId64
+            " hasContent:%{public}d", pageTranslateVersion_, pageTranslatedContent_.has_value());
         return true;
     }
     auto host = GetHost();
@@ -15494,6 +15533,7 @@ void RichEditorPattern::ResetPageTranslate()
     if (!ResetTranslateCommon()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetPageTranslate");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -15524,6 +15564,8 @@ void RichEditorPattern::OnPlaceholderSourceTextChanged()
     CHECK_NULL_VOID(hasTranslateState);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "OnPlaceholderSourceChanged nodeId:%{public}d", host->GetId());
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();

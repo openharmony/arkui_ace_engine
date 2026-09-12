@@ -36,6 +36,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -3217,6 +3218,7 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
+            delegate->SetClickExtEnabled();
 
             delegate->JavaScriptOnDocumentStartByOrder();
             delegate->JavaScriptOnDocumentEndByOrder();
@@ -3795,6 +3797,7 @@ void WebDelegate::InitWebViewWithSurface()
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
+            delegate->SetClickExtEnabled();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             CHECK_NULL_VOID(delegate->cookieManager_);
             auto nweb_handler = std::make_shared<WebClientImpl>();
@@ -5731,6 +5734,12 @@ void WebDelegate::OnLoadStarted(const std::string& param)
             CHECK_NULL_VOID(webEventHub);
             webEventHub->FireOnLoadStartedEvent(std::make_shared<LoadStartedEvent>(param));
             delegate->RecordWebEvent(Recorder::EventType::LOAD_STARTED, param);
+            if (webPattern->ShouldEnableAgentManager()) {
+                auto agentManager = delegate->GetNWebAgentManager();
+                if (agentManager && !agentManager->IsAgentEnabled()) {
+                    webPattern->EnableAgentManager();
+                }
+            }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebLoadStarted");
 }
@@ -6337,6 +6346,9 @@ void WebDelegate::OnAccessibilityEvent(
             CHECK_NULL_VOID(report);
             report->ReportEvent(eventType, accessibilityId);
         }
+        if (eventType == AccessibilityEventType::TEXT_CHANGE) {
+            FillTextChangeExtraInfo(event, accessibilityId);
+        }
         event.nodeId = accessibilityId;
         event.type = eventType;
         accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
@@ -6347,6 +6359,20 @@ void WebDelegate::OnAccessibilityEvent(
         event.type = eventType;
         accessibilityManager->SendAccessibilityAsyncEvent(event);
     }
+}
+
+void WebDelegate::FillTextChangeExtraInfo(AccessibilityEvent& event, int64_t accessibilityId)
+{
+    auto nWebAccessibilityNodeInfo = GetAccessibilityNodeInfoById(accessibilityId);
+    CHECK_NULL_VOID(nWebAccessibilityNodeInfo);
+    std::string addText = nWebAccessibilityNodeInfo->GetAddText();
+    std::string removeText = nWebAccessibilityNodeInfo->GetRemoveText();
+    event.extraEventInfo["addText"] = addText;
+    event.extraEventInfo["removeText"] = removeText;
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebDelegate::OnAccessibilityEvent FillTextChangeExtraInfo addText: %{private}s, removeText: %{private}s, "
+        "accessibilityId: %{public}" PRId64,
+        addText.c_str(), removeText.c_str(), accessibilityId);
 }
 
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
@@ -10236,6 +10262,19 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist)
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->SetTouchHandleExistState(touchHandleExist);
+}
+
+void WebDelegate::SetClickExtEnabled()
+{
+    CHECK_NULL_VOID(nweb_);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(pipeline);
+    auto clickOptimizer = pipeline->GetClickOptimizer();
+    if (clickOptimizer) {
+        auto enable = clickOptimizer->GetClickExtEnabled();
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::SetClickExtEnabled enable: %{public}d", enable);
+        nweb_->SetClickExtEnabled(enable);
+    }
 }
 
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
