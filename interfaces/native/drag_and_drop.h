@@ -40,7 +40,7 @@
 #include "native_type.h"
 #include "ui_input_event.h"
 
-typedef struct OH_UdmfSummary OH_UdmfSummary;
+typedef struct OH_UDMF_Summary OH_UDMF_Summary;
 
 #ifdef __cplusplus
 extern "C" {
@@ -360,14 +360,16 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
  * @brief Obtains the unified data summary from a drag event.
  *
  * @param event Pointer to an <b>ArkUI_DragEvent</b> object.
- * @param summary Pointer to an <b>OH_UdmfSummary</b> object used to receive the summary.
+ * @param summary Pointer to an <b>OH_UDMF_Summary</b> object used to receive the summary.
+ * The pointer cannot be null. The object must be created by the caller before this API is called and destroyed
+ * by the caller after use. If the operation fails, the content of the object is not guaranteed to be valid.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if an internal error occurs.
  * @since 26
  */
-int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UdmfSummary* summary);
+int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UDMF_Summary* summary);
 
 /**
  * @brief Obtains the drag result from a drag event.
