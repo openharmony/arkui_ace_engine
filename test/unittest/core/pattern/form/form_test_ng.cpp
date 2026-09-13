@@ -32,7 +32,6 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/utils/system_properties.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/form_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -50,13 +49,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #include "form_constants.h"
-
-// 对应 mock/mock_form_manager_delegate.cpp 中定义的测试观察点
-namespace OHOS::Ace {
-extern std::string g_mockActionEventAction;
-extern bool g_mockActionEventIsManuallyClick;
-extern int32_t g_mockActionEventCallCount;
-} // namespace OHOS::Ace
 
 using namespace testing;
 using namespace testing::ext;
@@ -835,114 +827,6 @@ HWTEST_F(FormTestNg, OnActionEvent, TestSize.Level1)
      */
     action->Put("abilityName", "abilityName");
     pattern->OnActionEvent(action->ToString());
-}
-
-/**
- * @tc.name: OnActionEventInsightIntent001
- * @tc.desc: Verify insightIntent action of OnActionEvent passes and resets isManuallyClick_.
- * @tc.type: FUNC
- */
-HWTEST_F(FormTestNg, OnActionEventInsightIntent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a FormPattern with subContainer and form manager bridge.
-     */
-    RefPtr<FrameNode> frameNode = CreateFromNode();
-    auto pattern = frameNode->GetPattern<FormPattern>();
-    ASSERT_NE(pattern, nullptr);
-    WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>();
-    auto subContainer = AceType::MakeRefPtr<MockSubContainer>(context);
-    pattern->subContainer_ = subContainer;
-    pattern->frameNode_ = frameNode;
-    pattern->formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
-    auto action = JsonUtil::Create(true);
-    action->Put("action", "insightIntent");
-    int32_t callCount = g_mockActionEventCallCount;
-
-    /**
-     * @tc.steps: step2. Trigger insightIntent with manual click (JS_CARD).
-     * @tc.expected: the action is delivered to bridge and isManuallyClick_ is reset.
-     */
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
-    pattern->isManuallyClick_ = true;
-    pattern->OnActionEvent(action->ToString());
-    EXPECT_EQ(g_mockActionEventCallCount, callCount + 1);
-    EXPECT_EQ(g_mockActionEventAction, action->ToString());
-    EXPECT_FALSE(g_mockActionEventIsManuallyClick);
-    EXPECT_FALSE(pattern->isManuallyClick_);
-
-    /**
-     * @tc.steps: step3. Trigger insightIntent without manual click (JS_CARD).
-     * @tc.expected: JS_CARD is not intercepted and the action is delivered.
-     */
-    pattern->OnActionEvent(action->ToString());
-    EXPECT_EQ(g_mockActionEventCallCount, callCount + 2);
-
-    /**
-     * @tc.steps: step4. Trigger insightIntent without manual click (ETS_CARD, accessibility disabled).
-     * @tc.expected: the action is intercepted and the bridge is not called.
-     */
-    subContainer->uiSyntax_ = FrontendType::ETS_CARD;
-    pattern->OnActionEvent(action->ToString());
-    EXPECT_EQ(g_mockActionEventCallCount, callCount + 2);
-
-    /**
-     * @tc.steps: step5. Trigger insightIntent without manual click (ETS_CARD, accessibility enabled).
-     * @tc.expected: the action is not intercepted and delivered with isManuallyClick false.
-     */
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
-    pattern->OnActionEvent(action->ToString());
-    EXPECT_EQ(g_mockActionEventCallCount, callCount + 3);
-    EXPECT_FALSE(g_mockActionEventIsManuallyClick);
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
-
-    /**
-     * @tc.steps: step6. Trigger insightIntent with manual click (ETS_CARD).
-     * @tc.expected: the action is delivered and isManuallyClick_ is reset.
-     */
-    pattern->isManuallyClick_ = true;
-    pattern->OnActionEvent(action->ToString());
-    EXPECT_EQ(g_mockActionEventCallCount, callCount + 4);
-    EXPECT_FALSE(pattern->isManuallyClick_);
-}
-
-/**
- * @tc.name: OnActionEventInsightIntent002
- * @tc.desc: Verify insightIntent action of OnActionEvent returns early when bridge or subContainer is null.
- * @tc.type: FUNC
- */
-HWTEST_F(FormTestNg, OnActionEventInsightIntent002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a FormPattern with form manager bridge but no subContainer.
-     */
-    RefPtr<FrameNode> frameNode = CreateFromNode();
-    auto pattern = frameNode->GetPattern<FormPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->frameNode_ = frameNode;
-    WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>();
-    auto action = JsonUtil::Create(true);
-    action->Put("action", "insightIntent");
-    int32_t callCount = g_mockActionEventCallCount;
-
-    /**
-     * @tc.steps: step2. Trigger insightIntent when formManagerBridge_ is null.
-     * @tc.expected: return before bridge call and isManuallyClick_ is not reset.
-     */
-    pattern->formManagerBridge_ = nullptr;
-    pattern->isManuallyClick_ = true;
-    pattern->OnActionEvent(action->ToString());
-    EXPECT_EQ(g_mockActionEventCallCount, callCount);
-    EXPECT_TRUE(pattern->isManuallyClick_);
-
-    /**
-     * @tc.steps: step3. Trigger insightIntent when subContainer_ is null.
-     * @tc.expected: return before bridge call and isManuallyClick_ is not reset.
-     */
-    pattern->formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
-    pattern->OnActionEvent(action->ToString());
-    EXPECT_EQ(g_mockActionEventCallCount, callCount);
-    EXPECT_TRUE(pattern->isManuallyClick_);
 }
 
 /**

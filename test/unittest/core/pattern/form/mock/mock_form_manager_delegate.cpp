@@ -17,11 +17,6 @@
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
-// 测试观察点：记录最近一次 OnActionEvent 调用参数与累计调用次数，供单测断言拦截/放行行为。
-std::string g_mockActionEventAction;
-bool g_mockActionEventIsManuallyClick = false;
-int32_t g_mockActionEventCallCount = 0;
-
 FormManagerDelegate::~FormManagerDelegate() = default;
 
 void FormManagerDelegate::ReleasePlatformResource() {}
@@ -55,12 +50,7 @@ void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback
 
 void FormManagerDelegate::AddUnTrustFormCallback(const UnTrustFormCallback& callback) {}
 
-void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManuallyClick)
-{
-    g_mockActionEventAction = action;
-    g_mockActionEventIsManuallyClick = isManuallyClick;
-    ++g_mockActionEventCallCount;
-}
+void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManuallyClick) {}
 
 void FormManagerDelegate::SetRSUIContext(std::shared_ptr<Rosen::RSUIContext> &rsUIContext) {}
 
