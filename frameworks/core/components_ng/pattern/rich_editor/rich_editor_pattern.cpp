@@ -1622,8 +1622,8 @@ int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
-        frameId_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent nodeId:%{public}d, commandLength:%{public}zu", frameId_,
+        command.size());
     if (!ParseCommand(command)) {
         return RET_FAILED;
     }
@@ -1777,8 +1777,7 @@ bool RichEditorPattern::ProcessCommand(const std::string& cmd, const std::unique
     } else if (cmd == "requestKeyboard") {
         HandleRequestKeyboardCommand(hostId);
     } else {
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent unknown cmd : %{public}s, nodeId : %{public}d",
-            cmd.c_str(), hostId);
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent unknown command, nodeId : %{public}d", hostId);
         return false;
     }
     return true;

@@ -1838,6 +1838,9 @@ void SwiperPattern::FireAnimationEndEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    if (isInterrupt) {
+        ContentChangeOnTransitionEnd(host, true);
+    }
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -1896,7 +1899,7 @@ void SwiperPattern::NotifyScrollStateEvent(ScrollState scrollState)
     CHECK_NULL_VOID(mgr);
     auto host = GetHost();
     if (scrollState_ == ScrollState::IDLE) {
-        mgr->OnSwiperScrollStart(host);
+        mgr->OnSwiperScrollStart(host, hasTabsAncestor_);
     }
     if (scrollState == ScrollState::IDLE) {
         mgr->OnSwiperScrollEnd(host);
@@ -2143,6 +2146,15 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index, std::optional<int32_t> rawIndex)
 {
     if (currentIndex_ != index) {
+#ifndef CROSS_PLATFORM
+        auto pipeline = GetContext();
+        if (pipeline) {
+            auto contentChangeManager = pipeline->GetContentChangeManager();
+            if (contentChangeManager) {
+                contentChangeManager->OnSwiperChangeStart(GetHost(), hasTabsAncestor_);
+            }
+        }
+#endif
         FireWillShowEvent(index);
         FireWillHideEvent(currentIndex_);
     }
@@ -6873,6 +6885,14 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     }
     CHECK_NULL_VOID(onTabsCustomContentTransition_);
 
+#ifndef CROSS_PLATFORM
+    if (auto context = GetContext()) {
+        auto contentChangeManager = context->GetContentChangeManager();
+        if (contentChangeManager) {
+            contentChangeManager->OnSwiperChangeStart(GetHost(), hasTabsAncestor_);
+        }
+    }
+#endif
     auto tabContentAnimatedTransition = (*onTabsCustomContentTransition_)(fromIndex, toIndex);
     auto transition = tabContentAnimatedTransition.transition;
 
@@ -8362,6 +8382,11 @@ void SwiperPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool n
         return;
     }
     if (targetIndex_.has_value() && targetIndex_.value() == currentIndex_) {
+#ifndef CROSS_PLATFORM
+        if (mgr->IsStartEventReportEnabled()) {
+            mgr->OnSwiperChangeCancel(keyNode, hasTabsAncestor_);
+        }
+#endif
         return;
     }
 #ifndef CROSS_PLATFORM
@@ -8381,7 +8406,7 @@ void SwiperPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyN
 #endif
 }
 
-void SwiperPattern::ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const
+void SwiperPattern::ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode, bool isInterrupt) const
 {
 #ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
@@ -8389,7 +8414,13 @@ void SwiperPattern::ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNod
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
+    if (isInterrupt && (IsAutoPlay() || !mgr->IsStartEventReportEnabled())) {
+        return;
+    }
     mgr->OnTransitionRemoved(keyNode->GetId());
+    if (isInterrupt) {
+        mgr->OnSwiperChangeEnd(keyNode, hasTabsAncestor_);
+    }
 #endif
 }
 

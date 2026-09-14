@@ -4012,8 +4012,10 @@
       "OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::UpdateWithCheck(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&)";
       "OHOS::Ace::NG::ContentChangeManager::OnSwiperChangeEnd(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
+      "OHOS::Ace::NG::ContentChangeManager::OnSwiperChangeCancel(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
+      "OHOS::Ace::NG::ContentChangeManager::OnSwiperChangeStart(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::ContentChangeManager::OnSwiperScrollEnd(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
-      "OHOS::Ace::NG::ContentChangeManager::OnSwiperScrollStart(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
+      "OHOS::Ace::NG::ContentChangeManager::OnSwiperScrollStart(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::ContentChangeManager::OnTransitionAdded(int)";
       "OHOS::Ace::NG::ContentChangeManager::OnTransitionRemoved(int)";
       "OHOS::Ace::NG::ContentChangeManager::ReportTranslateTextNode(OHOS::Ace::WeakPtr<OHOS::Ace::NG::PageTranslateNode> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";

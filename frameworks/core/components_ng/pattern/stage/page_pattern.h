@@ -352,6 +352,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void FirePageTransitionStart();
+    void FirePageTransitionStart(PageTransitionType type);
     void FirePageTransitionFinish();
 
     void OnAttachToMainTree() override;

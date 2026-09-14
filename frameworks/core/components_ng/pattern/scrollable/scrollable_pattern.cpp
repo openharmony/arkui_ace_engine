@@ -3721,6 +3721,15 @@ void ScrollablePattern::OnScrollStop(
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+#ifndef CROSS_PLATFORM
+        if (pipeline) {
+            auto mgr = pipeline->GetContentChangeManager();
+            if (mgr && mgr->IsStartEventReportEnabled() && AnimateStoped() && IsScrollableStopped() &&
+                !GetIsDragging() && ScrollBarIdle() && InnerScrollBarIdle()) {
+                mgr->OnContentChangeInterrupted(host, ChangeType::SCROLL);
+            }
+        }
+#endif
     }
     if (pipeline) {
         pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
@@ -5241,6 +5250,7 @@ void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyN
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeStart(keyNode);
+    mgr->OnContentChangeStart(keyNode, ChangeType::SCROLL);
 #endif
 }
 
