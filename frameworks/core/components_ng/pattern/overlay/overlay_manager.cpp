@@ -7078,12 +7078,35 @@ RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& 
     const auto& children = rootNode->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
+        if (child->GetTag() == V2::SHEET_WRAPPER_TAG) {
+            auto sheetWrapper = GetLastChildNotOnDisappearingForSheet(child);
+            if (sheetWrapper) {
+                return sheetWrapper;
+            }
+            continue;
+        }
         if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
             auto atomicNode = child;
             return GetLastChildNotRemovingForAtm(atomicNode);
         } else if (!child->IsRemoving()) {
             return DynamicCast<FrameNode>(child);
         }
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> OverlayManager::GetLastChildNotOnDisappearingForSheet(const RefPtr<UINode>& node)
+{
+    auto sheetWrapperNode = DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
+    auto* sheetWrapperModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
+    CHECK_NULL_RETURN(sheetWrapperModifier, nullptr);
+    auto sheetPageNode = sheetWrapperModifier->sheetWrapperGetSheetPageNode(sheetWrapperNode);
+    CHECK_NULL_RETURN(sheetPageNode, nullptr);
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_RETURN(sheetPatternModifier, nullptr);
+    if (!sheetPatternModifier->sheetIsOnDisappearing(sheetPageNode)) {
+        return sheetWrapperNode;
     }
     return nullptr;
 }
