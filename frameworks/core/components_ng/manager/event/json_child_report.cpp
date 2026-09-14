@@ -324,4 +324,43 @@ std::shared_ptr<JsonValue> FocusJsonReport::GetJsonData() const
     value->Put("data", dataValue);
     return value;
 }
+TouchEventJsonReport::TouchEventJsonReport(int32_t nodeId, const std::string& action,
+    int64_t actionTimeMs, int32_t fingerId, float pointX, float pointY,
+    std::vector<FingerData>&& fingers)
+    : nodeId_(nodeId), action_(action), actionTimeMs_(actionTimeMs),
+      fingerId_(fingerId), pointX_(pointX), pointY_(pointY), fingers_(std::move(fingers))
+{
+    SetId(nodeId);
+    SetGestureType(GestureTypeName::TOUCH_EVENT);
+}
+
+std::shared_ptr<JsonValue> TouchEventJsonReport::GetJsonData() const
+{
+    auto value = JsonUtil::CreateSharedPtrJson();
+    value->Put("GestureType", "TouchEvent");
+    value->Put("nodeId", nodeId_);
+    value->Put("action", action_.c_str());
+    value->Put("actionTimeMs", static_cast<double>(actionTimeMs_));
+    value->Put("fingerId", fingerId_);
+
+    auto point = JsonUtil::CreateArray();
+    point->Put(pointX_);
+    point->Put(pointY_);
+    value->Put("point", point);
+
+    auto fingersArray = JsonUtil::CreateArray();
+    for (const auto& finger : fingers_) {
+        auto fingerObj = JsonUtil::CreateSharedPtrJson();
+        fingerObj->Put("fingerId", finger.fingerId);
+        auto fingerPoint = JsonUtil::CreateArray();
+        fingerPoint->Put(finger.pointX);
+        fingerPoint->Put(finger.pointY);
+        fingerObj->Put("point", fingerPoint);
+        fingersArray->Put(fingerObj);
+    }
+    value->Put("fingers", fingersArray);
+
+    return value;
+}
+
 } // namespace OHOS::Ace::NG

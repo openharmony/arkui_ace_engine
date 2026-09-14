@@ -126,6 +126,8 @@ public:
     bool IsTextNode() const;
     bool DefaultSupportDrag() override;
     void OnModifyDone() override;
+    void RegisterTranslateListener();
+    void UnRegisterTranslateListener(int32_t nodeId);
     void OnWindowHide() override;
     void OnWindowShow() override;
     void OnLanguageConfigurationUpdate() override;
@@ -671,6 +673,7 @@ protected:
     std::vector<SubComponentInfoEx> subComponentInfos_;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<PipelineContext> translatePipeline_;
     Status status_ = Status::NONE;
     CopyOptions copyOption_ = CopyOptions::None;
     SourceType sourceType_ = SourceType::NONE;

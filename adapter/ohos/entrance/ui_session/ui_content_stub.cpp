@@ -278,14 +278,14 @@ int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel&
 
 int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    sptr<IRemoteObject> report = data.ReadRemoteObject();
-    if (report == nullptr) {
-        LOGW("read reportStub object is nullptr,connect failed");
+    sptr<IRemoteObject> reportProxy = data.ReadRemoteObject();
+    if (reportProxy == nullptr) {
+        LOGW("read reportProxy object is nullptr,connect failed");
         return FAILED;
     }
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManagerOhos* uisession = reinterpret_cast<UiSessionManagerOhos*>(UiSessionManager::GetInstance());
-    uisession->SaveReportStub(report, processId);
+    uisession->SaveReportProxy(reportProxy, processId);
     uisession->SendBaseInfo(processId);
     return NO_ERROR;
 }

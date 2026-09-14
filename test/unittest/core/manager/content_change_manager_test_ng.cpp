@@ -432,7 +432,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest005, TestSize.Level
 
 /**
  * @tc.name: ContentChangeManagerTest006
- * @tc.desc: Test OnScrollChangeEnd
+ * @tc.desc: Test OnScrollChangeEnd with abnormal conditions
  * @tc.type: FUNC
  */
 HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest006, TestSize.Level1)
@@ -449,25 +449,37 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest006, TestSize.Level
     ASSERT_NE(mockUiSessionManager, nullptr);
 
     /**
-     * @tc.steps: step2. call OnScrollChangeEnd under abnormal conditions.
+     * @tc.steps: step2. call OnScrollChangeEnd with nullptr node.
      * @tc.expected: ReportContentChangeEvent never called.
      */
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
         .Times(NEVER_ONCE);
     contentChangeMgr->OnScrollChangeEnd(nullptr);
 
+    /**
+     * @tc.steps: step3. call OnScrollChangeEnd when detect is disabled.
+     * @tc.expected: ReportContentChangeEvent never called, scrollingNodes_ cleaned up.
+     */
     EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
         .Times(NEVER_ONCE);
     contentChangeMgr->OnScrollChangeEnd(node);
     EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingNodes_.count(node->GetId())), 0);
 
+    /**
+     * @tc.steps: step4. call OnScrollChangeEnd with node in scrollingNodes but detect disabled.
+     * @tc.expected: ReportContentChangeEvent never called, node removed from scrollingNodes_.
+     */
     EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
     contentChangeMgr->scrollingNodes_.emplace(node->GetId());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
     contentChangeMgr->OnScrollChangeEnd(node);
     EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingNodes_.count(node->GetId())), 0);
 
+    /**
+     * @tc.steps: step5. call OnScrollChangeEnd when other nodes are still scrolling.
+     * @tc.expected: ReportContentChangeEvent never called.
+     */
     ContentChangeConfig config;
     contentChangeMgr->currentContentChangeConfig_ = config;
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
@@ -479,18 +491,126 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest006, TestSize.Level
     ResetScrollingNodes();
 
     /**
-     * @tc.steps: step3. call OnScrollChangeEnd under normal conditions.
-     * @tc.expected: ReportContentChangeEvent called once.
+     * @tc.steps: step6. reset.
      */
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest006_1
+ * @tc.desc: Test OnScrollChangeEnd with different scroll reasons
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest006_1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize content change manager and enable detect.
+     * @tc.expected: contentChangeMgr is not nullptr and detect is enabled.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto node = FrameNode::CreateFrameNode("frameNode", NORMAL_NODE_ID, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+
+    ContentChangeConfig config;
+    contentChangeMgr->currentContentChangeConfig_ = config;
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    /**
+     * @tc.steps: step2. call OnScrollChangeEnd with default reason (scrollEnd).
+     * @tc.expected: ReportContentChangeEvent called with scrollEnd reason.
+     */
     contentChangeMgr->scrollingNodes_.emplace(node->GetId());
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL, ""))
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL,
+        "{\"scrollReason\":\"scrollEnd\"}"))
         .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->OnScrollChangeEnd(node);
 
     /**
-     * @tc.steps: step4. reset.
+     * @tc.steps: step3. call OnScrollChangeEnd with SCROLL_TO reason.
+     * @tc.expected: ReportContentChangeEvent called with scrollTo reason.
      */
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->scrollingNodes_.emplace(node->GetId());
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL,
+        "{\"scrollReason\":\"scrollTo\"}"))
+        .Times(AtLeast(AT_LEAST_ONCE));
+    contentChangeMgr->OnScrollChangeEnd(node, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step4. call OnScrollChangeEnd with SCROLL_TO_INDEX reason.
+     * @tc.expected: ReportContentChangeEvent called with scrollToIndex reason.
+     */
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->scrollingNodes_.emplace(node->GetId());
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL,
+        "{\"scrollReason\":\"scrollToIndex\"}"))
+        .Times(AtLeast(AT_LEAST_ONCE));
+    contentChangeMgr->OnScrollChangeEnd(node, ContentChangeManager::SCROLL_TO_INDEX);
+
+    /**
+     * @tc.steps: step5. reset.
+     */
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest006_2
+ * @tc.desc: Test OnScrollChangeEnd with ignoreEventMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest006_2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize content change manager and enable detect.
+     * @tc.expected: contentChangeMgr is not nullptr and detect is enabled.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto node = FrameNode::CreateFrameNode("frameNode", NORMAL_NODE_ID, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+
+    ContentChangeConfig config;
+    contentChangeMgr->currentContentChangeConfig_ = config;
+    EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    /**
+     * @tc.steps: step2. set ignoreEventMask to ignore SCROLL_TO and SCROLL_TO_INDEX.
+     * @tc.expected: ignoreEventMask is set correctly.
+     */
+    contentChangeMgr->ignoreEventMask_ = ContentChangeManager::SCROLL_TO |
+        ContentChangeManager::SCROLL_TO_INDEX;
+
+    /**
+     * @tc.steps: step3. call OnScrollChangeEnd with ignored SCROLL_TO reason.
+     * @tc.expected: ReportContentChangeEvent never called, scrollingNodes_ is cleaned up.
+     */
+    contentChangeMgr->scrollingNodes_.emplace(node->GetId());
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    contentChangeMgr->OnScrollChangeEnd(node, ContentChangeManager::SCROLL_TO);
+    EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
+
+    /**
+     * @tc.steps: step4. call OnScrollChangeEnd with default reason (not ignored).
+     * @tc.expected: ReportContentChangeEvent called with scrollEnd reason.
+     */
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    contentChangeMgr->scrollingNodes_.emplace(node->GetId());
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL,
+        "{\"scrollReason\":\"scrollEnd\"}"))
+        .Times(AtLeast(AT_LEAST_ONCE));
+    contentChangeMgr->OnScrollChangeEnd(node);
+
+    /**
+     * @tc.steps: step5. reset ignoreEventMask and config.
+     */
+    contentChangeMgr->ignoreEventMask_ = ContentChangeManager::NONE;
     contentChangeMgr->currentContentChangeConfig_.reset();
     EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
 }

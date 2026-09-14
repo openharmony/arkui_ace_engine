@@ -423,41 +423,13 @@ public:
         return nullptr;
     }
 
-    bool EnableCachePredictNodes() const
-    {
-        CHECK_NULL_RETURN(hostNode_, false);
-        const auto& pattern = hostNode_->GetPattern();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->EnableCachePredictNodes();
-    }
-
-    bool NeedReacquireFrameNode(const RefPtr<LayoutWrapper>& child, bool isCache) const
-    {
-        CHECK_NULL_RETURN(child, false);
-        const bool isActive = child->IsActive();
-        bool needReacquire = isActive == isCache;
-        if (!needReacquire && isActive) {
-            const auto hostNode = child->GetHostNode();
-            needReacquire = hostNode && !hostNode->IsOnMainTree();
-        }
-        return needReacquire && EnableCachePredictNodes();
-    }
-
     RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
             auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
-            if (child && (!isCache || EnableCachePredictNodes())) {
-                partFrameNodeChildren_[index] = child;
-            }
-            return child;
-        } else if (NeedReacquireFrameNode(itor->second, isCache)) {
-            // Re-acquire the node when entering the viewport.
-            // Pending analysis scenarios: cachedItems_ erase, but not notify partFrameNodeChildren_.
-            auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
-            if (child) {
+            if (child && !isCache) {
                 partFrameNodeChildren_[index] = child;
             }
             return child;
@@ -510,8 +482,7 @@ public:
     void RemoveChildInRenderTree(uint32_t index)
     {
         auto itor = partFrameNodeChildren_.find(index);
-        if (itor == partFrameNodeChildren_.end() ||
-            (!itor->second->IsActive() && EnableCachePredictNodes())) {
+        if (itor == partFrameNodeChildren_.end()) {
             return;
         }
         itor->second->SetActive(false);
@@ -535,12 +506,8 @@ public:
 
     void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false)
     {
-        int32_t startIndex = start;
-        int32_t endIndex = end;
-        if (showCache || EnableCachePredictNodes()) {
-            startIndex = start - cacheStart;
-            endIndex = end + cacheEnd;
-        }
+        int32_t startIndex = showCache ? start - cacheStart : start;
+        int32_t endIndex = showCache ? end + cacheEnd : end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
             if ((startIndex <= endIndex && index >= startIndex && index <= endIndex) ||
@@ -8111,23 +8078,6 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
         }
     }
     return total;
-}
-
-void FrameNode::GetInspectorValue()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED) && defined(OHOS_PLATFORM)
-    if (tag_ == V2::WEB_ETS_TAG) {
-        UiSessionManager::GetInstance()->WebTaskNumsChange(1);
-        auto pattern = GetPattern<NG::WebPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
-            UiSessionManager::GetInstance()->AddValueForTree(webId, value->ToString());
-            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-        };
-        pattern->GetAllWebAccessibilityNodeInfos(cb, nodeId_);
-    }
-#endif
-    UINode::GetInspectorValue();
 }
 
 void FrameNode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)

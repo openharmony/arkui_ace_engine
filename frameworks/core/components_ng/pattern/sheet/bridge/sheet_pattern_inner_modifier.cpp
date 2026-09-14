@@ -648,6 +648,14 @@ void SheetUpdateSheetScrollBar(const RefPtr<FrameNode>& sheetPageNode, const She
     CHECK_NULL_VOID(sheetPattern);
     sheetPattern->UpdateSheetScrollBar(sheetStyle);
 }
+
+bool SheetIsOnDisappearing(const RefPtr<FrameNode>& sheetNode)
+{
+    CHECK_NULL_RETURN(sheetNode, false);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, false);
+    return sheetPattern->IsOnDisappearing();
+}
 } // namespace
 
 const ArkUISheetPatternInnerModifier* GetSheetPatternInnerModifier()
@@ -727,6 +735,7 @@ const ArkUISheetPatternInnerModifier* GetSheetPatternInnerModifier()
         .sheetIsPresentationPattern = SheetIsPresentationPattern,
         .sheetSetSheetBlurSnapshotFreeze = SheetSetSheetBlurSnapshotFreeze,
         .sheetUpdateSheetScrollBar = SheetUpdateSheetScrollBar,
+        .sheetIsOnDisappearing = SheetIsOnDisappearing,
     };
     return &modifier;
 }

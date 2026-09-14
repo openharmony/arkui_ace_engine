@@ -195,6 +195,14 @@ void SheetWrapperLayoutAlgorithm::MeasureSheetEC(LayoutWrapper* layoutWrapper)
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
     auto constraint = layoutProp->CreateChildConstraint();
+    auto wrapperGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(wrapperGeometryNode);
+    if (!constraint.parentIdealSize.Width()) {
+        constraint.parentIdealSize.SetWidth(wrapperGeometryNode->GetFrameSize().Width());
+    }
+    if (!constraint.parentIdealSize.Height()) {
+        constraint.parentIdealSize.SetHeight(wrapperGeometryNode->GetFrameSize().Height());
+    }
     auto layoutPropEC = sheetECWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPropEC);
     layoutPropEC->UpdateMeasureType(MeasureType::MATCH_PARENT);

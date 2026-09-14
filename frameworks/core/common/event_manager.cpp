@@ -2731,7 +2731,7 @@ void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImm
 void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately)
 {
     if (logImmediately) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "Consumed id:%{public}d, last id:%{public}d", eventId,
             lastConsumedEvent_.eventId);
         return;

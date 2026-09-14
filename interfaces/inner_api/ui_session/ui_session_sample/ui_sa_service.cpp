@@ -406,6 +406,8 @@ sptr<Ace::IUiContentService> UiSaService::getArkUIService(int32_t windowId)
         LOGW("through uiSa, agent window dead, windowId:%{public}d", windowId);
         this->uiContentRemoteObjMap_.erase(windowId);
     });
+    // In this sample SA, tmpRemoteObj refers to the application-side UiContentStub.
+    // Listen for remote application death through this proxy and remove the local cached service.
     tmpRemoteObj->AddDeathRecipient(uiContentProxyRecipient);
     service = iface_cast<Ace::IUiContentService>(tmpRemoteObj);
     if (service == nullptr) {
@@ -666,13 +668,18 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
 void UiSaService::HandleRegisterComponentChangeEventCallback(
     sptr<IUiContentService> service, std::vector<std::string> params)
 {
+    bool toFile = HasToFileParam(params);
+    RemoveToFileParam(params);
     uint32_t mask = ParseComponentChangeEventMask(params);
-    auto finishCallback = [](std::string data) {
+    auto finishCallback = [toFile](std::string data) {
         LOGI("[ComponentChangeEvent] data = %{public}s", data.c_str());
+        if (toFile && !data.empty()) {
+            WriteTextFile("[ComponentChangeEvent]", "component_change_event", data);
+        }
     };
     service->RegisterComponentChangeEventCallback(finishCallback, mask);
-    LOGI("[ComponentChangeEvent] call RegisterComponentChangeEventCallback mask=%{public}s",
-        std::bitset<BITS_UINT32>(mask).to_string().c_str());
+    LOGI("[ComponentChangeEvent] call RegisterComponentChangeEventCallback mask=%{public}s, toFile=%{public}d",
+        std::bitset<BITS_UINT32>(mask).to_string().c_str(), toFile);
 }
 
 void UiSaService::HandleUnregisterComponentChangeEventCallback(

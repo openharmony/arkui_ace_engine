@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
 
@@ -189,7 +190,28 @@ bool MemoryManager::RegisterNavDestinationHiddenChange(
             }
             auto eventHub = navDestPattern->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_RETURN(eventHub, false);
-            eventHub->AddOnHiddenChange(imageNodeId, std::move(callback));
+            auto navDestWeak = WeakPtr<FrameNode>(parent);
+            auto wrappedCallback = [navDestWeak, callback = std::move(callback)](bool isShown) {
+                auto navDestNode = navDestWeak.Upgrade();
+                CHECK_NULL_VOID(navDestNode);
+                if (isShown) {
+                    callback(isShown);
+                    return;
+                }
+                auto navDestPattern = navDestNode->GetPattern<NavDestinationPattern>();
+                CHECK_NULL_VOID(navDestPattern);
+                auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navDestPattern->GetNavigationNode());
+                CHECK_NULL_VOID(navigationNode);
+                auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+                CHECK_NULL_VOID(navigationPattern);
+                if (navigationPattern->IsTopNavDestination(navDestNode)) {
+                    TAG_LOGD(AceLogTag::ACE_IMAGE,
+                        "Skip recycle for top NavDestination. navDestId:%{public}d", navDestNode->GetId());
+                    return;
+                }
+                callback(isShown);
+            };
+            eventHub->AddOnHiddenChange(imageNodeId, std::move(wrappedCallback));
             imageNavDestMap_[imageNodeId] = WeakPtr<FrameNode>(parent);
             TAG_LOGD(AceLogTag::ACE_IMAGE, "RegisterNavDestinationHiddenChange imageNodeId:%{public}d navId:%{public}d",
                 imageNodeId, parent->GetId());

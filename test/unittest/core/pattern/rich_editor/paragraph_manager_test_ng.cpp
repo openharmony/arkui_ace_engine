@@ -1852,4 +1852,131 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetRects005, TestSize
         richEditorPattern->paragraphs_.GetRects(TEST_RECT_START, TEST_RECT_END_20, RectHeightPolicy::COVER_TEXT);
     EXPECT_EQ(rects.size(), 2);
 }
+/**
+ * @tc.name: CalPosyRangeNullParagraph001
+ * @tc.desc: Test CalPosyRange with null paragraph, should return without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, CalPosyRangeNullParagraph001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = nullptr;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+
+    richEditorPattern->paragraphs_.CalPosyRange();
+    EXPECT_FALSE(richEditorPattern->paragraphs_.hasPosyRange);
+}
+
+/**
+ * @tc.name: CalPosyRangeNullParagraph002
+ * @tc.desc: Test CalPosyRange with valid then null paragraphs, should abort at null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, CalPosyRangeNullParagraph002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(TEST_HEIGHT_100));
+    ParagraphManager::ParagraphInfo info1;
+    info1.paragraph = paragraph;
+    info1.start = TEST_PARAGRAPH_START;
+    info1.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info1);
+
+    ParagraphManager::ParagraphInfo info2;
+    info2.paragraph = nullptr;
+    info2.start = TEST_PARAGRAPH_END_10;
+    info2.end = TEST_PARAGRAPH_END_20;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info2);
+
+    richEditorPattern->paragraphs_.CalPosyRange();
+    EXPECT_FALSE(richEditorPattern->paragraphs_.hasPosyRange);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.front().topPos, 0.0f);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.front().bottomPos, TEST_HEIGHT_100);
+}
+
+/**
+ * @tc.name: CalLineIndexNullParagraph001
+ * @tc.desc: Test CalLineIndex with null paragraph, should return without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, CalLineIndexNullParagraph001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = nullptr;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+
+    richEditorPattern->paragraphs_.CalLineIndex();
+    EXPECT_FALSE(richEditorPattern->paragraphs_.hasLineIndex);
+}
+
+/**
+ * @tc.name: CalLineIndexNullParagraph002
+ * @tc.desc: Test CalLineIndex with valid then null paragraphs, should abort at null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, CalLineIndexNullParagraph002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(2));
+    ParagraphManager::ParagraphInfo info1;
+    info1.paragraph = paragraph;
+    info1.start = TEST_PARAGRAPH_START;
+    info1.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info1);
+
+    ParagraphManager::ParagraphInfo info2;
+    info2.paragraph = nullptr;
+    info2.start = TEST_PARAGRAPH_END_10;
+    info2.end = TEST_PARAGRAPH_END_20;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info2);
+
+    richEditorPattern->paragraphs_.CalLineIndex();
+    EXPECT_FALSE(richEditorPattern->paragraphs_.hasLineIndex);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.front().topLineIndex, 0u);
+    EXPECT_EQ(richEditorPattern->paragraphs_.paragraphs_.front().bottomLineIndex, 1u);
+}
+
+/**
+ * @tc.name: GetRectsNullParagraph001
+ * @tc.desc: Test GetRects with null paragraph, should skip without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRectsNullParagraph001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = nullptr;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+
+    auto rects = richEditorPattern->paragraphs_.GetRects(TEST_RECT_START, TEST_RECT_END, RectHeightPolicy::COVER_LINE);
+    EXPECT_EQ(rects.size(), 0);
+}
+
 } // namespace OHOS::Ace::NG

@@ -2706,13 +2706,6 @@ bool UINode::IsContextTransparent()
     return true;
 }
 
-void UINode::GetInspectorValue()
-{
-    for (const auto& item : GetChildren()) {
-        item->GetInspectorValue();
-    }
-}
-
 void UINode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
 {
     for (const auto& child : GetChildren()) {

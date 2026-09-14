@@ -1440,6 +1440,7 @@ public:
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);
+    void FillTextChangeExtraInfo(AccessibilityEvent& event, int64_t accessibilityId);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth,
@@ -2082,6 +2083,7 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+    uint32_t rotation_ = 0;
 
     // autofill sync state
     std::string pendingAutoFillJsonStr_;

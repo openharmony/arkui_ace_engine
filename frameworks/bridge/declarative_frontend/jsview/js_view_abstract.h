@@ -831,7 +831,9 @@ public:
                 return false;
             }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+            CHECK_EQUAL_RETURN(params->Length(), 0, false);
             auto param = params->GetValueAt(0);
+            if (!param->IsString()) return false;
             if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
                 result = static_cast<T>(resourceAdapter->GetIntByName(param->ToString()));
                 return true;

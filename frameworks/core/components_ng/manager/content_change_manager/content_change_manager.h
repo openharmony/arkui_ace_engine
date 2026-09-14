@@ -65,7 +65,7 @@ public:
 
     void OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode);
     void OnScrollChangeStart(const RefPtr<FrameNode>& keyNode);
-    void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode);
+    void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode, uint32_t type = NONE);
     void OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
     ACE_FORCE_EXPORT void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
     void OnScrollRemoved(int32_t nodeId);

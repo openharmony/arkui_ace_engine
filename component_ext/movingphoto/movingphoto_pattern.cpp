@@ -65,6 +65,7 @@ constexpr int32_t US_CONVERT = 1000;
 constexpr int32_t ROUND_XMAGE_PIXEL_GAP = 2;
 constexpr int32_t EIGHTY_TO_HUNDRED_TIME = 3000;
 constexpr int32_t NODE_COUNT = 2;
+constexpr float HDR_BRIGHTNESS_OFF = 0.0f;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -530,6 +531,9 @@ void MovingPhotoPattern::UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode)
     if (dynamicRangeMode_ == DynamicRangeMode::STANDARD) {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, imageNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, imageNode);
+        if (renderContextForMediaPlayer_) {
+            renderContextForMediaPlayer_->SetHDRBrightness(HDR_BRIGHTNESS_OFF);
+        }
     }
 }
 

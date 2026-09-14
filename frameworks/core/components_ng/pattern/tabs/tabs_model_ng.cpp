@@ -332,6 +332,12 @@ void TabsModelNG::SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& o
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     onApply(tabBarNode);
+    // Store the callback so it can be replayed on the sidebar during SyncPropertiesToSideBar.
+    // No need to apply immediately — OnModifyDone will replay it in the correct order
+    // (modifier first, then bar* properties override), consistent with tabBar execution order.
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetBarModifierApply(std::move(onApply));
 }
 
 void TabsModelNG::SetWidthAuto(bool isAuto)
@@ -593,6 +599,7 @@ void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColor, backgroundColor);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
@@ -953,6 +960,7 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColor, backgroundColor, frameNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
@@ -1000,6 +1008,9 @@ void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyl
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetBarBlurStyleOption(styleOption);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto pipeline = tabBarNode->GetContext();
@@ -1355,6 +1366,12 @@ void TabsModelNG::SetBarModifier(FrameNode* frameNode, std::function<void(WeakPt
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     onApply(tabBarNode);
+    // Store the callback so it can be replayed on the sidebar during SyncPropertiesToSideBar.
+    // No need to apply immediately — OnModifyDone will replay it in the correct order
+    // (modifier first, then bar* properties override), consistent with tabBar execution order.
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetBarModifierApply(std::move(onApply));
 }
 
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)

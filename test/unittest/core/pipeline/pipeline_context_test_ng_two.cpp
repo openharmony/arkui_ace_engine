@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+#include <cstddef>
+#include <type_traits>
+#include <unistd.h>
+
+#include "test/mock/ohos_mock/rosen/render_service_client/core/ui/rs_mock.h"
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -42,6 +47,293 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace NG {
+
+/**
+ * @tc.name: FrameMetricsApiContract
+ * @tc.desc: Verify the type, default value, and append-only order of the new FrameMetrics fields.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsApiContract, TestSize.Level1)
+{
+    static_assert(std::is_same_v<decltype(FrameMetrics::actualStartTime), uint64_t>);
+    static_assert(std::is_same_v<decltype(FrameMetrics::totalDuration), uint64_t>);
+
+    FrameMetrics frameMetrics;
+    EXPECT_EQ(frameMetrics.actualStartTime, 0);
+    EXPECT_EQ(frameMetrics.totalDuration, 0);
+    EXPECT_LT(offsetof(FrameMetrics, layoutMeasureDuration), offsetof(FrameMetrics, actualStartTime));
+    EXPECT_LT(offsetof(FrameMetrics, actualStartTime), offsetof(FrameMetrics, totalDuration));
+}
+
+/**
+ * @tc.name: FrameMetricsFlushVsyncCallback
+ * @tc.desc: Verify a submitted frame reports the actual start time and total duration once.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsFlushVsyncCallback, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto window = static_cast<MockWindow*>(context_->window_.get());
+    ASSERT_NE(window, nullptr);
+    auto director = Rosen::RSUIDirector::Create(nullptr);
+    ASSERT_NE(director, nullptr);
+    ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(director));
+
+    FrameMetrics observedMetrics;
+    int32_t callbackCount = 0;
+    const bool originalFreezeFlushMessage = context_->IsFreezeFlushMessage();
+    const bool originalOnShow = context_->onShow_;
+    const bool originalOnFocus = context_->onFocus_;
+    const bool originalBackgroundColorModeUpdated = context_->backgroundColorModeUpdated_;
+    context_->SetFrameMetricsCallBack([&observedMetrics, &callbackCount](FrameMetrics info) {
+        observedMetrics = info;
+        ++callbackCount;
+    });
+    context_->SetIsFreezeFlushMessage(false);
+    context_->backgroundColorModeUpdated_ = false;
+    context_->onShow_ = true;
+    context_->onFocus_ = false;
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_EQ(observedMetrics.vsyncTimestamp, NANO_TIME_STAMP);
+    EXPECT_GT(observedMetrics.actualStartTime, 0);
+    EXPECT_GT(observedMetrics.totalDuration, 0);
+    EXPECT_GE(
+        observedMetrics.totalDuration, observedMetrics.inputHandlingDuration + observedMetrics.layoutMeasureDuration);
+
+    context_->frameMetricsCallBack_ = nullptr;
+    context_->SetIsFreezeFlushMessage(originalFreezeFlushMessage);
+    context_->onShow_ = originalOnShow;
+    context_->onFocus_ = originalOnFocus;
+    context_->backgroundColorModeUpdated_ = originalBackgroundColorModeUpdated;
+    ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(nullptr));
+}
+
+/**
+ * @tc.name: FrameMetricsFreezeFrame
+ * @tc.desc: Verify a frozen submission preserves the start time and still reports total duration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsFreezeFrame, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto window = static_cast<MockWindow*>(context_->window_.get());
+    ASSERT_NE(window, nullptr);
+    int32_t flushCount = 0;
+    ON_CALL(*window, FlushTasks(_)).WillByDefault([&flushCount](std::function<void()>) { ++flushCount; });
+    FrameMetrics observedMetrics;
+    int32_t callbackCount = 0;
+    const bool originalFreezeFlushMessage = context_->IsFreezeFlushMessage();
+    const bool originalOnShow = context_->onShow_;
+    const bool originalOnFocus = context_->onFocus_;
+    const bool originalBackgroundColorModeUpdated = context_->backgroundColorModeUpdated_;
+    context_->SetFrameMetricsCallBack([&observedMetrics, &callbackCount](FrameMetrics info) {
+        observedMetrics = info;
+        ++callbackCount;
+    });
+    context_->SetIsFreezeFlushMessage(true);
+    context_->backgroundColorModeUpdated_ = false;
+    context_->onShow_ = true;
+    context_->onFocus_ = false;
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_GT(observedMetrics.actualStartTime, 0);
+    EXPECT_GT(observedMetrics.totalDuration, 0);
+    EXPECT_FALSE(context_->IsFreezeFlushMessage());
+    EXPECT_EQ(flushCount, 0);
+    context_->frameMetricsCallBack_ = nullptr;
+    context_->SetIsFreezeFlushMessage(originalFreezeFlushMessage);
+    context_->onShow_ = originalOnShow;
+    context_->onFocus_ = originalOnFocus;
+    context_->backgroundColorModeUpdated_ = originalBackgroundColorModeUpdated;
+    ON_CALL(*window, FlushTasks(_)).WillByDefault([](std::function<void()>) {});
+}
+
+/**
+ * @tc.name: FrameMetricsMissingDirector
+ * @tc.desc: Verify a missing RS director still reports total duration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsMissingDirector, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto window = static_cast<MockWindow*>(context_->window_.get());
+    ASSERT_NE(window, nullptr);
+    int32_t flushCount = 0;
+    ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(nullptr));
+    ON_CALL(*window, FlushTasks(_)).WillByDefault([&flushCount](std::function<void()>) { ++flushCount; });
+
+    FrameMetrics observedMetrics;
+    const bool originalFreezeFlushMessage = context_->IsFreezeFlushMessage();
+    int32_t callbackCount = 0;
+    const bool originalOnShow = context_->onShow_;
+    const bool originalOnFocus = context_->onFocus_;
+    const bool originalBackgroundColorModeUpdated = context_->backgroundColorModeUpdated_;
+    context_->SetFrameMetricsCallBack([&observedMetrics, &callbackCount](FrameMetrics info) {
+        observedMetrics = info;
+        ++callbackCount;
+    });
+    context_->SetIsFreezeFlushMessage(false);
+    context_->backgroundColorModeUpdated_ = false;
+    context_->onShow_ = true;
+    context_->onFocus_ = false;
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+
+    EXPECT_EQ(flushCount, 1);
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_GT(observedMetrics.actualStartTime, 0);
+    EXPECT_GT(observedMetrics.totalDuration, 0);
+
+    context_->frameMetricsCallBack_ = nullptr;
+    context_->SetIsFreezeFlushMessage(originalFreezeFlushMessage);
+    context_->onShow_ = originalOnShow;
+    context_->onFocus_ = originalOnFocus;
+    context_->backgroundColorModeUpdated_ = originalBackgroundColorModeUpdated;
+    ON_CALL(*window, FlushTasks(_)).WillByDefault([](std::function<void()>) {});
+}
+
+/**
+ * @tc.name: FrameMetricsDvSyncTimestamp
+ * @tc.desc: Verify a future DVSync timestamp does not overwrite the actual frame start time.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsDvSyncTimestamp, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto window = static_cast<MockWindow*>(context_->window_.get());
+    ASSERT_NE(window, nullptr);
+    auto director = Rosen::RSUIDirector::Create(nullptr);
+    ASSERT_NE(director, nullptr);
+    ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(director));
+    constexpr uint64_t futureOffset = 1000000000;
+    const uint64_t futureVsyncTimestamp = static_cast<uint64_t>(GetSysTimestamp()) + futureOffset;
+    EXPECT_CALL(*window, FlushAnimation(futureVsyncTimestamp)).WillOnce(Return(false));
+
+    FrameMetrics observedMetrics;
+    const bool originalFreezeFlushMessage = context_->IsFreezeFlushMessage();
+    const bool originalOnShow = context_->onShow_;
+    const bool originalOnFocus = context_->onFocus_;
+    const bool originalBackgroundColorModeUpdated = context_->backgroundColorModeUpdated_;
+    context_->SetFrameMetricsCallBack([&observedMetrics](FrameMetrics info) { observedMetrics = info; });
+    context_->SetIsFreezeFlushMessage(false);
+    context_->backgroundColorModeUpdated_ = false;
+    context_->onShow_ = true;
+    context_->onFocus_ = false;
+    context_->FlushVsync(futureVsyncTimestamp, FRAME_COUNT);
+
+    EXPECT_EQ(observedMetrics.vsyncTimestamp, futureVsyncTimestamp);
+    EXPECT_GT(observedMetrics.actualStartTime, 0);
+    EXPECT_LT(observedMetrics.actualStartTime, observedMetrics.vsyncTimestamp);
+    EXPECT_GT(observedMetrics.totalDuration, 0);
+
+    context_->frameMetricsCallBack_ = nullptr;
+    context_->SetIsFreezeFlushMessage(originalFreezeFlushMessage);
+    context_->onShow_ = originalOnShow;
+    context_->onFocus_ = originalOnFocus;
+    context_->backgroundColorModeUpdated_ = originalBackgroundColorModeUpdated;
+    ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(nullptr));
+}
+
+/**
+ * @tc.name: FrameMetricsExistingContract
+ * @tc.desc: Verify the existing fields and single callback behavior remain intact.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsExistingContract, TestSize.Level1)
+{
+    static_assert(std::is_same_v<decltype(FrameMetrics::firstDrawFrame), bool>);
+    static_assert(std::is_same_v<decltype(FrameMetrics::vsyncTimestamp), uint64_t>);
+    static_assert(std::is_same_v<decltype(FrameMetrics::inputHandlingDuration), uint64_t>);
+    static_assert(std::is_same_v<decltype(FrameMetrics::layoutMeasureDuration), uint64_t>);
+
+    ASSERT_NE(context_, nullptr);
+    auto window = static_cast<MockWindow*>(context_->window_.get());
+    ASSERT_NE(window, nullptr);
+    auto director = Rosen::RSUIDirector::Create(nullptr);
+    ASSERT_NE(director, nullptr);
+    ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(director));
+    FrameMetrics observedMetrics;
+    int32_t callbackCount = 0;
+    const bool originalFirstFlushMessages = context_->isFirstFlushMessages_;
+    const bool originalFreezeFlushMessage = context_->IsFreezeFlushMessage();
+    const bool originalOnShow = context_->onShow_;
+    const bool originalOnFocus = context_->onFocus_;
+    const bool originalBackgroundColorModeUpdated = context_->backgroundColorModeUpdated_;
+    context_->SetFrameMetricsCallBack([&observedMetrics, &callbackCount](FrameMetrics info) {
+        observedMetrics = info;
+        ++callbackCount;
+    });
+    context_->isFirstFlushMessages_ = true;
+    context_->SetIsFreezeFlushMessage(false);
+    context_->backgroundColorModeUpdated_ = true;
+    context_->onShow_ = false;
+    context_->onFocus_ = false;
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_TRUE(observedMetrics.firstDrawFrame);
+    EXPECT_EQ(observedMetrics.vsyncTimestamp, NANO_TIME_STAMP);
+    EXPECT_GT(observedMetrics.actualStartTime, 0);
+    EXPECT_GT(observedMetrics.totalDuration, 0);
+    EXPECT_FALSE(context_->isFirstFlushMessages_);
+    EXPECT_FALSE(context_->backgroundColorModeUpdated_);
+    context_->frameMetricsCallBack_ = nullptr;
+    context_->isFirstFlushMessages_ = originalFirstFlushMessages;
+    context_->SetIsFreezeFlushMessage(originalFreezeFlushMessage);
+    context_->onShow_ = originalOnShow;
+    context_->onFocus_ = originalOnFocus;
+    context_->backgroundColorModeUpdated_ = originalBackgroundColorModeUpdated;
+    ON_CALL(*window, GetRSUIDirector()).WillByDefault(Return(nullptr));
+}
+
+/**
+ * @tc.name: FrameMetricsCoversRSSubmission
+ * @tc.desc: Verify totalDuration covers the RS submission phase. Inject a known delay inside
+ *           window_->FlushVsync() and assert totalDuration includes it, confirming submitEndTime
+ *           is captured after (not before) the actual RS submission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FrameMetricsCoversRSSubmission, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto originalWindow = context_->window_;
+    ASSERT_NE(originalWindow, nullptr);
+
+    constexpr int32_t DELAY_US = 30000;
+    class FrameMetricsSubmissionWindow : public NiceMock<MockWindow> {
+    public:
+        explicit FrameMetricsSubmissionWindow(int32_t delayUs) : delayUs_(delayUs) {}
+        void FlushVsync() override
+        {
+            beforeFlushVsync = GetSysTimestamp();
+            usleep(delayUs_);
+            afterFlushVsync = GetSysTimestamp();
+        }
+        int64_t beforeFlushVsync = 0;
+        int64_t afterFlushVsync = 0;
+
+    private:
+        int32_t delayUs_;
+    };
+    auto delayWindow = std::make_shared<FrameMetricsSubmissionWindow>(DELAY_US);
+    ASSERT_NE(delayWindow, nullptr);
+    context_->window_ = delayWindow;
+
+    FrameMetrics observedMetrics;
+    context_->SetFrameMetricsCallBack([&observedMetrics](FrameMetrics info) { observedMetrics = info; });
+
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+
+    EXPECT_GT(delayWindow->beforeFlushVsync, 0);
+    EXPECT_GT(delayWindow->afterFlushVsync, 0);
+    EXPECT_GE(observedMetrics.totalDuration,
+        static_cast<uint64_t>(delayWindow->afterFlushVsync - delayWindow->beforeFlushVsync));
+
+    context_->frameMetricsCallBack_ = nullptr;
+    context_->window_ = originalWindow;
+}
 
 /**
  * @tc.name: PipelineContextTestNg130

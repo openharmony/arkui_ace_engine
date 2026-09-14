@@ -47,7 +47,7 @@ NG::TimePickerModelNG* GetTimePickerModel()
 
 FFiTimePickerResult TimePickerChangeEventToFfi(const OHOS::Ace::NG::DatePickerChangeEvent& eventInfo)
 {
-    FFiTimePickerResult result;
+    FFiTimePickerResult result {};
     auto infoStr = eventInfo.GetSelectedStr();
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
     if (!argsPtr) {

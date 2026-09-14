@@ -78,7 +78,7 @@ void RSWindow::VsyncThreadMain()
         int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();
         for (auto &callback : vsyncCallbacks_) {
-            callback(now, 0);
+            callback(now, 0, now);
         }
         vsyncCallbacks_.clear();
     }

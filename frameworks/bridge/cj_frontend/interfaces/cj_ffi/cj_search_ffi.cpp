@@ -596,7 +596,7 @@ int64_t FfiOHOSAceFrameworkSearchTextMenuItemGetSize(SearchTextMenuItemHandle ve
 
 CJRectResult FfiOHOSAceFrameworkSearchGetTextContentRect(int64_t selfID)
 {
-    CJRectResult result;
+    CJRectResult result {};
     auto self = FFIData::GetData<SearchController>(selfID);
     if (self != nullptr) {
         result = self->GetTextContentRect();
@@ -620,7 +620,7 @@ int32_t FfiOHOSAceFrameworkSearchGetTextContentLineCount(int64_t selfID)
 
 CJCaretOffset FfiOHOSAceFrameworkSearchGetCaretOffset(int64_t selfID)
 {
-    CJCaretOffset result;
+    CJCaretOffset result {};
     auto self = FFIData::GetData<SearchController>(selfID);
     if (self != nullptr) {
         result = self->GetCaretOffset();

@@ -78,6 +78,13 @@ RefPtr<NodePaintMethod> DepthComponentPattern::CreateNodePaintMethod()
     return MakeRefPtr<DepthComponentPaintMethod>(WeakClaim(this));
 }
 
+DepthComponentPattern::~DepthComponentPattern()
+{
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+    ClearNativeSurfaceNodeBuffer();
+#endif
+}
+
 void DepthComponentPattern::OnAttachToFrameNode()
 {
     ACE_SCOPED_TRACE("DepthComponent::OnAttachToFrameNode id=%d gltf=%d", GetHost() ? GetHost()->GetId() : -1,
@@ -115,7 +122,16 @@ void DepthComponentPattern::OnDetachFromFrameNode(FrameNode* node)
                 pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
             }
         }
+        // Use the node parameter directly for RemoveChild since GetHost() may
+        // return null during detach. CleanupGltfResources handles the rest.
+        auto renderContext = node->GetRenderContext();
+        if (renderContext) {
+            for (size_t i = 0; i < surfaceRenderContext_.size(); ++i) {
+                renderContext->RemoveChild(surfaceRenderContext_[i]);
+            }
+        }
     }
+    CleanupGltfResources(true);
 #else
     (void)node;
 #endif
@@ -853,12 +869,26 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
     ACE_SCOPED_TRACE("DepthComponent::CleanupGltfResources clearAdapter=%d surfaces=%zu", clearAdapter,
         nativeSurfaces_.size());
 
+    // Detach surface render contexts from the parent RSNode tree.
+    // This is a best-effort operation — host may be null during detach.
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    for (size_t i = 0; i < surfaceRenderContext_.size(); ++i) {
-        renderContext->RemoveChild(surfaceRenderContext_[i]);
+    if (host) {
+        auto renderContext = host->GetRenderContext();
+        if (renderContext) {
+            for (size_t i = 0; i < surfaceRenderContext_.size(); ++i) {
+                renderContext->RemoveChild(surfaceRenderContext_[i]);
+            }
+        }
+    }
+    for (const auto& surface : nativeSurfaces_) {
+        if (surface) {
+            SurfaceUtils::GetInstance()->Remove(surface->GetUniqueId());
+        }
+    }
+    for (auto& sNode : nativeSurfaceNodes_) {
+        if (sNode && sNode->GetSurface()) {
+            sNode->GetSurface()->CleanCache(true);
+        }
     }
     windowChangeInfos_.clear();
     nativeSurfaceNodes_.clear();
@@ -888,6 +918,20 @@ void DepthComponentPattern::CreateNativeSurfaces(float width, float height)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    for (size_t i = 0; i < surfaceRenderContext_.size(); ++i) {
+        renderContext->RemoveChild(surfaceRenderContext_[i]);
+    }
+    for (const auto& surface : nativeSurfaces_) {
+        if (surface) {
+            SurfaceUtils::GetInstance()->Remove(surface->GetUniqueId());
+        }
+    }
+    surfaceRenderContext_.clear();
+    for (auto& sNode : nativeSurfaceNodes_) {
+        if (sNode && sNode->GetSurface()) {
+            sNode->GetSurface()->CleanCache(true);
+        }
+    }
     nativeSurfaceNodes_.clear();
     nativeSurfaces_.clear();
     windowChangeInfos_.clear();
@@ -925,6 +969,21 @@ void DepthComponentPattern::CreateNativeSurfaces(float width, float height)
         windowChangeInfos_.emplace_back(info);
     }
     gltfWindowsInitialized_ = true;
+}
+
+void DepthComponentPattern::ClearNativeSurfaceNodeBuffer()
+{
+    ACE_SCOPED_TRACE("DepthComponentPattern::ClearNativeSurfaceNodeBuffer");
+
+    // clean up the buffer. like the SceneAdapter
+    for (auto& sNode : nativeSurfaceNodes_) {
+        if (sNode && sNode->GetSurface()) {
+            ACE_SCOPED_TRACE("auto& sNode: nativeSurfaceNodes_ sId is %d", (int)(sNode->GetSurface()->GetUniqueId()));
+            sNode->GetSurface()->CleanCache(true);
+        }
+    }
+    nativeSurfaceNodes_.clear();
+    nativeSurfaces_.clear();
 }
 
 Render3D::WindowChangeInfo DepthComponentPattern::GetWindowChangeInfos(float width, float height) const
