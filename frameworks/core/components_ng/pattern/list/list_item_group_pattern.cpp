@@ -915,12 +915,12 @@ void ListItemGroupPattern::ApplyHeaderFooterStyle(const RefPtr<FrameNode>& node)
         .style = UiMaterialStyle::THICK
     };
     material->SetImmersiveOptions(options);
-    if (MaterialUtils::IsMaterialDisabled() || !MaterialUtils::IsSystemApp()) {
+    if (MaterialUtils::IsMaterialDisabled()) {
         ACE_SCOPED_TRACE("ListItemGroup ApplyLowEndHeaderFooterMaterial");
         ApplyLowEndHeaderFooterMaterial(node, material);
         return;
     }
-    ViewAbstract::SetSystemMaterial(AceType::RawPtr(node), AceType::RawPtr(material));
+    ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(node), AceType::RawPtr(material));
 }
 
 float ListItemGroupPattern::GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const
