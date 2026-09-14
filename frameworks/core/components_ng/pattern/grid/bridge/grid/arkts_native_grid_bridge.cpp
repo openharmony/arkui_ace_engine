@@ -49,9 +49,42 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
 namespace {
-
-void ParseGridStartLineInfo(const EcmaVM* vm, const Local<JSValueRef>& value, GridStartLineInfo& gridStartLineInfo)
+void ParseJSGridStartLineInfo(const EcmaVM* vm, const Local<JSValueRef>& value, GridStartLineInfo& gridStartLineInfo)
 {
+    if (value.IsEmpty() || value->IsUndefined()) {
+        return;
+    }
+
+    if (value->IsObject(vm)) {
+        auto obj = value->ToObject(vm);
+        auto startIndex = ArkTSUtils::GetProperty(vm, obj, "startIndex");
+        if (!startIndex.IsEmpty() && startIndex->IsNumber()) {
+            gridStartLineInfo.startIndex = startIndex->Int32Value(vm);
+        }
+        auto startLine = ArkTSUtils::GetProperty(vm, obj, "startLine");
+        if (!startLine.IsEmpty() && startLine->IsNumber()) {
+            gridStartLineInfo.startLine = startLine->Int32Value(vm);
+        }
+        auto startOffset = ArkTSUtils::GetProperty(vm, obj, "startOffset");
+        if (!startOffset.IsEmpty() && startOffset->IsNumber()) {
+            auto offset = Dimension(startOffset->ToNumber(vm)->Value(), DimensionUnit::VP);
+            gridStartLineInfo.startOffset = offset.ConvertToPx();
+        }
+        auto totalOffset = ArkTSUtils::GetProperty(vm, obj, "totalOffset");
+        if (!totalOffset.IsEmpty() && totalOffset->IsNumber()) {
+            auto offset = Dimension(totalOffset->ToNumber(vm)->Value(), DimensionUnit::VP);
+            gridStartLineInfo.totalOffset = offset.ConvertToPx();
+        }
+    }
+}
+
+void ParseGridStartLineInfo(
+    const EcmaVM* vm, const Local<JSValueRef>& value, GridStartLineInfo& gridStartLineInfo, bool isJSView = false)
+{
+    if (isJSView) {
+        ParseJSGridStartLineInfo(vm, value, gridStartLineInfo);
+        return;
+    }
     if (!value->IsArray(vm)) {
         return;
     }
@@ -188,21 +221,21 @@ void ParseGetStartIndexByOffset(
     }
     if (getStartIndexByOffset->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getStartIndexByOffset->ToObject(vm);
-        auto onGetStartIndexByOffset = [func = panda::CopyableGlobal(vm, functionRef), isJSView](float offset) {
+        auto onGetStartIndexByOffset = [func = panda::CopyableGlobal(vm, functionRef), isJSView](double offset) {
             GridStartLineInfo gridStartLineInfo;
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, gridStartLineInfo);
             panda::LocalScope scope(vm);
             panda::TryCatch trycatch(vm);
-            auto offsetValue = ArkTSUtils::ToJsValueWithVM(vm, offset);
+            auto offsetValue = ArkTSUtils::ToJsValueWithVM(vm, Dimension(offset).ConvertToVp());
             auto result = func->Call(vm, func.ToLocal(), &offsetValue, 1);
             if (isJSView) {
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
             }
-            if (!result->IsArray(vm)) {
+            if (result.IsEmpty() || result->IsUndefined()) {
                 return gridStartLineInfo;
             }
-            ParseGridStartLineInfo(vm, result, gridStartLineInfo);
+            ParseGridStartLineInfo(vm, result, gridStartLineInfo, isJSView);
             return gridStartLineInfo;
         };
         option.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
@@ -227,10 +260,10 @@ void ParseGetStartIndexByIndex(
         if (isJSView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
-        if (!result->IsArray(vm)) {
+        if (result.IsEmpty() || result->IsUndefined()) {
             return gridStartLineInfo;
         }
-        ParseGridStartLineInfo(vm, result, gridStartLineInfo);
+        ParseGridStartLineInfo(vm, result, gridStartLineInfo, isJSView);
         return gridStartLineInfo;
     };
     option.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
