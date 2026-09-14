@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorLayoutProperty : public TextLayoutProperty {
@@ -31,6 +32,15 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDragPreviewStyle, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SingleLine, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CleanNodeStyle, CleanNodeStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, CalcDimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSrc, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowSymbol, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowCancelButton, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsDisabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BundleName, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ModuleName, std::string, PROPERTY_UPDATE_MEASURE);
 
     // placeholder
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::u16string, PROPERTY_UPDATE_MEASURE);
@@ -75,6 +85,19 @@ public:
             UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
         }
     }
+
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
+    {
+        return cancelIconSymbol_;
+    }
+
+    void SetCancelIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& cancelIconSymbol)
+    {
+        cancelIconSymbol_ = cancelIconSymbol;
+    }
+
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> cancelIconSymbol_;
 };
 } // namespace OHOS::Ace::NG
 

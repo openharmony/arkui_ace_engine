@@ -91,6 +91,7 @@ private:
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
     RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
+    void LayoutCancelButton(LayoutWrapper* layoutWrapper);
 
     bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 
@@ -140,6 +141,7 @@ private:
     std::unordered_set<uint64_t> paragraphKeySet_;
     bool isHorizontalScrolling_ = false;
     bool isSingleLineMode_ = false;
+    float cancelButtonWidth_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

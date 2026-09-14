@@ -833,7 +833,6 @@ public:
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::u16string content);
     bool InitValueText(std::u16string content);
-    void HandleButtonMouseEvent(const RefPtr<TextInputResponseArea>& responseArea, bool isHover);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -1499,6 +1498,12 @@ public:
     // Layout-property bridge methods are provided by CleanNodeHostBase CRTP.
     void HandleCleanNodeClicked() override;
     bool IsContentEmpty() const override;
+    // ICleanNodeHost behavioral hooks
+    void SetCleanHoverColorAndRect(const RoundRect& rect, uint32_t color) override;
+    void ClearCleanHoverColorAndRects() override;
+    void OnCleanNodeHover(bool isHover, const HoverInfo& info) override;
+    bool IsCancelButtonTouched() const override;
+    void SetCancelButtonTouched(bool touched) override;
     void CheckPasswordAreaState();
 
     bool GetShowSelect() const
@@ -1914,8 +1919,6 @@ public:
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
-    void AfterLayoutProcessCleanResponse(
-        const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
     void UpdateContentScroller(
         const Offset& localOffset, bool hasHotArea = true, float delay = 0.0f, bool enableScrollOutside = true);
@@ -2190,8 +2193,6 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleResponseButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea);
-    void HandleResponseButtonTouchUp();
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
@@ -2227,7 +2228,6 @@ private:
     void UpdateOverlayHandleOffsetAfterScroll();
     bool CheckSelectAreaVisible();
     void InitMouseEvent();
-    void InitCancelButtonMouseEvent();
     void InitPasswordButtonMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void UpdateHoverStyle(bool isHover);
@@ -2520,11 +2520,9 @@ private:
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
-    RefPtr<TouchEventImpl> imageTouchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
-    RefPtr<InputEvent> imageHoverEvent_;
     RefPtr<LongPressEvent> longPressEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 

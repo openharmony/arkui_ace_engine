@@ -7154,6 +7154,31 @@ typedef enum {
     NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW,
 
     /**
+     * @brief Defines the style of the cancel button of the text editor.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: button style {@link ArkUI_CancelButtonStyle}. The default value is <b>ARKUI_CANCELBUTTON_STYLE_INPUT</b>.</li>
+     * <li>.value[1]?.f32: button icon size, in vp.</li>
+     * <li>.value[2]?.u32: button icon color, in 0xARGB format. For example, 0xFFFF0000 indicates red.</li>
+     * <li>?.string: button icon image source. The value is the local address of the image, for example, /pages/icon.png.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: button style {@link ArkUI_CancelButtonStyle}.</li>
+     * <li>.value[1].f32: icon size, in vp.</li>
+     * <li>.value[2].u32: button icon color, in 0xARGB format.</li>
+     * <li>.string: button icon image source.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_CANCEL_BUTTON,
+
+    /**
      * @brief Defines the index string array.
      * The attribute can be set, reset, and obtained as required through APIs.
      *

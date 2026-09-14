@@ -45,7 +45,7 @@ constexpr int NUM_7 = 7;
 constexpr float COLOR_COEFFICIENT = 100.0f;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 }
-Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
+static Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(

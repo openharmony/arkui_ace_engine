@@ -300,7 +300,7 @@ bool CheckRegexValid(const std::string& pattern)
 #endif
 }
 
-Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
+static Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo =
@@ -311,7 +311,7 @@ Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
     return JSValueRef::Undefined(info->GetVM());
 }
 
-Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info)
+static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(

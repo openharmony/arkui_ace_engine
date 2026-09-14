@@ -237,6 +237,9 @@ public:
     static void SetOnStyledStringDidChange(FrameNode* frameNode,
         std::function<void(const NG::StyledStringChangeValue&)>&& func);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, NG::KeyboardAppearanceConfig config);
+    static void SetCancelButton(FrameNode* frameNode, int32_t style, const CalcDimension& iconSize,
+        const Color& iconColor, const std::string& iconSrc);
+    static void ResetCancelButton(FrameNode* frameNode);
 
 private:
     void SetDraggable(bool draggable);

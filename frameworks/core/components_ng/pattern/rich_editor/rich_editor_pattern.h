@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/clean_node_host.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
@@ -98,6 +99,7 @@ class RichEditorLayoutAlgorithm;
 class RichEditorOverlayModifier;
 class RichEditorScrollController;
 class RichEditorUndoManager;
+class CleanNodeResponseArea;
 class ScrollBar;
 class SpanNode;
 class StyleManager;
@@ -252,8 +254,9 @@ private:
 };
 
 class RichEditorPattern
-    : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, SpanWatcher);
+    : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher,
+      public CleanNodeHostBase<RichEditorPattern, RichEditorLayoutProperty> {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, SpanWatcher, ICleanNodeHost);
 
 public:
     RichEditorPattern(bool isStyledStringMode = false);
@@ -1167,8 +1170,37 @@ private:
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     std::pair<int32_t, int32_t> CalcSpansRange(const std::vector<RefPtr<SpanNode>>& spanNodes) const;
-    void OnHover(bool isHover);
+    void OnHover(bool isHover, const HoverInfo& info) override;
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
+
+    // ICleanNodeHost implementations
+    bool IsShowCancelButtonMode() const override;
+    void HandleCleanNodeClicked() override;
+    std::function<void(WeakPtr<FrameNode>)> GetCancelIconSymbol() const override;
+    bool IsContentEmpty() const override;
+    bool IsDragging() const override;
+    bool HasUserAccessibilityText() const override;
+    RefPtr<FrameNode> GetHost() const override;
+    bool GetIsDisabled() const override;
+    // ICleanNodeHost behavioral hooks
+    void SetCleanHoverColorAndRect(const RoundRect& rect, uint32_t color) override;
+    void ClearCleanHoverColorAndRects() override;
+    void OnCleanNodeHoverEnter() override;
+    void OnCleanNodeHoverLeave() override;
+    bool IsCancelButtonTouched() const override;
+    void SetCancelButtonTouched(bool touched) override;
+    // Cancel button support
+    void ProcessCancelButton();
+    void MarkCancelButtonDirty() { cancelButtonDirty_ = true; }
+    void SetAccessibilityClearAction();
+    bool IsOnCleanNodeByPosition(const Offset& localOffset);
+    bool IsOnCancelButtonHoverArea(const Offset& localOffset);
+    bool IsInResponseArea(const Offset& location);
+    const RefPtr<CleanNodeResponseArea>& GetCleanNodeResponseArea() const
+    {
+        return cleanNodeResponseArea_;
+    }
+    void SetCancelButtonIconColor(const Color& color);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
         SourceType sourceType = SourceType::NONE);
     void UpdateCaretInfoToController();
@@ -1543,6 +1575,11 @@ private:
     bool isHorizontalScrolling_ = false;
     bool needResetScrollBar_ = false;
     bool isSingleLineMode_ = false;
+    RefPtr<CleanNodeResponseArea> cleanNodeResponseArea_;
+    bool lastContentEmptyForCancel_ = true;
+    bool cancelButtonDirty_ = true;
+    bool cancelButtonTouched_ = false;
+    bool hasUserAccessibilityText_ = false;
     std::string lastReportSelectionText_ = "";
 
 #if defined(CROSS_PLATFORM)

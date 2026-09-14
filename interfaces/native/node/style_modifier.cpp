@@ -36,6 +36,8 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/inner_api/ace_kit/include/ui/properties/blur_style_option.h"
@@ -21793,6 +21795,56 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     if (setters[subTypeId]) {
         setters[subTypeId](node);
     }
+}
+
+int32_t SetRichEditorCancelButton(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_CANCELBUTTON_STYLE_CONSTANT),
+        static_cast<int32_t>(ARKUI_CANCELBUTTON_STYLE_INPUT), item->value[NUM_0].i32)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    struct ArkUISizeType size = { -1.0f, GetDefaultUnit(node, UNIT_VP) };
+    if (item->size > NUM_1 && item->value[NUM_1].f32 >= 0) {
+        size.value = item->value[NUM_1].f32;
+    }
+    uint32_t color = DEFAULT_COLOR;
+    if (item->size > NUM_2) {
+        color = item->value[NUM_2].u32;
+    }
+    const char* str = nullptr;
+    if (item->string) {
+        str = item->string;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorCancelButton(
+        node->uiNodeHandle, item->value[NUM_0].i32, &size, color, str);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetRichEditorCancelButton(ArkUI_NodeHandle node)
+{
+    int index = 0;
+    g_numberValues[index++].i32 =
+        GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorCancelButtonStyle(
+            node->uiNodeHandle);
+    g_numberValues[index++].f32 =
+        GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorCancelIconSize(
+            node->uiNodeHandle, GetDefaultUnit(node, UNIT_VP));
+    g_numberValues[index++].u32 =
+        GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorCancelIconColor(
+            node->uiNodeHandle);
+    g_attributeItem.size = index;
+    g_attributeItem.string =
+        GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorCancelIconSrc(
+            node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+void ResetRichEditorCancelButton(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorCancelButton(node->uiNodeHandle);
 }
 
 int32_t SetRichEditorAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)

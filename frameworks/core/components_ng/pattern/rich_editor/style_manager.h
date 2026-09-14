@@ -35,6 +35,7 @@ public:
     static constexpr std::string_view PLACEHOLDER_FONT_COLOR_KEY = "placeholderFontColor";
     static constexpr std::string_view SELECTED_DRAG_PREVIEW_COLOR_KEY = "selectedDragPreviewColor";
     static constexpr std::string_view SELECTED_BACKGROUND_COLOR_KEY = "selectedBackgroundColor";
+    static constexpr std::string_view CANCEL_BUTTON_ICON_COLOR_KEY = "cancelButtonIconColor";
 
     // color in TextStyle
     static constexpr std::string_view TEXT_COLOR_KEY = "textColor";

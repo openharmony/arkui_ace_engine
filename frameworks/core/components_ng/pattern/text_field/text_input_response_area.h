@@ -210,6 +210,15 @@ public:
 
     void Refresh() override;
     void UpdateShowState();
+    void SetAccessibilityClearAction();
+
+    // Shared cancel button event handling (up-lifted from pattern classes).
+    void HandleCleanNodeHover(bool isHover, const HoverInfo& info);
+    void HandleButtonMouseEvent(bool isHover);
+    void HandleResponseButtonTouchDown();
+    void HandleResponseButtonTouchUp();
+    void InitCancelButtonMouseEvent();
+    void AfterLayoutProcessCleanResponse();
 
     float GetIconSize();
 

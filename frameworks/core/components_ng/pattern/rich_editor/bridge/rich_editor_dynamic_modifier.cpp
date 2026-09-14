@@ -23,10 +23,12 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/node/node_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/select_overlay/service_collaboration_menu_ace_helper.h"
 #include "core/components/font/constants_converter.h"
@@ -35,6 +37,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 #include "core/interfaces/native/node/node_api.h"
@@ -2420,6 +2423,92 @@ void RequestRichEditorKeyboardForStylus(const RefPtr<NG::FrameNode>& frameNode, 
     resultCode = 0;
 }
 
+void SetRichEditorCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
+    ArkUI_Uint32 color, ArkUI_CharPtr src)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
+    if (LessNotEqual(iconSize.Value(), 0.0)) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        iconSize = theme->GetCancelIconSize();
+    }
+    Color iconColor(color);
+    NG::RichEditorModelNG::SetCancelButton(frameNode, style, iconSize, iconColor, src ? std::string(src) : "");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> colorResObj;
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorResObj, iconColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        if (colorResObj) {
+            pattern->RegisterResource<Color>(
+                std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY), colorResObj, iconColor);
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+                "SetRichEditorCancelButton: register color=%{public}s", iconColor.ToString().c_str());
+        } else {
+            pattern->UnRegisterResource(std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY));
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+                "SetRichEditorCancelButton: colorResObj is null, unregister");
+        }
+    }
+}
+
+void ResetRichEditorCancelButton(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RichEditorModelNG::ResetCancelButton(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource(std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY));
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetRichEditorCancelButton: unregister");
+    }
+}
+
+ArkUI_Int32 GetRichEditorCancelButtonStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto layoutProperty = frameNode->GetLayoutProperty<NG::RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(
+        layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT));
+}
+
+ArkUI_Float32 GetRichEditorCancelIconSize(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<NG::RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    return layoutProperty->GetIconSize().value_or(CalcDimension(0.0f)).GetNativeValue(
+        static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Uint32 GetRichEditorCancelIconColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    auto layoutProperty = frameNode->GetLayoutProperty<NG::RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ERROR_UINT_CODE);
+    return layoutProperty->GetIconColor().value_or(Color(0xFF000000)).GetValue();
+}
+
+ArkUI_CharPtr GetRichEditorCancelIconSrc(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    auto layoutProperty = frameNode->GetLayoutProperty<NG::RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    const auto& iconSrc = layoutProperty->GetIconSrc();
+    return iconSrc.has_value() ? iconSrc.value().c_str() : "";
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
 {
@@ -2596,6 +2685,12 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
             .setRichEditorHorizontalScrolling = nullptr,
             .resetRichEditorHorizontalScrolling = nullptr,
             .getRichEditorHorizontalScrolling = nullptr,
+            .setRichEditorCancelButton = nullptr,
+            .resetRichEditorCancelButton = nullptr,
+            .getRichEditorCancelButtonStyle = nullptr,
+            .getRichEditorCancelIconSize = nullptr,
+            .getRichEditorCancelIconColor = nullptr,
+            .getRichEditorCancelIconSrc = nullptr,
             .setRichEditorCaretStyle = nullptr,
             .getRichEditorCaretStyle = nullptr,
             .resetRichEditorCaretStyle = nullptr,
@@ -2787,6 +2882,12 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setRichEditorHorizontalScrolling = SetRichEditorHorizontalScrolling,
         .resetRichEditorHorizontalScrolling = ResetRichEditorHorizontalScrolling,
         .getRichEditorHorizontalScrolling = GetRichEditorHorizontalScrolling,
+        .setRichEditorCancelButton = SetRichEditorCancelButton,
+        .resetRichEditorCancelButton = ResetRichEditorCancelButton,
+        .getRichEditorCancelButtonStyle = GetRichEditorCancelButtonStyle,
+        .getRichEditorCancelIconSize = GetRichEditorCancelIconSize,
+        .getRichEditorCancelIconColor = GetRichEditorCancelIconColor,
+        .getRichEditorCancelIconSrc = GetRichEditorCancelIconSrc,
         .setRichEditorCaretStyle = SetRichEditorCaretStyle,
         .getRichEditorCaretStyle = GetRichEditorCaretStyle,
         .resetRichEditorCaretStyle = ResetRichEditorCaretStyle,

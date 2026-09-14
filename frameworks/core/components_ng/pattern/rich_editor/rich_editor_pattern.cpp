@@ -84,6 +84,8 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_utils.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -769,6 +771,10 @@ void RichEditorPattern::OnModifyDone()
     if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         dataDetectorAdapter_->GetAIEntityMenu();
     }
+    if (cancelButtonDirty_) {
+        cancelButtonDirty_ = false;
+        ProcessCancelButton();
+    }
     RegisterTranslateListener();
 }
 
@@ -828,6 +834,187 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
         contentMod_->ContentChange();
     }
     TryExecuteSelectAll();
+    bool isContentEmpty = IsContentEmpty();
+    if (isContentEmpty != lastContentEmptyForCancel_) {
+        lastContentEmptyForCancel_ = isContentEmpty;
+        ProcessCancelButton();
+    }
+}
+
+void RichEditorPattern::ProcessCancelButton()
+{
+    if (!IsShowCancelButtonMode()) {
+        if (cleanNodeResponseArea_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+                "ProcessCancelButton: mode off, remove area, frameId=%{public}d", frameId_);
+            cleanNodeResponseArea_->ClearArea();
+            cleanNodeResponseArea_.Reset();
+        }
+        return;
+    }
+    if (!cleanNodeResponseArea_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "ProcessCancelButton: create area, frameId=%{public}d, contentEmpty=%{public}d",
+            frameId_, static_cast<int32_t>(IsContentEmpty()));
+        cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
+        cleanNodeResponseArea_->InitResponseArea();
+        cleanNodeResponseArea_->InitCancelButtonMouseEvent();
+    } else {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "ProcessCancelButton: refresh area, frameId=%{public}d, contentEmpty=%{public}d",
+            frameId_, static_cast<int32_t>(IsContentEmpty()));
+        cleanNodeResponseArea_->Refresh();
+    }
+    cleanNodeResponseArea_->UpdateShowState();
+    SetAccessibilityClearAction();
+    if (cleanNodeResponseArea_->IsShow()) {
+        cleanNodeResponseArea_->AfterLayoutProcessCleanResponse();
+    }
+}
+
+void RichEditorPattern::SetCancelButtonIconColor(const Color& color)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "SetCancelButtonIconColor: newColor=%{public}s", color.ToString().c_str());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconColor, color, host);
+    MarkCancelButtonDirty();
+}
+
+bool RichEditorPattern::IsShowCancelButtonMode() const
+{
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (!layoutProperty->GetSingleLineValue(false)) {
+        return false;
+    }
+    return layoutProperty->GetIsShowCancelButton().value_or(false);
+}
+
+void RichEditorPattern::HandleCleanNodeClicked()
+{
+    CHECK_NULL_VOID(!IsDragging());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isPreview = IsPreviewTextInputting();
+    auto length = GetTextContentLength();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "HandleCleanNodeClicked: frameId=%{public}d, length=%{public}d, isPreview=%{public}d, hasFocus=%{public}d",
+        frameId_, length, static_cast<int32_t>(isPreview), static_cast<int32_t>(HasFocus()));
+    if (isPreview) {
+        NotifyExitTextPreview(true);
+        length = GetTextContentLength();
+        FireOnSelectionChange(caretPosition_);
+    }
+    CloseSelectOverlay();
+    ResetSelection();
+    SetCaretPosition(0, false);
+    if (length > 0) {
+        DeleteForward(length, TextChangeReason::UNKNOWN, false);
+    }
+    if (!HasFocus()) {
+        auto focusHub = GetFocusHub();
+        if (focusHub) {
+            focusHub->RequestFocusImmediately();
+        }
+    }
+    StartTwinkling();
+    ClearTextForDisplayIfEmpty();
+}
+
+bool RichEditorPattern::IsContentEmpty() const
+{
+    if (previewTextRecord_.IsValid()) {
+        return false;
+    }
+    if (isSpanStringMode_ && styledString_) {
+        return styledString_->GetLength() == 0;
+    }
+    return spans_.empty();
+}
+
+bool RichEditorPattern::HasUserAccessibilityText() const
+{
+    return hasUserAccessibilityText_;
+}
+
+void RichEditorPattern::SetCleanHoverColorAndRect(const RoundRect& rect, uint32_t color)
+{
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(hostOverlayMod_);
+    CHECK_NULL_VOID(overlayMod);
+    std::vector<RoundRect> roundRectVector;
+    roundRectVector.push_back(rect);
+    overlayMod->SetHoverColorAndRects(roundRectVector, color);
+}
+
+void RichEditorPattern::ClearCleanHoverColorAndRects()
+{
+    CHECK_NULL_VOID(hostOverlayMod_);
+    auto overlay = AceType::DynamicCast<RichEditorOverlayModifier>(hostOverlayMod_);
+    CHECK_NULL_VOID(overlay);
+    overlay->ClearHoverColorAndRects();
+}
+
+void RichEditorPattern::OnCleanNodeHoverEnter()
+{
+    if (currentMouseStyle_ != MouseFormat::DEFAULT) {
+        ChangeMouseStyle(MouseFormat::DEFAULT);
+    }
+}
+
+void RichEditorPattern::OnCleanNodeHoverLeave()
+{
+    // Do not set mouse style here. Defer to HandleMouseEvent/OnHover to avoid flicker.
+}
+
+bool RichEditorPattern::IsOnCleanNodeByPosition(const Offset& localOffset)
+{
+    CHECK_NULL_RETURN(cleanNodeResponseArea_, false);
+    auto frameNode = cleanNodeResponseArea_->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    return geometryNode->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
+}
+
+void RichEditorPattern::SetAccessibilityClearAction()
+{
+    CHECK_NULL_VOID(cleanNodeResponseArea_);
+    cleanNodeResponseArea_->SetAccessibilityClearAction();
+}
+
+std::function<void(WeakPtr<FrameNode>)> RichEditorPattern::GetCancelIconSymbol() const
+{
+    return std::function<void(WeakPtr<FrameNode>)>();
+}
+
+bool RichEditorPattern::GetIsDisabled() const
+{
+    return IsDisabled();
+}
+
+bool RichEditorPattern::IsCancelButtonTouched() const
+{
+    return cancelButtonTouched_;
+}
+
+void RichEditorPattern::SetCancelButtonTouched(bool touched)
+{
+    cancelButtonTouched_ = touched;
+}
+
+bool RichEditorPattern::IsOnCancelButtonHoverArea(const Offset& localOffset)
+{
+    CHECK_NULL_RETURN(cleanNodeResponseArea_, false);
+    RoundRect hoverRect;
+    cleanNodeResponseArea_->CreateIconRect(hoverRect, false);
+    return hoverRect.GetRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
+}
+
+bool RichEditorPattern::IsInResponseArea(const Offset& location)
+{
+    return cancelButtonTouched_ || IsOnCleanNodeByPosition(location);
 }
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
@@ -3820,7 +4007,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     }
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable()) {
+    if (!focusHub->IsFocusable() || IsInResponseArea(info.GetLocalLocation())) {
         return;
     }
 
@@ -4630,7 +4817,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(!IsHandleMoving());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable()) {
+    if (!focusHub->IsFocusable() || IsInResponseArea(info.GetLocalLocation())) {
         return;
     }
     if (info.GetFingerList().size() > 1) {
@@ -5936,11 +6123,11 @@ void RichEditorPattern::InitMouseEvent()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, HoverInfo& info) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "on hover event isHover=%{public}d", isHover);
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->OnHover(isHover);
+            pattern->OnHover(isHover, info);
         }
     };
     auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -5948,7 +6135,7 @@ void RichEditorPattern::InitMouseEvent()
     mouseEventInitialized_ = true;
 }
 
-void RichEditorPattern::OnHover(bool isHover)
+void RichEditorPattern::OnHover(bool isHover, const HoverInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
     if (!isHover && lastHoverSpanItem_) {
@@ -5958,7 +6145,13 @@ void RichEditorPattern::OnHover(bool isHover)
     }
     auto scrollBar = GetScrollBar();
     if (isHover && (!scrollBar || !scrollBar->IsPressed())) {
-        ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
+        if (cleanNodeResponseArea_ && IsOnCancelButtonHoverArea(info.GetLocalLocation())) {
+            if (currentMouseStyle_ != MouseFormat::DEFAULT) {
+                ChangeMouseStyle(MouseFormat::DEFAULT);
+            }
+        } else {
+            ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
+        }
     } else {
         ChangeMouseStyle(MouseFormat::DEFAULT, true);
         HandleUrlSpanForegroundClear();
@@ -6274,6 +6467,8 @@ void RichEditorPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Proper
             [this](const Color& c) { SetSelectedBackgroundColor(c); } },
         { std::string(StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY),
             [this](const Color& c) { SetSelectedDragPreviewColor(c); } },
+        { std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY),
+            [this](const Color& c) { SetCancelButtonIconColor(c); } },
     };
     auto iter = UPDATER_MAP.find(key);
     IF_TRUE(iter != UPDATER_MAP.end(), iter->second(*color));
@@ -8803,6 +8998,9 @@ void RichEditorPattern::HandleTouchedFingersCount(TouchEventInfo& info)
 void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
 {
     HandleTouchedFingersCount(info);
+    if (cancelButtonTouched_) {
+        return;
+    }
     CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
     CHECK_NULL_VOID(!info.GetTouches().empty());
     HandleUserTouchEvent(info);
@@ -9449,7 +9647,13 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
 
-    if (hasUrlSpan_ && !IsDragging()) {
+    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    bool isOverCancelButton = cleanNodeArea && cleanNodeArea->IsShow() &&
+        cleanNodeArea->GetAreaRect().IsInRegion(PointF(
+            static_cast<float>(info.GetLocalLocation().GetX()),
+            static_cast<float>(info.GetLocalLocation().GetY())));
+
+    if (hasUrlSpan_ && !IsDragging() && !isOverCancelButton) {
         auto show = HandleUrlSpanShowShadow(info.GetLocalLocation(), info.GetGlobalLocation(), GetUrlHoverColor());
         if (show) {
             ChangeMouseStyle(MouseFormat::HAND_POINTING);
@@ -9458,8 +9662,11 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
 
-    if (currentMouseStyle_ == MouseFormat::DEFAULT && !IsDragging()) {
-        ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
+    if (!isOverCancelButton && currentMouseStyle_ == MouseFormat::DEFAULT && !IsDragging()) {
+        auto localLoc = info.GetLocalLocation();
+        if (GetTextRect().IsInRegion({ localLoc.GetX(), localLoc.GetY() })) {
+            ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
+        }
     }
 
     caretUpdateType_ = CaretUpdateType::NONE;
