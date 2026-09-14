@@ -168,7 +168,7 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UdmfSummary* summary)
+int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UDMF_Summary* summary)
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
     if (!event || !dragEvent || !summary) {

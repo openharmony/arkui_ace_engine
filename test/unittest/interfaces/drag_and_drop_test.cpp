@@ -2148,15 +2148,15 @@ HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_001, TestSize.Level1)
     ArkUIDragEvent dragEvent {};
     dragEvent.unifiedDataSummary = &summaryInfo;
     auto event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
-    auto summary = OH_UdmfSummary_Create();
+    auto summary = OH_UDMF_CreateSummary();
     ASSERT_NE(summary, nullptr);
     EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_NO_ERROR);
     const char* const* extensions = nullptr;
-    unsigned int count = 0;
-    EXPECT_EQ(OH_UdmfSummary_GetFilenameExtensions(summary, &extensions, &count), UDMF_E_OK);
+    int64_t count = 0;
+    EXPECT_EQ(OH_UDMF_GetSummaryFilenameExtensions(summary, &extensions, &count), UDMF_E_OK);
     ASSERT_NE(extensions, nullptr);
-    ASSERT_EQ(count, 1u);
+    ASSERT_EQ(count, 1);
     EXPECT_STREQ(extensions[0], ".png");
-    OH_UdmfSummary_Destroy(summary);
+    OH_UDMF_DestroySummary(summary);
 }
 } // namespace OHOS::Ace
