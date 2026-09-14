@@ -1201,6 +1201,7 @@ public:
 
     WebDelegate() = delete;
     ~WebDelegate() override;
+    bool MaybeRelease() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
         : WebResource(type, context, std::move(onError)), instanceId_(Container::CurrentId())
     {}
