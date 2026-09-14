@@ -421,7 +421,7 @@ void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
     }
 }
 
-void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
+void UiSessionManagerOhos::SaveReportProxy(sptr<IRemoteObject> reportProxy, int32_t processId)
 {
     // add death callback
     auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
@@ -479,9 +479,11 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
             webPageSceneFunc(WebPageSceneOp::UnregisterRules, processId, "", false);
         }
     });
-    reportStub->AddDeathRecipient(uiReportProxyRecipient);
+    // In the application process, reportProxy refers to the SA-side UiReportStub.
+    // Listen for remote SA death through this proxy and clean up local report registrations.
+    reportProxy->AddDeathRecipient(uiReportProxyRecipient);
     std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    reportObjectMap_[processId] = reportStub;
+    reportObjectMap_[processId] = reportProxy;
 }
 
 int32_t UiSessionManagerOhos::RegisterWebPageSceneRules(int32_t processId, const std::string& ruleJson)
