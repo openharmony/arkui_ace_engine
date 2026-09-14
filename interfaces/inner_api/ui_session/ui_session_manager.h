@@ -329,16 +329,16 @@ protected:
 
     std::map<std::string, std::set<int32_t>> processMap_;
     std::shared_mutex processMapMutex_;
-    std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
+    std::atomic<bool> clickEventRegistered_ = false;
+    std::atomic<bool> searchEventRegistered_ = false;
+    std::atomic<bool> textChangeEventRegistered_ = false;
+    std::atomic<bool> routerChangeEventRegistered_ = false;
+    std::atomic<bool> componentChangeEventRegistered_ = false;
     uint32_t componentChangeEventMask_ = 0;
-    std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> pageSceneRuleRegisterProcesses_ = 0;
+    std::atomic<bool> scrollEventRegistered_ = false;
+    std::atomic<bool> lifeCycleEventRegistered_ = false;
+    std::atomic<bool> selectTextEventRegistered_ = false;
+    std::atomic<bool> pageSceneRuleRegistered_ = false;
     bool webFocusEventRegistered = false;
     std::mutex webFocusEventRegisteredMutex_;
     InspectorFunction inspectorFunction_ = 0;
