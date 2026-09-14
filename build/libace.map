@@ -6095,6 +6095,8 @@
       vtable?for?OHOS::Ace::NG::TextFieldManagerNG;
       VTT?for?OHOS::Ace::NG::ParagraphManager;
       VTT?for?OHOS::Ace::NG::TextFieldManagerNG;
+      OHOS::Ace::NG::TokenThemeStorage::GetInstance*;
+      OHOS::Ace::NG::TokenThemeStorage::GetDefaultTheme*;
     };
   local:
     *;

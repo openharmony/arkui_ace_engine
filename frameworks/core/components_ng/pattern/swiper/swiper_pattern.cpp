@@ -2286,7 +2286,7 @@ int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackwar
             --targetIndex;
         }
         if (!IsLoop() && (targetIndex < 0 || targetIndex >= TotalCount())) {
-            if (isIgnoreHiddenItem_) {
+            if (isIgnoreHiddenItem_ && !IsAutoPlay()) {
                 return 0;
             }
             return currentIndex_;
@@ -7827,7 +7827,12 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     auto indicatorType = GetIndicatorType();
     const char* indicator = "indicator";
     if (indicatorType == SwiperIndicatorType::DOT) {
-        json->PutExtAttr(indicator, SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
+        auto host = GetHost();
+        int32_t id = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+        if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            id = host->GetThemeScopeId();
+        }
+        json->PutExtAttr(indicator, SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters(), id).c_str(), filter);
     } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
             json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
     } else {
@@ -8247,14 +8252,14 @@ void SwiperPattern::UpdateDefaultColor()
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
     }
     if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("backgroundColor")) {
-        if (props->GetIsSidebarMiddleValue()) {
+        if (props->GetIsSidebarMiddleValue(false)) {
             props->UpdateBackgroundColor(swiperIndicatorTheme->GetBigArrowBackgroundColor());
         } else {
             props->UpdateBackgroundColor(swiperIndicatorTheme->GetSmallArrowBackgroundColor());
         }
     }
     if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("arrowColor")) {
-        if (props->GetIsSidebarMiddleValue()) {
+        if (props->GetIsSidebarMiddleValue(false)) {
             props->UpdateArrowColor(swiperIndicatorTheme->GetBigArrowColor());
         } else {
             props->UpdateArrowColor(swiperIndicatorTheme->GetSmallArrowColor());
