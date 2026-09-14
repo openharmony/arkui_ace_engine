@@ -1180,9 +1180,12 @@ void PipelineContext::ReloadNodesResource()
     needReloadResource_ = false;
 }
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime)
 {
     CHECK_RUN_ON(UI);
+    FrameMetrics frameMetrics;
+    const int64_t actualStartTime = vsyncStartTime >= 0 ? vsyncStartTime : GetSysTimestamp();
+    frameMetrics.actualStartTime = static_cast<uint64_t>(actualStartTime);
     if (IsDestroyed()) {
         LOGW("Cannot flush vsync as the pipeline context is destroyed.");
         return;
@@ -1230,7 +1233,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #ifdef RELAXED_INTERACTION_SUPPORT
     FlushRelaxedInteraction();
 #endif
-    FrameMetrics frameMetrics;
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
     FlushTouchEvents();
@@ -1362,6 +1364,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
     window_->FlushVsync();
+    const int64_t submitEndTime = GetSysTimestamp();
+    frameMetrics.totalDuration = (submitEndTime > actualStartTime)
+        ? static_cast<uint64_t>(submitEndTime - actualStartTime) : 0;
     if (IsFocusWindowIdSetted()) {
         FireAllUIExtensionEvents();
     }
@@ -1387,6 +1392,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
 #endif
     FireFrameMetricsCallBack(frameMetrics);
+    TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE,
+        "FrameMetrics actualStartTime=%{public}" PRIu64 ", totalDuration=%{public}" PRIu64
+        ", vsyncTimestamp=%{public}" PRIu64,
+        frameMetrics.actualStartTime, frameMetrics.totalDuration, frameMetrics.vsyncTimestamp);
     // First vsync may come before rootNode_ is created.
 #ifndef CROSS_PLATFORM
     if (contentChangeMgr_ && rootNode_) {

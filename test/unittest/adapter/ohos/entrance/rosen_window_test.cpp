@@ -249,7 +249,7 @@ HWTEST_F(RosenWindowTest, InitMissingSubWindowContinuesVsyncFlush, TestSize.Leve
 HWTEST_F(RosenWindowTest, DestroyAfterParentWindowDestroyedCompletesCleanup, TestSize.Level1)
 {
     auto parentWindow = std::make_shared<RosenWindow>(rsWindow_, taskExecutor_, PARENT_CONTAINER_ID);
-    window_->SetVsyncCallback([](uint64_t, uint64_t) {});
+    window_->SetVsyncCallback([](uint64_t, uint64_t, int64_t) {});
     ASSERT_FALSE(window_->callbacks_.empty());
     SetSharedParentRoute(parentWindow);
     window_->Init();
@@ -273,7 +273,7 @@ HWTEST_F(RosenWindowTest, DestroyAfterParentWindowDestroyedCompletesCleanup, Tes
 HWTEST_F(RosenWindowTest, DestroyAfterParentWindowReleasedCompletesCleanup, TestSize.Level1)
 {
     auto parentWindow = std::make_shared<RosenWindow>(rsWindow_, taskExecutor_, PARENT_CONTAINER_ID);
-    window_->SetVsyncCallback([](uint64_t, uint64_t) {});
+    window_->SetVsyncCallback([](uint64_t, uint64_t, int64_t) {});
     SetSharedParentRoute(parentWindow);
     window_->Init();
     ASSERT_THAT(parentWindow->GetSubWindowIds(), ElementsAre(CHILD_CONTAINER_ID));
@@ -299,7 +299,7 @@ HWTEST_F(RosenWindowTest, DestroyAfterParentWindowReleasedCompletesCleanup, Test
 HWTEST_F(RosenWindowTest, DestroyRepeatedlyIsSafe, TestSize.Level1)
 {
     auto parentWindow = std::make_shared<RosenWindow>(rsWindow_, taskExecutor_, PARENT_CONTAINER_ID);
-    window_->SetVsyncCallback([](uint64_t, uint64_t) {});
+    window_->SetVsyncCallback([](uint64_t, uint64_t, int64_t) {});
     SetSharedParentRoute(parentWindow);
     window_->Init();
     ASSERT_THAT(parentWindow->GetSubWindowIds(), ElementsAre(CHILD_CONTAINER_ID));

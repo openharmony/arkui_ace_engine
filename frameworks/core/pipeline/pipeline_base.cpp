@@ -71,11 +71,12 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
     statisticEventReporter_ = std::make_shared<StatisticEventReporter>(instanceId);
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](uint64_t nanoTimestamp, uint64_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
+                               uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
-            context->OnVsyncEvent(nanoTimestamp, frameCount);
+            context->OnVsyncEvent(nanoTimestamp, frameCount, vsyncStartTime);
         }
     };
     ACE_DCHECK(window_);
@@ -97,11 +98,12 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
     statisticEventReporter_ = std::make_shared<StatisticEventReporter>(instanceId);
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](uint64_t nanoTimestamp, uint64_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
+                               uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
-            context->OnVsyncEvent(nanoTimestamp, frameCount);
+            context->OnVsyncEvent(nanoTimestamp, frameCount, vsyncStartTime);
         }
     };
     ACE_DCHECK(window_);
@@ -801,7 +803,7 @@ void PipelineBase::PopInfiniteAnimationFlushExceeded()
     }
 }
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
@@ -815,12 +817,12 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushAsyncLoadTask();
 
     for (auto& callback : subWindowVsyncCallbacks_) {
-        callback.second(nanoTimestamp, frameCount);
+        callback.second(nanoTimestamp, frameCount, vsyncStartTime);
     }
 
     decltype(jsFormVsyncCallbacks_) jsFormVsyncCallbacks(std::move(jsFormVsyncCallbacks_));
     for (auto& callback : jsFormVsyncCallbacks) {
-        callback.second(nanoTimestamp, frameCount);
+        callback.second(nanoTimestamp, frameCount, vsyncStartTime);
     }
 
     if (onVsyncProfiler_) {
@@ -831,7 +833,7 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
         gsVsyncCallback_();
     }
 
-    FlushVsync(nanoTimestamp, frameCount);
+    FlushVsync(nanoTimestamp, frameCount, vsyncStartTime);
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
     }
