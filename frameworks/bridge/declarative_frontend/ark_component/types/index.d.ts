@@ -1841,6 +1841,7 @@ declare type EmbeddedComponentAttribute = any;
 declare interface EmbedOptions {
   supportDefaultIntrinsicSize?: boolean;
   supportCssDisplayChange?: boolean;
+  supportTransformRotateAndSkew?: boolean;
 }
 declare class FileSelectorParam {
   constructor();

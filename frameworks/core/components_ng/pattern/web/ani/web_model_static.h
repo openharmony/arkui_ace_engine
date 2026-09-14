@@ -71,7 +71,8 @@ public:
     static void JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems& scriptItems,
         const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     static void SetNativeEmbedOptions(
-        FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange);
+        FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange,
+        bool supportTransformRotateAndSkew);
     static void SetBypassVsyncCondition(FrameNode *frameNode, const std::optional<WebBypassVsyncCondition>& condition);
     static void SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedMode);
     static void SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode);

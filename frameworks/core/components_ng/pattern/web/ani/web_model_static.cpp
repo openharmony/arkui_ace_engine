@@ -401,13 +401,15 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
                                            bool supportDefaultIntrinsicSize,
-                                           bool supportCssDisplayChange)
+                                           bool supportCssDisplayChange,
+                                           bool supportTransformRotateAndSkew)
 {
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
     webPatternStatic->UpdateCssDisplayChangeEnabled(supportCssDisplayChange);
+    webPatternStatic->UpdateTransformRotateAndSkewEnabled(supportTransformRotateAndSkew);
 }
 
 void WebModelStatic::SetBypassVsyncCondition(FrameNode *frameNode,

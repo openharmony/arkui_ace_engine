@@ -16318,6 +16318,7 @@ typedef struct Ark_EmbedOptions {
     /* kind: Interface */
     Opt_Boolean supportDefaultIntrinsicSize;
     Opt_Boolean supportCssDisplayChange;
+    Opt_Boolean supportTransformRotateAndSkew;
 } Ark_EmbedOptions;
 typedef struct Opt_EmbedOptions {
     Ark_Tag tag;

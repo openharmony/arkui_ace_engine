@@ -4341,6 +4341,13 @@ void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnTransformRotateAndSkewEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateTransformRotateAndSkewEnabled(value);
+    }
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     if (delegate_) {
@@ -4789,6 +4796,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateIntrinsicSizeEnabled(GetIntrinsicSizeEnabledValue(false));
         delegate_->UpdateCssDisplayChangeEnabled(GetCssDisplayChangeEnabledValue(false));
+        delegate_->UpdateTransformRotateAndSkewEnabled(GetTransformRotateAndSkewEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
 

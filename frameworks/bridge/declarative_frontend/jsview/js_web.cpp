@@ -5027,6 +5027,12 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
         bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
         WebModel::GetInstance()->SetCssDisplayChangeEnabled(cssDisplayChange);
     }
+
+    auto transformRotateAndSkewObj = paramObject->GetProperty("supportTransformRotateAndSkew");
+    if (transformRotateAndSkewObj->IsBoolean()) {
+        bool transformRotateAndSkew = transformRotateAndSkewObj->ToBoolean();
+        WebModel::GetInstance()->SetTransformRotateAndSkewEnabled(transformRotateAndSkew);
+    }
 }
 
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)

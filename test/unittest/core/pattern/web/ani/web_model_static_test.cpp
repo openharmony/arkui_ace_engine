@@ -1026,9 +1026,10 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, true);
+    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, true, true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckCssDisplayChangeEnabled(true), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckTransformRotateAndSkewEnabled(true), true);
 #endif
 }
 
@@ -1048,9 +1049,10 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions002, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, false);
+    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, false, false);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckCssDisplayChangeEnabled(false), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckTransformRotateAndSkewEnabled(false), true);
 #endif
 }
 
