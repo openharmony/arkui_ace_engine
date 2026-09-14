@@ -272,9 +272,23 @@ class ObserveV2 {
           instance.__initialRenderForPreRender__Internal();
         }
 
+        // call ViewStackProcessor::Finish to reset view stack.
+        if ('finishUpdateFunc' in instance && typeof instance.finishUpdateFunc === 'function' &&
+            'getUniqueId' in instance && typeof instance.getUniqueId === 'function') {
+          try {
+            instance.finishUpdateFunc(instance.getUniqueId());
+          } catch (e) {
+            stateMgmtConsole.error('ERROR: finishUpdateFunc failed:', e);
+          }
+        }
+
         // Push to pool before endPreRender
         if (pool && typeof pool.push === 'function') {
+          if (pool.isActive()) {
             pool.push(reuseId, instance, componentClass);
+          } else {
+            instance.resetRecycleCustomNode();
+          }
         }
       } finally {
         PUV2ViewBase.__endPreRender__Internal();
