@@ -7453,24 +7453,57 @@ void TextFieldPattern::ProcessPendingCaretEvent()
     }
 }
 
-bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
+EmojiRelation TextFieldPattern::GetEmojiRelation(int index)
 {
-#ifdef CROSS_PLATFORM
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    return TextEmojiProcessor::GetIndexRelationToEmoji(index, GetTextUtf16Value(),
+        emojiStartIndex, emojiEndIndex);
+}
+
+
+#if defined(CROSS_PLATFORM)
+bool TextFieldPattern::HandleCrossPlatformDeleteEvent(const std::shared_ptr<TextEditingValue>& value)
+{
+    bool shouldHandleDelete = value->isDelete;
 #ifdef IOS_PLATFORM
-    if (value->isDelete && !value->discardedMarkedText) {
-#else
-    if (value->isDelete) {
+    shouldHandleDelete = value->isDelete && !value->discardedMarkedText;
 #endif
-        if (value->compose.IsValid()) {
-            if (value->compose.GetStart() == 0 && value->text.empty()) {
-                DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+    if (!shouldHandleDelete) {
+        return false;
+    }
+    if (value->compose.IsValid()) {
+        if ((value->compose.GetStart() == 0 && value->text.empty()) ||
+            (value->unmarkText && value->selection.GetStart() == value->selection.GetEnd() &&
+             value->selection.GetEnd() == value->compose.GetStart() &&
+             value->compose.GetEnd() > value->compose.GetStart() + 1)) {
+            InputCommandInfo info;
+            info.deleteRange = { value->compose.GetStart(), value->compose.GetEnd() };
+            info.insertOffset = value->compose.GetStart();
+            info.insertValue = u"";
+            info.reason = InputReason::IME;
+            AddInputCommand(info);
+        } else {
+            EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+            if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+                relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+                HandleOnDelete(true);
             } else {
                 DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
             }
-            value->compose.Update(-1);
-        } else {
-            HandleOnDelete(true);
         }
+        value->compose.Update(-1);
+    } else {
+        HandleOnDelete(true);
+    }
+    return true;
+}
+#endif
+
+bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
+{
+#ifdef CROSS_PLATFORM
+    if (HandleCrossPlatformDeleteEvent(value)) {
         return true;
     }
     editingValue_ = value;
