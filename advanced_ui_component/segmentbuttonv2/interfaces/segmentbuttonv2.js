@@ -2259,11 +2259,11 @@ class SimpleSegmentButtonV2 extends ViewV2 {
       }
     }
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
-      this.$selectedIndex?.(selectedIndex);
       const targetRect = this.itemRects[selectedIndex];
       if (!targetRect) {
         return;
       }
+      this.$selectedIndex?.(selectedIndex);
       this.backplatePosition = {
         x: targetRect.position.x,
         y: targetRect.position.y,
