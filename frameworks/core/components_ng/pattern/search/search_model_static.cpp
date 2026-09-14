@@ -788,6 +788,7 @@ void SearchModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, std:
 {
     if (value) {
         SearchModelNG::SetSelectDetectEnable(frameNode, value.value());
+        return;
     }
     SearchModelNG::ResetSelectDetectEnable(frameNode);
 }
