@@ -431,11 +431,6 @@ void JsDragEvent::GetData(const JSCallbackInfo& args)
 
 void JsDragEvent::GetSummary(const JSCallbackInfo& args)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent.getSummary called, filename extension count: %{public}zu",
-        dragEvent_->GetSummaryInfo().filenameExtensions.size());
-    for (const auto& extension : dragEvent_->GetSummaryInfo().filenameExtensions) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent.getSummary filename extension: %{public}s", extension.c_str());
-    }
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     napi_value nativeValue = UdmfClient::GetInstance()->TransformSummary(dragEvent_->GetSummaryInfo());

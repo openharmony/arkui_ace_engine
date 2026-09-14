@@ -181,11 +181,6 @@ int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UDMF_Summary* s
 
     OHOS::UDMF::Summary innerSummary;
     innerSummary.summary = summaryInfo->summary;
-    innerSummary.specificSummary = summaryInfo->detailedSummary;
-    innerSummary.summaryFormat = summaryInfo->summaryFormat;
-    innerSummary.version = summaryInfo->version;
-    innerSummary.totalSize = summaryInfo->totalSize;
-    innerSummary.tag = summaryInfo->tag;
     innerSummary.filenameExtensions = summaryInfo->filenameExtensions;
     auto convertStatus = OHOS::UDMF::NdkDataConversion::GetNdkSummary(innerSummary, summary);
     if (convertStatus != OHOS::UDMF::Status::E_OK) {

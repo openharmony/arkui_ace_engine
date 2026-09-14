@@ -271,12 +271,6 @@ void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInte
     }
     if (ret == 0) {
         ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
-        TAG_LOGI(AceLogTag::ACE_DRAG,
-            "EnvelopedData received UDMF summary, result: %{public}d, filename extension count: %{public}zu",
-            ret, dragSummaryInfo.filenameExtensions.size());
-        for (const auto& extension : dragSummaryInfo.filenameExtensions) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "EnvelopedData filename extension: %{public}s", extension.c_str());
-        }
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
         }
@@ -1740,12 +1734,6 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
         }
     }
     ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
-    TAG_LOGI(AceLogTag::ACE_DRAG,
-        "ProcessDragDropData received UDMF summary, result: %{public}d, filename extension count: %{public}zu",
-        ret, dragSummaryInfo.filenameExtensions.size());
-    for (const auto& extension : dragSummaryInfo.filenameExtensions) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "ProcessDragDropData filename extension: %{public}s", extension.c_str());
-    }
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
     }
