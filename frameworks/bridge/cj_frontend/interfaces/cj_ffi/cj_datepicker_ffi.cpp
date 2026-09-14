@@ -115,7 +115,7 @@ PickerTime ParseTime(FfiTime data)
 
 FFiDatePickerResult DatePickerChangeEventToFfi(const OHOS::Ace::NG::DatePickerChangeEvent& eventInfo)
 {
-    FFiDatePickerResult result;
+    FFiDatePickerResult result {};
     auto infoStr = eventInfo.GetSelectedStr();
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
     if (!argsPtr) {

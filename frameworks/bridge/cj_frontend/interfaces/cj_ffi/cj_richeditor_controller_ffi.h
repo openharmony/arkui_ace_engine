@@ -522,6 +522,16 @@ public:
     static void ParseRichEditorAbstractImageStyleResult(const NG::RichEditorAbstractSpanResult& spanObject,
         NativeRichEditorImageSpanStyleResult& nativeImageStyleResult);
 
+    static void ParseToSpanResult(const ResultObject& spanObject, NativeRichEditorSpanResult& current);
+
+    static void ParseToSpanResult12(const ResultObject& spanObject, NativeRichEditorSpanResult12& current);
+
+    static void ParseAbstractToSpanResult(const NG::RichEditorAbstractSpanResult& spanObject,
+        NativeRichEditorSpanResult& current);
+
+    static void ParseAbstractToSpanResult12(const NG::RichEditorAbstractSpanResult& spanObject,
+        NativeRichEditorSpanResult12& current);
+
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;

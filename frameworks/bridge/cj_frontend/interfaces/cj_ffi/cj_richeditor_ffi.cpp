@@ -277,7 +277,7 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete12(void(*callback)(NativeRic
 {
     auto onIMEInputCompleteFunc = [cjCallback = CJLambda::Create(callback)](
         const NG::RichEditorAbstractSpanResult& textSpanResult) {
-        NativeRichEditorTextSpanResult12 result;
+        NativeRichEditorTextSpanResult12 result {};
         NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(textSpanResult, result);
         cjCallback(result);
         if (result.textStyle.decoration.color) {
@@ -300,18 +300,8 @@ void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichEditorSelec
         auto spans = new NativeRichEditorSpanResult[spanObjectList.size()];
         size_t idx = 0;
         for (const ResultObject& spanObject : spanObjectList) {
-            NativeRichEditorSpanResult current;
-            if (spanObject.type == SelectSpanType::TYPESPAN) {
-                current.isText = true;
-                NativeRichEditorTextSpanResult textResult;
-                NativeRichEditorController::ParseRichEditorTextSpanResult(spanObject, textResult);
-                current.textResult = textResult;
-            } else {
-                current.isText = false;
-                NativeRichEditorImageSpanResult imageResult;
-                NativeRichEditorController::ParseRichEditorImageSpanResult(spanObject, imageResult);
-                current.imageResult = imageResult;
-            }
+            NativeRichEditorSpanResult current {};
+            NativeRichEditorController::ParseToSpanResult(spanObject, current);
             spans[idx] = current;
             idx ++;
         }
@@ -340,19 +330,8 @@ void FfiOHOSAceFrameworkRichEditorOnSelect12(void(*callback)(NativeRichEditorSel
         auto spans = new NativeRichEditorSpanResult12[spanObjectList.size()];
         size_t idx = 0;
         for (const ResultObject& spanObject : spanObjectList) {
-            NativeRichEditorSpanResult12 current;
-            if (spanObject.type == SelectSpanType::TYPESPAN ||
-                spanObject.type == SelectSpanType::TYPESYMBOLSPAN) {
-                current.isText = true;
-                NativeRichEditorTextSpanResult12 textResult;
-                NativeRichEditorController::ParseRichEditorTextSpanResult(spanObject, textResult);
-                current.textResult = textResult;
-            } else {
-                current.isText = false;
-                NativeRichEditorImageSpanResult12 imageResult;
-                NativeRichEditorController::ParseRichEditorImageSpanResult(spanObject, imageResult);
-                current.imageResult = imageResult;
-            }
+            NativeRichEditorSpanResult12 current {};
+            NativeRichEditorController::ParseToSpanResult12(spanObject, current);
             spans[idx] = current;
             idx ++;
         }
@@ -376,18 +355,8 @@ void FfiOHOSAceFrameworkRichEditorAboutToDelete(bool(*callback)(NativeRichEditor
         auto spans = new NativeRichEditorSpanResult[deleteSpans.size()];
         size_t idx = 0;
         for (const NG::RichEditorAbstractSpanResult& spanObject : deleteSpans) {
-            NativeRichEditorSpanResult current;
-            if (spanObject.GetType() == NG::SpanResultType::TEXT) {
-                current.isText = true;
-                NativeRichEditorTextSpanResult textResult;
-                NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(spanObject, textResult);
-                current.textResult = textResult;
-            } else {
-                current.isText = false;
-                NativeRichEditorImageSpanResult imageResult;
-                NativeRichEditorController::ParseRichEditorAbstractImageSpanResult(spanObject, imageResult);
-                current.imageResult = imageResult;
-            }
+            NativeRichEditorSpanResult current {};
+            NativeRichEditorController::ParseAbstractToSpanResult(spanObject, current);
             spans[idx] = current;
             idx ++;
         }
@@ -427,19 +396,8 @@ void FfiOHOSAceFrameworkRichEditorAboutToDelete12(bool(*callback)(NativeRichEdit
         auto spans = new NativeRichEditorSpanResult12[deleteSpans.size()];
         size_t idx = 0;
         for (const NG::RichEditorAbstractSpanResult& spanObject : deleteSpans) {
-            NativeRichEditorSpanResult12 current;
-            if (spanObject.GetType() == NG::SpanResultType::TEXT ||
-                spanObject.GetType() == NG::SpanResultType::SYMBOL) {
-                current.isText = true;
-                NativeRichEditorTextSpanResult12 textResult;
-                NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(spanObject, textResult);
-                current.textResult = textResult;
-            } else {
-                current.isText = false;
-                NativeRichEditorImageSpanResult12 imageResult;
-                NativeRichEditorController::ParseRichEditorAbstractImageSpanResult(spanObject, imageResult);
-                current.imageResult = imageResult;
-            }
+            NativeRichEditorSpanResult12 current {};
+            NativeRichEditorController::ParseAbstractToSpanResult12(spanObject, current);
             spans[idx] = current;
             idx ++;
         }
@@ -680,17 +638,17 @@ void FfiOHOSAceFrameworkRichEditorOnWillChange(bool(*callback)(NativeRichEditorC
         auto nativeReplacedSymbolSpans = new NativeRichEditorTextSpanResult12[replacedSymbolSpans.size()];
 
         for (size_t i = 0; i < replacedSpans.size(); i++) {
-            NativeRichEditorTextSpanResult12 current;
+            NativeRichEditorTextSpanResult12 current {};
             NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(replacedSpans[i], current);
             nativeReplacedSpans[i] = current;
         }
         for (size_t i = 0; i < replacedImageSpans.size(); i++) {
-            NativeRichEditorImageSpanResult12 current;
+            NativeRichEditorImageSpanResult12 current {};
             NativeRichEditorController::ParseRichEditorAbstractImageSpanResult(replacedImageSpans[i], current);
             nativeReplacedImageSpans[i] = current;
         }
         for (size_t i = 0; i < replacedSymbolSpans.size(); i++) {
-            NativeRichEditorTextSpanResult12 current;
+            NativeRichEditorTextSpanResult12 current {};
             NativeRichEditorController::ParseRichEditorAbstractSymbolSpanResult(replacedSymbolSpans[i], current);
             nativeReplacedSymbolSpans[i] = current;
         }
