@@ -481,10 +481,13 @@ void SearchPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(renderContext);
     auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
-    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
-    CHECK_NULL_VOID(searchLayoutProperty);
-    if (!searchLayoutProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    if (!renderContext->HasBackgroundColor()) {
+        auto material = renderContext->GetSystemMaterial();
+        if (material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+            renderContext->UpdatePreBackgroundColor(textFieldTheme->GetBgColor());
+        } else {
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        }
     }
 }
 
