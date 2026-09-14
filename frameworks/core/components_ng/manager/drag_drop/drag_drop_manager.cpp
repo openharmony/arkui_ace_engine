@@ -1818,8 +1818,8 @@ void DragDropManager::RequireSummary()
 {
     DragSummaryInfo dragSummaryInfo;
     int32_t ret = InteractionInterface::GetInstance()->GetDragSummary(dragSummaryInfo);
-    TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary received MSDP summary, result: %{public}d, extension count: %{public}zu",
-        ret, dragSummaryInfo.filenameExtensions.size());
+    auto extensionCount = dragSummaryInfo.filenameExtensions.size();
+    TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary ret: %{public}d, extensionCount: %{public}zu", ret, extensionCount);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
     } else {
