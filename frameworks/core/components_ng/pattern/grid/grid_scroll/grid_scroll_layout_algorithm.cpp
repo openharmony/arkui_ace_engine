@@ -154,7 +154,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
 
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
-        AddCacheItemsInFront(info_.startIndex_, layoutWrapper, cache.first, predictBuildList_);
+        // In bottom overscroll startIndex_ is stale; preload relative to the effective
+        // start so the window matches cache.first (which is calculated from the same anchor).
+        AddCacheItemsInFront(info_.GetEffectiveStartIndex(), layoutWrapper, cache.first, predictBuildList_);
         if (!predictBuildList_.empty()) {
             PreloadItems(layoutWrapper);
             predictBuildList_.clear();
