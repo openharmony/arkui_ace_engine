@@ -2446,7 +2446,9 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
         positionIter->second = ComputeItemCrossPosition(item.first);
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper) {
-            if (predictBuildList_.back().idx < currentIndex) {
+            if (predictBuildList_.empty()) {
+                predictBuildList_.emplace_back(currentIndex);
+            } else if (predictBuildList_.back().idx < currentIndex) {
                 predictBuildList_.emplace_front(currentIndex);
             } else if (predictBuildList_.front().idx > currentIndex) {
                 predictBuildList_.emplace_back(currentIndex);
