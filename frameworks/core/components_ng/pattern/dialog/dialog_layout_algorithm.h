@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace::NG {
 class OverlayManager;
+class DialogPattern;
 enum class TouchingBoundaryType {
     NotTouchBoundary = 0,
     TouchBottomBoundary,
@@ -110,6 +111,8 @@ private:
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
     float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+    void UpdateDialogOffsetY(const RefPtr<FrameNode>& hostNode, const RefPtr<DialogPattern>& dialogPattern,
+        const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& maxSize, OptionalSizeF& realSize);
     void AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode);
     bool IsDefaultPosition(const RefPtr<DialogLayoutProperty>& dialogProp);
     void AvoidTitlebarInSubwindow(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp);
