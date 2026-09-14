@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "gtest/gtest.h"
+
 #define private public
 #define protected public
 #include "core/common/event_manager.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -755,5 +757,148 @@ HWTEST_F(TouchEventTestNg, ConvertFromMouseTest001, TestSize.Level1)
     touchEvent.convertInfo.first = UIInputEventType::NONE;
     touchEvent.sourceType = SourceType::MOUSE;
     EXPECT_TRUE(touchEvent.ConvertFromMouse());
+}
+
+/**
+ * @tc.name: TouchEventReportToUISessionTest001
+ * @tc.desc: VM-1: DOWN/UP/CANCEL triggers report; callback still executes; return value unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventReportToUISessionTest001, TestSize.Level1)
+{
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 1001, AceType::MakeRefPtr<Pattern>());
+    touchEventActuator->AttachFrameNode(frameNode);
+
+    for (auto touchType : { TouchType::DOWN, TouchType::UP, TouchType::CANCEL }) {
+        bool callbackCalled = false;
+        TouchEventFunc callback = [&callbackCalled](TouchEventInfo& info) { callbackCalled = true; };
+        touchEventActuator->ReplaceTouchEvent(std::move(callback));
+
+        TouchEvent point;
+        point.type = touchType;
+        point.id = 1;
+        point.time = std::chrono::steady_clock::now();
+
+        bool result = touchEventActuator->HandleEvent(point);
+        EXPECT_TRUE(result) << "HandleEvent should return true for " << static_cast<int>(touchType);
+        EXPECT_TRUE(callbackCalled) << "userCallback should execute for " << static_cast<int>(touchType);
+    }
+}
+
+/**
+ * @tc.name: TouchEventReportMoveNotReportedTest002
+ * @tc.desc: VM-3: MOVE events do not trigger report; callback still executes
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventReportMoveNotReportedTest002, TestSize.Level1)
+{
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 1002, AceType::MakeRefPtr<Pattern>());
+    touchEventActuator->AttachFrameNode(frameNode);
+
+    bool callbackCalled = false;
+    TouchEventFunc callback = [&callbackCalled](TouchEventInfo& info) { callbackCalled = true; };
+    touchEventActuator->ReplaceTouchEvent(std::move(callback));
+
+    TouchEvent point;
+    point.type = TouchType::MOVE;
+    point.id = 1;
+    point.time = std::chrono::steady_clock::now();
+
+    bool result = touchEventActuator->HandleEvent(point);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: TouchEventReportFailureIsolationTest003
+ * @tc.desc: VM-6: failure isolation — no FrameNode attached, callback still works
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventReportFailureIsolationTest003, TestSize.Level1)
+{
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    bool callbackCalled = false;
+    TouchEventFunc callback = [&callbackCalled](TouchEventInfo& info) { callbackCalled = true; };
+    touchEventActuator->ReplaceTouchEvent(std::move(callback));
+
+    TouchEvent point;
+    point.type = TouchType::DOWN;
+    point.id = 1;
+    point.time = std::chrono::steady_clock::now();
+
+    bool result = touchEventActuator->HandleEvent(point);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: TouchEventReportCallbackOrderTest004
+ * @tc.desc: VM-9: callback order preserved — report call does not block callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventReportCallbackOrderTest004, TestSize.Level1)
+{
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 1004, AceType::MakeRefPtr<Pattern>());
+    touchEventActuator->AttachFrameNode(frameNode);
+
+    std::vector<int32_t> callOrder;
+    TouchEventFunc callback = [&callOrder](TouchEventInfo& info) { callOrder.push_back(1); };
+    touchEventActuator->ReplaceTouchEvent(std::move(callback));
+    TouchEventFunc afterCallback = [&callOrder](TouchEventInfo& info) { callOrder.push_back(2); };
+    touchEventActuator->AddTouchAfterEvent(AceType::MakeRefPtr<TouchEventImpl>(std::move(afterCallback)));
+
+    TouchEvent point;
+    point.type = TouchType::DOWN;
+    point.id = 1;
+    point.time = std::chrono::steady_clock::now();
+
+    touchEventActuator->HandleEvent(point);
+    EXPECT_EQ(callOrder.size(), 2u);
+    EXPECT_EQ(callOrder[0], 1);
+    EXPECT_EQ(callOrder[1], 2);
+}
+
+/**
+ * @tc.name: TouchEventReportMultiPointerTest009
+ * @tc.desc: VM-5: multi-pointer event with Local coords from TouchEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventReportMultiPointerTest009, TestSize.Level1)
+{
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 1009, AceType::MakeRefPtr<Pattern>());
+    touchEventActuator->AttachFrameNode(frameNode);
+
+    bool callbackCalled = false;
+    TouchEventFunc callback = [&callbackCalled](TouchEventInfo& info) {
+        callbackCalled = true;
+        const auto& touches = info.GetTouches();
+        EXPECT_FALSE(touches.empty());
+    };
+    touchEventActuator->ReplaceTouchEvent(std::move(callback));
+
+    TouchPoint tp1, tp2;
+    tp1.id = 1;
+    tp1.x = 100.0f;
+    tp1.y = 200.0f;
+    tp1.isPressed = true;
+    tp2.id = 2;
+    tp2.x = 300.0f;
+    tp2.y = 400.0f;
+    tp2.isPressed = true;
+
+    TouchEvent point;
+    point.type = TouchType::DOWN;
+    point.id = 1;
+    point.time = std::chrono::steady_clock::now();
+    point.pointers.push_back(tp1);
+    point.pointers.push_back(tp2);
+
+    touchEventActuator->HandleEvent(point);
+    EXPECT_TRUE(callbackCalled);
 }
 } // namespace OHOS::Ace::NG

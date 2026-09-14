@@ -15,7 +15,13 @@
 
 #include "core/components_ng/event/touch_event.h"
 
+#include <chrono>
+#include <unordered_set>
+
+#include "base/log/log_wrapper.h"
 #include "core/common/event_manager.h"
+#include "core/common/reporter/reporter.h"
+#include "core/components_ng/manager/event/json_child_report.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -231,6 +237,7 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
     }
     changedInfo.SetSourceTool(lastPoint.sourceTool);
     changedInfo.SetOperatingHand(lastPoint.operatingHand);
+    changedInfo.SetTimeStamp(lastPoint.time);
     return changedInfo;
 }
 
@@ -340,6 +347,9 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
 
 void TouchEventActuator::TriggerCallBacks(TouchEventInfo& event)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+    ReportTouchEventToUISession(event);
+#endif
     for (auto& impl : touchEvents_) {
         if (impl) {
             (*impl)(event);
@@ -365,5 +375,64 @@ void TouchEventActuator::TriggerCallBacks(TouchEventInfo& event)
         (*commonTouchEventCallback)(event);
     }
 }
+
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+void TouchEventActuator::ReportTouchEventToUISession(const TouchEventInfo& event)
+{
+    const auto& changedTouches = event.GetChangedTouches();
+    if (changedTouches.empty()) {
+        return;
+    }
+    const auto& changed = changedTouches.front();
+    if (changed.GetTouchType() != TouchType::DOWN && changed.GetTouchType() != TouchType::UP &&
+        changed.GetTouchType() != TouchType::CANCEL) {
+        return;
+    }
+
+    auto frameNode = GetAttachedNode().Upgrade();
+    if (!frameNode) {
+        return;
+    }
+    int32_t nodeId = frameNode->GetId();
+    if (nodeId < 0) {
+        return;
+    }
+
+    std::string action;
+    switch (changed.GetTouchType()) {
+        case TouchType::DOWN:
+            action = "Down";
+            break;
+        case TouchType::UP:
+            action = "Up";
+            break;
+        case TouchType::CANCEL:
+            action = "Cancel";
+            break;
+        default:
+            return;
+    }
+
+    int64_t actionTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        changed.GetTimeStamp().time_since_epoch()).count();
+
+    float pointX = changed.GetGlobalLocation().GetX();
+    float pointY = changed.GetGlobalLocation().GetY();
+    int32_t fingerId = changed.GetFingerId();
+
+    std::vector<TouchEventJsonReport::FingerData> fingers;
+    for (const auto& touch : event.GetTouches()) {
+        TouchEventJsonReport::FingerData finger;
+        finger.fingerId = touch.GetFingerId();
+        finger.pointX = touch.GetGlobalLocation().GetX();
+        finger.pointY = touch.GetGlobalLocation().GetY();
+        fingers.push_back(std::move(finger));
+    }
+
+    TouchEventJsonReport report(nodeId, action, actionTimeMs,
+        fingerId, pointX, pointY, std::move(fingers));
+    Reporter::GetInstance().HandleUISessionReporting(report);
+}
+#endif
 
 } // namespace OHOS::Ace::NG

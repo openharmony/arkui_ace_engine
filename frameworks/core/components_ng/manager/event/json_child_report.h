@@ -18,6 +18,8 @@
 
 #include <functional>
 #include <limits>
+#include <string>
+#include <vector>
 
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
@@ -355,6 +357,30 @@ private:
     int32_t windowID_;
     bool isFocus_;
 };
+class TouchEventJsonReport : public JsonReport {
+public:
+    struct FingerData {
+        int32_t fingerId = 0;
+        float pointX = 0.0f;
+        float pointY = 0.0f;
+    };
+
+    TouchEventJsonReport(int32_t nodeId, const std::string& action, int64_t actionTimeMs,
+        int32_t fingerId, float pointX, float pointY, std::vector<FingerData>&& fingers);
+    ~TouchEventJsonReport() = default;
+
+    std::shared_ptr<JsonValue> GetJsonData() const override;
+
+private:
+    int32_t nodeId_ = 0;
+    std::string action_;
+    int64_t actionTimeMs_ = 0;
+    int32_t fingerId_ = 0;
+    float pointX_ = 0.0f;
+    float pointY_ = 0.0f;
+    std::vector<FingerData> fingers_;
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_EVENT_JSON_CHILD_REPORT_H
