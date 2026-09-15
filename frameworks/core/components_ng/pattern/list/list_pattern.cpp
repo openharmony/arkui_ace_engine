@@ -4169,14 +4169,20 @@ void ListPattern::ApplyEditModeToCachedItems(bool enabled)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (itemPosition_.empty()) {
         return;
     }
     bool needReserveCheckBoxSpace = enabled && NeedJudgeWithHotZone();
+    auto cachedLines = std::max(layoutProperty->GetCachedCountWithDefault(), 0);
+    bool showCached = layoutProperty->GetShowCachedItemsValue(false);
+    auto cachedItems = static_cast<int64_t>(cachedLines) * std::max(lanes_, 1);
 
     auto startIndex = itemPosition_.begin()->first;
-    for (int32_t index = startIndex - 1; index >= 0; --index) {
-        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, true);
+    auto cacheStartIndex = static_cast<int32_t>(std::max<int64_t>(startIndex - cachedItems, 0));
+    for (int32_t index = startIndex - 1; index >= cacheStartIndex; --index) {
+        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, !showCached);
         if (!childWrapper) {
             continue;
         }
@@ -4188,8 +4194,9 @@ void ListPattern::ApplyEditModeToCachedItems(bool enabled)
 
     int32_t totalCount = std::max(maxListItemIndex_ + 1, 0);
     auto endIndex = itemPosition_.rbegin()->first;
-    for (int32_t index = endIndex + 1; index < totalCount; ++index) {
-        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, true);
+    auto cacheEndIndex = static_cast<int32_t>(std::min<int64_t>(endIndex + cachedItems + 1, totalCount));
+    for (int32_t index = endIndex + 1; index < cacheEndIndex; ++index) {
+        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, !showCached);
         if (!childWrapper) {
             continue;
         }
