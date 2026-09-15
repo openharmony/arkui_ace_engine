@@ -513,9 +513,10 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
     CHECK_NULL_VOID(surfaceNode);
     surfaceNode->bufferId_ = surfaceBuffer->GetSeqNum();
     surfaceNode->isOpaque_ = isOpaque_;
-    InsertSurfaceNode(surfaceNode);
+    size_t bufferSize = 0;
+    InsertSurfaceNode(surfaceNode, bufferSize);
     ACE_SCOPED_TRACE("ConsumeXComponentBuffer[id:%u][sendTimes:%d][size:%u]", surfaceNode->bufferId_,
-        surfaceNode->sendTimes_, static_cast<uint32_t>(buffersToDraw_.size()));
+        surfaceNode->sendTimes_, static_cast<uint32_t>(bufferSize));
 #endif
 }
 
@@ -550,7 +551,8 @@ void RosenRenderSurface::MarkDirtyIfNeeded()
 }
 
 #ifdef OHOS_PLATFORM
-void RosenRenderSurface::InsertSurfaceNode(const std::shared_ptr<SurfaceBufferNode>& surfaceNode)
+void RosenRenderSurface::InsertSurfaceNode(const std::shared_ptr<SurfaceBufferNode>& surfaceNode,
+    size_t& bufferSize)
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     if (isUniRender_.load()) {
@@ -563,6 +565,7 @@ void RosenRenderSurface::InsertSurfaceNode(const std::shared_ptr<SurfaceBufferNo
         }
     }
     buffersToDraw_.emplace_back(surfaceNode);
+    bufferSize = buffersToDraw_.size();
 }
 #endif
 
