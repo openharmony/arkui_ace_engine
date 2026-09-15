@@ -34,6 +34,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "adapter/ohos/osal/js_accessibility_manager.h"
+#include "core/pipeline/base/element_register.h"
+
+#include <sstream>
 
 
 using namespace OHOS::Accessibility;
@@ -353,4 +357,270 @@ HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest016, TestSize.Level1
     prop->SetAccessibilityCustomActions(actions);
     Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
 }
+
+/**
+ * @tc.name: DumpTreeNodeInfoNG001
+ * @tc.desc: DumpTreeNodeInfoNG dumps accessibilitySelected/accessibilityRole and accessibilityOptions
+ *           nested as a sub-field of accessibilityGroup when accessibilityGroup is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpTreeNodeInfoNG001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetUserSelected(true);
+    accessibilityProperty->SetAccessibilityRole("button");
+    NG::AccessibilityGroupOptions groupOptions;
+    groupOptions.accessibilityTextPreferred = true;
+    groupOptions.stateControllerByType = AccessibilityRoleType::BUTTON;
+    groupOptions.stateControllerByInspector = "stateInspector";
+    groupOptions.actionControllerByType = AccessibilityRoleType::RADIO;
+    groupOptions.actionControllerByInspector = "actionInspector";
+    accessibilityProperty->SetAccessibilityGroupOptions(groupOptions);
+
+    auto ostream = std::make_unique<std::ostringstream>();
+    auto* ostreamPtr = ostream.get();
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->isUseJson_ = false;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->DumpTreeNG(frameNode, 0, frameNode->GetAccessibilityId(), commonProperty, false);
+
+    std::string dumpContent = ostreamPtr->str();
+    EXPECT_NE(dumpContent.find("accessibilityGroup: 1"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilitySelected: 1"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilityRole: button"), std::string::npos);
+    EXPECT_NE(dumpContent.find("    accessibilityOptions: "), std::string::npos);
+    EXPECT_NE(dumpContent.find("        accessibilityTextPreferred: 1"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        stateControllerByType: button"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        stateControllerByInspector: stateInspector"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        actionControllerByType: radio"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        actionControllerByInspector: actionInspector"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpTreeNodeInfoNG002
+ * @tc.desc: accessibilityOptions is not dumped at all and accessibilitySelected/accessibilityRole
+ *           keep default values when accessibilityGroup is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpTreeNodeInfoNG002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(false);
+
+    auto ostream = std::make_unique<std::ostringstream>();
+    auto* ostreamPtr = ostream.get();
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->isUseJson_ = false;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->DumpTreeNG(frameNode, 0, frameNode->GetAccessibilityId(), commonProperty, false);
+
+    std::string dumpContent = ostreamPtr->str();
+    EXPECT_EQ(dumpContent.find("accessibilityOptions"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilitySelected: 0"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilityRole: \n"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpTreeNodeInfoNG003
+ * @tc.desc: simplify dump path does not contain the new accessibility fields
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpTreeNodeInfoNG003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetUserSelected(true);
+    accessibilityProperty->SetAccessibilityRole("button");
+    NG::AccessibilityGroupOptions groupOptions;
+    groupOptions.accessibilityTextPreferred = true;
+    accessibilityProperty->SetAccessibilityGroupOptions(groupOptions);
+
+    auto ostream = std::make_unique<std::ostringstream>();
+    auto* ostreamPtr = ostream.get();
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->isUseJson_ = false;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->DumpTreeNG(frameNode, 0, frameNode->GetAccessibilityId(), commonProperty, true);
+
+    std::string dumpContent = ostreamPtr->str();
+    EXPECT_EQ(dumpContent.find("accessibilityOptions"), std::string::npos);
+    EXPECT_EQ(dumpContent.find("accessibilitySelected"), std::string::npos);
+    EXPECT_EQ(dumpContent.find("accessibilityRole"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpTreeNodeInfoNG004
+ * @tc.desc: dump tree entry points are null-safe and skip inactive/missing nodes without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpTreeNodeInfoNG004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    Framework::CommonProperty commonProperty;
+
+    auto ostream = std::make_unique<std::ostringstream>();
+    auto* ostreamPtr = ostream.get();
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    jsAccessibilityManager->DumpTreeNG(nullptr, 0, 1, commonProperty, false);
+    std::string dumpContent = ostreamPtr->str();
+    EXPECT_NE(dumpContent.find("Error: failed to get accessibility node"), std::string::npos);
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    jsAccessibilityManager->DumpTreeAccessibilityNodeNG(nullptr, 0, 1, commonProperty);
+    jsAccessibilityManager->DumpTreeNG(frameNode, 0, -1, commonProperty, false);
+    EXPECT_NE(ostreamPtr->str().find("Error: failed to get accessibility node with ID -1"), std::string::npos);
+
+    jsAccessibilityManager->DumpTreeNG(frameNode, 0, frameNode->GetAccessibilityId(), commonProperty, false);
+    EXPECT_EQ(ostreamPtr->str().find("accessibilityOptions"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpTreeNodeInfoNG005
+ * @tc.desc: accessibilityOptions dumps empty role strings for unset AccessibilityGroupOptions
+ *           when accessibilityGroup is true with default options
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpTreeNodeInfoNG005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions());
+
+    auto ostream = std::make_unique<std::ostringstream>();
+    auto* ostreamPtr = ostream.get();
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->isUseJson_ = false;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->DumpTreeNG(frameNode, 0, frameNode->GetAccessibilityId(), commonProperty, false);
+
+    std::string dumpContent = ostreamPtr->str();
+    EXPECT_NE(dumpContent.find("    accessibilityOptions: "), std::string::npos);
+    EXPECT_NE(dumpContent.find("        accessibilityTextPreferred: 0"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        stateControllerByType: \n"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        stateControllerByInspector: \n"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        actionControllerByType: \n"), std::string::npos);
+    EXPECT_NE(dumpContent.find("        actionControllerByInspector: \n"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpTreeNodeInfoNG006
+ * @tc.desc: accessibilitySelected/accessibilityRole of child nodes are dumped through
+ *           DumpTreeNG recursion while the parent dumps accessibilityOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpTreeNodeInfoNG006, TestSize.Level1)
+{
+    auto parentNode = FrameNode::CreateFrameNode("parent",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->SetActive(true);
+    auto parentProperty = parentNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(parentProperty, nullptr);
+    parentProperty->SetAccessibilityGroup(true);
+    parentProperty->SetAccessibilityRole("button");
+
+    auto childNode = FrameNode::CreateFrameNode("child",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(childNode, nullptr);
+    childNode->SetActive(true);
+    auto childProperty = childNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(childProperty, nullptr);
+    childProperty->SetUserSelected(true);
+    childProperty->SetAccessibilityRole("radio");
+    parentNode->AddChild(childNode);
+
+    auto ostream = std::make_unique<std::ostringstream>();
+    auto* ostreamPtr = ostream.get();
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->isUseJson_ = false;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->DumpTreeNG(parentNode, 0, parentNode->GetAccessibilityId(), commonProperty, false);
+
+    std::string dumpContent = ostreamPtr->str();
+    EXPECT_NE(dumpContent.find("|-> parent childSize:1"), std::string::npos);
+    EXPECT_NE(dumpContent.find("|-> child childSize:0"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilityRole: button"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilityRole: radio"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilitySelected: 1"), std::string::npos);
+    EXPECT_NE(dumpContent.find("    accessibilityOptions: "), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpTreeNodeInfoNG007
+ * @tc.desc: json dump path works with the new accessibility fields configured and
+ *           keeps the new fields limited to the text dump path
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpTreeNodeInfoNG007, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetUserSelected(true);
+    accessibilityProperty->SetAccessibilityRole("button");
+    NG::AccessibilityGroupOptions groupOptions;
+    groupOptions.accessibilityTextPreferred = true;
+    accessibilityProperty->SetAccessibilityGroupOptions(groupOptions);
+
+    auto ostream = std::make_unique<std::ostringstream>();
+    auto* ostreamPtr = ostream.get();
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->isUseJson_ = true;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->DumpTreeNG(frameNode, 0, frameNode->GetAccessibilityId(), commonProperty, false);
+
+    std::string dumpContent = ostreamPtr->str();
+    EXPECT_NE(dumpContent.find("ID"), std::string::npos);
+    EXPECT_NE(dumpContent.find("accessibilityGroup"), std::string::npos);
+    EXPECT_EQ(dumpContent.find("accessibilitySelected"), std::string::npos);
+    EXPECT_EQ(dumpContent.find("accessibilityOptions"), std::string::npos);
+}
+
 } // namespace OHOS::Ace::NG
