@@ -2444,7 +2444,6 @@ void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
         RETURN_IF_CALLING_FROM_M114();
     }
     if (supportTransformRotateAndSkew.has_value()) {
-        RETURN_IF_CALLING_FROM_M114();
         RETURN_IF_CALLING_FROM_M132();
     }
 
