@@ -18,8 +18,9 @@ import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import componentUtils from '@ohos.arkui.componentUtils';
-import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
+import { SymbolGlyphModifier } from '@kit.ArkUI';
 import { systemDateTime } from '@kit.BasicServicesKit';
+import i18n from '@ohos.i18n';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -736,11 +737,19 @@ export struct PopupComponent {
   }
 
   private getTitleTextAlign(): TextAlign {
-    let titleAlign = TextAlign.Start;
-    if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
-      titleAlign = TextAlign.End;
+    return TextAlign.Start;
+  }
+
+  private getResolvedTextDirection(): Direction {
+    if (this.popupDirection === Direction.Auto || this.popupDirection === undefined) {
+      try {
+        return i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr;
+      } catch (error) {
+        console.error(`popup getResolvedTextDirection, error: ${error.toString()}`);
+        return Direction.Ltr;
+      }
     }
-    return titleAlign
+    return this.popupDirection;
   }
 
   build() {
@@ -759,7 +768,7 @@ export struct PopupComponent {
         Column() {
           Flex({ alignItems: ItemAlign.Start }) {
             Text(this.getTitleText())
-              .direction(this.popupDirection)
+              .direction(this.getResolvedTextDirection())
               .flexGrow(1)
               .maxLines(2)
               .align(Alignment.Start)
@@ -813,7 +822,7 @@ export struct PopupComponent {
 
           Scroll() {
             Text(this.getMessageText())
-              .direction(this.popupDirection)
+              .direction(this.getResolvedTextDirection())
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
