@@ -16,6 +16,26 @@
 #include "display_manager.h"
 
 namespace OHOS::Rosen {
+int32_t Display::GetWidth() const
+{
+    return displayInfo_->GetWidth();
+}
+
+int32_t Display::GetHeight() const
+{
+    return displayInfo_->GetHeight();
+}
+
+int32_t Display::GetPhysicalWidth() const
+{
+    return displayInfo_->GetPhysicalWidth();
+}
+
+int32_t Display::GetPhysicalHeight() const
+{
+    return displayInfo_->GetPhysicalHeight();
+}
+
 sptr<DisplayInfo> Display::GetDisplayInfo()
 {
     return displayInfo_;
@@ -31,6 +51,20 @@ float Display::GetVirtualPixelRatio() const
     return displayInfo_->GetVirtualPixelRatio();
 }
 
+DMError Display::GetLiveCreaseRegion(FoldCreaseRegion& region) const
+{
+    if (!liveCreaseRegionValid_) {
+        return DMError::DM_ERROR;
+    }
+    region = liveCreaseRegion_;
+    return DMError::DM_OK;
+}
+
+DMError Display::GetAvailableArea(DMRect& area) const
+{
+    return DMError::DM_ERROR;
+}
+
 
 DisplayManager& DisplayManager::GetInstance()
 {
@@ -38,12 +72,31 @@ DisplayManager& DisplayManager::GetInstance()
     return instance;
 }
 
+DisplayManager::DisplayManager() {}
+
+DisplayManager::~DisplayManager() {}
+
 sptr<Display> DisplayManager::GetDefaultDisplay()
 {
     return defaultDisplay_;
 }
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId, bool isGetActualInfo)
+{
+    return defaultDisplay_;
+}
+
+std::vector<sptr<Display>> DisplayManager::GetAllDisplays(int32_t userId)
+{
+    return { defaultDisplay_ };
+}
+
+DisplayId DisplayManager::GetDefaultDisplayId()
+{
+    return 0;
+}
+
+sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi, int32_t userId)
 {
     return defaultDisplay_;
 }
@@ -76,5 +129,20 @@ DMError DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listene
 bool DisplayManager::IsFoldable()
 {
     return false;
+}
+
+FoldStatus DisplayManager::GetFoldStatus()
+{
+    return FoldStatus::UNKNOWN;
+}
+
+sptr<FoldCreaseRegion> DisplayManager::GetCurrentFoldCreaseRegion()
+{
+    return nullptr;
+}
+
+DMError DisplayManager::GetExpandAvailableArea(DisplayId displayId, DMRect& rect)
+{
+    return DMError::DM_ERROR;
 }
 }

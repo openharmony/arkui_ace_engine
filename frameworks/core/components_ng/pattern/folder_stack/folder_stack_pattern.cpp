@@ -38,8 +38,9 @@ void FolderStackPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct() ||
-        OHOS::Ace::SystemProperties::IsPortraitFoldProduct());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(container->IsFoldable());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -57,6 +58,7 @@ void FolderStackPattern::OnDetachFromFrameNode(FrameNode* node)
     CHECK_NULL_VOID(pipeline);
     if (HasFoldStatusChangedCallbackId()) {
         pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
+        UpdateFoldStatusChangedCallbackId(std::nullopt);
     }
     Pattern::OnDetachFromFrameNode(node);
 }
@@ -140,12 +142,7 @@ void FolderStackPattern::SetLayoutBeforeAnimation(const RefPtr<FolderStackGroupN
 bool FolderStackPattern::IsSupportHoverState(const RefPtr<DisplayInfo>& displayInfo)
 {
     CHECK_NULL_RETURN(displayInfo, false);
-    bool isFoldable = OHOS::Ace::SystemProperties::IsBigFoldProduct();
-    bool isPortraitFoldable = OHOS::Ace::SystemProperties::IsPortraitFoldProduct();
-    auto rotation = displayInfo->GetRotation();
-    auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
-    auto isPortrait = rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
-    return (isLandscape && isFoldable) || (isPortrait && isPortraitFoldable);
+    return displayInfo->GetFoldCreaseDirection() == FoldCreaseDirection::HORIZONTAL;
 }
 
 void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
@@ -177,8 +174,9 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
         }
         auto windowManager = pipeline->GetWindowManager();
         auto windowMode = windowManager->GetWindowMode();
+        bool isWindowFullScreen = FolderStackLayoutAlgorithm::IsWindowFullScreenMode(windowMode);
         if (currentFoldStatus == displayInfo->GetFoldStatus() && pattern->IsSupportHoverState(displayInfo)
-            && windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            && isWindowFullScreen) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(host);
