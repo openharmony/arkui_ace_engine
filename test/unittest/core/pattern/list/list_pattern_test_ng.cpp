@@ -3285,4 +3285,138 @@ HWTEST_F(ListPatternTestNg, ListPatternUpdateChildPosInfoKeepsIsLazyChild001, Te
     EXPECT_TRUE(result.isLazyChild);
 }
 
+/**
+ * @tc.name: LanesChangeDuringAnimateTo001
+ * @tc.desc: During a running AnimateTo, changing lanes invalidates the single-lane finalPosition_ and
+ *           recomputes item positions, so the final offset diverges from the original target.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, LanesChangeDuringAnimateTo001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(1);
+    CreateListItems(int32_t(10));
+    CreateDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    AnimateTo(Dimension(500.0f), 1, nullptr, false);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 500.0f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    layoutProperty_->UpdateLanes(2);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_NE(pattern_->GetTotalOffset(), 500.0f);
+}
+
+/**
+ * @tc.name: SpaceChangeDuringAnimation001
+ * @tc.desc: During a running AnimateTo, changing space recomputes spaceWidth_ and item positions,
+ *           so the final offset diverges from the target computed under the old space.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, SpaceChangeDuringAnimation001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(10.0f));
+    CreateListItems(10);
+    CreateDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    ScrollToIndex(8, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    float offsetBefore = pattern_->currentOffset_;
+
+    layoutProperty_->UpdateSpace(Dimension(40.0f));
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_NE(pattern_->currentOffset_, offsetBefore);
+}
+
+/**
+ * @tc.name: CachedCountChangeDuringAnimateToTarget001
+ * @tc.desc: During a smooth ScrollToIndex, changing cachedCount triggers relayout and changes the
+ *           itemPosition_ range, which may force AnimateToTarget to fall back to targetIndex_ + MarkDirty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, CachedCountChangeDuringAnimateToTarget001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    CreateListItems(10);
+    CreateDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    ScrollToIndex(8, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 0);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+}
+
+/**
+ * @tc.name: DataSourceShrinkClampDuringAnimation001
+ * @tc.desc: During a running AnimateTo towards a far position, shrinking the scrollable distance
+ *           (simulating data-source shrinkage) clamps the running offset to the new boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, DataSourceShrinkClampDuringAnimation001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(10);
+    CreateDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    AnimateTo(Dimension(500.0f), 1, nullptr, false);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    layoutProperty_->UpdateContentStartOffset(400.0f);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    float totalOffset = pattern_->GetTotalOffset();
+    EXPECT_LE(totalOffset, VERTICAL_SCROLLABLE_DISTANCE);
+}
+
+/**
+ * @tc.name: ChainAnimationChangeDuringAnimation001
+ * @tc.desc: During a running AnimateTo, toggling chainAnimation switches the layout algorithm and
+ *           overlays chain delta, causing the final offset to diverge from the original target.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ChainAnimationChangeDuringAnimation001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(10);
+    CreateDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    ScrollToIndex(8, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    float offsetBefore = pattern_->currentOffset_;
+
+    ListModelNG::SetChainAnimation(AceType::RawPtr(frameNode_), true);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_NE(pattern_->currentOffset_, offsetBefore);
+}
+
 } // namespace OHOS::Ace::NG
