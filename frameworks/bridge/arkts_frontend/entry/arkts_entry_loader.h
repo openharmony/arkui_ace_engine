@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ENTRY_ARKTS_ENTRY_LOADER_H
 
 #include <string>
-#include <vector>
 #include <ani.h>
 
 namespace OHOS::Ace {
@@ -37,7 +36,6 @@ namespace NG {
 class EntryLoader {
 public:
     EntryLoader(ani_env* env, const std::string& abcModulePath);
-    EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent);
     ~EntryLoader() = default;
 
     ani_object GetPageEntryObj(std::string& entryPath) const;
