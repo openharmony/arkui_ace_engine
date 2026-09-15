@@ -28,13 +28,13 @@ ace_unittest("interfaces_test") {
   if (!ace_enable_full_test_suite) {
     sources = []
     sources = [
-      "core_interfaces_test_min.cpp",
       "core_interfaces_test_core.cpp",
+      "core_interfaces_test_min.cpp",
     ]
   } else {
     sources += [
-      "core_interfaces_test_min.cpp",
       "core_interfaces_test_core.cpp",
+      "core_interfaces_test_min.cpp",
     ]
   }
 }
@@ -48,9 +48,19 @@ ace_unittest("visual_effect_ani_modifier_test") {
   ]
 }
 
+ace_unittest("immersive_strategy_ani_modifier_test") {
+  module_name = "ImmersiveStrategy"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/interfaces/native/ani/immersive_strategy_ani_modifier.cpp",
+    "native/ani/immersive_strategy_ani_modifier_test.cpp",
+  ]
+}
+
 group("core_interfaces_unittest") {
   testonly = true
   deps = [
+    ":immersive_strategy_ani_modifier_test",
     ":interfaces_test",
     ":visual_effect_ani_modifier_test",
   ]

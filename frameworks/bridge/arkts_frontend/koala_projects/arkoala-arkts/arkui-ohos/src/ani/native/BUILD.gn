@@ -33,8 +33,8 @@ ohos_source_set("ani_utils_common") {
   sources = [ "utils/ani_utils.cpp" ]
 
   external_deps = [
-    "hilog:libhilog", 
-    "runtime_core:ani"
+    "hilog:libhilog",
+    "runtime_core:ani",
   ]
 }
 ohos_shared_library("arkoala_native_ani") {
@@ -45,20 +45,20 @@ ohos_shared_library("arkoala_native_ani") {
   include_dirs = [
     "./",
     "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
-    "$ace_root/frameworks/core/interfaces/native/generated/interface"
+    "$ace_root/frameworks/core/interfaces/native/generated/interface",
   ]
 
   deps = [
     ":ani_utils_common",
-    "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+    "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
   if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
     deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
   }
 
   sources = [
-    "//foundation/arkui/ace_engine/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "//foundation/arkui/ace_engine/frameworks/base/utils/string_utils.cpp",
     "UINode/uinode_module_methods.cpp",
     "animation/animation_ani_impl.cpp",
     "canvas/canvas_module.cpp",
@@ -73,18 +73,20 @@ ohos_shared_library("arkoala_native_ani") {
     "dragController/drag_controller_module.cpp",
     "drag_and_drop/native_drag_drop_global.cpp",
     "drawable/drawable_module.cpp",
+    "dynamiclayout/dynamiclayout_module.cpp",
     "image/image_module.cpp",
     "image_span/image_span_module.cpp",
+    "immersive_strategy/immersive_strategy_module.cpp",
     "interop/interop_module.cpp",
     "keyboard_avoid_mode/keyboard_avoid_mode_module.cpp",
     "lazy_dynamic_layout/lazy_dynamic_layout_module.cpp",
-    "list/list_module.cpp",
     "list/list_item_group_module.cpp",
+    "list/list_module.cpp",
     "load.cpp",
     "module.cpp",
     "node_adapter/node_adapter_module.cpp",
-    "security_component/save_button_module.cpp",
     "security_component/paste_button_module.cpp",
+    "security_component/save_button_module.cpp",
     "shape/shape_module_methods.cpp",
     "stateMgmt/stateMgmt_module.cpp",
     "styled_string/styled_string_module.cpp",
@@ -98,10 +100,9 @@ ohos_shared_library("arkoala_native_ani") {
     "visual_effect/visual_effect_module.cpp",
     "water_flow/water_flow_module.cpp",
     "web/web_module_methods.cpp",
+    "with_env/with_env_module.cpp",
     "xbar/xbar_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
-    "dynamiclayout/dynamiclayout_module.cpp",
-    "with_env/with_env_module.cpp",
   ]
 
   external_deps = [
@@ -112,13 +113,13 @@ ohos_shared_library("arkoala_native_ani") {
     "image_framework:image_taihe",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "resource_management:global_resmgr",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
+    "runtime_core:libarkruntime",
     "udmf:libudmf",
     "udmf:udmf_client",
     "udmf:udmf_taihe_native",
-    "resource_management:global_resmgr",
-    "runtime_core:libarkruntime",
   ]
   if (!build_ohos_sdk) {
     external_deps += [
@@ -132,7 +133,8 @@ ohos_shared_library("arkoala_native_ani") {
   if (defined(enable_standard_input) && enable_standard_input) {
     external_deps += [ "imf:extra_config_ani" ]
   }
-  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.hiviewdfx_api_metrics)) {
     external_deps += [ "api_metrics:histogrammanager" ]
     defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
   }
@@ -165,19 +167,20 @@ if (use_linux) {
       "content_slot/content_slot_module.cpp",
       "custom_node/custom_node_module.cpp",
       "detached_free_root_node/detached_free_root_node.cpp",
+      "dynamiclayout/dynamiclayout_module.cpp",
+      "immersive_strategy/immersive_strategy_module.cpp",
       "interop/interop_module.cpp",
       "keyboard_avoid_mode/keyboard_avoid_mode_module.cpp",
       "lazy_dynamic_layout/lazy_dynamic_layout_module.cpp",
-      "list/list_module.cpp",
       "list/list_item_group_module.cpp",
+      "list/list_module.cpp",
       "load.cpp",
       "module_linux.cpp",
       "stateMgmt/stateMgmt_module.cpp",
       "utils/ani_utils.cpp",
       "water_flow/water_flow_module.cpp",
-      "xcomponent/xcomponent_module_methods.cpp",
-      "dynamiclayout/dynamiclayout_module.cpp",
       "with_env/with_env_module.cpp",
+      "xcomponent/xcomponent_module_methods.cpp",
     ]
 
     external_deps = [

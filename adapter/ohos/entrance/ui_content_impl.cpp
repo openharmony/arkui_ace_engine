@@ -711,19 +711,24 @@ public:
             navigationBar_ = ConvertAvoidArea(avoidArea);
         } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
             cutoutSafeArea_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+            floatNavSafeArea_ = ConvertAvoidArea(avoidArea);
         }
         auto safeArea = systemSafeArea_;
         auto navSafeArea = navigationBar_;
         auto cutoutSafeArea = cutoutSafeArea_;
+        auto floatNavArea = floatNavSafeArea_;
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea, navSafeArea, cutoutSafeArea, type, avoidArea] {
+            [pipeline, safeArea, navSafeArea, cutoutSafeArea, floatNavArea, type, avoidArea] {
                 if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
                     pipeline->UpdateSystemSafeArea(safeArea, true);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea, true);
                 } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea, true);
+                } else if (type == Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+                    pipeline->UpdateFloatNavSafeArea(floatNavArea);
                 }
                 // for ui extension component
                 pipeline->UpdateOriginAvoidArea(avoidArea, static_cast<uint32_t>(type));
@@ -783,6 +788,7 @@ private:
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets navigationBar_;
     NG::SafeAreaInsets cutoutSafeArea_;
+    NG::SafeAreaInsets floatNavSafeArea_;
     int32_t instanceId_ = -1;
 };
 
@@ -2771,15 +2777,20 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     // Use metadata to control whether the cutout safeArea takes effect.
+    // Only set the switch when the avoid_cutout metadata is present (true/false);
+    // leave it unset (nullopt) when absent so AVOID_CUTOUT strategy can take effect as fallback.
+    bool hasCutoutSwitch = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout"; });
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
-    if (pipeline) {
-        auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-        if (pipelineContext) {
-            auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-            if (safeAreaManager) {
+    if (pipelineContext) {
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        if (safeAreaManager) {
+            if (hasCutoutSwitch) {
                 safeAreaManager->SetUseCutout(useCutout);
             }
+            // AVOID_FLOAT_NAV: register delegate to pull float nav safe area from window when empty.
+            safeAreaManager->SetFloatNavPullDelegate([this](bool enable) { ApplyFloatNavigationAvoidArea(enable); });
         }
     }
     pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
@@ -2870,6 +2881,22 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
     return errorCode;
+}
+
+void UIContentImpl::ApplyFloatNavigationAvoidArea(bool enable)
+{
+    CHECK_NULL_VOID(window_);
+    window_->SetFloatNavigationAvoidAreaEnabled(enable);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineNG = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineNG);
+    if (enable) {
+        auto insets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION);
+        pipelineNG->UpdateFloatNavSafeAreaWithoutAnimation(insets);
+    } else {
+        pipelineNG->UpdateFloatNavSafeAreaWithoutAnimation(NG::SafeAreaInsets());
+    }
 }
 
 bool GetIsSystemWindow(const RefPtr<Platform::AceContainer>& container)

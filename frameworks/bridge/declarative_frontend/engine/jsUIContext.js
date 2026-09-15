@@ -738,6 +738,12 @@ class UIContext {
         });
     }
 
+    applyDefaultImmersiveStrategy(...types) {
+        withInstanceId(this.instanceId_, () => {
+            __ImmersiveStrategy__.applyDefaultImmersiveStrategy(...types);
+        });
+    }
+
     setPixelRoundMode(pixelRoundMode) {
         withInstanceId(this.instanceId_, () => {
             JSViewAbstract.setPixelRoundMode(pixelRoundMode);

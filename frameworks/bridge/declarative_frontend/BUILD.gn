@@ -17,9 +17,9 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 import(
-    "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/files_to_watch.gni")
-import(
     "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_breakpoint/files_to_watch.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/files_to_watch.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -104,7 +104,8 @@ foreach(item, ace_platforms) {
 # js resources objects
 base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
-jsproxyclass_obj_ark_breakpoint_path = base_output_path + "/js_proxy_class_ark_breakpoint.o"
+jsproxyclass_obj_ark_breakpoint_path =
+    base_output_path + "/js_proxy_class_ark_breakpoint.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcommon_obj_path = base_output_path + "/arkCommon.o"
@@ -127,9 +128,7 @@ action("run_state_mgmt_build") {
   script = "state_mgmt/build.py"
   inputs = state_mgmt_release_files_to_watch
   outputs = [ "$target_out_dir/stateMgmt.js" ]
-  deps = [
-    ":state_mgmt_npm_install($host_toolchain)",
-  ]
+  deps = [ ":state_mgmt_npm_install($host_toolchain)" ]
   args = [
     # Paths: 1 StateMgmt root folder. 2. Folder to check need of npm install. 3. stateMgmt.js output path.
     rebase_path("$ace_root/frameworks/bridge/declarative_frontend/state_mgmt"),
@@ -153,11 +152,10 @@ action("ark_breakpoint_npm_install") {
   script = "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/npm_install_guard.py"
   stamp_file = "$target_gen_dir/ark_breakpoint_npm_install.stamp"
   outputs = [ stamp_file ]
-  inputs = [
-    "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/package.json",
-  ]
+  inputs = [ "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/package.json" ]
   args = [
-    rebase_path("$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint"),
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint"),
     rebase_path(stamp_file),
   ]
 }
@@ -166,22 +164,22 @@ action("run_ark_breakpoint_build") {
   script = "ark_breakpoint/build.py"
   inputs = ark_breakpoint_files_to_watch
   outputs = [ "$target_out_dir/WindowSizeLayoutBreakpoint.js" ]
-  deps = [
-    ":ark_breakpoint_npm_install($host_toolchain)",
-  ]
+  deps = [ ":ark_breakpoint_npm_install($host_toolchain)" ]
   args = [
-  rebase_path("$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint"),
-  rebase_path(
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/node_modules"),
-  rebase_path("$target_out_dir"),
-  "--release",
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint"),
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/node_modules"),
+    rebase_path("$target_out_dir"),
+    "--release",
   ]
 }
 
 gen_obj("js_proxyclass_ark_breakpoint") {
   input = "$target_out_dir/WindowSizeLayoutBreakpoint.js"
   if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    jsproxyclass_obj_ark_breakpoint_path = base_output_path + "/js_proxy_class_ark_breakpoint.c"
+    jsproxyclass_obj_ark_breakpoint_path =
+        base_output_path + "/js_proxy_class_ark_breakpoint.c"
   }
   output = jsproxyclass_obj_ark_breakpoint_path
   snapshot_dep = [ ":run_ark_breakpoint_build" ]
@@ -244,25 +242,25 @@ template("declarative_js_engine") {
     }
 
     deps = [
-      "ark_modifier:modifier",
       ":ark_theme_control",
       ":gen_obj_src_ark_common",
       ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
+      ":shape",
+      ":statemanagement",
+      ":uicontext",
+      ":windowsizelayoutbreakpoint",
+      ":withenv",
+      "ark_component/components:module_group",
       "ark_layoutalgorithm:layoutalgorithm",
       "ark_lazylayoutalgorithm:lazylayoutalgorithm",
       "ark_mock:mock",
-      "ark_prefetcher:prefetcher",
-      ":shape",
-      ":withenv",
-      ":statemanagement",
-      ":windowsizelayoutbreakpoint",
+      "ark_modifier:modifier",
       "ark_node:x_node",
+      "ark_prefetcher:prefetcher",
       "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
-      "ark_component/components:module_group",
-      ":uicontext"
     ]
 
     configs = [ "$ace_root:ace_config" ]
@@ -342,8 +340,8 @@ template("declarative_js_engine") {
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_datepicker.cpp",
-      "jsview/js_distortion_component.cpp",
       "jsview/js_depth_component.cpp",
+      "jsview/js_distortion_component.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_ellipse_shape.cpp",
@@ -355,23 +353,26 @@ template("declarative_js_engine") {
       "jsview/js_gesture.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
+      "jsview/js_immersive_strategy.cpp",
+      "jsview/js_indicator_controller.cpp",
+      "jsview/js_indicator_controller_binding.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
       "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
-      "jsview/js_with_env.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
       "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
+      "jsview/js_list_children_main_size.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
-      "jsview/js_list_children_main_size.cpp",
       "jsview/js_local_storage.cpp",
       "jsview/js_location_button.cpp",
       "jsview/js_magnifier_controller.cpp",
       "jsview/js_mock.cpp",
+      "jsview/js_nav_param_flat_serializer.cpp",
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
@@ -380,7 +381,6 @@ template("declarative_js_engine") {
       "jsview/js_navigation_stack.cpp",
       "jsview/js_navigation_utils.cpp",
       "jsview/js_navrouter.cpp",
-      "jsview/js_nav_param_flat_serializer.cpp",
       "jsview/js_node_container.cpp",
       "jsview/js_page_transition.cpp",
       "jsview/js_pan_handler.cpp",
@@ -413,8 +413,6 @@ template("declarative_js_engine") {
       "jsview/js_stack.cpp",
       "jsview/js_state_mgmt_histogram.cpp",
       "jsview/js_state_mgmt_profiler.cpp",
-      "jsview/js_indicator_controller.cpp",
-      "jsview/js_indicator_controller_binding.cpp",
       "jsview/js_swiper_controller_binding.cpp",
       "jsview/js_tabs_controller.cpp",
       "jsview/js_tabs_feature.cpp",
@@ -436,6 +434,7 @@ template("declarative_js_engine") {
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
       "jsview/js_water_flow_sections.cpp",
+      "jsview/js_with_env.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "jsview/text_menu/js_text_menu.cpp",
@@ -507,14 +506,12 @@ template("declarative_js_engine") {
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&
         config.rich_components_support) {
-      sources += [
-        "jsview/js_piece.cpp",
-      ]
+      sources += [ "jsview/js_piece.cpp" ]
       if (defined(config.video_components_support) &&
           config.video_components_support) {
         sources += [
-          "jsview/js_video_controller_async.cpp",
           "jsview/js_video_controller.cpp",
+          "jsview/js_video_controller_async.cpp",
         ]
       }
       if (defined(config.video_support_jsstack) &&
@@ -525,10 +522,8 @@ template("declarative_js_engine") {
 
     include_dirs = []
     if (defined(global_parts_info.multimedia_image_extension)) {
-      external_deps += ["access_token:libtokenid_sdk"]
-      sources += [
-        "$ace_root/frameworks/core/components_ng/pattern/cached_image/js_cached_image.cpp"
-      ]
+      external_deps += [ "access_token:libtokenid_sdk" ]
+      sources += [ "$ace_root/frameworks/core/components_ng/pattern/cached_image/js_cached_image.cpp" ]
     } else {
       sources += [ "jsview/js_cached_image.cpp" ]
     }
@@ -575,7 +570,8 @@ template("declarative_js_engine") {
       external_deps += [ "webview:libarkweb_utils" ]
     }
 
-    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.hiviewdfx_api_metrics)) {
       external_deps += [ "api_metrics:histogrammanager" ]
       defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
@@ -619,28 +615,26 @@ template("declarative_js_engine") {
     if (defined(config.preview_support) && config.preview_support) {
       sources += [
         "jsview/js_previewer_mock.cpp",
-        "jsview/models/preview_mock_model_impl.cpp"
+        "jsview/models/preview_mock_model_impl.cpp",
       ]
     }
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [
-        "graphic_3d:lib3dWidgetAdapter",
-      ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
 
       if (!build_ohos_sdk) {
         external_deps += [
-          "graphic_3d:AGPSceneApi",
-          "graphic_3d:AGPMetaApi",
-          "graphic_3d:AGPEcshelperApi",
-          "graphic_3d:AGPBaseApi",
-          "graphic_3d:AGPEngineApi",
-          "graphic_3d:AGP3DApi",
-          "graphic_3d:AGPRenderApi",
           "graphic_2d:EGL",
           "graphic_2d:GLESv3",
+          "graphic_3d:AGP3DApi",
+          "graphic_3d:AGPBaseApi",
+          "graphic_3d:AGPEcshelperApi",
+          "graphic_3d:AGPEngineApi",
+          "graphic_3d:AGPMetaApi",
+          "graphic_3d:AGPRenderApi",
+          "graphic_3d:AGPSceneApi",
         ]
       }
     }
@@ -747,25 +741,25 @@ template("declarative_js_engine_ng") {
     }
 
     deps = [
-      "ark_modifier:modifier",
       ":ark_theme_control",
       ":gen_obj_src_ark_common",
       ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
+      ":shape",
+      ":statemanagement",
+      ":uicontext",
+      ":windowsizelayoutbreakpoint",
+      ":withenv",
+      "ark_component/components:module_group",
       "ark_layoutalgorithm:layoutalgorithm",
       "ark_lazylayoutalgorithm:lazylayoutalgorithm",
       "ark_mock:mock",
-      "ark_prefetcher:prefetcher",
-      ":shape",
-      ":withenv",
-      ":statemanagement",
-      ":windowsizelayoutbreakpoint",
+      "ark_modifier:modifier",
       "ark_node:x_node",
+      "ark_prefetcher:prefetcher",
       "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
-      "ark_component/components:module_group",
-      ":uicontext"
     ]
 
     configs = [ "$ace_root:ace_config" ]
@@ -864,22 +858,25 @@ template("declarative_js_engine_ng") {
       "jsview/js_gesture.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
+      "jsview/js_immersive_strategy.cpp",
+      "jsview/js_indicator_controller.cpp",
+      "jsview/js_indicator_controller_binding.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
       "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
-      "jsview/js_with_env.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
       "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
+      "jsview/js_list_children_main_size.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
-      "jsview/js_list_children_main_size.cpp",
       "jsview/js_location_button.cpp",
       "jsview/js_magnifier_controller.cpp",
       "jsview/js_mock.cpp",
+      "jsview/js_nav_param_flat_serializer.cpp",
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
@@ -888,7 +885,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_navigation_stack.cpp",
       "jsview/js_navigation_utils.cpp",
       "jsview/js_navrouter.cpp",
-      "jsview/js_nav_param_flat_serializer.cpp",
       "jsview/js_node_container.cpp",
       "jsview/js_page_transition.cpp",
       "jsview/js_particle.cpp",
@@ -915,8 +911,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_shape_abstract.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
-      "jsview/js_indicator_controller.cpp",
-      "jsview/js_indicator_controller_binding.cpp",
       "jsview/js_swiper_controller_binding.cpp",
       "jsview/js_tabs_controller.cpp",
       "jsview/js_tabs_feature.cpp",
@@ -927,13 +921,14 @@ template("declarative_js_engine_ng") {
       "jsview/js_textfield.cpp",
       "jsview/js_textinput.cpp",
       "jsview/js_texttimer_controller.cpp",
-      "jsview/js_utils.cpp",
       "jsview/js_union_effect_container.cpp",
+      "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
       "jsview/js_water_flow_sections.cpp",
+      "jsview/js_with_env.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "jsview/text_menu/js_text_menu.cpp",
@@ -964,16 +959,14 @@ template("declarative_js_engine_ng") {
     }
 
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
-      sources += [
-        "jsview/js_pattern_lock.cpp",
-      ]
+      sources += [ "jsview/js_pattern_lock.cpp" ]
     }
 
     if (defined(config.video_components_support) &&
         config.video_components_support) {
       sources += [
-        "jsview/js_video_controller_async.cpp",
         "jsview/js_video_controller.cpp",
+        "jsview/js_video_controller_async.cpp",
       ]
       if (defined(config.video_support_jsstack) &&
           config.video_support_jsstack) {
@@ -1042,7 +1035,8 @@ template("declarative_js_engine_ng") {
       external_deps += [ "webview:libarkweb_utils" ]
     }
 
-    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.hiviewdfx_api_metrics)) {
       external_deps += [ "api_metrics:histogrammanager" ]
       defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
@@ -1074,21 +1068,19 @@ template("declarative_js_engine_ng") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [
-        "graphic_3d:lib3dWidgetAdapter",
-      ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
 
       if (!build_ohos_sdk) {
         external_deps += [
-          "graphic_3d:AGPSceneApi",
-          "graphic_3d:AGPMetaApi",
-          "graphic_3d:AGPEcshelperApi",
-          "graphic_3d:AGPBaseApi",
-          "graphic_3d:AGPEngineApi",
-          "graphic_3d:AGP3DApi",
-          "graphic_3d:AGPRenderApi",
           "graphic_2d:EGL",
           "graphic_2d:GLESv3",
+          "graphic_3d:AGP3DApi",
+          "graphic_3d:AGPBaseApi",
+          "graphic_3d:AGPEcshelperApi",
+          "graphic_3d:AGPEngineApi",
+          "graphic_3d:AGPMetaApi",
+          "graphic_3d:AGPRenderApi",
+          "graphic_3d:AGPSceneApi",
         ]
       }
     }

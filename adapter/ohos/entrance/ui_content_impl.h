@@ -611,6 +611,7 @@ protected:
 
 private:
     void ProcessWindowSizeLayoutBreakPointChange(double density);
+    void ApplyFloatNavigationAvoidArea(bool enable);
 };
 
 } // namespace OHOS::Ace

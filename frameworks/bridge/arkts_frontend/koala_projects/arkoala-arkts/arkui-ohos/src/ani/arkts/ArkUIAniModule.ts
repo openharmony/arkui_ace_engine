@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, NodeIdentity, NodeRenderStateChangeCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { KeyboardAvoidMode, ImmersiveStrategy, NodeIdentity, NodeRenderStateChangeCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
 import { PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
 import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, PictureDrawableDescriptor, HdrCompositionConfig } from '@ohos.arkui.drawableDescriptor';
 import { AnimationStatus, Resource } from '#generated';
@@ -136,6 +136,7 @@ export class ArkUIAniModule {
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _GetKeyboardAvoidMode(): KeyboardAvoidMode
     native static _SetKeyboardAvoidMode(mode: KeyboardAvoidMode): void
+    native static _ApplyDefaultImmersiveStrategy(types: Array<ImmersiveStrategy>): void
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _CustomNode_RequestFrame(): void
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
