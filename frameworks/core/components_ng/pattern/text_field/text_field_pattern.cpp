@@ -10021,6 +10021,11 @@ void TextFieldPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("content", IsInPasswordMode() ? "" : GetTextValue().c_str());
     json->Put("placeholder", UtfUtils::Str16DebugToStr8(GetPlaceHolder()).c_str());
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasEnableAutoFill()) {
+        json->Put("enableAutoFill", layoutProperty->GetEnableAutoFillValue(true));
+    }
 }
 
 void TextFieldPattern::DumpFontInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty)

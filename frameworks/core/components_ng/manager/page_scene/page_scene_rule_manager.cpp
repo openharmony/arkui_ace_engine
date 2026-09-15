@@ -184,6 +184,22 @@ void FillInputInfo(const RefPtr<FrameNode>& node, PageSceneNodeInfo& info)
     }
 }
 
+// enableAutoFill can only be set on TextInput/TextArea nodes: Search has no such API and its
+// internal SearchField node is not publicly configurable, RichEditor has no EnableAutoFill property.
+void FillEnableAutoFillInfo(const RefPtr<FrameNode>& node, PageSceneNodeInfo& info)
+{
+    CHECK_NULL_VOID(node);
+    auto tag = node->GetTag();
+    if (tag != V2::TEXTINPUT_ETS_TAG && tag != V2::TEXTAREA_ETS_TAG) {
+        return;
+    }
+    auto layoutProperty = node->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasEnableAutoFill()) {
+        info.enableAutoFill = layoutProperty->GetEnableAutoFillValue(true);
+    }
+}
+
 std::string BuildPageSceneEventName(const std::string& sceneType, bool matched, bool forceReportUnmatched)
 {
     if (!matched && !forceReportUnmatched) {
@@ -300,6 +316,7 @@ std::optional<PageSceneNodeInfo> PageSceneInputCountTracker::BuildNodeInfo(
     if (rule.includeText) {
         FillInputInfo(node, info);
     }
+    FillEnableAutoFillInfo(node, info);
     info.focusable = focusable;
     info.rect.x = rect.GetX();
     info.rect.y = rect.GetY();
@@ -639,6 +656,9 @@ std::string PageSceneRuleManager::BuildSceneJson(const PageSceneRuleSet& ruleSet
             nodeJson->Put("placeholder", node.placeholder.c_str());
             nodeJson->Put("contentType", node.contentType.c_str());
             nodeJson->Put("inputType", node.inputType.c_str());
+        }
+        if (node.enableAutoFill.has_value()) {
+            nodeJson->Put("enableAutoFill", node.enableAutoFill.value());
         }
         nodesJson->Put(nodeJson);
     }
