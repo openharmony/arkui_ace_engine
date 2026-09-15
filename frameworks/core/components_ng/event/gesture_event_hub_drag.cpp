@@ -1246,6 +1246,7 @@ DragDataCore GestureEventHub::CreateDragData(const DragStartContext& ctx, const 
         ctx.event->IsUseDataLoadParams(), ctx.dragSummaryInfo.detailedSummary, ctx.dragSummaryInfo.summaryFormat,
         ctx.dragSummaryInfo.version, ctx.dragSummaryInfo.totalSize, ctx.dragSummaryInfo.tag, materialId,
         ctx.event->GetDragAnimationTypeValue(), isSetMaterialFilter, materialFilter };
+    dragData.filenameExtensions = ctx.dragSummaryInfo.filenameExtensions;
     ctx.dragDropManager->SetDragAnimationType(ctx.event->GetDragAnimationType());
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && ctx.info.GetSourceTool() == SourceTool::MOUSE &&
         ctx.info.GetSourceDevice() == SourceType::TOUCH) {

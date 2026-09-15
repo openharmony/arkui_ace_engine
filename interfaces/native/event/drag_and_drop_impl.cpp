@@ -14,6 +14,7 @@
  */
 
 #include "base/hiviewdfx/histogram_wrapper.h"
+#include "core/common/udmf/udmf_client.h"
 #include "interfaces/native/drag_and_drop.h"
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
@@ -25,6 +26,7 @@
 #include "securec.h"
 #include "udmf_async_client.h"
 #include "udmf_client.h"
+#include "udmf.h"
 #include "unified_types.h"
 
 #ifdef __cplusplus
@@ -162,6 +164,28 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
         } else {
             eventTypeArray[i][0] = '\0';
         }
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragEvent_GetSummary(ArkUI_DragEvent* event, OH_UDMF_Summary* summary)
+{
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (!event || !dragEvent || !summary) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto summaryInfo = static_cast<const OHOS::Ace::DragSummaryInfo*>(dragEvent->unifiedDataSummary);
+    if (summaryInfo == nullptr) {
+        return ARKUI_ERROR_CODE_INTERNAL_ERROR;
+    }
+
+    OHOS::UDMF::Summary innerSummary;
+    innerSummary.summary = summaryInfo->summary;
+    innerSummary.filenameExtensions = summaryInfo->filenameExtensions;
+    auto convertStatus = OHOS::UDMF::NdkDataConversion::GetNdkSummary(innerSummary, summary);
+    if (convertStatus != OHOS::UDMF::Status::E_OK) {
+        return convertStatus == OHOS::UDMF::Status::E_INVALID_PARAMETERS ?
+            ARKUI_ERROR_CODE_PARAM_INVALID : ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

@@ -23,6 +23,7 @@
 
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "adapter/ohos/capability/interaction/stop_drag_listener_impl.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
@@ -81,6 +82,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
     dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId,
     dragData.isSetMaterialFilter, dragData.materialFilter, dragData.dragAnimationType };
+    msdpDragData.filenameExtensions = dragData.filenameExtensions;
     for (auto& shadowInfo: dragData.shadowInfos) {
         auto pixelSharedPtr = shadowInfo.GetPixelMapSharedPtr();
         msdpDragData.shadowInfos.push_back({ pixelSharedPtr, shadowInfo.x, shadowInfo.y });
@@ -149,20 +151,19 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
         shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
 }
 
-int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary,
-    std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
-    int32_t& version, int64_t& totalSize, std::string& tag)
+int32_t InteractionImpl::GetDragSummary(DragSummaryInfo& summaryInfo)
 {
     Msdp::DeviceStatus::DragSummaryInfo dragSummary;
     auto ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummary);
     if (ret != 0) {
         return ret;
     }
-    summary = dragSummary.summarys;
-    detailedSummary = dragSummary.detailedSummarys;
-    summaryFormat = dragSummary.summaryFormat;
-    version = dragSummary.version;
-    totalSize = dragSummary.totalSize;
+    summaryInfo.summary = dragSummary.summarys;
+    summaryInfo.detailedSummary = dragSummary.detailedSummarys;
+    summaryInfo.summaryFormat = dragSummary.summaryFormat;
+    summaryInfo.version = dragSummary.version;
+    summaryInfo.totalSize = dragSummary.totalSize;
+    summaryInfo.filenameExtensions = dragSummary.filenameExtensions;
     return ret;
 }
 

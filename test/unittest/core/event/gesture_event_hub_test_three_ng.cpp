@@ -3394,6 +3394,7 @@ HWTEST_F(GestureEventHubTestNg, CreateDragDataDragAnimationType001, TestSize.Lev
     ctx.pixelMapDuplicated = AceType::MakeRefPtr<MockPixelMap>();
     ctx.pixelMapOffset = OffsetF(1.0f, 2.0f);
     ctx.recordsSize = 2;
+    ctx.dragSummaryInfo.filenameExtensions = { ".jpg", ".png" };
     ctx.info.SetInputEventType(InputEventType::TOUCH_SCREEN);
 
     auto dragData = gestureEventHub->CreateDragData(ctx, "{}", 10, 3.0f, 4.0f);
@@ -3402,5 +3403,6 @@ HWTEST_F(GestureEventHubTestNg, CreateDragDataDragAnimationType001, TestSize.Lev
     EXPECT_EQ(dragData.shadowInfos.size(), 1);
     EXPECT_EQ(dragData.shadowInfos.front().x, 1.0f);
     EXPECT_EQ(dragData.shadowInfos.front().y, 2.0f);
+    EXPECT_EQ(dragData.filenameExtensions, ctx.dragSummaryInfo.filenameExtensions);
 }
 } // namespace OHOS::Ace::NG

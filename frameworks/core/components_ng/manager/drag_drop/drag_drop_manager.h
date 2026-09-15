@@ -208,6 +208,12 @@ public:
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
     {
         summaryMap_ = summaryMap;
+        dragSummaryInfo_.summary = summaryMap;
+    }
+    void SetSummaryInfo(const DragSummaryInfo& summaryInfo)
+    {
+        dragSummaryInfo_ = summaryInfo;
+        summaryMap_ = summaryInfo.summary;
     }
     const std::map<std::string, int64_t>& GetSummaryMap()
     {
@@ -633,6 +639,7 @@ public:
     inline void ResetPullId()
     {
         summaryMap_.clear();
+        dragSummaryInfo_ = {};
         parentHitNodes_.clear();
         currentPullId_ = -1;
     }

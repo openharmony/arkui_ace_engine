@@ -27,6 +27,8 @@ namespace OHOS::Rosen {
 }
 
 namespace OHOS::Ace {
+struct DragSummaryInfo;
+
 class ACE_FORCE_EXPORT InteractionInterface : public AceType {
     DECLARE_ACE_TYPE(InteractionInterface, AceType);
 
@@ -59,9 +61,7 @@ public:
 
     virtual int32_t GetShadowOffset(ShadowOffsetData& shadowOffsetData) = 0;
 
-    virtual int32_t GetDragSummary(std::map<std::string, int64_t>& summary,
-        std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
-        int32_t& version, int64_t& totalSize, std::string& tag) = 0;
+    virtual int32_t GetDragSummary(DragSummaryInfo& summaryInfo) = 0;
 
     virtual int32_t GetDragExtraInfo(std::string& extraInfo) = 0;
 
