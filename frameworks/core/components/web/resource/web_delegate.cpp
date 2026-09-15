@@ -1171,8 +1171,15 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidAre
 bool WebDelegate::MaybeRelease()
 {
     if (taskExecutor_ == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "MaybeRelease taskExecutor_ is null, destroy WebDelegate on current thread.");
-        return true;
+        TAG_LOGW(AceLogTag::ACE_WEB, "MaybeRelease taskExecutor_ is null, use main EventRunner to destroy");
+        auto mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+        if (mainRunner == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_WEB,
+                "MaybeRelease mainRunner is null, destroy WebDelegate on current thread");
+            return true;
+        }
+        auto mainHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(mainRunner);
+        return !mainHandler->PostTask([this] { delete this; }, "ArkUIWebDelegateDestroy");
     }
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Destroy WebDelegate on UI thread.");
