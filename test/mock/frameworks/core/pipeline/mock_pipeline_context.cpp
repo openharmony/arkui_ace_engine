@@ -342,6 +342,17 @@ PipelineContext::PipelineContext(): safeAreaManager_(MakeRefPtr<SafeAreaManager>
     }
 }
 
+// Host test binary does not link the real pipeline_context.cpp; provide the same lazy
+// creation so syntax-side observation hooks resolve and exercise the real manager.
+const RefPtr<ScrollPlaceholderManager>& PipelineContext::GetOrCreateScrollPlaceholderManager()
+{
+    if (!scrollPlaceholderManager_) {
+        scrollPlaceholderManager_ = MakeRefPtr<ScrollPlaceholderManager>(instanceId_);
+        scrollPlaceholderManager_->SetPipelineContext(WeakClaim(this));
+    }
+    return scrollPlaceholderManager_;
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);

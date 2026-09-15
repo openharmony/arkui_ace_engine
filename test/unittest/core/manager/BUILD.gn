@@ -238,6 +238,12 @@ ace_unittest("scroll_adjust_manager_test_ng") {
   sources = [ "scroll_adjust_manager_test_ng.cpp" ]
 }
 
+ace_unittest("scroll_placeholder_manager_test_ng") {
+  module_name = "ScrollingSet-ScrollPlaceholder"
+  type = "new"
+  sources = [ "scroll_placeholder_manager_test_ng.cpp" ]
+}
+
 ace_unittest("safe_area_manager_test_ng") {
   module_name = "StateManagement-ComponentExtention"
   type = "new"
@@ -450,6 +456,7 @@ group("core_manager_unittest") {
     ":recoverable_manager_test_ng",
     ":safe_area_manager_test_ng",
     ":scroll_adjust_manager_test_ng",
+    ":scroll_placeholder_manager_test_ng",
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",

@@ -14,6 +14,7 @@
  */
 #include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -249,14 +250,23 @@ RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItem(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    // Scroll placeholder load observation at the WaterFlow child build call point: predict
+    // before the real builder runs on an unbuilt index and sample its duration afterwards.
+    // Observation only; the dummy empty-branch fallback is reported after the acquisition so
+    // it never feeds the cost model.
+    ScrollPlaceholderItemBuildScope buildScope(
+        ScrollPlaceholderComponentType::WATER_FLOW, layoutWrapper, index, isCache);
     if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        buildScope.SetAcquiredWrapper(wrapper);
         if (!wrapper) {
             wrapper = CreateDummyFlowItem();
         }
         return wrapper;
     }
-    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    buildScope.SetAcquiredWrapper(wrapper);
+    return wrapper;
 }
 
 RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItemByIndex(

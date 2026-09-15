@@ -86,7 +86,9 @@ HWTEST_F(ThreadSafeNodeTestNg, ThreadSafeNodeTestNg002, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
-    EXPECT_EQ(ElementRegisterMultiThread::GetInstance()->AddUINodeMultiThread(frameNode), true);
+    // Creation inside the scope registers the free node into the multi-thread registry
+    // automatically, so a manual duplicate add fails.
+    EXPECT_EQ(ElementRegisterMultiThread::GetInstance()->AddUINodeMultiThread(frameNode), false);
 
     /**
      * @tc.steps: step2. get the thread safe node which id is 1 from ElementRegister
@@ -116,7 +118,8 @@ HWTEST_F(ThreadSafeNodeTestNg, ThreadSafeNodeTestNg003, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
-    EXPECT_EQ(ElementRegisterMultiThread::GetInstance()->AddUINodeMultiThread(frameNode), true);
+    // Creation inside the scope already registered the free node.
+    EXPECT_EQ(ElementRegisterMultiThread::GetInstance()->GetThreadSafeNodeById(1), true);
 
     /**
      * @tc.steps: step2. remove the thread safe node which id is 1 from ElementRegister

@@ -39,6 +39,7 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/recoverable/recoverable_manager.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/event/key_event.h"
@@ -1211,6 +1212,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, in
         touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
     }
 #endif
+    if (scrollPlaceholderManager_) {
+        scrollPlaceholderManager_->NotifyVsync(static_cast<int64_t>(nanoTimestamp),
+            static_cast<int64_t>(vsyncPeriod));
+    }
     uint64_t timeStamp = (nanoTimestamp > vsyncPeriod) ? (nanoTimestamp - vsyncPeriod + ONE_MS_IN_NS) : ONE_MS_IN_NS;
     resampleTimeStamp_ = (timeStamp > compensationValue_) ? (timeStamp - compensationValue_) : 0;
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -6020,6 +6025,12 @@ void PipelineContext::Destroy()
     if (rootNode_) {
         rootNode_->FireCustomDisappear();
     }
+    // Cancel scroll placeholder tasks and release the registry before the task scheduler and
+    // pipeline resources go away, so no late callback can reach a half-destroyed pipeline.
+    if (scrollPlaceholderManager_) {
+        scrollPlaceholderManager_->Destroy();
+        scrollPlaceholderManager_.Reset();
+    }
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
@@ -6494,6 +6505,9 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE_COMMERCIAL("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    if (scrollPlaceholderManager_ && scrollPlaceholderManager_->HasPendingRealBuild()) {
+        scrollPlaceholderManager_->FlushRealBuild(deadline - TIME_THRESHOLD);
+    }
     currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
         auto frontend = GetFrontend();
@@ -8564,6 +8578,17 @@ void PipelineContext::InitManagers()
     environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
     privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
+}
+
+const RefPtr<ScrollPlaceholderManager>& PipelineContext::GetOrCreateScrollPlaceholderManager()
+{
+    std::call_once(scrollPlaceholderOnceFlag_, [this]() {
+        if (!scrollPlaceholderManager_) {
+            scrollPlaceholderManager_ = MakeRefPtr<ScrollPlaceholderManager>(instanceId_);
+            scrollPlaceholderManager_->SetPipelineContext(WeakClaim(this));
+        }
+    });
+    return scrollPlaceholderManager_;
 }
 
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
