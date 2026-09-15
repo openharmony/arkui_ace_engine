@@ -21,11 +21,16 @@ import { ArkUIAniModule } from 'arkui.ani';
 
 export class NativeDestructor {
   private ptr: long = 0
+  private _cleaned: boolean = false
   constructor(ptr: long) {
     this.ptr = ptr
   }
 
   clean(): void {
+    if (this._cleaned || this.ptr === 0) {
+      return
+    }
+    this._cleaned = true
     ArkUIAniModule._Drawable_DestructDrawable(this.ptr)
   }
 }
