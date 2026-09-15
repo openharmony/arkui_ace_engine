@@ -286,6 +286,10 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
+    const RefPtr<PanRecognizer>& GetDragEventPanRecognizer() {
+        return panRecognizer_;
+    }
+
 protected:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
