@@ -210,7 +210,7 @@ void SetSymbolOptionApply(
 
 void SearchBridge::RegisterSearchAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
-    LOGE("Strat RegisterSearchAttributes nativeModule");
+    LOGI("Start RegisterSearchAttributes nativeModule");
 
     const char* functionNames[] = { "jsCreate", "setSearchInitialize", "resetSearchInitialize", "setTextFont",
         "resetTextFont", "setPlaceholderColor", "resetPlaceholderColor", "setSelectionMenuHidden",
