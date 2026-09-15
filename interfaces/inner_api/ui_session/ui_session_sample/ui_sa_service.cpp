@@ -609,6 +609,13 @@ void UiSaService::HandleSendCommand(sptr<IUiContentService> service, std::vector
     if (params.size() == SEND_COMMAND_WITH_NODEID) {
         int32_t id = std::atoi(params[1].c_str());
         std::string command = params[2];
+        if (command == "file") {
+            std::string commandFromFile = ReadPageSceneRuleJson();
+            LOGI("[SendCommand] commandFromFile=%{public}s", commandFromFile.c_str());
+            service->SendCommand(id, commandFromFile);
+            return;
+        }
+        LOGI("[SendCommand] service->SendCommand(id, command);");
         service->SendCommand(id, command);
     } else if (params.size() == SEND_COMMAND_WITHOUT_NODEID) {
         std::string command = params[1];
