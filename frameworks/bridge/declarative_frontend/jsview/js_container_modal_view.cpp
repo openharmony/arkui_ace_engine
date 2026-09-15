@@ -133,12 +133,15 @@ void JSContainerModal::CallMenuWidthChange(const JSCallbackInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "CallMenuWidthChange");
     // second param is resource id
-    if (info.Length() < EVENT_NAME_MENU_WIDTH_CHANGE_PARAM_COUNT || !info[1]->IsString()) {
+    if (info.Length() < EVENT_NAME_MENU_WIDTH_CHANGE_PARAM_COUNT) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "CallMenuWidthChange param error");
         return;
     }
-    int32_t resId;
-    ConvertFromJSValue(info[1], resId);
+    int32_t resId = 0;
+    if (!ConvertFromJSValue(info[1], resId)) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "CallMenuWidthChange param error");
+        return;
+    }
     auto pattern = GetContainerModalPattern();
     CHECK_NULL_VOID(pattern);
     ACE_UINODE_TRACE(pattern->GetHost());
