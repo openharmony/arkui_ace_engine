@@ -2440,8 +2440,12 @@ void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
     auto supportDefaultIntrinsicSize = Converter::OptConvert<bool>(convValue.value().supportDefaultIntrinsicSize);
     auto supportCssDisplayChange = Converter::OptConvert<bool>(convValue.value().supportCssDisplayChange);
     auto supportTransformRotateAndSkew = Converter::OptConvert<bool>(convValue.value().supportTransformRotateAndSkew);
-    if (supportCssDisplayChange.has_value() || supportTransformRotateAndSkew.has_value()) {
+    if (supportCssDisplayChange.has_value()) {
         RETURN_IF_CALLING_FROM_M114();
+    }
+    if (supportTransformRotateAndSkew.has_value()) {
+        RETURN_IF_CALLING_FROM_M114();
+        RETURN_IF_CALLING_FROM_M132();
     }
 
     WebModelStatic::SetNativeEmbedOptions(frameNode, *supportDefaultIntrinsicSize, *supportCssDisplayChange,
