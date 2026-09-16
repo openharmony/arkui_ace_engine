@@ -41,6 +41,7 @@ if (is_host_product) {
       "tabs_model_static_test_ng.cpp",
       "tabs_model_test_ng.cpp",
       "tabs_pattern_test_ng.cpp",
+      "tab_side_bar_test_ng.cpp",
       "tabs_side_bar_tab_list_test_ng.cpp",
       "tabs_sub_tab_bar_style_test_ng.cpp",
       "tabs_test_ng.cpp",
@@ -77,6 +78,7 @@ if (is_host_product) {
       "tabs_model_test_ng.cpp",
       "tabs_pattern_test_ng.cpp",
       "tabs_side_bar_tab_list_test_ng.cpp",
+      "tab_side_bar_test_ng.cpp",
       "tabs_sub_tab_bar_style_test_ng.cpp",
       "tabs_test_ng.cpp",
     ]
