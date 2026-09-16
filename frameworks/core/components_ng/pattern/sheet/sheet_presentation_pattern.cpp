@@ -4318,10 +4318,6 @@ void SheetPresentationPattern::OnWillDisappear()
     SendMessagesBeforeTransitionOut();
     auto hostNode = GetHost();
     CHECK_NULL_VOID(hostNode);
-    auto sheetWrapper = hostNode->GetParent();
-    if (sheetWrapper) {
-        sheetWrapper->MarkRemoving();
-    }
     auto pipelineContext = hostNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto navigationManager = pipelineContext->GetNavigationManager();

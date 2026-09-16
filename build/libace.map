@@ -95,6 +95,8 @@
       "OHOS::Ace::AceScopedTraceFlag::AceScopedTraceFlag(bool, char const*, ...)";
       "OHOS::Ace::AceScoringLog::~AceScoringLog()";
       "OHOS::Ace::AceScoringLog::AceScoringLog(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::AceTraceBeginWithArgs(char const*, ...)";
+      "OHOS::Ace::AceTraceEnd()";
       "OHOS::Ace::AIWriteAdapter::CloseModalUIExtension()";
       "OHOS::Ace::AIWriteAdapter::GetSelectLengthOnlyText(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&)";
       "OHOS::Ace::AIWriteAdapter::IsSentenceBoundary(char16_t)";
@@ -1867,6 +1869,9 @@
       "OHOS::Ace::NG::ScrollPattern::TriggerScrollBarDisplay()";
       "OHOS::Ace::NG::TextPattern::GetContentModifier()";
       "OHOS::Ace::NG::ScrollPattern::TriggerModifyDone()";
+      "OHOS::Ace::NG::ScrollPlaceholderManager::NotifyRealBuildEnd(OHOS::Ace::NG::ScrollPlaceholderPredictParams const&, long long)";
+      "OHOS::Ace::NG::ScrollPlaceholderManager::NotifyRealBuildEnd(OHOS::Ace::NG::ScrollPlaceholderPredictParams const&, long)";
+      "OHOS::Ace::NG::ScrollPlaceholderManager::NotifyRealBuildStart(OHOS::Ace::NG::ScrollPlaceholderPredictParams const&)";
       "OHOS::Ace::SelectComponent::SelectComponent()";
       "OHOS::Ace::SelectComponent::GetPopup() const";
       "OHOS::Ace::SelectComponent::GetSelectStyle() const";
@@ -4012,8 +4017,10 @@
       "OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::UpdateWithCheck(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&)";
       "OHOS::Ace::NG::ContentChangeManager::OnSwiperChangeEnd(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
+      "OHOS::Ace::NG::ContentChangeManager::OnSwiperChangeCancel(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
+      "OHOS::Ace::NG::ContentChangeManager::OnSwiperChangeStart(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::ContentChangeManager::OnSwiperScrollEnd(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
-      "OHOS::Ace::NG::ContentChangeManager::OnSwiperScrollStart(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
+      "OHOS::Ace::NG::ContentChangeManager::OnSwiperScrollStart(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
       "OHOS::Ace::NG::ContentChangeManager::OnTransitionAdded(int)";
       "OHOS::Ace::NG::ContentChangeManager::OnTransitionRemoved(int)";
       "OHOS::Ace::NG::ContentChangeManager::ReportTranslateTextNode(OHOS::Ace::WeakPtr<OHOS::Ace::NG::PageTranslateNode> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -4742,6 +4749,7 @@
       "OHOS::Ace::NG::PipelineContext::GetNavigationManager() const";
       "OHOS::Ace::NG::PipelineContext::GetNodeRenderStatusMonitor()";
       "OHOS::Ace::NG::PipelineContext::GetOrCreateFocusManager()";
+      "OHOS::Ace::NG::PipelineContext::GetOrCreateScrollPlaceholderManager()";
       "OHOS::Ace::NG::PipelineContext::GetRootRect()";
       "OHOS::Ace::NG::PipelineContext::GetTaihangOptimizer() const";
       "OHOS::Ace::NG::PipelineContext::HasOnAreaChangeNode(int)";
@@ -6095,6 +6103,8 @@
       vtable?for?OHOS::Ace::NG::TextFieldManagerNG;
       VTT?for?OHOS::Ace::NG::ParagraphManager;
       VTT?for?OHOS::Ace::NG::TextFieldManagerNG;
+      OHOS::Ace::NG::TokenThemeStorage::GetInstance*;
+      OHOS::Ace::NG::TokenThemeStorage::GetDefaultTheme*;
     };
   local:
     *;

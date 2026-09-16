@@ -32,6 +32,7 @@ enum class GestureTypeName {
     WEBSCROLL = 9,
     TEXTFIELD_BOXSELECT = 10,
     CONTEXT_MENU_HOVER = 11,
+    TOUCH_EVENT = 12,
 };
 
 enum class TextDirection {

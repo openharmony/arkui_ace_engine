@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
 #include "base/utils/feature_param.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -548,7 +549,12 @@ bool WaterFlowLayoutAlgorithm::PreloadItem(LayoutWrapper* host, int32_t itemIdx,
         startFrom = 0;
     }
     if (itemIdx <= lastItem) {
-        return host->GetOrCreateChildByIndex(itemIdx, false, true);
+        // Scroll placeholder load observation at the WaterFlow preload build call point.
+        ScrollPlaceholderItemBuildScope buildScope(
+            ScrollPlaceholderComponentType::WATER_FLOW, host, itemIdx, true);
+        auto wrapper = host->GetOrCreateChildByIndex(itemIdx, false, true);
+        buildScope.SetAcquiredWrapper(wrapper);
+        return wrapper;
     }
     const auto sub = layoutInfo_->targetIndex_;
     layoutInfo_->targetIndex_ = itemIdx;
@@ -562,7 +568,11 @@ void WaterFlowLayoutAlgorithm::SyncPreloadItem(LayoutWrapper* host, int32_t item
     const int32_t lastItem = layoutInfo_->GetLastItem();
     if (itemIdx <= lastItem) {
         auto pos = GetItemPosition(itemIdx);
+        // Scroll placeholder load observation at the WaterFlow preload build call point.
+        ScrollPlaceholderItemBuildScope buildScope(
+            ScrollPlaceholderComponentType::WATER_FLOW, host, GetChildIndexWithFooter(itemIdx), false);
         auto item = host->GetOrCreateChildByIndex(GetChildIndexWithFooter(itemIdx));
+        buildScope.SetAcquiredWrapper(item);
         CHECK_NULL_VOID(item);
         auto itemCrossSize = itemsCrossSize_.find(pos.crossIndex);
         if (itemCrossSize == itemsCrossSize_.end()) {
@@ -604,7 +614,11 @@ void WaterFlowLayoutAlgorithm::ReMeasureItems(LayoutWrapper* layoutWrapper)
     layoutInfo_->UpdateStartIndex();
     if (!hasLazyChild) {
         for (auto i = oldStart; i >= layoutInfo_->startIndex_; i--) {
+            // Scroll placeholder load observation at the WaterFlow child build call point.
+            ScrollPlaceholderItemBuildScope buildScope(
+                ScrollPlaceholderComponentType::WATER_FLOW, layoutWrapper, GetChildIndexWithFooter(i), false);
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(i));
+            buildScope.SetAcquiredWrapper(itemWrapper);
             CHECK_NULL_VOID(itemWrapper);
 
             auto itemCrossSize = itemsCrossSize_.find(layoutInfo_->GetCrossIndex(i));
@@ -617,7 +631,11 @@ void WaterFlowLayoutAlgorithm::ReMeasureItems(LayoutWrapper* layoutWrapper)
         }
     } else {
         for (auto i = layoutInfo_->startIndex_; i <= layoutInfo_->endIndex_; i++) {
+            // Scroll placeholder load observation at the WaterFlow child build call point.
+            ScrollPlaceholderItemBuildScope buildScope(
+                ScrollPlaceholderComponentType::WATER_FLOW, layoutWrapper, GetChildIndexWithFooter(i), false);
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(i));
+            buildScope.SetAcquiredWrapper(itemWrapper);
             CHECK_NULL_VOID(itemWrapper);
 
             auto pos = GetItemPosition(i);

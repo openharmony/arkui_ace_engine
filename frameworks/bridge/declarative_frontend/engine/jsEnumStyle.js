@@ -3031,7 +3031,7 @@ class NavPathStack {
     this.preloadItem = {
       info: info,
       paramString: paramString,
-      onDestroy: options !== undefined ? options.onDestroy : undefined
+      onDestroy: options !== undefined && options !== null ? options.onDestroy : undefined
     };
     
     // Create the preloaded node via native stack

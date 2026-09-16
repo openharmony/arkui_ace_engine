@@ -380,6 +380,19 @@ struct GridLayoutInfo {
         return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
     }
 
+    // Effective anchor of the viewport start for cache calculations and preloading.
+    // When the Grid is completely scrolled past the bottom (inverted range with
+    // endMainLineIndex_ >= 0), startIndex_ is stale (it still points at the first
+    // item of the last measured line): all content is above the viewport, so the
+    // children count is the effective start.
+    int32_t GetEffectiveStartIndex() const
+    {
+        if (startMainLineIndex_ > endMainLineIndex_ && endMainLineIndex_ >= 0) {
+            return GetChildrenCount();
+        }
+        return startIndex_;
+    }
+
     // Layout viewport bounds while the contentClip extension is active (ADR-3):
     // - GetViewStartBound/GetViewEndBound are used by fill/clear/jump paths
     //   (including the extension area).

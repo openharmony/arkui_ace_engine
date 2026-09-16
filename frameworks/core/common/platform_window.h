@@ -25,7 +25,7 @@
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
-using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
+using AceVsyncCallback = std::function<void(uint64_t, uint64_t, int64_t)>;
 
 enum class FromWhom : uint8_t {
     INNER = 0,

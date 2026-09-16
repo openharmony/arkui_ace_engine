@@ -702,32 +702,12 @@ export class ChipGroup extends ViewPU {
   }
   getBackgroundColor() {
     if (this.itemStyle && this.itemStyle.backgroundColor) {
-      if (typeof this.itemStyle.backgroundColor === 'object') {
-        let temp = this.itemStyle.backgroundColor;
-        if (temp == undefined || temp == null) {
-          return defaultTheme.itemStyle.backgroundColor;
-        }
-        if (temp.type === 10001) {
-          return this.itemStyle.backgroundColor;
-        }
-        return defaultTheme.itemStyle.backgroundColor;
-      }
       return this.itemStyle.backgroundColor;
     }
     return defaultTheme.itemStyle.backgroundColor;
   }
   getSelectedBackgroundColor() {
     if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
-      if (typeof this.itemStyle.selectedBackgroundColor === 'object') {
-        let temp = this.itemStyle.selectedBackgroundColor;
-        if (temp == undefined || temp == null) {
-          return defaultTheme.itemStyle.selectedBackgroundColor;
-        }
-        if (temp.type === 10001) {
-          return this.itemStyle.selectedBackgroundColor;
-        }
-        return defaultTheme.itemStyle.selectedBackgroundColor;
-      }
       return this.itemStyle.selectedBackgroundColor;
     }
     return defaultTheme.itemStyle.selectedBackgroundColor;
@@ -942,7 +922,7 @@ export class ChipGroup extends ViewPU {
                 this.ChipItemsBuilder.bind(this)(
                   makeBuilderParameterProxy('ChipItemsBuilder', {
                     backgroundSystemMaterial: () => createSubECMaterial(this.getBackgroundSystemMaterial()),
-                    activatedBackgroundSystemMaterial: () => this.getSelectedBackgroundSystemMaterial(),
+                    activatedBackgroundSystemMaterial: () => createSubECMaterial(this.getSelectedBackgroundSystemMaterial()),
                   })
                 );
                 EffectComponent.pop();

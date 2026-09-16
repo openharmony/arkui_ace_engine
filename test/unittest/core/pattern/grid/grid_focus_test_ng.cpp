@@ -18,6 +18,7 @@
 #include "grid_test_ng.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
@@ -29,6 +30,21 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
+
+class GridNullHostChildFrameNode : public FrameNode {
+    DECLARE_ACE_TYPE(GridNullHostChildFrameNode, FrameNode);
+public:
+    GridNullHostChildFrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern, false, false)
+    {}
+
+    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
+        uint32_t index, bool addToRenderTree = true, bool isCache = false) override
+    {
+        return AceType::MakeRefPtr<LayoutWrapperNode>(
+            nullptr, MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+    }
+};
 
 class GridFocusTestNg : public GridTestNg {
 public:
@@ -773,5 +789,29 @@ HWTEST_F(GridFocusTestNg, FocusDependence001, TestSize.Level1)
     currentFocusNode->RequestFocusImmediately();
     FlushUITasks();
     EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::AUTO);
+}
+
+/**
+ * @tc.name: ProcessFocusEventNullChildNode001
+ * @tc.desc: ProcessFocusEvent must not dereference a null child host node
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridFocusTestNg, ProcessFocusEventNullChildNode001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    auto gridPattern = AceType::MakeRefPtr<GridPattern>();
+    auto hostNode = AceType::MakeRefPtr<GridNullHostChildFrameNode>(V2::GRID_ETS_TAG, 1, gridPattern);
+    gridPattern->frameNode_ = hostNode;
+    hostNode->GetOrCreateFocusHub()->SetCurrentFocus(true);
+
+    GridFocus gridFocus(*gridPattern, info);
+    gridFocus.SetFocusIndex(3);
+    gridFocus.needTriggerFocus_ = true;
+    gridFocus.triggerFocus_ = false;
+
+    KeyEvent event;
+    gridFocus.ProcessFocusEvent(event, false);
+
+    EXPECT_TRUE(gridFocus.triggerFocus_);
 }
 } // namespace OHOS::Ace::NG

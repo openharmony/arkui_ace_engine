@@ -914,7 +914,7 @@ public:
 
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool needSwiperChangeEnd);
     void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode) const;
-    void ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const;
+    void ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode, bool isInterrupt = false) const;
 
     void SetCachedCountIndependent(bool independent)
     {

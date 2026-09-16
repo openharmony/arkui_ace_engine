@@ -25,6 +25,7 @@
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -1281,6 +1282,9 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
         }
         if (touchTestResults_.empty()) {
             currentReferee->CleanRedundanceScope();
+            if (!escapeRecognizers_.empty()) {
+                SweepEscapeRecognizers();
+            }
         }
     }
 
@@ -1427,6 +1431,9 @@ void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
     currentReferee->CleanGestureScope(touchEvent.id);
     referee_->CleanGestureScope(touchEvent.id);
     touchTestResults_.erase(touchEvent.id);
+    if (!escapeRecognizers_.empty()) {
+        SweepEscapeRecognizers();
+    }
     touchEvent.isFalsified = true;
     touchEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
@@ -1556,6 +1563,63 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
         if (!recognizer && sendOnTouch && !isTriggeredInteractionEvent) {
             isTriggeredInteractionEvent |= entry->HandleInteractionEvent(touchEvent);
         }
+    }
+    if (!escapeRecognizers_.empty()) {
+        HandleEscapeRecognizer(touchEvent);
+    }
+}
+
+void EventManager::HandleEscapeRecognizer(const TouchEvent& touchEvent)
+{
+    for (const auto& recognizer : escapeRecognizers_) {
+        if (!recognizer) {
+            continue;
+        }
+        if (recognizer->IsFingerEscaped(touchEvent.id)) {
+            continue;
+        }
+        recognizer->HandleMultiContainerEvent(touchEvent);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+        if (touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP ||
+            touchEvent.type == TouchType::CANCEL) {
+            AddGestureSnapshot(touchEvent.id, 0, recognizer, NG::EventTreeType::TOUCH);
+        }
+#endif
+    }
+}
+
+void EventManager::RegisterEscapeRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer)
+{
+    if (!recognizer) {
+        return;
+    }
+    if (AceType::DynamicCast<NG::RecognizerGroup>(recognizer)) {
+        return;
+    }
+    for (const auto& ref : escapeRecognizers_) {
+        if (ref == recognizer) {
+            return;
+        }
+    }
+    escapeRecognizers_.push_back(recognizer);
+    recognizer->SetEscapedToEventManager(true);
+    auto parent = recognizer->GetGestureGroup().Upgrade();
+    auto group = AceType::DynamicCast<NG::RecognizerGroup>(parent);
+    if (group) {
+        group->RemoveRecognizerInGroup(recognizer);
+    }
+}
+
+void EventManager::SweepEscapeRecognizers()
+{
+    for (auto it = escapeRecognizers_.begin(); it != escapeRecognizers_.end();) {
+        const auto& recognizer = *it;
+        if (recognizer) {
+            recognizer->SetEscapedToEventManager(false);
+            recognizer->ResetEscapeMode();
+            recognizer->ResetTriggeredIds();
+        }
+        it = escapeRecognizers_.erase(it);
     }
 }
 

@@ -21,7 +21,9 @@
 #define protected public
 #include "drag_and_drop.h"
 #include "event_converter.h"
+#include "core/common/udmf/udmf_client.h"
 #include "udmf.h"
+#include "udmf_err_code.h"
 #include "native_interface.h"
 #include "native_node.h"
 #include "native_type.h"
@@ -2130,5 +2132,31 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0067, TestSize.Level1)
      * @tc.steps: step3.dispose dragAction (should free pixelmapNativeList and delete dragAction).
      */
     OH_ArkUI_DragAction_Dispose(dragAction);
+}
+
+/**
+ * @tc.name: OH_ArkUI_DragEvent_GetSummary_001
+ * @tc.desc: Test OH_ArkUI_DragEvent_GetSummary with the summary stored in drag event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, OH_ArkUI_DragEvent_GetSummary_001, TestSize.Level1)
+{
+    DragSummaryInfo summaryInfo;
+    summaryInfo.summary["general.file-uri"] = 100;
+    summaryInfo.totalSize = 100;
+    summaryInfo.filenameExtensions = { ".png" };
+    ArkUIDragEvent dragEvent {};
+    dragEvent.unifiedDataSummary = &summaryInfo;
+    auto event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    auto summary = OH_UDMF_CreateSummary();
+    ASSERT_NE(summary, nullptr);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetSummary(event, summary), ARKUI_ERROR_CODE_NO_ERROR);
+    const char* const* extensions = nullptr;
+    int64_t count = 0;
+    EXPECT_EQ(OH_UDMF_GetSummaryFilenameExtensions(summary, &extensions, &count), UDMF_E_OK);
+    ASSERT_NE(extensions, nullptr);
+    ASSERT_EQ(count, 1);
+    EXPECT_STREQ(extensions[0], ".png");
+    OH_UDMF_DestroySummary(summary);
 }
 } // namespace OHOS::Ace

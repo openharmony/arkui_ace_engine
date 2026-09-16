@@ -7154,6 +7154,284 @@ typedef enum {
     NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW,
 
     /**
+     * @brief Defines the text editor type.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: text editor type {@link OH_ArkUI_TextEditorType}.
+     * The default value is <b>OH_ARKUI_TEXT_EDITOR_TYPE_NORMAL</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: text editor type {@link OH_ArkUI_TextEditorType}. \n
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_TYPE = 22031,
+
+    /**
+     * @brief Defines whether to display the password icon at the end of the password text editor.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to display the password icon at the end of the password text editor.
+     * The value <b>true</b> means to display the password icon, and <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The value <b>1</b> means to display the password icon, and <b>0</b> means the opposite. \n
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_SHOW_PASSWORD_ICON = 22032,
+
+    /**
+     * @brief Defines the password icon of the text editor.
+     * This attribute can be set and reset as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].string: show icon image source. \n
+     * .value[1].string: hide icon image source. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].string: show icon image source. \n
+     * .value[1].string: hide icon image source. \n
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_PASSWORD_ICON = 22033,
+
+    /**
+     * @brief Sets whether to enable autofill. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: Whether to enable autofill. The value **1** means to enable, and **0** means the opposite. The default value is **0**.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: Whether autofill is enabled. The value **1** means enabled, and **0** means disabled.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_ENABLE_AUTO_FILL = 22034,
+
+    /**
+     * @brief Sets the autofill type. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: autofill type, used to specify the content type for autofill scenarios.
+     * <br>The parameter type is {@link ArkUI_TextInputContentType}. For details about the enum values and applicable scenarios, see {@link ArkUI_TextInputContentType}.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: autofill type, used to determine the autofill content type. The parameter type is {@link ArkUI_TextInputContentType}.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_CONTENT_TYPE = 22035,
+
+    /**
+     * @brief Defines the rules for generating passwords. When autofill is used, these rules are transparently
+     * transmitted to Password Vault for generating a new password. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.string: rules for generating passwords, used to control new password generation by being transparently transmitted to the Password Vault when autofill is triggered.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.string: rules for generating passwords.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_PASSWORD_RULES = 22036,
+
+    /**
+     * @brief Sets whether to enable the autofill animation. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: Whether to enable the autofill animation. The value **1** means to enable, and **0** means the opposite. The default value is **1**.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: Whether the autofill animation is enabled. The value **1** means enabled, and **0** means disabled.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_ENABLE_FILL_ANIMATION = 22037,
+
+    /**
+     * @brief Sets whether to show the underline. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: Whether to show the underline. The value **1** means to show, and **0** means the opposite. The default value is **0**.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: Whether the underline is shown. The value **1** means shown, and **0** means not shown.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_SHOW_UNDERLINE = 22038,
+
+    /**
+     * @brief Sets the color of the underline. This attribute can be set, reset, and obtained as required through APIs.
+     * This attribute takes effect only after NODE_TEXT_EDITOR_SHOW_UNDERLINE is set to **1**.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].u32: color of the underline applied to the text being typed in. The value is in 0xARGB format.</li>
+     * <li>.value[1].u32: color of the underline applied to the text in the normal state. The value is in 0xARGB format.</li>
+     * <li>.value[2].u32: color of the underline applied to the text when an error is detected. The value is in 0xARGB format.</li>
+     * <li>.value[3].u32: color of the underline applied to the text when it is disabled. The value is in 0xARGB format.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].u32: color of the underline applied to the text being typed in. The value is in 0xARGB format.</li>
+     * <li>.value[1].u32: color of the underline applied to the text in the normal state. The value is in 0xARGB format.</li>
+     * <li>.value[2].u32: color of the underline applied to the text when an error is detected. The value is in 0xARGB format.</li>
+     * <li>.value[3].u32: color of the underline applied to the text when it is disabled. The value is in 0xARGB format.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_UNDERLINE_COLOR = 22039,
+
+    /**
+     * @brief Sets the caret width. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].f32: caret width, in vp.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].f32: caret width, in vp.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_CARET_STYLE = 22040,
+
+    /**
+     * @brief Sets whether to select all text in the initial state. This attribute can be set, reset, and obtained as required through APIs.
+     * The full selection is triggered only when the component gains focus for the first time and the layout is complete. It is not triggered when the window regains focus.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: Whether to select all text in the initial state. The value **1** means to enable, and **0** means the opposite. The default value is **0**.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: Whether to select all text in the initial state. The value **1** means to select all, and **0** means the opposite.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_SELECT_ALL = 22041,
+
+    /**
+     * @brief Sets whether to blur on submit. This attribute can be set, reset, and obtained as required through APIs.
+     * This attribute takes effect only when EnterKeyType is NEW_LINE and the Enter key is pressed.
+     * When set to **1**, the keyboard is closed and the component loses focus without inserting a newline.
+     * When set to **0**, a newline is inserted and the component retains focus.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: Whether to blur on submit. The value **1** means to enable, and **0** means the opposite. The default value is **0**.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: Whether to blur on submit. The value **1** means to blur, and **0** means the opposite.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_BLUR_ON_SUBMIT = 22042,
+
+    /**
+     * @brief Gets the position and size of the editing content area. This attribute can only be obtained.
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].f32: x offset of the editing content area.</li>
+     * <li>.value[1].f32: y offset of the editing content area.</li>
+     * <li>.value[2].f32: width of the editing content area.</li>
+     * <li>.value[3].f32: height of the editing content area.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_CONTENT_RECT = 22043,
+
+    /**
+     * @brief Sets whether to hide the selection menu. This attribute can be set, reset, and obtained as required through APIs.
+     * When set to **1**, the selection menu is not displayed on long press, double-tap, or right-click, but the selection handles are not affected.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: Whether to hide the selection menu. The value **1** means to hide, and **0** means the opposite. The default value is **0**.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: Whether the selection menu is hidden. The value **1** means hidden, and **0** means not hidden.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_SELECTION_MENU_HIDDEN = 22044,
+
+    /**
+     * @brief Sets whether to skip the preview state on long press and directly enter the editing state. This attribute can be set, reset, and obtained as required through APIs.
+     * When set to **1**, long press directly enters the editing state (keyboard pops up and cursor twinkles), skipping the preview state. Double-tap behavior is not affected.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: Whether to skip the preview state on long press. The value **1** means to skip, and **0** means the opposite. The default value is **0**.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: Whether to skip the preview state on long press. The value **1** means to skip, and **0** means the opposite.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_ENABLE_SKIP_PREVIEW_LONG_PRESS = 22045,
+
+    /**
      * @brief Defines the style of the cancel button of the text editor.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -7176,7 +7454,49 @@ typedef enum {
      * @ingroup Text Editor
      * @since 26.2.0
      */
-    NODE_TEXT_EDITOR_CANCEL_BUTTON,
+    NODE_TEXT_EDITOR_CANCEL_BUTTON = 22046,
+
+    /**
+     * @brief Defines the counter settings. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: whether to show a character counter. The value <b>true</b> means to show a character counter.</li>
+     * <li>.value[1]?.f32: threshold percentage for displaying the character counter. The character counter is displayed when the number of characters that have been entered is greater than the maximum number of characters multiplied by the threshold percentage value. The value range is 1 to 100. If the value is a decimal, it is rounded down.</li>
+     * <li>.value[2]?.i32: whether to highlight the border when the number of entered characters reaches the maximum.</li>
+     * <li>.object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: whether to show a character counter.</li>
+     * <li>.value[1].f32: threshold percentage for displaying the character counter. The character counter is displayed when the number of characters that have been entered is greater than the maximum number of characters multiplied by the threshold percentage value. The value range is 1 to 100.</li>
+     * <li>.value[2].i32: whether to highlight the border when the number of entered characters reaches the maximum. The default value is <b>true</b>.</li>
+     * <li>.object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_SHOW_COUNTER = 22047,
+
+    /**
+     * @brief Sets the input filter regex for the **TextEditor** component.
+     * <br>This attribute can be set, reset, and obtained as required through APIs.
+     * <br>This attribute is effective only in spanString mode (including both single-line and multi-line modes).
+     * <br>When both inputFilter and maxLength are set, the filter priority is: inputFilter first, then maxLength.
+     * <br>When the regex changes, existing content is silently re-filtered (consistent with TextInput behavior).
+     * <br>Non-character content (ImageSpan/SymbolSpan/BuilderSpan) is treated as \uFFFC during regex matching.
+     * <br>The format of {@link ArkUI_AttributeItem} for property setting method parameters and property getting method return values is as follows.
+     * <br>**Parameter:**
+     * <br>.string: Regex expression string for input filtering. Only characters matching the regex whitelist are allowed. An empty string is equivalent to not setting the filter.
+     * <br>**Return:**
+     * <br>.string: The currently set input filter regex expression string.
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_INPUT_FILTER = 22048,
 
     /**
      * @brief Defines the index string array.
@@ -11554,6 +11874,52 @@ typedef enum {
      * @since 24
      */
     NODE_TEXT_EDITOR_ON_DID_CHANGE,
+
+    /**
+     * @brief This event is triggered when the text content of TextEditor is scrolled.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.
+     * **{@link ArkUI_NodeComponentEvent} contains 2 parameters:**
+     * <ul>
+     * <li>ArkUI_NodeComponentEvent.data[0].f32: Indicates the horizontal offset of the text in the content area.</li>
+     * <li>ArkUI_NodeComponentEvent.data[1].f32: Indicates the vertical offset of the text in the content area.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_ON_CONTENT_SCROLL = 22009,
+
+    /**
+     * @brief This event is triggered when the content size of TextEditor changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.
+     * **{@link ArkUI_NodeComponentEvent} contains 2 parameters:**
+     * <ul>
+     * <li>ArkUI_NodeComponentEvent.data[0].f32: Indicates the width of the text.</li>
+     * <li>ArkUI_NodeComponentEvent.data[1].f32: Indicates the height of the text.</li>
+     * </ul>
+     *
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_ON_CONTENT_SIZE_CHANGE = 22010,
+
+    /**
+     * @brief Event triggered when input characters are rejected by the inputFilter regex
+     * of the **TextEditor** component.
+     * <br>This event is effective only in spanString mode.
+     * <br>The event is triggered only when the onInputFilterError callback has been registered
+     * and input characters are rejected by the inputFilter regex.
+     * <br>When the event callback occurs, you can obtain the rejected characters from the
+     * {@link ArkUI_NodeEvent} object by calling {@link OH_ArkUI_NodeEvent_GetStringAsyncEvent}.
+     * <br>The **ArkUI_StringAsyncEvent.pStr** field contains the rejected characters as a UTF-8 string.
+     * @ingroup Text Editor
+     * @since 26.2.0
+     */
+    NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR = 22011,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this

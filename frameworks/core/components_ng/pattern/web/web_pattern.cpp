@@ -4649,6 +4649,8 @@ void WebPattern::OnModifyDone()
             renderSurface_->InitSurface();
             renderSurface_->SetTransformHint(rotation_);
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
+            delegate_->SetTransformHint(rotation_);
+
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
 #if defined(ENABLE_ROSEN_BACKEND)

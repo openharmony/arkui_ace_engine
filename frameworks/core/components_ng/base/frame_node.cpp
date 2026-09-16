@@ -2189,6 +2189,14 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
+#ifndef CROSS_PLATFORM
+    if (context) {
+        auto contentChangeMgr = context->GetContentChangeManager();
+        if (contentChangeMgr) {
+            contentChangeMgr->OnContentChangeNodeDestroyed(GetId());
+        }
+    }
+#endif
     for (auto [_, callback] : removeToolbarItemCallbacks_) {
         if (callback) {
             callback();

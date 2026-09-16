@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -610,8 +610,8 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
     CHECK_NULL_RETURN(json && !cmd.empty(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d OnInjectionEvent cmd:%{public}s", host->GetId(),
-        (cmd == "addText" || cmd == "setText") ? cmd.c_str() : command.c_str());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent nodeId:%{public}d, commandLength:%{public}zu",
+        host->GetId(), command.size());
     if (cmd == "MSDP_AutoFill") {
         return HandleMSDPAutoFillCommand(json);
     } else if (cmd == "addText" || cmd == "setText" || cmd == "deleteText") {
@@ -650,8 +650,7 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
         int32_t position = json->GetInt("position");
         return HandleSetCaretPositionCommand(position, host->GetId());
     } else {
-        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent unknown cmd : %{public}s, nodeId : %{public}d",
-            cmd.c_str(), host->GetId());
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent unknown command, nodeId : %{public}d", host->GetId());
         return false;
     }
     return true;
@@ -10013,6 +10012,11 @@ void TextFieldPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("content", IsInPasswordMode() ? "" : GetTextValue().c_str());
     json->Put("placeholder", UtfUtils::Str16DebugToStr8(GetPlaceHolder()).c_str());
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasEnableAutoFill()) {
+        json->Put("enableAutoFill", layoutProperty->GetEnableAutoFillValue(true));
+    }
 }
 
 void TextFieldPattern::DumpFontInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty)

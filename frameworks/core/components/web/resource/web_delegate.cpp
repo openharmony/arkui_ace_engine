@@ -3255,6 +3255,7 @@ void WebDelegate::InitWebViewWithWindow()
             auto vaultPlainTextImpl = std::make_shared<VaultPlainTextImpl>(Container::CurrentId());
             vaultPlainTextImpl->SetWebDelegate(weak);
             delegate->nweb_->PutVaultPlainTextCallback(vaultPlainTextImpl);
+            delegate->nweb_->SetTransformHint(delegate->rotation_);
 
             std::optional<std::string> src;
             auto isNewPipe = Container::IsCurrentUseNewPipeline();
@@ -3841,6 +3842,8 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->RegisterDisplayInfoChange();
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetFitContentMode(layoutMode);
+            delegate->nweb_->SetTransformHint(delegate->rotation_);
+
             delegate->RegisterConfigObserver();
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
@@ -9941,9 +9944,10 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 
 void WebDelegate::SetTransformHint(uint32_t rotation)
 {
+    rotation_ = rotation;
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->SetTransformHint(rotation);
+        nweb_->SetTransformHint(rotation_);
     }
 }
 

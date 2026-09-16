@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace {
 ContentChangeConfigImpl::ContentChangeConfigImpl(int32_t minReportTime, float textContentRatio,
-    std::string ignoreEventType, int32_t minWidth, int32_t minHeight, int32_t reportDelayTime)
+    std::string ignoreEventType, int32_t minWidth, int32_t minHeight, int32_t reportDelayTime, bool reportStartEvent)
 {
     config_.minReportTime = minReportTime;
     config_.textContentRatio = textContentRatio;
@@ -25,6 +25,7 @@ ContentChangeConfigImpl::ContentChangeConfigImpl(int32_t minReportTime, float te
     config_.minWidth = minWidth;
     config_.minHeight = minHeight;
     config_.reportDelayTime = reportDelayTime;
+    config_.reportStartEvent = reportStartEvent;
 }
 
 ContentChangeConfigImpl::ContentChangeConfigImpl(const ContentChangeConfig& config)
@@ -35,6 +36,7 @@ ContentChangeConfigImpl::ContentChangeConfigImpl(const ContentChangeConfig& conf
     config_.minWidth = config.minWidth;
     config_.minHeight = config.minHeight;
     config_.reportDelayTime = config.reportDelayTime;
+    config_.reportStartEvent = config.reportStartEvent;
 }
 
 bool ContentChangeConfigImpl::Marshalling(Parcel& parcel) const
@@ -55,6 +57,9 @@ bool ContentChangeConfigImpl::Marshalling(Parcel& parcel) const
         return false;
     }
     if (!parcel.WriteInt32(config_.reportDelayTime)) {
+        return false;
+    }
+    if (!parcel.WriteBool(config_.reportStartEvent)) {
         return false;
     }
     return true;
@@ -86,8 +91,12 @@ ContentChangeConfigImpl* ContentChangeConfigImpl::Unmarshalling(Parcel& parcel)
     if (!parcel.ReadInt32(reportDelayTime)) {
         return nullptr;
     }
+    bool reportStartEvent = false;
+    if (parcel.GetReadableBytes() >= sizeof(int32_t) && !parcel.ReadBool(reportStartEvent)) {
+        return nullptr;
+    }
     ContentChangeConfigImpl* configImpl = new ContentChangeConfigImpl(
-        minReportTime, textContentRatio, ignoreEventType, minWidth, minHeight, reportDelayTime);
+        minReportTime, textContentRatio, ignoreEventType, minWidth, minHeight, reportDelayTime, reportStartEvent);
     return configImpl;
 }
 

@@ -52,6 +52,7 @@ struct PageSceneNodeInfo {
     std::string placeholder;
     std::string contentType;
     std::string inputType;
+    std::optional<bool> enableAutoFill;
     bool focusable = false;
     PageSceneRectInfo rect;
 };

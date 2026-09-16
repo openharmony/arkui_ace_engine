@@ -362,8 +362,12 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
 
     auto adjustedConstraint = contentConstraint;
     if (GreatNotEqual(cancelButtonWidth_, 0.0f)) {
-        adjustedConstraint.MinusPaddingToNonNegativeSize(
-            cancelButtonWidth_, std::nullopt, std::nullopt, std::nullopt);
+        adjustedConstraint.maxSize.SetWidth(std::max(adjustedConstraint.maxSize.Width() - cancelButtonWidth_, 0.0f));
+        adjustedConstraint.minSize.SetWidth(std::max(adjustedConstraint.minSize.Width() - cancelButtonWidth_, 0.0f));
+        if (adjustedConstraint.selfIdealSize.Width()) {
+            adjustedConstraint.selfIdealSize.SetWidth(
+                std::max(adjustedConstraint.selfIdealSize.Width().value() - cancelButtonWidth_, 0.0f));
+        }
     }
     auto optionalTextSize = MeasureContentSize(adjustedConstraint, layoutWrapper);
     CHECK_NULL_RETURN(optionalTextSize.has_value(), {});
@@ -676,6 +680,20 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffsetNG() - context->GetRootRect().GetOffset();
     MultipleParagraphLayoutAlgorithm::Layout(layoutWrapper);
 
+    // RTL: the cancelButton is laid out on the left side (CleanNodeResponseArea::Layout isRTL branch).
+    // Since contentRect_ excludes the cancelButton width, shift the content offset right by the
+    // cancelButton width so text does not overlap the left-side cancelButton.
+    if (GreatNotEqual(cancelButtonWidth_, 0.0f)) {
+        auto layoutProperty = layoutWrapper->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+            const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+            if (content) {
+                auto offset = content->GetRect().GetOffset();
+                content->SetOffset(OffsetF(offset.GetX() + cancelButtonWidth_, offset.GetY()));
+            }
+        }
+    }
+
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto contentLayoutWrapper = FindContentLayoutWrapper(children);
     if (!contentLayoutWrapper) {
@@ -743,11 +761,6 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
     if (GreatNotEqual(cancelButtonWidth_, 0.0f)) {
         auto layoutProperty = layoutWrapper->GetLayoutProperty();
         if (layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
-            const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-            if (content) {
-                auto offset = content->GetRect().GetOffset();
-                content->SetOffset(OffsetF(offset.GetX() + cancelButtonWidth_, offset.GetY()));
-            }
             contentOffset.SetX(contentOffset.GetX() + cancelButtonWidth_);
         }
     }

@@ -137,7 +137,7 @@ public:
 
     void FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
 
-    void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
+    void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime = -1) override;
 
     void SetUiDvsyncSwitch(bool vsyncSwitch, FromWhom fromWhom = FromWhom::INNER) override;
 

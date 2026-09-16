@@ -1088,7 +1088,7 @@ HWTEST_F(RichEditorCancelButtonTestNg, CleanNodeResponseArea_HandleCleanNodeHove
 
 /**
  * @tc.name: CleanNodeResponseArea_SetAccessibilityClearAction
- * @tc.desc: SetAccessibilityClearAction sets accessibility properties on the clean node.
+ * @tc.desc: SetAccessibilityClearAction sets clear action and role on the clean node.
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorCancelButtonTestNg, CleanNodeResponseArea_SetAccessibilityClearAction, TestSize.Level1)
@@ -1103,7 +1103,7 @@ HWTEST_F(RichEditorCancelButtonTestNg, CleanNodeResponseArea_SetAccessibilityCle
     auto cleanArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern->cleanNodeResponseArea_);
     ASSERT_NE(cleanArea, nullptr);
     ASSERT_NE(cleanArea->cleanNode_, nullptr);
-    // Should not crash and should set accessibility properties
+    // Verify SetAccessibilityClearAction does not crash and sets expected properties.
     cleanArea->SetAccessibilityClearAction();
     auto accessibilityProperty =
         cleanArea->cleanNode_->GetAccessibilityProperty<AccessibilityProperty>();

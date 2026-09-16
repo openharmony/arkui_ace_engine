@@ -172,7 +172,7 @@ public:
     void SaveWebPageSceneFunction(WebPageSceneFunction&& function) override;
     bool IsWebSourceEnabled(const std::string& ruleJson);
 
-    void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
+    void SaveReportProxy(sptr<IRemoteObject> reportProxy, int32_t processId);
 
 private:
     bool PostToCurrentTranslateManager(const char* caller,

@@ -2441,22 +2441,21 @@ void SetRichEditorCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const st
     }
     Color iconColor(color);
     NG::RichEditorModelNG::SetCancelButton(frameNode, style, iconSize, iconColor, src ? std::string(src) : "");
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        RefPtr<ResourceObject> colorResObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(
-            colorResObj, iconColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
-        if (colorResObj) {
-            pattern->RegisterResource<Color>(
-                std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY), colorResObj, iconColor);
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-                "SetRichEditorCancelButton: register color=%{public}s", iconColor.ToString().c_str());
-        } else {
-            pattern->UnRegisterResource(std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY));
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-                "SetRichEditorCancelButton: colorResObj is null, unregister");
-        }
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> colorResObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(
+        colorResObj, iconColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+    if (colorResObj) {
+        pattern->RegisterResource<Color>(
+            std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY), colorResObj, iconColor);
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "SetRichEditorCancelButton: register color=%{public}s", iconColor.ToString().c_str());
+    } else {
+        pattern->UnRegisterResource(std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY));
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+            "SetRichEditorCancelButton: colorResObj is null, unregister");
     }
 }
 
@@ -2465,12 +2464,11 @@ void ResetRichEditorCancelButton(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::RichEditorModelNG::ResetCancelButton(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource(std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY));
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetRichEditorCancelButton: unregister");
-    }
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource(std::string(StyleManager::CANCEL_BUTTON_ICON_COLOR_KEY));
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetRichEditorCancelButton: unregister");
 }
 
 ArkUI_Int32 GetRichEditorCancelButtonStyle(ArkUINodeHandle node)

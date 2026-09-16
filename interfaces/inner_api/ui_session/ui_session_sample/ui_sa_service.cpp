@@ -58,6 +58,11 @@ constexpr size_t SIMPLIFYTREE_WITH_PARAMCONFIG = GET_VISIBLE_WITH_UI_EXTENSION_I
 constexpr size_t SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG = GET_VISIBLE_MIN_OPACITY_INDEX + 1;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
+constexpr size_t MAX_BATCH_SET_TEXT_COUNT = 50;
+constexpr size_t BATCH_ARGUMENT_PAIR_SIZE = 2;
+constexpr size_t MIN_BATCH_SET_TEXT_PARAM_COUNT = 3;
+constexpr uint8_t NIBBLE_BITS = 4;
+constexpr uint8_t LOW_NIBBLE_MASK = 0x0F;
 constexpr int32_t START_WEB_VIEW_TRANSLATE = 2;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
 constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
@@ -205,6 +210,12 @@ ContentChangeConfig ParseContentChangeConfig(
         [&config](const std::string& value) {
             config.reportDelayTime = std::atoi(value.c_str());
         },
+        [&config](const std::string& value) {
+            config.reportStartEvent = value == "1";
+            if (value != "0" && value != "1") {
+                LOGW("[ContentChangeManager] reportStartEvent only accepts 0 or 1, use false");
+            }
+        },
     };
 
     const size_t configStart = static_cast<size_t>(PARAMS_OFFSET);
@@ -219,6 +230,44 @@ ContentChangeConfig ParseContentChangeConfig(
     }
 
     return config;
+}
+
+const char* GetContentChangeTypeName(ChangeType type)
+{
+    switch (type) {
+        case ChangeType::PAGE:
+            return "PAGE";
+        case ChangeType::SCROLL:
+            return "SCROLL";
+        case ChangeType::SWIPER:
+            return "SWIPER";
+        case ChangeType::TABS:
+            return "TABS";
+        case ChangeType::TEXT:
+            return "TEXT";
+        case ChangeType::DIALOG:
+            return "DIALOG";
+        case ChangeType::ARKWEB_PAGE:
+            return "ARKWEB_PAGE";
+        case ChangeType::ARKWEB_TEXT:
+            return "ARKWEB_TEXT";
+        case ChangeType::IMAGE_LOADED:
+            return "IMAGE_LOADED";
+        case ChangeType::PAGE_START:
+            return "PAGE_START";
+        case ChangeType::SCROLL_START:
+            return "SCROLL_START";
+        case ChangeType::SWIPER_START:
+            return "SWIPER_START";
+        case ChangeType::TABS_START:
+            return "TABS_START";
+        case ChangeType::SWIPER_START_CANCEL:
+            return "SWIPER_START_CANCEL";
+        case ChangeType::TABS_START_CANCEL:
+            return "TABS_START_CANCEL";
+        default:
+            return "UNKNOWN";
+    }
 }
 
 std::string UnescapeContent(const std::string& param)
@@ -306,6 +355,51 @@ std::string ReadPageSceneRuleJson()
     }
     return ruleJson;
 }
+
+void AppendJsonEscaped(std::string& output, const std::string& value)
+{
+    constexpr char HEX_DIGITS[] = "0123456789abcdef";
+    for (const auto character : value) {
+        const auto byte = static_cast<uint8_t>(character);
+        if (character == '"' || character == '\\') {
+            output.push_back('\\');
+            output.push_back(character);
+        } else if (character == '\b') {
+            output += "\\b";
+        } else if (character == '\f') {
+            output += "\\f";
+        } else if (character == '\n') {
+            output += "\\n";
+        } else if (character == '\r') {
+            output += "\\r";
+        } else if (character == '\t') {
+            output += "\\t";
+        } else if (byte < 0x20) {
+            output += "\\u00";
+            output.push_back(HEX_DIGITS[byte >> NIBBLE_BITS]);
+            output.push_back(HEX_DIGITS[byte & LOW_NIBBLE_MASK]);
+        } else {
+            output.push_back(character);
+        }
+    }
+}
+
+std::string BuildBatchSetTextCommand(const std::vector<std::string>& params)
+{
+    std::string command = R"({"cmd":"batch","commands":{)";
+    for (size_t index = 1; index + 1 < params.size(); index += BATCH_ARGUMENT_PAIR_SIZE) {
+        if (index > 1) {
+            command.push_back(',');
+        }
+        command.push_back('"');
+        AppendJsonEscaped(command, params[index]);
+        command += R"(":{"cmd":"setText","params":{"value":")";
+        AppendJsonEscaped(command, params[index + 1]);
+        command += R"("}})";
+    }
+    command += "}}";
+    return command;
+}
 } // namespace
 
 const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
@@ -313,6 +407,7 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "GetVisibleInspectorTree", &UiSaService::HandleGetVisibleInspectorTree },
     { "GetCurrentPageName", &UiSaService::HandleGetCurrentPageName },
     { "SendCommand", &UiSaService::HandleSendCommand },
+    { "SendBatchSetText", &UiSaService::HandleSendBatchSetText },
     { "SendCommandSync", &UiSaService::HandleSendCommandSync },
     { "RegisterContentChangeCallback", &UiSaService::HandleRegisterContentChangeCallback },
     { "UnregisterContentChangeCallback", &UiSaService::HandleUnregisterContentChangeCallback },
@@ -406,6 +501,8 @@ sptr<Ace::IUiContentService> UiSaService::getArkUIService(int32_t windowId)
         LOGW("through uiSa, agent window dead, windowId:%{public}d", windowId);
         this->uiContentRemoteObjMap_.erase(windowId);
     });
+    // In this sample SA, tmpRemoteObj refers to the application-side UiContentStub.
+    // Listen for remote application death through this proxy and remove the local cached service.
     tmpRemoteObj->AddDeathRecipient(uiContentProxyRecipient);
     service = iface_cast<Ace::IUiContentService>(tmpRemoteObj);
     if (service == nullptr) {
@@ -519,6 +616,19 @@ void UiSaService::HandleSendCommand(sptr<IUiContentService> service, std::vector
     }
 }
 
+void UiSaService::HandleSendBatchSetText(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    const auto itemCount = params.empty() ? 0 : (params.size() - 1) / BATCH_ARGUMENT_PAIR_SIZE;
+    if (params.size() < MIN_BATCH_SET_TEXT_PARAM_COUNT ||
+        (params.size() - 1) % BATCH_ARGUMENT_PAIR_SIZE != 0 || itemCount > MAX_BATCH_SET_TEXT_COUNT) {
+        LOGW("SendBatchSetText expects 1..50 nodeId/text pairs");
+        return;
+    }
+    auto command = BuildBatchSetTextCommand(params);
+    LOGI("SendBatchSetText itemCount=%{public}zu, commandLength=%{public}zu", itemCount, command.size());
+    service->SendCommand(command);
+}
+
 void UiSaService::HandleSendCommandSync(sptr<IUiContentService> service, std::vector<std::string> params)
 {
     CHECK_EQUAL_VOID(params.size() == SEND_COMMAND_WITH_NODEID, false);
@@ -532,8 +642,8 @@ void UiSaService::HandleRegisterContentChangeCallback(sptr<IUiContentService> se
 {
     bool toFile = params.back() == "-tofile";
     auto contentChangeCallback = [toFile](ChangeType type, const std::string& simpleTree) {
-        LOGI("[ContentChangeManager] callback type = %{public}d, tree: %{public}s", type,
-            simpleTree.substr(0, 200).c_str());
+        LOGI("[ContentChangeManager] callback type=%{public}s(%{public}d), tree: %{public}s",
+            GetContentChangeTypeName(type), static_cast<int32_t>(type), simpleTree.substr(0, 200).c_str());
         if (toFile && simpleTree.length()) {
             auto filePath = UI_SA_PATH + "arkui_simpleTree_" + GetCurrentTimestampStr() + ".json";
             std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
@@ -666,13 +776,18 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
 void UiSaService::HandleRegisterComponentChangeEventCallback(
     sptr<IUiContentService> service, std::vector<std::string> params)
 {
+    bool toFile = HasToFileParam(params);
+    RemoveToFileParam(params);
     uint32_t mask = ParseComponentChangeEventMask(params);
-    auto finishCallback = [](std::string data) {
+    auto finishCallback = [toFile](std::string data) {
         LOGI("[ComponentChangeEvent] data = %{public}s", data.c_str());
+        if (toFile && !data.empty()) {
+            WriteTextFile("[ComponentChangeEvent]", "component_change_event", data);
+        }
     };
     service->RegisterComponentChangeEventCallback(finishCallback, mask);
-    LOGI("[ComponentChangeEvent] call RegisterComponentChangeEventCallback mask=%{public}s",
-        std::bitset<BITS_UINT32>(mask).to_string().c_str());
+    LOGI("[ComponentChangeEvent] call RegisterComponentChangeEventCallback mask=%{public}s, toFile=%{public}d",
+        std::bitset<BITS_UINT32>(mask).to_string().c_str(), toFile);
 }
 
 void UiSaService::HandleUnregisterComponentChangeEventCallback(

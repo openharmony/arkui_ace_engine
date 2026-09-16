@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -481,10 +481,13 @@ void SearchPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(renderContext);
     auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
-    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
-    CHECK_NULL_VOID(searchLayoutProperty);
-    if (!searchLayoutProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    if (!renderContext->HasBackgroundColor()) {
+        auto material = renderContext->GetSystemMaterial();
+        if (material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+            renderContext->UpdatePreBackgroundColor(textFieldTheme->GetBgColor());
+        } else {
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        }
     }
 }
 
@@ -1503,8 +1506,8 @@ int32_t SearchPattern::OnInjectionEvent(const std::string& command)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
-    TAG_LOGI(AceLogTag::ACE_SEARCH, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
-        host->GetId());
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "OnInjectionEvent nodeId:%{public}d, commandLength:%{public}zu", host->GetId(),
+        command.size());
     std::string cmd;
     std::unique_ptr<JsonValue> json = nullptr;
     std::unique_ptr<JsonValue> params = nullptr;
