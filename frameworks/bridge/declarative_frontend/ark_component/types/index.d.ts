@@ -1517,6 +1517,11 @@ declare enum JoinStyle {
   ROUND = 1,
   BEVEL = 2,
 }
+declare enum StrokeJoinStyle {
+  MITER_JOIN = 0,
+  ROUND_JOIN = 1,
+  BEVEL_JOIN = 2,
+}
 declare type CancelButtonStyle = string;
 declare interface IconOptions {
   size?: Length;

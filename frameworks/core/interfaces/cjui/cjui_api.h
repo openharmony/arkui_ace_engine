@@ -737,6 +737,16 @@ struct CJUITextModifier {
     ArkUI_Int32 (*getTailIndentsCount)(ArkUINodeHandle node);
     void (*getTailIndents)(ArkUINodeHandle node, ArkUI_Float32* values,
         ArkUI_Int32* units, ArkUI_Int32 size);
+    void (*setStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 strokeWidthValue, ArkUI_Int32 strokeWidthUnit,
+        void* strokeWidthRawPtr);
+    void (*resetStrokeWidth)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getStrokeWidth)(ArkUINodeHandle node);
+    void (*setStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* strokeColorRawPtr);
+    void (*resetStrokeColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getStrokeColor)(ArkUINodeHandle node);
+    void (*setStrokeJoinStyle)(ArkUINodeHandle node, ArkUI_Int32 strokeJoinStyle);
+    void (*resetStrokeJoinStyle)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getStrokeJoinStyle)(ArkUINodeHandle node);
 };
 
 struct CJUIButtonModifier {

@@ -821,6 +821,9 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     }): this;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAttribute;
     tailIndents(value: LengthMetrics | Array<LengthMetrics>): TextAttribute;
+    strokeWidth(value: LengthMetrics): TextAttribute;
+    strokeColor(value: ResourceColor): TextAttribute;
+    strokeJoinStyle(value: StrokeJoinStyle): TextAttribute;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

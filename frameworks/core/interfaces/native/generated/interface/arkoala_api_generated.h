@@ -27909,6 +27909,12 @@ typedef struct GENERATED_ArkUITextModifier {
                                      const Opt_Boolean* value);
     void (*setShaderStyle)(Ark_NativePointer node,
                            const Opt_ShaderStyleProxy* value);
+    void (*setStrokeWidth)(Ark_NativePointer node,
+                           const Opt_LengthMetricsProxy* value);
+    void (*setStrokeColor)(Ark_NativePointer node,
+                           const Opt_ResourceColor* value);
+    void (*setStrokeJoinStyle)(Ark_NativePointer node,
+                               const Opt_StrokeJoinStyle* value);
     void (*setEnableAutoSpacing)(Ark_NativePointer node,
                                  const Opt_Boolean* value);
     void (*setTextVerticalAlign)(Ark_NativePointer node,

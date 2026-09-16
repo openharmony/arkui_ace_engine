@@ -3278,6 +3278,13 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     value[0].i32 = ARKUI_TEXT_DATA_DETECTOR_TYPE_URL;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG, &item);
 
+    value[0].f32 = size;
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_STROKE_WIDTH, &item);
+    value[0].u32 = color;
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_STROKE_COLOR, &item);
+    value[0].i32 = OH_ARKUI_STROKE_JOIN_STYLE_ROUND_JOIN;
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_STROKE_JOIN_STYLE, &item);
+
     value[0].i32 = false;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR, &item);
 
@@ -3326,6 +3333,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_HALF_LEADING), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_STROKE_WIDTH), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_STROKE_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_STROKE_JOIN_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_FONT_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_FONT_SIZE), nullptr);
@@ -3356,6 +3366,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), nullptr);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_HALF_LEADING), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_STROKE_WIDTH), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_STROKE_COLOR), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_STROKE_JOIN_STYLE), nullptr);
 
     value[0].i32 = ARKUI_FONT_WEIGHT_W100;
     nodeAPI->setAttribute(rootNode, NODE_IMMUTABLE_FONT_WEIGHT, &item);
@@ -5680,6 +5693,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest038, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_DECORATION, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_CASE, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_CASE, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_STROKE_JOIN_STYLE, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_STROKE_JOIN_STYLE, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_LETTER_SPACING, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_MAX_LINES, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_ALIGN, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
