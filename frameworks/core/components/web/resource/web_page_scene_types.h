@@ -49,12 +49,14 @@ struct PageSceneScope {
 constexpr int32_t PAGE_SCENE_QUERY_SUCCESS = 0;          // Query completed normally
 constexpr int32_t PAGE_SCENE_QUERY_EMPTY_SCRIPT = 1;     // Empty/invalid selector script
 constexpr int32_t PAGE_SCENE_QUERY_EXCEPTION = 2;        // JS execution exception
-constexpr int32_t PAGE_SCENE_QUERY_DOM_PENDING = 3;      // DOM not ready (readyState=loading)
+constexpr int32_t PAGE_SCENE_QUERY_DOM_PENDING = 3;      // observer detected DOM mutation, re-query needed
 
 // MutationObserver timing constants (milliseconds)
 constexpr int32_t PAGE_SCENE_DOM_READY_DELAY_MS = 100;   // Delay after DOMContentLoaded before notifying
 constexpr int32_t PAGE_SCENE_OBSERVER_DEBOUNCE_MS = 500; // Debounce interval for MutationObserver
-constexpr int32_t PAGE_SCENE_OBSERVER_TIMEOUT_MS = 5000; // Auto-disconnect timeout for MutationObserver
+constexpr int32_t PAGE_SCENE_OBSERVER_TIMEOUT_MS = 3500; // Auto-disconnect timeout for MutationObserver
+constexpr int32_t PAGE_SCENE_MAX_REQUERY_COUNT = 5;       // Max re-query attempts after DOM_PENDING
+constexpr int32_t PAGE_SCENE_REQUERY_DELAY_MS = 200;      // Delay before re-query after DOM_PENDING
 
 // Policy defaults (aligned with ArkUI PageSceneRuleManager)
 constexpr int32_t PAGE_SCENE_DEFAULT_MIN_REPORT_INTERVAL_MS = 500;
@@ -112,6 +114,7 @@ struct RuleMatchState {
     int64_t lastReportTimeMs = 0;
     std::set<int32_t> lastMatchedNodeIds;
     int32_t lastMatchedCount = 0;
+    std::string lastEventName;
 };
 
 // ArkWeb-side rule set (distinct from baseline PageSceneRuleSet used by ArkUI host)
