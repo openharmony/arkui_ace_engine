@@ -58,6 +58,7 @@ constexpr size_t SIMPLIFYTREE_WITH_PARAMCONFIG = GET_VISIBLE_WITH_UI_EXTENSION_I
 constexpr size_t SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG = GET_VISIBLE_MIN_OPACITY_INDEX + 1;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
+constexpr size_t SEND_COMMAND_LOG_PREVIEW_LENGTH = 200;
 constexpr size_t MAX_BATCH_SET_TEXT_COUNT = 50;
 constexpr size_t BATCH_ARGUMENT_PAIR_SIZE = 2;
 constexpr size_t MIN_BATCH_SET_TEXT_PARAM_COUNT = 3;
@@ -330,7 +331,11 @@ bool ReadTextFile(const std::string& filePath, std::string& content)
     std::ostringstream buffer;
     buffer << input.rdbuf();
     content = buffer.str();
-    return !content.empty();
+    if (content.empty()) {
+        LOGW("[PageScene] file content is empty, filePath=%{public}s", filePath.c_str());
+        return false;
+    }
+    return true;
 }
 
 void WriteTextFile(const std::string& tag, const std::string& fileNamePrefix, const std::string& content)
@@ -609,6 +614,7 @@ void UiSaService::HandleSendCommand(sptr<IUiContentService> service, std::vector
     if (params.size() == SEND_COMMAND_WITH_NODEID) {
         int32_t id = std::atoi(params[1].c_str());
         std::string command = params[2];
+        // "file" is a reserved SendCommand keyword: command content is read from page_scene_rules.json.
         if (command == "file") {
             std::string commandFromFile = ReadPageSceneRuleJson();
             if (commandFromFile.empty()) {
@@ -616,7 +622,8 @@ void UiSaService::HandleSendCommand(sptr<IUiContentService> service, std::vector
                 return;
             }
             LOGI("[SendCommand] commandFromFile preview=%{private}s, length=%{public}zu",
-                commandFromFile.substr(0, 200).c_str(), commandFromFile.length());
+                commandFromFile.substr(0, SEND_COMMAND_LOG_PREVIEW_LENGTH).c_str(),
+                commandFromFile.length());
             service->SendCommand(id, commandFromFile);
             return;
         }
