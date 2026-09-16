@@ -253,7 +253,7 @@ void AnimatedDrawableDescriptor::CreateAnimator(int32_t nodeId)
     animator->SetIteration(iterations);
     animator->SetFillMode(ToFillMode());
     auto pictureAnimation = std::vector<PictureInfo>();
-    for (uint32_t index = 0; index < GetFrameCount(); ++index) {
+    for (uint32_t index = 0; index < static_cast<int32_t>(durations.size()); ++index) {
         pictureAnimation.emplace_back(
             durations[index] / static_cast<float>(totalDuration), static_cast<int32_t>(index));
     }
