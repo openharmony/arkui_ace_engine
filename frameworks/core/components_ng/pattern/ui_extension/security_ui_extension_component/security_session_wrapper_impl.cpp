@@ -155,8 +155,8 @@ void SecuritySessionWrapperImpl::InitAllCallback()
         return;
     }
     auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
-    foregroundCallback_ =
-        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
+    foregroundCallback_ = [weak = hostPattern_,
+        taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode, int32_t abilityCode) {
         if (errcode != OHOS::Rosen::WSError::WS_OK) {
             taskExecutor->PostTask(
                 [weak, callSessionId] {
