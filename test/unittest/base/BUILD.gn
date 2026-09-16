@@ -86,10 +86,21 @@ ace_unittest("util_test") {
   ]
 }
 
+ace_unittest("shared_image_manager_test") {
+  module_name = "Resource"
+  type = "new"
+  sources = [
+    "shared_image_manager_test.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+  ]
+  deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
+}
+
 group("base_unittest") {
   testonly = true
   deps = [
     ":geometry_test",
+    ":shared_image_manager_test",
     ":util_test",
   ]
 }
