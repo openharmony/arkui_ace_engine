@@ -157,20 +157,12 @@ export class ArkLazyVGridLayoutPeer extends ArkLazyGridLayoutAttributePeer {
         ArkUIGeneratedNativeModule._LazyVGridLayoutAttribute_setColumnsTemplate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColumnsTemplate1Attribute(value: string | ItemFillPolicy | undefined): void {
+    setColumnsTemplate1Attribute(value: ItemFillPolicy | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0 = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof ItemFillPolicy) {
-                thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1 = valueTmpValue as ItemFillPolicy
-                ItemFillPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            }
+            ItemFillPolicy_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -205,7 +197,10 @@ export interface LazyVGridLayoutAttribute extends LazyGridLayoutAttribute {
     setLazyVGridLayoutOptions(): this {
         throw new Error('Unimplemented method setLazyVGridLayoutOptions')
     }
-    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
+    columnsTemplate(value: string | undefined): this {
+        throw new Error('Unimplemented method columnsTemplate')
+    }
+    columnsTemplate(value: ItemFillPolicy | undefined): this {
         throw new Error('Unimplemented method columnsTemplate')
     }
     attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -270,12 +265,12 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutAttributeCompo
         this.applyOptionsFinish('LazyVGridLayoutAttribute');
         return this
     }
-    public columnsTemplate(value: string | ItemFillPolicy | undefined): this {
-        if (value !== undefined && value instanceof string) {
-            this.getPeer()?.setColumnsTemplate0Attribute(value)
-        } else {
-            this.getPeer()?.setColumnsTemplate1Attribute(value)
-        }
+    public columnsTemplate(value: string | undefined): this {
+        this.getPeer()?.setColumnsTemplate0Attribute(value)
+        return this
+    }
+    public columnsTemplate(value: ItemFillPolicy | undefined): this {
+        this.getPeer()?.setColumnsTemplate1Attribute(value)
         return this
     }
     public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {

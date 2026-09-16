@@ -151,22 +151,18 @@ void SetColumnsTemplateImpl(Ark_NativePointer node, const Opt_String* value)
     LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, convValue);
 }
 
-void SetColumnsTemplateUnionImpl(Ark_NativePointer node, const Opt_Union_String_ItemFillPolicy* value)
+void SetColumnsTemplatePolicyImpl(Ark_NativePointer node, const Opt_ItemFillPolicy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnionPtr(
-        value,
-        [frameNode](const Ark_String& value0) {
-            auto convValue = Converter::ConvertArkString(value0);
-            LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, convValue);
-        },
-        [frameNode](const Ark_ItemFillPolicy& value1) {
-            auto result = Converter::ConvertArkPresetFillType(value1.fillType)
-                              .value_or(PresetFillType::BREAKPOINT_DEFAULT);
-            LazyVGridLayoutModelStatic::SetItemFillPolicy(frameNode, result);
-        },
-        [frameNode]() { LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, ""); });
+    auto policy = Converter::GetOptPtr(value);
+    if (!policy) {
+        LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, "");
+        return;
+    }
+    auto result = Converter::ConvertArkPresetFillType(policy->fillType)
+                      .value_or(PresetFillType::BREAKPOINT_DEFAULT);
+    LazyVGridLayoutModelStatic::SetItemFillPolicy(frameNode, result);
 }
 } // namespace LazyVGridLayoutAttributeModifier
 
@@ -190,7 +186,7 @@ const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutStaticModifier()
         LazyVGridLayoutModifier::ConstructImpl,
         LazyVGridLayoutInterfaceModifier::SetLazyVGridLayoutOptionsImpl,
         LazyVGridLayoutAttributeModifier::SetColumnsTemplateImpl,
-        LazyVGridLayoutAttributeModifier::SetColumnsTemplateUnionImpl,
+        LazyVGridLayoutAttributeModifier::SetColumnsTemplatePolicyImpl,
     };
     return &impl;
 }

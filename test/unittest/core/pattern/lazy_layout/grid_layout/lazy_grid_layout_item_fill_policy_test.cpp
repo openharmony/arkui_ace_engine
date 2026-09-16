@@ -258,21 +258,20 @@ HWTEST_F(LazyGridLayoutTest, ResetItemFillPolicyTest005, TestSize.Level1)
     ASSERT_NE(modifier, nullptr);
     ASSERT_NE(modifier->setColumnsTemplate1, nullptr);
     auto nativeNode = reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode_));
-    Opt_Union_String_ItemFillPolicy unionPolicy {};
-    unionPolicy.tag = INTEROP_TAG_OBJECT;
-    unionPolicy.value.selector = 1;
-    unionPolicy.value.value1.fillType.tag = INTEROP_TAG_OBJECT;
-    unionPolicy.value.value1.fillType.value = ARK_PRESET_FILL_TYPE_BREAKPOINT_SM2MD3LG5;
-    modifier->setColumnsTemplate1(nativeNode, &unionPolicy);
+    Opt_ItemFillPolicy policyValue {};
+    policyValue.tag = INTEROP_TAG_OBJECT;
+    policyValue.value.fillType.tag = INTEROP_TAG_OBJECT;
+    policyValue.value.fillType.value = ARK_PRESET_FILL_TYPE_BREAKPOINT_SM2MD3LG5;
+    modifier->setColumnsTemplate1(nativeNode, &policyValue);
     FlushUITasks();
     EXPECT_TRUE(layoutProperty_->GetItemFillPolicy().has_value());
     EXPECT_EQ(pattern_->layoutInfo_->lanes_, 2);
 
     /**
-     * @tc.steps: step2. Pass undefined through the public static columnsTemplate union slot.
+     * @tc.steps: step2. Pass undefined through the public static columnsTemplate policy slot.
      * @tc.expected: policy is cleared and the default "1fr" template is written back.
      */
-    auto undefinedValue = Converter::ArkValue<Opt_Union_String_ItemFillPolicy>();
+    auto undefinedValue = Converter::ArkValue<Opt_ItemFillPolicy>();
     modifier->setColumnsTemplate1(nativeNode, &undefinedValue);
     FlushUITasks();
     EXPECT_FALSE(layoutProperty_->GetItemFillPolicy().has_value());
@@ -362,11 +361,11 @@ HWTEST_F(LazyGridLayoutTest, InvalidFillPolicyTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: StaticColumnsTemplateUnionTest008
- * @tc.desc: AC-4/AC-5. Generated static string and union slots are both registered and handle string templates.
+ * @tc.name: StaticColumnsTemplateOverloadsTest008
+ * @tc.desc: AC-4/AC-5. Generated static string and policy slots are registered and override each other.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, StaticColumnsTemplateUnionTest008, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, StaticColumnsTemplateOverloadsTest008, TestSize.Level1)
 {
     CreateWaterFlow();
     CreateLazyGridLayout();
@@ -391,20 +390,31 @@ HWTEST_F(LazyGridLayoutTest, StaticColumnsTemplateUnionTest008, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->lanes_, 4);
 
     /**
-     * @tc.steps: step2. Set a string through generated union slot 1.
-     * @tc.expected: The string union branch is reachable and renders three lanes.
+     * @tc.steps: step2. Set a policy through generated slot 1.
+     * @tc.expected: The policy replaces the string template and renders two lanes.
      */
-    auto unionString = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr 1fr 1fr");
-    modifier->setColumnsTemplate1(nativeNode, &unionString);
+    Opt_ItemFillPolicy policyValue {};
+    policyValue.tag = INTEROP_TAG_OBJECT;
+    policyValue.value.fillType.tag = INTEROP_TAG_OBJECT;
+    policyValue.value.fillType.value = ARK_PRESET_FILL_TYPE_BREAKPOINT_SM2MD3LG5;
+    modifier->setColumnsTemplate1(nativeNode, &policyValue);
+    FlushUITasks();
+    ASSERT_TRUE(layoutProperty_->GetItemFillPolicy().has_value());
+    EXPECT_FALSE(layoutProperty_->GetColumnsTemplate().has_value());
+    EXPECT_EQ(pattern_->layoutInfo_->lanes_, 2);
+
+    // A null optional policy follows the same reset path as undefined.
+    modifier->setColumnsTemplate1(nativeNode, nullptr);
     FlushUITasks();
     EXPECT_FALSE(layoutProperty_->GetItemFillPolicy().has_value());
-    EXPECT_EQ(layoutProperty_->GetColumnsTemplate().value_or(""), "1fr 1fr 1fr");
-    EXPECT_EQ(pattern_->layoutInfo_->lanes_, 3);
+    EXPECT_EQ(layoutProperty_->GetColumnsTemplate().value_or(""), "1fr");
+    EXPECT_EQ(pattern_->layoutInfo_->lanes_, 1);
 }
 
 /**
  * @tc.name: StaticColumnsTemplatePolicyRecoveryTest015
- * @tc.desc: AC-4/AC-5/AC-9. The union handles invalid or missing fillType and undefined after a string template.
+ * @tc.desc: AC-4/AC-5/AC-9. The policy overload handles invalid or missing fillType and undefined
+ *           after a string template.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyGridLayoutTest, StaticColumnsTemplatePolicyRecoveryTest015, TestSize.Level1)
@@ -417,29 +427,28 @@ HWTEST_F(LazyGridLayoutTest, StaticColumnsTemplatePolicyRecoveryTest015, TestSiz
     ASSERT_NE(modifier, nullptr);
     ASSERT_NE(modifier->setColumnsTemplate1, nullptr);
     auto nativeNode = reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode_));
-    auto unionString = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr 1fr 1fr");
-    modifier->setColumnsTemplate1(nativeNode, &unionString);
+    auto stringValue = Converter::ArkValue<Opt_String>("1fr 1fr 1fr");
+    modifier->setColumnsTemplate0(nativeNode, &stringValue);
     FlushUITasks();
 
     /**
-     * @tc.steps: step1. Set an invalid ItemFillPolicy through generated union slot 1 after a string template.
+     * @tc.steps: step1. Set an invalid ItemFillPolicy through generated policy slot 1 after a string template.
      * @tc.expected: The value is normalized to DEFAULT and renders 2/3/5 lanes at SM/MD/LG.
      */
-    Opt_Union_String_ItemFillPolicy unionPolicy {};
-    unionPolicy.tag = INTEROP_TAG_OBJECT;
-    unionPolicy.value.selector = 1;
-    unionPolicy.value.value1.fillType.tag = INTEROP_TAG_OBJECT;
+    Opt_ItemFillPolicy policyValue {};
+    policyValue.tag = INTEROP_TAG_OBJECT;
+    policyValue.value.fillType.tag = INTEROP_TAG_OBJECT;
     const std::array<int32_t, 3> invalidFillTypes = { -1, 3, 99 };
     for (const auto invalidFillType : invalidFillTypes) {
-        unionPolicy.value.value1.fillType.value = static_cast<Ark_PresetFillType>(invalidFillType);
-        modifier->setColumnsTemplate1(nativeNode, &unionPolicy);
+        policyValue.value.fillType.value = static_cast<Ark_PresetFillType>(invalidFillType);
+        modifier->setColumnsTemplate1(nativeNode, &policyValue);
         FlushUITasks();
         ASSERT_TRUE(layoutProperty_->GetItemFillPolicy().has_value());
         EXPECT_EQ(layoutProperty_->GetItemFillPolicy().value(), PresetFillType::BREAKPOINT_DEFAULT);
         EXPECT_EQ(pattern_->layoutInfo_->lanes_, 2) << "invalidFillType=" << invalidFillType;
     }
-    unionPolicy.value.value1.fillType.tag = INTEROP_TAG_UNDEFINED;
-    modifier->setColumnsTemplate1(nativeNode, &unionPolicy);
+    policyValue.value.fillType.tag = INTEROP_TAG_UNDEFINED;
+    modifier->setColumnsTemplate1(nativeNode, &policyValue);
     FlushUITasks();
     ASSERT_TRUE(layoutProperty_->GetItemFillPolicy().has_value());
     EXPECT_EQ(layoutProperty_->GetItemFillPolicy().value(), PresetFillType::BREAKPOINT_DEFAULT);
@@ -452,10 +461,10 @@ HWTEST_F(LazyGridLayoutTest, StaticColumnsTemplatePolicyRecoveryTest015, TestSiz
     EXPECT_EQ(pattern_->layoutInfo_->lanes_, 5);
 
     /**
-     * @tc.steps: step2. Pass undefined through generated union slot 1.
+     * @tc.steps: step2. Pass undefined through generated policy slot 1.
      * @tc.expected: ItemFillPolicy is cleared and the default single-column template is restored.
      */
-    auto undefinedValue = Converter::ArkValue<Opt_Union_String_ItemFillPolicy>();
+    auto undefinedValue = Converter::ArkValue<Opt_ItemFillPolicy>();
     modifier->setColumnsTemplate1(nativeNode, &undefinedValue);
     FlushUITasks();
     EXPECT_FALSE(layoutProperty_->GetItemFillPolicy().has_value());
@@ -693,12 +702,11 @@ HWTEST_F(LazyGridLayoutTest, RepeatedStaticAllPoliciesAndUndefinedTest014, TestS
         EXPECT_FALSE(layoutProperty_->GetItemFillPolicy().has_value());
         EXPECT_EQ(pattern_->layoutInfo_->lanes_, 3);
 
-        Opt_Union_String_ItemFillPolicy unionPolicy {};
-        unionPolicy.tag = INTEROP_TAG_OBJECT;
-        unionPolicy.value.selector = 1;
-        unionPolicy.value.value1.fillType.tag = INTEROP_TAG_OBJECT;
-        unionPolicy.value.value1.fillType.value = policyCase.arkPolicy;
-        modifier->setColumnsTemplate1(nativeNode, &unionPolicy);
+        Opt_ItemFillPolicy policyValue {};
+        policyValue.tag = INTEROP_TAG_OBJECT;
+        policyValue.value.fillType.tag = INTEROP_TAG_OBJECT;
+        policyValue.value.fillType.value = policyCase.arkPolicy;
+        modifier->setColumnsTemplate1(nativeNode, &policyValue);
         FlushUITasks();
         EXPECT_FALSE(layoutProperty_->GetColumnsTemplate().has_value());
         ASSERT_TRUE(layoutProperty_->GetItemFillPolicy().has_value());
@@ -706,7 +714,7 @@ HWTEST_F(LazyGridLayoutTest, RepeatedStaticAllPoliciesAndUndefinedTest014, TestS
         EXPECT_EQ(pattern_->layoutInfo_->lanes_, policyCase.lanes);
     }
 
-    auto undefinedValue = Converter::ArkValue<Opt_Union_String_ItemFillPolicy>();
+    auto undefinedValue = Converter::ArkValue<Opt_ItemFillPolicy>();
     modifier->setColumnsTemplate1(nativeNode, &undefinedValue);
     FlushUITasks();
     EXPECT_FALSE(layoutProperty_->GetItemFillPolicy().has_value());
