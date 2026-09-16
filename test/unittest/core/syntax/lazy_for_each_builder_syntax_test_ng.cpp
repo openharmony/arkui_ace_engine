@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <optional>
 #include <utility>
 
@@ -57,6 +58,35 @@ public:
     {
         return nullptr;
     }
+};
+
+// UINode whose GetFrameChildByIndex runs a one-shot hook before returning child_, simulating
+// frontend callbacks re-entering LazyForEachBuilder and mutating cachedItems_ mid-iteration.
+class ReentrantMockUINode : public UINode {
+public:
+    explicit ReentrantMockUINode(const std::string& tag = V2::TEXT_ETS_TAG, int32_t nodeId = -1)
+        : UINode(tag, nodeId) {}
+    ~ReentrantMockUINode() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
+        bool addToRenderTree = false) override
+    {
+        if (onGetFrameChildByIndex_) {
+            // One-shot: clear the hook before running it so re-entry cannot fire it recursively.
+            auto hook = onGetFrameChildByIndex_;
+            onGetFrameChildByIndex_ = nullptr;
+            hook();
+        }
+        return child_;
+    }
+
+    std::function<void()> onGetFrameChildByIndex_;
+    RefPtr<UINode> child_;
 };
 }
 
@@ -3042,6 +3072,474 @@ HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeExpiringToCachedTest001, Te
     EXPECT_TRUE(result);
     EXPECT_NE(lazyForEachBuilder->cachedItems_[0].second, nullptr);
     EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+}
+
+/**
+ * @tc.name: SetActiveChildRangeWrapAroundRangeTest001
+ * @tc.desc: Test SetActiveChildRange with wrap-around active range (start > end, loop mode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeWrapAroundRangeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Fill cached items 0..6, total count is 7
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    for (int32_t i = 0; i < 7; i++) {
+        lazyForEachBuilder->cachedItems_[i] = LazyForEachChild("k" + std::to_string(i),
+            AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1000 + i));
+    }
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange with wrap-around range [5, 1]
+     * @tc.expected: indices 0, 1, 5, 6 are in range and stay cached; 2, 3, 4 move to expiringItem_
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(5, 1);
+    EXPECT_TRUE(result);  // needBuild = true, out-of-range nodes moved
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 7);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k2"), 0U);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k4"), 0U);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[0].second, nullptr);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[1].second, nullptr);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[5].second, nullptr);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[6].second, nullptr);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[2].second, nullptr);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[3].second, nullptr);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[4].second, nullptr);
+}
+
+/**
+ * @tc.name: SetActiveChildRangeIndexBeyondCountTest001
+ * @tc.desc: Test SetActiveChildRange treats index >= total count as out of range even if covered by range
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeIndexBeyondCountTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Cached items {0, 3}, total count from OnGetTotalCount is 2
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", AceType::MakeRefPtr<MockUINode>());
+    lazyForEachBuilder->cachedItems_[3] = LazyForEachChild("k3", AceType::MakeRefPtr<MockUINode>());
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(0, 3) whose interval covers index 3, but count is 2
+     * @tc.expected: index 3 is out of range because 3 >= count, moved to expiringItem_; index 0 stays
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 3);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 1);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k3"), 0U);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[0].second, nullptr);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[3].second, nullptr);
+}
+
+/**
+ * @tc.name: SetActiveChildRangeSingleSlotBoundaryTest001
+ * @tc.desc: Test SetActiveChildRange boundary equality when start == end == index
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeSingleSlotBoundaryTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Cached items {0, 1, 2}, total count is 3
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    for (int32_t i = 0; i < 3; i++) {
+        lazyForEachBuilder->cachedItems_[i] = LazyForEachChild("k" + std::to_string(i),
+            AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1000 + i));
+    }
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(1, 1): only index == start == end is in range
+     * @tc.expected: index 1 stays cached, indices 0 and 2 move to expiringItem_
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(1, 1);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 2);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k0"), 0U);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k2"), 0U);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[1].second, nullptr);
+}
+
+/**
+ * @tc.name: SetActiveChildRangeNullNodeOutOfRangeTest001
+ * @tc.desc: Test SetActiveChildRange out-of-range null-node entries: erased only when key not expiring
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeNullNodeOutOfRangeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Indices 0..4 in range with nodes; index 5 null without expiring entry,
+     *            index 6 null with expiring entry
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    for (int32_t i = 0; i < 5; i++) {
+        lazyForEachBuilder->cachedItems_[i] = LazyForEachChild("k" + std::to_string(i),
+            AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1000 + i));
+    }
+    lazyForEachBuilder->cachedItems_[5] = LazyForEachChild("k5", nullptr);
+    lazyForEachBuilder->cachedItems_[6] = LazyForEachChild("k6", nullptr);
+    lazyForEachBuilder->expiringItem_["k6"] = LazyForEachCacheChild(6, AceType::MakeRefPtr<MockUINode>());
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(0, 4): indices 5 and 6 out of range with null node
+     * @tc.expected: entry 5 erased (key not in expiringItem_), entry 6 kept (key in expiringItem_),
+     *               no needBuild from the null-node branch
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 4);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 6);  // 0..4 + 6, entry 5 erased
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.count(5), 0U);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[6].second, nullptr);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k6"), 0U);  // expiring entry untouched
+}
+
+/**
+ * @tc.name: SetActiveChildRangeDuplicateKeyToExpiringTest001
+ * @tc.desc: Test SetActiveChildRange moving an out-of-range node whose key already exists in expiringItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeDuplicateKeyToExpiringTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Out-of-range cached node with key "dupKey"; expiringItem_ already holds "dupKey"
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto nodeA = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    nodeA->children_.push_back(AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>()));
+    auto nodeB = AceType::MakeRefPtr<MockUINode>();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("dupKey", nodeA);
+    lazyForEachBuilder->expiringItem_["dupKey"] = LazyForEachCacheChild(9, nodeB);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(1, 5): index 0 out of range, try_emplace fails
+     * @tc.expected: expiringItem_ keeps the old nodeB entry, cached entry becomes a null shell,
+     *               nodeA goes through ProcessOffscreenNode, needBuild = true
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(1, 5);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 1);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_["dupKey"].second, nodeB);  // old entry preserved
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, nullptr);        // null shell kept
+}
+
+/**
+ * @tc.name: SetActiveChildRangeNullFrameNodeInRangeTest001
+ * @tc.desc: Test SetActiveChildRange in-range node whose GetFrameChildByIndex returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeNullFrameNodeInRangeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Cached node is a MockUINode whose GetFrameChildByIndex returns nullptr
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto mockNode = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1001);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", mockNode);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(0, 0): in range, ActivateChild gets null frameNode
+     * @tc.expected: no crash, no SetActive call, node stays in cachedItems_, needBuild = false
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 0);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, mockNode);
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+}
+
+/**
+ * @tc.name: SetActiveChildRangeRestoreMissAndNullTest001
+ * @tc.desc: Test SetActiveChildRange restoring an in-range null entry whose key is missing or null in expiring
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeRestoreMissAndNullTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. In-range null entry, key not in expiringItem_
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(0, 0): key missing in expiringItem_
+     * @tc.expected: early return, entry stays null, needBuild still true
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 0);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, nullptr);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 1);
+
+    /**
+     * @tc.steps: step4. Put a null-node entry into expiringItem_ and call again
+     * @tc.expected: found but null node, early return, nothing restored or erased
+     */
+    lazyForEachBuilder->expiringItem_["k0"] = LazyForEachCacheChild(0, nullptr);
+    result = lazyForEachBuilder->SetActiveChildRange(0, 0);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, nullptr);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k0"), 0U);  // null entry not consumed
+}
+
+/**
+ * @tc.name: SetActiveChildRangeReentrantEraseCurrentTest001
+ * @tc.desc: Test SetActiveChildRange when reentrant callback erases the entry being processed
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeReentrantEraseCurrentTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Out-of-range items; the node at index 1 erases its own cachedItems_ entry
+     *            from inside GetFrameChildByIndex (simulating a data-change reentry)
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", AceType::MakeRefPtr<MockUINode>());
+    lazyForEachBuilder->cachedItems_[2] = LazyForEachChild("k2", AceType::MakeRefPtr<MockUINode>());
+    auto reentrantNode = AceType::MakeRefPtr<ReentrantMockUINode>(V2::TEXT_ETS_TAG, 1001);
+    reentrantNode->child_ = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    reentrantNode->onGetFrameChildByIndex_ = [builderRaw = AceType::RawPtr(lazyForEachBuilder)]() {
+        if (builderRaw) {
+            builderRaw->cachedItems_.erase(1);
+        }
+    };
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("k1", reentrantNode);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(5, 6): all indices out of range
+     * @tc.expected: no crash; the erased entry's node is still moved into expiringItem_ alive,
+     *               no null shell is written back, iteration continues to index 2
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(5, 6);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.count(1), 0U);            // entry stays erased
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, nullptr);      // moved out normally
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[2].second, nullptr);      // loop reached index 2
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_["k1"].second, reentrantNode);  // node kept alive
+}
+
+/**
+ * @tc.name: SetActiveChildRangeReentrantEraseLaterEntryTest001
+ * @tc.desc: Test SetActiveChildRange when reentrant callback erases a later entry
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeReentrantEraseLaterEntryTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. In-range items; the node at index 0 erases entry 2 from GetFrameChildByIndex
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1003);
+    auto node2 = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1004);
+    auto reentrantNode = AceType::MakeRefPtr<ReentrantMockUINode>(V2::TEXT_ETS_TAG, 1001);
+    reentrantNode->child_ = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    reentrantNode->onGetFrameChildByIndex_ = [builderRaw = AceType::RawPtr(lazyForEachBuilder)]() {
+        if (builderRaw) {
+            builderRaw->cachedItems_.erase(2);
+        }
+    };
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", reentrantNode);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("k1", node1);
+    lazyForEachBuilder->cachedItems_[2] = LazyForEachChild("k2", node2);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(0, 2): all in range, entry 2 erased during activation of 0
+     * @tc.expected: no crash; loop re-locates via upper_bound, processes index 1, ends before erased 2
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 2);
+    EXPECT_FALSE(result);  // activation path only, no needBuild
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.count(2), 0U);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, reentrantNode);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[1].second, node1);
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+}
+
+/**
+ * @tc.name: SetActiveChildRangeReentrantInsertSkippedTest001
+ * @tc.desc: Test SetActiveChildRange skips entries inserted at or below the current index during reentry
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeReentrantInsertSkippedTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Items {1, 2}; the node at index 1 inserts a null entry at new index 0 during reentry
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node2 = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1003);
+    auto reentrantNode = AceType::MakeRefPtr<ReentrantMockUINode>(V2::TEXT_ETS_TAG, 1001);
+    reentrantNode->child_ = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    reentrantNode->onGetFrameChildByIndex_ = [builderRaw = AceType::RawPtr(lazyForEachBuilder)]() {
+        if (builderRaw) {
+            builderRaw->cachedItems_[0] = LazyForEachChild("k0", nullptr);
+        }
+    };
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("k1", reentrantNode);
+    lazyForEachBuilder->cachedItems_[2] = LazyForEachChild("k2", node2);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(1, 1): index 1 in range, index 2 out of range by count
+     * @tc.expected: no crash; the entry inserted at index 0 (< current index 1) is not visited in this
+     *               pass and stays a null shell (had it been visited it would have been erased)
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(1, 1);
+    EXPECT_TRUE(result);  // needBuild from moving index 2 out
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 3);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_.count(0), 0U);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, nullptr);        // inserted entry skipped
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[1].second, reentrantNode);  // activated, stays
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[2].second, nullptr);        // moved to expiring
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k2"), 0U);
+}
+
+/**
+ * @tc.name: SetActiveChildRangeReentrantInsertVisitedTest001
+ * @tc.desc: Test SetActiveChildRange still processes entries inserted above the current index during reentry
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeReentrantInsertVisitedTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Items {0, 1, 3}; the node at index 0 inserts a node entry at index 2 during reentry
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1003);
+    auto node3 = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1004);
+    auto insertedNode = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1005);
+    auto reentrantNode = AceType::MakeRefPtr<ReentrantMockUINode>(V2::TEXT_ETS_TAG, 1001);
+    reentrantNode->child_ = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    reentrantNode->onGetFrameChildByIndex_ = [builderRaw = AceType::RawPtr(lazyForEachBuilder),
+                                                insertedNode]() {
+        if (builderRaw) {
+            builderRaw->cachedItems_[2] = LazyForEachChild("k2", insertedNode);
+        }
+    };
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", reentrantNode);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("k1", node1);
+    lazyForEachBuilder->cachedItems_[3] = LazyForEachChild("k3", node3);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange(0, 1): indices 0, 1 in range; 2 (inserted) and 3 out
+     * @tc.expected: the entry inserted at index 2 (> current index 0) is processed in the same pass
+     *               and moved to expiringItem_ with index 3
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 1);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 2);
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k2"), 0U);  // inserted entry visited
+    EXPECT_NE(lazyForEachBuilder->expiringItem_.count("k3"), 0U);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, reentrantNode);  // activated, stays
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[1].second, node1);
+}
+
+/**
+ * @tc.name: MoveChildToExpiringEntryReplacedTest001
+ * @tc.desc: Test MoveChildToExpiring keeps the cached entry when it no longer refers to the moved node
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, MoveChildToExpiringEntryReplacedTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Entry at index 0 holds nodeB; move nodeA into expiring under the same key
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto nodeA = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1001);
+    auto nodeB = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1002);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", nodeB);
+
+    /**
+     * @tc.steps: step3. Call MoveChildToExpiring with nodeA while the entry holds nodeB
+     * @tc.expected: nodeA lands in expiringItem_, the cached entry keeps nodeB (not nulled)
+     */
+    lazyForEachBuilder->MoveChildToExpiring(0, "k0", nodeA);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_["k0"].second, nodeA);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, nodeB);
+}
+
+/**
+ * @tc.name: RestoreChildFromExpiringEntryReplacedTest001
+ * @tc.desc: Test RestoreChildFromExpiring skips write-back when entry is non-null or missing
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, RestoreChildFromExpiringEntryReplacedTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Entry at index 0 holds nodeB; expiringItem_ holds nodeA under the same key
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto nodeA = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1001);
+    auto nodeB = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1002);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("k0", nodeB);
+    lazyForEachBuilder->expiringItem_["k0"] = LazyForEachCacheChild(0, nodeA);
+
+    /**
+     * @tc.steps: step3. Restore while the cached entry is non-null
+     * @tc.expected: expiring entry consumed, cached entry keeps nodeB (not overwritten)
+     */
+    lazyForEachBuilder->RestoreChildFromExpiring(0, "k0");
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 0U);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_[0].second, nodeB);
+
+    /**
+     * @tc.steps: step4. Restore when the cached entry does not exist at all
+     * @tc.expected: no crash, expiring entry consumed, no entry created
+     */
+    lazyForEachBuilder->expiringItem_["k9"] = LazyForEachCacheChild(9, nodeA);
+    lazyForEachBuilder->RestoreChildFromExpiring(9, "k9");
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 0U);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.count(9), 0U);
 }
 
 /**

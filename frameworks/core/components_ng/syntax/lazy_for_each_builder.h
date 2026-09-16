@@ -348,6 +348,9 @@ private:
     void RecycleItemsOutOfBoundary();
     void RecycleChildByIndex(int32_t index);
     void CollectNodesForDelayedRelease(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
+    void ActivateChild(const RefPtr<UINode>& node);
+    void MoveChildToExpiring(int32_t index, const std::string& key, const RefPtr<UINode>& node);
+    void RestoreChildFromExpiring(int32_t index, const std::string& key);
 
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
