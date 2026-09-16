@@ -1393,6 +1393,8 @@ public:
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
+    std::vector<uint8_t> SerializeWebState();
+    bool RestoreWebState(const std::vector<uint8_t>& state);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

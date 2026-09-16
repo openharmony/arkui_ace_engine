@@ -10018,6 +10018,50 @@ void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOptimizeParserBudget");
 }
 
+std::vector<uint8_t> WebDelegate::SerializeWebState()
+{
+    std::vector<uint8_t> result;
+    auto context = context_.Upgrade();
+    if (!context) {
+        return result;
+    }
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "SerializeWebState WebId %{public}d", delegate->nweb_->GetWebId());
+                result = delegate->nweb_->SerializeWebState();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSerializeWebState");
+    return result;
+}
+
+bool WebDelegate::RestoreWebState(const std::vector<uint8_t>& state)
+{
+    bool result = false;
+    auto context = context_.Upgrade();
+    if (!context) {
+        return result;
+    }
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result, &state]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "RestoreWebState WebId %{public}d", delegate->nweb_->GetWebId());
+                result = delegate->nweb_->RestoreWebState(state);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRestoreWebState");
+    return result;
+}
+
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
 {
     auto context = context_.Upgrade();
