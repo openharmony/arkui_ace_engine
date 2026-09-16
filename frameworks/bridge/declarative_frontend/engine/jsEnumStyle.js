@@ -2988,17 +2988,7 @@ class NavPathStack {
     if (ret) {
       return;
     }
-    // find in pop array
-    info.index = -1;
-    info.navDestinationId = undefined;
-    for (let i = this.popArray.length - 1; i >= 0; i--) {
-      if (info.name === this.popArray[i].name) {
-        let infoFind = this.popArray.splice(i, 1);
-        info.index = infoFind[0].index;
-        info.navDestinationId = infoFind[0].navDestinationId;
-        break;
-      }
-    }
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
