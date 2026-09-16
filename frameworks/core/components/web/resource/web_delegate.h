@@ -1297,6 +1297,7 @@ public:
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled);
+    void UpdateTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled);
     void UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition);
     void UpdateGestureFocusMode(const GestureFocusMode& mode);
     void UpdateNativeEmbedRuleTag(const std::string& tag);

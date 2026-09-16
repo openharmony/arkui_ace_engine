@@ -4933,6 +4933,25 @@ void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetCssDisplayChangeEnabled");
 }
 
+void WebDelegate::UpdateTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isTransformRotateAndSkewEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetTransformRotateAndSkewEnabled(isTransformRotateAndSkewEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetTransformRotateAndSkewEnabled");
+}
+
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag)
 {
     auto context = context_.Upgrade();

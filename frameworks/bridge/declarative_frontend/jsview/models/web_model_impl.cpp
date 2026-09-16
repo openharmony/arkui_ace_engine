@@ -639,6 +639,13 @@ void WebModelImpl::SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
     webComponent->SetCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
 }
 
+void WebModelImpl::SetTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetTransformRotateAndSkewEnabled(isTransformRotateAndSkewEnabled);
+}
+
 void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
