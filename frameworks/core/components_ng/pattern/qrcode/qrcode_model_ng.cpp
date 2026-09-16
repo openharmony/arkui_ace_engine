@@ -42,11 +42,6 @@ void QRCodeModelNG::Create(const std::string& value)
         pros->ResetQRBackgroundColorSetByUser();
     }
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
-    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        auto qrcodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
-        CHECK_NULL_VOID(qrcodeTheme);
-        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrcodeTheme->GetBackgroundColor());
-    }
 }
 
 void QRCodeModelNG::SetQRCodeColor(const Color& color)
