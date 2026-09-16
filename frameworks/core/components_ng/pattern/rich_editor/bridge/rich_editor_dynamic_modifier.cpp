@@ -895,6 +895,29 @@ void ResetRichEditorOnDidChange(ArkUINodeHandle node)
     RichEditorModelNG::SetOnDidChange(frameNode, nullptr);
 }
 
+void SetRichEditorInputFilter(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string inputFilter(value ? value : "");
+    RichEditorModelNG::SetInputFilter(frameNode, inputFilter);
+}
+
+ArkUI_CharPtr GetRichEditorInputFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    strValue = RichEditorModelNG::GetInputFilter(frameNode);
+    return strValue.c_str();
+}
+
+void ResetRichEditorInputFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetInputFilter(frameNode);
+}
+
 void SetRichEditorNapiOnContentScroll(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2231,6 +2254,27 @@ void ResetRichEditorNapiOnDidChange(ArkUINodeHandle node)
     RichEditorModelNG::SetOnStyledStringDidChange(frameNode, nullptr);
 }
 
+void SetRichEditorNapiOnInputFilterError(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onInputFilterError = [extraParam](const std::u16string& str) {
+        ArkUINodeEvent event = CreateArkUINodeEvent(TEXT_INPUT, extraParam);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        event.textInputEvent.subKind = ON_RICH_EDITOR_ON_INPUT_FILTER_ERROR;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        SendArkUISyncEvent(&event);
+    };
+    RichEditorModelNG::SetInputFilterError(frameNode, std::move(onInputFilterError));
+}
+
+void ResetRichEditorNapiOnInputFilterError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetInputFilterError(frameNode, nullptr);
+}
+
 void* GetEventSetHandler(uint32_t kind)
 {
     static const ComponentAsyncEventHandler richEditorNodeAsyncEventHandlers[] = {
@@ -2243,6 +2287,7 @@ void* GetEventSetHandler(uint32_t kind)
         NG::SetRichEditorNapiOnCopy,
         NG::SetRichEditorNapiOnWillChange,
         NG::SetRichEditorNapiOnDidChange,
+        NG::SetRichEditorNapiOnInputFilterError,
         NG::SetRichEditorNapiOnContentScroll,
         NG::SetRichEditorNapiOnContentSizeChange,
     };
@@ -2265,6 +2310,7 @@ void* GetEventResetHandler(uint32_t kind)
         NG::ResetRichEditorOnCopy,
         NG::ResetRichEditorNapiOnWillChange,
         NG::ResetRichEditorNapiOnDidChange,
+        NG::ResetRichEditorNapiOnInputFilterError,
         NG::ResetRichEditorOnContentScroll,
         NG::ResetRichEditorOnContentSizeChange,
     };
@@ -2585,6 +2631,9 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
             .resetRichEditorOnWillChange = nullptr,
             .setRichEditorOnDidChange = nullptr,
             .resetRichEditorOnDidChange = nullptr,
+            .setRichEditorInputFilter = nullptr,
+            .getRichEditorInputFilter = nullptr,
+            .resetRichEditorInputFilter = nullptr,
             .setRichEditorNapiOnContentScroll = nullptr,
             .resetRichEditorOnContentScroll = nullptr,
             .setRichEditorNapiOnContentSizeChange = nullptr,
@@ -2782,6 +2831,9 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .resetRichEditorOnWillChange = ResetRichEditorOnWillChange,
         .setRichEditorOnDidChange = SetRichEditorOnDidChange,
         .resetRichEditorOnDidChange = ResetRichEditorOnDidChange,
+        .setRichEditorInputFilter = SetRichEditorInputFilter,
+        .getRichEditorInputFilter = GetRichEditorInputFilter,
+        .resetRichEditorInputFilter = ResetRichEditorInputFilter,
         .setRichEditorNapiOnContentScroll = SetRichEditorNapiOnContentScroll,
         .resetRichEditorOnContentScroll = ResetRichEditorOnContentScroll,
         .setRichEditorNapiOnContentSizeChange = SetRichEditorNapiOnContentSizeChange,

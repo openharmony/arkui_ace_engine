@@ -6042,6 +6042,32 @@ void ResetRichEditorHorizontalScrolling(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorHorizontalScrolling(node->uiNodeHandle);
 }
 
+int32_t SetRichEditorInputFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorInputFilter(
+        node->uiNodeHandle, itemString);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetRichEditorInputFilter(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_attributeItem.string = fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorInputFilter(
+        node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+void ResetRichEditorInputFilter(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorInputFilter(node->uiNodeHandle);
+}
+
 int32_t SetRichEditorBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);

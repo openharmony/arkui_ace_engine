@@ -565,7 +565,18 @@ void StyledStringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isU
         curStyledString->BindWithSpans(updateSpans);
         curStyledString->NotifySpanWatcher();
     } else {
-        curStyledString->ReplaceSpanString(start, length, styledString);
+        // re-filter: apply inputFilter to undo/redo content (consistent with TextInput)
+        // Skip copy when no filter is active — preserves original behavior (R17 safe)
+        auto filter = pattern->GetActiveFilter();
+        if (filter.empty()) {
+            curStyledString->ReplaceSpanString(start, length, styledString);
+        } else {
+            // FilterStyledStringBeforeInsert creates a deep copy internally,
+            // protecting the record's styledStringAfter from modification
+            RefPtr<SpanString> filtered = styledString;
+            pattern->FilterStyledStringBeforeInsert(filtered);
+            curStyledString->ReplaceSpanString(start, length, filtered);
+        }
     }
 }
 
