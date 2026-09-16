@@ -19,6 +19,7 @@
 #include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/common/ime/text_input_filter.h"
 
 #include <chrono>
 #include <cstddef>
@@ -248,6 +249,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
         }
         subValue = value->GetSubSpanString(0, subLength);
     }
+    IF_TRUE(hasActiveFilter_, FilterStyledStringBeforeInsert(subValue));
     IF_TRUE(IsPreviewTextInputting() && !previewTextRecord_.previewTextExiting, NotifyExitTextPreview(true));
     auto length = styledString_->GetLength();
     UndoRedoRecord record;
@@ -276,9 +278,20 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 
 void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems)
 {
+    std::u16string oldText;
+    if (hasActiveFilter_) {
+        oldText = textForDisplay_;
+    }
     SetSpanItemChildren(spanItems);
     ProcessStyledString();
     UpdateLpxUnitFlag();
+    if (hasActiveFilter_ && !isFiltering_ && styledString_ &&
+        styledString_->GetLength() >= static_cast<int32_t>(oldText.length()) &&
+        !IsPreviewTextInputting() && filterManager_.IsAnchoredFilter()) {
+        isFiltering_ = true;
+        FilterInitializeText(oldText);
+        isFiltering_ = false;
+    }
 }
 
 void RichEditorPattern::ProcessStyledString()
@@ -438,8 +451,8 @@ void RichEditorPattern::HandleStyledStringInsertion(RefPtr<SpanString> insertSty
     host->MarkModifyDone();
 }
 
-void RichEditorPattern::InsertValueInStyledString(
-    const std::u16string& insertValue, bool shouldCommitInput, bool isPaste)
+void RichEditorPattern::InsertValueInStyledString(const std::u16string& insertValue,
+    bool shouldCommitInput, bool isPaste, bool preFiltered)
 {
     CHECK_NULL_VOID(styledString_);
     IF_TRUE(shouldCommitInput && previewTextRecord_.IsValid(), FinishTextPreviewInner());
@@ -460,26 +473,21 @@ void RichEditorPattern::InsertValueInStyledString(
         IF_TRUE(!shouldCommitInput, undoManager_->RecordPreviewInputtingStart(changeStart, changeLength));
     }
     auto subValue = insertValue;
+    auto subWasNonEmpty = !subValue.empty();
+    if (!preFiltered && hasActiveFilter_ && (shouldCommitInput || !IsPreviewTextInputting())) {
+        FilterWithInputFilter(subValue);
+        if (subWasNonEmpty && subValue.empty()) {
+            return;
+        }
+    }
     if (!ProcessTextTruncationOperation(subValue, shouldCommitInput)) {
         return;
     }
-    auto needReplaceInTextPreview = (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) &&
-                               previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start > 0;
-    if (needReplaceInTextPreview) {
-        changeStart= previewTextRecord_.replacedRange.start;
-        changeLength = previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start;
-    }
+    auto needReplaceInTextPreview = GetPreviewReplaceRange(changeStart, changeLength);
     UndoRedoRecord record;
     bool isPreventChange = false;
-    auto insertStyledString = styleManager_->CreateStyledStringByTypingStyle(subValue, styledString_, changeStart, changeLength);
-    if (insertStyledString) {
-        undoManager_->ApplyOperationToRecord(changeStart, changeLength, insertStyledString, record);
-    } else {
-        undoManager_->ApplyOperationToRecord(changeStart, changeLength, subValue, record);
-    }
-    isPreventChange = !BeforeStyledStringChange(record);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "InsertValueInSS isPreventChange=%{public}d, needReplacePreviewText=%{public}d",
-        isPreventChange, previewTextRecord_.needReplacePreviewText);
+    RefPtr<SpanString> insertStyledString;
+    PrepareInsertRecord(insertStyledString, subValue, changeStart, changeLength, record, isPreventChange);
     if (isPreventChange && !previewTextRecord_.needReplacePreviewText) {
         IF_TRUE(shouldCommitInput, undoManager_->ClearPreviewInputRecord());
         return;
@@ -708,6 +716,7 @@ void RichEditorPattern::AddPlaceholderSpan(const BuilderSpanOptions& options, bo
     TextChangeReason reason)
 {
     ACE_UINODE_TRACE(GetHost());
+    CHECK_NULL_VOID(!hasActiveFilter_ || FilterNonCharContent());
     if (!restoreBuilderSpan || !options.customNode) {
         auto textOptions = TextSpanOptions{ .offset = options.offset, .value = u" " };
         textOptions.optionSource = OptionSource::UNDO_REDO;
@@ -1163,6 +1172,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, TextCha
     int32_t index, bool updateCaret)
 {
     ACE_UINODE_TRACE(GetHost());
+    CHECK_NULL_RETURN(!hasActiveFilter_ || FilterNonCharContent(), -1);
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddImageSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
@@ -1410,6 +1420,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     TextChangeReason reason)
 {
     ACE_UINODE_TRACE(GetHost());
+    CHECK_NULL_RETURN(!hasActiveFilter_ || FilterNonCharContent(), -1);
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddPlaceholderSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
@@ -1575,6 +1586,14 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddTextSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
+    // re-filter: apply inputFilter BEFORE truncation (spec R-8: inputFilter → maxLength)
+    auto wasNonEmpty = !options.value.empty();
+    if (hasActiveFilter_) {
+        FilterWithInputFilter(options.value);
+    }
+    if (wasNonEmpty && options.value.empty()) {
+        return -1;
+    }
     auto length = CalculateTruncationLength(options.value, maxLength_.value_or(INT_MAX) - GetTextContentLength());
     if (length == 0) {
         return -1;
@@ -1594,18 +1613,7 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
     record.addText = options.value;
     RichEditorChangeValue changeValue(reason);
     bool isUndoRedo = options.optionSource == OptionSource::UNDO_REDO;
-    auto needUpdateUrlColor = options.urlAddress.has_value() && !options.urlAddress.value().empty()
-        && options.useThemeFontColor;
-    if (needUpdateUrlColor && options.style.has_value()) {
-        auto urlSpanColor = GetUrlSpanColor();
-        options.style.value().SetTextColor(urlSpanColor);
-        if (options.useThemeDecorationColor) {
-            options.style.value().SetTextDecorationColor(urlSpanColor);
-        }
-        if (options.strokeColorFollowFontColor) {
-            options.style.value().SetStrokeColor(urlSpanColor);
-        }
-    }
+    UpdateUrlSpanColorIfNeeded(options);
     CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
     ClearRedoOperationRecords();
     record.afterCaretPosition = record.beforeCaretPosition + static_cast<int32_t>(options.value.length());
@@ -1616,6 +1624,45 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
         AfterContentChange(changeValue);
     }
     return ret;
+}
+
+void RichEditorPattern::UpdateUrlSpanColorIfNeeded(TextSpanOptions& options)
+{
+    auto needUpdateUrlColor = options.urlAddress.has_value() && !options.urlAddress.value().empty()
+        && options.useThemeFontColor;
+    if (needUpdateUrlColor && options.style.has_value()) {
+        auto urlSpanColor = GetUrlSpanColor();
+        StyleManager::UpdateUrlSpanColor(options.style.value(), urlSpanColor,
+            options.useThemeDecorationColor, options.strokeColorFollowFontColor);
+    }
+}
+
+bool RichEditorPattern::GetPreviewReplaceRange(int32_t& start, int32_t& length)
+{
+    auto needReplace = (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) &&
+        previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start > 0;
+    if (needReplace) {
+        start = previewTextRecord_.replacedRange.start;
+        length = previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start;
+    }
+    return needReplace;
+}
+
+void RichEditorPattern::PrepareInsertRecord(RefPtr<SpanString>& insertStyledString,
+    const std::u16string& subValue, int32_t changeStart, int32_t changeLength,
+    UndoRedoRecord& record, bool& isPreventChange)
+{
+    insertStyledString = styleManager_->CreateStyledStringByTypingStyle(
+        subValue, styledString_, changeStart, changeLength);
+    if (insertStyledString) {
+        undoManager_->ApplyOperationToRecord(changeStart, changeLength, insertStyledString, record);
+    } else {
+        undoManager_->ApplyOperationToRecord(changeStart, changeLength, subValue, record);
+    }
+    isPreventChange = !BeforeStyledStringChange(record);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "InsertValueInSS isPreventChange=%{public}d, needReplacePreviewText=%{public}d",
+        isPreventChange, previewTextRecord_.needReplacePreviewText);
 }
 
 int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
@@ -1953,6 +2000,7 @@ void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::op
 int32_t RichEditorPattern::AddSymbolSpan(SymbolSpanOptions options, TextChangeReason reason, bool isPaste, int32_t index)
 {
     ACE_UINODE_TRACE(GetHost());
+    CHECK_NULL_RETURN(!hasActiveFilter_ || FilterNonCharContent(), -1);
     auto envFontScale = GetEnvFontScaleFromLayout();
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX) - 1) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddSymbolSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
@@ -5631,9 +5679,10 @@ void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& span
     InsertStyledString(spanString, caretPosition_, true);
 }
 
-void RichEditorPattern::InsertStyledString(const RefPtr<SpanString>& spanString, int32_t insertIndex, bool updateCaret)
+void RichEditorPattern::InsertStyledString(RefPtr<SpanString> spanString, int32_t insertIndex, bool updateCaret)
 {
     CHECK_NULL_VOID(spanString && styledString_);
+    IF_TRUE(hasActiveFilter_, FilterStyledStringBeforeInsert(spanString));
     int32_t changeStart = insertIndex;
     int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
@@ -5662,9 +5711,10 @@ void RichEditorPattern::InsertStyledString(const RefPtr<SpanString>& spanString,
     AfterStyledStringChange(changeStart, changeLength, subSpanString->GetU16string());
 }
 
-void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy)
+void RichEditorPattern::HandleOnDragInsertStyledString(RefPtr<SpanString> spanString, bool isCopy)
 {
     CHECK_NULL_VOID(spanString && styledString_);
+    IF_TRUE(hasActiveFilter_, FilterStyledStringBeforeInsert(spanString));
     int currentCaretPosition = caretPosition_;
     auto strLength = spanString->GetLength();
     insertValueLength_ = strLength;
@@ -6944,6 +6994,152 @@ void RichEditorPattern::InsertValueByOperationType(const std::u16string& insertV
     ProcessInsertValue(insertValue, operationType, true);
 }
 
+std::u16string RichEditorPattern::GetActiveFilter()
+{
+    CHECK_NULL_RETURN(isSpanStringMode_, u"");
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, u"");
+    auto inputFilter = layoutProperty->GetInputFilter();
+    CHECK_NULL_RETURN(inputFilter.has_value() && !inputFilter.value().empty(), u"");
+    return UtfUtils::Str8ToStr16(inputFilter.value());
+}
+
+std::function<bool(const std::u16string&)> RichEditorPattern::MakeFilterErrorHandler()
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    return [eventHub](const std::u16string& error) -> bool {
+        eventHub->FireOnInputFilterError(error);
+        return true;
+    };
+}
+
+bool RichEditorPattern::PrepareFilter(std::function<bool(const std::u16string&)>& onError)
+{
+    if (!filterErrorHandler_) {
+        filterErrorHandler_ = MakeFilterErrorHandler();
+    }
+    onError = filterErrorHandler_;
+    CHECK_NULL_RETURN(onError, false);
+    if (filterDirty_) {
+        auto filter = GetActiveFilter();
+        if (filter.empty()) {
+            filterManager_.SetFilter(u"");
+            filterDirty_ = false;
+            return false;
+        }
+        filterManager_.SetFilter(filter);
+        filterDirty_ = false;
+    }
+    return true;
+}
+
+void RichEditorPattern::FilterWithInputFilter(std::u16string& text)
+{
+    std::function<bool(const std::u16string&)> onError;
+    CHECK_NULL_VOID(PrepareFilter(onError));
+    filterManager_.FilterText(text, onError);
+}
+
+bool RichEditorPattern::FilterInitializeText(const std::u16string& oldText)
+{
+    std::function<bool(const std::u16string&)> onError;
+    CHECK_NULL_RETURN(PrepareFilter(onError), false);
+    auto styledString = GetStyledString();
+    CHECK_NULL_RETURN(styledString, false);
+    std::u16string originalContent = styledString->GetU16string();
+    CHECK_NULL_RETURN(!originalContent.empty(), false);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "FilterInitText len=%{public}zu, isFiltering=%{public}d", originalContent.length(), isFiltering_);
+    IF_TRUE(IsPreviewTextInputting() && !previewTextRecord_.previewTextExiting, NotifyExitTextPreview(true));
+    auto lenBefore = originalContent.length();
+    std::u16string testContent = originalContent;
+    auto noopOnError = [](const std::u16string&) -> bool { return true; };
+    filterManager_.FilterText(testContent, noopOnError);
+    if (testContent.empty() && !oldText.empty() &&
+        TryRestoreFilteredContent(originalContent, oldText, onError)) {
+        return true;
+    }
+    isFiltering_ = true; // prevent re-entrant UpdateSpanItems from filtering
+    filterManager_.FilterSpanString(styledString, originalContent, onError);
+    auto afterContent = styledString->GetU16string();
+    if (afterContent.length() == lenBefore) {
+        isFiltering_ = false;
+        return false;
+    }
+    AfterStyledStringChange(0, static_cast<int32_t>(lenBefore), afterContent);
+    auto host = GetHost();
+    if (!host) { isFiltering_ = false; return true; }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+    SetCaretPosition(styledString->GetLength(), true);
+    if (HasFocus()) {
+        StartTwinkling();
+        RequestKeyboard(false, true, true);
+        IF_TRUE(!isEditing_, HandleOnEditChanged(true));
+    }
+    isFiltering_ = false;
+    return true;
+}
+
+bool RichEditorPattern::TryRestoreFilteredContent(const std::u16string& originalContent,
+    const std::u16string& oldText, const std::function<bool(const std::u16string&)>& onError)
+{
+    if (originalContent.length() <= oldText.length() ||
+        originalContent.substr(0, oldText.length()) != oldText) {
+        return false;
+    }
+    auto insertedText = originalContent.substr(oldText.length());
+    std::u16string testInserted = insertedText;
+    auto noopOnError = [](const std::u16string&) -> bool { return true; };
+    filterManager_.FilterText(testInserted, noopOnError);
+    if (!testInserted.empty()) {
+        return false;
+    }
+    IF_TRUE(onError, onError(insertedText));
+    isFiltering_ = true;
+    auto currentLen = styledString_->GetLength();
+    IF_TRUE(currentLen > 0, styledString_->RemoveString(0, currentLen));
+    styledString_->InsertString(0, oldText);
+    spans_ = styledString_->GetSpanItems();
+    ProcessStyledString();
+    auto host = GetHost();
+    IF_TRUE(host, host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE));
+    IF_TRUE(host, host->MarkModifyDone());
+    isFiltering_ = false;
+    return true;
+}
+
+bool RichEditorPattern::FilterNonCharContent()
+{
+    std::function<bool(const std::u16string&)> onError;
+    CHECK_NULL_RETURN(PrepareFilter(onError), true);
+    return filterManager_.IsNonCharAllowed(onError);
+}
+
+void RichEditorPattern::FilterStyledStringBeforeInsert(RefPtr<SpanString>& spanString)
+{
+    std::function<bool(const std::u16string&)> onError;
+    CHECK_NULL_VOID(PrepareFilter(onError));
+    CHECK_NULL_VOID(spanString);
+    auto mutableSpanString = AceType::DynamicCast<MutableSpanString>(spanString);
+    if (!mutableSpanString) {
+        // re-filter: create mutable copy for immutable SpanString
+        mutableSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
+        mutableSpanString->InsertSpanString(0, spanString);
+        spanString = mutableSpanString;
+    } else {
+        // deep copy to avoid modifying shared MutableSpanString (consistent with undo_manager)
+        auto deepCopy = AceType::MakeRefPtr<MutableSpanString>(u"");
+        deepCopy->InsertSpanString(0, mutableSpanString);
+        spanString = deepCopy;
+        mutableSpanString = deepCopy;
+    }
+    std::u16string originalContent = mutableSpanString->GetU16string();
+    CHECK_NULL_VOID(!originalContent.empty());
+    filterManager_.FilterSpanString(mutableSpanString, originalContent, onError);
+}
+
 bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, bool shouldCommitInput)
 {
 #if defined(IOS_PLATFORM)
@@ -7030,6 +7226,13 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
 {
     CONTENT_MODIFY_LOCK(this);
     auto text = insertValue;
+    auto wasNonEmpty = !text.empty();
+    if (hasActiveFilter_ && (shouldCommitInput || !IsPreviewTextInputting())) {
+        FilterWithInputFilter(text);
+        if (wasNonEmpty && text.empty()) {
+            return;
+        }
+    }
     if (!ProcessTextTruncationOperation(text, shouldCommitInput)) {
         return;
     }
@@ -7045,7 +7248,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
         return;
     }
     if (isSpanStringMode_) {
-        InsertValueInStyledString(text, shouldCommitInput);
+        InsertValueInStyledString(text, shouldCommitInput, false, true);
         return;
     }
     OperationRecord record;

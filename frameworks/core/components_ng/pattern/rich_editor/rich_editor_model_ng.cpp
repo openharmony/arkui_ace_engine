@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1704,5 +1704,44 @@ void RichEditorModelNG::SetOnStyledStringDidChange(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStyledStringDidChange(std::move(func));
+}
+
+void RichEditorModelNG::SetInputFilter(FrameNode* frameNode, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, InputFilter, value, frameNode);
+    // re-filter existing content when regex changes
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->filterDirty_ = true;
+    pattern->hasActiveFilter_ = !value.empty();
+    pattern->FilterInitializeText();
+}
+
+void RichEditorModelNG::SetInputFilterError(FrameNode* frameNode,
+    const std::function<void(const std::u16string&)>& onError)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInputFilterError(onError);
+}
+
+std::string RichEditorModelNG::GetInputFilter(FrameNode* frameNode)
+{
+    std::string value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, InputFilter, value, frameNode, value);
+    return value;
+}
+
+void RichEditorModelNG::ResetInputFilter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, InputFilter, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->filterDirty_ = true;
+    pattern->hasActiveFilter_ = false;
+    pattern->filterErrorHandler_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

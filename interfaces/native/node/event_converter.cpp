@@ -510,6 +510,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_RICH_EDITOR_ON_CONTENT_SIZE_CHANGE;
         case NODE_ON_NEED_SOFTKEYBOARD:
             return ON_NEED_SOFTKEYBOARD;
+        case NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR:
+            return ON_RICH_EDITOR_ON_INPUT_FILTER_ERROR;
         default:
             return -1;
     }
@@ -888,6 +890,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_EDITOR_ON_CONTENT_SIZE_CHANGE;
         case ON_NEED_SOFTKEYBOARD:
             return NODE_ON_NEED_SOFTKEYBOARD;
+        case ON_RICH_EDITOR_ON_INPUT_FILTER_ERROR:
+            return NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR;
         default:
             return -1;
     }
@@ -901,6 +905,7 @@ bool IsStringEvent(ArkUI_Int32 type)
         case NODE_TEXT_INPUT_ON_PASTE:
         case NODE_TEXT_AREA_ON_CHANGE:
         case NODE_TEXT_AREA_ON_PASTE:
+        case NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR:
             return true;
         default:
             return false;

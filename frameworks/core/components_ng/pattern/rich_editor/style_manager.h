@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -279,6 +279,14 @@ public:
             auto key = std::string(SYMBOL_COLOR_KEY_PREFIX) + std::to_string(i);
             spanNode->AddResource(key, textStyle.GetResource(key), std::move(updater));
         }
+    }
+
+    static void UpdateUrlSpanColor(TextStyle& style, const Color& urlSpanColor,
+        bool useThemeDecorationColor, bool strokeColorFollowFontColor)
+    {
+        style.SetTextColor(urlSpanColor);
+        IF_TRUE(useThemeDecorationColor, style.SetTextDecorationColor(urlSpanColor));
+        IF_TRUE(strokeColorFollowFontColor, style.SetStrokeColor(urlSpanColor));
     }
 
     void SetTypingStyle(const std::optional<struct UpdateSpanStyle>& typingStyle,

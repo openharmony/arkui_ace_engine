@@ -1769,6 +1769,7 @@ enum ArkUIEventSubKind {
     ON_RICH_EDITOR_ON_COPY,
     ON_RICH_EDITOR_ON_WILL_CHANGE,
     ON_RICH_EDITOR_ON_DID_CHANGE,
+    ON_RICH_EDITOR_ON_INPUT_FILTER_ERROR,
     ON_RICH_EDITOR_ON_CONTENT_SCROLL,
     ON_RICH_EDITOR_ON_CONTENT_SIZE_CHANGE,
 
@@ -9319,6 +9320,9 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnWillChange)(ArkUINodeHandle node);
     void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
+    void (*setRichEditorInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    ArkUI_CharPtr (*getRichEditorInputFilter)(ArkUINodeHandle node);
+    void (*resetRichEditorInputFilter)(ArkUINodeHandle node);
     void (*setRichEditorNapiOnContentScroll)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnContentScroll)(ArkUINodeHandle node);
     void (*setRichEditorNapiOnContentSizeChange)(ArkUINodeHandle node, void* callback);

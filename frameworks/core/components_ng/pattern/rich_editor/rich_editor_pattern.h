@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_input_filter_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
 #include "core/text/text_emoji_processor.h"
 
@@ -392,8 +393,8 @@ public:
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
-    void InsertValueInStyledString(
-        const std::u16string& insertValue, bool shouldCommitInput = false, bool isPaste = false);
+    void InsertValueInStyledString(const std::u16string& insertValue, bool shouldCommitInput = false,
+        bool isPaste = false, bool preFiltered = false);
     void HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
         std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
@@ -1019,6 +1020,7 @@ private:
     friend class RichEditorPaintMethod;
     friend class RichEditorScrollController;
     friend class RichEditorBaseController;
+    friend class RichEditorModelNG;
     bool ParseCommand(const std::string& command);
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
@@ -1307,9 +1309,9 @@ private:
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString, TextChangeReason reason = TextChangeReason::PASTE);
     void CompleteStyledString(RefPtr<SpanString>& spanString);
-    void InsertStyledString(const RefPtr<SpanString>& spanString, int32_t insertIndex, bool updateCaret = true);
+    void InsertStyledString(RefPtr<SpanString> spanString, int32_t insertIndex, bool updateCaret = true);
     void InsertStyledStringByPaste(const RefPtr<SpanString>& spanString);
-    void HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy = false);
+    void HandleOnDragInsertStyledString(RefPtr<SpanString> spanString, bool isCopy = false);
     void AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans,
         TextChangeReason reason = TextChangeReason::PASTE);
     void HandleOnCopyStyledString();
@@ -1519,6 +1521,24 @@ private:
     bool suppressBuilderSpanCallback_ = false;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
+    void UpdateUrlSpanColorIfNeeded(TextSpanOptions& options);
+    bool GetPreviewReplaceRange(int32_t& start, int32_t& length);
+    void FilterWithInputFilter(std::u16string& text);
+    std::u16string GetActiveFilter();
+    bool PrepareFilter(std::function<bool(const std::u16string&)>& onError);
+    bool FilterInitializeText(const std::u16string& oldText = u"");
+    bool TryRestoreFilteredContent(const std::u16string& originalContent,
+        const std::u16string& oldText, const std::function<bool(const std::u16string&)>& onError);
+    bool FilterNonCharContent();
+    void FilterStyledStringBeforeInsert(RefPtr<SpanString>& spanString);
+    void PrepareInsertRecord(RefPtr<SpanString>& insertStyledString, const std::u16string& subValue,
+        int32_t changeStart, int32_t changeLength, UndoRedoRecord& record, bool& isPreventChange);
+    std::function<bool(const std::u16string&)> MakeFilterErrorHandler();
+    std::function<bool(const std::u16string&)> filterErrorHandler_;
+    RichEditorInputFilterManager filterManager_;
+    bool filterDirty_ = true;
+    bool hasActiveFilter_ = false;
+    bool isFiltering_ = false;
     bool isStopBackPress_ = true;
     bool isIncludeFontPadding_ = false;
     bool isFallbackLineSpacing_ = false;
