@@ -298,6 +298,7 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_size', { resourceId: 1258
 RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_padding_bottom', { resourceId: 125835813, defaultValue: 4 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_loading_padding_bottom', { resourceId: 125835814, defaultValue: 4 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_margin_start', { resourceId: 125835815, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_margin_bottom', { resourceId: 125837102, defaultValue: 8 });
 
 @Component
 export struct SubHeader {
@@ -499,7 +500,7 @@ export struct SubHeader {
         }
         .margin({
           top: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level8') : '',
-          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level4') : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.subheader_title_margin_bottom') : '',
         })
         .width('100%')
         .flexShrink(1)
