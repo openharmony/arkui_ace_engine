@@ -1177,7 +1177,7 @@ export struct SubHeaderV2 {
         }
         .margin({
           top: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level8') : '',
-          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level4') : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.subheader_title_margin_bottom') : '',
         } as Margin)
         .width('100%')
         .flexShrink(1)
@@ -1581,6 +1581,8 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_height', { resourceI
 RESOURCE_CACHE_MAP.set('sys.float.subheader_double_height', { resourceId: 125834254, defaultValue: 72 });
 // subheader_title_font_weight: 125834255 700
 RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 125834255, defaultValue: 700 });
+// subheader_title_margin_bottom: 125837102, 8
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_margin_bottom', { resourceId: 125837102, defaultValue: 8 });
 
 function getResourceValue(resourceName: string): number {
   if (RESOURCE_CACHE_MAP.hasKey(resourceName)) {

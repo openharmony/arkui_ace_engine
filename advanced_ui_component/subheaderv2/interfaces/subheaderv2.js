@@ -1928,7 +1928,7 @@ export class SubHeaderV2 extends ViewV2 {
                         Row.create();
                         Row.margin({
                             top: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level8') : '',
-                            bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level4') : '',
+                            bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.subheader_title_margin_bottom') : '',
                         });
                         Row.width('100%');
                         Row.flexShrink(1);
@@ -2547,6 +2547,7 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_padding_bottom', { res
 RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_loading_padding_bottom',
     { resourceId: 125835814, defaultValue: 4 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_margin_start', { resourceId: 125835815, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_margin_bottom', { resourceId: 125837102, defaultValue: 8 });
 
 function getResourceValue(j132) {
     if (RESOURCE_CACHE_MAP.hasKey(j132)) {
