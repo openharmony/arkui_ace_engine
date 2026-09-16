@@ -344,6 +344,7 @@ void AtomicServicePattern::UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr
         option.color = theme->GetBlurColorDark();
         borderColor.SetColor(theme->GetBorderColorDark());
     }
+    CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundEffect(option);
     renderContext->UpdateBorderColor(borderColor);
 
