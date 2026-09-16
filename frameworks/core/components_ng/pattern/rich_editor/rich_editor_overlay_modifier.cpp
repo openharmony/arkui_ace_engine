@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LAND_DURATION = 100;
 const RefPtr<CubicCurve> LAND_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2, 0, 0.2, 1.0f);
+constexpr int32_t HALF_RECT = 2;
 } // namespace
 
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
@@ -69,6 +70,8 @@ RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG
     AttachProperty(showPreviewTextDecoration_);
     changeOverlay_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(changeOverlay_);
+    hoverColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+    AttachProperty(hoverColor_);
 }
 
 void RichEditorOverlayModifier::SetPreviewTextDecorationColor(const Color& value)
@@ -288,6 +291,23 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
         DrawContent(drawingContext);
     } else {
         DrawScrollBar(drawingContext);
+        // Draw hover/press circle for cancelButton (same as TextFieldOverlayModifier)
+        if (!hoverRects_.empty()) {
+            auto& canvas = drawingContext.canvas;
+            canvas.Save();
+            RSBrush brush;
+            brush.SetAntiAlias(true);
+            brush.SetColor(hoverColor_->Get());
+            canvas.AttachBrush(brush);
+            for (const auto& hoverRect : hoverRects_) {
+                auto rect = hoverRect.GetRect();
+                RSRect rsRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+                canvas.DrawRoundRect(
+                    RSRoundRect(rsRect, rect.Width() / HALF_RECT, rect.Height() / HALF_RECT));
+            }
+            canvas.DetachBrush();
+            canvas.Restore();
+        }
     }
 }
 
@@ -369,5 +389,21 @@ void RichEditorOverlayModifier::ChangeOverlay()
 {
     CHECK_NULL_VOID(changeOverlay_);
     changeOverlay_->Set(!changeOverlay_->Get());
+}
+
+void RichEditorOverlayModifier::SetHoverColorAndRects(
+    const std::vector<RoundRect>& hoverRects, uint32_t hoverColor)
+{
+    CHECK_NULL_VOID(hoverColor_);
+    hoverRects_ = hoverRects;
+    hoverColor_->Set(static_cast<int32_t>(hoverColor));
+}
+
+void RichEditorOverlayModifier::ClearHoverColorAndRects()
+{
+    hoverRects_.clear();
+    if (hoverColor_) {
+        hoverColor_->Set(0);
+    }
 }
 } // namespace OHOS::Ace::NG

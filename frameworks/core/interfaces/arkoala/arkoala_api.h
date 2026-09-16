@@ -9443,6 +9443,13 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorEnableSkipPreviewLongPress)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Int32 (*getRichEditorEnableSkipPreviewLongPress)(ArkUINodeHandle node);
     void (*resetRichEditorEnableSkipPreviewLongPress)(ArkUINodeHandle node);
+    void (*setRichEditorCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
+        ArkUI_Uint32 color, ArkUI_CharPtr src);
+    void (*resetRichEditorCancelButton)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRichEditorCancelButtonStyle)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getRichEditorCancelIconSize)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    ArkUI_Uint32 (*getRichEditorCancelIconColor)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getRichEditorCancelIconSrc)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

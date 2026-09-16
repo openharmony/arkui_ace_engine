@@ -64,6 +64,8 @@ public:
     }
     void StartFloatingCaretLand(const OffsetF& originCaretOffset);
     void ChangeOverlay();
+    void SetHoverColorAndRects(const std::vector<RoundRect>& hoverRects, uint32_t hoverColor);
+    void ClearHoverColorAndRects();
 private:
     void PaintPreviewTextDecoration(DrawingContext& drawingContext) const;
     void PaintCaret(DrawingContext& drawingContext) const;
@@ -94,6 +96,8 @@ private:
     PreviewTextStyle previewTextStyle_;
     bool caretLanding_ = false;
     bool isContentNode_ = false;
+    std::vector<RoundRect> hoverRects_;
+    RefPtr<PropertyInt> hoverColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

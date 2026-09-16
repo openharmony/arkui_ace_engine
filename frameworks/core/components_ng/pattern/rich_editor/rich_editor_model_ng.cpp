@@ -1467,6 +1467,39 @@ bool RichEditorModelNG::GetHorizontalScrolling(FrameNode* frameNode)
     return richEditorPattern->GetHorizontalScrolling();
 }
 
+void RichEditorModelNG::SetCancelButton(FrameNode* frameNode, int32_t style, const CalcDimension& iconSize,
+    const Color& iconColor, const std::string& iconSrc)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CleanNodeStyle,
+        static_cast<CleanNodeStyle>(style), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSize, iconSize, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconColor, iconColor, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSrc, iconSrc, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowCancelButton, true, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowSymbol, false, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->MarkCancelButtonDirty();
+}
+
+void RichEditorModelNG::ResetCancelButton(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CleanNodeStyle, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSrc, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowSymbol, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowCancelButton, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BundleName, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ModuleName, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->MarkCancelButtonDirty();
+    }
+}
+
 Color RichEditorModelNG::GetScrollBarColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, Color());

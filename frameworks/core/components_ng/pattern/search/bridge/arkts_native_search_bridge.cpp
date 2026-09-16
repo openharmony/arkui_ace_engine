@@ -84,7 +84,7 @@ const char SEARCH_FIELD_ETS_TAG[] = "SearchField";
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr double DEFAULT_LINE_THICKNESS_SCALE = 1.0;
 
-Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
+static Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo =
@@ -95,7 +95,7 @@ Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
     return JSValueRef::Undefined(info->GetVM());
 }
 
-Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info)
+static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(
