@@ -1768,16 +1768,22 @@ ArkUINativeModuleValue TextInputBridge::SetMaxLength(ArkUIRuntimeCallInfo *runti
     bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     if ((isJsView && secondArg->IsUndefined()) || !secondArg->IsNumber()) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputMaxLength(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    const bool isInfinity = std::isinf(static_cast<float>(secondArg->ToNumber(vm)->Value()));
+    uint32_t maxLength = 0;
+    bool isMaxLengthValid = true;
+    if (isJsView) {
+        const int32_t length = isInfinity ? INT32_MAX : secondArg->Int32Value(vm);
+        isMaxLengthValid = GreatOrEqual(length, 0);
+        maxLength = static_cast<uint32_t>(length);
     } else {
-        uint32_t maxLength = secondArg->Uint32Value(vm);
-        if (std::isinf(static_cast<float>(secondArg->ToNumber(vm)->Value()))) {
-            maxLength = INT32_MAX; // Infinity
-        }
-        if (GreatOrEqual(maxLength, 0)) {
-            GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMaxLength(nativeNode, maxLength);
-        } else {
-            GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputMaxLength(nativeNode);
-        }
+        maxLength = isInfinity ? static_cast<uint32_t>(INT32_MAX) : secondArg->Uint32Value(vm);
+    }
+    if (isMaxLengthValid) {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMaxLength(nativeNode, maxLength);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputMaxLength(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
