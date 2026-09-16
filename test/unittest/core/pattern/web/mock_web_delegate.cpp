@@ -451,6 +451,10 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
     const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type,
     const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) {}
 WebDelegate::~WebDelegate() {}
+bool WebDelegate::MaybeRelease()
+{
+    return true;
+}
 void WebDelegate::ReleasePlatformResource() {}
 void WebGeolocationOhos::Invoke(const std::string& origin, const bool& allow, const bool& retain) {}
 void WebDelegate::Stop() {}
