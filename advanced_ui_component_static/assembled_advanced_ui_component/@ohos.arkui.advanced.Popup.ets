@@ -62,7 +62,6 @@ import systemDateTime from '@ohos.systemDateTime';
 import resourceManager from '@ohos.resourceManager';
 import mediaQuery from '@ohos.mediaquery';
 import I18n from '@ohos.i18n';
-
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
@@ -830,17 +829,19 @@ export struct PopupComponent {
   }
 
   private getTitleTextAlign(): TextAlign {
-    let titleAlign = TextAlign.Start;
-    try {
-      let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) &&
-        (this.popupDirection === Direction.Auto || this.popupDirection === undefined)) {
-        titleAlign = TextAlign.End;
+    return TextAlign.Start;
+  }
+
+  private getResolvedTextDirection(): Direction {
+    if (this.popupDirection === undefined || this.popupDirection === Direction.Auto) {
+      try {
+        return I18n.isRTL(I18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr;
+      } catch (error) {
+        console.error(`popup getResolvedTextDirection, error: ${error.toString()}`);
+        return Direction.Ltr;
       }
-    } catch (error) {
-      console.error(`popup getSystemLanguage, error: ${error.toString()}`);
     }
-    return titleAlign
+    return this.popupDirection as Direction;
   }
 
   build() {
@@ -859,7 +860,7 @@ export struct PopupComponent {
         Column() {
           Flex({ alignItems: ItemAlign.Start }) {
             Text(this.getTitleText())
-              .direction(this.popupDirection)
+              .direction(this.getResolvedTextDirection())
               .flexGrow(1)
               .maxLines(2)
               .align(Alignment.Start)
@@ -915,7 +916,7 @@ export struct PopupComponent {
           Scroll() {
             Text(this.getMessageText())
               .textAlign(this.getTitleTextAlign())
-              .direction(this.popupDirection)
+              .direction(this.getResolvedTextDirection())
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
