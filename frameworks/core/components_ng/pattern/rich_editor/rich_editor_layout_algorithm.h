@@ -92,6 +92,8 @@ private:
     void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
     RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
     void LayoutCancelButton(LayoutWrapper* layoutWrapper);
+    void MeasureCancelButton(LayoutWrapper* layoutWrapper);
+    RefPtr<LayoutWrapper> FindContentLayoutWrapper(const ChildrenListWithGuard& children);
 
     bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 

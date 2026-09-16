@@ -93,7 +93,9 @@ public:
     virtual void SetCleanHoverColorAndRect(const RoundRect& rect, uint32_t color) = 0;
     virtual void ClearCleanHoverColorAndRects() = 0;
 
-    // Anti-flicker hooks. RichEditor overrides to manage currentMouseStyle_.
+    // Anti-flicker hooks. RichEditor overrides OnCleanNodeHoverEnter to manage currentMouseStyle_.
+    // OnCleanNodeHoverLeave is intentionally empty: do not set mouse style here.
+    // Defer to HandleMouseEvent/OnHover to avoid flicker.
     virtual void OnCleanNodeHoverEnter() {}
     virtual void OnCleanNodeHoverLeave() {}
 

@@ -2428,11 +2428,14 @@ void SetRichEditorCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const st
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(size);
     CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
     if (LessNotEqual(iconSize.Value(), 0.0)) {
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        auto theme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         iconSize = theme->GetCancelIconSize();
     }
@@ -2685,12 +2688,6 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
             .setRichEditorHorizontalScrolling = nullptr,
             .resetRichEditorHorizontalScrolling = nullptr,
             .getRichEditorHorizontalScrolling = nullptr,
-            .setRichEditorCancelButton = nullptr,
-            .resetRichEditorCancelButton = nullptr,
-            .getRichEditorCancelButtonStyle = nullptr,
-            .getRichEditorCancelIconSize = nullptr,
-            .getRichEditorCancelIconColor = nullptr,
-            .getRichEditorCancelIconSrc = nullptr,
             .setRichEditorCaretStyle = nullptr,
             .getRichEditorCaretStyle = nullptr,
             .resetRichEditorCaretStyle = nullptr,
@@ -2707,6 +2704,12 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
             .setRichEditorEnableSkipPreviewLongPress = nullptr,
             .getRichEditorEnableSkipPreviewLongPress = nullptr,
             .resetRichEditorEnableSkipPreviewLongPress = nullptr,
+            .setRichEditorCancelButton = nullptr,
+            .resetRichEditorCancelButton = nullptr,
+            .getRichEditorCancelButtonStyle = nullptr,
+            .getRichEditorCancelIconSize = nullptr,
+            .getRichEditorCancelIconColor = nullptr,
+            .getRichEditorCancelIconSrc = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2882,12 +2885,6 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setRichEditorHorizontalScrolling = SetRichEditorHorizontalScrolling,
         .resetRichEditorHorizontalScrolling = ResetRichEditorHorizontalScrolling,
         .getRichEditorHorizontalScrolling = GetRichEditorHorizontalScrolling,
-        .setRichEditorCancelButton = SetRichEditorCancelButton,
-        .resetRichEditorCancelButton = ResetRichEditorCancelButton,
-        .getRichEditorCancelButtonStyle = GetRichEditorCancelButtonStyle,
-        .getRichEditorCancelIconSize = GetRichEditorCancelIconSize,
-        .getRichEditorCancelIconColor = GetRichEditorCancelIconColor,
-        .getRichEditorCancelIconSrc = GetRichEditorCancelIconSrc,
         .setRichEditorCaretStyle = SetRichEditorCaretStyle,
         .getRichEditorCaretStyle = GetRichEditorCaretStyle,
         .resetRichEditorCaretStyle = ResetRichEditorCaretStyle,
@@ -2904,6 +2901,12 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setRichEditorEnableSkipPreviewLongPress = SetRichEditorEnableSkipPreviewLongPress,
         .getRichEditorEnableSkipPreviewLongPress = GetRichEditorEnableSkipPreviewLongPress,
         .resetRichEditorEnableSkipPreviewLongPress = ResetRichEditorEnableSkipPreviewLongPress,
+        .setRichEditorCancelButton = SetRichEditorCancelButton,
+        .resetRichEditorCancelButton = ResetRichEditorCancelButton,
+        .getRichEditorCancelButtonStyle = GetRichEditorCancelButtonStyle,
+        .getRichEditorCancelIconSize = GetRichEditorCancelIconSize,
+        .getRichEditorCancelIconColor = GetRichEditorCancelIconColor,
+        .getRichEditorCancelIconSrc = GetRichEditorCancelIconSrc,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

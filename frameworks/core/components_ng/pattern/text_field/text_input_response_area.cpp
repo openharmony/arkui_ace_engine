@@ -1598,8 +1598,7 @@ void CleanNodeResponseArea::AfterLayoutProcessCleanResponse()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto weak = WeakClaim(this);
-    pipeline->AddAfterLayoutTask([weak]() {
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto area = weak.Upgrade();
         CHECK_NULL_VOID(area);
         area->UpdateCleanNode(area->IsShow());

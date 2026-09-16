@@ -85,7 +85,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_utils.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "core/components_ng/pattern/text_field/text_input_response_area.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -834,10 +833,12 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
         contentMod_->ContentChange();
     }
     TryExecuteSelectAll();
-    bool isContentEmpty = IsContentEmpty();
-    if (isContentEmpty != lastContentEmptyForCancel_) {
-        lastContentEmptyForCancel_ = isContentEmpty;
-        ProcessCancelButton();
+    if (IsShowCancelButtonMode()) {
+        bool isContentEmpty = IsContentEmpty();
+        if (isContentEmpty != lastContentEmptyForCancel_) {
+            lastContentEmptyForCancel_ = isContentEmpty;
+            ProcessCancelButton();
+        }
     }
 }
 
@@ -882,6 +883,11 @@ void RichEditorPattern::SetCancelButtonIconColor(const Color& color)
     MarkCancelButtonDirty();
 }
 
+RefPtr<FrameNode> RichEditorPattern::GetHost() const
+{
+    return Pattern::GetHost();
+}
+
 bool RichEditorPattern::IsShowCancelButtonMode() const
 {
     auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
@@ -898,15 +904,14 @@ void RichEditorPattern::HandleCleanNodeClicked()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isPreview = IsPreviewTextInputting();
-    auto length = GetTextContentLength();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "HandleCleanNodeClicked: frameId=%{public}d, length=%{public}d, isPreview=%{public}d, hasFocus=%{public}d",
-        frameId_, length, static_cast<int32_t>(isPreview), static_cast<int32_t>(HasFocus()));
+        "HandleCleanNodeClicked: frameId=%{public}d, isPreview=%{public}d, hasFocus=%{public}d",
+        frameId_, static_cast<int32_t>(isPreview), static_cast<int32_t>(HasFocus()));
     if (isPreview) {
         NotifyExitTextPreview(true);
-        length = GetTextContentLength();
         FireOnSelectionChange(caretPosition_);
     }
+    auto length = GetTextContentLength();
     CloseSelectOverlay();
     ResetSelection();
     SetCaretPosition(0, false);
@@ -936,7 +941,9 @@ bool RichEditorPattern::IsContentEmpty() const
 
 bool RichEditorPattern::HasUserAccessibilityText() const
 {
-    return hasUserAccessibilityText_;
+    // RichEditor does not support user-defined accessibility text; always allow
+    // CleanNodeResponseArea to proceed with automatic accessibility focus request.
+    return false;
 }
 
 void RichEditorPattern::SetCleanHoverColorAndRect(const RoundRect& rect, uint32_t color)
@@ -963,11 +970,6 @@ void RichEditorPattern::OnCleanNodeHoverEnter()
     }
 }
 
-void RichEditorPattern::OnCleanNodeHoverLeave()
-{
-    // Do not set mouse style here. Defer to HandleMouseEvent/OnHover to avoid flicker.
-}
-
 bool RichEditorPattern::IsOnCleanNodeByPosition(const Offset& localOffset)
 {
     CHECK_NULL_RETURN(cleanNodeResponseArea_, false);
@@ -982,11 +984,6 @@ void RichEditorPattern::SetAccessibilityClearAction()
 {
     CHECK_NULL_VOID(cleanNodeResponseArea_);
     cleanNodeResponseArea_->SetAccessibilityClearAction();
-}
-
-std::function<void(WeakPtr<FrameNode>)> RichEditorPattern::GetCancelIconSymbol() const
-{
-    return std::function<void(WeakPtr<FrameNode>)>();
 }
 
 bool RichEditorPattern::GetIsDisabled() const
@@ -4499,6 +4496,7 @@ void RichEditorPattern::HandleBlurEventReset()
     firstClickAfterWindowFocus_ = false;
     needSelectAll_ = false;
     StopTwinkling();
+    cancelButtonTouched_ = false;
 }
 
 bool RichEditorPattern::IsCloseKeyboard()
@@ -9647,13 +9645,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
 
-    auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-    bool isOverCancelButton = cleanNodeArea && cleanNodeArea->IsShow() &&
-        cleanNodeArea->GetAreaRect().IsInRegion(PointF(
-            static_cast<float>(info.GetLocalLocation().GetX()),
-            static_cast<float>(info.GetLocalLocation().GetY())));
-
-    if (hasUrlSpan_ && !IsDragging() && !isOverCancelButton) {
+    if (hasUrlSpan_ && !IsDragging()) {
         auto show = HandleUrlSpanShowShadow(info.GetLocalLocation(), info.GetGlobalLocation(), GetUrlHoverColor());
         if (show) {
             ChangeMouseStyle(MouseFormat::HAND_POINTING);
@@ -9662,7 +9654,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
 
-    if (!isOverCancelButton && currentMouseStyle_ == MouseFormat::DEFAULT && !IsDragging()) {
+    if (currentMouseStyle_ == MouseFormat::DEFAULT && !IsDragging()) {
         auto localLoc = info.GetLocalLocation();
         if (GetTextRect().IsInRegion({ localLoc.GetX(), localLoc.GetY() })) {
             ChangeMouseStyle(MouseFormat::TEXT_CURSOR);

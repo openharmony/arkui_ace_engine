@@ -1000,6 +1000,10 @@ public:
     void UpdateSpanNodeByColorMode();
     void UpdateLayoutPropertyColor();
 
+    // Public for RichEditorModelNG access
+    RefPtr<FrameNode> GetHost() const override;
+    void MarkCancelButtonDirty() { cancelButtonDirty_ = true; }
+
 protected:
     RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
     RefPtr<TextSelectOverlay> GetSelectOverlay() const override;
@@ -1170,28 +1174,23 @@ private:
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     std::pair<int32_t, int32_t> CalcSpansRange(const std::vector<RefPtr<SpanNode>>& spanNodes) const;
-    void OnHover(bool isHover, const HoverInfo& info) override;
+    void OnHover(bool isHover, const HoverInfo& info);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
 
     // ICleanNodeHost implementations
     bool IsShowCancelButtonMode() const override;
     void HandleCleanNodeClicked() override;
-    std::function<void(WeakPtr<FrameNode>)> GetCancelIconSymbol() const override;
     bool IsContentEmpty() const override;
-    bool IsDragging() const override;
     bool HasUserAccessibilityText() const override;
-    RefPtr<FrameNode> GetHost() const override;
     bool GetIsDisabled() const override;
     // ICleanNodeHost behavioral hooks
     void SetCleanHoverColorAndRect(const RoundRect& rect, uint32_t color) override;
     void ClearCleanHoverColorAndRects() override;
     void OnCleanNodeHoverEnter() override;
-    void OnCleanNodeHoverLeave() override;
     bool IsCancelButtonTouched() const override;
     void SetCancelButtonTouched(bool touched) override;
     // Cancel button support
     void ProcessCancelButton();
-    void MarkCancelButtonDirty() { cancelButtonDirty_ = true; }
     void SetAccessibilityClearAction();
     bool IsOnCleanNodeByPosition(const Offset& localOffset);
     bool IsOnCancelButtonHoverArea(const Offset& localOffset);
@@ -1579,7 +1578,6 @@ private:
     bool lastContentEmptyForCancel_ = true;
     bool cancelButtonDirty_ = true;
     bool cancelButtonTouched_ = false;
-    bool hasUserAccessibilityText_ = false;
     std::string lastReportSelectionText_ = "";
 
 #if defined(CROSS_PLATFORM)
