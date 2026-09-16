@@ -65,7 +65,7 @@ if (is_host_product) {
     # idlize_gen is a generation precondition, not a functional test dependency:
     # it regenerates the tracked arkoala_api_generated.h from the SDK in the build
     # tree, so this target requires an SDK that already contains the
-    # LazyVGridLayout columnsTemplate(string | ItemFillPolicy) overload.
+    # separate LazyVGridLayout columnsTemplate(string) and columnsTemplate(ItemFillPolicy) overloads.
     deps = [
       "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen",
     ]
