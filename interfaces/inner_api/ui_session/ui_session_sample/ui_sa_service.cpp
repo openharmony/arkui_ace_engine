@@ -611,11 +611,15 @@ void UiSaService::HandleSendCommand(sptr<IUiContentService> service, std::vector
         std::string command = params[2];
         if (command == "file") {
             std::string commandFromFile = ReadPageSceneRuleJson();
-            LOGI("[SendCommand] commandFromFile=%{public}s", commandFromFile.c_str());
+            if (commandFromFile.empty()) {
+                LOGW("[SendCommand] commandFromFile is empty");
+                return;
+            }
+            LOGI("[SendCommand] commandFromFile preview=%{private}s, length=%{public}zu",
+                commandFromFile.substr(0, 200).c_str(), commandFromFile.length());
             service->SendCommand(id, commandFromFile);
             return;
         }
-        LOGI("[SendCommand] service->SendCommand(id, command);");
         service->SendCommand(id, command);
     } else if (params.size() == SEND_COMMAND_WITHOUT_NODEID) {
         std::string command = params[1];
