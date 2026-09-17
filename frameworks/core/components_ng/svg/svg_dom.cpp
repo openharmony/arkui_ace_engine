@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/svg_dom.h"
 
+#include <stack>
+
 #include "core/components_ng/svg/parse/svg_fe_blend.h"
 #include "core/components_ng/svg/parse/svg_fe_flood.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
@@ -341,6 +343,25 @@ std::string SvgDom::GetDumpInfo()
         return svgContext_->GetDumpInfo();
     }
     return "";
+}
+
+size_t SvgDom::GetNodeCount() const
+{
+    CHECK_NULL_RETURN(root_, 0);
+    std::stack<RefPtr<SvgNode>> nodeStack;
+    nodeStack.push(root_);
+    size_t count = 0;
+    while (!nodeStack.empty()) {
+        auto node = nodeStack.top();
+        nodeStack.pop();
+        count++;
+        for (const auto& child : node->GetChildren()) {
+            if (child) {
+                nodeStack.push(child);
+            }
+        }
+    }
+    return count;
 }
 
 void SvgDom::InitStyles()
