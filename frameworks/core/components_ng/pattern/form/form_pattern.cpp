@@ -716,6 +716,7 @@ void FormPattern::OnColorConfigurationUpdate()
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
+    UpdateSpecialStyleCfg();
     OnModifyDone();
 }
 
@@ -1090,9 +1091,11 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
         layoutConstraint.maxSize = idealSize;
         if (imageNode != nullptr) {
             imageNode->UpdateLayoutConstraint(layoutConstraint);
+            imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         if (disableStyleRootNode != nullptr) {
             disableStyleRootNode->UpdateLayoutConstraint(layoutConstraint);
+            disableStyleRootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
 
