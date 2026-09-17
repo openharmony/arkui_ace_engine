@@ -2584,6 +2584,12 @@ bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
     }
 
     auto result = OnScrollCallback(overOffset, source);
+    if (result) {
+        // An item may be floating or dragged: let the drag host know the container
+        // really scrolled, and by which source, so it can interrupt a float or hand
+        // the scrolling over to the finger that is driving the container.
+        FireDragScrollCallback(source);
+    }
     SelectOverlayScrollNotifier::NotifyOnScrollCallback(WeakClaim(this), overOffset, source);
     return result;
 }

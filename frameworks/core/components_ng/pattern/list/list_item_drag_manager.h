@@ -64,6 +64,19 @@ public:
 
 private:
     void HandleOnItemLongPress(const GestureEvent& info);
+    void LockDragFingerAndEscapeScrollPan(int32_t fingerId);
+    // Driven by the host List on every real scroll frame while an item floats or is
+    // dragged, with the scroll source. Interrupts a float (long press without any drag
+    // update) as soon as another finger scrolls the container, and arms the edge
+    // auto-scroll suppression for the rest of that drag; a real drag is never
+    // interrupted, so one finger can drag while another scrolls.
+    void HandleContainerScroll(int32_t source);
+    // Registers HandleContainerScroll on the host List for the duration of the float
+    // or drag session, released again on drag end / cancel / DeInitDragDropEvent.
+    void RegisterContainerScrollInterrupt();
+    // Stops a running drag edge auto-scroll: releases the hot zone callback and tells
+    // the host List to stop the hot zone animator. Mirrors GridItemDragManager.
+    void StopAutoScroll();
     void HandleOnItemDragStart(const GestureEvent& info);
     void HandleOnItemDragUpdate(const GestureEvent& info);
     void HandleOnItemDragEnd(const GestureEvent& info);
@@ -107,6 +120,10 @@ private:
     bool isStackFromEnd_ = false;
     bool isRtl_ = false;
     bool scrolling_ = false;
+    // Armed by HandleContainerScroll() when another finger really scrolls the List,
+    // cleared again as soon as that finger leaves the container. Only then is the drag
+    // edge auto-scroll suppressed, a second finger merely resting on the List is not.
+    bool suppressAutoScroll_ = false;
     bool isDragAnimationStopped_ = true;
     OffsetF realOffset_;
 
