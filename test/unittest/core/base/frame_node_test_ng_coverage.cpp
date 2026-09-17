@@ -440,9 +440,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpOnSizeChangeInfo01, TestSize.Level1)
 {
     NG::RectF testLastFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
     NG::RectF testCurrFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
-    FrameNode::onSizeChangeDumpInfo dumpInfo1 { 1, testLastFrameRect,
+    NG::onSizeChangeDumpInfo dumpInfo1 { 1, testLastFrameRect,
         testCurrFrameRect }; // 1 is the onSizeChangeTimeStamp
-    FrameNode::onSizeChangeDumpInfo dumpInfo2 { 2, testLastFrameRect,
+    NG::onSizeChangeDumpInfo dumpInfo2 { 2, testLastFrameRect,
         testCurrFrameRect }; // 2 is the onSizeChangeTimeStamp
 
     /**
@@ -453,8 +453,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpOnSizeChangeInfo01, TestSize.Level1)
     /**
      * @tc.steps: step2. add onSizeChangeDumpInfos.
      */
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfo1);
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfo2);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfo1);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfo2);
 
     /**
      * @tc.steps: step3. call the function DumpOnSizeChangeInfo.
@@ -1374,15 +1374,15 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback01, TestSize.Level
 {
     NG::RectF testLastFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
     NG::RectF testCurrFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
-    FrameNode::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect,
+    NG::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect,
         testCurrFrameRect }; // 1 is the onSizeChangeTimeStamp
-    FrameNode::onSizeChangeDumpInfo dumpInfoTwo { 2, testLastFrameRect,
+    NG::onSizeChangeDumpInfo dumpInfoTwo { 2, testLastFrameRect,
         testCurrFrameRect }; // 2 is the onSizeChangeTimeStamp
-    FrameNode::onSizeChangeDumpInfo dumpInfoThree { 3, testLastFrameRect,
+    NG::onSizeChangeDumpInfo dumpInfoThree { 3, testLastFrameRect,
         testCurrFrameRect }; // 3 is the onSizeChangeTimeStamp
-    FrameNode::onSizeChangeDumpInfo dumpInfoFour { 4, testLastFrameRect,
+    NG::onSizeChangeDumpInfo dumpInfoFour { 4, testLastFrameRect,
         testCurrFrameRect }; // 4 is the onSizeChangeTimeStamp
-    FrameNode::onSizeChangeDumpInfo dumpInfoFive { 5, testLastFrameRect,
+    NG::onSizeChangeDumpInfo dumpInfoFive { 5, testLastFrameRect,
         testCurrFrameRect }; // 5 is the onSizeChangeTimeStamp
     /**
      * @tc.steps: step1. create frameNode.
@@ -1398,11 +1398,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback01, TestSize.Level
     frameNode->GetEventHub<EventHub>()->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoTwo);
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoThree);
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoFour);
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoFive);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoOne);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoTwo);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoThree);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoFour);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoFive);
     /**
      * @tc.steps: step3. call the function TriggerOnSizeChangeCallback.
      */
@@ -1418,7 +1418,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback02, TestSize.Level
 {
     NG::RectF testLastFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
     NG::RectF testCurrFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
-    FrameNode::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
+    NG::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
     /**
      * @tc.steps: step1. create frameNode.
      */
@@ -1432,7 +1432,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback02, TestSize.Level
     frameNode->GetEventHub<EventHub>()->SetOnSizeChanged(std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoOne);
     /**
      * @tc.steps: step3. call the function TriggerOnSizeChangeCallback.
      */
@@ -1448,7 +1448,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback03, TestSize.Level
 {
     NG::RectF testLastFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
     NG::RectF testCurrFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
-    FrameNode::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
+    NG::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
     /**
      * @tc.steps: step1. create frameNode.
      */
@@ -1462,7 +1462,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback03, TestSize.Level
     frameNode->GetEventHub<EventHub>()->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoOne);
     /**
      * @tc.steps: step3. call the function TriggerOnSizeChangeCallback.
      */
