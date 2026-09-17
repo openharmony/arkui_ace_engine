@@ -214,7 +214,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternToJsonValueSystemMaterial00
     ASSERT_NE(json, nullptr);
     InspectorFilter filter;
     frameNode->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("systemMaterial"), "unset");
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "false");
     EXPECT_FALSE(json->GetString("distortionMode").empty());
     EXPECT_FALSE(json->GetString("edgeLightMode").empty());
 }
@@ -268,7 +268,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternToJsonValueSystemMaterial00
     ASSERT_NE(json, nullptr);
     InspectorFilter filter;
     frameNode->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("systemMaterial"), "set");
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "true");
 }
 
 /**
@@ -290,7 +290,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternDumpInfoMaterial002, TestSi
     pattern->DumpInfo();
     bool hasSet = false;
     for (const auto& desc : DumpLog::GetInstance().description_) {
-        if (desc.find("SystemMaterial: set") != std::string::npos) {
+        if (desc.find("HasSystemMaterial: true") != std::string::npos) {
             hasSet = true;
             break;
         }

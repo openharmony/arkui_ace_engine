@@ -356,7 +356,7 @@ HWTEST_F(MenuPatternTestNg, MenuToJsonValueSystemMaterial001, TestSize.Level1)
 
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     pattern->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("systemMaterial"), "unset");
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "false");
 }
 
 /**
@@ -415,7 +415,7 @@ HWTEST_F(MenuPatternTestNg, MenuToJsonValueSystemMaterial002, TestSize.Level1)
 
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     pattern->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("systemMaterial"), "set");
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "true");
 }
 
 /**
@@ -442,7 +442,7 @@ HWTEST_F(MenuPatternTestNg, MenuDumpInfoSystemMaterial002, TestSize.Level1)
     pattern->DumpInfo();
     bool hasSet = false;
     for (const auto& desc : DumpLog::GetInstance().description_) {
-        if (desc.find("SystemMaterial: set") != std::string::npos) {
+        if (desc.find("HasSystemMaterial: true") != std::string::npos) {
             hasSet = true;
             break;
         }
