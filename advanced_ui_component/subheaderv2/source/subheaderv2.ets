@@ -318,6 +318,8 @@ export struct SubHeaderV2 {
   @Param
   icon?: SubHeaderV2IconType = undefined;
   @Param
+  endIcon?: SubHeaderV2IconType = undefined;
+  @Param
   title?: SubHeaderV2Title | undefined = undefined;
   @Param
   select?: SubHeaderV2Select | undefined = undefined;
@@ -417,6 +419,7 @@ export struct SubHeaderV2 {
         })
         .attributeModifier(this.title?.secondaryTitleModifier)
         .flexShrink(1)
+      this.endTitleIcon()
     }
     .commonListPadding()
   }
@@ -496,14 +499,18 @@ export struct SubHeaderV2 {
   @Builder
   SubTitleStyle($$: ContentIconOption): void {
     Column() {
-      Text($$.content)
-        .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
-          maxLines: DOUBLE_LINE_NUM,
-          alignment: Alignment.Start,
-          fontColor: this.subHeaderV2Theme.fontPrimaryColor,
-        })
-        .attributeModifier(this.title?.primaryTitleModifier)
+      Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Start }) {
+        Text($$.content)
+          .primaryTitleStyles({
+            fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+            maxLines: DOUBLE_LINE_NUM,
+            alignment: Alignment.Start,
+            fontColor: this.subHeaderV2Theme.fontPrimaryColor,
+          })
+          .attributeModifier(this.title?.primaryTitleModifier)
+          .flexShrink(1)
+        this.endTitleIcon()
+      }
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
@@ -523,28 +530,58 @@ export struct SubHeaderV2 {
 
   @Builder
   SecondTitleStyle($$: ContentIconOption): void {
-    Text($$.content)
-      .secondaryTitleStyles({
-        maxLines: DOUBLE_LINE_NUM,
-        fontWeight: FontWeight.Medium,
-        alignment: Alignment.Start,
-        fontColor: this.subHeaderV2Theme.fontSecondaryColor,
-      })
-      .attributeModifier(this.title?.secondaryTitleModifier)
-      .commonListPadding()
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+      Text($$.content)
+        .secondaryTitleStyles({
+          maxLines: DOUBLE_LINE_NUM,
+          fontWeight: FontWeight.Medium,
+          alignment: Alignment.Start,
+          fontColor: this.subHeaderV2Theme.fontSecondaryColor,
+        })
+        .attributeModifier(this.title?.secondaryTitleModifier)
+        .flexShrink(1)
+      this.endTitleIcon()
+    }
+    .commonListPadding()
   }
 
   @Builder
   PrimaryTitleStyle($$: ContentIconOption): void {
-    Text($$.content)
-      .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
-        maxLines: DOUBLE_LINE_NUM,
-        alignment: Alignment.Start,
-        fontColor: this.subHeaderV2Theme.fontPrimaryColor,
-      })
-      .attributeModifier(this.title?.primaryTitleModifier)
-      .commonContentPadding()
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Start }) {
+      Text($$.content)
+        .primaryTitleStyles({
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+          maxLines: DOUBLE_LINE_NUM,
+          alignment: Alignment.Start,
+          fontColor: this.subHeaderV2Theme.fontPrimaryColor,
+        })
+        .attributeModifier(this.title?.primaryTitleModifier)
+        .flexShrink(1)
+      this.endTitleIcon()
+    }
+    .commonContentPadding()
+  }
+
+  @Builder
+  endTitleIcon(): void {
+    if (this.endIcon) {
+      if (Util.isSymbolResource(this.endIcon)) {
+        SymbolGlyph(this.endIcon as Resource)
+          .fontSize(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
+          .fontColor([this.subHeaderV2Theme.leftIconColor])
+          .attributeModifier(this.endIcon as SymbolGlyphModifier)
+          .margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) })
+          .flexShrink(0)
+      } else {
+        Image(this.endIcon as ResourceStr)
+          .fillColor(this.subHeaderV2Theme.leftIconColor)
+          .width(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
+          .height(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
+          .margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) })
+          .draggable(false)
+          .flexShrink(0)
+      }
+    }
   }
 
   @Builder
