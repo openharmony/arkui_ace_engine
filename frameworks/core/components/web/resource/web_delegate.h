@@ -1933,6 +1933,8 @@ private:
         const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
     void RegisterFreeMultiWindowListener();
     void UnregisterFreeMultiWindowListener();
+    uint64_t GetDelegateRSHandle();
+    uint64_t GetDelegateUIContextToken();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -2097,6 +2099,8 @@ private:
     // data detector js state
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
+
+    sptr<OHOS::IRemoteObject> connectToRender_ = nullptr;
 
     bool isVisible_ = false;
 
