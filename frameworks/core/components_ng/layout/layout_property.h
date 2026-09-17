@@ -113,6 +113,8 @@ public:
 
     void UpdateBorderWidth(const BorderWidthProperty& value);
 
+    void UpdateMaterialBorderWidth(const BorderWidthProperty& value);
+
     void UpdateOuterBorderWidth(const BorderWidthProperty& value);
 
     void UpdateAlignment(Alignment value);

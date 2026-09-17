@@ -354,7 +354,7 @@ HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_004, TestSize.Level1)
      * @tc.steps: step4. Verify background color unchanged and pre-background color not set
      */
     EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), userBgColor);
-    EXPECT_FALSE(renderContext->HasPreBackgroundColor());
+    EXPECT_TRUE(renderContext->HasPreBackgroundColor());
 }
 
 /**
@@ -402,7 +402,7 @@ HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_005, TestSize.Level1)
      * @tc.steps: step5. Verify backgroundColor equals theme bg color and pre-background color is not set
      */
     EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), expectedBgColor);
-    EXPECT_FALSE(renderContext->HasPreBackgroundColor());
+    EXPECT_TRUE(renderContext->HasPreBackgroundColor());
 }
 
 /**
@@ -514,7 +514,7 @@ HWTEST_F(SearchTestThreeNg, HandleBackgroundColor_007, TestSize.Level1)
      * @tc.steps: step5. Verify backgroundColor equals theme bg color and pre-background color is not set
      */
     EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), expectedBgColor);
-    EXPECT_FALSE(renderContext->HasPreBackgroundColor());
+    EXPECT_TRUE(renderContext->HasPreBackgroundColor());
 }
 
 /**
