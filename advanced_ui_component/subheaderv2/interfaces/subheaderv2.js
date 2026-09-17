@@ -407,6 +407,7 @@ export class SubHeaderV2 extends ViewV2 {
     constructor(j141, k141, l141, m141 = -1, n141, o141) {
         super(j141, m141, o141);
         this.initParam('icon', (k141 && 'icon' in k141) ? k141.icon : undefined);
+        this.initParam('endIcon', (k141 && 'endIcon' in k141) ? k141.endIcon : undefined);
         this.initParam('title', (k141 && 'title' in k141) ? k141.title : undefined);
         this.initParam('select', (k141 && 'select' in k141) ? k141.select : undefined);
         this.initParam('operationType',
@@ -445,6 +446,7 @@ export class SubHeaderV2 extends ViewV2 {
 
     resetStateVarsOnReuse(i141) {
         this.resetParam('icon', (i141 && 'icon' in i141) ? i141.icon : undefined);
+        this.resetParam('endIcon', (i141 && 'endIcon' in i141) ? i141.endIcon : undefined);
         this.resetParam('title', (i141 && 'title' in i141) ? i141.title : undefined);
         this.resetParam('select', (i141 && 'select' in i141) ? i141.select : undefined);
         this.resetParam('operationType',
@@ -595,6 +597,7 @@ export class SubHeaderV2 extends ViewV2 {
             Text.flexShrink(1);
         }, Text);
         Text.pop();
+        this.endTitleIcon.bind(this)();
         Flex.pop();
     }
 
@@ -649,8 +652,8 @@ export class SubHeaderV2 extends ViewV2 {
         Select.pop();
     }
 
-    SubTitleStyle(x139, y139 = null) {
-        this.observeComponentCreation2((d140, e140) => {
+    SubTitleStyle(k19, l19 = null) {
+        this.observeComponentCreation2((s19, t19) => {
             Column.create();
             Column.width('100%');
             Column.padding({
@@ -662,8 +665,11 @@ export class SubHeaderV2 extends ViewV2 {
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((b140, c140) => {
-            Text.create(x139.content);
+        this.observeComponentCreation2((q19, r19) => {
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Start });
+        }, Flex);
+        this.observeComponentCreation2((o19, p19) => {
+            Text.create(k19.content);
             __Text__primaryTitleStyles({
                 fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
                 maxLines: DOUBLE_LINE_NUM,
@@ -671,10 +677,13 @@ export class SubHeaderV2 extends ViewV2 {
                 fontColor: this.subHeaderV2Theme.fontPrimaryColor,
             });
             Text.attributeModifier.bind(this)(this.title?.primaryTitleModifier);
+            Text.flexShrink(1);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((z139, a140) => {
-            Text.create(x139.subContent);
+        this.endTitleIcon.bind(this)();
+        Flex.pop();
+        this.observeComponentCreation2((m19, n19) => {
+            Text.create(k19.subContent);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
                 fontWeight: getResourceValue('sys.float.subheader_subtitle_font_weight'),
@@ -690,9 +699,19 @@ export class SubHeaderV2 extends ViewV2 {
         Column.pop();
     }
 
-    SecondTitleStyle(t139, u139 = null) {
-        this.observeComponentCreation2((v139, w139) => {
-            Text.create(t139.content);
+    SecondTitleStyle(e19, f19 = null) {
+        this.observeComponentCreation2((i19, j19) => {
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
+            Flex.padding({
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
+            });
+        }, Flex);
+        this.observeComponentCreation2((g19, h19) => {
+            Text.create(e19.content);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Medium,
@@ -700,20 +719,26 @@ export class SubHeaderV2 extends ViewV2 {
                 fontColor: this.subHeaderV2Theme.fontSecondaryColor,
             });
             Text.attributeModifier.bind(this)(this.title?.secondaryTitleModifier);
-            Text.padding({
-                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+            Text.flexShrink(1);
+        }, Text);
+        Text.pop();
+        this.endTitleIcon.bind(this)();
+        Flex.pop();
+    }
+
+    PrimaryTitleStyle(y18, z18 = null) {
+        this.observeComponentCreation2((c19, d19) => {
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Start });
+            Flex.padding({
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
                     : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
                     : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
-        }, Text);
-        Text.pop();
-    }
-
-    PrimaryTitleStyle(p139, q139 = null) {
-        this.observeComponentCreation2((r139, s139) => {
-            Text.create(p139.content);
+        }, Flex);
+        this.observeComponentCreation2((a19, b19) => {
+            Text.create(y18.content);
             __Text__primaryTitleStyles({
                 fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
                 maxLines: DOUBLE_LINE_NUM,
@@ -721,15 +746,55 @@ export class SubHeaderV2 extends ViewV2 {
                 fontColor: this.subHeaderV2Theme.fontPrimaryColor,
             });
             Text.attributeModifier.bind(this)(this.title?.primaryTitleModifier);
-            Text.padding({
-                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
-                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
-                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
-            });
+            Text.flexShrink(1);
         }, Text);
         Text.pop();
+        this.endTitleIcon.bind(this)();
+        Flex.pop();
+    }
+
+    endTitleIcon(p18 = null) {
+        this.observeComponentCreation2((q18, r18) => {
+            If.create();
+            if (this.endIcon) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((s18, t18) => {
+                        If.create();
+                        if (Util.isSymbolResource(this.endIcon)) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((w18, x18) => {
+                                    SymbolGlyph.create(this.endIcon);
+                                    SymbolGlyph.fontSize(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                                    SymbolGlyph.fontColor([this.subHeaderV2Theme.leftIconColor]);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.endIcon);
+                                    SymbolGlyph.margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+                                    SymbolGlyph.flexShrink(0);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((u18, v18) => {
+                                    Image.create(this.endIcon);
+                                    Image.fillColor(this.subHeaderV2Theme.leftIconColor);
+                                    Image.width(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                                    Image.height(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                                    Image.margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+                                    Image.draggable(false);
+                                    Image.flexShrink(0);
+                                }, Image);
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
     }
 
     leftArea(m139 = null) {
@@ -2008,6 +2073,9 @@ export class SubHeaderV2 extends ViewV2 {
         if ('icon' in r134) {
             this.updateParam('icon', r134.icon);
         }
+        if ('endIcon' in r134) {
+            this.updateParam('endIcon', r134.endIcon);
+        }
         if ('title' in r134) {
             this.updateParam('title', r134.title);
         }
@@ -2029,6 +2097,9 @@ export class SubHeaderV2 extends ViewV2 {
 __decorate([
     Param
 ], SubHeaderV2.prototype, 'icon', void 0);
+__decorate([
+    Param
+], SubHeaderV2.prototype, 'endIcon', void 0);
 __decorate([
     Param
 ], SubHeaderV2.prototype, 'title', void 0);
