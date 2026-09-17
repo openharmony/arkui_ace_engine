@@ -5721,6 +5721,7 @@ struct ArkUITabsModifier {
     void (*setTabsOnSelected)(ArkUINodeHandle node, void* callback);
     void (*resetTabsOnSelected)(ArkUINodeHandle node);
     void (*setCachedMaxCount)(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode);
+    void (*setCachedMaxCountForJs)(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode);
     void (*resetCachedMaxCount)(ArkUINodeHandle node);
     void (*setTabsOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetTabsOnChange)(ArkUINodeHandle node);
@@ -5765,6 +5766,8 @@ struct ArkUITabsModifier {
     void (*resetOnBarDisplayModeChange)(ArkUINodeHandle node);
     void (*setSidebarDisplayStyle)(ArkUINodeHandle node, ArkUI_Int32 sidebarDisplayStyle);
     void (*resetSidebarDisplayStyle)(ArkUINodeHandle node);
+    void (*setTabsIndex)(ArkUINodeHandle node, ArkUI_Int32 indexVal);
+    void (*setTabsOnChangeEvent)(ArkUINodeHandle node, void* callback);
 };
 
 struct ArkUIStepperItemModifier {

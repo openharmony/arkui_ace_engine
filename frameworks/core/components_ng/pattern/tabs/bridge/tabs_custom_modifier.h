@@ -49,6 +49,9 @@ struct ArkUITabsCustomModifier {
     void (*handleBackgroundBlurStyleInactiveColor)(ArkUINodeHandle node, void* resObjPtr);
     void (*handleBarBackgroundColor)(ArkUINodeHandle node, void* resObjPtr);
     void (*handleBackgroundEffectInactiveColor)(ArkUINodeHandle node, void* resObjPtr);
+    void (*setTabBarTranslate)(ArkUINodeHandle node, const void* options);
+    void (*setTabBarOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
+    void (*swipeTo)(ArkUINodeHandle node, ArkUI_Int32 index);
 };
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TABS_BRIDGE_TABS_CUSTOM_MODIFIER_H
