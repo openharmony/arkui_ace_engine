@@ -417,6 +417,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
         navigationRoute->InitRouteInfo(options.hapModuleInfo.routerArray);
         container->SetNavigationRoute(navigationRoute);
     }
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    // Read UIMaterial metadata from entry module only
+    if (hapModuleInfo && hapModuleInfo->moduleType == OHOS::AppExecFwk::ModuleType::ENTRY) {
+        const auto& metaData = hapModuleInfo->metadata;
+        for (const auto& metaDataItem : metaData) {
+            if (metaDataItem.name == "ohos.arkui.UIMaterial.state") {
+                AceApplicationInfo::GetInstance().SetUIMaterialState(metaDataItem.value);
+            } else if (metaDataItem.name == "ohos.arkui.UIMaterial.type") {
+                AceApplicationInfo::GetInstance().SetUIMaterialType(metaDataItem.value);
+            }
+        }
+    }
     std::vector<std::string> paths;
     paths.push_back(assetPath_);
     std::string appResourcesPath(appResourcesPath_);

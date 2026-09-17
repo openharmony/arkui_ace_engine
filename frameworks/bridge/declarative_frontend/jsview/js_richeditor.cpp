@@ -1783,7 +1783,7 @@ void JSRichEditorBaseControllerBinding::SetTypingStyle(const JSCallbackInfo& inf
         }
     }
     bool isNeedReset = !isBelowApi12 && (!info[0]->IsObject() || isUndefined);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetTypingStyle %{public}d", isNeedReset);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SetTypingStyle %{public}d", isNeedReset);
     if (isNeedReset) {
         controller->SetTypingStyle(std::nullopt, std::nullopt);
         return;

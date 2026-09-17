@@ -1138,6 +1138,13 @@ void WebModelNG::SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
     webPattern->UpdateCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
 }
 
+void WebModelNG::SetTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateTransformRotateAndSkewEnabled(isTransformRotateAndSkewEnabled);
+}
+
 void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

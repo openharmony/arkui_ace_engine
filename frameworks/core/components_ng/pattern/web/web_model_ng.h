@@ -201,6 +201,7 @@ public:
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
     void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) override;
     void SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) override;
+    void SetTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;

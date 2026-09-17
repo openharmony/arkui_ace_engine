@@ -681,7 +681,7 @@ public:
     void UpdateBackShadow(const Shadow& value)
     {
         UpdatePreBackShadow(value);
-        auto& groupProperty = GetOrCreateVisual();
+        auto& groupProperty = GetOrCreateGraphics();
         if (groupProperty->CheckBackShadow(value)) {
             return;
         }
@@ -743,7 +743,7 @@ public:
     }
     void UpdateMaterialBackShadow(const Shadow& value)
     {
-        auto& groupProperty = GetOrCreateVisual();
+        auto& groupProperty = GetOrCreateGraphics();
         if (groupProperty->CheckBackShadow(value)) {
             return;
         }

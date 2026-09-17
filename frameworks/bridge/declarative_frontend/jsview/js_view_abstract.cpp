@@ -123,6 +123,7 @@ constexpr int32_t FLOAT_PRECISION = 6;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
 constexpr int NUM2 = 2;
+constexpr size_t MAX_MODIFIER_KEYS = 3;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 constexpr std::string_view CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
@@ -309,6 +310,7 @@ void OnPreDragTrampoline(const RefPtr<JsDragFunction>& func, const PreDragStatus
 void OnKeyboardShortcutActionTrampoline(const RefPtr<JsFunction>& func)
 {
     ACE_SCORING_EVENT("onKeyboardShortcutAction");
+    CHECK_NULL_VOID(func);
     func->ExecuteJS();
 }
 
@@ -8000,7 +8002,9 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
             return false;
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        CHECK_EQUAL_RETURN(params->Length(), 0, false);
         auto param = params->GetValueAt(0);
+        if (!param->IsString()) return false;
         if (resType == static_cast<int32_t>(ResourceType::BOOLEAN)) {
             result = resourceAdapter->GetBooleanByName(param->ToString());
             return true;
@@ -10987,8 +10991,7 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
         return true;
     }
     if (jsonValue->IsString()) {
-        result = StringUtils::StringToDouble(jsonValue->GetString());
-        return true;
+        return StringUtils::StringToDouble(jsonValue->GetString(), result);
     }
     // parse json Resource
     auto resVal = JsonUtil::ParseJsonString(jsonValue->ToString());
@@ -11901,6 +11904,7 @@ void JSViewAbstract::JsOnGestureCollectIntercept(const JSCallbackInfo& info)
             func = panda::CopyableGlobal(vm, jsFuncLocalHandle), node = frameNode](
             const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
             const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> NG::GestureCollectIntervention {
+        panda::TryCatch trycatch(vm);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::GestureCollectIntervention::CONTINUE);
         ACE_SCORING_EVENT("onGestureCollectIntercept");
         PipelineContext::SetCallBackNode(node);
@@ -12307,8 +12311,12 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
 
     auto keysArray = JSRef<JSArray>::Cast(info[1]);
     size_t size = keysArray->Length();
-    std::vector<ModifierKey> keys(size);
-    keys.clear();
+    if (size > MAX_MODIFIER_KEYS) {
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut({}, {}, nullptr);
+        return;
+    }
+    std::vector<ModifierKey> keys;
+    keys.reserve(size);
     for (size_t i = 0; i < size; i++) {
         JSRef<JSVal> key = keysArray->GetValueAt(i);
         if (key->IsNumber()) {

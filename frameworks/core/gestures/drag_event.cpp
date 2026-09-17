@@ -146,12 +146,22 @@ RefPtr<PixelMap> DragEvent::GetPixmap() const
 
 void DragEvent::SetSummary(std::map<std::string, int64_t>& summary)
 {
-    summary_ = summary;
+    summaryInfo_.summary = summary;
 }
 
 std::map<std::string, int64_t>& DragEvent::GetSummary()
 {
-    return summary_;
+    return summaryInfo_.summary;
+}
+
+void DragEvent::SetSummaryInfo(const DragSummaryInfo& summaryInfo)
+{
+    summaryInfo_ = summaryInfo;
+}
+
+const DragSummaryInfo& DragEvent::GetSummaryInfo() const
+{
+    return summaryInfo_;
 }
 
 void DragEvent::SetResult(DragRet dragRet)

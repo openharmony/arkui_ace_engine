@@ -74,6 +74,7 @@ private:
 };
 
 class CJScrollableTargetInfo : public CJEventTargetInfo {
+    DECL_TYPE(CJScrollableTargetInfo, CJEventTargetInfo)
 public:
     CJScrollableTargetInfo() : CJEventTargetInfo() {}
 
@@ -155,6 +156,7 @@ protected:
 };
 
 class CJMultiFingerRecognizer : public CJGestureRecognizer {
+    DECL_TYPE(CJMultiFingerRecognizer, CJGestureRecognizer)
 public:
     CJMultiFingerRecognizer() : CJGestureRecognizer() {}
 
@@ -167,6 +169,7 @@ public:
 };
 
 class CJPanRecognizer : public CJMultiFingerRecognizer {
+    DECL_TYPE(CJPanRecognizer, CJMultiFingerRecognizer)
 public:
     CJPanRecognizer() : CJMultiFingerRecognizer() {}
 

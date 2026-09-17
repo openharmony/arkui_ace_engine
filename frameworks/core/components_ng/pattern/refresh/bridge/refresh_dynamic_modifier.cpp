@@ -340,9 +340,7 @@ void SetBuilder(ArkUINodeHandle node, void* callback)
             NG::ScopedViewStackProcessor scopedViewStackProcessor;
             (*builderFunc)();
             auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            if (customNode) {
-                RefreshModelNG::SetCustomBuilderNode(frameNode, customNode);
-            }
+            RefreshModelNG::SetCustomBuilderNode(frameNode, customNode);
         }
     }
 }

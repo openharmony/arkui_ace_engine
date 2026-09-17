@@ -891,12 +891,26 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest017, TestSize.Level1)
      */
     auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
+    DragSummaryInfo summaryInfo;
+    summaryInfo.summary = { { "general.file", 2 } };
+    summaryInfo.filenameExtensions = { ".jpg", ".png" };
+    dragDropManager->SetSummaryInfo(summaryInfo);
 
     /**
      * @tc.steps: step3. call UpdateDragEvent.
      * @tc.expected: pipeline is not null.
      */
     dragDropManager->UpdateDragEvent(event, DragPointerEvent(1, 1));
+    EXPECT_EQ(event->GetSummary(), summaryInfo.summary);
+    EXPECT_EQ(event->GetSummaryInfo().filenameExtensions, summaryInfo.filenameExtensions);
+    auto notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    dragDropManager->UpdateNotifyDragEvent(notifyEvent, Point(), DragEventType::MOVE);
+    EXPECT_EQ(notifyEvent->GetSummaryInfo().filenameExtensions, summaryInfo.filenameExtensions);
+    dragDropManager->ResetPullId();
+    EXPECT_TRUE(dragDropManager->summaryMap_.empty());
+    EXPECT_TRUE(dragDropManager->dragSummaryInfo_.filenameExtensions.empty());
+    dragDropManager->SetSummaryMap(summaryInfo.summary);
+    EXPECT_EQ(dragDropManager->dragSummaryInfo_.summary, summaryInfo.summary);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
 }

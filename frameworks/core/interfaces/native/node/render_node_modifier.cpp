@@ -134,6 +134,7 @@ void ClearBuilderNode(ArkUINodeHandle node)
 void ClearChildren(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
     currentNode->Clean();
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }

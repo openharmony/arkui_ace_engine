@@ -707,4 +707,58 @@ HWTEST_F(ScrollableUtilsTest, IsChildLazy006, TestSize.Level1)
     bool isLazy = ScrollableUtils::IsChildLazy(scrollable, childIndex);
     EXPECT_EQ(isLazy, false);
 }
+
+/**
+ * @tc.name: GetMoveOffset007
+ * @tc.desc: Test GetMoveOffset uses scaled size from GetPaintRectWithTransform when child has transform scale.
+ *           Previously GetFrameSize (unscaled) was used, causing inconsistent offset/size when scale is applied.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, GetMoveOffset007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create parent List and child Button with scale.
+     *   Parent at origin, frame size = parentFrameSize.
+     *   Button frame size = childFrameSize (layout, unscaled).
+     *   Button paintRectWithTransform = childOffset + childScaledSize (relative to parent, scaled).
+     *   Button right edge = childOffset + childScaledWidth, beyond parent's viewport.
+     * @tc.expected: GetMoveOffset should use the scaled size (childScaledWidth) to calculate
+     *   scroll offset, producing a more negative value than if unscaled size (childFrameWidth)
+     *   were used. This anchors the behavior fixed by switching from GetFrameSize to
+     *   GetPaintRectWithTransform().GetSize().
+     */
+    constexpr float parentWidth = 642.0f;
+    constexpr float parentHeight = 120.0f;
+    constexpr float childFrameWidth = 180.0f;
+    constexpr float childFrameHeight = 90.0f;
+    constexpr float childScale = 1.3f;
+    constexpr float childScaledWidth = childFrameWidth * childScale;   // 234.0
+    constexpr float childScaledHeight = childFrameHeight * childScale; // 117.0
+    constexpr float childOffsetX = 650.0f; // beyond parent viewport
+    constexpr float focusMarginPx = 5.0f;  // FOCUS_SCROLL_MARGIN (5.0_vp) at density 1.0
+
+    auto parentFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    parentFrameNode->geometryNode_->SetFrameSize({ parentWidth, parentHeight });
+    parentFrameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(parentFrameNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 0, parentWidth, parentHeight));
+
+    auto curFrameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    curFrameNode->geometryNode_->SetFrameSize({ childFrameWidth, childFrameHeight });
+    curFrameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(curFrameNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(childOffsetX, 0, childScaledWidth, childScaledHeight));
+    parentFrameNode->AddChild(curFrameNode);
+
+    MoveOffsetParam param { false, 0.0f, 0.0f, false };
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
+
+    // With fix (scaled size): moveOffset = parentWidth - childOffsetX - childScaledWidth - focusMarginPx
+    // Without fix (unscaled):  moveOffset = parentWidth - childOffsetX - childFrameWidth - focusMarginPx
+    // The fix produces a more negative offset by (childScaledWidth - childFrameWidth) = 54.0
+    constexpr float expectedWithFix = parentWidth - childOffsetX - childScaledWidth - focusMarginPx;
+    constexpr float expectedWithoutFix = parentWidth - childOffsetX - childFrameWidth - focusMarginPx;
+    EXPECT_NEAR(moveOffset, expectedWithFix, 0.5f);
+    EXPECT_NE(moveOffset, expectedWithoutFix);
+}
 } // namespace OHOS::Ace::NG

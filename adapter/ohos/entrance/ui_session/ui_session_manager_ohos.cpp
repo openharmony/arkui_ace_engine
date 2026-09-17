@@ -315,6 +315,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
         if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component change event failed, process id:%{public}d", pair.first);
@@ -341,6 +342,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             if (isClickGestureEvent) {
                 LOGI("[UiSessionManagerOhos] ReportComponentChangeEvent gesture eventType:%{public}u nodeId:%{public}d",
                     eventType, nodeId);
@@ -419,7 +421,7 @@ void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
     }
 }
 
-void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
+void UiSessionManagerOhos::SaveReportProxy(sptr<IRemoteObject> reportProxy, int32_t processId)
 {
     // add death callback
     auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
@@ -460,8 +462,9 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
             std::lock_guard<std::mutex> lock(pageSceneMutex_);
             if (pageSceneRuleSets_.erase(processId) > 0) {
                 ErasePendingPageSceneRulesLocked(processId);
-                auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
-                if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
+                pageSceneRuleRegistered_.store(
+                    HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE));
+                if (!pageSceneRuleRegistered_.load()) {
                     pendingPageSceneDetectRules_.clear();
                 }
             }
@@ -477,9 +480,11 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
             webPageSceneFunc(WebPageSceneOp::UnregisterRules, processId, "", false);
         }
     });
-    reportStub->AddDeathRecipient(uiReportProxyRecipient);
+    // In the application process, reportProxy refers to the SA-side UiReportStub.
+    // Listen for remote SA death through this proxy and clean up local report registrations.
+    reportProxy->AddDeathRecipient(uiReportProxyRecipient);
     std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    reportObjectMap_[processId] = reportStub;
+    reportObjectMap_[processId] = reportProxy;
 }
 
 int32_t UiSessionManagerOhos::RegisterWebPageSceneRules(int32_t processId, const std::string& ruleJson)
@@ -499,7 +504,8 @@ int32_t UiSessionManagerOhos::RegisterWebPageSceneRules(int32_t processId, const
         {
             std::lock_guard<std::mutex> lock(pageSceneMutex_);
             pageSceneRuleSets_.erase(processId);
-            pageSceneRuleRegisterProcesses_.fetch_sub(1);
+            pageSceneRuleRegistered_.store(
+                HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE));
         }
         EraseProcessId("pageScene", processId);
     }
@@ -532,7 +538,7 @@ int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const st
             return LAST_UNFINISH;
         }
         pageSceneRuleSets_[processId] = ruleSetInfo;
-        pageSceneRuleRegisterProcesses_.fetch_add(1);
+        pageSceneRuleRegistered_.store(true);
     }
     SaveProcessId("pageScene", processId);
     auto registerRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, true, "");
@@ -559,8 +565,9 @@ int32_t UiSessionManagerOhos::UnregisterPageSceneRules(int32_t processId, const 
         }
         pageSceneRuleSets_.erase(iter);
         ErasePendingPageSceneRulesLocked(processId);
-        auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
-        if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
+        pageSceneRuleRegistered_.store(
+            HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE));
+        if (!pageSceneRuleRegistered_.load()) {
             pendingPageSceneDetectRules_.clear();
         }
         pendingPageSceneGets_.erase(processId);
@@ -649,7 +656,7 @@ int32_t UiSessionManagerOhos::GetPageScene(int32_t processId, const std::string&
 
 bool UiSessionManagerOhos::GetPageSceneRulesRegistered()
 {
-    return pageSceneRuleRegisterProcesses_.load() > 0 ? true : false;
+    return pageSceneRuleRegistered_.load();
 }
 
 void UiSessionManagerOhos::ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult)
@@ -703,7 +710,7 @@ void UiSessionManagerOhos::NotifyPageSceneNodeStateChanged(
     const std::string& nodeTag, PageSceneNodeStateChange stateChange)
 {
     if ((stateChange == PageSceneNodeStateChange::FOCUSABILITY &&
-            !IsPageSceneInputControlNode(nodeTag)) || pageSceneRuleRegisterProcesses_.load() <= 0) {
+            !IsPageSceneInputControlNode(nodeTag)) || !pageSceneRuleRegistered_.load()) {
         return;
     }
     auto ruleJsons = GetPageSceneRuleJsonsForNodeStateChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE, stateChange);
@@ -1004,140 +1011,103 @@ std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneR
 
 void UiSessionManagerOhos::SetClickEventRegistered(bool status)
 {
-    if (status) {
-        clickEventRegisterProcesses_.fetch_add(1);
-    } else {
-        clickEventRegisterProcesses_.fetch_sub(1);
-    }
+    clickEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetSearchEventRegistered(bool status)
 {
-    if (status) {
-        searchEventRegisterProcesses_.fetch_add(1);
-    } else {
-        searchEventRegisterProcesses_.fetch_sub(1);
-    }
+    searchEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetTextChangeEventRegistered(bool status)
 {
-    if (status) {
-        textChangeEventRegisterProcesses_.fetch_add(1);
-    } else {
-        textChangeEventRegisterProcesses_.fetch_sub(1);
-    }
+    textChangeEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetRouterChangeEventRegistered(bool status)
 {
-    if (status) {
-        routerChangeEventRegisterProcesses_.fetch_add(1);
-    } else {
-        routerChangeEventRegisterProcesses_.fetch_sub(1);
-    }
+    routerChangeEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
 {
+    componentChangeEventRegistered_.store(status);
     if (status) {
-        componentChangeEventRegisterProcesses_.fetch_add(1);
         LOGI("SetComponentChangeEventRegistered register component change event");
     } else {
-        componentChangeEventRegisterProcesses_.fetch_sub(1);
         LOGI("SetComponentChangeEventRegistered unregister component change event");
     }
 }
 
 void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
 {
-    componentChangeEventMask_ = mask;
+    componentChangeEventMask_.store(mask);
     LOGI("SetComponentChangeEventMask mask:%{public}u", mask);
 }
 
 void UiSessionManagerOhos::SetScrollEventRegistered(bool status)
 {
-    if (status) {
-        scrollEventRegisterProcesses_.fetch_add(1);
-    } else {
-        scrollEventRegisterProcesses_.fetch_sub(1);
-    }
+    scrollEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetLifeCycleEventRegistered(bool status)
 {
-    if (status) {
-        lifeCycleEventRegisterProcesses_.fetch_add(1);
-    } else {
-        lifeCycleEventRegisterProcesses_.fetch_sub(1);
-    }
+    lifeCycleEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetSelectTextEventRegistered(bool status)
 {
-    if (status) {
-        selectTextEventRegisterProcesses_.fetch_add(1);
-    } else {
-        selectTextEventRegisterProcesses_.fetch_sub(1);
-    }
-    LOGD("SetSelectTextEventRegistered selectTextEventRegisterProcesses_: %{public}d",
-        selectTextEventRegisterProcesses_.load());
+    selectTextEventRegistered_.store(status);
+    LOGD("SetSelectTextEventRegistered registered: %{public}d", status);
 }
 
 bool UiSessionManagerOhos::GetClickEventRegistered()
 {
-    return clickEventRegisterProcesses_.load() > 0 ? true : false;
+    return clickEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetSearchEventRegistered()
 {
-    return searchEventRegisterProcesses_.load() > 0 ? true : false;
+    return searchEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetTextChangeEventRegistered()
 {
-    return textChangeEventRegisterProcesses_.load() > 0 ? true : false;
+    return textChangeEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetRouterChangeEventRegistered()
 {
-    return routerChangeEventRegisterProcesses_.load() > 0 ? true : false;
+    return routerChangeEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 {
-    return componentChangeEventRegisterProcesses_.load() > 0 ? true : false;
+    return componentChangeEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::NeedComponentChangeTypeReporting(uint32_t eventType)
 {
-    return (componentChangeEventMask_ & eventType) != 0;
+    return (componentChangeEventMask_.load() & eventType) != 0;
 }
 
 bool UiSessionManagerOhos::GetScrollEventRegistered()
 {
-    return scrollEventRegisterProcesses_.load() > 0 ? true : false;
+    return scrollEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetLifeCycleEventRegistered()
 {
-    return lifeCycleEventRegisterProcesses_.load() > 0 ? true : false;
+    return lifeCycleEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetSelectTextEventRegistered()
 {
-    return selectTextEventRegisterProcesses_.load() > 0 ? true : false;
+    return selectTextEventRegistered_.load();
 }
 
 void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)
 {
-    webTaskNums_.store(0);
-    WebTaskNumsChange(1);
-    {
-        std::lock_guard<std::mutex> lock(jsonValueMutex_);
-        jsonValue_ = InspectorJsonUtil::Create(true);
-    }
-
     InspectorFunction inspectorFunction;
     {
         std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
@@ -1164,38 +1134,6 @@ void UiSessionManagerOhos::SaveInspectorTreeFunction(InspectorFunction&& functio
 {
     std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
     inspectorFunction_ = std::move(function);
-}
-
-void UiSessionManagerOhos::AddValueForTree(int32_t id, const std::string& value)
-{
-    std::lock_guard<std::mutex> lock(jsonValueMutex_);
-    if (!jsonValue_) {
-        LOGW("AddValueForTree jsonValue is nullptr");
-        return;
-    }
-    std::string key = std::to_string(id);
-    if (jsonValue_->Contains(key)) {
-        jsonValue_->Replace(key.c_str(), value.c_str());
-    } else {
-        jsonValue_->Put(key.c_str(), value.c_str());
-    }
-}
-
-void UiSessionManagerOhos::WebTaskNumsChange(int32_t num)
-{
-    webTaskNums_.fetch_add(num);
-    if (webTaskNums_.load() == 0) {
-        std::string data;
-        {
-            std::lock_guard<std::mutex> lock(jsonValueMutex_);
-            if (!jsonValue_) {
-                LOGW("WebTaskNumsChange jsonValue is nullptr");
-                return;
-            }
-            data = jsonValue_->ToString();
-        }
-        ReportInspectorTreeValue(data);
-    }
 }
 
 void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
@@ -1972,11 +1910,21 @@ void UiSessionManagerOhos::SendCommand(const std::string& command)
     }
 
     auto value = json->GetValue("cmd");
-    if (sendCommandFunction_ && value && value->IsNumber()) {
+    SendCommandFunction sendCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(sendCommandFunctionMutex_);
+        sendCommandFunction = sendCommandFunction_;
+    }
+    RelaxedCommandFunction relaxedCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
+        relaxedCommandFunction = relaxedCommandFunction_;
+    }
+    if (sendCommandFunction && value && value->IsNumber()) {
         int32_t cmdNumber = value->GetInt();
-        sendCommandFunction_(cmdNumber);
-    } else if (relaxedCommandFunction_) {
-        relaxedCommandFunction_(command);
+        sendCommandFunction(cmdNumber);
+    } else if (relaxedCommandFunction) {
+        relaxedCommandFunction(command);
     } else {
         LOGW("SendCommand failed");
     }
@@ -1990,6 +1938,7 @@ void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& functio
 
 void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
     relaxedCommandFunction_ = std::move(function);
 }
 

@@ -424,6 +424,7 @@ public:
     void HandleContentSizeChange(const RectF& textRect);
     void UpdateRichTextRect(const std::optional<RectF>& richTextRectOpt);
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void HandleEditingDeleteEvent(const std::shared_ptr<TextEditingValue>& value);
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     bool IsIMEOperation(OperationType operationType);
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
@@ -736,6 +737,7 @@ public:
     void DumpInfo() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpPageTranslateInfo();
     void RichEditorErrorReport(RichEditorInfo& info);
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);

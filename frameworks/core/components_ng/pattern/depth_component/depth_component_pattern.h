@@ -58,7 +58,7 @@ class ACE_EXPORT DepthComponentPattern : public Pattern {
 
 public:
     DepthComponentPattern() = default;
-    ~DepthComponentPattern() override = default;
+    ~DepthComponentPattern() override;
 
     bool IsAtomicNode() const override
     {
@@ -223,6 +223,7 @@ private:
     void UpdateGltfWindowChange(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
     void CleanupGltfResources(bool clearAdapter = false);
     void CreateNativeSurfaces(float width, float height);
+    void ClearNativeSurfaceNodeBuffer();
     Render3D::WindowChangeInfo GetWindowChangeInfos(float width, float height) const;
     void UpdateWindowChangeSize(bool recreateWindow);
     bool NeedUpdateWindowInfo();

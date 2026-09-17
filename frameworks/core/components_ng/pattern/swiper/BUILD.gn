@@ -23,6 +23,7 @@ build_component_ng("swiper_pattern_ng") {
     "swiper_event_hub.cpp",
     "swiper_helper.cpp",
     "swiper_layout_algorithm.cpp",
+    "swiper_layout_property.cpp",
     "swiper_model_ng.cpp",
     "swiper_model_static.cpp",
     "swiper_paint_method.cpp",

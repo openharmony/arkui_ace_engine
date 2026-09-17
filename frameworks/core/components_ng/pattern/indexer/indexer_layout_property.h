@@ -134,6 +134,7 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void WithThemeValueCheck(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActualArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
@@ -167,6 +168,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupItemBackgroundColorByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupBackgroundBlurStyleByUser, bool, PROPERTY_UPDATE_NORMAL);
 
+    std::unordered_map<std::string, Color> indexerThemeColors_;
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);
     static std::string AlignStyleToString(const AlignStyle& alignStyle);

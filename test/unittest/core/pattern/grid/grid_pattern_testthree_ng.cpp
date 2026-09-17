@@ -69,6 +69,18 @@ private:
     bool lastIsCache_ = false;
 };
 
+class GridNullChildLayoutWrapper : public LayoutWrapperNode {
+public:
+    GridNullChildLayoutWrapper()
+        : LayoutWrapperNode(nullptr, MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>())
+    {}
+
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override
+    {
+        return nullptr;
+    }
+};
+
 /**
  * @tc.name: SkipRegularLines001
  * @tc.desc: Test GridScrollLayoutAlgorithm SkipRegularLines
@@ -564,6 +576,74 @@ HWTEST_F(GridTestThreeNg, CompleteItemCrossPosition001, TestSize.Level1)
     ASSERT_EQ(layout->itemsCrossPosition_.size(), 2);
     EXPECT_EQ(layout->itemsCrossPosition_.at(0), 0.0f);
     EXPECT_EQ(layout->itemsCrossPosition_.at(1), 110.0f);
+}
+
+/**
+ * @tc.name: CompleteItemCrossPositionEmptyList001
+ * @tc.desc: Insert into an empty predictBuildList_ without touching back()/front()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestThreeNg, CompleteItemCrossPositionEmptyList001, TestSize.Level1)
+{
+    GridLayoutInfo gridLayoutInfo;
+    auto layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
+    ASSERT_NE(layout, nullptr);
+    layout->itemsCrossSize_[0] = 100.0f;
+    layout->crossGap_ = 10.0f;
+    ASSERT_TRUE(layout->predictBuildList_.empty());
+
+    const std::map<int32_t, int32_t> items = { { 0, 5 } };
+    GridNullChildLayoutWrapper layoutWrapper;
+    layout->CompleteItemCrossPosition(&layoutWrapper, items);
+
+    ASSERT_EQ(layout->predictBuildList_.size(), 1);
+    EXPECT_EQ(layout->predictBuildList_.front().idx, 5);
+}
+
+/**
+ * @tc.name: CompleteItemCrossPositionInsertFront002
+ * @tc.desc: Non-empty list, back().idx < currentIndex -> emplace_front
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestThreeNg, CompleteItemCrossPositionInsertFront002, TestSize.Level1)
+{
+    GridLayoutInfo gridLayoutInfo;
+    auto layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
+    ASSERT_NE(layout, nullptr);
+    layout->itemsCrossSize_[0] = 100.0f;
+    layout->crossGap_ = 10.0f;
+    layout->predictBuildList_.emplace_back(3);
+
+    const std::map<int32_t, int32_t> items = { { 0, 5 } };
+    GridNullChildLayoutWrapper layoutWrapper;
+    layout->CompleteItemCrossPosition(&layoutWrapper, items);
+
+    ASSERT_EQ(layout->predictBuildList_.size(), 2);
+    EXPECT_EQ(layout->predictBuildList_.front().idx, 5);
+    EXPECT_EQ(layout->predictBuildList_.back().idx, 3);
+}
+
+/**
+ * @tc.name: CompleteItemCrossPositionInsertBack003
+ * @tc.desc: Non-empty list, front().idx > currentIndex -> emplace_back
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestThreeNg, CompleteItemCrossPositionInsertBack003, TestSize.Level1)
+{
+    GridLayoutInfo gridLayoutInfo;
+    auto layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
+    ASSERT_NE(layout, nullptr);
+    layout->itemsCrossSize_[0] = 100.0f;
+    layout->crossGap_ = 10.0f;
+    layout->predictBuildList_.emplace_back(8);
+
+    const std::map<int32_t, int32_t> items = { { 0, 5 } };
+    GridNullChildLayoutWrapper layoutWrapper;
+    layout->CompleteItemCrossPosition(&layoutWrapper, items);
+
+    ASSERT_EQ(layout->predictBuildList_.size(), 2);
+    EXPECT_EQ(layout->predictBuildList_.front().idx, 8);
+    EXPECT_EQ(layout->predictBuildList_.back().idx, 5);
 }
 
 /**

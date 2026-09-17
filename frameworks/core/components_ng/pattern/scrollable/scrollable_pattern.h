@@ -1049,11 +1049,6 @@ public:
 
     ACE_FORCE_EXPORT void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
-    bool EnableCachePredictNodes() const override
-    {
-        return true;
-    }
-
 protected:
     ACE_FORCE_EXPORT void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
@@ -1299,6 +1294,7 @@ private:
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
+    std::unordered_set<int32_t> activeTouchFingerIds_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;

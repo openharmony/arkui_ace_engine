@@ -79,7 +79,7 @@ int32_t NGNativeTextAreaController::GetTextContentLinesNum()
 
 CJRectResult NGNativeTextAreaController::GetTextContentRect()
 {
-    CJRectResult result;
+    CJRectResult result {};
     if (controller_) {
         Rect rect = controller_->GetTextContentRect();
         result.x = rect.Left();
@@ -92,7 +92,7 @@ CJRectResult NGNativeTextAreaController::GetTextContentRect()
 
 CJCaretOffset NGNativeTextAreaController::GetCaretOffset()
 {
-    CJCaretOffset result;
+    CJCaretOffset result {};
     if (controller_) {
         NG::OffsetF caretOffset = controller_->GetCaretPosition();
         result.index = controller_->GetCaretIndex();
@@ -168,7 +168,7 @@ void FfiOHOSAceFrameworkTextAreaControllerSetTextSelection(
 
 CJRectResult FfiOHOSAceFrameworkTextAreaControllerGetTextContentRect(int64_t selfID)
 {
-    CJRectResult result;
+    CJRectResult result {};
     auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
     if (self != nullptr) {
         result = self->GetTextContentRect();
@@ -192,7 +192,7 @@ int32_t FfiOHOSAceFrameworkTextAreaControllerGetTextContentLineCount(int64_t sel
 
 CJCaretOffset FfiOHOSAceFrameworkTextAreaControllerGetCaretOffset(int64_t selfID)
 {
-    CJCaretOffset result;
+    CJCaretOffset result {};
     auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
     if (self != nullptr) {
         result = self->GetCaretOffset();

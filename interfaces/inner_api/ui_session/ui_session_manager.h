@@ -43,7 +43,6 @@ class PixelMap;
 } // namespace Media
 } // namespace OHOS
 namespace OHOS::Ace {
-class InspectorJsonValue;
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
     using InspectorFunction = std::function<void(bool onlyNeedVisible, ParamConfig config)>;
@@ -139,8 +138,6 @@ public:
      * @description: get current page inspector tree value
      */
     virtual void GetInspectorTree(ParamConfig config = ParamConfig()) {};
-    virtual void AddValueForTree(int32_t id, const std::string& value) {};
-    virtual void WebTaskNumsChange(int32_t num) {};
     virtual void ReportInspectorTreeValue(const std::string& value) {};
     virtual void SaveForSendCommandFunction(NotifySendCommandFunction&& function) {};
     virtual void SaveForSendCommandSyncFunction(NotifySendCommandSyncFunction&& function) {};
@@ -329,16 +326,16 @@ protected:
 
     std::map<std::string, std::set<int32_t>> processMap_;
     std::shared_mutex processMapMutex_;
-    std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
-    uint32_t componentChangeEventMask_ = 0;
-    std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
-    std::atomic<int32_t> pageSceneRuleRegisterProcesses_ = 0;
+    std::atomic<bool> clickEventRegistered_ = false;
+    std::atomic<bool> searchEventRegistered_ = false;
+    std::atomic<bool> textChangeEventRegistered_ = false;
+    std::atomic<bool> routerChangeEventRegistered_ = false;
+    std::atomic<bool> componentChangeEventRegistered_ = false;
+    std::atomic<uint32_t> componentChangeEventMask_ { 0 };
+    std::atomic<bool> scrollEventRegistered_ = false;
+    std::atomic<bool> lifeCycleEventRegistered_ = false;
+    std::atomic<bool> selectTextEventRegistered_ = false;
+    std::atomic<bool> pageSceneRuleRegistered_ = false;
     bool webFocusEventRegistered = false;
     std::mutex webFocusEventRegisteredMutex_;
     InspectorFunction inspectorFunction_ = 0;
@@ -357,9 +354,6 @@ protected:
     std::mutex notifySendCommandSyncFunctionMutex_;
     GetStateMgmtInfoFunction getStateMgmtInfoFunction_ = 0;
     std::mutex getStateMgmtInfoFunctionMutex_;
-    std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
-    std::mutex jsonValueMutex_;
-    std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
     std::mutex baseInfoMutex_;
     std::map<int32_t, std::shared_ptr<UiTranslateManager>> translateManagerMap_;
@@ -396,6 +390,7 @@ protected:
     PageTranslateResultFunction sendArkUIPageTranslateResultFunction_;
     std::mutex arkUIPageTranslateFunctionMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
+    std::mutex relaxedCommandFunctionMutex_;
     PageSceneDetectFunction pageSceneDetectFunction_;
     std::mutex pageSceneDetectFunctionMutex_;
     WebPageSceneFunction webPageSceneFunction_;

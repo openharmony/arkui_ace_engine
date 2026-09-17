@@ -640,6 +640,22 @@ void SheetSetSheetBlurSnapshotFreeze(const RefPtr<FrameNode>& sheetPageNode, con
             sheetStyle.blurSnapshotOptions.has_value() && sheetStyle.blurSnapshotOptions->enableFreeze.value_or(false));
     }
 }
+
+void SheetUpdateSheetScrollBar(const RefPtr<FrameNode>& sheetPageNode, const SheetStyle& sheetStyle)
+{
+    CHECK_NULL_VOID(sheetPageNode);
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->UpdateSheetScrollBar(sheetStyle);
+}
+
+bool SheetIsOnDisappearing(const RefPtr<FrameNode>& sheetNode)
+{
+    CHECK_NULL_RETURN(sheetNode, false);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, false);
+    return sheetPattern->IsOnDisappearing();
+}
 } // namespace
 
 const ArkUISheetPatternInnerModifier* GetSheetPatternInnerModifier()
@@ -718,6 +734,8 @@ const ArkUISheetPatternInnerModifier* GetSheetPatternInnerModifier()
         .sheetDismissSheetAction = SheetDismissSheetAction,
         .sheetIsPresentationPattern = SheetIsPresentationPattern,
         .sheetSetSheetBlurSnapshotFreeze = SheetSetSheetBlurSnapshotFreeze,
+        .sheetUpdateSheetScrollBar = SheetUpdateSheetScrollBar,
+        .sheetIsOnDisappearing = SheetIsOnDisappearing,
     };
     return &modifier;
 }

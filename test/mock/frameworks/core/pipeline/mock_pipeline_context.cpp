@@ -342,6 +342,17 @@ PipelineContext::PipelineContext(): safeAreaManager_(MakeRefPtr<SafeAreaManager>
     }
 }
 
+// Host test binary does not link the real pipeline_context.cpp; provide the same lazy
+// creation so syntax-side observation hooks resolve and exercise the real manager.
+const RefPtr<ScrollPlaceholderManager>& PipelineContext::GetOrCreateScrollPlaceholderManager()
+{
+    if (!scrollPlaceholderManager_) {
+        scrollPlaceholderManager_ = MakeRefPtr<ScrollPlaceholderManager>(instanceId_);
+        scrollPlaceholderManager_->SetPipelineContext(WeakClaim(this));
+    }
+    return scrollPlaceholderManager_;
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
@@ -632,7 +643,7 @@ void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
@@ -1526,7 +1537,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount) {}
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {}
 
 bool PipelineBase::ReachResponseDeadline() const
 {

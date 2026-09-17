@@ -25,6 +25,7 @@
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeCanvasPath : public OHOS::FFI::FFIData {
+    DECL_TYPE(NativeCanvasPath, OHOS::FFI::FFIData)
 public:
     NativeCanvasPath();
     explicit NativeCanvasPath(const std::string& capStr);

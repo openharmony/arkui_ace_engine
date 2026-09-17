@@ -36,6 +36,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -1165,6 +1166,28 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(const OHOS::Rosen::AvoidAre
             delegate->OnAvoidAreaChanged(avoidArea, type);
         },
         TaskExecutor::TaskType::UI, "OnAvoidAreaChanged");
+}
+
+bool WebDelegate::MaybeRelease()
+{
+    if (taskExecutor_ == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "MaybeRelease taskExecutor_ is null, use main EventRunner to destroy");
+        auto mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+        if (mainRunner == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_WEB,
+                "MaybeRelease mainRunner is null, destroy WebDelegate on current thread");
+            return true;
+        }
+        auto mainHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(mainRunner);
+        return !mainHandler->PostTask([this] { delete this; }, "ArkUIWebDelegateDestroy");
+    }
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Destroy WebDelegate on UI thread.");
+        return true;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Post destroy WebDelegate task to UI thread.");
+    return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI,
+        "ArkUIWebDelegateDestroy");
 }
 
 WebDelegate::~WebDelegate()
@@ -3217,6 +3240,7 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
+            delegate->SetClickExtEnabled();
 
             delegate->JavaScriptOnDocumentStartByOrder();
             delegate->JavaScriptOnDocumentEndByOrder();
@@ -3253,6 +3277,7 @@ void WebDelegate::InitWebViewWithWindow()
             auto vaultPlainTextImpl = std::make_shared<VaultPlainTextImpl>(Container::CurrentId());
             vaultPlainTextImpl->SetWebDelegate(weak);
             delegate->nweb_->PutVaultPlainTextCallback(vaultPlainTextImpl);
+            delegate->nweb_->SetTransformHint(delegate->rotation_);
 
             std::optional<std::string> src;
             auto isNewPipe = Container::IsCurrentUseNewPipeline();
@@ -3795,6 +3820,7 @@ void WebDelegate::InitWebViewWithSurface()
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
+            delegate->SetClickExtEnabled();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             CHECK_NULL_VOID(delegate->cookieManager_);
             auto nweb_handler = std::make_shared<WebClientImpl>();
@@ -3838,6 +3864,8 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->RegisterDisplayInfoChange();
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetFitContentMode(layoutMode);
+            delegate->nweb_->SetTransformHint(delegate->rotation_);
+
             delegate->RegisterConfigObserver();
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
@@ -4927,6 +4955,25 @@ void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetCssDisplayChangeEnabled");
 }
 
+void WebDelegate::UpdateTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isTransformRotateAndSkewEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetTransformRotateAndSkewEnabled(isTransformRotateAndSkewEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetTransformRotateAndSkewEnabled");
+}
+
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag)
 {
     auto context = context_.Upgrade();
@@ -5731,6 +5778,12 @@ void WebDelegate::OnLoadStarted(const std::string& param)
             CHECK_NULL_VOID(webEventHub);
             webEventHub->FireOnLoadStartedEvent(std::make_shared<LoadStartedEvent>(param));
             delegate->RecordWebEvent(Recorder::EventType::LOAD_STARTED, param);
+            if (webPattern->ShouldEnableAgentManager()) {
+                auto agentManager = delegate->GetNWebAgentManager();
+                if (agentManager && !agentManager->IsAgentEnabled()) {
+                    webPattern->EnableAgentManager();
+                }
+            }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebLoadStarted");
 }
@@ -6337,6 +6390,9 @@ void WebDelegate::OnAccessibilityEvent(
             CHECK_NULL_VOID(report);
             report->ReportEvent(eventType, accessibilityId);
         }
+        if (eventType == AccessibilityEventType::TEXT_CHANGE) {
+            FillTextChangeExtraInfo(event, accessibilityId);
+        }
         event.nodeId = accessibilityId;
         event.type = eventType;
         accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
@@ -6347,6 +6403,20 @@ void WebDelegate::OnAccessibilityEvent(
         event.type = eventType;
         accessibilityManager->SendAccessibilityAsyncEvent(event);
     }
+}
+
+void WebDelegate::FillTextChangeExtraInfo(AccessibilityEvent& event, int64_t accessibilityId)
+{
+    auto nWebAccessibilityNodeInfo = GetAccessibilityNodeInfoById(accessibilityId);
+    CHECK_NULL_VOID(nWebAccessibilityNodeInfo);
+    std::string addText = nWebAccessibilityNodeInfo->GetAddText();
+    std::string removeText = nWebAccessibilityNodeInfo->GetRemoveText();
+    event.extraEventInfo["addText"] = addText;
+    event.extraEventInfo["removeText"] = removeText;
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebDelegate::OnAccessibilityEvent FillTextChangeExtraInfo addText: %{private}s, removeText: %{private}s, "
+        "accessibilityId: %{public}" PRId64,
+        addText.c_str(), removeText.c_str(), accessibilityId);
 }
 
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
@@ -9915,9 +9985,10 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 
 void WebDelegate::SetTransformHint(uint32_t rotation)
 {
+    rotation_ = rotation;
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->SetTransformHint(rotation);
+        nweb_->SetTransformHint(rotation_);
     }
 }
 
@@ -9945,6 +10016,50 @@ void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOptimizeParserBudget");
+}
+
+std::vector<uint8_t> WebDelegate::SerializeWebState()
+{
+    std::vector<uint8_t> result;
+    auto context = context_.Upgrade();
+    if (!context) {
+        return result;
+    }
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "SerializeWebState WebId %{public}d", delegate->nweb_->GetWebId());
+                result = delegate->nweb_->SerializeWebState();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSerializeWebState");
+    return result;
+}
+
+bool WebDelegate::RestoreWebState(const std::vector<uint8_t>& state)
+{
+    bool result = false;
+    auto context = context_.Upgrade();
+    if (!context) {
+        return result;
+    }
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result, &state]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "RestoreWebState WebId %{public}d", delegate->nweb_->GetWebId());
+                result = delegate->nweb_->RestoreWebState(state);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRestoreWebState");
+    return result;
 }
 
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
@@ -10236,6 +10351,19 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist)
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->SetTouchHandleExistState(touchHandleExist);
+}
+
+void WebDelegate::SetClickExtEnabled()
+{
+    CHECK_NULL_VOID(nweb_);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(pipeline);
+    auto clickOptimizer = pipeline->GetClickOptimizer();
+    if (clickOptimizer) {
+        auto enable = clickOptimizer->GetClickExtEnabled();
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::SetClickExtEnabled enable: %{public}d", enable);
+        nweb_->SetClickExtEnabled(enable);
+    }
 }
 
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,

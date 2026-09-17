@@ -119,7 +119,10 @@ ace_unittest("full_screen_manager_test_ng") {
 ace_unittest("json_report_test_ng") {
   module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
-  sources = [ "json_report_test_ng.cpp" ]
+  sources = [
+    "json_report_test_ng.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/manager/event/json_child_report.cpp",
+  ]
 }
 
 ace_unittest("post_event_manager_test_ng") {
@@ -235,6 +238,12 @@ ace_unittest("scroll_adjust_manager_test_ng") {
   sources = [ "scroll_adjust_manager_test_ng.cpp" ]
 }
 
+ace_unittest("scroll_placeholder_manager_test_ng") {
+  module_name = "ScrollingSet-ScrollPlaceholder"
+  type = "new"
+  sources = [ "scroll_placeholder_manager_test_ng.cpp" ]
+}
+
 ace_unittest("safe_area_manager_test_ng") {
   module_name = "StateManagement-ComponentExtention"
   type = "new"
@@ -327,7 +336,18 @@ ace_unittest("content_change_manager_test_ng") {
     type = "host_components"
     cflags = [ "-fno-access-control" ]
   }
-  sources = [ "content_change_manager_test_ng.cpp" ]
+
+  # ContentChangeConfigImpl Parcelable compatibility tests must run against the REAL
+  # c_utils Parcel (trailing-field guard relies on GetReadableBytes/strict read-failure
+  # semantics). The adapter suite ui_content_stub_unittest is bound to the functional
+  # mock Parcel (test/mock/ohos_mock/c_utils), where these semantics differ, so the
+  # config impl sources are hosted here on purpose (Feat-01 plan Revision 1).
+  external_deps = [ "c_utils:utils" ]
+  sources = [
+    "$ace_root/adapter/ohos/entrance/ui_session/content_change_config_impl.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/ui_session/content_change_config_impl_test.cpp",
+    "content_change_manager_test_ng.cpp",
+  ]
 }
 
 ace_unittest("recoverable_manager_test_ng") {
@@ -436,6 +456,7 @@ group("core_manager_unittest") {
     ":recoverable_manager_test_ng",
     ":safe_area_manager_test_ng",
     ":scroll_adjust_manager_test_ng",
+    ":scroll_placeholder_manager_test_ng",
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",

@@ -779,4 +779,31 @@ HWTEST_F(TextThirteenTestNg, PageTranslate_RestoreLastDrawnBeforeRegister, TestS
     }
     EXPECT_TRUE(pattern->lastDrawnPageTranslateContent_.empty());
 }
+
+/**
+ * @tc.name: TranslateListener_PipelineConsistency
+ * @tc.desc: Test RegisterTranslateListener caches pipeline and UnRegisterTranslateListener uses cached pipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, TranslateListener_PipelineConsistency, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 100, AceType::MakeRefPtr<TextPattern>());
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto mainPipeline = AceType::MakeRefPtr<PipelineContext>();
+    auto subPipeline = AceType::MakeRefPtr<PipelineContext>();
+
+    // Branch: register caches host->GetContext() as translatePipeline_
+    textNode->context_ = AceType::RawPtr(subPipeline);
+    pattern->RegisterTranslateListener();
+    auto cachedPipeline = pattern->translatePipeline_.Upgrade();
+    EXPECT_EQ(AceType::RawPtr(cachedPipeline), AceType::RawPtr(subPipeline));
+
+    // Branch: unregister uses translatePipeline_ instead of pipeline_ after context_ cleared
+    pattern->pipeline_ = mainPipeline;
+    textNode->context_ = nullptr;
+    pattern->UnRegisterTranslateListener(textNode->GetId());
+    cachedPipeline = pattern->translatePipeline_.Upgrade();
+    EXPECT_EQ(AceType::RawPtr(cachedPipeline), AceType::RawPtr(subPipeline));
+}
 } // namespace OHOS::Ace::NG

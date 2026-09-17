@@ -75,6 +75,21 @@ constexpr double SCROLLBARTHEME_WIDTH_VALUE_PX = 100.0;
 constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr int32_t FIRST_THRESHOLD = 4;
 
+void FireMultiTouchEvent(const TouchEventFunc& callback, int32_t changedFingerId, TouchType changedType,
+    const std::vector<std::pair<int32_t, TouchType>>& touches)
+{
+    TouchEventInfo info("default");
+    for (const auto& [fingerId, touchType] : touches) {
+        TouchLocationInfo touch(fingerId);
+        touch.SetTouchType(touchType);
+        info.AddTouchLocationInfo(std::move(touch));
+    }
+    TouchLocationInfo changedTouch(changedFingerId);
+    changedTouch.SetTouchType(changedType);
+    info.AddChangedTouchLocationInfo(std::move(changedTouch));
+    callback(info);
+}
+
 void ScrollableCoverTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
@@ -2010,6 +2025,64 @@ HWTEST_F(ScrollableCoverTestNg, InitTouchEvent001, TestSize.Level1)
     auto cancelInfo = createTouchEventInfo(TouchType::CANCEL);
     callback(cancelInfo);
     EXPECT_FALSE(scrollable->isTouching_);
+}
+
+/**
+ * @tc.name: InitTouchEventDifferentComponents001
+ * @tc.desc: A finger on another component does not prevent this component from handling its last touch up
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitTouchEventDifferentComponents001, TestSize.Level1)
+{
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<PartiallyMockedSelectableContainer>());
+    auto pattern = selectableNode->GetPattern<PartiallyMockedSelectableContainer>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetEnableEditMode(true);
+    pattern->AddScrollEvent();
+    auto scrollable = pattern->scrollableEvent_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    auto gestureHub = selectableNode->GetOrCreateGestureEventHub();
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+
+    FireMultiTouchEvent(callback, 0, TouchType::DOWN, { { 0, TouchType::DOWN } });
+    EXPECT_TRUE(scrollable->isTouching_);
+    EXPECT_EQ(pattern->activeTouchFingerIds_.size(), 1u);
+
+    FireMultiTouchEvent(callback, 0, TouchType::UP, { { 0, TouchType::UP }, { 1, TouchType::MOVE } });
+    EXPECT_FALSE(scrollable->isTouching_);
+    EXPECT_TRUE(pattern->activeTouchFingerIds_.empty());
+}
+
+/**
+ * @tc.name: InitTouchEventSameComponent001
+ * @tc.desc: Touch up is handled after the last finger received by the same component is released
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitTouchEventSameComponent001, TestSize.Level1)
+{
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<PartiallyMockedSelectableContainer>());
+    auto pattern = selectableNode->GetPattern<PartiallyMockedSelectableContainer>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetEnableEditMode(true);
+    pattern->AddScrollEvent();
+    auto scrollable = pattern->scrollableEvent_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    auto gestureHub = selectableNode->GetOrCreateGestureEventHub();
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+
+    FireMultiTouchEvent(callback, 0, TouchType::DOWN, { { 0, TouchType::DOWN } });
+    FireMultiTouchEvent(callback, 1, TouchType::DOWN, { { 0, TouchType::MOVE }, { 1, TouchType::DOWN } });
+    EXPECT_EQ(pattern->activeTouchFingerIds_.size(), 2u);
+
+    FireMultiTouchEvent(callback, 0, TouchType::UP, { { 0, TouchType::UP }, { 1, TouchType::MOVE } });
+    EXPECT_TRUE(scrollable->isTouching_);
+    EXPECT_EQ(pattern->activeTouchFingerIds_.size(), 1u);
+
+    FireMultiTouchEvent(callback, 1, TouchType::UP, { { 1, TouchType::UP } });
+    EXPECT_FALSE(scrollable->isTouching_);
+    EXPECT_TRUE(pattern->activeTouchFingerIds_.empty());
 }
 
 /**

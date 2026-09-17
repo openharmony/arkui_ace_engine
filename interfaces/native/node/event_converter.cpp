@@ -504,6 +504,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_RICH_EDITOR_ON_WILL_CHANGE;
         case NODE_TEXT_EDITOR_ON_DID_CHANGE:
             return ON_RICH_EDITOR_ON_DID_CHANGE;
+        case NODE_TEXT_EDITOR_ON_CONTENT_SCROLL:
+            return ON_RICH_EDITOR_ON_CONTENT_SCROLL;
+        case NODE_TEXT_EDITOR_ON_CONTENT_SIZE_CHANGE:
+            return ON_RICH_EDITOR_ON_CONTENT_SIZE_CHANGE;
         case NODE_ON_NEED_SOFTKEYBOARD:
             return ON_NEED_SOFTKEYBOARD;
         default:
@@ -878,6 +882,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_EDITOR_ON_WILL_CHANGE;
         case ON_RICH_EDITOR_ON_DID_CHANGE:
             return NODE_TEXT_EDITOR_ON_DID_CHANGE;
+        case ON_RICH_EDITOR_ON_CONTENT_SCROLL:
+            return NODE_TEXT_EDITOR_ON_CONTENT_SCROLL;
+        case ON_RICH_EDITOR_ON_CONTENT_SIZE_CHANGE:
+            return NODE_TEXT_EDITOR_ON_CONTENT_SIZE_CHANGE;
         case ON_NEED_SOFTKEYBOARD:
             return NODE_ON_NEED_SOFTKEYBOARD;
         default:

@@ -833,6 +833,10 @@ void IndexerModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>& 
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, Color, PROPERTY_UPDATE_NORMAL, frameNode);
     }
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->indexerThemeColors_.erase("color");
 }
 
 void IndexerModelNG::RemoveColor(FrameNode* frameNode)
@@ -850,6 +854,10 @@ void IndexerModelNG::SetPopupColor(FrameNode* frameNode, const std::optional<Col
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupColor, PROPERTY_UPDATE_NORMAL, frameNode);
     }
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->indexerThemeColors_.erase("popupColor");
 }
 
 void IndexerModelNG::RemovePopupColor(FrameNode* frameNode)
@@ -868,6 +876,10 @@ void IndexerModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             IndexerLayoutProperty, SelectedColor, PROPERTY_UPDATE_NORMAL, frameNode);
     }
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->indexerThemeColors_.erase("selectedColor");
 }
 
 void IndexerModelNG::RemoveSelectedColor(FrameNode* frameNode)
@@ -1086,4 +1098,11 @@ void IndexerModelNG::SetPopupBackgroundByUser(FrameNode* frameNode, bool isByUse
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupBackgroundColorByUser, isByUser, frameNode);
 }
 
+void IndexerModelNG::SetIndexerThemeColors(FrameNode* frameNode, const IndexerThemeColors& indexerThemeColors)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->indexerThemeColors_ = indexerThemeColors;
+}
 } // namespace OHOS::Ace::NG

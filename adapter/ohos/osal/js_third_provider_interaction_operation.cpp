@@ -732,14 +732,28 @@ bool JsThirdProviderInteractionOperation::ExecuteActionForThird(
     CHECK_NULL_RETURN(context, false);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(ngPipeline, false);
+    Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
+    bool actResult = false;
     if (action == static_cast<int32_t>(
         Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS)) {
-        jsAccessibilityManager->ActThirdAccessibilityFocus(
+        eventType = Accessibility::EventType::TYPE_VIEW_ACCESSIBILITY_FOCUSED_EVENT;
+        actResult = jsAccessibilityManager->ActThirdAccessibilityFocus(
             elementId, nodeInfo, hostNode, ngPipeline, false);
     } else if (action == static_cast<int32_t>(
         Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS)) {
-        jsAccessibilityManager->ActThirdAccessibilityFocus(
+        eventType = Accessibility::EventType::TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED_EVENT;
+        actResult = jsAccessibilityManager->ActThirdAccessibilityFocus(
             elementId, nodeInfo, hostNode, ngPipeline, true);
+    }
+    if (actResult && jsAccessibilityManager->IsScreenReaderEnabled() &&
+        eventType != Accessibility::EventType::TYPE_VIEW_INVALID) {
+        int64_t combinedElementId = elementId;
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(belongTreeId_, combinedElementId);
+        SendAccessibilityAsyncEventForThird(combinedElementId, eventType);
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+            "send accessibility componentType:%{public}s event:%{public}d action:%{public}d "
+            "accessibilityId:%{public}" PRId64,
+            nodeInfo.GetComponentType().c_str(), static_cast<int32_t>(eventType), action, combinedElementId);
     }
     return true;
 }

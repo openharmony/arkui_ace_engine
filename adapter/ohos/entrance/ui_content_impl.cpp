@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,7 @@
 #include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "adapter/ohos/entrance/ui_session/ui_session_batch_command.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/navigation_route_ohos.h"
@@ -6225,11 +6226,71 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
 
+void LogBatchItemDiagnostic(const BatchDiagnostic& diagnostic)
+{
+    if (diagnostic.hasNodeId) {
+        LOGW("UISession batch command failed: nodeId=%{public}d, reason=%{public}s, commandSummary=%{public}s, "
+             "valueLength=%{public}d",
+            diagnostic.nodeId, UiSessionBatchCommand::GetReasonName(diagnostic.reason),
+            UiSessionBatchCommand::GetSummaryName(diagnostic.commandSummary), diagnostic.valueLength);
+        return;
+    }
+    LOGW("UISession batch command failed: ordinal=%{public}zu, keyLength=%{public}zu, reason=%{public}s, "
+         "commandSummary=%{public}s, valueLength=%{public}d",
+        diagnostic.ordinal, diagnostic.keyLength, UiSessionBatchCommand::GetReasonName(diagnostic.reason),
+        UiSessionBatchCommand::GetSummaryName(diagnostic.commandSummary), diagnostic.valueLength);
+}
+
+void LogBatchLevelDiagnostic(const BatchLevelDiagnostic& diagnostic)
+{
+    LOGW("UISession batch failed: reason=%{public}s, commandCount=%{public}zu, commandLength=%{public}zu",
+        UiSessionBatchCommand::GetReasonName(diagnostic.reason), diagnostic.commandCount, diagnostic.commandLength);
+}
+
+bool IsSupportedBatchTextTarget(const RefPtr<NG::FrameNode>& node)
+{
+    const auto& tag = node->GetTag();
+    return tag == V2::TEXTINPUT_ETS_TAG || tag == V2::TEXTAREA_ETS_TAG || tag == V2::SEARCH_ETS_TAG ||
+           tag == V2::RICH_EDITOR_ETS_TAG;
+}
+
+BatchResolvedTarget ResolveBatchTextTarget(int32_t nodeId)
+{
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+    if (!uiNode) {
+        return { .status = BatchTargetStatus::NOT_FOUND };
+    }
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (!frameNode || !IsSupportedBatchTextTarget(frameNode)) {
+        return { .status = BatchTargetStatus::UNSUPPORTED_TYPE };
+    }
+    return { .status = BatchTargetStatus::READY, .execute = [frameNode](const std::string& command) {
+                return frameNode->OnRecvCommand(command) == NG::RET_SUCCESS;
+            } };
+}
+
+BatchDispatchCallbacks CreateBatchDispatchCallbacks(const RefPtr<TaskExecutor>& taskExecutor)
+{
+    BatchDispatchCallbacks callbacks;
+    if (taskExecutor) {
+        callbacks.postTask = [taskExecutor](std::function<void()>&& task) {
+            return taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "UiSessionBatchSendCommand");
+        };
+    }
+    callbacks.resolveTarget = ResolveBatchTextTarget;
+    callbacks.itemDiagnosticSink = LogBatchItemDiagnostic;
+    callbacks.batchDiagnosticSink = LogBatchLevelDiagnostic;
+    return callbacks;
+}
+
 void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifdef RELAXED_INTERACTION_SUPPORT
     auto relaxedCommandCallback = [weakTaskExecutor = taskExecutor](const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (UiSessionBatchCommand::Dispatch(command, CreateBatchDispatchCallbacks(taskExecutor))) {
+            return;
+        }
+#ifdef RELAXED_INTERACTION_SUPPORT
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [command]() {
@@ -6242,9 +6303,11 @@ void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& tas
                 pipelineContext->ProcessCommand(command);
             },
             TaskExecutor::TaskType::UI, "UiSessionRelaxedSendCommand");
+#else
+        LOGW("SendCommand failed: relaxed interaction is unsupported, commandLength=%{public}zu", command.size());
+#endif
     };
     UiSessionManager::GetInstance()->SaveRelaxedCommandFunction(relaxedCommandCallback);
-#endif
 }
 
 void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)

@@ -16,7 +16,7 @@
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 
 namespace OHOS::Ace {
-void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
+void UiSessionManagerOhos::SaveReportProxy(sptr<IRemoteObject> reportProxy, int32_t processId)
 {
 }
 } // namespace OHOS::Ace

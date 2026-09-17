@@ -2611,6 +2611,117 @@ void JSViewPopups::ParseSheetBlurSnapshotOptions(
     }
 }
 
+bool JSViewPopups::ParseSheetTitleBarBlurStyle(const JSRef<JSVal>& value, NG::SheetTitleBarBackgroundBlur& blurStyle)
+{
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto blurStyleValue = value->ToNumber<int32_t>();
+    if (blurStyleValue < static_cast<int32_t>(NG::SheetTitleBarBackgroundBlur::NONE) ||
+        blurStyleValue > static_cast<int32_t>(NG::SheetTitleBarBackgroundBlur::GRADIENT)) {
+        return false;
+    }
+    blurStyle = static_cast<NG::SheetTitleBarBackgroundBlur>(blurStyleValue);
+    return true;
+}
+
+void JSViewPopups::ParseSheetTitleBarBackgroundBlurOptions(
+    const JSRef<JSObject>& object, NG::SheetTitleBarBackgroundBlurOptions& options, NG::SheetStyle& sheetStyle)
+{
+    auto blurStyleVal = object->GetProperty("blurStyle");
+    NG::SheetTitleBarBackgroundBlur blurStyle;
+    if (ParseSheetTitleBarBlurStyle(blurStyleVal, blurStyle)) {
+        options.blurStyle = blurStyle;
+    }
+    auto maskExtraHeightVal = object->GetProperty("maskExtraHeight");
+    if (maskExtraHeightVal->IsObject()) {
+        CalcDimension maskExtraHeight;
+        RefPtr<ResourceObject> maskExtraHeightResObj;
+        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(
+                JSRef<JSObject>::Cast(maskExtraHeightVal), maskExtraHeight, maskExtraHeightResObj)) {
+            options.maskExtraHeight = maskExtraHeight;
+            if (SystemProperties::ConfigChangePerform()) {
+                sheetStyle.SetTitleBarMaskExtraHeightResObj(maskExtraHeightResObj);
+            }
+        }
+    }
+    auto maskColorVal = object->GetProperty("maskColor");
+    Color maskColor;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsColor(maskColorVal, maskColor, resObj)) {
+            options.maskColor = maskColor;
+            sheetStyle.SetTitleBarMaskColorResObj(resObj);
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(maskColorVal, maskColor)) {
+            options.maskColor = maskColor;
+        }
+    }
+    auto effectiveDistanceVal = object->GetProperty("effectiveDistance");
+    if (effectiveDistanceVal->IsObject()) {
+        CalcDimension effectiveDistance;
+        RefPtr<ResourceObject> effectiveDistanceResObj;
+        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(
+                JSRef<JSObject>::Cast(effectiveDistanceVal), effectiveDistance, effectiveDistanceResObj)) {
+            options.effectiveDistance = effectiveDistance;
+            if (SystemProperties::ConfigChangePerform()) {
+                sheetStyle.SetTitleBarEffectiveDistanceResObj(effectiveDistanceResObj);
+            }
+        }
+    }
+}
+
+void JSViewPopups::ParseSheetTitleBarBackgroundBlur(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle)
+{
+    if (value->IsObject()) {
+        NG::SheetTitleBarBackgroundBlurOptions options;
+        auto object = JSRef<JSObject>::Cast(value);
+        ParseSheetTitleBarBackgroundBlurOptions(object, options, sheetStyle);
+        sheetStyle.titleBarBackgroundBlur = options;
+    }
+}
+
+void JSViewPopups::ParseSheetTitleBarHoverMode(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle)
+{
+    if (value->IsNumber()) {
+        auto modeValue = value->ToNumber<int32_t>();
+        if (modeValue >= static_cast<int32_t>(NG::SheetTitleBarHoverMode::STANDARD) &&
+            modeValue <= static_cast<int32_t>(NG::SheetTitleBarHoverMode::STACK)) {
+            sheetStyle.titleBarHoverMode = static_cast<NG::SheetTitleBarHoverMode>(modeValue);
+        } else {
+            sheetStyle.titleBarHoverMode = NG::SheetTitleBarHoverMode::STANDARD;
+        }
+    }
+}
+
+void JSViewPopups::ParseSheetScrollBarState(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle)
+{
+    if (value->IsNumber()) {
+        auto barStateValue = value->ToNumber<int32_t>();
+        if (barStateValue >= static_cast<int32_t>(DisplayMode::OFF) &&
+            barStateValue <= static_cast<int32_t>(DisplayMode::ON)) {
+            sheetStyle.scrollBarState = static_cast<DisplayMode>(barStateValue);
+        } else {
+            sheetStyle.scrollBarState = DisplayMode::OFF;
+        }
+    }
+}
+
+void JSViewPopups::ParseSheetCloseButtonMaterial(const JSRef<JSVal>& value, NG::SheetStyle& sheetStyle)
+{
+    if (value->IsObject()) {
+        const auto* material = CreateUiMaterialFromNapiValue(value);
+        sheetStyle.closeButtonMaterial = material ? material->Copy() : nullptr;
+        if (sheetStyle.closeButtonMaterial &&
+            !MaterialUtils::IsImmersiveMaterialSupported(sheetStyle.closeButtonMaterial.GetRawPtr())) {
+            sheetStyle.closeButtonMaterial = nullptr;
+        }
+    } else {
+        sheetStyle.closeButtonMaterial = nullptr;
+    }
+}
+
 void JSViewAbstract::ParseSheetStyle(
     const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
@@ -2941,6 +3052,11 @@ void JSViewAbstract::ParseSheetStyle(
     sheetStyle.sheetHeight = sheetStruct;
 
     ParseSheetSubWindowValue(paramObj, sheetStyle);
+
+    JSViewPopups::ParseSheetTitleBarBackgroundBlur(paramObj->GetProperty("titleBarBackgroundBlur"), sheetStyle);
+    JSViewPopups::ParseSheetTitleBarHoverMode(paramObj->GetProperty("titleBarHoverMode"), sheetStyle);
+    JSViewPopups::ParseSheetScrollBarState(paramObj->GetProperty("scrollBarState"), sheetStyle);
+    JSViewPopups::ParseSheetCloseButtonMaterial(paramObj->GetProperty("closeButtonMaterial"), sheetStyle);
 
     // parse ModalTransition
     auto modalTransitionValue = paramObj->GetProperty("modalTransition");
