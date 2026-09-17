@@ -55,7 +55,7 @@ HWTEST_F(SharedImageManagerTest, GetFormSharedImageCacheThreshold_001, TestSize.
  */
 HWTEST_F(SharedImageManagerTest, SharedImageManagerAddSharedImage_001, TestSize.Level1)
 {
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
     auto manager = AceType::MakeRefPtr<SharedImageManager>(taskExecutor);
     std::vector<uint8_t> data = { 0x01, 0x02, 0x03 };
     manager->AddSharedImage("img1", std::vector<uint8_t>(data));
@@ -72,7 +72,7 @@ HWTEST_F(SharedImageManagerTest, SharedImageManagerAddSharedImage_001, TestSize.
  */
 HWTEST_F(SharedImageManagerTest, SharedImageManagerAddSharedImage_002, TestSize.Level1)
 {
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
     auto manager = AceType::MakeRefPtr<SharedImageManager>(taskExecutor);
     std::vector<uint8_t> data1 = { 0x01 };
     std::vector<uint8_t> data2 = { 0x02, 0x03 };
@@ -90,7 +90,7 @@ HWTEST_F(SharedImageManagerTest, SharedImageManagerAddSharedImage_002, TestSize.
  */
 HWTEST_F(SharedImageManagerTest, SharedImageManagerAddSharedImage_003, TestSize.Level1)
 {
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
     auto manager = AceType::MakeRefPtr<SharedImageManager>(taskExecutor);
     for (int i = 0; i < 30; ++i) {
         std::string name = "img" + std::to_string(i);
