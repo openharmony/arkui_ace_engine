@@ -1769,9 +1769,9 @@ enum ArkUIEventSubKind {
     ON_RICH_EDITOR_ON_COPY,
     ON_RICH_EDITOR_ON_WILL_CHANGE,
     ON_RICH_EDITOR_ON_DID_CHANGE,
-    ON_RICH_EDITOR_ON_INPUT_FILTER_ERROR,
     ON_RICH_EDITOR_ON_CONTENT_SCROLL,
     ON_RICH_EDITOR_ON_CONTENT_SIZE_CHANGE,
+    ON_RICH_EDITOR_ON_INPUT_FILTER_ERROR,
 
     ON_LAZY_COLUMN_LAYOUT_SCROLL_INDEX = ARKUI_MAX_EVENT_NUM * ARKUI_LAZY_COLUMN_LAYOUT,
 
@@ -9323,9 +9323,6 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnWillChange)(ArkUINodeHandle node);
     void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
-    void (*setRichEditorInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value);
-    ArkUI_CharPtr (*getRichEditorInputFilter)(ArkUINodeHandle node);
-    void (*resetRichEditorInputFilter)(ArkUINodeHandle node);
     void (*setRichEditorNapiOnContentScroll)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnContentScroll)(ArkUINodeHandle node);
     void (*setRichEditorNapiOnContentSizeChange)(ArkUINodeHandle node, void* callback);
@@ -9434,6 +9431,9 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorHorizontalScrolling)(ArkUINodeHandle node, ArkUI_Bool singleLine);
     void (*resetRichEditorHorizontalScrolling)(ArkUINodeHandle node);
     ArkUI_Bool (*getRichEditorHorizontalScrolling)(ArkUINodeHandle node);
+    void (*setRichEditorInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    ArkUI_CharPtr (*getRichEditorInputFilter)(ArkUINodeHandle node);
+    void (*resetRichEditorInputFilter)(ArkUINodeHandle node);
     void (*setRichEditorCaretStyle)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     ArkUI_Float32 (*getRichEditorCaretStyle)(ArkUINodeHandle node, ArkUI_Int32 unit);
     void (*resetRichEditorCaretStyle)(ArkUINodeHandle node);
