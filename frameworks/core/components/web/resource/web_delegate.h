@@ -1831,6 +1831,8 @@ public:
     void ExecuteAllRuleSetMatch();
 
 private:
+    void ExecuteAllRuleSetMatchInternal();
+    void ResetPageSceneOnNavigate();
     void InitWebEvent();
     void RegisterWebEvent();
     void ReleasePlatformResource();
@@ -2099,6 +2101,8 @@ private:
     bool isFileSelectorShow_ = false;
 
     bool isVisible_ = false;
+    int32_t pageSceneRequeryCount_ = 0;
+    bool isRequeryScheduled_ = false;
 
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
     sptr<OHOS::Rosen::DisplayManager::IDisplayAttributeListener> displayListener_ = nullptr;

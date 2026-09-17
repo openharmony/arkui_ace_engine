@@ -5170,7 +5170,7 @@ void WebDelegate::OnInactive()
     }
     int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
     if (processId > 0) {
-        WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, GetWebId());
+        WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, GetWebId(), GetHostNodeId());
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
@@ -5676,6 +5676,24 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
 #endif
 }
 
+void WebDelegate::ResetPageSceneOnNavigate()
+{
+    int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+    if (processId <= 0) {
+        return;
+    }
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, GetWebId(), GetHostNodeId());
+    // Clear per-rule observer map from previous page so new page's
+    // query script won't find stale observers
+    ExecuteTypeScript(
+        "(function(){"
+        "if(window.__pageSceneObservers){"
+        "for(const k in window.__pageSceneObservers){"
+        "window.__pageSceneObservers[k].disconnect();}"
+        "window.__pageSceneObservers=null;}})()",
+        [](std::string) {});
+}
+
 void WebDelegate::OnPageStarted(const std::string& param)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "OnPageStarted:Start. webId:%{public}d", GetWebId());
@@ -5698,18 +5716,7 @@ void WebDelegate::OnPageStarted(const std::string& param)
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
-                if (processId > 0) {
-                    WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, delegate->GetWebId());
-                }
-                // Clear per-rule observer map from previous page so new page's
-                // query script won't find stale observers
-                delegate->ExecuteTypeScript(
-                    "if(window.__pageSceneObservers){"
-                    "for(var k in window.__pageSceneObservers){"
-                    "window.__pageSceneObservers[k].disconnect();}"
-                    "window.__pageSceneObservers=null;}",
-                    [](std::string) {});
+                delegate->ResetPageSceneOnNavigate();
             }
         },
         TaskExecutor::TaskType::UI, "PageSceneResetObserver");
@@ -10427,6 +10434,14 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText)
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnTextSelectionChange webId=%{public}d selLen=%{public}zu",
         GetWebId(), selectionText.size());
     CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->ExecuteAllRuleSetMatch();
+            }
+        },
+        TaskExecutor::TaskType::UI, "PageSceneTextSelMatch");
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     lastSelectionText_ = selectionText;
@@ -10454,17 +10469,6 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText)
             webEventHub->FireOnTextSelectionChangeEvent(std::make_shared<TextSelectionChangedEvent>(selectionText));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebTextSelectionChanged");
-    auto context = context_.Upgrade();
-    if (context) {
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this)]() {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->ExecuteAllRuleSetMatch();
-                }
-            },
-            TaskExecutor::TaskType::UI, "PageSceneTextSelMatch");
-    }
 }
 
 void WebDelegate::OnDetectedBlankScreen(
@@ -11019,9 +11023,8 @@ void WebDelegate::QueryPageControls(const std::string& selectorJson,
                     auto delegate = weak.Upgrade();
                     CHECK_NULL_VOID(delegate);
                     TAG_LOGI(AceLogTag::ACE_WEB,
-                        "WebDelegate::QueryPageControls: JS result received, webId=%{public}d result len=%{public}zu "
-                        "content=%{public}s",
-                        delegate->GetWebId(), result.size(), result.c_str());
+                        "WebDelegate::QueryPageControls: JS result received, webId=%{public}d result len=%{public}zu",
+                        delegate->GetWebId(), result.size());
                     auto context = delegate->context_.Upgrade();
                     CHECK_NULL_VOID(context);
                     context->GetTaskExecutor()->PostTask(
@@ -11046,17 +11049,19 @@ void WebDelegate::ExecuteReportOnRegisterMatch(int32_t processId)
     }
     // Trigger match for each enabled rule with reportOnRegister, report per-rule
     for (const auto& rule : ruleSetsOpt->rules) {
-        if (!rule.enabled || !rule.policy.reportOnRegister) continue;
+        if (!rule.enabled || !rule.policy.reportOnRegister || (rule.scope.onlyVisible && !isVisible_)) {
+            continue;
+        }
         std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
             rule, ruleSetsOpt->globalConfig);
         QueryPageControls(selectorJson, rule.ruleId, rule.selector.nodeTypes,
-            [processId, webId = GetWebId(), selectorJson, ruleId = rule.ruleId](
+            [processId, webId = GetWebId(), hostNodeId = GetHostNodeId(), selectorJson, ruleId = rule.ruleId](
                 const std::string& resultJson) {
                 TAG_LOGI(AceLogTag::ACE_WEB,
                     "WebDelegate::ExecuteReportOnRegisterMatch: query result for ruleId=%{public}s "
                     "resultLen=%{public}zu", ruleId.c_str(), resultJson.size());
                 WebPageSceneManager::GetInstance().ProcessQueryResult(
-                    processId, webId, selectorJson, resultJson, false);
+                    processId, webId, hostNodeId, selectorJson, resultJson, false);
             });
     }
 }
@@ -11081,10 +11086,10 @@ void WebDelegate::ExecuteGetPageSceneMatch(int32_t processId,
         std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
             rule, ruleSet.globalConfig);
         QueryPageControls(selectorJson, rule.ruleId, {},
-            [processId, webId = GetWebId(), isTemporary, remaining, selectorJson](
+            [processId, webId = GetWebId(), hostNodeId = GetHostNodeId(), isTemporary, remaining, selectorJson](
                 const std::string& resultJson) {
                 WebPageSceneManager::GetInstance().ProcessQueryResult(
-                    processId, webId, selectorJson, resultJson, true);
+                    processId, webId, hostNodeId, selectorJson, resultJson, true);
                 int32_t rem = remaining->fetch_sub(1, std::memory_order_acq_rel) - 1;
                 if (rem == 0 && isTemporary) {
                     WebPageSceneManager::GetInstance().CompleteGetPageScene(processId);
@@ -11118,15 +11123,48 @@ void WebDelegate::GetPageSceneForWeb(int32_t processId, const std::string& ruleJ
 void WebDelegate::ProcessPageSceneDomReadyResult(const std::string& resultJson,
     const std::string& selectorJson)
 {
+    auto root = JsonUtil::ParseJsonString(resultJson);
+    if (root && root->IsObject()) {
+        int32_t errorCode = root->GetInt("errorCode", -1);
+        if (errorCode == PAGE_SCENE_QUERY_DOM_PENDING) {
+            if (pageSceneRequeryCount_ >= PAGE_SCENE_MAX_REQUERY_COUNT) {
+                return;
+            }
+            if (isRequeryScheduled_) {
+                return;
+            }
+            isRequeryScheduled_ = true;
+            pageSceneRequeryCount_++;
+            auto context = context_.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->GetTaskExecutor()->PostDelayedTask(
+                [weak = WeakClaim(this)]() {
+                    auto delegate = weak.Upgrade();
+                    CHECK_NULL_VOID(delegate);
+                    delegate->ExecuteAllRuleSetMatchInternal();
+                },
+                TaskExecutor::TaskType::UI, PAGE_SCENE_REQUERY_DELAY_MS,
+                    "PageSceneReQueryAfterDomPending");
+            return;
+        }
+    }
+
     int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
     if (processId > 0) {
         WebPageSceneManager::GetInstance().ProcessQueryResult(
-            processId, GetWebId(), selectorJson, resultJson, false);
+            processId, GetWebId(), GetHostNodeId(), selectorJson, resultJson, false);
     }
 }
 
 void WebDelegate::ExecuteAllRuleSetMatch()
 {
+    pageSceneRequeryCount_ = 0;
+    ExecuteAllRuleSetMatchInternal();
+}
+
+void WebDelegate::ExecuteAllRuleSetMatchInternal()
+{
+    isRequeryScheduled_ = false;
     int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
     if (processId <= 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::ExecuteAllRuleSetMatch: no registered processId");
@@ -11139,16 +11177,18 @@ void WebDelegate::ExecuteAllRuleSetMatch()
         return;
     }
     for (const auto& rule : ruleSet->rules) {
-        if (!rule.enabled) continue;
+        if (!rule.enabled || (rule.scope.onlyVisible && !isVisible_)) {
+            continue;
+        }
         std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
             rule, ruleSet->globalConfig);
         QueryPageControls(selectorJson, rule.ruleId, rule.selector.nodeTypes,
-            [processId, webId = GetWebId(), selectorJson, ruleId = rule.ruleId](
+            [processId, webId = GetWebId(), hostNodeId = GetHostNodeId(), selectorJson, ruleId = rule.ruleId](
                 const std::string& resultJson) {
                 TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::ExecuteAllRuleSetMatch: query result for ruleId=%{public}s "
                     "resultLen=%{public}zu", ruleId.c_str(), resultJson.size());
                 WebPageSceneManager::GetInstance().ProcessQueryResult(
-                    processId, webId, selectorJson, resultJson, false);
+                    processId, webId, hostNodeId, selectorJson, resultJson, false);
             });
     }
 }
