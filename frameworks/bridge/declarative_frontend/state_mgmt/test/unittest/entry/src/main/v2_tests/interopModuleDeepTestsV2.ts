@@ -21,7 +21,9 @@ declare class InteropExtractorModule {
   static compatibleStaticComponent?: (
     factory: () => Object,
     options?: () => Object,
-    content?: () => void
+    content?: () => void,
+    ownerElmtId?: number,
+    ownerInstanceId?: number
   ) => [() => void, number];
   static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
   static updateInteropExtendableComponent?: (dynamicComponent: any) => void;
@@ -38,7 +40,9 @@ declare function registerCompatibleStaticComponentCallback(
   callback: (
     factory: () => Object,
     options?: () => Object,
-    content?: () => void
+    content?: () => void,
+    ownerElmtId?: number,
+    ownerInstanceId?: number
   ) => [() => void, number]
 ): void;
 declare function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object): void;

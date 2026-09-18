@@ -290,6 +290,18 @@ void SetOnNodeDestroyEvent(ArkUINodeHandle node, std::function<void(int32_t)>&& 
     frameNode->SetOnNodeDestroyCallback(std::move(event));
 }
 
+ani_long InteropProxyNodeConstruct(ArkUI_Int32 id)
+{
+    auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
+        "InteropProxyNode", id, []() { return AceType::MakeRefPtr<StackPattern>(); });
+    CHECK_NULL_RETURN(proxyNode, 0);
+    auto stackLayoutAlgorithm = proxyNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(stackLayoutAlgorithm, 0);
+    stackLayoutAlgorithm->UpdateAlignment(Alignment::TOP_LEFT);
+    proxyNode->IncRefCount();
+    return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
+}
+
 ani_ref GetSharedLocalStorage()
 {
     auto context = NG::PipelineContext::GetCurrentContextSafely();
@@ -1287,6 +1299,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getFocusedInstanceId = OHOS::Ace::NG::GetFocusedInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
         .builderProxyNodeMockConstruct = OHOS::Ace::NG::BuilderProxyNodeMockConstruct,
+        .interopProxyNodeConstruct = OHOS::Ace::NG::InteropProxyNodeConstruct,
         .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
         .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,

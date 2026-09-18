@@ -608,6 +608,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeMockConstruct)
         },
         ani_native_function {
+            "_InteropProxyNode_Construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::InteropProxyNodeConstruct)
+        },
+        ani_native_function {
             "_SetOnNodeDestroyEvent",
             "lC{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOnNodeDestroyEvent)
