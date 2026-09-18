@@ -1299,7 +1299,6 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getFocusedInstanceId = OHOS::Ace::NG::GetFocusedInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
         .builderProxyNodeMockConstruct = OHOS::Ace::NG::BuilderProxyNodeMockConstruct,
-        .interopProxyNodeConstruct = OHOS::Ace::NG::InteropProxyNodeConstruct,
         .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
         .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
@@ -1382,6 +1381,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setOnNodeDestroyEvent = OHOS::Ace::NG::SetOnNodeDestroyEvent,
         .fireArkUIObjectLifecycleCallback = OHOS::Ace::NG::FireArkUIObjectLifecycleCallbackImpl,
         .GetIdString = OHOS::Ace::NG::GetIdString,
+        .interopProxyNodeConstruct = OHOS::Ace::NG::InteropProxyNodeConstruct,
     };
     return &impl;
 }

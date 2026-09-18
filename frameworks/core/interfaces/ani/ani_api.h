@@ -608,7 +608,6 @@ struct ArkUIAniCommonModifier {
     ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
     ani_long (*builderProxyNodeMockConstruct)(ArkUI_Int32 id);
-    ani_long (*interopProxyNodeConstruct)(ArkUI_Int32 id);
     ani_ref (*getSharedLocalStorage)();
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
     void (*setCustomCallback)(ani_long ptr, void* fnMeasure, void* fnLayout);
@@ -695,6 +694,7 @@ struct ArkUIAniCommonModifier {
     void (*setOnNodeDestroyEvent)(ArkUINodeHandle node, std::function<void(int32_t)>&& event);
     void(*fireArkUIObjectLifecycleCallback)(ani_long nodePtr, const std::string& className, void* data);
     std::string (*GetIdString)(ArkUINodeHandle node);
+    ani_long (*interopProxyNodeConstruct)(ArkUI_Int32 id);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
