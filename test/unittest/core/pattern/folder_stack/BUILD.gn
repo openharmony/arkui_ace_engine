@@ -30,13 +30,15 @@ if (is_host_product) {
       "$ace_root/adapter/ohos/osal/display_info_utils.cpp",
     ]
     cflags = [ "-fno-access-control" ]
-    deps = [ "$ace_root/test/mock/ohos_mock/dm:mock_dm" ]
+    extra_deps = []
+    extra_deps = [ "$ace_root/test/mock/ohos_mock/dm:mock_dm" ]
   }
 } else {
   ace_unittest("folder_stack_test_ng") {
     type = "new"
     module_name = "Layout-FolderStack"
     sources = test_sources
+    extra_deps = [ "$ace_root/test/mock/ohos_mock/dm:mock_dm" ]
 
     if (!ace_enable_full_test_suite) {
       sources = []
