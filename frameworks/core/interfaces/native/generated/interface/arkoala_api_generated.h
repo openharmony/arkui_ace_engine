@@ -7444,6 +7444,14 @@ typedef struct Opt_TabsNestedScrollMode {
     Ark_Tag tag;
     Ark_TabsNestedScrollMode value;
 } Opt_TabsNestedScrollMode;
+typedef enum Ark_TabsSidebarDisplayStyle {
+    ARK_TABS_SIDEBAR_DISPLAY_STYLE_EMBED = 0,
+    ARK_TABS_SIDEBAR_DISPLAY_STYLE_DISPLACE = 1,
+} Ark_TabsSidebarDisplayStyle;
+typedef struct Opt_TabsSidebarDisplayStyle {
+    Ark_Tag tag;
+    Ark_TabsSidebarDisplayStyle value;
+} Opt_TabsSidebarDisplayStyle;
 typedef enum Ark_TabVisibility {
     ARK_TAB_VISIBILITY_VISIBLE = 0,
     ARK_TAB_VISIBILITY_HIDDEN = 1,
@@ -27801,6 +27809,8 @@ typedef struct GENERATED_ArkUITabsModifier {
                                           const Opt_ResourceColor* value);
     void (*setSidebarSelectedBoardColor)(Ark_NativePointer node,
                                          const Opt_ResourceColor* value);
+    void (*setSidebarDisplayStyle)(Ark_NativePointer node,
+                                   const Opt_TabsSidebarDisplayStyle* value);
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);

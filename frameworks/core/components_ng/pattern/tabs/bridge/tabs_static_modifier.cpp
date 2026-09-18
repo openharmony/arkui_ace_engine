@@ -1039,6 +1039,18 @@ void SetSidebarSelectedBoardColorImpl(Ark_NativePointer node,
     }
     TabsModelNG::SetSidebarSelectedBoardColor(frameNode, color);
 }
+void SetSidebarDisplayStyleImpl(Ark_NativePointer node,
+                     const Opt_TabsSidebarDisplayStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SidebarDisplayStyle sidebarDisplayStyle = SidebarDisplayStyle::EMBED;
+    auto convValue = Converter::OptConvertPtr<SidebarDisplayStyle>(value);
+    if (convValue.has_value()) {
+        sidebarDisplayStyle = convValue.value();
+    }
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, sidebarDisplayStyle);
+}
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
@@ -1085,6 +1097,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetSidebarUnselectedIconColorImpl,
         TabsAttributeModifier::SetSidebarUnselectedTextColorImpl,
         TabsAttributeModifier::SetSidebarSelectedBoardColorImpl,
+        TabsAttributeModifier::SetSidebarDisplayStyleImpl,
         TabsAttributeModifier::SetBarModeImpl,
         TabsAttributeModifier::SetBarHeight1Impl,
         TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,

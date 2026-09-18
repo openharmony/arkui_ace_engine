@@ -86,6 +86,7 @@ enum class MenuPolicy;
 enum class NavigationType;
 enum class ParticleDisturbanceShapeType : uint32_t;
 enum class TabBarDisplayMode;
+enum class SidebarDisplayStyle;
 enum class TabsCacheMode;
 enum class TextDeleteDirection;
 enum class TextInputAction;
@@ -1074,6 +1075,8 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
     template<>
     ACE_FORCE_EXPORT void AssignCast(std::optional<TabBarDisplayMode>& dst, const Ark_TabBarDisplayMode& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<SidebarDisplayStyle>& dst, const Ark_TabsSidebarDisplayStyle& src);
     template<> void AssignCast(std::optional<TabsCacheMode>& dst, const Ark_TabsCacheMode& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src);
     template<> void AssignCast(std::optional<TextVerticalAlign>& dst, const Ark_TextVerticalAlign& src);

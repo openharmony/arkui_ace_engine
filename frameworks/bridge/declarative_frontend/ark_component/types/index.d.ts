@@ -1577,7 +1577,7 @@ declare enum TabBarStyle {
   SIDEBAR = 1,
   SIDEBAR_ADAPTABLE = 2,
 }
-declare enum SidebarDisplayStyle {
+declare enum TabsSidebarDisplayStyle {
   EMBED = 0,
   DISPLACE = 1,
 }
