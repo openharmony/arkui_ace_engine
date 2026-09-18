@@ -777,8 +777,8 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperInitAllCallb
     AttachValidSession(wrapper);
     wrapper->InitAllCallback();
     ASSERT_NE(wrapper->foregroundCallback_, nullptr);
-    wrapper->foregroundCallback_(Rosen::WSError::WS_ERROR_INVALID_PARAM);
-    wrapper->foregroundCallback_(Rosen::WSError::WS_OK);
+    wrapper->foregroundCallback_(Rosen::WSError::WS_ERROR_INVALID_PARAM, 0);
+    wrapper->foregroundCallback_(Rosen::WSError::WS_OK, 0);
     EXPECT_NE(wrapper->taskExecutor_, nullptr);
 #endif
 }

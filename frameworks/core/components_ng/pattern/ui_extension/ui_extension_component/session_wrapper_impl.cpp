@@ -22,6 +22,7 @@
 #include "extension/extension_business_info.h"
 #include "int_wrapper.h"
 #include "interfaces/include/ws_common.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 #include "parameters.h"
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
@@ -171,16 +172,30 @@ void SessionWrapperImpl::InitForegroundCallback()
     CHECK_NULL_VOID(taskExecutor_);
     int32_t callSessionId = GetSessionId();
     foregroundCallback_ = [weakTaskExecutor = WeakClaim(RawPtr(taskExecutor_)),
-        weak = hostPattern_, callSessionId] (OHOS::Rosen::WSError errcode) {
-            if (errcode == OHOS::Rosen::WSError::WS_OK) {
-                return;
-            }
-
+        weak = hostPattern_, callSessionId] (OHOS::Rosen::WSError errcode, int32_t abilityCode) {
             auto taskExecutor = weakTaskExecutor.Upgrade();
             if (taskExecutor == nullptr) {
                 TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                     "InitForegroundCallback: taskExecutor is nullptr");
                     return;
+            }
+
+            taskExecutor->PostTask(
+                [weak, abilityCode, callSessionId] {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    if (callSessionId != pattern->GetSessionId()) {
+                        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                            "foregroundCallback_: The callSessionId(%{public}d)"
+                                " is inconsistent with the curSession(%{public}d)",
+                            callSessionId, pattern->GetSessionId());
+                            return;
+                    }
+                    pattern->FireOnAbilityErrorCodeCallback(UIExtensionOperationPhase::FOREGROUND, abilityCode);
+                }, TaskExecutor::TaskType::UI, "ArkUIUIExtensionAbilityErrorCode");
+
+            if (errcode == OHOS::Rosen::WSError::WS_OK) {
+                return;
             }
 
             taskExecutor->PostTask(

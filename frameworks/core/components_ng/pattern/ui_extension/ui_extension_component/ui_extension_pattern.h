@@ -60,6 +60,7 @@ namespace OHOS::Ace {
 class ModalUIExtensionProxy;
 class AccessibilityChildTreeCallback;
 class AccessibilitySAObserverCallback;
+enum class UIExtensionOperationPhase;
 struct AccessibilityParentRectInfo;
 } // namespace OHOS::Ace
 
@@ -155,6 +156,10 @@ public:
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
     void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
+    void SetOnAbilityErrorCodeCallback(
+        const std::function<void(const UIExtensionOperationPhase&, int32_t)>&& callback);
+    void FireOnAbilityErrorCodeCallback(
+        const UIExtensionOperationPhase& operationPhase, int32_t abilityErrorCode);
     void SetSyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void FireSyncCallbacks();
     void SetAsyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
@@ -452,6 +457,7 @@ private:
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
+    std::function<void(const UIExtensionOperationPhase&, int32_t)> onAbilityErrorCodeCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
