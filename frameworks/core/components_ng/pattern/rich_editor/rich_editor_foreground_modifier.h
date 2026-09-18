@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace::NG {
 class RichEditorForegroundModifier : public CounterForegroundModifier {
+    DECLARE_ACE_TYPE(RichEditorForegroundModifier, CounterForegroundModifier);
+
 public:
     explicit RichEditorForegroundModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern);
     ~RichEditorForegroundModifier() override = default;

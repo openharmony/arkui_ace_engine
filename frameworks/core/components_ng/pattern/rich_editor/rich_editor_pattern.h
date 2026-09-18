@@ -1040,6 +1040,7 @@ public:
     bool HasCounterTextOverflowColor() const override;
     Color GetCounterTextOverflowColor() const override;
     float GetFontScaleFromEnv(const RefPtr<FrameNode>& host) const override;
+    TextDirection GetLayoutDirection() const override;
     TextDirection GetNonAutoLayoutDirection() const override;
     std::optional<MarginProperty> GetMarginProperty() const override;
     bool NeedRestoreMeasureConstraint() const override;

@@ -487,7 +487,7 @@ void RichEditorPattern::PrepareInsertChangeRange(
 }
 
 void RichEditorPattern::InsertValueInStyledString(
-    const std::u16string& insertValue, bool shouldCommitInput, bool isPaste)
+    const std::u16string& insertValue, bool shouldCommitInput, bool isPaste, bool preFiltered)
 {
     CHECK_NULL_VOID(styledString_);
     IF_TRUE(shouldCommitInput && previewTextRecord_.IsValid(), FinishTextPreviewInner());
@@ -16377,6 +16377,13 @@ float RichEditorPattern::GetFontScaleFromEnv(const RefPtr<FrameNode>& host) cons
     return pipeline->GetFontScaleFromEnv(host);
 }
 
+TextDirection RichEditorPattern::GetLayoutDirection() const
+{
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    return layoutProperty->GetLayoutDirection();
+}
+
 TextDirection RichEditorPattern::GetNonAutoLayoutDirection() const
 {
     auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
@@ -16422,10 +16429,7 @@ void RichEditorPattern::AddCounterNode()
     if (!counterDecorator_) {
         counterDecorator_ = MakeRefPtr<CounterDecorator>(host);
     }
-    auto counterDec = DynamicCast<CounterDecorator>(counterDecorator_);
-    if (counterDec) {
-        counterDec->SetCounterHost(WeakClaim(static_cast<ICounterHost*>(this)));
-    }
+    counterDecorator_->SetCounterHost(WeakClaim(static_cast<ICounterHost*>(this)));
 }
 
 void RichEditorPattern::CleanCounterNode()

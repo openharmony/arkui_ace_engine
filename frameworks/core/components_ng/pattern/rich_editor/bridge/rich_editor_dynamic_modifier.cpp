@@ -2622,6 +2622,7 @@ void GetRichEditorShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
     options->open = RichEditorModelNG::GetShowCounter(frameNode);
     options->thresholdPercentage = RichEditorModelNG::GetCounterType(frameNode);
     options->highlightBorder = RichEditorModelNG::GetShowCounterBorder(frameNode);
