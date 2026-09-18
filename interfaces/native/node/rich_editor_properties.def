@@ -48,7 +48,7 @@ X(0, 1, 0, RichEditorContentRect)
 X(1, 1, 1, RichEditorSelectionMenuHidden)
 X(1, 1, 1, RichEditorEnableSkipPreviewLongPress)
 X(1, 1, 1, RichEditorCancelButton)
-X(0, 0, 0, RichEditorShowCounter)
+X(1, 1, 1, RichEditorShowCounter)
 X(1, 1, 1, RichEditorInputFilter)
 #undef IF_1
 #undef IF_0

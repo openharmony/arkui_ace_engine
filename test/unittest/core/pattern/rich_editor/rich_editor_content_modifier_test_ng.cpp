@@ -569,7 +569,7 @@ HWTEST_F(RichEditorContentModifierTestNg, RefreshRichTextRect001, TestSize.Level
     contentMod->SetRichTextRectY(TEXTRICHTEXTRECTY);
 
     auto paintMethod = AceType::MakeRefPtr<RichEditorPaintMethod>(
-        WeakPtr<Pattern>(contentPattern), &richEditorPattern->paragraphs_, 0.0f, contentMod, nullptr);
+        WeakPtr<Pattern>(contentPattern), &richEditorPattern->paragraphs_, 0.0f, contentMod, nullptr, nullptr);
     ASSERT_NE(paintMethod, nullptr);
 
     // Branch: valid contentMod — textRect refreshed

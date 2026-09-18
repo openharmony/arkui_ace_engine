@@ -52,6 +52,10 @@ public:
     static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpans(std::list<RefPtr<SpanItem>> spans,
         bool isSingleLineMode);
 
+    // counter measure and layout
+    float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper);
+    void CounterLayout(LayoutWrapper* layoutWrapper);
+
     const std::optional<RectF>& GetTextRect()
     {
         return richTextRect_;

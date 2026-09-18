@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
@@ -24,9 +25,11 @@
 namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
     float baselineOffset, const RefPtr<TextContentModifier>& contentMod,
-    const RefPtr<TextOverlayModifier>& overlayMod)
+    const RefPtr<TextOverlayModifier>& overlayMod,
+    const RefPtr<RichEditorForegroundModifier>& foregroundModifier)
     : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod),
-      pManager_(pManager)
+      pManager_(pManager),
+      foregroundModifier_(foregroundModifier)
 {}
 
 void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
@@ -196,5 +199,22 @@ void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     contentMod->SetClipOffset(paddingOffset);
     contentMod->SetClipSize(frameSize);
     contentMod->ContentChange();
+}
+
+RefPtr<Modifier> RichEditorPaintMethod::GetForegroundModifier(PaintWrapper* paintWrapper)
+{
+    return foregroundModifier_;
+}
+
+void RichEditorPaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(foregroundModifier_);
+    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    foregroundModifier_->SetInnerBorderWidth(
+        static_cast<float>(richEditorPattern->GetInnerBorderWidthValue().ConvertToPx()));
+    auto textFieldTheme = richEditorPattern->GetTheme<TextFieldTheme>();
+    foregroundModifier_->SetInnerBorderColor(
+        richEditorPattern->GetInnerBorderColorValue(textFieldTheme ? textFieldTheme->GetOverCounterColor() : Color()));
 }
 } // namespace OHOS::Ace::NG

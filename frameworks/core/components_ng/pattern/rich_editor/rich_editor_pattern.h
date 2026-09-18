@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_input_filter_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
+#include "core/components_ng/pattern/common_text/counter_host.h"
 #include "core/text/text_emoji_processor.h"
 
 #include "core/components_ng/pattern/text_field/clean_node_host.h"
@@ -86,6 +87,7 @@ struct RangeOptions;
 enum class ColorMode;
 
 namespace NG {
+class CounterDecorator;
 class EventHub;
 class FrameNode;
 class InspectorFilter;
@@ -97,6 +99,7 @@ struct OverlayRequest;
 class RichEditorAccessibilityProperty;
 class RichEditorContentModifier;
 class RichEditorContentPattern;
+class RichEditorForegroundModifier;
 class RichEditorLayoutAlgorithm;
 class RichEditorOverlayModifier;
 class RichEditorScrollController;
@@ -257,8 +260,9 @@ private:
 
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher,
-      public CleanNodeHostBase<RichEditorPattern, RichEditorLayoutProperty> {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, SpanWatcher, ICleanNodeHost);
+      public CleanNodeHostBase<RichEditorPattern, RichEditorLayoutProperty>, public ICounterHost {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, SpanWatcher, ICleanNodeHost,
+        ICounterHost);
 
 public:
     RichEditorPattern(bool isStyledStringMode = false);
@@ -393,6 +397,7 @@ public:
     void SetStyledString(const RefPtr<SpanString>& value);
     RefPtr<MutableSpanString> GetStyledString() const;
     bool IsStyledStringModeEnabled();
+    virtual bool IsNapiRichEditorPattern() const { return false; }
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
@@ -401,6 +406,8 @@ public:
         bool isPaste = false, bool preFiltered = false);
     void HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
         std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput);
+    void HandleComposingTextBeforeInsertion(const std::u16string& insertValue);
+    void PrepareInsertChangeRange(bool shouldCommitInput, int32_t& changeStart, int32_t& changeLength);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
         const std::u16string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
     RefPtr<FontSpan> CreateFontSpanByTextStyle(
@@ -409,7 +416,7 @@ public:
         const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
     void DeleteBackwardInStyledString(int32_t length);
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
-    void DeleteValueInStyledString(int32_t start, int32_t length, bool isIME = true, bool isUpdateCaret = true);
+    bool DeleteValueInStyledString(int32_t start, int32_t length, bool isIME = true, bool isUpdateCaret = true);
     RefPtr<SpanString> CreateStyledStringByStyleBefore(int32_t start, const std::u16string& string);
     bool BeforeStyledStringChange(const UndoRedoRecord& record, bool isUndo = false);
     bool BeforeStyledStringChange(int32_t start, int32_t length, const std::u16string& string);
@@ -594,7 +601,7 @@ public:
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle,
         bool isExternal = true);
-    void GetContentBySpans(std::u16string& u16Str);
+    void GetContentBySpans(std::u16string& u16Str) const;
     void SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart);
     void GetSelectSpansPositionInfo(
         int32_t& start, int32_t& end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
@@ -747,7 +754,7 @@ public:
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
-    bool HasFocus() const;
+    bool HasFocus() const override;
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void OnColorModeChange(uint32_t colorMode) override;
     void OnColorConfigurationUpdate() override;
@@ -1001,6 +1008,63 @@ public:
     void UpdateStyledStringByColorMode();
     void UpdateSpanNodeByColorMode();
     void UpdateLayoutPropertyColor();
+
+    // ===== ICounterHost interface (must implement: pure virtual) =====
+    bool GetShowCounterStyleValue() const override;
+    void SetShowCounterStyleValue(bool value) override;
+    bool IsShowCounterEnabled() const override;
+    uint32_t GetRealMaxLength() const override;
+    bool HasMaxLength() const override;
+    uint32_t GetTextLength() const override;
+    std::string GetTextValue() const override;
+    bool GetShowCounterValue() const override;
+    void UpdateMargin(const MarginProperty& margin) override;
+    bool HasMarginByUser() const override;
+    MarginProperty GetMarginByUserValue() const override;
+    void UpdateInnerBorderWidth(float width) override;
+    void UpdateInnerBorderColor(const Color& color) override;
+    bool HasBorderWidthFlagByUser() const override;
+    BorderWidthProperty GetBorderWidthFlagByUserValue() const override;
+    bool HasBorderColorFlagByUser() const override;
+    BorderColorProperty GetBorderColorFlagByUserValue() const override;
+    bool HasBorderRadiusFlagByUser() const override;
+    BorderRadiusProperty GetBorderRadiusFlagByUserValue() const override;
+    void UpdateBorderColor(const BorderColorProperty& color) override;
+    void SetThemeBorderAttr() override;
+
+    // ===== ICounterHost interface (optional override) =====
+    int32_t GetCounterType() const override;
+    bool GetShowHighlightBorder() const override;
+    bool HasCounterTextColor() const override;
+    Color GetCounterTextColor() const override;
+    bool HasCounterTextOverflowColor() const override;
+    Color GetCounterTextOverflowColor() const override;
+    float GetFontScaleFromEnv(const RefPtr<FrameNode>& host) const override;
+    TextDirection GetNonAutoLayoutDirection() const override;
+    std::optional<MarginProperty> GetMarginProperty() const override;
+    bool NeedRestoreMeasureConstraint() const override;
+
+    // ===== counter behavior logic (RichEditor-specific) =====
+    void ProcessCounter();
+    void AddCounterNode();
+    void CleanCounterNode();
+    void UpdateShowCountBorderStyle();
+    void HandleCountStyle();
+    void HandleCounterBorder();
+    void ApplyInnerBorderColor();
+    void UltralimitShake();
+    void HandleDeleteOnCounterScene();
+    void HandleCounterWithLength(int32_t insertLength, std::optional<int32_t> maxLength);
+    void CalcCounterAfterFilterInsertValue(int32_t curLength, int32_t insertLength, int32_t maxLength);
+    void ProcBorderInBlurEvent();
+    void UpdateCounterContent();
+    void InitMargin();
+
+    // ===== accessors for ForegroundModifier =====
+    bool HasInnerBorderColor() const;
+    Dimension GetInnerBorderWidthValue() const;
+    Color GetInnerBorderColorValue(const Color& defaultColor) const;
+    RefPtr<TextComponentDecorator> GetCounterDecorator() const override;
 
     // Public for RichEditorModelNG access
     RefPtr<FrameNode> GetHost() const override;
@@ -1405,6 +1469,7 @@ private:
     // hostOverlayMod_ is the overlay modifier of rich editor,
     // while overlayMod_ is the overlay modifier of rich editor content node.
     RefPtr<TextOverlayModifier> hostOverlayMod_;
+    RefPtr<RichEditorForegroundModifier> foregroundModifier_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -1475,8 +1540,6 @@ private:
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
-    // Tracks last min-corrected rect for content size change event
-    RectF lastContentSizeRect_;
     bool isFirstCallOnReady_ = false;
     bool scrollable_ = true;
     // add for ai input analysis
@@ -1547,12 +1610,14 @@ private:
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
+    // Tracks last min-corrected rect for content size change event
+    RectF lastContentSizeRect_;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
     std::unique_ptr<RichEditorUndoManager> undoManager_;
     bool isStyledUndoSupported_ = false;
-    bool suppressBuilderSpanCallback_ = false;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
+    bool suppressBuilderSpanCallback_ = false;
     void UpdateUrlSpanColorIfNeeded(TextSpanOptions& options);
     bool GetPreviewReplaceRange(int32_t& start, int32_t& length);
     void FilterWithInputFilter(std::u16string& text);
@@ -1600,6 +1665,10 @@ private:
     bool cancelButtonDirty_ = true;
     bool cancelButtonTouched_ = false;
     std::string lastReportSelectionText_ = "";
+
+    // ===== counter members =====
+    RefPtr<CounterDecorator> counterDecorator_;
+    bool showCountBorderStyle_ = false;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

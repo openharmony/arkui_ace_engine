@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 namespace OHOS::Ace::NG {
@@ -244,6 +243,37 @@ public:
     static void SetCancelButton(FrameNode* frameNode, int32_t style, const CalcDimension& iconSize,
         const Color& iconColor, const std::string& iconSrc);
     static void ResetCancelButton(FrameNode* frameNode);
+
+    // ===== counter properties (instance methods) =====
+    void SetShowCounter(bool value);
+    void SetCounter(int32_t value);
+    void SetCounterTextColor(const Color& value);
+    void SetCounterTextOverflowColor(const Color& value);
+    void SetShowHighlightBorder(bool value);
+    void ResetCounterTextColor();
+    void ResetCounterTextOverflowColor();
+
+    // ===== counter properties (static methods with FrameNode*) =====
+    static void SetShowCounter(FrameNode* frameNode, bool value);
+    static void SetCounter(FrameNode* frameNode, int32_t value);
+    static void SetCounterTextColor(FrameNode* frameNode, const Color& value);
+    static void SetCounterTextOverflowColor(FrameNode* frameNode, const Color& value);
+    static void SetShowHighlightBorder(FrameNode* frameNode, bool value);
+    static void ResetCounterTextColor(FrameNode* frameNode);
+    static void ResetCounterTextOverflowColor(FrameNode* frameNode);
+    static bool GetShowCounter(FrameNode* frameNode);
+    static int GetCounterType(FrameNode* frameNode);
+    static bool GetShowCounterBorder(FrameNode* frameNode);
+    static Color GetCounterTextColor(FrameNode* frameNode);
+    static Color GetCounterTextOverflowColor(FrameNode* frameNode);
+
+    // ===== border methods (static methods with FrameNode*) =====
+    static void SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& borderWidth);
+    static void SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& borderRadius);
+    static void SetBorderColor(FrameNode* frameNode, const BorderColorProperty& borderColors);
+    static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& borderStyles);
+    static void SetMargin(FrameNode* frameNode, const MarginProperty& margin);
+    static MarginProperty GetMargin(FrameNode* frameNode);
 
 private:
     void SetDraggable(bool draggable);

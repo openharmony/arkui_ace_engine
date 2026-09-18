@@ -80,7 +80,7 @@ public:
             contentMod_->SetIsCustomFont(true);
         }
         return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &(richEditorPattern->paragraphs_),
-            richEditorPattern->baselineOffset_, contentMod_, richEditorPattern->GetOverlayModifier());
+            richEditorPattern->baselineOffset_, contentMod_, richEditorPattern->GetOverlayModifier(), nullptr);
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override

@@ -41,6 +41,9 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/common_text/text_border_utils.h"
+#include "core/components_ng/pattern/common_text/text_margin_utils.h"
 
 namespace OHOS::Ace {
 #ifndef CROSS_PLATFORM
@@ -2557,6 +2560,138 @@ ArkUI_CharPtr GetRichEditorCancelIconSrc(ArkUINodeHandle node)
 }
 
 namespace NodeModifier {
+// ===== ShowCounter bridge =====
+void SetRichEditorShowCounter(ArkUINodeHandle node, ArkUIShowCountOptions* showCountOptions,
+    void* counterTextColorRawPtr, void* counterTextOverflowColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetShowCounter(frameNode, static_cast<bool>(showCountOptions->open));
+    RichEditorModelNG::SetCounter(frameNode, showCountOptions->thresholdPercentage);
+    RichEditorModelNG::SetShowHighlightBorder(frameNode, static_cast<bool>(showCountOptions->highlightBorder));
+    if (showCountOptions->counterTextColorIsSet) {
+        RichEditorModelNG::SetCounterTextColor(frameNode, Color(showCountOptions->counterTextColor));
+    } else {
+        RichEditorModelNG::ResetCounterTextColor(frameNode);
+    }
+    if (showCountOptions->counterTextOverflowColorIsSet) {
+        RichEditorModelNG::SetCounterTextOverflowColor(frameNode, Color(showCountOptions->counterTextOverflowColor));
+    } else {
+        RichEditorModelNG::ResetCounterTextOverflowColor(frameNode);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (counterTextColorRawPtr) {
+            auto resObjTextColor = AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextColor", resObjTextColor, Color(showCountOptions->counterTextColor));
+        } else {
+            pattern->UnRegisterResource("counterTextColor");
+        }
+        if (counterTextOverflowColorRawPtr) {
+            auto resObjTextOverflowColor =
+                AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextOverflowColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextOverflowColor", resObjTextOverflowColor,
+                Color(showCountOptions->counterTextOverflowColor));
+        } else {
+            pattern->UnRegisterResource("counterTextOverflowColor");
+        }
+    }
+}
+
+void ResetRichEditorShowCounter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetShowCounter(frameNode, false);
+    RichEditorModelNG::SetCounter(frameNode, -1);
+    RichEditorModelNG::SetShowHighlightBorder(frameNode, true);
+    RichEditorModelNG::ResetCounterTextColor(frameNode);
+    RichEditorModelNG::ResetCounterTextOverflowColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("counterTextColor");
+        pattern->UnRegisterResource("counterTextOverflowColor");
+    }
+}
+
+void GetRichEditorShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->open = RichEditorModelNG::GetShowCounter(frameNode);
+    options->thresholdPercentage = RichEditorModelNG::GetCounterType(frameNode);
+    options->highlightBorder = RichEditorModelNG::GetShowCounterBorder(frameNode);
+    options->counterTextColor = RichEditorModelNG::GetCounterTextColor(frameNode).GetValue();
+    options->counterTextOverflowColor = RichEditorModelNG::GetCounterTextOverflowColor(frameNode).GetValue();
+}
+
+// ===== Border bridge =====
+void SetRichEditorBorderWidth(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    SetBorderWidthCommon(node, values, units, length, RichEditorModelNG::SetBorderWidth);
+}
+
+void ResetRichEditorBorderWidth(ArkUINodeHandle node)
+{
+    ResetBorderWidthCommon(node, RichEditorModelNG::SetBorderWidth);
+}
+
+void SetRichEditorBorderColor(ArkUINodeHandle node, ArkUI_Uint32 topColorInt,
+    ArkUI_Uint32 rightColorInt, ArkUI_Uint32 bottomColorInt, ArkUI_Uint32 leftColorInt, void* res)
+{
+    const ArkUI_Uint32 colors[] = { topColorInt, rightColorInt, bottomColorInt, leftColorInt };
+    SetBorderColorCommon(node, colors, res, RichEditorModelNG::SetBorderColor);
+}
+
+void ResetRichEditorBorderColor(ArkUINodeHandle node)
+{
+    ResetBorderColorCommon(node, RichEditorModelNG::SetBorderColor);
+}
+
+void SetRichEditorBorderStyle(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length)
+{
+    SetBorderStyleCommon(node, styles, length, RichEditorModelNG::SetBorderStyle);
+}
+
+void ResetRichEditorBorderStyle(ArkUINodeHandle node)
+{
+    ResetBorderStyleCommon(node, RichEditorModelNG::SetBorderStyle);
+}
+
+void SetRichEditorBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    SetBorderRadiusCommon(node, values, units, length, RichEditorModelNG::SetBorderRadius);
+}
+
+void ResetRichEditorBorderRadius(ArkUINodeHandle node)
+{
+    ResetBorderRadiusCommon(node, RichEditorModelNG::SetBorderRadius);
+}
+
+// ===== Margin bridge =====
+
+void SetRichEditorMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
+{
+    SetMarginCommon(node, { top, right, bottom, left }, marginRes, RichEditorModelNG::SetMargin);
+}
+
+void ResetRichEditorMargin(ArkUINodeHandle node)
+{
+    ResetMarginCommon(node, RichEditorModelNG::SetMargin);
+}
+
+void GetRichEditorMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
+{
+    GetMarginCommon(node, values, length, unit, RichEditorModelNG::GetMargin);
+}
+
 const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
 {
     static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
@@ -2757,6 +2892,20 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
             .getRichEditorCancelIconSize = nullptr,
             .getRichEditorCancelIconColor = nullptr,
             .getRichEditorCancelIconSrc = nullptr,
+            .setRichEditorShowCounter = nullptr,
+            .resetRichEditorShowCounter = nullptr,
+            .getRichEditorShowCounterOptions = nullptr,
+            .setRichEditorBorderWidth = nullptr,
+            .resetRichEditorBorderWidth = nullptr,
+            .setRichEditorBorderColor = nullptr,
+            .resetRichEditorBorderColor = nullptr,
+            .setRichEditorBorderStyle = nullptr,
+            .resetRichEditorBorderStyle = nullptr,
+            .setRichEditorBorderRadius = nullptr,
+            .resetRichEditorBorderRadius = nullptr,
+            .setRichEditorMargin = nullptr,
+            .resetRichEditorMargin = nullptr,
+            .getRichEditorMargin = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2957,6 +3106,20 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .getRichEditorCancelIconSize = GetRichEditorCancelIconSize,
         .getRichEditorCancelIconColor = GetRichEditorCancelIconColor,
         .getRichEditorCancelIconSrc = GetRichEditorCancelIconSrc,
+        .setRichEditorShowCounter = SetRichEditorShowCounter,
+        .resetRichEditorShowCounter = ResetRichEditorShowCounter,
+        .getRichEditorShowCounterOptions = GetRichEditorShowCounterOptions,
+        .setRichEditorBorderWidth = SetRichEditorBorderWidth,
+        .resetRichEditorBorderWidth = ResetRichEditorBorderWidth,
+        .setRichEditorBorderColor = SetRichEditorBorderColor,
+        .resetRichEditorBorderColor = ResetRichEditorBorderColor,
+        .setRichEditorBorderStyle = SetRichEditorBorderStyle,
+        .resetRichEditorBorderStyle = ResetRichEditorBorderStyle,
+        .setRichEditorBorderRadius = SetRichEditorBorderRadius,
+        .resetRichEditorBorderRadius = ResetRichEditorBorderRadius,
+        .setRichEditorMargin = SetRichEditorMargin,
+        .resetRichEditorMargin = ResetRichEditorMargin,
+        .getRichEditorMargin = GetRichEditorMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
