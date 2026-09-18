@@ -40,12 +40,16 @@ int32_t Collect(int32_t id, char** data, uint32_t* size, const char** reason)
     if (collectCode) {
         return collectCode;
     }
+    // The UTF-8 payload {"texts":[]} contains 12 bytes, excluding its terminating NUL.
     *size = 12;
+    // Allocate 13 bytes for the 12-byte JSON payload plus its terminating NUL.
     *data = static_cast<char*>(std::malloc(13));
     if (!*data) {
         *reason = "Page text allocation failed.";
+        // 100001 is ARKUI_ERROR_CODE_INTERNAL_ERROR for an allocation failure.
         return 100001;
     }
+    // Copy all 13 bytes so the 12-byte JSON payload remains NUL-terminated.
     std::memcpy(*data, "{\"texts\":[]}", 13);
     return 0;
 }
@@ -111,8 +115,10 @@ TEST_F(PageTextCapiTest, validationOrderAndSharedDiagnostics)
 {
     ArkUI_Context context { 17 };
     OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
+    // 401 is ARKUI_ERROR_CODE_PARAM_INVALID for the null output slot.
     EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(nullptr, nullptr), 401);
     EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("output slot"), std::string::npos);
+    // 190001 is ARKUI_ERROR_CODE_UI_CONTEXT_INVALID for the null UI context.
     EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(nullptr, &result), 190001);
     support = false;
     EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 500);
@@ -125,13 +131,17 @@ TEST_F(PageTextCapiTest, validationOrderAndSharedDiagnostics)
 
 TEST_F(PageTextCapiTest, failureRecoveryAndIndependentSnapshots)
 {
+    // Instance ID 17 is a non-default mock instance used to verify forwarding through the public API.
     ArkUI_Context context { 17 };
     OH_ArkUI_NativeModule_UIJsonWrapper* old = nullptr;
     ASSERT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &old), 0);
+    // The collector must receive the exact mock instance ID 17 supplied by the caller.
     EXPECT_EQ(lastInstance, 17);
     EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_GetSchemaVersion(old), 1u);
     OH_ArkUI_NativeModule_UIJsonWrapper* result = old;
+    // Inject 100001 (ARKUI_ERROR_CODE_INTERNAL_ERROR) to test failure followed by recovery.
     collectCode = 100001;
+    // 100001 is the injected ARKUI_ERROR_CODE_INTERNAL_ERROR and must reach the caller unchanged.
     EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 100001);
     EXPECT_EQ(result, nullptr);
     auto error = std::string(OH_ArkUI_NativeModule_GetErrorMessage());
@@ -157,15 +167,19 @@ TEST_F(PageTextCapiTest, originalErrorChannelAvailabilityAndThreadIsolation)
     EXPECT_STREQ(OH_ArkUI_NativeModule_GetErrorMessage(), "");
 
     errorSupport = true;
+    // 500 is ARKUI_ERROR_CODE_CAPI_INIT_ERROR while the query implementation is unavailable.
     EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 500);
     auto message = std::string(OH_ArkUI_NativeModule_GetErrorMessage());
+    // The diagnostic must contain code 500, matching the unavailable query implementation.
     EXPECT_NE(message.find("500"), std::string::npos);
     std::thread worker([] {
         OH_ArkUI_NativeModule_GetPageText(nullptr, nullptr);
+        // Code 401 identifies the worker thread null-output error and must not replace the caller diagnostic.
         EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("401"), std::string::npos);
     });
     worker.join();
     EXPECT_EQ(OH_ArkUI_NativeModule_GetErrorMessage(), message);
+    // Record 401 (ARKUI_ERROR_CODE_PARAM_INVALID) to verify replacement of the preceding diagnostic.
     OHOS::Ace::SetErrorMessageByModifier(401, "anotherAPI", "new error");
     EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("anotherAPI"), std::string::npos);
 }
@@ -175,10 +189,12 @@ TEST_F(PageTextCapiTest, allocationFailuresAndRecovery)
     ArkUI_Context context { 1 };
     OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
     failMalloc = true;
+    // 100001 is ARKUI_ERROR_CODE_INTERNAL_ERROR for the injected collection allocation failure.
     EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 100001);
     EXPECT_EQ(result, nullptr);
     EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("allocation"), std::string::npos);
     failMalloc = true;
+    // The payload {} is 2 bytes; allocation failure must return 100001 (ARKUI_ERROR_CODE_INTERNAL_ERROR).
     EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_Create("{}", 2, 1, &result), 100001);
     EXPECT_EQ(result, nullptr);
     ASSERT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 0);
@@ -233,12 +249,16 @@ TEST(PageTextJsonTest, failedGrowthKeepsBufferValid)
 
 TEST_F(PageTextCapiTest, sharedErrorChannelPreservesLongLegacyMessages)
 {
+    // A 1024-byte reason verifies that long legacy diagnostics are preserved without truncation.
     std::string longReason(1024, 'r');
+    // A 256-byte function name verifies preservation of long names in the shared diagnostic channel.
     std::string longName(256, 'n');
+    // Use 401 (ARKUI_ERROR_CODE_PARAM_INVALID) as the error paired with the long diagnostic strings.
     OHOS::Ace::SetErrorMessageByModifier(401, longName.c_str(), longReason.c_str());
     auto message = std::string(OH_ArkUI_NativeModule_GetErrorMessage());
     EXPECT_NE(message.find(longName), std::string::npos);
     EXPECT_NE(message.find(longReason), std::string::npos);
+    // 500 (ARKUI_ERROR_CODE_CAPI_INIT_ERROR) replaces the code while retaining the existing function name.
     OHOS::Ace::SetErrorCodeAndMessageByModifier(500, "short reason");
     message = OH_ArkUI_NativeModule_GetErrorMessage();
     EXPECT_NE(message.find(longName), std::string::npos);

@@ -44,6 +44,7 @@ class CountingPageTextLazyBuilder : public OHOS::Ace::Framework::MockLazyForEach
     DECLARE_ACE_TYPE(CountingPageTextLazyBuilder, OHOS::Ace::Framework::MockLazyForEachBuilder);
 public:
     int builds = 0;
+    // 8 total items leave unbuilt entries beyond the children materialized by each lazy-list test.
     int32_t OnGetTotalCount() override { return 8; }
     std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& items) override
@@ -70,6 +71,7 @@ public:
         MockContainer::SetUp(pipeline);
         MockContainer::Current()->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
         stage = FrameNode::CreateFrameNode("stage", 1, AceType::MakeRefPtr<StagePattern>());
+        // Node ID 2 identifies the fixture page, distinct from the stage node with ID 1.
         page = FrameNode::CreateFrameNode("page", 2, AceType::MakeRefPtr<PagePattern>(nullptr));
         stage->AddChild(page);
         Mount(stage);
@@ -90,8 +92,10 @@ public:
         node->onMainTree_ = true;
         node->SetActive(true);
         auto render = AceType::MakeRefPtr<MockRenderContext>();
+        // The 100 x 20 px paint rectangle gives the fixture positive dimensions for text collection.
         render->SetPaintRectWithTransform(RectF(0, 0, 100, 20));
         node->renderContext_ = render;
+        // The 100 x 20 px layout size matches the fixture paint rectangle.
         node->GetGeometryNode()->SetFrameSize(SizeF(100, 20));
         pipeline->uiTranslateManager_->AddTranslateListener(WeakPtr<FrameNode>(node));
     }
@@ -122,8 +126,10 @@ public:
         pattern->textForDisplay_ = text;
         pattern->MarkPageTranslateTextDrawn();
         auto render = AceType::MakeRefPtr<MockRenderContext>();
+        // The 100 x 20 px paint rectangle makes cached text eligible once its active state permits collection.
         render->SetPaintRectWithTransform(RectF(0, 0, 100, 20));
         node->renderContext_ = render;
+        // The 100 x 20 px layout size matches the cached text paint rectangle.
         node->GetGeometryNode()->SetFrameSize(SizeF(100, 20));
         return node;
     }
@@ -159,9 +165,13 @@ TEST_F(PageTextCollectorTest, emptyRegistryAndMissingPageOrManager)
 TEST_F(PageTextCollectorTest, registryOrderDuplicatesAndIndependentNestedCarriers)
 {
     auto first = Text(30, u"same");
+    // Node ID 4 sorts before its parent ID 30, checking independent nested-carrier collection.
     Text(4, u"internal", first);
+    // Node ID 5 provides a second carrier with the same text, which must not be deduplicated.
     Text(5, u"same");
+    // Node ID 6 identifies the empty-text carrier that must be omitted.
     Text(6, u"");
+    // Node ID 7 identifies the whitespace-only carrier that must be retained.
     Text(7, u" ");
     ExpectContents({ "internal", "same", " ", "same" });
     page->RemoveChild(first);
@@ -181,13 +191,17 @@ TEST_F(PageTextCollectorTest, registryEligibilityMatchesOriginalTranslationRepor
     page->AddChild(ancestor);
     Mount(ancestor);
     ancestor->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    // Node ID 7 identifies the child excluded because its ancestor is hidden.
     Text(7, u"hidden ancestor", ancestor);
     auto outside = Text(8, u"outside");
     AceType::DynamicCast<MockRenderContext>(outside->GetRenderContext())->SetPaintRectWithTransform(
+        // Position (-10000, 5000) px places the 100 x 20 px text far outside the usual viewport.
         RectF(-10000, 5000, 100, 20));
     auto zero = Text(9, u"zero transform");
     AceType::DynamicCast<MockRenderContext>(zero->GetRenderContext())->SetPaintRectWithTransform(RectF());
+    // Node ID 10 identifies the carrier whose registration is removed before collection.
     auto unregistered = Text(10, u"unregistered");
+    // Remove the registration for node ID 10 while keeping the node alive in the tree.
     pipeline->uiTranslateManager_->RemoveTranslateListener(10);
     ExpectContents({ "self hidden", "detached", "outside" });
     // Use the real report filter as the oracle; only its service transport is mocked.
@@ -269,9 +283,11 @@ TEST_F(PageTextCollectorTest, wrongThreadAbortsAndInvalidInstanceReturnsError)
     uint32_t size = 0;
     const char* reason = nullptr;
     // The mock lookup returns the current container for any ID, like plugin redirection.
+    // Instance ID 404 differs from the fixture instance; 190001 means ARKUI_ERROR_CODE_UI_CONTEXT_INVALID.
     EXPECT_EQ(CollectPageText(404, &data, &size, &reason), 190001);
     EXPECT_EQ(data, nullptr);
     MockContainer::SetGetContainerCallback([](int32_t) -> RefPtr<Container> { return nullptr; });
+    // Instance ID 404 now has no container; 190001 means ARKUI_ERROR_CODE_UI_CONTEXT_INVALID.
     EXPECT_EQ(CollectPageText(404, &data, &size, &reason), 190001);
     EXPECT_EQ(data, nullptr);
 }
@@ -284,27 +300,36 @@ TEST_F(PageTextCollectorTest, geometryMatchesDumpAndInvalidNumbersFail)
     auto rect = json->GetValue("texts")->GetArrayItem(0)->GetValue("rect");
     EXPECT_DOUBLE_EQ(rect->GetArrayItem(0)->GetDouble(), expected.GetX());
     EXPECT_DOUBLE_EQ(rect->GetArrayItem(1)->GetDouble(), expected.GetY());
+    // In rect [x, y, w, h], index 2 is the fixture width of 123.5 px.
     EXPECT_DOUBLE_EQ(rect->GetArrayItem(2)->GetDouble(), 123.5);
+    // In rect [x, y, w, h], index 3 is the fixture height of 21.25 px.
     EXPECT_DOUBLE_EQ(rect->GetArrayItem(3)->GetDouble(), 21.25);
+    // A width of -1 is invalid; the positive height of 20 px isolates the negative-width failure.
     node->GetGeometryNode()->SetFrameSize(SizeF(-1, 20));
     char* data = nullptr;
     uint32_t size = 0;
     const char* reason = nullptr;
+    // 100001 is ARKUI_ERROR_CODE_INTERNAL_ERROR for the invalid geometry.
     EXPECT_EQ(CollectPageText(0, &data, &size, &reason), 100001);
     EXPECT_EQ(data, nullptr);
 }
 
 TEST_F(PageTextCollectorTest, registeredHistoryOverlayAndEmbeddedDescendantsFollowTranslation)
 {
+    // Node ID 3 identifies the history-page text and sorts before the current-page text.
     Text(3, u"history");
+    // Node ID 4 identifies the new page, distinct from the original fixture page ID 2.
     page = FrameNode::CreateFrameNode("page", 4, AceType::MakeRefPtr<PagePattern>(nullptr));
     stage->AddChild(page);
     Mount(page);
+    // Node ID 5 identifies the current-page text.
     Text(5, u"current");
+    // Node ID 6 identifies overlay text attached outside the page subtree.
     Text(6, u"overlay", stage);
     auto embedded = FrameNode::CreateFrameNode("XComponent", 7, AceType::MakeRefPtr<Pattern>());
     page->AddChild(embedded);
     Mount(embedded);
+    // Node ID 8 identifies registered text below the embedded-component node.
     Text(8, u"registered descendant", embedded);
     ExpectContents({ "history", "current", "overlay", "registered descendant" });
     stage->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
@@ -353,6 +378,7 @@ TEST_F(PageTextCollectorTest, realLazyForEachSurvivesCacheInvalidationWithoutBui
     EXPECT_EQ(builder->endIndex_, endBefore);
     EXPECT_TRUE(nodes[0]->IsOnMainTree());
     EXPECT_TRUE(nodes[0]->IsActive());
+    // Index 3 is the fourth fixture node, explicitly made inactive before collection.
     EXPECT_FALSE(nodes[3]->IsActive());
     EXPECT_FALSE(cached->IsOnMainTree());
     page->RemoveChild(lazy);
@@ -372,11 +398,13 @@ TEST_F(PageTextCollectorTest, realArkoalaLazyUsesMountedChildrenWithoutCallbacks
     lazy->SetCallbacks([&](int32_t index, bool) -> RefPtr<UINode> { ++callbacks; return nodes.at(index); },
         [&](int32_t, int32_t, int32_t, int32_t, bool) { ++callbacks; },
         [&]() { ++callbacks; }, [&](int32_t) { ++callbacks; });
+    // 8 total items include the five created fixtures and three entries that remain uninstantiated.
     lazy->SetTotalCount(8);
     for (int32_t index : { 1, 0, 2, 3 }) {
         ASSERT_EQ(lazy->GetFrameChildByIndex(index, true, false, true), nodes[index]);
         Register(nodes[index]);
     }
+    // Index 4 is the fifth fixture, requested only for the cache without adding it to the render tree.
     ASSERT_EQ(lazy->GetFrameChildByIndex(4, true, true, false), nodes[4]);
     nodes[2]->SetActive(false);
     nodes[3]->SetActive(false);
@@ -394,6 +422,7 @@ TEST_F(PageTextCollectorTest, realArkoalaLazyUsesMountedChildrenWithoutCallbacks
     EXPECT_TRUE(lazy->children_.empty());
     EXPECT_EQ(callbacks, before);
     EXPECT_TRUE(nodes[0]->IsOnMainTree());
+    // Index 4 is the cache-only fixture and must remain off the main tree.
     EXPECT_FALSE(nodes[4]->IsOnMainTree());
     page->RemoveChild(lazy);
 }
@@ -421,9 +450,13 @@ TEST_F(PageTextCollectorTest, realRepeatVirtual2PreservesOrderAndCacheState)
         ASSERT_EQ(repeat->GetFrameChildByIndex(i, false, false, true), child);
         Register(nodes[i]);
     }
+    // Index 2 is the third fixture; make it inactive to verify exclusion.
     nodes[2]->SetActive(false);
+    // Index 3 is the fourth fixture; also exclude it through the inactive state.
     nodes[3]->SetActive(false);
+    // Node ID 1205 identifies the L2-only text, separate from L1 fixture IDs 1201 through 1204.
     RefPtr<UINode> cached = UnmountedText(1205, u"L2 cache");
+    // RID 99 is an L2-only cache key, distinct from the L1 RIDs 10 through 13.
     repeat->caches_.cacheItem4Rid_[99] = RepeatVirtualScroll2CacheItem::MakeCacheItem(cached, false);
     const auto l1Before = repeat->caches_.l1Rid4Index_;
     const auto cacheBefore = repeat->caches_.cacheItem4Rid_;
@@ -471,6 +504,7 @@ TEST_F(PageTextCollectorTest, realRepeatVirtual1DoesNotInsertOrBuildDuringRead)
         repeat->caches_.activeNodeKeysInL1_.insert(key);
     }
     repeat->caches_.activeNodeKeysInL1_.insert("missing");
+    // Index 7 is the last valid slot in the eight-item dataset but intentionally has no cached node.
     repeat->caches_.index4Key_["missing"] = 7;
     const auto cacheSize = repeat->caches_.node4key_.size();
     const int before = callbacks;
@@ -484,8 +518,10 @@ TEST_F(PageTextCollectorTest, realRepeatVirtual1DoesNotInsertOrBuildDuringRead)
 
 TEST_F(PageTextCollectorTest, registrationRemovalExpiryAndWebExclusion)
 {
+    // Node ID 3 is the live carrier used to exercise registration removal and re-registration.
     auto node = Text(3, u"registered");
     auto manager = pipeline->uiTranslateManager_;
+    // Remove node ID 3 from the registry without destroying its text carrier.
     manager->RemoveTranslateListener(3);
     EXPECT_EQ(Collect(), "{\"texts\":[]}");
     Register(node);
