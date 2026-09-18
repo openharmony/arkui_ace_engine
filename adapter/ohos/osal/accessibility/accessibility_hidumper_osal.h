@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_ACCESSIBILITY_HIDUMPER_OSAL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_ACCESSIBILITY_HIDUMPER_OSAL_H
 
+#include <list>
 #include <string>
+#include <utility>
+#include <vector>
 #include "accessibility_element_info.h"
 
 #include "base/memory/referenced.h"
@@ -28,9 +31,21 @@ namespace OHOS::Accessibility {
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+class UINode;
 }
 
 namespace OHOS::Ace::Framework {
+struct CommonProperty;
+
+bool IsExtensionComponent(const RefPtr<NG::UINode>& node);
+bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
+void GetFrameNodeChildren(
+    const RefPtr<NG::UINode>& uiNode,
+    std::vector<std::pair<int64_t, int32_t>>& childrenIdInfo,
+    const CommonProperty& commonProperty);
+void DumpAccessibilityElementInfosTreeNG(
+    std::list<Accessibility::AccessibilityElementInfo>& infos, int32_t depth, int64_t accessibilityId, bool isRoot);
+
 struct ActionTable {
     AceAction aceAction;
     Accessibility::ActionType action;
