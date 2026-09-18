@@ -5329,6 +5329,7 @@
       construction?vtable?for?OHOS::Parcelable-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
       GetArkUIAniModifiers;
       GetArkUIAnyFullNodeAPI;
+      GetArkUIPageTextAPI;
       GetArkUIDrawableDescriptor;
       GetArkUIFullNodeAPI;
       GetArkUINodeAPI;

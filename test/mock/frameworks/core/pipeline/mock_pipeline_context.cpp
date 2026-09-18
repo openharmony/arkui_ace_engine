@@ -2174,3 +2174,10 @@ int32_t PipelineBase::RegisterDensityChangedCallback(std::function<void(double)>
 void PipelineBase::UnregisterDensityChangedCallback(int) {}
 
 } // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG {
+std::shared_ptr<UiTranslateManagerImpl> PipelineContext::GetUiTranslateManagerImpl()
+{
+    return uiTranslateManager_;
+}
+} // namespace OHOS::Ace::NG

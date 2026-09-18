@@ -27,3 +27,5 @@
 #include "native_type.h"
 #include "native_xcomponent_key_event.h"
 #include "ui_input_event.h"
+
+#include "ui_info_collection.h"

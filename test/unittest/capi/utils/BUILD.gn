@@ -33,5 +33,8 @@ ace_unittest("capi_all_utils_test") {
 
 group("capi_utils_unittest") {
   testonly = true
-  deps = [ ":capi_all_utils_test" ]
+  deps = [
+    ":capi_all_utils_test",
+    "page_text:capi_page_text_test",
+  ]
 }
