@@ -1550,7 +1550,7 @@ export class SubHeader extends ViewPU {
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
         this.observeComponentCreation2((o7, p7) => {
-            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Start });
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
         }, Flex);
         this.observeComponentCreation2((m7, n7) => {
             Text.create(i7.content);
@@ -1638,7 +1638,7 @@ export class SubHeader extends ViewPU {
 
     PrimaryTitleStyle(q6, r6 = null) {
         this.observeComponentCreation2((u6, v6) => {
-            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Start });
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
             Flex.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
