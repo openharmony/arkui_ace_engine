@@ -9457,6 +9457,30 @@ struct ArkUIRichEditorModifier {
     ArkUI_Float32 (*getRichEditorCancelIconSize)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Uint32 (*getRichEditorCancelIconColor)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getRichEditorCancelIconSrc)(ArkUINodeHandle node);
+    // ShowCounter
+    void (*setRichEditorShowCounter)(ArkUINodeHandle node, ArkUIShowCountOptions* showCountOptions,
+        void* resourceObject, void* resourceObjectTextOverflowColor);
+    void (*resetRichEditorShowCounter)(ArkUINodeHandle node);
+    void (*getRichEditorShowCounterOptions)(ArkUINodeHandle node, ArkUIShowCountOptions* options);
+    // Border
+    void (*setRichEditorBorderWidth)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 size);
+    void (*resetRichEditorBorderWidth)(ArkUINodeHandle node);
+    void (*setRichEditorBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 topColorInt,
+        ArkUI_Uint32 rightColorInt, ArkUI_Uint32 bottomColorInt, ArkUI_Uint32 leftColorInt, void* res);
+    void (*resetRichEditorBorderColor)(ArkUINodeHandle node);
+    void (*setRichEditorBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
+    void (*resetRichEditorBorderStyle)(ArkUINodeHandle node);
+    void (*setRichEditorBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 size);
+    void (*resetRichEditorBorderRadius)(ArkUINodeHandle node);
+    // Margin
+    void (*setRichEditorMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top,
+        const struct ArkUISizeType* right, const struct ArkUISizeType* bottom,
+        const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes);
+    void (*resetRichEditorMargin)(ArkUINodeHandle node);
+    void (*getRichEditorMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4],
+        ArkUI_Int32 length, ArkUI_Int32 unit);
 };
 
 struct ArkUIRichEditorControllerModifier {

@@ -15,10 +15,47 @@
 
 #include "rich_editor_test_min.h"
 
+#define private public
+#define protected public
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#undef private
+#undef protected
+
+using namespace testing;
+using namespace OHOS::Ace;
+using namespace OHOS::Ace::NG;
+
 void RichEditorTestBase::SetUpTestCase() {}
 
 void RichEditorTestBase::TearDownTestCase() {}
 
-void RichEditorTestBase::SetUp() {}
+void RichEditorTestBase::SetUp()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(testing::Return(textFieldTheme));
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    pattern->InitScrollablePattern();
+    pattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    pattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    pattern->CreateNodePaintMethod();
+    richEditorNode_->GetGeometryNode()->SetContentSize({});
+}
 
-void RichEditorTestBase::TearDown() {}
+void RichEditorTestBase::TearDown()
+{
+    richEditorNode_ = nullptr;
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}

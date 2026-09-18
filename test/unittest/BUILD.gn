@@ -1448,6 +1448,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_foreground_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_property.cpp",

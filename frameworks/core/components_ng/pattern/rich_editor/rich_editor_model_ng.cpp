@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/rich_editor/napi_rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -54,7 +56,7 @@ void RichEditorModelNG::CreateModel(bool isStyledStringMode)
 RefPtr<FrameNode> RichEditorModelNG::CreateRichEditorStyledStringNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<RichEditorPattern>(true); });
+        []() { return AceType::MakeRefPtr<NapiRichEditorPattern>(true); });
     ACE_UINODE_TRACE(frameNode);
     InitRichEditorModel(true, frameNode);
 
@@ -1737,6 +1739,179 @@ void RichEditorModelNG::SetOnStyledStringDidChange(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStyledStringDidChange(std::move(func));
+}
+
+// ===== counter properties (instance methods) =====
+void RichEditorModelNG::SetShowCounter(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowCounter, value);
+}
+
+void RichEditorModelNG::SetCounter(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SetCounter, value);
+}
+
+void RichEditorModelNG::SetCounterTextColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor, value);
+}
+
+void RichEditorModelNG::SetCounterTextOverflowColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor, value);
+}
+
+void RichEditorModelNG::SetShowHighlightBorder(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowHighlightBorder, value);
+}
+
+void RichEditorModelNG::ResetCounterTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor);
+}
+
+void RichEditorModelNG::ResetCounterTextOverflowColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor);
+}
+
+// ===== counter properties (static methods with FrameNode*) =====
+void RichEditorModelNG::SetShowCounter(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowCounter, value, frameNode);
+}
+
+void RichEditorModelNG::SetCounter(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SetCounter, value, frameNode);
+}
+
+void RichEditorModelNG::SetCounterTextColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor, value, frameNode);
+}
+
+void RichEditorModelNG::SetCounterTextOverflowColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor, value, frameNode);
+}
+
+void RichEditorModelNG::SetShowHighlightBorder(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowHighlightBorder, value, frameNode);
+}
+
+void RichEditorModelNG::ResetCounterTextColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor, frameNode);
+}
+
+void RichEditorModelNG::ResetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor, frameNode);
+}
+
+bool RichEditorModelNG::GetShowCounter(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, ShowCounter, value, frameNode, value);
+    return value;
+}
+
+int RichEditorModelNG::GetCounterType(FrameNode* frameNode)
+{
+    int value = -1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, SetCounter, value, frameNode, value);
+    return value;
+}
+
+bool RichEditorModelNG::GetShowCounterBorder(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, ShowHighlightBorder, value, frameNode, value);
+    return value;
+}
+
+Color RichEditorModelNG::GetCounterTextColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, CounterTextColor, value, frameNode, value);
+    return value;
+}
+
+Color RichEditorModelNG::GetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, CounterTextOverflowColor, value, frameNode, value);
+    return value;
+}
+
+// ===== border methods (static methods with FrameNode*) =====
+void RichEditorModelNG::SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& borderWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderWidthFlagByUser, borderWidth, frameNode);
+}
+
+void RichEditorModelNG::SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& borderRadius)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderRadiusFlagByUser, borderRadius, frameNode);
+}
+
+void RichEditorModelNG::SetBorderColor(FrameNode* frameNode, const BorderColorProperty& borderColors)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderColor(frameNode, borderColors);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderColorFlagByUser, borderColors, frameNode);
+}
+
+void RichEditorModelNG::SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& borderStyles)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderStyle(frameNode, borderStyles);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderStyleFlagByUser, borderStyles, frameNode);
+}
+
+void RichEditorModelNG::SetMargin(FrameNode* frameNode, const MarginProperty& margin)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MarginByUser, margin, frameNode);
+}
+
+MarginProperty RichEditorModelNG::GetMargin(FrameNode* frameNode)
+{
+    CalcLength defaultDimen = CalcLength(0, DimensionUnit::VP);
+    NG::MarginProperty margins;
+    margins.top = std::optional<CalcLength>(defaultDimen);
+    margins.right = std::optional<CalcLength>(defaultDimen);
+    margins.bottom = std::optional<CalcLength>(defaultDimen);
+    margins.left = std::optional<CalcLength>(defaultDimen);
+    CHECK_NULL_RETURN(frameNode, margins);
+    auto layoutProperty = frameNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, margins);
+    if (layoutProperty->HasMarginByUser()) {
+        const auto& property = layoutProperty->GetMarginByUserValue();
+        margins.top = std::optional<CalcLength>(property.top);
+        margins.right = std::optional<CalcLength>(property.right);
+        margins.bottom = std::optional<CalcLength>(property.bottom);
+        margins.left = std::optional<CalcLength>(property.left);
+    }
+    return margins;
 }
 
 void RichEditorModelNG::SetInputFilter(FrameNode* frameNode, const std::string& value)

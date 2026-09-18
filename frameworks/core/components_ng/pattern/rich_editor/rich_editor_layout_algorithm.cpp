@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/common_text/counter_decorator.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/text_field/text_input_response_area.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -385,6 +386,14 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     if (layoutProperty) {
         RelayoutShaderStyle(layoutProperty);
     }
+    // counter: measure counter node
+    auto frameNode = layoutWrapper->GetHostNode();
+    if (frameNode) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        if (pattern && pattern->IsShowCounterEnabled()) {
+            CounterNodeMeasure(contentWidth, layoutWrapper);
+        }
+    }
     return SizeF(contentWidth, contentHeight);
 }
 
@@ -702,6 +711,14 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     contentLayoutWrapper->SetActive(true);
     contentLayoutWrapper->Layout();
+    // counter: layout counter node
+    auto frameNode = layoutWrapper->GetHostNode();
+    if (frameNode) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        if (pattern && pattern->IsShowCounterEnabled()) {
+            CounterLayout(layoutWrapper);
+        }
+    }
     LayoutCancelButton(layoutWrapper);
 }
 
@@ -904,5 +921,25 @@ void RichEditorLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<SpanItem>&
         return;
     }
     spanTextLength += static_cast<int32_t>(child->content.length());
+}
+
+float RichEditorLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    auto counterDecorator = pattern->GetCounterDecorator();
+    CHECK_NULL_RETURN(counterDecorator, 0.0f);
+    std::u16string textContent;
+    pattern->GetContentBySpans(textContent);
+    bool showPlaceHolder = pattern->IsShowPlaceholder();
+    return counterDecorator->MeasureDecorator(contentWidth, textContent, showPlaceHolder);
+}
+
+void RichEditorLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
+{
+    CounterDecorator::LayoutCounterNode(layoutWrapper);
 }
 } // namespace OHOS::Ace::NG
