@@ -91,9 +91,8 @@ ace_unittest("shared_image_manager_test") {
   type = "new"
   sources = [
     "shared_image_manager_test.cpp",
-    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "$ace_root/frameworks/base/resource/shared_image_manager.cpp",
   ]
-  deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
 }
 
 group("base_unittest") {
