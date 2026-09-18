@@ -19,13 +19,13 @@ import { ArkUIAniModule } from "arkui.ani"
 import { PeerNode } from "../PeerNode"
 
 export class ArkInteropProxyNodePeer extends PeerNode {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
 
     public static create(id: int32, flags: int32 = 0): ArkInteropProxyNodePeer {
         const peerPtr = ArkUIAniModule._InteropProxyNode_Construct(id)
-        return new ArkInteropProxyNodePeer(peerPtr, id, "InteropProxyNode", flags)
+        return new ArkInteropProxyNodePeer(peerPtr, id, 'InteropProxyNode', flags)
     }
 
     public registerDestroyEvent(event: (nodeId: int) => void): void {
