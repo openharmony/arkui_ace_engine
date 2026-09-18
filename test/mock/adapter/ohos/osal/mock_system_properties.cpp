@@ -81,6 +81,7 @@ bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::recycleImageEnabled_ = false;
 bool SystemProperties::navigationImageRecycleEnabled_ = false;
 bool SystemProperties::imageReleaseManageObjectEnabled_ = true;
+bool SystemProperties::svgCacheSkipEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;

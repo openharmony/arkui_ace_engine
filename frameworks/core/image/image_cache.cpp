@@ -22,6 +22,8 @@
 namespace OHOS::Ace {
 namespace {
 constexpr uint64_t MAX_WAITING_TIME = 1000; // 1000ms
+constexpr size_t SVG_NODE_ESTIMATE_SIZE = 500; // estimate 500B per svg cache node
+constexpr int32_t SINGLE_FRAME_COUNT = 1; // single frame image (non-animated)
 }
 RefPtr<ImageCache> ImageCache::Create()
 {
@@ -253,6 +255,45 @@ void ImageCache::Clear()
     }
 }
 
+void ImageCache::DumpImgObjCacheInfo()
+{
+    std::scoped_lock lock(imgObjMutex_);
+    int32_t totalImgObjCount = static_cast<int32_t>(cacheImgObjListNG_.size());
+    int32_t svgDomCount = 0;
+    size_t svgDomTotalNodeCount = 0;
+    int32_t pixmapCount = 0;
+    int32_t animatedCount = 0;
+    int32_t staticCount = 0;
+    size_t nonSvgTotalDataSize = 0;
+    for (const auto& item : cacheImgObjListNG_) {
+        const auto& cacheObj = item.cacheObj;
+        auto svgDom = cacheObj->GetSVGDom();
+        if (svgDom) {
+            svgDomCount++;
+            svgDomTotalNodeCount += svgDom->GetNodeCount();
+            continue;
+        }
+        const auto& srcInfo = cacheObj->GetSourceInfo();
+        if (srcInfo.IsPixmap()) {
+            pixmapCount++;
+        } else if (cacheObj->GetFrameCount() > SINGLE_FRAME_COUNT) {
+            animatedCount++;
+        } else {
+            staticCount++;
+        }
+        nonSvgTotalDataSize += cacheObj->GetImageDataSize();
+    }
+    DumpLog::GetInstance().Print("ImageObject cache total count: " + std::to_string(totalImgObjCount));
+    DumpLog::GetInstance().Print("SvgDom cache count: " + std::to_string(svgDomCount));
+    DumpLog::GetInstance().Print("SvgDom cache total node count: " + std::to_string(svgDomTotalNodeCount));
+    DumpLog::GetInstance().Print("SvgDom cache estimated size: " +
+        std::to_string(svgDomTotalNodeCount * SVG_NODE_ESTIMATE_SIZE) + "(B)");
+    DumpLog::GetInstance().Print("PixelMap cache count: " + std::to_string(pixmapCount));
+    DumpLog::GetInstance().Print("Animated image cache count: " + std::to_string(animatedCount));
+    DumpLog::GetInstance().Print("Static image cache count: " + std::to_string(staticCount));
+    DumpLog::GetInstance().Print("Non-SVG cache total data size: " + std::to_string(nonSvgTotalDataSize) + "(B)");
+}
+
 void ImageCache::DumpCacheInfo()
 {
     auto cacheSize = dataCacheList_.size();
@@ -262,6 +303,9 @@ void ImageCache::DumpCacheInfo()
     DumpLog::GetInstance().Print("User set ImageRawDataCacheSize : " + std::to_string(dataSizeLimit) + "(B)" +
                                  ", ImageCacheCount :" + std::to_string(capacity) + "(number)");
     DumpLog::GetInstance().Print("Cache count: " + std::to_string(cacheSize));
+
+    DumpImgObjCacheInfo();
+
     if (cacheSize == 0) {
         return;
     }

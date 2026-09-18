@@ -36,6 +36,10 @@ public:
     virtual void SetSmoothEdge(float value) {}
     virtual void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter) {}
     virtual std::string GetDumpInfo() { return ""; }
+    virtual size_t GetNodeCount() const
+    {
+        return 0;
+    }
     void SetRadius(const BorderRadiusArray& radiusXY)
     {
         if (!radius_) {
