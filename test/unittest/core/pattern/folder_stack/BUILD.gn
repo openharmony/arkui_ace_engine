@@ -47,5 +47,6 @@ if (is_host_product) {
         "folder_stack_test_core.cpp",
       ]
     }
+    sources += [ "$ace_root/adapter/ohos/osal/display_info_utils.cpp" ]
   }
 }
