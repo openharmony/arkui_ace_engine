@@ -18,8 +18,6 @@
 
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
 #include "base/resource/shared_image_manager.h"
 #include "base/utils/system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
