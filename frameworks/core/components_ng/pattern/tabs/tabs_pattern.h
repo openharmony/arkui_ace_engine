@@ -245,6 +245,11 @@ public:
         searchableOptions_ = options;
     }
 
+    const TabsSidebarSearchableOptions& GetTabsSidebarSearchableOptions() const
+    {
+        return searchableOptions_;
+    }
+
     void SetBarModifierApply(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply)
     {
         barModifierApply_ = std::move(onApply);

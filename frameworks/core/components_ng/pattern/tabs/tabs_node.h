@@ -231,6 +231,7 @@ private:
     std::string GetAnimationMode() const;
     std::string GetEdgeEffect() const;
     std::unique_ptr<JsonValue> GetBarBackgroundEffect() const;
+    void SidebarInfoToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
