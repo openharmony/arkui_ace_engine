@@ -162,6 +162,12 @@ static bool GetWebOptimizationValue()
     return OHOS::system::GetBoolParameter("web.optimization", true);
 }
 
+static bool IsDelegateCompositingEnabled()
+{
+    static const bool kEnabled = OHOS::system::GetBoolParameter("web.delegatedCompositing.enable", false);
+    return kEnabled;
+}
+
 Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
 {
     switch (colorType) {
@@ -3228,6 +3234,12 @@ void WebDelegate::InitWebViewWithWindow()
             if (!delegate->window_) {
                 return;
             }
+            if (IsDelegateCompositingEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "InitWebViewWithWindow nodeId: %{public}" PRIu64,
+                    delegate->surfaceNodeId_);
+                initArgs->SetParamsForDelegateCompositing(
+                    delegate->surfaceNodeId_, delegate->GetDelegateRSHandle(), delegate->GetDelegateUIContextToken());
+            }
 
             initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
             initArgs->SetEmulateTouchFromMouseEvent(delegate->emulateTouchFromMouseEvent_);
@@ -3786,6 +3798,14 @@ void WebDelegate::InitWebViewWithSurface()
                 // Created a richtext component
                 initArgs->AddArg(std::string("--init-richtext-data=").append(delegate->richtextData_.value()));
             }
+
+            if (IsDelegateCompositingEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "InitWebViewWithSurface nodeId: %{public}" PRIu64,
+                    delegate->surfaceNodeId_);
+                initArgs->SetParamsForDelegateCompositing(
+                    delegate->surfaceNodeId_, delegate->GetDelegateRSHandle(), delegate->GetDelegateUIContextToken());
+            }
+
             if (isEnhanceSurface) {
                 TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
@@ -11191,5 +11211,43 @@ void WebDelegate::ExecuteAllRuleSetMatchInternal()
                     processId, webId, hostNodeId, selectorJson, resultJson, false);
             });
     }
+}
+
+uint64_t WebDelegate::GetDelegateRSHandle()
+{
+    if (surfaceRsNode_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Get rs handle failed, surfaceRsNode_ is nullptr");
+        return 0;
+    }
+
+    auto rsUIContext = surfaceRsNode_->GetRSUIContext();
+    if (rsUIContext == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Get rs handle failed, rsUIContext is nullptr");
+        return 0;
+    }
+    connectToRender_ = rsUIContext->GetConnectToRender();
+    if (connectToRender_) {
+        return reinterpret_cast<uint64_t>(connectToRender_.GetRefPtr());
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Get rs handle failed, connectToRender_ is nullptr");
+    }
+
+    return 0;
+}
+
+uint64_t WebDelegate::GetDelegateUIContextToken()
+{
+    if (surfaceRsNode_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Get uiContext token failed, surfaceRsNode_ is nullptr");
+        return 0;
+    }
+
+    auto rsUIContext = surfaceRsNode_->GetRSUIContext();
+    if (rsUIContext == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Get uiContext token failed, rsUIContext is nullptr");
+        return 0;
+    }
+
+    return rsUIContext->GetToken();
 }
 } // namespace OHOS::Ace
