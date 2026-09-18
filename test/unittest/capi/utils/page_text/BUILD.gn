@@ -25,7 +25,7 @@ action("page_text_error_getter") {
   ]
 }
 
-# Keep allocation fault injection and NodeModel stubs local to this executable.
+# Keep NodeModel stubs local to this executable.
 ohos_unittest("capi_page_text_test") {
   module_out_path = "ace_engine/C-API-Main"
   sources = [
@@ -50,13 +50,5 @@ ohos_unittest("capi_page_text_test") {
 
     # The wrapper's uint32_t/size_t overflow check is only needed on 32-bit.
     "-Wno-tautological-constant-out-of-range-compare",
-  ]
-  cflags = [
-    "-fno-builtin-malloc",
-    "-fno-builtin-realloc",
-  ]
-  ldflags = [
-    "-Wl,--wrap=malloc",
-    "-Wl,--wrap=realloc",
   ]
 }

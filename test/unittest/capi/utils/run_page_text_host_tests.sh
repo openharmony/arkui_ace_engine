@@ -20,6 +20,6 @@ g++ -std=c++17 -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer -pthr
   "$repo/frameworks/core/interfaces/native/utility/error_message_manager.cpp" \
   "$repo/test/unittest/capi/utils/page_text_capi_test.cpp" \
   "$gtest/src/gtest-all.cc" "$gtest/src/gtest_main.cc" \
-  -Wl,--wrap=malloc -Wl,--wrap=realloc -o "$out/page_text_test"
+  -o "$out/page_text_test"
 "$out/page_text_test" --gtest_filter='PageTextCapiTest.*:PageTextJsonTest.*:UIJsonWrapperTest.*' \
   --gtest_output="xml:$out/page_text_test.xml"

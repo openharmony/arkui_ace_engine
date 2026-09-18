@@ -286,7 +286,9 @@ TEST_F(PageTextCollectorTest, wrongThreadAbortsAndInvalidInstanceReturnsError)
     // Instance ID 404 differs from the fixture instance; 190001 means ARKUI_ERROR_CODE_UI_CONTEXT_INVALID.
     EXPECT_EQ(CollectPageText(404, &data, &size, &reason), 190001);
     EXPECT_EQ(data, nullptr);
-    MockContainer::SetGetContainerCallback([](int32_t) -> RefPtr<Container> { return nullptr; });
+    MockContainer::SetGetContainerCallback([](int32_t) -> RefPtr<Container> {
+        return nullptr;
+    });
     // Instance ID 404 now has no container; 190001 means ARKUI_ERROR_CODE_UI_CONTEXT_INVALID.
     EXPECT_EQ(CollectPageText(404, &data, &size, &reason), 190001);
     EXPECT_EQ(data, nullptr);
@@ -395,9 +397,20 @@ TEST_F(PageTextCollectorTest, realArkoalaLazyUsesMountedChildrenWithoutCallbacks
         UnmountedText(1103, u"hidden"), UnmountedText(1104, u"inactive"),
         UnmountedText(1105, u"unmounted cache")
     };
-    lazy->SetCallbacks([&](int32_t index, bool) -> RefPtr<UINode> { ++callbacks; return nodes.at(index); },
-        [&](int32_t, int32_t, int32_t, int32_t, bool) { ++callbacks; },
-        [&]() { ++callbacks; }, [&](int32_t) { ++callbacks; });
+    lazy->SetCallbacks(
+        [&](int32_t index, bool) -> RefPtr<UINode> {
+            ++callbacks;
+            return nodes.at(index);
+        },
+        [&](int32_t, int32_t, int32_t, int32_t, bool) {
+            ++callbacks;
+        },
+        [&]() {
+            ++callbacks;
+        },
+        [&](int32_t) {
+            ++callbacks;
+        });
     // 8 total items include the five created fixtures and three entries that remain uninstantiated.
     lazy->SetTotalCount(8);
     for (int32_t index : { 1, 0, 2, 3 }) {
@@ -431,11 +444,28 @@ TEST_F(PageTextCollectorTest, realRepeatVirtual2PreservesOrderAndCacheState)
 {
     int callbacks = 0;
     auto repeat = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(1200, 8, 8, 0,
-        [&](IndexType, bool, bool) -> std::pair<RIDType, uint32_t> { ++callbacks; return { 0, 0 }; },
-        [&](IndexType, IndexType) { ++callbacks; },
-        [&](int32_t, int32_t, int32_t, int32_t, bool, bool) { ++callbacks; },
-        [&](IndexType, IndexType) { ++callbacks; }, [&]() { ++callbacks; },
-        [&]() { ++callbacks; }, [&]() { ++callbacks; });
+        [&](IndexType, bool, bool) -> std::pair<RIDType, uint32_t> {
+            ++callbacks;
+            return { 0, 0 };
+        },
+        [&](IndexType, IndexType) {
+            ++callbacks;
+        },
+        [&](int32_t, int32_t, int32_t, int32_t, bool, bool) {
+            ++callbacks;
+        },
+        [&](IndexType, IndexType) {
+            ++callbacks;
+        },
+        [&]() {
+            ++callbacks;
+        },
+        [&]() {
+            ++callbacks;
+        },
+        [&]() {
+            ++callbacks;
+        });
     page->AddChild(repeat);
     repeat->onMainTree_ = true;
     std::vector<RefPtr<FrameNode>> nodes {
@@ -488,10 +518,23 @@ TEST_F(PageTextCollectorTest, realRepeatVirtual1DoesNotInsertOrBuildDuringRead)
     int callbacks = 0;
     auto repeat = AceType::MakeRefPtr<RepeatVirtualScrollNode>(1300, 8,
         std::map<std::string, std::pair<bool, uint32_t>> {},
-        [&](uint32_t) { ++callbacks; }, [&](const std::string&, uint32_t) { ++callbacks; },
-        [&](uint32_t, uint32_t) -> std::list<std::string> { ++callbacks; return {}; },
-        [&](uint32_t, uint32_t) -> std::list<std::string> { ++callbacks; return {}; },
-        [&](int32_t, int32_t) { ++callbacks; });
+        [&](uint32_t) {
+            ++callbacks;
+        },
+        [&](const std::string&, uint32_t) {
+            ++callbacks;
+        },
+        [&](uint32_t, uint32_t) -> std::list<std::string> {
+            ++callbacks;
+            return {};
+        },
+        [&](uint32_t, uint32_t) -> std::list<std::string> {
+            ++callbacks;
+            return {};
+        },
+        [&](int32_t, int32_t) {
+            ++callbacks;
+        });
     page->AddChild(repeat);
     repeat->onMainTree_ = true;
     for (int32_t i : { 1, 0 }) {

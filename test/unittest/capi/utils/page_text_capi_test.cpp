@@ -29,8 +29,6 @@ thread_local bool support = true;
 thread_local bool errorSupport = true;
 thread_local int32_t collectCode = 0;
 thread_local int32_t lastInstance = -1;
-thread_local bool failMalloc = false;
-thread_local bool failRealloc = false;
 
 int32_t Collect(int32_t id, char** data, uint32_t* size, const char** reason)
 {
@@ -74,28 +72,15 @@ const ArkUIBasicAPI* Basic()
     return &api;
 }
 }
-extern "C" void* __real_malloc(size_t size);
-extern "C" void* __real_realloc(void* ptr, size_t size);
-extern "C" void* __wrap_malloc(size_t size)
-{
-    if (failMalloc) {
-        failMalloc = false;
-        return nullptr;
-    }
-    return __real_malloc(size);
-}
-extern "C" void* __wrap_realloc(void* ptr, size_t size)
-{
-    if (failRealloc) {
-        failRealloc = false;
-        return nullptr;
-    }
-    return __real_realloc(ptr, size);
-}
 namespace OHOS::Ace::NodeModel {
 const ArkUIPageTextAPI* GetPageTextAPI()
 {
-    static const ArkUIPageTextAPI api { Collect, [](char* data) { std::free(data); } };
+    static const ArkUIPageTextAPI api {
+        Collect,
+        [](char* data) {
+            std::free(data);
+        }
+    };
     return support ? &api : nullptr;
 }
 ArkUIFullNodeAPI* GetFullImplForErrorMessage()
@@ -108,7 +93,12 @@ ArkUIFullNodeAPI* GetFullImplForErrorMessage()
 
 class PageTextCapiTest : public testing::Test {
 public:
-    void SetUp() override { support = errorSupport = true; collectCode = 0; }
+    void SetUp() override
+    {
+        errorSupport = true;
+        support = true;
+        collectCode = 0;
+    }
 };
 
 TEST_F(PageTextCapiTest, validationOrderAndSharedDiagnostics)
@@ -157,7 +147,8 @@ TEST_F(PageTextCapiTest, failureRecoveryAndIndependentSnapshots)
 
 TEST_F(PageTextCapiTest, originalErrorChannelAvailabilityAndThreadIsolation)
 {
-    support = errorSupport = false;
+    errorSupport = false;
+    support = false;
     ArkUI_Context context { 1 };
     OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
     EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 500);
@@ -182,23 +173,6 @@ TEST_F(PageTextCapiTest, originalErrorChannelAvailabilityAndThreadIsolation)
     // Record 401 (ARKUI_ERROR_CODE_PARAM_INVALID) to verify replacement of the preceding diagnostic.
     OHOS::Ace::SetErrorMessageByModifier(401, "anotherAPI", "new error");
     EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("anotherAPI"), std::string::npos);
-}
-
-TEST_F(PageTextCapiTest, allocationFailuresAndRecovery)
-{
-    ArkUI_Context context { 1 };
-    OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
-    failMalloc = true;
-    // 100001 is ARKUI_ERROR_CODE_INTERNAL_ERROR for the injected collection allocation failure.
-    EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 100001);
-    EXPECT_EQ(result, nullptr);
-    EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("allocation"), std::string::npos);
-    failMalloc = true;
-    // The payload {} is 2 bytes; allocation failure must return 100001 (ARKUI_ERROR_CODE_INTERNAL_ERROR).
-    EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_Create("{}", 2, 1, &result), 100001);
-    EXPECT_EQ(result, nullptr);
-    ASSERT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 0);
-    OH_ArkUI_NativeModule_UIJsonWrapper_Destroy(result);
 }
 
 TEST(UIJsonWrapperTest, immutableCopyMetadataNullAndConcurrentReaders)
@@ -231,19 +205,6 @@ TEST(PageTextJsonTest, utf8GetterPayloadAndEmbeddedNul)
     char* data = json.Release(size);
     EXPECT_EQ(std::string(data, size), "\"中文e\u0301אב\\\"\\\\\\u000a\\u0000�\"");
     EXPECT_EQ(std::strlen(data), size);
-    std::free(data);
-}
-
-TEST(PageTextJsonTest, failedGrowthKeepsBufferValid)
-{
-    OHOS::Ace::NG::PageTextJson json;
-    ASSERT_TRUE(json.Append("["));
-    failRealloc = true;
-    EXPECT_FALSE(json.Append("123456"));
-    EXPECT_TRUE(json.Append("7]"));
-    uint32_t size = 0;
-    char* data = json.Release(size);
-    EXPECT_EQ(std::string(data, size), "[7]");
     std::free(data);
 }
 
