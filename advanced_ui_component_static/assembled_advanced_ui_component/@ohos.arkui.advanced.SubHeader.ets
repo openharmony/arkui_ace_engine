@@ -830,7 +830,7 @@ export struct SubHeader {
   @Builder
   SubTitleStyle($$: ContentIconOption): void {
     Column() {
-      Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Start }) {
+      Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
         Text($$.content)
           .primaryTitleStyles({
             fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
@@ -900,7 +900,7 @@ export struct SubHeader {
 
   @Builder
   PrimaryTitleStyle($$: ContentIconOption): void {
-    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Start }) {
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
       Text($$.content)
         .primaryTitleStyles({
           fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),

@@ -666,7 +666,7 @@ export class SubHeaderV2 extends ViewV2 {
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
         this.observeComponentCreation2((q19, r19) => {
-            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Start });
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
         }, Flex);
         this.observeComponentCreation2((o19, p19) => {
             Text.create(k19.content);
@@ -728,7 +728,7 @@ export class SubHeaderV2 extends ViewV2 {
 
     PrimaryTitleStyle(y18, z18 = null) {
         this.observeComponentCreation2((c19, d19) => {
-            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Start });
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
             Flex.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
