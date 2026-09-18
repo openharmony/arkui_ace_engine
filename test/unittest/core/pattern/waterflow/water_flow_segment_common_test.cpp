@@ -1472,7 +1472,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, DirtyItemUserDefMainSize001, TestSize.Level
     auto stack = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
     int32_t measureCount = 0;
-    stack->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    stack->measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>(
+        [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; });
     item->AddChild(stack);
     stack->SetActive(false);
     item->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -1502,7 +1503,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, LayoutOnlyDirtyItem001, TestSize.Level1)
     auto item = GetItem(2);
     ASSERT_TRUE(item);
     int32_t measureCount = 0;
-    item->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>(
+        [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; });
     item->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     EXPECT_FALSE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));
 
@@ -1530,7 +1532,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, DirtyLazyLayoutItem001, TestSize.Level1)
     ASSERT_TRUE(item);
     item->GetLayoutProperty()->SetNeedLazyLayout(true);
     int32_t measureCount = 0;
-    item->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>(
+        [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; });
     item->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     EXPECT_FALSE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));
 

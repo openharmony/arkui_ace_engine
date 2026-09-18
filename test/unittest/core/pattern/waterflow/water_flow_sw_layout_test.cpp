@@ -2831,7 +2831,8 @@ HWTEST_F(WaterFlowSWTest, DirtyItemWithFooter001, TestSize.Level1)
     auto stack = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
     int32_t measureCount = 0;
-    stack->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    stack->measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>(
+        [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; });
     item->AddChild(stack);
     stack->SetActive(false);
     item->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);

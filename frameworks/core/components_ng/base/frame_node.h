@@ -34,6 +34,7 @@
 #include "base/geometry/ng/vector.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node_extension.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -711,12 +712,12 @@ public:
 
     std::string& GetNodeName()
     {
-        return nodeName_;
+        return GetExtensionData().nodeName;
     }
 
     void SetNodeName(std::string& nodeName)
     {
-        nodeName_ = nodeName;
+        GetExtensionData().nodeName = nodeName;
     }
 
     void OnWindowShow() override;
@@ -1223,6 +1224,25 @@ public:
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
+
+    // UI thread only: lazy initialization is not thread-safe.
+    FrameNodeExtension& GetExtensionData()
+    {
+        if (!extensionData_) {
+            extensionData_ = std::make_unique<FrameNodeExtension>();
+        }
+        return *extensionData_;
+    }
+
+    const FrameNodeExtension* GetConstExtensionData() const
+    {
+        return extensionData_.get();
+    }
+
+    FrameNodeExtension* GetMutableExtensionData()
+    {
+        return extensionData_.get();
+    }
 
     ExtensionHandler* GetExtensionHandler() const;
 
@@ -1858,8 +1878,8 @@ private:
 
     std::function<void(const ConfigurationChange& configurationChange)> configurationUpdateCallback_;
     std::function<void()> colorModeUpdateCallback_;
-    std::function<void(int32_t)> ndkColorModeUpdateCallback_;
-    std::function<void(float, float)> ndkFontUpdateCallback_;
+    std::unique_ptr<std::function<void(int32_t)>> ndkColorModeUpdateCallback_;
+    std::unique_ptr<std::function<void(float, float)>> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<SmartGestureProperty> smartGestureProperty_;
     bool hasAccessibilityVirtualNode_ = false;
@@ -1878,10 +1898,8 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::shared_ptr<OffsetF> lastHostParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
+    std::unique_ptr<FrameNodeExtension> extensionData_;
     std::set<std::string> allowDrop_;
-    std::function<void()> removeCustomProperties_;
-    std::function<std::string(const std::string& key)> getCustomProperty_;
-    std::function<std::string()> getCustomPropertyMapFunc_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1922,8 +1940,6 @@ private:
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility
     bool isInternal_ = false;
-
-    std::string nodeName_;
 
     ColorMode colorMode_ = ColorMode::LIGHT;
 
@@ -1979,11 +1995,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
-
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
-
-    std::map<std::string, std::function<void()>> destroyCallbacks_;
 
 #ifndef CROSS_PLATFORM
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
@@ -1995,12 +2007,6 @@ private:
     std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
-    struct onSizeChangeDumpInfo {
-        int64_t onSizeChangeTimeStamp;
-        RectF lastFrameRect;
-        RectF currFrameRect;
-    };
-    std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
     FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
     std::optional<RectF> syncedFramePaintRect_;
@@ -2009,7 +2015,7 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
-    std::function<void(RefPtr<Kit::FrameNode>&)> measureCallback_;
+    std::unique_ptr<std::function<void(RefPtr<Kit::FrameNode>&)>> measureCallback_;
 
     bool topWindowBoundary_ = false;
 
