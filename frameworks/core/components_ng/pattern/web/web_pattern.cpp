@@ -117,6 +117,7 @@
 #include "core/event/statusbar/statusbar_event_proxy.h"
 #include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "common_event_manager.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -142,6 +143,7 @@ constexpr std::string_view AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_ori
 constexpr std::string_view AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
 constexpr std::string_view AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
 constexpr std::string_view COMMAND_ACTION_JSON = "persist.sys.abilityms.command.action.book.info";
+constexpr std::string_view ESC_TO_BACK_SUPPORT = "const.multimodalinput.esc_to_back_support";
 constexpr std::string_view WEB_INFO_PC = "8";
 constexpr std::string_view WEB_INFO_TABLET = "4";
 constexpr std::string_view WEB_INFO_PHONE = "2";
@@ -3657,6 +3659,33 @@ bool WebPattern::IsContextMenuShow()
            (contextMenuOverlay_ && contextMenuOverlay_->IsCurrentMenuVisibile());
 }
 
+bool WebPattern::HandleEscToBackSupport(PipelineContext* pipeline)
+{
+    // 1. FullScreen
+    if (OnBackPressedForFullScreen()) {
+        return true;
+    }
+    // 2. Soft Keyboard
+    if (OnBackPressed()) {
+        return true;
+    }
+    // 3. For web delegate
+    if (Backward()) {
+        return true;
+    }
+    // 4. For PipelineContext
+    if (pipeline->OnBackPressed()) {
+        return true;
+    }
+    // 5. For WindowManager
+    auto windowManager = pipeline->GetWindowManager();
+    if (windowManager != nullptr) {
+        windowManager->WindowPerformBack();
+        return true;
+    }
+    return false;
+}
+
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (IsContextMenuShow() && keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
@@ -3669,6 +3698,9 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             CloseContextSelectionMenu();
             CloseDefaultContextMenu();
         }
+    }
+    if (keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
+        isEscKeyDownConsumed_ = false;
     }
     bool ret = false;
     auto host = GetHost();
@@ -3767,6 +3799,17 @@ void WebPattern::KeyboardReDispatch(
     if (keyEvent == webKeyEvent_.rend()) {
         TAG_LOGW(AceLogTag::ACE_WEB, "KeyEvent is not find keycode");
         return;
+    }
+    if (keyEvent->code == KeyCode::KEY_ESCAPE && keyEvent->action == KeyAction::DOWN) {
+        isEscKeyDownConsumed_ = isUsed;
+    }
+    if (keyEvent->code == KeyCode::KEY_ESCAPE && keyEvent->action == KeyAction::UP) {
+        if(!isUsed && !isEscKeyDownConsumed_ && system::GetBoolParameter(std::string(ESC_TO_BACK_SUPPORT), false)) {
+            if(HandleEscToBackSupport(pipelineContext)) {
+                webKeyEvent_.erase((++keyEvent).base());
+                return;
+            }
+        }
     }
     if (!isUsed) {
         taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),

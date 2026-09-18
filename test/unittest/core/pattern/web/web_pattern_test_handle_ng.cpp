@@ -1264,6 +1264,42 @@ HWTEST_F(WebPatternTestHandle, KeyboardReDispatch005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyboardReDispatch006
+ * @tc.desc: KeyboardReDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestHandle, KeyboardReDispatch006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+
+    auto event = std::make_shared<OHOS::NWeb::MockNWebKeyEventAf>();
+    EXPECT_NE(event, nullptr);
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    bool isUsed = false;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_ESCAPE;
+    keyEvent.action = KeyAction::UP;
+    for (int i = 0; i <= 10; ++i) {
+        webPattern->webKeyEvent_.push_back(keyEvent);
+    }
+    webPattern->KeyboardReDispatch(event, isUsed);
+    EXPECT_EQ(webPattern->webKeyEvent_.front().deviceId, 0);
+#endif
+}
+
+/**
  * @tc.name: OnTakeFocus001
  * @tc.desc: OnTakeFocus
  * @tc.type: FUNC
