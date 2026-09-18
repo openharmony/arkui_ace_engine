@@ -157,6 +157,18 @@ void SwiperIndicatorPattern::OnModifyDone()
         dotIndicatorModifier_->StopAnimation();
     }
     InitIndicatorEvent();
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        auto indicatorPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indicatorPattern);
+        indicatorPattern->ShowNext();
+    });
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        auto indicatorPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indicatorPattern);
+        indicatorPattern->ShowPrevious();
+    });
 }
 
 void SwiperIndicatorPattern::InitIndicatorEvent()
