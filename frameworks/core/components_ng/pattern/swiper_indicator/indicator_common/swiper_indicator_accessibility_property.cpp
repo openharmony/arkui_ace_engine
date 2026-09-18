@@ -81,4 +81,38 @@ RefPtr<FrameNode> SwiperIndicatorAccessibilityProperty::GetSwiperNode() const
     CHECK_NULL_RETURN(swiperNode, nullptr);
     return DynamicCast<FrameNode>(swiperNode);
 }
+
+bool SwiperIndicatorAccessibilityProperty::IsScrollable() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, false);
+    auto swiperAccessibilityProperty = swiperNode->GetAccessibilityProperty<SwiperAccessibilityProperty>();
+    CHECK_NULL_RETURN(swiperAccessibilityProperty, false);
+    return swiperAccessibilityProperty->IsScrollable();
+}
+
+void SwiperIndicatorAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+    if (IsScrollable()) {
+        if (!isLoop) {
+            if (GetCurrentIndex() > 0) {
+                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+            }
+            auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(swiperPattern);
+            if (GetCurrentIndex() < swiperPattern->TotalCount() - displayCount) {
+                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            }
+        } else {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
