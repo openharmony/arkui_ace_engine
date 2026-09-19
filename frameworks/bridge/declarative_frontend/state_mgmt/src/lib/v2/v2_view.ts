@@ -640,7 +640,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
                 if (InteropConfigureStateMgmt.needsInterop()) {
                     const interopOwner = InteropStaticComponentOwnerRegistry.setCurrentOwner(
-                        elmtId, this.getInstanceId());
+                        elmtId);
                     try {
                         compilerAssignedUpdateFunc(elmtId, isFirstRender);
                     } finally {

@@ -78,8 +78,7 @@ declare class InteropExtractorModule {
     factory: () => Object,
     options?: () => Object,
     content?: () => void,
-    ownerElmtId?: number,
-    ownerInstanceId?: number
+    ownerElmtId?: number
   ) => [() => void, number];
   static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
   static updateInteropExtendableComponent?: (dynamicComponent: any) => void;
@@ -94,7 +93,7 @@ declare class InteropExtractorModule {
 }
 
 declare class InteropStaticComponentOwnerRegistry {
-  static setCurrentOwner(elmtId: number, instanceId: number): Object | undefined;
+  static setCurrentOwner(elmtId: number): Object | undefined;
   static restoreCurrentOwner(owner: Object | undefined): void;
   static getCurrentOwner(): Object | undefined;
 }
@@ -180,8 +179,7 @@ declare function registerCompatibleStaticComponentCallback(
     factory: () => Object,
     options?: () => Object,
     content?: () => void,
-    ownerElmtId?: number,
-    ownerInstanceId?: number
+    ownerElmtId?: number
   ) => [() => void, number]
 ): void;
 declare function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object): void;
@@ -403,28 +401,24 @@ export class InteropTestsV2 implements ITestFile {
   public testCreateStaticComponentForwardsOwner(): void {
     InteropTestsV2._skipWhenMissing('__Interop_CreateStaticComponent_Internal', () => {
       const oldCreate = InteropExtractorModule.compatibleStaticComponent;
-      const oldOwner = InteropStaticComponentOwnerRegistry.setCurrentOwner(101, 202);
+      const oldOwner = InteropStaticComponentOwnerRegistry.setCurrentOwner(101);
       let receivedOwnerElmtId: number | undefined = undefined;
-      let receivedOwnerInstanceId: number | undefined = undefined;
       try {
         InteropExtractorModule.compatibleStaticComponent = (
           factory: () => Object,
           options?: () => Object,
           content?: () => void,
-          ownerElmtId?: number,
-          ownerInstanceId?: number
+          ownerElmtId?: number
         ): [() => void, number] => {
           factory();
           options?.();
           content?.();
           receivedOwnerElmtId = ownerElmtId;
-          receivedOwnerInstanceId = ownerInstanceId;
           return [(): void => {}, 303];
         };
 
         __Interop_CreateStaticComponent_Internal((): Object => ({ value: 1 }));
         eq(receivedOwnerElmtId, 101, 'static component owner elmtId forwarded');
-        eq(receivedOwnerInstanceId, 202, 'static component owner instance forwarded');
       } finally {
         InteropStaticComponentOwnerRegistry.restoreCurrentOwner(oldOwner);
         InteropExtractorModule.compatibleStaticComponent = oldCreate;

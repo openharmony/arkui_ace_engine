@@ -209,7 +209,7 @@ function __Interop_CreateStaticComponent_Internal(
     }
     const owner = InteropStaticComponentOwnerRegistry.getCurrentOwner();
     return InteropExtractorModule.compatibleStaticComponent(
-        factory, options, content, owner?.elmtId, owner?.instanceId);
+        factory, options, content, owner?.elmtId);
 }
 
 function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object): void {

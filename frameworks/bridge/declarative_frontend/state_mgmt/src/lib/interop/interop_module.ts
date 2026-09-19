@@ -78,8 +78,7 @@ class InteropExtractorModule {
         factory: () => Object,
         options?: () => Object,
         content?: () => void,
-        ownerElmtId?: number,
-        ownerInstanceId?: number
+        ownerElmtId?: number
     ) => [() => void, number];
     static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
     static updateInteropExtendableComponent?: (dynamicComponent: any) => void;
@@ -105,15 +104,14 @@ class InteropExtractorModule {
 
 interface InteropStaticComponentOwner {
     elmtId: number;
-    instanceId: number;
 }
 
 class InteropStaticComponentOwnerRegistry {
     private static currentOwner_: InteropStaticComponentOwner | undefined = undefined;
 
-    static setCurrentOwner(elmtId: number, instanceId: number): InteropStaticComponentOwner | undefined {
+    static setCurrentOwner(elmtId: number): InteropStaticComponentOwner | undefined {
         const oldOwner = InteropStaticComponentOwnerRegistry.currentOwner_;
-        InteropStaticComponentOwnerRegistry.currentOwner_ = { elmtId, instanceId };
+        InteropStaticComponentOwnerRegistry.currentOwner_ = { elmtId };
         return oldOwner;
     }
 
@@ -143,8 +141,7 @@ function registerCompatibleStaticComponentCallback(
         factory: () => Object,
         options?: () => Object,
         content?: () => void,
-        ownerElmtId?: number,
-        ownerInstanceId?: number
+        ownerElmtId?: number
     ) => [() => void, number]
 ): void {
     InteropExtractorModule.compatibleStaticComponent = callback;

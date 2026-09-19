@@ -158,8 +158,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     factory: () => T,
     options?: () => T_Options,
     content?: () => void,
-    ownerElmtId?: double,
-    _ownerInstanceId?: double
+    ownerElmtId?: double
 ): [() => void, number] {
     StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('compatibleStaticComponent');
     const instantiateImpl = /** @memo */ (): void => {

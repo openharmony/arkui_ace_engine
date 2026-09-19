@@ -1137,7 +1137,7 @@ abstract class ViewPU extends PUV2ViewBase
 
         if (InteropConfigureStateMgmt.needsInterop()) {
           const interopOwner = InteropStaticComponentOwnerRegistry.setCurrentOwner(
-            elmtId, this.getInstanceId());
+            elmtId);
           try {
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
           } finally {
