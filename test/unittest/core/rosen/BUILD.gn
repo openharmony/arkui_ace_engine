@@ -219,6 +219,9 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "napi:ace_napi",
   ]
   defines = [ "ACE_NON_VIRTUAL=virtual" ]
+  if (!is_arkui_x) {
+    defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
+  }
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
     defines += [ "USE_ROSEN_DRAWING" ]
   }
