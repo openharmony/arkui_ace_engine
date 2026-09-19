@@ -694,6 +694,7 @@ struct ArkUIAniCommonModifier {
     void (*setOnNodeDestroyEvent)(ArkUINodeHandle node, std::function<void(int32_t)>&& event);
     void(*fireArkUIObjectLifecycleCallback)(ani_long nodePtr, const std::string& className, void* data);
     std::string (*GetIdString)(ArkUINodeHandle node);
+    ani_long (*interopProxyNodeConstruct)(ArkUI_Int32 id);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

@@ -207,7 +207,9 @@ function __Interop_CreateStaticComponent_Internal(
         // only happened in toolchain error, internal error
         throw new BusinessError(NOT_IMPLEMENT, 'No compatibleStaticComponent Method For Create StaticComponent');
     }
-    return InteropExtractorModule.compatibleStaticComponent(factory, options, content);
+    const owner = InteropStaticComponentOwnerRegistry.getCurrentOwner();
+    return InteropExtractorModule.compatibleStaticComponent(
+        factory, options, content, owner?.elmtId);
 }
 
 function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object): void {
