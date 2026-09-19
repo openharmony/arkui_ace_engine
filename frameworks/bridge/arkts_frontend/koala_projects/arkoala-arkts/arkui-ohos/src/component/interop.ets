@@ -17,7 +17,7 @@ import { ArkUIAniModule } from 'arkui.ani'
 import { KPointer } from '@koalaui/interop';
 import { PeerNode, findPeerNode } from '../PeerNode';
 import { int32 } from '@koalaui/common';
-import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach } from '@koalaui/runtime';
+import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach, scheduleCallback } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { ExtendableComponent } from './extendableComponent';
 import { 
@@ -109,9 +109,9 @@ function createInteropProxyNode(rootPtr: KPointer, instanceId: int32, ownerElmtI
         destroyed = true;
         destroyUiDetachedRoot(rootPtr, instanceId);
     });
-    setTimeout(() => {
+    scheduleCallback(() => {
         proxyNode.dispose();
-    }, 0);
+    });
     return proxyNode.getPeerPtr();
 }
 
