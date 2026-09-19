@@ -181,6 +181,7 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void InitPrefixSuffixRow();
     void SetPrefix(const RefPtr<NG::UINode>& prefix, const NG::SliderPrefixOptions& options);

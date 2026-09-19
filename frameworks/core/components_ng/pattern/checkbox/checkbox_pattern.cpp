@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
@@ -34,6 +35,17 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr int32_t DEFAULT_CHECKBOX_ANIMATION_DURATION = 100;
 const char CHECKBOX_ETS_TAG[] = "Toggle";
 const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
+
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
 } // namespace
 
 RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
@@ -117,6 +129,7 @@ void CheckBoxPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     auto select = paintProperty->GetCheckBoxSelectValue(false);
     json->PutExtAttr("select", select ? "true" : "false", filter);
+    json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
 }
 
 void CheckBoxPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -1202,6 +1215,48 @@ void CheckBoxPattern::DumpInfo()
     }
     if (paintProperty->HasCheckBoxCheckMarkColor()) {
         DumpLog::GetInstance().AddDesc("MarkColor: " + paintProperty->GetCheckBoxCheckMarkColorValue().ToString());
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    bool hasSystemMaterial = material != nullptr;
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        DumpLog::GetInstance().AddDesc("MaterialType: " +
+            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
+                                       : std::string("MaterialType.NONE")));
+    }
+}
+
+bool CheckBoxPattern::HasSystemMaterial() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto material = renderContext->GetSystemMaterial();
+    return material != nullptr;
+}
+
+void CheckBoxPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    bool hasSystemMaterial = material != nullptr;
+    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        json->Put("MaterialType",
+            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
+                                     : "MaterialType.NONE");
     }
 }
 

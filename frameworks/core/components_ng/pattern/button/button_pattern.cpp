@@ -48,6 +48,17 @@ constexpr TextAlign DEFAULT_TEXT_ALIGN = TextAlign::CENTER;
 constexpr TextAlign DEFAULT_TEXT_ALIGN = TextAlign::START;
 #endif
 
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
+
 RectF ExpandRectHeightToMinimum(RectF rect, float minHeight)
 {
     if (GreatOrEqual(rect.Height(), minHeight)) {
@@ -250,6 +261,7 @@ void ButtonPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
     json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
     ToJsonValueAttribute(json, filter);
+    json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
 }
 
 void ButtonPattern::ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1339,6 +1351,47 @@ void ButtonPattern::DumpInfo()
     }
 
     DumpSubInfo(layoutProperty);
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    bool hasSystemMaterial = material != nullptr;
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        DumpLog::GetInstance().AddDesc("MaterialType: " +
+            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
+                                       : std::string("MaterialType.NONE")));
+    }
+}
+
+bool ButtonPattern::HasSystemMaterial() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto material = renderContext->GetSystemMaterial();
+    return material != nullptr;
+}
+
+void ButtonPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    bool hasSystemMaterial = material != nullptr;
+    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        json->Put("MaterialType",
+            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
+                                     : "MaterialType.NONE");
+    }
 }
 
 void ButtonPattern::DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty)

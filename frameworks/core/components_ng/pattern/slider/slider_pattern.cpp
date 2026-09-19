@@ -20,6 +20,7 @@
 #include <string_view>
 
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components/common/properties/ui_material.h"
 #include "ui/properties/ui_material_structs.h"
 #include "ui/properties/ui_material_enums.h"
 #ifndef ACE_UNITTEST
@@ -54,6 +55,17 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
+
 constexpr float HALF = 0.5;
 constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
@@ -3140,6 +3152,142 @@ void SliderPattern::DumpInfo()
 
     DumpSubInfo(paintProperty);
     DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(HasSystemMaterial() ? "true" : "false"));
+    bool hasSystemMaterial = HasSystemMaterial();
+    if (hasSystemMaterial) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto material = renderContext->GetSystemMaterial();
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        DumpLog::GetInstance().AddDesc("MaterialType: " +
+            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
+                                      : std::string("MaterialType.NONE")));
+    }
+}
+
+void SliderPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (paintProperty->HasValue()) {
+        json->Put("Value", std::to_string(paintProperty->GetValue().value()).c_str());
+    }
+    if (paintProperty->HasMin()) {
+        json->Put("Min", std::to_string(paintProperty->GetMin().value()).c_str());
+    }
+    if (paintProperty->HasMax()) {
+        json->Put("Max", std::to_string(paintProperty->GetMax().value()).c_str());
+    }
+    if (paintProperty->HasStep()) {
+        json->Put("Step", std::to_string(paintProperty->GetStep().value()).c_str());
+    }
+    if (paintProperty->HasSliderMode()) {
+        json->Put("Style", ToString(paintProperty->GetSliderMode().value()).c_str());
+    }
+    if (paintProperty->HasDirection()) {
+        json->Put("Direction", ToString(paintProperty->GetDirection().value()).c_str());
+    }
+    if (paintProperty->HasReverse()) {
+        json->Put("Reverse", ToString(paintProperty->GetReverse().value()).c_str());
+    }
+    if (paintProperty->HasBlockColor()) {
+        json->Put("BlockColor", paintProperty->GetBlockColor().value().ToString().c_str());
+    }
+    if (paintProperty->HasBlockGradientColor()) {
+        std::vector<GradientColor> gradientColors = paintProperty->GetBlockGradientColor().value().GetColors();
+        std::ostringstream oss;
+        for (const auto& gradientColor : gradientColors) {
+            oss << gradientColor.GetLinearColor().ToColor().ToString() << " ";
+        }
+        json->Put("BlockLinearGradientColor", oss.str().c_str());
+    }
+    if (paintProperty->HasTrackBackgroundColor()) {
+        std::vector<GradientColor> gradientColors = paintProperty->GetTrackBackgroundColor().value().GetColors();
+        std::ostringstream oss;
+        for (const auto& gradientColor : gradientColors) {
+            oss << gradientColor.GetLinearColor().ToColor().ToString() << " ";
+        }
+        json->Put("TrackBackgroundColor", oss.str().c_str());
+    }
+    if (paintProperty->HasSelectColor()) {
+        json->Put("SelectColor", paintProperty->GetSelectColor().value().ToString().c_str());
+    }
+    if (paintProperty->HasMinResponsiveDistance()) {
+        json->Put("MinResponsiveDistance",
+            std::to_string(paintProperty->GetMinResponsiveDistance().value()).c_str());
+    }
+    if (paintProperty->HasShowSteps()) {
+        json->Put("ShowSteps", ToString(paintProperty->GetShowSteps().value()).c_str());
+    }
+    if (paintProperty->HasShowTips()) {
+        json->Put("ShowTips", ToString(paintProperty->GetShowTips().value()).c_str());
+    }
+
+    auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
+    if (layoutProperty) {
+        if (layoutProperty->HasThickness()) {
+            json->Put("Thickness", layoutProperty->GetThickness().value().ToString().c_str());
+        }
+        if (layoutProperty->HasBlockSize()) {
+            SizeT<Dimension> size = layoutProperty->GetBlockSize().value();
+            std::stringstream ss;
+            ss << "[" << size.Width().ToString() << " x " << size.Height().ToString() << "]";
+            json->Put("BlockSize", ss.str().c_str());
+        }
+    }
+    if (paintProperty->HasBlockBorderColor()) {
+        json->Put("BlockBorderColor", paintProperty->GetBlockBorderColor().value().ToString().c_str());
+    }
+    if (paintProperty->HasBlockBorderWidth()) {
+        json->Put("BlockBorderWidth", paintProperty->GetBlockBorderWidth().value().ToString().c_str());
+    }
+    if (paintProperty->HasStepColor()) {
+        json->Put("StepColor", paintProperty->GetStepColor().value().ToString().c_str());
+    }
+    if (paintProperty->HasStepSize()) {
+        json->Put("StepSize", paintProperty->GetStepSize().value().ToString().c_str());
+    }
+    if (paintProperty->HasTrackBorderRadius()) {
+        json->Put("TrackBorderRadius", paintProperty->GetTrackBorderRadius().value().ToString().c_str());
+    }
+    if (paintProperty->HasSelectedBorderRadius()) {
+        json->Put("SelectedBorderRadius", paintProperty->GetSelectedBorderRadius().value().ToString().c_str());
+    }
+    if (paintProperty->HasBlockType()) {
+        json->Put("BlockType", ToString(paintProperty->GetBlockType().value()).c_str());
+    }
+    if (paintProperty->HasBlockImage()) {
+        json->Put("BlockImage", paintProperty->GetBlockImage().value().c_str());
+    }
+    if (paintProperty->HasBlockShape()) {
+        json->Put("BlockShape",
+            ToString(paintProperty->GetBlockShape().value()->GetBasicShapeType()).c_str());
+    }
+    if (paintProperty->HasSliderInteractionMode()) {
+        json->Put("SliderInteractionMode",
+            ToString(paintProperty->GetSliderInteractionMode().value()).c_str());
+    }
+    if (paintProperty->HasValidSlideRange()) {
+        json->Put("SlideRange", paintProperty->GetValidSlideRange().value()->ToString().c_str());
+    }
+
+    bool hasSystemMaterial = HasSystemMaterial();
+    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
+    if (hasSystemMaterial) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto material = renderContext->GetSystemMaterial();
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        json->Put("MaterialType",
+            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
+                                     : "MaterialType.NONE");
+    }
 }
 
 void SliderPattern::DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty)

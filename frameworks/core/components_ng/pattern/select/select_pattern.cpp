@@ -95,6 +95,17 @@ constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 constexpr int32_t FIRST_NODE_INDEX = 0;
 constexpr Dimension MIN_HOT_ZONE_HEIGHT = 32.0_vp;
 
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
+
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
     std::string result;
@@ -1817,6 +1828,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
+    json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
 }
 
 void SelectPattern::ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json,
@@ -3097,6 +3109,48 @@ void SelectPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("OptionFontColor: " + optionFont_.FontColor.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("OptionBgColor: " + optionBgColor_.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    bool hasSystemMaterial = material != nullptr;
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        DumpLog::GetInstance().AddDesc("MaterialType: " +
+            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
+                                       : std::string("MaterialType.NONE")));
+    }
+}
+
+bool SelectPattern::HasSystemMaterial() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto material = renderContext->GetSystemMaterial();
+    return material != nullptr;
+}
+
+void SelectPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    bool hasSystemMaterial = material != nullptr;
+    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        json->Put("MaterialType",
+            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
+                                     : "MaterialType.NONE");
+    }
 }
 
 void SelectPattern::SetArrowModifierByUser(

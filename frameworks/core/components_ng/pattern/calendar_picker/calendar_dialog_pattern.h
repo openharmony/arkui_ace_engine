@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/event/input_event.h"
+#include "core/components/common/properties/ui_material.h"
 
 
 namespace OHOS::Ace::NG {
@@ -127,6 +128,16 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+
+    void SetSystemMaterial(const RefPtr<UiMaterial>& material)
+    {
+        systemMaterial_ = material;
+    }
+
+    bool HasSystemMaterial() const;
+
     int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
@@ -210,6 +221,7 @@ private:
     WeakPtr<FrameNode> titleNode_;
     bool hasInitTitleArrowsColor_ = false;
     bool hasScopedExplicitColorMode_ = false;
+    RefPtr<UiMaterial> systemMaterial_;
 };
 } // namespace OHOS::Ace::NG
 

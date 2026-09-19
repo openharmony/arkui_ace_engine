@@ -24,8 +24,10 @@
 #include "core/common/container_scope.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
@@ -42,6 +44,17 @@ constexpr float INVISIABLE_ALPHA = 0.0f;
 constexpr int32_t ENTRY_ANIMATION_DURATION = 250;
 constexpr int32_t EXIT_ANIMATION_DURATION = 100;
 const Dimension INVISIABLE_OFFSET = 8.0_px;
+
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
 } // namespace
 
 bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -950,6 +963,67 @@ void BubblePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("finalPlacement: " + dumpInfo_.finalPlacement);
     DumpLog::GetInstance().AddDesc("enableHoverMode: " + std::to_string(dumpInfo_.enableHoverMode));
     DumpLog::GetInstance().AddDesc("avoidKeyboard: " + std::to_string(dumpInfo_.avoidKeyboard));
+    bool hasSystemMaterial = HasSystemMaterial();
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
+    if (hasSystemMaterial) {
+        auto popupParam = GetPopupParam();
+        CHECK_NULL_VOID(popupParam);
+        auto material = popupParam->GetSystemMaterial();
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        DumpLog::GetInstance().AddDesc("MaterialType: " +
+            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
+                                      : std::string("MaterialType.NONE")));
+    }
+}
+
+void BubblePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("enableArrow", std::to_string(dumpInfo_.enableArrow).c_str());
+    json->Put("mask", std::to_string(dumpInfo_.mask).c_str());
+    json->Put("targetTag", dumpInfo_.targetNode.c_str());
+    json->Put("targetID", std::to_string(dumpInfo_.targetID).c_str());
+    json->Put("targetOffset", dumpInfo_.targetOffset.ToString().c_str());
+    json->Put("targetSize", dumpInfo_.targetSize.ToString().c_str());
+    json->Put("touchRegion", dumpInfo_.touchRegion.ToString().c_str());
+    json->Put("avoidTop", std::to_string(dumpInfo_.top).c_str());
+    json->Put("avoidBottom", std::to_string(dumpInfo_.bottom).c_str());
+    json->Put("needAvoidWindowButtonHeight", std::to_string(dumpInfo_.needAvoidWindowButtonHeight).c_str());
+    json->Put("userOffset", dumpInfo_.userOffset.ToString().c_str());
+    json->Put("targetSpace", dumpInfo_.targetSpace.ToString().c_str());
+    json->Put("originPlacement", dumpInfo_.originPlacement.c_str());
+    json->Put("finalPlacement", dumpInfo_.finalPlacement.c_str());
+    json->Put("enableHoverMode", std::to_string(dumpInfo_.enableHoverMode).c_str());
+    json->Put("avoidKeyboard", std::to_string(dumpInfo_.avoidKeyboard).c_str());
+    bool hasSystemMaterial = HasSystemMaterial();
+    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
+    if (hasSystemMaterial) {
+        auto popupParam = GetPopupParam();
+        CHECK_NULL_VOID(popupParam);
+        auto material = popupParam->GetSystemMaterial();
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        json->Put("MaterialType",
+            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
+                                     : "MaterialType.NONE");
+    }
+}
+
+bool BubblePattern::HasSystemMaterial() const
+{
+    auto popupParam = GetPopupParam();
+    CHECK_NULL_RETURN(popupParam, false);
+    return popupParam->GetSystemMaterial() != nullptr;
+}
+
+void BubblePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    bool hasSystemMaterial = HasSystemMaterial();
+    json->PutExtAttr("hasSystemMaterial", hasSystemMaterial ? "true" : "false", filter);
 }
 
 void BubblePattern::UpdateBubbleText()

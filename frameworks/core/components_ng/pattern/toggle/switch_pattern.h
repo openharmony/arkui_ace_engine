@@ -147,6 +147,7 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void SetIsUserSetMargin(bool isUserSetMargin)
