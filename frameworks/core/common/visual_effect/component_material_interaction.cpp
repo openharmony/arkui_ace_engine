@@ -53,6 +53,7 @@ constexpr int32_t TOUCH_CURVE_DURATION = 1000;
 constexpr float LIGHT_EFFECT_POSITION_Z = 80.0f;
 constexpr float LIGHT_EFFECT_INTENSITY = 3.0f;
 constexpr uint32_t LIGHT_ILLUMINATED = 3; // ILLUMINATED_TYPE_BORDER_CONTENT
+constexpr uint32_t LIGHT_UNILLUMINATED = 0; // ILLUMINATED_TYPE_NONE
 constexpr Dimension ILLUMINATED_BORDER_WIDTH = 0.5_vp;
 
 // color breakpoints
@@ -265,7 +266,7 @@ void ControlInteractionBase::HandleTouchEvent(RefPtr<FrameNode> targetNode, cons
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
-    auto clickPos = info.GetTouches().front().GetLocalLocation();
+    auto clickPos = info.GetTouches().front().GetCurrentLocalLocation();
     ControlInteractionInfo interactionInfo;
     InitInteractionOffset(targetNode, interactionInfo);
     if (touchType == TouchType::DOWN) {
@@ -451,6 +452,7 @@ void ControlInteractionBase::UninitLightEffect(FrameNode* targetNode)
         renderContext->ResetLightColor();
     }
     if (renderContext->GetLightIlluminated().has_value()) {
+        renderContext->UpdateLightIlluminated(LIGHT_UNILLUMINATED);
         renderContext->ResetLightIlluminated();
     }
     if (renderContext->GetLightIntensity().has_value()) {
