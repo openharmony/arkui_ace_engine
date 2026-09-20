@@ -2050,7 +2050,7 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
 void JsAccessibilityManager::UpdateAccessibilityVisible(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
-    if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
+    if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled() || IsSelectReaderEnabled()) {
         NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
         nodeInfo.SetAccessibilityVisible(node->GetAccessibilityVisible());
         return;
@@ -4046,19 +4046,22 @@ int64_t JsAccessibilityManager::GetDelayTimeBeforeSendEvent(
 
 bool JsAccessibilityManager::IsEventIgnoredByWorkMode(const AccessibilityEvent& accessibilityEvent)
 {
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
-        switch (accessibilityEvent.type) {
-            case AccessibilityEventType::ELEMENT_INFO_CHANGE:
-            case AccessibilityEventType::COMPONENT_CHANGE:
-            case AccessibilityEventType::TEXT_CHANGE:
-            case AccessibilityEventType::FOCUS:
-            case AccessibilityEventType::SCROLLING_EVENT:
-                return true;
-            default:
-                return false;
-        }
+    if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
+        return false;
     }
-    return false;
+    if (accessibilityEvent.type == AccessibilityEventType::SCROLLING_EVENT && IsSelectReaderEnabled()) {
+        return false;
+    }
+    switch (accessibilityEvent.type) {
+        case AccessibilityEventType::ELEMENT_INFO_CHANGE:
+        case AccessibilityEventType::COMPONENT_CHANGE:
+        case AccessibilityEventType::TEXT_CHANGE:
+        case AccessibilityEventType::FOCUS:
+        case AccessibilityEventType::SCROLLING_EVENT:
+            return true;
+        default:
+            return false;
+    }
 }
 
 void JsAccessibilityManager::SendEventToAccessibilityWithNode(
@@ -10689,6 +10692,18 @@ bool JsAccessibilityManager::IsScreenReaderEnabled()
         }
     }
     return isScreenReaderEnabled_;
+}
+
+bool JsAccessibilityManager::IsSelectReaderEnabled()
+{
+    if (!isSelectReaderEnabledInitialized_) {
+        auto client = AccessibilitySystemAbilityClient::GetInstance();
+        if (client) {
+            client->IsSelectReaderEnabled(isSelectReaderEnabled_);
+            isSelectReaderEnabledInitialized_ = true;
+        }
+    }
+    return isSelectReaderEnabled_;
 }
 
 SearchSurfaceIdRet JsAccessibilityManager::SearchElementInfoBySurfaceId(

@@ -440,6 +440,7 @@ public:
     void RegisterGetParentRectHandler();
 
     bool IsScreenReaderEnabled() override;
+    bool IsSelectReaderEnabled() override;
     WeakPtr<NG::WebPattern> GetWebPatternBySurfaceId(const std::string& surfaceId) override;
     void SetWebPatternBySurfaceId(const std::string& surfaceId, WeakPtr<NG::WebPattern> pattern) override;
     void RemoveWebPatternBySurfaceId(const std::string& surfaceId) override;
@@ -1066,6 +1067,8 @@ private:
     bool isScreenReaderEnabled_ = false;
     int64_t currentFocusVirtualNodeParentId_ = -1;
     bool isScreenReaderEnabledInitialized_ = false;
+    bool isSelectReaderEnabled_ = false;
+    bool isSelectReaderEnabledInitialized_ = false;
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;

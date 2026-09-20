@@ -217,6 +217,10 @@ public:
     {
         return false;
     }
+    virtual bool IsSelectReaderEnabled()
+    {
+        return false;
+    }
     virtual WeakPtr<NG::WebPattern> GetWebPatternBySurfaceId(const std::string& surfaceId)
     {
         return nullptr;
