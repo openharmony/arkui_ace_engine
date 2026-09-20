@@ -122,7 +122,7 @@ public:
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
     void SetFocusContainerInfo(const std::string& windowName, int32_t id);
     int32_t GetContainerId(bool isFocus = true);
-    const std::string& GetPageUrl();
+    std::string GetPageUrl();
     const std::string& GetNavDstName() const;
     void FillWebJsCode(std::optional<WebJsItem>& scriptItems) const;
     bool IsMessageValid(const std::string& webCategory, const std::string& identifier);
@@ -154,10 +154,11 @@ private:
     std::vector<bool> globalSwitch_;
     std::unordered_map<std::string, std::string> webIdentifierMap_;
 
+    std::shared_mutex mutex_;
     int32_t containerId_ = -1;
     int32_t focusContainerId_ = -1;
-
     std::string pageUrl_;
+
     std::string navDstName_;
     int64_t navShowTime_ = -1;
     bool isFocusContainerChanged_ = false;

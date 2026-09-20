@@ -2838,7 +2838,10 @@ void AceContainer::SetIsFormRender(bool isFormRender)
 void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
     float height, uint32_t windowId, UIEnvCallback callback)
 {
-    aceView_ = view;
+    {
+        std::lock_guard<std::mutex> lock(viewMutex_);
+        aceView_ = view;
+    }
     auto instanceId = aceView_->GetInstanceId();
     auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
     if (!isSubContainer_) {
