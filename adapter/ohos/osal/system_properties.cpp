@@ -1075,7 +1075,8 @@ void SystemProperties::ReadSystemParametersCallOnce()
 
         // init form sys params
         formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
-        formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
+        formSharedImageCacheThreshold_ = system::GetIntParameter(
+            "const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
 
         InitDeviceTypeBySystemProperty();
         BackgroundTaskExecutor::GetInstance().PostTask([]() {
