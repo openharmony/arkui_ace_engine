@@ -68,6 +68,7 @@
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
+#include "bridge/declarative_frontend/jsview/js_immersive_strategy.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -526,6 +527,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SaveButton", JSSaveButton::JSBind },
     { "WithTheme", JSWithTheme::JSBind },
     { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
+    { "__ImmersiveStrategy__", JSImmersiveStrategy::JSBind },
     { "TextMenu", JSTextMenu::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },

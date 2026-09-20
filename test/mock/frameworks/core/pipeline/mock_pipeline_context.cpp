@@ -1132,6 +1132,18 @@ void PipelineContext::UpdateNavSafeAreaWithoutAnimation(
 
 void PipelineContext::UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) {}
 
+void PipelineContext::ApplyDefaultImmersiveStrategy(const std::unordered_set<ImmersiveStrategy>& types)
+{
+    CHECK_NULL_VOID(safeAreaManager_);
+    safeAreaManager_->ApplyDefaultImmersiveStrategy(types);
+}
+ 
+bool PipelineContext::IsImmersiveStrategySet(ImmersiveStrategy strategy) const
+{
+    CHECK_NULL_RETURN(safeAreaManager_, false);
+    return safeAreaManager_->IsImmersiveStrategySet(strategy);
+}
+
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return KeyBoardAvoidMode::OFFSET;

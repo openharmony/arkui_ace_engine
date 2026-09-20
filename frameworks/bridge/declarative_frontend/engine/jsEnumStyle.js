@@ -369,6 +369,12 @@ let PixelRoundMode;
   PixelRoundMode[PixelRoundMode.PIXEL_ROUND_AFTER_MEASURE = 1] = 'PIXEL_ROUND_AFTER_MEASURE';
 })(PixelRoundMode || (PixelRoundMode = {}));
 
+let ImmersiveStrategy;
+(function (ImmersiveStrategy) {
+  ImmersiveStrategy[ImmersiveStrategy.AVOID_CUTOUT = 0] = 'AVOID_CUTOUT';
+  ImmersiveStrategy[ImmersiveStrategy.AVOID_FLOAT_NAV = 1] = 'AVOID_FLOAT_NAV';
+})(ImmersiveStrategy || (ImmersiveStrategy = {}));
+
 let VerticalAlign;
 (function (VerticalAlign) {
   VerticalAlign[VerticalAlign.Top = 1] = 'Top';

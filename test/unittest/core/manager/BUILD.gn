@@ -58,23 +58,23 @@ ace_unittest("drag_drop_manager_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
   sources = [
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_grid_modifier.cpp",
     "drag_drop_manager_test_ng.cpp",
     "drag_drop_manager_test_ng_coverage.cpp",
     "drag_drop_manager_test_ng_plus.cpp",
     "drag_drop_manager_test_ng_property_config.cpp",
-    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_grid_modifier.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
     sources = []
     sources = [
-      "manager_test_min.cpp",
       "manager_test_core.cpp",
+      "manager_test_min.cpp",
     ]
   } else {
     sources += [
-      "manager_test_min.cpp",
       "manager_test_core.cpp",
+      "manager_test_min.cpp",
     ]
   }
 }
@@ -120,8 +120,8 @@ ace_unittest("json_report_test_ng") {
   module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
   sources = [
-    "json_report_test_ng.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/manager/event/json_child_report.cpp",
+    "json_report_test_ng.cpp",
   ]
 }
 
@@ -252,6 +252,7 @@ ace_unittest("safe_area_manager_test_ng") {
     cflags = [ "-fno-access-control" ]
   }
   sources = [
+    "safe_area_immersive_strategy_test_ng.cpp",
     "safe_area_manager_test_ng.cpp",
     "safe_area_manager_test_ng_part_two.cpp",
   ]
@@ -394,8 +395,8 @@ ohos_unittest("content_change_manager_translate_test_ng") {
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
-    "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/frameworks/base/geometry/mock_matrix4.cpp",
+    "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/base/mock_ui_node.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/layout/mock_layout_property.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/layout/mock_layout_wrapper.cpp",
@@ -447,8 +448,8 @@ group("core_manager_unittest") {
     ":focus_manager_test_ng",
     ":focus_view_test_ng",
     ":frame_rate_manager_test_ng",
-    ":gesture_debug_boundary_manager_test_ng",
     ":full_screen_manager_test_ng",
+    ":gesture_debug_boundary_manager_test_ng",
     ":json_report_test_ng",
     ":navigation_manager_test_ng",
     ":page_scene_rule_manager_test_ng",

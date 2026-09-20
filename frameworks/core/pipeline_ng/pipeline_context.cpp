@@ -3023,6 +3023,18 @@ KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
     return safeAreaManager_->GetKeyBoardAvoidMode();
 }
 
+void PipelineContext::ApplyDefaultImmersiveStrategy(const std::unordered_set<ImmersiveStrategy>& types)
+{
+    CHECK_NULL_VOID(safeAreaManager_);
+    safeAreaManager_->ApplyDefaultImmersiveStrategy(types);
+}
+
+bool PipelineContext::IsImmersiveStrategySet(ImmersiveStrategy strategy) const
+{
+    CHECK_NULL_RETURN(safeAreaManager_, false);
+    return safeAreaManager_->IsImmersiveStrategySet(strategy);
+}
+
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return safeAreaManager_->KeyboardSafeAreaEnabled();

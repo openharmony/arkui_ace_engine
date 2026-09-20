@@ -501,6 +501,10 @@ public:
 
     KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() override;
 
+    void ApplyDefaultImmersiveStrategy(const std::unordered_set<ImmersiveStrategy>& types);
+
+    bool IsImmersiveStrategySet(ImmersiveStrategy strategy) const;
+
     bool UsingCaretAvoidMode();
 
     void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
@@ -652,6 +656,11 @@ public:
     bool IsLayouting() const override
     {
         return taskScheduler_->IsLayouting();
+    }
+
+    bool IsFirstRootLayout() const
+    {
+        return isFirstRootLayout_;
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
