@@ -602,7 +602,7 @@ RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
 void StageManager::ReloadStage(bool fullRebuild)
 {
     CHECK_NULL_VOID(stageNode_);
-    LOGI("HotReload StageManager::ReloadStage fullRebuild=%{public}d", fullRebuild);
+    TAG_LOGI(AceLogTag::ACE_LAYOUT, "HotReload StageManager::ReloadStage fullRebuild=%{public}d", fullRebuild);
     const auto& children = stageNode_->GetChildren();
     for (const auto& child : children) {
         auto frameNode = DynamicCast<FrameNode>(child);

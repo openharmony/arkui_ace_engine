@@ -537,7 +537,8 @@ void PagePattern::RebuildPage()
     CHECK_NULL_VOID(host);
     auto customNodeBase = FindCustomNode(host);
     if (!customNodeBase) {
-        LOGW("HotReload RebuildPage: CustomNodeBase not found, host tag=%{public}s id=%{public}d",
+        TAG_LOGW(AceLogTag::ACE_LAYOUT,
+            "HotReload RebuildPage: CustomNodeBase not found, host tag=%{public}s id=%{public}d",
             host->GetTag().c_str(), host->GetId());
         return;
     }
@@ -545,7 +546,8 @@ void PagePattern::RebuildPage()
     if (customNode) {
         customNode->FlushReload();
     } else {
-        LOGW("HotReload RebuildPage: CustomNodeBase is not CustomNode, jsViewName=%{public}s",
+        TAG_LOGW(AceLogTag::ACE_LAYOUT,
+            "HotReload RebuildPage: CustomNodeBase is not CustomNode, jsViewName=%{public}s",
             customNodeBase->GetJSViewName().c_str());
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
