@@ -2290,9 +2290,9 @@ void* GetEventSetHandler(uint32_t kind)
         NG::SetRichEditorNapiOnCopy,
         NG::SetRichEditorNapiOnWillChange,
         NG::SetRichEditorNapiOnDidChange,
-        NG::SetRichEditorNapiOnInputFilterError,
         NG::SetRichEditorNapiOnContentScroll,
         NG::SetRichEditorNapiOnContentSizeChange,
+        NG::SetRichEditorNapiOnInputFilterError,
     };
     if (kind >= sizeof(richEditorNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
@@ -2313,9 +2313,9 @@ void* GetEventResetHandler(uint32_t kind)
         NG::ResetRichEditorOnCopy,
         NG::ResetRichEditorNapiOnWillChange,
         NG::ResetRichEditorNapiOnDidChange,
-        NG::ResetRichEditorNapiOnInputFilterError,
         NG::ResetRichEditorOnContentScroll,
         NG::ResetRichEditorOnContentSizeChange,
+        NG::ResetRichEditorNapiOnInputFilterError,
     };
     if (kind >=
         sizeof(richEditorNodeResetAsyncEventHandlers) / sizeof(ResetComponentAsyncEventHandler)) {
