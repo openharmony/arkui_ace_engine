@@ -90,7 +90,7 @@ HWTEST_F(DialogModelTest, DialogModelTest004, TestSize.Level1)
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NativeDialogHandle nativeDialogHandle = Create();
     ASSERT_NE(nativeDialogHandle, nullptr);
-    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node({ .magic = ARKUI_NODE_MAGIC_VALID });
     int32_t ret = SetContent(nativeDialogHandle, nodeHandle);
     ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     Dispose(nativeDialogHandle);
@@ -721,7 +721,7 @@ HWTEST_F(DialogModelTest, DialogModelTest046, TestSize.Level1)
 HWTEST_F(DialogModelTest, DialogModelTest047, TestSize.Level1)
 {
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node({ .magic = ARKUI_NODE_MAGIC_VALID });
     int32_t ret = SetContent(nullptr, nodeHandle);
     EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 
@@ -958,7 +958,7 @@ HWTEST_F(DialogModelTest, DialogModelTest059, TestSize.Level1)
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NativeDialogHandle nativeDialogHandle = Create();
     ASSERT_NE(nativeDialogHandle, nullptr);
-    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node({ .magic = ARKUI_NODE_MAGIC_VALID });
     int32_t ret = SetContent(nativeDialogHandle, nodeHandle);
     EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 
@@ -1044,7 +1044,7 @@ HWTEST_F(DialogModelTest, DialogModelTest063, TestSize.Level1)
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
     ASSERT_NE(nativeDialogHandle, nullptr);
-    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node({ .magic = ARKUI_NODE_MAGIC_VALID });
     int32_t ret = SetContent(nativeDialogHandle, nodeHandle);
     EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 

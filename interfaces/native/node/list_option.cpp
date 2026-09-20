@@ -17,6 +17,7 @@
 
 
 #include "native_error_message_macros.h"
+#include "config_manager.h"
 #include "node_model.h"
 
 #include "base/error/error_code.h"
@@ -41,6 +42,7 @@ void OH_ArkUI_ListItemSwipeActionItem_Dispose(ArkUI_ListItemSwipeActionItem* ite
 void OH_ArkUI_ListItemSwipeActionItem_SetContent(ArkUI_ListItemSwipeActionItem* item, ArkUI_NodeHandle node)
 {
     CHECK_NULL_VOID(item);
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     item->node = node->uiNodeHandle;
 }
 
@@ -169,6 +171,7 @@ void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData(ArkUI_List
 int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData))
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != ARKUI_NODE_LIST) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, __FUNCTION__,
             "node type is not List");
@@ -287,7 +290,7 @@ int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListIte
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, __FUNCTION__, "native module not initialized");
-
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto errorCode = fullImpl->getNodeModifiers()->getListItemModifier()->expand(
         node->uiNodeHandle, static_cast<int32_t>(direction));
     if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -302,7 +305,7 @@ int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node)
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, __FUNCTION__, "native module not initialized");
-
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto errorCode = fullImpl->getNodeModifiers()->getListItemModifier()->collapse(node->uiNodeHandle);
     if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
         SET_ERROR_FUNCTION_NAME(__FUNCTION__);
