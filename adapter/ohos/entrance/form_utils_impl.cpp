@@ -16,6 +16,7 @@
 #include "adapter/ohos/entrance/form_utils_impl.h"
 
 #include "form_mgr.h"
+#include "form_constants.h"
 
 #include "insight_intent/insight_intent_execute_param.h"
 #include "want_params.h"
@@ -78,47 +79,6 @@ namespace {
         }
         return true;
     }
-
-    // 将单个 intentParams 子项按类型写入 WantParams：
-    // string/number/bool 直接映射；null/object/array 降级为空字符串
-    // （GetString 对 object/array 返回 ""），object/array 加告警暴露数据丢失。
-    void SetWantParamByType(const std::unique_ptr<JsonValue>& child, AAFwk::WantParams& wantParams)
-    {
-        auto key = child->GetKey();
-        // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
-        if (child->IsString()) {
-            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
-        } else if (child->IsNumber()) {
-            wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
-        } else if (child->IsBool()) {
-            wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
-        } else {
-            if (child->IsObject() || child->IsArray()) {
-                TAG_LOGW(AceLogTag::ACE_FORM,
-                    "InsightIntentEvent intentParams contains object/array value, "
-                    "downgrade to empty string, key: %{public}s", key.c_str());
-            }
-            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
-        }
-    }
-
-    // 遍历 params.intentParams（业务意图参数信封），将各键值按类型写入 wantParams；
-    // params 或 intentParams 缺失时保持 wantParams 为空。
-    void ParseIntentParams(const std::unique_ptr<JsonValue>& params, AAFwk::WantParams& wantParams)
-    {
-        if (!params->IsValid()) {
-            return;
-        }
-        auto intentParams = params->GetValue("intentParams");
-        if (!intentParams->IsValid()) {
-            return;
-        }
-        auto child = intentParams->GetChild();
-        while (child->IsValid()) {
-            SetWantParamByType(child, wantParams);
-            child = child->GetNext();
-        }
-    }
 }
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
@@ -150,6 +110,10 @@ int32_t FormUtilsImpl::RouterEvent(
     }
     want.SetParam("params", params->ToString());
     AddWantFreeInstallFlagForRouterEvent(eventAction->GetValue("flag"), want);
+    auto enableRouteSecondPage = eventAction->GetValue("enableRouteSecondePage");
+    bool isRouteSecondPageEnabled = enableRouteSecondPage->IsValid()
+        && enableRouteSecondPage->IsBoolean() && enableRouteSecondPage->GetBool();
+    want.SetParam(AppExecFwk::Constants::PARAM_ENABLE_ROUTE_SECOND_PAGE, isRouteSecondPageEnabled);
     auto abilityName = eventAction->GetValue("abilityName");
     auto bundleName = eventAction->GetValue("bundleName");
     auto bundle = bundleName->GetString();
@@ -268,10 +232,6 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     }
 
     auto eventAction = JsonUtil::ParseJsonString(action);
-    if (!eventAction->IsValid()) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent action is not valid json");
-        return -1;
-    }
     auto intentNameJson = eventAction->GetValue("intentName");
     const auto intentName = intentNameJson->GetString();
     if (intentName.empty()) {
@@ -288,7 +248,26 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     }
 
     AAFwk::WantParams wantParams;
-    ParseIntentParams(params, wantParams);
+    if (params->IsValid()) {
+        auto intentParams = params->GetValue("intentParams");
+        if (intentParams->IsValid()) {
+            auto child = intentParams->GetChild();
+            while (child->IsValid()) {
+                auto key = child->GetKey();
+                // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
+                if (child->IsString()) {
+                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+                } else if (child->IsNumber()) {
+                    wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
+                } else if (child->IsBool()) {
+                    wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
+                } else {
+                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+                }
+                child = child->GetNext();
+            }
+        }
+    }
 
     AAFwk::Want want;
     AAFwk::WantParams executeWantParams;
@@ -304,9 +283,9 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     want.SetParams(executeWantParams);
     // postCardAction 显式传入的目标三元组优先，缺失字段由 FMS 按 FormRecord 补齐。
     SetIntentTargetElement(eventAction, want);
+    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent send IPC, intentName: %{public}s", intentName.c_str());
     auto ret = AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
-    TAG_LOGI(AceLogTag::ACE_FORM,
-        "InsightIntentEvent IPC done, intentName: %{public}s, result: %{public}d", intentName.c_str(), ret);
+    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent IPC result: %{public}d", ret);
     return ret;
 }
 } // namespace OHOS::Ace
