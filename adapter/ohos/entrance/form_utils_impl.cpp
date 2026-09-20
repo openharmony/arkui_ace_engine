@@ -79,6 +79,92 @@ namespace {
         }
         return true;
     }
+
+    // 将单个 intentParams 子项按类型写入 WantParams：
+    // string/number/bool 直接映射；null/object/array 降级为空字符串
+    // （GetString 对 object/array 返回 ""），object/array 加告警暴露数据丢失。
+    void SetWantParamByType(const std::unique_ptr<JsonValue>& child, AAFwk::WantParams& wantParams)
+    {
+        auto key = child->GetKey();
+        // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
+        if (child->IsString()) {
+            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+        } else if (child->IsNumber()) {
+            wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
+        } else if (child->IsBool()) {
+            wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
+        } else {
+            if (child->IsObject() || child->IsArray()) {
+                TAG_LOGW(AceLogTag::ACE_FORM,
+                    "InsightIntentEvent intentParams contains object/array value, "
+                    "downgrade to empty string, key: %{public}s", key.c_str());
+            }
+            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+        }
+    }
+
+    // 遍历 params.intentParams（业务意图参数信封），将各键值按类型写入 wantParams；
+    // params 或 intentParams 缺失时保持 wantParams 为空。
+    void ParseIntentParams(const std::unique_ptr<JsonValue>& params, AAFwk::WantParams& wantParams)
+    {
+        if (!params->IsValid()) {
+            return;
+        }
+        auto intentParams = params->GetValue("intentParams");
+        if (!intentParams->IsValid()) {
+            return;
+        }
+        auto child = intentParams->GetChild();
+        while (child->IsValid()) {
+            SetWantParamByType(child, wantParams);
+            child = child->GetNext();
+        }
+    }
+
+    void ParseRouterEventParams(const std::unique_ptr<JsonValue>& params, AAFwk::Want& want)
+    {
+        if (params->IsValid()) {
+            auto child = params->GetChild();
+            while (child->IsValid()) {
+                auto key = child->GetKey();
+                if (child->IsNull()) {
+                    want.SetParam(key, std::string());
+                } else if (child->IsString()) {
+                    want.SetParam(key, child->GetString());
+                } else if (child->IsNumber()) {
+                    want.SetParam(key, child->GetInt());
+                } else {
+                    want.SetParam(key, std::string());
+                }
+                child = child->GetNext();
+            }
+        }
+        want.SetParam("params", params->ToString());
+    }
+
+    bool SetRouterEventElement(
+        const std::unique_ptr<JsonValue>& eventAction, const std::string& defaultBundleName, AAFwk::Want& want)
+    {
+        auto uri = eventAction->GetValue("uri");
+        if (uri->IsValid()) {
+            want.SetUri(uri->GetString());
+        }
+        auto bundle = eventAction->GetValue("bundleName")->GetString();
+        auto ability = eventAction->GetValue("abilityName")->GetString();
+        if (!ability.empty()) {
+            if (bundle.empty()) {
+                bundle = defaultBundleName;
+            }
+            want.SetElementName(bundle, ability);
+        } else if (uri->IsValid()) {
+            if (!bundle.empty()) {
+                want.SetElementName(bundle, std::string());
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
 }
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
@@ -90,47 +176,13 @@ int32_t FormUtilsImpl::RouterEvent(
     CHECK_NULL_RETURN(token_, -1);
     AAFwk::Want want;
     auto eventAction = JsonUtil::ParseJsonString(action);
-    auto uri = eventAction->GetValue("uri");
-    auto params = eventAction->GetValue("params");
-    if (params->IsValid()) {
-        auto child = params->GetChild();
-        while (child->IsValid()) {
-            auto key = child->GetKey();
-            if (child->IsNull()) {
-                want.SetParam(key, std::string());
-            } else if (child->IsString()) {
-                want.SetParam(key, child->GetString());
-            } else if (child->IsNumber()) {
-                want.SetParam(key, child->GetInt());
-            } else {
-                want.SetParam(key, std::string());
-            }
-            child = child->GetNext();
-        }
-    }
-    want.SetParam("params", params->ToString());
+    ParseRouterEventParams(eventAction->GetValue("params"), want);
     AddWantFreeInstallFlagForRouterEvent(eventAction->GetValue("flag"), want);
     auto enableRouteSecondPage = eventAction->GetValue("enableRouteSecondePage");
     bool isRouteSecondPageEnabled = enableRouteSecondPage->IsValid()
-        && enableRouteSecondPage->IsBoolean() && enableRouteSecondPage->GetBool();
+        && enableRouteSecondPage->IsBool() && enableRouteSecondPage->GetBool();
     want.SetParam(AppExecFwk::Constants::PARAM_ENABLE_ROUTE_SECOND_PAGE, isRouteSecondPageEnabled);
-    auto abilityName = eventAction->GetValue("abilityName");
-    auto bundleName = eventAction->GetValue("bundleName");
-    auto bundle = bundleName->GetString();
-    auto ability = abilityName->GetString();
-    if (uri->IsValid()) {
-        want.SetUri(uri->GetString());
-    }
-    if (!ability.empty()) {
-        if (bundle.empty()) {
-            bundle = defaultBundleName;
-        }
-        want.SetElementName(bundle, ability);
-    } else if (uri->IsValid()) {
-        if (!bundle.empty()) {
-            want.SetElementName(bundle, std::string());
-        }
-    } else {
+    if (!SetRouterEventElement(eventAction, defaultBundleName, want)) {
         return -1;
     }
 
@@ -232,6 +284,10 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     }
 
     auto eventAction = JsonUtil::ParseJsonString(action);
+    if (!eventAction->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent action is not valid json");
+        return -1;
+    }
     auto intentNameJson = eventAction->GetValue("intentName");
     const auto intentName = intentNameJson->GetString();
     if (intentName.empty()) {
@@ -248,26 +304,7 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     }
 
     AAFwk::WantParams wantParams;
-    if (params->IsValid()) {
-        auto intentParams = params->GetValue("intentParams");
-        if (intentParams->IsValid()) {
-            auto child = intentParams->GetChild();
-            while (child->IsValid()) {
-                auto key = child->GetKey();
-                // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
-                if (child->IsString()) {
-                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
-                } else if (child->IsNumber()) {
-                    wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
-                } else if (child->IsBool()) {
-                    wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
-                } else {
-                    wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
-                }
-                child = child->GetNext();
-            }
-        }
-    }
+    ParseIntentParams(params, wantParams);
 
     AAFwk::Want want;
     AAFwk::WantParams executeWantParams;
