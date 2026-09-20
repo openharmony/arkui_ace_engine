@@ -2230,10 +2230,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     } else {
         LOGD("configuration is nullptr,use default type");
     }
-    static std::once_flag onceFlag;
-    std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
-    AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
-    AceNewPipeJudgement::InitAceNewPipeConfig();
     auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
     if (xcomponentModifier && xcomponentModifier->getApsSdrRatio) {
         auto apsSdrRatioSize = ApsMonitorImpl::GetInstance().GetApsSdrRatio(
@@ -2250,6 +2246,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     LOGD("GetApsSdrRatio XCOMPONENT_SIZE_RATIO:%{public}f, XCOMPONENT_TOUCH_RATIO:%{public}f",
         NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1],
         NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1]);
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
+    AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
+    AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
     auto apiTargetVersion = context->GetApplicationInfo()->apiTargetVersion;
