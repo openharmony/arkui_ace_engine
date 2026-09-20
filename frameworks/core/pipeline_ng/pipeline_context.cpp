@@ -5964,7 +5964,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
         if (fullUpdate && configurationChange.IsNeedUpdate()) {
             CHECK_NULL_VOID(pipeline->stageManager_);
             pipeline->SetIsReloading(true);
-            pipeline->stageManager_->ReloadStage();
+            pipeline->stageManager_->ReloadStage(configurationChange.hotReloadFullRebuild);
             pipeline->SetIsReloading(false);
             pipeline->FlushUITasks();
         }

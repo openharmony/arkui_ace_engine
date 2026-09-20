@@ -79,6 +79,12 @@ export function ArkComponentRoot(
                 } else {
                     return new Long(childPeerPtr);
                 }
+            }, (): void => {
+                const root = weakNode.deref();
+                if (root) {
+                    root.armRebuild();
+                    root.rebuildPage();
+                }
             });
             if (component instanceof CustomDelegate) {
                 const delegateComponent = component as Any as CustomDelegate<ExtendableComponent, Object>;

@@ -164,13 +164,18 @@ void CustomNode::FireCustomDisappear()
 // used in HotReload to update root view @Component
 void CustomNode::FlushReload()
 {
+    LOGI("HotReload CustomNode::FlushReload enter, hasCompleteReloadFunc=%{public}d, hasRenderFunction=%{public}d",
+        completeReloadFunc_ != nullptr, renderFunction_ != nullptr);
     ResetNode();
     Build(nullptr);
 }
 
 void CustomNode::ResetNode()
 {
-    CHECK_NULL_VOID(completeReloadFunc_);
+    if (!completeReloadFunc_) {
+        LOGW("HotReload CustomNode::ResetNode: completeReloadFunc_ is null, skip reload");
+        return;
+    }
     Clean();
     renderFunction_ = completeReloadFunc_;
     executeFireOnAppear_ = false;

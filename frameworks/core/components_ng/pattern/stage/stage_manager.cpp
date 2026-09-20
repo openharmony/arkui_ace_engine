@@ -599,9 +599,10 @@ RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
     return nullptr;
 }
 
-void StageManager::ReloadStage()
+void StageManager::ReloadStage(bool fullRebuild)
 {
     CHECK_NULL_VOID(stageNode_);
+    LOGI("HotReload StageManager::ReloadStage fullRebuild=%{public}d", fullRebuild);
     const auto& children = stageNode_->GetChildren();
     for (const auto& child : children) {
         auto frameNode = DynamicCast<FrameNode>(child);
@@ -612,7 +613,11 @@ void StageManager::ReloadStage()
         if (!pagePattern) {
             continue;
         }
-        pagePattern->ReloadPage();
+        if (fullRebuild) {
+            pagePattern->RebuildPage();
+        } else {
+            pagePattern->ReloadPage();
+        }
     }
 }
 

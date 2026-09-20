@@ -364,7 +364,7 @@ public:
     }
 
     void FlushReload() override {}
-    void HotReload() override {}
+    void HotReload() override;
 
     ani_ref GetSharedStorage(int32_t id) override;
     

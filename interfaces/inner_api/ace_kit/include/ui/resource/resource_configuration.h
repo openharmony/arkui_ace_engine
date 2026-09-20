@@ -28,6 +28,7 @@ struct ConfigurationChange {
     bool fontScaleUpdate = false;
     bool fontWeightScaleUpdate = false;
     bool hotReloadUpdate = false;
+    bool hotReloadFullRebuild = false;
 
     bool IsNeedUpdate() const
     {
@@ -52,6 +53,8 @@ struct ConfigurationChange {
         skinUpdate |= config.skinUpdate;
         fontScaleUpdate |= config.fontScaleUpdate;
         fontWeightScaleUpdate |= config.fontWeightScaleUpdate;
+        hotReloadUpdate |= config.hotReloadUpdate;
+        hotReloadFullRebuild |= config.hotReloadFullRebuild;
     }
 };
 } // namespace OHOS::Ace

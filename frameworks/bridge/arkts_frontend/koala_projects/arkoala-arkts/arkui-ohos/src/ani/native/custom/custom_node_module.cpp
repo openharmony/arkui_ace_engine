@@ -108,27 +108,44 @@ void NativeCustomComponent::CustomNodeCallDefaultLayout(
     return;
 }
 
+struct WeakRefGuard {
+    ani_wref ref = nullptr;
+    ani_vm* vm = nullptr;
+    ~WeakRefGuard()
+    {
+        if (ref && vm) {
+            ani_env *env = nullptr;
+            if (ANI_OK == vm->GetEnv(ANI_VERSION_1, &env)) {
+                env->WeakReference_Delete(ref);
+            }
+        }
+    }
+};
+
 void NativeCustomComponent::CustomNodeSetBuildFunction(
-    ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object buildFunc)
+    ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr,
+    ani_fn_object buildFunc, ani_fn_object reloadFunc)
 {
     ani_vm *vm = nullptr;
     env->GetVM(&vm);
 
-    std::shared_ptr<ani_wref> weakRef(new ani_wref, [vm](ani_wref *wref) {
-        ani_env *env = nullptr;
-        if (ANI_OK == vm->GetEnv(ANI_VERSION_1, &env)) {
-            env->WeakReference_Delete(*wref);
-        }
-    });
+    auto buildGuard = std::make_shared<WeakRefGuard>();
+    buildGuard->vm = vm;
+    if (ANI_OK != env->WeakReference_Create(buildFunc, &buildGuard->ref)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Failed to create weak reference for buildFunc!");
+        return;
+    }
 
-    if (ANI_OK != env->WeakReference_Create(buildFunc, weakRef.get())) {
-        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Failed to create weak reference!");
+    auto reloadGuard = std::make_shared<WeakRefGuard>();
+    reloadGuard->vm = vm;
+    if (ANI_OK != env->WeakReference_Create(reloadFunc, &reloadGuard->ref)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Failed to create weak reference for reloadFunc!");
         return;
     }
 
     auto node = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
     auto base = AceType::DynamicCast<NG::CustomNodeBase>(node);
-    base->SetRenderFunction([vm, weakRef](int64_t, bool&) -> RefPtr<NG::UINode> {
+    NG::RenderFunction renderFunction = [vm, buildGuard](int64_t, bool&) -> RefPtr<NG::UINode> {
         ACE_SCOPED_TRACE("CustomNode renderFunction");
 
         ani_env *env = nullptr;
@@ -140,7 +157,7 @@ void NativeCustomComponent::CustomNodeSetBuildFunction(
         }
         ani_boolean released;
         ani_ref localRef;
-        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef) || released) {
+        if (ANI_OK != env->WeakReference_GetReference(buildGuard->ref, &released, &localRef) || released) {
             env->DestroyLocalScope();
             return nullptr;
         }
@@ -158,7 +175,55 @@ void NativeCustomComponent::CustomNodeSetBuildFunction(
         }
         env->DestroyLocalScope();
         return AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
-    });
+    };
+
+    NG::RenderFunction completeReloadFunc = [vm, buildGuard, reloadGuard](int64_t, bool&) -> RefPtr<NG::UINode> {
+        ACE_SCOPED_TRACE("CustomNode completeReloadFunc");
+
+        ani_env *env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return nullptr;
+        }
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return nullptr;
+        }
+
+        // Step 1: call reloadFunc to trigger ArkTS-side armRebuild + rebuildPage
+        ani_boolean reloadReleased;
+        ani_ref reloadLocalRef;
+        if (ANI_OK == env->WeakReference_GetReference(
+            reloadGuard->ref, &reloadReleased, &reloadLocalRef) && !reloadReleased) {
+            ani_ref reloadRes;
+            env->FunctionalObject_Call(static_cast<ani_fn_object>(reloadLocalRef), 0, nullptr, &reloadRes);
+        }
+
+        // Step 2: call buildFunc to get child pointer (updated by rebuildPage)
+        ani_boolean released;
+        ani_ref localRef;
+        if (ANI_OK != env->WeakReference_GetReference(buildGuard->ref, &released, &localRef) || released) {
+            env->DestroyLocalScope();
+            return nullptr;
+        }
+
+        ani_ref resRef;
+        if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(localRef), 0, nullptr, &resRef)) {
+            env->DestroyLocalScope();
+            return nullptr;
+        }
+
+        ani_long ptr;
+        if (ANI_OK != env->Object_CallMethodByName_Long(static_cast<ani_object>(resRef), "toLong", ":l", &ptr)) {
+            env->DestroyLocalScope();
+            return nullptr;
+        }
+        env->DestroyLocalScope();
+        return AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    };
+
+    TAG_LOGI(AceLogTag::ACE_LAYOUT,
+        "HotReload CustomNodeSetBuildFunction: install render and complete reload callbacks");
+    base->SetRenderFunction(renderFunction);
+    base->SetCompleteReloadFunc(std::move(completeReloadFunc));
 }
 
 void NativeCustomComponent::EnvBuildFunction(

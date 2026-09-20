@@ -3985,6 +3985,9 @@ void AceContainer::HotReload()
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             ConfigurationChange configurationChange { .hotReloadUpdate = true };
+            if (frontend->GetType() == FrontendType::ARK_TS) {
+                configurationChange.hotReloadFullRebuild = true;
+            }
             pipeline->FlushReload(configurationChange);
         },
         TaskExecutor::TaskType::UI, "ArkUIHotReload");

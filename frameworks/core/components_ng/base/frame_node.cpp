@@ -32,6 +32,7 @@
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_constants.h"
+#include "interfaces/inner_api/ace_kit/include/ui/resource/resource_configuration.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/manager/environment/environment_types.h"
@@ -1156,6 +1157,9 @@ void FrameNode::DumpExtensionHandlerInfo()
 
 void FrameNode::DumpCommonInfo()
 {
+    if (!geometryNode_ || !renderContext_ || !layoutProperty_) {
+        return;
+    }
     if (DumpLog::GetInstance().IsDumpAllNodes()) {
         DumpLog::GetInstance().AddDesc("IsFrameDisappear: " + std::to_string(IsFrameDisappear()));
         DumpLog::GetInstance().AddDesc("IsActive: " + std::to_string(isActive_));
