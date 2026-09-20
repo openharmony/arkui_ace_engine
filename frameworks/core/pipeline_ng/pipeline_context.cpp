@@ -8705,7 +8705,7 @@ void PipelineContext::UnregisterSurfaceChangedCallback(int32_t callbackId)
 int32_t PipelineContext::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
 {
     if (callback) {
-        foldStatusChangedCallbackMap_.emplace(callbackId_, std::move(callback));
+        foldStatusChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
         return callbackId_;
     }
     return 0;
