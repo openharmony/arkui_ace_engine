@@ -1334,15 +1334,11 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action, bool isMa
 
 void FormManagerDelegate::OnInsightIntentActionEvent(const std::string& action)
 {
-    // 不复用 ParseAction：其强制要求 abilityName（router/call 语义），
-    // intentName/params 在 FormUtilsImpl::InsightIntentEvent 内解析。
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid() || !eventAction->GetValue("intentName")->IsValid()) {
         TAG_LOGE(AceLogTag::ACE_FORM, "insightIntent action parse failed, detail action:%{public}s", action.c_str());
         return;
     }
-    // 提供方系统应用校验统一在 FMS 侧 FormEventAdapter::InsightIntentEvent 完成
-    // （预置系统应用 + 系统签名应用），宿主侧不再重复拦截。
     CHECK_NULL_VOID(formUtils_);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);

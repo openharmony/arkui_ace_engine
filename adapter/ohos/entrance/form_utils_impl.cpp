@@ -33,9 +33,6 @@ namespace OHOS::Ace {
 namespace {
     constexpr int32_t ERR_OK = 0;
 
-    // postCardAction 可选透传意图目标三元组（bundleName/moduleName/abilityName），
-    // 塞入 want element（FMS/AMS 的 GenerateFromWant 从 element 解析三元组）；
-    // 全缺省时不设置 element，任一字段缺失由 FMS 按 FormRecord 逐项补齐。
     void SetIntentTargetElement(const std::unique_ptr<JsonValue>& eventAction, AAFwk::Want& want)
     {
         const auto bundleName = eventAction->GetValue("bundleName")->GetString();
@@ -54,9 +51,6 @@ namespace {
         want.SetElement(element);
     }
 
-    // postCardAction 可选透传 executeMode（取值见 AppExecFwk::ExecuteMode，0-3），
-    // 作为 params 内保留键（与 intentParams 并列）解析；缺省回退前台执行，
-    // 传入非法值（非数字/超范围）返回 false 由调用方拒绝。
     bool GetIntentExecuteMode(const std::unique_ptr<JsonValue>& params, int32_t& executeMode)
     {
         executeMode = static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND);
@@ -80,13 +74,9 @@ namespace {
         return true;
     }
 
-    // 将单个 intentParams 子项按类型写入 WantParams：
-    // string/number/bool 直接映射；null/object/array 降级为空字符串
-    // （GetString 对 object/array 返回 ""），object/array 加告警暴露数据丢失。
     void SetWantParamByType(const std::unique_ptr<JsonValue>& child, AAFwk::WantParams& wantParams)
     {
         auto key = child->GetKey();
-        // WantParams::SetParam 仅接受 IInterface 派生类型，需用 AAFwk 包装类 Box() 转换。
         if (child->IsString()) {
             wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
         } else if (child->IsNumber()) {
@@ -103,8 +93,6 @@ namespace {
         }
     }
 
-    // 遍历 params.intentParams（业务意图参数信封），将各键值按类型写入 wantParams；
-    // params 或 intentParams 缺失时保持 wantParams 为空。
     void ParseIntentParams(const std::unique_ptr<JsonValue>& params, AAFwk::WantParams& wantParams)
     {
         if (!params->IsValid()) {
@@ -276,7 +264,6 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent aceContainer is null");
         return -1;
     }
-    // 权限校验已在宿主侧 OnInsightIntentActionEvent 完成，此处不重复。
     auto token = aceContainer->GetToken();
     if (token == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent token is null");
@@ -294,9 +281,6 @@ int32_t FormUtilsImpl::InsightIntentEvent(
         TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent intentName is empty");
         return -1;
     }
-    // params 为透传信封：内含 intentParams（业务意图参数）与保留键 executeMode，
-    // 业务参数整体隔离在子对象中，与保留键无同名冲突；
-    // executeMode 缺省回退前台执行，非法值整体拒绝。
     auto params = eventAction->GetValue("params");
     int32_t executeMode = 0;
     if (!GetIntentExecuteMode(params, executeMode)) {
@@ -310,7 +294,6 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     AAFwk::WantParams executeWantParams;
     executeWantParams.SetParam(
         AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, AAFwk::String::Box(intentName));
-    // intentId 由 AMS 侧按名称查表覆盖，此处占位 "0"（GenerateFromWant 要求可解析为 uint64，不能为空）。
     executeWantParams.SetParam(
         AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("0"));
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE,
@@ -318,7 +301,6 @@ int32_t FormUtilsImpl::InsightIntentEvent(
     executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
         AAFwk::WantParamWrapper::Box(wantParams));
     want.SetParams(executeWantParams);
-    // postCardAction 显式传入的目标三元组优先，缺失字段由 FMS 按 FormRecord 补齐。
     SetIntentTargetElement(eventAction, want);
     TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent send IPC, intentName: %{public}s", intentName.c_str());
     auto ret = AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
