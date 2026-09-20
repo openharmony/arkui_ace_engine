@@ -544,6 +544,9 @@ void PagePattern::RebuildPage()
     auto customNode = AceType::DynamicCast<CustomNode>(customNodeBase);
     if (customNode) {
         customNode->FlushReload();
+    } else {
+        LOGW("HotReload RebuildPage: CustomNodeBase is not CustomNode, jsViewName=%{public}s",
+            customNodeBase->GetJSViewName().c_str());
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
 }

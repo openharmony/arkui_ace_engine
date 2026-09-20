@@ -306,6 +306,7 @@ private:
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;
+    bool isReloading_ = false;
     bool needMarkParent_ = true;
     bool prevJsActive_ = true;
     bool isDidBuild_ = false;

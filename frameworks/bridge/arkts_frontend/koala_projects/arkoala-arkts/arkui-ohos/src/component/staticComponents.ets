@@ -164,7 +164,8 @@ export class ArkCustomComponentRootPeer extends PeerNode {
             return this.childPeerPtr;
         }
         this.isRebuild = false;
-        if (!this.component || !this.customNodeBuilder) {
+        const component = this.component;
+        if (!component || !this.customNodeBuilder) {
             InteropNativeModule._NativeLog(
                 `HotReload ArkCustomComponentRootPeer rebuild: component or builder is null`);
             return nullptr;
@@ -172,7 +173,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
 
         const oldChild = this.childPeerPtr;
         if (oldChild !== nullptr) {
-            const uiContext = this.component!.getUIContext() as UIContext;
+            const uiContext = component.getUIContext() as UIContext;
             if (uiContext) {
                 const destroyed = destroyUiDetachedRoot(oldChild, uiContext.getInstanceId());
                 if (!destroyed) {

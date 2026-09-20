@@ -126,15 +126,16 @@ HWTEST_F(HotReloadTestNg, HotReloadTest002, TestSize.Level1)
      * @tc.steps: step3. Create CustomNode with triggerLifecycleFunc and completeReloadFunc
      */
     auto customNode = CustomNode::CreateCustomNode(3, "root");
+    auto child = FrameNode::CreateFrameNode("hotReloadChild", 4, AceType::MakeRefPtr<StagePattern>());
     customNode->SetTriggerLifecycleFunction([](int32_t eventId) -> bool {
         if (eventId == static_cast<int32_t>(CustomNodeBase::LifeCycleEvent::ON_APPEAR)) {
             g_hotReloadAboutToAppearCallCount++;
         }
         return true;
     });
-    customNode->SetCompleteReloadFunc([](int64_t, bool&) -> RefPtr<UINode> {
+    customNode->SetCompleteReloadFunc([&g_hotReloadCompleteReloadCallCount, child](int64_t, bool&) -> RefPtr<UINode> {
         g_hotReloadCompleteReloadCallCount++;
-        return nullptr;
+        return child;
     });
     customNode->MountToParent(pageNode);
 
@@ -145,12 +146,15 @@ HWTEST_F(HotReloadTestNg, HotReloadTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Call ReloadStage with fullRebuild=true
-     * @tc.expected: both aboutToAppear and completeReloadFunc should be called
+     * @tc.expected: both aboutToAppear and completeReloadFunc should be called,
+     *               the returned child should be mounted with the correct tag
      */
     stageManager.ReloadStage(true);
 
     EXPECT_EQ(g_hotReloadAboutToAppearCallCount, 1);
     EXPECT_EQ(g_hotReloadCompleteReloadCallCount, 1);
+    ASSERT_NE(customNode->GetFirstChild(), nullptr);
+    EXPECT_EQ(customNode->GetFirstChild()->GetTag(), "hotReloadChild");
 }
 
 /**
@@ -168,31 +172,44 @@ HWTEST_F(HotReloadTestNg, HotReloadTest003, TestSize.Level1)
     auto host = FrameNode::CreateFrameNode("page", 2, pagePattern);
 
     /**
-     * @tc.steps: step2. Create CustomNode with lifecycle and complete reload functions
+     * @tc.steps: step2. Create CustomNode with lifecycle and complete reload functions.
+     *            A sentinel renderFunction is installed first; it must be replaced by the
+     *            completeReloadFunc during FlushReload and therefore never be called.
      */
     bool aboutToAppearCalled = false;
     bool completeReloadCalled = false;
+    bool sentinelRenderFunctionCalled = false;
     auto customNode = CustomNode::CreateCustomNode(3, "root");
+    auto child = FrameNode::CreateFrameNode("hotReloadChild", 4, AceType::MakeRefPtr<StagePattern>());
     customNode->SetTriggerLifecycleFunction([&aboutToAppearCalled](int32_t eventId) -> bool {
         if (eventId == static_cast<int32_t>(CustomNodeBase::LifeCycleEvent::ON_APPEAR)) {
             aboutToAppearCalled = true;
         }
         return true;
     });
-    customNode->SetCompleteReloadFunc([&completeReloadCalled](int64_t, bool&) -> RefPtr<UINode> {
-        completeReloadCalled = true;
+    customNode->SetRenderFunction([&sentinelRenderFunctionCalled](int64_t, bool&) -> RefPtr<UINode> {
+        sentinelRenderFunctionCalled = true;
         return nullptr;
+    });
+    customNode->SetCompleteReloadFunc([&completeReloadCalled, child](int64_t, bool&) -> RefPtr<UINode> {
+        completeReloadCalled = true;
+        return child;
     });
     customNode->MountToParent(host);
 
     /**
      * @tc.steps: step3. Call RebuildPage
      * @tc.expected: aboutToAppear should be called via Render, completeReloadFunc should be called
+     *               instead of the original renderFunction, and the returned child should be
+     *               mounted with the correct tag
      */
     pagePattern->RebuildPage();
 
     EXPECT_TRUE(aboutToAppearCalled);
     EXPECT_TRUE(completeReloadCalled);
+    EXPECT_FALSE(sentinelRenderFunctionCalled);
+    ASSERT_NE(customNode->GetFirstChild(), nullptr);
+    EXPECT_EQ(customNode->GetFirstChild()->GetTag(), "hotReloadChild");
 }
 
 /**
@@ -222,15 +239,16 @@ HWTEST_F(HotReloadTestNg, HotReloadTest004, TestSize.Level1)
     auto customNode = CustomNode::CreateCustomNode(3, "root");
     bool aboutToAppearCalled = false;
     bool completeReloadCalled = false;
+    auto child = FrameNode::CreateFrameNode("hotReloadChild", 4, AceType::MakeRefPtr<StagePattern>());
     customNode->SetTriggerLifecycleFunction([&aboutToAppearCalled](int32_t eventId) -> bool {
         if (eventId == static_cast<int32_t>(CustomNodeBase::LifeCycleEvent::ON_APPEAR)) {
             aboutToAppearCalled = true;
         }
         return true;
     });
-    customNode->SetCompleteReloadFunc([&completeReloadCalled](int64_t, bool&) -> RefPtr<UINode> {
+    customNode->SetCompleteReloadFunc([&completeReloadCalled, child](int64_t, bool&) -> RefPtr<UINode> {
         completeReloadCalled = true;
-        return nullptr;
+        return child;
     });
     customNode->MountToParent(pageNode);
     pageNode->MountToParent(rootNode);
@@ -244,9 +262,12 @@ HWTEST_F(HotReloadTestNg, HotReloadTest004, TestSize.Level1)
     context->FlushReload(config, true);
 
     /**
-     * @tc.expected: aboutToAppear should be triggered and completeReloadFunc should be called via FlushReload
+     * @tc.expected: aboutToAppear should be triggered and completeReloadFunc should be called via FlushReload,
+     *               the returned child should be mounted with the correct tag
      */
     EXPECT_TRUE(aboutToAppearCalled);
     EXPECT_TRUE(completeReloadCalled);
+    ASSERT_NE(customNode->GetFirstChild(), nullptr);
+    EXPECT_EQ(customNode->GetFirstChild()->GetTag(), "hotReloadChild");
 }
 } // namespace OHOS::Ace::NG

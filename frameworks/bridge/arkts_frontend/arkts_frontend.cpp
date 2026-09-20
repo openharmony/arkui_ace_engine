@@ -1367,10 +1367,6 @@ int32_t ArktsFrontend::GetCurrentPageIndex() const
     return pageRouterManager_->GetCurrentPageIndex();
 }
 
-void ArktsFrontend::HotReload()
-{
-}
-
 UIContentErrorCode ArktsFrontend::RunIntentPage()
 {
     if (pageRouterManager_) {

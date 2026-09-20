@@ -194,7 +194,11 @@ void NativeCustomComponent::CustomNodeSetBuildFunction(
         if (ANI_OK == env->WeakReference_GetReference(
             reloadGuard->ref, &reloadReleased, &reloadLocalRef) && !reloadReleased) {
             ani_ref reloadRes;
-            env->FunctionalObject_Call(static_cast<ani_fn_object>(reloadLocalRef), 0, nullptr, &reloadRes);
+            if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(reloadLocalRef), 0, nullptr,
+                &reloadRes)) {
+                env->DestroyLocalScope();
+                return nullptr;
+            }
         }
 
         // Step 2: call buildFunc to get child pointer (updated by rebuildPage)
