@@ -173,6 +173,9 @@ bool MemoryManager::RegisterNavDestinationHiddenChange(
 {
     CHECK_NULL_RETURN(imageNode, false);
     int32_t imageNodeId = imageNode->GetId();
+    if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
+        return false;
+    }
     auto iter = imageNavDestMap_.find(imageNodeId);
     if (iter != imageNavDestMap_.end() && iter->second.Upgrade()) {
         return true;
