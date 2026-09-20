@@ -6164,6 +6164,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
 {
     HintToTypeWrap hintToTypeWrap;
     if (NWEB_AUTOFILL_TYPE_OFF == attribute) {
+        node->SetEnableAutoFill(false);
         return hintToTypeWrap;
     }
     auto placeholder = node->GetPlaceholder();

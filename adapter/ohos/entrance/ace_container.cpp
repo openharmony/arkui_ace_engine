@@ -2268,6 +2268,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         node.depth = -1;
         node.autoFillType = static_cast<AbilityBase::AutoFillType>(info->GetAutoFillType());
         node.isFocus = info->GetIsFocus();
+        node.enableAutoFill = info->GetEnableAutoFill();
         node.value = info->GetValue();
         node.placeholder = info->GetPlaceholder();
         node.metadata = info->GetMetadata();
