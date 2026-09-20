@@ -42,6 +42,8 @@ RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
     GetIsFoldable();
     GetCurrentFoldStatus();
     GetCurrentFoldCreaseRegion();
+    GetLiveFoldCreaseRegion();
+    GetFoldCreaseDirection();
     return displayInfo_;
 }
 
@@ -103,6 +105,50 @@ std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
     displayInfo_->SetCurrentFoldCreaseRegion(rects);
     hasInitFoldCreaseRegion_ = true;
     return rects;
+}
+
+std::vector<Rect> DisplayInfoUtils::GetLiveFoldCreaseRegion()
+{
+    std::vector<Rect> rects;
+    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (!display) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "failed to get default display for live crease region");
+        displayInfo_->SetLiveFoldCreaseRegion(rects);
+        return rects;
+    }
+    Rosen::FoldCreaseRegion region;
+    Rosen::DMError ret = display->GetLiveCreaseRegion(region);
+    if (ret != Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "GetLiveCreaseRegion failed, ret: %{public}d",
+            static_cast<int32_t>(ret));
+        displayInfo_->SetLiveFoldCreaseRegion(rects);
+        return rects;
+    }
+    auto creaseRects = region.GetCreaseRects();
+    for (const auto& item : creaseRects) {
+        Rect rect;
+        rect.SetRect(item.posX_, item.posY_, item.width_, item.height_);
+        rects.insert(rects.end(), rect);
+    }
+    displayInfo_->SetLiveFoldCreaseRegion(rects);
+    return rects;
+}
+
+FoldCreaseDirection DisplayInfoUtils::GetFoldCreaseDirection()
+{
+    auto rects = displayInfo_->GetLiveFoldCreaseRegion();
+    if (rects.empty()) {
+        displayInfo_->SetFoldCreaseDirection(FoldCreaseDirection::UNKNOWN);
+        return FoldCreaseDirection::UNKNOWN;
+    }
+    auto crease = rects.front();
+    FoldCreaseDirection direction = (crease.Width() > crease.Height())
+        ? FoldCreaseDirection::HORIZONTAL
+        : (crease.Width() < crease.Height())
+            ? FoldCreaseDirection::VERTICAL
+            : FoldCreaseDirection::UNKNOWN;
+    displayInfo_->SetFoldCreaseDirection(direction);
+    return direction;
 }
 
 DisplaySourceMode DisplayInfoUtils::GetDisplaySourceMode()
