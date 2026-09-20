@@ -169,7 +169,6 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
     if (frameNode) {
         patternName = frameNode->GetTag();
     }
-    eventInfo.SetTouchEventId(lastPoint.touchEventId);
     eventInfo.SetPatternName(patternName.c_str());
     eventInfo.SetSourceDevice(lastPoint.sourceType);
     eventInfo.SetForce(lastPoint.force);
@@ -389,13 +388,10 @@ void TouchEventActuator::ReportTouchEventToUISession(const TouchEventInfo& event
         return;
     }
 
+    int32_t nodeId = -1;
     auto frameNode = GetAttachedNode().Upgrade();
-    if (!frameNode) {
-        return;
-    }
-    int32_t nodeId = frameNode->GetId();
-    if (nodeId < 0) {
-        return;
+    if (frameNode) {
+        nodeId = frameNode->GetId();
     }
 
     std::string action;
