@@ -48,6 +48,9 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/common/properties/ui_material.h"
+#include "base/json/json_util.h"
+#include "core/components_ng/base/inspector_filter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1899,5 +1902,69 @@ HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest006, TestSize.Level1)
     std::string validCmd = R"({"cmd":"onButtonClick"})";
     int32_t result = buttonPattern->OnInjectionEvent(validCmd);
     EXPECT_EQ(result, RET_SUCCESS);
+}
+
+/**
+ * @tc.name: ButtonPattern_ToJsonValue_HasSystemMaterial_False
+ * @tc.desc: Test ButtonPattern::ToJsonValue outputs hasSystemMaterial "false" by default
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonPattern_ToJsonValue_HasSystemMaterial_False, TestSize.Level1)
+{
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    buttonNode->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "false");
+}
+
+/**
+ * @tc.name: ButtonPattern_ToJsonValue_HasSystemMaterial_True
+ * @tc.desc: Test ButtonPattern::ToJsonValue outputs hasSystemMaterial "true" when material set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonPattern_ToJsonValue_HasSystemMaterial_True, TestSize.Level1)
+{
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->SetSystemMaterial(AceType::MakeRefPtr<UiMaterial>());
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    buttonNode->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "true");
+}
+
+/**
+ * @tc.name: ButtonPattern_DumpInfo_HasSystemMaterial
+ * @tc.desc: Test ButtonPattern::DumpInfo outputs HasSystemMaterial and does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonPattern_DumpInfo_HasSystemMaterial, TestSize.Level1)
+{
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    bool hasHasSystemMaterial = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("HasSystemMaterial") != std::string::npos) {
+            hasHasSystemMaterial = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasHasSystemMaterial);
 }
 } // namespace OHOS::Ace::NG
