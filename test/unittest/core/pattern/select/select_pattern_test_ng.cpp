@@ -1431,7 +1431,7 @@ HWTEST_F(SelectPatternTestNg, SelectPattern_ToJsonValue_HasSystemMaterial_False,
 
 /**
  * @tc.name: SelectPattern_ToJsonValue_HasSystemMaterial_True
- * @tc.desc: Test SelectPattern::ToJsonValue outputs hasSystemMaterial "true" and distortionMode/edgeLightMode when material set
+ * @tc.desc: Test ToJsonValue outputs hasSystemMaterial "true" and distortionMode/edgeLightMode
  * @tc.type: FUNC
  */
 HWTEST_F(SelectPatternTestNg, SelectPattern_ToJsonValue_HasSystemMaterial_True, TestSize.Level1)
