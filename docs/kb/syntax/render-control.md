@@ -22,7 +22,7 @@
 | if/else Model | `frameworks/core/components_ng/syntax/if_else_model_ng.cpp`、`if_else_model.h` | Create / Pop / `SetBranchId` / `CanRetake` |
 | ForEach Model | `frameworks/core/components_ng/syntax/for_each_model_ng.cpp` | Create / `SetNewIds` / `CreateNewChildStart/Finish` / `OnMove` |
 | JS 桥接 | `frameworks/bridge/declarative_frontend/jsview/js_if_else.cpp`（`JSIfElse`）、`js_foreach.cpp`（`JSForEach`） | 绑定 + NG/legacy 管线选择 |
-| TS 分支/diff 驱动 | `frameworks/bridge/declarative_frontend/state_mgmt/.../puv2_view_buildnode_base.ts`（`ifElseBranchUpdateFunction`）、`puv2_view_base.ts`（ForEach diff / keyGen） | TS 侧分支选择 / id diff |
+| TS 分支/diff 驱动 | `frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_buildnode_base.ts`（`ifElseBranchUpdateFunction`）、`puv2_view_base.ts`（ForEach diff / keyGen） | TS 侧分支选择 / id diff |
 | C-API（Arkoala）节点 | `frameworks/core/components_ng/syntax/arkoala_condition_scope.*`（if/else `ConditionScopeNode`）、`arkoala_for_each_node.*`（`ArkoalaForEachNode`） | Arkoala / C-API 对应节点（不做 C++ 分支 diff，分支由 Arkoala 侧先决） |
 | 父容器 | `frameworks/core/components_ng/base/frame_node.cpp`（`ChildrenUpdatedFrom` / dirty） | 分支 / 列表变更通知父重测量 |
 

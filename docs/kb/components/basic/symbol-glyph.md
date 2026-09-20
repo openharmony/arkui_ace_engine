@@ -40,7 +40,7 @@ SymbolGlyph 已完成组件化改造（在 `adapter/ohos/osal/dynamic_module_hel
 
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
-| 前端 JS/TS 定义 | `frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_glyph_modifier.ts` + `frameworks/bridge/declarative_frontend/ark_component/src/arkSymbolGlyph.ts`（若存在） | ArkTS Modifier 类，经 `applySymbolGlyphModifierToNode` 挂接 |
+| 前端 JS/TS 定义 | `frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_glyph_modifier.ts` + `frameworks/bridge/declarative_frontend/ark_component/src/ArkSymbolGlyph.ts` | ArkTS Modifier 类，经 `applySymbolGlyphModifierToNode` 挂接 |
 | 统一 Bridge（声明式+动态属性） | `frameworks/core/components_ng/pattern/symbol/bridge/arkts_native_symbol_glyph_bridge.cpp` | `SymbolGlyphBridge`，`RegisterSymbolGlyphAttributes` |
 | Dynamic Modifier | `frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_dynamic_modifier.cpp` | `GetSymbolGlyphDynamicModifier` 动态属性表 |
 | Static Modifier | `frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_static_modifier.cpp` | 静态编译路径 |

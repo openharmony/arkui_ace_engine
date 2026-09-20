@@ -96,6 +96,14 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 多实例并发刷新竞争 | 修复后缓存键与创建实例一致，`UpdateColorMode` 能正确匹配并刷新对应实例的适配器 | `resource_adapter_impl_v2.cpp`：`actualInstanceId = aceContainer->GetInstanceId()` | PR #81929 |
 | 跨包 HSP 资源上下文缺失 | 修复后即使系统级弹窗实例创建的无效适配器也会以其自身 instanceId 缓存，不会污染主实例的缓存条目 | `resource_adapter.h`：签名增加 `int32_t& actualInstanceId` | PR #81929 |
 
+## 关联变更
+
+- 修复 PR [#81929](https://gitcode.com/openharmony/arkui_ace_engine/pull/81929)：`CreateNewResourceAdapter` 增加 `int32_t& actualInstanceId` 出参，`GetOrCreateResourceAdapter` 改用真实容器实例 ID 作缓存键
+  - `resource_manager.cpp`（声明 `actualInstanceId` 并传给工厂函数，`AddResourceAdapter` 使用该值做缓存键）
+  - `resource_adapter_impl_v2.cpp`（`actualInstanceId = aceContainer->GetInstanceId()`）
+  - `resource_adapter.h`（签名增加 `int32_t& actualInstanceId`）
+- 关联 Issue [#74062](https://gitcode.com/openharmony/arkui_ace_engine/issues/74062)
+
 ## 关联案例
 
 | 案例编号 | 问题简述 | 根因类别 | 修复方式 | 关联 PR / Issue |

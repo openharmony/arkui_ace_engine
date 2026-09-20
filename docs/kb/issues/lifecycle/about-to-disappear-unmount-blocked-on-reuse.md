@@ -104,6 +104,11 @@ role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dep
 | 动画屏蔽下树与复用缓存池冲突 | 应用侧规避：不在 `aboutToDisappear` 中执行依赖组件下树时序的操作 | 应用代码调整为不在此生命周期中修改条件渲染状态 | — |
 | BuilderNode 内节点结构异常 | 应用侧规避：BuilderNode 内条件渲染子组件的下树不依赖 `aboutToDisappear` 时序 | 应用代码调整为在 `onRecycle` 或其他时机处理状态变更 | — |
 
+## 关联变更
+
+- 特性引入 PR [#54006](https://gitcode.com/openharmony/arkui_ace_engine/pull/54006)："自定义组件前端对象删除前移"特性改为默认不使能，开放接口让应用按需开启
+- 应用侧规避：不在 `aboutToDisappear` 中执行依赖组件下树时序的状态修改（改在 `onRecycle` / `aboutToRecycle` 时机处理）
+
 ## 关联案例
 
 | 案例编号 | 问题简述 | 根因类别 | 修复方式 | 关联 PR / Issue |

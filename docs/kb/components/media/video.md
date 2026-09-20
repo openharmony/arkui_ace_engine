@@ -81,7 +81,7 @@ Video 组件已完成组件动态模块化：`adapter/ohos/osal/dynamic_module_h
 
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
-| **前端 JS/TS 定义** | `frameworks/bridge/declarative_frontend/ark_direct_component/src/arkvideo.ts`、`frameworks/bridge/declarative_frontend/ark_component/dist/ArkVideo.js` | 动态前端 Video 组件类和 ArkComponent/JSView 侧入口 |
+| **前端 JS/TS 定义** | `frameworks/bridge/declarative_frontend/ark_direct_component/src/arkvideo.ts` | 动态前端 Video 组件类和 ArkComponent/JSView 侧入口 |
 | **组件动态模块** | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_module.cpp` | 导出 `OHOS_ACE_DynamicModule_Create_Video`，提供 dynamic/static/CJ/custom modifier 和 `VideoModelNG` |
 | **动态前端入口** | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_modifier.cpp` | JSView/动态属性侧属性写入入口 |
 | **JSView Controller（同步）** | `frameworks/bridge/declarative_frontend/jsview/js_video_controller.cpp` | `VideoController` 命令式接口的 JS 桥 |
