@@ -174,7 +174,6 @@ public:
         auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
         json->PutExtAttr("group", group.c_str(), filter);
-        json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
     }
 
     void ResetUIStatus()
@@ -196,8 +195,6 @@ public:
     void UpdateCheckBoxStyle();
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    bool HasSystemMaterial() const;
 
     int32_t OnInjectionEvent(const std::string& command) override;
     void ReportChangeEvent(bool selectStatus);

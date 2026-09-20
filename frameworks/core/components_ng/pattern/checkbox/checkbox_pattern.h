@@ -166,8 +166,6 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    bool HasSystemMaterial() const;
     void SetIsUserSetMargin(bool isUserSetMargin)
     {
         isUserSetMargin_ = isUserSetMargin;

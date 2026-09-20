@@ -174,9 +174,6 @@ public:
     void AddPipelineCallBack();
     void UpdateAgingTextSize();
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    bool HasSystemMaterial() const;
     void UpdateBubbleText(const Color& value);
     void UpdateBubbleBackGroundColor(const Color& value);
     void UpdateMaskColor(const Color& value);

@@ -18,7 +18,6 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "base/i18n/localization.h"
-#include "base/log/dump_log.h"
 #include "base/utils/date_util.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
@@ -60,18 +59,6 @@ constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 constexpr int32_t MIN_MONTH = 1;
 constexpr int32_t MIN_DAY = 1;
 const char BUTTON_ETS_TAG[] = "Button";
-
-std::string MaterialTypeToString(int32_t type)
-{
-    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
-        "MaterialType.IMMERSIVE" };
-    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
-        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
-        return MaterialTypeStyles[type];
-    }
-    return MaterialTypeStyles[0];
-}
-
 ArkUINodeHandle GetNodeHandle(const RefPtr<FrameNode>& frameNode)
 {
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
@@ -1682,46 +1669,6 @@ void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
     if (currentSettingData_.endDate.ToDays() != PickerDate().ToDays()) {
         json->PutExtAttr("end", currentSettingData_.endDate.ToString(false).c_str(), filter);
-    }
-    bool hasSystemMaterial = HasSystemMaterial();
-    json->PutExtAttr("hasSystemMaterial", hasSystemMaterial ? "true" : "false", filter);
-}
-
-bool CalendarDialogPattern::HasSystemMaterial() const
-{
-    return systemMaterial_ != nullptr;
-}
-
-void CalendarDialogPattern::DumpInfo()
-{
-    DumpLog::GetInstance().AddDesc("markToday: " + std::string(currentSettingData_.markToday ? "true" : "false"));
-    DumpLog::GetInstance().AddDesc(
-        "DialogOffset: { x: " + std::to_string(dialogOffset_.GetX()) +
-        " y: " + std::to_string(dialogOffset_.GetY()) + " }");
-    bool hasSystemMaterial = HasSystemMaterial();
-    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(systemMaterial_));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        DumpLog::GetInstance().AddDesc("MaterialType: " +
-            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
-                                      : std::string("MaterialType.NONE")));
-    }
-}
-
-void CalendarDialogPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
-{
-    json->Put("markToday", currentSettingData_.markToday ? "true" : "false");
-    json->Put("DialogOffsetX", std::to_string(dialogOffset_.GetX()).c_str());
-    json->Put("DialogOffsetY", std::to_string(dialogOffset_.GetY()).c_str());
-    bool hasSystemMaterial = HasSystemMaterial();
-    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(systemMaterial_));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        json->Put("MaterialType",
-            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
-                                     : "MaterialType.NONE");
     }
 }
 

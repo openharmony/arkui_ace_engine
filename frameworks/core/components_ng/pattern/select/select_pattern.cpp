@@ -1829,6 +1829,10 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
     json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
+    json->PutExtAttr("distortionMode",
+        DistortionModeToString(GetMenuDistortionMode().value_or(DistortionMode::DISTORTION_AUTO)).c_str(), filter);
+    json->PutExtAttr("edgeLightMode",
+        EdgeLightModeToString(GetMenuEdgeLightMode().value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str(), filter);
 }
 
 void SelectPattern::ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json,
@@ -3123,6 +3127,10 @@ void SelectPattern::DumpInfo()
             (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
                                        : std::string("MaterialType.NONE")));
     }
+    DumpLog::GetInstance().AddDesc("DistortionMode: " +
+        DistortionModeToString(GetMenuDistortionMode().value_or(DistortionMode::DISTORTION_AUTO)));
+    DumpLog::GetInstance().AddDesc("EdgeLightMode: " +
+        EdgeLightModeToString(GetMenuEdgeLightMode().value_or(EdgeLightMode::EDGELIGHT_AUTO)));
 }
 
 bool SelectPattern::HasSystemMaterial() const
@@ -3151,6 +3159,10 @@ void SelectPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
             materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
                                      : "MaterialType.NONE");
     }
+    json->Put("DistortionMode",
+        DistortionModeToString(GetMenuDistortionMode().value_or(DistortionMode::DISTORTION_AUTO)).c_str());
+    json->Put("EdgeLightMode",
+        EdgeLightModeToString(GetMenuEdgeLightMode().value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str());
 }
 
 void SelectPattern::SetArrowModifierByUser(

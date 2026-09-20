@@ -23,10 +23,8 @@
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/common/properties/ui_material.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/toast/toast_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -41,16 +39,6 @@ constexpr int32_t API_VERSION_9 = 9;
 constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
 constexpr Dimension LIMIT_SPACING = 8.0_vp;
 
-std::string MaterialTypeToString(int32_t type)
-{
-    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
-        "MaterialType.IMMERSIVE" };
-    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
-        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
-        return MaterialTypeStyles[type];
-    }
-    return MaterialTypeStyles[0];
-}
 } // namespace
 
 int32_t ToastPattern::GetToastParentContainerId(const RefPtr<FrameNode>& host)
@@ -957,15 +945,6 @@ void ToastPattern::DumpInfo()
     std::string hoverModeAreaType =
         toastInfo_.hoverModeArea == HoverModeAreaType::TOP_SCREEN ? "TOP_SCREEN" : "BOTTOM_SCREEN";
     DumpLog::GetInstance().AddDesc("HoverModeArea: " + hoverModeAreaType);
-    bool hasSystemMaterial = HasSystemMaterial();
-    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(toastInfo_.systemMaterial));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        DumpLog::GetInstance().AddDesc("MaterialType: " +
-            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
-                                      : std::string("MaterialType.NONE")));
-    }
 }
 
 void ToastPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -990,30 +969,6 @@ void ToastPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     children->Put("dx", offset.GetX().ToString().c_str());
     children->Put("dy", offset.GetY().ToString().c_str());
     json->Put("Offset", children);
-    bool hasSystemMaterial = HasSystemMaterial();
-    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(toastInfo_.systemMaterial));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        json->Put("MaterialType",
-            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
-                                     : "MaterialType.NONE");
-    }
-}
-
-bool ToastPattern::HasSystemMaterial() const
-{
-    return toastInfo_.systemMaterial != nullptr;
-}
-
-void ToastPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    /* no fixed attr below, just return */
-    if (filter.IsFastFilter()) {
-        return;
-    }
-    bool hasSystemMaterial = HasSystemMaterial();
-    json->PutExtAttr("hasSystemMaterial", hasSystemMaterial ? "true" : "false", filter);
 }
 
 NG::SizeF ToastPattern::GetSystemTopMostSubwindowSize() const

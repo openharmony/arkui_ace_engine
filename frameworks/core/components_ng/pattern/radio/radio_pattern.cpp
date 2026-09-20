@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/properties/ui_material.h"
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/icon_theme.h"
@@ -50,17 +49,6 @@ constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 728.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 46.0f;
 constexpr Color DEFAULT_INDICATOR_DARK_LIGHT_COLOR = Color(0xffffffff);
-
-std::string MaterialTypeToString(int32_t type)
-{
-    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
-        "MaterialType.IMMERSIVE" };
-    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
-        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
-        return MaterialTypeStyles[type];
-    }
-    return MaterialTypeStyles[0];
-}
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()
@@ -1074,48 +1062,6 @@ void RadioPattern::DumpInfo ()
     }
     if (paintProperty->HasRadioIndicatorColor()) {
         DumpLog::GetInstance().AddDesc("IndicatorColor: " + paintProperty->GetRadioIndicatorColorValue().ToString());
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto material = renderContext->GetSystemMaterial();
-    bool hasSystemMaterial = material != nullptr;
-    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        DumpLog::GetInstance().AddDesc("MaterialType: " +
-            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
-                                       : std::string("MaterialType.NONE")));
-    }
-}
-
-bool RadioPattern::HasSystemMaterial() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto material = renderContext->GetSystemMaterial();
-    return material != nullptr;
-}
-
-void RadioPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto material = renderContext->GetSystemMaterial();
-    bool hasSystemMaterial = material != nullptr;
-    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        json->Put("MaterialType",
-            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
-                                     : "MaterialType.NONE");
     }
 }
 

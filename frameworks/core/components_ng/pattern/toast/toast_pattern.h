@@ -71,8 +71,6 @@ public:
     void DumpInfo() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    bool HasSystemMaterial() const;
 
     void SetTextNode(RefPtr<FrameNode> textNode)
     {

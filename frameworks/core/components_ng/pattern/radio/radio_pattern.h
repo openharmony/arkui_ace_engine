@@ -160,7 +160,6 @@ public:
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
         json->PutExtAttr("value", value.c_str(), filter);
         json->PutExtAttr("group", group.c_str(), filter);
-        json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
     }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -194,8 +193,6 @@ public:
     }
 
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    bool HasSystemMaterial() const;
 
     bool IsEnableMatchParent() override
     {

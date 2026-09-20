@@ -252,7 +252,6 @@ void CalendarDialogView::OperationsToPattern(
     pattern->SetDialogOffset(OffsetF(dialogProperties.offset.GetX().Value(), dialogProperties.offset.GetY().Value()));
     pattern->SetCurrentButtonInfo(buttonInfos);
     pattern->SetCurrentSettingData(settingData);
-    pattern->SetSystemMaterial(dialogProperties.systemMaterial);
     SetPreviousOrientation();
     pattern->InitSurfaceChangedCallback();
     DisableResetOptionButtonColor(pattern, buttonInfos);

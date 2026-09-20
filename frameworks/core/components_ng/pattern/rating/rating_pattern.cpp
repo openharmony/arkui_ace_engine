@@ -30,7 +30,6 @@
 #include "core/common/recorder/node_data_cache.h"
 #endif
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/ui_material.h"
 #include "core/components/rating/rating_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -49,19 +48,6 @@ constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
 constexpr int32_t HALF_DIVIDE = 2;
 const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
 const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
-
-namespace {
-std::string MaterialTypeToString(int32_t type)
-{
-    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
-        "MaterialType.IMMERSIVE" };
-    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
-        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
-        return MaterialTypeStyles[type];
-    }
-    return MaterialTypeStyles[0];
-}
-} // namespace
 
 void RatingPattern::OnAttachToFrameNode()
 {
@@ -1087,7 +1073,6 @@ void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
             ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
         json->PutExtAttr("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str(), filter);
     }
-    json->PutExtAttr("hasSystemMaterial", HasSystemMaterial() ? "true" : "false", filter);
 }
 
 void RatingPattern::MarkDirtyNode(const PropertyChangeFlag& flag)
@@ -1158,48 +1143,6 @@ void RatingPattern::DumpInfo()
     if (layoutProperty->HasBackgroundImageSourceInfo()) {
         DumpLog::GetInstance().AddDesc(
             "BackgroundImageSourceInfo: " + layoutProperty->GetBackgroundImageSourceInfo().value().ToString());
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto material = renderContext->GetSystemMaterial();
-    bool hasSystemMaterial = material != nullptr;
-    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        DumpLog::GetInstance().AddDesc("MaterialType: " +
-            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
-                                       : std::string("MaterialType.NONE")));
-    }
-}
-
-bool RatingPattern::HasSystemMaterial() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto material = renderContext->GetSystemMaterial();
-    return material != nullptr;
-}
-
-void RatingPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto material = renderContext->GetSystemMaterial();
-    bool hasSystemMaterial = material != nullptr;
-    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        json->Put("MaterialType",
-            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
-                                     : "MaterialType.NONE");
     }
 }
 

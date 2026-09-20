@@ -16,7 +16,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
-#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
@@ -36,17 +35,6 @@ inline std::string ToString(const CheckBoxGroupPaintProperty::SelectStatus& stat
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), status);
     return iter != -1 ? table[iter].value : "";
-}
-
-std::string MaterialTypeToString(int32_t type)
-{
-    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
-        "MaterialType.IMMERSIVE" };
-    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
-        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
-        return MaterialTypeStyles[type];
-    }
-    return MaterialTypeStyles[0];
 }
 }
 
@@ -835,48 +823,6 @@ void CheckBoxGroupPattern::DumpInfo()
     }
     if (paintProperty->HasCheckBoxGroupCheckMarkColor()) {
         DumpLog::GetInstance().AddDesc("MarkColor: " + paintProperty->GetCheckBoxGroupCheckMarkColorValue().ToString());
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto material = renderContext->GetSystemMaterial();
-    bool hasSystemMaterial = material != nullptr;
-    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        DumpLog::GetInstance().AddDesc("MaterialType: " +
-            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
-                                       : std::string("MaterialType.NONE")));
-    }
-}
-
-bool CheckBoxGroupPattern::HasSystemMaterial() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto material = renderContext->GetSystemMaterial();
-    return material != nullptr;
-}
-
-void CheckBoxGroupPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto material = renderContext->GetSystemMaterial();
-    bool hasSystemMaterial = material != nullptr;
-    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
-    if (hasSystemMaterial) {
-        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(material));
-        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
-        json->Put("MaterialType",
-            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
-                                     : "MaterialType.NONE");
     }
 }
 
