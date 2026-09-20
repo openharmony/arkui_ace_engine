@@ -48,7 +48,7 @@ public:
 
     float GetVirtualPixelRatio() const;
 
-    sptr<DisplayInfo> GetDisplayInfo();
+    sptr<DisplayInfo> GetDisplayInfo() const;
     sptr<DisplayInfo> GetDisplayInfoWithCache() const;
 
     DMError GetLiveCreaseRegion(FoldCreaseRegion& region) const;
