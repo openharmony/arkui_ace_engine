@@ -420,8 +420,10 @@ bool ArkTSUtils::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
     if (resId == -1 && !params.empty() && params.back().value.has_value()) {
         std::vector<std::string> splitter;
         StringUtils::StringSplitter(params.back().value.value(), '.', splitter);
-        hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(),
-            std::to_string(resObj->GetType()));
+        if (!splitter.empty()) {
+            hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(),
+                std::to_string(resObj->GetType()));
+        }
     } else {
         hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
     }
@@ -1703,7 +1705,7 @@ bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &j
     }
     if (jsValue->IsString(vm)) {
         auto value = jsValue->ToString(vm)->ToString(vm);
-        if (value.back() == '%' && !isSupportPercent) {
+        if (!value.empty() && value.back() == '%' && !isSupportPercent) {
             return false;
         }
         return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(vm), result, false, defaultUnit);
@@ -1748,7 +1750,7 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
     }
     if (jsValue->IsString(vm)) {
         auto stringValue = jsValue->ToString(vm)->ToString(vm);
-        if (stringValue.back() == '%' && !isSupportPercent) {
+        if (!stringValue.empty() && stringValue.back() == '%' && !isSupportPercent) {
             return false;
         }
         if (enableCheckInvalidvalue && stringValue.find("calc") == std::string::npos) {
