@@ -29,13 +29,13 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 
 namespace OHOS::Ace::NG {
 
 // Forward declarations to minimize include dependencies in this interface header.
 class FrameNode;
 class RenderContext;
-class TextInputResponseArea;
 class TextComponentDecorator;
 
 class ICounterHost : public virtual AceType {
