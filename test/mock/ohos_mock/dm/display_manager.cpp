@@ -36,7 +36,7 @@ int32_t Display::GetPhysicalHeight() const
     return displayInfo_->GetPhysicalHeight();
 }
 
-sptr<DisplayInfo> Display::GetDisplayInfo()
+sptr<DisplayInfo> Display::GetDisplayInfo() const
 {
     return displayInfo_;
 }
