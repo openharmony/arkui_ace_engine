@@ -22,6 +22,7 @@
 
 #include "refbase.h"
 #include "display_info.h"
+#include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
 enum class DMError : int32_t {
@@ -29,7 +30,14 @@ enum class DMError : int32_t {
     DM_ERROR = 1,
 };
 
-class Display {
+enum class FoldStatus : uint32_t {
+    UNKNOWN = 0,
+    EXPAND = 1,
+    FOLDED = 2,
+    HALF_FOLD = 3,
+};
+
+class Display : public OHOS::RefBase {
 public:
     Display() : displayInfo_(sptr<DisplayInfo>(new DisplayInfo())) {}
     int32_t GetWidth() const;
@@ -40,12 +48,17 @@ public:
 
     float GetVirtualPixelRatio() const;
 
-    sptr<DisplayInfo> GetDisplayInfo();
+    sptr<DisplayInfo> GetDisplayInfo() const;
     sptr<DisplayInfo> GetDisplayInfoWithCache() const;
+
+    DMError GetLiveCreaseRegion(FoldCreaseRegion& region) const;
+    DMError GetAvailableArea(DMRect& area) const;
 
     float virtualPixelRatio_ = 1.0f;
 
     sptr<DisplayInfo> displayInfo_;
+    mutable FoldCreaseRegion liveCreaseRegion_;
+    mutable bool liveCreaseRegionValid_ = true;
 };
 
 class DisplayManager {
@@ -97,6 +110,10 @@ public:
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
 
     bool IsFoldable();
+
+    FoldStatus GetFoldStatus();
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+    DMError GetExpandAvailableArea(DisplayId displayId, DMRect& rect);
 
     sptr<Display> defaultDisplay_ = sptr<Display>(new Display());
     sptr<IDisplayAttributeListener> attributeListener_;
