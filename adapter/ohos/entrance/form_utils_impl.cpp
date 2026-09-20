@@ -178,7 +178,7 @@ int32_t FormUtilsImpl::RouterEvent(
     auto eventAction = JsonUtil::ParseJsonString(action);
     ParseRouterEventParams(eventAction->GetValue("params"), want);
     AddWantFreeInstallFlagForRouterEvent(eventAction->GetValue("flag"), want);
-    auto enableRouteSecondPage = eventAction->GetValue("enableRouteSecondePage");
+    auto enableRouteSecondPage = eventAction->GetValue("enableRouteSecondPage");
     bool isRouteSecondPageEnabled = enableRouteSecondPage->IsValid()
         && enableRouteSecondPage->IsBool() && enableRouteSecondPage->GetBool();
     want.SetParam(AppExecFwk::Constants::PARAM_ENABLE_ROUTE_SECOND_PAGE, isRouteSecondPageEnabled);
