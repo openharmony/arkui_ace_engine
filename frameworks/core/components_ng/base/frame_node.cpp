@@ -2036,6 +2036,9 @@ void FrameNode::HandleColorModeConfigurationUpdate(const ConfigurationChange& co
         cb();
     }
     FireColorNDKCallback();
+    if (renderContext_) {
+        renderContext_->OnMaterialColorModeChange();
+    }
     MarkModifyDone();
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (cornerMarkNode_) {
