@@ -6590,7 +6590,7 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
     }
     if (jsValue->IsString()) {
         auto value = jsValue->ToString();
-        if (!isSupportPercent && value.back() == '%') {
+        if (!isSupportPercent && !value.empty() && value.back() == '%') {
             return false;
         }
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
@@ -7330,8 +7330,10 @@ bool JSViewAbstract::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
     if (resId == -1 && !params.empty() && params.back().value.has_value()) {
         std::vector<std::string> splitter;
         StringUtils::StringSplitter(params.back().value.value(), '.', splitter);
-        hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(),
-            std::to_string(resObj->GetType()));
+        if (!splitter.empty()) {
+            hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(),
+                std::to_string(resObj->GetType()));
+        }
     } else {
         hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
     }
