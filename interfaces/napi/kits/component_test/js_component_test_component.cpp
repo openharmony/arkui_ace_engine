@@ -19,6 +19,7 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 #include "base/log/log.h"
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::Napi {
@@ -635,8 +636,7 @@ void ComponentTestComponent::CreateJsComponent(
 void ComponentTestComponent::AsyncCompleteWork(void* data)
 {
     ComponentTestAsyncCtx* asyncContext = reinterpret_cast<ComponentTestAsyncCtx*>(data);
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(asyncContext->env, &scope);
+    ScopeRAII scope(asyncContext->env);
     if (asyncContext->ret.errCode != ErrCode::RET_OK) {
         ComponentTest::ComponentTestManagerProxy::Record(
             std::string(asyncContext->ret.message), "napi_reject_deferred", ComponentTest::Result::ERROR);
@@ -645,7 +645,6 @@ void ComponentTestComponent::AsyncCompleteWork(void* data)
     } else {
         napi_resolve_deferred(asyncContext->env, asyncContext->deferred, asyncContext->asyncResult);
     }
-    napi_close_handle_scope(asyncContext->env, scope);
     delete asyncContext;
     asyncContext = nullptr;
 }
