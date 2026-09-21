@@ -601,6 +601,10 @@ public:
 
     bool CheckThreadSafe();
 
+    // Side-effect-free predicate: returns whether the current thread is the UI thread of this
+    // pipeline. No task executor and form render are treated as safe. Never logs.
+    bool IsCurrentThreadSafe();
+
     RefPtr<Frontend> GetFrontend() const;
 
     int32_t GetInstanceId() const

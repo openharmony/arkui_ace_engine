@@ -10537,6 +10537,11 @@ struct ArkUIBasicAPI {
     void (*setErrorCodeAndMessage)(ArkUI_Int32 errorCode, ArkUI_CharPtr errorMessage);
     void (*setErrorFunctionName)(ArkUI_CharPtr functionName);
     const char* (*getErrorMessage)();
+    // Returns whether the current application package is a debug build.
+    ArkUI_Bool (*isDebugVersion)();
+    // Returns whether the current thread is the UI thread of the current pipeline context.
+    // No container/pipeline, no task executor and form render are all treated as safe.
+    ArkUI_Bool (*isCurrentThreadSafe)();
 };
 
 struct ArkUIMultiThreadManagerAPI {

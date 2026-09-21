@@ -1228,10 +1228,18 @@ void PipelineBase::SetUiDvsyncSwitch(bool on, FromWhom fromWhom)
     lastUiDvsyncStatus_ = on;
 }
 
-bool PipelineBase::CheckThreadSafe()
+bool PipelineBase::IsCurrentThreadSafe()
 {
     CHECK_NULL_RETURN(taskExecutor_, true);
-    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+    if (isFormRender_) {
+        return true;
+    }
+    return taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+
+bool PipelineBase::CheckThreadSafe()
+{
+    if (!IsCurrentThreadSafe()) {
         LogBacktrace();
         return false;
     }
