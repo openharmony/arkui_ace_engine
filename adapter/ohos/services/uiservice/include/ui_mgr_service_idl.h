@@ -63,6 +63,7 @@ public:
 private:
     const char* IpcCodeToString(uint32_t code);
     bool IsSystemApp();
+    bool CheckCallingBundleName(const std::string& reportedBundleName) const;
     bool Init();
     bool CheckCallBackFromMap(const std::string& key);
     int32_t HandleRegister(const AAFwk::Want& want,  const sptr<IUIServiceNew>& uiService);
