@@ -32,7 +32,8 @@ import {
     IObservedObject,
     OBSERVE,
     LocalStorage,
-    StateMgmtDFX
+    StateMgmtDFX,
+    ObservedObjectRegistry
 } from '../stateManagement';
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType, IMutableStateMeta, STATE_MGMT_FACTORY, WatchFuncType } from '../stateManagement/decorator';
@@ -1323,7 +1324,7 @@ export function enableCompatibleObservedV2ForDynamic<T>(
     value: T
 ): T {
     if (value instanceof IObservedObject) {
-        addCompatibleWatchFuncForDynamic(value as IObservedObject)
+        addCompatibleWatchFuncForDynamic(value as IObservedObject, new Set<IObservedObject>())
     }
     return value;
 }
@@ -1343,15 +1344,23 @@ function createDynamicCompatibleStateMeta(): [()=> void,()=> void] {
     return [addRef, fireChange];
 }
 
-function addCompatibleWatchFuncForDynamic(value: IObservedObject): void {
+function addCompatibleWatchFuncForDynamic(value: IObservedObject, visited: Set<IObservedObject>): void {
+    // Prevent cyclic recursion
+    if (visited.has(value)) {
+        return;
+    }
+    visited.add(value);
+
+    ObservedObjectRegistry.get(value)?.getMutableStateMetas()?.forEach((meta: MutableStateMeta) => {
+        let result = createDynamicCompatibleStateMeta();
+        meta.registerDynamicHookFunc(result[0], result[1]);
+    });
+
     let values = Object.values(value);
     for(let i =0; i < values.length; i++){
         let attr = values[i];
-        if (attr instanceof MutableStateMeta) {
-            let result = createDynamicCompatibleStateMeta();
-            (attr as MutableStateMeta).registerDynamicHookFunc(result[0], result[1]);
-        } else if (attr instanceof IObservedObject) {
-            addCompatibleWatchFuncForDynamic(attr as IObservedObject);
+        if (attr instanceof IObservedObject) {
+            addCompatibleWatchFuncForDynamic(attr as IObservedObject, visited);
         }
     }
 }
