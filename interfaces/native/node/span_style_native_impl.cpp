@@ -2502,13 +2502,13 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetResizableLattice(
 }
 
 ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetResizableLattice(const OH_ArkUI_ImageAttachment* imageAttachment,
-    OH_Drawing_Lattice** lattice)
+    OH_Drawing_Lattice* lattice)
 {
     CHECK_NULL_RETURN(imageAttachment && lattice, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     if (imageAttachment->resizableLattice == nullptr) {
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
-    *lattice = imageAttachment->resizableLattice;
+    lattice = imageAttachment->resizableLattice;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
