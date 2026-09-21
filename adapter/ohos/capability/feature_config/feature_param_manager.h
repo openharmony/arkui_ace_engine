@@ -69,7 +69,7 @@ private:
     static const std::unordered_map<std::string, std::shared_ptr<ConfigParserBase>> featureParamMap_;
     static const std::unordered_map<std::string, std::string> metaDataMappingMap_;
     static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
-    static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
+    static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 10; // 10ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
     static std::mutex arkui_cloud_config_mutex_;
     static std::mutex arkweb_cloud_config_mutex_;

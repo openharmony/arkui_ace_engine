@@ -37,6 +37,8 @@ public:
     static Alignment GetAlignment(FrameNode* frameNode);
     static void SetSyncLoad(FrameNode* frameNode, bool enable);
     static bool GetSyncLoad(FrameNode* frameNode);
+    static void ResetSyncLoad(FrameNode* frameNode);
+
 private:
     void Create() override;
 };
