@@ -4534,6 +4534,57 @@ class TextTailIndentsModifier extends ModifierWithKey {
 }
 TextTailIndentsModifier.identity = Symbol('textTailIndents');
 
+class TextStrokeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetStrokeWidth(node);
+    } else {
+      getUINativeModule().text.setStrokeWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextStrokeWidthModifier.identity = Symbol('textStrokeWidth');
+
+class TextStrokeColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetStrokeColor(node);
+    } else {
+      getUINativeModule().text.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextStrokeColorModifier.identity = Symbol('textStrokeColor');
+
+class TextStrokeJoinStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetStrokeJoinStyle(node);
+    } else {
+      getUINativeModule().text.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextStrokeJoinStyleModifier.identity = Symbol('textStrokeJoinStyle');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -4861,6 +4912,18 @@ class ArkTextComponent extends ArkComponent {
   }
   tailIndents(value) {
     modifierWithKey(this._modifiersWithKeys, TextTailIndentsModifier.identity, TextTailIndentsModifier, value);
+    return this;
+  }
+  strokeWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeWidthModifier.identity, TextStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeColorModifier.identity, TextStrokeColorModifier, value);
+    return this;
+  }
+  strokeJoinStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeJoinStyleModifier.identity, TextStrokeJoinStyleModifier, value);
     return this;
   }
 }

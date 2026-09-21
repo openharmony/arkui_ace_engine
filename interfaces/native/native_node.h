@@ -3158,6 +3158,64 @@ typedef enum {
     NODE_TEXT_TAIL_INDENTS = 1056,
 
     /**
+     * @brief Sets the text stroke width.
+     * <br>This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].f32: text stroke width, in vp. The default value is <b>0</b>, indicating no stroke. A value less than <b>0</b> indicates solid text; a value greater than <b>0</b> indicates outlined text. Percentage values are not supported.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].f32: text stroke width, in vp.</li>
+     * </ul>
+     *
+     * @ingroup Text Display
+     * @since 26.2.0
+     */
+    NODE_TEXT_STROKE_WIDTH = 1057,
+
+    /**
+     * @brief Sets the text stroke color.
+     * <br>This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].u32: text stroke color, in 0xARGB format. The default value is the text font color. Invalid values are treated as the default value.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].u32: text stroke color, in 0xARGB format.</li>
+     * </ul>
+     *
+     * @ingroup Text Display
+     * @since 26.2.0
+     */
+    NODE_TEXT_STROKE_COLOR = 1058,
+
+    /**
+     * @brief Sets the join style of the text stroke.
+     * <br>This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * **Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:**
+     * <ul>
+     * <li>.value[0].i32: text stroke join style. The parameter type is {@link OH_ArkUI_StrokeJoinStyle}.
+     * The default value is <b>OH_ARKUI_STROKE_JOIN_STYLE_MITER_JOIN</b>.</li>
+     * </ul>
+     *
+     * **Format of the return value {@link ArkUI_AttributeItem}:**
+     * <ul>
+     * <li>.value[0].i32: text stroke join style. The parameter type is {@link OH_ArkUI_StrokeJoinStyle}.</li>
+     * </ul>
+     *
+     * @ingroup Text Display
+     * @since 26.2.0
+     */
+    NODE_TEXT_STROKE_JOIN_STYLE = 1059,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

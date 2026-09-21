@@ -15217,6 +15217,87 @@ const ArkUI_AttributeItem* GetTailIndents(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetTextStrokeWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setStrokeWidth(
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP), nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextStrokeWidth(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetStrokeWidth(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextStrokeWidth(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    g_numberValues[0].f32 = GetFullImpl()->getNodeModifiers()->getTextModifier()->getStrokeWidth(node->uiNodeHandle);
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return &g_attributeItem;
+}
+
+int32_t SetTextStrokeColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setStrokeColor(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextStrokeColor(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetStrokeColor(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextStrokeColor(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    g_numberValues[0].u32 = GetFullImpl()->getNodeModifiers()->getTextModifier()->getStrokeColor(node->uiNodeHandle);
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return &g_attributeItem;
+}
+
+int32_t SetTextStrokeJoinStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(OH_ARKUI_STROKE_JOIN_STYLE_BEVEL_JOIN)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setStrokeJoinStyle(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextStrokeJoinStyle(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetStrokeJoinStyle(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextStrokeJoinStyle(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    g_numberValues[0].i32 =
+        GetFullImpl()->getNodeModifiers()->getTextModifier()->getStrokeJoinStyle(node->uiNodeHandle);
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return &g_attributeItem;
+}
+
 int32_t SetIncludeFontPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == NUM_0) {
@@ -21516,7 +21597,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetSelectDetectorEnable, nullptr, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
         nullptr, SetEditMenuOption, SetTextBindSelectionMenu, SetTextTextSelection, SetOrphanCharOptimization,
         SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, SetTextMarqueeOptions, SetTextDirection,
-        SetSelectedDragPreviewStyle, SetTextController, SetPunctuationOverflow, SetTailIndents };
+        SetSelectedDragPreviewStyle, SetTextController, SetPunctuationOverflow, SetTailIndents,
+        SetTextStrokeWidth, SetTextStrokeColor, SetTextStrokeJoinStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21536,7 +21618,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         nullptr, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager,
         nullptr, nullptr, GetTextTextSelection, GetOrphanCharOptimization, GetCompressLeadingPunctuation, GetIncludeFontPadding,
         GetFallbackLineSpacing, GetTextMarqueeOptions, GetTextDirection, GetSelectedDragPreviewStyle, nullptr,
-        GetPunctuationOverflow, GetTailIndents };
+        GetPunctuationOverflow, GetTailIndents, GetTextStrokeWidth, GetTextStrokeColor, GetTextStrokeJoinStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -21559,7 +21641,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu, ResetTextTextSelection,
         ResetOrphanCharOptimization, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
         ResetTextMarqueeOptions, ResetTextDirection, ResetSelectedDragPreviewStyle, nullptr, ResetPunctuationOverflow,
-        ResetTailIndents };
+        ResetTailIndents, ResetTextStrokeWidth, ResetTextStrokeColor, ResetTextStrokeJoinStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

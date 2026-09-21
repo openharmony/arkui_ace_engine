@@ -3965,6 +3965,18 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTailIndents));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTailIndents"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTailIndents));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetStrokeWidth));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetStrokeWidth));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetStrokeColor));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetStrokeColor));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeJoinStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetStrokeJoinStyle));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeJoinStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetStrokeJoinStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 }
 

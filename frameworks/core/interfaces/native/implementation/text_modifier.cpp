@@ -542,6 +542,38 @@ void SetTailIndentsImpl(Ark_NativePointer node,
     indent = tailIndents;
     TextModelStatic::SetTailIndents(frameNode, indent);
 }
+void SetStrokeWidthImpl(Ark_NativePointer node,
+                        const Opt_LengthMetricsProxy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<Dimension> strokeWidth = std::nullopt;
+    if (value && value->tag != INTEROP_TAG_UNDEFINED) {
+        double doubleValue = static_cast<double>(value->value.value);
+        auto unit = Converter::OptConvert<DimensionUnit>(value->value.unit)
+            .value_or(DimensionUnit::VP);
+        if (unit != DimensionUnit::PERCENT) {
+            strokeWidth = Dimension(doubleValue, unit);
+        }
+    }
+    TextModelStatic::SetStrokeWidth(frameNode, strokeWidth);
+}
+void SetStrokeColorImpl(Ark_NativePointer node,
+                        const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
+    TextModelStatic::SetStrokeColor(frameNode, convValue);
+}
+void SetStrokeJoinStyleImpl(Ark_NativePointer node,
+                            const Opt_StrokeJoinStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<StrokeJoinStyle>(value);
+    TextModelStatic::SetStrokeJoinStyle(frameNode, convValue);
+}
 void SetWordBreakImpl(Ark_NativePointer node,
                       const Opt_WordBreak* value)
 {
@@ -1146,6 +1178,9 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetFallbackLineSpacingImpl,
         TextAttributeModifier::SetOptimizeTrailingSpaceImpl,
         TextAttributeModifier::SetShaderStyleImpl,
+        TextAttributeModifier::SetStrokeWidthImpl,
+        TextAttributeModifier::SetStrokeColorImpl,
+        TextAttributeModifier::SetStrokeJoinStyleImpl,
         TextAttributeModifier::SetEnableAutoSpacingImpl,
         TextAttributeModifier::SetTextVerticalAlignImpl,
         TextAttributeModifier::SetContentTransitionImpl,
