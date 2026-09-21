@@ -72,12 +72,9 @@ public:
 
     virtual void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
         StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
-        CommonEvent&& startRenderFrameEvent)
+        CommonEvent&& startRenderFrameEvent, VideoErrorEvent&& videoErrorEvent = {},
+        SeekDoneEvent&& seekDoneEvent = {})
     {}
-
-    virtual void RegisterMediaPlayerVideoErrorEvent(VideoErrorEvent&& errorEvent) {}
-
-    virtual void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) {}
 
     virtual void RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent) {}
 

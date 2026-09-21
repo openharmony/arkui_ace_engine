@@ -81,7 +81,6 @@ OffscreenCanvasRenderingContext2DPeer* OffscreenCanvasPeer::GetContext2D(
     CHECK_NULL_RETURN(offscreenCanvasContext, nullptr);
     offscreenCanvasContext->SetInstanceId(OHOS::Ace::Container::CurrentId());
     offscreenCanvasContext->SetOffscreenPattern(offscreenCanvasPattern);
-    offscreenCanvasContext->AddOffscreenCanvasPattern(offscreenCanvasPattern);
     offscreenCanvasContext->SetWidth(width);
     offscreenCanvasContext->SetHeight(height);
     offscreenCanvasSettings = offscreenCanvasSettingsPeer;
