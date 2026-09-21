@@ -43,7 +43,9 @@ NavDestinationModel* NavDestinationModel::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
-        instance_.reset(new NG::NavDestinationModelNG());
+        if (!instance_) {
+            instance_.reset(new NG::NavDestinationModelNG());
+        }
     }
     return instance_.get();
 }
@@ -66,7 +68,7 @@ public:
 
     void operator()() const
     {
-        JAVASCRIPT_EXECUTION_SCOPE(context_);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_);
         JSRef<JSFunc>::Cast(builder_)->Call(JSRef<JSObject>());
     }
 

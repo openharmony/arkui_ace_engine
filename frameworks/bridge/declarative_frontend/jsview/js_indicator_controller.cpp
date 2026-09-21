@@ -22,12 +22,14 @@ namespace {
 const NG::ArkUIIndicatorControllerModifier* GetIndicatorControllerModifier()
 {
     static const NG::ArkUIIndicatorControllerModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
+    static std::once_flag initFlag;
+    std::call_once(initFlag, {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("IndicatorComponent");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const NG::ArkUIIndicatorControllerModifier*>(
-            module->GetCustomModifier("indicator_controller"));
-    }
+        if (module != nullptr) {
+            cachedModifier = reinterpret_cast<const NG::ArkUIIndicatorControllerModifier*>(
+                module->GetCustomModifier("indicator_controller"));
+        }
+    });
     return cachedModifier;
 }
 } // namespace
@@ -41,9 +43,11 @@ JSIndicatorController::JSIndicatorController()
 
 void JSIndicatorController::SetControllerHandle(const RefPtr<AceType>& controller, const RefPtr<AceType>& indicatorNode)
 {
-    if (auto* modifier = GetIndicatorControllerModifier()) {
-        modifier->setController(controllerHandle_, controller, indicatorNode);
+    auto* modifier = GetIndicatorControllerModifier();
+    if (!modifier || !controllerHandle_) {
+        return;
     }
+    modifier->setController(controllerHandle_, controller, indicatorNode);
 }
 
 void JSIndicatorController::ResetSwiperNode()
