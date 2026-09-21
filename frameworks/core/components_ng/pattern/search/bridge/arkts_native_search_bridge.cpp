@@ -91,6 +91,8 @@ static Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
         static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetPreventDefault(true);
+    } else {
+        LOGE("JsPreventDefault failed. eventInfo is null.");
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -102,6 +104,8 @@ static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info)
         panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetKeepEditable(true);
+    } else {
+        LOGE("JsKeepEditableState failed. eventInfo is null.");
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -2349,6 +2353,7 @@ ArkUINativeModuleValue SearchBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtimeCa
             if (isJsView) {
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
             }
+            eventObject->SetNativePointerField(vm, NUM_0, nullptr);
         };
     GetArkUINodeModifiers()->getSearchModifier()->setSearchOnSubmitWithEvent(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -2607,6 +2612,7 @@ ArkUINativeModuleValue SearchBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtimeCal
             if (isJsView) {
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
             }
+            eventObject->SetNativePointerField(vm, 0, nullptr);
         };
     GetArkUINodeModifiers()->getSearchModifier()->setSearchOnPaste(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);

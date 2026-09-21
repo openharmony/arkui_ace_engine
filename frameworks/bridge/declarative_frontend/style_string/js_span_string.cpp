@@ -18,6 +18,7 @@
 #include <unordered_set>
 #include "securec.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -78,11 +79,7 @@ void ProcessPromiseCallback(std::shared_ptr<HtmlConverterAsyncCtx> asyncContext,
     CHECK_NULL_VOID(asyncContext);
     CHECK_NULL_VOID(asyncContext->env);
     CHECK_NULL_VOID(asyncContext->deferred);
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(asyncContext->env, &scope);
-    if (status != napi_ok) {
-        return;
-    }
+    ScopeRAII scope(asyncContext->env);
     CHECK_NULL_VOID(scope);
     if (callbackCode == ERROR_CODE_NO_ERROR) {
         napi_resolve_deferred(asyncContext->env, asyncContext->deferred, spanStr);
@@ -90,7 +87,6 @@ void ProcessPromiseCallback(std::shared_ptr<HtmlConverterAsyncCtx> asyncContext,
         napi_value error = CreateErrorValue(asyncContext->env, callbackCode, ASYNC_ERROR_MAP[callbackCode]);
         napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
     }
-    napi_close_handle_scope(asyncContext->env, scope);
 }
 
 void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
