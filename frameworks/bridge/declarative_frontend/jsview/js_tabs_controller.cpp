@@ -162,7 +162,8 @@ RefPtr<AceType> JSTabsController::CreateController()
 void JSTabsController::ChangeIndex(int32_t index)
 {
     ContainerScope scope(instanceId_);
-    if (auto* modifier = GetTabsControllerModifier()) {
+    auto* modifier = GetTabsControllerModifier();
+    if (modifier && controllerHandle_) {
         modifier->changeIndex(controllerHandle_, index);
     }
 
@@ -181,6 +182,7 @@ void JSTabsControllerBinding::PreloadItems(const JSCallbackInfo& args)
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
     auto env = reinterpret_cast<napi_env>(nativeEngine);
     auto asyncContext = std::make_shared<TabsControllerAsyncContext>();
     asyncContext->env = env;
