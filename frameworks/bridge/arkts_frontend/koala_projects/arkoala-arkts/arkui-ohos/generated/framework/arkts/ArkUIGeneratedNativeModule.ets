@@ -7508,6 +7508,8 @@ export class ArkUIGeneratedNativeModule {
     native static _WebResourceResponse_getResponseCode(ptr: KPointer): KInt
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseData(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _WebResourceResponse_setResponseBody(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _WebResourceResponse_setResponseEncoding(ptr: KPointer, encoding: KStringPtr): void
     @ani.unsafe.Quick

@@ -33178,6 +33178,8 @@ typedef struct GENERATED_ArkUIWebResourceResponseAccessor {
     void (*setResponseIsReady)(Ark_WebResourceResponse peer,
                                Ark_Boolean IsReady);
     Ark_Boolean (*getResponseIsReady)(Ark_WebResourceResponse peer);
+    void (*setResponseBody)(Ark_WebResourceResponse peer,
+                            const Ark_Union_String_I32_Resource_Buffer* data);
 } GENERATED_ArkUIWebResourceResponseAccessor;
 
 typedef struct GENERATED_ArkUIXComponentControllerExtenderAccessor {
