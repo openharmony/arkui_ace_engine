@@ -401,10 +401,12 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
 // (GetCrossStartAndSpan without getSizeByIndex): regular items pack crossCount per
 // line between irregulars, each irregular occupies one whole line, and the anchor is
 // always at a line boundary (startIndex_ is the first item of the start line;
-// GetEffectiveStartIndex returns childrenCount on bottom overscroll). The only assumed
-// term is the tail beyond the first irregular, returned as full regular lines; it can
-// exceed the available items when the window reaches the top of the data (bounded
-// downstream by the preload index range).
+// GetEffectiveStartIndex returns childrenCount on bottom overscroll). Walking backward
+// from that boundary, the last regular line of a gap may be partial
+// (diff % crossCount != 0) and counts as rem items, not a full crossCount. The only
+// assumed term is the tail beyond the first irregular, returned as full regular lines;
+// it can exceed the available items when the window reaches the top of the data
+// (bounded downstream by the preload index range).
 int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCountByIrregular(
     const GridLayoutOptions& options, int32_t cachedCount, int32_t effectiveStartIndex)
 {
@@ -421,7 +423,13 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCountByIrregul
     while (lineCount < cachedCount) {
         int32_t budget = cachedCount - lineCount;
         if (diff >= budget * crossCount) {
-            return budget * crossCount + sum;
+            // Backward walk hits this gap from its end: a leftover last line
+            // (diff % crossCount != 0) contributes rem items, not a full line.
+            int32_t rem = diff % crossCount;
+            if (rem == 0) {
+                return budget * crossCount + sum;
+            }
+            return rem + (budget - 1) * crossCount + sum;
         }
         if (diff > (budget - 1) * crossCount) {
             return sum + diff;
