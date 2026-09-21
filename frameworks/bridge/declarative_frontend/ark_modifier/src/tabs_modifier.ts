@@ -57,7 +57,7 @@ class LazyArkTabsComponent extends ArkComponent {
     return this;
   }
 
-  sidebarDisplayStyle(value: SidebarDisplayStyle): this {
+  sidebarDisplayStyle(value: TabsSidebarDisplayStyle): this {
     this.lazyComponent.sidebarDisplayStyle(value);
     return this;
   }

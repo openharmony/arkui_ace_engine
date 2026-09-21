@@ -835,6 +835,18 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setSidebarSelectedBoardColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSidebarDisplayStyleAttribute(value: TabsSidebarDisplayStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as TabsSidebarDisplayStyle)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setSidebarDisplayStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBarModeAttribute(value: BarMode | undefined, options?: ScrollableBarModeOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -999,6 +1011,10 @@ export enum TabBarStyle {
     SIDEBAR = 1,
     SIDEBAR_ADAPTABLE = 2
 }
+export enum TabsSidebarDisplayStyle {
+    EMBED = 0,
+    DISPLACE = 1
+}
 export type TabsSidebarSearchFilterCallback = (tabIndex: int32, text: string) => boolean;
 export interface TabsSidebarSearchableOptions {
     searchText?: ResourceStr;
@@ -1138,6 +1154,9 @@ export interface TabsAttribute extends CommonMethod {
     }
     sidebarSelectedBoardColor(value: ResourceColor | undefined): this {
         throw new Error('Unimplemented method sidebarSelectedBoardColor')
+    }
+    sidebarDisplayStyle(value: TabsSidebarDisplayStyle | undefined): this {
+        throw new Error('Unimplemented method sidebarDisplayStyle')
     }
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         throw new Error('Unimplemented method barMode')
@@ -1368,6 +1387,11 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     public sidebarSelectedBoardColor(value: ResourceColor | undefined): this {
         const value_casted = value as (ResourceColor | undefined)
         this.getPeer()?.setSidebarSelectedBoardColorAttribute(value_casted)
+        return this
+    }
+    public sidebarDisplayStyle(value: TabsSidebarDisplayStyle | undefined): this {
+        const value_casted = value as (TabsSidebarDisplayStyle | undefined)
+        this.getPeer()?.setSidebarDisplayStyleAttribute(value_casted)
         return this
     }
     public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {

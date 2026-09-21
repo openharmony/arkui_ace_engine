@@ -258,7 +258,7 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabsOnContentWillChange.identity, TabsOnContentWillChange, handler);
         return this;
       }
-      sidebarDisplayStyle(value: SidebarDisplayStyle): TabsAttribute {
+      sidebarDisplayStyle(value: TabsSidebarDisplayStyle): TabsAttribute {
         modifierWithKey(this._modifiersWithKeys, SidebarDisplayStyleModifier.identity, SidebarDisplayStyleModifier, value);
         return this;
       }
@@ -1105,8 +1105,8 @@ function loadComponent(): ComponentObj | undefined {
       }
     } 
 
-    class SidebarDisplayStyleModifier extends ModifierWithKey<SidebarDisplayStyle> {
-      constructor(value: SidebarDisplayStyle) {
+    class SidebarDisplayStyleModifier extends ModifierWithKey<TabsSidebarDisplayStyle> {
+      constructor(value: TabsSidebarDisplayStyle) {
         super(value);
       }
       static identity: Symbol = Symbol('sidebarDisplayStyle');
