@@ -211,7 +211,7 @@
       "kb": "docs/kb/capabilities/pixel-rounding.md",
       "spec_domain": "specs/04-common-capability/24-layout-common-capability/01-pixel-rounding",
       "func_id": "04-24-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
         "layout_property": "frameworks/core/components_ng/layout/layout_property.cpp",
@@ -2911,7 +2911,7 @@
       "kb": "docs/kb/api/mediaquery.md",
       "spec_domain": "specs/04-common-capability/20-media-query/01-media-query",
       "func_id": "04-20-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "query_engine": "frameworks/bridge/common/media_query/media_queryer.cpp",
         "media_info": "frameworks/bridge/common/media_query/media_query_info.cpp",
@@ -6316,7 +6316,7 @@
         "search_py": "build/search.py"
       },
       "api_paths": {
-        "inner_kits": "bundle.json inner_kits 声明"
+        "inner_kits": "bundle.json"
       },
       "test_paths": [
         "test/unittest/BUILD.gn",
@@ -7353,7 +7353,7 @@
       "kb": "docs/kb/capabilities/interaction-attributes.md",
       "spec_domain": "specs/04-common-capability/03-common-attributes/04-interaction-attributes",
       "func_id": "04-03-04",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
         "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
@@ -7401,7 +7401,7 @@
       "kb": "docs/kb/capabilities/component-screenshot.md",
       "spec_domain": "specs/04-common-capability/10-component-screenshot/01-offscreen-screenshot",
       "func_id": "04-10-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "component_snapshot": "frameworks/core/components_ng/render/adapter/component_snapshot.cpp",
         "snapshot_param": "frameworks/core/components_ng/render/snapshot_param.h",
@@ -10513,7 +10513,7 @@
       "kb": "docs/kb/issues/text/custom-span-controller-lifecycle.md",
       "spec_domain": "specs/05-ui-components/09-text-components/04-text",
       "func_id": "05-09-04",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "text_js_bridge": "frameworks/bridge/declarative_frontend/jsview/js_text.cpp",
         "text_controller": "frameworks/bridge/declarative_frontend/jsview/js_text.h",
@@ -11389,7 +11389,7 @@
       "kb": "docs/kb/capabilities/inspector.md",
       "spec_domain": "specs/03-engine-framework/07-accessibility-mechanism/02-inspector",
       "func_id": "03-07-02",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "inspector_ng": "frameworks/core/components_ng/base/inspector.h",
         "inspector_ng_cpp": "frameworks/core/components_ng/base/inspector.cpp",
@@ -11440,7 +11440,7 @@
       "kb": "docs/kb/capabilities/inspector-layout-callback.md",
       "spec_domain": "specs/04-common-capability/11-component-info/03-inspector-layout-callback",
       "func_id": "04-11-03",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "napi_inspector": "interfaces/napi/kits/inspector/js_inspector.cpp",
         "napi_inspector_h": "interfaces/napi/kits/inspector/js_inspector.h",
@@ -11489,7 +11489,7 @@
       "kb": "docs/kb/capabilities/window-toolbar.md",
       "spec_domain": "specs/04-common-capability/08-root-view/01-window-toolbar",
       "func_id": "04-08-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "toolbar_cpp": "frameworks/core/components_ng/pattern/container_modal/container_modal_toolbar.cpp",
         "toolbar_h": "frameworks/core/components_ng/pattern/container_modal/container_modal_toolbar.h",
@@ -11545,7 +11545,7 @@
       "kb": "docs/kb/capabilities/atomic-service-appbar.md",
       "spec_domain": "specs/04-common-capability/08-root-view/02-atomic-service-appbar",
       "func_id": "04-08-02",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "app_bar_view_cpp": "frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
         "app_bar_view_h": "frameworks/core/components_ng/pattern/app_bar/app_bar_view.h",
