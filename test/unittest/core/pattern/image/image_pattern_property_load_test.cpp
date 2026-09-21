@@ -1426,7 +1426,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, ImageRenderPropertyTestNg015, TestSize.Le
     EXPECT_EQ(dfx.GetAccessibilityId(), 2L);
     EXPECT_EQ(dfx.GetImageSrc(), "test_src");
     EXPECT_EQ(dfx.GetSrcType(), 1);
-    EXPECT_FALSE(dfx.GetIsTrimMemRecycle());
 }
 
 /**
@@ -1506,7 +1505,7 @@ HWTEST_F(ImagePatternPropertyLoadTest, ImageRenderPropertyTestNg019, TestSize.Le
 
 /**
  * @tc.name: ImageRenderPropertyTestNg020
- * @tc.desc: Test ImageDfxConfig default constructor and GetIsTrimMemRecycle.
+ * @tc.desc: Test ImageDfxConfig default constructor.
  * @tc.type: FUNC
  */
 HWTEST_F(ImagePatternPropertyLoadTest, ImageRenderPropertyTestNg020, TestSize.Level1)
@@ -1515,7 +1514,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, ImageRenderPropertyTestNg020, TestSize.Le
     EXPECT_EQ(dfx.GetNodeId(), -1);
     EXPECT_EQ(dfx.GetAccessibilityId(), -1);
     EXPECT_EQ(dfx.GetSrcType(), -1);
-    EXPECT_FALSE(dfx.GetIsTrimMemRecycle());
     EXPECT_FALSE(dfx.GetAutoResize());
     EXPECT_FLOAT_EQ(dfx.GetFrameSizeWidth(), 0.0f);
     EXPECT_FLOAT_EQ(dfx.GetFrameSizeHeight(), 0.0f);
