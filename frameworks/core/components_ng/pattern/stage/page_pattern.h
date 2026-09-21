@@ -184,6 +184,7 @@ public:
     void BuildSharedTransitionMap();
 
     void ReloadPage();
+    void RebuildPage();
 
     void SetFirstBuildCallback(std::function<void()>&& buildCallback);
 

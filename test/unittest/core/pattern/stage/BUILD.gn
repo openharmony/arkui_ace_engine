@@ -49,6 +49,12 @@ if (is_host_product) {
   }
 }
 
+ace_unittest("hot_reload_test_ng") {
+  module_name = "HotReload"
+  type = "new"
+  sources = [ "hot_reload_test_ng.cpp" ]
+}
+
 if (!is_host_product) {
   ace_unittest("force_split_stage_test_ng") {
     module_name = "Animation-Frame"
