@@ -551,6 +551,7 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest013, TestSize.Level1)
     napi_value result = scope.Escape(napiTestStr);
     EXPECT_NE(result, nullptr);
 
+    result = nullptr;
     status = scope.Escape(napiTestStr, &result);
     EXPECT_EQ(status, napi_escape_called_twice);
     EXPECT_EQ(result, nullptr);
