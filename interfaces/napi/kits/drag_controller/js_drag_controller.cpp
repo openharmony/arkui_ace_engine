@@ -345,6 +345,7 @@ public:
                 napi_delete_reference(dragAction->env_, item);
             }
             dragAction->cbList_.clear();
+            TAG_LOGI(AceLogTag::ACE_DRAG, "SubEvent op=off_all, kit=ArkUI, event=statusChange");
         } else {
             NAPI_ASSERT(env, (argc == ARG_COUNT_2 && dragAction != nullptr && cb != nullptr), "Invalid arguments");
             napi_valuetype valueType = napi_undefined;
