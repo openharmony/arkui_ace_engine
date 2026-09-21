@@ -1497,6 +1497,16 @@ void GetFrameNodeChildren(
     }
 }
 
+struct ActionTable {
+    AceAction aceAction;
+    Accessibility::ActionType action;
+};
+
+struct ActionStrTable {
+    Accessibility::ActionType action;
+    std::string actionStr;
+};
+
 ActionType JsAccessibilityManager::ConvertAceAction(AceAction aceAction)
 {
     static const ActionTable actionTable[] = {

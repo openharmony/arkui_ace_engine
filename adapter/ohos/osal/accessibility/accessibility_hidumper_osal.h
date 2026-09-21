@@ -20,10 +20,8 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "accessibility_element_info.h"
 
 #include "base/memory/referenced.h"
-#include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Accessibility {
     class AccessibilityElementInfo;
@@ -46,23 +44,6 @@ void GetFrameNodeChildren(
 void DumpAccessibilityElementInfosTreeNG(
     std::list<Accessibility::AccessibilityElementInfo>& infos, int32_t depth, int64_t accessibilityId, bool isRoot);
 
-struct ActionTable {
-    AceAction aceAction;
-    Accessibility::ActionType action;
-};
-
-using ToInfoFunc = std::function<void(std::string& input)>;
-
-struct ActionStrTable {
-    Accessibility::ActionType action;
-    std::string actionStr;
-};
-
-enum class ToInfoMode {
-    TO_STRING,
-    DUMPLOG_ADD,
-};
-
 class AccessibilityElementInfoUtils {
 public:
     AccessibilityElementInfoUtils() = default;
@@ -84,8 +65,6 @@ public:
     AccessibilityManagerHidumper() = default;
     ~AccessibilityManagerHidumper() = default;
 
-    static AceAction ConvertAccessibilityAction(Accessibility::ActionType accessibilityAction);
-    static std::string ConvertActionTypeToString(Accessibility::ActionType action);
     static void DumpCustomActionTest(
         const std::vector<std::string>& params,
         const RefPtr<OHOS::Ace::NG::FrameNode>& frameNode);

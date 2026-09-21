@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "accessibility_element_info.h"
 #include "accessibility_system_ability_client.h"
 
 #include "adapter/ohos/osal/accessibility/accessibility_hidumper_osal.h"
