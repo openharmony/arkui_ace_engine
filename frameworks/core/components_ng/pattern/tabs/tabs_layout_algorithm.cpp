@@ -172,28 +172,25 @@ float TabsLayoutAlgorithm::MeasureSideBar(
     auto geometryNode = sideBarWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    // Sidebar width: if barWidth is set to a valid non-negative value, use it (fixed, no drag).
-    // Otherwise use dragged width if available, else default width.
+    // Calculate effective sidebar width:
+    // 1. If a drag width has been set (realSideBarWidthPx has value), use it
+    // 2. Otherwise, use effective sidebarWidth (or barWidth if sidebarWidth never called) from pattern
+    // 3. Otherwise default 240vp
     float sideBarWidthPx = SIDE_BAR_DEFAULT_WIDTH.ConvertToPx();
-    bool hasValidBarWidth = false;
-    if (layoutProperty->HasBarWidth()) {
-        auto barWidth = layoutProperty->GetBarWidthValue();
-        if (barWidth.IsNonNegative()) {
-            auto barWidthPx = ConvertToPx(barWidth, childLayoutConstraint.scaleProperty, idealSize.Width());
-            if (barWidthPx.has_value() && GreatOrEqual(barWidthPx.value(), 0.0f)) {
-                sideBarWidthPx = barWidthPx.value();
-                hasValidBarWidth = true;
+    const auto& realSideBarWidthPx = tabsPattern->GetRealSideBarWidthPx();
+    bool hasDragWidth = realSideBarWidthPx.has_value();
+    if (hasDragWidth) {
+        sideBarWidthPx = realSideBarWidthPx.value();
+    } else {
+        auto effectiveWidth = tabsPattern->GetEffectiveSidebarWidth();
+        if (effectiveWidth.has_value()) {
+            auto px = ConvertToPx(effectiveWidth.value(), childLayoutConstraint.scaleProperty, idealSize.Width());
+            if (px.has_value() && GreatOrEqual(px.value(), 0.0f)) {
+                sideBarWidthPx = px.value();
             }
         }
     }
-    if (!hasValidBarWidth) {
-        float realSideBarWidthPx = tabsPattern->GetRealSideBarWidthPx();
-        if (GreatNotEqual(realSideBarWidthPx, 0.0f)) {
-            sideBarWidthPx = realSideBarWidthPx;
-        }
-    }
     // Clamp to container width to prevent overflow on rotation/resize.
-    // realSideBarWidthPx_ is NOT modified, so rotating back restores the original width.
     sideBarWidthPx = std::min(sideBarWidthPx, idealSize.Width());
     childLayoutConstraint.selfIdealSize.SetWidth(sideBarWidthPx);
     childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
@@ -229,10 +226,15 @@ float TabsLayoutAlgorithm::MeasureSideBarDivider(
     float startMarginPx = 0.0f;
     float endMarginPx = 0.0f;
     do {
-        if (!layoutProperty->HasDivider()) {
+        // Prefer sidebarDivider, fall back to divider (barDivider) for backward compatibility.
+        TabsItemDivider divider;
+        if (layoutProperty->HasSidebarDivider()) {
+            divider = layoutProperty->GetSidebarDividerValue();
+        } else if (layoutProperty->HasDivider()) {
+            divider = layoutProperty->GetDividerValue();
+        } else {
             break;
         }
-        auto divider = layoutProperty->GetDividerValue();
         if (divider.isNull) {
             break;
         }
@@ -687,12 +689,15 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(
     auto paddingOffset = layoutProperty->CreatePaddingAndBorder().Offset();
     // Apply the divider startMargin (top margin) to the vertical sidebar divider's Y offset.
     float dividerStartMarginPx = 0.0f;
-    if (layoutProperty->HasDivider()) {
-        auto divider = layoutProperty->GetDividerValue();
-        if (!divider.isNull && divider.startMargin.Value() > 0.0f &&
-            divider.startMargin.Unit() != DimensionUnit::PERCENT) {
-            dividerStartMarginPx = divider.startMargin.ConvertToPx();
-        }
+    TabsItemDivider effectiveDivider;
+    if (layoutProperty->HasSidebarDivider()) {
+        effectiveDivider = layoutProperty->GetSidebarDividerValue();
+    } else if (layoutProperty->HasDivider()) {
+        effectiveDivider = layoutProperty->GetDividerValue();
+    }
+    if (!effectiveDivider.isNull && effectiveDivider.startMargin.Value() > 0.0f &&
+        effectiveDivider.startMargin.Unit() != DimensionUnit::PERCENT) {
+        dividerStartMarginPx = effectiveDivider.startMargin.ConvertToPx();
     }
     bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if ((!isRTL && sideBarPosition == BarPosition::START) || (isRTL && sideBarPosition == BarPosition::END)) {

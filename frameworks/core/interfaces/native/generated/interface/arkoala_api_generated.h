@@ -27809,6 +27809,20 @@ typedef struct GENERATED_ArkUITabsModifier {
                                           const Opt_ResourceColor* value);
     void (*setSidebarSelectedBoardColor)(Ark_NativePointer node,
                                          const Opt_ResourceColor* value);
+    void (*setSidebarWidth)(Ark_NativePointer node,
+                            const Opt_Length* value);
+    void (*setMinSidebarWidth)(Ark_NativePointer node,
+                               const Opt_Length* value);
+    void (*setMaxSidebarWidth)(Ark_NativePointer node,
+                               const Opt_Length* value);
+    void (*setMinContentWidth)(Ark_NativePointer node,
+                               const Opt_Length* value);
+    void (*setSidebarBackgroundColor)(Ark_NativePointer node,
+                                      const Opt_ResourceColor* value);
+    void (*setSidebarBackgroundBlurStyle)(Ark_NativePointer node,
+                                          const Opt_BlurStyle* value);
+    void (*setSidebarDivider)(Ark_NativePointer node,
+                              const Opt_DividerStyle* value);
     void (*setSidebarDisplayStyle)(Ark_NativePointer node,
                                    const Opt_TabsSidebarDisplayStyle* value);
     void (*setBarMode)(Ark_NativePointer node,

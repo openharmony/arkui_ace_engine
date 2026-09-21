@@ -74,6 +74,7 @@ public:
         std::function<bool(int32_t, const std::string& text)> searchFilter, const std::u16string& searchText);
     void AddOrUpdateTabListItem(const RefPtr<FrameNode>& tabContentNode, int32_t position, bool update);
     void ApplyDefaultVisibility();
+    void RefreshAllTabItemColors();
 
     // Check whether a tab should be hidden by defaultVisibility.
     // Returns true if the tab should be GONE per defaultVisibility rules.
