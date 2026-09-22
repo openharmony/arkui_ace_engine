@@ -46,6 +46,7 @@ NavDestinationModel* NavDestinationModel::GetInstance()
         if (!instance_) {
             instance_.reset(new NG::NavDestinationModelNG());
         }
+        return instance_.get();
     }
     return instance_.get();
 }
