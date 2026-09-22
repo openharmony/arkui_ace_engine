@@ -18,8 +18,8 @@
 namespace OHOS::Ace::NG {
 
 ImageDfxConfig::ImageDfxConfig(
-    const ImageNodeId& nodeInfo, int32_t srcType, std::string imageSrc, bool isTrimMemRecycle)
-    : nodeInfo_(nodeInfo), srcType_(srcType), imageSrc_(std::move(imageSrc)), isTrimMemRecycle_(isTrimMemRecycle)
+    const ImageNodeId& nodeInfo, int32_t srcType, std::string imageSrc)
+    : nodeInfo_(nodeInfo), srcType_(srcType), imageSrc_(std::move(imageSrc))
 {
     InitToStringWithoutSrc();
     InitToStringWithSrc();
@@ -95,11 +95,6 @@ std::string ImageDfxConfig::ToStringWithoutSrc() const
 std::string ImageDfxConfig::ToStringWithSrc() const
 {
     return withSrcInfo_;
-}
-
-bool ImageDfxConfig::GetIsTrimMemRecycle() const
-{
-    return isTrimMemRecycle_;
 }
 
 void ImageDfxConfig::SetAutoResize(bool autoResize)

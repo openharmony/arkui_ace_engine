@@ -64,7 +64,7 @@ void MemoryManager::RecycleImage(const RefPtr<UINode>& node, int& recycleNum)
         auto childNode = AceType::DynamicCast<FrameNode>(child);
         if (childNode && (childNode->GetTag() == V2::IMAGE_ETS_TAG)) {
             auto imagePattern = childNode->GetPattern<ImagePattern>();
-            if ((!imagePattern) || (!imagePattern->RecycleImageData())) {
+            if ((!imagePattern) || (!imagePattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"))) {
                 continue;
             }
             recycleNum--;
