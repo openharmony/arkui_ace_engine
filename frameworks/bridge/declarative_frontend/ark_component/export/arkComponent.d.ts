@@ -2060,6 +2060,13 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     sidebarSearchable(value?: TabsSidebarSearchableOptions): TabsAttribute;
     barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): TabsAttribute;
     onBarDisplayModeChange(event: (mode: TabBarDisplayMode) => void): TabsAttribute;
+    sidebarWidth(value: Optional<Length>): TabsAttribute;
+    minSidebarWidth(value: Optional<Length>): TabsAttribute;
+    maxSidebarWidth(value: Optional<Length>): TabsAttribute;
+    minContentWidth(value: Optional<Length>): TabsAttribute;
+    sidebarBackgroundColor(value: Optional<ResourceColor>): TabsAttribute;
+    sidebarBackgroundBlurStyle(value: Optional<BlurStyle>): TabsAttribute;
+    sidebarDivider(value: Optional<DividerStyle>): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

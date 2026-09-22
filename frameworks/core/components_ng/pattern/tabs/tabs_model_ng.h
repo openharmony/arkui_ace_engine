@@ -179,16 +179,20 @@ public:
         bool isModifier = false);
     static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         bool isModifier = false);
-    static void HandleSidebarSelectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
-        bool isModifier = false);
-    static void HandleSidebarSelectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
-        bool isModifier = false);
-    static void HandleSidebarUnselectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
-        bool isModifier = false);
-    static void HandleSidebarUnselectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
-        bool isModifier = false);
-    static void HandleSidebarSelectedBoardColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
-        bool isModifier = false);
+    static void HandleSidebarSelectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarSelectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarUnselectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarUnselectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarSelectedBoardColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleMinSidebarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleMaxSidebarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleMinContentWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarBackgroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleSidebarDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters);
     static void ResetBarFloatingStyle(FrameNode* frameNode);
@@ -200,7 +204,18 @@ public:
     static void SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint);
     static void SetOnBarDisplayModeChange(FrameNode* frameNode,
         std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange);
+    static void SetSidebarWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetMinSidebarWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetMaxSidebarWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetMinContentWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetSidebarBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetSidebarBackgroundColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetSidebarBackgroundBlurStyle(FrameNode* frameNode, const std::optional<BlurStyle>& blurStyle);
+    static void SetSidebarDivider(FrameNode* frameNode, const TabsItemDivider& divider);
+    static void SetSidebarDividerColorByUser(FrameNode* frameNode, bool isByUser);
     static void CreateWithResourceObj(
+        FrameNode* frameNode, TabJsResType colorType, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithSidebarResourceObj(
         FrameNode* frameNode, TabJsResType colorType, const RefPtr<ResourceObject>& resObj);
     static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
 

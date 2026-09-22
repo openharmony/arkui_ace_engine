@@ -194,6 +194,10 @@ public:
     {
         OnUpdateShowDivider();
     }
+    void UpdateSidebarDividerStrokeWidth()
+    {
+        UpdateSideBarDivider();
+    }
     int32_t OnInjectionEvent(const std::string& command) override;
     void OnColorConfigurationUpdate() override;
     void OnColorModeChange(uint32_t colorMode) override;
@@ -265,9 +269,24 @@ public:
         hasBarBlurStyle_ = true;
         barBlurStyleOption_ = option;
     }
-
     const BlurStyleOption& GetBarBlurStyleOption() const
     {
+        return barBlurStyleOption_;
+    }
+    void SetSidebarBlurStyleOptions(const BlurStyleOption& option)
+    {
+        hasSidebarBlurStyle_ = true;
+        sidebarBlurStyleOptions_ = option;
+    }
+    const BlurStyleOption& GetSidebarBlurStyleOption() const
+    {
+        return sidebarBlurStyleOptions_;
+    }
+    const BlurStyleOption& GetEffectiveSidebarBlurStyleOptions() const
+    {
+        if (hasSidebarBlurStyle_) {
+            return sidebarBlurStyleOptions_;
+        }
         return barBlurStyleOption_;
     }
 
@@ -276,15 +295,32 @@ public:
     bool IsColorInvertEnabled();
     ColorMode GetColorInvertColorMode();
 
-    float GetRealSideBarWidthPx() const
+    const std::optional<float>& GetRealSideBarWidthPx() const
     {
         return realSideBarWidthPx_;
     }
 
+    std::optional<Dimension> GetEffectiveSidebarWidth() const;
+
+    void SetSidebarWidthCalled()
+    {
+        hasSidebarWidth_ = true;
+    }
+
     // Sync bar* attributes to the sidebar (no-op when sidebar does not exist).
     void UpdateSideBarDivider();
+    void UpdateSidebarDividerColor();
     void UpdateSideBarBackgroundColor();
     void UpdateSideBarBackgroundBlurStyle();
+
+    struct SideBarDragRange {
+        float minPx = 0.0f;
+        float maxPx = 0.0f;
+        bool draggable = false;
+        float initialWidthPx = 0.0f;
+    };
+    SideBarDragRange CalcSideBarDragRange(float tabsWidth);
+    void ClampSideBarWidthToRange();
 
 private:
     void OnAttachToFrameNode() override;
@@ -373,6 +409,10 @@ private:
     void AddDividerHotZoneRect();
     bool IsDividerDraggable() const;
 
+    TabsItemDivider GetEffectiveSidebarDividerConfig() const;
+    float GetEffectiveSidebarDividerWidthPx() const;
+    std::optional<Color> GetEffectiveSidebarBackgroundColor() const;
+
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
@@ -410,6 +450,9 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> barModifierApply_;
     bool hasBarBlurStyle_ = false;
     BlurStyleOption barBlurStyleOption_;
+    bool hasSidebarBlurStyle_ = false;
+    BlurStyleOption sidebarBlurStyleOptions_;
+    bool hasSidebarWidth_ = false;
     std::vector<WeakPtr<TabContentNode>> tabContentNodes_;
     // Color invert state for auto-inversion
     std::optional<bool> isColorPickerDark_;
@@ -420,7 +463,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
     bool isInDividerDrag_ = false;
-    float realSideBarWidthPx_ = 0.0f;
+    std::optional<float> realSideBarWidthPx_;
     float preSideBarWidthPx_ = 0.0f;
     float minSideBarWidth_ = -1.0f;
     float maxSideBarWidth_ = -1.0f;

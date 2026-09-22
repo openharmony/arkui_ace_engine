@@ -847,6 +847,154 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setSidebarDisplayStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSidebarWidthAttribute(value: Length | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setSidebarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinSidebarWidthAttribute(value: Length | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setMinSidebarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMaxSidebarWidthAttribute(value: Length | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setMaxSidebarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinContentWidthAttribute(value: Length | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setMinContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSidebarBackgroundColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setSidebarBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSidebarBackgroundBlurStyleAttribute(value: BlurStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as BlurStyle)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setSidebarBackgroundBlurStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSidebarDividerAttribute(value: DividerStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            DividerStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setSidebarDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBarModeAttribute(value: BarMode | undefined, options?: ScrollableBarModeOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1158,6 +1306,27 @@ export interface TabsAttribute extends CommonMethod {
     sidebarDisplayStyle(value: TabsSidebarDisplayStyle | undefined): this {
         throw new Error('Unimplemented method sidebarDisplayStyle')
     }
+    sidebarWidth(value: Length | undefined): this {
+        throw new Error('Unimplemented method sidebarWidth')
+    }
+    minSidebarWidth(value: Length | undefined): this {
+        throw new Error('Unimplemented method minSidebarWidth')
+    }
+    maxSidebarWidth(value: Length | undefined): this {
+        throw new Error('Unimplemented method maxSidebarWidth')
+    }
+    minContentWidth(value: Length | undefined): this {
+        throw new Error('Unimplemented method minContentWidth')
+    }
+    sidebarBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error('Unimplemented method sidebarBackgroundColor')
+    }
+    sidebarBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        throw new Error('Unimplemented method sidebarBackgroundBlurStyle')
+    }
+    sidebarDivider(value: DividerStyle | undefined): this {
+        throw new Error('Unimplemented method sidebarDivider')
+    }
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         throw new Error('Unimplemented method barMode')
     }
@@ -1392,6 +1561,41 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     public sidebarDisplayStyle(value: TabsSidebarDisplayStyle | undefined): this {
         const value_casted = value as (TabsSidebarDisplayStyle | undefined)
         this.getPeer()?.setSidebarDisplayStyleAttribute(value_casted)
+        return this
+    }
+    public sidebarWidth(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.getPeer()?.setSidebarWidthAttribute(value_casted)
+        return this
+    }
+    public minSidebarWidth(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.getPeer()?.setMinSidebarWidthAttribute(value_casted)
+        return this
+    }
+    public maxSidebarWidth(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.getPeer()?.setMaxSidebarWidthAttribute(value_casted)
+        return this
+    }
+    public minContentWidth(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.getPeer()?.setMinContentWidthAttribute(value_casted)
+        return this
+    }
+    public sidebarBackgroundColor(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setSidebarBackgroundColorAttribute(value_casted)
+        return this
+    }
+    public sidebarBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        const value_casted = value as (BlurStyle | undefined)
+        this.getPeer()?.setSidebarBackgroundBlurStyleAttribute(value_casted)
+        return this
+    }
+    public sidebarDivider(value: DividerStyle | undefined): this {
+        const value_casted = value as (DividerStyle | undefined)
+        this.getPeer()?.setSidebarDividerAttribute(value_casted)
         return this
     }
     public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
