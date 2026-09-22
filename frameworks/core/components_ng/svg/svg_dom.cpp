@@ -56,6 +56,33 @@ const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
 constexpr int32_t ONE_BYTE_TO_HEX_LEN = 2;
 constexpr int32_t MAX_PARSE_DEPTH = 5000;
+constexpr size_t MAX_SVG_CLASS_NAME_COUNT = 1024 * 100;
+constexpr size_t MAX_SVG_STYLE_DECL_COUNT = 1024 * 100;
+
+void SplitStrWithLimit(const std::string& str, const std::string& sep,
+    std::vector<std::string>& out, size_t maxCount)
+{
+    out.clear();
+    if (str.empty() || sep.empty()) {
+        return;
+    }
+    std::string::size_type startPos = 0;
+    std::string::size_type pos = str.find_first_of(sep, startPos);
+    while (pos != std::string::npos) {
+        if (pos > startPos) {
+            out.emplace_back(StringUtils::TrimStr(str.substr(startPos, pos - startPos)));
+            if (out.size() == maxCount) {
+                LOGW("SVG attribute split count exceeds limit (%{public}zu), truncating", maxCount);
+                return;
+            }
+        }
+        startPos = pos + sep.size();
+        pos = str.find_first_of(sep, startPos);
+    }
+    if (startPos < str.size() && out.size() < maxCount) {
+        out.emplace_back(StringUtils::TrimStr(str.substr(startPos)));
+    }
+}
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -258,7 +285,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     std::vector<std::string> styleNameVector;
-    StringUtils::SplitStr(value, " ", styleNameVector);
+    SplitStrWithLimit(value, " ", styleNameVector, MAX_SVG_CLASS_NAME_COUNT);
     for (const auto& styleName : styleNameVector) {
         auto attrMap = svgContext_->GetAttrMap(styleName);
         if (attrMap.empty()) {
@@ -275,12 +302,12 @@ void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     std::vector<std::string> attrPairVector;
-    StringUtils::SplitStr(value, ";", attrPairVector);
+    SplitStrWithLimit(value, ";", attrPairVector, MAX_SVG_STYLE_DECL_COUNT);
     for (const auto& attrPair : attrPairVector) {
-        std::vector<std::string> attrVector;
-        StringUtils::SplitStr(attrPair, ":", attrVector);
-        if (attrVector.size() == 2) {
-            svgNode->SetAttr(attrVector[0], attrVector[1]);
+        auto colonPos = attrPair.find(':');
+        if (colonPos != std::string::npos && colonPos > 0 && colonPos < attrPair.size() - 1) {
+            svgNode->SetAttr(StringUtils::TrimStr(attrPair.substr(0, colonPos)),
+                StringUtils::TrimStr(attrPair.substr(colonPos + 1)));
         }
     }
 }
