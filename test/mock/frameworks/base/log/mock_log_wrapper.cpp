@@ -12,7 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "test/mock/frameworks/base/log/mock_log_wrapper.h"
+
+#include <atomic>
+
 #include "base/log/log_wrapper.h"
+
+namespace {
+std::atomic<int> g_printLogCount { 0 };
+} // namespace
+
+void ResetPrintLogCount()
+{
+    g_printLogCount.store(0, std::memory_order_relaxed);
+}
+
+int GetPrintLogCount()
+{
+    return g_printLogCount.load(std::memory_order_relaxed);
+}
 
 namespace OHOS::Ace {
 
@@ -56,5 +74,6 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const
     (void)level;
     (void)tag;
     (void)fmt;
+    g_printLogCount.fetch_add(1, std::memory_order_relaxed);
 }
 } // namespace OHOS::Ace

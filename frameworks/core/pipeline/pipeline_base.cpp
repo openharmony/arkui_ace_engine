@@ -1228,15 +1228,6 @@ void PipelineBase::SetUiDvsyncSwitch(bool on, FromWhom fromWhom)
     lastUiDvsyncStatus_ = on;
 }
 
-bool PipelineBase::IsCurrentThreadSafe()
-{
-    CHECK_NULL_RETURN(taskExecutor_, true);
-    if (isFormRender_) {
-        return true;
-    }
-    return taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
-}
-
 bool PipelineBase::CheckThreadSafe()
 {
     if (!IsCurrentThreadSafe()) {
@@ -1244,6 +1235,12 @@ bool PipelineBase::CheckThreadSafe()
         return false;
     }
     return true;
+}
+
+bool PipelineBase::IsCurrentThreadSafe() const
+{
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    return isFormRender_ || taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
 }
 
 bool PipelineBase::CheckIfGetTheme()

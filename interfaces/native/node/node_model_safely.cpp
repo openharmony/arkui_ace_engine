@@ -14,10 +14,10 @@
  */
 
 #include "node_model_safely.h"
+#include "node/config_manager.h"
 
 #include "node_extened.h"
 #include "node_model.h"
-#include "config_manager.h"
 
 #include "interfaces/native/native_error_message_macros.h"
 #include "base/error/error_code.h"

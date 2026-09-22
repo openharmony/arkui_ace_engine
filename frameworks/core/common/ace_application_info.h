@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_APPLICATION_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_APPLICATION_INFO_H
 
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -98,11 +99,16 @@ public:
 
     void SetDebugForParallel(bool isDebug)
     {
-        isDebugForParallel_ = isDebug;
+        isDebugForParallel_.store(isDebug, std::memory_order_release);
+        isDebugForParallelSet_.store(true, std::memory_order_release);
     }
     bool IsDebugForParallel() const
     {
-        return isDebugForParallel_;
+        return isDebugForParallel_.load(std::memory_order_acquire);
+    }
+    bool IsDebugForParallelSet() const
+    {
+        return isDebugForParallelSet_.load(std::memory_order_acquire);
     }
 
     void SetApiTargetVersion(int32_t apiVersion)
@@ -384,7 +390,8 @@ protected:
 
     bool isRightToLeft_ = false;
     bool isDebugVersion_ = false;
-    bool isDebugForParallel_ = false;
+    std::atomic<bool> isDebugForParallel_ { false };
+    std::atomic<bool> isDebugForParallelSet_ { false };
     bool needDebugBreakpoint_ = false;
     std::optional<bool> useNewPipeline_;
 

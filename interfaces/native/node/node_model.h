@@ -144,6 +144,7 @@ bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
 ArkUIFullNodeAPI* GetOrCreateFullImpl();
 ArkUIFullNodeAPI* GetFullImplForErrorMessage();
+const ArkUIBasicAPI* GetBasicAPI();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNativeSource(ArkUI_NodeHandle nativePtr);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
