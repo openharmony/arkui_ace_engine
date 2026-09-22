@@ -1830,7 +1830,7 @@ void JSNavigationStack::CallPushDestinationInner(const NG::NavdestinationRecover
     JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
     navPathInfo->SetProperty<std::string>("name", infoName);
     if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
-        if (infoParam.size > MAX_RECOVERY_PARAM_LEN) {
+        if (infoParam.size() > MAX_RECOVERY_PARAM_LEN) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "CallPushDestinationInner failed, infoParam too long!");
         } else {
             auto parsed = JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str());
