@@ -31,6 +31,7 @@
 #endif
 
 #include "base/thread/task_executor.h"
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
@@ -3515,14 +3516,12 @@ void JsiDeclarativeEngine::SetJsContextWithDeserialize(const std::shared_ptr<voi
 void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativeValue)
 {
 #ifdef USE_ARK_ENGINE
-    napi_handle_scope scope;
-    napi_status status = napi_open_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), &scope);
-    if (status != napi_ok) {
+    ScopeRAII scope(reinterpret_cast<napi_env>(GetNativeEngine()));
+    if (!scope) {
         return;
     }
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!arkRuntime || !arkRuntime->GetEcmaVm()) {
-        napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
         return;
     }
     auto localRef = NapiValueToLocalValue(nativeValue->GetNapiValue());
@@ -3530,7 +3529,6 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
     if (jsValue->IsObject(arkRuntime)) {
         JsiContextModule::AddContext(instanceId_, jsValue);
     }
-    napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
 #endif
 }
 

@@ -15,6 +15,7 @@
 
 #include "ui_observer_listener.h"
 #include "js_native_api.h"
+#include "base/utils/napi_scope_raii.h"
 #include "core/common/container.h"
 #include "core/event/ace_events.h"
 #include "interfaces/napi/kits/observer/gesture/gesture_observer_listener.h"
@@ -483,9 +484,8 @@ void UIObserverListener::OnWinSizeLayoutBreakpointChange(const WindowSizeBreakpo
             "Handle winSizeLayoutBreakpoint change failed, runtime or callback function invalid!");
         return;
     }
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env_, &scope);
-    if (status != napi_ok) {
+    ScopeRAII scope(env_);
+    if (!scope) {
         return;
     }
     napi_value callback = nullptr;
@@ -500,7 +500,6 @@ void UIObserverListener::OnWinSizeLayoutBreakpointChange(const WindowSizeBreakpo
     napi_set_named_property(env_, objValue, "heightBreakpoint", heightValue);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
-    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState)
@@ -551,9 +550,8 @@ void UIObserverListener::OnDrawOrLayout()
         TAG_LOGW(AceLogTag::ACE_OBSERVER, "Handle draw or layout failed, runtime or callback function invalid!");
         return;
     }
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env_, &scope);
-    if (status != napi_ok) {
+    ScopeRAII scope(env_);
+    if (!scope) {
         return;
     }
     napi_value callback = nullptr;
@@ -562,7 +560,6 @@ void UIObserverListener::OnDrawOrLayout()
     napi_create_object(env_, &objValue);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
-    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo, napi_value context)
