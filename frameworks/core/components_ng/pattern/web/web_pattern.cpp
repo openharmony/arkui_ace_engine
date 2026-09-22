@@ -1363,9 +1363,10 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
         isMenuShownFromWebBeforeStartClose_ = false;
         isLastEventMenuClose_ = true;
         lastMenuCloseTimestamp_ = GetCurrentTimestamp();
-    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DISAPPEAR && isMenuShownFromWeb_) {
-        OnCursorChange(OHOS::NWeb::CursorType::CT_DRAG, nullptr, true);
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR && isMenuShownFromWeb_) {
+        if (!isHoverExit_) {
+            OnCursorChange(OHOS::NWeb::CursorType::CT_DRAG, nullptr, true);
+        }
         isMenuShownFromWeb_ = false;
     }
 }
@@ -2622,10 +2623,15 @@ bool WebPattern::CheckShouldBlockMouseEvent(const MouseInfo &info)
         }
         if (info.GetAction() == MouseAction::HOVER_EXIT) {
             isSupplementMouseLeave_ = true;
+            isHoverExit_ = true;
+        }
+        if (info.GetAction() == MouseAction::HOVER) {
+            isHoverExit_ = false;
         }
         TAG_LOGD(AceLogTag::ACE_WEB,
             "WebSendMouseEvent stopped because BindedMenu is showing. isUpSupplementDown_:%{public}d, "
-            "isSupplementMouseLeave_: %{public}d ", isUpSupplementDown_, isSupplementMouseLeave_);
+            "isSupplementMouseLeave_: %{public}d, isHoverExit_: %{public}d", isUpSupplementDown_,
+            isSupplementMouseLeave_, isHoverExit_);
         return true;
     }
 

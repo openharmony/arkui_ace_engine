@@ -622,4 +622,78 @@ HWTEST_F(WebPatternCursorTest, OnCursorChangeWebWindowID_002, TestSize.Level1)
     EXPECT_EQ(web_pattern_->cursorType_, originalCursorType);
 #endif
 }
+
+/**
+ * @tc.name: NotifyMenuLifeCycleEvent_Hovering_001
+ * @tc.desc: Restore the previous web cursor when the web menu disappears and the pointer is still hovering.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, NotifyMenuLifeCycleEvent_Hovering_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->isMenuShownFromWeb_ = true;
+    web_pattern_->isHoverExit_ = false;
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_POINTER;
+
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    ASSERT_NE(mockMouseStyle, nullptr);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(0));
+
+    web_pattern_->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+
+    EXPECT_FALSE(web_pattern_->isMenuShownFromWeb_);
+#endif
+}
+
+/**
+ * @tc.name: NotifyMenuLifeCycleEvent_HoverExit_001
+ * @tc.desc: Do not restore the drag cursor when the web menu disappears after hover exit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, NotifyMenuLifeCycleEvent_HoverExit_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->isMenuShownFromWeb_ = true;
+    web_pattern_->isHoverExit_ = true;
+
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    ASSERT_NE(mockMouseStyle, nullptr);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).Times(0);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).Times(0);
+
+    web_pattern_->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+
+    EXPECT_FALSE(web_pattern_->isMenuShownFromWeb_);
+#endif
+}
+
+/**
+ * @tc.name: CheckShouldBlockMouseEvent_MenuShownHover_001
+ * @tc.desc: Track hover exit state while the web menu blocks mouse events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, CheckShouldBlockMouseEvent_MenuShownHover_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->isMenuShownFromWebBeforeStartClose_ = true;
+    web_pattern_->isHoverExit_ = false;
+    web_pattern_->isSupplementMouseLeave_ = false;
+
+    MouseInfo hoverExitInfo;
+    hoverExitInfo.SetAction(MouseAction::HOVER_EXIT);
+    bool result = web_pattern_->CheckShouldBlockMouseEvent(hoverExitInfo);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(web_pattern_->isHoverExit_);
+    EXPECT_TRUE(web_pattern_->isSupplementMouseLeave_);
+
+    MouseInfo hoverInfo;
+    hoverInfo.SetAction(MouseAction::HOVER);
+    result = web_pattern_->CheckShouldBlockMouseEvent(hoverInfo);
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(web_pattern_->isHoverExit_);
+    EXPECT_TRUE(web_pattern_->isSupplementMouseLeave_);
+#endif
+}
 } // namespace OHOS::Ace::NG
