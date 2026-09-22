@@ -1744,6 +1744,7 @@
       "OHOS::Ace::NG::LayoutProperty::UpdateAlignRules(std::__h::map<OHOS::Ace::AlignDirection, OHOS::Ace::AlignRule, std::__h::less<OHOS::Ace::AlignDirection>, std::__h::allocator<std::__h::pair<OHOS::Ace::AlignDirection const, OHOS::Ace::AlignRule>>> const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateAlignSelf(OHOS::Ace::FlexAlign const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateBorderWidth(OHOS::Ace::NG::BorderWidthPropertyT<OHOS::Ace::Dimension> const&)";
+      "OHOS::Ace::NG::LayoutProperty::UpdateMaterialBorderWidth(OHOS::Ace::NG::BorderWidthPropertyT<OHOS::Ace::Dimension> const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateCalcLayoutProperty(OHOS::Ace::NG::MeasureProperty const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateCalcMaxSize(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateCalcMinSize(OHOS::Ace::NG::CalcSize const&)";
