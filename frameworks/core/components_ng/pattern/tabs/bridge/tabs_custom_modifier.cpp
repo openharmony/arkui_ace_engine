@@ -316,6 +316,13 @@ void SwipeToCustom(ArkUINodeHandle node, ArkUI_Int32 index)
     CHECK_NULL_VOID(tabsController);
     tabsController->SwipeTo(index);
 }
+
+int32_t GetBarDisplayMode(ArkUINodeHandle node)
+{
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_RETURN(tabsController, static_cast<int32_t>(TabBarDisplayMode::BOTTOMTABBAR));
+    return static_cast<int32_t>(tabsController->GetBarDisplayMode());
+}
 } // namespace
 
 namespace NodeModifier {
@@ -356,6 +363,7 @@ const ArkUITabsCustomModifier* GetTabsCustomModifier()
         .setTabBarTranslate = SetTabsTabBarTranslateCustom,
         .setTabBarOpacity = SetTabsTabBarOpacityCustom,
         .swipeTo = SwipeToCustom,
+        .getBarDisplayMode = GetBarDisplayMode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

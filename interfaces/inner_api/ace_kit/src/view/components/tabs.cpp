@@ -17,6 +17,8 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/ace_type.h"
+#include "ui/base/referenced.h"
+#include "ui/base/utils/utils.h"
 #include "ui/view_stack/view_stack_processor.h"
 
 #include "core/interfaces/native/node/tabs_modifier.h"
@@ -638,5 +640,15 @@ void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption, const RefPtr
     CHECK_NULL_VOID(modifier);
     modifier->handleBackgroundEffectInactiveColor(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
         AceType::RawPtr(resObj));
+}
+
+NG::TabBarDisplayMode Tabs::GetBarDisplayMode() const
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_RETURN(tabsNode, NG::TabBarDisplayMode::BOTTOMTABBAR);
+    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
+    CHECK_NULL_RETURN(modifier, NG::TabBarDisplayMode::BOTTOMTABBAR);
+    auto mode = modifier->getBarDisplayMode(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)));
+    return static_cast<NG::TabBarDisplayMode>(mode);
 }
 } // namespace OHOS::Ace::Kit
