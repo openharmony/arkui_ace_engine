@@ -1021,6 +1021,7 @@ void UIObserver::UnRegisterWillClickCallback(napi_env env, napi_value uiAbilityC
         auto& holder = abilityContextWillClickListeners_[listenerPair.first];
         if (callback == nullptr) {
             holder.clear();
+            TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=willClick");
         } else {
             holder.erase(
                 std::remove_if(
@@ -1052,6 +1053,7 @@ void UIObserver::UnRegisterWillClickCallback(int32_t uiContextInstanceId, napi_v
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=willClick");
         return;
     }
     holder.erase(
@@ -1169,6 +1171,7 @@ void UIObserver::UnRegisterDidClickCallback(napi_env env, napi_value uiAbilityCo
         auto& holder = abilityContextDidClickListeners_[listenerPair.first];
         if (callback == nullptr) {
             holder.clear();
+            TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=didClick");
         } else {
             holder.erase(
                 std::remove_if(
@@ -1200,6 +1203,7 @@ void UIObserver::UnRegisterDidClickCallback(int32_t uiContextInstanceId, napi_va
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=didClick");
         return;
     }
     holder.erase(
@@ -1317,6 +1321,7 @@ void UIObserver::UnRegisterBeforePanStartCallback(napi_env env, napi_value uiAbi
         auto& holder = listenerPair.second;
         if (callback == nullptr) {
             holder.clear();
+            TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=beforePanStart");
         } else {
             holder.erase(
                 std::remove_if(
@@ -1348,6 +1353,7 @@ void UIObserver::UnRegisterBeforePanStartCallback(int32_t uiContextInstanceId, n
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=beforePanStart");
         return;
     }
     holder.erase(
@@ -1428,6 +1434,7 @@ void UIObserver::UnRegisterBeforePanEndCallback(napi_env env, napi_value uiAbili
         auto& holder = listenerPair.second;
         if (callback == nullptr) {
             holder.clear();
+            TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=beforePanEnd");
         } else {
             holder.erase(
                 std::remove_if(
@@ -1459,6 +1466,7 @@ void UIObserver::UnRegisterBeforePanEndCallback(int32_t uiContextInstanceId, nap
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=beforePanEnd");
         return;
     }
     holder.erase(
@@ -1539,6 +1547,7 @@ void UIObserver::UnRegisterAfterPanStartCallback(napi_env env, napi_value uiAbil
         auto& holder = listenerPair.second;
         if (callback == nullptr) {
             holder.clear();
+            TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=afterPanStart");
         } else {
             holder.erase(
                 std::remove_if(
@@ -1570,6 +1579,7 @@ void UIObserver::UnRegisterAfterPanStartCallback(int32_t uiContextInstanceId, na
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=afterPanStart");
         return;
     }
     holder.erase(
@@ -1650,6 +1660,7 @@ void UIObserver::UnRegisterAfterPanEndCallback(napi_env env, napi_value uiAbilit
         auto& holder = listenerPair.second;
         if (callback == nullptr) {
             holder.clear();
+            TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=afterPanEnd");
         } else {
             holder.erase(
                 std::remove_if(
@@ -1681,6 +1692,7 @@ void UIObserver::UnRegisterAfterPanEndCallback(int32_t uiContextInstanceId, napi
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=afterPanEnd");
         return;
     }
     holder.erase(
@@ -1816,6 +1828,7 @@ void UIObserver::UnRegisterNodeRenderStateChangeCallback(
     auto& holder = iter->second->listeners;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=nodeRenderState");
         specifiedNodeRenderStateListeners_.erase(iter);
         monitor->UnRegisterNodeRenderStatusListener(frameNodePtr, id);
         return;
