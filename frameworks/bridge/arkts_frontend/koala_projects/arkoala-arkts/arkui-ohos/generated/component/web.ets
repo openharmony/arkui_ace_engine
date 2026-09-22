@@ -3359,6 +3359,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableMediaNetworkProxy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnZoomChangeAttribute(value: OnZoomChangeCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnZoomChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -3990,6 +4002,11 @@ export interface FirstScreenPaint {
 }
 export type OnFirstScreenPaintCallback = (firstScreenPaint: FirstScreenPaint) => void;
 export type OnInputmethodAttachedCallback = () => void;
+export type OnZoomChangeCallback = (zoomChangeInfo: OnZoomChangeEvent) => void;
+export interface OnZoomChangeEvent {
+    oldZoomFactor: double;
+    newZoomFactor: double;
+}
 export interface WebAttribute extends CommonMethod {
     setWebOptions(value: WebOptions): this {
         throw new Error('Unimplemented method setWebOptions')
@@ -4449,6 +4466,9 @@ export interface WebAttribute extends CommonMethod {
     }
     enableMediaNetworkProxy(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableMediaNetworkProxy')
+    }
+    onZoomChange(value: OnZoomChangeCallback | undefined): this {
+        throw new Error('Unimplemented method onZoomChange')
     }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error('Unimplemented method registerNativeEmbedRule')
@@ -5326,6 +5346,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         this.getPeer()?.setEnableMediaNetworkProxyAttribute(value_casted)
         return this
     }
+    public onZoomChange(value: OnZoomChangeCallback | undefined): this {
+        const value_casted = value as (OnZoomChangeCallback | undefined)
+        this.getPeer()?.setOnZoomChangeAttribute(value_casted)
+        return this
+    }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         const tag_casted = tag as (string | undefined)
         const type_casted = type as (string | undefined)
@@ -5671,6 +5696,22 @@ export class OnScaleChangeEvent_serializer {
         const oldScaleTmpResult: double = valueDeserializer.readFloat64()
         const newScaleTmpResult: double = valueDeserializer.readFloat64()
         let value: OnScaleChangeEvent = ({oldScale: oldScaleTmpResult, newScale: newScaleTmpResult} as OnScaleChangeEvent)
+        return value
+    }
+}
+export class OnZoomChangeEvent_serializer {
+    public static write(buffer: SerializerBase, value: OnZoomChangeEvent): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOldZoomFactor = value.oldZoomFactor
+        valueSerializer.writeFloat64(valueHolderForOldZoomFactor)
+        const valueHolderForNewZoomFactor = value.newZoomFactor
+        valueSerializer.writeFloat64(valueHolderForNewZoomFactor)
+    }
+    public static read(buffer: DeserializerBase): OnZoomChangeEvent {
+        let valueDeserializer: DeserializerBase = buffer
+        const oldZoomFactorTmpResult: double = valueDeserializer.readFloat64()
+        const newZoomFactorTmpResult: double = valueDeserializer.readFloat64()
+        let value: OnZoomChangeEvent = ({oldZoomFactor: oldZoomFactorTmpResult, newZoomFactor: newZoomFactorTmpResult} as OnZoomChangeEvent)
         return value
     }
 }

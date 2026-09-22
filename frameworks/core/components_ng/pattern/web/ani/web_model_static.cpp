@@ -1050,6 +1050,19 @@ void WebModelStatic::SetScaleChangeId(FrameNode* frameNode, std::function<void(c
     webEventHub->SetOnScaleChangeEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetZoomChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    if (!callback) {
+        webEventHub->SetOnZoomChangeEvent(nullptr);
+        return;
+    }
+    auto uiCallback = [func = std::move(callback)](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    webEventHub->SetOnZoomChangeEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetOnHttpAuthRequest(
     FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback)
 {

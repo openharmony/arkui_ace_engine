@@ -7181,6 +7181,8 @@ struct ArkUIWebModifier {
     void (*resetKeyboardAppearance)(ArkUINodeHandle node);
     void (*setEnableFullscreenVideoOverlay)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableFullscreenVideoOverlay)(ArkUINodeHandle node);
+    void (*setOnZoomChangeCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnZoomChangeCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

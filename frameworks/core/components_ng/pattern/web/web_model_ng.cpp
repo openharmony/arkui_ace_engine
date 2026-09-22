@@ -714,6 +714,18 @@ void WebModelNG::SetScaleChangeId(std::function<void(const BaseEventInfo* info)>
     webEventHub->SetOnScaleChangeEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetZoomChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnZoomChangeEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1725,6 +1737,22 @@ void WebModelNG::SetOnScaleChange(FrameNode* frameNode, std::function<void(const
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnScaleChangeEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetOnZoomChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    if (!jsCallback) {
+        webEventHub->SetOnZoomChangeEvent(nullptr);
+        return;
+    }
+    auto uiCallback = [func = std::move(jsCallback)](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    webEventHub->SetOnZoomChangeEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)

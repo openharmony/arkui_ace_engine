@@ -122,6 +122,7 @@ public:
     void SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback) override;
     void SetResourceLoadId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetZoomChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetPermissionRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
@@ -305,6 +306,7 @@ public:
     static void SetOnScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnOverScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnScaleChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
+    static void SetOnZoomChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnContextMenuHide(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
