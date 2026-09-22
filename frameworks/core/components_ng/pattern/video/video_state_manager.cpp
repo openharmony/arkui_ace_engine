@@ -645,10 +645,10 @@ void VideoStateManager::PostSerialBgTask(std::function<void()> task, const std::
     TAG_LOGI(AceLogTag::ACE_VIDEO,
         "Video[%{public}d] PostSerialBgTask: posting first drain task",
         hostId);
-    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor] {
+    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor, hostId] {
         auto manager = weak.Upgrade();
         if (manager) {
-            manager->DrainNextSerialBgTaskOnBg(bgTaskExecutor);
+            manager->DrainNextSerialBgTaskOnBg(hostId, bgTaskExecutor);
         }
     }, "ArkUIVideoSerialDrain");
     if (!posted) {
@@ -660,11 +660,13 @@ void VideoStateManager::PostSerialBgTask(std::function<void()> task, const std::
     }
 }
 
-void VideoStateManager::DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor)
+void VideoStateManager::DrainNextSerialBgTaskOnBg(int32_t hostId, const SingleTaskExecutor& bgTaskExecutor)
 {
-    auto ctx = GetCurrentPattern();
-    auto host = ctx ? ctx->GetHost() : nullptr;
-    int32_t hostId = host ? host->GetId() : -1;
+    // NOTE: Do NOT resolve the current pattern or its host here. This runs on the
+    // background thread; taking a strong RefPtr<VideoStateMachinePattern>/RefPtr<FrameNode>
+    // here could make it the last strong owner, so the object would be destroyed off the
+    // UI thread. hostId is captured at PostSerialBgTask time and is used for logging only,
+    // so it may be slightly stale across fullscreen transitions, which is acceptable.
     TAG_LOGI(AceLogTag::ACE_VIDEO,
         "Video[%{public}d] DrainNextSerialBgTaskOnBg: enter", hostId);
     SerialBgTask current;
@@ -706,10 +708,10 @@ void VideoStateManager::DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTa
 
     TAG_LOGI(AceLogTag::ACE_VIDEO,
         "Video[%{public}d] DrainNextSerialBgTaskOnBg: posting next drain", hostId);
-    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor] {
+    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor, hostId] {
         auto manager = weak.Upgrade();
         if (manager) {
-            manager->DrainNextSerialBgTaskOnBg(bgTaskExecutor);
+            manager->DrainNextSerialBgTaskOnBg(hostId, bgTaskExecutor);
         } else {
             TAG_LOGW(AceLogTag::ACE_VIDEO,
                 "Video state manager destroyed, skip serial drain");
