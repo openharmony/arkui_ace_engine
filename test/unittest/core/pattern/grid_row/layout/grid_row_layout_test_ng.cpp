@@ -186,8 +186,14 @@ HWTEST_F(GridRowLayoutTestNG, GetPaddingOffsetTest, TestSize.Level0)
     GridRowLayoutAlgorithm algorithm;
     OffsetF result;
     result = algorithm.GetPaddingOffset(Referenced::RawPtr(gridRow), false);
+    /**
+     * @tc.expected: result = OffsetF(10, 30)
+     */
     EXPECT_EQ(result, OffsetF(10, 30));
     result = algorithm.GetPaddingOffset(Referenced::RawPtr(gridRow), true);
+    /**
+     * @tc.expected: result = OffsetF(-20, 30)
+     */
     EXPECT_EQ(result, OffsetF(-20, 30));
 }
 } // namespace OHOS::Ace::NG
