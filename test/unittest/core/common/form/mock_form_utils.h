@@ -43,6 +43,11 @@ public:
     {
         return 1;
     }
+
+    int32_t InsightIntentEvent(const int64_t formId, const std::string& action, const int32_t containerId)
+    {
+        return 1;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_COMMON_FORM_MOCK_FORM_TUILS_H
