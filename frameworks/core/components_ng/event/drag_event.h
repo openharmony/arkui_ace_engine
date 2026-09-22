@@ -275,6 +275,15 @@ public:
     void CallTimerCallback(const RefPtr<FrameNode>& frameNode);
     void SetExecTimerCallback(bool isExecCallback);
     void RemovePixelMap();
+
+    // Exposes the drag pan so that drag hosts (List/Grid item drag manager) can
+    // lock the dragging finger and let the host scroll pan escape it, which is
+    // what makes "one finger dragging + another finger scrolling" possible.
+    const RefPtr<PanRecognizer>& GetDragEventPanRecognizer() const
+    {
+        return panRecognizer_;
+    }
+
 protected:
     DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
 
@@ -286,9 +295,6 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
-    const RefPtr<PanRecognizer>& GetDragEventPanRecognizer() {
-        return panRecognizer_;
-    }
 
 protected:
     RefPtr<PanRecognizer> panRecognizer_;

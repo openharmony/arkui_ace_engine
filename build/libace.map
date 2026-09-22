@@ -6108,6 +6108,7 @@
       VTT?for?OHOS::Ace::NG::TextFieldManagerNG;
       OHOS::Ace::NG::TokenThemeStorage::GetInstance*;
       OHOS::Ace::NG::TokenThemeStorage::GetDefaultTheme*;
+      OHOS::Ace::NG::PanRecognizer::SetEscapeModeForPan*;
     };
   local:
     *;

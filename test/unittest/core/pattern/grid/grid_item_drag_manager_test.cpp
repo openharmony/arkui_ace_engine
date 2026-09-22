@@ -31,6 +31,10 @@
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_ng/pattern/grid/grid_item_drag_manager.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/common/event_manager.h"
+#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,6 +44,11 @@ constexpr float SCALE_TOLERANCE = 0.001f;
 constexpr int32_t TEST_INVALID_ROW = 100;
 constexpr int32_t TEST_INVALID_COL = 50;
 constexpr float TEST_DISTANCE_TOLERANCE = 0.001f;
+constexpr float DRAG_SCROLL_COEXIST_SIZE = 100.0f;
+// inside the container but far from both edge hot zones
+constexpr float DRAG_SCROLL_COEXIST_MID_MAIN_OFFSET = 200.0f;
+constexpr int32_t DRAG_FINGER_ID = 0;
+constexpr int32_t SCROLL_FINGER_ID = 1;
 } // namespace
 
 class GridItemDragManagerTestNg : public GridTestNg {
@@ -2172,6 +2181,270 @@ HWTEST_F(GridItemDragManagerTestNg, ScaleDiagonalNeighborScalesSuccessfully001, 
     EXPECT_NO_FATAL_FAILURE(manager->ScaleDiagonalNeighbor(0, 0, 0, 1, 1,
         rect, delta, 0, TEST_ITEM_COUNT - 1, info, forEach));
     EXPECT_FALSE(manager->scaleNode_.empty());
+}
+
+/**
+ * @tc.name: GridDragScrollCoexistAutoScrollSuppression001
+ * @tc.desc: only a second finger that really scrolls the container stops the drag edge
+ *           auto-scroll, and it is actively stopped instead of merely skipped
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GridDragScrollCoexistAutoScrollSuppression001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto gridNode = pattern_->GetHost();
+    ASSERT_NE(gridNode, nullptr);
+    manager->gridNode_ = AceType::WeakClaim(AceType::RawPtr(gridNode));
+    auto scrollable = pattern_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    // frame rect at the container origin, so IsInHotZone() is true for item 0 and the
+    // non-suppressed path arms the edge auto-scroll; the drag point itself sits far
+    // from both edge hot zones, so no hot zone animator is actually started
+    RectF frameRect(0.0f, 0.0f, DRAG_SCROLL_COEXIST_SIZE, DRAG_SCROLL_COEXIST_SIZE);
+    PointF center(DRAG_SCROLL_COEXIST_SIZE / 2.0f, DRAG_SCROLL_COEXIST_MID_MAIN_OFFSET);
+
+    /**
+     * @tc.steps: step1. only the dragging finger is down.
+     * @tc.expected: the edge auto-scroll is armed.
+     */
+    scrollable->isTouching_ = true;
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID };
+    manager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_TRUE(manager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step2. a second finger goes down but only rests on the Grid, it does
+     *              not scroll it.
+     * @tc.expected: the edge auto-scroll keeps running, a resting finger is not a
+     *              reason to give the container up.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID, SCROLL_FINGER_ID };
+    manager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_TRUE(manager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step3. that second finger really scrolls the Grid, which the host Grid
+     *              reports through the drag scroll callback of an ongoing drag.
+     * @tc.expected: the suppression is armed, so the next HandleAutoScroll actively
+     *              stops the auto-scroll instead of merely skipping it; the hot zone
+     *              flag consumed by the swap candidate filter is cleared with it.
+     */
+    manager->dragState_ = GridItemDragState::DRAGGING;
+    manager->HandleContainerScroll(SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(manager->suppressAutoScroll_);
+    manager->inAutoScrollHotZone_ = true;
+    manager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_FALSE(manager->scrolling_);
+    EXPECT_EQ(pattern_->hotZoneScrollCallback_, nullptr);
+    EXPECT_FALSE(manager->inAutoScrollHotZone_);
+
+    /**
+     * @tc.steps: step4. the second finger is lifted again.
+     * @tc.expected: the suppression is cleared and the edge auto-scroll is armed again.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID };
+    manager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_FALSE(manager->suppressAutoScroll_);
+    EXPECT_TRUE(manager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step5. both fingers down again, but the container moves because of a
+     *              wheel/crown scroll rather than a finger.
+     * @tc.expected: that is not "another finger scrolling", the edge auto-scroll is
+     *              left alone.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID, SCROLL_FINGER_ID };
+    manager->HandleContainerScroll(SCROLL_FROM_AXIS);
+    EXPECT_FALSE(manager->suppressAutoScroll_);
+    manager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_TRUE(manager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+    manager->StopAutoScroll();
+    EXPECT_FALSE(manager->scrolling_);
+}
+
+/**
+ * @tc.name: GridLockDragFingerAndEscapeScrollPan001
+ * @tc.desc: the dragging finger is locked on the drag pan and the Grid scroll pan escapes it
+ *           through the EventManager channel, so another finger can still scroll the Grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GridLockDragFingerAndEscapeScrollPan001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto gridNode = pattern_->GetHost();
+    ASSERT_NE(gridNode, nullptr);
+    manager->gridNode_ = AceType::WeakClaim(AceType::RawPtr(gridNode));
+    auto gridItemNode = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));
+    ASSERT_NE(gridItemNode, nullptr);
+    manager->InitDragDropEvent();
+
+    auto gridItemEventHub = gridItemNode->GetEventHub<GridItemEventHub>();
+    ASSERT_NE(gridItemEventHub, nullptr);
+    auto gestureHub = gridItemEventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto dragPan = dragEventActuator->GetDragEventPanRecognizer();
+    ASSERT_NE(dragPan, nullptr);
+
+    auto scrollable = pattern_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    if (!scrollable->panRecognizerNG_) {
+        scrollable->InitPanRecognizerNG();
+    }
+    auto scrollPan = scrollable->panRecognizerNG_;
+    ASSERT_NE(scrollPan, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step1. before the long-press drag takes over.
+     * @tc.expected: neither lock nor escape is in place.
+     */
+    EXPECT_FALSE(dragPan->IsTriggeredIds(DRAG_FINGER_ID));
+    EXPECT_FALSE(scrollPan->IsFingerEscaped(DRAG_FINGER_ID));
+
+    /**
+     * @tc.steps: step2. long-press drag takes the finger over.
+     * @tc.expected: drag pan locks the finger, Grid scroll pan escapes it and is
+     *              bound to the EventManager escape channel.
+     */
+    manager->LockDragFingerAndEscapeScrollPan(DRAG_FINGER_ID);
+    EXPECT_TRUE(dragPan->IsTriggeredIds(DRAG_FINGER_ID));
+    EXPECT_TRUE(scrollPan->IsFingerEscaped(DRAG_FINGER_ID));
+    EXPECT_TRUE(scrollPan->IsEscapedToManager());
+    EXPECT_FALSE(eventManager->escapeRecognizers_.empty());
+
+    /**
+     * @tc.steps: step3. all fingers lifted, EventManager sweeps the channel.
+     * @tc.expected: no escaped recognizer is left behind and the scroll pan is re-armed.
+     */
+    eventManager->SweepEscapeRecognizers();
+    EXPECT_TRUE(eventManager->escapeRecognizers_.empty());
+    EXPECT_FALSE(scrollPan->IsEscapedToManager());
+    EXPECT_TRUE(scrollPan->GetEscapedFingerIds().empty());
+}
+
+/**
+ * @tc.name: GridItemDragFloatInterruptedByContainerScroll001
+ * @tc.desc: A floating GridItem (long press, the finger never moved) is dropped as soon as
+ *           another finger scrolls the Grid; a scroll without a second finger keeps it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GridItemDragFloatInterruptedByContainerScroll001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEachAndChildren();
+    ASSERT_NE(manager, nullptr);
+    auto gridNode = pattern_->GetHost();
+    ASSERT_NE(gridNode, nullptr);
+    manager->gridNode_ = AceType::WeakClaim(AceType::RawPtr(gridNode));
+
+    /**
+     * @tc.steps: step1. Long press the item, the finger then never moves.
+     * @tc.expected: the item floats and the host Grid notifies it on container scrolls.
+     */
+    GestureEvent info;
+    manager->HandleOnItemLongPress(info);
+    ASSERT_EQ(manager->dragState_, GridItemDragState::LONG_PRESS);
+    ASSERT_NE(pattern_->dragScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step2. A finger driven container scroll frame with only the dragging
+     *              finger on it.
+     * @tc.expected: the float survives, nobody took the container over.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID };
+    pattern_->FireDragScrollCallback(SCROLL_FROM_UPDATE);
+    EXPECT_EQ(manager->dragState_, GridItemDragState::LONG_PRESS);
+    EXPECT_NE(pattern_->dragScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step3. A second finger is down, but the container moves because of a
+     *              wheel/crown scroll rather than that finger.
+     * @tc.expected: the float survives, only a finger really scrolling drops it.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID, SCROLL_FINGER_ID };
+    pattern_->FireDragScrollCallback(SCROLL_FROM_AXIS);
+    EXPECT_EQ(manager->dragState_, GridItemDragState::LONG_PRESS);
+    EXPECT_NE(pattern_->dragScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step4. That second finger really scrolls the container.
+     * @tc.expected: the pending float is interrupted and the drag auto-scroll state is
+     *              cleared with it.
+     */
+    manager->scrolling_ = true;
+    manager->inAutoScrollHotZone_ = true;
+    pattern_->SetHotZoneScrollCallback([]() {});
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID, SCROLL_FINGER_ID };
+    pattern_->FireDragScrollCallback(SCROLL_FROM_UPDATE);
+    EXPECT_EQ(manager->dragState_, GridItemDragState::IDLE);
+    EXPECT_EQ(pattern_->dragScrollCallback_, nullptr);
+    EXPECT_EQ(pattern_->hotZoneScrollCallback_, nullptr);
+    EXPECT_FALSE(manager->scrolling_);
+    EXPECT_FALSE(manager->inAutoScrollHotZone_);
+}
+
+/**
+ * @tc.name: GridItemDragNotInterruptedWhileDragging001
+ * @tc.desc: Once the GridItem is really being dragged, a second finger scrolling the Grid
+ *           does not interrupt it, one finger drags while another scrolls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GridItemDragNotInterruptedWhileDragging001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEachAndChildren();
+    ASSERT_NE(manager, nullptr);
+    auto gridNode = pattern_->GetHost();
+    ASSERT_NE(gridNode, nullptr);
+    manager->gridNode_ = AceType::WeakClaim(AceType::RawPtr(gridNode));
+
+    /**
+     * @tc.steps: step1. Long press, then move the finger so the drag really starts.
+     * @tc.expected: the session is in DRAGGING.
+     */
+    GestureEvent info;
+    manager->HandleOnItemLongPress(info);
+    manager->HandleOnItemDragStart(info);
+    ASSERT_EQ(manager->dragState_, GridItemDragState::DRAGGING);
+
+    /**
+     * @tc.steps: step2. A second finger is down but the container moves because of a
+     *              wheel/crown scroll rather than that finger.
+     * @tc.expected: the drag edge auto-scroll is not handed over.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID, SCROLL_FINGER_ID };
+    pattern_->FireDragScrollCallback(SCROLL_FROM_AXIS);
+    EXPECT_EQ(manager->dragState_, GridItemDragState::DRAGGING);
+    EXPECT_FALSE(manager->suppressAutoScroll_);
+
+    /**
+     * @tc.steps: step3. That second finger really scrolls the container.
+     * @tc.expected: the running drag is left alone (one finger drags while another
+     *              scrolls), only its edge auto-scroll is handed over.
+     */
+    pattern_->FireDragScrollCallback(SCROLL_FROM_UPDATE);
+    EXPECT_EQ(manager->dragState_, GridItemDragState::DRAGGING);
+    EXPECT_NE(pattern_->dragScrollCallback_, nullptr);
+    EXPECT_TRUE(manager->suppressAutoScroll_);
+
+    /**
+     * @tc.steps: step4. The drag is cancelled.
+     * @tc.expected: the host Grid stops notifying the manager and the suppression is
+     *              reset with the session.
+     */
+    manager->HandleOnItemDragCancel();
+    EXPECT_EQ(pattern_->dragScrollCallback_, nullptr);
+    EXPECT_EQ(manager->dragState_, GridItemDragState::IDLE);
+    EXPECT_FALSE(manager->suppressAutoScroll_);
 }
 
 } // namespace OHOS::Ace::NG
