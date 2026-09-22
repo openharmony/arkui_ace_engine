@@ -91,7 +91,9 @@ Result GridIrregularFiller::FillBackward(const FillParameters& params, float tar
     if (idx == -1) {
         auto startLine = info_->gridMatrix_.find(startingLine);
         if (startLine != info_->gridMatrix_.end() && (!startLine->second.empty())) {
-            idx = startLine->second.begin()->second - 1;
+            // Cell may be an origin (+i / 0) or a continuation (-i). abs() maps
+            // both to the item id so FillImpl's ++idx resumes at that item.
+            idx = std::abs(startLine->second.begin()->second) - 1;
         }
     }
     if (startingLine == 0 && info_->currentOffset_ > 0) {

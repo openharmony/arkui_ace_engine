@@ -1278,9 +1278,11 @@ HWTEST_F(GridScrollLayoutTestFourNg, CachedCount016, TestSize.Level1)
  *           bottom out-of-bounds scenario. With irregularIndexes = {0,3,6,9,12},
  *           cachedCount=2, crossCount=3, childrenCount=30:
  *           effectiveStartIndex = 30 (GetChildrenCount). lower_bound(30) returns
- *           end(), iter != begin, --iter points to 12, diff = 30-12-1 = 17 >= (2-0)*3=6,
- *           return (2-0)*3+0 = 6. With the stale startIndex_ (7),
- *           the result would differ — proving the effective value is used.
+ *           end(), iter != begin, --iter points to 12, diff = 30-12-1 = 17.
+ *           17 >= 2*3, but 17 % 3 = 2 so the last regular line is partial:
+ *           last two lines are {28,29}+{25,26,27} = 5, not 2*3 = 6.
+ *           With the stale startIndex_ (7), the result would differ — proving
+ *           the effective value is used.
  * @tc.type: FUNC
  */
 HWTEST_F(GridScrollLayoutTestFourNg, CachedCount017, TestSize.Level1)
@@ -1296,26 +1298,27 @@ HWTEST_F(GridScrollLayoutTestFourNg, CachedCount017, TestSize.Level1)
     CreateFixedItems(30);
     CreateDone();
 
-    // Bottom out of bounds: startMainLineIndex_ (5) > endMainLineIndex_ (3)
-    pattern_->info_.startMainLineIndex_ = 5;
-    pattern_->info_.endMainLineIndex_ = 3;
-    pattern_->info_.startIndex_ = 7; // stale
-    pattern_->info_.endIndex_ = 6;
-    pattern_->info_.childrenCount_ = 30;
-    pattern_->info_.crossCount_ = 3;
-    // gridMatrix_ does NOT contain line 3 (startMainLineIndex_ - cachedCount = 3)
-    // so the gridMatrix path is skipped and the fallthrough path is reached
-    pattern_->info_.gridMatrix_ = {
-        { 5, { { 0, 15 }, { 1, 16 }, { 2, 17 } } },
-    };
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto algo =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    // Bottom out of bounds: startMainLineIndex_ (5) > endMainLineIndex_ (3)
+    algo->info_.startMainLineIndex_ = 5;
+    algo->info_.endMainLineIndex_ = 3;
+    algo->info_.startIndex_ = 7; // stale
+    algo->info_.endIndex_ = 6;
+    algo->info_.childrenCount_ = 30;
+    algo->info_.crossCount_ = 3;
+    // gridMatrix_ does NOT contain line 3 (startMainLineIndex_ - cachedCount = 3)
+    // so the gridMatrix path is skipped and the fallthrough path is reached
+    algo->info_.gridMatrix_ = {
+        { 5, { { 0, 15 }, { 1, 16 }, { 2, 17 } } },
+    };
     auto cacheStart = algo->CalculateStartCachedCount(option, 2);
     // effectiveStartIndex = GetChildrenCount() = 30 (bottom out-of-bounds)
     // lower_bound(30) on {0,3,6,9,12} → end(), iter != begin, --iter → 12
-    // diff = 30 - 12 - 1 = 17 >= (2-0)*3=6 → return (2-0)*3+0 = 6
-    EXPECT_EQ(cacheStart, 6);
+    // diff = 30 - 12 - 1 = 17 >= 2*3, rem = 17 % 3 = 2
+    // last two lines: rem + (2-1)*3 = 5
+    EXPECT_EQ(cacheStart, 5);
 }
 
 /**
@@ -1662,7 +1665,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, CachedCount024, TestSize.Level1)
  *           (effectiveStartIndex = GetChildrenCount()) reaching the fallthrough
  *           path via CalculateStartCachedCountByIrregular, where effectiveStartIndex
  *           exceeds all irregular indexes. lower_bound returns end(), --iter → 12,
- *           diff = 30 - 12 - 1 = 17 >= (2-0)*3 = 6 → return 6.
+ *           diff = 30 - 12 - 1 = 17 >= 2*3, rem = 2 → last two lines = 5.
  *           This specifically covers the combination of branch 1 (overscroll)
  *           with the fallthrough irregular computation path.
  * @tc.type: FUNC
@@ -1680,23 +1683,23 @@ HWTEST_F(GridScrollLayoutTestFourNg, CachedCount025, TestSize.Level1)
     CreateFixedItems(30);
     CreateDone();
 
-    // Bottom out of bounds: startMainLineIndex_ (5) > endMainLineIndex_ (3)
-    pattern_->info_.startMainLineIndex_ = 5;
-    pattern_->info_.endMainLineIndex_ = 3;
-    pattern_->info_.startIndex_ = 7; // stale
-    pattern_->info_.endIndex_ = 6;
-    pattern_->info_.childrenCount_ = 30;
-    pattern_->info_.crossCount_ = 3;
-    pattern_->info_.gridMatrix_ = {};
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto algo =
         AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    // Bottom out of bounds: startMainLineIndex_ (5) > endMainLineIndex_ (3)
+    algo->info_.startMainLineIndex_ = 5;
+    algo->info_.endMainLineIndex_ = 3;
+    algo->info_.startIndex_ = 7; // stale
+    algo->info_.endIndex_ = 6;
+    algo->info_.childrenCount_ = 30;
+    algo->info_.crossCount_ = 3;
+    algo->info_.gridMatrix_ = {};
     auto cacheStart = algo->CalculateStartCachedCount(option, 2);
     // effectiveStartIndex = GetChildrenCount() = 30 (branch 1: overscroll)
     // > firstIrregularIndex(0) → fallthrough to CalculateStartCachedCountByIrregular
     // lower_bound(30) on {0,3,6,9,12} → end(), iter != begin, --iter → 12
-    // diff = 30 - 12 - 1 = 17 >= (2-0)*3=6 → return (2-0)*3+0 = 6
-    EXPECT_EQ(cacheStart, 6);
+    // diff = 30 - 12 - 1 = 17 >= 2*3, rem = 17 % 3 = 2 → 2 + 3 = 5
+    EXPECT_EQ(cacheStart, 5);
 }
 
 /**
@@ -2007,6 +2010,125 @@ HWTEST_F(GridScrollLayoutTestFourNg, CachedCount033, TestSize.Level1)
     // → walk: {16} (1 line) + {17} (1 line) exhausts the 2-line budget → 2
     // clamped at remaining = 21 - 1 - 15 = 5 → 2 (true window: lines 6-7 hold 2 items)
     EXPECT_EQ(cacheEnd, 2);
+}
+
+/**
+ * @tc.name: CachedCount034
+ * @tc.desc: Test CalculateStartCachedCountByIrregular when the last regular line
+ *           before an irregular start is partial. irregularIndexes = {0,2,22},
+ *           cachedCount = 2, crossCount = 3, startIndex_ = 22 (irregular).
+ *           Layout: line with {21} is leftover (1 item), previous line is
+ *           {18,19,20}. The 2-line window above 22 holds 4 items, not 2*3 = 6.
+ *           Regression: the first branch previously returned budget * crossCount
+ *           whenever diff filled that many full lines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestFourNg, CachedCount034, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 2, 22 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(25);
+    CreateDone();
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    // Viewport starts on irregular 22; matrix miss on startMainLineIndex_ - cachedCount.
+    algo->info_.startMainLineIndex_ = 3;
+    algo->info_.endMainLineIndex_ = 4;
+    algo->info_.startIndex_ = 22;
+    algo->info_.endIndex_ = 24;
+    algo->info_.childrenCount_ = 25;
+    algo->info_.crossCount_ = 3;
+    algo->info_.gridMatrix_ = {};
+    // lower_bound(22) → 22, --iter → 2, diff = 22-2-1 = 19, budget = 2
+    // 19 >= 6, rem = 19 % 3 = 1 → 1 + 3 = 4 ({21} + {18,19,20})
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 4);
+}
+
+/**
+ * @tc.name: CachedCount035
+ * @tc.desc: Test CalculateStartCachedCount bottom-overscroll when the last content
+ *           line is partial. irregularIndexes = {0}, cachedCount = 2, crossCount = 2,
+ *           childrenCount = 6. Layout: line0={0}, {1,2}, {3,4}, {5}. The 2-line
+ *           window above childrenCount holds {5}+{3,4} = 3, not 2*2 = 4.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestFourNg, CachedCount035, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(6);
+    CreateDone();
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    // Bottom out of bounds: startMainLineIndex_ (5) > endMainLineIndex_ (0)
+    algo->info_.startMainLineIndex_ = 5;
+    algo->info_.endMainLineIndex_ = 0;
+    algo->info_.startIndex_ = 0; // stale
+    algo->info_.endIndex_ = 0;
+    algo->info_.childrenCount_ = 6;
+    algo->info_.crossCount_ = 2;
+    algo->info_.gridMatrix_ = {};
+    // effectiveStartIndex = 6, lower_bound(6) → end(), --iter → 0
+    // diff = 6-0-1 = 5, budget = 2: 5 >= 4, rem = 1 → 1 + 2 = 3
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 3);
+}
+
+/**
+ * @tc.name: CachedCount036
+ * @tc.desc: Test CalculateStartCachedCountByIrregular when rem == 0, i.e. diff equals
+ *           budget * crossCount. irregularIndexes = {0}, cachedCount = 2, crossCount = 2,
+ *           childrenCount = 5. Layout: line0={0}, {1,2}, {3,4}. The 2-line window above
+ *           childrenCount is two full regular lines = 4, matching the pre-fix
+ *           budget * crossCount branch. CachedCount017/035 cover rem != 0 only.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestFourNg, CachedCount036, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(5);
+    CreateDone();
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    // Bottom out of bounds so GetEffectiveStartIndex() == childrenCount.
+    // startMainLineIndex_ - cachedCount > 0 avoids the top-of-grid early return.
+    algo->info_.startMainLineIndex_ = 5;
+    algo->info_.endMainLineIndex_ = 0;
+    algo->info_.startIndex_ = 0; // stale
+    algo->info_.endIndex_ = 0;
+    algo->info_.childrenCount_ = 5;
+    algo->info_.crossCount_ = 2;
+    algo->info_.gridMatrix_ = {};
+    // effectiveStartIndex = 5, lower_bound(5) → end(), --iter → 0
+    // diff = 5-0-1 = 4, budget = 2: 4 >= 4, rem = 0 → budget * crossCount = 4
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 4);
 }
 
 HWTEST_F(GridScrollLayoutTestFourNg, isFadingBottomTest001, TestSize.Level1)
