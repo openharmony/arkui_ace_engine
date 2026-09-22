@@ -23,6 +23,7 @@
 #include "base/geometry/shape.h"
 #include "frame_information.h"
 #include "grid_layout_option.h"
+#include "animate_impl.h"
 #include "native_material_impl.h"
 #include "native_type.h"
 #include "node_model.h"
@@ -2900,6 +2901,48 @@ const ArkUI_AttributeItem* GetTransform(ArkUI_NodeHandle node)
     }
     g_attributeItem.size = NUM_16;
     return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetTransform3D(ArkUI_NodeHandle node)
+{
+    ArkUI_Float32 values[NUM_16];
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getTransform3D(node->uiNodeHandle, &values);
+    for (int i = 0; i < NUM_16; i++) {
+        g_numberValues[i].f32 = values[i];
+    }
+    g_attributeItem.size = NUM_16;
+    return &g_attributeItem;
+}
+
+int32_t SetTransform3D(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || (item->size == 0 && item->object == nullptr)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    float transforms[ALLOW_SIZE_16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+
+    if (item->size == ALLOW_SIZE_16) {
+        for (int i = 0; i < ALLOW_SIZE_16; ++i) {
+            transforms[i] = item->value[i].f32;
+        }
+    } else if (item->object != nullptr) {
+        const ArkUI_Matrix4* matrixObj = static_cast<const ArkUI_Matrix4*>(item->object);
+        if (matrixObj == nullptr || matrixObj->matrix == nullptr) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        fullImpl->getNodeModifiers()->getMatrix4Modifier()->getElements(matrixObj->matrix, transforms);
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setTransform3D(node->uiNodeHandle, transforms, ALLOW_SIZE_16);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTransform3D(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetTransform3D(node->uiNodeHandle);
 }
 
 int32_t SetHitTestBehavior(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -21290,6 +21333,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAccessibilityDefaultFocus,
         SetInspectorLabel,
         SetSystemMaterial,
+        SetTransform3D,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -21432,6 +21476,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         nullptr,
         GetInspectorLabel,
         GetSystemMaterial,
+        GetTransform3D,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -21575,6 +21620,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAccessibilityDefaultFocus,
         ResetInspectorLabel,
         ResetSystemMaterial,
+        ResetTransform3D,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

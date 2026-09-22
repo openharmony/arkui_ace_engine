@@ -1055,6 +1055,7 @@ public:
     static bool GetClip(FrameNode* frameNode);
     static RefPtr<BasicShape> GetClipShape(FrameNode* frameNode);
     static Matrix4 GetTransform(FrameNode* frameNode);
+    static Matrix4 GetTransform3D(FrameNode* frameNode);
     static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
     static std::optional<EdgesParam> GetPositionEdges(FrameNode* frameNode);
