@@ -4542,7 +4542,11 @@ void TextFieldPattern::OnModifyDone()
     }
     TriggerAvoidWhenCaretGoesDown();
     UpdateSelectOverlay(textFieldTheme);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    // Skip measure dirty when pressed state style (attributeModifier with applyPressedAttribute) is configured,
+    // to avoid unnecessary re-layout on every press state re-application.
+    if (!HasStateStyle(UI_STATE_PRESSED)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
     SetIsEnableSubWindowMenu();
     isModifyDone_ = true;
     lpxInfo_.lastLogicScale = context->GetLogicScale();
