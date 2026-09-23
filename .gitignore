@@ -3,6 +3,8 @@
 *.iml
 .idea/
 .teamai/
+.codespec/
+.gitcode/oh-gc-config.json
 adapter/*
 !adapter/ohos/
 !adapter/preview/
