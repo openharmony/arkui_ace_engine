@@ -1331,6 +1331,11 @@ export class WebResourceResponse implements MaterializedBase {
         this.setResponseData_serialize(data_casted)
         return
     }
+    public setResponseBody(data: string | int32 | global_resource_Resource | ArrayBuffer): void {
+        const data_casted = data as (string | int32 | global_resource_Resource | ArrayBuffer)
+        this.setResponseBody_serialize(data_casted)
+        return
+    }
     public setResponseEncoding(encoding: string): void {
         const encoding_casted = encoding as (string)
         this.setResponseEncoding_serialize(encoding_casted)
@@ -1452,6 +1457,28 @@ export class WebResourceResponse implements MaterializedBase {
             thisSerializer.writeBuffer(dataForIdx3)
         }
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseData(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setResponseBody_serialize(data: string | int32 | global_resource_Resource | ArrayBuffer): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (data instanceof string) {
+            thisSerializer.writeInt8((0).toByte())
+            const dataForIdx0 = data as string
+            thisSerializer.writeString(dataForIdx0)
+        } else if (data instanceof int32) {
+            thisSerializer.writeInt8((1).toByte())
+            const dataForIdx1 = data as int32
+            thisSerializer.writeInt32(dataForIdx1)
+        } else if (data instanceof global_resource_Resource) {
+            thisSerializer.writeInt8((2).toByte())
+            const dataForIdx2 = data as global_resource_Resource
+            global_resource_Resource_serializer.write(thisSerializer, dataForIdx2)
+        } else if (data instanceof ArrayBuffer) {
+            thisSerializer.writeInt8((3).toByte())
+            const dataForIdx3 = data as ArrayBuffer
+            thisSerializer.writeBuffer(dataForIdx3)
+        }
+        ArkUIGeneratedNativeModule._WebResourceResponse_setResponseBody(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setResponseEncoding_serialize(encoding: string): void {
