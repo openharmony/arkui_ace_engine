@@ -30,15 +30,19 @@ constexpr uint32_t ARKUI_NEW_PIPELINE_MIN_VERSION = 9;
 #if defined(WINDOWS_PLATFORM)
 constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dll";
 constexpr char ARKUI_LIB_NAME[] = "libace.dll";
+constexpr char ARKUI_XCOMPONENT_LIB_NAME[] = "libarkui_xcomponent.dll";
 #elif defined(MAC_PLATFORM)
 constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.dylib";
 constexpr char ARKUI_LIB_NAME[] = "libace.dylib";
+constexpr char ARKUI_XCOMPONENT_LIB_NAME[] = "libarkui_xcomponent.dylib";
 #elif defined(LINUX_PLATFORM)
 constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.so";
 constexpr char ARKUI_LIB_NAME[] = "libace.so";
+constexpr char ARKUI_XCOMPONENT_LIB_NAME[] = "libarkui_xcomponent.so";
 #else
 constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.z.so";
 constexpr char ARKUI_LIB_NAME[] = "libace.z.so";
+constexpr char ARKUI_XCOMPONENT_LIB_NAME[] = "libarkui_xcomponent.z.so";
 #endif
 #ifdef OHOS_PLATFORM
 const std::string KERNEL_TYPE_HM = "hongmeng";
@@ -94,6 +98,11 @@ const char* AceForwardCompatibility::GetAceLibName()
         libName = ARKUI_LIB_NAME_COMPATIBLE;
     }
     return libName;
+}
+
+const char* AceForwardCompatibility::GetAceXComponentLibName()
+{
+    return ARKUI_XCOMPONENT_LIB_NAME;
 }
 
 bool AceForwardCompatibility::PipelineChanged()
