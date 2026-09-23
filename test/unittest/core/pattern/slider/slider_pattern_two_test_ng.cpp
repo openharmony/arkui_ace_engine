@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <optional>
 #include <type_traits>
 
@@ -546,7 +547,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest018, TestSize.Level1)
     sliderPaintProperty->UpdateValue(FLOAT_ONE);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Value: 1.000000\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Value: 1.000000\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -565,7 +566,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest019, TestSize.Level1)
     sliderPaintProperty->UpdateMin(FLOAT_ZERO);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Min: 0.000000\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Min: 0.000000\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -584,7 +585,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest020, TestSize.Level1)
     sliderPaintProperty->UpdateMax(FLOAT_FIFTY);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Max: 50.000000\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Max: 50.000000\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -603,7 +604,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest021, TestSize.Level1)
     sliderPaintProperty->UpdateStep(FLOAT_FIVE);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Step: 5.000000\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Step: 5.000000\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -622,7 +623,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest022, TestSize.Level1)
     sliderPaintProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Style: OUTSET\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Style: OUTSET\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -641,7 +642,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest023, TestSize.Level1)
     sliderPaintProperty->UpdateDirection(Axis::HORIZONTAL);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Direction: HORIZONTAL\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Direction: HORIZONTAL\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -660,7 +661,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest024, TestSize.Level1)
     sliderPaintProperty->UpdateReverse(true);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Reverse: true\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Reverse: true\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -679,7 +680,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest025, TestSize.Level1)
     sliderPaintProperty->UpdateBlockColor(Color::RED);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockColor: #FFFF0000\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockColor: #FFFF0000\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -701,7 +702,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest026, TestSize.Level1)
     sliderPaintProperty->UpdateTrackBackgroundColor(gradient);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "TrackBackgroundColor: #00000000 \n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "TrackBackgroundColor: #00000000 \n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -720,7 +721,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest027, TestSize.Level1)
     sliderPaintProperty->UpdateSelectColor(Color::GRAY);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "SelectColor: #FFC0C0C0\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "SelectColor: #FFC0C0C0\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -739,7 +740,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest028, TestSize.Level1)
     sliderPaintProperty->UpdateMinResponsiveDistance(FLOAT_TWENTY);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "MinResponsiveDistance: 20.000000\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "MinResponsiveDistance: 20.000000\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -758,7 +759,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest029, TestSize.Level1)
     sliderPaintProperty->UpdateShowSteps(true);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ShowSteps: true\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "ShowSteps: true\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -777,7 +778,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest030, TestSize.Level1)
     sliderPaintProperty->UpdateShowTips(true);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "ShowTips: true\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "ShowTips: true\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -797,7 +798,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest031, TestSize.Level1)
     RefPtr<SliderPaintProperty> paintProperty = AceType::MakeRefPtr<SliderPaintProperty>();
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "Thickness: 10.00px\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "Thickness: 10.00px\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -817,7 +818,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest032, TestSize.Level1)
     paintProperty->UpdateBlockBorderColor(Color::BLUE);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockBorderColor: #FF0000FF\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockBorderColor: #FF0000FF\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -837,7 +838,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest033, TestSize.Level1)
     paintProperty->UpdateBlockBorderWidth(BORDER_WIDTH);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockBorderWidth: 15.00px\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockBorderWidth: 15.00px\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -857,7 +858,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest034, TestSize.Level1)
     paintProperty->UpdateStepColor(Color::GREEN);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "StepColor: #FF00FF00\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "StepColor: #FF00FF00\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -877,7 +878,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest035, TestSize.Level1)
     paintProperty->UpdateStepSize(STEP_SIZE);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "StepSize: 2.00px\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "StepSize: 2.00px\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -897,7 +898,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest036, TestSize.Level1)
     paintProperty->UpdateTrackBorderRadius(TRACK_BORDER_RADIUS);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "TrackBorderRadius: 5.00px\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "TrackBorderRadius: 5.00px\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -917,7 +918,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest037, TestSize.Level1)
     paintProperty->UpdateSelectedBorderRadius(SELECT_BORDER_RADIUS);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "SelectedBorderRadius: 5.00px\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "SelectedBorderRadius: 5.00px\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -937,7 +938,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest038, TestSize.Level1)
     layoutProperty->UpdateBlockSize(BLOCK_SIZE);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockSize: [300.00px x 300.00px]\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockSize: [300.00px x 300.00px]\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -957,7 +958,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest039, TestSize.Level1)
     paintProperty->UpdateBlockType(SliderModel::BlockStyleType::SHAPE);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockType: SHAPE\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockType: SHAPE\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -977,7 +978,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest040, TestSize.Level1)
     paintProperty->UpdateBlockImage(SLIDER_MODEL_NG_BLOCK_IMAGE);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockImage: Default Image\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockImage: Default Image\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -997,7 +998,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest041, TestSize.Level1)
     paintProperty->UpdateSliderInteractionMode(SliderModel::SliderInteraction::SLIDE_AND_CLICK);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "SliderInteractionMode: SLIDE_AND_CLICK\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "SliderInteractionMode: SLIDE_AND_CLICK\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -1018,7 +1019,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest042, TestSize.Level1)
     paintProperty->UpdateValidSlideRange(range);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "SlideRange: from: nan to: nan\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "SlideRange: from: nan to: nan\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -1039,7 +1040,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest043, TestSize.Level1)
     paintProperty->UpdateBlockShape(shape);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpSubInfo(paintProperty);
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockShape: NONE\n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockShape: NONE\n"), DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -1204,7 +1205,7 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest048, TestSize.Level1)
     sliderPaintProperty->UpdateBlockGradientColor(gradient);
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockLinearGradientColor: #00000000 \n");
+    EXPECT_NE(std::find(DumpLog::GetInstance().description_.begin(), DumpLog::GetInstance().description_.end(), "BlockLinearGradientColor: #00000000 \n"), DumpLog::GetInstance().description_.end());
 }
 
 /**

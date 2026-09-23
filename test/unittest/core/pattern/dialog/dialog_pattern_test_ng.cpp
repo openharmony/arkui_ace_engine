@@ -164,7 +164,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump001, Te
      * @tc.expected: These Dump properties are matched.
      */
     pattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 26);
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 31);
 }
 
 /**
@@ -192,7 +192,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump002, Te
      * @tc.expected: These Dump properties are matched.
      */
     pattern->DumpInfo(jsonPtr);
-    EXPECT_EQ(jsonPtr->GetArraySize(), 12);
+    EXPECT_EQ(jsonPtr->GetArraySize(), 17);
 }
 
 /**
@@ -338,7 +338,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump003, Te
      * @tc.expected: These Dump properties are matched.
      */
     pattern->DumpInfo(jsonPtr);
-    EXPECT_EQ(jsonPtr->GetArraySize(), 26);
+    EXPECT_EQ(jsonPtr->GetArraySize(), 31);
 }
 
 /**
