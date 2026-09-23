@@ -7406,12 +7406,17 @@ void TextFieldPattern::ProcessPendingCaretEvent()
 
     auto caretInfo = pendingCaretInfo_.value();
     pendingCaretInfo_.reset();
-    if (caretInfo.text == contentController_->GetTextValue()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ProcessPendingCaretEvent set caret to %{public}d", caretInfo.pos);
-        SetCaretPosition(caretInfo.pos);
-    } else {
+    if (caretInfo.text != contentController_->GetTextValue()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ProcessPendingCaretEvent Not Matched abort");
+        return;
     }
+    // On the cross-platform path the IME may echo back a redundant caret set with the same position.
+    // SetCaretPosition would then close the select overlay/menu that was just shown, so skip it here.
+    if (selectController_ && caretInfo.pos == selectController_->GetCaretIndex()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ProcessPendingCaretEvent set caret to %{public}d", caretInfo.pos);
+    SetCaretPosition(caretInfo.pos);
 }
 
 EmojiRelation TextFieldPattern::GetEmojiRelation(int index)
