@@ -701,6 +701,14 @@ void SmartGestureManager::RevealSelectedNodeIfNeeded(const RefPtr<FrameNode>& no
 void SmartGestureManager::PaintSelectedNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    if (paintRect.Width() <= 0 || paintRect.Height() <= 0) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "paintSelectedNode skipped, node not laid out, deferred until SyncGeometryNode retry");
+        return;
+    }
     auto focusHub = node->GetFocusHub();
     if (focusHub && focusHub->PaintFocusStateToRenderContext()) {
         selectedPaintedNode_ = node;
@@ -708,8 +716,6 @@ void SmartGestureManager::PaintSelectedNode(const RefPtr<FrameNode>& node)
     }
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto appTheme = context->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
     renderContext->PaintFocusState(appTheme->GetFocusOutPaddingVp(), appTheme->GetFocusColor(),
