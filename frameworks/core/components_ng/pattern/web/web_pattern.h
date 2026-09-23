@@ -1354,6 +1354,7 @@ private:
     void HandleBlurEvent(const BlurReason& blurReason);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
+    bool HandleEscToBackSupport(PipelineContext* pipeline);
     void WebRequestFocus();
     void ResetDragAction();
     void InitSlideUpdateListener();
@@ -1836,6 +1837,7 @@ private:
     ScrollbarLayoutPolicy scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
     bool scrollbarLayoutPolicyChanged_ = false;
     bool isLanguageRtl_ = false;
+    bool isEscKeyDownConsumed_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
