@@ -411,7 +411,7 @@ HWTEST_F(TextFieldTenPatternNg, LogForFormRender001, TestSize.Level1)
 HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftMoveAction001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and pattern
+     * @tc.steps: step1. create frameNode and pattern.
      */
     auto [frameNode, pattern] = Init();
     pattern->textForDisplay_ = u"test";
@@ -436,7 +436,7 @@ HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftMoveAction001, TestSize.Level1)
 HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftMoveAction002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and pattern
+     * @tc.steps: step1. create frameNode and pattern.
      */
     auto [frameNode, pattern] = Init();
     pattern->textForDisplay_ = u"test";
@@ -1180,7 +1180,7 @@ HWTEST_F(TextFieldTenPatternNg, GetTextHeight001, TestSize.Level1)
     EXPECT_CALL(*paragraph2, GetLineCount()).WillRepeatedly(Return(1));
     
     /**
-     * @tc.steps: step3. UpdateMaxLines of lines in the layout property to 3
+     * @tc.steps: step3. UpdateMaxLines of lines in the layout property to 3.
      * @tc.expected: The result of GetTextHeight is 0.0.
      */
     layoutProperty->UpdateMaxLines(3);
