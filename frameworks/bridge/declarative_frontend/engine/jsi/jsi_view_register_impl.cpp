@@ -801,6 +801,14 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         return;
     }
 #endif
+    if (module == "Canvas") {
+        JSCanvasPattern::JSBind(globalObj);
+        JSCanvasGradient::JSBind(globalObj);
+        JSCanvasImageData::JSBind(globalObj);
+        JSMatrix2d::JSBind(globalObj);
+        JSRenderImage::JSBind(globalObj, nativeEngine);
+        return;
+    }
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
@@ -810,12 +818,6 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSSwiperControllerBinding::JSBind(globalObj);
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
-    } else if ((*func).first == "Canvas") {
-        JSCanvasPattern::JSBind(globalObj);
-        JSCanvasGradient::JSBind(globalObj);
-        JSCanvasImageData::JSBind(globalObj);
-        JSMatrix2d::JSBind(globalObj);
-        JSRenderImage::JSBind(globalObj, nativeEngine);
     }
 
     (*func).second(globalObj);

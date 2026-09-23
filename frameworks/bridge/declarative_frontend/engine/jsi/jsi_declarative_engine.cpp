@@ -919,6 +919,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Select", "arkui.components.arkselect" },
         { "Navigator", "arkui.components.arknavigator" },
         { "Panel", "arkui.components.arkpanel" },
+        { "Canvas", "arkui.components.arkcanvas" },
         { "Divider", "arkui.components.arkdivider" },
         { "RelativeContainer", "arkui.components.arkrelativecontainer" },
         { "Blank", "arkui.components.arkblank" },
