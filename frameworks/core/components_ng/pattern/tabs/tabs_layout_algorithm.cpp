@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/tabs/tabs_side_bar_tab_list_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "ui/base/geometry/ng/offset_t.h"
+#include "ui/base/geometry/ng/size_t.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,6 +63,7 @@ const Dimension SIDE_BAR_DEFAULT_WIDTH = 240.0_vp;
 constexpr int32_t SWIPER_INDEX = 0;
 constexpr int32_t SIDEBAR_DIVIDER_INDEX = 1;
 constexpr int32_t SIDEBAR_INDEX = 2;
+constexpr int32_t EFFECT_NODE_INDEX = 3;
 } // namespace
 
 void TabsLayoutAlgorithm::UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
@@ -121,21 +124,6 @@ void TabsLayoutAlgorithm::UpdateTabBarAndDividerVisibility(LayoutWrapper* layout
     auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->ApplyDefaultVisibility();
-}
-
-void TabsLayoutAlgorithm::UpdateEffectNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto host = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
-    CHECK_NULL_VOID(host);
-    if (!host->HasEffectNode()) {
-        return;
-    }
-    auto effectNode = AceType::DynamicCast<FrameNode>(host->GetEffectNode());
-    CHECK_NULL_VOID(effectNode);
-    auto property = effectNode->GetLayoutProperty();
-    CHECK_NULL_VOID(property);
-    property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
 }
 
 void TabsLayoutAlgorithm::UpdateBgMaskNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible)
@@ -319,11 +307,16 @@ void TabsLayoutAlgorithm::MeasureInSideBarMode(
     if (swiperWrapper) {
         swiperWrapper->GetLayoutProperty()->UpdateLayoutDirection(layoutProperty->GetNonAutoLayoutDirection());
     }
+    SizeF swiperSize;
     if (swiperWrapper && swiperWrapper->GetHostNode() && swiperWrapper->GetHostNode()->TotalChildCount() > 0) {
-        MeasureSwiperInSideBarMode(
+        swiperSize = MeasureSwiperInSideBarMode(
             layoutProperty, swiperWrapper, idealSize, sideBarWidth, dividerStrokeWidth);
     } else if (swiperWrapper && swiperWrapper->GetGeometryNode()) {
         swiperWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+    }
+    auto effectWrapper = layoutWrapper->GetChildByIndex(itemIndex_.effectIndex);
+    if (effectWrapper) {
+        MeasureEffectNode(layoutProperty, effectWrapper, swiperSize);
     }
 }
 
@@ -371,7 +364,6 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (displayModeChanged) {
         UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::SIDEBAR);
         UpdateTabBarAndDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
-        UpdateEffectNodeVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
         UpdateBgMaskNodeVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
         auto context = tabsNode->GetContext();
         CHECK_NULL_VOID(context);
@@ -483,15 +475,16 @@ void TabsLayoutAlgorithm::LayoutInSideBarMode(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.swiperIndex);
+    auto effectWrapper = layoutWrapper->GetChildByIndex(itemIndex_.effectIndex);
     if (!swiperWrapper || !sideBarDividerWrapper || !sideBarWrapper) {
         return;
     }
 
     // swiper sideBarDivider sideBar
-    std::vector<OffsetF> offsetList = { OffsetF(), OffsetF(), OffsetF() };
+    std::vector<OffsetF> offsetList = { OffsetF(), OffsetF(), OffsetF(), OffsetF() };
     if (frameSize.IsPositive()) {
         MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), frameSize);
-        offsetList = LayoutOffsetListInSideBarMode(layoutWrapper, sideBarWrapper, frameSize);
+        offsetList = LayoutOffsetListInSideBarMode(layoutWrapper, sideBarWrapper, effectWrapper, frameSize);
     }
 
     auto swiperGeo = swiperWrapper->GetGeometryNode();
@@ -508,6 +501,12 @@ void TabsLayoutAlgorithm::LayoutInSideBarMode(LayoutWrapper* layoutWrapper)
     if (sideBarGeo) {
         sideBarGeo->SetMarginFrameOffset(offsetList[SIDEBAR_INDEX]);
         sideBarWrapper->Layout();
+    }
+    if (effectWrapper) {
+        auto geometryNode = effectWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->SetMarginFrameOffset(offsetList[EFFECT_NODE_INDEX]);
+        effectWrapper->Layout();
     }
 }
 
@@ -653,11 +652,28 @@ void TabsLayoutAlgorithm::LayoutBackgroundMask(LayoutWrapper* layoutWrapper)
     backgroundMaskWrapper->Layout();
 }
 
-std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarWrapper,
+void TabsLayoutAlgorithm::CalcEffectNodeOffsetInSideBarMode(LayoutWrapper* layoutWrapper,
+    const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize,
+    const OffsetF& paddingOffset, std::vector<OffsetF>& offsetList) const
+{
+    CHECK_NULL_VOID(effectNodeWrapper);
+    auto effectNodeGeometryNode = effectNodeWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(effectNodeGeometryNode);
+    auto effectNodeFrameSize = effectNodeGeometryNode->GetMarginFrameSize();
+    auto barPosition = GetBarPosition(layoutWrapper);
+    if (barPosition == BarPosition::START) {
+        offsetList[EFFECT_NODE_INDEX] = OffsetF(offsetList[SWIPER_INDEX].GetX(), paddingOffset.GetY());
+    } else {
+        offsetList[EFFECT_NODE_INDEX] = OffsetF(offsetList[SWIPER_INDEX].GetX(),
+            frameSize.Height() - effectNodeFrameSize.Height() + paddingOffset.GetY());
+    }
+}
+
+std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(LayoutWrapper* layoutWrapper,
+    const RefPtr<LayoutWrapper>& sideBarWrapper, const RefPtr<LayoutWrapper>& effectNodeWrapper,
     const SizeF& frameSize) const
 {
-    constexpr int32_t OFFSET_COUNT = 3;
+    constexpr int32_t OFFSET_COUNT = 4;
     std::vector<OffsetF> offsetList(OFFSET_COUNT, OffsetF());
     CHECK_NULL_RETURN(layoutWrapper, offsetList);
     auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
@@ -719,6 +735,7 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetListInSideBarMode(
         offsetList[SIDEBAR_DIVIDER_INDEX] = OffsetF(frameSize.Width() - sideBarFrameSize.Width() - dividerStrokeWidth +
             paddingOffset.GetX(), paddingOffset.GetY() + dividerStartMarginPx);
     }
+    CalcEffectNodeOffsetInSideBarMode(layoutWrapper, effectNodeWrapper, frameSize, paddingOffset, offsetList);
     return offsetList;
 }
 

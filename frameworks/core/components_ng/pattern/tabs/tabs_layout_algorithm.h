@@ -119,7 +119,6 @@ private:
 
     void UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
     void UpdateTabBarAndDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
-    void UpdateEffectNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
     void UpdateBgMaskNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
     void MeasureInSideBarMode(
         LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize);
@@ -131,9 +130,12 @@ private:
         const RefPtr<TabsLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& swiperWrapper,
         const SizeF& idealSize, const float sideBarWidth, const float dividerWidth);
 
-    std::vector<OffsetF> LayoutOffsetListInSideBarMode(
-        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarWrapper,
+    std::vector<OffsetF> LayoutOffsetListInSideBarMode(LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& sideBarWrapper, const RefPtr<LayoutWrapper>& effectNodeWrapper,
         const SizeF& frameSize) const;
+    void CalcEffectNodeOffsetInSideBarMode(LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize,
+        const OffsetF& paddingOffset, std::vector<OffsetF>& offsetList) const;
     void LayoutInSideBarMode(LayoutWrapper* layoutWrapper);
 
     LayoutCalPolicy widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
