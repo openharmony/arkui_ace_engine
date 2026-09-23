@@ -18,7 +18,7 @@ import { InteropNativeModule } from "@koalaui/interop";
 import { ArkBaseNode } from "./ArkBaseNode";
 import { CopyOptions, CustomBuilder, DecorationStyleInterface, EditMenuOptions, EllipsisMode, Font, FontSettingOptions, FontStyle, FontWeight, Length, LineBreakStrategy, MarqueeState, ResourceColor, SelectionMenuOptions, ShadowOptions, TextAlign, TextAttribute, TextCase, TextDataDetectorConfig, TextHeightAdaptivePolicy, TextMarqueeOptions, TextOverflowOptions, TextResponseType, TextSelectableMode, TextSpanType, WordBreak } from "../framework";
 import { ArkCommonMethodPeer } from "../framework";
-import { ArkTextPeer } from "../framework";
+import { ArkTextPeer, ResourceStr } from "../framework";
 import { LengthMetrics } from "../Graphics";
 import { Resource } from "global.resource"
 import { runtimeType, RuntimeType,  } from "@koalaui/interop"
@@ -113,17 +113,12 @@ export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
         this.markDirty();
         return this;
     }
-    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
-        const weight_type = runtimeType(weight)
-        const options_type = runtimeType(options)
-        if ((RuntimeType.NUMBER == weight_type) || (RuntimeType.NUMBER == weight_type) || (RuntimeType.STRING == weight_type) || (RuntimeType.UNDEFINED == weight_type)) {
-            const weight_casted = weight as (int32 | FontWeight | string | undefined)
-            const options_casted = options as (FontSettingOptions | undefined)
-            this.getPeer()?.setFontWeightAttribute(weight_casted, options_casted)
-            this.markDirty();
-            return this
-        }
-        return this;
+    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
+        const weight_casted = weight as (int32 | FontWeight | ResourceStr | undefined)
+        const options_casted = options as (FontSettingOptions | undefined)
+        this.getPeer()?.setFontWeightAttribute(weight_casted, options_casted)
+        this.markDirty();
+        return this
     }
     lineSpacing(value: LengthMetrics | undefined): this {
         const value_casted = value as (LengthMetrics | undefined)

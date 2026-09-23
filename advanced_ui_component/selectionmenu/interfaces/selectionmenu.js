@@ -577,7 +577,7 @@ class SelectionMenuComponent extends ViewPU {
     }
 
     popDataFromPasteboard(richEditorSelection) {
-        if (!richEditorSelection) {
+        if (!richEditorSelection || !richEditorSelection.selection) {
             return;
         }
         let start = richEditorSelection.selection[0];
