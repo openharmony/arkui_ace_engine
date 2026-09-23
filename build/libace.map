@@ -3512,6 +3512,7 @@
       "OHOS::Ace::SystemProperties::GetDebugEnabled()";
       "OHOS::Ace::SystemProperties::GetDeviceType()";
       "OHOS::Ace::SystemProperties::GetDragStartPanDistanceThreshold()";
+      "OHOS::Ace::SystemProperties::GetEventBenchMarkEnabled()";
       "OHOS::Ace::SystemProperties::GetMultiInstanceEnabled()";
       "OHOS::Ace::SystemProperties::GetSideBarContainerBlurEnable()";
       "OHOS::Ace::SystemProperties::GetVelocityTrackerPointNumber()";
