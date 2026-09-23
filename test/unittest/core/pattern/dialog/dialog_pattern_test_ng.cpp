@@ -34,6 +34,7 @@
 #include "test/unittest/core/event/frame_node_on_tree.h"
 
 #include "base/log/dump_log.h"
+#include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/multi_thread_build_manager.h"
@@ -1836,5 +1837,39 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternForceSplitRatioListenerCall
     ASSERT_TRUE(it != forceSplitMgr->forceSplitRatioListeners_.end());
     ASSERT_TRUE(it->second);
     it->second(0.6f);
+}
+namespace {
+struct DialogShowReportRecorder {
+    uint32_t lastResType = 0;
+    int32_t reportCount = 0;
+} g_dialogShowReportRecorder;
+
+void DialogShowReportCapture(uint32_t resType, int64_t value,
+    const std::unordered_map<std::string, std::string>& payload)
+{
+    g_dialogShowReportRecorder.lastResType = resType;
+    g_dialogShowReportRecorder.reportCount++;
+}
+} // namespace
+
+/**
+ * @tc.name: DialogPatternReportDialogShow001
+ * @tc.desc: test alert dialog did-appear reports RES_TYPE_DIALOG_EVENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternReportDialogShow001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    pattern->dialogProperties_.type = DialogType::ALERT_DIALOG;
+    g_dialogShowReportRecorder = {};
+    ResSchedReport::GetInstance().reportDataFunc_ = &DialogShowReportCapture;
+    pattern->CallDialogDidAppearCallback();
+    ResSchedReport::GetInstance().reportDataFunc_ = nullptr;
+    EXPECT_EQ(g_dialogShowReportRecorder.lastResType, 225u);
+    EXPECT_EQ(g_dialogShowReportRecorder.reportCount, 1);
+    EXPECT_EQ(pattern->GetState(), PromptActionCommonState::APPEARED);
 }
 } // namespace OHOS::Ace::NG

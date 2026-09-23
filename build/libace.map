@@ -4030,6 +4030,7 @@
       "OHOS::Ace::PreMakeScope::SetPreMake(bool)";
       "OHOS::Ace::ResourceParseUtils::ParseResDimensionNG(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, bool)";
       "OHOS::Ace::ResSchedReport::HandleSwiperChange(std::__h::unordered_map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::hash<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::equal_to<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>&)";
+      "OHOS::Ace::ResSchedReport::ReportDialogShow()";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::BarPosition, Ark_BarPosition>(std::__h::optional<OHOS::Ace::BarPosition>&, Ark_BarPosition const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::BoardStyle, Ark_BoardStyle>(std::__h::optional<OHOS::Ace::BoardStyle>&, Ark_BoardStyle const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::IndicatorStyle, Ark_SubTabBarIndicatorStyle>(std::__h::optional<OHOS::Ace::IndicatorStyle>&, Ark_SubTabBarIndicatorStyle const&)";
