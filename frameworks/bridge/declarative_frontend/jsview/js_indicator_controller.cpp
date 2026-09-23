@@ -23,7 +23,7 @@ const NG::ArkUIIndicatorControllerModifier* GetIndicatorControllerModifier()
 {
     static const NG::ArkUIIndicatorControllerModifier* cachedModifier = nullptr;
     static std::once_flag initFlag;
-    std::call_once(initFlag, {
+    std::call_once(initFlag, []() {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("IndicatorComponent");
         if (module != nullptr) {
             cachedModifier = reinterpret_cast<const NG::ArkUIIndicatorControllerModifier*>(

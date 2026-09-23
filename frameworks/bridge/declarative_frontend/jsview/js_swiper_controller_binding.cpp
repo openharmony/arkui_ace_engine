@@ -94,7 +94,7 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
 
 const NG::NodeModifier::ArkUICustomSwiperControllerModifier* GetSwiperControllerModifier()
 {
-    static const NG::NodeModifier::ArkUICustomSwiperControllerModifier* cachedModifier = {
+    static const NG::NodeModifier::ArkUICustomSwiperControllerModifier* cachedModifier = []() {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
         if (module == nullptr) {
             LOGF_ABORT("Can't find swiper dynamic module");
@@ -328,7 +328,7 @@ void JSSwiperControllerBinding::StopFakeDrag(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     bool ret = false;
     if (!controller_) {
-        args.SetReturnValue(JSRef::Make(ToJSValue(ret)));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(ret)));
         return;
     }
     if (auto* modifier = GetSwiperControllerModifier()) {
@@ -342,7 +342,7 @@ void JSSwiperControllerBinding::IsFakeDragging(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     bool ret = false;
     if (!controller_) {
-        args.SetReturnValue(JSRef::Make(ToJSValue(ret)));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(ret)));
         return;
     }
     if (auto* modifier = GetSwiperControllerModifier()) {
