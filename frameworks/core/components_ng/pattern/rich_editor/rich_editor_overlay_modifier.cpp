@@ -268,11 +268,20 @@ void RichEditorOverlayModifier::PaintFloatingCaret(DrawingContext& drawingContex
 void RichEditorOverlayModifier::PaintScrollBar(DrawingContext& context)
 {
     auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(!pattern || pattern->GetBarDisplayMode() != DisplayMode::OFF);
-    if (pattern->IsFreeScrollEnabled()) {
-        pattern->GetScrollController()->OnDrawScrollBar(context, Claim(this));
-        return;
-    }
+    CHECK_NULL_VOID(pattern && pattern->GetBarDisplayMode() != DisplayMode::OFF);
+    pattern->IsFreeScrollEnabled() ? PaintFreeScrollBar(context, pattern) : PaintFixedScrollBar(context);
+}
+
+void RichEditorOverlayModifier::PaintFreeScrollBar(DrawingContext& context, const RefPtr<RichEditorPattern>& pattern)
+{
+    CHECK_NULL_VOID(pattern);
+    auto scrollController = pattern->GetScrollController();
+    CHECK_NULL_VOID(scrollController);
+    scrollController->OnDrawScrollBar(context, Claim(this));
+}
+
+void RichEditorOverlayModifier::PaintFixedScrollBar(DrawingContext& context)
+{
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);
     scrollBarOverlayModifier->onDraw(context);
@@ -338,13 +347,23 @@ void RichEditorOverlayModifier::DrawScrollBar(DrawingContext& drawingContext)
 
 void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)
 {
-    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(richEditorPattern);
-    if (richEditorPattern->IsFreeScrollEnabled()) {
-        richEditorPattern->GetScrollController()->UpdateScrollBar();
-        return;
-    }
-    auto scrollBar = richEditorPattern->GetScrollControllerBar();
+    auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    pattern->IsFreeScrollEnabled() ? UpdateFreeScrollBar(pattern) : UpdateFixedScrollBar(pattern);
+}
+
+void RichEditorOverlayModifier::UpdateFreeScrollBar(const RefPtr<RichEditorPattern>& pattern)
+{
+    CHECK_NULL_VOID(pattern);
+    auto scrollController = pattern->GetScrollController();
+    CHECK_NULL_VOID(scrollController);
+    scrollController->UpdateScrollBar();
+}
+
+void RichEditorOverlayModifier::UpdateFixedScrollBar(const RefPtr<RichEditorPattern>& pattern)
+{
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollControllerBar();
     if (!scrollBar || !scrollBar->NeedPaint()) {
         return;
     }

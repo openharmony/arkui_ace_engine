@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
+class RichEditorPattern;
 class RichEditorOverlayModifier : public TextOverlayModifier {
     DECLARE_ACE_TYPE(RichEditorOverlayModifier, TextOverlayModifier);
 
@@ -71,8 +72,12 @@ private:
     void PaintCaret(DrawingContext& drawingContext) const;
     void PaintFloatingCaret(DrawingContext& drawingContext) const;
     void PaintScrollBar(DrawingContext& context);
+    void PaintFreeScrollBar(DrawingContext& context, const RefPtr<RichEditorPattern>& pattern);
+    void PaintFixedScrollBar(DrawingContext& context);
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void DrawScrollBar(DrawingContext& drawingContext);
+    void UpdateFreeScrollBar(const RefPtr<RichEditorPattern>& pattern);
+    void UpdateFixedScrollBar(const RefPtr<RichEditorPattern>& pattern);
 
     RefPtr<PropertyBool> caretVisible_;
     RefPtr<PropertyBool> originCaretVisible_;

@@ -68,6 +68,11 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleFreeScroll001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    pattern->CreateNodePaintMethod();
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
@@ -75,29 +80,29 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleFreeScroll001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
 
-    // needUpdateOffset=true, barDisplayMode_=ON, IsAttachedModifier true → UpdateScrollBarOffset
+    // needUpdateOffset=true, barDisplayMode_=ON, IsAttachedModifier true -> UpdateScrollBarOffset
     pattern->barDisplayMode_ = DisplayMode::ON;
-    controller->isScrollBarModifierPropertyAttached_ = true;
+    freeScroll->isScrollBarModifierPropertyAttached_ = true;
     pattern->HandleFreeScroll(true);
     ASSERT_TRUE(controller->IsFreeScrollEnabled());
-    ASSERT_NE(controller->scrollBar_, nullptr);
-    ASSERT_EQ(controller->scrollBar_->GetDisplayMode(), DisplayMode::ON);
+    ASSERT_NE(freeScroll->scrollBar_, nullptr);
+    ASSERT_EQ(freeScroll->scrollBar_->GetDisplayMode(), DisplayMode::ON);
     ASSERT_NE(pattern->hostOverlayMod_, nullptr);
 
-    // needUpdateOffset=true, barDisplayMode_ nullopt → AUTO, IsAttachedModifier false → RemoveOverlayModifier
-    auto oldCtrl = controller->freeScrollController_;
-    controller->isScrollBarModifierPropertyAttached_ = false;
+    // needUpdateOffset=true, barDisplayMode_ nullopt -> AUTO, IsAttachedModifier false -> RemoveOverlayModifier
+    auto oldCtrl = freeScroll->freeScrollController_;
+    freeScroll->isScrollBarModifierPropertyAttached_ = false;
     pattern->overlayMod_ = nullptr;
     pattern->barDisplayMode_.reset();
     pattern->HandleFreeScroll(true);
-    ASSERT_NE(controller->freeScrollController_, oldCtrl);
-    ASSERT_EQ(controller->scrollBar_->GetDisplayMode(), DisplayMode::AUTO);
+    ASSERT_NE(freeScroll->freeScrollController_, oldCtrl);
+    ASSERT_EQ(freeScroll->scrollBar_->GetDisplayMode(), DisplayMode::AUTO);
     ASSERT_EQ(pattern->hostOverlayMod_, nullptr);
 
-    // needUpdateOffset=false → no recreate, early return
-    oldCtrl = controller->freeScrollController_;
+    // needUpdateOffset=false -> no recreate, early return
+    oldCtrl = freeScroll->freeScrollController_;
     pattern->HandleFreeScroll(false);
-    ASSERT_EQ(controller->freeScrollController_, oldCtrl);
+    ASSERT_EQ(freeScroll->freeScrollController_, oldCtrl);
 }
 
 /**
@@ -112,19 +117,22 @@ HWTEST_F(RichEditorFreeScrollTestNg, InitFreeScrollController001, TestSize.Level
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
 
-    // Branch: freeScrollController_ null → create new controller
+    // Branch: freeScrollController_ null -> create new controller
     ASSERT_FALSE(controller->IsFreeScrollEnabled());
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     ASSERT_TRUE(controller->IsFreeScrollEnabled());
 
-    // Branch: freeScrollController_ exists + forceRecreate=false → early return
-    auto oldFreeCtrl = controller->freeScrollController_;
-    controller->InitFreeScrollController(false);
-    ASSERT_EQ(controller->freeScrollController_, oldFreeCtrl);
+    // Branch: freeScrollController_ exists + forceRecreate=false -> early return
+    auto oldFreeCtrl = freeScroll->freeScrollController_;
+    freeScroll->InitFreeScrollController(false);
+    ASSERT_EQ(freeScroll->freeScrollController_, oldFreeCtrl);
 
-    // Branch: freeScrollController_ exists + forceRecreate=true → reset then recreate
-    controller->InitFreeScrollController(true);
-    ASSERT_NE(controller->freeScrollController_, oldFreeCtrl);
+    // Branch: freeScrollController_ exists + forceRecreate=true -> reset then recreate
+    freeScroll->InitFreeScrollController(true);
+    ASSERT_NE(freeScroll->freeScrollController_, oldFreeCtrl);
 }
 
 /**
@@ -138,41 +146,45 @@ HWTEST_F(RichEditorFreeScrollTestNg, SetScrollBar001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
 
-    // Branch: displayMode==OFF + scrollBar_ null → isScrollBarModifierPropertyAttached_ reset
+    // Branch: displayMode==OFF + scrollBar_ null -> isScrollBarModifierPropertyAttached_ reset
     controller->SetScrollBar(DisplayMode::OFF);
-    ASSERT_EQ(controller->scrollBar_, nullptr);
-    ASSERT_FALSE(controller->isScrollBarModifierPropertyAttached_);
+    ASSERT_EQ(freeScroll->scrollBar_, nullptr);
+    ASSERT_FALSE(freeScroll->isScrollBarModifierPropertyAttached_);
 
-    // Branch: displayMode!=OFF + scrollBar_ null + oldMode!=displayMode → create and set mode
+    // Branch: displayMode!=OFF + scrollBar_ null + oldMode!=displayMode -> create and set mode
     controller->SetScrollBar(DisplayMode::AUTO);
-    ASSERT_NE(controller->scrollBar_, nullptr);
-    ASSERT_EQ(controller->scrollBar_->GetDisplayMode(), DisplayMode::AUTO);
+    ASSERT_NE(freeScroll->scrollBar_, nullptr);
+    ASSERT_EQ(freeScroll->scrollBar_->GetDisplayMode(), DisplayMode::AUTO);
 
-    // Branch: displayMode!=OFF + scrollBar_ exists + oldMode==displayMode → skip inner block
+    // Branch: displayMode!=OFF + scrollBar_ exists + oldMode==displayMode -> skip inner block
     controller->SetScrollBar(DisplayMode::AUTO);
-    ASSERT_EQ(controller->scrollBar_->GetDisplayMode(), DisplayMode::AUTO);
+    ASSERT_EQ(freeScroll->scrollBar_->GetDisplayMode(), DisplayMode::AUTO);
 
-    // Branch: isSingleLineMode_ true → vertical scrollable disabled
+    // Branch: isSingleLineMode_ true -> vertical scrollable disabled
     pattern->isSingleLineMode_ = true;
     controller->SetScrollBar(DisplayMode::ON);
-    ASSERT_FALSE(controller->scrollBar_->IsVerticalScrollable());
+    ASSERT_FALSE(freeScroll->scrollBar_->IsVerticalScrollable());
     pattern->isSingleLineMode_ = false;
 
-    // Branch: displayMode==OFF + scrollBar_ exists → reset scrollBar_
+    // Branch: displayMode==OFF + scrollBar_ exists -> reset scrollBar_
     controller->SetScrollBar(DisplayMode::OFF);
-    ASSERT_FALSE(controller->scrollBar_);
+    ASSERT_FALSE(freeScroll->scrollBar_);
 
-    // Branch: isRTL → PositionMode LEFT; isLTR → PositionMode RIGHT
+    // Branch: isRTL -> PositionMode LEFT; isLTR -> PositionMode RIGHT
     controller->SetScrollBar(DisplayMode::AUTO);
     auto layoutProperty = pattern->GetLayoutProperty<RichEditorLayoutProperty>();
     layoutProperty->layoutDirection_ = TextDirection::RTL;
     controller->SetScrollBar(DisplayMode::ON);
-    ASSERT_NE(controller->scrollBar_->GetVerticalBar(), nullptr);
-    ASSERT_EQ(controller->scrollBar_->GetVerticalBar()->GetPositionMode(), PositionMode::LEFT);
+    ASSERT_NE(freeScroll->scrollBar_->GetVerticalBar(), nullptr);
+    ASSERT_EQ(freeScroll->scrollBar_->GetVerticalBar()->GetPositionMode(), PositionMode::LEFT);
     layoutProperty->layoutDirection_ = TextDirection::LTR;
     controller->SetScrollBar(DisplayMode::AUTO);
-    ASSERT_EQ(controller->scrollBar_->GetVerticalBar()->GetPositionMode(), PositionMode::RIGHT);
+    ASSERT_EQ(freeScroll->scrollBar_->GetVerticalBar()->GetPositionMode(), PositionMode::RIGHT);
 }
 
 /**
@@ -186,25 +198,29 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveTextRectWithAxis001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::ON);
 
-    // Branch: isSingleLineMode_ + Axis::VERTICAL → IsScrollDirectionValid false → return 0.0f
+    // Branch: isSingleLineMode_ + Axis::VERTICAL -> IsScrollDirectionValid false -> return 0.0f
     pattern->isSingleLineMode_ = true;
-    ASSERT_EQ(controller->MoveTextRectWithAxis(10.0f, Axis::VERTICAL), 0.0f);
+    ASSERT_EQ(controller->MoveTextRectWithAxis(10.0f, Axis::VERTICAL, 0.0f), 0.0f);
 
-    // Branch: isSingleLineMode_ + Axis::HORIZONTAL → valid direction, MoveTextRectHorizontal
+    // Branch: isSingleLineMode_ + Axis::HORIZONTAL -> valid direction, MoveTextRectHorizontal
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(-5.0f, 0.0f, 120.0f, 50.0f);
-    auto hOffset = controller->MoveTextRectWithAxis(5.0f, Axis::HORIZONTAL);
+    auto hOffset = controller->MoveTextRectWithAxis(5.0f, Axis::HORIZONTAL, 0.0f);
     ASSERT_EQ(hOffset, 5.0f);
     ASSERT_EQ(controller->textRect_.GetX(), 0.0f);
 
-    // Branch: !isSingleLineMode_ + Axis::VERTICAL → valid direction, MoveTextRectVertical
+    // Branch: !isSingleLineMode_ + Axis::VERTICAL -> valid direction, MoveTextRectVertical
     pattern->isSingleLineMode_ = false;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(0.0f, -3.0f, 100.0f, 80.0f);
-    auto vOffset = controller->MoveTextRectWithAxis(3.0f, Axis::VERTICAL);
+    auto vOffset = controller->MoveTextRectWithAxis(3.0f, Axis::VERTICAL, 0.0f);
     ASSERT_EQ(vOffset, 3.0f);
     ASSERT_EQ(controller->textRect_.GetY(), 0.0f);
 }
@@ -220,42 +236,45 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleScrollCallback001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
 
-    // Branch: HandleScrollCallback - invalid direction (isVertical + isSingleLineMode) → early return
+    // Branch: HandleScrollCallback - invalid direction (isVertical + isSingleLineMode) — early return
     pattern->isSingleLineMode_ = true;
-    controller->scrollingAxis_ = Axis::VERTICAL;
-    controller->HandleScrollCallback(10.0f, SCROLL_FROM_START, true);
-    ASSERT_EQ(controller->scrollingAxis_, Axis::VERTICAL);
+    freeScroll->scrollingAxis_ = Axis::VERTICAL;
+    freeScroll->HandleScrollCallback(10.0f, SCROLL_FROM_START, true);
+    ASSERT_EQ(freeScroll->scrollingAxis_, Axis::VERTICAL);
 
-    // Branch: HandleScrollCallback - valid direction + source=SCROLL_FROM_START → scrollingAxis_ set
+    // Branch: HandleScrollCallback - valid direction + source=SCROLL_FROM_START — scrollingAxis_ set
     pattern->isSingleLineMode_ = false;
-    controller->HandleScrollCallback(10.0f, SCROLL_FROM_START, false);
-    ASSERT_EQ(controller->scrollingAxis_, Axis::HORIZONTAL);
+    freeScroll->HandleScrollCallback(10.0f, SCROLL_FROM_START, false);
+    ASSERT_EQ(freeScroll->scrollingAxis_, Axis::HORIZONTAL);
 
     // Branch: HandleScrollCallback - valid direction + source!=SCROLL_FROM_START + !IsReachAvoidBoundary
-    controller->HandleScrollCallback(0.0f, SCROLL_FROM_NONE, true);
-    ASSERT_EQ(controller->scrollingAxis_, Axis::HORIZONTAL);
+    freeScroll->HandleScrollCallback(0.0f, SCROLL_FROM_NONE, true);
+    ASSERT_EQ(freeScroll->scrollingAxis_, Axis::HORIZONTAL);
 
-    // Branch: HandleScrollCallback - valid direction + source!=SCROLL_FROM_START + IsReachAvoidBoundary → stop
+    // Branch: HandleScrollCallback - valid direction + source!=SCROLL_FROM_START + IsReachAvoidBoundary — stop
     pattern->contentRect_ = RectF(0.0f, 0.0f, 300.0f, 300.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 300.0f, 300.0f);
-    controller->HandleScrollCallback(5.0f, SCROLL_FROM_NONE, true);
-    ASSERT_EQ(controller->scrollingAxis_, Axis::HORIZONTAL);
+    freeScroll->HandleScrollCallback(5.0f, SCROLL_FROM_NONE, true);
+    ASSERT_EQ(freeScroll->scrollingAxis_, Axis::HORIZONTAL);
 
     // Branch: HandleScrollCallback - valid direction + source=SCROLL_FROM_JUMP + offset!=0 + !IsReachAvoidBoundary
-    controller->SetScrollBar(DisplayMode::AUTO);
-    controller->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->SetScrollBar(DisplayMode::AUTO);
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
     MockContainer::SetUp(MockPipelineContext::pipeline_);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::pipeline_->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(0.0f, -3.0f, 100.0f, 80.0f);
-    ASSERT_NE(controller->scrollBar_, nullptr);
-    auto vBar = controller->scrollBar_->GetVerticalBar();
+    ASSERT_NE(freeScroll->scrollBar_, nullptr);
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
     ASSERT_NE(vBar, nullptr);
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->HandleScrollCallback(3.0f, SCROLL_FROM_JUMP, true);
+    freeScroll->HandleScrollCallback(3.0f, SCROLL_FROM_JUMP, true);
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
     ASSERT_EQ(controller->textRect_.GetY(), 0.0f);
 }
@@ -271,40 +290,44 @@ HWTEST_F(RichEditorFreeScrollTestNg, UpdateScrollBarOffsetWithAxis001, TestSize.
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::ON);
 
-    // Branch: isSingleLineMode_ + Axis::VERTICAL → IsScrollDirectionValid false → early return
+    // Branch: isSingleLineMode_ + Axis::VERTICAL -> IsScrollDirectionValid false -> early return
     pattern->isSingleLineMode_ = true;
     controller->UpdateScrollBarOffsetWithAxis(Axis::VERTICAL);
-    ASSERT_FALSE(controller->scrollBar_->IsVerticalScrollable());
+    ASSERT_FALSE(freeScroll->scrollBar_->IsVerticalScrollable());
     pattern->isSingleLineMode_ = false;
 
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(0.0f, -5.0f, 120.0f, 60.0f);
     pattern->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
 
-    // Branch: Axis::NONE → early return
+    // Branch: Axis::NONE -> early return
     controller->UpdateScrollBarOffsetWithAxis(Axis::NONE);
-    ASSERT_FALSE(controller->scrollBar_->IsVerticalScrollable());
+    ASSERT_FALSE(freeScroll->scrollBar_->IsVerticalScrollable());
 
-    // Branch: Axis::VERTICAL + hasText=false → SetVerticalScrollable(false)
+    // Branch: Axis::VERTICAL + hasText=false -> SetVerticalScrollable(false)
     controller->UpdateScrollBarOffsetWithAxis(Axis::VERTICAL, false);
-    ASSERT_FALSE(controller->scrollBar_->IsVerticalScrollable());
+    ASSERT_FALSE(freeScroll->scrollBar_->IsVerticalScrollable());
 
-    // Branch: Axis::HORIZONTAL + hasText=false → SetHorizontalScrollable(false)
+    // Branch: Axis::HORIZONTAL + hasText=false -> SetHorizontalScrollable(false)
     controller->UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL, false);
-    ASSERT_FALSE(controller->scrollBar_->IsHorizontalScrollable());
+    ASSERT_FALSE(freeScroll->scrollBar_->IsHorizontalScrollable());
 
     AddSpan(TEST_STR);
 
-    // Branch: Axis::VERTICAL + hasText=true + needAnimation=false → SetVerticalScrollable(true)
+    // Branch: Axis::VERTICAL + hasText=true + needAnimation=false -> SetVerticalScrollable(true)
     controller->UpdateScrollBarOffsetWithAxis(Axis::VERTICAL, false);
-    ASSERT_TRUE(controller->scrollBar_->IsVerticalScrollable());
+    ASSERT_TRUE(freeScroll->scrollBar_->IsVerticalScrollable());
 
-    // Branch: Axis::HORIZONTAL + hasText=true + needAnimation=true → SetHorizontalScrollable(true)
+    // Branch: Axis::HORIZONTAL + hasText=true + needAnimation=true -> SetHorizontalScrollable(true)
     controller->UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL, true);
-    ASSERT_TRUE(controller->scrollBar_->IsHorizontalScrollable());
+    ASSERT_TRUE(freeScroll->scrollBar_->IsHorizontalScrollable());
 }
 
 /**
@@ -318,43 +341,47 @@ HWTEST_F(RichEditorFreeScrollTestNg, ScheduleDisappearDelayTask001, TestSize.Lev
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::AUTO);
-    controller->scrollBar_->SetVerticalScrollable(true);
-    controller->scrollBar_->SetHorizontalScrollable(true);
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->scrollBar_->SetHorizontalScrollable(true);
     MockContainer::SetUp(MockPipelineContext::pipeline_);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::pipeline_->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
-    auto vBar = controller->scrollBar_->GetVerticalBar();
-    auto hBar = controller->scrollBar_->GetHorizontalBar();
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto hBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(vBar, nullptr);
     ASSERT_NE(hBar, nullptr);
 
-    // scrollingAxis_ == NONE → schedule both vertical and horizontal disappear tasks
-    controller->scrollingAxis_ = Axis::NONE;
+    // scrollingAxis_ == NONE -> schedule both vertical and horizontal disappear tasks
+    freeScroll->scrollingAxis_ = Axis::NONE;
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
     hBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
     controller->ScheduleDisappearDelayTask();
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
     ASSERT_EQ(hBar->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
 
-    // scrollingAxis_ == VERTICAL → only schedule vertical disappear task
-    controller->scrollingAxis_ = Axis::VERTICAL;
+    // scrollingAxis_ == VERTICAL -> only schedule vertical disappear task
+    freeScroll->scrollingAxis_ = Axis::VERTICAL;
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
     hBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
     controller->ScheduleDisappearDelayTask();
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
     ASSERT_EQ(hBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
 
-    // single-line mode + Axis::VERTICAL → direction invalid → no task scheduled
+    // single-line mode + Axis::VERTICAL -> direction invalid -> no task scheduled
     pattern->isSingleLineMode_ = true;
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->ScheduleDisappearDelayTask(Axis::VERTICAL);
+    freeScroll->ScheduleDisappearDelayTask(Axis::VERTICAL);
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
 
-    // single-line mode + Axis::HORIZONTAL → direction valid → schedule horizontal task
+    // single-line mode + Axis::HORIZONTAL -> direction valid -> schedule horizontal task
     hBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->ScheduleDisappearDelayTask(Axis::HORIZONTAL);
+    freeScroll->ScheduleDisappearDelayTask(Axis::HORIZONTAL);
     ASSERT_EQ(hBar->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
     pattern->isSingleLineMode_ = false;
 }
@@ -370,23 +397,27 @@ HWTEST_F(RichEditorFreeScrollTestNg, PlayScrollBarAppearAnimation001, TestSize.L
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::AUTO);
-    controller->scrollBar_->SetVerticalScrollable(true);
-    controller->scrollBar_->SetHorizontalScrollable(true);
-    auto vBar = controller->scrollBar_->GetVerticalBar();
-    auto hBar = controller->scrollBar_->GetHorizontalBar();
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->scrollBar_->SetHorizontalScrollable(true);
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto hBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(vBar, nullptr);
     ASSERT_NE(hBar, nullptr);
 
-    // axis == Axis::VERTICAL → play vertical bar appear animation
+    // axis == Axis::VERTICAL -> play vertical bar appear animation
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->PlayScrollBarAppearAnimation(Axis::VERTICAL);
+    freeScroll->PlayScrollBarAppearAnimation(Axis::VERTICAL);
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
 
-    // axis != Axis::VERTICAL → play horizontal bar appear animation
+    // axis != Axis::VERTICAL -> play horizontal bar appear animation
     hBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->PlayScrollBarAppearAnimation(Axis::HORIZONTAL);
+    freeScroll->PlayScrollBarAppearAnimation(Axis::HORIZONTAL);
     ASSERT_EQ(hBar->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
 }
 
@@ -401,7 +432,11 @@ HWTEST_F(RichEditorFreeScrollTestNg, UpdateScrollBarColor001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
@@ -411,8 +446,8 @@ HWTEST_F(RichEditorFreeScrollTestNg, UpdateScrollBarColor001, TestSize.Level1)
     auto themeFg = scrollbarTheme->GetForegroundColor();
     auto themeBg = scrollbarTheme->GetBackgroundColor();
     controller->SetScrollBar(DisplayMode::AUTO);
-    auto vBar = controller->scrollBar_->GetVerticalBar();
-    auto hBar = controller->scrollBar_->GetHorizontalBar();
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto hBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(vBar, nullptr);
     ASSERT_NE(hBar, nullptr);
 
@@ -441,12 +476,16 @@ HWTEST_F(RichEditorFreeScrollTestNg, IsMouseOverScrollBar001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::ON);
-    controller->scrollBar_->SetVerticalScrollable(true);
-    controller->scrollBar_->SetHorizontalScrollable(true);
-    auto vBar = controller->scrollBar_->GetVerticalBar();
-    auto hBar = controller->scrollBar_->GetHorizontalBar();
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->scrollBar_->SetHorizontalScrollable(true);
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto hBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(vBar, nullptr);
     ASSERT_NE(hBar, nullptr);
     pattern->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
@@ -493,38 +532,43 @@ HWTEST_F(RichEditorFreeScrollTestNg, IsPointInScrollBarRect001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->SetScrollBar(DisplayMode::ON);
-    controller->scrollBar_->SetVerticalScrollable(true);
-    controller->scrollBar_->SetHorizontalScrollable(true);
-    auto vBar = controller->scrollBar_->GetVerticalBar();
-    auto hBar = controller->scrollBar_->GetHorizontalBar();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->SetScrollBar(DisplayMode::ON);
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->scrollBar_->SetHorizontalScrollable(true);
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto hBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(vBar, nullptr);
     ASSERT_NE(hBar, nullptr);
     pattern->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     vBar->barRect_ = Rect(0.0, 0.0, 100.0, 100.0);
     hBar->barRect_ = Rect(0.0, 0.0, 100.0, 100.0);
 
-    // shapeMode is ROUND instead of RECT → return false
+    // shapeMode is ROUND instead of RECT -> return false
+    auto frameSize = SizeF(100.0f, 100.0f);
     vBar->SetShapeMode(ShapeMode::ROUND);
-    ASSERT_FALSE(controller->IsPointInScrollBarRect(Point(95, 50), true));
+    ASSERT_FALSE(freeScroll->scrollBar_->IsPointInScrollBar(Point(95, 50), frameSize, true));
     vBar->SetShapeMode(ShapeMode::RECT);
 
-    // vertical bar not scrollable → return false
-    controller->scrollBar_->SetVerticalScrollable(false);
-    ASSERT_FALSE(controller->IsPointInScrollBarRect(Point(95, 50), true));
-    controller->scrollBar_->SetVerticalScrollable(true);
+    // vertical bar not scrollable -> return false
+    freeScroll->scrollBar_->SetVerticalScrollable(false);
+    ASSERT_FALSE(freeScroll->scrollBar_->IsPointInScrollBar(Point(95, 50), frameSize, true));
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
 
-    // isVertical true, point in region → return true
-    ASSERT_TRUE(controller->IsPointInScrollBarRect(Point(95, 50), true));
+    // isVertical true, point in region -> return true
+    ASSERT_TRUE(freeScroll->scrollBar_->IsPointInScrollBar(Point(95, 50), frameSize, true));
 
-    // isVertical true, point not in region → return false
-    ASSERT_FALSE(controller->IsPointInScrollBarRect(Point(0, 0), true));
+    // isVertical true, point not in region -> return false
+    ASSERT_FALSE(freeScroll->scrollBar_->IsPointInScrollBar(Point(0, 0), frameSize, true));
 
-    // isVertical false, point in region → return true
-    ASSERT_TRUE(controller->IsPointInScrollBarRect(Point(50, 95), false));
+    // isVertical false, point in region -> return true
+    ASSERT_TRUE(freeScroll->scrollBar_->IsPointInScrollBar(Point(50, 95), frameSize, false));
 
-    // isVertical false, point not in region → return false
-    ASSERT_FALSE(controller->IsPointInScrollBarRect(Point(0, 0), false));
+    // isVertical false, point not in region -> return false
+    ASSERT_FALSE(freeScroll->scrollBar_->IsPointInScrollBar(Point(0, 0), frameSize, false));
 }
 
 /**
@@ -538,41 +582,45 @@ HWTEST_F(RichEditorFreeScrollTestNg, CheckScrollEnabled001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::ON);
-    ASSERT_NE(controller->freeScrollController_, nullptr);
-    ASSERT_NE(controller->scrollBar_->scrollableEvent_, nullptr);
+    ASSERT_NE(freeScroll->freeScrollController_, nullptr);
+    ASSERT_NE(freeScroll->scrollBar_->scrollableEvent_, nullptr);
 
-    // no text content and no overflow → enabled false
+    // no text content and no overflow -> enabled false
     pattern->isSingleLineMode_ = false;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     controller->CheckScrollEnabled();
-    ASSERT_FALSE(controller->freeScrollController_->enabled_);
-    ASSERT_FALSE(controller->scrollBar_->scrollableEvent_->GetEnabled());
+    ASSERT_FALSE(freeScroll->freeScrollController_->enabled_);
+    ASSERT_FALSE(freeScroll->scrollBar_->scrollableEvent_->GetEnabled());
 
-    // text present and vertical overflow → enabled true
+    // text present and vertical overflow -> enabled true
     AddSpan(TEST_STR);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 100.0f, 200.0f);
     controller->CheckScrollEnabled();
-    ASSERT_TRUE(controller->freeScrollController_->enabled_);
-    ASSERT_TRUE(controller->scrollBar_->scrollableEvent_->GetEnabled());
+    ASSERT_TRUE(freeScroll->freeScrollController_->enabled_);
+    ASSERT_TRUE(freeScroll->scrollBar_->scrollableEvent_->GetEnabled());
 
-    // single-line mode suppresses vertical scroll, horizontal overflow → enabled true
+    // single-line mode suppresses vertical scroll, horizontal overflow -> enabled true
     pattern->isSingleLineMode_ = true;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 50.0f, 100.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 200.0f, 100.0f);
     controller->CheckScrollEnabled();
-    ASSERT_TRUE(controller->freeScrollController_->enabled_);
-    ASSERT_TRUE(controller->scrollBar_->scrollableEvent_->GetEnabled());
+    ASSERT_TRUE(freeScroll->freeScrollController_->enabled_);
+    ASSERT_TRUE(freeScroll->scrollBar_->scrollableEvent_->GetEnabled());
 
-    // text present but no overflow → enabled false
+    // text present but no overflow -> enabled false
     pattern->isSingleLineMode_ = false;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 300.0f, 300.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 300.0f, 300.0f);
     controller->CheckScrollEnabled();
-    ASSERT_FALSE(controller->freeScrollController_->enabled_);
-    ASSERT_FALSE(controller->scrollBar_->scrollableEvent_->GetEnabled());
+    ASSERT_FALSE(freeScroll->freeScrollController_->enabled_);
+    ASSERT_FALSE(freeScroll->scrollBar_->scrollableEvent_->GetEnabled());
 }
 
 /**
@@ -585,11 +633,15 @@ HWTEST_F(RichEditorFreeScrollTestNg, UpdateScrollBarOffset001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto& scrollController = richEditorPattern->scrollController_;
-    scrollController->InitFreeScrollController();
+    richEditorPattern->isHorizontalScrolling_ = true;
+    richEditorPattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(scrollController);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     scrollController->SetScrollBar(DisplayMode::ON);
-    ASSERT_NE(scrollController->scrollBar_, nullptr);
-    auto verticalBar = scrollController->scrollBar_->GetVerticalBar();
-    auto horizontalBar = scrollController->scrollBar_->GetHorizontalBar();
+    ASSERT_NE(freeScroll->scrollBar_, nullptr);
+    auto verticalBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto horizontalBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(verticalBar, nullptr);
     ASSERT_NE(horizontalBar, nullptr);
     verticalBar->SetScrollable(true);
@@ -611,7 +663,7 @@ HWTEST_F(RichEditorFreeScrollTestNg, UpdateScrollBarOffset001, TestSize.Level1)
     horizontalBar->SetScrollable(true);
     verticalBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
     horizontalBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    scrollController->scrollingAxis_ = Axis::VERTICAL;
+    freeScroll->scrollingAxis_ = Axis::VERTICAL;
     scrollController->UpdateScrollBarOffset();
     EXPECT_TRUE(verticalBar->IsScrollable());
     EXPECT_TRUE(horizontalBar->IsScrollable());
@@ -630,23 +682,27 @@ HWTEST_F(RichEditorFreeScrollTestNg, SetMinHeight001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     controller->SetScrollBar(DisplayMode::ON);
-    ASSERT_NE(controller->scrollBar_, nullptr);
+    ASSERT_NE(freeScroll->scrollBar_, nullptr);
 
     Dimension testHeight(50.0, DimensionUnit::VP);
     // horizontalBar is nullptr, verticalBar exists, SetMinHeight sets vertical bar min height
-    auto savedHorizontalBar = controller->scrollBar_->horizontalBar_;
-    controller->scrollBar_->horizontalBar_ = nullptr;
+    auto savedHorizontalBar = freeScroll->scrollBar_->horizontalBar_;
+    freeScroll->scrollBar_->horizontalBar_ = nullptr;
     controller->SetMinHeight(testHeight);
-    auto verticalBar = controller->scrollBar_->GetVerticalBar();
+    auto verticalBar = freeScroll->scrollBar_->GetVerticalBar();
     ASSERT_NE(verticalBar, nullptr);
     ASSERT_EQ(verticalBar->GetMinHeight().Value(), testHeight.Value());
 
     // verticalBar is nullptr, horizontalBar exists, SetMinHeight sets horizontal bar min height
-    controller->scrollBar_->horizontalBar_ = savedHorizontalBar;
-    controller->scrollBar_->verticalBar_ = nullptr;
+    freeScroll->scrollBar_->horizontalBar_ = savedHorizontalBar;
+    freeScroll->scrollBar_->verticalBar_ = nullptr;
     controller->SetMinHeight(testHeight);
-    auto horizontalBar = controller->scrollBar_->GetHorizontalBar();
+    auto horizontalBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(horizontalBar, nullptr);
     ASSERT_EQ(horizontalBar->GetMinHeight().Value(), testHeight.Value());
 }
@@ -662,10 +718,14 @@ HWTEST_F(RichEditorFreeScrollTestNg, AttachModifier001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     controller->SetScrollBar(DisplayMode::ON);
-    ASSERT_NE(controller->scrollBar_, nullptr);
-    auto verticalModifier = controller->scrollBar_->GetVerticalModifier();
-    auto horizontalModifier = controller->scrollBar_->GetHorizontalModifier();
+    ASSERT_NE(freeScroll->scrollBar_, nullptr);
+    auto verticalModifier = freeScroll->scrollBar_->GetVerticalModifier();
+    auto horizontalModifier = freeScroll->scrollBar_->GetHorizontalModifier();
     ASSERT_NE(verticalModifier, nullptr);
     ASSERT_NE(horizontalModifier, nullptr);
     auto modifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
@@ -674,13 +734,13 @@ HWTEST_F(RichEditorFreeScrollTestNg, AttachModifier001, TestSize.Level1)
         horizontalModifier->GetAttachedProperties().size();
     auto propsBefore = modifier->GetAttachedProperties().size();
 
-    // isScrollBarModifierPropertyAttached_ is false → attach all properties and set flag to true
-    controller->AttachModifier(modifier);
-    ASSERT_TRUE(controller->isScrollBarModifierPropertyAttached_);
+    // isScrollBarModifierPropertyAttached_ is false -> attach all properties and set flag to true
+    freeScroll->AttachModifier(modifier);
+    ASSERT_TRUE(freeScroll->isScrollBarModifierPropertyAttached_);
     ASSERT_EQ(modifier->GetAttachedProperties().size(), propsBefore + expectedCount);
 
-    // isScrollBarModifierPropertyAttached_ already true → early return, no additional properties attached
-    controller->AttachModifier(modifier);
+    // isScrollBarModifierPropertyAttached_ already true -> early return, no additional properties attached
+    freeScroll->AttachModifier(modifier);
     ASSERT_EQ(modifier->GetAttachedProperties().size(), propsBefore + expectedCount);
 }
 
@@ -695,48 +755,52 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleEndScrollCallback001, TestSize.Level1
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::AUTO);
-    controller->scrollBar_->SetVerticalScrollable(true);
-    controller->scrollBar_->SetHorizontalScrollable(true);
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->scrollBar_->SetHorizontalScrollable(true);
     MockContainer::SetUp(MockPipelineContext::pipeline_);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::pipeline_->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
-    auto vBar = controller->scrollBar_->GetVerticalBar();
-    auto hBar = controller->scrollBar_->GetHorizontalBar();
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto hBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(vBar, nullptr);
     ASSERT_NE(hBar, nullptr);
 
-    // isVertical true + isSingleLineMode true → direction invalid → early return, scrollingAxis_ reset
+    // isVertical true + isSingleLineMode true -> direction invalid -> early return, scrollingAxis_ reset
     pattern->isSingleLineMode_ = true;
-    controller->scrollingAxis_ = Axis::VERTICAL;
+    freeScroll->scrollingAxis_ = Axis::VERTICAL;
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->HandleEndScrollCallback(true);
-    ASSERT_EQ(controller->scrollingAxis_, Axis::NONE);
+    freeScroll->HandleEndScrollCallback(true);
+    ASSERT_EQ(freeScroll->scrollingAxis_, Axis::NONE);
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
 
-    // isVertical true + isSingleLineMode false → valid → schedule vertical disappear task
+    // isVertical true + isSingleLineMode false -> valid -> schedule vertical disappear task
     pattern->isSingleLineMode_ = false;
-    controller->scrollingAxis_ = Axis::VERTICAL;
+    freeScroll->scrollingAxis_ = Axis::VERTICAL;
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->HandleEndScrollCallback(true);
-    ASSERT_EQ(controller->scrollingAxis_, Axis::NONE);
+    freeScroll->HandleEndScrollCallback(true);
+    ASSERT_EQ(freeScroll->scrollingAxis_, Axis::NONE);
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
 
-    // isVertical false → valid → schedule horizontal disappear task
-    controller->scrollingAxis_ = Axis::HORIZONTAL;
+    // isVertical false -> valid -> schedule horizontal disappear task
+    freeScroll->scrollingAxis_ = Axis::HORIZONTAL;
     hBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->HandleEndScrollCallback(false);
-    ASSERT_EQ(controller->scrollingAxis_, Axis::NONE);
+    freeScroll->HandleEndScrollCallback(false);
+    ASSERT_EQ(freeScroll->scrollingAxis_, Axis::NONE);
     ASSERT_EQ(hBar->GetOpacityAnimationType(), OpacityAnimationType::DISAPPEAR);
 }
 
 /**
- * @tc.name: MoveHandleOnScrollWithAxis001
- * @tc.desc: Test MoveHandleOnScrollWithAxis
+ * @tc.name: MoveHandleOnScroll001
+ * @tc.desc: Test MoveHandleOnScroll
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorFreeScrollTestNg, MoveHandleOnScrollWithAxis001, TestSize.Level1)
+HWTEST_F(RichEditorFreeScrollTestNg, MoveHandleOnScroll001, TestSize.Level1)
 {
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -745,11 +809,11 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveHandleOnScrollWithAxis001, TestSize.Lev
     OffsetF zero{ 0.0f, 0.0f };
     textSelector.firstHandle.SetOffset(zero);
     textSelector.secondHandle.SetOffset(zero);
-    // offset near zero → early return, handles unchanged
-    controller->MoveHandleOnScrollWithAxis(0.0f, Axis::VERTICAL);
+    // offset near zero -> early return, handles unchanged
+    controller->MoveHandlesOnScroll(0.0f, Axis::VERTICAL);
     ASSERT_EQ(textSelector.firstHandle.GetOffset(), zero);
-    // SelectOverlayIsOn false + non-zero offset → early return
-    controller->MoveHandleOnScrollWithAxis(1.0f, Axis::VERTICAL);
+    // SelectOverlayIsOn false + non-zero offset -> early return
+    controller->MoveHandlesOnScroll(1.0f, Axis::VERTICAL);
     ASSERT_EQ(textSelector.secondHandle.GetOffset(), zero);
     // set up selection overlay to make SelectOverlayIsOn true
     AddSpan(INIT_VALUE_1);
@@ -761,28 +825,28 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveHandleOnScrollWithAxis001, TestSize.Lev
     pattern->ShowSelectOverlay(
         pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, false);
     ASSERT_TRUE(pattern->SelectOverlayIsOn());
-    // non-zero offset + VERTICAL → move both handles on Y axis
+    // non-zero offset + VERTICAL -> move both handles on Y axis
     textSelector.firstHandle.SetOffset(zero);
     textSelector.secondHandle.SetOffset(zero);
-    controller->MoveHandleOnScrollWithAxis(1.0f, Axis::VERTICAL);
+    controller->MoveHandlesOnScroll(1.0f, Axis::VERTICAL);
     ASSERT_EQ(textSelector.firstHandle.GetOffset(), OffsetF(0.0f, 1.0f));
     ASSERT_EQ(textSelector.secondHandle.GetOffset(), OffsetF(0.0f, 1.0f));
-    // non-zero offset + HORIZONTAL → move both handles on X axis
+    // non-zero offset + HORIZONTAL -> move both handles on X axis
     textSelector.firstHandle.SetOffset(zero);
     textSelector.secondHandle.SetOffset(zero);
-    controller->MoveHandleOnScrollWithAxis(1.0f, Axis::HORIZONTAL);
+    controller->MoveHandlesOnScroll(1.0f, Axis::HORIZONTAL);
     ASSERT_EQ(textSelector.firstHandle.GetOffset(), OffsetF(1.0f, 0.0f));
     ASSERT_EQ(textSelector.secondHandle.GetOffset(), OffsetF(1.0f, 0.0f));
-    // overload2: isFirst true → only firstHandle moves
+    // overload2: isFirst true -> only firstHandle moves
     textSelector.firstHandle.SetOffset(zero);
     textSelector.secondHandle.SetOffset(zero);
-    controller->MoveHandleOnScrollWithAxis(1.0f, true, Axis::VERTICAL);
+    controller->MoveHandleWithAxisOnScroll(1.0f, true, Axis::VERTICAL);
     ASSERT_EQ(textSelector.firstHandle.GetOffset(), OffsetF(0.0f, 1.0f));
     ASSERT_EQ(textSelector.secondHandle.GetOffset(), zero);
-    // overload2: isFirst false → only secondHandle moves
+    // overload2: isFirst false -> only secondHandle moves
     textSelector.firstHandle.SetOffset(zero);
     textSelector.secondHandle.SetOffset(zero);
-    controller->MoveHandleOnScrollWithAxis(1.0f, false, Axis::VERTICAL);
+    controller->MoveHandleWithAxisOnScroll(1.0f, false, Axis::VERTICAL);
     ASSERT_EQ(textSelector.firstHandle.GetOffset(), zero);
     ASSERT_EQ(textSelector.secondHandle.GetOffset(), OffsetF(0.0f, 1.0f));
 }
@@ -798,12 +862,16 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveCaretToContentRect001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::AUTO);
-    controller->scrollBar_->SetVerticalScrollable(true);
-    controller->scrollBar_->SetHorizontalScrollable(true);
-    auto vBar = controller->scrollBar_->GetVerticalBar();
-    auto hBar = controller->scrollBar_->GetHorizontalBar();
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->scrollBar_->SetHorizontalScrollable(true);
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto hBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(vBar, nullptr);
     ASSERT_NE(hBar, nullptr);
 
@@ -811,14 +879,14 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveCaretToContentRect001, TestSize.Level1)
     pattern->isShowPlaceholder_ = true;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 100.0f, 200.0f);
-    controller->MoveCaretToContentRect(RectF(0.0f, 150.0f, 2.0f, 20.0f));
+    freeScroll->MoveCaretToContentRect(RectF(0.0f, 150.0f, 2.0f, 20.0f));
     ASSERT_EQ(controller->textRect_.GetY(), 0.0f);
 
     // no overflow on either axis, NeedScroll false, both axis calls return early
     pattern->isShowPlaceholder_ = false;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
-    controller->MoveCaretToContentRect(RectF(0.0f, 50.0f, 2.0f, 20.0f));
+    freeScroll->MoveCaretToContentRect(RectF(0.0f, 50.0f, 2.0f, 20.0f));
     ASSERT_EQ(controller->textRect_.GetY(), 0.0f);
     ASSERT_EQ(controller->textRect_.GetX(), 0.0f);
 
@@ -826,7 +894,7 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveCaretToContentRect001, TestSize.Level1)
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 100.0f, 200.0f);
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->MoveCaretToContentRect(RectF(0.0f, 80.0f, 2.0f, 20.0f));
+    freeScroll->MoveCaretToContentRect(RectF(0.0f, 80.0f, 2.0f, 20.0f));
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
     ASSERT_EQ(controller->textRect_.GetY(), -66.0f);
 
@@ -834,7 +902,7 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveCaretToContentRect001, TestSize.Level1)
     pattern->contentRect_ = RectF(0.0f, 0.0f, 50.0f, 100.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 200.0f, 100.0f);
     hBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->MoveCaretToContentRect(RectF(60.0f, 0.0f, 2.0f, 20.0f));
+    freeScroll->MoveCaretToContentRect(RectF(60.0f, 0.0f, 2.0f, 20.0f));
     ASSERT_EQ(hBar->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
     ASSERT_EQ(controller->textRect_.GetX(), -12.0f);
 
@@ -842,7 +910,7 @@ HWTEST_F(RichEditorFreeScrollTestNg, MoveCaretToContentRect001, TestSize.Level1)
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 100.0f, 200.0f);
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->scrollBar_->SetVerticalScrollable(true);
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
     controller->MoveCaretToContentRect(OffsetF(0.0f, 80.0f), 20.0f);
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
     ASSERT_EQ(controller->textRect_.GetY(), -66.0f);
@@ -860,6 +928,10 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleAutoScrollNearBoundary001, TestSize.L
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     // contentRect_ = (0,0,100,100), edgeThreshold=15px, safeAreaRect=(15,15,70,70)
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     pattern->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
@@ -871,27 +943,27 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleAutoScrollNearBoundary001, TestSize.L
     MockPipelineContext::pipeline_->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
 
     // point (50,50) is inside safeAreaRect, StopAutoScroll is called
-    controller->isAutoScrollRunning_ = true;
+    controller->autoScrollScheduler_->isAutoScrollRunning_ = true;
     AutoScrollParam param;
     param.autoScrollEvent = AutoScrollEvent::NONE;
     controller->HandleAutoScrollNearBoundary(param, OffsetF(50.0f, 50.0f));
-    ASSERT_FALSE(controller->isAutoScrollRunning_);
+    ASSERT_FALSE(controller->autoScrollScheduler_->isAutoScrollRunning_);
 
-    // both hot areas active, HandleCornerScrolling dispatches to HandleInVerticalHotArea
+    // both hot areas active, HandleCornerScrolling dispatches to HandleInVerticalHotArea (tie -> vertical)
     param.isFirstRun_ = true;
     controller->HandleAutoScrollNearBoundary(param, OffsetF(5.0f, 5.0f));
-    ASSERT_EQ(controller->currentScrollParam_.axis, Axis::VERTICAL);
-    ASSERT_EQ(controller->currentScrollParam_.offset, 10.0f);
+    ASSERT_EQ(controller->autoScrollScheduler_->currentScrollParam_.axis, Axis::VERTICAL);
+    ASSERT_EQ(controller->autoScrollScheduler_->currentScrollParam_.offset, 10.0f);
 
     // only horizontal hot area active, HandleInHorizontalHotArea sets axis and offset
     controller->HandleAutoScrollNearBoundary(param, OffsetF(5.0f, 50.0f));
-    ASSERT_EQ(controller->currentScrollParam_.axis, Axis::HORIZONTAL);
-    ASSERT_EQ(controller->currentScrollParam_.offset, 10.0f);
+    ASSERT_EQ(controller->autoScrollScheduler_->currentScrollParam_.axis, Axis::HORIZONTAL);
+    ASSERT_EQ(controller->autoScrollScheduler_->currentScrollParam_.offset, 10.0f);
 
     // only vertical hot area active, HandleInVerticalHotArea sets axis and offset
     controller->HandleAutoScrollNearBoundary(param, OffsetF(50.0f, 5.0f));
-    ASSERT_EQ(controller->currentScrollParam_.axis, Axis::VERTICAL);
-    ASSERT_EQ(controller->currentScrollParam_.offset, 10.0f);
+    ASSERT_EQ(controller->autoScrollScheduler_->currentScrollParam_.axis, Axis::VERTICAL);
+    ASSERT_EQ(controller->autoScrollScheduler_->currentScrollParam_.offset, 10.0f);
 }
 
 /**
@@ -905,6 +977,10 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleInHorizontalHotArea001, TestSize.Leve
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     // safeAreaRect Left()=15, Right()=85; frameRect_ width=100
     controller->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     RectF safeAreaRect(15.0f, 15.0f, 70.0f, 70.0f);
@@ -912,31 +988,31 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleInHorizontalHotArea001, TestSize.Leve
 
     // point to the right of safeAreaRect and not dragging
     param.autoScrollEvent = AutoScrollEvent::NONE;
-    controller->HandleInHorizontalHotArea(param, safeAreaRect, PointF(95.0f, 50.0f));
+    freeScroll->boundaryScrollResolver_.HandleInHorizontalHotArea(param, safeAreaRect, PointF(95.0f, 50.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_EQ(param.offset, -10.0f);
 
     // point to the right of safeAreaRect and dragging
     param.autoScrollEvent = AutoScrollEvent::DRAG;
-    controller->HandleInHorizontalHotArea(param, safeAreaRect, PointF(95.0f, 50.0f));
+    freeScroll->boundaryScrollResolver_.HandleInHorizontalHotArea(param, safeAreaRect, PointF(95.0f, 50.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_TRUE(param.offset < 0.0f);
 
     // point to the left of safeAreaRect and not dragging
     param.autoScrollEvent = AutoScrollEvent::NONE;
-    controller->HandleInHorizontalHotArea(param, safeAreaRect, PointF(5.0f, 50.0f));
+    freeScroll->boundaryScrollResolver_.HandleInHorizontalHotArea(param, safeAreaRect, PointF(5.0f, 50.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_EQ(param.offset, 10.0f);
 
     // point to the left of safeAreaRect and dragging
     param.autoScrollEvent = AutoScrollEvent::DRAG;
-    controller->HandleInHorizontalHotArea(param, safeAreaRect, PointF(5.0f, 50.0f));
+    freeScroll->boundaryScrollResolver_.HandleInHorizontalHotArea(param, safeAreaRect, PointF(5.0f, 50.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_TRUE(param.offset > 0.0f);
 
     // point inside safeAreaRect horizontally
     param.offset = 0.0f;
-    controller->HandleInHorizontalHotArea(param, safeAreaRect, PointF(50.0f, 50.0f));
+    freeScroll->boundaryScrollResolver_.HandleInHorizontalHotArea(param, safeAreaRect, PointF(50.0f, 50.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_EQ(param.offset, 0.0f);
 }
@@ -952,6 +1028,10 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleInVerticalHotArea001, TestSize.Level1
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     // safeAreaRect Top()=15, Bottom()=85; frameRect_ height=100
     controller->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     RectF safeAreaRect(15.0f, 15.0f, 70.0f, 70.0f);
@@ -959,31 +1039,31 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleInVerticalHotArea001, TestSize.Level1
 
     // point below safeAreaRect and not dragging
     param.autoScrollEvent = AutoScrollEvent::NONE;
-    controller->HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 95.0f));
+    freeScroll->boundaryScrollResolver_.HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 95.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_EQ(param.offset, -10.0f);
 
     // point below safeAreaRect and dragging
     param.autoScrollEvent = AutoScrollEvent::DRAG;
-    controller->HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 95.0f));
+    freeScroll->boundaryScrollResolver_.HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 95.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_TRUE(param.offset < 0.0f);
 
     // point above safeAreaRect and not dragging
     param.autoScrollEvent = AutoScrollEvent::NONE;
-    controller->HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 5.0f));
+    freeScroll->boundaryScrollResolver_.HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 5.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_EQ(param.offset, 10.0f);
 
     // point above safeAreaRect and dragging
     param.autoScrollEvent = AutoScrollEvent::DRAG;
-    controller->HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 5.0f));
+    freeScroll->boundaryScrollResolver_.HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 5.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_TRUE(param.offset > 0.0f);
 
     // point inside safeAreaRect vertically
     param.offset = 0.0f;
-    controller->HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 50.0f));
+    freeScroll->boundaryScrollResolver_.HandleInVerticalHotArea(param, safeAreaRect, PointF(50.0f, 50.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_EQ(param.offset, 0.0f);
 }
@@ -999,34 +1079,38 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleCornerScrolling001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     controller->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     RectF safeAreaRect(15.0f, 15.0f, 70.0f, 70.0f);
     AutoScrollParam param;
     param.autoScrollEvent = AutoScrollEvent::NONE;
 
-    // top-right corner, angle 315° in HORIZONTAL range, point right of right edge
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(92.0f, 8.0f));
+    // top-right corner, horizontal beyond > vertical beyond, point right of right edge
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(92.0f, 10.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_EQ(param.offset, -7.0f);
 
     // top-right corner, angle ~283° in VERTICAL range, point above top edge
     param.axis = Axis::NONE;
     param.offset = 0.0f;
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(88.0f, 2.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(88.0f, 2.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_EQ(param.offset, 13.0f);
 
     // top-left corner, angle ~208° in HORIZONTAL range, point left of left edge
     param.axis = Axis::NONE;
     param.offset = 0.0f;
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(2.0f, 8.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(2.0f, 8.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_EQ(param.offset, 13.0f);
 
     // top-left corner, angle ~242° in VERTICAL range, point above top edge
     param.axis = Axis::NONE;
     param.offset = 0.0f;
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(8.0f, 2.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(8.0f, 2.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_EQ(param.offset, 13.0f);
 }
@@ -1042,39 +1126,43 @@ HWTEST_F(RichEditorFreeScrollTestNg, HandleCornerScrolling002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
     controller->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     RectF safeAreaRect(15.0f, 15.0f, 70.0f, 70.0f);
     AutoScrollParam param;
     param.autoScrollEvent = AutoScrollEvent::NONE;
 
     // bottom-left corner, angle ~118° in VERTICAL range, point below bottom edge
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(8.0f, 98.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(8.0f, 98.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_EQ(param.offset, -13.0f);
 
     // bottom-left corner, angle ~152° in HORIZONTAL range, point left of left edge
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(2.0f, 92.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(2.0f, 92.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_EQ(param.offset, 13.0f);
 
     // bottom-right corner, angle ~28° in HORIZONTAL range, point right of right edge
     param.axis = Axis::NONE;
     param.offset = 0.0f;
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(98.0f, 92.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(98.0f, 92.0f));
     ASSERT_EQ(param.axis, Axis::HORIZONTAL);
     ASSERT_EQ(param.offset, -13.0f);
 
     // bottom-right corner, angle ~66° in VERTICAL range, point below bottom edge
     param.axis = Axis::NONE;
     param.offset = 0.0f;
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(89.0f, 94.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(89.0f, 94.0f));
     ASSERT_EQ(param.axis, Axis::VERTICAL);
     ASSERT_EQ(param.offset, -9.0f);
 
     // point inside safe area, no corner range matches, fall through, axis unchanged
     param.axis = Axis::NONE;
     param.offset = 0.0f;
-    controller->HandleCornerScrolling(param, safeAreaRect, PointF(50.0f, 50.0f));
+    freeScroll->boundaryScrollResolver_.HandleCornerScrolling(param, safeAreaRect, PointF(50.0f, 50.0f));
     ASSERT_EQ(param.axis, Axis::NONE);
     ASSERT_EQ(param.offset, 0.0f);
 }
@@ -1090,10 +1178,14 @@ HWTEST_F(RichEditorFreeScrollTestNg, ProcessAutoScroll001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::AUTO);
-    controller->scrollBar_->SetVerticalScrollable(true);
-    auto vBar = controller->scrollBar_->GetVerticalBar();
+    freeScroll->scrollBar_->SetVerticalScrollable(true);
+    auto vBar = freeScroll->scrollBar_->GetVerticalBar();
     ASSERT_NE(vBar, nullptr);
     pattern->isSingleLineMode_ = false;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
@@ -1102,38 +1194,38 @@ HWTEST_F(RichEditorFreeScrollTestNg, ProcessAutoScroll001, TestSize.Level1)
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(true);
     MockPipelineContext::pipeline_->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(true));
 
-    // showScrollbar=true + CARET + offset!=0 → animation played + ScheduleAutoScroll
-    auto& param = controller->currentScrollParam_;
+    // showScrollbar=true + CARET + offset!=0 -> animation played + ScheduleAutoScroll
+    auto& param = controller->autoScrollScheduler_->currentScrollParam_;
     param.showScrollbar = true;
     param.autoScrollEvent = AutoScrollEvent::CARET;
     param.axis = Axis::VERTICAL;
     param.offset = 3.0f;
     param.isFirstRun_ = true;
     vBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    controller->ProcessAutoScroll();
+    controller->DoAutoScrollStep();
     ASSERT_EQ(vBar->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
-    ASSERT_TRUE(controller->isAutoScrollRunning_);
+    ASSERT_TRUE(controller->autoScrollScheduler_->isAutoScrollRunning_);
 
-    // event=NONE → early return, no ScheduleAutoScroll
+    // event=NONE -> early return, no ScheduleAutoScroll
     controller->StopAutoScroll();
     param.autoScrollEvent = AutoScrollEvent::NONE;
     param.showScrollbar = false;
-    controller->ProcessAutoScroll();
-    ASSERT_FALSE(controller->isAutoScrollRunning_);
+    controller->DoAutoScrollStep();
+    ASSERT_FALSE(controller->autoScrollScheduler_->isAutoScrollRunning_);
 
-    // CARET + offset=0 → no ScheduleAutoScroll
+    // CARET + offset=0 -> no ScheduleAutoScroll
     param.autoScrollEvent = AutoScrollEvent::CARET;
     param.offset = 0.0f;
-    controller->ProcessAutoScroll();
-    ASSERT_FALSE(controller->isAutoScrollRunning_);
+    controller->DoAutoScrollStep();
+    ASSERT_FALSE(controller->autoScrollScheduler_->isAutoScrollRunning_);
 
-    // DRAG + offset!=0 → ScheduleAutoScroll
+    // DRAG + offset!=0 -> ScheduleAutoScroll
     pattern->richTextRect_ = RectF(0.0f, -10.0f, 100.0f, 80.0f);
     param.autoScrollEvent = AutoScrollEvent::DRAG;
     param.offset = 3.0f;
     param.isFirstRun_ = true;
-    controller->ProcessAutoScroll();
-    ASSERT_TRUE(controller->isAutoScrollRunning_);
+    controller->DoAutoScrollStep();
+    ASSERT_TRUE(controller->autoScrollScheduler_->isAutoScrollRunning_);
 }
 
 /**
@@ -1147,7 +1239,11 @@ HWTEST_F(RichEditorFreeScrollTestNg, ProcessAutoScroll002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
-    controller->InitFreeScrollController();
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     controller->SetScrollBar(DisplayMode::ON);
     pattern->isSingleLineMode_ = false;
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
@@ -1156,16 +1252,16 @@ HWTEST_F(RichEditorFreeScrollTestNg, ProcessAutoScroll002, TestSize.Level1)
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(true);
     MockPipelineContext::pipeline_->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(true));
 
-    // HANDLE + offset!=0 → MoveHandle+OnHandleMove called, ScheduleAutoScroll
-    auto& param = controller->currentScrollParam_;
+    // HANDLE + offset!=0 -> MoveHandle+OnHandleMove called, ScheduleAutoScroll
+    auto& param = controller->autoScrollScheduler_->currentScrollParam_;
     param.autoScrollEvent = AutoScrollEvent::HANDLE;
     param.axis = Axis::VERTICAL;
     param.offset = 3.0f;
     param.isFirstRun_ = true;
-    controller->ProcessAutoScroll();
-    ASSERT_TRUE(controller->isAutoScrollRunning_);
+    controller->DoAutoScrollStep();
+    ASSERT_TRUE(controller->autoScrollScheduler_->isAutoScrollRunning_);
 
-    // MOUSE + textLength==0 → extend=0, caretPosition clamped to 0
+    // MOUSE + textLength==0 -> extend=0, caretPosition clamped to 0
     controller->StopAutoScroll();
     pattern->isSingleLineMode_ = true;
     param.autoScrollEvent = AutoScrollEvent::MOUSE;
@@ -1173,11 +1269,11 @@ HWTEST_F(RichEditorFreeScrollTestNg, ProcessAutoScroll002, TestSize.Level1)
     param.isFirstRun_ = true;
     pattern->textSelector_.Update(0, 5);
     pattern->caretPosition_ = 5;
-    controller->ProcessAutoScroll();
+    controller->DoAutoScrollStep();
     ASSERT_EQ(pattern->GetCaretPosition(), 0);
     ASSERT_EQ(pattern->textSelector_.destinationOffset, 0);
 
-    // MOUSE + textLength!=0 → extend=GetIndex, caretPosition set
+    // MOUSE + textLength!=0 -> extend=GetIndex, caretPosition set
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     spanItem->rangeStart = 0;
     spanItem->position = 4;
@@ -1186,7 +1282,7 @@ HWTEST_F(RichEditorFreeScrollTestNg, ProcessAutoScroll002, TestSize.Level1)
     pattern->isSingleLineMode_ = false;
     pattern->textSelector_.baseOffset = 3;
     pattern->caretPosition_ = 0;
-    controller->ProcessAutoScroll();
+    controller->DoAutoScrollStep();
     ASSERT_EQ(pattern->GetCaretPosition(), 3);
 }
 
@@ -1202,25 +1298,89 @@ HWTEST_F(RichEditorFreeScrollTestNg, UpdateHorizontalScrollState001, TestSize.Le
     auto& controller = pattern->scrollController_;
     ASSERT_NE(controller, nullptr);
 
-    // free scroll not enabled → return false
+    // free scroll not enabled -> return false
     ASSERT_FALSE(controller->UpdateHorizontalScrollState());
 
-    // free scroll enabled, text width exceeds content width, need scroll → return false
-    controller->InitFreeScrollController();
+    // free scroll enabled, text width exceeds content width, need scroll -> return false
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    freeScroll->InitFreeScrollController();
     pattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(0.0f, 0.0f, 120.0f, 50.0f);
     ASSERT_FALSE(controller->UpdateHorizontalScrollState());
 
-    // no horizontal overflow, textRect X not less than contentRect X → return false
+    // no horizontal overflow, textRect X not less than contentRect X -> return false
     pattern->contentRect_ = RectF(10.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(15.0f, 0.0f, 80.0f, 50.0f);
     ASSERT_FALSE(controller->UpdateHorizontalScrollState());
 
-    // no horizontal overflow, textRect X less than contentRect X → align left and return true
+    // no horizontal overflow, textRect X less than contentRect X -> align left and return true
     pattern->contentRect_ = RectF(10.0f, 0.0f, 100.0f, 50.0f);
     pattern->richTextRect_ = RectF(5.0f, 0.0f, 80.0f, 50.0f);
     ASSERT_TRUE(controller->UpdateHorizontalScrollState());
     ASSERT_EQ(controller->textRect_.GetX(), 10.0f);
+}
+
+/**
+ * @tc.name: DisposeAndHandleFixedScroll001
+ * @tc.desc: Test Dispose stops scheduler, and HandleFixedScroll switches Free->Fixed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorFreeScrollTestNg, DisposeAndHandleFixedScroll001, TestSize.Level1)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& controller = pattern->scrollController_;
+    ASSERT_NE(controller, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
+
+    // Setup free scroll controller
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    ASSERT_TRUE(controller->IsFreeScrollEnabled());
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(controller);
+    ASSERT_NE(freeScroll, nullptr);
+    ASSERT_NE(freeScroll->freeScrollController_, nullptr);
+
+    // Free Dispose: StopScrolling -> StopAllScrollAnimation -> states IDLE
+    freeScroll->freeScrollController_->verticalState_ = State::FLING;
+    freeScroll->freeScrollController_->horizontalState_ = State::FLING;
+    controller->autoScrollScheduler_->isAutoScrollRunning_ = true;
+    controller->Dispose();
+    ASSERT_FALSE(controller->autoScrollScheduler_->isAutoScrollRunning_);
+    ASSERT_EQ(freeScroll->freeScrollController_->verticalState_, State::IDLE);
+    ASSERT_EQ(freeScroll->freeScrollController_->horizontalState_, State::IDLE);
+
+    // Free->Fixed: controller type changes, old controller disposed
+    pattern->isHorizontalScrolling_ = false;
+    pattern->HandleFixedScroll();
+    ASSERT_FALSE(controller->IsFreeScrollEnabled());
+    auto fixedScroll = AceType::DynamicCast<RichEditorFixedScrollController>(controller);
+    ASSERT_NE(fixedScroll, nullptr);
+
+    // Fixed Dispose: StopAutoScroll + StopScrolling -> pattern->StopScrollable
+    ASSERT_NE(pattern->GetScrollableEvent(), nullptr);
+    ASSERT_NE(controller->autoScrollScheduler_, nullptr);
+    controller->autoScrollScheduler_->isAutoScrollRunning_ = true;
+    pattern->SetScrollAbort(false);
+    fixedScroll->Dispose();
+    // StopAutoScroll stops the scheduler
+    ASSERT_FALSE(controller->autoScrollScheduler_->isAutoScrollRunning_);
+    // StopScrollable does not set scrollAbort_
+    ASSERT_FALSE(pattern->GetScrollAbort());
+
+    // Fixed->Free: controller type changes back to Free
+    pattern->isHorizontalScrolling_ = true;
+    pattern->HandleFreeScroll(true);
+    ASSERT_TRUE(controller->IsFreeScrollEnabled());
+    ASSERT_NE(AceType::DynamicCast<RichEditorFreeScrollController>(controller), nullptr);
 }
 
 } // namespace OHOS::Ace::NG
