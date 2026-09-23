@@ -18,7 +18,9 @@
 #include <gmock/gmock.h>
 #include <vector>
 
+#include "core/components/web/web_event.h"
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_ng/pattern/web/web_util.h"
 #include "arkweb_utils.h"
 
@@ -928,6 +930,22 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
 }
 void WebDelegate::OnResourceLoad(const std::string& url) {}
 void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor) {}
+void WebDelegate::OnZoomChange(double oldZoomFactor, double newZoomFactor)
+{
+    auto webPattern = webPattern_.Upgrade();
+    if (!webPattern) {
+        return;
+    }
+    auto webEventHub = webPattern->GetWebEventHub();
+    if (!webEventHub) {
+        return;
+    }
+    auto onZoomChange = webEventHub->GetOnZoomChangeEvent();
+    if (!onZoomChange) {
+        return;
+    }
+    onZoomChange(std::make_shared<ZoomChangeEvent>(oldZoomFactor, newZoomFactor));
+}
 void WebDelegate::OnScroll(double xOffset, double yOffset) {}
 void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting) {}
 bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int height)

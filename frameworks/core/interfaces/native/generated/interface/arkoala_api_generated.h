@@ -730,6 +730,8 @@ typedef struct Ark_OnSearchResultReceiveEvent Ark_OnSearchResultReceiveEvent;
 typedef struct Opt_OnSearchResultReceiveEvent Opt_OnSearchResultReceiveEvent;
 typedef struct Ark_OnShowFileSelectorEvent Ark_OnShowFileSelectorEvent;
 typedef struct Opt_OnShowFileSelectorEvent Opt_OnShowFileSelectorEvent;
+typedef struct Ark_OnZoomChangeEvent Ark_OnZoomChangeEvent;
+typedef struct Opt_OnZoomChangeEvent Opt_OnZoomChangeEvent;
 typedef struct PanGestureEventPeer PanGestureEventPeer;
 typedef struct PanGestureEventPeer* Ark_PanGestureEvent;
 typedef struct Opt_PanGestureEvent Opt_PanGestureEvent;
@@ -2049,6 +2051,8 @@ typedef struct OnWillScrollCallback OnWillScrollCallback;
 typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct OnWillStopDraggingCallback OnWillStopDraggingCallback;
 typedef struct Opt_OnWillStopDraggingCallback Opt_OnWillStopDraggingCallback;
+typedef struct OnZoomChangeCallback OnZoomChangeCallback;
+typedef struct Opt_OnZoomChangeCallback Opt_OnZoomChangeCallback;
 typedef struct Opt_Object Opt_Object;
 typedef struct Opt_Opt_Object Opt_Opt_Object;
 typedef struct PasteButtonCallback PasteButtonCallback;
@@ -9125,6 +9129,15 @@ typedef struct Opt_OnShowFileSelectorEvent {
     Ark_Tag tag;
     Ark_OnShowFileSelectorEvent value;
 } Opt_OnShowFileSelectorEvent;
+typedef struct Ark_OnZoomChangeEvent {
+    /* kind: Interface */
+    Ark_Float64 oldZoomFactor;
+    Ark_Float64 newZoomFactor;
+} Ark_OnZoomChangeEvent;
+typedef struct Opt_OnZoomChangeEvent {
+    Ark_Tag tag;
+    Ark_OnZoomChangeEvent value;
+} Opt_OnZoomChangeEvent;
 typedef struct Opt_PanGestureEvent {
     Ark_Tag tag;
     Ark_PanGestureEvent value;
@@ -14635,6 +14648,16 @@ typedef struct Opt_OnWillStopDraggingCallback {
     Ark_Tag tag;
     OnWillStopDraggingCallback value;
 } Opt_OnWillStopDraggingCallback;
+typedef struct OnZoomChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_OnZoomChangeEvent data);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnZoomChangeEvent data);
+} OnZoomChangeCallback;
+typedef struct Opt_OnZoomChangeCallback {
+    Ark_Tag tag;
+    OnZoomChangeCallback value;
+} Opt_OnZoomChangeCallback;
 typedef struct Opt_Object {
     Ark_Tag tag;
     Ark_Object value;
@@ -28935,6 +28958,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                             const Opt_Boolean* value);
     void (*setEnableMediaNetworkProxy)(Ark_NativePointer node,
                                        const Opt_Boolean* value);
+    void (*setOnZoomChange)(Ark_NativePointer node,
+                            const Opt_OnZoomChangeCallback* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);

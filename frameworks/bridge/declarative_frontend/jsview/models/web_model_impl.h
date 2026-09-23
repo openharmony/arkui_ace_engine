@@ -86,6 +86,7 @@ public:
     void SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback) override;
     void SetResourceLoadId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetZoomChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetPermissionRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBackgroundColor(Color backgroundColor) override;

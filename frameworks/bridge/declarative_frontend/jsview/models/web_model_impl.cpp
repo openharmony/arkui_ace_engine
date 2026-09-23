@@ -463,6 +463,15 @@ void WebModelImpl::SetScaleChangeId(std::function<void(const BaseEventInfo* info
     webComponent->SetScaleChangeId(eventMarker);
 }
 
+void WebModelImpl::SetZoomChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetZoomChangeId(eventMarker);
+}
+
 void WebModelImpl::SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

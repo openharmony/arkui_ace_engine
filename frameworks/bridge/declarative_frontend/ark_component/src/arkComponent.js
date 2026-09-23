@@ -9540,6 +9540,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnScaleChangeModifier.identity, WebOnScaleChangeModifier, callback);
     return this;
   }
+  onZoomChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnZoomChangeModifier.identity, WebOnZoomChangeModifier, callback);
+    return this;
+  }
   onHttpAuthRequest(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnHttpAuthRequestModifier.identity, WebOnHttpAuthRequestModifier, callback);
     return this;
@@ -10217,6 +10221,21 @@ class WebOnScaleChangeModifier extends ModifierWithKey {
   }
 }
 WebOnScaleChangeModifier.identity = Symbol('webOnScaleChangeModifier');
+
+class WebOnZoomChangeModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().web.resetOnZoomChange(node);
+        }
+        else {
+            getUINativeModule().web.setOnZoomChange(node, this.value);
+        }
+    }
+}
+WebOnZoomChangeModifier.identity = Symbol('webOnZoomChangeModifier');
 
 class WebOnRequestSelectedModifier extends ModifierWithKey {
     constructor(value) {
