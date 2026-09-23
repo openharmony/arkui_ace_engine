@@ -32,8 +32,6 @@ build_component_ng("lazy_waterflow_layout_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/lazy_water_flow_layout_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/lazy_water_flow_layout_static_modifier.cpp" ]
   }
 }

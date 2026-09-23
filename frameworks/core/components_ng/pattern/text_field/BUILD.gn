@@ -80,12 +80,10 @@ build_component_ng("text_field_pattern_ng") {
   }
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "../text_input/bridge/text_input_static_modifier.cpp",
-        "../text_area/bridge/text_area_static_modifier.cpp",
-      ]
-    }
+    ark_sources += [
+      "../text_input/bridge/text_input_static_modifier.cpp",
+      "../text_area/bridge/text_area_static_modifier.cpp",
+    ]
   }
 
   if (!build_ohos_sdk) {

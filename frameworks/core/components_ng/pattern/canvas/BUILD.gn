@@ -41,9 +41,7 @@ build_component_ng("canvas_pattern_ng") {
     "bridge/canvas_runtime_bridge.cpp",
   ]
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/canvas_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/canvas_static_modifier.cpp" ]
     external_deps = [
       "graphic_2d:librender_service_client",
       "graphic_2d:2d_graphics",

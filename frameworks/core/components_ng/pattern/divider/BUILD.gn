@@ -34,11 +34,6 @@ build_component_ng("divider_pattern_ng") {
   if (!is_arkui_x) {
     ark_sources += [
       "bridge/divider_model_impl.cpp",
-    ]
-  }
-
-  if (!is_arkui_x && !ace_engine_feature_wearable) {
-    ark_sources += [
       "bridge/divider_static_modifier.cpp",
     ]
   }

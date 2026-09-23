@@ -25,11 +25,9 @@ build_component_ng("symbol_pattern_ng") {
     "bridge/symbol_glyph_dynamic_module.cpp",
   ]
   if (!is_arkui_x) {
-    if (include_generated_sources) {
-      ark_sources += [
-        "bridge/symbol_glyph_static_modifier.cpp",
-      ]
-    }
+    ark_sources += [
+      "bridge/symbol_glyph_static_modifier.cpp",
+    ]
   }
   if (!build_ohos_sdk) {
     deps = []

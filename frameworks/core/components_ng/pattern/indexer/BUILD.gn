@@ -36,10 +36,10 @@ build_component_ng("indexer_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    ark_sources += [ "indexer_model_impl.cpp" ]
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/indexer_static_modifier.cpp" ]
-    }
+    ark_sources += [
+      "indexer_model_impl.cpp",
+      "bridge/indexer_static_modifier.cpp"
+    ]
   }
 
   if (!build_ohos_sdk) {

@@ -37,9 +37,7 @@ build_component_ng("marquee_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (include_generated_sources) {
-      ark_sources += [ "bridge/marquee_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/marquee_static_modifier.cpp" ]
   }
   if (!is_arkui_x) {
     deps = [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]

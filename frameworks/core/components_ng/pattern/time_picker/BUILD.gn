@@ -30,9 +30,7 @@ build_component_ng("time_picker_pattern_ng") {
     "timepicker_row_pattern_multi_thread.cpp",
   ]
 
-  if (!ace_engine_feature_wearable) {
-    sources += [ "timepicker_dialog_view.cpp" ]
-  }
+  sources += [ "timepicker_dialog_view.cpp" ]
 
   ark_sources = [
     "bridge/arkts_native_timepicker_bridge.cpp",
@@ -44,14 +42,12 @@ build_component_ng("time_picker_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/time_picker_dialog_extender.cpp",
-        #"bridge/time_picker_dialog_static_accessor.cpp",
-        "bridge/timepickerdialog_static_modifier.cpp",
-        "bridge/timepicker_static_modifier.cpp"
-      ]
-    }
+    ark_sources += [
+      "bridge/time_picker_dialog_extender.cpp",
+      #"bridge/time_picker_dialog_static_accessor.cpp",
+      "bridge/timepickerdialog_static_modifier.cpp",
+      "bridge/timepicker_static_modifier.cpp"
+    ]
   }
 
   if (!build_ohos_sdk) {

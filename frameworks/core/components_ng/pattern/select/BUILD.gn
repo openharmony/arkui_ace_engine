@@ -36,14 +36,10 @@ build_component_ng("select_pattern_ng") {
 
   if (!is_arkui_x) {
 
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/select_static_modifier.cpp",
-      ]
-    }
     ark_sources += [
-         "bridge/select_model_impl.cpp",
-       ]
+      "bridge/select_static_modifier.cpp",
+      "bridge/select_model_impl.cpp",
+    ]
   }
 
   if (!build_ohos_sdk) {

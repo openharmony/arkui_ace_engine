@@ -43,7 +43,7 @@ build_component_ng("stepper_pattern_ng") {
     "bridge/stepper_item_dynamic_module.cpp",
   ]
 
-  if (!is_arkui_x && !ace_engine_feature_wearable) {
+  if (!is_arkui_x) {
     ark_sources += [
      #"bridge/stepper_item_static_modifier.cpp",
      #"bridge/stepper_static_modifier.cpp",

@@ -38,11 +38,9 @@ build_component_ng("search_pattern_ng") {
 
   if (!is_arkui_x) {
 
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/search_static_modifier.cpp",
-      ]
-    }
+    ark_sources += [
+      "bridge/search_static_modifier.cpp",
+    ]
   }
 
   if (!build_ohos_sdk && !is_arkui_x) {

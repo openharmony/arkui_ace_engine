@@ -33,8 +33,6 @@ build_component_ng("image_animator_pattern_ng") {
         "${ace_root}/interfaces/inner_api/ui_session:ui_session",
       ]
     }
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/image_animator_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/image_animator_static_modifier.cpp" ]
   }
 }

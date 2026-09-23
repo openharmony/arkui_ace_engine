@@ -31,7 +31,7 @@ build_component_ng("grid_row_pattern_ng") {
     "bridge/grid_row_dynamic_module.cpp",
   ]
 
-  if (!is_arkui_x && !ace_engine_feature_wearable) {
+  if (!is_arkui_x) {
     ark_sources += [
       "bridge/grid_row_static_modifier.cpp",
     ]

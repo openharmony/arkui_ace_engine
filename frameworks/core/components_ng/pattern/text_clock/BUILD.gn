@@ -33,11 +33,9 @@ build_component_ng("text_clock_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/text_clock_static_modifier.cpp" ]
-    }
     ark_sources += [
-      "text_clock_model_impl.cpp",
+      "bridge/text_clock_static_modifier.cpp",
+      "text_clock_model_impl.cpp"
     ]
   }
 }

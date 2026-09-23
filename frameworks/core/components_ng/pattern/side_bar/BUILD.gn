@@ -30,9 +30,7 @@ build_component_ng("side_bar_pattern_ng") {
     "bridge/side_bar_container_dynamic_module.cpp",
   ]
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/side_bar_container_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/side_bar_container_static_modifier.cpp" ]
     ark_sources += [ "side_bar_container_model_impl.cpp" ]
   }
 

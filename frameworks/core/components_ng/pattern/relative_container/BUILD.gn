@@ -31,10 +31,8 @@ build_component_ng("relative_container_pattern_ng") {
   if (!is_arkui_x) {
     ark_sources += [
       "bridge/relative_container_model_impl.cpp",
+      "bridge/relative_container_static_modifier.cpp"
     ]
-    if (!ace_engine_feature_wearable) {
-        ark_sources += [ "bridge/relative_container_static_modifier.cpp" ]
-    }
   }
 }
 

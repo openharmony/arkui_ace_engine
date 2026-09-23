@@ -33,8 +33,6 @@ build_component_ng("loading_progress_pattern_ng") {
     "bridge/loading_progress_model_impl.cpp"
   ]
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/loading_progress_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/loading_progress_static_modifier.cpp" ]
   }
 }

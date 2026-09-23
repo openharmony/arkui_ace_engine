@@ -161,19 +161,17 @@ build_component_ng("shape_pattern_ng") {
 
   # Static modifiers
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/shape_static_modifier.cpp",
-        "bridge/circle_static_modifier.cpp",
-        "bridge/common_shape_static_modifier.cpp",
-        "bridge/ellipse_static_modifier.cpp",
-        "bridge/line_static_modifier.cpp",
-        "bridge/polyline_static_modifier.cpp",
-        "bridge/path_static_modifier.cpp",
-        "bridge/polygon_static_modifier.cpp",
-        "bridge/rect_static_modifier.cpp",
-      ]
-    }
+    ark_sources += [
+      "bridge/shape_static_modifier.cpp",
+      "bridge/circle_static_modifier.cpp",
+      "bridge/common_shape_static_modifier.cpp",
+      "bridge/ellipse_static_modifier.cpp",
+      "bridge/line_static_modifier.cpp",
+      "bridge/polyline_static_modifier.cpp",
+      "bridge/path_static_modifier.cpp",
+      "bridge/polygon_static_modifier.cpp",
+      "bridge/rect_static_modifier.cpp",
+    ]
   }
 
   if (!build_ohos_sdk) {
