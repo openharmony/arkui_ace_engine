@@ -17,7 +17,7 @@ class JSON2 {
   /**
    * JSON-like stringify with refs, cycles, and special types (Map, Set, Date, etc.)
    */
-  static stringify<T>(value: T): string {
+  static stringify<T>(value: T, ignoreReadOnlyProperties: boolean = false): string {
     // visited objects along with their assigned refIDs
     const visited = new Map<object, string>();
 
@@ -80,7 +80,7 @@ class JSON2 {
       }
 
       // replace property names with their aliases if any, skip disabled ones
-      const aliased = JSON2.toAliasedObject(value);
+      const aliased = JSON2.toAliasedObject(value, ignoreReadOnlyProperties);
 
       // skip root to prevent recursion
       if (root === value) {
@@ -157,12 +157,15 @@ class JSON2 {
   }
 
   // Convert object properties to their aliased names according to Meta, skip disabled ones
-  static toAliasedObject<T extends object>(value: T): T {
+  static toAliasedObject<T extends object>(value: T, ignoreReadOnlyProperties: boolean = false): T {
     const meta: any = Meta.gets(value);
     const result: any = {};
 
     Object.keys(value).forEach(key => {
       const baseKey = key.replace(new RegExp('^' + V2_STATE_PREFIX), '');
+      if (ignoreReadOnlyProperties === true && DataCoder.isReadOnlyGetter(value, baseKey)) {
+        return;
+      }
       const options = meta?.[baseKey];
       if (options?.disabled) { return; }
       result[options?.alias || baseKey] = (value as Record<string, unknown>)[baseKey];
