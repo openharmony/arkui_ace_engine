@@ -1811,6 +1811,10 @@ bool MenuPattern::IsUseDistortionAnimation() const
     }
     auto menuSystemMaterialType =
         MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(menuSystemMaterial)).value_or(MaterialType::NONE);
+    if (menuSystemMaterialType != MaterialType::IMMERSIVE &&
+        Ace::AceType::TypeId(AceType::RawPtr(menuSystemMaterial)) == Ace::UiMaterial::TypeId()) {
+        return false;
+    }
     auto menuDistortionMode = menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO);
     if ((menuSystemMaterialType == MaterialType::IMMERSIVE ||
             Ace::AceType::TypeId(AceType::RawPtr(menuSystemMaterial)) != Ace::UiMaterial::TypeId()) &&
