@@ -312,14 +312,6 @@ void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper,
     }
     LostChildFocusToSelf(layoutWrapper, start - cacheStart, end + cacheEnd);
     layoutWrapper->SetActiveChildRange(start, end, cacheStart, cacheEnd, show);
-    // FEAT-028: keep the full node cache range above unchanged, only narrow the image decode
-    // window of already-built cached items (AC-1.1/AC-1.4). Inputs are recorded for the
-    // predict-build param of this layout pass.
-    lastDecodeRangeStartIndex_ = start;
-    lastDecodeRangeEndIndex_ = end;
-    lastDecodeRangeCacheStart_ = cacheStart;
-    lastDecodeRangeCacheEnd_ = cacheEnd;
-    ScrollableUtils::UpdateCachedImageDecodeRange(layoutWrapper->GetHostNode(), start, end, cacheStart, cacheEnd);
 }
 
 void ListLayoutAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end)
@@ -1950,15 +1942,7 @@ void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_
             }
             value.startFixOffset = startFixOffset_;
             value.endFixOffset = endFixOffset_;
-            // FEAT-028: pass the cached image decode window inputs captured by SetActiveChildRange
-            // so predicted items get decode eligibility before offscreen resource processing.
-            ListPredictLayoutParamV2 predictParam = { items, childLayoutConstraint_, GetGroupLayoutConstraint(),
-                value, show };
-            predictParam.visibleStartIndex = lastDecodeRangeStartIndex_;
-            predictParam.visibleEndIndex = lastDecodeRangeEndIndex_;
-            predictParam.cacheStartCount = lastDecodeRangeCacheStart_;
-            predictParam.cacheEndCount = lastDecodeRangeCacheEnd_;
-            PostIdleTaskV2(host, predictParam);
+            PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint(), value, show });
         } else {
             auto pattern = host->GetPattern<ListPattern>();
             CHECK_NULL_VOID(pattern);
@@ -2988,10 +2972,6 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
             it = param.items.erase(it);
             continue;
         }
-        // FEAT-028: apply image decode eligibility to the newly built cached item before its
-        // offscreen resource processing, so far-cache items do not keep decoded images (ADR-6).
-        ScrollableUtils::UpdateCachedImageDecodeActiveForItem(frameNode, index + pattern->GetItemStartIndex(),
-            param.visibleStartIndex, param.visibleEndIndex, param.cacheStartCount, param.cacheEndCount);
         if (wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
             break;
         }
