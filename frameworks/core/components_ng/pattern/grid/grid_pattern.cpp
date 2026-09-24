@@ -97,7 +97,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         return MakeRefPtr<GridLayoutAlgorithm>(info_);
     }
 
-    // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
+    // If only one of rowTemplate and columnsTemplate is set, use scrollable layout algorithm.
     const bool disableSkip = IsOutOfBoundary(true) || (ScrollablePattern::AnimateRunning() && !IsBackToTopRunning());
     const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
     const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || preSpring_;
