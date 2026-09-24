@@ -341,9 +341,9 @@ void SmartLayoutConstraints::AddScaleUpConstraints(SmartLayoutNode& parent)
         return;
     }
 
-    double contentPadding = parent.GetContext().contentPadding;
-    double availableWidth = containerWidth - 2.0 * contentPadding;
-    double availableHeight = containerHeight - 2.0 * contentPadding;
+    const auto& padding = parent.GetContext().padding;
+    double availableWidth = containerWidth - padding.left - padding.right;
+    double availableHeight = containerHeight - padding.top - padding.bottom;
     if (LessOrEqual(availableWidth, 0.0) || LessOrEqual(availableHeight, 0.0)) {
         return;
     }
