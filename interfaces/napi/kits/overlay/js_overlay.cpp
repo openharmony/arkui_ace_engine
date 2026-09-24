@@ -15,6 +15,7 @@
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
@@ -172,9 +173,8 @@ void CreateOverlayCallback(std::shared_ptr<OverlayAsyncContext>& asyncContext, s
         auto task = [asyncContext, errorCode]() {
             CHECK_NULL_VOID(asyncContext);
             CHECK_NULL_VOID(asyncContext->deferred);
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(asyncContext->env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(asyncContext->env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_OVERLAY, "CreateOverlayCallback failed to open the scope of the handle.");
                 return;
             }
@@ -194,7 +194,6 @@ void CreateOverlayCallback(std::shared_ptr<OverlayAsyncContext>& asyncContext, s
                 napi_create_error(asyncContext->env, code, msg, &error);
                 napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
             }
-            napi_close_handle_scope(asyncContext->env, scope);
         };
         taskExecutor->PostTask(task, TaskExecutor::TaskType::JS, "ArkUICreateOverlayCallback");
         asyncContext = nullptr;
@@ -354,8 +353,11 @@ static napi_value JSSetOverlayManagerOptions(napi_env env, napi_callback_info in
             };
             auto callbackRefHolder = std::make_shared<NapiRefHolder>(env, callbackRef);
             overlayInfo.onBackPress = [env, callbackRefHolder]() -> bool {
-                napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                ScopeRAII scope(env);
+                if (!scope) {
+                    TAG_LOGE(AceLogTag::ACE_OVERLAY, "onBackPress failed to open the scope of the handle.");
+                    return false;
+                }
                 napi_value callback = nullptr;
                 napi_get_reference_value(env, callbackRefHolder->ref, &callback);
                 napi_value undefined = nullptr;
@@ -364,7 +366,6 @@ static napi_value JSSetOverlayManagerOptions(napi_env env, napi_callback_info in
                 napi_call_function(env, undefined, callback, 0, nullptr, &result);
                 bool intercepted = false;
                 napi_get_value_bool(env, result, &intercepted);
-                napi_close_handle_scope(env, scope);
                 return intercepted;
             };
         }

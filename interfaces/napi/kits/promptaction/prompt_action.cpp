@@ -19,6 +19,7 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "interfaces/napi/kits/ui_material/ui_material_napi.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/napi_scope_raii.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/ace_engine.h"
@@ -590,9 +591,8 @@ napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
     napi_create_promise(env, &deferred, &result);
     std::function<void(int32_t)> toastCallback = nullptr;
     toastCallback = [env, deferred](int32_t toastId) mutable {
-        napi_handle_scope scope = nullptr;
-        auto status = napi_open_handle_scope(env, &scope);
-        if ((status != napi_ok) || (scope == nullptr)) {
+        ScopeRAII scope(env);
+        if (!scope) {
             TAG_LOGE(AceLogTag::ACE_DIALOG,
                      "toastCallback failed to open the scope of the handle.");
             return;
@@ -600,7 +600,6 @@ napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
         napi_value napiToastId = nullptr;
         napi_create_int32(env, toastId, &napiToastId);
         napi_resolve_deferred(env, deferred, napiToastId);
-        napi_close_handle_scope(env, scope);
     };
     if (ShowToast(env, toastInfo, toastCallback)) {
         return result;
@@ -1755,9 +1754,8 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
 {
     auto onDidAppear = [env = asyncContext->env, onDidAppearRef = asyncContext->onDidAppearRef]() {
         if (onDidAppearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onDidAppear of the PromptDialogAttr failed to open the scope of the handle.");
                 return;
@@ -1766,14 +1764,12 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
             napi_get_reference_value(env, onDidAppearRef, &onDidAppearFunc);
             napi_call_function(env, nullptr, onDidAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidAppearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     auto onDidDisappear = [env = asyncContext->env, onDidDisappearRef = asyncContext->onDidDisappearRef]() {
         if (onDidDisappearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onDidDisappear of the PromptDialogAttr failed to open the scope of the handle.");
                 return;
@@ -1782,14 +1778,12 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
             napi_get_reference_value(env, onDidDisappearRef, &onDidDisappearFunc);
             napi_call_function(env, nullptr, onDidDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidDisappearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillAppear = [env = asyncContext->env, onWillAppearRef = asyncContext->onWillAppearRef]() {
         if (onWillAppearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onWillAppear of the PromptDialogAttr failed to open the scope of the handle.");
                 return;
@@ -1798,14 +1792,12 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
             napi_get_reference_value(env, onWillAppearRef, &onWillAppearFunc);
             napi_call_function(env, nullptr, onWillAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillAppearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillDisappear = [env = asyncContext->env, onWillDisappearRef = asyncContext->onWillDisappearRef]() {
         if (onWillDisappearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onWillDisappear of the PromptDialogAttr failed to open the scope of the handle.");
                 return;
@@ -1814,7 +1806,6 @@ PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<
             napi_get_reference_value(env, onWillDisappearRef, &onWillDisappearFunc);
             napi_call_function(env, nullptr, onWillDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillDisappearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     PromptDialogAttr promptDialogAttr = {
@@ -2012,9 +2003,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     return;
                 }
 
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(asyncContext->env, &scope);
-                if ((status != napi_ok) || (scope == nullptr)) {
+                ScopeRAII scope(asyncContext->env);
+                if (!scope) {
                     TAG_LOGE(AceLogTag::ACE_DIALOG,
                              "ArkUIDialogParseDialogCallback failed to open the scope of the handle.");
                     return;
@@ -2055,7 +2045,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                         asyncContext->env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
-                napi_close_handle_scope(asyncContext->env, scope);
             },
             TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback");
         asyncContext = nullptr;
@@ -2185,9 +2174,8 @@ void GetActionMenuAppearLifeCycleCallback(napi_env env,
 {
     auto onDidAppear = [env = asyncContext->env, onDidAppearRef = asyncContext->onDidAppearRef]() {
         if (onDidAppearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onDidAppear of the ActionMenu failed to open the scope of the handle.");
                 return;
@@ -2196,14 +2184,12 @@ void GetActionMenuAppearLifeCycleCallback(napi_env env,
             napi_get_reference_value(env, onDidAppearRef, &onDidAppearFunc);
             napi_call_function(env, nullptr, onDidAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidAppearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillAppear = [env = asyncContext->env, onWillAppearRef = asyncContext->onWillAppearRef]() {
         if (onWillAppearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onWillAppear of the ActionMenu failed to open the scope of the handle.");
                 return;
@@ -2212,7 +2198,6 @@ void GetActionMenuAppearLifeCycleCallback(napi_env env,
             napi_get_reference_value(env, onWillAppearRef, &onWillAppearFunc);
             napi_call_function(env, nullptr, onWillAppearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillAppearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     promptDialogAttr.onDidAppear = std::move(onDidAppear);
@@ -2224,9 +2209,8 @@ void GetActionMenuDisappearLifeCycleCallback(napi_env env,
 {
     auto onDidDisappear = [env = asyncContext->env, onDidDisappearRef = asyncContext->onDidDisappearRef]() {
         if (onDidDisappearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onDidDisappear of the ActionMenu failed to open the scope of the handle.");
                 return;
@@ -2235,14 +2219,12 @@ void GetActionMenuDisappearLifeCycleCallback(napi_env env,
             napi_get_reference_value(env, onDidDisappearRef, &onDidDisappearFunc);
             napi_call_function(env, nullptr, onDidDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onDidDisappearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     auto onWillDisappear = [env = asyncContext->env, onWillDisappearRef = asyncContext->onWillDisappearRef]() {
         if (onWillDisappearRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onWillDisappear of the ActionMenu failed to open the scope of the handle.");
                 return;
@@ -2251,7 +2233,6 @@ void GetActionMenuDisappearLifeCycleCallback(napi_env env,
             napi_get_reference_value(env, onWillDisappearRef, &onWillDisappearFunc);
             napi_call_function(env, nullptr, onWillDisappearFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, onWillDisappearRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     promptDialogAttr.onDidDisappear = std::move(onDidDisappear);
@@ -2372,9 +2353,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     return;
                 }
 
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(asyncContext->env, &scope);
-                if ((status != napi_ok) || (scope == nullptr)) {
+                ScopeRAII scope(asyncContext->env);
+                if (!scope) {
                     TAG_LOGE(AceLogTag::ACE_DIALOG,
                              "ArkUIDialogParseActionMenuCallback failed to open the scope of the handle.");
                     return;
@@ -2415,7 +2395,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         asyncContext->env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
-                napi_close_handle_scope(asyncContext->env, scope);
             },
             TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
         asyncContext = nullptr;
@@ -2528,15 +2507,13 @@ void ParseDialogReleaseCallback(std::shared_ptr<PromptAsyncContext>& asyncContex
 {
     onWillDismissRelease = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]() {
         if (onWillDismissRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onWillDismissRelease of the PromptDialogAttr failed to open the scope of the handle.");
                 return;
             }
             napi_delete_reference(env, onWillDismissRef);
-            napi_close_handle_scope(env, scope);
         }
     };
 }
@@ -2547,9 +2524,8 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
     onWillDismiss = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]
         (const int32_t& info, const int32_t& instanceId) {
         if (onWillDismissRef) {
-            napi_handle_scope scope = nullptr;
-            auto ret = napi_open_handle_scope(env, &scope);
-            if ((ret != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                          "onWillDismiss of the PromptDialogAttr failed to open the scope of the handle.");
                 return;
@@ -2574,14 +2550,12 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
             if (status != napi_ok) {
                 delete id;
                 LOGE("Fail to add the finalizer method for instanceId.");
-                napi_close_handle_scope(env, scope);
                 return;
             }
             napi_create_int32(env, info, &value);
             napi_set_named_property(env, paramObj, "reason", value);
             napi_get_reference_value(env, onWillDismissRef, &onWillDismissFunc);
             napi_call_function(env, nullptr, onWillDismissFunc, 1, &paramObj, nullptr);
-            napi_close_handle_scope(env, scope);
         }
     };
 }
@@ -2654,9 +2628,8 @@ std::function<void()> GetCustomBuilder(napi_env env, const std::shared_ptr<Promp
 {
     auto builder = [env = asyncContext->env, builderRef = asyncContext->builderRef]() {
         if (builderRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                     "customBuilder of the PromptDialogAttr failed to open the scope of the handle.");
                 napi_delete_reference(env, builderRef);
@@ -2666,7 +2639,6 @@ std::function<void()> GetCustomBuilder(napi_env env, const std::shared_ptr<Promp
             napi_get_reference_value(env, builderRef, &builderFunc);
             napi_call_function(env, nullptr, builderFunc, 0, nullptr, nullptr);
             napi_delete_reference(env, builderRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     return builder;
@@ -2677,9 +2649,8 @@ std::function<void(const int32_t& dialogId)> GetCustomBuilderWithId(
 {
     auto builder = [env = asyncContext->env, builderRef = asyncContext->builderRef](const int32_t dialogId) {
         if (builderRef) {
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 TAG_LOGE(AceLogTag::ACE_DIALOG,
                     "customBuilderWithId of the PromptDialogAttr failed to open the scope of the handle.");
                 napi_delete_reference(env, builderRef);
@@ -2691,7 +2662,6 @@ std::function<void(const int32_t& dialogId)> GetCustomBuilderWithId(
             napi_create_int32(env, dialogId, &dialogIdArg);
             napi_call_function(env, nullptr, builderFunc, 1, &dialogIdArg, nullptr);
             napi_delete_reference(env, builderRef);
-            napi_close_handle_scope(env, scope);
         }
     };
     return builder;
@@ -2850,9 +2820,8 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                 if (asyncContext == nullptr || !asyncContext->valid) {
                     return;
                 }
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(asyncContext->env, &scope);
-                if ((status != napi_ok) || (scope == nullptr)) {
+                ScopeRAII scope(asyncContext->env);
+                if (!scope) {
                     TAG_LOGE(AceLogTag::ACE_DIALOG,
                              "ArkUIDialogParseCustomDialogContentCallback failed to open the scope of the handle.");
                     return;
@@ -2875,7 +2844,6 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                     napi_create_error(asyncContext->env, code, msg, &error);
                     napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
                 }
-                napi_close_handle_scope(asyncContext->env, scope);
             },
             TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback");
         asyncContext = nullptr;
@@ -2903,9 +2871,8 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                     return;
                 }
 
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(asyncContext->env, &scope);
-                if ((status != napi_ok) || (scope == nullptr)) {
+                ScopeRAII scope(asyncContext->env);
+                if (!scope) {
                     TAG_LOGE(AceLogTag::ACE_DIALOG,
                              "ArkUIDialogParseCustomDialogIdCallback failed to open the scope of the handle.");
                     return;
@@ -2929,7 +2896,6 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                     napi_create_error(asyncContext->env, code, msg, &error);
                     napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
                 }
-                napi_close_handle_scope(asyncContext->env, scope);
             },
             TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
         asyncContext = nullptr;
