@@ -133,11 +133,6 @@
 
 ## 相关主题
 
-- `docs/kb/architecture/multi-instance-management.md`
-- `docs/kb/frontend/state_management/cpp_bindings.md`
-- `docs/kb/capabilities/frame_node.md`
-- `specs/03-engine-framework/06-multi-instance-management/01-multi-instance-management/`
-- `frameworks/core/pipeline/base/element_register.cpp`
-- `frameworks/core/common/frontend.h`
-- `frameworks/core/pipeline_ng/pipeline_context.cpp`
-- `frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp`
+- [multi-instance-management](../../architecture/multi-instance-management.md)
+- [cpp-bindings](../../frontend/state_management/cpp-bindings.md)
+- [frame-node](../../capabilities/frame-node.md)

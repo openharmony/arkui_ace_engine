@@ -57,6 +57,7 @@ constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstac
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_NAVIGATION_IMAGE_KEY[] = "const.arkui.recycle.navigation.image.enable";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
+constexpr char ENABLE_SVG_CACHE_SKIP_KEY[] = "const.ace.image.svgcacheskip.enabled";
 constexpr char ENABLE_IMAGE_AUTO_RESIZE_KEY[] = "persist.ace.image.autoresize.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
@@ -74,7 +75,7 @@ constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
-constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
+constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 30;
 constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINT_NUMBER = 20;
 constexpr bool DEFAULT_IS_VELOCITY_WITHIN_TIME_WINDOW = true;
 constexpr bool DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT = true;
@@ -145,6 +146,11 @@ bool IsNavigationImageRecycleEnabled()
 bool IsImageReleaseManageObjectEnabled()
 {
     return system::GetBoolParameter(ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY, true);
+}
+
+bool IsSvgCacheSkipEnabled()
+{
+    return system::GetBoolParameter(ENABLE_SVG_CACHE_SKIP_KEY, true);
 }
 
 bool IsSvgTraceEnabled()
@@ -809,6 +815,7 @@ bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled()
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
 bool SystemProperties::imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
+bool SystemProperties::svgCacheSkipEnabled_ = IsSvgCacheSkipEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
@@ -1037,6 +1044,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         recycleImageEnabled_ = IsRecycleImageEnabled();
         navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
         imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
+        svgCacheSkipEnabled_ = IsSvgCacheSkipEnabled();
         pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
         forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
         softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);

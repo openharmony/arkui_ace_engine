@@ -339,6 +339,11 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     if (!tailIndentJsonStr.empty()) {
         json->PutExtAttr("tailIndents", tailIndentJsonStr.c_str(), filter);
     }
+    json->PutExtAttr("strokeWidth", GetStrokeWidth().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("strokeColor",
+        GetStrokeColor().value_or(defaultColor).ColorToString().c_str(), filter);
+    json->PutExtAttr("strokeJoinStyle",
+        StringUtils::ToString(GetStrokeJoinStyle().value_or(StrokeJoinStyle::MITER_JOIN)).c_str(), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

@@ -25,7 +25,9 @@
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/ace_scoring_log.h"
-
+#ifndef CROSS_PLATFORM
+#include "lattice_napi/js_lattice.h"
+#endif
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -56,7 +58,8 @@ void ImageSpanBridge::RegisterImageSpanAttributes(Local<panda::ObjectRef> object
         "resetObjectFit", "setTextBackgroundStyle", "resetTextBackgroundStyle", "setBaselineOffset",
         "resetBaselineOffset", "setAlt", "resetAlt", "setOnComplete", "resetOnComplete", "setOnError", "resetOnError",
         "setColorFilter", "resetColorFilter", "setBorderRadius", "resetBorderRadius", "setImageSpanSrc",
-        "setSupportSvg2", "resetSupportSvg2" };
+        "setSupportSvg2", "resetSupportSvg2", "setResizableSlice", "resetResizableSlice",
+        "setResizableLattice", "resetResizableLattice" };
     Local<JSValueRef> functionValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::Create),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetVerticalAlign),
@@ -80,6 +83,10 @@ void ImageSpanBridge::RegisterImageSpanAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetImageSpanSrc),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetSupportSvg2),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetSupportSvg2),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetResizableSlice),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetResizableSlice),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetResizableLattice),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetResizableLattice),
     };
     auto imageSpan =
         panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
@@ -296,11 +303,16 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnComplete(ArkUIRuntimeCallInfo *runt
             panda::NumberRef::New(vm, event.GetHeight()), panda::NumberRef::New(vm, event.GetComponentWidth()),
             panda::NumberRef::New(vm, event.GetComponentHeight()), panda::NumberRef::New(vm, event.GetLoadingStatus()),
             panda::NumberRef::New(vm, event.GetContentWidth()), panda::NumberRef::New(vm, event.GetContentHeight()),
-            panda::NumberRef::New(vm, event.GetContentOffsetX()),
-            panda::NumberRef::New(vm, event.GetContentOffsetY()) };
+            panda::NumberRef::New(vm, event.GetContentOffsetX()), panda::NumberRef::New(vm, event.GetContentOffsetY())};
+        // The eventPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto eventPtr = new LoadImageSuccessEvent(event);
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
-        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
+        eventObject->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(eventPtr),
+            [](void* env, void* nativePtr, void* data) {
+                delete static_cast<LoadImageSuccessEvent*>(nativePtr);
+            }, nullptr);
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {
@@ -354,9 +366,15 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnError(ArkUIRuntimeCallInfo *runtime
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetComponentWidth()),
             panda::NumberRef::New(vm, event.GetComponentHeight()),
             panda::StringRef::NewFromUtf8(vm, event.GetErrorMessage().c_str()) };
+        // The eventPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto eventPtr = new LoadImageFailEvent(event);
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
-        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
+        eventObject->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(eventPtr),
+            [](void* env, void* nativePtr, void* data) {
+                delete static_cast<LoadImageFailEvent*>(nativePtr);
+            }, nullptr);
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {
@@ -598,6 +616,102 @@ ArkUINativeModuleValue ImageSpanBridge::SetImageSpanSrc(ArkUIRuntimeCallInfo* ru
         nodeModifiers->getImageSpanModifier()->setImageSpanSrc(
             nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), (resId == -1));
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::SetResizableSlice(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    if (leftArg->IsUndefined() && topArg->IsUndefined() && rightArg->IsUndefined() &&
+        bottomArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanResizableSlice(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CalcDimension left;
+    CalcDimension top;
+    CalcDimension right;
+    CalcDimension bottom;
+    bool isLengthMetrics = false;
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, leftArg, left);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, topArg, top);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, rightArg, right);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, bottomArg, bottom);
+    if (!isLengthMetrics) {
+        ArkTSUtils::ParseAllBorder(vm, leftArg, left);
+        ArkTSUtils::ParseAllBorder(vm, topArg, top);
+        ArkTSUtils::ParseAllBorder(vm, rightArg, right);
+        ArkTSUtils::ParseAllBorder(vm, bottomArg, bottom);
+    }
+    uint32_t size = SIZE_OF_FOUR;
+    ArkUI_Float32 values[size];
+    int units[size];
+    values[NUM_0] = left.Value();
+    units[NUM_0] = static_cast<int>(left.Unit());
+    values[NUM_1] = top.Value();
+    units[NUM_1] = static_cast<int>(top.Unit());
+    values[NUM_2] = right.Value();
+    units[NUM_2] = static_cast<int>(right.Unit());
+    values[NUM_3] = bottom.Value();
+    units[NUM_3] = static_cast<int>(bottom.Unit());
+    GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanResizableSlice(
+        nativeNode, values, units, SIZE_OF_FOUR);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::ResetResizableSlice(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanResizableSlice(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::SetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+#ifndef CROSS_PLATFORM
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> latticeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (latticeArg->IsUndefined() || latticeArg->IsNull() || !latticeArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanResizableLattice(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto* lattice = ArkTSUtils::UnwrapNapiValue(vm, latticeArg);
+    if (lattice) {
+        auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(lattice);
+        CHECK_NULL_RETURN(jsLattice, panda::JSValueRef::Undefined(vm));
+        auto latticeSptr = jsLattice->GetLattice();
+        CHECK_NULL_RETURN(latticeSptr, panda::NativePointerRef::New(vm, nullptr));
+        GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanResizableLattice(
+            nativeNode, &latticeSptr, false);
+    } else {
+        GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanResizableLattice(nativeNode);
+    }
+#endif
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue ImageSpanBridge::ResetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanResizableLattice(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

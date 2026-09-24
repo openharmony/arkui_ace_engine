@@ -92,6 +92,7 @@ void SheetPresentationSideLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureOperation(layoutWrapper, childConstraint);
     MeasureCloseIcon(layoutWrapper, childConstraint);
     MeasureScrollNode(layoutWrapper, childConstraint);
+    MeasureTitleBarEffect(layoutWrapper, childConstraint);
 
     SizeF idealSize(sheetWidth_, sheetHeight_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -145,6 +146,13 @@ void SheetPresentationSideLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* layo
     auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
     float childHeight = sheetHeight_ - operatorGeometryNode->GetFrameSize().Height() - padding.top.value_or(0.0f);
     float childWidth = sheetWidth_ - padding.left.value_or(0.0f) - padding.right.value_or(0.0f);
+
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    auto titleBarHoverMode = sheetStyle.titleBarHoverMode.value_or(SheetTitleBarHoverMode::STANDARD);
+    if (titleBarHoverMode == SheetTitleBarHoverMode::STACK) {
+        childHeight += operatorGeometryNode->GetFrameSize().Height();
+    }
+
     auto childConstraint = layoutProperty->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(childWidth);
     childConstraint.maxSize.SetHeight(childHeight);
@@ -152,6 +160,44 @@ void SheetPresentationSideLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* layo
     childConstraint.percentReference = SizeF(childWidth, childHeight);
     childConstraint.selfIdealSize = OptionalSizeF(childWidth, childHeight - sideObject->GetResizeDecreasedHeight());
     scrollWrapper->Measure(childConstraint);
+}
+
+void SheetPresentationSideLayoutAlgorithm::MeasureTitleBarEffect(
+    LayoutWrapper* layoutWrapper, LayoutConstraintF constraint)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto effectNode = sheetPattern->GetTitleBarEffectNode();
+    CHECK_NULL_VOID(effectNode);
+    auto index = host->GetChildIndexById(effectNode->GetId());
+    auto effectNodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(effectNodeWrapper);
+    auto sideObject = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(sideObject);
+    auto operatoration = sheetPattern->GetTitleBuilderNode();
+    CHECK_NULL_VOID(operatoration);
+    auto operatorGeometryNode = operatoration->GetGeometryNode();
+    CHECK_NULL_VOID(operatorGeometryNode);
+    auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
+    float childHeight = operatorGeometryNode->GetFrameSize().Height();
+    float childWidth = sheetWidth_ - padding.left.value_or(0.0f) - padding.right.value_or(0.0f);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.isTitleBuilder.has_value()) {
+        childHeight += SHEET_DRAG_BAR_HEIGHT.ConvertToPx();
+    }
+    childHeight = static_cast<float>(sheetPattern->GetTitleBarEffectHeight(sheetStyle, childHeight));
+    auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(childWidth);
+    childConstraint.maxSize.SetHeight(childHeight);
+    childConstraint.parentIdealSize = OptionalSizeF(childWidth, childHeight);
+    childConstraint.percentReference = SizeF(childWidth, childHeight);
+    childConstraint.selfIdealSize = OptionalSizeF(childWidth, childHeight);
+    effectNodeWrapper->Measure(childConstraint);
 }
 
 void SheetPresentationSideLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -172,6 +218,31 @@ void SheetPresentationSideLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutCloseIcon(layoutWrapper);
     LayoutTitleBuilder(layoutWrapper);
     LayoutScrollNode(layoutWrapper);
+    LayoutTitleBarEffect(layoutWrapper);
+}
+
+void SheetPresentationSideLayoutAlgorithm::LayoutTitleBarEffect(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto effectNode = sheetPattern->GetTitleBarEffectNode();
+    CHECK_NULL_VOID(effectNode);
+
+    OffsetF offset;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    CHECK_NULL_VOID(sheetObject);
+    auto padding = sheetObject->GetSheetSafeAreaPadding();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        offset.SetX(padding.left.value_or(0.0f));
+    }
+    offset.SetY(padding.top.value_or(0.0f));
+
+    auto effectGeometry = effectNode->GetGeometryNode();
+    CHECK_NULL_VOID(effectGeometry);
+    effectGeometry->SetMarginFrameOffset(offset);
+    effectNode->Layout();
 }
 
 void SheetPresentationSideLayoutAlgorithm::LayoutCloseIcon(LayoutWrapper* layoutWrapper)
@@ -263,13 +334,24 @@ void SheetPresentationSideLayoutAlgorithm::LayoutScrollNode(LayoutWrapper* layou
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(wrapperProp);
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+
+    auto titleBarHoverMode = sheetStyle.titleBarHoverMode.value_or(SheetTitleBarHoverMode::STANDARD);
+
     auto titleBuilder = sheetPattern->GetTitleBuilderNode();
     if (titleBuilder && sheetStyle.isTitleBuilder.has_value()) {
+        if (titleBarHoverMode == SheetTitleBarHoverMode::STACK) {
+            auto geometryNode = scrollWrapper->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            geometryNode->SetMarginFrameOffset(offset);
+            scrollWrapper->Layout();
+            return;
+        }
         auto titleBuilderNode = titleBuilder->GetGeometryNode();
         CHECK_NULL_VOID(titleBuilderNode);
         offset += OffsetF(0, titleBuilderNode->GetFrameSize().Height() + SHEET_DRAG_BAR_HEIGHT.ConvertToPx());
     }
     auto geometryNode = scrollWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(offset);
     scrollWrapper->Layout();
 }

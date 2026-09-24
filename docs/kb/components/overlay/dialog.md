@@ -166,7 +166,6 @@ SO 包含范围（依据 `frameworks/core/components_ng/pattern/dialog/BUILD.gn`
 
 ## 相关主题
 
-- Menu 组件（菜单组件，同属弹窗类组件）
-- Toast 组件（提示组件，同属弹窗类组件，通过 promptAction API 触发）
+- [Menu 组件（菜单组件，同属弹窗类组件）](menu.md)
+- [Toast 组件（提示组件，同属弹窗类组件，通过 promptAction API 触发）](toast.md)
 - bindSheet 组件（半模态弹窗，同属弹窗类组件）
-- 组件化改造通用方案

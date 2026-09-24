@@ -20,3 +20,5 @@
 - Stage 3 confirmed the stable-check policy: input control attach/detach only updates count and pending detection rules; PageScene matching is flushed from `ContentChangeManager` page-stable points or VSync end when no scroll, Swiper scroll, or transition is active.
 - `PipelineContext` must not directly depend on PageScene rule state or `UiSessionManager::FlushPageSceneNodeChanged`; it only invokes `ContentChangeManager::OnVsyncEnd`.
 - Text/Image concrete ContentChange events are not PageScene-only detection points.
+- The formal ArkUI rule scope separates component-visibility filtering (`onlyVisible`) from viewport intersection filtering (`rectCulling`, default false); Web PageScene rule format remains unchanged.
+- Stable-point matching re-reads parent/child visibility, active state, opacity and rect. Parent visibility changes are coalesced into one PageScene dirty mark, and node-ID deduplication remains unchanged.

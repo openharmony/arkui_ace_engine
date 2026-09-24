@@ -638,7 +638,17 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                 ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
                 ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
-                compilerAssignedUpdateFunc(elmtId, isFirstRender);
+                if (InteropConfigureStateMgmt.needsInterop()) {
+                    const interopOwner = InteropStaticComponentOwnerRegistry.setCurrentOwner(
+                        elmtId);
+                    try {
+                        compilerAssignedUpdateFunc(elmtId, isFirstRender);
+                    } finally {
+                        InteropStaticComponentOwnerRegistry.restoreCurrentOwner(interopOwner);
+                    }
+                } else {
+                    compilerAssignedUpdateFunc(elmtId, isFirstRender);
+                }
 
                 // After first render, new bindings (pending) need to be recorded
                 // immediately, as they may fire changes before the next idle time,

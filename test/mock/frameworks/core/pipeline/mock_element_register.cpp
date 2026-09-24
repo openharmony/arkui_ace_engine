@@ -14,11 +14,13 @@
  */
 
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/element.h"
+#include "core/pipeline/base/element_register_multi_thread.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
@@ -263,6 +265,10 @@ NG::FrameNode* ElementRegisterImpl::GetFrameNodePtrById(ElementIdType elementId)
 
 bool ElementRegisterImpl::AddUINode(const RefPtr<NG::UINode>& node)
 {
+    // Mirror the production routing: nodes created in a thread-safe node scope are free
+    // nodes and register into the mutex-guarded multi-thread registry instead of the global
+    // map, so host tests exercise the same behavior as the device build.
+    FREE_NODE_CHECK(node, ElementRegisterMultiThread::GetInstance()->AddUINode, node);
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
         return false;
     }

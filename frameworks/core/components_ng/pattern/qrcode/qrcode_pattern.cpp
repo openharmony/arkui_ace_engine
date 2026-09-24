@@ -37,7 +37,21 @@ void QRCodePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-    host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+}
+
+void QRCodePattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasBackgroundColor()) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto qrcodeTheme = host->GetTheme<QrcodeTheme>(true);
+        CHECK_NULL_VOID(qrcodeTheme);
+        renderContext->UpdateBackgroundColor(qrcodeTheme->GetBackgroundColor());
+    }
 }
 
 bool QRCodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)

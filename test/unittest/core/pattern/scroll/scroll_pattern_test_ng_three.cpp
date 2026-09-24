@@ -1045,4 +1045,250 @@ HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetTailPrecision006, TestSi
     EXPECT_TRUE(result.has_value());
     EXPECT_NEAR(result.value(), delta, 0.01f);
 }
+
+/**
+ * @tc.name: ScrollDirectionNoneResetPositionDuringAnimation001
+ * @tc.desc: During a running AnimateTo animation, changing scrollable to ScrollDirection.None triggers
+ *           SetAxis + ResetPosition, resetting currentOffset_ to 0 (back-to-top at data level).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, ScrollDirectionNoneResetPositionDuringAnimation001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. scroll to a middle position
+     */
+    ScrollBy(0, -300.0);
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, -300.0f);
+
+    /**
+     * @tc.steps: step2. start an AnimateTo animation towards position 100 (currentOffset -> -100)
+     */
+    AnimateTo(Dimension(100.0f), 1, nullptr, false);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+
+    /**
+     * @tc.steps: step3. advance the animation by one tick
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step4. change scrollable direction to None during the running animation
+     * @tc.expected: SetAxis(NONE) triggers ResetPosition, currentOffset_ and lastOffset_ reset to 0
+     */
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode_), Axis::NONE);
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_FLOAT_EQ(pattern_->lastOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetAxis(), Axis::NONE);
+}
+
+/**
+ * @tc.name: StopAnimateAtNonTerminalPosition001
+ * @tc.desc: StopAnimate called during a running animation stops at the current intermediate (non-terminal)
+ *           position, neither the start (0) nor the final target.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, StopAnimateAtNonTerminalPosition001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. start an AnimateTo animation towards a far position (500 => currentOffset -> -500)
+     */
+    AnimateTo(Dimension(500.0f), 1, nullptr, false);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+
+    /**
+     * @tc.steps: step2. advance one tick so the animation reaches an intermediate offset
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    float midOffset = pattern_->currentOffset_;
+
+    /**
+     * @tc.steps: step3. call StopAnimate to interrupt the running animation
+     * @tc.expected: animation stops, currentOffset_ stays at the intermediate value (not 0, not -500)
+     */
+    StopAnimate();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->AnimateRunning());
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, midOffset);
+    EXPECT_NE(pattern_->currentOffset_, 0.0f);
+    EXPECT_NE(pattern_->currentOffset_, -500.0f);
+}
+
+/**
+ * @tc.name: AxisSwitchDuringAnimation001
+ * @tc.desc: During a running AnimateTo animation, switching axis (Vertical<->Horizontal) invalidates the
+ *           old-axis finalPosition_ and causes a visible jump, since the target was computed on the old axis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, AxisSwitchDuringAnimation001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. start an AnimateTo animation towards position 300 on the vertical axis
+     */
+    AnimateTo(Dimension(300.0f), 1, nullptr, false);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 300.0f);
+
+    /**
+     * @tc.steps: step2. advance one tick to move partway
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    float beforeSwitch = pattern_->currentOffset_;
+
+    /**
+     * @tc.steps: step3. switch axis to Horizontal during the running animation
+     * @tc.expected: finalPosition_ was computed on the vertical axis; after switching axis the animation
+     *               target is no longer valid for the new axis, currentOffset_ diverges from the old target
+     */
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode_), Axis::HORIZONTAL);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step4. tick to finish; the final position no longer matches the original vertical target 300
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->AnimateRunning());
+    EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
+    EXPECT_NE(pattern_->GetTotalOffset(), 300.0f);
+    // currentOffset diverged from a clean vertical-only animation
+    EXPECT_NE(pattern_->currentOffset_, beforeSwitch);
+}
+
+/**
+ * @tc.name: EdgeEffectSpringToNoneDuringAnimation001
+ * @tc.desc: During a running over-scroll animation (SPRING), switching edgeEffect to NONE removes the
+ *           spring effect and clamps the offset back to the boundary (currentOffset_ <= 0).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, EdgeEffectSpringToNoneDuringAnimation001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetEdgeEffect(AceType::RawPtr(frameNode_), EdgeEffect::SPRING, true, EffectEdge::ALL);
+    CreateContent();
+    CreateScrollDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    AnimateTo(Dimension(-100.0f), 1, nullptr, false, true);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    float overBefore = pattern_->currentOffset_;
+
+    ScrollableModelNG::SetEdgeEffect(AceType::RawPtr(frameNode_), EdgeEffect::NONE, false, EffectEdge::ALL);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->edgeEffect_, EdgeEffect::NONE);
+    EXPECT_LE(pattern_->currentOffset_, overBefore);
+}
+
+/**
+ * @tc.name: ContentStartOffsetChangeDuringAnimation001
+ * @tc.desc: During a running AnimateTo, changing contentStartOffset recomputes the offset baseline
+ *           (GetTotalOffset = -currentOffset - contentStartOffset), so the running offset diverges.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, ContentStartOffsetChangeDuringAnimation001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    AnimateTo(Dimension(500.0f), 1, nullptr, false);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    float offsetBefore = pattern_->currentOffset_;
+
+    ScrollableModelNG::SetContentStartOffset(AceType::RawPtr(frameNode_), 50.0f);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_NE(pattern_->currentOffset_, offsetBefore);
+}
+
+/**
+ * @tc.name: EffectEdgeChangeDuringAnimation001
+ * @tc.desc: During a running over-scroll animation (SPRING, ALL), switching effectEdge to END disables
+ *           over-scroll at the START end, so the offset is clamped at the top boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, EffectEdgeChangeDuringAnimation001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetEdgeEffect(AceType::RawPtr(frameNode_), EdgeEffect::SPRING, true, EffectEdge::ALL);
+    CreateContent();
+    CreateScrollDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    AnimateTo(Dimension(-100.0f), 1, nullptr, false, true);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    ScrollableModelNG::SetEdgeEffect(AceType::RawPtr(frameNode_), EdgeEffect::SPRING, true, EffectEdge::END);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_LE(pattern_->currentOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: NestedScrollModeChangeDuringAnimation001
+ * @tc.desc: During a running AnimateTo, changing nestedScroll mode does not interrupt the animation;
+ *           the running state remains and the boundary dispatch chain uses the new mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, NestedScrollModeChangeDuringAnimation001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    NestedScrollOptions opt;
+    opt.forward = NestedScrollMode::SELF_ONLY;
+    opt.backward = NestedScrollMode::SELF_ONLY;
+    ScrollableModelNG::SetNestedScroll(AceType::RawPtr(frameNode_), opt);
+    CreateContent();
+    CreateScrollDone();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    AnimateTo(Dimension(500.0f), 1, nullptr, false);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    NestedScrollOptions opt2;
+    opt2.forward = NestedScrollMode::PARENT_FIRST;
+    opt2.backward = NestedScrollMode::PARENT_FIRST;
+    ScrollableModelNG::SetNestedScroll(AceType::RawPtr(frameNode_), opt2);
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->AnimateRunning());
+}
 } // namespace OHOS::Ace::NG

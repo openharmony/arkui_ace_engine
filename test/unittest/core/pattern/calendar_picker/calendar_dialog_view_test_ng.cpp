@@ -629,4 +629,51 @@ HWTEST_F(CalendarDialogViewTestNg, UpdateDefaultFocusByButtonInfo001, TestSize.L
     CalendarDialogView::UpdateDefaultFocusByButtonInfo(contentRow, contentRow, contentRow);
     EXPECT_TRUE(contentRowFocusHub->IsDefaultFocus());
 }
+
+/**
+ * @tc.name: UpdateBackgroundStyle001
+ * @tc.desc: Test UpdateBackgroundStyle with SystemMaterial set, should return early and not modify render context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogViewTestNg, UpdateBackgroundStyle001, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto dialogNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(dialogNode, nullptr);
+    auto renderContext = dialogNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
+    ASSERT_NE(calendarTheme, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+    ASSERT_NE(renderContext->GetSystemMaterial(), nullptr);
+
+    DialogProperties dialogProperties;
+    CalendarDialogView::UpdateBackgroundStyle(renderContext, dialogProperties, calendarTheme, dialogNode);
+    EXPECT_FALSE(renderContext->GetBackBlurStyle().has_value());
+}
+
+/**
+ * @tc.name: UpdateBackgroundStyle002
+ * @tc.desc: Test UpdateBackgroundStyle without SystemMaterial, should not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogViewTestNg, UpdateBackgroundStyle002, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto dialogNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(dialogNode, nullptr);
+    auto renderContext = dialogNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_EQ(renderContext->GetSystemMaterial(), nullptr);
+    auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
+    ASSERT_NE(calendarTheme, nullptr);
+
+    DialogProperties dialogProperties;
+    CalendarDialogView::UpdateBackgroundStyle(renderContext, dialogProperties, calendarTheme, dialogNode);
+    EXPECT_FALSE(renderContext->GetBackBlurStyle().has_value());
+}
 } // namespace OHOS::Ace::NG

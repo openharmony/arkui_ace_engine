@@ -61,7 +61,15 @@ struct InitializationOptions {
     Size size;
 };
 
-struct SourceOptions {};
+enum SVGResourceLimitLevel {
+    SVG_RESOURCE_LIMIT_NONE = 0,
+    SVG_RESOURCE_LIMIT_LOW = 1,
+    SVG_RESOURCE_LIMIT_MEDIUM = 2,
+    SVG_RESOURCE_LIMIT_HIGH = 3
+};
+struct SourceOptions {
+    SVGResourceLimitLevel svgResourceLimitLevel = SVG_RESOURCE_LIMIT_NONE;
+};
 struct DecodeOptions {
     PixelFormat desiredPixelFormat;
     Size desiredSize;

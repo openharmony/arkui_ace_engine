@@ -32,8 +32,6 @@ public:
     RefPtr<Clipboard> GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const override;
 
 private:
-    static ClipboardProxy* inst_;
-    static std::mutex mutex_;
     std::unique_ptr<ClipboardInterface> delegate_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ClipboardProxy);

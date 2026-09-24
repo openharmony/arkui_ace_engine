@@ -26,6 +26,7 @@
 
 #include "core/animation/scroll_motion.h"
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -74,6 +75,21 @@ constexpr double SCROLLBAR_START_MARGIN_VALUE_VP = 12.0;
 constexpr double SCROLLBARTHEME_WIDTH_VALUE_PX = 100.0;
 constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr int32_t FIRST_THRESHOLD = 4;
+
+void FireMultiTouchEvent(const TouchEventFunc& callback, int32_t changedFingerId, TouchType changedType,
+    const std::vector<std::pair<int32_t, TouchType>>& touches)
+{
+    TouchEventInfo info("default");
+    for (const auto& [fingerId, touchType] : touches) {
+        TouchLocationInfo touch(fingerId);
+        touch.SetTouchType(touchType);
+        info.AddTouchLocationInfo(std::move(touch));
+    }
+    TouchLocationInfo changedTouch(changedFingerId);
+    changedTouch.SetTouchType(changedType);
+    info.AddChangedTouchLocationInfo(std::move(changedTouch));
+    callback(info);
+}
 
 void ScrollableCoverTestNg::SetUpTestSuite()
 {
@@ -2013,6 +2029,64 @@ HWTEST_F(ScrollableCoverTestNg, InitTouchEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitTouchEventDifferentComponents001
+ * @tc.desc: A finger on another component does not prevent this component from handling its last touch up
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitTouchEventDifferentComponents001, TestSize.Level1)
+{
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<PartiallyMockedSelectableContainer>());
+    auto pattern = selectableNode->GetPattern<PartiallyMockedSelectableContainer>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetEnableEditMode(true);
+    pattern->AddScrollEvent();
+    auto scrollable = pattern->scrollableEvent_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    auto gestureHub = selectableNode->GetOrCreateGestureEventHub();
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+
+    FireMultiTouchEvent(callback, 0, TouchType::DOWN, { { 0, TouchType::DOWN } });
+    EXPECT_TRUE(scrollable->isTouching_);
+    EXPECT_EQ(pattern->activeTouchFingerIds_.size(), 1u);
+
+    FireMultiTouchEvent(callback, 0, TouchType::UP, { { 0, TouchType::UP }, { 1, TouchType::MOVE } });
+    EXPECT_FALSE(scrollable->isTouching_);
+    EXPECT_TRUE(pattern->activeTouchFingerIds_.empty());
+}
+
+/**
+ * @tc.name: InitTouchEventSameComponent001
+ * @tc.desc: Touch up is handled after the last finger received by the same component is released
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitTouchEventSameComponent001, TestSize.Level1)
+{
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<PartiallyMockedSelectableContainer>());
+    auto pattern = selectableNode->GetPattern<PartiallyMockedSelectableContainer>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetEnableEditMode(true);
+    pattern->AddScrollEvent();
+    auto scrollable = pattern->scrollableEvent_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    auto gestureHub = selectableNode->GetOrCreateGestureEventHub();
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+
+    FireMultiTouchEvent(callback, 0, TouchType::DOWN, { { 0, TouchType::DOWN } });
+    FireMultiTouchEvent(callback, 1, TouchType::DOWN, { { 0, TouchType::MOVE }, { 1, TouchType::DOWN } });
+    EXPECT_EQ(pattern->activeTouchFingerIds_.size(), 2u);
+
+    FireMultiTouchEvent(callback, 0, TouchType::UP, { { 0, TouchType::UP }, { 1, TouchType::MOVE } });
+    EXPECT_TRUE(scrollable->isTouching_);
+    EXPECT_EQ(pattern->activeTouchFingerIds_.size(), 1u);
+
+    FireMultiTouchEvent(callback, 1, TouchType::UP, { { 1, TouchType::UP } });
+    EXPECT_FALSE(scrollable->isTouching_);
+    EXPECT_TRUE(pattern->activeTouchFingerIds_.empty());
+}
+
+/**
  * @tc.name: InitCurveOffsetPropertyTest001
  * @tc.desc: Test the behavior of the InitCurveOffsetPropert callback method Test
  * @tc.type: FUNC
@@ -2124,5 +2198,104 @@ HWTEST_F(ScrollableCoverTestNg, TouchpadInteractionTest002, TestSize.Level1)
     listeners[scroll_->GetId()] = iter;
     eventManager->NotifyTouchpadInteraction();
     EXPECT_EQ(listeners.find(scroll_->GetId()), listeners.end());
+}
+
+/**
+ * @tc.name: GetActiveTouchFingerIdsSize001
+ * @tc.desc: GetActiveTouchFingerIdsSize exposes the finger count tracked from the raw touch stream,
+ *           which is what the List/Grid drag auto-scroll guard reads
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, GetActiveTouchFingerIdsSize001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) { return true; };
+    auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
+    scrollable->isTouching_ = false;
+    scrollPn->scrollableEvent_->scrollable_ = scrollable;
+    auto gestureHub = scroll_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+
+    /**
+     * @tc.steps: step1. no finger down yet.
+     * @tc.expected: reported size is 0.
+     */
+    EXPECT_EQ(scrollPn->GetActiveTouchFingerIdsSize(), 0u);
+
+    /**
+     * @tc.steps: step2. finger 0 down, then finger 1 down (one drags, one scrolls).
+     * @tc.expected: reported size grows to 2.
+     */
+    FireMultiTouchEvent(callback, 0, TouchType::DOWN, { { 0, TouchType::DOWN } });
+    EXPECT_EQ(scrollPn->GetActiveTouchFingerIdsSize(), 1u);
+    FireMultiTouchEvent(callback, 1, TouchType::DOWN, { { 0, TouchType::MOVE }, { 1, TouchType::DOWN } });
+    EXPECT_EQ(scrollPn->GetActiveTouchFingerIdsSize(), 2u);
+
+    /**
+     * @tc.steps: step3. lift both fingers.
+     * @tc.expected: reported size falls back to 0.
+     */
+    FireMultiTouchEvent(callback, 0, TouchType::UP, { { 0, TouchType::UP }, { 1, TouchType::MOVE } });
+    EXPECT_EQ(scrollPn->GetActiveTouchFingerIdsSize(), 1u);
+    FireMultiTouchEvent(callback, 1, TouchType::UP, { { 1, TouchType::UP } });
+    EXPECT_EQ(scrollPn->GetActiveTouchFingerIdsSize(), 0u);
+}
+
+/**
+ * @tc.name: SetScrollPanEscapeToEntityManager001
+ * @tc.desc: SetScrollPanEscape(ids, true) escapes the scroll pan and binds it to the EventManager
+ *           escape channel; the default call keeps the legacy in-tree escape behavior
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, SetScrollPanEscapeToEntityManager001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    auto scrollable = scrollPn->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    auto option = AceType::MakeRefPtr<PanGestureOption>();
+    auto pan = AceType::MakeRefPtr<PanRecognizer>(option);
+    ASSERT_NE(pan, nullptr);
+    pan->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(scroll_)));
+    scrollable->panRecognizerNG_ = pan;
+    auto registeredBefore = eventManager->escapeRecognizers_.size();
+
+    /**
+     * @tc.steps: step1. escape the dragging finger with toEntityManager = true.
+     * @tc.expected: the finger is escaped on the scroll pan and the pan is registered
+     *              to the EventManager escape channel.
+     */
+    scrollPn->SetScrollPanEscape({ 0 }, true);
+    EXPECT_TRUE(pan->IsFingerEscaped(0));
+    EXPECT_TRUE(pan->IsEscapedToManager());
+    EXPECT_EQ(eventManager->escapeRecognizers_.size(), registeredBefore + 1);
+
+    /**
+     * @tc.steps: step2. escape through the default (legacy) call on a fresh pan.
+     * @tc.expected: the finger is escaped but nothing is registered to EventManager.
+     */
+    auto legacyPan = AceType::MakeRefPtr<PanRecognizer>(option);
+    ASSERT_NE(legacyPan, nullptr);
+    legacyPan->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(scroll_)));
+    scrollable->panRecognizerNG_ = legacyPan;
+    scrollPn->SetScrollPanEscape({ 1 });
+    EXPECT_TRUE(legacyPan->IsFingerEscaped(1));
+    EXPECT_FALSE(legacyPan->IsEscapedToManager());
+    EXPECT_EQ(eventManager->escapeRecognizers_.size(), registeredBefore + 1);
+
+    /**
+     * @tc.steps: step3. sweep the channel, as EventManager does when every finger is lifted.
+     * @tc.expected: registration cleared and the escaped pan re-armed.
+     */
+    eventManager->SweepEscapeRecognizers();
+    EXPECT_TRUE(eventManager->escapeRecognizers_.empty());
+    EXPECT_FALSE(pan->IsEscapedToManager());
+    EXPECT_TRUE(pan->GetEscapedFingerIds().empty());
 }
 } // namespace OHOS::Ace::NG

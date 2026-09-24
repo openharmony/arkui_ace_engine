@@ -52,10 +52,7 @@ void LazyLayoutPattern::AfterMountToParent()
             parent = parent->GetParent();
             continue;
         }
-        // FEAT-027: cached LazyForEach hosts may sit under arbitrary intermediate containers. Propagate the
-        // lazy marker through every ordinary FrameNode, stopping at the scrollable boundary that later
-        // OnAttachToMainTree validation confirms (never mark or cross a scroll context while pre-publishing).
-        if (LazyLayoutUtils::IsScrollableBoundary(parentFrameNode)) {
+        if (!LazyLayoutUtils::IsAllowedIntermediateNode(parentFrameNode)) {
             return;
         }
         auto layoutProperty = parentFrameNode->GetLayoutProperty();

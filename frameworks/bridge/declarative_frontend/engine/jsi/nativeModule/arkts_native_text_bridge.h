@@ -157,6 +157,12 @@ public:
     static ArkUINativeModuleValue ResetIncrementalUpdatePolicy(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetTailIndents(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTailIndents(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetStrokeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetStrokeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetStrokeColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetStrokeColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetStrokeJoinStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetStrokeJoinStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static void ParseAIEntityColorAndPreview(

@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/components_ng/pattern/tabs/bridge/tabs_controller_modifier_peer_impl.h"
 #include "core/components_ng/pattern/tabs/bridge/tab_content_transition_proxy_peer_impl.h"
@@ -31,6 +32,24 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+int32_t GetThemeScopeId(FrameNode* frameNode)
+{
+    if (!frameNode || !frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+    }
+    return frameNode->GetThemeScopeId();
+}
+
+RefPtr<TabTheme> GetTabTheme(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetTheme<TabTheme>(GetThemeScopeId(frameNode));
+}
+
 RefPtr<ResourceObject> GetResourceObject(const Ark_Resource& resource)
 {
     Converter::ResourceConverter converter(resource);
@@ -226,6 +245,17 @@ BarFloatingStyleParameters Convert(const Ark_FloatingTabBarStyle& src)
     dst.maskColorObject = GetResourceObjectFromOptResourceColor(src.maskColor);
     dst.maskHeightObject = GetResourceObjectFromOptLength(src.maskHeight);
     return dst;
+}
+
+template<>
+void AssignCast(std::optional<TabBarLayoutStyle>& dst, const Ark_TabBarStyle& src)
+{
+    switch (src) {
+        case ARK_TAB_BAR_STYLE_BOTTOM: dst = TabBarLayoutStyle::BOTTOM; break;
+        case ARK_TAB_BAR_STYLE_SIDEBAR: dst = TabBarLayoutStyle::SIDEBAR; break;
+        case ARK_TAB_BAR_STYLE_SIDEBAR_ADAPTABLE: dst = TabBarLayoutStyle::SIDEBAR_ADAPTABLE; break;
+        default: LOGE("Unexpected enum value in Ark_TabBarStyle: %{public}d", src);
+    }
 }
 }
 
@@ -820,6 +850,326 @@ void SetCachedMaxCountImpl(Ark_NativePointer node,
     auto modeValue = Converter::OptConvertPtr<TabsCacheMode>(mode);
     TabsModelStatic::SetCachedMaxCount(frameNode, countValue, modeValue);
 }
+void SetBarStyleImpl(Ark_NativePointer node,
+                     const Opt_TabBarStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabBarLayoutStyle barStyle = TabBarLayoutStyle::BOTTOM;
+    auto convValue = Converter::OptConvertPtr<TabBarLayoutStyle>(value);
+    if (convValue.has_value()) {
+        barStyle = convValue.value();
+    }
+    TabsModelNG::SetBarLayoutStyle(frameNode, barStyle);
+}
+void SetSidebarPositionImpl(Ark_NativePointer node,
+                            const Opt_BarPosition* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    BarPosition position = BarPosition::START;
+    auto convValue = Converter::OptConvertPtr<BarPosition>(value);
+    if (convValue.has_value()) {
+        position = convValue.value();
+    }
+    TabsModelNG::SetSidebarPosition(frameNode, position);
+}
+void SetSidebarHeaderImpl(Ark_NativePointer node,
+                          const Opt_ComponentContentBase* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        TabsModelNG::SetSidebarHeader(frameNode, nullptr);
+        return;
+    }
+    auto contentPeer = reinterpret_cast<FrameNodePeer*>(value->value);
+    if (!contentPeer) {
+        TabsModelNG::SetSidebarHeader(frameNode, nullptr);
+        return;
+    }
+    if (auto headerNode = FrameNodePeer::GetFrameNodeByPeer(contentPeer)) {
+        TabsModelNG::SetSidebarHeader(frameNode, headerNode);
+    } else {
+        TabsModelNG::SetSidebarHeader(frameNode, nullptr);
+    }
+}
+void SetSidebarSearchableImpl(Ark_NativePointer node,
+                              const Opt_TabsSidebarSearchableOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsSidebarSearchableOptions options;
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        TabsModelNG::SetSidebarSearchableOptions(frameNode, options);
+        return;
+    }
+    options.isNull = false;
+    options.searchText = Converter::OptConvertPtr<std::string>(&value->value.searchText);
+    options.placeholder = Converter::OptConvertPtr<std::string>(&value->value.placeholder);
+    auto searchCallback = Converter::GetOptPtr(&value->value.searchCallback);
+    if (searchCallback) {
+        options.searchCallback = [arkCallback = CallbackHelper(searchCallback.value())](const std::string& searchText) {
+            Converter::ConvContext ctx;
+            arkCallback.InvokeSync(Converter::ArkValue<Ark_String>(searchText, &ctx));
+        };
+    }
+    auto searchFilter = Converter::GetOptPtr(&value->value.searchFilter);
+    if (searchFilter) {
+        options.searchFilter = [arkCallback = CallbackHelper(searchFilter.value())](
+            int32_t tabIndex, const std::string& text) -> bool {
+            Ark_Int32 arkTabIndex = Converter::ArkValue<Ark_Int32>(tabIndex);
+            Converter::ConvContext ctx;
+            Ark_String arkText = Converter::ArkValue<Ark_String>(text, &ctx);
+            return arkCallback.InvokeWithOptConvertResult<
+                bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(arkTabIndex, arkText)
+                .value_or(true);
+        };
+    }
+    TabsModelNG::SetSidebarSearchableOptions(frameNode, options);
+}
+void SetBarDisplayModeBreakpointImpl(Ark_NativePointer node,
+                                     const Opt_TabsBreakpointType_TabBarDisplayMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabBarDisplayModeBreakpoint breakpoint;
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, breakpoint);
+        return;
+    }
+    breakpoint.isNull = false;
+    auto smConvValue = Converter::OptConvertPtr<TabBarDisplayMode>(&value->value.sm);
+    if (smConvValue.has_value()) {
+        breakpoint.sm = smConvValue.value();
+    }
+    auto mdConvValue = Converter::OptConvertPtr<TabBarDisplayMode>(&value->value.md);
+    if (mdConvValue.has_value()) {
+        breakpoint.md = mdConvValue.value();
+    }
+    auto lgConvValue = Converter::OptConvertPtr<TabBarDisplayMode>(&value->value.lg);
+    if (lgConvValue.has_value()) {
+        breakpoint.lg = lgConvValue.value();
+    }
+    TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, breakpoint);
+}
+void SetOnBarDisplayModeChangeImpl(Ark_NativePointer node,
+                                   const Opt_Callback_TabBarDisplayMode_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TabsModelStatic::SetOnBarDisplayModeChange(frameNode, nullptr);
+        return;
+    }
+    auto onBarDisplayModeChange = [arkCallback = CallbackHelper(*optValue)](TabBarDisplayMode mode) {
+        auto modeArk = Converter::ArkValue<Ark_TabBarDisplayMode>(mode);
+        arkCallback.InvokeSync(modeArk);
+    };
+    TabsModelStatic::SetOnBarDisplayModeChange(frameNode, std::move(onBarDisplayModeChange));
+}
+void SetSidebarSelectedIconColorImpl(Ark_NativePointer node,
+                                     const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tabTheme = GetTabTheme(frameNode);
+    CHECK_NULL_VOID(tabTheme);
+    Color color = tabTheme->GetSideBarSelectedIconColor();
+    auto convColor = Converter::OptConvertPtr<Color>(value);
+    if (convColor.has_value()) {
+        color = convColor.value();
+    }
+    TabsModelNG::SetSidebarSelectedIconColor(frameNode, color);
+    auto resObj = value ? GetResourceObjectFromOptResourceColor(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_SELECTED_ICONCOLOR, resObj);
+}
+void SetSidebarSelectedTextColorImpl(Ark_NativePointer node,
+                                     const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tabTheme = GetTabTheme(frameNode);
+    CHECK_NULL_VOID(tabTheme);
+    Color color = tabTheme->GetSideBarSelectedTextColor();
+    auto convColor = Converter::OptConvertPtr<Color>(value);
+    if (convColor.has_value()) {
+        color = convColor.value();
+    }
+    TabsModelNG::SetSidebarSelectedTextColor(frameNode, color);
+    auto resObj = value ? GetResourceObjectFromOptResourceColor(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_SELECTED_TEXTCOLOR, resObj);
+}
+void SetSidebarUnselectedIconColorImpl(Ark_NativePointer node,
+                                       const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tabTheme = GetTabTheme(frameNode);
+    CHECK_NULL_VOID(tabTheme);
+    Color color = tabTheme->GetSideBarUnselectedIconColor();
+    auto convColor = Converter::OptConvertPtr<Color>(value);
+    if (convColor.has_value()) {
+        color = convColor.value();
+    }
+    TabsModelNG::SetSidebarUnselectedIconColor(frameNode, color);
+    auto resObj = value ? GetResourceObjectFromOptResourceColor(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_UNSELECTED_ICONCOLOR, resObj);
+}
+void SetSidebarUnselectedTextColorImpl(Ark_NativePointer node,
+                                       const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tabTheme = GetTabTheme(frameNode);
+    CHECK_NULL_VOID(tabTheme);
+    Color color = tabTheme->GetSideBarUnselectedTextColor();
+    auto convColor = Converter::OptConvertPtr<Color>(value);
+    if (convColor.has_value()) {
+        color = convColor.value();
+    }
+    TabsModelNG::SetSidebarUnselectedTextColor(frameNode, color);
+    auto resObj = value ? GetResourceObjectFromOptResourceColor(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_UNSELECTED_TEXTCOLOR, resObj);
+}
+void SetSidebarSelectedBoardColorImpl(Ark_NativePointer node,
+                                      const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tabTheme = GetTabTheme(frameNode);
+    CHECK_NULL_VOID(tabTheme);
+    Color color = tabTheme->GetSideBarListItemActivedColor();
+    auto convColor = Converter::OptConvertPtr<Color>(value);
+    if (convColor.has_value()) {
+        color = convColor.value();
+    }
+    TabsModelNG::SetSidebarSelectedBoardColor(frameNode, color);
+    auto resObj = value ? GetResourceObjectFromOptResourceColor(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_SELECTED_BOARDCOLOR, resObj);
+}
+void SetSidebarWidthImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
+    TabsModelNG::SetSidebarWidth(frameNode, valueOpt);
+    auto resObj = value ? GetResourceObjectFromOptLength(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_WIDTH, resObj);
+}
+void SetMinSidebarWidthImpl(Ark_NativePointer node,
+                            const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
+    TabsModelNG::SetMinSidebarWidth(frameNode, valueOpt);
+    auto resObj = value ? GetResourceObjectFromOptLength(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_MIN_SIDEBAR_WIDTH, resObj);
+}
+void SetMaxSidebarWidthImpl(Ark_NativePointer node,
+                            const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
+    TabsModelNG::SetMaxSidebarWidth(frameNode, valueOpt);
+    auto resObj = value ? GetResourceObjectFromOptLength(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_MAX_SIDEBAR_WIDTH, resObj);
+}
+void SetMinContentWidthImpl(Ark_NativePointer node,
+                            const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
+    TabsModelNG::SetMinContentWidth(frameNode, valueOpt);
+    auto resObj = value ? GetResourceObjectFromOptLength(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_MIN_CONTENT_WIDTH, resObj);
+}
+void SetSidebarBackgroundColorImpl(Ark_NativePointer node,
+                                   const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tabTheme = GetTabTheme(frameNode);
+    CHECK_NULL_VOID(tabTheme);
+    Color color = tabTheme->GetSideBarBackgroundColor();
+    auto convColor = Converter::OptConvertPtr<Color>(value);
+    if (convColor.has_value()) {
+        color = convColor.value();
+        TabsModelNG::SetSidebarBackgroundColorByUser(frameNode, true);
+    } else {
+        TabsModelNG::SetSidebarBackgroundColorByUser(frameNode, false);
+    }
+    TabsModelNG::SetSidebarBackgroundColor(frameNode, color);
+    auto resObj = value ? GetResourceObjectFromOptResourceColor(*value) : nullptr;
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_BACKGROUND_COLOR, resObj);
+}
+void SetSidebarBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                       const Opt_BlurStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<BlurStyle> blurStyleValue;
+    auto blurStyle = Converter::OptConvertPtr<BlurStyle>(value);
+    if (blurStyle) {
+        blurStyleValue = blurStyle.value();
+    }
+    TabsModelNG::SetSidebarBackgroundBlurStyle(frameNode, blurStyleValue);
+}
+void SetSidebarDividerImpl(Ark_NativePointer node,
+                           const Opt_DividerStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    TabsItemDivider divider;
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        divider.isNull = true;
+        TabsModelNG::SetSidebarDivider(frameNode, divider);
+        TabsModelNG::SetSidebarDividerColorByUser(frameNode, false);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_DIVIDER_STROKE_WIDTH, nullptr);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_DIVIDER_COLOR, nullptr);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_DIVIDER_START_MARGIN, nullptr);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode, TabJsResType::SIDEBAR_DIVIDER_END_MARGIN, nullptr);
+    } else {
+        divider = Converter::Convert<TabsItemDivider>(value->value);
+        auto colorOpt = Converter::OptConvert<Color>(value->value.color);
+        TabsModelNG::SetSidebarDivider(frameNode, divider);
+        if (colorOpt.has_value()) {
+            TabsModelNG::SetSidebarDividerColorByUser(frameNode, true);
+        } else {
+            TabsModelNG::SetSidebarDividerColorByUser(frameNode, false);
+        }
+        auto strokeWidthObj = GetResourceObjectFromOptLength(value->value.strokeWidth);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode,
+            TabJsResType::SIDEBAR_DIVIDER_STROKE_WIDTH, strokeWidthObj);
+        auto colorObj = GetResourceObjectFromOptResourceColor(value->value.color);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode,
+            TabJsResType::SIDEBAR_DIVIDER_COLOR, colorObj);
+        auto startMarginObj = GetResourceObjectFromOptLength(value->value.startMargin);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode,
+            TabJsResType::SIDEBAR_DIVIDER_START_MARGIN, startMarginObj);
+        auto endMarginObj = GetResourceObjectFromOptLength(value->value.endMargin);
+        TabsModelNG::CreateWithSidebarResourceObj(frameNode,
+            TabJsResType::SIDEBAR_DIVIDER_END_MARGIN, endMarginObj);
+    }
+}
+void SetSidebarDisplayStyleImpl(Ark_NativePointer node,
+                     const Opt_TabsSidebarDisplayStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SidebarDisplayStyle sidebarDisplayStyle = SidebarDisplayStyle::EMBED;
+    auto convValue = Converter::OptConvertPtr<SidebarDisplayStyle>(value);
+    if (convValue.has_value()) {
+        sidebarDisplayStyle = convValue.value();
+    }
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, sidebarDisplayStyle);
+}
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
@@ -855,6 +1205,25 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetOnContentWillChangeImpl,
         TabsAttributeModifier::SetOnContentDidScrollImpl,
         TabsAttributeModifier::SetBarFloatingStyleImpl,
+        TabsAttributeModifier::SetBarStyleImpl,
+        TabsAttributeModifier::SetSidebarPositionImpl,
+        TabsAttributeModifier::SetSidebarHeaderImpl,
+        TabsAttributeModifier::SetSidebarSearchableImpl,
+        TabsAttributeModifier::SetBarDisplayModeBreakpointImpl,
+        TabsAttributeModifier::SetOnBarDisplayModeChangeImpl,
+        TabsAttributeModifier::SetSidebarSelectedIconColorImpl,
+        TabsAttributeModifier::SetSidebarSelectedTextColorImpl,
+        TabsAttributeModifier::SetSidebarUnselectedIconColorImpl,
+        TabsAttributeModifier::SetSidebarUnselectedTextColorImpl,
+        TabsAttributeModifier::SetSidebarSelectedBoardColorImpl,
+        TabsAttributeModifier::SetSidebarWidthImpl,
+        TabsAttributeModifier::SetMinSidebarWidthImpl,
+        TabsAttributeModifier::SetMaxSidebarWidthImpl,
+        TabsAttributeModifier::SetMinContentWidthImpl,
+        TabsAttributeModifier::SetSidebarBackgroundColorImpl,
+        TabsAttributeModifier::SetSidebarBackgroundBlurStyleImpl,
+        TabsAttributeModifier::SetSidebarDividerImpl,
+        TabsAttributeModifier::SetSidebarDisplayStyleImpl,
         TabsAttributeModifier::SetBarModeImpl,
         TabsAttributeModifier::SetBarHeight1Impl,
         TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,

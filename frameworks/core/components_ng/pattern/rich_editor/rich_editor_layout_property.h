@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorLayoutProperty : public TextLayoutProperty {
@@ -31,6 +32,25 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDragPreviewStyle, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SingleLine, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputFilter, std::string, PROPERTY_UPDATE_MEASURE);
+
+    // counter
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCounter, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetCounter, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CounterTextColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CounterTextOverflowColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowHighlightBorder, bool, PROPERTY_UPDATE_MEASURE);
+
+    // used to record values set by developer (similar to TextFieldPaintProperty)
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderWidthFlagByUser, BorderWidthProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderColorFlagByUser, BorderColorProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadiusFlagByUser, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderStyleFlagByUser, BorderStyleProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarginByUser, MarginProperty, PROPERTY_UPDATE_RENDER);
+
+    // inner border for ForegroundModifier
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InnerBorderWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InnerBorderColor, Color, PROPERTY_UPDATE_RENDER);
 
     // placeholder
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::u16string, PROPERTY_UPDATE_MEASURE);
@@ -45,6 +65,16 @@ public:
         PlaceholderFontStyle, FontWeight, PlaceholderFontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         PlaceholderFontStyle, FontFamily, PlaceholderFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CleanNodeStyle, CleanNodeStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, CalcDimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSrc, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowSymbol, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowCancelButton, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsDisabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BundleName, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ModuleName, std::string, PROPERTY_UPDATE_MEASURE);
 
     void ResetPlaceholderTextColor()
     {
@@ -75,6 +105,19 @@ public:
             UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
         }
     }
+
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
+    {
+        return cancelIconSymbol_;
+    }
+
+    void SetCancelIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& cancelIconSymbol)
+    {
+        cancelIconSymbol_ = cancelIconSymbol;
+    }
+
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> cancelIconSymbol_;
 };
 } // namespace OHOS::Ace::NG
 

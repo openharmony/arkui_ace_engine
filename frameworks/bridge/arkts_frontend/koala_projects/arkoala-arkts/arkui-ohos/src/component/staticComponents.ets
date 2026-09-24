@@ -25,7 +25,7 @@ import { ArkUIGeneratedNativeModule } from "#components"
 import { ArkUIAniModule, ArkUIAniCustomNodeModule } from "arkui.ani"
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
 import { IExtendableComponent } from './extendableComponent';
 import { destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
 import { UIContext } from '@ohos/arkui/UIContext';
@@ -65,6 +65,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     private envFunc?: (instanceId: int32) => void;
     private customNodeBuilder: CustomNodeBuilder | undefined = undefined;
     private freezeRoot: Set<FreeRootNode>;
+    private isRebuild: boolean = false;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags, RootPeerType)
         this.freezeRoot = new Set<FreeRootNode>();
@@ -151,9 +152,50 @@ export class ArkCustomComponentRootPeer extends PeerNode {
         return this.customNodeBuilder!(ptr);
     }
 
-    setBuildFunction(buildFunc: () => Long): void {
+    armRebuild(): void {
+        this.isRebuild = true;
+    }
+
+    rebuildPage(): KPointer {
+        InteropNativeModule._NativeLog(`HotReload ArkCustomComponentRootPeer rebuild start`);
+        if (!this.isRebuild) {
+            InteropNativeModule._NativeLog(
+                `HotReload ArkCustomComponentRootPeer rebuild: not authorized, reuse existing child`);
+            return this.childPeerPtr;
+        }
+        this.isRebuild = false;
+        const component = this.component;
+        if (!component || !this.customNodeBuilder) {
+            InteropNativeModule._NativeLog(
+                `HotReload ArkCustomComponentRootPeer rebuild: component or builder is null`);
+            return nullptr;
+        }
+
+        const oldChild = this.childPeerPtr;
+        if (oldChild !== nullptr) {
+            const uiContext = component.getUIContext() as UIContext;
+            if (uiContext) {
+                const destroyed = destroyUiDetachedRoot(oldChild, uiContext.getInstanceId());
+                if (!destroyed) {
+                    InteropNativeModule._NativeLog(`HotReload destroy old detached root failed`);
+                }
+            }
+        }
+
+        this.childPeerPtr = nullptr;
+        const newChild = this.callCustomNodeBuilder(this.peer.ptr);
+        if (newChild === nullptr) {
+            InteropNativeModule._NativeLog(`HotReload new detached root is null, skip mount`);
+            return nullptr;
+        }
+        this.setChildPeerPtr(newChild);
+        this.recompute();
+        return newChild;
+    }
+
+    setBuildFunction(buildFunc: () => Long, reloadFunc?: () => void): void {
         this.buildFunc = buildFunc;
-        ArkUIAniCustomNodeModule._CustomNode_SetBuildFunction(this.peer.ptr, buildFunc);
+        ArkUIAniCustomNodeModule._CustomNode_SetBuildFunction(this.peer.ptr, buildFunc, reloadFunc ?? (() => {}));
     }
 
     setChildPeerPtr(childPeerPtr: KPointer): void {

@@ -2559,4 +2559,28 @@ HWTEST_F(DragEventTestNg, DragEventFollowHandMorphDropAnimation001, TestSize.Lev
     EXPECT_EQ(callbackCount, 2);
 }
 
+/**
+ * @tc.name: DragEventSummaryInfo001
+ * @tc.desc: Test the complete drag summary information.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventSummaryInfo001, TestSize.Level1)
+{
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    DragSummaryInfo summaryInfo;
+    summaryInfo.summary = { { "general.file", 2 } };
+    summaryInfo.filenameExtensions = { ".jpg", ".png" };
+
+    dragEvent->SetSummaryInfo(summaryInfo);
+
+    EXPECT_EQ(dragEvent->GetSummary(), summaryInfo.summary);
+    EXPECT_EQ(dragEvent->GetSummaryInfo().filenameExtensions, summaryInfo.filenameExtensions);
+
+    std::map<std::string, int64_t> legacySummary = { { "general.text", 1 } };
+    dragEvent->SetSummary(legacySummary);
+    EXPECT_EQ(dragEvent->GetSummary(), legacySummary);
+    EXPECT_EQ(dragEvent->GetSummaryInfo().summary, legacySummary);
+}
+
 } // namespace OHOS::Ace::NG

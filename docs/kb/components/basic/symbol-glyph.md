@@ -40,7 +40,7 @@ SymbolGlyph 已完成组件化改造（在 `adapter/ohos/osal/dynamic_module_hel
 
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
-| 前端 JS/TS 定义 | `frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_glyph_modifier.ts` + `frameworks/bridge/declarative_frontend/ark_component/src/arkSymbolGlyph.ts`（若存在） | ArkTS Modifier 类，经 `applySymbolGlyphModifierToNode` 挂接 |
+| 前端 JS/TS 定义 | `frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_glyph_modifier.ts` + `frameworks/bridge/declarative_frontend/ark_component/src/ArkSymbolGlyph.ts` | ArkTS Modifier 类，经 `applySymbolGlyphModifierToNode` 挂接 |
 | 统一 Bridge（声明式+动态属性） | `frameworks/core/components_ng/pattern/symbol/bridge/arkts_native_symbol_glyph_bridge.cpp` | `SymbolGlyphBridge`，`RegisterSymbolGlyphAttributes` |
 | Dynamic Modifier | `frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_dynamic_modifier.cpp` | `GetSymbolGlyphDynamicModifier` 动态属性表 |
 | Static Modifier | `frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_static_modifier.cpp` | 静态编译路径 |
@@ -48,7 +48,6 @@ SymbolGlyph 已完成组件化改造（在 `adapter/ohos/osal/dynamic_module_hel
 | Custom Modifier | `frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_custom_modifier.h` | 自定义字形/扩展 |
 | node_modifier 委托层 | `frameworks/core/interfaces/native/node/node_symbol_glyph_modifier.h` | 经 `DynamicModuleHelper` 转发到动态模块 |
 
-组件化改造参考：`./组件化重构通用方案.md`（如存在）。改造后 JSView 与 Bridge 双路径统一到 `pattern/symbol/bridge/`，输出独立 so。
 
 ### 外部依赖入口
 
@@ -85,4 +84,4 @@ Dump：共享 `TextPattern` dump 路径；属性经 `TextLayoutProperty` SymbolS
 ## 相关主题
 
 - [Text](./text.md)（SymbolGlyph 复用 TextPattern）
-- [StyledString](../capabilities/styled-string.md)（属性字符串，TextSpan 体系）
+- [StyledString](../../capabilities/styled-string.md)（属性字符串，TextSpan 体系）

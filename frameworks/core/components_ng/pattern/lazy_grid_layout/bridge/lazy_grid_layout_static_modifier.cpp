@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <string>
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
@@ -21,6 +20,7 @@
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter_primitives.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -146,8 +146,23 @@ void SetColumnsTemplateImpl(Ark_NativePointer node, const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value).value_or("");
+    auto convValue = (value != nullptr && value->tag != INTEROP_TAG_UNDEFINED) ?
+        Converter::ConvertArkString(value->value) : "";
     LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, convValue);
+}
+
+void SetColumnsTemplatePolicyImpl(Ark_NativePointer node, const Opt_ItemFillPolicy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto policy = Converter::GetOptPtr(value);
+    if (!policy) {
+        LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, "");
+        return;
+    }
+    auto result = Converter::ConvertArkPresetFillType(policy->fillType)
+                      .value_or(PresetFillType::BREAKPOINT_DEFAULT);
+    LazyVGridLayoutModelStatic::SetItemFillPolicy(frameNode, result);
 }
 } // namespace LazyVGridLayoutAttributeModifier
 
@@ -171,6 +186,7 @@ const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutStaticModifier()
         LazyVGridLayoutModifier::ConstructImpl,
         LazyVGridLayoutInterfaceModifier::SetLazyVGridLayoutOptionsImpl,
         LazyVGridLayoutAttributeModifier::SetColumnsTemplateImpl,
+        LazyVGridLayoutAttributeModifier::SetColumnsTemplatePolicyImpl,
     };
     return &impl;
 }

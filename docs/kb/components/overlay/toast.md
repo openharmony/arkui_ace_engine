@@ -48,7 +48,7 @@ API 检索建议：
 
 ### API 解析实现路径
 
-Toast 不是声明式组件，没有 JSView/Bridge/Modifier 路径。Toast 通过 NAPI 命令式 API 触发，经 `OverlayManager` 创建和管理节点。
+Toast **尚未组件化**——不是声明式组件，没有 JSView/Bridge/Modifier 路径，编译产物在主 `libace_compatible.z.so` 中。Toast 通过 NAPI 命令式 API 触发，经 `OverlayManager` 创建和管理节点。
 
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
@@ -104,6 +104,6 @@ Toast 不是声明式组件，没有 JSView/Bridge/Modifier 路径。Toast 通�
 
 ## 相关主题
 
-- Dialog 组件（对话框组件，同属弹窗类组件）
-- bindPopup 组件（气泡弹窗，同属弹窗类组件）
+- [Dialog 组件（对话框组件，同属弹窗类组件）](dialog.md)
+- [bindPopup 组件（气泡弹窗，同属弹窗类组件）](bind-popup.md)
 - Overlay 管理器（Toast / Dialog / Popup 共享的 overlay 基础设施）

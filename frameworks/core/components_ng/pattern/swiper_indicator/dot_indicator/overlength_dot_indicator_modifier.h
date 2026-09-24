@@ -309,11 +309,8 @@ private:
     float CalcRealPadding(
         float unselectedIndicatorRadius, float selectedIndicatorRadius, OverlongType overlongType) const;
 
-    bool NotInDraggingWithUseAlone()
-    {
-        return !isBindIndicator_ &&
-               (gestureState_ == GestureState::GESTURE_STATE_INIT || gestureState_ == GestureState::GESTURE_STATE_NONE);
-    }
+    bool NotInDraggingWithUseAlone();
+    std::vector<int32_t> GetLiveCustomIconSlots() const;
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;

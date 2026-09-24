@@ -122,6 +122,16 @@ void CalendarMonthPattern::OnAttachToFrameNode()
     InitFoldState();
 }
 
+void CalendarMonthPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+}
+
 bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (IsCalendarDialog()) {
@@ -131,16 +141,7 @@ bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return !(config.skipMeasure || dirty->SkipMeasureContent());
 }
 
-CalendarMonthPattern::~CalendarMonthPattern()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto accessibilityManager = pipeline->GetAccessibilityManager();
-    CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->DeregisterAccessibilitySAObserverCallback(host->GetAccessibilityId());
-}
+CalendarMonthPattern::~CalendarMonthPattern() {}
 
 Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
 {

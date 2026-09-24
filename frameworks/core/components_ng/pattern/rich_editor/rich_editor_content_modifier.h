@@ -32,6 +32,8 @@ public:
     void onDraw(DrawingContext& drawingContext) override;
     void SetRichTextRectX(float value);
     void SetRichTextRectY(float value);
+    float GetRichTextRectX() const;
+    float GetRichTextRectY() const;
     void SetClipOffset(OffsetF offset);
     void SetClipSize(SizeF size);
 

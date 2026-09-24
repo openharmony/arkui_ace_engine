@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 
+#include "core/components_ng/pattern/common_text/counter_decorator.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +43,18 @@ std::string RichEditorAccessibilityProperty::GetHintText() const
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, "");
     return richEditorPattern->GetPlaceHolder();
+}
+
+bool RichEditorAccessibilityProperty::IsShowCount() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditorPattern, false);
+    CHECK_NULL_RETURN(richEditorPattern->IsShowCounterEnabled(), false);
+    auto counterDecorator = DynamicCast<CounterDecorator>(richEditorPattern->GetCounterDecorator());
+    CHECK_NULL_RETURN(counterDecorator, false);
+    return counterDecorator->HasContent();
 }
 
 const std::list<RefPtr<UINode>>& RichEditorAccessibilityProperty::GetChildren(const RefPtr<FrameNode>& host) const

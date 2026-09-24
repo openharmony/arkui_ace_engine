@@ -27,7 +27,6 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<RepeatVirtualScroll2Model> RepeatVirtualScroll2Model::instance_ = nullptr;
-#define UNUSED_CACHED_SIZE_PARAM 2
 
 RepeatVirtualScroll2Model* RepeatVirtualScroll2Model::GetInstance()
 {
@@ -54,22 +53,17 @@ void CallJsFuncWithFromTo(const JSRef<JSFunc>& func, int32_t from, int32_t to)
 }
 } // namespace
 
-enum {
-    PARAM_ARR_LEN = 0,
-    PARAM_TOTAL_COUNT = 1,
-    PARAM_MEMORY_OPT_STRATEGY = 2,
-    PARAM_HANDLERS = 3,
-    PARAM_SIZE = 4,
-};
-
+// RepeatVirtualScroll2Native.create() positional arguments:
+//   0: arrLen (number)
+//   1: totalCount (number)
+//   2: memOptStrategy (number)
+//   3: handlers (object; the handler functions it carries are validated in Create)
 static bool ParseAndVerifyParams(const JSCallbackInfo& info)
 {
-    if (info.Length() != PARAM_SIZE || !info[PARAM_ARR_LEN]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber() ||
-        !info[PARAM_MEMORY_OPT_STRATEGY]->IsNumber() || !info[PARAM_HANDLERS]->IsObject()) {
+    if (info.Length() != 4 || !info[0]->IsNumber() || !info[1]->IsNumber() ||
+        !info[2]->IsNumber() || !info[3]->IsObject()) {
         return false;
     }
-
-    auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
     return true;
 }
 
@@ -81,16 +75,18 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
     }
 
     // arg 0 arrLen : number
-    auto arrLen = info[PARAM_ARR_LEN]->ToNumber<uint32_t>();
+    auto arrLen = info[0]->ToNumber<uint32_t>();
 
     // arg 1 totalCount : number
-    auto totalCount = info[PARAM_TOTAL_COUNT]->ToNumber<uint32_t>();
+    auto totalCount = info[1]->ToNumber<uint32_t>();
 
     // arg 2 memOptStrategy : number
-    auto memOptStrategy = info[PARAM_MEMORY_OPT_STRATEGY]->ToNumber<int32_t>();
+    auto memOptStrategy = info[2]->ToNumber<int32_t>();
 
     // arg 3 onGetRid4Index(number int32_t) : number(uint32_t)
-    auto handlers = JSRef<JSObject>::Cast(info[PARAM_HANDLERS]);
+    // Each IsFunction check must stay immediately after its own GetProperty so it
+    // validates the exact reference that gets bound below, not a re-fetched value.
+    auto handlers = JSRef<JSObject>::Cast(info[3]);
     auto onGetRid4IndexFunc = handlers->GetProperty("onGetRid4Index");
     if (!onGetRid4IndexFunc->IsFunction()) {
         return;
@@ -245,94 +241,86 @@ void JSRepeatVirtualScroll2::SetInvalid(const JSCallbackInfo& info)
     RepeatVirtualScroll2Model::GetInstance()->SetInvalid(repeatElmtId, rid);
 }
 
-// requestContainerReLayout(repeatElmtId: number, totalCount: number, index: number): void;
+// requestContainerReLayout positional arguments:
+//   0: repeatElmtId (number)
+//   1: arrLen (number)
+//   2: totalCount (number)
+//   3: invalidateContainerLayoutFromChildIndex (number, optional)
 void JSRepeatVirtualScroll2::RequestContainerReLayout(const JSCallbackInfo& info)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll:RequestContainerReLayout");
-    enum {
-        PARAM_ELMTID = 0,
-        PARAM_ARR_LEN = 1,
-        PARAM_TOTAL_COUNT = 2,
-        PARAM_CHILD_INDEX = 3, // optional
-    };
 
-    if (!info[PARAM_ELMTID]->IsNumber() || !info[PARAM_ARR_LEN]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber()) {
+    if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::RequestContainerReLayout - invalid parameters ERROR");
         return;
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::RequestContainerReLayout");
-    auto repeatElmtId = info[PARAM_ELMTID]->ToNumber<int32_t>();
-    auto arrLen = info[PARAM_ARR_LEN]->ToNumber<uint32_t>();
-    auto totalCount = info[PARAM_TOTAL_COUNT]->ToNumber<uint32_t>();
+    auto repeatElmtId = info[0]->ToNumber<int32_t>();
+    auto arrLen = info[1]->ToNumber<uint32_t>();
+    auto totalCount = info[2]->ToNumber<uint32_t>();
 
-    if (!info[PARAM_CHILD_INDEX]->IsNumber()) {
+    if (!info[3]->IsNumber()) {
         RepeatVirtualScroll2Model::GetInstance()->RequestContainerReLayout(repeatElmtId, arrLen, totalCount);
     } else {
-        auto invalidateContainerLayoutFromChildIndex = info[PARAM_CHILD_INDEX]->ToNumber<int32_t>();
+        auto invalidateContainerLayoutFromChildIndex = info[3]->ToNumber<int32_t>();
         RepeatVirtualScroll2Model::GetInstance()->RequestContainerReLayout(
             repeatElmtId, arrLen, totalCount, invalidateContainerLayoutFromChildIndex);
     }
 }
 
+// notifyContainerLayoutChange positional arguments:
+//   0: repeatElmtId (number)
+//   1: arrLen (number)
+//   2: totalCount (number)
+//   3: index (number)
+//   4: count (number)
+//   5: notificationType (number)
 void JSRepeatVirtualScroll2::NotifyContainerLayoutChange(const JSCallbackInfo& info)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll:NotifyContainerLayoutChange");
-    enum {
-        PARAM_ELMTID = 0,
-        PARAM_ARR_LEN = 1,
-        PARAM_TOTAL_COUNT = 2,
-        PARAM_INDEX = 3,
-        PARAM_COUNT = 4,
-        PARAM_TYPE = 5,
-    };
 
-    if (!info[PARAM_ELMTID]->IsNumber() || !info[PARAM_ARR_LEN]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber() ||
-        !info[PARAM_INDEX]->IsNumber() || !info[PARAM_COUNT]->IsNumber() || !info[PARAM_TYPE]->IsNumber()) {
+    if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() ||
+        !info[3]->IsNumber() || !info[4]->IsNumber() || !info[5]->IsNumber()) {
         TAG_LOGW(
             AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::NotifyContainerLayoutChange - invalid parameters ERROR");
         return;
     }
 
-    auto repeatElmtId = info[PARAM_ELMTID]->ToNumber<int32_t>();
-    auto arrLen = info[PARAM_ARR_LEN]->ToNumber<uint32_t>();
-    auto totalCount = info[PARAM_TOTAL_COUNT]->ToNumber<int32_t>();
-    auto index = info[PARAM_INDEX]->ToNumber<int32_t>();
-    auto count = info[PARAM_COUNT]->ToNumber<int32_t>();
-    auto notificationType = static_cast<NG::UINode::NotificationType>(info[PARAM_TYPE]->ToNumber<int32_t>());
+    auto repeatElmtId = info[0]->ToNumber<int32_t>();
+    auto arrLen = info[1]->ToNumber<uint32_t>();
+    auto totalCount = info[2]->ToNumber<int32_t>();
+    auto index = info[3]->ToNumber<int32_t>();
+    auto count = info[4]->ToNumber<int32_t>();
+    auto notificationType = static_cast<NG::UINode::NotificationType>(info[5]->ToNumber<int32_t>());
 
     RepeatVirtualScroll2Model::GetInstance()->NotifyContainerLayoutChange(
         repeatElmtId, arrLen, totalCount, index, count, notificationType);
 }
 
-// updateL1Rid4Index(repeatElmtId: number,
-//   totalCount: number,
-//   invalidateContainerLayoutFromChildIndex: number,
-//   l1rid4index: Array<Array<number>>): void;
+// updateL1Rid4Index positional arguments:
+//   0: repeatElmtId (number)
+//   1: arrLen (number)
+//   2: totalCount (number)
+//   3: invalidateContainerLayoutFromChildIndex (number)
+//   4: l1rid4index (Array<Array<number>>)
 void JSRepeatVirtualScroll2::UpdateL1Rid4Index(const JSCallbackInfo& info)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll:UpdateL1Rid4Index");
-    enum {
-        PARAM_ELMTID = 0,
-        PARAM_ARR_LEN = 1,
-        PARAM_TOTAL_COUNT = 2,
-        PARAM_CHILD_INDEX = 3,
-        PARAM_ARRAY_PAIRS = 4,
-    };
 
-    if (!info[PARAM_ELMTID]->IsNumber() || !info[PARAM_ARR_LEN]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber() ||
-        !info[PARAM_CHILD_INDEX]->IsNumber() || !info[PARAM_ARRAY_PAIRS]->IsArray()) {
+    if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() ||
+        !info[3]->IsNumber() || !info[4]->IsArray()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::UpdateL1Rid4Index - invalid parameters ERROR");
         return;
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::UpdateL1Rid4Index");
-    auto repeatElmtId = info[PARAM_ELMTID]->ToNumber<int32_t>();
-    auto arrLen = info[PARAM_ARR_LEN]->ToNumber<uint32_t>();
-    auto totalCount = info[PARAM_TOTAL_COUNT]->ToNumber<uint32_t>();
-    auto invalidateContainerLayoutFromChildIndex = info[PARAM_CHILD_INDEX]->ToNumber<uint32_t>();
+    auto repeatElmtId = info[0]->ToNumber<int32_t>();
+    auto arrLen = info[1]->ToNumber<uint32_t>();
+    auto totalCount = info[2]->ToNumber<uint32_t>();
+    auto invalidateContainerLayoutFromChildIndex = info[3]->ToNumber<uint32_t>();
 
-    auto arrayOfPairs = JSRef<JSArray>::Cast(info[PARAM_ARRAY_PAIRS]);
+    auto arrayOfPairs = JSRef<JSArray>::Cast(info[4]);
     std::map<int32_t, uint32_t> l1Rid4Index;
     for (size_t i = 0; i < arrayOfPairs->Length(); i++) {
         JSRef<JSArray> pair = arrayOfPairs->GetValueAt(i);
@@ -346,34 +334,37 @@ void JSRepeatVirtualScroll2::UpdateL1Rid4Index(const JSCallbackInfo& info)
         repeatElmtId, arrLen, totalCount, invalidateContainerLayoutFromChildIndex, l1Rid4Index);
 }
 
+// onMove positional arguments:
+//   0: repeatElmtId (number)
+//   1: onMove (function, optional)
+//   2: itemDragHandler (object, optional)
 void JSRepeatVirtualScroll2::OnMove(const JSCallbackInfo& info)
 {
-    enum OnMoveParam {
-        ELMTID = 0,
-        ON_MOVE = 1,
-        ITEM_DRAG_HANDLER = 2,
-    };
-    if (!info[OnMoveParam::ELMTID]->IsNumber()) {
+    if (!info[0]->IsNumber()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::OnMove - invalid parameters ERROR");
         return;
     }
-    auto repeatElmtId = info[OnMoveParam::ELMTID]->ToNumber<int32_t>();
-    if (!info[OnMoveParam::ON_MOVE]->IsFunction()) {
+    auto repeatElmtId = info[0]->ToNumber<int32_t>();
+    if (!info[1]->IsFunction()) {
         RepeatVirtualScroll2Model::GetInstance()->OnMove(repeatElmtId, nullptr);
         RepeatVirtualScroll2Model::GetInstance()->SetItemDragHandler(repeatElmtId, nullptr, nullptr, nullptr, nullptr);
         return;
     }
     auto context = info.GetExecutionContext();
     auto onMove = JsCallbackWithoutNode<void(int32_t, int32_t)>(
-        context, JSRef<JSFunc>::Cast(info[OnMoveParam::ON_MOVE]), &CallJsFuncWithFromTo);
+        context, JSRef<JSFunc>::Cast(info[1]), &CallJsFuncWithFromTo);
     RepeatVirtualScroll2Model::GetInstance()->OnMove(repeatElmtId, std::move(onMove));
-    if ((info.Length() > 2) && info[ITEM_DRAG_HANDLER]->IsObject()) { // 2: Array length
-        JsParseItemDragEventHandler(context, info[ITEM_DRAG_HANDLER], repeatElmtId);
+    if ((info.Length() > 2) && info[2]->IsObject()) { // 2: Array length
+        JsParseItemDragEventHandler(context, info[2], repeatElmtId);
     } else {
         RepeatVirtualScroll2Model::GetInstance()->SetItemDragHandler(repeatElmtId, nullptr, nullptr, nullptr, nullptr);
     }
 }
 
+// NOTE: this function and its CallJsFuncWithIndex/CallJsFuncWithFromTo helpers are duplicated
+// verbatim in js_lazy_foreach.cpp, js_foreach.cpp and js_repeat.cpp; this variant additionally
+// carries repeatElmtId. Any change here must be mirrored there; consolidating them into
+// js_view_common_def.h is the tracked follow-up.
 void JSRepeatVirtualScroll2::JsParseItemDragEventHandler(
     const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj, int32_t repeatElmtId)
 {
@@ -433,40 +424,34 @@ void JSRepeatVirtualScroll2::IsImplicitAnimationOpen(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+// isChildInAnimation positional arguments:
+//   0: repeatElmtId (number)
+//   1: rid (number)
 void JSRepeatVirtualScroll2::IsChildInAnimation(const JSCallbackInfo& info)
 {
-    enum IsChildInAnimationParam {
-        ELMTID = 0,
-        RID = 1,
-        PARAM_SIZE = 2,
-    };
-    if ((info.Length() < IsChildInAnimationParam::PARAM_SIZE) || !info[IsChildInAnimationParam::ELMTID]->IsNumber() ||
-        !info[IsChildInAnimationParam::RID]->IsNumber()) {
+    if ((info.Length() < 2) || !info[0]->IsNumber() || !info[1]->IsNumber()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildInAnimation - invalid parameter ERROR");
         return;
     }
     TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildInAnimation");
-    auto repeatElmtId = info[IsChildInAnimationParam::ELMTID]->ToNumber<int32_t>();
-    auto rid = info[IsChildInAnimationParam::RID]->ToNumber<uint32_t>();
+    auto repeatElmtId = info[0]->ToNumber<int32_t>();
+    auto rid = info[1]->ToNumber<uint32_t>();
     auto result = RepeatVirtualScroll2Model::GetInstance()->IsChildInAnimation(repeatElmtId, rid);
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+// isChildOnMainTree positional arguments:
+//   0: repeatElmtId (number)
+//   1: rid (number)
 void JSRepeatVirtualScroll2::IsChildOnMainTree(const JSCallbackInfo& info)
 {
-    enum IsChildOnMainTreeParam {
-        ELMTID = 0,
-        RID = 1,
-        PARAM_SIZE = 2,
-    };
-    if ((info.Length() < IsChildOnMainTreeParam::PARAM_SIZE) || !info[IsChildOnMainTreeParam::ELMTID]->IsNumber() ||
-        !info[IsChildOnMainTreeParam::RID]->IsNumber()) {
+    if ((info.Length() < 2) || !info[0]->IsNumber() || !info[1]->IsNumber()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildOnMainTree - invalid parameter ERROR");
         return;
     }
     TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildOnMainTree");
-    auto repeatElmtId = info[IsChildOnMainTreeParam::ELMTID]->ToNumber<int32_t>();
-    auto rid = info[IsChildOnMainTreeParam::RID]->ToNumber<uint32_t>();
+    auto repeatElmtId = info[0]->ToNumber<int32_t>();
+    auto rid = info[1]->ToNumber<uint32_t>();
     auto result = RepeatVirtualScroll2Model::GetInstance()->IsChildOnMainTree(repeatElmtId, rid);
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }

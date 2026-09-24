@@ -31,7 +31,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWO_IN_ONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
-constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
+constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 30;
 
 constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 20;
 constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
@@ -99,6 +99,7 @@ bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::recycleImageEnabled_ = false;
 bool SystemProperties::navigationImageRecycleEnabled_ = false;
 bool SystemProperties::imageReleaseManageObjectEnabled_ = true;
+bool SystemProperties::svgCacheSkipEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;

@@ -1227,6 +1227,8 @@ public:
     std::optional<Color> dragBackgroundColor_;
     bool isDragShadowNeeded_ = true;
     std::optional<AccessibilitySpanOptions> accessibilityOptions;
+    std::optional<std::string> builderSpanId;
+    std::function<void(const BuilderSpanInfo&)> onDetach;
     PlaceholderSpanItem()
     {
         this->spanItemType = SpanItemType::PLACEHOLDER;
@@ -1250,6 +1252,16 @@ public:
     const RefPtr<UINode> GetCustomNode() const
     {
         return customNode_;
+    }
+
+    BuilderSpanInfo GetBuilderSpanInfo() const
+    {
+        BuilderSpanInfo info;
+        info.id = builderSpanId;
+        if (rangeStart >= 0) {
+            info.offset = rangeStart;
+        }
+        return info;
     }
 
 private:
@@ -1344,6 +1356,19 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        Pattern::OnDetachFromMainTree();
+        auto spanNode = DynamicCast<PlaceholderSpanNode>(GetHost());
+        CHECK_NULL_VOID(spanNode);
+        auto spanItem = spanNode->GetSpanItem();
+        CHECK_NULL_VOID(spanItem);
+        CHECK_NULL_VOID(spanItem->onDetach);
+        auto callback = spanItem->onDetach;
+        spanItem->onDetach = nullptr;
+        callback(spanItem->GetBuilderSpanInfo());
     }
 };
 

@@ -27,6 +27,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_invoke_scope.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -789,10 +790,11 @@ public:
         if (stateStack.empty()) {
             states_.erase(iter);
         }
-        if (stateToDetach) {
-            stateToDetach->Detach();
+        if (!stateToDetach) {
+            return false;
         }
-        return stateToDetach != nullptr;
+        InvokeScope::DetachOrDefer(std::move(stateToDetach));
+        return true;
     }
 
     static bool Clear(int32_t instanceId)
@@ -805,10 +807,8 @@ public:
         statesToDetach = std::move(iter->second);
         states_.erase(iter);
 
-        for (const auto& state : statesToDetach) {
-            if (state) {
-                state->Detach();
-            }
+        for (auto& state : statesToDetach) {
+            InvokeScope::DetachOrDefer(std::move(state));
         }
         return true;
     }
@@ -827,6 +827,7 @@ public:
             return CreateAcceptedResolution();
         }
         auto states = iter->second;
+        InvokeScope invokeScope;
 
         for (auto stateIter = states.rbegin(); stateIter != states.rend(); ++stateIter) {
             auto state = *stateIter;
@@ -844,6 +845,8 @@ public:
     }
 
 private:
+    using InvokeScope = NG::SmartGestureMonitorInvokeScope<SmartGestureMonitorState>;
+
     static std::unordered_map<int32_t, std::vector<std::shared_ptr<SmartGestureMonitorState>>> states_;
 };
 

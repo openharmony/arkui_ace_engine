@@ -38,7 +38,6 @@ COMMON_SRC = [
 REGULAR_SRC = [
   "grid_attr_test_ng.cpp",
   "grid_attr_testtwo_ng.cpp",
-  "grid_content_clip_test.cpp",
   "grid_event_test_ng.cpp",
   "grid_focus_test_ng.cpp",
   "grid_layout_test_ng.cpp",
@@ -74,12 +73,21 @@ CUSTOM_SRC = [
   "grid_test_ng.cpp",
 ]
 
+# contentClip set-vs-unset parity suite (Phase 0 baseline before the feature;
+# covers the scroll / with-options / irregular algorithms, wired into the
+# matching targets; the custom layout algorithm is out of the feature scope).
+PARITY_SRC = [
+  "grid_content_clip_parity_test.cpp",
+  "grid_content_clip_test.cpp",
+]
+
 if (is_host_product) {
   ace_unittest("grid_test_regular") {
     type = "host_components"
       cflags = [ "-fno-access-control" ]
     module_name = "ScrollingSet-GridAndGridItem"
     sources = COMMON_SRC + REGULAR_SRC + [ "grid_test_core.cpp" ]
+    sources += PARITY_SRC
   }
 } else {
   ace_unittest("grid_test_regular") {
@@ -87,6 +95,7 @@ if (is_host_product) {
     type = "new"
     sources = COMMON_SRC
     sources += REGULAR_SRC
+    sources += PARITY_SRC
 
     if (!ace_enable_full_test_suite) {
       sources = []
@@ -103,6 +112,7 @@ if (is_host_product) {
     type = "host_components"
       cflags = [ "-fno-access-control" ]
     sources = COMMON_SRC + IRREGULAR_SRC + [ "grid_test_core.cpp" ]
+    sources += PARITY_SRC
     defines = [ "TEST_IRREGULAR_GRID" ]
   }
 } else {
@@ -111,6 +121,7 @@ if (is_host_product) {
     type = "new"
     sources = COMMON_SRC
     sources += IRREGULAR_SRC
+    sources += PARITY_SRC
     defines = [ "TEST_IRREGULAR_GRID" ]
 
     if (!ace_enable_full_test_suite) {
@@ -154,7 +165,7 @@ if (is_host_product) {
 if (is_host_product) {
   ace_unittest("grid_test_custom") {
     type = "host_components"
-      cflags = [ "-fno-access-control" ]
+    cflags = [ "-fno-access-control" ]
     module_name = "ScrollingSet-GridAndGridItem"
     sources = CUSTOM_SRC + [ "grid_custom_test_core.cpp" ]
   }

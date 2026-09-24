@@ -63,6 +63,10 @@ private:
     std::pair<int32_t, int32_t> CalculateCachedCount(LayoutWrapper* layoutWrapper, int32_t cachedCount) override;
     int32_t CalculateStartCachedCount(const GridLayoutOptions& options, int32_t cachedCount);
     int32_t CalculateEndCachedCount(const GridLayoutOptions& options, int32_t cachedCount);
+    int32_t CalculateStartCachedCountByIrregular(
+        const GridLayoutOptions& options, int32_t cachedCount, int32_t effectiveStartIndex);
+    int32_t CalculateEndCachedCountByIrregular(
+        const GridLayoutOptions& options, int32_t cachedCount, int32_t effectiveEndIndex);
 
     void PreloadItems(LayoutWrapper* layoutWrapper) override;
     static bool PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param,

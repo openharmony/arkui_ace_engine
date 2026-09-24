@@ -31,6 +31,8 @@ public:
 
     void ReportClick(const WeakPtr<NG::FrameNode> weakNode, const GestureEvent& gestureEvent);
 
+    void ReportClickWithExtData(const std::string& text, const std::string& xpath);
+
     bool GetClickExtEnabled()
     {
         return clickExtEnabled_;

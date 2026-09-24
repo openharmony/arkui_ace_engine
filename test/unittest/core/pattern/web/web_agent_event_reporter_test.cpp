@@ -23,6 +23,7 @@
 #include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -105,6 +106,11 @@ void WebAgentEventReporterTest::SetUpTestCase()
     g_webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(g_webPattern);
     g_webPattern->OnModifyDone();
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        pipelineContext->clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
+    }
 #endif
 }
 
@@ -1032,6 +1038,43 @@ HWTEST_F(WebAgentEventReporterTest, AISessionCallbacks_MultipleTypes, TestSize.L
         EXPECT_NE(executeCallback, nullptr);
         EXPECT_NE(destroyCallback, nullptr);
     }
+#endif
+}
+
+/**
+ * @tc.name: AddTapEvent_ClickOptimizer
+ * @tc.desc: Test AddTapEvent with click optimizer extension enabled/disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, AddTapEvent_ClickOptimizer, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    auto tapEventJson = JsonUtil::ParseJsonString(
+        R"({"EventType": "Tap", "point": [100, 200], "count": 1, "text": "test_text", "xpath": "/html/body/div"})");
+    ASSERT_NE(tapEventJson, nullptr);
+    auto host = g_webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto clickOptimizer = pipelineContext->GetClickOptimizer();
+    ASSERT_NE(clickOptimizer, nullptr);
+
+    /**
+     * @tc.steps: step1. set clickExtEnabled to true and call AddTapEvent
+     * @tc.expected: step1. ReportClickWithExtData is called
+     */
+    clickOptimizer->SetClickExtEnabled(true);
+    reporter->AddTapEvent(tapEventJson);
+    EXPECT_TRUE(clickOptimizer->GetClickExtEnabled());
+
+    /**
+     * @tc.steps: step2. set clickExtEnabled to false and call AddTapEvent
+     * @tc.expected: step2. ReportClickWithExtData is not called
+     */
+    clickOptimizer->SetClickExtEnabled(false);
+    reporter->AddTapEvent(tapEventJson);
+    EXPECT_FALSE(clickOptimizer->GetClickExtEnabled());
 #endif
 }
 

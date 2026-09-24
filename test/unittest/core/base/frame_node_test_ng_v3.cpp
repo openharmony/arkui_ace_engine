@@ -2401,7 +2401,7 @@ HWTEST_F(FrameNodeTestNg, SetNDKColorModeUpdateCallbackTest003, TestSize.Level1)
      * @tc.steps: step3. Verify that callback is set to nullptr.
      * @tc.expected: The ndkColorModeUpdateCallback_ should be nullptr.
      */
-    EXPECT_EQ(frameNode->ndkColorModeUpdateCallback_, nullptr);
+    EXPECT_EQ(*(frameNode->ndkColorModeUpdateCallback_), nullptr);
     EXPECT_EQ(frameNode->colorMode_, context->GetColorMode());
 }
 

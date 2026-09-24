@@ -179,6 +179,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
     "$ace_root/test/unittest/core/rosen/mock_task_runner_adapter_factory.cpp",
+    "component_snapshot_test.cpp",
     "detached_rs_node_manager_test.cpp",
     "overlay_modifier_test_ng.cpp",
     "rosen_render_context_test.cpp",
@@ -219,6 +220,9 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "napi:ace_napi",
   ]
   defines = [ "ACE_NON_VIRTUAL=virtual" ]
+  if (!is_arkui_x) {
+    defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
+  }
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
     defines += [ "USE_ROSEN_DRAWING" ]
   }

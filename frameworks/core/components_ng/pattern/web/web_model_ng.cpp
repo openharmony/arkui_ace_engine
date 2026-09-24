@@ -714,6 +714,18 @@ void WebModelNG::SetScaleChangeId(std::function<void(const BaseEventInfo* info)>
     webEventHub->SetOnScaleChangeEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetZoomChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnZoomChangeEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1136,6 +1148,13 @@ void WebModelNG::SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
+}
+
+void WebModelNG::SetTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateTransformRotateAndSkewEnabled(isTransformRotateAndSkewEnabled);
 }
 
 void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
@@ -1725,6 +1744,22 @@ void WebModelNG::SetOnScaleChange(FrameNode* frameNode, std::function<void(const
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnScaleChangeEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetOnZoomChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    if (!jsCallback) {
+        webEventHub->SetOnZoomChangeEvent(nullptr);
+        return;
+    }
+    auto uiCallback = [func = std::move(jsCallback)](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    webEventHub->SetOnZoomChangeEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -2961,7 +2996,7 @@ void WebModelNG::SetAiSessionOptions(FrameNode* frameNode, uint32_t type, AISess
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
         std::move(onExecuteAIAction), std::move(onDestroyAISession));

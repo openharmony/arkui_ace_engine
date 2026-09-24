@@ -139,10 +139,10 @@
 
 | Feat | 主题 | 文件 |
 |------|------|------|
-| Feat-01 | 窗口抽象与 Rosen Window 初始化 | `Feat-01-window-abstraction-rosen-window-init-spec.md` |
-| Feat-02 | 窗口生命周期状态转换 | `Feat-02-window-lifecycle-state-transition-spec.md` |
-| Feat-03 | 多实例全局管线 | `Feat-03-multi-instance-global-pipeline-spec.md` |
-| Feat-04 | 特殊窗口类型 | `Feat-04-special-window-types-spec.md` |
+| Feat-01 | 窗口抽象与 Rosen Window 初始化 | `specs/03-engine-framework/05-window-mechanism/01-window-mechanism/Feat-01-window-abstraction-rosen-window-init-spec.md` |
+| Feat-02 | 窗口生命周期状态转换 | `specs/03-engine-framework/05-window-mechanism/01-window-mechanism/Feat-02-window-lifecycle-state-transition-spec.md` |
+| Feat-03 | 多实例全局管线 | `specs/03-engine-framework/05-window-mechanism/01-window-mechanism/Feat-03-multi-instance-global-pipeline-spec.md` |
+| Feat-04 | 特殊窗口类型 | `specs/03-engine-framework/05-window-mechanism/01-window-mechanism/Feat-04-special-window-types-spec.md` |
 
 #### 多实例管理 Spec
 
@@ -185,9 +185,9 @@
 
 ## 相关主题
 
-- 渲染管线：`docs/kb/architecture/layout-framework.md`
-- 基础渲染管线：`docs/kb/architecture/basic-render-pipeline.md`
-- UIContext 接口：`docs/kb/capabilities/ui-context.md`
-- 窗口机制：`docs/kb/architecture/window-mechanism.md`
-- [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — 动态前端历史配对问题（已修复）与多路径实例栈排查
-- UISession：`docs/kb/architecture/uisession-service.md`（跨进程 UI 会话通道）
+- [渲染管线](layout-framework.md)
+- [基础渲染管线](basic-render-pipeline.md)
+- [UIContext 接口](../capabilities/ui-context.md)
+- [窗口机制](window-mechanism.md)
+- [[UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — 动态前端历史配对问题（已修复）与多路径实例栈排查
+- [UISession](uisession-service.md)（跨进程 UI 会话通道）

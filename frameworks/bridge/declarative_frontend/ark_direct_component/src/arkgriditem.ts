@@ -20,106 +20,106 @@ type ComponentObj = {
 }
 
 /// <reference path='./import.ts' />
-class GridItemSelectableModifier extends ModifierWithKey<boolean> {
-  static identity: Symbol = Symbol('gridItemSelectable');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.resetGridItemSelectable(node);
-    }
-    else {
-      getUINativeModule().gridItem.setGridItemSelectable(node, this.value);
-    }
-  }
-}
-class GridItemSelectedModifier extends ModifierWithKey<boolean> {
-  static identity: Symbol = Symbol('gridItemSelected');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.resetGridItemSelected(node);
-    }
-    else {
-      getUINativeModule().gridItem.setGridItemSelected(node, this.value);
-    }
-  }
-}
-class GridItemRowStartModifier extends ModifierWithKey<number> {
-  static identity: Symbol = Symbol('gridItemRowStart');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.resetGridItemRowStart(node);
-    }
-    else {
-      getUINativeModule().gridItem.setGridItemRowStart(node, this.value);
-    }
-  }
-}
-class GridItemRowEndModifier extends ModifierWithKey<number> {
-  static identity: Symbol = Symbol('gridItemRowEnd');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.resetGridItemRowEnd(node);
-    }
-    else {
-      getUINativeModule().gridItem.setGridItemRowEnd(node, this.value);
-    }
-  }
-}
-class GridItemColumnStartModifier extends ModifierWithKey<number> {
-  static identity: Symbol = Symbol('gridItemColumnStart');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.resetGridItemColumnStart(node);
-    }
-    else {
-      getUINativeModule().gridItem.setGridItemColumnStart(node, this.value);
-    }
-  }
-}
-class GridItemColumnEndModifier extends ModifierWithKey<number> {
-  static identity: Symbol = Symbol('gridItemColumnEnd');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.resetGridItemColumnEnd(node);
-    }
-    else {
-      getUINativeModule().gridItem.setGridItemColumnEnd(node, this.value);
-    }
-  }
-}
-class GridItemOptionsModifier extends ModifierWithKey<GridItemOptions> {
-  static identity: Symbol = Symbol('gridItemOptions');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.setGridItemOptions(node, undefined);
-    } else {
-      if (this.value?.style === undefined) {
-        getUINativeModule().gridItem.setGridItemOptions(node, undefined);
-      } else {
-        getUINativeModule().gridItem.setGridItemOptions(node, this.value.style);
-      }
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue?.style, this.value?.style);
-  }
-}
-class GridItemOnSelectedModifier extends ModifierWithKey<(isSelected: boolean) => void> {
-  constructor(value: (isSelected: boolean) => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridItemOnSelected');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridItem.resetGridItemOnSelected(node);
-    }
-    else {
-      getUINativeModule().gridItem.setGridItemOnSelected(node, this.value);
-    }
-  }
-}
-
 function loadComponent(): ComponentObj|undefined {
   if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
+    class GridItemSelectableModifier extends ModifierWithKey<boolean> {
+      static identity: Symbol = Symbol('gridItemSelectable');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.resetGridItemSelectable(node);
+        }
+        else {
+          getUINativeModule().gridItem.setGridItemSelectable(node, this.value);
+        }
+      }
+    }
+    class GridItemSelectedModifier extends ModifierWithKey<boolean> {
+      static identity: Symbol = Symbol('gridItemSelected');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.resetGridItemSelected(node);
+        }
+        else {
+          getUINativeModule().gridItem.setGridItemSelected(node, this.value);
+        }
+      }
+    }
+    class GridItemRowStartModifier extends ModifierWithKey<number> {
+      static identity: Symbol = Symbol('gridItemRowStart');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.resetGridItemRowStart(node);
+        }
+        else {
+          getUINativeModule().gridItem.setGridItemRowStart(node, this.value);
+        }
+      }
+    }
+    class GridItemRowEndModifier extends ModifierWithKey<number> {
+      static identity: Symbol = Symbol('gridItemRowEnd');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.resetGridItemRowEnd(node);
+        }
+        else {
+          getUINativeModule().gridItem.setGridItemRowEnd(node, this.value);
+        }
+      }
+    }
+    class GridItemColumnStartModifier extends ModifierWithKey<number> {
+      static identity: Symbol = Symbol('gridItemColumnStart');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.resetGridItemColumnStart(node);
+        }
+        else {
+          getUINativeModule().gridItem.setGridItemColumnStart(node, this.value);
+        }
+      }
+    }
+    class GridItemColumnEndModifier extends ModifierWithKey<number> {
+      static identity: Symbol = Symbol('gridItemColumnEnd');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.resetGridItemColumnEnd(node);
+        }
+        else {
+          getUINativeModule().gridItem.setGridItemColumnEnd(node, this.value);
+        }
+      }
+    }
+    class GridItemOptionsModifier extends ModifierWithKey<GridItemOptions> {
+      static identity: Symbol = Symbol('gridItemOptions');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+        } else {
+          if (this.value?.style === undefined) {
+            getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+          } else {
+            getUINativeModule().gridItem.setGridItemOptions(node, this.value.style);
+          }
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue?.style, this.value?.style);
+      }
+    }
+    class GridItemOnSelectedModifier extends ModifierWithKey<(isSelected: boolean) => void> {
+      constructor(value: (isSelected: boolean) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridItemOnSelected');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().gridItem.resetGridItemOnSelected(node);
+        }
+        else {
+          getUINativeModule().gridItem.setGridItemOnSelected(node, this.value);
+        }
+      }
+    }
+
     class ArkGridItemComponent extends globalThis.__ArkComponent__ {
       constructor(nativePtr: any, classType: any) {
         super(nativePtr, classType);
@@ -269,8 +269,7 @@ function createComponent(nativePtr: any, classType?: any): any {
 }
 
 function exportComponent(): void {
-  loadComponent();
-  globalThis.ArkGridItemComponent = loadComponent.componentObj?.component;
+  globalThis.ArkGridItemComponent = (loadComponent as any).componentObj?.component;
 }
 
 function exportView(): void {

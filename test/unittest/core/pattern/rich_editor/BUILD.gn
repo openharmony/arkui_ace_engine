@@ -21,8 +21,10 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_accessibility_test_ng.cpp",
     "rich_editor_add_span_test_ng.cpp",
     "rich_editor_ai_test_ng.cpp",
+    "rich_editor_builder_span_test_ng.cpp",
     "rich_editor_base_test_ng.cpp",
     "rich_editor_callback_content_no_change_test_ng.cpp",
+    "rich_editor_capi_modifier_test_ng.cpp",
     "rich_editor_caret_test_ng.cpp",
     "rich_editor_change_callback_test_ng.cpp",
     "rich_editor_change_reason_test.cpp",
@@ -36,6 +38,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_drag_test_ng.cpp",
     "rich_editor_edit_test_ng.cpp",
     "rich_editor_event_test_ng.cpp",
+    "rich_editor_input_filter_test_ng.cpp",
     "rich_editor_free_scroll_test_ng.cpp",
     "rich_editor_keyboard_shortcut_test_ng.cpp",
     "rich_editor_keyboard_test_ng.cpp",
@@ -49,6 +52,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_onwill_test_normal_insert.cpp",
     "rich_editor_onwill_test_replace_insert.cpp",
     "rich_editor_placeholder_span_test_ng.cpp",
+    "rich_editor_placeholder_test_ng.cpp",
     "rich_editor_preview_text_test_ng.cpp",
     "rich_editor_resource_test.cpp",
     "rich_editor_scroll_controller_test.cpp",
@@ -80,6 +84,9 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_theme_test_ng.cpp",
     "rich_editor_theme_wrapper_test.cpp",
     "rich_editor_overlay_modifier_test_ng.cpp",
+    "rich_editor_cancel_button_test_ng.cpp",
+    "rich_editor_border_utils_test_ng.cpp",
+    "rich_editor_margin_utils_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

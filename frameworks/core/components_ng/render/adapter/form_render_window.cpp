@@ -272,7 +272,7 @@ void FormRenderWindow::InitOnVsyncCallback()
             }
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
-            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount), ts);
             if (uiContentType == UIContentType::DYNAMIC_COMPONENT) {
                 ArkUIPerfMonitor::GetInstance().FinishPerf();
             }

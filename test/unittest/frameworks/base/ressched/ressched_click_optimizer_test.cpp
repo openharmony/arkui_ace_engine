@@ -147,6 +147,40 @@ HWTEST_F(ResSchedClickOptimizerTest, ReportClickTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ReportClickWithExtDataTest001
+ * @tc.dest: test ReportClickWithExtData with different GetClickExtEnabled states
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedClickOptimizerTest, ReportClickWithExtDataTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init node.
+     * @tc.expected: step1. node created successfully.
+     */
+    auto node = NG::FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<NG::Pattern>());
+    WeakPtr<NG::FrameNode> host = AceType::WeakClaim(AceType::RawPtr(node));
+    GestureEvent info = GestureEvent();
+
+    /**
+     * @tc.steps: step2. call ReportClickWithExtData and compare result.
+     * @tc.steps: case1: GetClickExtEnabled is false, all params provided
+     * @tc.expected: step2. ResSchedReport::GetInstance().ResSchedDataReport("click") called without payload.
+     */
+    optimizer_->SetClickExtEnabled(false);
+    optimizer_->ReportClickWithExtData("test_text", "test_xpath");
+    EXPECT_FALSE(optimizer_->GetClickExtEnabled());
+
+    /**
+     * @tc.steps: step3. call ReportClickWithExtData and compare result.
+     * @tc.steps: case2: GetClickExtEnabled is true, all params provided
+     * @tc.expected: step3. ResSchedReport::GetInstance().ResSchedDataReport("click", payload) called with full payload.
+     */
+    optimizer_->SetClickExtEnabled(true);
+    optimizer_->ReportClickWithExtData("test_text", "test_xpath");
+    EXPECT_TRUE(optimizer_->GetClickExtEnabled());
+}
+
+/**
  * @tc.name: GetComponentTextRecursiveTest001
  * @tc.desc: test GetComponentTextRecursive method
  * @tc.type: FUNC

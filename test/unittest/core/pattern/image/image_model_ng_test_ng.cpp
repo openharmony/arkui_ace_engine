@@ -1270,7 +1270,7 @@ HWTEST_F(ImageModelNGTestNg, ImageModelNGSetDraggable002, TestSize.Level0)
     image.Create(imageInfoConfig);
 
     image.SetDraggable(true);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_TRUE(frameNode->IsDraggable());
 

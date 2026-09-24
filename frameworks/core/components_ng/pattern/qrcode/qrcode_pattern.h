@@ -68,6 +68,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 

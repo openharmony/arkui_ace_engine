@@ -36,6 +36,7 @@ RefPtr<SpanStringBase> RichEditorStyledStringController::GetStyledString()
     auto styledString = richEditorPattern->GetStyledString();
     CHECK_NULL_RETURN(styledString, mutableSpanString);
     auto length = styledString->GetLength();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetStyledString: create snapshot, len=%{public}d", length);
     auto spanString = styledString->GetSubSpanString(0, length);
     mutableSpanString->AppendSpanString(spanString);
     return mutableSpanString;

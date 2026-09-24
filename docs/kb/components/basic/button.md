@@ -102,6 +102,5 @@ Button 已完成组件化改造，JSView 文件不存在，Bridge 和动态属�
 
 ## 相关主题
 
-- Toggle 组件（ToggleButtonPattern 继承 ButtonPattern）
-- ArcButton 高级组件（ArkUI 高级按钮组件）
-- 组件化改造通用方案
+- [Toggle 组件（ToggleButtonPattern 继承 ButtonPattern）](../selector/toggle.md)
+- [ArcButton 高级组件（ArkUI 高级按钮组件）](../selector/arc-button.md)

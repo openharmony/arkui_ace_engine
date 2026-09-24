@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_INTERFACES_NATIVE_NODE_NATIVE_MATERIAL_IMPL_H
 #define FOUNDATION_ACE_INTERFACES_NATIVE_NODE_NATIVE_MATERIAL_IMPL_H
 
+#include <optional>
 #include "native_material.h"
 
 struct ArkUI_LightEffectOptions {
-    uint32_t color = 0xFFFFFFFF;
+    std::optional<uint32_t> color = std::nullopt;
 };
 
 struct ArkUI_ImmersiveMaterial {

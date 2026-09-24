@@ -97,9 +97,9 @@ OverlayManager 通过 JS→NAPI→C++ 三层桥接实现，不涉及独立 Patte
 
 ## 相关主题
 
-- Dialog 弹窗组件（OverlayManager 管理 Dialog/Menu/Toast/Sheet 等）
-- 模态属性（bindSheet/bindContentCover 也通过 OverlayManager 挂载）
-- 子窗机制（子窗弹窗与 OverlayManager 的关系）
-- UIContext（getOverlayManager 入口）
+- [Dialog 弹窗组件（OverlayManager 管理 Dialog/Menu/Toast/Sheet 等）](../components/overlay/dialog.md)
+- [模态属性（bindSheet/bindContentCover 也通过 OverlayManager 挂载）](modal-attributes.md)
+- [子窗机制（子窗弹窗与 OverlayManager 的关系）](../architecture/subwindow-mechanism.md)
+- [UIContext（getOverlayManager 入口）](ui-context.md)
 - [渲染树同步](../architecture/render-tree-sync.md) — OverlayManager 通过 RebuildRenderContextTree 同步浮层节点
 - [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — JS 前端历史配对问题（已修复）与浮层实例路由排查

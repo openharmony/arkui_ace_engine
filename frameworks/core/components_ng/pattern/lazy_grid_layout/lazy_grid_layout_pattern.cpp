@@ -28,6 +28,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+const char WATERFLOW_ETS_TAG[] = "WaterFlow";
 
 LazyGridLayoutPattern::~LazyGridLayoutPattern() = default;
 
@@ -342,10 +343,26 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
     if (isDynamicLayout_) {
         return;
     }
-    // FEAT-027: share the generalized ancestor validation so LazyVGridLayout accepts arbitrary intermediate
-    // containers between itself and the nearest legal same-axis scroll ancestor, with the same LOGF_ABORT
-    // contract for axis-incompatible or missing scroll ancestors.
-    LazyLayoutUtils::ValidateLazyLayoutParent(GetHost(), "LazyVGridLayout");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetNeedLazyLayout(true);
+    auto parent = host->GetParent();
+    while (parent) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            parent = parent->GetParent();
+            continue;
+        }
+        if (LazyLayoutUtils::IsAllowedIntermediateNode(parent)) {
+            frameNode->SetNeedLazyLayout(true);
+            parent = parent->GetParent();
+            continue;
+        }
+        if (parent->GetTag() == WATERFLOW_ETS_TAG || LazyLayoutUtils::IsVerticalScrollableParent(parent)) {
+            return;
+        }
+        LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
+    }
 }
 
 void LazyGridLayoutPattern::DumpAdvanceInfo()

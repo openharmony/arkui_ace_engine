@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,12 +107,6 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
     auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
 
-    std::vector<uint8_t> abcContent;
-    if (!Framework::GetAssetContentImpl(assetManager_, "ets/modules_static.abc", abcContent)) {
-        LOGE("GetAssetContent fail: ets/modules_static.abc");
-        return UIContentErrorCode::INVALID_URL;
-    }
-
     ani_class appClass{};
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return UIContentErrorCode::INVALID_URL);
 
@@ -140,7 +134,7 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
     ani_string aniParams{};
     env->String_NewUTF8(params.c_str(), params.size(), &aniParams);
 
-    NG::EntryLoader entryLoader {env, abcContent};
+    NG::EntryLoader entryLoader {env, ""};
     if (!entryLoader) {
         return UIContentErrorCode::INVALID_URL;
     }

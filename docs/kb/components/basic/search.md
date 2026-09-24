@@ -131,9 +131,8 @@ Search 功能域：`specs/05-ui-components/09-text-components/03-search/`
 
 ## 相关主题
 
-- `Text`：`docs/kb/components/basic/text.md`
-- `TextArea`：`docs/kb/components/basic/text_area.md`
-- `Marquee`：`docs/kb/components/basic/marquee.md`
-- `TextInput`：`docs/pattern/text_input/TextInput_Knowledge_Base_CN.md`（未迁移）
-- `RichEditor`：`docs/pattern/rich_editor/RichEditor_Knowledge_Base_CN.md`（未迁移）
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`
+- [Text](text.md)
+- [TextArea](text-area.md)
+- [Marquee](marquee.md)
+- [TextInput](text-input.md)（未迁移）
+- [RichEditor](rich-editor.md)（未迁移）

@@ -78,5 +78,5 @@ Inspector 布局回调是 ArkUI 通过 `@ohos.arkui.inspector` 模块的 `create
 
 ## 相关主题
 
-- 组件树 Inspector：`docs/kb/capabilities/inspector.md`（同属 `@ohos.arkui.inspector` 模块）
-- 无感监听：`docs/kb/capabilities/ui-observer.md`（sibling 04-11-02，全局 observer）
+- [组件树 Inspector（同属 `@ohos.arkui.inspector` 模块）](inspector.md)
+- [无感监听（sibling 04-11-02，全局 observer）](ui-observer.md)

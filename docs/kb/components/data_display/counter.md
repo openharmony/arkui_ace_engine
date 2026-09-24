@@ -32,6 +32,8 @@ Counter 是三节点计数器组件，由减号按钮、内容区域、加号按
 
 ### API 解析实现路径
 
+**已组件化**（有 `bridge/` 子目录、统一 Bridge，旧 JSView 已移除），输出独立 SO。
+
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
 | 统一 Bridge | `frameworks/core/components_ng/pattern/counter/bridge/arkts_native_counter_bridge.cpp` | 通过 `IsJsView()` 区分模式，统一参数解析 |
@@ -78,6 +80,6 @@ Counter 是三节点计数器组件，由减号按钮、内容区域、加号按
 
 ## 相关主题
 
-- Button：按钮组件
-- TextInput：文本输入组件
+- [Button：按钮组件](../basic/button.md)
+- [TextInput：文本输入组件](../basic/text-input.md)
 - 数值管理：外部状态管理，通过事件回调处理

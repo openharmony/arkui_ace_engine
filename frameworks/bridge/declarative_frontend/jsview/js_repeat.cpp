@@ -138,6 +138,10 @@ void JSRepeat::AfterAddChild()
     RepeatModel::GetInstance()->AfterAddChild();
 }
 
+// NOTE: this function and its CallJsFuncWithIndex/CallJsFuncWithFromTo helpers are duplicated
+// verbatim in js_lazy_foreach.cpp, js_foreach.cpp and js_repeat_virtual_scroll_2.cpp (the latter
+// with an extra repeatElmtId parameter). Any change here must be mirrored there; consolidating
+// them into js_view_common_def.h is the tracked follow-up.
 void JSRepeat::JsParseItemDragEventHandler(
     const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {

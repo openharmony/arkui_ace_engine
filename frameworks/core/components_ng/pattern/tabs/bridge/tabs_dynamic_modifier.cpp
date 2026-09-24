@@ -219,6 +219,26 @@ void CreateBarBackgroundColorWithResourceObjImpl(ArkUINodeHandle node, void* bgC
     (void)bgColorRawPtr;
 }
 
+void SetTabsSidebarSelectedIconColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void ResetTabsSidebarSelectedIconColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarSelectedTextColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void ResetTabsSidebarSelectedTextColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarUnselectedIconColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void ResetTabsSidebarUnselectedIconColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarUnselectedTextColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void ResetTabsSidebarUnselectedTextColorImpl(ArkUINodeHandle node) {}
+
+void SetTabsSidebarSelectedBoardColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void ResetTabsSidebarSelectedBoardColorImpl(ArkUINodeHandle node) {}
+
 void SetBarBackgroundBlurStyleImpl(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption)
 {
     (void)node;
@@ -284,6 +304,14 @@ void SetTabBarPositionImpl(ArkUINodeHandle node, ArkUI_Int32 barVal)
 }
 
 void SetTabsOptionsIndexImpl(ArkUINodeHandle node, ArkUI_Int32 indexVal)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    tabsModelImpl->SetIndex(indexVal < 0 ? 0 : indexVal);
+}
+
+void SetTabsIndexImpl(ArkUINodeHandle node, ArkUI_Int32 indexVal)
 {
     (void)node;
     auto tabsModelImpl = GetTabsModelImpl();
@@ -688,6 +716,19 @@ void SetCachedMaxCountImpl(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 
     tabsModelImpl->SetCachedMaxCount(count, cacheMode);
 }
 
+void SetCachedMaxCountForJsImpl(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    tabsModelImpl->SetCachedMaxCount(count, cacheMode);
+}
+
 void ResetTabsOnSelectedImpl(ArkUINodeHandle node)
 {
     SetTabsOnSelectedImpl(node, nullptr);
@@ -711,6 +752,19 @@ void SetTabsOnChangeImpl(ArkUINodeHandle node, void* callback)
         tabsModelImpl->SetOnChange(std::move(*onChange));
     } else {
         tabsModelImpl->SetOnChange(nullptr);
+    }
+}
+
+void SetTabsOnChangeEventImpl(ArkUINodeHandle node, void* callback)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    if (callback) {
+        auto onChangeEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        tabsModelImpl->SetOnChangeEvent(std::move(*onChangeEvent));
+    } else {
+        tabsModelImpl->SetOnChangeEvent(nullptr);
     }
 }
 
@@ -863,6 +917,10 @@ void CreateWithResourceObjImpl(ArkUINodeHandle node, void* paramRawPtr)
     tabsModelImpl->CreateWithResourceObj(param->jsResourceType, AceType::Claim(param->resourceObj));
 }
 
+void SetSidebarDisplayStyleImpl(ArkUINodeHandle node, ArkUI_Int32 sidebarDisplayStyle) {}
+
+void ResetSidebarDisplayStyleImpl(ArkUINodeHandle node) {}
+
 void SetBarStyleImpl(ArkUINodeHandle node, ArkUI_Int32 barStyle) {}
 
 void ResetBarStyleImpl(ArkUINodeHandle node) {}
@@ -882,7 +940,48 @@ void ResetSidebarSearchableImpl(ArkUINodeHandle node) {}
 void SetBarDisplayModeBreakpointImpl(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint) {}
 
 void ResetBarDisplayModeBreakpointImpl(ArkUINodeHandle node) {}
+
+void SetOnBarDisplayModeChangeImpl(ArkUINodeHandle node, void* callback) {}
+
+void ResetOnBarDisplayModeChangeImpl(ArkUINodeHandle node) {}
+
+void SetTabSidebarWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit) {}
+
+void ResetTabSidebarWidthImpl(ArkUINodeHandle node) {}
+
+void SetTabMinSidebarWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit) {}
+
+void ResetTabMinSidebarWidthImpl(ArkUINodeHandle node) {}
+
+void SetTabMaxSidebarWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit) {}
+
+void ResetTabMaxSidebarWidthImpl(ArkUINodeHandle node) {}
+
+void SetTabMinContentWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit) {}
+
+void ResetTabMinContentWidthImpl(ArkUINodeHandle node) {}
+
+void SetTabSidebarBackgroundColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color) {}
+
+void SetSidebarBackgroundColorByUserImpl(ArkUINodeHandle node, ArkUI_Bool isByUser) {}
+
+void ResetTabSidebarBackgroundColorImpl(ArkUINodeHandle node) {}
+
+void SetTabSidebarBackgroundBlurStyleImpl(ArkUINodeHandle node, ArkUI_Uint32 blurStyle) {}
+
+void ResetTabSidebarBackgroundBlurStyleImpl(ArkUINodeHandle node) {}
+
+void SetSidebarDividerImpl(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length) {}
+
+void SetSidebarDividerColorByUserImpl(ArkUINodeHandle node, ArkUI_Bool isByUser) {}
+
+void ResetSidebarDividerImpl(ArkUINodeHandle node) {}
+
+void CreateWithSidebarResourceObjImpl(ArkUINodeHandle node, void* paramRawPtr) {}
 #endif
+
+void CreateWithSidebarResourceObj(ArkUINodeHandle node, void* paramRawPtr);
 
 void CreateTabs(
     ArkUI_Int32 barPosition, ArkUI_Int32 index, ArkUINodeHandle tabsController, ArkUINodeHandle tabController)
@@ -1061,6 +1160,106 @@ void CreateBarBackgroundColorWithResourceObj(ArkUINodeHandle node, void* bgColor
     TabsModelNG::HandleBarBackgroundColor(frameNode, bgColorResObj, true);
 }
 
+void SetTabsSidebarSelectedIconColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarSelectedIconColor(frameNode, Color(color));
+}
+
+void ResetTabsSidebarSelectedIconColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarSelectedIconColor(frameNode, tabTheme->GetSideBarSelectedIconColor());
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_SELECTED_ICONCOLOR, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabsSidebarSelectedTextColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarSelectedTextColor(frameNode, Color(color));
+}
+
+void ResetTabsSidebarSelectedTextColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarSelectedTextColor(frameNode, tabTheme->GetSideBarSelectedTextColor());
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_SELECTED_TEXTCOLOR, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabsSidebarUnselectedIconColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarUnselectedIconColor(frameNode, Color(color));
+}
+
+void ResetTabsSidebarUnselectedIconColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarUnselectedIconColor(frameNode, tabTheme->GetSideBarUnselectedIconColor());
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_UNSELECTED_ICONCOLOR, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabsSidebarUnselectedTextColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarUnselectedTextColor(frameNode, Color(color));
+}
+
+void ResetTabsSidebarUnselectedTextColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarUnselectedTextColor(frameNode, tabTheme->GetSideBarUnselectedTextColor());
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_UNSELECTED_TEXTCOLOR, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabsSidebarSelectedBoardColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarSelectedBoardColor(frameNode, Color(color));
+}
+
+void ResetTabsSidebarSelectedBoardColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    TabsModelNG::SetSidebarSelectedBoardColor(frameNode, tabTheme->GetSideBarListItemActivedColor());
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_SELECTED_BOARDCOLOR, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
 void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1144,6 +1343,12 @@ void SetTabsOptionsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarIndex(frameNode, indexVal < 0 ? 0 : indexVal);
+}
+void SetTabsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIndex(frameNode, indexVal < 0 ? 0 : indexVal);
 }
 void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsController)
 {
@@ -1611,6 +1816,18 @@ void SetCachedMaxCount(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode
     TabsModelNG::SetCachedMaxCount(frameNode, count, cacheMode);
 }
 
+void SetCachedMaxCountForJs(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    TabsModelNG::SetCachedMaxCountForJs(frameNode, count, cacheMode);
+}
+
 void ResetCachedMaxCount(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1626,6 +1843,18 @@ void SetTabsOnChange(ArkUINodeHandle node, void* callback)
         TabsModelNG::SetOnChange(frameNode, std::move(*onChange));
     } else {
         TabsModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void SetTabsOnChangeEvent(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChangeEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnChangeEvent(frameNode, std::move(*onChangeEvent));
+    } else {
+        TabsModelNG::SetOnChangeEvent(frameNode, nullptr);
     }
 }
 
@@ -1783,6 +2012,20 @@ void CreateWithResourceObj(ArkUINodeHandle node, void* paramRawPtr)
     TabsModelNG::CreateWithResourceObj(frameNode, param->jsResourceType, resObj);
 }
 
+void SetSidebarDisplayStyle(ArkUINodeHandle node, ArkUI_Int32 sidebarDisplayStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, static_cast<SidebarDisplayStyle>(sidebarDisplayStyle));
+}
+
+void ResetSidebarDisplayStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, SidebarDisplayStyle::EMBED);
+}
+
 void SetBarStyle(ArkUINodeHandle node, ArkUI_Int32 barLayoutStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1902,6 +2145,201 @@ void ResetBarDisplayModeBreakpoint(ArkUINodeHandle node)
     TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, breakpoint);
 }
 
+void SetOnBarDisplayModeChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(NG::TabBarDisplayMode)>*>(callback);
+        TabsModelNG::SetOnBarDisplayModeChange(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnBarDisplayModeChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnBarDisplayModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnBarDisplayModeChange(frameNode, nullptr);
+}
+
+void SetTabSidebarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    TabsModelNG::SetSidebarWidth(frameNode, width);
+}
+
+void ResetTabSidebarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width;
+    TabsModelNG::SetSidebarWidth(frameNode, width);
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_WIDTH, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabMinSidebarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    TabsModelNG::SetMinSidebarWidth(frameNode, width);
+}
+
+void ResetTabMinSidebarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width;
+    TabsModelNG::SetMinSidebarWidth(frameNode, width);
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_MIN_SIDEBAR_WIDTH, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabMaxSidebarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    TabsModelNG::SetMaxSidebarWidth(frameNode, width);
+}
+
+void ResetTabMaxSidebarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width;
+    TabsModelNG::SetMaxSidebarWidth(frameNode, width);
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_MAX_SIDEBAR_WIDTH, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    TabsModelNG::SetMinContentWidth(frameNode, width);
+}
+
+void ResetTabMinContentWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> width;
+    TabsModelNG::SetMinContentWidth(frameNode, width);
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_MIN_CONTENT_WIDTH, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabSidebarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarBackgroundColor(frameNode, Color(color));
+}
+
+void SetSidebarBackgroundColorByUser(ArkUINodeHandle node, ArkUI_Bool isByUser)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarBackgroundColorByUser(frameNode, isByUser);
+}
+
+void ResetTabSidebarBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    auto themeColor = tabTheme->GetSideBarBackgroundColor();
+    TabsModelNG::SetSidebarBackgroundColor(frameNode, themeColor);
+    TabsModelNG::SetSidebarBackgroundColorByUser(frameNode, false);
+    TabsResourceObjParam param { TabJsResType::SIDEBAR_BACKGROUND_COLOR, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&param));
+}
+
+void SetTabSidebarBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Uint32 blurStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<BlurStyle> blurStyleValue;
+    if (blurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+        blurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        blurStyleValue = static_cast<BlurStyle>(blurStyle);
+    }
+    TabsModelNG::SetSidebarBackgroundBlurStyle(frameNode, blurStyleValue);
+}
+
+void ResetTabSidebarBackgroundBlurStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<BlurStyle> blurStyleValue;
+    TabsModelNG::SetSidebarBackgroundBlurStyle(frameNode, blurStyleValue);
+}
+
+void SetSidebarDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units,
+    ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    TabsItemDivider divider;
+    divider.strokeWidth = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    divider.startMargin = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    divider.endMargin = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    divider.color = Color(color);
+
+    TabsModelNG::SetSidebarDivider(frameNode, divider);
+}
+
+void SetSidebarDividerColorByUser(ArkUINodeHandle node, ArkUI_Bool isByUser)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDividerColorByUser(frameNode, isByUser);
+}
+
+void ResetSidebarDivider(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsItemDivider divider;
+    divider.isNull = true;
+    TabsModelNG::SetSidebarDivider(frameNode, divider);
+    TabsModelNG::SetSidebarDividerColorByUser(frameNode, false);
+    TabsResourceObjParam widthParam { TabJsResType::SIDEBAR_DIVIDER_STROKE_WIDTH, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&widthParam));
+    TabsResourceObjParam colorParam { TabJsResType::SIDEBAR_DIVIDER_COLOR, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&colorParam));
+    TabsResourceObjParam startMarginParam{ TabJsResType::SIDEBAR_DIVIDER_START_MARGIN, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&startMarginParam));
+    TabsResourceObjParam endMarginParam { TabJsResType::SIDEBAR_DIVIDER_END_MARGIN, nullptr };
+    CreateWithSidebarResourceObj(node, reinterpret_cast<void*>(&endMarginParam));
+}
+
+void CreateWithSidebarResourceObj(ArkUINodeHandle node, void* paramRawPtr)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* param = reinterpret_cast<TabsResourceObjParam*>(paramRawPtr);
+    CHECK_NULL_VOID(param);
+    auto resObj = AceType::Claim(param->resourceObj);
+    TabsModelNG::CreateWithSidebarResourceObj(frameNode, param->jsResourceType, resObj);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -1921,6 +2359,16 @@ const ArkUITabsModifier* GetTabsModifier()
             .setTabsOnContentDidScroll = SetTabsOnContentDidScroll,
             .setBarBackgroundColor = SetBarBackgroundColor,
             .setBarBackgroundColorByUser = SetBarBackgroundColorByUser,
+            .setTabsSidebarSelectedIconColor = SetTabsSidebarSelectedIconColor,
+            .resetTabsSidebarSelectedIconColor = ResetTabsSidebarSelectedIconColor,
+            .setTabsSidebarSelectedTextColor = SetTabsSidebarSelectedTextColor,
+            .resetTabsSidebarSelectedTextColor = ResetTabsSidebarSelectedTextColor,
+            .setTabsSidebarUnselectedIconColor = SetTabsSidebarUnselectedIconColor,
+            .resetTabsSidebarUnselectedIconColor = ResetTabsSidebarUnselectedIconColor,
+            .setTabsSidebarUnselectedTextColor = SetTabsSidebarUnselectedTextColor,
+            .resetTabsSidebarUnselectedTextColor = ResetTabsSidebarUnselectedTextColor,
+            .setTabsSidebarSelectedBoardColor = SetTabsSidebarSelectedBoardColor,
+            .resetTabsSidebarSelectedBoardColor = ResetTabsSidebarSelectedBoardColor,
             .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
             .setBarBackgroundBlurStyleWithStyleOption = SetBarBackgroundBlurStyleWithStyleOption,
             .setBarOverlap = SetBarOverlap,
@@ -1977,6 +2425,7 @@ const ArkUITabsModifier* GetTabsModifier()
             .setTabsOnSelected = SetTabsOnSelected,
             .resetTabsOnSelected = ResetTabsOnSelected,
             .setCachedMaxCount = SetCachedMaxCount,
+            .setCachedMaxCountForJs = SetCachedMaxCountForJs,
             .resetCachedMaxCount = ResetCachedMaxCount,
             .setTabsOnChange = SetTabsOnChange,
             .resetTabsOnChange = ResetTabsOnChange,
@@ -2004,6 +2453,8 @@ const ArkUITabsModifier* GetTabsModifier()
             .setTabsBarFloatingStyle = SetTabsBarFloatingStyle,
             .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyle,
             .createWithResourceObj = CreateWithResourceObj,
+            .setSidebarDisplayStyle = SetSidebarDisplayStyle,
+            .resetSidebarDisplayStyle = ResetSidebarDisplayStyle,
             .setBarStyle = SetBarStyle,
             .resetBarStyle = ResetBarStyle,
             .setSidebarPosition = SetSidebarPosition,
@@ -2014,6 +2465,27 @@ const ArkUITabsModifier* GetTabsModifier()
             .resetSidebarSearchable = ResetSidebarSearchable,
             .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpoint,
             .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpoint,
+            .setOnBarDisplayModeChange = SetOnBarDisplayModeChange,
+            .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChange,
+            .setTabsIndex = SetTabsIndex,
+            .setTabsOnChangeEvent = SetTabsOnChangeEvent,
+            .setTabSidebarWidth = SetTabSidebarWidth,
+            .resetTabSidebarWidth = ResetTabSidebarWidth,
+            .setTabMinSidebarWidth = SetTabMinSidebarWidth,
+            .resetTabMinSidebarWidth = ResetTabMinSidebarWidth,
+            .setTabMaxSidebarWidth = SetTabMaxSidebarWidth,
+            .resetTabMaxSidebarWidth = ResetTabMaxSidebarWidth,
+            .setTabMinContentWidth = SetTabMinContentWidth,
+            .resetTabMinContentWidth = ResetTabMinContentWidth,
+            .setTabSidebarBackgroundColor = SetTabSidebarBackgroundColor,
+            .setTabSidebarBackgroundColorByUser = SetSidebarBackgroundColorByUser,
+            .resetTabSidebarBackgroundColor = ResetTabSidebarBackgroundColor,
+            .setTabSidebarBackgroundBlurStyle = SetTabSidebarBackgroundBlurStyle,
+            .resetTabSidebarBackgroundBlurStyle = ResetTabSidebarBackgroundBlurStyle,
+            .setSidebarDivider = SetSidebarDivider,
+            .setSidebarDividerColorByUser = SetSidebarDividerColorByUser,
+            .resetSidebarDivider = ResetSidebarDivider,
+            .createWithSidebarResourceObj = CreateWithSidebarResourceObj,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2033,6 +2505,16 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabsOnContentDidScroll = SetTabsOnContentDidScrollImpl,
         .setBarBackgroundColor = SetBarBackgroundColorImpl,
         .setBarBackgroundColorByUser = SetBarBackgroundColorByUserImpl,
+        .setTabsSidebarSelectedIconColor = SetTabsSidebarSelectedIconColorImpl,
+        .resetTabsSidebarSelectedIconColor = ResetTabsSidebarSelectedIconColorImpl,
+        .setTabsSidebarSelectedTextColor = SetTabsSidebarSelectedTextColorImpl,
+        .resetTabsSidebarSelectedTextColor = ResetTabsSidebarSelectedTextColorImpl,
+        .setTabsSidebarUnselectedIconColor = SetTabsSidebarUnselectedIconColorImpl,
+        .resetTabsSidebarUnselectedIconColor = ResetTabsSidebarUnselectedIconColorImpl,
+        .setTabsSidebarUnselectedTextColor = SetTabsSidebarUnselectedTextColorImpl,
+        .resetTabsSidebarUnselectedTextColor = ResetTabsSidebarUnselectedTextColorImpl,
+        .setTabsSidebarSelectedBoardColor = SetTabsSidebarSelectedBoardColorImpl,
+        .resetTabsSidebarSelectedBoardColor = ResetTabsSidebarSelectedBoardColorImpl,
         .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyleImpl,
         .setBarBackgroundBlurStyleWithStyleOption = SetBarBackgroundBlurStyleWithStyleOptionImpl,
         .setBarOverlap = SetBarOverlapImpl,
@@ -2089,6 +2571,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabsOnSelected = SetTabsOnSelectedImpl,
         .resetTabsOnSelected = ResetTabsOnSelectedImpl,
         .setCachedMaxCount = SetCachedMaxCountImpl,
+        .setCachedMaxCountForJs = SetCachedMaxCountForJsImpl,
         .resetCachedMaxCount = ResetCachedMaxCountImpl,
         .setTabsOnChange = SetTabsOnChangeImpl,
         .resetTabsOnChange = ResetTabsOnChangeImpl,
@@ -2116,6 +2599,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabsBarFloatingStyle = SetTabsBarFloatingStyleImpl,
         .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyleImpl,
         .createWithResourceObj = CreateWithResourceObjImpl,
+        .setSidebarDisplayStyle = SetSidebarDisplayStyleImpl,
+        .resetSidebarDisplayStyle = ResetSidebarDisplayStyleImpl,
         .setBarStyle = SetBarStyleImpl,
         .resetBarStyle = ResetBarStyleImpl,
         .setSidebarPosition = SetSidebarPositionImpl,
@@ -2126,6 +2611,27 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetSidebarSearchable = ResetSidebarSearchableImpl,
         .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpointImpl,
         .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpointImpl,
+        .setOnBarDisplayModeChange = SetOnBarDisplayModeChangeImpl,
+        .resetOnBarDisplayModeChange = ResetOnBarDisplayModeChangeImpl,
+        .setTabsIndex = SetTabsIndexImpl,
+        .setTabsOnChangeEvent = SetTabsOnChangeEventImpl,
+        .setTabSidebarWidth = SetTabSidebarWidthImpl,
+        .resetTabSidebarWidth = ResetTabSidebarWidthImpl,
+        .setTabMinSidebarWidth = SetTabMinSidebarWidthImpl,
+        .resetTabMinSidebarWidth = ResetTabMinSidebarWidthImpl,
+        .setTabMaxSidebarWidth = SetTabMaxSidebarWidthImpl,
+        .resetTabMaxSidebarWidth = ResetTabMaxSidebarWidthImpl,
+        .setTabMinContentWidth = SetTabMinContentWidthImpl,
+        .resetTabMinContentWidth = ResetTabMinContentWidthImpl,
+        .setTabSidebarBackgroundColor = SetTabSidebarBackgroundColorImpl,
+        .setTabSidebarBackgroundColorByUser = SetSidebarBackgroundColorByUserImpl,
+        .resetTabSidebarBackgroundColor = ResetTabSidebarBackgroundColorImpl,
+        .setTabSidebarBackgroundBlurStyle = SetTabSidebarBackgroundBlurStyleImpl,
+        .resetTabSidebarBackgroundBlurStyle = ResetTabSidebarBackgroundBlurStyleImpl,
+        .setSidebarDivider = SetSidebarDividerImpl,
+        .setSidebarDividerColorByUser = SetSidebarDividerColorByUserImpl,
+        .resetSidebarDivider = ResetSidebarDividerImpl,
+        .createWithSidebarResourceObj = CreateWithSidebarResourceObjImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

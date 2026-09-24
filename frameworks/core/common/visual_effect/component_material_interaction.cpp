@@ -55,6 +55,46 @@ constexpr float LIGHT_EFFECT_INTENSITY = 3.0f;
 constexpr uint32_t LIGHT_ILLUMINATED = 3; // ILLUMINATED_TYPE_BORDER_CONTENT
 constexpr Dimension ILLUMINATED_BORDER_WIDTH = 0.5_vp;
 
+// color breakpoints
+constexpr Color COLOR_NARROW_SHORT = Color(0xE5FFFFFF);
+constexpr Color COLOR_NARROW_SHORT_DARK = Color(0x99FFFFFF);
+constexpr Color COLOR_SHORT = Color(0xBFFFFFFF);
+constexpr Color COLOR_MID = Color(0x33FFFFFF);
+constexpr Color COLOR_TALL = Color(0xE5FFFFFF);
+
+// width breakpoints in vp
+constexpr float LIGHT_WIDTH_SMALL = 96.0f;
+constexpr float LIGHT_WIDTH_MEDIUM = 360.0f;
+constexpr float LIGHT_WIDTH_LARGE = 480.0f;
+
+// height breakpoints in vp
+constexpr float LIGHT_HEIGHT_SMALL = 48.0f;
+constexpr float LIGHT_HEIGHT_MEDIUM = 56.0f;
+constexpr float LIGHT_HEIGHT_LARGE = 780.0f;
+
+// posZ values in vp
+constexpr float LIGHT_POSITION_Z_NARROW_SHORT = 80.0f;
+constexpr float LIGHT_POSITION_Z_MEDIUM_SHORT = 80.0f;
+constexpr float LIGHT_POSITION_Z_LARGE_SHORT = 80.0f;
+constexpr float LIGHT_POSITION_Z_NARROW_MID = 80.0f;
+constexpr float LIGHT_POSITION_Z_MEDIUM_MID = 80.0f;
+constexpr float LIGHT_POSITION_Z_LARGE_MID = 120.0f;
+constexpr float LIGHT_POSITION_Z_NARROW_TALL = 80.0f;
+constexpr float LIGHT_POSITION_Z_MEDIUM_TALL = 120.0f;
+constexpr float LIGHT_POSITION_Z_LARGE_TALL = 160.0f;
+
+// intensity values
+constexpr float LIGHT_INTENSITY_NARROW_SHORT = 2.0f;
+constexpr float LIGHT_INTENSITY_NARROW_SHORT_DARK = 1.4f;
+constexpr float LIGHT_INTENSITY_MEDIUM_SHORT = 2.4f;
+constexpr float LIGHT_INTENSITY_LARGE_SHORT = 1.2f;
+constexpr float LIGHT_INTENSITY_NARROW_MID = 2.4f;
+constexpr float LIGHT_INTENSITY_MEDIUM_MID = 3.0f;
+constexpr float LIGHT_INTENSITY_LARGE_MID = 1.8f;
+constexpr float LIGHT_INTENSITY_NARROW_TALL = 1.4f;
+constexpr float LIGHT_INTENSITY_MEDIUM_TALL = 1.8f;
+constexpr float LIGHT_INTENSITY_LARGE_TALL = 0.8f;
+
 // Limit value within [min, max]
 float Clamp(float value, float min, float max)
 {
@@ -428,14 +468,33 @@ void ControlInteractionBase::UpdateLightPositionAndColor(RefPtr<FrameNode>& targ
     CHECK_NULL_VOID(lightEffectOptions);
     auto renderContext = targetNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateLightIntensity(LIGHT_EFFECT_INTENSITY);
-    renderContext->UpdateLightPosition(TranslateOptions(Dimension(Dimension(x).ConvertToVp(), DimensionUnit::VP),
-        Dimension(Dimension(y).ConvertToVp(), DimensionUnit::VP),
-        Dimension(LIGHT_EFFECT_POSITION_Z, DimensionUnit::VP)));
+
     auto colorMode = MaterialUtils::GetNodeColorMode(targetNode);
-    ResourceParseUtilsBase::ParseResColorWithColorMode(
-        lightEffectOptions->colorResObj, lightEffectOptions->color, colorMode);
-    renderContext->UpdateLightColor(lightEffectOptions->color);
+    float posZ = LIGHT_EFFECT_POSITION_Z;
+    float intensity = LIGHT_EFFECT_INTENSITY;
+    Color lightColor;
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    if (!paintRect.IsEmpty()) {
+        float widthVp = Dimension(paintRect.Width()).ConvertToVp();
+        float heightVp = Dimension(paintRect.Height()).ConvertToVp();
+        auto params = GetLightEffectParamsBySize(widthVp, heightVp, colorMode);
+        posZ = params.posZ;
+        intensity = params.intensity;
+        lightColor = params.color;
+    }
+
+    renderContext->UpdateLightIntensity(intensity);
+    renderContext->UpdateLightPosition(
+        TranslateOptions(
+            Dimension(Dimension(x).ConvertToVp(), DimensionUnit::VP),
+            Dimension(Dimension(y).ConvertToVp(), DimensionUnit::VP),
+            Dimension(posZ, DimensionUnit::VP)));
+    if (lightEffectOptions->color.has_value()) {
+        ResourceParseUtilsBase::ParseResColorWithColorMode(
+            lightEffectOptions->colorResObj, lightEffectOptions->color.value(), colorMode);
+    }
+    renderContext->UpdateLightColor(lightEffectOptions->color.has_value() ? lightEffectOptions->color.value()
+                                                                          : lightColor);
 }
 
 void ControlInteractionBase::ResetLightPositionAndColor(RefPtr<FrameNode>& targetNode)
@@ -452,5 +511,57 @@ void ControlInteractionBase::ResetLightPositionAndColor(RefPtr<FrameNode>& targe
         renderContext->ResetLightPosition();
     }
     renderContext->UpdateLightIntensity(0.0f);
+}
+
+LightEffectParams ControlInteractionBase::GetLightEffectParamsBySize(float widthVp, float heightVp, ColorMode colorMode)
+{
+    LightEffectParams params = { LIGHT_EFFECT_POSITION_Z, LIGHT_EFFECT_INTENSITY };
+    if (widthVp >= LIGHT_WIDTH_LARGE && heightVp >= LIGHT_HEIGHT_LARGE) {
+        params.posZ = LIGHT_POSITION_Z_LARGE_TALL;
+        params.intensity = LIGHT_INTENSITY_LARGE_TALL;
+        params.color = COLOR_TALL;
+    } else if (heightVp < LIGHT_HEIGHT_SMALL) {
+        if (widthVp < LIGHT_WIDTH_SMALL) {
+            params.posZ = LIGHT_POSITION_Z_NARROW_SHORT;
+            params.intensity =
+                colorMode == ColorMode::LIGHT ? LIGHT_INTENSITY_NARROW_SHORT : LIGHT_INTENSITY_NARROW_SHORT_DARK;
+            params.color = colorMode == ColorMode::LIGHT ? COLOR_NARROW_SHORT : COLOR_NARROW_SHORT_DARK;
+        } else if (widthVp < LIGHT_WIDTH_MEDIUM) {
+            params.posZ = LIGHT_POSITION_Z_MEDIUM_SHORT;
+            params.intensity = LIGHT_INTENSITY_MEDIUM_SHORT;
+            params.color = COLOR_SHORT;
+        } else {
+            params.posZ = LIGHT_POSITION_Z_LARGE_SHORT;
+            params.intensity = LIGHT_INTENSITY_LARGE_SHORT;
+            params.color = COLOR_SHORT;
+        }
+    } else if (heightVp < LIGHT_HEIGHT_MEDIUM) {
+        params.color = COLOR_MID;
+        if (widthVp < LIGHT_WIDTH_SMALL) {
+            params.posZ = LIGHT_POSITION_Z_NARROW_MID;
+            params.intensity = LIGHT_INTENSITY_NARROW_MID;
+        } else if (widthVp < LIGHT_WIDTH_MEDIUM) {
+            params.posZ = LIGHT_POSITION_Z_MEDIUM_MID;
+            params.intensity = LIGHT_INTENSITY_MEDIUM_MID;
+        } else {
+            params.posZ = LIGHT_POSITION_Z_LARGE_MID;
+            params.intensity = LIGHT_INTENSITY_LARGE_MID;
+        }
+    } else {
+        if (widthVp < LIGHT_WIDTH_SMALL) {
+            params.posZ = LIGHT_POSITION_Z_NARROW_TALL;
+            params.intensity = LIGHT_INTENSITY_NARROW_TALL;
+            params.color = COLOR_MID;
+        } else if (widthVp < LIGHT_WIDTH_MEDIUM) {
+            params.posZ = LIGHT_POSITION_Z_MEDIUM_TALL;
+            params.intensity = LIGHT_INTENSITY_MEDIUM_TALL;
+            params.color = COLOR_TALL;
+        } else {
+            params.posZ = LIGHT_POSITION_Z_LARGE_TALL;
+            params.intensity = LIGHT_INTENSITY_LARGE_TALL;
+            params.color = COLOR_TALL;
+        }
+    }
+    return params;
 }
 } // namespace OHOS::Ace::NG

@@ -40,6 +40,8 @@ public:
     bool GetIsFoldable();
     FoldStatus GetCurrentFoldStatus();
     std::vector<Rect> GetCurrentFoldCreaseRegion();
+    std::vector<Rect> GetLiveFoldCreaseRegion();
+    FoldCreaseDirection GetFoldCreaseDirection();
     void UpdateDisplaySourceMode(const sptr<Rosen::Display>& display);
     DisplaySourceMode GetDisplaySourceMode();
     Rect GetDisplayAvailableRect(int32_t displayId) const;

@@ -73,6 +73,8 @@ constexpr int32_t SIDEBAR_POSITION_START = static_cast<int32_t>(BarPosition::STA
 constexpr int32_t SIDEBAR_POSITION_END = static_cast<int32_t>(BarPosition::END);
 constexpr int32_t BAR_DISPLAY_MODE_BOTTOMTABBAR = static_cast<int32_t>(TabBarDisplayMode::BOTTOMTABBAR);
 constexpr int32_t BAR_DISPLAY_MODE_SIDEBAR = static_cast<int32_t>(TabBarDisplayMode::SIDEBAR);
+constexpr int32_t SIDEBAR_DISPLAY_STYLE_EMBED = static_cast<int32_t>(SidebarDisplayStyle::EMBED);
+constexpr int32_t SIDEBAR_DISPLAY_STYLE_DISPLACE = static_cast<int32_t>(SidebarDisplayStyle::DISPLACE);
 namespace {
 constexpr int NUM_2 = 2;
 #ifndef NG_BUILD
@@ -167,7 +169,8 @@ void ParseTabsCreateIndexObject(EcmaVM* vm, const Local<JSValueRef>& changeEvent
         auto result = func->Call(vm, func.ToLocal(), args, 1);
         ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
     };
-    GetArkUINodeModifiers()->getTabsModifier()->setTabsOnChange(nativeNode, reinterpret_cast<void*>(&onChangeEvent));
+    GetArkUINodeModifiers()->getTabsModifier()->setTabsOnChangeEvent(
+        nativeNode, reinterpret_cast<void*>(&onChangeEvent));
 }
 
 void SetCreateBarModifier(EcmaVM* vm, const Local<JSValueRef>& jsValue)
@@ -259,6 +262,11 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         "setBarGridAlign", "resetBarGridAlign", "resetTabBarMode", "setDivider", "resetDivider", "setFadingEdge",
         "resetFadingEdge", "setTabOnUnselected", "resetTabOnUnselected", "setTabsOnContentDidScroll",
         "resetTabsOnContentDidScroll", "setBarBackgroundColor", "resetBarBackgroundColor",
+        "setTabsSidebarSelectedIconColor", "resetTabsSidebarSelectedIconColor",
+        "setTabsSidebarSelectedTextColor", "resetTabsSidebarSelectedTextColor",
+        "setTabsSidebarUnselectedIconColor", "resetTabsSidebarUnselectedIconColor",
+        "setTabsSidebarUnselectedTextColor", "resetTabsSidebarUnselectedTextColor",
+        "setTabsSidebarSelectedBoardColor", "resetTabsSidebarSelectedBoardColor",
         "setBarBackgroundBlurStyle", "resetBarBackgroundBlurStyle", "setBarBackgroundEffect",
         "resetBarBackgroundEffect", "setBarOverlap", "resetBarOverlap", "setIsVertical", "resetIsVertical",
         "setTabBarPosition", "resetTabBarPosition", "setTabsOptionsIndex", "resetTabsOptionsIndex",
@@ -277,7 +285,13 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         "setTabsCustomContentTransition", "resetTabsCustomContentTransition", "setTabsBarFloatingStyle",
         "resetTabsBarFloatingStyle", "setBarStyle", "resetBarStyle", "setSidebarPosition",
         "resetSidebarPosition", "setSidebarHeader", "resetSidebarHeader", "setSidebarSearchable",
-        "resetSidebarSearchable", "setBarDisplayModeBreakpoint", "resetBarDisplayModeBreakpoint"
+        "resetSidebarSearchable", "setBarDisplayModeBreakpoint", "resetBarDisplayModeBreakpoint",
+        "setOnBarDisplayModeChange", "resetOnBarDisplayModeChange", "setSidebarDisplayStyle",
+        "resetSidebarDisplayStyle", "setTabSidebarWidth", "resetTabSidebarWidth", "setTabMinSidebarWidth",
+        "resetTabMinSidebarWidth", "setTabMaxSidebarWidth", "resetTabMaxSidebarWidth", "setTabMinContentWidth",
+        "resetTabMinContentWidth", "setTabSidebarBackgroundColor", "resetTabSidebarBackgroundColor",
+        "setTabSidebarBackgroundBlurStyle", "resetTabSidebarBackgroundBlurStyle", "setTabSidebarDivider",
+        "resetTabSidebarDivider"
     };
     Local<JSValueRef> functionValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::Create),
@@ -298,6 +312,16 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetOnContentDidScroll),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarBackgroundColor),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarBackgroundColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsSidebarSelectedIconColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsSidebarSelectedIconColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsSidebarSelectedTextColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsSidebarSelectedTextColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsSidebarUnselectedIconColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsSidebarUnselectedIconColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsSidebarUnselectedTextColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsSidebarUnselectedTextColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsSidebarSelectedBoardColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsSidebarSelectedBoardColor),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarBackgroundBlurStyle),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarBackgroundBlurStyle),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarBackgroundEffect),
@@ -374,6 +398,24 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetSidebarSearchable),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarDisplayModeBreakpoint),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetBarDisplayModeBreakpoint),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetOnBarDisplayModeChange),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetOnBarDisplayModeChange),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetSidebarDisplayStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetSidebarDisplayStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabSidebarWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabSidebarWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabMinSidebarWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabMinSidebarWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabMaxSidebarWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabMaxSidebarWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabMinContentWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabMinContentWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabSidebarBackgroundColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabSidebarBackgroundColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabSidebarBackgroundBlurStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabSidebarBackgroundBlurStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabSidebarDivider),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabSidebarDivider),
     };
     auto tabs = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
@@ -1076,7 +1118,8 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundColor(ArkUIRuntimeCallInfo* r
     if (ArkTSUtils::IsJsView(firstArg, vm)) {
         Color color = Color::BLACK.BlendOpacity(0.0f);
         RefPtr<ResourceObject> backgroundColorResObj;
-        if (!secondArg.IsNull() && !secondArg->IsUndefined()) {
+        uint32_t argc = runtimeCallInfo->GetArgsNumber();
+        if (argc > TABS_ARG_INDEX_1) {
             bool parseResult = ArkTSUtils::ConvertFromJSValue(vm, secondArg, color, backgroundColorResObj);
             GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundColorByUser(nativeNode, parseResult);
         }
@@ -1108,6 +1151,166 @@ ArkUINativeModuleValue TabsBridge::ResetBarBackgroundColor(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsSidebarSelectedIconColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Color iconColor;
+    RefPtr<ResourceObject> iconColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, iconColor, iconColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarSelectedIconColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->setTabsSidebarSelectedIconColor(nativeNode, iconColor.GetValue());
+        TabsResourceObjParam param{ TabJsResType::SIDEBAR_SELECTED_ICONCOLOR, AceType::RawPtr(iconColorResObj) };
+        GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &param);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsSidebarSelectedIconColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarSelectedIconColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsSidebarSelectedTextColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Color textColor;
+    RefPtr<ResourceObject> textColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor, textColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarSelectedTextColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->setTabsSidebarSelectedTextColor(nativeNode, textColor.GetValue());
+        TabsResourceObjParam param{ TabJsResType::SIDEBAR_SELECTED_TEXTCOLOR, AceType::RawPtr(textColorResObj) };
+        GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &param);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsSidebarSelectedTextColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarSelectedTextColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsSidebarUnselectedIconColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Color iconColor;
+    RefPtr<ResourceObject> iconColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, iconColor, iconColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarUnselectedIconColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->setTabsSidebarUnselectedIconColor(nativeNode, iconColor.GetValue());
+        TabsResourceObjParam param{ TabJsResType::SIDEBAR_UNSELECTED_ICONCOLOR, AceType::RawPtr(iconColorResObj) };
+        GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &param);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsSidebarUnselectedIconColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarUnselectedIconColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsSidebarUnselectedTextColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Color textColor;
+    RefPtr<ResourceObject> textColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor, textColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarUnselectedTextColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->setTabsSidebarUnselectedTextColor(nativeNode, textColor.GetValue());
+        TabsResourceObjParam param{ TabJsResType::SIDEBAR_UNSELECTED_TEXTCOLOR, AceType::RawPtr(textColorResObj) };
+        GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &param);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsSidebarUnselectedTextColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarUnselectedTextColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsSidebarSelectedBoardColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Color boardColor;
+    RefPtr<ResourceObject> boardColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, boardColor, boardColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarSelectedBoardColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->setTabsSidebarSelectedBoardColor(nativeNode, boardColor.GetValue());
+        TabsResourceObjParam param{ TabJsResType::SIDEBAR_SELECTED_BOARDCOLOR, AceType::RawPtr(boardColorResObj) };
+        GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &param);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsSidebarSelectedBoardColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsSidebarSelectedBoardColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1517,7 +1720,11 @@ ArkUINativeModuleValue TabsBridge::SetTabsOptionsIndex(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getTabsModifier()->resetTabsOptionsIndex(nativeNode);
     } else {
         int32_t indexVal = indexValArg->Int32Value(vm);
-        GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsIndex(nativeNode, indexVal);
+        if (ArkTSUtils::IsJsView(nodeArg, vm)) {
+            GetArkUINodeModifiers()->getTabsModifier()->setTabsIndex(nativeNode, indexVal);
+        } else {
+            GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsIndex(nativeNode, indexVal);
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1675,13 +1882,15 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
 
     RefPtr<ResourceObject> widthResObj;
     if (ArkTSUtils::IsJsView(firstArg, vm)) {
-        if (jsValue.IsNull() || jsValue->IsUndefined()) {
+        uint32_t argc = runtimeCallInfo->GetArgsNumber();
+        if (argc < TABS_ARG_INDEX_2) {
             return undefinedRes;
         }
         width = Dimension(-1.0, DimensionUnit::VP);
         GetArkUINodeModifiers()->getTabsModifier()->createTabBarWidthWithResourceObj(nativeNode, nullptr);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width, widthResObj, false)) {
+            if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width, widthResObj)) {
+                width = Dimension(-1.0, DimensionUnit::VP);
                 GetArkUINodeModifiers()->getTabsModifier()->setTabBarWidth(
                     nativeNode, width.Value(), static_cast<int>(width.Unit()));
                 return undefinedRes;
@@ -1748,7 +1957,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
             jsValue->ToString(vm)->ToString(vm) == "auto") {
             adaptiveHeight = true;
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, height, heightResObj, false)) {
+            if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, heightResObj)) {
                 height = Dimension(-1.0, DimensionUnit::VP);
             }
         } else {
@@ -2312,7 +2521,7 @@ ArkUINativeModuleValue TabsBridge::SetCachedMaxCount(ArkUIRuntimeCallInfo* runti
             }
         }
         if (count.has_value()) {
-            GetArkUINodeModifiers()->getTabsModifier()->setCachedMaxCount(nativeNode, count.value(), mode);
+            GetArkUINodeModifiers()->getTabsModifier()->setCachedMaxCountForJs(nativeNode, count.value(), mode);
         } else {
             GetArkUINodeModifiers()->getTabsModifier()->resetCachedMaxCount(nativeNode);
         }
@@ -2871,6 +3080,37 @@ ArkUINativeModuleValue TabsBridge::ResetTabsBarFloatingStyle(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetSidebarDisplayStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    int32_t sidebarDisplayStyle = SIDEBAR_DISPLAY_STYLE_EMBED;
+    if (runtimeCallInfo->GetArgsNumber() > TABS_ARG_INDEX_1 && !styleArg.IsNull() && !styleArg->IsUndefined() &&
+        styleArg->IsNumber()) {
+        auto sidebarDisplayStyleVal = styleArg->Int32Value(vm);
+        if (sidebarDisplayStyleVal >= SIDEBAR_DISPLAY_STYLE_EMBED &&
+            sidebarDisplayStyleVal <= SIDEBAR_DISPLAY_STYLE_DISPLACE) {
+            sidebarDisplayStyle = sidebarDisplayStyleVal;
+        }
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setSidebarDisplayStyle(nativeNode, sidebarDisplayStyle);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetSidebarDisplayStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetSidebarDisplayStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue TabsBridge::SetBarStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -3092,6 +3332,344 @@ ArkUINativeModuleValue TabsBridge::ResetBarDisplayModeBreakpoint(ArkUIRuntimeCal
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetBarDisplayModeBreakpoint(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetOnBarDisplayModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetOnBarDisplayModeChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+ 
+    std::function<void(TabBarDisplayMode)> callback =
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](TabBarDisplayMode mode) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ACE_SCORING_EVENT("Tabs.onBarDisplayModeChange");
+        ACE_SCOPED_TRACE("Tabs.onBarDisplayModeChange mode %d", static_cast<int32_t>(mode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, static_cast<int32_t>(mode)) };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getTabsModifier()->setOnBarDisplayModeChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue TabsBridge::ResetOnBarDisplayModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetOnBarDisplayModeChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabSidebarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CalcDimension width;
+    ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
+    RefPtr<ResourceObject> widthResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width,
+        widthResObj)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabSidebarWidth(nativeNode);
+        return undefinedRes;
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabSidebarWidth(
+        nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    TabsResourceObjParam sidebarWidthParam{ TabJsResType::SIDEBAR_WIDTH, AceType::RawPtr(widthResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &sidebarWidthParam);
+    return undefinedRes;
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabSidebarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabSidebarWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabMinSidebarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CalcDimension width;
+    ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
+    RefPtr<ResourceObject> widthResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width,
+        widthResObj)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabMinSidebarWidth(nativeNode);
+        return undefinedRes;
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabMinSidebarWidth(
+        nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    TabsResourceObjParam minSidebarWidthParam{ TabJsResType::SIDEBAR_MIN_SIDEBAR_WIDTH, AceType::RawPtr(widthResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &minSidebarWidthParam);
+    return undefinedRes;
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabMinSidebarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabMinSidebarWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabMaxSidebarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CalcDimension width;
+    ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
+    RefPtr<ResourceObject> widthResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width,
+        widthResObj)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabMaxSidebarWidth(nativeNode);
+        return undefinedRes;
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabMaxSidebarWidth(
+        nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    TabsResourceObjParam maxSidebarWidthParam{ TabJsResType::SIDEBAR_MAX_SIDEBAR_WIDTH, AceType::RawPtr(widthResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &maxSidebarWidthParam);
+    return undefinedRes;
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabMaxSidebarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabMaxSidebarWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabMinContentWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CalcDimension width;
+    ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
+    RefPtr<ResourceObject> widthResObj;
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width,
+        widthResObj)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabMinContentWidth(nativeNode);
+        return undefinedRes;
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabMinContentWidth(
+        nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    TabsResourceObjParam minContentWidthParam{ TabJsResType::SIDEBAR_MIN_CONTENT_WIDTH, AceType::RawPtr(widthResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &minContentWidthParam);
+    return undefinedRes;
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabMinContentWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabMinContentWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabSidebarBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Color color;
+    RefPtr<ResourceObject> backgroundColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabSidebarBackgroundColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->setTabSidebarBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getTabsModifier()->setTabSidebarBackgroundColorByUser(nativeNode, true);
+        TabsResourceObjParam bgColorParam{
+            TabJsResType::SIDEBAR_BACKGROUND_COLOR, AceType::RawPtr(backgroundColorResObj) };
+        GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &bgColorParam);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabSidebarBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabSidebarBackgroundColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabSidebarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> blurStyleArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    int32_t blurStyle = static_cast<int32_t>(BlurStyle::NO_MATERIAL);
+    if (blurStyleArg->IsNumber()) {
+        blurStyle = blurStyleArg->Int32Value(vm);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabSidebarBackgroundBlurStyle(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabSidebarBackgroundBlurStyle(nativeNode, blurStyle);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabSidebarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabSidebarBackgroundBlurStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabSidebarDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> dividerArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    if (dividerArg->IsNull() || dividerArg->IsUndefined() || !dividerArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetSidebarDivider(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto dividerObj = dividerArg->ToObject(vm);
+    Local<JSValueRef> dividerStrokeWidthArgs = ArkTSUtils::GetProperty(vm, dividerObj, "strokeWidth");
+    Local<JSValueRef> colorArg = ArkTSUtils::GetProperty(vm, dividerObj, "color");
+    Local<JSValueRef> dividerStartMarginArgs = ArkTSUtils::GetProperty(vm, dividerObj, "startMargin");
+    Local<JSValueRef> dividerEndMarginArgs = ArkTSUtils::GetProperty(vm, dividerObj, "endMargin");
+    auto isDividerStrokeWidthArgsInvalid = dividerStrokeWidthArgs->IsNull() || dividerStrokeWidthArgs->IsUndefined();
+    auto isDividerStartMarginArgsInvalid = dividerStartMarginArgs->IsNull() || dividerStartMarginArgs->IsUndefined();
+    auto isDividerEndMarginArgsInvalid = dividerEndMarginArgs->IsNull() || dividerEndMarginArgs->IsUndefined();
+    auto isColorArgInvalid = colorArg->IsNull() || colorArg->IsUndefined();
+    if (isDividerStrokeWidthArgsInvalid && isDividerStartMarginArgsInvalid && isDividerEndMarginArgsInvalid &&
+        isColorArgInvalid) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetSidebarDivider(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
+    uint32_t color;
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    auto tabTheme = frameNode->GetTheme<TabTheme>(true);
+    CHECK_NULL_RETURN(tabTheme, panda::NativePointerRef::New(vm, nullptr));
+    RefPtr<ResourceObject> strokeWidthResObj;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
+    if (isDividerStrokeWidthArgsInvalid ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth, strokeWidthResObj) ||
+        LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
+        dividerStrokeWidth.Reset();
+    }
+    Color colorObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (isColorArgInvalid || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj, nodeInfo)) {
+        color = tabTheme->GetSideBarDividerColor().GetValue();
+        GetArkUINodeModifiers()->getTabsModifier()->setSidebarDividerColorByUser(nativeNode, false);
+    } else {
+        color = colorObj.GetValue();
+        GetArkUINodeModifiers()->getTabsModifier()->setSidebarDividerColorByUser(nativeNode, true);
+    }
+    if (isDividerStartMarginArgsInvalid ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin, startMarginResObj) ||
+        LessNotEqual(dividerStartMargin.Value(), 0.0f) || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
+        dividerStartMargin.Reset();
+    }
+    if (isDividerEndMarginArgsInvalid ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin, endMarginResObj) ||
+        LessNotEqual(dividerEndMargin.Value(), 0.0f) || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
+        dividerEndMargin.Reset();
+    }
+    uint32_t size = SIZE_OF_THREE;
+    ArkUI_Float32 values[size];
+    int32_t units[size];
+    values[TABS_ARG_INDEX_0] = static_cast<ArkUI_Float32>(dividerStrokeWidth.Value());
+    values[TABS_ARG_INDEX_1] = static_cast<ArkUI_Float32>(dividerStartMargin.Value());
+    values[TABS_ARG_INDEX_2] = static_cast<ArkUI_Float32>(dividerEndMargin.Value());
+    units[TABS_ARG_INDEX_0] = static_cast<int32_t>(dividerStrokeWidth.Unit());
+    units[TABS_ARG_INDEX_1] = static_cast<int32_t>(dividerStartMargin.Unit());
+    units[TABS_ARG_INDEX_2] = static_cast<int32_t>(dividerEndMargin.Unit());
+    GetArkUINodeModifiers()->getTabsModifier()->setSidebarDivider(nativeNode, color, values, units, size);
+    TabsResourceObjParam widthParam { TabJsResType::SIDEBAR_DIVIDER_STROKE_WIDTH, AceType::RawPtr(strokeWidthResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &widthParam);
+    TabsResourceObjParam colorParam { TabJsResType::SIDEBAR_DIVIDER_COLOR, AceType::RawPtr(colorResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &colorParam);
+    TabsResourceObjParam startMarginParam{
+        TabJsResType::SIDEBAR_DIVIDER_START_MARGIN, AceType::RawPtr(startMarginResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &startMarginParam);
+    TabsResourceObjParam endMarginParam { TabJsResType::SIDEBAR_DIVIDER_END_MARGIN, AceType::RawPtr(endMarginResObj) };
+    GetArkUINodeModifiers()->getTabsModifier()->createWithSidebarResourceObj(nativeNode, &endMarginParam);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabSidebarDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetSidebarDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

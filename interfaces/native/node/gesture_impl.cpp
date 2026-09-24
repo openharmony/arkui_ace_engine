@@ -305,7 +305,8 @@ ArkUI_NodeHandle OH_ArkUI_TouchRecognizer_GetNodeHandle(const ArkUI_TouchRecogni
             static_cast<void*>(recognizer));
 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
+    ArkUI_Node* arkUINode = new ArkUI_Node({
+        .type = -1, .uiNodeHandle = node, .cNode = false, .magic = ARKUI_NODE_MAGIC_VALID });
     impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
     return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
 }

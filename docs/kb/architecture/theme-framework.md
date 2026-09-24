@@ -65,6 +65,6 @@ ArkUI Theme 框架以 ThemeManager 为核心，采用双轨注册（THEME_BUILDE
 
 ## 相关主题
 
-- 主题分层访问
-- 资源访问
-- WithTheme 组件
+- [主题分层访问](theme-layered-access.md)
+- [资源访问](resource-access.md)
+- [WithTheme 组件](../components/container/with-theme.md)

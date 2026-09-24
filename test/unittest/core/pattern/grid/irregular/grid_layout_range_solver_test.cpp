@@ -121,7 +121,6 @@ HWTEST_F(GridLayoutRangeTest, SolveForward002, TestSize.Level1)
     info.currentOffset_ = -10.0f;
     info.startMainLineIndex_ = 3;
     info.startIndex_ = 4;
-    info.startFixOffset_ = 0.0f;
 
     GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
 
@@ -1283,5 +1282,168 @@ HWTEST_F(GridLayoutRangeTest, CheckMultiRow011, TestSize.Level1)
 
     auto result = solver.CheckMultiRow(1);
     EXPECT_EQ(result, std::make_pair(0, 2));
+}
+
+/**
+ * @tc.name: LayoutRangeSolver::FindStartingRowExtensionGuard001
+ * @tc.desc: M-1 regression: with the start extension active, FindStartingRow must verify the
+ *           whole SolveBackward span before augmenting the target length. A missing
+ *           lineHeightMap_ entry inside the span must NOT make the visible range silently
+ *           jump back to row 0 / item 0 (SolveBackward's {0,0,0} return).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, FindStartingRowExtensionGuard001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 2, { { 0, 4 }, { 1, 5 } } },
+        { 3, { { 0, 6 }, { 1, 7 } } },
+    };
+    // rows 0-1 missing from lineHeightMap_ (e.g. heights cleared while matrix retained)
+    info.lineHeightMap_ = { { 2, 40.0f }, { 3, 10.0f } };
+    info.startMainLineIndex_ = 3;
+    info.startIndex_ = 6;
+    info.startFixOffset_ = 100.0f; // extension span reaches past the gap at row 1
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    // currentOffset_ == 0: the guard must reject the extension branch (the old
+    // code only checked row2 exists; SolveBackward returned {0,0,0} when it hit
+    // the missing row1, jumping the view back to item 0) and fall back to the
+    // original near-zero behavior.
+    info.currentOffset_ = 0.0f;
+    auto res = solver.FindStartingRow(1.0f);
+    EXPECT_EQ(res.row, 3) << "guard must fall back to the original near-zero behavior";
+    EXPECT_EQ(res.idx, 6);
+    EXPECT_EQ(res.pos, 0.0f);
+
+    // currentOffset_ > 0 (top blank): the extension walk crosses the gap, so
+    // fall back to the baseline SolveBackward(5) (walks row2 only:
+    // len = 1 + 40 + 1 = 42 > 5 stops before the gap).
+    info.currentOffset_ = 5.0f;
+    res = solver.FindStartingRow(1.0f);
+    EXPECT_EQ(res.row, 2) << "guard must fall back to the baseline SolveBackward span";
+    EXPECT_EQ(res.idx, 4);
+    // Baseline semantics: row2 top = targetLen - len + mainGap = 5 - 42 + 1 = -36 (partly above the viewport)
+    EXPECT_EQ(res.pos, -36.0f);
+
+    // Contrast: with all heights present the extension branch engages
+    // (SolveBackward reaches row0, pos corrected by -startFixOffset_).
+    info.gridMatrix_[0] = { { 0, 0 }, { 1, 1 } };
+    info.gridMatrix_[1] = { { 0, 2 }, { 1, 3 } };
+    info.lineHeightMap_ = { { 0, 20.0f }, { 1, 30.0f }, { 2, 40.0f }, { 3, 10.0f } };
+    info.currentOffset_ = 0.0f;
+    res = solver.FindStartingRow(1.0f);
+    EXPECT_EQ(res.row, 0) << "extension branch must engage when the span is complete";
+    EXPECT_EQ(res.idx, 0);
+    // SolveBackward: len sums to 94 (1 + 41 + 31 + 21), pos evaluates to -93
+    EXPECT_EQ(res.pos, -93.0f);
+}
+
+/**
+ * @tc.name: LayoutRangeSolver::SolveForwardWithExtensionMissingMatrix001
+ * @tc.desc: M-2 regression: SolveForwardWithExtension must not feed CheckMultiRow's {-1,-1}
+ *           (gridMatrix_ row missing while lineHeightMap_ has the row) into the multi-row
+ *           backtrack loop, which would subtract all heights above and leak startRow = -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, SolveForwardWithExtensionMissingMatrix001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    // matrix non-empty but row 3 missing; lineHeightMap_ only has row 3
+    info.gridMatrix_ = { { 5, { { 0, 10 } } } };
+    info.lineHeightMap_ = { { 3, 40.0f } };
+    info.startMainLineIndex_ = 3;
+    info.startIndex_ = 6;
+    info.startFixOffset_ = 100.0f;
+    info.currentOffset_ = -10.0f;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    auto res = solver.FindStartingRow(1.0f);
+    EXPECT_GE(res.row, 0) << "startRow must not leak CheckMultiRow's -1";
+    EXPECT_GE(res.idx, 0) << "startIdx must not leak CheckMultiRow's -1";
+    // SkipLinesAboveView stays at row 3 (bottom 31 >= 0), the walk-back stops
+    // at begin(), and CheckMultiRow(3) returns {-1,-1}: degrade to row 3
+    // itself without multi-row backtrack.
+    EXPECT_EQ(res.row, 3);
+    EXPECT_EQ(res.idx, 6);
+    EXPECT_EQ(res.pos, -10.0f) << "pos must stay walk-adjusted, not extreme negative";
+}
+
+/**
+ * @tc.name: LayoutRangeSolver::SolveForwardForEndIdxDiscontinuousHeights001
+ * @tc.desc: SolveForwardForEndIdx must walk consecutive line numbers and stop at the first
+ *           missing lineHeightMap_ entry. After a bottom-edge jump (FillMatrixOnly fills the
+ *           whole matrix but only view heights are measured) followed by a top-edge jump,
+ *           lineHeightMap_ is discontinuous (e.g. {6,7} ∪ {16..20}). Map-order iteration
+ *           silently skips the hole, treats stale far-away lines as adjacent and returns an
+ *           end line inside the unmeasured range (which then collapses the active range in
+ *           UpdateLayoutInfo's height validity check).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, SolveForwardForEndIdxDiscontinuousHeights001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 6, { { 0, 10 }, { 1, 11 } } },
+        { 7, { { 0, 12 }, { 1, 13 } } },
+        { 8, { { 0, 14 }, { 1, 15 } } },
+        { 16, { { 0, 32 }, { 1, 33 } } },
+        { 17, { { 0, 34 }, { 1, 35 } } },
+        { 18, { { 0, 36 }, { 1, 37 } } },
+    };
+    // rows 8-15 unmeasured: the hole between the re-measured top range and the
+    // stale bottom-edge range
+    info.lineHeightMap_ = { { 6, 100.0f }, { 7, 100.0f }, { 16, 100.0f }, { 17, 100.0f }, { 18, 100.0f } };
+    info.startMainLineIndex_ = 6;
+    info.startIndex_ = 10;
+    info.startFixOffset_ = 100.0f;
+    info.endFixOffset_ = 100.0f;
+    info.currentOffset_ = 0.0f;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    // Extension-inflated target (view end bound = mainSize + endFix): the walk
+    // must stop at the hole (row 7), not jump to the stale row 16.
+    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(20.0f, 300.0f, 6);
+    EXPECT_EQ(endLine, 7) << "walk must stop at the first missing line, not jump the hole";
+    EXPECT_EQ(endIdx, 13);
+
+    // Small target: row 6 alone exceeds it, so the walk adds nothing further.
+    std::tie(endLine, endIdx) = solver.SolveForwardForEndIdx(20.0f, 100.0f, 6);
+    EXPECT_EQ(endLine, 6);
+    EXPECT_EQ(endIdx, 11);
+
+    // Contrast: with the map consecutive through row 8, the same target keeps
+    // the original accumulate-while-fits semantics (row 8 crosses 300).
+    info.lineHeightMap_[8] = 100.0f;
+    std::tie(endLine, endIdx) = solver.SolveForwardForEndIdx(20.0f, 300.0f, 6);
+    EXPECT_EQ(endLine, 8) << "consecutive map must keep the original walk semantics";
+    EXPECT_EQ(endIdx, 15);
 }
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 namespace OHOS::Ace {
 std::string FontManager::appCustomFont_ = "";
 bool FontManager::isDefaultFontChanged_ = false;
+std::shared_mutex FontManager::appCustomFontMutex_;
 RefPtr<FontManager> FontManager::Create()
 {
     return AceType::MakeRefPtr<MockFontManager>();
@@ -102,8 +103,9 @@ bool FontManager::IsUseAppCustomFont() const
     return false;
 }
 
-const std::string& FontManager::GetAppCustomFont() const
+std::string FontManager::GetAppCustomFont() const
 {
+    std::shared_lock<std::shared_mutex> lock(appCustomFontMutex_);
     return appCustomFont_;
 }
 

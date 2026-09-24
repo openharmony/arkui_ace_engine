@@ -689,10 +689,6 @@ void DotIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
 
 void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
 {
-    if (disableIndicatorAnimation_) {
-        normalToHoverPointDilateRatio_->Set(scaleIndicator_);
-        return;
-    }
     normalToHoverPointDilateRatio_->Set(1.0f);
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
@@ -706,10 +702,6 @@ void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
 
 void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
 {
-    if (disableIndicatorAnimation_) {
-        hoverToNormalPointDilateRatio_->Set(1.0f);
-        return;
-    }
     hoverToNormalPointDilateRatio_->Set(normalToHoverPointDilateRatio_->Get());
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
