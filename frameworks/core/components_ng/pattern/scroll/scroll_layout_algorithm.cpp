@@ -110,7 +110,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             childWrapper->Measure(childLayoutConstraint);
             childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
         }
-        // Use child size when self idea size of scroll is not setted.
+        // Use child size when self ideal size of scroll is not set.
         if (!idealSize.Width()) {
             idealSize.SetWidth(childSize.Width());
         }
