@@ -1164,7 +1164,7 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         }
     }
 
-    // ArkTSCard need no window : 梳理所有需要window和不需要window的场景
+    // ArkTSCard need no window：梳理所有需要window和不需要window的场景
     if (isFormRender_ && !window) {
         LOGI("[%{public}s][%{public}s][%{public}d]: CommonInitializeForm url: %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, contentInfo.c_str());
