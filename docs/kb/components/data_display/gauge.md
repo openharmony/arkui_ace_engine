@@ -34,6 +34,8 @@ Gauge 是仪表盘组件，用于数据占比环形展示。支持单色（Monoc
 
 ### API 解析实现路径
 
+**已组件化**（有 `bridge/` 子目录、统一 Bridge，旧 JSView 已移除），输出独立 SO。
+
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
 | 统一 Bridge | `frameworks/core/components_ng/pattern/gauge/bridge/arkts_native_gauge_bridge.cpp` | 通过 `IsJsView()` 区分模式，统一参数解析 |
@@ -79,6 +81,6 @@ Gauge 是仪表盘组件，用于数据占比环形展示。支持单色（Monoc
 
 ## 相关主题
 
-- DataPanel：数据面板组件，同属信息展示类
-- Progress：进度条组件
-- LoadingProgress：加载进度组件
+- [DataPanel：数据面板组件，同属信息展示类](data-panel.md)
+- [Progress：进度条组件](progress.md)
+- [LoadingProgress：加载进度组件](loading-progress.md)

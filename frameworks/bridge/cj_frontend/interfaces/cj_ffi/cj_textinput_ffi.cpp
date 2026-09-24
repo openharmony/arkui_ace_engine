@@ -175,7 +175,7 @@ void FfiOHOSAceFrameworkTextInputControllerStopEditing(int64_t selfID)
 
 CJRectResult FfiOHOSAceFrameworkTextInputControllerGetTextContentRect(int64_t selfID)
 {
-    CJRectResult result;
+    CJRectResult result {};
     auto self = FFIData::GetData<NGNativeTextInputController>(selfID);
     if (self != nullptr) {
         result = self->GetTextContentRect();
@@ -199,7 +199,7 @@ int32_t FfiOHOSAceFrameworkTextInputControllerGetTextContentLineCount(int64_t se
 
 CJCaretOffset FfiOHOSAceFrameworkTextInputControllerGetCaretOffset(int64_t selfID)
 {
-    CJCaretOffset result;
+    CJCaretOffset result {};
     auto self = FFIData::GetData<NGNativeTextInputController>(selfID);
     if (self != nullptr) {
         result = self->GetCaretOffset();

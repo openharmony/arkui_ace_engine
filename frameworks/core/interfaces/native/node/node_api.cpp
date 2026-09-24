@@ -2176,6 +2176,18 @@ const char* GetErrorMessage()
     return OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
 }
 
+ArkUI_Bool IsDebugVersion()
+{
+    return AceApplicationInfo::GetInstance().IsDebugForParallel() ? 1 : 0;
+}
+
+ArkUI_Bool IsCurrentThreadSafe()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, true);
+    return pipeline->IsCurrentThreadSafe() ? 1 : 0;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2215,6 +2227,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         .setErrorCodeAndMessage = SetErrorCodeAndMessage,
         .setErrorFunctionName = SetErrorFunctionName,
         .getErrorMessage = GetErrorMessage,
+        .isDebugVersion = IsDebugVersion,
+        .isCurrentThreadSafe = IsCurrentThreadSafe,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;

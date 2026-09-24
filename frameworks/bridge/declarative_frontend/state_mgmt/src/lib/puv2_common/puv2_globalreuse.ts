@@ -152,6 +152,7 @@ class __ReusePool__Internal implements IReusePool {
     }
 
     deactivate(): void {
+        this.preRenderTasks_ = [];
         this.purgeAllCachedRecycleNode();
         this.recycleIdMapping_.clear();
         this.activeReuseIds_.clear();
@@ -427,7 +428,16 @@ class __ReusePool__Internal implements IReusePool {
         finally {
             // clear context
             PUV2ViewBase.__endPreRender__Internal();
+            // call ViewStackProcessor::Finish to reset view stack.
+            if (context) {
+                try {
+                    context.finishUpdateFunc(context.getUniqueId());
+                } catch (e) {
+                    stateMgmtConsole.error('ERROR: finishUpdateFunc failed:', e);
+                }
+            }
         }
+
         // Wait for all deferred builds to push to the pool before resolving, so the
         // consuming component reuses the pre-rendered node instead of creating a fresh one
         const builds = this.preRenderTasks_;

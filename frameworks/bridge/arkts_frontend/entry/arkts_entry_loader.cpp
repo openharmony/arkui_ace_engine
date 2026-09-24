@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,43 +120,17 @@ EntryLoader::EntryLoader(ani_env* env, const std::string& abcModulePath): env_(e
     ani_ref undefined;
     ANI_CALL(env, GetUndefined(&undefined), return);
 
-    ani_string abcModulePathStr;
-    ANI_CALL(env, String_NewUTF8(abcModulePath.c_str(), abcModulePath.length(), &abcModulePathStr), return);
-
-    ani_type stringCls;
-    ANI_CALL(env, Object_GetType(abcModulePathStr, &stringCls), return);
-
     ani_array refArray;
-    ANI_CALL(env, Array_New(1, abcModulePathStr, &refArray), return);
+    if (abcModulePath.empty()) {
+        ANI_CALL(env, Array_New(0, undefined, &refArray), return);
+    } else {
+        ani_string abcModulePathStr;
+        ANI_CALL(env, String_NewUTF8(abcModulePath.c_str(), abcModulePath.length(), &abcModulePathStr), return);
+        ANI_CALL(env, Array_New(1, abcModulePathStr, &refArray), return);
+    }
 
     ani_class cls;
     ANI_CALL(env, FindClass("std.core.AbcRuntimeLinker", &cls), return);
-
-    ani_method ctor;
-    ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "C{std.core.RuntimeLinker}C{std.core.Array}:", &ctor), return);
-
-    ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
-
-    ANI_CALL(env, Class_FindMethod(
-        cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}", &loadClass_), return);
-}
-
-EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): env_(env)
-{
-    ani_ref undefined;
-    ANI_CALL(env, GetUndefined(&undefined), return);
-
-    ani_valuearray_byte byteArray;
-    ANI_CALL(env, ValueArray_New_Byte(abcContent.size(), &byteArray), return);
-    const auto *data = reinterpret_cast<const ani_byte *>(abcContent.data());
-    ANI_CALL(env, ValueArray_SetRegion_Byte(byteArray, 0, abcContent.size(), data));
-
-    ani_array refArray;
-    ANI_CALL(env, Array_New(1, byteArray, &refArray), return);
-
-    ani_class cls;
-    ANI_CALL(env, FindClass("std.core.MemoryRuntimeLinker", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(

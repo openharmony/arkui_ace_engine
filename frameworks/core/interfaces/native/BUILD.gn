@@ -37,18 +37,14 @@ template("ace_core_interfaces_native_node") {
       "node/alphabet_indexer_modifier.cpp",
       "node/atomic_service_modifier.cpp",
       "node/badge_modifier.cpp",
-      "node/node_arc_list_item_modifier.cpp",
-      "node/node_arc_list_modifier.cpp",
-      "node/node_arc_scroll_bar_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/bubble_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
-      "node/circle_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
+      "node/circle_modifier.cpp",
       "node/column_modifier.cpp",
       "node/column_split_modifier.cpp",
       "node/common_shape_modifier.cpp",
-      "node/node_container_reader_modifier.cpp",
       "node/counter_modifier.cpp",
       "node/data_panel_modifier.cpp",
       "node/dialog_modifier.cpp",
@@ -70,13 +66,15 @@ template("ace_core_interfaces_native_node") {
       "node/grid_row_modifier.cpp",
       "node/hyperlink_modifier.cpp",
       "node/image_animator_modifier.cpp",
+      "node/lazy_column_layout_modifier.cpp",
       "node/lazy_grid_layout_modifier.cpp",
+      "node/lazy_water_flow_layout_modifier.cpp",
       "node/line_modifier.cpp",
       "node/linear_indicator_modifier.cpp",
       "node/marquee_modifier.cpp",
-      "node/menu_item_group_modifier.cpp",
       "node/martix_modifier.cpp",
       "node/material_modifier.cpp",
+      "node/menu_item_group_modifier.cpp",
       "node/menu_item_modifier.cpp",
       "node/menu_modifier.cpp",
       "node/native_material_util.cpp",
@@ -88,14 +86,19 @@ template("ace_core_interfaces_native_node") {
       "node/node_animate.cpp",
       "node/node_api.cpp",
       "node/node_api_multi_thread.cpp",
+      "node/node_arc_list_item_modifier.cpp",
+      "node/node_arc_list_modifier.cpp",
+      "node/node_arc_scroll_bar_modifier.cpp",
+      "node/node_arc_swiper_modifier.cpp",
       "node/node_button_modifier.cpp",
       "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
       "node/node_common_modifier_multi_thread.cpp",
       "node/node_container_modifier.cpp",
-      "node/node_container_span_modifier.cpp",
       "node/node_container_picker_modifier.cpp",
+      "node/node_container_reader_modifier.cpp",
+      "node/node_container_span_modifier.cpp",
       "node/node_content_modifier.cpp",
       "node/node_custom_node_ext_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
@@ -118,7 +121,6 @@ template("ace_core_interfaces_native_node") {
       "node/node_span_modifier.cpp",
       "node/node_stack_modifier.cpp",
       "node/node_swiper_modifier.cpp",
-      "node/node_arc_swiper_modifier.cpp",
       "node/node_symbol_glyph_modifier.cpp",
       "node/node_symbol_span_modifier.cpp",
       "node/node_text_area_modifier.cpp",
@@ -143,31 +145,29 @@ template("ace_core_interfaces_native_node") {
       "node/row_split_modifier.cpp",
       "node/scrollable_modifier.cpp",
       "node/scroller_modifier.cpp",
-      "node/selection_container_modifier.cpp",
       "node/search_modifier.cpp",
       "node/select_modifier.cpp",
-      "node/sheet_modifier.cpp",
+      "node/selection_container_modifier.cpp",
       "node/shape_modifier.cpp",
+      "node/sheet_modifier.cpp",
       "node/side_bar_container_modifier.cpp",
       "node/stepper_item_modifier.cpp",
       "node/stepper_modifier.cpp",
+      "node/styled_string_impl.cpp",
       "node/swiper_controller_modifier.cpp",
       "node/tab_content_modifier.cpp",
       "node/tabs_modifier.cpp",
       "node/text_clock_modifier.cpp",
       "node/text_timer_modifier.cpp",
-      "node/toolbaritem_modifier.cpp",
       "node/theme_modifier.cpp",
+      "node/toolbaritem_modifier.cpp",
       "node/util_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",
       "node/view_model_multi_thread.cpp",
-      "utility/error_message_manager.cpp",
       "node/water_flow_modifier.cpp",
-      "node/styled_string_impl.cpp",
       "runtime/runtime_init.cpp",
-      "node/lazy_column_layout_modifier.cpp",
-      "node/lazy_water_flow_layout_modifier.cpp",
+      "utility/error_message_manager.cpp",
     ]
 
     if (!is_arkui_x) {
@@ -187,15 +187,19 @@ template("ace_core_interfaces_native_node") {
         "ani/custom_node_ani_modifier.cpp",
         "ani/detached_free_root_ani_modifier.cpp",
         "ani/drag_ani_modifier.cpp",
+        "ani/dynamiclayout_ani_modifier.cpp",
         "ani/gesture_event_uiobserver_ani_modifier.cpp",
         "ani/image_ani_modifier.cpp",
         "ani/image_span_ani_modifier.cpp",
+        "ani/immersive_strategy_ani_modifier.cpp",
         "ani/interop_ani_modifier.cpp",
         "ani/keyboard_avoid_mode_ani_modifier.cpp",
+        "ani/lazy_dynamic_layout_ani_modifier.cpp",
         "ani/list_ani_modifier.cpp",
         "ani/list_item_group_ani_modifier.cpp",
         "ani/node_adapter_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
+        "ani/parallelize_ui_ani_modifier.cpp",
         "ani/paste_button_ani_modifier.cpp",
         "ani/save_button_ani_modifier.cpp",
         "ani/security_component_ani_method.cpp",
@@ -212,9 +216,6 @@ template("ace_core_interfaces_native_node") {
         "ani/with_env_ani_modifier.cpp",
         "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
-        "ani/parallelize_ui_ani_modifier.cpp",
-        "ani/dynamiclayout_ani_modifier.cpp",
-        "ani/lazy_dynamic_layout_ani_modifier.cpp",
       ]
 
       sources += [ "drawable/drawable_modifier.cpp" ]
@@ -226,8 +227,11 @@ template("ace_core_interfaces_native_node") {
           "ani/common_ani_modifier.cpp",
           "ani/component3d_ani_modifier.cpp",
           "ani/custom_node_ani_modifier.cpp",
+          "ani/dynamiclayout_ani_modifier.cpp",
           "ani/gesture_event_uiobserver_ani_modifier.cpp",
+          "ani/image_ani_modifier.cpp",
           "ani/interop_ani_modifier.cpp",
+          "ani/lazy_dynamic_layout_ani_modifier.cpp",
           "ani/list_ani_modifier.cpp",
           "ani/list_item_group_ani_modifier.cpp",
           "ani/node_adapter_ani_modifier.cpp",
@@ -237,10 +241,7 @@ template("ace_core_interfaces_native_node") {
           "ani/security_component_ani_method.cpp",
           "ani/uinode_ani_modifier.cpp",
           "ani/waterflow_ani_modifier.cpp",
-          "ani/image_ani_modifier.cpp",
           "ani/with_env_ani_modifier.cpp",
-          "ani/dynamiclayout_ani_modifier.cpp",
-          "ani/lazy_dynamic_layout_ani_modifier.cpp",
         ]
       }
 
@@ -251,8 +252,8 @@ template("ace_core_interfaces_native_node") {
     }
 
     deps = [
-      "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform",
       "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen",
+      "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform",
     ]
     if (defined(config.web_components_support) &&
         config.web_components_support) {
@@ -299,8 +300,8 @@ template("ace_core_interfaces_native_node") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
-        "node/calendar_picker_modifier.cpp",
         "node/calendar_picker_dialog_modifier.cpp",
+        "node/calendar_picker_modifier.cpp",
         "node/node_folder_stack_modifier.cpp",
       ]
     }
@@ -314,13 +315,13 @@ template("ace_core_interfaces_native_node") {
     }
 
     external_deps = [
+      "egl:libEGL",
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
       "node:node_header_notice",
+      "opengles:libGLES",
       "runtime_core:ani",
-      "egl:libEGL",
-      "opengles:libGLES"
     ]
 
     if (current_os == "ohos") {
@@ -356,7 +357,8 @@ template("ace_core_interfaces_native_node") {
       ]
     }
 
-    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.hiviewdfx_api_metrics)) {
       external_deps += [ "api_metrics:histogrammanager" ]
       defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
@@ -390,4 +392,3 @@ foreach(item, ace_platforms) {
     }
   }
 }
-

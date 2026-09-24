@@ -257,7 +257,8 @@ void TextClockPattern::InitTextClockController()
 
 void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Clock:%{public}s", visible ? "visible" : "invisible");
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Clock:%{public}s PT:%{public}s",
+        visible ? "visible" : "invisible", prevTime_.c_str());
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
         UpdateTimeText();
@@ -373,7 +374,7 @@ void TextClockPattern::RequestUpdateForNextSecond()
         delayTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUITextClockUpdateTimeText");
 }
 
-std::string TextClockPattern::GetCurrentFormatDateTime()
+std::string TextClockPattern::GetFormattedDateTime()
 {
     auto now = std::chrono::system_clock::now();
     time_t current = std::chrono::system_clock::to_time_t(now);
@@ -418,12 +419,21 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     }
     std::string outputDateTime = ParseDateTime(dateTimeValue, timeZoneTime->tm_wday, timeZoneTime->tm_mon,
         timeZoneTime->tm_hour);
+    return outputDateTime;
+}
+
+std::string TextClockPattern::GetCurrentFormatDateTime()
+{
+    auto now = std::chrono::system_clock::now();
+    auto duration_cast_to_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    auto timeValue = duration_cast_to_millis.count();
+    std::string outputDateTime = GetFormattedDateTime();
     if (timeValue - timeValue_ > LOG_INTERVAL_TIME) {
         timeValue_ = timeValue;
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, outputDateTime);
-        TAG_LOGI(
-            AceLogTag::ACE_TEXT_CLOCK, "T:%{public}s ID:%{public}d", outputDateTime.c_str(), host->GetId());
+        auto textNode = GetTextNode();
+        CHECK_NULL_RETURN(textNode, outputDateTime);
+        TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "PT:%{public}s CT:%{public}s ID:%{public}d",
+            prevTime_.c_str(), outputDateTime.c_str(), textNode->GetId());
     }
     return outputDateTime;
 }
@@ -918,6 +928,9 @@ void TextClockPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("is24H: ", is24H_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("isInVisibleArea: ", isInVisibleArea_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("isStart: ", isStart_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc("prevTime: ", prevTime_);
+    DumpLog::GetInstance().AddDesc("currentTime: ", GetFormattedDateTime());
+    DumpLog::GetInstance().AddDesc("logTime: ", timeValue_);
 }
 
 void TextClockPattern::OnColorConfigurationUpdate()

@@ -6802,11 +6802,14 @@ void SetBindContextMenuByResponseTypeImpl(Ark_NativePointer node,
                 [&param, node, contentBuilder](const CustomNodeBuilder& builderVal) {
                     auto fn = reinterpret_cast<FrameNode*>(node);
                     CHECK_NULL_VOID(fn);
+                    WeakPtr<FrameNode> weakFn = AceType::WeakClaim(fn);
                     param.previewMode = MenuPreviewMode::CUSTOM;
                     CallbackHelper(builderVal).BuildAsync(
-                        [fn, param, contentBuilder](const RefPtr<UINode>& uiNode) mutable {
-                            auto previewBuildFunc = [fn, uiNode]() {
-                                PipelineContext::SetCallBackNode(AceType::WeakClaim(fn));
+                        [weakFn, param, contentBuilder](const RefPtr<UINode>& uiNode) mutable {
+                            auto previewBuildFunc = [weakFn, uiNode]() {
+                                auto fn = weakFn.Upgrade();
+                                CHECK_NULL_VOID(fn);
+                                PipelineContext::SetCallBackNode(weakFn);
                                 ViewStackProcessor::GetInstance()->Push(uiNode);
                             };
                             contentBuilder(param, std::move(previewBuildFunc));
@@ -6892,11 +6895,14 @@ void SetBindContextMenuWithResponse1Impl(Ark_NativePointer node,
                     [&param, node, contentBuilder](const CustomNodeBuilder& builderVal) {
                         auto fn = reinterpret_cast<FrameNode*>(node);
                         CHECK_NULL_VOID(fn);
+                        WeakPtr<FrameNode> weakFn = AceType::WeakClaim(fn);
                         param.previewMode = MenuPreviewMode::CUSTOM;
                         CallbackHelper(builderVal).BuildAsync(
-                            [fn, param, contentBuilder](const RefPtr<UINode>& uiNode) mutable {
-                                auto previewBuildFunc = [fn, uiNode]() {
-                                    PipelineContext::SetCallBackNode(AceType::WeakClaim(fn));
+                            [weakFn, param, contentBuilder](const RefPtr<UINode>& uiNode) mutable {
+                                auto previewBuildFunc = [weakFn, uiNode]() {
+                                    auto fn = weakFn.Upgrade();
+                                    CHECK_NULL_VOID(fn);
+                                    PipelineContext::SetCallBackNode(weakFn);
                                     ViewStackProcessor::GetInstance()->Push(uiNode);
                                 };
                                 contentBuilder(param, std::move(previewBuildFunc));
@@ -6976,11 +6982,14 @@ void SetBindContextMenuByIsShowImpl(Ark_NativePointer node,
                 [&param, node, contentBuilder](const CustomNodeBuilder& builderVal) {
                     auto fn = reinterpret_cast<FrameNode*>(node);
                     CHECK_NULL_VOID(fn);
+                    WeakPtr<FrameNode> weakFn = AceType::WeakClaim(fn);
                     param.previewMode = MenuPreviewMode::CUSTOM;
                     CallbackHelper(builderVal).BuildAsync(
-                        [fn, param, contentBuilder](const RefPtr<UINode>& uiNode) mutable {
-                            auto previewBuildFunc = [fn, uiNode]() {
-                                PipelineContext::SetCallBackNode(AceType::WeakClaim(fn));
+                        [weakFn, param, contentBuilder](const RefPtr<UINode>& uiNode) mutable {
+                            auto previewBuildFunc = [weakFn, uiNode]() {
+                                auto fn = weakFn.Upgrade();
+                                CHECK_NULL_VOID(fn);
+                                PipelineContext::SetCallBackNode(weakFn);
                                 ViewStackProcessor::GetInstance()->Push(uiNode);
                             };
                             contentBuilder(param, std::move(previewBuildFunc));

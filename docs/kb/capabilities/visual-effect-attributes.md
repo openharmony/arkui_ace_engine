@@ -63,5 +63,5 @@ ArkUI 视效属性包括模糊（blur/backdropBlur）、亮度（brightness）�
 
 ## 相关主题
 
-- 基础布局属性
-- 基础单位
+- [基础布局属性](layout-attributes.md)
+- [基础单位](basic-units.md)

@@ -159,6 +159,25 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
     return dataVal;
 }
 
+napi_value UdmfClientImpl::TransformSummary(const DragSummaryInfo& summaryInfo)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    auto udmfSummary = std::make_shared<UDMF::Summary>();
+    CHECK_NULL_RETURN(udmfSummary, nullptr);
+    udmfSummary->totalSize = 0;
+    for (const auto& element : summaryInfo.summary) {
+        udmfSummary->totalSize += element.second;
+    }
+    udmfSummary->summary = summaryInfo.summary;
+    udmfSummary->filenameExtensions = summaryInfo.filenameExtensions;
+    napi_value dataVal = nullptr;
+    UDMF::SummaryNapi::NewInstance(env, udmfSummary, dataVal);
+    return dataVal;
+}
+
 int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key)
 {
     auto& client = UDMF::UdmfClient::GetInstance();
@@ -225,6 +244,7 @@ int32_t UdmfClientImpl::GetSummary(std::string& key, DragSummaryInfo& dragSummar
     dragSummaryInfo.version = summary.version;
     dragSummaryInfo.totalSize = summary.totalSize;
     dragSummaryInfo.tag = summary.tag;
+    dragSummaryInfo.filenameExtensions = summary.filenameExtensions;
     return ret;
 }
 
@@ -725,5 +745,18 @@ void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary
         udmfSummary->totalSize += element.second;
     }
     udmfSummary->summary = std::move(summary);
+}
+
+void UdmfClientImpl::TransformSummaryANI(
+    const DragSummaryInfo& summaryInfo, std::shared_ptr<void> summaryPtr)
+{
+    auto udmfSummary = std::static_pointer_cast<OHOS::UDMF::Summary>(summaryPtr);
+    CHECK_NULL_VOID(udmfSummary);
+    udmfSummary->totalSize = 0;
+    for (const auto& element : summaryInfo.summary) {
+        udmfSummary->totalSize += element.second;
+    }
+    udmfSummary->summary = summaryInfo.summary;
+    udmfSummary->filenameExtensions = summaryInfo.filenameExtensions;
 }
 } // namespace OHOS::Ace

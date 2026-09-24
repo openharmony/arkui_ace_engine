@@ -672,6 +672,8 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutS
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
     tabbarLayoutAlgorithm->childCount_ = 2;
+    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
+    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
     tabbarLayoutAlgorithm->contentMainSize_ = TABS_WIDTH;
 
     /**
@@ -719,6 +721,8 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayou
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
     auto layoutProperty = tabBarLayoutProperty_;
     tabbarLayoutAlgorithm->childCount_ = 2;
+    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
+    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
 
     /**
      * @tc.steps: steps2. Create two children for layoutWrapper.

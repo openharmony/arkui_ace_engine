@@ -1446,7 +1446,8 @@ void PanRecognizer::OnFingerEscaped(int32_t fingerId)
     activeFingers_.remove(fingerId);
 }
 
-void PanRecognizer::SetEscapeModeForPan(const std::unordered_set<int32_t>& existingFingers)
+void PanRecognizer::SetEscapeModeForPan(
+    const std::unordered_set<int32_t>& existingFingers, bool toEntityManager)
 {
     std::unordered_set<int32_t> toCleanup;
     for (const auto& id : existingFingers) {
@@ -1482,6 +1483,15 @@ void PanRecognizer::SetEscapeModeForPan(const std::unordered_set<int32_t>& exist
         panVelocity_.ResetAll();
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::READY;
+    }
+    if (toEntityManager) {
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto eventManager = pipeline->GetEventManager();
+            if (eventManager) {
+                eventManager->RegisterEscapeRecognizer(AceType::Claim(this));
+            }
+        }
     }
 }
 

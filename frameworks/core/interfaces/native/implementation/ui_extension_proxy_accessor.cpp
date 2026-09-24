@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "base/log/log_wrapper.h"
 
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 
@@ -108,6 +109,7 @@ void OffAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
     if (cb) {
         peer->DeleteAsyncCallbackFromList(cb.value().resource.resourceId);
     } else {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SubEvent op=off_all kit=ArkUI event=asyncReceiverRegister");
         peer->ClearAsyncCallbackList();
     }
     auto pattern = peer->GetPattern();
@@ -126,6 +128,7 @@ void OffSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
     if (cb) {
         peer->DeleteSyncCallbackFromList(cb.value().resource.resourceId);
     } else {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SubEvent op=off_all kit=ArkUI event=syncReceiverRegister");
         peer->ClearSyncCallbackList();
     }
     auto pattern = peer->GetPattern();

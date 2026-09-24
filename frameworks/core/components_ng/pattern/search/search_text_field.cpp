@@ -35,6 +35,17 @@ RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
     return parentFrameNode->GetOrCreateFocusHub();
 }
 
+bool SearchTextFieldPattern::HasStateStyle(UIState state) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    return eventHub->HasStateStyle(state);
+}
+
 void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
     if (!HasFocus()) {

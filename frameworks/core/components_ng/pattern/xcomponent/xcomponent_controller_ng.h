@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class XComponentPattern;
+class XComponentPatternV2;
 
 class ACE_FORCE_EXPORT XComponentControllerNG : public OHOS::Ace::InnerXComponentController {
 public:
@@ -71,6 +72,9 @@ public:
     void SetSurfaceConfig(bool isOpaque) override;
 
 private:
+    void UpdateSurfaceBoundsV1(const RefPtr<XComponentPattern>& pattern);
+    void UpdateSurfaceBoundsV2(const RefPtr<XComponentPatternV2>& pattern);
+
     WeakPtr<XComponentPattern> pattern_;
     bool isOpaque_ = false;
 };

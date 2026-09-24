@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "ui/properties/gradient_property.h"
+#include "ui/properties/ui_material.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -387,6 +388,8 @@ public:
     void SetTransparencyCallbackId(const std::optional<int32_t>& id);
     std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig() const;
     std::optional<int32_t> GetTransparencyCallbackId() const;
+    void SetMaterialColorModeChangeCallback(std::function<void()>&& callback);
+    void OnMaterialColorModeChange();
     RefPtr<UiMaterial> GetSystemMaterial() const;
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
@@ -545,6 +548,7 @@ public:
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
     virtual void UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) {}
     virtual void OnExcludeFromRenderGroupUpdate(bool exclude) {}
+    virtual void OnMarkLayeredRenderUpdate(bool isLayeredRender) {}
     virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
     virtual void OnDynamicDimDegreeUpdate(const float degree) {}
@@ -626,10 +630,23 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageGradient, Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(BackgroundColor, Color);
+public:
+    void UpdateBackgroundColor(const Color& value)
+    {
+        UpdatePreBackgroundColor(value);
+        if (propBackgroundColor_.has_value()) {
+            if (NearEqual(propBackgroundColor_.value(), value)) {
+                return;
+            }
+        }
+        propBackgroundColor_ = value;
+        OnBackgroundColorUpdate(value);
+    }
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ExcludeFromRenderGroup, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MarkLayeredRender, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
@@ -662,7 +679,17 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BgDynamicBrightnessOption, BrightnessOption);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FgDynamicBrightnessOption, BrightnessOption);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(Graphics, BackShadow, Shadow);
+    void UpdateBackShadow(const Shadow& value)
+    {
+        UpdatePreBackShadow(value);
+        auto& groupProperty = GetOrCreateGraphics();
+        if (groupProperty->CheckBackShadow(value)) {
+            return;
+        }
+        groupProperty->UpdateBackShadow(value);
+        OnBackShadowUpdate(value);
+    }
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
 
@@ -670,7 +697,17 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderWidth, BorderWidthProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(Border, BorderColor, BorderColorProperty);
+    void UpdateBorderColor(const BorderColorProperty& value)
+    {
+        UpdatePreBorderColor(value);
+        auto& groupProperty = GetOrCreateBorder();
+        if (groupProperty->CheckBorderColor(value)) {
+            return;
+        }
+        groupProperty->UpdateBorderColor(value);
+        OnBorderColorUpdate(value);
+    }
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
@@ -681,6 +718,40 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackShadow, Shadow);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackgroundColor, Color);
+
+    // MaterialBackgroundColor/MaterialBorderColor share the same property storage as
+    // BackgroundColor/BorderColor (propBackgroundColor_ / Border group's propBorderColor).
+    // The only difference from UpdateBackgroundColor/UpdateBorderColor is the OnXXUpdate
+    // callback they invoke, so the equality short-circuit stays consistent across both
+    // update paths.
+    void UpdateMaterialBackgroundColor(const Color& value)
+    {
+        if (propBackgroundColor_.has_value()) {
+            if (NearEqual(propBackgroundColor_.value(), value)) {
+                return;
+            }
+        }
+        propBackgroundColor_ = value;
+        OnBackgroundColorUpdate(value);
+    }
+    void UpdateMaterialBorderColor(const BorderColorProperty& value)
+    {
+        auto& groupProperty = GetOrCreateBorder();
+        if (groupProperty->CheckBorderColor(value)) {
+            return;
+        }
+        groupProperty->UpdateBorderColor(value);
+        OnBorderColorUpdate(value);
+    }
+    void UpdateMaterialBackShadow(const Shadow& value)
+    {
+        auto& groupProperty = GetOrCreateGraphics();
+        if (groupProperty->CheckBackShadow(value)) {
+            return;
+        }
+        groupProperty->UpdateBackShadow(value);
+        OnBackShadowUpdate(value);
+    }
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
@@ -902,6 +973,54 @@ public:
 
     virtual void UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void ResetRadiusGradientBlur() {}
+
+    // MaterialProcessor support. Appended at the end of the class so the new
+    // data members below do not shift the offset of any pre-existing member.
+    // Whether the material of this node has been suppressed by MaterialProcessor
+    // (e.g. the node is not inside a titleBar), so the material is fully removed
+    // until the node re-enters a titleBar.
+    bool IsMaterialSuppressed() const
+    {
+        return materialSuppressed_;
+    }
+    void SetMaterialSuppressed(bool flag)
+    {
+        materialSuppressed_ = flag;
+    }
+    // Snapshot of the material configured before suppression, kept so the
+    // processor can restore it when the node re-enters a titleBar.
+    RefPtr<UiMaterial> GetSavedMaterialForSuppress() const;
+    void SetSavedMaterialForSuppress(const RefPtr<UiMaterial>& material);
+
+    // Guard set by MaterialProcessor around its own SetSystemMaterial calls
+    // (suppress / restore) so ViewAbstract::SetSystemMaterial can distinguish
+    // them from external calls: external calls on a suppressed node are blocked
+    // (the material would otherwise re-take effect), while the processor's own
+    // suppress/restore calls bypass the block via this flag.
+    bool IsMaterialLimiterUpdating() const
+    {
+        return materialLimiterUpdating_;
+    }
+    void SetMaterialLimiterUpdating(bool flag)
+    {
+        materialLimiterUpdating_ = flag;
+    }
+    // Set by ViewAbstract::SetSystemMaterialForOverlay for popup / dialog / menu /
+    // sheet / toast / select-overlay material targets. Exempts the node from the
+// scope gate (titleBar / bottom-TabBar) in MaterialProcessor::ApplyScopeGate so
+// these components keep material effective for non-system apps too. The overlap
+// lowering (condition 2) still applies.
+    bool IsMaterialScopeExempt() const
+    {
+        return materialScopeExempt_;
+    }
+    void SetMaterialScopeExempt(bool flag)
+    {
+        materialScopeExempt_ = flag;
+    }
+
+    virtual void ReloadBackgroundImage() {}
+
 protected:
     RenderContext();
     std::unique_ptr<BorderImageProperty> propBdImage_;
@@ -915,6 +1034,10 @@ protected:
     bool isNeedAnimate_ = true;
     bool isFree_ = false;
     std::optional<std::list<ParticleOption>> propParticleOptionArray_;
+    RefPtr<UiMaterial> savedMaterialForSuppress_;
+    bool materialSuppressed_ = false;
+    bool materialLimiterUpdating_ = false;
+    bool materialScopeExempt_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -1015,6 +1138,8 @@ protected:
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;
     void ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void LightEffectOptionsToJsonValue(const std::unique_ptr<JsonValue>& json,
+        const std::optional<LightEffectOptions>& lightEffectOptions) const;
     friend class ViewAbstract;
     friend class ViewAbstractModelStatic;
     std::function<void(bool)> requestFrame_;

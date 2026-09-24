@@ -896,6 +896,11 @@ public:
         ViewAbstract::SetExcludeFromRenderGroup(exclude);
     }
 
+    void SetMarkLayeredRender(bool isLayeredRender) override
+    {
+        ViewAbstract::SetMarkLayeredRender(isLayeredRender);
+    }
+
     void SetRenderFit(RenderFit renderFit) override
     {
         ViewAbstract::SetRenderFit(renderFit);

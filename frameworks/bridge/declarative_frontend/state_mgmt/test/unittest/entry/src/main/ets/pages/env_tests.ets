@@ -18,6 +18,7 @@ import { IEnvBreakpointTests } from '../../env_tests/i_env_breakpointTests'
 import { IEnvWindowSizeTests } from '../../env_tests/i_env_windowsizeTests'
 import { IEnvWindowAvoidAreaTests } from '../../env_tests/i_env_windowavoidareaTests'
 import { IEnvValueTests } from '../../env_tests/i_env_valueTests'
+import { SystemEnvKeyTests } from '../../env_tests/systemEnvKeyTests'
 
 import { PageController } from '../../lib/pageController'
 import { TestRunner } from '../../lib/testRunner'
@@ -39,6 +40,7 @@ struct Parent {
       TestRunner.bind(this)(new IEnvWindowSizeTests('i_env_windowsize'));
       TestRunner.bind(this)(new IEnvWindowAvoidAreaTests('i_env_windowavoidarea'));
       TestRunner.bind(this)(new IEnvValueTests('i_env_value'));
+      TestRunner.bind(this)(new SystemEnvKeyTests('env_system_env_key'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)

@@ -17,6 +17,9 @@
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -157,6 +160,12 @@ void ListItemDragManager::DeInitDragDropEvent()
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->RemoveDragEvent();
+    // The drag session is gone, do not leave the host List notifying a dead manager.
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDragScrollCallback(nullptr);
 }
 
 void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
@@ -193,6 +202,7 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
 void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
 {
     dragState_ = ListItemDragState::LONG_PRESS;
+    suppressAutoScroll_ = false;
     SetIsNeedDividerAnimation(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -233,6 +243,89 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
         },
         option.GetOnFinishEvent(), nullptr, context
     );
+
+    LockDragFingerAndEscapeScrollPan(info.GetPointerId());
+    RegisterContainerScrollInterrupt();
+}
+
+void ListItemDragManager::RegisterContainerScrollInterrupt()
+{
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    // A float that the user abandons in favour of scrolling the container with
+    // another finger is interrupted instead of being kept alive, and a running drag
+    // hands the scrolling over to that finger.
+    pattern->SetDragScrollCallback([weak = WeakClaim(this)](int32_t source) {
+        auto manager = weak.Upgrade();
+        CHECK_NULL_VOID(manager);
+        manager->HandleContainerScroll(source);
+    });
+}
+
+void ListItemDragManager::LockDragFingerAndEscapeScrollPan(int32_t fingerId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
+    auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    CHECK_NULL_VOID(dragEventActuator);
+    auto panRecognizer = dragEventActuator->GetDragEventPanRecognizer();
+    CHECK_NULL_VOID(panRecognizer);
+    panRecognizer->SetTriggeredIds({ fingerId });
+
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    // toEntityManager = true binds the escaped scroll pan to EventManager so the
+    // escape survives the new GestureScope created when the second finger goes
+    // down; EventManager sweeps it once every finger is lifted.
+    pattern->SetScrollPanEscape({ fingerId }, true);
+}
+
+void ListItemDragManager::HandleContainerScroll(int32_t source)
+{
+    if (dragState_ == ListItemDragState::IDLE) {
+        return;
+    }
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    // Both actions need a second finger on the List that really drives it: a finger
+    // merely resting on the container, a wheel/crown scroll or a programmatic scroll
+    // must neither drop the float nor disable the drag edge auto-scroll.
+    if (pattern->GetActiveTouchFingerIdsSize() <= 1 ||
+        !ScrollablePattern::IsFingerDrivenScrollSource(source)) {
+        return;
+    }
+    if (dragState_ == ListItemDragState::LONG_PRESS) {
+        // The item only floats, this finger never moved: the user has taken the
+        // container over, so the pending float is dropped.
+        HandleOnItemDragCancel();
+        return;
+    }
+    // One finger dragging while another scrolls is the supported coexistence case, the
+    // drag is kept alive, only its edge auto-scroll is handed over to that finger.
+    suppressAutoScroll_ = true;
+}
+
+void ListItemDragManager::StopAutoScroll()
+{
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHotZoneScrollCallback(nullptr);
+    if (scrolling_) {
+        pattern->HandleLeaveHotzoneEvent();
+        scrolling_ = false;
+    }
 }
 
 void ListItemDragManager::SetNearbyNodeScale(RefPtr<FrameNode> node, float scale)
@@ -512,6 +605,19 @@ void ListItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, c
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    // Another finger is scrolling the List itself: hand the scrolling over to that
+    // finger instead of fighting it with the drag edge auto-scroll. The suppression is
+    // armed by HandleContainerScroll() on a real finger-driven scroll frame, so a
+    // second finger merely resting on the List does not disable the edge auto-scroll.
+    if (pattern->GetActiveTouchFingerIdsSize() <= 1) {
+        suppressAutoScroll_ = false;
+    } else if (suppressAutoScroll_) {
+        // Returning early alone is not enough: the hot zone animator started by an
+        // earlier frame is self-sustaining, it keeps feeding offsets and keeps
+        // driving HandleScrollCallback every frame, so it has to be stopped here.
+        StopAutoScroll();
+        return;
+    }
     if (IsInHotZone(index, frameRect) && parent->GetDragPreviewOption().enableEdgeAutoScroll) {
         pattern->HandleMoveEventInComp(point, true);
         if (!scrolling_) {
@@ -757,10 +863,12 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(pattern);
     pattern->SetDraggingIndex(-1);
     pattern->SetHotZoneScrollCallback(nullptr);
+    pattern->SetDragScrollCallback(nullptr);
     if (scrolling_) {
         pattern->HandleLeaveHotzoneEvent();
         scrolling_ = false;
     }
+    suppressAutoScroll_ = false;
     HandleDragEndAnimation();
     int32_t to = GetIndex();
     auto forEach = forEachNode_.Upgrade();
@@ -781,10 +889,12 @@ void ListItemDragManager::HandleOnItemDragCancel()
     CHECK_NULL_VOID(pattern);
     pattern->SetDraggingIndex(-1);
     pattern->SetHotZoneScrollCallback(nullptr);
+    pattern->SetDragScrollCallback(nullptr);
     if (scrolling_) {
         pattern->HandleLeaveHotzoneEvent();
         scrolling_ = false;
     }
+    suppressAutoScroll_ = false;
     HandleDragEndAnimation();
     if (dragState_ == ListItemDragState::DRAGGING) {
         int32_t to = GetIndex();

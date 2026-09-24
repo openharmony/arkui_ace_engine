@@ -69,8 +69,7 @@ void GetDragSummary(ani_ref event, SharedPointerWrapper& summaryPtr)
     CHECK_NULL_VOID(peer);
     auto dragEvent = peer->dragInfo;
     CHECK_NULL_VOID(dragEvent);
-    auto summary = dragEvent->GetSummary();
-    UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr.GetSharedPtr());
+    UdmfClient::GetInstance()->TransformSummaryANI(dragEvent->GetSummaryInfo(), summaryPtr.GetSharedPtr());
 }
 
 void SetDragDataLoadParams(ani_ref event, void* dataLoadParams)

@@ -165,6 +165,14 @@ void JsiObject::Wrap(T* data) const
 }
 
 template<typename T>
+void JsiObject::Wrap(T* data, void (*callback)(void*, void*, void*),
+    void* hint, size_t nativeBindingSize) const
+{
+    GetHandle()->SetNativePointerField(GetEcmaVM(), INSTANCE, static_cast<void*>(data),
+        callback, hint, nativeBindingSize);
+}
+
+template<typename T>
 void JsiObject::SetProperty(const char* prop, T value) const
 {
     auto stringRef = panda::StringRef::NewFromUtf8(GetEcmaVM(), prop);

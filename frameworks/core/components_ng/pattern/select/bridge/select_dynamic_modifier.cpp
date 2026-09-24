@@ -206,6 +206,8 @@ void ResetJsFontStyleImpl(ArkUINodeHandle node, ArkUI_Int32 type)
     }
 }
 
+void SetValuePtrImpl(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_VoidPtr valueRawPtr) {}
+
 void SetSelectFontColorPtrImpl(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr)
 {
     GetSelectModelImpl()->SetFontColor(Color(color));
@@ -2435,7 +2437,7 @@ const ArkUISelectModifier* GetSelectDynamicModifier()
             .setMenuOutline = nullptr,
             .resetMenuOutline = nullptr,
             .setSelectSymbolValue = nullptr,
-            .setValuePtr = nullptr,
+            .setValuePtr = SetValuePtrImpl,
             .setSelectedPtr = nullptr,
             .setSelectFontColorPtr = SetSelectFontColorPtrImpl,
             .setSelectedOptionBgColorPtr = nullptr,

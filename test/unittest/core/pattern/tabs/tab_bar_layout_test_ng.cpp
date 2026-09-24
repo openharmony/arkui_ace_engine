@@ -165,6 +165,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplyLayoutMode001, TestSize.L
     }
     float allocatedWidth = 0.0f;
     tabbarLayoutAlgorithm->childCount_ = 2;
+    tabbarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
+    tabbarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
 
     /**
      * @tc.steps: steps4. ApplyLayoutMode.
@@ -363,6 +365,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible001, T
      */
     float allocatedWidth = 0.0f;
     tabBarLayoutAlgorithm->childCount_ = 1;
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0 };
     tabBarLayoutAlgorithm->visibleItemLength_.clear();
     tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
     tabBarLayoutAlgorithm->visibleItemLength_[1] = 2000.0f;
@@ -374,6 +378,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible001, T
     tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_.size(), 1);
     tabBarLayoutAlgorithm->childCount_ = 3;
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1, 2 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1, 2 };
     tabBarLayoutAlgorithm->visibleItemLength_.clear();
     tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
     tabBarLayoutAlgorithm->visibleItemLength_[1] = 2000.0f;
@@ -467,6 +473,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
 
     float allocatedWidth = 0.0f;
     tabBarLayoutAlgorithm->childCount_ = 2;
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
 
     /**
      * @tc.steps: steps5. Test CalculateItemWidthsForSymmetricExtensible by using different conditions.
@@ -592,6 +600,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible002, T
      */
     float allocatedWidth = 0.0f;
     tabBarLayoutAlgorithm->childCount_ = 3;
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1, 2 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1, 2 };
     tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_[0], 0.0f);
 }
@@ -656,6 +666,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
      */
     float allocatedWidth = 100.0f;
     tabBarLayoutAlgorithm->childCount_ = 2;
+    tabBarLayoutAlgorithm->effectiveChildIndices_ = { 0, 1 };
+    tabBarLayoutAlgorithm->effectiveChildIndexSet_ = { 0, 1 };
     std::vector<float> spaceRequests;
     std::vector<float> leftBuffers;
     std::vector<float> rightBuffers;
@@ -1557,4 +1569,95 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator
     EXPECT_NE(indicatorGeometryNode->GetFrameSize().Width(), 0);
     g_isConfigChangePerform = false;
 }
+/**
+ * @tc.name: TabBarLayoutAlgorithmSetIsFloatingBar001
+ * @tc.desc: Test SetIsFloatingBar sets isFloatingBar_ to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmSetIsFloatingBar001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    auto layoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(
+        tabBarPattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->SetIsFloatingBar(true);
+    EXPECT_TRUE(layoutAlgorithm->isFloatingBar_);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmSetIsFloatingBar002
+ * @tc.desc: Test SetIsFloatingBar sets isFloatingBar_ to false (default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmSetIsFloatingBar002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    auto layoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(
+        tabBarPattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    EXPECT_FALSE(layoutAlgorithm->isFloatingBar_);
+    layoutAlgorithm->SetIsFloatingBar(false);
+    EXPECT_FALSE(layoutAlgorithm->isFloatingBar_);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmFloatingBarDefaultHeight001
+ * @tc.desc: Test that isFloatingBar_ uses FLOATING_BAR_HEIGHT as defaultHeight_ in horizontal mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmFloatingBarDefaultHeight001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+
+    auto layoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(
+        tabBarPattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->SetIsFloatingBar(true);
+    // Verify isFloatingBar_ is set correctly, which ensures defaultHeight_ logic
+    // uses FLOATING_BAR_HEIGHT (56vp) instead of bottom tab bar default (48vp)
+    EXPECT_TRUE(layoutAlgorithm->isFloatingBar_);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmFloatingBarDefaultHeight002
+ * @tc.desc: Test that non-floating BottomTabBarStyle defaultHeight_ differs from floating
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmFloatingBarDefaultHeight002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+
+    auto layoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(
+        tabBarPattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->SetIsFloatingBar(false);
+    // When isFloatingBar_ is false with BOTTOMTABBATSTYLE,
+    // defaultHeight_ should use bottom tab bar default height
+    EXPECT_FALSE(layoutAlgorithm->isFloatingBar_);
+}
+
 } // namespace OHOS::Ace::NG

@@ -57,6 +57,11 @@ class LazyArkTabsComponent extends ArkComponent {
     return this;
   }
 
+  sidebarDisplayStyle(value: TabsSidebarDisplayStyle): this {
+    this.lazyComponent.sidebarDisplayStyle(value);
+    return this;
+  }
+
   barPosition(value: BarPosition): this {
     this.lazyComponent.barPosition(value);
     return this;
@@ -142,6 +147,28 @@ class LazyArkTabsComponent extends ArkComponent {
     return this;
   }
 
+  sidebarSelectedIconColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarSelectedIconColor(value);
+    return this;
+  }
+
+  sidebarSelectedTextColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarSelectedTextColor(value);
+    return this;
+  }
+  sidebarUnselectedIconColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarUnselectedIconColor(value);
+    return this;
+  }
+  sidebarUnselectedTextColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarUnselectedTextColor(value);
+    return this;
+  }
+  sidebarSelectedBoardColor(value: ResourceColor): this {
+    this.lazyComponent.sidebarSelectedBoardColor(value);
+    return this;
+  }
+
   barBackgroundBlurStyle(style: BlurStyle, options?: BackgroundBlurStyleOptions): this {
     this.lazyComponent.barBackgroundBlurStyle(style, options);
     return this;
@@ -224,6 +251,46 @@ class LazyArkTabsComponent extends ArkComponent {
 
   barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): this {
     this.lazyComponent.barDisplayModeBreakpoint(value);
+    return this;
+  }
+
+  onBarDisplayModeChange(value: (mode: TabBarDisplayMode) => void): this {
+    this.lazyComponent.onBarDisplayModeChange(value);
+    return this;
+  }
+
+  sidebarWidth(value: Optional<Length>): this {
+    this.lazyComponent.sidebarWidth(value);
+    return this;
+  }
+
+  minSidebarWidth(value: Optional<Length>): this {
+    this.lazyComponent.minSidebarWidth(value);
+    return this;
+  }
+
+  maxSidebarWidth(value: Optional<Length>): this {
+    this.lazyComponent.maxSidebarWidth(value);
+    return this;
+  }
+
+  minContentWidth(value: Optional<Length>): this {
+    this.lazyComponent.minContentWidth(value);
+    return this;
+  }
+
+  sidebarBackgroundColor(value: Optional<ResourceColor>): this {
+    this.lazyComponent.sidebarBackgroundColor(value);
+    return this;
+  }
+
+  sidebarBackgroundBlurStyle(value: Optional<BlurStyle>): this {
+    this.lazyComponent.sidebarBackgroundBlurStyle(value);
+    return this;
+  }
+
+  sidebarDivider(value: Optional<DividerStyle>): this {
+    this.lazyComponent.sidebarDivider(value);
     return this;
   }
 }

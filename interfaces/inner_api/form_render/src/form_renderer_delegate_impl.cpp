@@ -71,6 +71,13 @@ int32_t FormRendererDelegateImpl::OnSurfaceChange(float width, float height, flo
         HILOG_ERROR("surfaceChangeEventHandler_ is null");
         return ERR_INVALID_DATA;
     }
+
+    if (width <= 0.0f || height <= 0.0f || borderWidth < 0.0f) {
+        HILOG_ERROR("invalid param: width: %.2f, height: %.2f, borderWidth: %.2f",
+            width, height, borderWidth);
+        return ERR_INVALID_DATA;
+    }
+
     surfaceChangeEventHandler_(width, height, borderWidth);
     return ERR_OK;
 }

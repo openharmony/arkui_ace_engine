@@ -22,12 +22,15 @@
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "base/utils/napi_scope_raii.h"
+
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_invoke_scope.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 extern const char _binary_smartgesturecontroller_js_start[];
@@ -147,32 +150,6 @@ void LogMonitorFailure(const char* message, const std::string& detail = "")
     }
     TAG_LOGW(AceLogTag::ACE_GESTURE, "%{public}s %{public}s", message, detail.c_str());
 }
-
-class ScopedHandleScope final {
-public:
-    explicit ScopedHandleScope(napi_env env) : env_(env)
-    {
-        if (env_ != nullptr && napi_open_handle_scope(env_, &scope_) != napi_ok) {
-            scope_ = nullptr;
-        }
-    }
-
-    ~ScopedHandleScope()
-    {
-        if (scope_ != nullptr) {
-            napi_close_handle_scope(env_, scope_);
-        }
-    }
-
-    bool IsValid() const
-    {
-        return scope_ != nullptr;
-    }
-
-private:
-    napi_env env_ = nullptr;
-    napi_handle_scope scope_ = nullptr;
-};
 
 class SmartGestureCodec final {
 public:
@@ -471,8 +448,10 @@ public:
         CHECK_NULL_RETURN(env_, resolution);
 
         ContainerScope scope(instanceId_);
-        ScopedHandleScope handleScope(env_);
-        CHECK_NULL_RETURN(handleScope.IsValid(), resolution);
+        ScopeRAII handleScope(env_);
+        if (!handleScope) {
+            return resolution;
+        }
 
         auto callback = GetCallback();
         CHECK_NULL_RETURN(callback != nullptr, resolution);
@@ -494,7 +473,7 @@ public:
             auto detail = parseResult == MonitorResolutionParseResult::INVALID_SELECTED_PROPOSAL
                               ? INVALID_SELECTED_PROPOSAL_MESSAGE
                               : INVALID_MONITOR_RESULT_MESSAGE;
-            LogMonitorFailure(detail);
+            LogMonitorFailure(detail, StringifyNapiValue(env_, result));
             return resolution;
         }
         return decodedResolution;
@@ -608,10 +587,11 @@ public:
         if (stateStack.empty()) {
             states_.erase(iter);
         }
-        if (stateToDetach) {
-            stateToDetach->Detach();
+        if (!stateToDetach) {
+            return false;
         }
-        return stateToDetach != nullptr;
+        InvokeScope::DetachOrDefer(std::move(stateToDetach));
+        return true;
     }
 
     static bool Clear(int32_t instanceId)
@@ -623,10 +603,8 @@ public:
         }
         statesToDetach = std::move(iter->second);
         states_.erase(iter);
-        for (const auto& state : statesToDetach) {
-            if (state) {
-                state->Detach();
-            }
+        for (auto& state : statesToDetach) {
+            InvokeScope::DetachOrDefer(std::move(state));
         }
         return true;
     }
@@ -646,6 +624,7 @@ public:
             return CreateAcceptedResolution();
         }
         states = iter->second;
+        InvokeScope invokeScope;
         for (auto iter = states.rbegin(); iter != states.rend(); ++iter) {
             auto state = *iter;
             CHECK_NULL_CONTINUE(state);
@@ -663,6 +642,8 @@ public:
     }
 
 private:
+    using InvokeScope = NG::SmartGestureMonitorInvokeScope<SmartGestureMonitorState>;
+
     static void HandleEnvCleanup(void* data)
     {
         auto env = static_cast<napi_env>(data);

@@ -491,7 +491,7 @@ HWTEST_F(TextFieldPatternTestNine, InitCancelButtonMouseEvent001, TestSize.Level
     pattern_->cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
     cleanNodeResponseArea->cleanNode_ = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
-    pattern_->InitCancelButtonMouseEvent();
+    cleanNodeResponseArea->InitCancelButtonMouseEvent();
     auto stackNode = cleanNodeResponseArea->GetFrameNode();
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     imageInputHub->CreateHoverEventActuator();

@@ -762,6 +762,7 @@ HWTEST_F(TextNativeImplErrorTest, TextSelectionMenuOptions_SetSpanType_Success_0
 HWTEST_F(TextNativeImplErrorTest, TextSelectionMenuOptions_SetContentNode_NullOptions_001, TestSize.Level1)
 {
     ArkUI_Node node;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     ArkUI_ErrorCode result = OH_ArkUI_TextSelectionMenuOptions_SetContentNode(nullptr, &node);
     EXPECT_EQ(result, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
 }

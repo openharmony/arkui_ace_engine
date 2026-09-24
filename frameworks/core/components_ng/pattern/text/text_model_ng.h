@@ -130,6 +130,12 @@ public:
     void ResetIncrementalUpdatePolicy() override;
     void BindJSTextController(std::function<void()>&& func) override;
     void SetTailIndents(const NG::TailIndents& value) override;
+    void SetStrokeWidth(const Dimension& value) override;
+    void ResetStrokeWidth() override;
+    void SetStrokeColor(const Color& value) override;
+    void ResetStrokeColor() override;
+    void SetStrokeJoinStyle(StrokeJoinStyle value) override;
+    void ResetStrokeJoinStyle() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -316,6 +322,15 @@ public:
     static std::optional<void*> GetInnerParagraph(FrameNode* frameNode);
     static void SetStyledString(FrameNode* frameNode, SpanString* value);
     static void SetTailIndents(FrameNode* frameNode, const NG::TailIndents& value);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void ResetStrokeWidth(FrameNode* frameNode);
+    static Dimension GetStrokeWidth(FrameNode* frameNode);
+    static void SetStrokeColor(FrameNode* frameNode, const Color& value);
+    static void ResetStrokeColor(FrameNode* frameNode);
+    static Color GetStrokeColor(FrameNode* frameNode);
+    static void SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle value);
+    static void ResetStrokeJoinStyle(FrameNode* frameNode);
+    static StrokeJoinStyle GetStrokeJoinStyle(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

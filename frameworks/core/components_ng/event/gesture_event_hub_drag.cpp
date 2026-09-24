@@ -772,6 +772,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     ACE_BENCH_MARK_TRACE("OnDragStart_start");
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
+    if (dragEventActuator_ && dragEventActuator_->IsDragStartedAcrossScreenLock(info)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG,
+            "Drag start aborted: screen was unlocked at down but locked at trigger, drag fails");
+        dragEventActuator_->NotifyDragEnd();
+        return;
+    }
     DragStartContext ctx;
     if (!InitDragStartTargets(info, ctx)) {
         return;
@@ -1240,6 +1246,7 @@ DragDataCore GestureEventHub::CreateDragData(const DragStartContext& ctx, const 
         ctx.event->IsUseDataLoadParams(), ctx.dragSummaryInfo.detailedSummary, ctx.dragSummaryInfo.summaryFormat,
         ctx.dragSummaryInfo.version, ctx.dragSummaryInfo.totalSize, ctx.dragSummaryInfo.tag, materialId,
         ctx.event->GetDragAnimationTypeValue(), isSetMaterialFilter, materialFilter };
+    dragData.filenameExtensions = ctx.dragSummaryInfo.filenameExtensions;
     ctx.dragDropManager->SetDragAnimationType(ctx.event->GetDragAnimationType());
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && ctx.info.GetSourceTool() == SourceTool::MOUSE &&
         ctx.info.GetSourceDevice() == SourceType::TOUCH) {
@@ -1323,6 +1330,10 @@ void GestureEventHub::BeginSuccessfulDragStart(DragStartContext& ctx)
 
 bool GestureEventHub::ShouldPerformDragStartAnimation(DragStartContext& ctx, const RefPtr<PipelineBase>& context)
 {
+    if (dragEventActuator_ && dragEventActuator_->IsDragStartedAcrossScreenLock(ctx.info)) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Drag crossed screen lock, skip drag start float animation.");
+        return false;
+    }
     return !ctx.needChangeFwkForLeaveWindow && ctx.subWindow &&
            TryDoDragStartAnimation(context, ctx.subWindow, ctx.info, ctx.preparedInfo);
 }

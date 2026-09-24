@@ -737,6 +737,16 @@ struct CJUITextModifier {
     ArkUI_Int32 (*getTailIndentsCount)(ArkUINodeHandle node);
     void (*getTailIndents)(ArkUINodeHandle node, ArkUI_Float32* values,
         ArkUI_Int32* units, ArkUI_Int32 size);
+    void (*setStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 strokeWidthValue, ArkUI_Int32 strokeWidthUnit,
+        void* strokeWidthRawPtr);
+    void (*resetStrokeWidth)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getStrokeWidth)(ArkUINodeHandle node);
+    void (*setStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* strokeColorRawPtr);
+    void (*resetStrokeColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getStrokeColor)(ArkUINodeHandle node);
+    void (*setStrokeJoinStyle)(ArkUINodeHandle node, ArkUI_Int32 strokeJoinStyle);
+    void (*resetStrokeJoinStyle)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getStrokeJoinStyle)(ArkUINodeHandle node);
 };
 
 struct CJUIButtonModifier {
@@ -2271,6 +2281,8 @@ struct CJUIWebModifier {
     void (*resetKeyboardAppearance)(ArkUINodeHandle node);
     void (*setEnableFullscreenVideoOverlay)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableFullscreenVideoOverlay)(ArkUINodeHandle node);
+    void (*setOnZoomChangeCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnZoomChangeCallBack)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
@@ -2393,6 +2405,12 @@ struct CJUIImageSpanModifier {
     void (*setImageSpanSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
         ArkUI_Bool isUriPureNumber);
     void (*setImageSpanPlaceHolderStyle)(ArkUINodeHandle node, void* style);
+    void (*setImageSpanResizableSlice)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetImageSpanResizableSlice)(ArkUINodeHandle node);
+    void (*getImageSpanResizableSlice)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
+    void (*setImageSpanResizableLattice)(ArkUINodeHandle node, void* lattice, bool isCapi);
+    void (*resetImageSpanResizableLattice)(ArkUINodeHandle node);
 };
 
 struct CJUIMenuModifier {

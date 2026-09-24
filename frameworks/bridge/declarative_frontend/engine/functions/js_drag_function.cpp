@@ -433,8 +433,7 @@ void JsDragEvent::GetSummary(const JSCallbackInfo& args)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
-    auto summary = dragEvent_->GetSummary();
-    napi_value nativeValue = UdmfClient::GetInstance()->TransformSummary(summary);
+    napi_value nativeValue = UdmfClient::GetInstance()->TransformSummary(dragEvent_->GetSummaryInfo());
     CHECK_NULL_VOID(nativeValue);
     auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue);
     args.SetReturnValue(jsValue);

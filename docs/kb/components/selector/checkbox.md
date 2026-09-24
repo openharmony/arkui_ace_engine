@@ -119,6 +119,5 @@ Checkbox 和 CheckboxGroup 均已完成组件化改造，JSView 文件不存在�
 
 ## 相关主题
 
-- Toggle 组件（ToggleCheckBoxPattern 继承 CheckBoxPattern）
-- Radio 组件（单选组件，同属选择类组件）
-- 组件化改造通用方案
+- [Toggle 组件（ToggleCheckBoxPattern 继承 CheckBoxPattern）](toggle.md)
+- [Radio 组件（单选组件，同属选择类组件）](radio.md)

@@ -43,6 +43,7 @@ constexpr char PAGE_SCENE_SELECTOR[] = "selector";
 constexpr char PAGE_SCENE_NODE_TYPES[] = "nodeTypes";
 constexpr char PAGE_SCENE_SCOPE[] = "scope";
 constexpr char PAGE_SCENE_ONLY_VISIBLE[] = "onlyVisible";
+constexpr char PAGE_SCENE_RECT_CULLING[] = "rectCulling";
 constexpr char PAGE_SCENE_INCLUDE_UNFOCUSABLE_TEXT_INPUT[] = "includeUnfocusableTextInput";
 constexpr char PAGE_SCENE_CONDITION[] = "condition";
 constexpr char PAGE_SCENE_OPERATOR[] = "operator";
@@ -54,7 +55,6 @@ constexpr char PAGE_SCENE_COUNT_GTE_OPERATOR[] = "COUNT_GTE";
 constexpr char PAGE_SCENE_TEXT_INPUT_TAG[] = "TextInput";
 constexpr char PAGE_SCENE_TEXT_AREA_TAG[] = "TextArea";
 constexpr char PAGE_SCENE_SEARCH_TAG[] = "Search";
-constexpr char PAGE_SCENE_SEARCH_FIELD_TAG[] = "SearchField";
 constexpr char PAGE_SCENE_RICH_EDITOR_TAG[] = "RichEditor";
 constexpr char GESTURE_TYPE_KEY[] = "GestureType";
 constexpr char CLICK_GESTURE_TYPE[] = "Click";
@@ -72,19 +72,13 @@ bool IsValidPageSceneId(const std::string& id)
 bool IsPageSceneTextInputNode(const std::string& nodeTag)
 {
     return nodeTag == PAGE_SCENE_TEXT_INPUT_TAG || nodeTag == PAGE_SCENE_TEXT_AREA_TAG ||
-           nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_SEARCH_FIELD_TAG ||
-           nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
+           nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
 }
 
 bool IsPageSceneInputControlNode(const std::string& nodeTag)
 {
     return nodeTag == PAGE_SCENE_TEXT_INPUT_TAG || nodeTag == PAGE_SCENE_TEXT_AREA_TAG ||
            nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
-}
-
-std::string NormalizePageSceneNodeType(const std::string& nodeTag)
-{
-    return nodeTag == PAGE_SCENE_SEARCH_FIELD_TAG ? PAGE_SCENE_SEARCH_TAG : nodeTag;
 }
 
 std::string GetJsonString(const JsonObject* object, const char* key)
@@ -136,9 +130,9 @@ std::set<std::string> ExtractTextInputNodeTypes(const JsonObject* ruleJsonValue)
         if (!cJSON_IsString(nodeType) || nodeType->valuestring == nullptr) {
             continue;
         }
-        auto normalizedType = NormalizePageSceneNodeType(nodeType->valuestring);
-        if (IsPageSceneTextInputNode(normalizedType)) {
-            nodeTypeSet.emplace(normalizedType);
+        std::string nodeTypeValue = nodeType->valuestring;
+        if (IsPageSceneTextInputNode(nodeTypeValue)) {
+            nodeTypeSet.emplace(nodeTypeValue);
         }
     }
     return nodeTypeSet;
@@ -321,6 +315,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
         if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component change event failed, process id:%{public}d", pair.first);
@@ -347,6 +342,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
+            data->Put("componentEventType", static_cast<int32_t>(eventType));
             if (isClickGestureEvent) {
                 LOGI("[UiSessionManagerOhos] ReportComponentChangeEvent gesture eventType:%{public}u nodeId:%{public}d",
                     eventType, nodeId);
@@ -425,7 +421,7 @@ void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
     }
 }
 
-void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
+void UiSessionManagerOhos::SaveReportProxy(sptr<IRemoteObject> reportProxy, int32_t processId)
 {
     // add death callback
     auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
@@ -466,8 +462,9 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
             std::lock_guard<std::mutex> lock(pageSceneMutex_);
             if (pageSceneRuleSets_.erase(processId) > 0) {
                 ErasePendingPageSceneRulesLocked(processId);
-                auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
-                if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
+                pageSceneRuleRegistered_.store(
+                    HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE));
+                if (!pageSceneRuleRegistered_.load()) {
                     pendingPageSceneDetectRules_.clear();
                 }
             }
@@ -483,9 +480,11 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
             webPageSceneFunc(WebPageSceneOp::UnregisterRules, processId, "", false);
         }
     });
-    reportStub->AddDeathRecipient(uiReportProxyRecipient);
+    // In the application process, reportProxy refers to the SA-side UiReportStub.
+    // Listen for remote SA death through this proxy and clean up local report registrations.
+    reportProxy->AddDeathRecipient(uiReportProxyRecipient);
     std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    reportObjectMap_[processId] = reportStub;
+    reportObjectMap_[processId] = reportProxy;
 }
 
 int32_t UiSessionManagerOhos::RegisterWebPageSceneRules(int32_t processId, const std::string& ruleJson)
@@ -505,7 +504,8 @@ int32_t UiSessionManagerOhos::RegisterWebPageSceneRules(int32_t processId, const
         {
             std::lock_guard<std::mutex> lock(pageSceneMutex_);
             pageSceneRuleSets_.erase(processId);
-            pageSceneRuleRegisterProcesses_.fetch_sub(1);
+            pageSceneRuleRegistered_.store(
+                HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE));
         }
         EraseProcessId("pageScene", processId);
     }
@@ -538,7 +538,7 @@ int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const st
             return LAST_UNFINISH;
         }
         pageSceneRuleSets_[processId] = ruleSetInfo;
-        pageSceneRuleRegisterProcesses_.fetch_add(1);
+        pageSceneRuleRegistered_.store(true);
     }
     SaveProcessId("pageScene", processId);
     auto registerRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, true, "");
@@ -565,8 +565,9 @@ int32_t UiSessionManagerOhos::UnregisterPageSceneRules(int32_t processId, const 
         }
         pageSceneRuleSets_.erase(iter);
         ErasePendingPageSceneRulesLocked(processId);
-        auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
-        if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
+        pageSceneRuleRegistered_.store(
+            HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE));
+        if (!pageSceneRuleRegistered_.load()) {
             pendingPageSceneDetectRules_.clear();
         }
         pendingPageSceneGets_.erase(processId);
@@ -655,7 +656,7 @@ int32_t UiSessionManagerOhos::GetPageScene(int32_t processId, const std::string&
 
 bool UiSessionManagerOhos::GetPageSceneRulesRegistered()
 {
-    return pageSceneRuleRegisterProcesses_.load() > 0 ? true : false;
+    return pageSceneRuleRegistered_.load();
 }
 
 void UiSessionManagerOhos::ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult)
@@ -708,7 +709,8 @@ void UiSessionManagerOhos::NotifyPageSceneNodeChanged(const std::string& nodeTag
 void UiSessionManagerOhos::NotifyPageSceneNodeStateChanged(
     const std::string& nodeTag, PageSceneNodeStateChange stateChange)
 {
-    if (!IsPageSceneInputControlNode(nodeTag) || pageSceneRuleRegisterProcesses_.load() <= 0) {
+    if ((stateChange == PageSceneNodeStateChange::FOCUSABILITY &&
+            !IsPageSceneInputControlNode(nodeTag)) || !pageSceneRuleRegistered_.load()) {
         return;
     }
     auto ruleJsons = GetPageSceneRuleJsonsForNodeStateChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE, stateChange);
@@ -873,6 +875,7 @@ UiSessionManagerOhos::PageSceneRuleSetInfo UiSessionManagerOhos::ExtractPageScen
         auto scope = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_SCOPE);
         if (cJSON_IsObject(scope)) {
             ruleInfo.onlyVisible = GetJsonBool(scope, PAGE_SCENE_ONLY_VISIBLE, true);
+            ruleInfo.rectCulling = GetJsonBool(scope, PAGE_SCENE_RECT_CULLING, false);
         }
         auto policy = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_POLICY);
         if (cJSON_IsObject(policy)) {
@@ -955,7 +958,7 @@ std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneR
     const std::string& nodeTag, const std::string& sceneType)
 {
     std::vector<std::pair<int32_t, std::string>> ruleJsons;
-    auto nodeType = NormalizePageSceneNodeType(nodeTag);
+    auto nodeType = nodeTag;
     std::lock_guard<std::mutex> lock(pageSceneMutex_);
     for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
         auto scopedRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, sceneType, false, nodeType);
@@ -976,6 +979,7 @@ bool UiSessionManagerOhos::IsPageSceneRuleAffectedByNodeStateChange(
             // unfocusable text inputs, so both dimensions must be re-evaluated.
             return rule.onlyVisible || !ruleSetInfo.includeUnfocusableTextInput;
         case PageSceneNodeStateChange::ACTIVE:
+        case PageSceneNodeStateChange::OPACITY:
             return rule.onlyVisible;
         case PageSceneNodeStateChange::FOCUSABILITY:
             return !ruleSetInfo.includeUnfocusableTextInput;
@@ -988,7 +992,7 @@ std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneR
     const std::string& nodeTag, const std::string& sceneType, PageSceneNodeStateChange stateChange)
 {
     std::vector<std::pair<int32_t, std::string>> ruleJsons;
-    auto nodeType = NormalizePageSceneNodeType(nodeTag);
+    auto nodeType = IsPageSceneInputControlNode(nodeTag) ? nodeTag : "";
     std::lock_guard<std::mutex> lock(pageSceneMutex_);
     for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
         if (!ruleSetInfo.arkuiEnabled) {
@@ -1007,140 +1011,103 @@ std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneR
 
 void UiSessionManagerOhos::SetClickEventRegistered(bool status)
 {
-    if (status) {
-        clickEventRegisterProcesses_.fetch_add(1);
-    } else {
-        clickEventRegisterProcesses_.fetch_sub(1);
-    }
+    clickEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetSearchEventRegistered(bool status)
 {
-    if (status) {
-        searchEventRegisterProcesses_.fetch_add(1);
-    } else {
-        searchEventRegisterProcesses_.fetch_sub(1);
-    }
+    searchEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetTextChangeEventRegistered(bool status)
 {
-    if (status) {
-        textChangeEventRegisterProcesses_.fetch_add(1);
-    } else {
-        textChangeEventRegisterProcesses_.fetch_sub(1);
-    }
+    textChangeEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetRouterChangeEventRegistered(bool status)
 {
-    if (status) {
-        routerChangeEventRegisterProcesses_.fetch_add(1);
-    } else {
-        routerChangeEventRegisterProcesses_.fetch_sub(1);
-    }
+    routerChangeEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
 {
+    componentChangeEventRegistered_.store(status);
     if (status) {
-        componentChangeEventRegisterProcesses_.fetch_add(1);
         LOGI("SetComponentChangeEventRegistered register component change event");
     } else {
-        componentChangeEventRegisterProcesses_.fetch_sub(1);
         LOGI("SetComponentChangeEventRegistered unregister component change event");
     }
 }
 
 void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
 {
-    componentChangeEventMask_ = mask;
+    componentChangeEventMask_.store(mask);
     LOGI("SetComponentChangeEventMask mask:%{public}u", mask);
 }
 
 void UiSessionManagerOhos::SetScrollEventRegistered(bool status)
 {
-    if (status) {
-        scrollEventRegisterProcesses_.fetch_add(1);
-    } else {
-        scrollEventRegisterProcesses_.fetch_sub(1);
-    }
+    scrollEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetLifeCycleEventRegistered(bool status)
 {
-    if (status) {
-        lifeCycleEventRegisterProcesses_.fetch_add(1);
-    } else {
-        lifeCycleEventRegisterProcesses_.fetch_sub(1);
-    }
+    lifeCycleEventRegistered_.store(status);
 }
 
 void UiSessionManagerOhos::SetSelectTextEventRegistered(bool status)
 {
-    if (status) {
-        selectTextEventRegisterProcesses_.fetch_add(1);
-    } else {
-        selectTextEventRegisterProcesses_.fetch_sub(1);
-    }
-    LOGD("SetSelectTextEventRegistered selectTextEventRegisterProcesses_: %{public}d",
-        selectTextEventRegisterProcesses_.load());
+    selectTextEventRegistered_.store(status);
+    LOGD("SetSelectTextEventRegistered registered: %{public}d", status);
 }
 
 bool UiSessionManagerOhos::GetClickEventRegistered()
 {
-    return clickEventRegisterProcesses_.load() > 0 ? true : false;
+    return clickEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetSearchEventRegistered()
 {
-    return searchEventRegisterProcesses_.load() > 0 ? true : false;
+    return searchEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetTextChangeEventRegistered()
 {
-    return textChangeEventRegisterProcesses_.load() > 0 ? true : false;
+    return textChangeEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetRouterChangeEventRegistered()
 {
-    return routerChangeEventRegisterProcesses_.load() > 0 ? true : false;
+    return routerChangeEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 {
-    return componentChangeEventRegisterProcesses_.load() > 0 ? true : false;
+    return componentChangeEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::NeedComponentChangeTypeReporting(uint32_t eventType)
 {
-    return (componentChangeEventMask_ & eventType) != 0;
+    return (componentChangeEventMask_.load() & eventType) != 0;
 }
 
 bool UiSessionManagerOhos::GetScrollEventRegistered()
 {
-    return scrollEventRegisterProcesses_.load() > 0 ? true : false;
+    return scrollEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetLifeCycleEventRegistered()
 {
-    return lifeCycleEventRegisterProcesses_.load() > 0 ? true : false;
+    return lifeCycleEventRegistered_.load();
 }
 
 bool UiSessionManagerOhos::GetSelectTextEventRegistered()
 {
-    return selectTextEventRegisterProcesses_.load() > 0 ? true : false;
+    return selectTextEventRegistered_.load();
 }
 
 void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)
 {
-    webTaskNums_.store(0);
-    WebTaskNumsChange(1);
-    {
-        std::lock_guard<std::mutex> lock(jsonValueMutex_);
-        jsonValue_ = InspectorJsonUtil::Create(true);
-    }
-
     InspectorFunction inspectorFunction;
     {
         std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
@@ -1167,38 +1134,6 @@ void UiSessionManagerOhos::SaveInspectorTreeFunction(InspectorFunction&& functio
 {
     std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
     inspectorFunction_ = std::move(function);
-}
-
-void UiSessionManagerOhos::AddValueForTree(int32_t id, const std::string& value)
-{
-    std::lock_guard<std::mutex> lock(jsonValueMutex_);
-    if (!jsonValue_) {
-        LOGW("AddValueForTree jsonValue is nullptr");
-        return;
-    }
-    std::string key = std::to_string(id);
-    if (jsonValue_->Contains(key)) {
-        jsonValue_->Replace(key.c_str(), value.c_str());
-    } else {
-        jsonValue_->Put(key.c_str(), value.c_str());
-    }
-}
-
-void UiSessionManagerOhos::WebTaskNumsChange(int32_t num)
-{
-    webTaskNums_.fetch_add(num);
-    if (webTaskNums_.load() == 0) {
-        std::string data;
-        {
-            std::lock_guard<std::mutex> lock(jsonValueMutex_);
-            if (!jsonValue_) {
-                LOGW("WebTaskNumsChange jsonValue is nullptr");
-                return;
-            }
-            data = jsonValue_->ToString();
-        }
-        ReportInspectorTreeValue(data);
-    }
 }
 
 void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
@@ -1254,17 +1189,17 @@ void UiSessionManagerOhos::NotifySendCommandPattern(int32_t id, const std::strin
     }
 }
 
-int32_t UiSessionManagerOhos::NotifySendCommandAsyncPattern(int32_t id, const std::string& command)
+int32_t UiSessionManagerOhos::NotifySendCommandSyncPattern(int32_t id, const std::string& command)
 {
-    NotifySendCommandAsyncFunction notifySendCommandAsyncFunction;
+    NotifySendCommandSyncFunction notifySendCommandSyncFunction;
     {
-        std::lock_guard<std::mutex> lock(notifySendCommandAsyncFunctionMutex_);
-        notifySendCommandAsyncFunction = notifySendCommandAsyncFunction_;
+        std::lock_guard<std::mutex> lock(notifySendCommandSyncFunctionMutex_);
+        notifySendCommandSyncFunction = notifySendCommandSyncFunction_;
     }
-    if (!notifySendCommandAsyncFunction) {
+    if (!notifySendCommandSyncFunction) {
         return 11; // 11 is the error code for no callback
     }
-    return notifySendCommandAsyncFunction(id, command);
+    return notifySendCommandSyncFunction(id, command);
 }
 
 void UiSessionManagerOhos::SaveRegisterForWebFunction(NotifyAllWebFunction&& function)
@@ -1320,10 +1255,10 @@ void UiSessionManagerOhos::SaveForSendCommandFunction(NotifySendCommandFunction&
     notifySendCommandFunction_ = std::move(function);
 }
 
-void UiSessionManagerOhos::SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function)
+void UiSessionManagerOhos::SaveForSendCommandSyncFunction(NotifySendCommandSyncFunction&& function)
 {
-    std::lock_guard<std::mutex> lock(notifySendCommandAsyncFunctionMutex_);
-    notifySendCommandAsyncFunction_ = std::move(function);
+    std::lock_guard<std::mutex> lock(notifySendCommandSyncFunctionMutex_);
+    notifySendCommandSyncFunction_ = std::move(function);
 }
 
 bool UiSessionManagerOhos::GetWebFocusRegistered()
@@ -1975,11 +1910,21 @@ void UiSessionManagerOhos::SendCommand(const std::string& command)
     }
 
     auto value = json->GetValue("cmd");
-    if (sendCommandFunction_ && value && value->IsNumber()) {
+    SendCommandFunction sendCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(sendCommandFunctionMutex_);
+        sendCommandFunction = sendCommandFunction_;
+    }
+    RelaxedCommandFunction relaxedCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
+        relaxedCommandFunction = relaxedCommandFunction_;
+    }
+    if (sendCommandFunction && value && value->IsNumber()) {
         int32_t cmdNumber = value->GetInt();
-        sendCommandFunction_(cmdNumber);
-    } else if (relaxedCommandFunction_) {
-        relaxedCommandFunction_(command);
+        sendCommandFunction(cmdNumber);
+    } else if (relaxedCommandFunction) {
+        relaxedCommandFunction(command);
     } else {
         LOGW("SendCommand failed");
     }
@@ -1993,6 +1938,7 @@ void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& functio
 
 void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(relaxedCommandFunctionMutex_);
     relaxedCommandFunction_ = std::move(function);
 }
 
@@ -2179,60 +2125,6 @@ void UiSessionManagerOhos::SendWebInfoByRequest(uint32_t windowId, int32_t webId
             reportService->SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
         } else {
             LOGW("Send WebInfo By Request failed, process id:%{public}d", pid);
-        }
-    }
-    processIter->second.clear();
-}
-
-void UiSessionManagerOhos::SaveComponentTreeQueryFunction(ComponentTreeQueryFunction&& function)
-{
-    std::lock_guard<std::mutex> lock(componentTreeQueryFunctionMutex_);
-    componentTreeQueryFunction_ = std::move(function);
-}
-
-void UiSessionManagerOhos::ComponentTreeQuery(const ComponentTreeQueryRequest& request)
-{
-    ComponentTreeQueryFunction componentTreeQueryFunction;
-    {
-        std::lock_guard<std::mutex> lock(componentTreeQueryFunctionMutex_);
-        componentTreeQueryFunction = componentTreeQueryFunction_;
-    }
-    if (componentTreeQueryFunction) {
-        componentTreeQueryFunction(request);
-    } else {
-        LOGW("ComponentTreeQuery function not registered");
-        // 7 is ComponentTreeQueryError::INTERNAL_ERROR.
-        ReportComponentTreeQueryResult("{\"errorCode\":7,\"type\":\"componentTreeQuery\"}");
-    }
-}
-
-void UiSessionManagerOhos::ReportComponentTreeQueryResult(const std::string& data)
-{
-    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    auto processIter = processMap_.find("componentTreeQuery");
-    if (processIter == processMap_.end() || processIter->second.empty()) {
-        LOGW("ReportComponentTreeQueryResult no report proxy");
-        return;
-    }
-    for (const auto& pid : processIter->second) {
-        auto reportIter = reportObjectMap_.find(pid);
-        auto reportService =
-            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
-        if (reportService == nullptr) {
-            LOGW("Report ComponentTreeQueryResult failed, process id:%{public}d", pid);
-            continue;
-        }
-        // Split large results the same way HitTest node infos do.
-        size_t partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
-        for (size_t i = 0; i <= partSize; i++) {
-            if (i != partSize) {
-                reportService->ReportComponentTreeQueryResult(
-                    data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE, ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, false);
-            } else {
-                reportService->ReportComponentTreeQueryResult(
-                    data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, true);
-            }
         }
     }
     processIter->second.clear();

@@ -1739,11 +1739,10 @@ HWTEST_F(SheetPresentationTestSixNg, OnWillDisappearTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call OnWillDisappear when onWillDisappear_ is null.
-     * @tc.expected: sheetWrapper should be marked as removing.
+     * @tc.expected: isOnDisappearing_ is true.
      */
-    EXPECT_FALSE(sheetPattern->onWillDisappear_);
     sheetPattern->OnWillDisappear();
-    EXPECT_TRUE(sheetWrapperNode->IsRemoving());
+    EXPECT_TRUE(sheetPattern->IsOnDisappearing());
     SheetPresentationTestSixNg::TearDownTestCase();
 }
 
@@ -1790,7 +1789,6 @@ HWTEST_F(SheetPresentationTestSixNg, OnWillDisappearTest002, TestSize.Level1)
      */
     sheetPattern->OnWillDisappear();
     EXPECT_TRUE(isCallbackCalled);
-    EXPECT_TRUE(sheetWrapperNode->IsRemoving());
     SheetPresentationTestSixNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

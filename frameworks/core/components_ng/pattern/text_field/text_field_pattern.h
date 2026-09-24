@@ -326,7 +326,7 @@ class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public PageTranslateNode,
                          public CleanNodeHostBase<TextFieldPattern, TextFieldLayoutProperty> {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient,
-        TextBase, Magnifier, TextGestureSelector, IPasswordIconHost, PageTranslateNode, ICleanNodeHost);
+        TextBase, Magnifier, TextGestureSelector, ICounterHost, IPasswordIconHost, PageTranslateNode, ICleanNodeHost);
 
 public:
     TextFieldPattern();
@@ -453,7 +453,6 @@ public:
     void HandleOnPageUp() override;
     void HandleOnPageDown() override;
     void CreateHandles() override;
-    void OnUiMaterialParamUpdate(const UiMaterialParam& params) override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
     EmojiRelation GetEmojiRelation(int index);
 
@@ -468,7 +467,7 @@ public:
     void FinishTextPreviewOperationMultiThreadPart(bool triggerOnWillChange = true);
     TextDragInfo CreateTextDragInfo() const;
 
-    RefPtr<TextComponentDecorator> GetCounterDecorator() const
+    RefPtr<TextComponentDecorator> GetCounterDecorator() const override
     {
         return counterDecorator_;
     }
@@ -833,7 +832,6 @@ public:
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::u16string content);
     bool InitValueText(std::u16string content);
-    void HandleButtonMouseEvent(const RefPtr<TextInputResponseArea>& responseArea, bool isHover);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -1138,6 +1136,7 @@ public:
     bool IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager);
     void HandleFocusEvent();
     void CheckAndUpdateInputTypeForOTP();
+    void UpdateBackgroundColorForMaterial(const Color& color);
     void SetFocusStyle();
     void ClearFocusStyle();
     void ProcessFocusStyle();
@@ -1499,6 +1498,12 @@ public:
     // Layout-property bridge methods are provided by CleanNodeHostBase CRTP.
     void HandleCleanNodeClicked() override;
     bool IsContentEmpty() const override;
+    // ICleanNodeHost behavioral hooks
+    void SetCleanHoverColorAndRect(const RoundRect& rect, uint32_t color) override;
+    void ClearCleanHoverColorAndRects() override;
+    void OnCleanNodeHover(bool isHover, const HoverInfo& info) override;
+    bool IsCancelButtonTouched() const override;
+    void SetCancelButtonTouched(bool touched) override;
     void CheckPasswordAreaState();
 
     bool GetShowSelect() const
@@ -1914,8 +1919,6 @@ public:
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
-    void AfterLayoutProcessCleanResponse(
-        const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
     void UpdateContentScroller(
         const Offset& localOffset, bool hasHotArea = true, float delay = 0.0f, bool enableScrollOutside = true);
@@ -2190,8 +2193,6 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleResponseButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea);
-    void HandleResponseButtonTouchUp();
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
@@ -2207,7 +2208,7 @@ private:
     void ShowSelectAfterDragEvent();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
-    bool HasStateStyle(UIState state) const;
+    virtual bool HasStateStyle(UIState state) const;
     bool IsStyledPlaceholder() const;
 
     // PageTranslateNode override
@@ -2227,7 +2228,6 @@ private:
     void UpdateOverlayHandleOffsetAfterScroll();
     bool CheckSelectAreaVisible();
     void InitMouseEvent();
-    void InitCancelButtonMouseEvent();
     void InitPasswordButtonMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void UpdateHoverStyle(bool isHover);
@@ -2481,6 +2481,9 @@ private:
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
     bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
+#if defined(CROSS_PLATFORM)
+    bool HandleCrossPlatformDeleteEvent(const std::shared_ptr<TextEditingValue>& value);
+#endif
     void ApplyInnerBorderColor();
     void GetSelectRectWithBlank(std::vector<RectF>& selectedRects);
     void ScrollToVisible(const TextScrollOptions& options);
@@ -2517,11 +2520,9 @@ private:
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
-    RefPtr<TouchEventImpl> imageTouchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
-    RefPtr<InputEvent> imageHoverEvent_;
     RefPtr<LongPressEvent> longPressEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 

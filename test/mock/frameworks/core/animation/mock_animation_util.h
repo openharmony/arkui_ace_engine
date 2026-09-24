@@ -73,7 +73,7 @@ public:
         nanoTimestamp_ += deltaNanoTimestamp;
         frameCount_ += deltaFrameCount;
         if (callback_) {
-            callback_(nanoTimestamp_, frameCount_);
+            callback_(nanoTimestamp_, frameCount_, static_cast<int64_t>(nanoTimestamp_));
         }
     }
 

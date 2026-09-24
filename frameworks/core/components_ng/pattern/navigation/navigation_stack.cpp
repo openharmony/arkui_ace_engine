@@ -370,6 +370,12 @@ void NavigationStack::RemoveCacheNode(int32_t handle)
             if (navDestination) {
                 navDestination->SetIsCacheNode(false);
             }
+            // Move the reference out before erasing: erasing the entry may drop
+            // the last strong reference and destroy the node inside the vector
+            // operation. Reentry path: ~UINode -> aboutToDisappear -> SetInPIPMode
+            // -> GetFromCacheNode traverses cacheNodes_ in an inconsistent state
+            // and copies a dying RefPtr, causing double delete.
+            auto cache = std::move(*it);
             cacheNodes_.erase(it);
             return;
         }
@@ -385,6 +391,10 @@ void NavigationStack::RemoveCacheNode(
 
     for (auto it = cacheNodes.begin(); it != cacheNodes.end(); ++it) {
         if ((*it).first == name || (*it).second == navDestinationNode) {
+            // Same as RemoveCacheNode(int32_t): move the reference out before
+            // erasing so the erase can never destroy the node inside the
+            // vector operation.
+            auto cache = std::move(*it);
             cacheNodes.erase(it);
             return;
         }

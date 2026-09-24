@@ -4226,6 +4226,15 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
 #endif
                 pattern->RecoveryToLastStack(preDestination, topDestination);
                 pattern->SyncWithJsStackIfNeeded();
+#ifndef CROSS_PLATFORM
+                auto pipeline = pattern->GetContext();
+                if (pipeline) {
+                    auto mgr = pipeline->GetContentChangeManager();
+                    if (mgr) {
+                        mgr->OnContentChangeInterrupted(topDestination, ChangeType::PAGE);
+                    }
+                }
+#endif
             }
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
@@ -8467,6 +8476,7 @@ void NavigationPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
     mgr->OnTransitionAdded(keyNode->GetId());
+    mgr->OnContentChangeStart(keyNode, ChangeType::PAGE);
 #endif
 }
 

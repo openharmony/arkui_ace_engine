@@ -22,7 +22,7 @@ Span 类（FuncID 05-09-06）共含 Span/ImageSpan/SymbolSpan/ContainerSpan 四�
 | Model façade | `frameworks/core/components_ng/pattern/text/span_model.h`、`span_model_ng.h`、`span_model_static.h` | `SpanModel`/`SpanModelNG`/`SpanModelStatic` 创建与属性下发 |
 | 属性访问器宏 | `frameworks/core/components_ng/pattern/text/span_node.h` | `DEFINE_SPAN_FONT_STYLE_ITEM`/`DEFINE_SPAN_TEXT_LINE_STYLE_ITEM` 生成类型化属性访问器并触发 `RequestTextFlushDirty` |
 | 父级布局消费 | `frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h`、`text_layout_algorithm.h` | 父级消费 `std::list<RefPtr<SpanItem>>` 构建 Paragraph |
-| 段落绘制 | `frameworks/core/components_ng/render/paragraph.h`、`render/adapter/txt_paragraph.h` | `Paragraph`/`TxtParagraph` 抽象，span 文本经此绘制 |
+| 段落绘制 | `frameworks/core/components_ng/render/paragraph.h`、`render/frameworks/core/components_ng/render/adapter/txt_paragraph.h` | `Paragraph`/`TxtParagraph` 抽象，span 文本经此绘制 |
 | C API 生成实现 | `frameworks/core/interfaces/native/implementation/span_modifier.cpp` | `SpanModifier::ConstructImpl` → `SpanModelNG::CreateSpanNode` |
 | C API node 层 | `frameworks/core/interfaces/native/node/node_span_modifier.h`、`node_span_modifier.cpp` | `NodeModifier::GetSpanModifier()`/`GetCJUISpanModifier()` |
 | C API 枚举 | `interfaces/native/native_node.h` | `ARKUI_NODE_SPAN`、`NODE_SPAN_*` 属性枚举 |
@@ -56,7 +56,6 @@ Span 组件**尚未进行组件化改造**，属性解析采用 JSView + 直连 
 
 Span 无独立 `arkts_native_span_bridge`（ArkTS-native 属性经 JSView 路径）；C-API 实现为真实代码（非动态模块桩），直接调用 `SpanModelNG`。
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后 JSView 与属性解析将统一到 `pattern/text/bridge/`，并输出独立 so。
 
 ### 外部依赖入口
 
@@ -106,7 +105,7 @@ Span 类功能域：`specs/05-ui-components/09-text-components/06-span-component
 
 ## 相关主题
 
-- `Text`：`docs/kb/components/basic/text.md`
-- `ImageSpan`：`docs/kb/components/basic/image_span.md`
-- `SymbolSpan`：`docs/kb/components/basic/symbol_span.md`
-- `ContainerSpan`：`docs/kb/components/basic/container_span.md`
+- [Text](text.md)
+- [ImageSpan](image-span.md)
+- [SymbolSpan](symbol-span.md)
+- [ContainerSpan](container-span.md)

@@ -82,6 +82,6 @@
 
 ## 相关主题
 
-- 样式属性：`docs/kb/capabilities/style-attributes.md`。
-- 交互归一化：`docs/kb/capabilities/interaction-normalization.md`。
-- 输入法交互：`docs/kb/capabilities/input-method-interaction.md`。
+- [样式属性](style-attributes.md)。
+- [交互归一化。](interaction-normalization.md)
+- [输入法交互。](input-method-interaction.md)

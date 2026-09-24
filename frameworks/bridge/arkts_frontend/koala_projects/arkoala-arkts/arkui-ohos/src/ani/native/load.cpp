@@ -16,6 +16,7 @@
 #include "load.h"
 
 #include <dlfcn.h>
+#include <mutex>
 
 namespace OHOS::Ace::Ani {
 namespace {
@@ -26,15 +27,13 @@ const ReturnType* LoadModifier(const char* symbolName)
 {
     static void* handle = nullptr;
     static void* aniModifier = nullptr;
-    static bool initialized = false;
-
-    if (!initialized) {
+    static std::once_flag initFlag;
+    std::call_once(initFlag, [&]() {
         handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
         if (handle != nullptr) {
             aniModifier = dlsym(handle, symbolName);
         }
-        initialized = true;
-    }
+    });
     if (handle == nullptr) {
         return nullptr;
     }
@@ -42,8 +41,7 @@ const ReturnType* LoadModifier(const char* symbolName)
     if (entry == nullptr) {
         return nullptr;
     }
-    const auto* modifier = entry();
-    return modifier;
+    return entry();
 }
 } // namespace
 

@@ -127,6 +127,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto hostEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(hostEngine);
     NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
+    CHECK_NULL_VOID(hostNativeEngine);
     auto jsWorker = dynamicComponentArg->GetProperty("worker");
     panda::Local<JsiValue> value = jsWorker.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
@@ -147,7 +148,10 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
         weak = AceType::WeakClaim(frameNode), entryPoint](napi_env env) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
-        container->GetTaskExecutor()->PostTask(
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
             [weak, entryPoint, env]() {
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);

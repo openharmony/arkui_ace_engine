@@ -284,13 +284,6 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportPageSceneEvent(result, isGetResult);
             break;
         }
-        case REPORT_COMPONENT_TREE_QUERY_RESULT: {
-            std::string result = data.ReadString();
-            int32_t partNum = data.ReadInt32();
-            bool isLastPart = data.ReadBool();
-            ReportComponentTreeQueryResult(result, partNum, isLastPart);
-            break;
-        }
 
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
@@ -415,29 +408,6 @@ void UiReportStub::RegisterGetHitTestNodeInfoCallback(
     getHitTestNodeInfoCallback_ = std::move(eventCallback);
 }
 
-void UiReportStub::ReportComponentTreeQueryResult(const std::string& data, int32_t partNum, bool isLastPart)
-{
-    std::function<void(std::string, int32_t, bool)> componentTreeQueryCallback;
-    {
-        std::lock_guard<std::mutex> lock(componentTreeQueryCallbackMutex_);
-        if (!componentTreeQueryCallback_) {
-            return;
-        }
-        componentTreeQueryCallback = componentTreeQueryCallback_;
-        if (isLastPart) {
-            componentTreeQueryCallback_ = nullptr;
-        }
-    }
-    componentTreeQueryCallback(data, partNum, isLastPart);
-}
-
-void UiReportStub::RegisterComponentTreeQueryCallback(
-    const std::function<void(std::string, int32_t, bool)>& eventCallback)
-{
-    std::lock_guard<std::mutex> lock(componentTreeQueryCallbackMutex_);
-    componentTreeQueryCallback_ = std::move(eventCallback);
-}
-
 void UiReportStub::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
 {
     if (unfocusEvent_ != nullptr) {
@@ -514,6 +484,7 @@ void UiReportStub::PostGetInspectorTreeCallbackRemoveTask(int32_t timeout)
     }, GET_INSPECTOR_TREE_CALLBACK_TIMEOUT, NormalizeTimeout(timeout, DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS));
     if (!postTaskSuccess) {
         LOGW("Post GetInspectorTree timeout task failed");
+        std::lock_guard<std::mutex> lock(inspectorTreeCallbackMutex_);
         inspectorTreeCallback_ = nullptr;
     }
 }

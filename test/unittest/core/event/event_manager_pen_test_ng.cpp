@@ -625,4 +625,78 @@ HWTEST_F(EventManagerTestNg, PenHoverTest0021, TestSize.Level1)
     EXPECT_FALSE(eventManager->curPenHoverResultsMap_.empty());
     EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
 }
+
+/**
+ * @tc.name: PenHoverDebugTrace001
+ * @tc.desc: Test HandlePenHoverEvent with debug enabled and attached node to cover debug branch.
+ */
+HWTEST_F(EventManagerTestNg, PenHoverDebugTrace001, TestSize.Level1)
+{
+    SystemProperties::debugEnabled_ = true;
+    const int nodeId = 10008;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.SetX(100.0).SetY(100.0).SetId(1).SetOriginalId(1);
+    touchEvent.SetType(TouchType::HOVER_ENTER);
+    touchEvent.sourceTool = SourceTool::PEN;
+    int32_t doneId = 0;
+    OnHoverFunc onHover = [&doneId](bool isHovered, HoverInfo& hoverInfo) {
+        hoverInfo.SetStopPropagation(false);
+        ++doneId;
+    };
+
+    // node attached: covers debug-true + node-true path
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    hoverEventTarget->AttachFrameNode(frameNode);
+    hoverEventTarget->SetPenHoverCallback(onHover);
+    bool ret = hoverEventTarget->HandlePenHoverEvent(true, touchEvent);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(doneId, 1);
+
+    // node not attached: covers debug-true + node-false path
+    auto noNodeTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId + 1);
+    noNodeTarget->SetPenHoverCallback(onHover);
+    bool ret2 = noNodeTarget->HandlePenHoverEvent(true, touchEvent);
+    EXPECT_TRUE(ret2);
+    EXPECT_EQ(doneId, 2);
+    SystemProperties::debugEnabled_ = false;
+}
+
+/**
+ * @tc.name: PenHoverMoveDebugTrace001
+ * @tc.desc: Test HandlePenHoverMoveEvent with debug enabled and attached node to cover debug branch.
+ */
+HWTEST_F(EventManagerTestNg, PenHoverMoveDebugTrace001, TestSize.Level1)
+{
+    SystemProperties::debugEnabled_ = true;
+    const int nodeId = 10009;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.SetX(100.0).SetY(100.0).SetId(1).SetOriginalId(1);
+    touchEvent.SetType(TouchType::HOVER_MOVE);
+    touchEvent.sourceTool = SourceTool::PEN;
+    int32_t doneId = 0;
+    OnHoverMoveFunc onHoverMove = [&doneId](HoverInfo& hoverInfo) {
+        hoverInfo.SetStopPropagation(false);
+        ++doneId;
+    };
+
+    // node attached: covers debug-true + node-true path
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    hoverEventTarget->AttachFrameNode(frameNode);
+    hoverEventTarget->SetPenHoverMoveCallback(onHoverMove);
+    bool ret = hoverEventTarget->HandlePenHoverMoveEvent(touchEvent);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(doneId, 1);
+
+    // node not attached: covers debug-true + node-false path
+    auto noNodeTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId + 1);
+    noNodeTarget->SetPenHoverMoveCallback(onHoverMove);
+    bool ret2 = noNodeTarget->HandlePenHoverMoveEvent(touchEvent);
+    EXPECT_TRUE(ret2);
+    EXPECT_EQ(doneId, 2);
+    SystemProperties::debugEnabled_ = false;
+}
 } // namespace OHOS::Ace::NG

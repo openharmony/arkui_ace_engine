@@ -2,7 +2,7 @@
 
 ## 状态
 
-Stage 2 Specify/Design 已完成首版设计。Stage 3 已进入实现与验证阶段；截至 2026-07-06，PageScene 分支已完成 ArkUI 宿主 `TEXT_EDITOR` 基础链路、PageScene-only 稳定点调度和相关 host UT 补充。本文保留设计意图，并记录实现阶段确认的架构边界。
+Stage 2 Specify/Design 已完成首版设计。Stage 3 已进入实现与验证阶段；截至 2026-08-22，PageScene 分支已完成 ArkUI 宿主 `TEXT_EDITOR` 基础链路、`onlyVisible`/`rectCulling` 过滤拆分、opacity 通知和父子树 dirty 方案落地。本文保留设计意图，并记录实现阶段确认的架构边界。
 
 ## 设计输入
 
@@ -12,6 +12,8 @@ Stage 2 Specify/Design 已完成首版设计。Stage 3 已进入实现与验证�
 - 已上报过命中的规则在后续页面稳定点检查时不再命中，需要额外上报一次 `TEXT_EDITOR_EXIT` 退出事件；退出后连续未命中不重复上报。
 - SA 通过 UISession innerAPI 下发 `ruleJson`，由宿主 ArkUI 保存规则、执行宿主树匹配、向 Web / UIExtension 下发规则，并通过宿主 UISession 统一上报 SA。
 - 默认不上报文本正文；上报结果必须包含 `currentPageName`、`source.type`、`nodes[].rect`、`nodes[].focusable`。
+- `scope.onlyVisible` 只负责组件属性可见性过滤；`scope.rectCulling` 独立负责节点 rect 与当前页面 viewport 的相交过滤，缺省为 `false`。
+- `onlyVisible=true` 时检查 visible/active、transform 后宽高和自身/祖先最终 opacity；`rectCulling=false` 时不执行 viewport 相交判断。
 
 ## 源码事实
 
@@ -210,7 +212,9 @@ virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
 | 首次注册后 | `policy.reportOnRegister=true` | 在 UI 线程全量扫描当前页面顶部控件树并执行规则匹配。 |
 | 文本输入类控件上树 | 已注册 `TEXT_EDITOR` 规则 | 挂起待检测规则，不维护候选索引或增量计数；稳定点重新扫描当前页面树。 |
 | 文本输入类控件下树 | 已注册 `TEXT_EDITOR` 规则 | 挂起待检测规则；稳定点全量扫描自然排除已下树节点，必要时补发一次 `TEXT_EDITOR_EXIT`。 |
-| 可见性/可获焦/rect 变化 | 已注册 `TEXT_EDITOR` 规则且触发稳定点检测 | 扫描时重新计算 visible、focusable 和 rect；单纯 rect 变化不形成新的去重状态。 |
+| 可见属性变化 | 已注册 `TEXT_EDITOR` 规则且 `onlyVisible=true` | 扫描时重新计算 visible/active、transform 尺寸和自身/祖先最终 opacity；父级变化由源节点一次 dirty 标记，稳定点统一重算。 |
+| opacity 变化 | opacity 实际值变化且规则使用 `onlyVisible` | 合并相关规则的 pending；同值更新不产生 dirty；不在 setter 内同步匹配。 |
+| rect/viewport 变化 | 页面几何、滚动或 viewport 稳定事件，且规则使用 `rectCulling` 或 `includeRect` | 扫描时重新计算 rect；单纯 rect 变化不形成新的去重状态。 |
 | 页面稳定点 | 页面切换结束、滚动结束、Swiper/Tabs 切换结束、弹窗显示隐藏结束或 VSync 末尾确认稳定 | 对已挂起的待检测规则执行匹配和上报。滚动、Swiper 滚动、页面转场中必须延后。 |
 | Text/Image 具体控件 ContentChange | 仅注册 PageScene、未注册 ContentChange | 不作为 PageScene-only 检测入口；这些事件仍属于 ContentChange 具体控件能力。 |
 | 主动查询 | SA 调用 `GetPageScene` | 按传入规则或已注册规则执行一次初始化扫描，得到当前计数和命中结果；一次性规则不改变长期注册状态。 |
@@ -241,13 +245,16 @@ public:
 private:
     std::vector<PageSceneNodeInfo> visibleInputNodes_;
     RectF pageViewportRect_;
+    bool IsOpacityVisible(const RefPtr<FrameNode>& node) const;
 };
 ```
 
 设计规则：
 
-- tracker 只保存一次扫描中“页面内符合当前规则的可见输入类控件”，每次检测重新构建。
-- `visibleInputNodes_` 只保存可计数节点；节点不可见、屏外、不可获焦且规则不计入时，不放入集合。
+- tracker 只保存一次扫描中“符合当前规则的输入类控件”，每次检测重新构建。
+- `onlyVisible` 过滤组件属性可见性；`rectCulling` 独立过滤 viewport 相交；`includeRect` 为 true 时即使两个过滤开关关闭也必须计算并输出 rect。
+- 仅在 `onlyVisible || rectCulling || includeRect` 时计算节点 rect，仅在 `rectCulling=true` 时计算 page viewport。
+- `visibleInputNodes_` 只保存可计数节点；节点不满足当前规则过滤、不可获焦且规则不计入时，不放入集合。
 - 上下树事件只对文本输入类 tag 挂起规则；非输入类节点忽略，不维护节点候选集合。
 - 每次检测前必须 `Reset`，随后从当前页面树重新收集节点。
 - 命中上报必须在页面稳定点执行，并受 `deduplicate` 和 `minReportIntervalMs` 控制。
@@ -267,11 +274,28 @@ private:
 
 | 字段/规则 | 设计 |
 |-----------|------|
-| 可见性 | `scope.onlyVisible=true` 时过滤不可见、尺寸为空、与当前页面窗口范围无交集的节点；本阶段不逐层计算滚动容器裁剪。 |
+| `onlyVisible` | `true` 时过滤节点或祖先 visible/active 不通过、transform 后宽高为 0、或自身/祖先 opacity 累乘为 0 的节点；不判断 viewport 相交。 |
+| `rectCulling` | `true` 时使用 pageRoot transform rect 作为 viewport，过滤与其无交集的节点；`false` 时不判断 rect 相交，缺省为 false。 |
 | 可获焦 | 通过节点 `FocusHub` / event hub 能力判断 `focusable`；`globalConfig.includeUnfocusableTextInput=false` 时不可获焦节点不参与计数。 |
-| rect | 使用节点相对窗口坐标，单位与现有 Inspector /布局坐标保持一致；rect 仍可上报，但单纯坐标变化不构成新的去重状态。 |
+| rect | 使用节点相对窗口坐标，单位与现有 Inspector /布局坐标保持一致；按需计算并由过滤和上报复用；单纯坐标变化不构成新的去重状态。 |
 | currentPageName | 复用 UISession 当前页面名回调链路；上报前由宿主补齐。 |
 | 上报去重 | 每条规则保存上次已上报的排序节点 ID 列表；rect、页面名和文本不参与重复状态判断。 |
+
+### 过滤与通知设计决策
+
+| 备选方案 | 选择结果 | 原因 |
+|----------|----------|------|
+| 继续由 `onlyVisible` 同时承担属性可见性和 viewport 过滤 | 不采用 | 两类职责无法独立表达四种组合，且旧规则无法显式关闭屏幕裁剪 |
+| 复用 Inspector 的 `config.rectCulling` | 不采用 | Inspector 请求配置与 PageScene 规则生命周期不同，PageScene 事件不依赖 Inspector 请求 |
+| 每个后代节点分别发送 PageScene 状态通知 | 不采用 | 父节点变化会产生重复规则查询和 pending 操作 |
+| 父/子树 dirty，稳定点从 pageRoot 统一重算 | 采用 | 父级属性变化只需一次 dirty，匹配阶段读取完整父子上下文；pending 集合和 nodeId 列表去重保持不变 |
+
+通知约束：
+
+- visible、active、opacity 变化只合并受影响规则；opacity 同值更新不产生 dirty。
+- 父节点 visibility 变化由源 FrameNode 发送一次 PageScene dirty，子树仍执行框架自身的可见性生命周期回调。
+- 稳定点 matcher 从当前 pageRoot 重新计算父子 visible/active、opacity、transform rect，避免依赖后代逐个通知。
+- active 生命周期若由框架逐个调用子节点，允许产生多个状态通知，但 `pendingPageSceneDetectRules_` 在规则层合并，稳定点同一规则只匹配一次。
 
 ### 命中逻辑
 
@@ -281,13 +305,15 @@ Register/Get:
     if tracker.visibleInputCount >= rule.threshold:
         ReportPageSceneEvent(MatchPageScene(rule, tracker.visibleInputNodes))
 
-Input attached/detached:
+Input attached/detached or visible-property change:
     UiSessionManager.MarkPendingPageSceneRule(rule)
+    # parent visibility change marks once; descendants do not repeat PageScene lookup
 
 Stable point / OnVsyncEnd:
     if not scrolling and not swiperScrolling and not transitioning:
         for rule in pendingRules:
             tracker.Initialize(rule, currentPageRoot)
+            # Re-read parent/child visible, active, opacity and rect at the stable point
             result = MatchPageScene(rule, tracker.visibleInputNodes)
             if result.matched and PassDeduplicateAndThrottle:
                 ReportPageSceneEvent(result.sceneJson)
@@ -356,7 +382,8 @@ void GetPageSceneForSubSource(const std::string& ruleJsonOrRuleSetId);
 | 类型 | 覆盖点 |
 |------|--------|
 | ruleJson 单元测试 | 合法 TEXT_EDITOR、非法 JSON、未知 sceneType、未知 operator、阈值非法、`includeText=false/true`、`includeText=true` 时输出用户输入文本或占位提示文本。 |
-| ArkUI tracker 单元测试 | 全量扫描、屏内/屏外过滤、上下树导致节点 ID 列表变化、坐标变化不重复上报、命中后跌出阈值补发一次退出事件。 |
+| ArkUI tracker 单元测试 | 全量扫描、`onlyVisible`/`rectCulling` 四象限、透明度和祖先属性过滤、includeRect 按需计算、上下树导致节点 ID 列表变化、坐标变化不重复上报、命中后跌出阈值补发一次退出事件。 |
+| 可见属性通知单元测试 | 父节点 visibility/active/opacity 变化对子孙输入框生效、父节点只产生一次 visibility dirty、opacity 同值更新不产生 dirty、稳定点重复 pending 只匹配一次。 |
 | ContentChangeManager 稳定点单元测试 | PageScene-only 注册下 VSync 尾部 flush、Page/Scroll/Dialog 稳定点触发、Swiper 延迟到 VSync、Swiper 滚动中不 flush、Text/Image 不触发 PageScene-only。 |
 | ArkUI matcher 单元测试 | 0/1/2 个文本输入控件、不可见过滤、不可获焦过滤、rect/focusable 输出、Search/RichEditor 归一。 |
 | UISession IPC 单元测试 | 注册、重复注册、反注册、主动查询、Get pending busy、非法参数、未 Connect、pid 隔离、死亡清理。 |

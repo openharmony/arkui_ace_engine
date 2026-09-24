@@ -265,10 +265,16 @@ void DataPanelModifier::GetPaintPath(ArcData& arcData, RSPath& path, RSPath& end
 
     Offset center = arcData.center;
 
-    float sine = thickness * PERCENT_HALF / (radius - (thickness * PERCENT_HALF));
-    float radian = asin(sine);
-    // the angle of center of start half circle to center and tangent of start half circle to center
-    arcData.circleAngle = radian * HALF_CIRCLE / ACE_PI;
+    float halfThickness = thickness * PERCENT_HALF;
+    float denom = radius - halfThickness;
+    if (LessOrEqual(radius, 0.0f) || LessOrEqual(denom, 0.0f)) {
+        arcData.circleAngle = 0.0f;
+    } else {
+        float sine = std::clamp(halfThickness / denom, -1.0f, 1.0f);
+        float radian = asin(sine);
+        // the angle of center of start half circle to center and tangent of start half circle to center
+        arcData.circleAngle = radian * HALF_CIRCLE / ACE_PI;
+    }
     float circleAngle = arcData.circleAngle;
 
     float startAngle = 0.0f;

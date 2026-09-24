@@ -779,6 +779,71 @@ HWTEST_F(GridEditModeTestNg, EditModeChangedOnModifyDoneRemovesFromItems001, Tes
 }
 
 /**
+ * @tc.name: ApplyEditModeToCachedItems001
+ * @tc.desc: Test applying edit mode only within the configured cache range
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, ApplyEditModeToCachedItems001, TestSize.Level1)
+{
+    // 2 columns per row; row R holds items [R * columnCount, R * columnCount + 1]
+    constexpr int32_t columnCount = 2;
+    // Cache 2 rows before and after the visible viewport
+    constexpr int32_t cachedCount = 2;
+    // Simulate viewport showing items 40-49, i.e. rows 20-24
+    constexpr int32_t visibleStartIndex = 40;
+    constexpr int32_t visibleEndIndex = 49;
+    constexpr int32_t startMainLineIndex = visibleStartIndex / columnCount; // 20
+    constexpr int32_t endMainLineIndex = visibleEndIndex / columnCount;     // 24
+
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(cachedCount);
+    CreateFixedItems(100);
+    CreateDone();
+
+    pattern_->info_.startIndex_ = visibleStartIndex;
+    pattern_->info_.endIndex_ = visibleEndIndex;
+    pattern_->info_.crossCount_ = columnCount;
+    pattern_->info_.startMainLineIndex_ = startMainLineIndex;
+    pattern_->info_.endMainLineIndex_ = endMainLineIndex;
+    pattern_->info_.gridMatrix_.clear();
+    // Populate gridMatrix_ only for cache-range rows, not the visible rows:
+    // rows [startMainLineIndex - cachedCount, startMainLineIndex - 1] before viewport,
+    // rows [endMainLineIndex + 1, endMainLineIndex + cachedCount] after viewport.
+    for (int32_t row = startMainLineIndex - cachedCount; row < startMainLineIndex; ++row) {
+        pattern_->info_.gridMatrix_[row] = { { 0, row * columnCount }, { 1, row * columnCount + 1 } };
+    }
+    for (int32_t row = endMainLineIndex + 1; row <= endMainLineIndex + cachedCount; ++row) {
+        pattern_->info_.gridMatrix_[row] = { { 0, row * columnCount }, { 1, row * columnCount + 1 } };
+    }
+    pattern_->ApplyEditModeToCachedItems(true);
+
+    // Cached items (rows 18-19 and 25-26) should have edit mode checkbox
+    for (int32_t index : { 36, 39, 50, 53 }) {
+        auto item = GetChildFrameNode(frameNode_, index);
+        ASSERT_NE(item, nullptr);
+        auto itemPattern = item->GetPattern<SelectableItemPattern>();
+        ASSERT_NE(itemPattern, nullptr);
+        EXPECT_NE(itemPattern->editModeCheckBoxNode_, nullptr) << "cached item " << index;
+    }
+    // Non-cached items (row 17, visible rows 20-24, row 27) should not
+    for (int32_t index : { 35, 40, 49, 54 }) {
+        auto item = GetChildFrameNode(frameNode_, index);
+        ASSERT_NE(item, nullptr);
+        auto itemPattern = item->GetPattern<SelectableItemPattern>();
+        ASSERT_NE(itemPattern, nullptr);
+        EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "non-cached item " << index;
+    }
+
+    pattern_->ApplyEditModeToCachedItems(false);
+    for (int32_t index : { 36, 39, 50, 53 }) {
+        auto itemPattern = GetChildFrameNode(frameNode_, index)->GetPattern<SelectableItemPattern>();
+        ASSERT_NE(itemPattern, nullptr);
+        EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "cached item " << index;
+    }
+}
+
+/**
  * @tc.name: EditModeChangedOnModifyDoneNoDefaultMultiSelectStyle001
  * @tc.desc: Test OnModifyDone calls RemoveEditModeFromItems when useDefaultMultiSelectStyle is false
  * @tc.type: FUNC

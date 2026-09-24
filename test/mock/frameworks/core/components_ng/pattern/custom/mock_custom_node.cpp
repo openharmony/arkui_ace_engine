@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/pattern/custom/custom_node.h"
+
+#include "core/pipeline_ng/environment_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
@@ -25,6 +29,26 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
 void CustomNode::OnAttachToMainTree(bool recursive)
 {
     UINode::OnAttachToMainTree(recursive);
+    auto callback = onEnvTreeStateChangeFunc_;
+    if (callback) {
+        callback(true);
+    }
+}
+
+void CustomNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+{
+    UINode::OnDetachFromMainTree(recursive, context);
+    auto callback = onEnvTreeStateChangeFunc_;
+    if (!callback) {
+        return;
+    }
+    if (context) {
+        auto environmentManager = context->GetEnvironmentManager();
+        if (environmentManager) {
+            environmentManager->UnregisterExplicitReader(this);
+        }
+    }
+    callback(false);
 }
 
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)

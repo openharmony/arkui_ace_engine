@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::Framework {
 class ACE_EXPORT NativeListScroller : public NativeNGScroller {
-    DECL_TYPE(ListScroller, OHOS::FFI::FFIData)
+    DECL_TYPE(NativeListScroller, NativeNGScroller)
 public:
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup);
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);

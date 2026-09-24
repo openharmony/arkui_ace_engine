@@ -84,8 +84,4 @@
 
 ## 相关主题
 
-- `frameworks/bridge/declarative_frontend/jsview/js_scroller.cpp`
-- `frameworks/bridge/declarative_frontend/jsview/js_view_common_def.inl`
-- `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp`
-- `docs/kb/capabilities/scroll-common-capability.md`（滚动通用能力，FuncID `05-03-01`）
-- `specs/05-ui-components/03-scroll-container-components/01-scroll-common-capability/`
+- [scroll-common-capability](../../capabilities/scroll-common-capability.md)（滚动通用能力，FuncID `05-03-01`）

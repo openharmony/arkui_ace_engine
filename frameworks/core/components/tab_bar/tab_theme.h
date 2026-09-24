@@ -461,6 +461,46 @@ public:
     {
         return sideBarListItemLeftRightPadding_;
     }
+    const Color& GetSideBarSelectedIconColor() const
+    {
+        return sideBarSelectedIconColor_;
+    }
+    const Color& GetSideBarSelectedTextColor() const
+    {
+        return sideBarSelectedTextColor_;
+    }
+    const Color& GetSideBarUnselectedIconColor() const
+    {
+        return sideBarUnselectedIconColor_;
+    }
+    const Color& GetSideBarUnselectedTextColor() const
+    {
+        return sideBarUnselectedTextColor_;
+    }
+    const Dimension& GetSideBarPaddingLevel4() const
+    {
+        return sideBarPaddingLevel4_;
+    }
+    const Dimension& GetSideBarPaddingLevel8() const
+    {
+        return sideBarPaddingLevel8_;
+    }
+    const Dimension& GetSideBarPaddingLevel10() const
+    {
+        return sideBarPaddingLevel10_;
+    }
+    const Dimension& GetSideBarTextFontSize() const
+    {
+        return sideBarTextFontSize_;
+    }
+    const Color& GetSideBarDividerColor() const
+    {
+        return sideBarDividerColor_;
+    }
+    const Color& GetSideBarBackgroundColor() const
+    {
+        return sideBarBackgroundColor_;
+    }
 
 protected:
     TabTheme() = default;
@@ -551,8 +591,18 @@ protected:
     Color sideBarListItemHoverColor_;
     Color sideBarListItemPressedColor_;
     Color sideBarListItemFocusColor_;
+    Color sideBarSelectedIconColor_;
+    Color sideBarSelectedTextColor_;
+    Color sideBarUnselectedIconColor_;
+    Color sideBarUnselectedTextColor_;
     Dimension sideBarListItemFocusWidth_;
     Dimension sideBarListItemLeftRightPadding_ = 8.0_vp;
+    Dimension sideBarPaddingLevel4_ = 8.0_vp;
+    Dimension sideBarPaddingLevel8_ = 16.0_vp;
+    Dimension sideBarPaddingLevel10_ = 20.0_vp;
+    Dimension sideBarTextFontSize_ = 16.0_fp;
+    Color sideBarDividerColor_;
+    Color sideBarBackgroundColor_;
 };
 
 } // namespace OHOS::Ace

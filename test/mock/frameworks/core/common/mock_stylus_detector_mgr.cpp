@@ -40,6 +40,8 @@ bool StylusDetectorMgr::Notify(const NotifyInfo& notifyInfo)
     return false;
 }
 
+void StylusDetectorMgr::InitImfHook() {}
+
 RefPtr<NG::FrameNode> StylusDetectorMgr::FindHitFrameNode(
     const TouchEvent& touchEvent, const TouchTestResult& touchTestResult)
 {

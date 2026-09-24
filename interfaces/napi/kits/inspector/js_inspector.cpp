@@ -265,6 +265,23 @@ void ComponentObserver::DeleteCallbackFromList(
     size_t argc, std::list<napi_ref>& cbList, CalloutType calloutType, napi_value cb, napi_env env)
 {
     if (argc == 1) {
+        const char* eventType = "unknown";
+        switch (calloutType) {
+            case CalloutType::LAYOUTCALLOUT:
+                eventType = "layout";
+                break;
+            case CalloutType::DRAWCALLOUT:
+                eventType = "draw";
+                break;
+            case CalloutType::DRAWCHILDRENCALLOUT:
+                eventType = "drawChildren";
+                break;
+            default:
+                LOGE("DeleteCallbackFromList received unexpected calloutType: %{public}d",
+                    static_cast<int>(calloutType));
+                break;
+        }
+        TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "SubEvent op=off_all kit=ArkUI event=%{public}s", eventType);
         for (auto& item : cbList) {
             napi_delete_reference(env, item);
         }
@@ -283,6 +300,7 @@ void ComponentObserver::DeleteOnDrawChildrenCallbackFromList(
     size_t argc, std::list<napi_ref>& cbList, CalloutType calloutType, napi_value cb, napi_env env)
 {
     if (argc == 0) {
+        TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "SubEvent op=off_all kit=ArkUI event=drawChildrenWithParameter");
         for (auto& item : cbList) {
             napi_delete_reference(env, item);
         }
@@ -301,6 +319,7 @@ void ComponentObserver::DeleteLayoutChildrenCallbackFromList(
     size_t argc, std::list<napi_ref>& cbList, CalloutType calloutType, napi_value cb, napi_env env)
 {
     if (argc == 0) {
+        TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "SubEvent op=off_all kit=ArkUI event=layoutChildren");
         for (auto& item : cbList) {
             napi_delete_reference(env, item);
         }

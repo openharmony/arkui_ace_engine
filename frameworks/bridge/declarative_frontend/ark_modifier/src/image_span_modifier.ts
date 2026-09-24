@@ -96,6 +96,11 @@ class LazyArkImageSpanComponent extends ArkComponent {
     this.lazyComponent.supportSvg2(value);
     return this;
   }
+
+  resizable(value: ResizableOptions): LazyArkImageSpanComponent {
+    this.lazyComponent.resizable(value);
+    return this;
+  }
 }
 
 class ImageSpanModifier extends LazyArkImageSpanComponent implements AttributeModifier<ImageSpanAttribute> {

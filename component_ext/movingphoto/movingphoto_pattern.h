@@ -266,9 +266,9 @@ private:
     void StartPlayback();
     void StartAnimation();
     void RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
-            const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode);
+            const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode, bool isZoomIn = true);
     void StopPlayback();
-    void PausePlayback();
+    void PausePlayback(bool isZoomIn = true);
     void RefreshMovingPhoto();
     void RefreshMovingPhotoSceneManager();
     void PauseVideo();
@@ -295,7 +295,7 @@ private:
     void DetachFirstImageFromFrameNode();
     void DetachTempImageFromFrameNode();
     RefPtr<FrameNode> GetTempNode();
-    void StopAnimation();
+    void StopAnimation(bool isZoomIn = true);
     void StopAnimationCallback();
     void StartAutoPlay();
     void StartRepeatPlay();

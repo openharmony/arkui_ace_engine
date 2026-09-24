@@ -61,6 +61,11 @@ class LazyArkTabContentComponent extends ArkComponent {
       this.lazyComponent.onWillHide(event);
       return this;
     }
+
+    tabBarVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): this {
+      this.lazyComponent.tabBarVisibility(visibility, displayMode);
+      return this;
+    }
   }
 
 class TabContentModifier extends LazyArkTabContentComponent implements AttributeModifier<TabContentAttribute> {

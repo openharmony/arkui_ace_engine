@@ -99,7 +99,7 @@ void JSEmbeddedComponent::ResolveAreaPlaceholderParams(const JSRef<JSObject>& ob
                 continue;
             }
             auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
-            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            auto* frameNode = AceType::DynamicCast<NG::FrameNode>(reinterpret_cast<AceType*>(node));
             if (!frameNode) {
                 continue;
             }
@@ -134,7 +134,7 @@ void InsertPlaceholderObj(JsiRef<JsiObject>& obj,
             break;
         }
         auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
-        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+        auto* frameNode = AceType::DynamicCast<NG::FrameNode>(reinterpret_cast<AceType*>(node));
         if (!frameNode) {
             break;
         }

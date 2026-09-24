@@ -132,7 +132,7 @@
 
 ## 相关主题
 
-- 基本渲染管线：`docs/kb/architecture/layout-framework.md`（Layout/Measure/Render 基础管线流程）
-- OH 平台适配层：`docs/kb/architecture/oh-platform-adapter.md`（Container/AceContainer 容器体系）
-- 窗口机制：`docs/kb/architecture/window-mechanism.md`（Rosen Window 窗口管理）
-- 基础渲染管线：`docs/kb/architecture/basic-render-pipeline.md`（NG 管线帧编排 + 旧管线三层架构兼容性）
+- [基本渲染管线](layout-framework.md)（Layout/Measure/Render 基础管线流程）
+- [OH 平台适配层](oh-platform-adapter.md)（Container/AceContainer 容器体系）
+- [窗口机制（Rosen Window 窗口管理）](window-mechanism.md)
+- [基础渲染管线（NG 管线帧编排 + 旧管线三层架构兼容性）](basic-render-pipeline.md)

@@ -423,6 +423,8 @@ public:
     static void SetAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter);
     // exclude self and children from renderGroup
     static void SetExcludeFromRenderGroup(bool exclude);
+    // mark node for layered render
+    static void SetMarkLayeredRender(bool isLayeredRender);
     // renderFit, i.e. gravity
     static void SetRenderFit(RenderFit renderFit);
     // renderStrategy
@@ -848,6 +850,7 @@ public:
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
     static void SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude);
+    static void SetMarkLayeredRender(FrameNode* frameNode, bool isLayeredRender);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseUnion(FrameNode* frameNode, bool useUnion);
@@ -1052,6 +1055,7 @@ public:
     static bool GetClip(FrameNode* frameNode);
     static RefPtr<BasicShape> GetClipShape(FrameNode* frameNode);
     static Matrix4 GetTransform(FrameNode* frameNode);
+    static Matrix4 GetTransform3D(FrameNode* frameNode);
     static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
     static std::optional<EdgesParam> GetPositionEdges(FrameNode* frameNode);
@@ -1194,6 +1198,12 @@ public:
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
     static void SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
+    // Like SetSystemMaterial but also marks the node exempt from the scope gate
+    // (titleBar / bottom-TabBar) in MaterialProcessor. Use for popup / dialog /
+    // menu / sheet / toast / select-overlay material targets so their material
+    // stays effective for non-system apps too.
+    static void SetSystemMaterialForOverlay(FrameNode* frameNode, const UiMaterial* material);
+    static void SetSystemMaterialForOverlay(const UiMaterial* material);
     // set systemMaterial for inner use, use SetSystemMaterial normally.
     static void SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material);
     // Set systemMaterial with component scale adjustment (for drag scenario)

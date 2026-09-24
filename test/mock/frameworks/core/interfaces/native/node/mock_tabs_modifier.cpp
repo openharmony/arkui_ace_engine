@@ -14,8 +14,11 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "interfaces/inner_api/ace_kit/include/ui/resource/resource_object.h"
 
@@ -286,11 +289,87 @@ void SetTabsDividerColorByUser(ArkUINodeHandle node, ArkUI_Bool colorByUser)
     TabsModelNG::SetDividerColorByUser(frameNode, colorByUser);
 }
 
+RefPtr<TabsControllerNG> GetTabsController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    return AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
+}
+
+void SetTabsTabBarTranslateCustom(ArkUINodeHandle node, const void* options)
+{
+    CHECK_NULL_VOID(options);
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SetTabBarTranslate(*reinterpret_cast<const TranslateOptions*>(options));
+}
+
+void SetTabsTabBarOpacityCustom(ArkUINodeHandle node, ArkUI_Float32 opacity)
+{
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SetTabBarOpacity(opacity);
+}
+
+void TabsSwipeToCustom(ArkUINodeHandle node, ArkUI_Int32 index)
+{
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_VOID(tabsController);
+    tabsController->SwipeTo(index);
+}
+
+int32_t GetBarDisplayModeCustom(ArkUINodeHandle node)
+{
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_RETURN(tabsController, static_cast<int32_t>(TabBarDisplayMode::BOTTOMTABBAR));
+    return static_cast<int32_t>(tabsController->GetBarDisplayMode());
+}
+
+void SetTabsIndexMock(ArkUINodeHandle node, ArkUI_Int32 indexVal)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIndex(frameNode, indexVal < 0 ? 0 : indexVal);
+}
+
+void SetTabsOnChangeEventMock(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChangeEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnChangeEvent(frameNode, std::move(*onChangeEvent));
+    } else {
+        TabsModelNG::SetOnChangeEvent(frameNode, nullptr);
+    }
+}
+
+void SetCachedMaxCountForJsMock(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    TabsModelNG::SetCachedMaxCountForJs(frameNode, count, cacheMode);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
     static const ArkUITabsModifier modifier = {
         .setDividerColorByUser = SetTabsDividerColorByUser,
+        .setTabsIndex = SetTabsIndexMock,
+        .setTabsOnChangeEvent = SetTabsOnChangeEventMock,
+        .setCachedMaxCountForJs = SetCachedMaxCountForJsMock,
     };
     return &modifier;
 }
@@ -329,6 +408,10 @@ const ArkUITabsCustomModifier* GetTabsCustomModifier()
         .handleBackgroundBlurStyleInactiveColor = HandleBackgroundBlurStyleInactiveColorCustom,
         .handleBarBackgroundColor = HandleBarBackgroundColorCustom,
         .handleBackgroundEffectInactiveColor = HandleBackgroundEffectInactiveColorCustom,
+        .setTabBarTranslate = SetTabsTabBarTranslateCustom,
+        .setTabBarOpacity = SetTabsTabBarOpacityCustom,
+        .swipeTo = TabsSwipeToCustom,
+        .getBarDisplayMode = GetBarDisplayModeCustom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -196,29 +196,28 @@ NG::EmitterOption CreateParticleEmitterOption(
     NG::EmitterOption emitter;
 
     float thickness = direction == Axis::HORIZONTAL ? stackHeight : stackWidth;
-    float emitterOffset = thickness * 3.0f;
+    float emitterOffset = thickness * 4.0f;
 
     float mainAxisPx = reverse ? blockCenterPx : (blockCenterPx - emitterOffset);
-    float crossAxisPx = -thickness;
+    float crossAxisPx = -thickness / 2.0f;
     float mainAxisVp = Dimension(mainAxisPx, DimensionUnit::PX).ConvertToVp();
     float crossAxisVp = Dimension(crossAxisPx, DimensionUnit::PX).ConvertToVp();
 
+    float emitterSize = thickness * 4.0f;
     if (direction == Axis::HORIZONTAL) {
-        emitter.SetPosition(std::make_pair(
-            Dimension(mainAxisVp, DimensionUnit::VP),
-            Dimension(crossAxisVp, DimensionUnit::VP)));
+        emitter.SetPosition(
+            std::make_pair(Dimension(mainAxisVp, DimensionUnit::VP), Dimension(crossAxisVp, DimensionUnit::VP)));
+        emitter.SetSize(std::make_pair(
+            Dimension(emitterSize, DimensionUnit::PX), Dimension(emitterSize / 2.0f, DimensionUnit::PX)));
     } else {
-        emitter.SetPosition(std::make_pair(
-            Dimension(crossAxisVp, DimensionUnit::VP),
-            Dimension(mainAxisVp, DimensionUnit::VP)));
+        emitter.SetPosition(
+            std::make_pair(Dimension(crossAxisVp, DimensionUnit::VP), Dimension(mainAxisVp, DimensionUnit::VP)));
+        emitter.SetSize(std::make_pair(
+            Dimension(emitterSize / 2.0f, DimensionUnit::PX), Dimension(emitterSize, DimensionUnit::PX)));
     }
 
-    float emitterSize = thickness * 3.0f;
-    emitter.SetSize(std::make_pair(
-        Dimension(emitterSize, DimensionUnit::PX),
-        Dimension(emitterSize, DimensionUnit::PX)));
-    emitter.SetShape(NG::ParticleEmitterShape::CIRCLE);
-    emitter.SetEmitterRate(static_cast<int32_t>(thickness));
+    emitter.SetShape(NG::ParticleEmitterShape::RECTANGLE);
+    emitter.SetEmitterRate(static_cast<int32_t>(emitterSize));
     return emitter;
 }
 
@@ -303,25 +302,23 @@ NG::VelocityProperty CreateVelocityProperty(Axis direction, bool reverse)
 }
 
 std::vector<ParticleVelocityField> CreateParticleVelocityFields(
-    float stackWidth, float stackHeight, Axis direction, bool reverse, float progressRatio)
+    float stackWidth, float stackHeight, Axis direction, bool reverse, float enabled)
 {
-    float avgSpeed = (PARTICLE_MIN_SPEED + PARTICLE_MAX_SPEED) / 2.0f;
-    float targetSpeed = 20.0f + (200.0f - 20.0f) * progressRatio;
-    float decel = avgSpeed - targetSpeed;
-    float fieldVelMain = reverse ? -decel : decel;
-
-    ParticleVelocityField velocityField;
-    if (direction == Axis::HORIZONTAL) {
-        velocityField.velocity = std::make_pair(fieldVelMain, 0.0f);
-    } else {
-        velocityField.velocity = std::make_pair(0.0f, fieldVelMain);
-    }
+    float speed = reverse ? PARTICLE_MIN_SPEED : -PARTICLE_MIN_SPEED;
+    float fieldVelMain = enabled ? speed : 0;
 
     ParticleFieldRegion region;
     region.shape = ParticleDisturbanceShapeType::RECT;
-    region.position = std::make_pair(
-        Dimension(stackWidth / 2.0f, DimensionUnit::PX),
-        Dimension(stackHeight / 2.0f, DimensionUnit::PX));
+    ParticleVelocityField velocityField;
+    if (direction == Axis::HORIZONTAL) {
+        velocityField.velocity = std::make_pair(fieldVelMain, 0.0f);
+        region.position =
+            std::make_pair(Dimension(stackWidth, DimensionUnit::PX), Dimension(stackHeight / 2.0f, DimensionUnit::PX));
+    } else {
+        velocityField.velocity = std::make_pair(0.0f, fieldVelMain);
+        region.position =
+            std::make_pair(Dimension(stackWidth / 2.0f, DimensionUnit::PX), Dimension(stackHeight, DimensionUnit::PX));
+    }
     region.size = std::make_pair(
         Dimension(stackWidth, DimensionUnit::PX),
         Dimension(stackHeight, DimensionUnit::PX));
@@ -3402,9 +3399,28 @@ void SliderPattern::StartDeformAnimation()
             pointRC->UpdateTransformScale({ scaleX, scaleY });
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
-    
+    SetVelocityFieldEnabled(true);
     isDeformStarted_ = true;
     ScheduleDeformRestore();
+}
+
+void SliderPattern::SetVelocityFieldEnabled(bool enabled)
+{
+    CHECK_NULL_VOID(particleFrameNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto reverse = GetReverseValue(layoutProperty);
+    auto direction = GetDirection();
+    CHECK_NULL_VOID(sliderContentModifier_);
+    auto trackRect = sliderContentModifier_->GetTrackRect();
+    float trackWidth = trackRect.GetWidth();
+    float trackHeight = trackRect.GetHeight();
+    auto velocityFields = CreateParticleVelocityFields(trackWidth, trackHeight, direction, reverse, enabled);
+    auto pattern = particleFrameNode_->GetPattern<ParticlePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateVelocityFields(velocityFields);
 }
 
 void SliderPattern::RestoreDeformAnimation()
@@ -3433,6 +3449,7 @@ void SliderPattern::RestoreDeformAnimation()
             pointRC->UpdateTransformScale({ 1.0f, 1.0f });
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
+    SetVelocityFieldEnabled(false);
 }
 
 void SliderPattern::ScheduleDeformRestore()
@@ -3466,6 +3483,18 @@ float SliderPattern::GetBlockRadius() const
         return std::min(actualBlockSize.Width(), actualBlockSize.Height()) * HALF;
     }
     return std::min(blockSize_.Width(), blockSize_.Height()) * HALF;
+}
+
+OffsetF SliderPattern::GetRealPosition(float x, float y)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    const auto& content = host->GetGeometryNode()->GetContent();
+    auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    auto padding = sliderLayoutProperty ? sliderLayoutProperty->CreatePaddingWithoutBorder() : PaddingPropertyF();
+    return OffsetF(x + contentOffset.GetX() - padding.left.value_or(0.0f),
+        y + contentOffset.GetY() - padding.top.value_or(0.0f));
 }
 
 float SliderPattern::GetDragFrameBaseScale() const
@@ -3625,7 +3654,7 @@ void SliderPattern::CreateSelectedTrackFrameNode()
         trackRC->SetClipToBounds(true);
     }
 
-    UpdateSelectedTrackFrameNode(circleCenter_.GetX(), circleCenter_.GetY());
+    UpdateSelectedTrackFrameNode();
 }
 
 void SliderPattern::CalculateEmitterPosition(float& emitterNodeX, float& emitterNodeY, float& emitterLength)
@@ -3693,8 +3722,13 @@ void SliderPattern::CreateParticleFrameNode()
             V2::PARTICLE_ETS_TAG, particleNodeId, AceType::MakeRefPtr<ParticlePattern>(PARTICLE_EMITTER_COUNT));
     }
 
-    particleFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(stackWidth), CalcLength(stackHeight)));
+    if (direction == Axis::HORIZONTAL) {
+        particleFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(stackWidth * 2.0f), CalcLength(stackHeight)));
+    } else {
+        particleFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(stackWidth), CalcLength(stackHeight * 2.0f)));
+    }
 
     auto particleOptions = CreateParticleOptions(stackWidth, stackHeight, direction, blockCenterPx, reverse);
     auto particleRC = particleFrameNode_->GetRenderContext();
@@ -3702,7 +3736,7 @@ void SliderPattern::CreateParticleFrameNode()
     particleRC->UpdateParticleOptionArray(particleOptions);
 }
 
-void SliderPattern::UpdateSelectedTrackFrameNode(float centerX, float centerY)
+void SliderPattern::UpdateSelectedTrackFrameNode()
 {
     CHECK_NULL_VOID(selectedTrackFrameNode_);
     CHECK_NULL_VOID(sliderContentModifier_);
@@ -3713,13 +3747,13 @@ void SliderPattern::UpdateSelectedTrackFrameNode(float centerX, float centerY)
     auto rect = sliderContentModifier_->GetSelectedTrackRect();
     float borderRadiusValue = sliderContentModifier_->GetSelectedBorderRadius();
 
-    const auto& content = host->GetGeometryNode()->GetContent();
-    auto contentOffsetF = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    auto padding = sliderLayoutProperty ? sliderLayoutProperty->CreatePaddingWithoutBorder() : PaddingPropertyF();
 
     float width = rect.GetWidth();
     float height = rect.GetHeight();
-    float x = rect.GetLeft() - contentOffsetF.GetX();
-    float y = rect.GetTop() - contentOffsetF.GetY();
+    float x = rect.GetLeft() - padding.left.value_or(0.0f);
+    float y = rect.GetTop() - padding.top.value_or(0.0f);
 
     selectedTrackFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(width), CalcLength(height)));
@@ -3767,8 +3801,13 @@ void SliderPattern::UpdateParticleFrameNode(float centerX, float centerY)
     float stackWidth = trackRect.GetWidth();
     float stackHeight = trackRect.GetHeight();
 
-    particleFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(stackWidth), CalcLength(stackHeight)));
+    if (direction == Axis::HORIZONTAL) {
+        particleFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(stackWidth * 2.0f), CalcLength(stackHeight)));
+    } else {
+        particleFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(stackWidth), CalcLength(stackHeight * 2.0f)));
+    }
 
     UpdateParticleFrameOffset(direction, reverse);
     UpdateEmitterProperties(centerX, centerY, direction, reverse);
@@ -3780,16 +3819,14 @@ void SliderPattern::UpdateParticleFrameOffset(Axis direction, bool reverse)
     auto selectedRect = sliderContentModifier_->GetSelectedTrackRect();
     float stackWidth = trackRect.GetWidth();
     float stackHeight = trackRect.GetHeight();
+    float blockLocalPos = reverse ? 0.0f :
+        (direction == Axis::HORIZONTAL ? selectedRect.GetWidth() : selectedRect.GetHeight());
     float offsetX = 0.0f;
     float offsetY = 0.0f;
     if (direction == Axis::HORIZONTAL) {
-        if (reverse) {
-            offsetX = selectedRect.GetWidth() - stackWidth;
-        }
+        offsetX = reverse ? (-stackWidth) : (blockLocalPos - stackWidth);
     } else {
-        if (reverse) {
-            offsetY = selectedRect.GetHeight() - stackHeight;
-        }
+        offsetY = reverse ? (-stackHeight) : (blockLocalPos - stackHeight);
     }
     auto particleRC = particleFrameNode_->GetRenderContext();
     CHECK_NULL_VOID(particleRC);
@@ -3801,16 +3838,12 @@ void SliderPattern::UpdateEmitterProperties(float centerX, float centerY, Axis d
     auto trackRect = sliderContentModifier_->GetTrackRect();
     float stackWidth = trackRect.GetWidth();
     float stackHeight = trackRect.GetHeight();
-    float uiValue = direction == Axis::HORIZONTAL ?
-        centerX - trackRect.GetLeft() :
-        centerY - trackRect.GetTop();
     float thickness = direction == Axis::HORIZONTAL ? stackHeight : stackWidth;
     float sliderLength = direction == Axis::HORIZONTAL ? stackWidth : stackHeight;
-    float progressRatio = sliderLength > 0.0f ? uiValue / sliderLength : 0.0f;
-    float emitterOffset = thickness * 3.0f;
-    float emitterMainAxisPx = reverse ? uiValue : (uiValue - emitterOffset);
+    float emitterOffset = thickness * 5.0f;
+    float emitterMainAxisPx = reverse ? (sliderLength + thickness) : (sliderLength - emitterOffset);
     float emitterMainAxisVp = Dimension(emitterMainAxisPx, DimensionUnit::PX).ConvertToVp();
-    float crossAxisPx = -thickness;
+    float crossAxisPx = -thickness / 2.0f;
     float crossAxisVp = Dimension(crossAxisPx, DimensionUnit::PX).ConvertToVp();
 
     std::vector<EmitterProperty> emitterProps;
@@ -3826,8 +3859,6 @@ void SliderPattern::UpdateEmitterProperties(float centerX, float centerY, Axis d
     auto pattern = particleFrameNode_->GetPattern<ParticlePattern>();
     if (pattern) {
         pattern->updateEmitterPosition(emitterProps);
-        auto velocityFields = CreateParticleVelocityFields(stackWidth, stackHeight, direction, reverse, progressRatio);
-        pattern->UpdateVelocityFields(velocityFields);
     }
 }
 
@@ -3841,13 +3872,14 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     
     const auto& content = host->GetGeometryNode()->GetContent();
     auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    float contentAreaX = isRealPosition ? centerX - contentOffset.GetX() : centerX;
+    float contentAreaY = isRealPosition ? centerY - contentOffset.GetY() : centerY;
+    auto realPosition = GetRealPosition(contentAreaX, contentAreaY);
     
     auto blockDiameter = blockRadius * NUMBER_TWO;
     auto frameSize = blockDiameter * GetDragFrameBaseScale();
-    auto realCenterX = isRealPosition ? centerX - contentOffset.GetX() : centerX;
-    auto realCenterY = isRealPosition ? centerY - contentOffset.GetY() : centerY;
-    float frameNodeX = realCenterX - frameSize / NUMBER_TWO;
-    float frameNodeY = realCenterY - frameSize / NUMBER_TWO;
+    float frameNodeX = realPosition.GetX() - frameSize / NUMBER_TWO;
+    float frameNodeY = realPosition.GetY() - frameSize / NUMBER_TWO;
     
     UpdateMaterialFrameNode(dragFrameNode_, frameSize, frameNodeX, frameNodeY, frameSize / NUMBER_TWO);
 
@@ -3857,17 +3889,18 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
             CalcSize(CalcLength(trackRect.GetWidth()), CalcLength(trackRect.GetHeight())));
         auto blurRC = blurCoverNode_->GetRenderContext();
         if (blurRC) {
+            auto blurPosition = GetRealPosition(
+                trackRect.GetLeft() - contentOffset.GetX(), trackRect.GetTop() - contentOffset.GetY());
             blurRC->UpdatePosition(OffsetT<Dimension>(
-                Dimension(trackRect.GetLeft() - contentOffset.GetX()),
-                Dimension(trackRect.GetTop() - contentOffset.GetY())));
+                Dimension(blurPosition.GetX()), Dimension(blurPosition.GetY())));
         }
     }
 
-    float pointNodeX = realCenterX - blockRadius;
-    float pointNodeY = realCenterY - blockRadius;
+    float pointNodeX = realPosition.GetX() - blockRadius;
+    float pointNodeY = realPosition.GetY() - blockRadius;
     UpdateMaterialFrameNode(dragPointNode_, blockDiameter, pointNodeX, pointNodeY, blockRadius);
     
-    UpdateSelectedTrackFrameNode(realCenterX, realCenterY);
+    UpdateSelectedTrackFrameNode();
     UpdateParticleFrameNode(centerX, centerY);
 }
 
@@ -3930,11 +3963,9 @@ void SliderPattern::ShowMaterialNode()
     auto blurRC = blurCoverNode_->GetRenderContext();
     CHECK_NULL_VOID(blurRC);
     auto blockRadius = GetBlockRadius();
-    const auto& content = host->GetGeometryNode()->GetContent();
-    auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
-    float pointNodeX = circleCenter_.GetX() - contentOffset.GetX() - blockRadius;
-    float pointNodeY = circleCenter_.GetY() - contentOffset.GetY() - blockRadius;
-    pointRC->UpdatePosition(OffsetT<Dimension>(Dimension(pointNodeX), Dimension(pointNodeY)));
+    auto realPosition = GetRealPosition(circleCenter_.GetX(), circleCenter_.GetY());
+    auto pointPosition = realPosition - OffsetF(blockRadius, blockRadius);
+    pointRC->UpdatePosition(OffsetT<Dimension>(Dimension(pointPosition.GetX()), Dimension(pointPosition.GetY())));
 
     host->AddChild(dragPointNode_);
     host->AddChild(blurCoverNode_);

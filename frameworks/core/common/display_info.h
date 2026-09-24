@@ -42,6 +42,16 @@ enum class FoldStatus : uint32_t {
 };
 
 /**
+ * Fold crease direction derived from the live crease region rect.
+ * Source: Rosen::Display::GetLiveCreaseRegion() creaseRects.front()
+ */
+enum class FoldCreaseDirection : uint32_t {
+    UNKNOWN = 0,
+    HORIZONTAL = 1, // creaseRect.width_ > creaseRect.height_
+    VERTICAL = 2,   // creaseRect.width_ < creaseRect.height_
+};
+
+/**
  * souce is Rosen::Rotation
  */
 enum class Rotation : uint32_t {
@@ -194,6 +204,26 @@ public:
         currentFoldCreaseRegion_ = currentFoldCreaseRegion;
     }
 
+    std::vector<Rect> GetLiveFoldCreaseRegion()
+    {
+        return liveFoldCreaseRegion_;
+    }
+
+    void SetLiveFoldCreaseRegion(std::vector<Rect> liveFoldCreaseRegion)
+    {
+        liveFoldCreaseRegion_ = std::move(liveFoldCreaseRegion);
+    }
+
+    FoldCreaseDirection GetFoldCreaseDirection()
+    {
+        return foldCreaseDirection_;
+    }
+
+    void SetFoldCreaseDirection(FoldCreaseDirection direction)
+    {
+        foldCreaseDirection_ = direction;
+    }
+
     DisplaySourceMode GetDisplaySourceMode()
     {
         return displaySourceMode_;
@@ -208,6 +238,8 @@ private:
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
     bool isFoldable_ = false;
     std::vector<Rect> currentFoldCreaseRegion_;
+    std::vector<Rect> liveFoldCreaseRegion_;
+    FoldCreaseDirection foldCreaseDirection_ = FoldCreaseDirection::UNKNOWN;
     DisplaySourceMode displaySourceMode_ = DisplaySourceMode::NONE;
 };
 } // namespace OHOS::Ace

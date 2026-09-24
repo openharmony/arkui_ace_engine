@@ -38,6 +38,7 @@ public:
     std::shared_ptr<void> TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl) override;
     napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) override;
     napi_value TransformSummary(std::map<std::string, int64_t>& summary) override;
+    napi_value TransformSummary(const DragSummaryInfo& summaryInfo) override;
     int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) override;
     int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) override;
     int32_t GetSummary(std::string& key, DragSummaryInfo& dragSummaryInfo) override;
@@ -81,6 +82,7 @@ public:
     RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) override;
     RefPtr<DataLoadParams> TransformDataLoadParamsFromANI(void* rawData) override;
     void TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr) override;
+    void TransformSummaryANI(const DragSummaryInfo& summaryInfo, std::shared_ptr<void> summaryPtr) override;
 };
 
 class UnifiedDataImpl : public UnifiedData {

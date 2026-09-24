@@ -277,4 +277,15 @@ namespace OHOS::Ace::NG {
     {
         return node_->GetExpandedState();
     }
+
+    std::string TransitionalNodeInfo::GetAddText()
+    {
+        return node_->GetAddText();
+    }
+
+    std::string TransitionalNodeInfo::GetRemoveText()
+    {
+        return node_->GetRemoveText();
+    }
+
 } // namespace OHOS::Ace::NG

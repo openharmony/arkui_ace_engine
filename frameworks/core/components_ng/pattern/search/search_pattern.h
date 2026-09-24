@@ -228,6 +228,7 @@ public:
     int32_t OnInjectionEvent(const std::string& command) override;
     void ProcessTextFieldDefaultStyleAndBehaviors();
     void ProcessDividerDefaultStyleAndBehaviors();
+    void OnMaterialDisable() override;
 
 private:
     void OnModifyDone() override;

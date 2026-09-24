@@ -181,4 +181,8 @@ TextDirection View::GetNonAutoLayoutDirection()
     return AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
 }
 
+void View::SetVisibility(VisibleType visible)
+{
+    NG::ViewAbstract::SetVisibility(reinterpret_cast<AceNode*>(node_->GetHandle()), visible);
+}
 } // namespace OHOS::Ace::Kit

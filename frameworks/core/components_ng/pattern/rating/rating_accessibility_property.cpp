@@ -25,7 +25,9 @@ AccessibilityValue RatingAccessibilityProperty::GetAccessibilityValue() const
     CHECK_NULL_RETURN(frameNode, accessibilityValue);
     auto ratingLayoutProperty = frameNode->GetLayoutProperty<NG::RatingLayoutProperty>();
     CHECK_NULL_RETURN(ratingLayoutProperty, accessibilityValue);
-    accessibilityValue.max = ratingLayoutProperty->GetStars().value_or(0);
+    auto ratingPattern = frameNode->GetPattern<NG::RatingPattern>();
+    accessibilityValue.max = ratingLayoutProperty->GetStars().value_or(
+        ratingPattern ? ratingPattern->GetThemeStarNum() : 0);
     auto ratingRenderProperty = frameNode->GetPaintProperty<NG::RatingRenderProperty>();
     CHECK_NULL_RETURN(ratingRenderProperty, accessibilityValue);
     accessibilityValue.current = ratingRenderProperty->GetRatingScore().value_or(0);
@@ -50,5 +52,19 @@ bool RatingAccessibilityProperty::IsEditable() const
     CHECK_NULL_RETURN(ratingLayoutProperty, false);
     bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
     return !indicator;
+}
+
+void RatingAccessibilityProperty::SetSpecificSupportAction()
+{
+    if (!IsEditable()) {
+        return;
+    }
+    auto accessibilityValue = GetAccessibilityValue();
+    if (accessibilityValue.current < accessibilityValue.max) {
+        AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    }
+    if (accessibilityValue.min < accessibilityValue.current) {
+        AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+    }
 }
 } // namespace OHOS::Ace::NG

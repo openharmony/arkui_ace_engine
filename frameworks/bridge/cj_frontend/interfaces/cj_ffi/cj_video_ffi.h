@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::Framework {
 class ACE_EXPORT NativeVideoController : public OHOS::FFI::FFIData {
-    DECL_TYPE(NativePatternLockController, OHOS::FFI::FFIData)
+    DECL_TYPE(NativeVideoController, OHOS::FFI::FFIData)
 public:
     NativeVideoController();
 

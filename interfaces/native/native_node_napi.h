@@ -399,10 +399,10 @@ int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
  * component without resampling during event distribution.
  *
  * @param uiContext UIContext object used to bind the instance.
- * @param enabled Whether to enable event passthrough. true: enable ; false (default value): disable
+ * @param enabled Whether to enable event passthrough. <b>true</b>: enable; <b>false</b> (default value): disable.
  * @param type Raw input event type {@link ArkUI_RawInputEventType} for enabling or disabling event passthrough.
- * @return Result code. \n
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful. \n
+ * @return Result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the UIContext object is invalid.
  * @since 26.0.0
  */

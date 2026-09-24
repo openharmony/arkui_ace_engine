@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, NodeIdentity, NodeRenderStateChangeCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { KeyboardAvoidMode, ImmersiveStrategy, NodeIdentity, NodeRenderStateChangeCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
 import { PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
 import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, PictureDrawableDescriptor, HdrCompositionConfig } from '@ohos.arkui.drawableDescriptor';
 import { AnimationStatus, Resource } from '#generated';
@@ -136,6 +136,7 @@ export class ArkUIAniModule {
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _GetKeyboardAvoidMode(): KeyboardAvoidMode
     native static _SetKeyboardAvoidMode(mode: KeyboardAvoidMode): void
+    native static _ApplyDefaultImmersiveStrategy(types: Array<ImmersiveStrategy>): void
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _CustomNode_RequestFrame(): void
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
@@ -148,6 +149,7 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _BuilderProxyNode_Mock_Construct(id: KInt): KPointer
+    native static _InteropProxyNode_Construct(id: KInt): KPointer
     native static _SetOnNodeDestroyEvent(ptr: KPointer, event: (nodeId: int) => void): void
     native static _DetachedFreeRoot_Construct(id: KInt): KPointer;
     native static _ContentSlot_construct(id: KInt): KPointer
@@ -300,6 +302,7 @@ export class ArkUIAniModule {
     native static _Drawable_Load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>
     native static _Drawable_GetAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined
     native static _Drawable_SetBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void
+    native static _Drawable_SetSVGResourceLimitLevel(value: DrawableDescriptor, limit: image.SVGResourceLimitLevel): void
     native static _Drawable_SetHdrComposition(value: PictureDrawableDescriptor, config: HdrCompositionConfig): void
     native static _Drawable_Invalidate(value: DrawableDescriptor): void
     native static _Drawable_NativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor

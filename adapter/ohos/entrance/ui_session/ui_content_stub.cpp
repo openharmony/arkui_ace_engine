@@ -90,8 +90,8 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterSelectTextEventCallbackInner(data, reply, option);
             break;
         }
-        case SENDCOMMAND_ASYNC_EVENT: {
-            SendCommandInnerAsync(data, reply, option);
+        case SENDCOMMAND_SYNC_EVENT: {
+            SendCommandInnerSync(data, reply, option);
             break;
         }
         case SENDCOMMAND_EVENT: {
@@ -254,22 +254,6 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetPageSceneInner(data, reply, option);
             break;
         }
-        case GET_LAZY_FOREACH_DATA_BY_POINT: {
-            GetLazyForEachDataByPointInner(data, reply, option);
-            break;
-        }
-        case GET_NAVIGATION_CONTENT_BY_POINT: {
-            GetNavigationContentByPointInner(data, reply, option);
-            break;
-        }
-        case GET_NODES_IN_CIRCLE: {
-            GetNodesInCircleInner(data, reply, option);
-            break;
-        }
-        case GET_NODES_IN_RECT: {
-            GetNodesInRectInner(data, reply, option);
-            break;
-        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -294,14 +278,14 @@ int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel&
 
 int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    sptr<IRemoteObject> report = data.ReadRemoteObject();
-    if (report == nullptr) {
-        LOGW("read reportStub object is nullptr,connect failed");
+    sptr<IRemoteObject> reportProxy = data.ReadRemoteObject();
+    if (reportProxy == nullptr) {
+        LOGW("read reportProxy object is nullptr,connect failed");
         return FAILED;
     }
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManagerOhos* uisession = reinterpret_cast<UiSessionManagerOhos*>(UiSessionManager::GetInstance());
-    uisession->SaveReportStub(report, processId);
+    uisession->SaveReportProxy(reportProxy, processId);
     uisession->SendBaseInfo(processId);
     return NO_ERROR;
 }
@@ -324,52 +308,6 @@ int32_t UiContentStub::GetPageSceneInner(MessageParcel& data, MessageParcel& rep
 {
     std::string ruleJsonOrRuleSetId = data.ReadString();
     reply.WriteInt32(GetPageScene(ruleJsonOrRuleSetId, nullptr));
-    return NO_ERROR;
-}
-
-int32_t UiContentStub::GetLazyForEachDataByPointInner(
-    MessageParcel& data, MessageParcel& reply, MessageOption& option)
-{
-    float x = data.ReadFloat();
-    float y = data.ReadFloat();
-    int32_t processId = IPCSkeleton::GetCallingRealPid();
-    UiSessionManager::GetInstance()->SaveProcessId("componentTreeQuery", processId);
-    reply.WriteInt32(GetLazyForEachDataByPoint(x, y, nullptr));
-    return NO_ERROR;
-}
-
-int32_t UiContentStub::GetNavigationContentByPointInner(
-    MessageParcel& data, MessageParcel& reply, MessageOption& option)
-{
-    float x = data.ReadFloat();
-    float y = data.ReadFloat();
-    std::string pattern = data.ReadString();
-    int32_t processId = IPCSkeleton::GetCallingRealPid();
-    UiSessionManager::GetInstance()->SaveProcessId("componentTreeQuery", processId);
-    reply.WriteInt32(GetNavigationContentByPoint(x, y, pattern, nullptr));
-    return NO_ERROR;
-}
-
-int32_t UiContentStub::GetNodesInCircleInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
-{
-    float centerX = data.ReadFloat();
-    float centerY = data.ReadFloat();
-    float radius = data.ReadFloat();
-    int32_t processId = IPCSkeleton::GetCallingRealPid();
-    UiSessionManager::GetInstance()->SaveProcessId("componentTreeQuery", processId);
-    reply.WriteInt32(GetNodesInCircle(centerX, centerY, radius, nullptr));
-    return NO_ERROR;
-}
-
-int32_t UiContentStub::GetNodesInRectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
-{
-    float x1 = data.ReadFloat();
-    float y1 = data.ReadFloat();
-    float x2 = data.ReadFloat();
-    float y2 = data.ReadFloat();
-    int32_t processId = IPCSkeleton::GetCallingRealPid();
-    UiSessionManager::GetInstance()->SaveProcessId("componentTreeQuery", processId);
-    reply.WriteInt32(GetNodesInRect(x1, y1, x2, y2, nullptr));
     return NO_ERROR;
 }
 
@@ -445,11 +383,17 @@ int32_t UiContentStub::SendCommandInner(
     return NO_ERROR;
 }
 
-int32_t UiContentStub::SendCommandInnerAsync(
+int32_t UiContentStub::SendCommandInnerSync(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     int32_t id = data.ReadInt32();
-    return SendCommandAsync(id, data.ReadString());
+    std::string command = data.ReadString();
+    int32_t result = SendCommandSync(id, command);
+    if (!reply.WriteInt32(result)) {
+        LOGE("SendCommandInnerSync write reply failed");
+        return FAILED;
+    }
+    return NO_ERROR;
 }
 
 int32_t UiContentStub::SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)

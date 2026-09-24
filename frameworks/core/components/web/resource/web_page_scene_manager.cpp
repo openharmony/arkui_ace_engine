@@ -365,7 +365,8 @@ void WebPageSceneManager::UpdateRuleState(int32_t processId, int32_t webId,
 void WebPageSceneManager::UpdateRuleStateInner(int32_t processId, int32_t webId,
     const std::string& ruleId, bool matched, int32_t matchedCount, bool reported,
     const std::vector<PageSceneControlInfo>& controls,
-    std::map<int32_t, WebPageSceneRuleSet>& rules)
+    std::map<int32_t, WebPageSceneRuleSet>& rules,
+    const std::string& eventName)
 {
     auto procIt = rules.find(processId);
     if (procIt == rules.end()) {
@@ -384,6 +385,9 @@ void WebPageSceneManager::UpdateRuleStateInner(int32_t processId, int32_t webId,
     if (reported) {
         ruleState.lastReportTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();
+        if (!eventName.empty()) {
+            ruleState.lastEventName = eventName;
+        }
     }
     ruleState.lastMatchedNodeIds = std::move(currentIds);
     ruleState.lastMatchedCount = matchedCount;
@@ -400,7 +404,7 @@ int32_t WebPageSceneManager::GetRegisteredProcessId()
 
 // ===== Result reporting =====
 
-void WebPageSceneManager::FlushExitOnNavigate(int32_t processId, int32_t webId)
+void WebPageSceneManager::FlushExitOnNavigate(int32_t processId, int32_t webId, int32_t hostNodeId)
 {
     // Collect EXIT results outside the lock
     std::vector<std::string> exitResults;
@@ -427,7 +431,8 @@ void WebPageSceneManager::FlushExitOnNavigate(int32_t processId, int32_t webId)
                     "FlushExitOnNavigate: ruleId=%{public}s not found in rules", ruleId.c_str());
                 continue;
             }
-            auto sceneJson = BuildSceneJsonInner(ruleSetId, webId, ruleOpt.value(), false, 0, {}, "TEXT_EDITOR_EXIT");
+            auto sceneJson = BuildSceneJsonInner(ruleSetId, webId, hostNodeId, ruleOpt.value(), false, 0, {},
+                "TEXT_EDITOR_EXIT");
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "FlushExitOnNavigate: processId=%{public}d webId=%{public}d ruleId=%{public}s EXIT",
                 processId, webId, ruleId.c_str());
@@ -435,6 +440,7 @@ void WebPageSceneManager::FlushExitOnNavigate(int32_t processId, int32_t webId)
             state.textEditorTriggered = false;
             state.lastMatchedCount = 0;
             state.lastMatchedNodeIds.clear();
+            state.lastEventName = "TEXT_EDITOR_EXIT";
         }
         procIt->second.componentRuleStates.erase(webId);
     }
@@ -455,10 +461,12 @@ void WebPageSceneManager::OnMatchResult(int32_t processId, const std::string& sc
             processId, isGetResult);
         return;
     }
+    auto root = JsonUtil::ParseJsonString(sceneJson);
+    int32_t matchedCount = root && root->IsObject() ? root->GetInt("matchedCount", 0) : 0;
     TAG_LOGI(AceLogTag::ACE_WEB,
         "PageSceneReport: OnMatchResult SUCCESS processId=%{public}d isGetResult=%{public}d "
-        "sceneJson len=%{public}zu sceneJson=%{public}s",
-        processId, isGetResult, sceneJson.size(), sceneJson.c_str());
+        "matchedCount=%{public}d sceneJson len=%{public}zu",
+        processId, isGetResult, matchedCount, sceneJson.size());
     UiSessionManager::GetInstance()->ReportPageSceneEvent(processId, sceneJson, isGetResult);
 }
 
@@ -596,9 +604,16 @@ bool WebPageSceneManager::IsDuplicatedEvent(const WebRule& rule, int32_t matched
     return false;
 }
 
-bool WebPageSceneManager::IsWithinMinInterval(const WebRule& rule, const RuleMatchState& ruleState)
+bool WebPageSceneManager::IsWithinMinInterval(const WebRule& rule, const RuleMatchState& ruleState,
+    const std::string& eventName)
 {
     if (rule.policy.minReportIntervalMs <= 0 || ruleState.lastReportTimeMs <= 0) {
+        return false;
+    }
+    // State transition (e.g. TEXT_EDITOR -> TEXT_EDITOR_EXIT or vice versa) should
+    // not be suppressed by min interval — it represents a genuine state change,
+    // not a duplicate report.
+    if (!ruleState.lastEventName.empty() && ruleState.lastEventName != eventName) {
         return false;
     }
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -653,7 +668,7 @@ bool WebPageSceneManager::ShouldReportEventInner(int32_t processId, int32_t webI
             matchedCount, ruleState.lastMatchedCount);
         return false;
     }
-    if (IsWithinMinInterval(*ruleOpt, ruleState)) {
+    if (IsWithinMinInterval(*ruleOpt, ruleState, eventName)) {
         TAG_LOGI(AceLogTag::ACE_WEB, "WebPageSceneManager::ShouldReportEvent: filtered by minReportInterval, "
             "processId=%{public}d webId=%{public}d ruleId=%{public}s eventName=%{public}s minInterval=%{public}dms",
             processId, webId, ruleId.c_str(), eventName.c_str(), ruleOpt->policy.minReportIntervalMs);
@@ -714,7 +729,7 @@ std::string WebPageSceneManager::BuildSelectorJson(
 }
 
 std::string WebPageSceneManager::BuildSceneJsonInner(const std::string& ruleSetId,
-    int32_t webId, const WebRule& rule, bool matched, int32_t matchedCount,
+    int32_t webId, int32_t hostNodeId, const WebRule& rule, bool matched, int32_t matchedCount,
     const std::vector<PageSceneControlInfo>& controls, const std::string& eventName)
 {
     auto root = JsonUtil::Create(true);
@@ -725,7 +740,7 @@ std::string WebPageSceneManager::BuildSceneJsonInner(const std::string& ruleSetI
 
     auto source = JsonUtil::Create(true);
     source->Put("type", "ARKWEB");
-    source->Put("hostNodeId", webId);
+    source->Put("hostNodeId", hostNodeId);
     root->Put("source", source);
 
     root->Put("matched", matched);
@@ -773,7 +788,7 @@ std::string WebPageSceneManager::BuildSceneJsonInner(const std::string& ruleSetI
 // ===== Query result processing (unified entry) =====
 
 void WebPageSceneManager::ProcessEmptyControlsInner(const std::string& ruleSetId, int32_t processId,
-    int32_t webId, const std::string& selectorJson,
+    int32_t webId, int32_t hostNodeId, const std::string& selectorJson,
     std::map<int32_t, WebPageSceneRuleSet>& rules, std::vector<std::string>& results)
 {
     auto procIt = rules.find(processId);
@@ -790,15 +805,15 @@ void WebPageSceneManager::ProcessEmptyControlsInner(const std::string& ruleSetId
 
         bool shouldReport = ShouldReportEventInner(processId, webId, rule.ruleId, eventName, 0,
             {}, rules);
-        UpdateRuleStateInner(processId, webId, rule.ruleId, false, 0, shouldReport, {}, rules);
+        UpdateRuleStateInner(processId, webId, rule.ruleId, false, 0, shouldReport, {}, rules, eventName);
         if (shouldReport) {
-            results.push_back(BuildSceneJsonInner(ruleSetId, webId, rule, false, 0, {}, eventName));
+            results.push_back(BuildSceneJsonInner(ruleSetId, webId, hostNodeId, rule, false, 0, {}, eventName));
         }
     }
 }
 
 void WebPageSceneManager::ProcessMatchedControlsInner(const std::string& ruleSetId, int32_t processId,
-    int32_t webId, const std::string& selectorJson, int32_t matchedCount, bool isGetResult,
+    int32_t webId, int32_t hostNodeId, const std::string& selectorJson, int32_t matchedCount, bool isGetResult,
     const std::vector<PageSceneControlInfo>& controls,
     std::map<int32_t, WebPageSceneRuleSet>& rules, std::vector<std::string>& results)
 {
@@ -831,19 +846,22 @@ void WebPageSceneManager::ProcessMatchedControlsInner(const std::string& ruleSet
         bool shouldReport = ShouldReportEventInner(processId, webId, rule.ruleId,
             eventName, matchedCount, controls, rules);
         if (!shouldReport && !isGetResult) {
-            UpdateRuleStateInner(processId, webId, rule.ruleId, matched, matchedCount, false, controls, rules);
+            UpdateRuleStateInner(processId, webId, rule.ruleId,
+                matched, matchedCount, false, controls, rules, eventName);
             continue;
         }
 
         if (!isGetResult) {
-            UpdateRuleStateInner(processId, webId, rule.ruleId, matched, matchedCount, shouldReport, controls, rules);
+            UpdateRuleStateInner(processId, webId, rule.ruleId,
+                matched, matchedCount, shouldReport, controls, rules, eventName);
         }
-        results.push_back(BuildSceneJsonInner(ruleSetId, webId, rule, matched, matchedCount, controls, eventName));
+        results.push_back(BuildSceneJsonInner(ruleSetId, webId, hostNodeId, rule, matched, matchedCount, controls,
+            eventName));
     }
 }
 
 std::vector<std::string> WebPageSceneManager::ProcessQueryResultCore(int32_t processId, int32_t webId,
-    const std::string& selectorJson, const std::string& rawResult, bool isGetResult)
+    int32_t hostNodeId, const std::string& selectorJson, const std::string& rawResult, bool isGetResult)
 {
     auto controls = ParseControlsJson(rawResult);
     std::vector<std::string> results;
@@ -869,10 +887,10 @@ std::vector<std::string> WebPageSceneManager::ProcessQueryResultCore(int32_t pro
         const std::string& ruleSetId = ruleIt->second.ruleSetId;
 
         if (controls.empty() && !isGetResult) {
-            ProcessEmptyControlsInner(ruleSetId, processId, webId, selectorJson, *rulesMap, results);
+            ProcessEmptyControlsInner(ruleSetId, processId, webId, hostNodeId, selectorJson, *rulesMap, results);
         } else {
             int32_t matchedCount = static_cast<int32_t>(controls.size());
-            ProcessMatchedControlsInner(ruleSetId, processId, webId, selectorJson,
+            ProcessMatchedControlsInner(ruleSetId, processId, webId, hostNodeId, selectorJson,
                 matchedCount, isGetResult, controls, *rulesMap, results);
         }
     } // lock released
@@ -880,10 +898,10 @@ std::vector<std::string> WebPageSceneManager::ProcessQueryResultCore(int32_t pro
     return results;
 }
 
-void WebPageSceneManager::ProcessQueryResult(int32_t processId, int32_t webId,
+void WebPageSceneManager::ProcessQueryResult(int32_t processId, int32_t webId, int32_t hostNodeId,
     const std::string& selectorJson, const std::string& rawResult, bool isGetResult)
 {
-    auto results = ProcessQueryResultCore(processId, webId, selectorJson, rawResult, isGetResult);
+    auto results = ProcessQueryResultCore(processId, webId, hostNodeId, selectorJson, rawResult, isGetResult);
     for (const auto& sceneJson : results) {
         OnMatchResult(processId, sceneJson, isGetResult);
     }

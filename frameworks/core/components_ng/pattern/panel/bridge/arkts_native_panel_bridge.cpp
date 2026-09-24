@@ -422,14 +422,11 @@ ArkUINativeModuleValue PanelBridge::SetPanelCustomHeight(ArkUIRuntimeCallInfo* r
         return panda::JSValueRef::Undefined(vm);
     }
     if (jsValue->IsString(vm) && jsValue->ToString(vm)->ToString(vm).find("wrapContent") != std::string::npos) {
-        if (ArkTSUtils::IsJsView(firstArg, vm)) {
-            customHeight = CalcDimension(jsValue->ToString(vm)->ToString(vm));
-        } else {
-            GetArkUINodeModifiers()->getPanelModifier()->setPanelCustomHeightByString(
-                nativeNode, jsValue->ToString(vm)->ToString(vm).c_str());
-            return panda::JSValueRef::Undefined(vm);
-        }
-    } else if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, customHeight)) {
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelCustomHeightByString(
+            nativeNode, jsValue->ToString(vm)->ToString(vm).c_str());
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, customHeight)) {
         customHeight = Dimension(0.0);
     }
     GetArkUINodeModifiers()->getPanelModifier()->setPanelCustomHeight(

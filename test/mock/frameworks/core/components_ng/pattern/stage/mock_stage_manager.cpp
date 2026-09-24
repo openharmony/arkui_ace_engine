@@ -158,5 +158,5 @@ std::vector<RefPtr<FrameNode>> StageManager::GetTopPagesWithTransition() const
 
 void StageManager::PageTransitionReport(const std::string& srcFullPath, const std::string& destFullPath) {}
 
-void StageManager::ReloadStage() {}
+void StageManager::ReloadStage(bool fullRebuild) {}
 } // namespace OHOS::Ace::NG

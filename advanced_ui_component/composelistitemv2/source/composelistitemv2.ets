@@ -1317,6 +1317,26 @@ export struct ComposeListItemV2 {
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
   private callbackId: number | undefined = undefined;
+  private wrapTextCallback: (eventData: emitter.EventData) => void = (eventData: emitter.EventData) => {
+    if (eventData.data && eventData.data.isWrapText !== undefined) {
+      this.isWrapText = eventData.data.isWrapText;
+    }
+  };
+  private canFocusCallback: (eventData: emitter.EventData) => void = (eventData: emitter.EventData) => {
+    if (eventData.data && eventData.data.canFocus !== undefined) {
+      this.canFocus = eventData.data.canFocus;
+    }
+  };
+  private canHoverCallback: (eventData: emitter.EventData) => void = (eventData: emitter.EventData) => {
+    if (eventData.data && eventData.data.canHover !== undefined) {
+      this.canHover = eventData.data.canHover;
+    }
+  };
+  private frontColorCallback: (eventData: emitter.EventData) => void = (eventData: emitter.EventData) => {
+    if (eventData.data && eventData.data.frontColor !== undefined) {
+      this.frontColor = eventData.data.frontColor;
+    }
+  };
   @Local accessibilityTextBuilder: string = '';
   @Local isFocus: boolean = false;
   @Local isWrapText: boolean = false;
@@ -1428,26 +1448,10 @@ export struct ComposeListItemV2 {
     if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
       this.onFontSizeScaleChange();
     }
-    emitter.on({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, (eventData: emitter.EventData) => {
-      if (eventData.data && eventData.data.isWrapText !== undefined) {
-        this.isWrapText = eventData.data.isWrapText;
-      }
-    });
-    emitter.on({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, (eventData: emitter.EventData) => {
-      if (eventData.data && eventData.data.canFocus !== undefined) {
-        this.canFocus = eventData.data.canFocus;
-      }
-    });
-    emitter.on({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, (eventData: emitter.EventData) => {
-      if (eventData.data && eventData.data.canHover !== undefined) {
-        this.canHover = eventData.data.canHover;
-      }
-    });
-    emitter.on({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, (eventData: emitter.EventData) => {
-      if (eventData.data && eventData.data.frontColor !== undefined) {
-        this.frontColor = eventData.data.frontColor;
-      }
-    });
+    emitter.on({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, this.wrapTextCallback);
+    emitter.on({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, this.canFocusCallback);
+    emitter.on({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, this.canHoverCallback);
+    emitter.on({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, this.frontColorCallback);
   }
 
   private envCallback: EnvironmentCallback = {
@@ -1478,10 +1482,10 @@ export struct ComposeListItemV2 {
       ?.off('environment', this.callbackId);
       this.callbackId = void (0);
     }
-    emitter.off(EVENT_IS_WRAP_TEXT_CHANGE);
-    emitter.off(EVENT_PARENT_CAN_FOCUS_CHANGE);
-    emitter.off(EVENT_PARENT_CAN_HOVER_CHANGE);
-    emitter.off(EVENT_PARENT_FRONT_COLOR_CHANGE);
+    emitter.off(EVENT_IS_WRAP_TEXT_CHANGE, this.wrapTextCallback);
+    emitter.off(EVENT_PARENT_CAN_FOCUS_CHANGE, this.canFocusCallback);
+    emitter.off(EVENT_PARENT_CAN_HOVER_CHANGE, this.canHoverCallback);
+    emitter.off(EVENT_PARENT_FRONT_COLOR_CHANGE, this.frontColorCallback);
   }
 
   calculatedRightWidth(): string {

@@ -160,7 +160,7 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (!IsSafeAreaValid()) {
         return {};
     }
-    if ((opts.type & SAFE_AREA_TYPE_CUTOUT) && useCutout_) {
+    if ((opts.type & SAFE_AREA_TYPE_CUTOUT) && GetUseCutout()) {
         res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
@@ -267,6 +267,22 @@ KeyBoardAvoidMode SafeAreaManager::GetKeyBoardAvoidMode()
     return keyboardAvoidMode_;
 }
 
+void SafeAreaManager::ApplyDefaultImmersiveStrategy(const std::unordered_set<ImmersiveStrategy>& types)
+{
+    appliedStrategies_ = types;
+    if (floatNavPullDelegate_) {
+        floatNavPullDelegate_(IsImmersiveStrategySet(ImmersiveStrategy::AVOID_FLOAT_NAV));
+    }
+}
+
+bool SafeAreaManager::IsImmersiveStrategySet(ImmersiveStrategy strategy) const
+{
+    if (strategy == ImmersiveStrategy::AVOID_CUTOUT) {
+        return useCutout_.value_or(appliedStrategies_.count(strategy) > 0);
+    }
+    return appliedStrategies_.count(strategy) > 0;
+}
+
 bool SafeAreaManager::SetIsAtomicService(bool value)
 {
     if (isAtomicService_ == value) {
@@ -292,7 +308,7 @@ SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
-    if (IsSafeAreaValid() && useCutout_) {
+    if (IsSafeAreaValid() && GetUseCutout()) {
         if (windowTypeConfig_.isSceneBoardWindow && scbCutoutSafeArea_.has_value()) {
             return scbCutoutSafeArea_.value();
         }
@@ -322,7 +338,7 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     if (!IsSafeAreaValid()) {
         return {};
     }
-    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    auto cutoutSafeArea = GetUseCutout() ? cutoutSafeArea_ : SafeAreaInsets();
     return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_).Combine(floatNavSafeArea_);
 }
 
@@ -336,7 +352,7 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
-    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    auto cutoutSafeArea = GetUseCutout() ? cutoutSafeArea_ : SafeAreaInsets();
     if (!windowTypeConfig_.isSceneBoardWindow) {
         return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_).Combine(floatNavSafeArea_);
     }
@@ -344,7 +360,7 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
     if (scbSystemSafeArea_.has_value()) {
         scbSafeArea = scbSafeArea.Combine(scbSystemSafeArea_.value());
     }
-    if (scbCutoutSafeArea_.has_value() && useCutout_) {
+    if (scbCutoutSafeArea_.has_value() && GetUseCutout()) {
         scbSafeArea = scbSafeArea.Combine(scbCutoutSafeArea_.value());
     }
     if (scbNavSafeArea_.has_value()) {
@@ -367,7 +383,7 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess, LayoutS
 #endif
     }
     SafeAreaInsets combinedSafeArea;
-    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    auto cutoutSafeArea = GetUseCutout() ? cutoutSafeArea_ : SafeAreaInsets();
 
     bool includeSystem = ignoreType & LAYOUT_SAFE_AREA_TYPE_SYSTEM;
     bool includeKeyboard = ignoreType & LAYOUT_SAFE_AREA_TYPE_KEYBOARD;

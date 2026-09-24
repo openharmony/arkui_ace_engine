@@ -14,6 +14,19 @@
 - 滑动过程中手指始终保持在菜单边界内，但仍触发了 onClick / HideMenu
 - 现象在 API12+ 版本上出现（受 `Container::GreatOrEqualAPITargetVersion(VERSION_TWELVE)` 分支控制）
 
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | symptom_surface | menu_pattern | frameworks/core/components_ng/pattern/menu/menu_pattern.cpp | verified |
+| capability | root_cause_owner | menu_item_pattern | frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp | verified |
+| capability | root_cause_owner | menu_pattern | frameworks/core/components_ng/pattern/menu/menu_pattern.h | verified |
+| capability | root_cause_owner | click_recognizer | frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
+
 ## 根因分类
 
 | 根因类别 | 触发条件 | 典型场景 |
@@ -41,10 +54,10 @@
 | 3 | 确认 `DEFAULT_CLICK_DISTANCE` 常量是否存在于 `menu_pattern.h` | PR #86305 删除了该常量；若不存在则说明采用了新逻辑 | — |
 
 关键代码定位：
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp:677` `MenuPattern::OnTouchEvent`：TouchType::UP 分支使用 `IsOffsetInNodeBounds` + `!movedOutOfRegion_` 判定点击
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp:669` `MenuPattern::IsOffsetInNodeBounds`：仅判断坐标是否在 frameSize 范围内，无距离阈值
-- `frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp:1555` `CustomMenuItemPattern::OnTouch`：同样的边界判定逻辑
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.h:973` / `menu_item_pattern.h:736`：`movedOutOfRegion_` 成员声明
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp` `MenuPattern::OnTouchEvent`：TouchType::UP 分支使用 `IsOffsetInNodeBounds` + `!movedOutOfRegion_` 判定点击
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp` `MenuPattern::IsOffsetInNodeBounds`：仅判断坐标是否在 frameSize 范围内，无距离阈值
+- `frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp` `CustomMenuItemPattern::OnTouch`：同样的边界判定逻辑
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.h` / `menu_item_pattern.h`：`movedOutOfRegion_` 成员声明
 
 #### Menu 自定义触摸处理与 ClickRecognizer 判定不一致 排查
 
@@ -55,8 +68,8 @@
 | 3 | 确认 Menu 注释中是否声明"mirroring ClickRecognizer::IsPointInRegion" | 源码注释明确声明镜像 ClickRecognizer，但实际实现仅做了边界判定子集 | — |
 
 关键代码定位：
-- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp:67` `ClickRecognizer::IsPointInRegion`：含 distanceThreshold_ 距离校验 + responseRegionBuffer_ 响应区域校验
-- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp:695` 注释声明"mirroring ClickRecognizer::IsPointInRegion"
+- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp` `ClickRecognizer::IsPointInRegion`：含 distanceThreshold_ 距离校验 + responseRegionBuffer_ 响应区域校验
+- `frameworks/core/components_ng/pattern/menu/menu_pattern.cpp` 注释声明"mirroring ClickRecognizer::IsPointInRegion"
 
 ## 修复方案
 
@@ -65,7 +78,7 @@
 | 点击判定条件过宽 | 回退 PR #86305，恢复基于按下↔抬起直线距离（DEFAULT_CLICK_DISTANCE=15px）的点击判定，使长距离滑动不被误判为点击 | `menu_pattern.cpp` OnTouchEvent UP 分支恢复 `GetDistance() <= DEFAULT_CLICK_DISTANCE`；`menu_item_pattern.cpp` OnTouch 同步恢复；删除 `movedOutOfRegion_`、`IsOffsetInNodeBounds`，恢复 `DEFAULT_CLICK_DISTANCE` 常量 | PR #86878（完整回退 #86305） |
 | Menu 自定义触摸处理与 ClickRecognizer 判定不一致 | 若需保留放宽判定，应使 Menu 的点击判定与 ClickRecognizer 口径完全对齐（含距离阈值），而非仅做边界判定 | `menu_pattern.cpp` IsOffsetInNodeBounds 增加距离阈值校验，或直接复用 ClickRecognizer 判定 | 待后续优化 |
 
-## 关联案例
+## 关联变更
 
 | 案例编号 | 问题简述 | 根因类别 | 修复方式 | 关联 PR / Issue |
 |----------|----------|----------|----------|----------------|
@@ -80,6 +93,4 @@
 
 ## 相关主题
 
-- `docs/kb/components/overlay/menu.md` — Menu 菜单组件代码型 KB
-- `frameworks/core/components_ng/pattern/menu/` — Menu 模式源码目录
-- `frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp` — ClickRecognizer 点击识别器（判定口径参考）
+- [menu](../../components/overlay/menu.md) — Menu 菜单组件代码型 KB

@@ -67,7 +67,7 @@ public:
         return stageNode_;
     }
 
-    void ReloadStage();
+    void ReloadStage(bool fullRebuild = false);
 
     virtual RefPtr<FrameNode> GetLastPageWithTransition() const;
     virtual RefPtr<FrameNode> GetPrevPageWithTransition() const;

@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
@@ -83,6 +84,8 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Sw
     if (SystemProperties::ConfigChangePerform()) {
         tabsLayoutProperty->ResetDividerColorSetByUser();
         tabsLayoutProperty->ResetBarBackgroundColorSetByUser();
+        tabsLayoutProperty->ResetSidebarDividerColorSetByUser();
+        tabsLayoutProperty->ResetSidebarBackgroundColorSetByUser();
     }
 }
 
@@ -186,7 +189,21 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     if (auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>(); tabBarPattern) {
         tabBarPattern->SetController(GetSwiperController(swiperNode, swiperController));
     }
-
+    // Sync current barDisplayMode to the new controller - controller is recreated
+    // every time JSTabs::Create runs, so the new instance has default mode=0.
+    do {
+        auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+        CHECK_NULL_BREAK(tabsPattern);
+        auto currentMode = tabsPattern->GetCurrentBarDisplayMode();
+        if (!currentMode.has_value()) {
+            break;
+        }
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_BREAK(swiperPattern);
+        auto tabsController = AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
+        CHECK_NULL_BREAK(tabsController);
+        tabsController->SetBarDisplayMode(currentMode.value());
+    } while (false);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     if (tabBarLayoutProperty->GetPixelRound() == static_cast<uint16_t>(PixelRoundPolicy::ALL_FORCE_ROUND)) {
@@ -317,6 +334,12 @@ void TabsModelNG::SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& o
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     onApply(tabBarNode);
+    // Store the callback so it can be replayed on the sidebar during SyncPropertiesToSideBar.
+    // No need to apply immediately — OnModifyDone will replay it in the correct order
+    // (modifier first, then bar* properties override), consistent with tabBar execution order.
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetBarModifierApply(std::move(onApply));
 }
 
 void TabsModelNG::SetWidthAuto(bool isAuto)
@@ -384,6 +407,32 @@ void TabsModelNG::SetIsVertical(bool isVertical)
 void TabsModelNG::SetIndex(int32_t index)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateIndex(index);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    if (index < 0) {
+        index = 0;
+    }
+    tabBarPattern->UpdateIndicator(index);
+    tabBarPattern->UpdateTextColorAndFontWeight(index);
+    swiperLayoutProperty->UpdateIndex(index);
+    auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
+    CHECK_NULL_VOID(tabsFrameNode);
+    auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
+    tabsLayoutProperty->UpdateIndex(index);
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TabsModelNG::SetIndex(FrameNode* frameNode, int32_t index)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
@@ -578,6 +627,7 @@ void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColor, backgroundColor);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
@@ -588,6 +638,41 @@ void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
 void TabsModelNG::SetBarBackgroundColorByUser(bool isByUser)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser);
+}
+
+void TabsModelNG::SetSidebarSelectedIconColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedTextColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedIconColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedTextColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedBoardColor(const Color& color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedBoardColor, color, frameNode);
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty()
@@ -705,6 +790,16 @@ RefPtr<TabsNode> TabsModelNG::GetOrCreateTabsNode(
 void TabsModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
+}
+
+void TabsModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
@@ -903,6 +998,7 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColor, backgroundColor, frameNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
@@ -915,11 +1011,44 @@ void TabsModelNG::SetBarBackgroundColorByUser(FrameNode* frameNode, bool isByUse
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColorSetByUser, isByUser, frameNode);
 }
 
+void TabsModelNG::SetSidebarSelectedIconColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedTextColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedIconColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedIconColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarUnselectedTextColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarUnselectedTextColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarSelectedBoardColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSelectedBoardColor, color, frameNode);
+}
+
 void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetBarBlurStyleOption(styleOption);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto pipeline = tabBarNode->GetContext();
@@ -1275,6 +1404,12 @@ void TabsModelNG::SetBarModifier(FrameNode* frameNode, std::function<void(WeakPt
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     onApply(tabBarNode);
+    // Store the callback so it can be replayed on the sidebar during SyncPropertiesToSideBar.
+    // No need to apply immediately — OnModifyDone will replay it in the correct order
+    // (modifier first, then bar* properties override), consistent with tabBar execution order.
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetBarModifierApply(std::move(onApply));
 }
 
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)
@@ -1336,6 +1471,19 @@ void TabsModelNG::SetPageFlipMode(FrameNode* frameNode, int32_t options)
 void TabsModelNG::SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (cachedMaxCount.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, cachedMaxCount.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, cacheMode, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, frameNode);
+    }
+}
+
+void TabsModelNG::SetCachedMaxCountForJs(
+    FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode)
+{
     CHECK_NULL_VOID(frameNode);
     if (cachedMaxCount.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, cachedMaxCount.value(), frameNode);
@@ -1484,6 +1632,61 @@ void TabsModelNG::CreateWithResourceObj(TabJsResType jsResourceType, const RefPt
             break;
         case TabJsResType::BlurStyle_INACTIVE_COLOR:
             HandleBackgroundBlurStyleInactiveColor(frameNode, resObj);
+            break;
+        default:
+            break;
+    }
+}
+
+void TabsModelNG::CreateWithSidebarResourceObj(
+    FrameNode* frameNode, TabJsResType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    switch (jsResourceType) {
+        case TabJsResType::SIDEBAR_SELECTED_ICONCOLOR:
+            HandleSidebarSelectedIconColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_SELECTED_TEXTCOLOR:
+            HandleSidebarSelectedTextColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_UNSELECTED_ICONCOLOR:
+            HandleSidebarUnselectedIconColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_UNSELECTED_TEXTCOLOR:
+            HandleSidebarUnselectedTextColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_SELECTED_BOARDCOLOR:
+            HandleSidebarSelectedBoardColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_WIDTH:
+            HandleSidebarWidth(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_MIN_SIDEBAR_WIDTH:
+            HandleMinSidebarWidth(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_MAX_SIDEBAR_WIDTH:
+            HandleMaxSidebarWidth(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_MIN_CONTENT_WIDTH:
+            HandleMinContentWidth(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_BACKGROUND_COLOR:
+            HandleSidebarBackgroundColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_DIVIDER_STROKE_WIDTH:
+            HandleSidebarDividerStrokeWidth(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_DIVIDER_COLOR:
+            HandleSidebarDividerColor(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_DIVIDER_START_MARGIN:
+            HandleSidebarDividerStartMargin(frameNode, resObj);
+            break;
+        case TabJsResType::SIDEBAR_DIVIDER_END_MARGIN:
+            HandleSidebarDividerEndMargin(frameNode, resObj);
             break;
         default:
             break;
@@ -1895,6 +2098,342 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
     pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
 
+void TabsModelNG::HandleSidebarSelectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarSelectedIconColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarSelectedIconColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarSelectedIconColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarSelectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarSelectedTextColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarSelectedTextColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarSelectedTextColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarUnselectedIconColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarUnselectedIconColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarUnselectedIconColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarUnselectedIconColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarUnselectedTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarUnselectedTextColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarUnselectedTextColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarUnselectedTextColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarSelectedBoardColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarSelectedBoardColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result = tabTheme->GetSideBarListItemActivedColor();
+        ResourceParseUtils::ParseResColor(resObj, result);
+        TabsModelNG::SetSidebarSelectedBoardColor(AceType::RawPtr(tabsNode), result);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        std::optional<CalcDimension> sidebarWidth;
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            sidebarWidth = result;
+        }
+        TabsModelNG::SetSidebarWidth(AceType::RawPtr(tabsNode), sidebarWidth);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleMinSidebarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsMinSidebarWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        std::optional<CalcDimension> minSidebarWidth;
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            minSidebarWidth = result;
+        }
+        TabsModelNG::SetMinSidebarWidth(AceType::RawPtr(tabsNode), minSidebarWidth);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleMaxSidebarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsMaxSidebarWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        std::optional<CalcDimension> maxSidebarWidth;
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            maxSidebarWidth = result;
+        }
+        TabsModelNG::SetMaxSidebarWidth(AceType::RawPtr(tabsNode), maxSidebarWidth);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleMinContentWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsMinContentWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        std::optional<CalcDimension> minContentWidth;
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            minContentWidth = result;
+        }
+        TabsModelNG::SetMinContentWidth(AceType::RawPtr(tabsNode), minContentWidth);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarBackgroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarBackgroundColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
+                            weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject> &resObj) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabsPattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(tabsPattern);
+        auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+        CHECK_NULL_VOID(tabTheme);
+        Color result;
+        if (ResourceParseUtils::ParseResColor(resObj, result)) {
+            TabsModelNG::SetSidebarBackgroundColorByUser(AceType::RawPtr(tabsNode), true);
+        } else {
+            result = tabTheme->GetSideBarBackgroundColor();
+            TabsModelNG::SetSidebarBackgroundColorByUser(AceType::RawPtr(tabsNode), false);
+        }
+        TabsModelNG::SetSidebarBackgroundColor(AceType::RawPtr(tabsNode), result);
+        tabsPattern->UpdateSideBarBackgroundColor();
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarDividerStrokeWidth";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
+                            weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject> &resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto tabsPattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(tabsPattern);
+        CalcDimension result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDivider, divider, node);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (result.Value() < 0.0f || result.Unit() == DimensionUnit::PERCENT) {
+            divider.strokeWidth.Reset();
+        } else {
+            divider.strokeWidth = result;
+        }
+        TabsModelNG::SetSidebarDivider(AceType::RawPtr(node), divider);
+        tabsPattern->UpdateSidebarDividerStrokeWidth();
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarDividerColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
+                            weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject> &resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto tabsPattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(tabsPattern);
+        Color result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDivider, divider, node);
+        if (ResourceParseUtils::ParseResColor(resObj, result)) {
+            divider.color = result;
+            TabsModelNG::SetSidebarDividerColorByUser(AceType::RawPtr(node), true);
+        } else {
+            auto tabTheme = node->GetTheme<TabTheme>(true);
+            CHECK_NULL_VOID(tabTheme);
+            divider.color = tabTheme->GetSideBarDividerColor();
+            TabsModelNG::SetSidebarDividerColorByUser(AceType::RawPtr(node), false);
+        }
+        TabsModelNG::SetSidebarDivider(AceType::RawPtr(node), divider);
+        tabsPattern->UpdateSidebarDividerColor();
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarDividerStartMargin";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDivider, divider, node);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (result.Value() < 0.0f || result.Unit() == DimensionUnit::PERCENT) {
+            divider.startMargin.Reset();
+        } else {
+            divider.startMargin = result;
+        }
+        TabsModelNG::SetSidebarDivider(AceType::RawPtr(node), divider);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TabsModelNG::HandleSidebarDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "tabsSidebarDividerEndMargin";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        TabsItemDivider divider;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDivider, divider, node);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (result.Value() < 0.0f || result.Unit() == DimensionUnit::PERCENT) {
+            divider.endMargin.Reset();
+        } else {
+            divider.endMargin = result;
+        }
+        TabsModelNG::SetSidebarDivider(AceType::RawPtr(node), divider);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
 void TabsModelNG::SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, parameters, frameNode);
@@ -1996,6 +2535,18 @@ void TabsModelNG::ProcessColorWithResourceObj(
     }
 }
 
+void TabsModelNG::SetSidebarDisplayStyle(SidebarDisplayStyle sidebarDisplayStyle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSidebarDisplayStyle(frameNode, sidebarDisplayStyle);
+}
+
+void TabsModelNG::SetSidebarDisplayStyle(FrameNode* frameNode, SidebarDisplayStyle sidebarDisplayStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDisplayStyle, sidebarDisplayStyle, frameNode);
+}
+
 void TabsModelNG::SetBarLayoutStyle(TabBarLayoutStyle barLayoutStyle)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2061,5 +2612,110 @@ void TabsModelNG::SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint&
 void TabsModelNG::SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarDisplayModeBreakpoint, breakpoint, frameNode);
+}
+
+void TabsModelNG::SetOnBarDisplayModeChange(std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetOnBarDisplayModeChangeEvent(std::move(onBarDisplayModeChange));
+}
+
+void TabsModelNG::SetOnBarDisplayModeChange(FrameNode* frameNode,
+    std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetOnBarDisplayModeChangeEvent(std::move(onBarDisplayModeChange));
+}
+
+void TabsModelNG::SetSidebarWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    if (tabsPattern) {
+        tabsPattern->SetSidebarWidthCalled();
+    }
+    if (width) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.value(), LpxAttribute::ALWAYS, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarWidth, width.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarWidth, frameNode);
+    }
+}
+
+void TabsModelNG::SetMinSidebarWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (width) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.value(), LpxAttribute::ALWAYS, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MinSidebarWidth, width.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MinSidebarWidth, frameNode);
+    }
+}
+
+void TabsModelNG::SetMaxSidebarWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (width) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.value(), LpxAttribute::ALWAYS, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MaxSidebarWidth, width.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MaxSidebarWidth, frameNode);
+    }
+}
+
+void TabsModelNG::SetMinContentWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (width) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.value(), LpxAttribute::ALWAYS, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MinContentWidth, width.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MinContentWidth, frameNode);
+    }
+}
+
+void TabsModelNG::SetSidebarBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarBackgroundColor, color, frameNode);
+}
+
+void TabsModelNG::SetSidebarBackgroundColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarBackgroundColorSetByUser, isByUser, frameNode);
+}
+
+void TabsModelNG::SetSidebarBackgroundBlurStyle(FrameNode* frameNode, const std::optional<BlurStyle>& blurStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    BlurStyleOption styleOption;
+    if (blurStyle.has_value()) {
+        styleOption.blurStyle = blurStyle.value();
+    }
+    tabsPattern->SetSidebarBlurStyleOptions(styleOption);
+}
+
+void TabsModelNG::SetSidebarDivider(FrameNode* frameNode, const TabsItemDivider& divider)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::ALWAYS, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::ALWAYS, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.strokeWidth, LpxAttribute::ALWAYS, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDivider, divider, frameNode);
+}
+
+void TabsModelNG::SetSidebarDividerColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDividerColorSetByUser, isByUser, frameNode);
 }
 } // namespace OHOS::Ace::NG

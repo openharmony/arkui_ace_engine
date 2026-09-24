@@ -95,6 +95,7 @@ struct IndexPage {
     new TextList(63, 'ListEmptyBranch', 'pages/List/ListEmptyBranch'),
     new TextList(64, 'ListItemGroupStickyHeaderWithHorizontalList',
       'pages/List/ListItemGroupStickyHeaderWithHorizontalList'),
+    new TextList(65, 'SyncLoadDemo', 'pages/List/syncLoad/SyncLoadDemo'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

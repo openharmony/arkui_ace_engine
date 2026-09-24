@@ -74,12 +74,12 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
         swiperTheme->GetIndicatorDotItemSpace()));
     auto renderContext = paintWrapper->GetRenderContext();
     auto host = renderContext ? renderContext->GetHost() : nullptr;
+    dotIndicatorModifier_->SetIndicatorHost(host ? AceType::WeakClaim(AceType::RawPtr(host)) : WeakPtr<FrameNode>());
     auto indicatorPattern = host ? host->GetPattern<SwiperIndicatorPattern>() : nullptr;
     bool needCustomIconLayout = indicatorPattern && indicatorPattern->NeedCustomDotIndicatorLayout();
     LinearVector<float> oldCustomIconCenters;
     if (needCustomIconLayout) {
         oldCustomIconCenters = dotIndicatorModifier_->GetBlackPointCenterX();
-        dotIndicatorModifier_->SetIndicatorHost(AceType::WeakClaim(AceType::RawPtr(host)));
         dotIndicatorModifier_->SetCustomIconIndexes(indicatorPattern->GetIndicatorIconIndexes());
     }
     dotIndicatorModifier_->SetHasCustomIcon(needCustomIconLayout);

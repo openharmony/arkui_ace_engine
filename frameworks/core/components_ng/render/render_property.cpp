@@ -255,6 +255,15 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         json->PutExtAttr("backgroundImagePosition", jsonValue, filter);
     }
     json->PutExtAttr("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx(), filter);
+    // converter main path creates exactly 2 elements; size() > 1 guard handles variable-size assign() paths
+    if (propBackdropBlurOption.has_value() && propBackdropBlurOption->grayscale.size() > 1) {
+        auto jsonBlurOption = JsonUtil::Create(true);
+        auto jsonGrayscale = JsonUtil::CreateArray(true);
+        jsonGrayscale->Put("0", propBackdropBlurOption->grayscale[0]);
+        jsonGrayscale->Put("1", propBackdropBlurOption->grayscale[1]);
+        jsonBlurOption->Put("grayscale", jsonGrayscale);
+        json->PutExtAttr("backdropBlurOptions", jsonBlurOption, filter);
+    }
     json->PutExtAttr("backgroundImageResizable",
         propBackgroundImageResizableSlice.value_or(ImageResizableSlice()).ToString().c_str(), filter);
     if (propSysOptions.has_value()) {
