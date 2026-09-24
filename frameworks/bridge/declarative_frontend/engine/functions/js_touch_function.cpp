@@ -56,7 +56,10 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<int32_t>("hand", touchInfo.GetOperatingHand());
     touchInfoObj->SetPropertyObject("getCurrentLocalPosition",
         JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
-    touchInfoObj->Wrap<TouchLocationInfo>(const_cast<TouchLocationInfo*>(&touchInfo));
+    auto* touchLocationInfoPtr = new TouchLocationInfo(touchInfo);
+    touchInfoObj->Wrap<TouchLocationInfo>(touchLocationInfoPtr, [](void* env, void* nativePtr, void* hint) {
+        delete static_cast<TouchLocationInfo*>(nativePtr);
+    });
     return touchInfoObj;
 }
 

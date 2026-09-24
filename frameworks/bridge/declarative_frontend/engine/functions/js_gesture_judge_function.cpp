@@ -46,6 +46,7 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
     params[0] = gestureInfoObj;
     params[1] = obj;
     auto jsValue = JsFunction::ExecuteJS(paramCount, params);
+    obj->Wrap<BaseGestureEvent>(nullptr);
     auto returnValue = GestureJudgeResult::CONTINUE;
     if (jsValue->IsNumber()) {
         returnValue = static_cast<GestureJudgeResult>(jsValue->ToNumber<int32_t>());
@@ -88,6 +89,7 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGes
     params[2] = othersArr;
     params[PARAM_COUNT_THREE] = touchRecognizers;
     auto jsValue = JsFunction::ExecuteJS(PARAM_COUNT_FOUR, params);
+    obj->Wrap<BaseGestureEvent>(nullptr);
     auto returnValue = GestureJudgeResult::CONTINUE;
     if (jsValue->IsNumber()) {
         returnValue = static_cast<GestureJudgeResult>(jsValue->ToNumber<int32_t>());
@@ -163,7 +165,10 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& finge
         "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     fingerInfoObj->SetPropertyObject("getCurrentLocalPosition",
         JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPositionForFinger));
-    fingerInfoObj->Wrap<FingerInfo>(const_cast<FingerInfo*>(&fingerInfo));
+    auto* fingerInfoPtr = new FingerInfo(fingerInfo);
+    fingerInfoObj->Wrap<FingerInfo>(fingerInfoPtr, [](void* env, void* nativePtr, void* hint) {
+        delete static_cast<FingerInfo*>(nativePtr);
+    });
     return fingerInfoObj;
 }
 
