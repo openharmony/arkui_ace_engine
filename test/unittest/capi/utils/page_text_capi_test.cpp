@@ -106,15 +106,15 @@ TEST_F(PageTextCapiTest, validationOrderAndSharedDiagnostics)
     ArkUI_Context context { 17 };
     OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
     // 401 is ARKUI_ERROR_CODE_PARAM_INVALID for the null output slot.
-    EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(nullptr, nullptr), 401);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(nullptr, nullptr), 401);
     EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("output slot"), std::string::npos);
     // 190001 is ARKUI_ERROR_CODE_UI_CONTEXT_INVALID for the null UI context.
-    EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(nullptr, &result), 190001);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(nullptr, &result), 190001);
     support = false;
-    EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 500);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &result), 500);
     auto message = std::string(OH_ArkUI_NativeModule_GetErrorMessage());
     EXPECT_NE(message.find("500"), std::string::npos);
-    EXPECT_NE(message.find("OH_ArkUI_NativeModule_GetPageText"), std::string::npos);
+    EXPECT_NE(message.find("OH_ArkUI_NativeModule_UIAgentGetPageText"), std::string::npos);
     EXPECT_NE(message.find("unavailable"), std::string::npos);
     EXPECT_EQ(result, nullptr);
 }
@@ -124,25 +124,24 @@ TEST_F(PageTextCapiTest, failureRecoveryAndIndependentSnapshots)
     // Instance ID 17 is a non-default mock instance used to verify forwarding through the public API.
     ArkUI_Context context { 17 };
     OH_ArkUI_NativeModule_UIJsonWrapper* old = nullptr;
-    ASSERT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &old), 0);
+    ASSERT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &old), 0);
     // The collector must receive the exact mock instance ID 17 supplied by the caller.
     EXPECT_EQ(lastInstance, 17);
-    EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_GetSchemaVersion(old), 1u);
     OH_ArkUI_NativeModule_UIJsonWrapper* result = old;
     // Inject 100001 (ARKUI_ERROR_CODE_INTERNAL_ERROR) to test failure followed by recovery.
     collectCode = 100001;
     // 100001 is the injected ARKUI_ERROR_CODE_INTERNAL_ERROR and must reach the caller unchanged.
-    EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 100001);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &result), 100001);
     EXPECT_EQ(result, nullptr);
     auto error = std::string(OH_ArkUI_NativeModule_GetErrorMessage());
     EXPECT_NE(error.find("Injected collection failure"), std::string::npos);
     collectCode = 0;
-    ASSERT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 0);
+    ASSERT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &result), 0);
     EXPECT_EQ(OH_ArkUI_NativeModule_GetErrorMessage(), error);
-    EXPECT_STREQ(OH_ArkUI_NativeModule_UIJsonWrapper_GetData(old), "{\"texts\":[]}");
+    EXPECT_STREQ(OH_ArkUI_NativeModule_UIJsonWrapperGetData(old), "{\"texts\":[]}");
     EXPECT_NE(old, result);
-    OH_ArkUI_NativeModule_UIJsonWrapper_Destroy(result);
-    OH_ArkUI_NativeModule_UIJsonWrapper_Destroy(old);
+    OH_ArkUI_NativeModule_UIJsonWrapperDestroy(result);
+    OH_ArkUI_NativeModule_UIJsonWrapperDestroy(old);
 }
 
 TEST_F(PageTextCapiTest, originalErrorChannelAvailabilityAndThreadIsolation)
@@ -151,20 +150,20 @@ TEST_F(PageTextCapiTest, originalErrorChannelAvailabilityAndThreadIsolation)
     support = false;
     ArkUI_Context context { 1 };
     OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
-    EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 500);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &result), 500);
     EXPECT_EQ(result, nullptr);
     EXPECT_STREQ(OH_ArkUI_NativeModule_GetErrorMessage(), "");
-    OH_ArkUI_NativeModule_GetPageText(nullptr, nullptr);
+    OH_ArkUI_NativeModule_UIAgentGetPageText(nullptr, nullptr);
     EXPECT_STREQ(OH_ArkUI_NativeModule_GetErrorMessage(), "");
 
     errorSupport = true;
     // 500 is ARKUI_ERROR_CODE_CAPI_INIT_ERROR while the query implementation is unavailable.
-    EXPECT_EQ(OH_ArkUI_NativeModule_GetPageText(&context, &result), 500);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &result), 500);
     auto message = std::string(OH_ArkUI_NativeModule_GetErrorMessage());
     // The diagnostic must contain code 500, matching the unavailable query implementation.
     EXPECT_NE(message.find("500"), std::string::npos);
     std::thread worker([] {
-        OH_ArkUI_NativeModule_GetPageText(nullptr, nullptr);
+        OH_ArkUI_NativeModule_UIAgentGetPageText(nullptr, nullptr);
         // Code 401 identifies the worker thread null-output error and must not replace the caller diagnostic.
         EXPECT_NE(std::string(OH_ArkUI_NativeModule_GetErrorMessage()).find("401"), std::string::npos);
     });
@@ -179,19 +178,18 @@ TEST(UIJsonWrapperTest, immutableCopyMetadataNullAndConcurrentReaders)
 {
     char source[] = "{\"texts\":[]}";
     OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
-    ASSERT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_Create(source, 12, 1, &result), 0);
+    ASSERT_EQ(OH_ArkUI_NativeModule_UIJsonWrapperCreate(source, 12, &result), 0);
     source[0] = '!';
     auto read = [result] {
-        EXPECT_STREQ(OH_ArkUI_NativeModule_UIJsonWrapper_GetData(result), "{\"texts\":[]}");
-        EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_GetSize(result), 12u);
+        EXPECT_STREQ(OH_ArkUI_NativeModule_UIJsonWrapperGetData(result), "{\"texts\":[]}");
+        EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapperGetSize(result), 12u);
     };
     std::thread worker(read);
     read();
     worker.join();
-    OH_ArkUI_NativeModule_UIJsonWrapper_Destroy(result);
-    EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_GetData(nullptr), nullptr);
-    EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapper_GetSchemaVersion(nullptr), 0u);
-    OH_ArkUI_NativeModule_UIJsonWrapper_Destroy(nullptr);
+    OH_ArkUI_NativeModule_UIJsonWrapperDestroy(result);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapperGetData(nullptr), nullptr);
+    OH_ArkUI_NativeModule_UIJsonWrapperDestroy(nullptr);
 }
 
 TEST(PageTextJsonTest, utf8GetterPayloadAndEmbeddedNul)

@@ -22,11 +22,10 @@
 struct OH_ArkUI_NativeModule_UIJsonWrapper {
     char* data;
     uint32_t size;
-    uint32_t schemaVersion;
 };
 
-ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapper_Create(const char* data, uint32_t size,
-    uint32_t schemaVersion, OH_ArkUI_NativeModule_UIJsonWrapper** outOwned)
+ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapperCreate(const char* data, uint32_t size,
+    OH_ArkUI_NativeModule_UIJsonWrapper** outOwned)
 {
     if (!outOwned) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -50,27 +49,21 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapper_Create(const char* data, uin
     std::memcpy(wrapper->data, data, size);
     wrapper->data[size] = '\0';
     wrapper->size = size;
-    wrapper->schemaVersion = schemaVersion;
     *outOwned = wrapper;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-const char* OH_ArkUI_NativeModule_UIJsonWrapper_GetData(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
+const char* OH_ArkUI_NativeModule_UIJsonWrapperGetData(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
 {
     return wrapper ? wrapper->data : nullptr;
 }
 
-uint32_t OH_ArkUI_NativeModule_UIJsonWrapper_GetSize(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
+uint32_t OH_ArkUI_NativeModule_UIJsonWrapperGetSize(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
 {
     return wrapper->size;
 }
 
-uint32_t OH_ArkUI_NativeModule_UIJsonWrapper_GetSchemaVersion(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
-{
-    return wrapper ? wrapper->schemaVersion : 0;
-}
-
-void OH_ArkUI_NativeModule_UIJsonWrapper_Destroy(OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
+void OH_ArkUI_NativeModule_UIJsonWrapperDestroy(OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
 {
     if (wrapper) {
         std::free(wrapper->data);

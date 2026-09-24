@@ -18,11 +18,11 @@
 #include "interfaces/native/native_error_message_wrapper.h"
 #include "interfaces/native/node/node_model.h"
 
-ArkUI_ErrorCode OH_ArkUI_NativeModule_GetPageText(
+ArkUI_ErrorCode OH_ArkUI_NativeModule_UIAgentGetPageText(
     ArkUI_ContextHandle uiContext, OH_ArkUI_NativeModule_UIJsonWrapper** pageText)
 {
     auto fail = [](ArkUI_ErrorCode code, const char* reason) {
-        OHOS::Ace::SetErrorMessageByModifier(code, "OH_ArkUI_NativeModule_GetPageText", reason);
+        OHOS::Ace::SetErrorMessageByModifier(code, "OH_ArkUI_NativeModule_UIAgentGetPageText", reason);
         return code;
     };
     if (!pageText) {
@@ -44,7 +44,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetPageText(
         api->release(data);
         return fail(code, reason);
     }
-    code = OH_ArkUI_NativeModule_UIJsonWrapper_Create(data, size, 1, pageText);
+    code = OH_ArkUI_NativeModule_UIJsonWrapperCreate(data, size, pageText);
     api->release(data);
     if (code != ARKUI_ERROR_CODE_NO_ERROR) {
         return fail(ARKUI_ERROR_CODE_INTERNAL_ERROR, "Page text snapshot allocation failed.");

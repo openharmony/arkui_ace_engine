@@ -85,12 +85,11 @@ extern "C" {
  * Different components have distinct IDs within a snapshot, even if their
  * text is identical. With no eligible text, the result is {"texts":[]}.
  * A missing page alone is not an error.
- * Use OH_ArkUI_NativeModule_UIJsonWrapper_GetData,
- * OH_ArkUI_NativeModule_UIJsonWrapper_GetSize, and
- * OH_ArkUI_NativeModule_UIJsonWrapper_GetSchemaVersion to read the JSON and
- * its metadata. The size is the UTF-8 byte length of the entire JSON payload,
+ * Use OH_ArkUI_NativeModule_UIJsonWrapperGetData and
+ * OH_ArkUI_NativeModule_UIJsonWrapperGetSize to read the JSON. The size is the
+ * UTF-8 byte length of the entire JSON payload,
  * excluding its terminating null character. Release the result with
- * OH_ArkUI_NativeModule_UIJsonWrapper_Destroy.
+ * OH_ArkUI_NativeModule_UIJsonWrapperDestroy.
  * @param uiContext A valid framework-provided context of the calling app.
  * @param pageText Writable output slot, initialized to NULL by the caller.
  * A valid slot is set to NULL on failure; an empty page still returns a
@@ -103,10 +102,10 @@ extern "C" {
  * unavailable.
  * ARKUI_ERROR_CODE_INTERNAL_ERROR if the JSON payload
  * cannot be represented by uint32_t size, or collection/serialization fails.
- * @release ui_json_wrapper/OH_ArkUI_NativeModule_UIJsonWrapper_Destroy {pageText}
+ * @release ui_json_wrapper/OH_ArkUI_NativeModule_UIJsonWrapperDestroy {pageText}
  * @since 26.2.0
  */
-ArkUI_ErrorCode OH_ArkUI_NativeModule_GetPageText(
+ArkUI_ErrorCode OH_ArkUI_NativeModule_UIAgentGetPageText(
     ArkUI_ContextHandle uiContext, OH_ArkUI_NativeModule_UIJsonWrapper** pageText);
 
 #ifdef __cplusplus

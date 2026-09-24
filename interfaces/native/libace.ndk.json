@@ -7034,27 +7034,23 @@
     },
     {
         "first_introduced": "26.2.0",
-        "name": "OH_ArkUI_NativeModule_GetPageText"
+        "name": "OH_ArkUI_NativeModule_UIAgentGetPageText"
     },
     {
         "first_introduced": "26.2.0",
-        "name": "OH_ArkUI_NativeModule_UIJsonWrapper_Create"
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperCreate"
     },
     {
         "first_introduced": "26.2.0",
-        "name": "OH_ArkUI_NativeModule_UIJsonWrapper_GetData"
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperGetData"
     },
     {
         "first_introduced": "26.2.0",
-        "name": "OH_ArkUI_NativeModule_UIJsonWrapper_GetSize"
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperGetSize"
     },
     {
         "first_introduced": "26.2.0",
-        "name": "OH_ArkUI_NativeModule_UIJsonWrapper_GetSchemaVersion"
-    },
-    {
-        "first_introduced": "26.2.0",
-        "name": "OH_ArkUI_NativeModule_UIJsonWrapper_Destroy"
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperDestroy"
     },
     {
         "first_introduced": "26.2.0",

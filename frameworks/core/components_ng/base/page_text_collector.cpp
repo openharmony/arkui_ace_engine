@@ -86,7 +86,7 @@ int32_t CollectPageText(int32_t instanceId, char** data, uint32_t* size, const c
     }
     auto executor = container->GetTaskExecutor();
     if (!executor || !executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
-        LOGF_ABORT("OH_ArkUI_NativeModule_GetPageText must run on the target UI thread.");
+        LOGF_ABORT("OH_ArkUI_NativeModule_UIAgentGetPageText must run on the target UI thread.");
     }
     ContainerScope scope(instanceId);
     *reason = "Page text serialization, allocation or size check failed.";

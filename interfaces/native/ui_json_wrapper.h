@@ -25,16 +25,14 @@ extern "C" {
 typedef struct OH_ArkUI_NativeModule_UIJsonWrapper OH_ArkUI_NativeModule_UIJsonWrapper;
 
 /** Copies size UTF-8 bytes. The result is immutable and independently owned. */
-ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapper_Create(const char* data, uint32_t size,
-    uint32_t schemaVersion, OH_ArkUI_NativeModule_UIJsonWrapper** outOwned);
+ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapperCreate(const char* data, uint32_t size,
+    OH_ArkUI_NativeModule_UIJsonWrapper** outOwned);
 /** Borrowed, NUL-terminated bytes; NULL wrapper returns NULL. */
-const char* OH_ArkUI_NativeModule_UIJsonWrapper_GetData(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
+const char* OH_ArkUI_NativeModule_UIJsonWrapperGetData(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
 /** Byte count excluding the terminator. wrapper must be non-NULL. */
-uint32_t OH_ArkUI_NativeModule_UIJsonWrapper_GetSize(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
-/** NULL wrapper returns zero. */
-uint32_t OH_ArkUI_NativeModule_UIJsonWrapper_GetSchemaVersion(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
+uint32_t OH_ArkUI_NativeModule_UIJsonWrapperGetSize(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
 /** NULL is a no-op. Must not race with readers or another destroy. */
-void OH_ArkUI_NativeModule_UIJsonWrapper_Destroy(OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
+void OH_ArkUI_NativeModule_UIJsonWrapperDestroy(OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
 
 #ifdef __cplusplus
 }
