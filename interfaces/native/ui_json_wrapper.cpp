@@ -15,9 +15,10 @@
 #include "ui_json_wrapper.h"
 
 #include <cstdlib>
-#include <cstring>
 #include <limits>
 #include <new>
+
+#include "securec.h"
 
 struct OH_ArkUI_NativeModule_UIJsonWrapper {
     char* data;
@@ -46,7 +47,11 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapperCreate(const char* data, uint
         delete wrapper;
         return ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
-    std::memcpy(wrapper->data, data, size);
+    if (memcpy_s(wrapper->data, static_cast<size_t>(size) + 1, data, size) != EOK) {
+        std::free(wrapper->data);
+        delete wrapper;
+        return ARKUI_ERROR_CODE_INTERNAL_ERROR;
+    }
     wrapper->data[size] = '\0';
     wrapper->size = size;
     *outOwned = wrapper;

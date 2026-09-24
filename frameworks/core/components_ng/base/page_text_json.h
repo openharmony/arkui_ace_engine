@@ -19,9 +19,10 @@
 #include <charconv>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <limits>
 #include <string_view>
+
+#include "securec.h"
 
 namespace OHOS::Ace::NG {
 // Checked JSON buffer. Escape the translation getter's UTF-8 bytes without
@@ -57,7 +58,9 @@ public:
             data_ = data;
             capacity_ = capacity;
         }
-        std::memcpy(data_ + size_, value.data(), value.size());
+        if (!value.empty() && memcpy_s(data_ + size_, capacity_ - size_, value.data(), value.size()) != EOK) {
+            return Fail("Page text JSON copy failed.");
+        }
         size_ += value.size();
         data_[size_] = '\0';
         return true;

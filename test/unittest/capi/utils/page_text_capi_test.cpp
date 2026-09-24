@@ -16,6 +16,7 @@
 #include <cstring>
 #include <thread>
 #include "gtest/gtest.h"
+#include "securec.h"
 #include "interfaces/native/ui_info_collection.h"
 #include "interfaces/native/native_interface.h"
 #include "interfaces/native/native_error_message_wrapper.h"
@@ -48,7 +49,7 @@ int32_t Collect(int32_t id, char** data, uint32_t* size, const char** reason)
         return 100001;
     }
     // Copy all 13 bytes so the 12-byte JSON payload remains NUL-terminated.
-    std::memcpy(*data, "{\"texts\":[]}", 13);
+    EXPECT_EQ(memcpy_s(*data, 13, "{\"texts\":[]}", 13), EOK);
     return 0;
 }
 void SetCode(int32_t code, const char* reason)
