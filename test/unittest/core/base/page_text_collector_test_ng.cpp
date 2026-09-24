@@ -135,6 +135,7 @@ public:
     }
     RefPtr<RepeatVirtualScroll2Node> CreateRepeatVirtual2Node(int& callbacks)
     {
+        // Node ID 1200 identifies the Repeat container, distinct from child node IDs 1201 through 1205.
         return AceType::MakeRefPtr<RepeatVirtualScroll2Node>(1200, 8, 8, 0,
             [&](IndexType, bool, bool) -> std::pair<RIDType, uint32_t> {
                 ++callbacks;
@@ -383,7 +384,9 @@ TEST_F(PageTextCollectorTest, realLazyForEachSurvivesCacheInvalidationWithoutBui
     builder->expiringItem_["cache"] = { 4, cached };
     ASSERT_EQ(lazy->GetChildren().size(), nodes.size());
     ASSERT_TRUE(lazy->UINode::GetChildren().empty());
+    // Index 2 is the "hidden" fixture; make it inactive to exclude it from text collection.
     nodes[2]->SetActive(false);
+    // Index 3 is the "inactive" fixture; ensure it is excluded from text collection.
     nodes[3]->SetActive(false);
     ExpectContents({ "first", "second" });
 

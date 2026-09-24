@@ -112,6 +112,7 @@ TEST_F(PageTextCapiTest, validationOrderAndSharedDiagnostics)
     // 190001 is ARKUI_ERROR_CODE_UI_CONTEXT_INVALID for the null UI context.
     EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(nullptr, &result), 190001);
     support = false;
+    // 500 is ARKUI_ERROR_CODE_CAPI_INIT_ERROR while the query implementation is unavailable.
     EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &result), 500);
     auto message = std::string(OH_ArkUI_NativeModule_GetErrorMessage());
     EXPECT_NE(message.find("500"), std::string::npos);
