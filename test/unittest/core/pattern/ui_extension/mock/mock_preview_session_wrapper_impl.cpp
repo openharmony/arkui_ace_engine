@@ -241,7 +241,7 @@ void PreviewSessionWrapperImpl::NotifySizeChangeReason(
 }
 
 void PreviewSessionWrapperImpl::NotifyOriginAvoidArea(
-    const Rosen::AvoidArea& avoidArea, uint32_t type) const
+    const Rosen::AvoidArea& avoidArea, uint32_t type, WindowSizeChangeReason reason) const
 {
 }
 

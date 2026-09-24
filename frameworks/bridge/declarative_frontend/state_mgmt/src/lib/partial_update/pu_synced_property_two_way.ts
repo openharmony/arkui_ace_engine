@@ -27,7 +27,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   
   private rootSource_?: ObservedPropertyObjectAbstract<C>;
   
-  private fakeSourceBackup_: ObservedPropertyObjectAbstract<C>;
+  private fakeSourceBackup_?: ObservedPropertyObjectAbstract<C>;
 
   constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
@@ -263,11 +263,17 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   private syncFromSource(): void {
+    const fakeSourceBackup = this.fakeSourceBackup_;
+    if (!fakeSourceBackup) {
+      stateMgmtConsole.frequentWarn(`${this.debugInfo()} does not have the fake source backup, ` +
+        `cannot sync from source`);
+      return;
+    }
     const isTrack = this.shouldInstallTrackedObjectReadCb;
     this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
     this.syncPeerHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, true);
     let newValue = ObservedObject.GetRawObject(this.source_.getUnmonitored());
-    let oldValue = ObservedObject.GetRawObject(this.fakeSourceBackup_.getUnmonitored());
+    let oldValue = ObservedObject.GetRawObject(fakeSourceBackup.getUnmonitored());
     if (isTrack && this.shouldInstallTrackedObjectReadCb) {
       Object.keys(newValue)
         .forEach(propName => {

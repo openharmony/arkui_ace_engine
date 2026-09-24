@@ -72,6 +72,22 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str(), filter);
     json->PutExtAttr("adaptiveWidth", propAdaptiveWidth_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("enableHapticFeedback", propEnableHapticFeedback_.value_or(true) ? "true" : "false", filter);
+    WithThemeValueCheck(json, filter);
+}
+
+void IndexerLayoutProperty::WithThemeValueCheck(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (indexerThemeColors_.count("color") != 0) {
+            json->Replace("color", indexerThemeColors_.at("color").ColorToString().c_str());
+        }
+        if (indexerThemeColors_.count("selectedColor") != 0) {
+            json->Replace("selectedColor", indexerThemeColors_.at("selectedColor").ColorToString().c_str());
+        }
+        if (indexerThemeColors_.count("popupColor") != 0) {
+            json->Replace("popupColor", indexerThemeColors_.at("popupColor").ColorToString().c_str());
+        }
+    }
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

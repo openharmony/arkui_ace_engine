@@ -142,21 +142,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     OptionalSizeF realSize;
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
-    embeddedDialogOffsetY_ = 0.0f;
-    stackRootDialogOffsetY_ = 0.0f;
-    if (IsEmbeddedDialog(hostNode)) {
-        if (!realSize.IsValid()) {
-            realSize.UpdateIllegalSizeWithCheck(layoutConstraint->maxSize);
-        }
-        if (dialogPattern->GetDialogProperties().dialogImmersiveMode == ImmersiveMode::EXTEND) {
-            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM,
-                .edges = SAFE_AREA_EDGE_TOP | SAFE_AREA_EDGE_BOTTOM };
-            dialogProp->UpdateSafeAreaExpandOpts(opts);
-        }
-        embeddedDialogOffsetY_ = GetEmbeddedDialogOffsetY(hostNode);
-    } else {
-        stackRootDialogOffsetY_ = GetStackRootDialogOffsetY(hostNode);
-    }
+    UpdateDialogOffsetY(hostNode, dialogPattern, dialogProp, layoutConstraint->maxSize, realSize);
     auto currentWindowOffset = pipeline->GetCurrentWindowRect().GetOffset();
     wrapperOffset_ = OffsetF(currentWindowOffset.GetX(), currentWindowOffset.GetY() + stackRootDialogOffsetY_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
@@ -1386,6 +1372,34 @@ float DialogLayoutAlgorithm::GetStackRootDialogOffsetY(const RefPtr<FrameNode>& 
         return parent->GetOffsetRelativeToWindow().GetY();
     }
     return 0.0f;
+}
+
+void DialogLayoutAlgorithm::UpdateDialogOffsetY(const RefPtr<FrameNode>& hostNode,
+    const RefPtr<DialogPattern>& dialogPattern, const RefPtr<DialogLayoutProperty>& dialogProp,
+    const SizeF& maxSize, OptionalSizeF& realSize)
+{
+    embeddedDialogOffsetY_ = 0.0f;
+    stackRootDialogOffsetY_ = 0.0f;
+    if (IsEmbeddedDialog(hostNode)) {
+        if (!realSize.IsValid()) {
+            realSize.UpdateIllegalSizeWithCheck(maxSize);
+        }
+        if (dialogPattern->GetDialogProperties().dialogImmersiveMode == ImmersiveMode::EXTEND) {
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM,
+                .edges = SAFE_AREA_EDGE_TOP | SAFE_AREA_EDGE_BOTTOM };
+            auto extraMaskNode = dialogPattern->GetExtraMaskNode();
+            if (extraMaskNode) {
+                auto maskLayoutProperty = extraMaskNode->GetLayoutProperty();
+                CHECK_NULL_VOID(maskLayoutProperty);
+                maskLayoutProperty->UpdateSafeAreaExpandOpts(opts);
+            } else {
+                dialogProp->UpdateSafeAreaExpandOpts(opts);
+            }
+        }
+        embeddedDialogOffsetY_ = GetEmbeddedDialogOffsetY(hostNode);
+    } else {
+        stackRootDialogOffsetY_ = GetStackRootDialogOffsetY(hostNode);
+    }
 }
 
 RefPtr<PipelineContext> DialogLayoutAlgorithm::GetPipelineContext() const

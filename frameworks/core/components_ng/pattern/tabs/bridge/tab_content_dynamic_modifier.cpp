@@ -307,6 +307,11 @@ void ResetTabContentOnWillHideImpl(ArkUINodeHandle node)
     CHECK_NULL_VOID(tabContentModelImpl);
     tabContentModelImpl->SetOnWillHide(nullptr);
 }
+
+void SetTabBarVisibilityImpl(
+    ArkUINodeHandle node, ArkUI_Int32 visibility, ArkUI_Int32 displayMode, ArkUI_Bool hasDisplayMode) {}
+
+void ResetTabBarVisibilityImpl(ArkUINodeHandle node) {}
 #endif
 } // namespace
 
@@ -601,6 +606,29 @@ void ResetTabContentOnWillHide(ArkUINodeHandle node)
     TabContentModelNG::SetOnWillHide(frameNode, nullptr);
 }
 
+void SetTabBarVisibility(
+    ArkUINodeHandle node, ArkUI_Int32 visibility, ArkUI_Int32 displayMode, ArkUI_Bool hasDisplayMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::TabContentDefaultVisibility defaultVisibility;
+    defaultVisibility.isNull = false;
+    defaultVisibility.visibility = static_cast<NG::TabVisibility>(visibility);
+    if (hasDisplayMode) {
+        defaultVisibility.displayMode = static_cast<NG::TabBarDisplayMode>(displayMode);
+    }
+    TabContentModelNG::SetDefaultVisibility(frameNode, defaultVisibility);
+}
+
+void ResetTabBarVisibility(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::TabContentDefaultVisibility defaultVisibility;
+    defaultVisibility.isNull = true;
+    TabContentModelNG::SetDefaultVisibility(frameNode, defaultVisibility);
+}
+
 namespace NodeModifier {
 const ArkUITabContentModifier* GetTabContentDynamicModifier()
 {
@@ -639,6 +667,8 @@ const ArkUITabContentModifier* GetTabContentDynamicModifier()
             .setIconSelectedColorByUser = SetIconSelectedColorByUser,
             .setId = SetId,
             .setTabBar = SetTabBar,
+            .setTabBarVisibility = SetTabBarVisibility,
+            .resetTabBarVisibility = ResetTabBarVisibility,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -677,6 +707,8 @@ const ArkUITabContentModifier* GetTabContentDynamicModifier()
         .setIconSelectedColorByUser = SetIconSelectedColorByUserImpl,
         .setId = SetIdImpl,
         .setTabBar = SetTabBarImpl,
+        .setTabBarVisibility = SetTabBarVisibilityImpl,
+        .resetTabBarVisibility = ResetTabBarVisibilityImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

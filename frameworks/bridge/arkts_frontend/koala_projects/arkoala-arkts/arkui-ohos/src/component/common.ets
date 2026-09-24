@@ -268,8 +268,8 @@ export class ClickEventTransfer {
                     y: positionYValue
                 },
                 globalPosition: {
-                    x: globalPositionXValue,
-                    y: globalPositionYValue
+                    x: globalPositionXValue - positionXValue,
+                    y: globalPositionYValue - positionYValue
                 }
             },
             id: idValue.isUndefined() ? undefined : idValue.toString()
@@ -412,8 +412,8 @@ export class HoverEventTransfer {
                     y: positionYValue
                 },
                 globalPosition: {
-                    x: globalPositionXValue,
-                    y: globalPositionYValue
+                    x: globalPositionXValue - positionXValue,
+                    y: globalPositionYValue - positionYValue
                 }
             },
             id: idValue.isUndefined() ? undefined : idValue.toString()
@@ -602,8 +602,8 @@ export class MouseEventTransfer {
                     y: positionYValue
                 },
                 globalPosition: {
-                    x: globalPositionXValue,
-                    y: globalPositionYValue
+                    x: globalPositionXValue - positionXValue,
+                    y: globalPositionYValue - positionYValue
                 }
             },
             id: idValue.isUndefined() ? undefined : idValue.toString()
@@ -933,8 +933,8 @@ export class AxisEventTransfer {
                     y: positionYValue
                 },
                 globalPosition: {
-                    x: globalPositionXValue,
-                    y: globalPositionYValue
+                    x: globalPositionXValue - positionXValue,
+                    y: globalPositionYValue - positionYValue
                 }
             },
             id: idValue.isUndefined() ? undefined : idValue.toString()

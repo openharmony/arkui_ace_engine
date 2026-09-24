@@ -1160,8 +1160,8 @@ export class ProxyFrameNode extends ImmutableFrameNode {
     }
 }
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
-    private __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
-    private __disposed: boolean = false;
+    protected __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
+    protected __disposed: boolean = false;
     constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
         super(uiContext, 'BuilderRootFrameNode', ptr);
         if (!ptr) {
@@ -1226,6 +1226,29 @@ export class BuilderRootWeakFrameNode<T> extends BuilderRootFrameNode<T> {
     }
     public getRenderNode(): RenderNode | null {
         return null;
+    }
+    private disposeWeakNode(needDisposeBuilderNode: boolean): void {
+        if (this.__disposed) {
+            return;
+        }
+        this.__disposed = true;
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
+        this.nodePtr_ = undefined;
+        if (this.peer?.ptr) {
+            this.peer!.ptr = nullptr;
+        }
+        this.renderNode_ = undefined;
+        this._nodeId = -1;
+        if (needDisposeBuilderNode) {
+            this.__BuilderNodeOpt?.disposeNode();
+        }
+        this.__BuilderNodeOpt = undefined;
+    }
+    public disposeNode(): void {
+        this.disposeWeakNode(false);
+    }
+    public dispose(): void {
+        this.disposeWeakNode(true);
     }
     public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
         const error = Error('weak FrameNode not support getChild');

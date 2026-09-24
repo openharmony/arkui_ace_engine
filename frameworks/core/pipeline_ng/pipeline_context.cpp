@@ -39,6 +39,7 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/recoverable/recoverable_manager.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/event/key_event.h"
@@ -99,6 +100,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/material/material_processor.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
@@ -1179,9 +1181,12 @@ void PipelineContext::ReloadNodesResource()
     needReloadResource_ = false;
 }
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime)
 {
     CHECK_RUN_ON(UI);
+    FrameMetrics frameMetrics;
+    const int64_t actualStartTime = vsyncStartTime >= 0 ? vsyncStartTime : GetSysTimestamp();
+    frameMetrics.actualStartTime = static_cast<uint64_t>(actualStartTime);
     if (IsDestroyed()) {
         LOGW("Cannot flush vsync as the pipeline context is destroyed.");
         return;
@@ -1207,6 +1212,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
     }
 #endif
+    if (scrollPlaceholderManager_) {
+        scrollPlaceholderManager_->NotifyVsync(static_cast<int64_t>(nanoTimestamp),
+            static_cast<int64_t>(vsyncPeriod));
+    }
     uint64_t timeStamp = (nanoTimestamp > vsyncPeriod) ? (nanoTimestamp - vsyncPeriod + ONE_MS_IN_NS) : ONE_MS_IN_NS;
     resampleTimeStamp_ = (timeStamp > compensationValue_) ? (timeStamp - compensationValue_) : 0;
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -1229,7 +1238,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #ifdef RELAXED_INTERACTION_SUPPORT
     FlushRelaxedInteraction();
 #endif
-    FrameMetrics frameMetrics;
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
     FlushTouchEvents();
@@ -1361,6 +1369,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
     window_->FlushVsync();
+    const int64_t submitEndTime = GetSysTimestamp();
+    frameMetrics.totalDuration = (submitEndTime > actualStartTime)
+        ? static_cast<uint64_t>(submitEndTime - actualStartTime) : 0;
     if (IsFocusWindowIdSetted()) {
         FireAllUIExtensionEvents();
     }
@@ -1386,6 +1397,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
 #endif
     FireFrameMetricsCallBack(frameMetrics);
+    TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE,
+        "FrameMetrics actualStartTime=%{public}" PRIu64 ", totalDuration=%{public}" PRIu64
+        ", vsyncTimestamp=%{public}" PRIu64,
+        frameMetrics.actualStartTime, frameMetrics.totalDuration, frameMetrics.vsyncTimestamp);
     // First vsync may come before rootNode_ is created.
 #ifndef CROSS_PLATFORM
     if (contentChangeMgr_ && rootNode_) {
@@ -2140,6 +2155,13 @@ void PipelineContext::SetupRootElement()
     }
     postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    materialProcessor_ = MakeRefPtr<MaterialProcessor>();
+    AddPersistAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(pipeline->materialProcessor_);
+        pipeline->materialProcessor_->ApplyScopeGate(pipeline);
+    });
     focusManager_ = GetOrCreateFocusManager();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent()));
@@ -2186,15 +2208,9 @@ void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::R
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(rsUIDirector);
-    if (SystemProperties::GetMultiInstanceEnabled()) {
-        auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
-        CHECK_NULL_VOID(surfaceNode);
-        auto shadowSurface = surfaceNode->CreateShadowSurfaceNode();
-        CHECK_NULL_VOID(shadowSurface);
-        shadowSurface->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-    } else {
-        rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-    }
+    auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    surfaceNode->SetAbilityBGAlpha(appBgColor_.GetAlpha());
 #endif
 }
 
@@ -2264,6 +2280,13 @@ void PipelineContext::SetupSubRootElement()
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     fontManager_->AddFontObserver(selectOverlayManager_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    materialProcessor_ = MakeRefPtr<MaterialProcessor>();
+    AddPersistAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(pipeline->materialProcessor_);
+        pipeline->materialProcessor_->ApplyScopeGate(pipeline);
+    });
     focusManager_ = GetOrCreateFocusManager();
     postEventManager_ = MakeRefPtr<PostEventManager>();
 }
@@ -2969,11 +2992,12 @@ void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
 
-void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(uiExtensionManager_);
-    uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type);
+    uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type, reason);
 #endif
 }
 
@@ -2997,6 +3021,18 @@ void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value)
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return safeAreaManager_->GetKeyBoardAvoidMode();
+}
+
+void PipelineContext::ApplyDefaultImmersiveStrategy(const std::unordered_set<ImmersiveStrategy>& types)
+{
+    CHECK_NULL_VOID(safeAreaManager_);
+    safeAreaManager_->ApplyDefaultImmersiveStrategy(types);
+}
+
+bool PipelineContext::IsImmersiveStrategySet(ImmersiveStrategy strategy) const
+{
+    CHECK_NULL_RETURN(safeAreaManager_, false);
+    return safeAreaManager_->IsImmersiveStrategySet(strategy);
 }
 
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
@@ -3813,7 +3849,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     HandlePenHoverOut(point);
-    if (CheckSourceTypeChange(point.sourceType)) {
+    if (!isRightMouseMappingActive_ && CheckSourceTypeChange(point.sourceType)) {
         HandleTouchHoverOut(point);
     }
 
@@ -5749,6 +5785,9 @@ void PipelineContext::OnHide()
     CHECK_RUN_ON(UI);
     NotifyDragOnHide();
     NotifyCoastingAxisEventOnHide();
+    if (isRightMouseMappingActive_ && onRightMouseMappingCancel_) {
+        onRightMouseMappingCancel_();
+    }
     onShow_ = false;
     isNeedCallbackAreaChange_ = true;
     window_->OnHide();
@@ -5776,6 +5815,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         RestoreDefault(0, MouseStyleChangeReason::WINDOW_LOST_FOCUS_RESET_MOUSESTYLE);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
+        if (isRightMouseMappingActive_ && onRightMouseMappingCancel_) {
+            onRightMouseMappingCancel_();
+        }
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window: %{public}d get focus.", windowId_);
 
@@ -5948,7 +5990,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
         if (fullUpdate && configurationChange.IsNeedUpdate()) {
             CHECK_NULL_VOID(pipeline->stageManager_);
             pipeline->SetIsReloading(true);
-            pipeline->stageManager_->ReloadStage();
+            pipeline->stageManager_->ReloadStage(configurationChange.hotReloadFullRebuild);
             pipeline->SetIsReloading(false);
             pipeline->FlushUITasks();
         }
@@ -5994,6 +6036,12 @@ void PipelineContext::Destroy()
     }
     if (rootNode_) {
         rootNode_->FireCustomDisappear();
+    }
+    // Cancel scroll placeholder tasks and release the registry before the task scheduler and
+    // pipeline resources go away, so no late callback can reach a half-destroyed pipeline.
+    if (scrollPlaceholderManager_) {
+        scrollPlaceholderManager_->Destroy();
+        scrollPlaceholderManager_.Reset();
     }
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
@@ -6469,6 +6517,9 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE_COMMERCIAL("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    if (scrollPlaceholderManager_ && scrollPlaceholderManager_->HasPendingRealBuild()) {
+        scrollPlaceholderManager_->FlushRealBuild(deadline - TIME_THRESHOLD);
+    }
     currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
         auto frontend = GetFrontend();
@@ -6518,6 +6569,18 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
+}
+
+void PipelineContext::RegisterMaterialNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(materialProcessor_);
+    materialProcessor_->Register(node);
+}
+
+void PipelineContext::UnregisterMaterialNode(int32_t nodeId)
+{
+    CHECK_NULL_VOID(materialProcessor_);
+    materialProcessor_->Unregister(nodeId);
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
@@ -7544,15 +7607,12 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
     CHECK_NULL_VOID(rootNode_);
     auto root = JsonUtil::CreateSharedPtrJson(true);
     GetAppInfo(root);
-    auto cb = [root, onlyNeedVisible]() {
+    auto cb = [root]() {
         auto json = root->ToString();
         auto res = JsonUtil::Create(true);
         res->Put("0", json.c_str());
 #ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
-        if (!onlyNeedVisible) {
-            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-        }
 #endif
     };
     ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
@@ -8532,6 +8592,17 @@ void PipelineContext::InitManagers()
     privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
 }
 
+const RefPtr<ScrollPlaceholderManager>& PipelineContext::GetOrCreateScrollPlaceholderManager()
+{
+    std::call_once(scrollPlaceholderOnceFlag_, [this]() {
+        if (!scrollPlaceholderManager_) {
+            scrollPlaceholderManager_ = MakeRefPtr<ScrollPlaceholderManager>(instanceId_);
+            scrollPlaceholderManager_->SetPipelineContext(WeakClaim(this));
+        }
+    });
+    return scrollPlaceholderManager_;
+}
+
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
 {
     return forceSplitMgr_;
@@ -8677,7 +8748,7 @@ void PipelineContext::UnregisterSurfaceChangedCallback(int32_t callbackId)
 int32_t PipelineContext::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
 {
     if (callback) {
-        foldStatusChangedCallbackMap_.emplace(callbackId_, std::move(callback));
+        foldStatusChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
         return callbackId_;
     }
     return 0;
@@ -8812,6 +8883,18 @@ int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& cal
         return callbackId_;
     }
     return 0;
+}
+
+bool PipelineContext::HitTestMouseTargetForMapping(const MouseEvent& event, const RefPtr<NG::FrameNode>& node,
+    const std::vector<std::string>& tagWhitelist) const
+{
+    auto frameNode = node ? node : GetRootElement();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto scaleEvent = event.CreateScaleEvent(GetViewScale());
+    const NG::PointF p { scaleEvent.x, scaleEvent.y };
+    const std::vector<std::string>* whitelistPtr = tagWhitelist.empty() ? nullptr : &tagWhitelist;
+    bool result = frameNode->HitTestMouseTarget(event, p, p, p, whitelistPtr);
+    return result;
 }
 
 } // namespace OHOS::Ace::NG

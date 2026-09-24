@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 using VectorDoubleHandle = void*;
@@ -26,6 +27,7 @@ using VectorInt32Handle = void*;
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkRectCreate(double width, int32_t widthUnit, double height, int32_t heightUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkRectCreateEx(NativeOptionLength width, NativeOptionLength height);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkRectInsCreate(double width, int32_t widthUnit, double height, int32_t heightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkRectSetRadiusWidth(double radiusWidth, int32_t radiusWidthUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkRectSetRadiusHeight(double radiusHeight, int32_t radiusHeightUnit);

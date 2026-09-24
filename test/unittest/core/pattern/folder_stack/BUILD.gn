@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 test_sources = [
+  "folder_stack_crease_hover_test.cpp",
   "folder_stack_multithread_test_ng.cpp",
   "folder_stack_test_ng.cpp",
   "folder_stack_test_min.cpp",
@@ -25,13 +26,19 @@ if (is_host_product) {
     type = "host_components"
     module_name = "Layout-FolderStack"
     sources = test_sources
+    sources += [
+      "$ace_root/adapter/ohos/osal/display_info_utils.cpp",
+    ]
     cflags = [ "-fno-access-control" ]
+    extra_deps = []
+    extra_deps = [ "$ace_root/test/mock/ohos_mock/dm:mock_dm" ]
   }
 } else {
   ace_unittest("folder_stack_test_ng") {
     type = "new"
     module_name = "Layout-FolderStack"
     sources = test_sources
+    extra_deps = [ "$ace_root/test/mock/ohos_mock/dm:mock_dm" ]
 
     if (!ace_enable_full_test_suite) {
       sources = []
@@ -40,5 +47,6 @@ if (is_host_product) {
         "folder_stack_test_core.cpp",
       ]
     }
+    sources += [ "$ace_root/adapter/ohos/osal/display_info_utils.cpp" ]
   }
 }

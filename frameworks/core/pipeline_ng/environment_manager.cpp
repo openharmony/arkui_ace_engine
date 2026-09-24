@@ -396,6 +396,23 @@ void EnvironmentManager::RemoveExplicitReaderFromAllScopes(EnvScopeReaderRegistr
     }
 }
 
+void EnvironmentManager::UnregisterExplicitReader(UINode* readerNode)
+{
+    CHECK_NULL_VOID(readerNode);
+    const auto readerId = readerNode->GetId();
+    auto unregister = [this, readerNode, readerId](
+                          ExplicitEnvReaderRegistry& readerRegistry, EnvScopeReaderRegistry& scopeRegistry) {
+        auto iter = readerRegistry.find(readerId);
+        if (iter == readerRegistry.end() || iter->second.weak.Upgrade().GetRawPtr() != readerNode) {
+            return;
+        }
+        RemoveExplicitReaderFromAllScopes(scopeRegistry, readerId, iter->second.ownerScopes);
+        readerRegistry.erase(iter);
+    };
+    unregister(systemExplicitReaders_, systemExplicitScopes_);
+    unregister(customExplicitReaders_, customExplicitScopes_);
+}
+
 bool EnvironmentManager::RebindExplicitEnvReader(ExplicitEnvReaderRegistry& readerRegistry,
     EnvScopeReaderRegistry& scopeRegistry, const RefPtr<UINode>& readerNode, EnvironmentPropertyKind kind,
     const std::string& key)

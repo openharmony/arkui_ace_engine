@@ -180,6 +180,7 @@ typedef enum {
     /** Wavy line. */
     ARKUI_TEXT_DECORATION_STYLE_WAVY,
 } ArkUI_TextDecorationStyle;
+
 /**
  * @brief Enumerates the text cases.
  *
@@ -502,6 +503,30 @@ typedef enum {
      */
     OH_ARKUI_LINE_BREAK_STRATEGY_BALANCE = 2,
 } OH_ArkUI_LineBreakStrategy;
+
+/**
+ * @brief Enumerates the join styles of a text stroke.
+ *
+ * @since 26.2.0
+ */
+typedef enum {
+    /**
+     * Miter join. The text stroke joins with a sharp corner.
+     * @since 26.2.0
+     */
+    OH_ARKUI_STROKE_JOIN_STYLE_MITER_JOIN = 0,
+    /**
+     * Round join. The text stroke joins with a rounded corner.
+     * @since 26.2.0
+     */
+    OH_ARKUI_STROKE_JOIN_STYLE_ROUND_JOIN = 1,
+    /**
+     * Bevel join. The text stroke joins with a beveled corner.
+     * @since 26.2.0
+     */
+    OH_ARKUI_STROKE_JOIN_STYLE_BEVEL_JOIN = 2,
+} OH_ArkUI_StrokeJoinStyle;
+
 /**
  * @brief Enumerates the text span type.
  *

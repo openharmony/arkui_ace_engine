@@ -2621,23 +2621,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[211] != 0) {
-            switch (flagArray[211]) {
-                case 1: {
-                    peer.setSpatialEffectAttribute((this._spatialEffect_0_0value as SpatialEffectParams | undefined));
-                    flagArray[211] = 2;
-                    break;
-                }
-                case 3: {
-                    flagArray[211] = 2;
-                    break;
-                }
-                default: {
-                    flagArray[211] = 0;
-                    peer.setSpatialEffectAttribute(undefined);
-                }
-            }
-        }
         if (flagArray[132] != 0) {
             switch (flagArray[132]) {
                 case 1: {
@@ -4246,6 +4229,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[226] = 0;
+                }
+            }
+        }
+        if (flagArray[227] != 0) {
+            switch (flagArray[227]) {
+                case 1: {
+                    peer.setSpatialEffectAttribute((this._spatialEffect_0_0value as SpatialEffectParams | undefined));
+                    flagArray[227] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[227] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[227] = 0;
+                    peer.setSpatialEffectAttribute(undefined);
                 }
             }
         }
@@ -5862,18 +5862,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[211] != 0) {
-            switch (flagArray[211]) {
-                case 1:
-                case 3: {
-                    this.spatialEffect((modifier._spatialEffect_0_0value as SpatialEffectParams | undefined));
-                    break;
-                }
-                default: {
-                    this.spatialEffect(undefined);
-                }
-            }
-        }
         if (flagArray[132] != 0) {
             switch (flagArray[132]) {
                 case 1:
@@ -7017,6 +7005,18 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
+                }
+            }
+        }
+        if (flagArray[227] != 0) {
+            switch (flagArray[227]) {
+                case 1:
+                case 3: {
+                    this.spatialEffect((modifier._spatialEffect_0_0value as SpatialEffectParams | undefined));
+                    break;
+                }
+                default: {
+                    this.spatialEffect(undefined);
                 }
             }
         }
@@ -8341,16 +8341,6 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    spatialEffect(value: SpatialEffectParams | undefined): this {
-        if (((this._flagArray[211]) == (0)) || (true)) {
-            this._flagArray[211] = 1
-            this._spatialEffect_0_0value = value
-            this._state.fireChange()
-        } else {
-            this._flagArray[211] = 3
-        }
-        return this
-    }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
         if (((this._flagArray[132]) == (0)) || (true)) {
             this._flagArray[132] = 1
@@ -9374,6 +9364,16 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[226] = 3
+        }
+        return this
+    }
+    spatialEffect(value: SpatialEffectParams | undefined): this {
+        if (((this._flagArray[227]) == (0)) || (true)) {
+            this._flagArray[227] = 1
+            this._spatialEffect_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[227] = 3
         }
         return this
     }

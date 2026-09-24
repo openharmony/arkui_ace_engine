@@ -71,7 +71,8 @@ public:
     static void JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems& scriptItems,
         const ScriptRegexItems& scriptRegexItems, const ScriptItemsByOrder& scriptItemsByOrder);
     static void SetNativeEmbedOptions(
-        FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange);
+        FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange,
+        bool supportTransformRotateAndSkew);
     static void SetBypassVsyncCondition(FrameNode *frameNode, const std::optional<WebBypassVsyncCondition>& condition);
     static void SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedMode);
     static void SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode);
@@ -147,6 +148,7 @@ public:
     static void SetOnFullScreenEnter(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetScaleChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetZoomChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnHttpAuthRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetOnInterceptRequest(

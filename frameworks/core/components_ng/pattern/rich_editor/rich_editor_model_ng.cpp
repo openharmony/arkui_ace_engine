@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,18 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/rich_editor/napi_rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+
+namespace {
+constexpr int32_t RECT_COMPONENT_COUNT = 4;
+constexpr int32_t RECT_INDEX_WIDTH = 2;
+constexpr int32_t RECT_INDEX_HEIGHT = 3;
+}
 
 namespace OHOS::Ace::NG {
 void RichEditorModelNG::Create(bool isStyledStringMode)
@@ -48,7 +56,7 @@ void RichEditorModelNG::CreateModel(bool isStyledStringMode)
 RefPtr<FrameNode> RichEditorModelNG::CreateRichEditorStyledStringNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<RichEditorPattern>(true); });
+        []() { return AceType::MakeRefPtr<NapiRichEditorPattern>(true); });
     ACE_UINODE_TRACE(frameNode);
     InitRichEditorModel(true, frameNode);
 
@@ -739,6 +747,22 @@ void RichEditorModelNG::SetOnDidChange(
     eventHub->SetOnDidChange(std::move(func));
 }
 
+void RichEditorModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void RichEditorModelNG::SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnContentSizeChange(std::move(func));
+}
+
 void RichEditorModelNG::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
@@ -1131,6 +1155,140 @@ void RichEditorModelNG::SetPunctuationOverflow(FrameNode* frameNode, bool enable
     pattern->SetPunctuationOverflow(enabled);
 }
 
+void RichEditorModelNG::SetRichEditorCaretStyle(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomCaretWidth(value);
+}
+
+Dimension RichEditorModelNG::GetRichEditorCaretStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Dimension());
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, Dimension());
+    return pattern->GetCustomCaretWidth();
+}
+
+void RichEditorModelNG::ResetRichEditorCaretStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetCustomCaretWidth();
+}
+
+void RichEditorModelNG::SetRichEditorSelectAll(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectAll(value);
+}
+
+bool RichEditorModelNG::GetRichEditorSelectAll(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectAll();
+}
+
+void RichEditorModelNG::ResetRichEditorSelectAll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectAll(false);
+}
+
+void RichEditorModelNG::SetRichEditorBlurOnSubmit(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBlurOnSubmit(value);
+}
+
+bool RichEditorModelNG::GetRichEditorBlurOnSubmit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetBlurOnSubmit();
+}
+
+void RichEditorModelNG::ResetRichEditorBlurOnSubmit(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBlurOnSubmit(false);
+}
+
+void RichEditorModelNG::GetRichEditorContentRect(FrameNode* frameNode, float* values, int32_t size)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto rect = pattern->GetTextContentRect();
+    if (values != nullptr && size >= RECT_COMPONENT_COUNT) {
+        values[0] = rect.GetX();
+        values[1] = rect.GetY();
+        values[RECT_INDEX_WIDTH] = rect.Width();
+        values[RECT_INDEX_HEIGHT] = rect.Height();
+    }
+}
+
+void RichEditorModelNG::SetRichEditorSelectionMenuHidden(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectionMenuHidden(value);
+}
+
+bool RichEditorModelNG::GetRichEditorSelectionMenuHidden(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSelectionMenuHidden();
+}
+
+void RichEditorModelNG::ResetRichEditorSelectionMenuHidden(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectionMenuHidden(false);
+}
+
+void RichEditorModelNG::SetRichEditorEnableSkipPreviewLongPress(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableSkipPreviewLongPress(value);
+}
+
+bool RichEditorModelNG::GetRichEditorEnableSkipPreviewLongPress(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetEnableSkipPreviewLongPress();
+}
+
+void RichEditorModelNG::ResetRichEditorEnableSkipPreviewLongPress(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableSkipPreviewLongPress(false);
+}
+
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1309,6 +1467,39 @@ bool RichEditorModelNG::GetHorizontalScrolling(FrameNode* frameNode)
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, false);
     return richEditorPattern->GetHorizontalScrolling();
+}
+
+void RichEditorModelNG::SetCancelButton(FrameNode* frameNode, int32_t style, const CalcDimension& iconSize,
+    const Color& iconColor, const std::string& iconSrc)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CleanNodeStyle,
+        static_cast<CleanNodeStyle>(style), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSize, iconSize, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconColor, iconColor, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSrc, iconSrc, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowCancelButton, true, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowSymbol, false, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->MarkCancelButtonDirty();
+}
+
+void RichEditorModelNG::ResetCancelButton(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CleanNodeStyle, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconSrc, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IconColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowSymbol, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IsShowCancelButton, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BundleName, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ModuleName, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->MarkCancelButtonDirty();
+    }
 }
 
 Color RichEditorModelNG::GetScrollBarColor(FrameNode* frameNode)
@@ -1548,5 +1739,217 @@ void RichEditorModelNG::SetOnStyledStringDidChange(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStyledStringDidChange(std::move(func));
+}
+
+// ===== counter properties (instance methods) =====
+void RichEditorModelNG::SetShowCounter(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowCounter, value);
+}
+
+void RichEditorModelNG::SetCounter(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SetCounter, value);
+}
+
+void RichEditorModelNG::SetCounterTextColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor, value);
+}
+
+void RichEditorModelNG::SetCounterTextOverflowColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor, value);
+}
+
+void RichEditorModelNG::SetShowHighlightBorder(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowHighlightBorder, value);
+}
+
+void RichEditorModelNG::ResetCounterTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor);
+}
+
+void RichEditorModelNG::ResetCounterTextOverflowColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor);
+}
+
+// ===== counter properties (static methods with FrameNode*) =====
+void RichEditorModelNG::SetShowCounter(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowCounter, value, frameNode);
+}
+
+void RichEditorModelNG::SetCounter(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SetCounter, value, frameNode);
+}
+
+void RichEditorModelNG::SetCounterTextColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor, value, frameNode);
+}
+
+void RichEditorModelNG::SetCounterTextOverflowColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor, value, frameNode);
+}
+
+void RichEditorModelNG::SetShowHighlightBorder(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, ShowHighlightBorder, value, frameNode);
+}
+
+void RichEditorModelNG::ResetCounterTextColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextColor, frameNode);
+}
+
+void RichEditorModelNG::ResetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, CounterTextOverflowColor, frameNode);
+}
+
+bool RichEditorModelNG::GetShowCounter(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, ShowCounter, value, frameNode, value);
+    return value;
+}
+
+int RichEditorModelNG::GetCounterType(FrameNode* frameNode)
+{
+    int value = -1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, SetCounter, value, frameNode, value);
+    return value;
+}
+
+bool RichEditorModelNG::GetShowCounterBorder(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, ShowHighlightBorder, value, frameNode, value);
+    return value;
+}
+
+Color RichEditorModelNG::GetCounterTextColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, CounterTextColor, value, frameNode, value);
+    return value;
+}
+
+Color RichEditorModelNG::GetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RichEditorLayoutProperty, CounterTextOverflowColor, value, frameNode, value);
+    return value;
+}
+
+// ===== border methods (static methods with FrameNode*) =====
+void RichEditorModelNG::SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& borderWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderWidthFlagByUser, borderWidth, frameNode);
+}
+
+void RichEditorModelNG::SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& borderRadius)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderRadiusFlagByUser, borderRadius, frameNode);
+}
+
+void RichEditorModelNG::SetBorderColor(FrameNode* frameNode, const BorderColorProperty& borderColors)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderColor(frameNode, borderColors);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderColorFlagByUser, borderColors, frameNode);
+}
+
+void RichEditorModelNG::SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& borderStyles)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBorderStyle(frameNode, borderStyles);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, BorderStyleFlagByUser, borderStyles, frameNode);
+}
+
+void RichEditorModelNG::SetMargin(FrameNode* frameNode, const MarginProperty& margin)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MarginByUser, margin, frameNode);
+}
+
+MarginProperty RichEditorModelNG::GetMargin(FrameNode* frameNode)
+{
+    CalcLength defaultDimen = CalcLength(0, DimensionUnit::VP);
+    NG::MarginProperty margins;
+    margins.top = std::optional<CalcLength>(defaultDimen);
+    margins.right = std::optional<CalcLength>(defaultDimen);
+    margins.bottom = std::optional<CalcLength>(defaultDimen);
+    margins.left = std::optional<CalcLength>(defaultDimen);
+    CHECK_NULL_RETURN(frameNode, margins);
+    auto layoutProperty = frameNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, margins);
+    if (layoutProperty->HasMarginByUser()) {
+        const auto& property = layoutProperty->GetMarginByUserValue();
+        margins.top = std::optional<CalcLength>(property.top);
+        margins.right = std::optional<CalcLength>(property.right);
+        margins.bottom = std::optional<CalcLength>(property.bottom);
+        margins.left = std::optional<CalcLength>(property.left);
+    }
+    return margins;
+}
+
+void RichEditorModelNG::SetInputFilter(FrameNode* frameNode, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, InputFilter, value, frameNode);
+    // re-filter existing content when regex changes
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->filterDirty_ = true;
+    pattern->hasActiveFilter_ = !value.empty();
+    pattern->FilterInitializeText();
+}
+
+void RichEditorModelNG::SetInputFilterError(FrameNode* frameNode,
+    const std::function<void(const std::u16string&)>& onError)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInputFilterError(onError);
+}
+
+std::string RichEditorModelNG::GetInputFilter(FrameNode* frameNode)
+{
+    std::string value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, InputFilter, value, frameNode, value);
+    return value;
+}
+
+void RichEditorModelNG::ResetInputFilter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, InputFilter, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->filterDirty_ = true;
+    pattern->hasActiveFilter_ = false;
+    pattern->filterErrorHandler_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

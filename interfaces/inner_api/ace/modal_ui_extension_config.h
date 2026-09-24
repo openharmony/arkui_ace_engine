@@ -48,6 +48,10 @@ struct ModalUIExtensionAllowedUpdateConfig {
     bool prohibitedRemoveByNavigation = true;
 };
 
+enum class UIExtensionOperationPhase {
+    FOREGROUND,
+};
+
 struct ModalUIExtensionCallbacks {
     std::function<void(int32_t)> onRelease;
     std::function<void(int32_t, const AAFwk::Want&)> onResult;
@@ -56,6 +60,7 @@ struct ModalUIExtensionCallbacks {
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onRemoteReady;
     std::function<void()> onDestroy;
     std::function<void()> onDrawReady;
+    std::function<void(const UIExtensionOperationPhase&, int32_t)> onAbilityErrorCode;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H

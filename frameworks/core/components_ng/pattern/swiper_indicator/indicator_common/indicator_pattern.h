@@ -275,6 +275,7 @@ public:
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
     void OnColorModeChange(uint32_t colorMode) override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnMaterialDisable() override;
 
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;

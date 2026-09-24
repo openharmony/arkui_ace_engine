@@ -26,6 +26,7 @@
 #include "core/interfaces/native/node/node_api.h"
 
 class NativeGesture : public OHOS::FFI::FFIData {
+    DECL_TYPE(NativeGesture, OHOS::FFI::FFIData)
 public:
     NativeGesture() : FFIData() {}
 
@@ -44,6 +45,7 @@ private:
 };
 
 class NativeGestureGroup : public OHOS::FFI::FFIData {
+    DECL_TYPE(NativeGestureGroup, OHOS::FFI::FFIData)
 public:
     NativeGestureGroup() : FFIData() {}
 

@@ -16,11 +16,12 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_ACCESSIBILITY_HIDUMPER_OSAL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_ACCESSIBILITY_HIDUMPER_OSAL_H
 
+#include <list>
 #include <string>
-#include "accessibility_element_info.h"
+#include <utility>
+#include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Accessibility {
     class AccessibilityElementInfo;
@@ -28,25 +29,20 @@ namespace OHOS::Accessibility {
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+class UINode;
 }
 
 namespace OHOS::Ace::Framework {
-struct ActionTable {
-    AceAction aceAction;
-    Accessibility::ActionType action;
-};
+struct CommonProperty;
 
-using ToInfoFunc = std::function<void(std::string& input)>;
-
-struct ActionStrTable {
-    Accessibility::ActionType action;
-    std::string actionStr;
-};
-
-enum class ToInfoMode {
-    TO_STRING,
-    DUMPLOG_ADD,
-};
+bool IsExtensionComponent(const RefPtr<NG::UINode>& node);
+bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
+void GetFrameNodeChildren(
+    const RefPtr<NG::UINode>& uiNode,
+    std::vector<std::pair<int64_t, int32_t>>& childrenIdInfo,
+    const CommonProperty& commonProperty);
+void DumpAccessibilityElementInfosTreeNG(
+    std::list<Accessibility::AccessibilityElementInfo>& infos, int32_t depth, int64_t accessibilityId, bool isRoot);
 
 class AccessibilityElementInfoUtils {
 public:
@@ -69,8 +65,6 @@ public:
     AccessibilityManagerHidumper() = default;
     ~AccessibilityManagerHidumper() = default;
 
-    static AceAction ConvertAccessibilityAction(Accessibility::ActionType accessibilityAction);
-    static std::string ConvertActionTypeToString(Accessibility::ActionType action);
     static void DumpCustomActionTest(
         const std::vector<std::string>& params,
         const RefPtr<OHOS::Ace::NG::FrameNode>& frameNode);

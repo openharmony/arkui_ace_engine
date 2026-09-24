@@ -101,6 +101,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CssDisplayChangeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TransformRotateAndSkewEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioSessionType, WebAudioSessionType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlankScreenDetectionConfig, BlankScreenDetectionConfig);
@@ -273,6 +274,7 @@ private:
     void OnWebMediaAVSessionEnabledUpdate(bool) {}
     void OnEnableDataDetectorUpdate(bool enable) {}
     void OnCssDisplayChangeEnabledUpdate(bool value) {}
+    void OnTransformRotateAndSkewEnabledUpdate(bool value) {}
     void OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition) {}
     void OnAudioSessionTypeUpdate(WebAudioSessionType value) {}
     void OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionConfig &config) {}

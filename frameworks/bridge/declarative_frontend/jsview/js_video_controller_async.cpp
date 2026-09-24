@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async_binding.h"
 
 #include "base/utils/linear_map.h"
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -66,9 +67,8 @@ void PostAsyncPromiseResult(napi_env env, napi_deferred deferred, const RefPtr<T
         [env, deferred, success, reason]() {
             CHECK_NULL_VOID(env);
             CHECK_NULL_VOID(deferred);
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(env, &scope);
-            if (status != napi_ok) {
+            ScopeRAII scope(env);
+            if (!scope) {
                 return;
             }
             napi_value result = nullptr;
@@ -82,7 +82,6 @@ void PostAsyncPromiseResult(napi_env env, napi_deferred deferred, const RefPtr<T
                 }
                 napi_reject_deferred(env, deferred, error);
             }
-            napi_close_handle_scope(env, scope);
         },
         TaskExecutor::TaskType::JS, taskName);
 }

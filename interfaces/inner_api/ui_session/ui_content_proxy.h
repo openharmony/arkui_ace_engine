@@ -50,7 +50,7 @@ public:
     virtual int32_t HighlightSpecifiedContent(int32_t id, const std::string& content,
         const std::vector<std::string>& nodeIds, const std::string& configs) override;
     virtual int32_t SendCommand(int32_t id, const std::string& command) override;
-    virtual int32_t SendCommandAsync(int32_t id, const std::string& command) override;
+    virtual int32_t SendCommandSync(int32_t id, const std::string& command) override;
     virtual int32_t SendCommand(const std::string command) override;
     virtual int32_t UnregisterClickEventCallback() override;
     virtual int32_t UnregisterSearchEventCallback() override;

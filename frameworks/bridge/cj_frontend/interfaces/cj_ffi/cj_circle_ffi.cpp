@@ -57,4 +57,15 @@ int64_t FfiOHOSAceFrameworkCircleInsCreate(double width, int32_t widthUnit, doub
     }
     return ret_->GetID();
 }
+
+void FfiOHOSAceFrameworkCircleCreateEx(NativeOptionLength width, NativeOptionLength height)
+{
+    GetCircleModel()->Create();
+    if (width.hasValue) {
+        FfiOHOSAceFrameworkShapeSetWidth(width.value.value, width.value.unitType);
+    }
+    if (height.hasValue) {
+        FfiOHOSAceFrameworkShapeSetHeight(height.value.value, height.value.unitType);
+    }
+}
 }

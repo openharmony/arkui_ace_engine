@@ -44,6 +44,12 @@ enum class ChangeType {
     ARKWEB_PAGE,   // WebView transition content change
     ARKWEB_TEXT,   // WebView Text change
     IMAGE_LOADED,  // Image load complete event when using network or pixelmap
+    PAGE_START,    // Navigation router content change start
+    SCROLL_START,  // Scroll content change start
+    SWIPER_START,  // Swiper content change start
+    TABS_START,    // Tabs content change start
+    SWIPER_START_CANCEL, // Swiper content change returned to its original index
+    TABS_START_CANCEL,   // Tabs content change returned to its original index
 };
 
 struct ContentChangeConfig {
@@ -53,6 +59,7 @@ struct ContentChangeConfig {
     int32_t minWidth = 100; // minimum width of Image report event: 100px
     int32_t minHeight = 100; // minimum height of Image report event: 100px
     int32_t reportDelayTime = 600; // delay time for component event reporting after transition event: 600 ms
+    bool reportStartEvent = false; // whether to report start events for content changes
 };
 
 enum ComponentEventType : uint32_t {

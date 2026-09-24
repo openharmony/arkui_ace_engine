@@ -166,18 +166,6 @@ void VideoPattern::RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, c
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     RegisterMediaPlayerEventImpl(weak, mediaPlayer, instanceId, uiTaskExecutor);
-
-    auto&& seekDoneEvent = [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
-        uiTaskExecutor.PostSyncTask(
-            [&weak, currentPos, instanceId] {
-                auto video = weak.Upgrade();
-                CHECK_NULL_VOID(video);
-                ContainerScope scope(instanceId);
-                video->SetIsSeeking(false);
-                video->OnCurrentTimeChange(currentPos);
-            }, "ArkUIVideoSeekDone");
-    };
-    mediaPlayer->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
 }
 
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)

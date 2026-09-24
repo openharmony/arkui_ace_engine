@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
 
+#include "core/common/container.h"
+
 namespace OHOS::Ace::NG {
 
 void FolderStackPattern::OnAttachToFrameNodeMultiThread()
@@ -31,8 +33,9 @@ void FolderStackPattern::OnAttachToMainTreeMultiThread()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct() ||
-        OHOS::Ace::SystemProperties::IsPortraitFoldProduct());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(container->IsFoldable());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -49,6 +52,7 @@ void FolderStackPattern::OnDetachFromMainTreeMultiThread()
     CHECK_NULL_VOID(pipeline);
     if (HasFoldStatusChangedCallbackId()) {
         pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
+        UpdateFoldStatusChangedCallbackId(std::nullopt);
     }
 }
 }

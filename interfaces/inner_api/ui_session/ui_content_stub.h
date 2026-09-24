@@ -40,7 +40,7 @@ private:
     int32_t RegisterLifeCycleEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterSelectTextEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
-    int32_t SendCommandInnerAsync(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t SendCommandInnerSync(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterClickEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterSearchEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);

@@ -412,6 +412,12 @@ HWTEST_F(Matrix3Test, Matrix3Test008, TestSize.Level1)
     // false true
     bool ret2 = matrix3NObj1.SetEntry(0, 3, 5.0f);
     EXPECT_FALSE(ret2);
+    // negative row
+    bool retNegRow = matrix3NObj1.SetEntry(-1, 2, 5.0f);
+    EXPECT_FALSE(retNegRow);
+    // negative col
+    bool retNegCol = matrix3NObj1.SetEntry(0, -1, 5.0f);
+    EXPECT_FALSE(retNegCol);
     // false false
     bool ret3 = matrix3NObj1.SetEntry(0, 2, 5.0f);
     EXPECT_TRUE(ret3);
@@ -426,6 +432,12 @@ HWTEST_F(Matrix3Test, Matrix3Test008, TestSize.Level1)
     // false true
     bool ret5 = matrixN3Obj1.SetEntry(0, 10, 5.0f);
     EXPECT_FALSE(ret5);
+    // negative row
+    bool retNegRow2 = matrixN3Obj1.SetEntry(-1, 2, 5.0f);
+    EXPECT_FALSE(retNegRow2);
+    // negative col
+    bool retNegCol2 = matrixN3Obj1.SetEntry(0, -1, 5.0f);
+    EXPECT_FALSE(retNegCol2);
     // false false
     bool ret6 = matrixN3Obj1.SetEntry(0, 2, 5.0f);
     EXPECT_TRUE(ret6);

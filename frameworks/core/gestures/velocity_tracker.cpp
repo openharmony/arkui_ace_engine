@@ -20,15 +20,23 @@
 
 namespace OHOS::Ace {
 
-VelocityTracker::VelocityTracker()
+void VelocityTracker::InitPointNumber()
 {
-    static int32_t pointNum = SystemProperties::GetVelocityTrackerPointNumber();
+    int32_t pointNum = SystemProperties::GetVelocityTrackerPointNumber();
     xAxis_.SetCountNum(pointNum);
     yAxis_.SetCountNum(pointNum);
     POINT_NUMBER = pointNum;
 }
 
-VelocityTracker::VelocityTracker(Axis mainAxis) : mainAxis_(mainAxis) {}
+VelocityTracker::VelocityTracker()
+{
+    InitPointNumber();
+}
+
+VelocityTracker::VelocityTracker(Axis mainAxis) : mainAxis_(mainAxis)
+{
+    InitPointNumber();
+}
 
 int32_t VelocityTracker::POINT_NUMBER = SystemProperties::GetVelocityTrackerPointNumber();
 
@@ -177,7 +185,7 @@ double VelocityTracker::UpdateAxisVelocity(LeastSquareImpl& axisRaw)
 {
     LeastSquareImpl axis = axisRaw;
     if (SystemProperties::IsVelocityWithinTimeWindow()) {
-        auto xTimes = axisRaw.GetXVals();
+        const auto& xTimes = axisRaw.GetXVals();
         auto timeThreshold = xTimes.back() - VelocityTracker::DURATION_LONGEST_THRESHOLD;
         int32_t cnt = (std::lower_bound(xTimes.begin(), xTimes.end(), timeThreshold) - xTimes.begin());
         axis.ResetValsFromRaw(axisRaw, cnt);

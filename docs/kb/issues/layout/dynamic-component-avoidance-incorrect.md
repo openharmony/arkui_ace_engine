@@ -104,12 +104,8 @@ DynamicComponent 内部创建弹窗或其他浮层时，若宿主窗口的安全
 
 ## 相关主题
 
-- `docs/kb/components/container/dynamic_component.md` — DynamicComponent 组件，FuncID `05-12-07`
-- `docs/kb/capabilities/dynamic-component.md` — DynamicComponent 机制，FuncID `04-17-05`
-- `docs/kb/capabilities/safe-area.md` — 安全区域和键盘避让机制，FuncID `04-02-01`
-- `docs/kb/architecture/window-mechanism.md` — 窗口视口、避让区与输入法事件桥接，FuncID `03-05-01`
-- `docs/kb/issues/layout/keyboard-avoid-timing-change.md` — 键盘避让调度时序的关联问题
-- `specs/05-ui-components/12-embedded-display-components/07-dynamic-component/`
-- `specs/04-common-capability/17-embedded-display/05-dynamic-component/`
-- `specs/04-common-capability/02-safe-area/01-safe-area-mechanism/`
-- `specs/03-engine-framework/05-window-mechanism/01-window-mechanism/`
+- [dynamic-component](../../components/container/dynamic-component.md) — DynamicComponent 组件，FuncID `05-12-07`
+- [dynamic-component](../../components/container/dynamic-component.md) — DynamicComponent 机制，FuncID `04-17-05`
+- [safe-area](../../capabilities/safe-area.md) — 安全区域和键盘避让机制，FuncID `04-02-01`
+- [window-mechanism](../../architecture/window-mechanism.md) — 窗口视口、避让区与输入法事件桥接，FuncID `03-05-01`
+- [keyboard-avoid-timing-change](keyboard-avoid-timing-change.md) — 键盘避让调度时序的关联问题

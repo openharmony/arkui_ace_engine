@@ -60,5 +60,5 @@ ArkUI 基础单位系统以 Dimension 类为核心，支持 vp/fp/px/lpx/percent
 
 ## 相关主题
 
-- 基础布局属性
-- 视效属性
+- [基础布局属性](layout-attributes.md)
+- [视效属性](visual-effect-attributes.md)

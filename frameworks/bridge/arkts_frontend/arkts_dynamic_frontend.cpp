@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -264,12 +264,6 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(const DynamicOptions& op
         options.entryPoint.c_str(), options.hapPath.c_str());
     if (pageRouterManager_ == nullptr) {
         pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
-    }
-
-    std::vector<uint8_t> abcContent;
-    if (!Framework::GetAssetContentImpl(assetManager_, "ets/modules_static.abc", abcContent)) {
-        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "GetAssetContent fail: ets/modules_static.abc");
-        return UIContentErrorCode::INVALID_URL;
     }
 
     auto errorCode = InnerRunDynamicPage(options);

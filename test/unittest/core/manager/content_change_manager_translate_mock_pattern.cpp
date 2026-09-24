@@ -73,4 +73,9 @@ bool Pattern::IsNeedAdjustByAspectRatio()
 {
     return false;
 }
+
+RefPtr<FrameNode> Pattern::GetHost() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

@@ -40,9 +40,9 @@ build_component_ng("span_pattern_ng") {
         "bridge/symbol_span/symbol_span_static_modifier.cpp",
       ]
     }
-
     if (!build_ohos_sdk) {
       deps = [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
     }
+    external_deps = [ "graphic_2d:drawing_napi_impl" ]
   }
 }

@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <tuple>
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -23,7 +24,9 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/common/text_field_manager_ng.h"
@@ -37,6 +40,179 @@ using namespace testing::ext;
 class ListAlgorithmTestNg : public TestNG {
 public:
 };
+
+namespace {
+enum class PredictScanOutcome { POSITION, PREDICT_AND_POSITION, WAIT_FOR_PARENT };
+
+struct PredictScanState {
+    const char* name;
+    bool dirty;
+    bool layoutComplete;
+    bool constraintChanged;
+    bool preMeasured;
+    bool missing;
+    PredictScanOutcome single;
+    PredictScanOutcome multi;
+};
+
+using Outcome = PredictScanOutcome;
+const PredictScanState PREDICT_SCAN_STATES[] = {
+    { "Missing", false, false, false, false, true, Outcome::WAIT_FOR_PARENT, Outcome::WAIT_FOR_PARENT },
+    { "DirtyUnpositioned", true, false, false, false, false, Outcome::WAIT_FOR_PARENT, Outcome::WAIT_FOR_PARENT },
+    { "DirtyPositioned", true, true, false, false, false,
+        Outcome::PREDICT_AND_POSITION, Outcome::PREDICT_AND_POSITION },
+    { "CleanPositioned", false, true, false, false, false, Outcome::POSITION, Outcome::POSITION },
+    { "CleanUnpositioned", false, false, false, false, false, Outcome::POSITION, Outcome::POSITION },
+    { "ConstraintPositioned", false, true, true, false, false,
+        Outcome::PREDICT_AND_POSITION, Outcome::PREDICT_AND_POSITION },
+    { "ConstraintUnpositioned", false, false, true, false, false,
+        Outcome::PREDICT_AND_POSITION, Outcome::PREDICT_AND_POSITION },
+    { "PreMeasuredDirtyUnpositioned", true, false, false, true, false, Outcome::POSITION, Outcome::WAIT_FOR_PARENT },
+    { "PreMeasuredDirtyPositioned", true, true, false, true, false, Outcome::POSITION, Outcome::PREDICT_AND_POSITION },
+    { "PreMeasuredConstraint", false, true, true, true, false, Outcome::POSITION, Outcome::PREDICT_AND_POSITION },
+};
+using PredictScanParam = std::tuple<int32_t, bool, PredictScanState>;
+constexpr float SCAN_START = 100.0f;
+constexpr float SCAN_END = 200.0f;
+constexpr float SCAN_SPACE = 7.0f;
+constexpr int32_t SCAN_ITEM_COUNT = 3;
+
+// LayoutWrapperNode intentionally has no GetChildByIndex implementation.
+class PredictScanWrapper : public LayoutWrapperNode {
+    DECLARE_ACE_TYPE(PredictScanWrapper, LayoutWrapperNode);
+public:
+    explicit PredictScanWrapper(const RefPtr<FrameNode>& node)
+        : LayoutWrapperNode(node, node->GetGeometryNode(), node->GetLayoutProperty()) {}
+
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache) override
+    {
+        return GetOrCreateChildByIndex(index, false, isCache);
+    }
+};
+} // namespace
+
+class ListPredictScanTestNg : public TestNG, public testing::WithParamInterface<PredictScanParam> {
+public:
+    void PrepareScan();
+    void CheckScanResult(const std::list<PredictLayoutItem>& predictions, int32_t cachedCount, int32_t lastIndex);
+
+protected:
+    RefPtr<ListLayoutAlgorithm> algorithm_;
+    RefPtr<PredictScanWrapper> parent_;
+    std::vector<RefPtr<FrameNode>> nodes_;
+    int32_t target_ = 0;
+};
+
+void ListPredictScanTestNg::PrepareScan()
+{
+    const auto& [lanes, forward, state] = GetParam();
+    if (lanes == 1) {
+        algorithm_ = AceType::MakeRefPtr<ListLayoutAlgorithm>();
+    } else {
+        auto algorithm = AceType::MakeRefPtr<ListLanesLayoutAlgorithm>();
+        algorithm->SetLanes(lanes);
+        algorithm_ = algorithm;
+    }
+    auto list = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ListPattern>());
+    nodes_.push_back(list);
+    list->GetGeometryNode()->SetFrameSize(SizeF(240.0f, 400.0f));
+    parent_ = AceType::MakeRefPtr<PredictScanWrapper>(list);
+    algorithm_->totalItemCount_ = SCAN_ITEM_COUNT;
+    algorithm_->contentMainSize_ = 400.0f;
+    algorithm_->spaceWidth_ = SCAN_SPACE;
+    algorithm_->itemPosition_[1] = { -1, SCAN_START, SCAN_END, false };
+    target_ = forward ? SCAN_ITEM_COUNT - 1 : 0;
+    for (int32_t index = 0; index < algorithm_->totalItemCount_; ++index) {
+        auto node = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, GetElmtId(),
+            AceType::MakeRefPtr<ListItemPattern>(nullptr));
+        nodes_.push_back(node);
+        node->isLayoutComplete_ = state.layoutComplete;
+        auto geometry = node->GetGeometryNode();
+        geometry->SetFrameSize(SizeF(120.0f, 100.0f));
+        auto constraint = algorithm_->childLayoutConstraint_;
+        if (state.constraintChanged) {
+            constraint.maxSize.SetWidth(123.0f);
+        }
+        geometry->SetParentLayoutConstraint(constraint);
+        auto child = AceType::MakeRefPtr<LayoutWrapperNode>(node, geometry, node->GetLayoutProperty());
+        child->needForceMeasureAndLayout_ = state.dirty;
+        if (state.preMeasured) {
+            child->SetHasPreMeasured();
+        }
+        parent_->AppendChild(child);
+    }
+    if (state.missing) {
+        parent_->childrenMap_.erase(target_);
+    }
+}
+
+void ListPredictScanTestNg::CheckScanResult(
+    const std::list<PredictLayoutItem>& predictions, int32_t cachedCount, int32_t lastIndex)
+{
+    const auto& [lanes, forward, state] = GetParam();
+    const auto outcome = lanes == 1 ? state.single : state.multi;
+    const bool needPredict = outcome != Outcome::POSITION;
+    const bool needParentLayout = outcome == Outcome::WAIT_FOR_PARENT;
+    ASSERT_EQ(predictions.size(), needPredict ? 1 : 0);
+    if (needPredict) {
+        const auto& item = predictions.front();
+        EXPECT_EQ(item.index, target_);
+        EXPECT_EQ(item.needParentLayout, needParentLayout);
+        EXPECT_EQ(item.forwardCacheCount, forward ? 0 : -1);
+        EXPECT_EQ(item.backwardCacheCount, forward ? -1 : 0);
+        EXPECT_TRUE(item.forceCache);
+        EXPECT_FLOAT_EQ(item.referencePos, forward ? SCAN_END + SCAN_SPACE : SCAN_START - SCAN_SPACE);
+    }
+    EXPECT_EQ(cachedCount, needParentLayout ? 0 : 1);
+    EXPECT_EQ(lastIndex, needParentLayout ? 1 : target_);
+    EXPECT_EQ(algorithm_->cachedItemPosition_.count(target_), needParentLayout ? 0 : 1);
+}
+
+/**
+ * @tc.name: ClassifiesParentLayoutRequirement
+ * @tc.desc: Cache scans distinguish missing, dirty, positioned, constraint-changed and premeasured items.
+ * @tc.type: FUNC
+ */
+HWTEST_P(ListPredictScanTestNg, ClassifiesParentLayoutRequirement, TestSize.Level1)
+{
+    ASSERT_NO_FATAL_FAILURE(PrepareScan());
+    std::list<PredictLayoutItem> predictions;
+    int32_t cachedCount = 0;
+    const bool forward = std::get<1>(GetParam());
+    const int32_t lastIndex = forward ?
+        algorithm_->LayoutCachedForward(AceType::RawPtr(parent_), 1, cachedCount, 1, predictions, false) :
+        algorithm_->LayoutCachedBackward(AceType::RawPtr(parent_), 1, cachedCount, 1, predictions, false);
+    ASSERT_NO_FATAL_FAILURE(CheckScanResult(predictions, cachedCount, lastIndex));
+}
+
+INSTANTIATE_TEST_SUITE_P(CacheScan, ListPredictScanTestNg,
+    testing::Combine(testing::Values(1, 2), testing::Bool(), testing::ValuesIn(PREDICT_SCAN_STATES)),
+    ([](const testing::TestParamInfo<PredictScanParam>& info) {
+        const auto& [lanes, forward, state] = info.param;
+        return std::string(lanes == 1 ? "Single" : "Multi") + (forward ? "Forward" : "Backward") + state.name;
+    }));
+
+/**
+ * @tc.name: CachedGroupBoundaryDoesNotRequestParentLayout
+ * @tc.desc: A Group after a partial multi-lane row ends the row without scheduling another prediction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CachedGroupBoundaryDoesNotRequestParentLayout, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<ListLanesLayoutAlgorithm>();
+    auto node = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, GetElmtId(),
+        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupOptions {}));
+    auto wrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        node, node->GetGeometryNode(), node->GetLayoutProperty());
+    for (bool forward : { false, true }) {
+        SCOPED_TRACE(forward);
+        bool isGroup = false;
+        const auto [needBreak, needPredict] = algorithm->CheckACachedItem(wrapper, 1, isGroup, 0.0f, forward);
+        EXPECT_FALSE(isGroup);
+        EXPECT_TRUE(needBreak);
+        EXPECT_FALSE(needPredict);
+    }
+}
 
 /**
  * @tc.name: UpdateListItemConstraint001

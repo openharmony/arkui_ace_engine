@@ -10,6 +10,18 @@ UISession 是 ArkUI 在应用进程内提供给系统 SA、调试工具和 AI �
 
 本 KB 只提供稳定的源码、SDK、测试和 Spec 路由。具体事件传递细节、门控逻辑、翻译流程和并发保护应回到当前源码、测试与相关 Spec 核实。
 
+### Report 对象与死亡监听方向
+
+SA 侧 `UIContentServiceProxy::Connect` 创建本地 `UiReportStub`，通过 IPC 传给应用侧
+`UiContentStub::ConnectInner`。应用侧 `SaveReportProxy` 保存的是 `sptr<IRemoteObject>` 远程对象，
+上报时通过 `iface_cast<ReportService>` 使用 `UiReportProxy` 业务代理；不能将 map 中的对象
+直接等同于 `UiReportProxy` C++ 实例。
+
+应用侧在该远程对象上添加 `UiReportProxyRecipient`，感知 SA 死亡并清理本地注册。
+模拟 SA 的 `UiSaService::getArkUIService` 则在指向应用侧 `UiContentStub` 的远程对象上添加
+`UiContentProxyRecipient`，感知应用死亡并清理本地缓存。两者均在本地 proxy 上注册，
+通知对应远端的死亡；应按 IPC 接收端和对象类型判断进程方向，避免因函数名包含 Stub 而倒置两端。
+
 ## 快速路由
 
 ### 源码入口
@@ -64,7 +76,7 @@ UISession 是框架内部 IPC 通道，没有独立 SDK API。IPC 接口通过 `
 | Feat-09 页面场景规则化感知 | `specs/03-engine-framework/09-uisession/01-uisession-service/Feat-09-pagescene-rule-awareness-spec.md` | Draft |
 | Feat-10 WM验证链路 | `specs/03-engine-framework/09-uisession/01-uisession-service/Feat-10-wm-uicontent-remoteobj-verification-spec.md` | Draft |
 
-### 测试路由
+### 测试入口
 
 | 关注点 | 路径 | 说明 |
 |--------|------|------|
@@ -77,7 +89,7 @@ UISession 是框架内部 IPC 通道，没有独立 SDK API。IPC 接口通过 `
 | 关注点 | 断点位置 | 说明 |
 |--------|----------|------|
 | IPC 入口 | `ui_content_stub.cpp` OnRemoteRequest | 检查 code、SA token、interface token |
-| 连接链路 | `ui_content_stub.cpp` ConnectInner + `ui_session_manager_ohos.cpp` SaveReportStub | 连接与 Report 注册 |
+| 连接链路 | `ui_content_stub.cpp` ConnectInner + `ui_session_manager_ohos.cpp` SaveReportProxy | 连接与 Report 注册 |
 | 事件注册 | `ui_content_stub_impl.cpp` | 各类事件注册回调 |
 | 组件事件过滤 | `ui_session_manager_ohos.cpp` | mask 过滤与广播上报 |
 | InspectorTree | `ui_content_impl.cpp` + `ui_session_manager_ohos.cpp` | 查询与 Web 聚合 |
@@ -99,7 +111,7 @@ UISession 是框架内部 IPC 通道，没有独立 SDK API。IPC 接口通过 `
 
 ## 附录：验证部署步骤
 
-完整验证部署步骤已迁移至 `test/tools/UISession/UISession_Verification_Guide.md`，包括：
+完整验证部署步骤已迁移至 `../../../test/tools/UISession/UISession_Verification_Guide.md`，包括：
 
 - ui_session_sample 构建与部署
 - WM 验证补丁构建与推送
@@ -149,7 +161,7 @@ UISession 是框架内部 IPC 通道，没有独立 SDK API。IPC 接口通过 `
 
 ## 相关主题
 
-- [多实例管理](../multi-instance-management.md) — Container/AceEngine 实例隔离与调度
-- [窗口机制](../window-mechanism.md) — UIContent/AceContainer 窗口生命周期
-- [子窗机制](../subwindow-mechanism.md) — SubwindowManager 子窗口管理
-- [OH 平台适配层](../oh-platform-adapter.md) — adapter/ohos 入口与 UIContentImpl
+- [多实例管理](./multi-instance-management.md) — Container/AceEngine 实例隔离与调度
+- [窗口机制](./window-mechanism.md) — UIContent/AceContainer 窗口生命周期
+- [子窗机制](./subwindow-mechanism.md) — SubwindowManager 子窗口管理
+- [OH 平台适配层](./oh-platform-adapter.md) — adapter/ohos 入口与 UIContentImpl

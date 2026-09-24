@@ -8859,7 +8859,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+    obj->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTargetDisplayId())));
@@ -9760,7 +9760,7 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* inf
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, 0.0f));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+    obj->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_HOVER_INFO);
     return obj;
 }
@@ -10243,6 +10243,9 @@ NG::GestureCollectIntervention CommonBridge::ProcessOnGestureCollectIntercept(Ec
     panda::Local<panda::JSValueRef> params[2] = { recognizersArr, touchRecognizersArr };
     auto returnValue = NG::GestureCollectIntervention::CONTINUE;
     auto result = func->Call(vm, func, params, 2);
+    if (result.IsEmpty()) {
+        return returnValue;
+    }
     if (result->IsNumber()) {
         auto interventionValue = result->Int32Value(vm);
         if (interventionValue >= 0 &&
@@ -11394,7 +11397,7 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, (infoPtr->GetTargetDisplayId()))};
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+    obj->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO);
     return obj;
 }
@@ -11519,7 +11522,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+    obj->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_AXIS_INFO);
     return obj;
 }
@@ -12185,6 +12188,33 @@ ArkUINativeModuleValue CommonBridge::ResetExcludeFromRenderGroup(ArkUIRuntimeCal
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getCommonModifier()->resetExcludeFromRenderGroup(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetMarkLayeredRender(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto isLayeredRender = false;
+    if (secondArg->IsBoolean()) {
+        isLayeredRender = secondArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setMarkLayeredRender(nativeNode, isLayeredRender);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetMarkLayeredRender(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getCommonModifier()->resetMarkLayeredRender(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

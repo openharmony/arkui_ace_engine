@@ -287,6 +287,7 @@ public:
     Dimension GetSelectLeftMargin(ControlSize controlSize) const;
     Dimension GetSelectRightMargin(ControlSize controlSize) const;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnMaterialDisable() override;
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<SelectPaintProperty>();

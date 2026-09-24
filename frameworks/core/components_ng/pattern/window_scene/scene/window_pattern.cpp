@@ -276,6 +276,14 @@ void WindowPattern::OnAttachToFrameNode()
             attachToFrameNodeFlag_ = true;
             auto surfaceNode = session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
+            if (session_->GetSessionInfo().frameNum_ == 0 && !surfaceNode->IsBufferAvailable()) {
+                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch add starting window");
+                CreateStartingWindow();
+                AddChild(host, startingWindow_, startingWindowName_);
+            } else if (session_->GetSessionInfo().frameNum_ < 0) {
+                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch pending add starting window");
+                needReplaceBlankWithStarting_ = true;
+            }
             surfaceNode->SetBufferAvailableCallback(callback_);
         } else if (session_->GetShowRecent() && session_->HasPersistentSnapshot()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch add snapshot");
@@ -644,7 +652,8 @@ void WindowPattern::HideStartingWindow()
 
 void WindowPattern::CreateStartingWindow()
 {
-    if (session_->GetSessionInfo().startWindowType_ == Rosen::StartWindowType::RETAIN_AND_INVISIBLE) {
+    if (session_->GetSessionInfo().startWindowType_ == Rosen::StartWindowType::RETAIN_AND_INVISIBLE &&
+        !needReplaceBlankWithStarting_) {
         HideStartingWindow();
         startingWindow_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -707,7 +716,7 @@ void WindowPattern::CreateStartingWindow()
         sourceInfo = ImageSourceInfo(preloadBufferInfo.first, preloadBufferInfo.second);
         session_->ResetPreloadStartingWindow();
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload buffer id:%{public}d", session_->GetPersistentId());
-    } else if (!session_->GetPreloadingStartingWindow()) {
+    } else if (!session_->GetPreloadingStartingWindow() || needReplaceBlankWithStarting_) {
         sourceInfo = ImageSourceInfo(startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_,
             sessionInfo.moduleName_);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "not preloading starting window id:%{public}d",

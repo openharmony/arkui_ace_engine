@@ -59,7 +59,7 @@ int32_t SearchController::GetTextContentLinesNum()
 
 CJRectResult SearchController::GetTextContentRect()
 {
-    CJRectResult result;
+    CJRectResult result {};
     auto controller = controller_.Upgrade();
     if (controller) {
         Rect rect = controller->GetTextContentRect();
@@ -73,7 +73,7 @@ CJRectResult SearchController::GetTextContentRect()
 
 CJCaretOffset SearchController::GetCaretOffset()
 {
-    CJCaretOffset result;
+    CJCaretOffset result {};
     auto controller = controller_.Upgrade();
     if (controller) {
         NG::OffsetF caretOffset = controller->GetCaretPosition();

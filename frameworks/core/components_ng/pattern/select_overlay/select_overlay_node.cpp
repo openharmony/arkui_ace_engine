@@ -2956,6 +2956,7 @@ RefPtr<UINode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo>& 
     info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     CHECK_NULL_RETURN(customNode, nullptr);
+    customNode->SetInCustomSelectMenu(true);
     return customNode;
 }
 
@@ -4302,7 +4303,7 @@ void SelectOverlayNode::UpdateNewMaterialProperties(const RefPtr<FrameNode>& fra
         CHECK_NULL_VOID(renderContext);
         if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
             renderContext->UpdateBackBlurStyle(std::nullopt);
-            ViewAbstract::SetSystemMaterial(
+            ViewAbstract::SetSystemMaterialForOverlay(
                 AceType::RawPtr(frameNode), AceType::RawPtr(GetMenuUiMaterial(colorMode)));
         } else {
             // 降档材质

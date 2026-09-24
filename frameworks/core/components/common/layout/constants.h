@@ -739,12 +739,6 @@ enum class CopyOptions {
     Distributed,
 };
 
-enum class VisibleType {
-    VISIBLE = 0,
-    INVISIBLE,
-    GONE,
-};
-
 enum class ShapeMode {
     /*
      * unspecified, follow theme.
@@ -894,6 +888,11 @@ enum class KeyBoardAvoidMode : int32_t {
     OFFSET_WITH_CARET = 2,
     RESIZE_WITH_CARET = 3,
     NONE = 4,
+};
+
+enum class ImmersiveStrategy : int32_t {
+    AVOID_CUTOUT = 0,
+    AVOID_FLOAT_NAV = 1,
 };
 
 enum class SwipeActionState : uint32_t {

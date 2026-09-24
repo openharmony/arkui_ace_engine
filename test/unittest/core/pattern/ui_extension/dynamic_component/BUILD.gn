@@ -72,6 +72,7 @@ ace_unittest("dynamic_pattern_test") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_security_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_safe_info.cpp",
     "dynamic_pattern_test.cpp",
   ]
   if (is_ohos_standard_system) {
@@ -156,6 +157,7 @@ ace_unittest("dynamic_pattern_test_two") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_security_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_safe_info.cpp",
     "dynamic_pattern_test_two.cpp",
   ]
   if (is_ohos_standard_system) {
@@ -240,6 +242,7 @@ ace_unittest("dynamic_pattern_test_three") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_security_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_safe_info.cpp",
     "dynamic_pattern_test_three.cpp",
   ]
   if (is_ohos_standard_system) {
@@ -384,6 +387,7 @@ ace_unittest("arkts_dynamic_pattern_test") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_security_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_safe_info.cpp",
     "arkts_dynamic_pattern_test.cpp",
   ]
   if (is_ohos_standard_system) {

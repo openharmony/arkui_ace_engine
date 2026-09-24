@@ -17,8 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_FULL_UPDATE_MODEL_H
 
 #include <functional>
-#include <memory>
-#include <mutex>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -44,10 +42,6 @@ public:
 
     virtual RefPtr<AceType> CreateNode(NodeInfo&& info) = 0;
     virtual bool MarkNeedUpdate(const WeakPtr<AceType>& node) = 0;
-
-private:
-    static std::unique_ptr<ViewFullUpdateModel> instance_;
-    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

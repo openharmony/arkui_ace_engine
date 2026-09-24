@@ -81,10 +81,14 @@ private:
     {
         static const OHOS::Ace::NG::ArkUIIndicatorControllerModifier* cachedModifier = nullptr;
         if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+            cachedModifier = OHOS::Ace::NG::GetIndicatorControllerModifier();
+#else
             auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("IndicatorComponent");
             CHECK_NULL_RETURN(module, nullptr);
             cachedModifier = reinterpret_cast<const OHOS::Ace::NG::ArkUIIndicatorControllerModifier*>(
                 module->GetCustomModifier("indicator_controller"));
+#endif
         }
         return cachedModifier;
     }

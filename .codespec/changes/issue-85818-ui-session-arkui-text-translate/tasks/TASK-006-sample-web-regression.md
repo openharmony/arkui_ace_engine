@@ -20,7 +20,7 @@
 
 1. 在 `ui_session_sample` 新增 dump 命令，触发 `GetPageTranslateText`、`StartPageTranslate`、`EndPageTranslate`、`Reset`、`SendPageTranslateResult`。
 2. dump 参数支持 scope bitmask、nodeId、version、译文、批量 `results` payload、安全摘要输出。
-3. dump 输出只打印 nodeId、version、长度、scope、requestId、状态，不打印原文/译文。
+3. `ui_session_sample`（UISA）是测试 SA，不随正式版本编译和发布。为开发调试并观察 `GetPageTranslateText`、`StartPageTranslate`、`SendPageTranslateResult` 的 IPC 参数及 callback 是否正确，dump 可在受控开发环境输出截断原文/译文（当前实现限制为前 200 个字符），同时输出 nodeId、version、长度、scope、requestId、状态。
 4. 增加 Web 回归，确认 `ARKUI_ARKWEB` 继续复用现有 Web 脚本注入提取/回填/Reset，并同时获取 ArkUI 原生文本。
 5. 增加 dump 命令触发 `GetCurrentAbilityLanguageInfo`，输出当前 Ability 实例 `language/region` 和状态。
 6. 补充端到端验证记录模板：真机 dump 命令、预期 hilog、异常恢复场景。
@@ -31,8 +31,8 @@
 
 - 不新增生产调试工具。
 - 不改变 sample SA 获取 UIContent remote object 的现有缓存/死亡监听机制。
-- 不打印敏感正文。
-- 不打印页面文本或资源内容；language/region 可直接打印。
+- UISA 的截断正文日志仅限受控开发调试，不得迁移到真实 SA、产品日志、持久化报告或其他生产链路。
+- 真实 SA 不打印页面原文、译文、请求或回填 payload 正文，仅记录 nodeId、version、textLen/resultLen、scope、requestId、错误码等摘要。页面文本可能包含应用业务或用户敏感信息，生产日志可能被采集、导出或长期留存，打印正文会扩大泄露面；language/region 可直接打印。
 
 ## 规格映射与边界
 
@@ -45,7 +45,7 @@
 | Rule ID | Must / Must Not |
 |---------|-----------------|
 | WEB-COMPAT | Web 脚本注入路径不回退 |
-| DFX | dump 输出安全摘要 |
+| DFX | UISA dump 可在受控开发调试中输出截断正文和状态；真实 SA 输出安全摘要 |
 | DATA-MIN | sample SA 只按 `nodeId/text/version` 使用节点 payload |
 | RESULT-VALIDATION | sample dump 必须能触发合法批量结果和非法结果 payload，用于验证 `PARAM_INVALID` 与局部成功语义 |
 | ABILITY-LANGUAGE | sample SA dump 输出 language/region，不依赖页面文本回调 |

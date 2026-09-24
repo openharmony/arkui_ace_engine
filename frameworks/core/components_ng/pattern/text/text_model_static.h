@@ -94,6 +94,9 @@ public:
     static void SetSelectDetectEnable(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetIncrementalUpdatePolicy(FrameNode* frameNode, const std::optional<IncrementalUpdatePolicy>& value);
     static void SetTailIndents(FrameNode* frameNode, const std::optional<TailIndents>& value);
+    static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetStrokeColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetStrokeJoinStyle(FrameNode* frameNode, const std::optional<StrokeJoinStyle>& value);
 };
 } // namespace OHOS::Ace::NG
 

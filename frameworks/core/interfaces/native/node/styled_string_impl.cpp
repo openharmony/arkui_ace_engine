@@ -419,28 +419,27 @@ RefPtr<SpanBase> ParseCustomSpan(const ArkUISpanStyle& style, int32_t start, int
     return ParseCustomSpan(style.customSpan, start, length);
 }
 
-void ConvertToImageSpanAttribute(ImageSpanAttribute& imageStyle, const ArkUIImageAttachment& imageAttachment)
+void ConvertImageSpanResizable(ImageSpanAttribute& imageStyle, const ArkUIImageAttachment& imageAttachment)
 {
-    imageStyle.verticalAlign = static_cast<VerticalAlign>(imageAttachment.verticalAlign);
-    imageStyle.objectFit = static_cast<ImageFit>(imageAttachment.objectFit);
-    imageStyle.marginProp = NG::ConvertToCalcPaddingProperty(
-        CalcDimension(imageAttachment.margin.top, DimensionUnit::VP),
-        CalcDimension(imageAttachment.margin.bottom, DimensionUnit::VP),
-        CalcDimension(imageAttachment.margin.left, DimensionUnit::VP),
-        CalcDimension(imageAttachment.margin.right, DimensionUnit::VP));
-    imageStyle.paddingProp =  NG::ConvertToCalcPaddingProperty(
-        CalcDimension(imageAttachment.padding.top, DimensionUnit::VP),
-        CalcDimension(imageAttachment.padding.bottom, DimensionUnit::VP),
-        CalcDimension(imageAttachment.padding.left, DimensionUnit::VP),
-        CalcDimension(imageAttachment.padding.right, DimensionUnit::VP));
-    imageStyle.borderRadius = {
-        CalcDimension(imageAttachment.topLeftRadius, DimensionUnit::VP),
-        CalcDimension(imageAttachment.topRightRadius, DimensionUnit::VP),
-        CalcDimension(imageAttachment.bottomRightRadius, DimensionUnit::VP),
-        CalcDimension(imageAttachment.bottomLeftRadius, DimensionUnit::VP) };
-    imageStyle.borderRadius->multiValued = true;
-    imageStyle.syncLoad = imageAttachment.syncLoad;
-    imageStyle.supportSvg2 = imageAttachment.supportSvg;
+    if (imageAttachment.resizableSliceLeft.has_value() || imageAttachment.resizableSliceTop.has_value() ||
+        imageAttachment.resizableSliceRight.has_value() || imageAttachment.resizableSliceBottom.has_value()) {
+        ImageResizableSlice slice;
+        slice.left = CalcDimension(imageAttachment.resizableSliceLeft.value_or(0), DimensionUnit::VP);
+        slice.top = CalcDimension(imageAttachment.resizableSliceTop.value_or(0), DimensionUnit::VP);
+        slice.right = CalcDimension(imageAttachment.resizableSliceRight.value_or(0), DimensionUnit::VP);
+        slice.bottom = CalcDimension(imageAttachment.resizableSliceBottom.value_or(0), DimensionUnit::VP);
+        imageStyle.resizableSlice = slice;
+    }
+    if (imageAttachment.resizableLattice != nullptr) {
+        auto drawingLattice = DrawingLattice::CreateDrawingLatticeFromNative(imageAttachment.resizableLattice);
+        if (drawingLattice) {
+            imageStyle.resizableLattice = drawingLattice;
+        }
+    }
+}
+
+void ConvertImageSpanSize(ImageSpanAttribute& imageStyle, const ArkUIImageAttachment& imageAttachment)
+{
     ImageSpanSize imageSize;
     if (imageAttachment.width.has_value()) {
         imageSize.width = CalcDimension(imageAttachment.width.value(), DimensionUnit::VP);
@@ -449,6 +448,10 @@ void ConvertToImageSpanAttribute(ImageSpanAttribute& imageStyle, const ArkUIImag
         imageSize.height = CalcDimension(imageAttachment.height.value(), DimensionUnit::VP);
     }
     imageStyle.size = imageSize;
+}
+
+void ConvertImageSpanColorFilter(ImageSpanAttribute& imageStyle, const ArkUIImageAttachment& imageAttachment)
+{
     bool isDrawingColorFilter = imageAttachment.isDrawingColorFilter.value_or(false);
     if (isDrawingColorFilter) {
         imageStyle.colorFilterMatrix = std::nullopt;
@@ -466,6 +469,33 @@ void ConvertToImageSpanAttribute(ImageSpanAttribute& imageStyle, const ArkUIImag
             imageStyle.colorFilterMatrix = imageAttachment.colorFilter;
         }
     }
+}
+
+void ConvertToImageSpanAttribute(ImageSpanAttribute& imageStyle, const ArkUIImageAttachment& imageAttachment)
+{
+    imageStyle.verticalAlign = static_cast<VerticalAlign>(imageAttachment.verticalAlign);
+    imageStyle.objectFit = static_cast<ImageFit>(imageAttachment.objectFit);
+    imageStyle.marginProp = NG::ConvertToCalcPaddingProperty(
+        CalcDimension(imageAttachment.margin.top, DimensionUnit::VP),
+        CalcDimension(imageAttachment.margin.bottom, DimensionUnit::VP),
+        CalcDimension(imageAttachment.margin.left, DimensionUnit::VP),
+        CalcDimension(imageAttachment.margin.right, DimensionUnit::VP));
+    imageStyle.paddingProp = NG::ConvertToCalcPaddingProperty(
+        CalcDimension(imageAttachment.padding.top, DimensionUnit::VP),
+        CalcDimension(imageAttachment.padding.bottom, DimensionUnit::VP),
+        CalcDimension(imageAttachment.padding.left, DimensionUnit::VP),
+        CalcDimension(imageAttachment.padding.right, DimensionUnit::VP));
+    imageStyle.borderRadius = {
+        CalcDimension(imageAttachment.topLeftRadius, DimensionUnit::VP),
+        CalcDimension(imageAttachment.topRightRadius, DimensionUnit::VP),
+        CalcDimension(imageAttachment.bottomRightRadius, DimensionUnit::VP),
+        CalcDimension(imageAttachment.bottomLeftRadius, DimensionUnit::VP) };
+    imageStyle.borderRadius->multiValued = true;
+    imageStyle.syncLoad = imageAttachment.syncLoad;
+    imageStyle.supportSvg2 = imageAttachment.supportSvg;
+    ConvertImageSpanResizable(imageStyle, imageAttachment);
+    ConvertImageSpanSize(imageStyle, imageAttachment);
+    ConvertImageSpanColorFilter(imageStyle, imageAttachment);
 }
 
 ImageSpanOptions CreateImageSpanOptions(const ArkUIImageAttachment& imageAttachment)

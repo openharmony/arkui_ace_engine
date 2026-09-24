@@ -32,6 +32,7 @@ enum class GestureTypeName {
     WEBSCROLL = 9,
     TEXTFIELD_BOXSELECT = 10,
     CONTEXT_MENU_HOVER = 11,
+    TOUCH_EVENT = 12,
 };
 
 enum class TextDirection {
@@ -41,6 +42,11 @@ enum class TextDirection {
     AUTO,
 };
 
+enum class VisibleType {
+    VISIBLE = 0,
+    INVISIBLE,
+    GONE,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_COMMON_LAYOUT_CONSTANTS_H

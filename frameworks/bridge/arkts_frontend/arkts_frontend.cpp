@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -490,7 +490,7 @@ bool ArktsFrontend::GetNearestNonBootRuntimeLinker()
 }
 
 UIContentErrorCode ArktsFrontend::RunPage(
-    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+    const std::shared_ptr<std::vector<uint8_t>>& content [[maybe_unused]], const std::string& params)
 {
     auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, UIContentErrorCode::NULL_POINTER);
@@ -517,7 +517,7 @@ UIContentErrorCode ArktsFrontend::RunPage(
     ani_string aniName;
     env->String_NewUTF8("", 0, &aniName);
 
-    NG::EntryLoader entryLoader { env, *(content.get()) };
+    NG::EntryLoader entryLoader { env, "" };
     std::string entryPath = params + ENTRY_SUFFIX;
     auto entryPointObj = entryLoader.GetPageEntryObj(entryPath);
     auto currentContainer = Container::Current();

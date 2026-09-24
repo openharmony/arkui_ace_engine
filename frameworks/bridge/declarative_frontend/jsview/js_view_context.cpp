@@ -1089,8 +1089,16 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
     auto targetInfoID = obj->GetProperty("id");
     if (targetInfoID->IsNumber()) {
         targetId = targetInfoID->ToNumber<int32_t>();
+        if (targetId < 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        auto node = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
+        CHECK_NULL_RETURN(node, ERROR_CODE_TARGET_INFO_NOT_EXIST);
     } else if (targetInfoID->IsString()) {
         std::string targetIdString = targetInfoID->ToString();
+        if (targetIdString.empty()) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         auto targetInfoComponentId = obj->GetProperty("componentId");
         if (targetInfoComponentId->IsNumber()) {
             auto componentId = targetInfoComponentId->ToNumber<int32_t>();
@@ -1113,6 +1121,8 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
         }
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
     }
     if (targetId < 0) {
         return ERROR_CODE_PARAM_INVALID;

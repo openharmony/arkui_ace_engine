@@ -39,6 +39,52 @@ bool IsTouchExplorationEnabled(const RefPtr<NG::PipelineContext>& context)
     auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
     return accessibilityWorkMode.isTouchExplorationEnabled;
 }
+
+void ClearThirdProviderFocusIfScreenReaderEnabled(
+    const RefPtr<NG::PipelineContext>& context,
+    const RefPtr<NG::FrameNode>& currentHostNode,
+    const std::unordered_map<int64_t, std::weak_ptr<JsThirdProviderInteractionOperation>>& jsThirdProviderOperator)
+{
+    CHECK_NULL_VOID(context);
+
+    {
+        auto jsAccessibilityManager =
+            AceType::DynamicCast<JsAccessibilityManager>(context->GetAccessibilityManager());
+        if (!jsAccessibilityManager || !jsAccessibilityManager->IsScreenReaderEnabled()) {
+            return;
+        }
+    }
+
+    std::vector<int64_t> focusedIds;
+    for (const auto& [hostAccessibilityId, weakOperator] : jsThirdProviderOperator) {
+        auto jsThirdProviderOperatorPtr = weakOperator.lock();
+        CHECK_NULL_CONTINUE(jsThirdProviderOperatorPtr);
+        auto hostNode = jsThirdProviderOperatorPtr->GetHost();
+        if (hostNode == nullptr || hostNode == currentHostNode) {
+            continue;
+        }
+        auto renderContext = hostNode->GetRenderContext();
+        CHECK_NULL_CONTINUE(renderContext);
+        if (!renderContext->GetAccessibilityFocus().value_or(false)) {
+            continue;
+        }
+        focusedIds.push_back(hostAccessibilityId);
+        jsThirdProviderOperatorPtr->ClearFocus();
+    }
+
+    if (focusedIds.empty()) {
+        return;
+    }
+    std::string idsStr;
+    for (size_t idx = 0; idx < focusedIds.size(); ++idx) {
+        if (idx > 0) {
+            idsStr += ",";
+        }
+        idsStr += std::to_string(focusedIds[idx]);
+    }
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "ClearThirdProviderFocusIfScreenReaderEnabled, ids: [%{public}s]",
+        idsStr.c_str());
+}
 } // namespace
 
 bool AccessibilityHoverManagerForThirdNG::GetElementInfoForThird(
@@ -310,10 +356,22 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
     CHECK_NULL_RETURN(renderContext, false);
     if (isNeedClear) {
         renderContext->UpdateAccessibilityFocus(false);
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-            "third act Accessibility element Id %{public}" PRId64 "Focus clear",
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "third act Accessibility element Id %{public}" PRId64 "Focus clear",
             nodeInfo.GetAccessibilityId());
         return true;
+    }
+    auto taskExecutor = context ? context->GetTaskExecutor() : nullptr;
+    if (taskExecutor) {
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), context, hostNode] {
+                auto self = weak.Upgrade();
+                CHECK_NULL_VOID(self);
+                ClearThirdProviderFocusIfScreenReaderEnabled(
+                    context, hostNode, self->jsThirdProviderOperator_);
+            },
+            TaskExecutor::TaskType::UI, "ClearThirdProviderAccessibilityFocus");
+    } else {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "task executor is null, skip clear third provider focus");
     }
     renderContext->UpdateAccessibilityFocus(false);
     auto rectInScreen = nodeInfo.GetRectInScreen();

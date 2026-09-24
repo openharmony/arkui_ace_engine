@@ -591,7 +591,7 @@ void FfiOHOSAceFrameworkRenderingContextStrokeTextWithMaxWidth(
 CTextMetrics FfiOHOSAceFrameworkRenderingContextMeasureText(int64_t contextId, const char* text)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
-    CTextMetrics textMetrics;
+    CTextMetrics textMetrics {};
     if (context != nullptr) {
         auto metrics = context->MeasureText(text);
         textMetrics.height = metrics.height;

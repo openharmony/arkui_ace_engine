@@ -217,6 +217,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/base/Callback.ets",
   "arkui-preprocessed/arkui/base/DataChangeListener.ets",
   "arkui-preprocessed/arkui/base/ForeignFunctions.ets",
+  "arkui-preprocessed/arkui/base/InteropProxyNode.ets",
   "arkui-preprocessed/arkui/base/LazyForEachImpl.ets",
   "arkui-preprocessed/arkui/base/RepeatImpl.ets",
   "arkui-preprocessed/arkui/base/Router.ets",

@@ -198,18 +198,16 @@ void MediaPlayerImpl::SetRenderSurface(const RefPtr<RenderSurface>& renderSurfac
 
 void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
     StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
-    CommonEvent&& startRenderFrameEvent)
+    CommonEvent&& startRenderFrameEvent, VideoErrorEvent&& videoErrorEvent, SeekDoneEvent&& seekDoneEvent)
 {
     positionUpdateCallback_ = positionUpdatedEvent;
     stateChangeCallback_ = stateChangedEvent;
     errorCallback_ = errorEvent;
     resolutionChangeCallback_ = resolutionChangeEvent;
     startRenderFrameCallback_ = startRenderFrameEvent;
-}
-
-void MediaPlayerImpl::RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent)
-{
-    seekDoneCallback_ = seekDoneEvent;
+    if (seekDoneEvent) {
+        seekDoneCallback_ = seekDoneEvent;
+    }
 }
 
 void MediaPlayerImpl::RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent)

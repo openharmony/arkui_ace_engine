@@ -521,6 +521,21 @@ void Invalidate(void* object)
     drawable->Invalidate();
 }
 
+void SetSVGResourceLimitLevel(void* object, int32_t id)
+{
+    if (object == nullptr) {
+        return;
+    }
+    constexpr int32_t MAX_LEVEL = 4;
+    if (id < 0 || id >= MAX_LEVEL) {
+        id = 0;
+    }
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DRAWABLE_DESCRIPTOR,
+        "SetSVGResourceLimitLevel svgResourceLimitLevel=%{public}d", id);
+    auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
+    drawable->SetSVGResourceLimitLevel(id);
+}
+
 } // namespace OHOS::Ace
 
 extern "C" {
@@ -567,7 +582,8 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
         .getAnimatedStopMode = OHOS::Ace::GetAnimatedStopMode,
         .setPicture = OHOS::Ace::SetPicture,
         .setHdrComposition = OHOS::Ace::SetHdrComposition,
-        .invalidate = OHOS::Ace::Invalidate
+        .invalidate = OHOS::Ace::Invalidate,
+        .setSVGResourceLimitLevel = OHOS::Ace::SetSVGResourceLimitLevel
     };
     return &impl;
 }

@@ -414,8 +414,6 @@ RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool
     return {};
 }
 
-void UINode::GetInspectorValue() {}
-
 void UINode::MarkNeedSyncRenderTree(bool needRebuild) {}
 
 HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,

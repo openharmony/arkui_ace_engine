@@ -21,6 +21,7 @@
 #include <cstdlib>
 
 #include "interfaces/inner_api/ace/ui_content.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
@@ -1150,6 +1151,7 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(renderSurface_);
     renderSurface_->UpdateSurfaceSizeInUserData(
         static_cast<uint32_t>(surfaceRect.Width()), static_cast<uint32_t>(surfaceRect.Height()));
 
@@ -1538,6 +1540,30 @@ void XComponentPattern::InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHu
     inputHub->AddOnHoverEvent(mouseHoverEvent_);
 }
 
+void XComponentPattern::ReportChangeEvent(const TouchEventInfo& info, const Offset& screenOffset,
+    const TouchLocationInfo& touchInfo)
+{
+    if (info.GetSourceDevice() != SourceType::TOUCH) {
+        return;
+    }
+    auto type = touchInfo.GetTouchType();
+    if ((type != TouchType::DOWN) && (type != TouchType::UP)) {
+        return;
+    }
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    json->Put("id", host->GetId());
+    json->Put("fingerId", touchInfo.GetFingerId());
+    const auto timeStamp = info.GetTimeStamp().time_since_epoch().count();
+    json->Put("timeStamp", static_cast<double>(timeStamp));
+    json->Put("offset", screenOffset.ToString().c_str());
+    json->Put("eventId", touchInfo.GetTouchEventId());
+    json->Put("type", static_cast<int32_t>(type));
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString(),
+        ComponentEventType::COMPONENT_EVENT_GESTURE);
+}
+
 void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchInfoList = info.GetChangedTouches();
@@ -1548,6 +1574,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     const auto& touchInfo = touchInfoList.front();
     const auto& screenOffset = touchInfo.GetGlobalLocation();
     const auto& localOffset = touchInfo.GetLocalLocation();
+    ReportChangeEvent(info, screenOffset, touchInfo);
     touchEventPoint_.id = touchInfo.GetFingerId();
     touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX() * xcomponentTouchSdrRatio_);
     touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY() * xcomponentTouchSdrRatio_);
@@ -1561,7 +1588,8 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleTouchEvent[%{public}f,%{public}f,%{public}d,%{public}zu,%{public}u]",
-        localOffset.GetX(), localOffset.GetY(), touchInfo.GetFingerId(), touchInfoList.front().GetTouchType(),
+        localOffset.GetX() * xcomponentTouchSdrRatio_, localOffset.GetY() * xcomponentTouchSdrRatio_,
+        touchInfo.GetFingerId(), touchInfoList.front().GetTouchType(),
         static_cast<uint32_t>(touchInfo.GetSize()));
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 

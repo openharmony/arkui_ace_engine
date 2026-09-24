@@ -1952,9 +1952,15 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
         ParseIndicatorAttribute(params->selectedItemHeight, hasValue, value);
         props->selectedItemHeight = ArkUIOptionalFloat { hasValue, value };
         props->maskValue = ArkUIOptionalInt { 1, params->maskValue.value_or(0) };
-        props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
-        props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
-        props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
+        if (params->colorVal.has_value()) {
+            props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
+        }
+        if (params->selectedColorVal.has_value()) {
+            props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
+        }
+        if (params->maxDisplayCountVal.has_value()) {
+            props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
+        }
         ParseIndicatorAttribute(params->dimSpace, hasValue, value);
         props->dimSpace = ArkUIOptionalFloat { hasValue, value };
     }
@@ -2642,6 +2648,13 @@ void ResetSwiperIgnoreHiddenItem(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetIgnoreHiddenItem(frameNode, false);
+}
+
+void SetSwiperRenderGroup(ArkUINodeHandle node, ArkUI_Bool isRenderGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetRenderGroupExplicitly(frameNode, isRenderGroup);
 }
 
 #ifndef CROSS_PLATFORM
@@ -3503,6 +3516,9 @@ void SetSwiperIgnoreHiddenItemImpl(ArkUINodeHandle node, ArkUI_Bool value)
 
 void ResetSwiperIgnoreHiddenItemImpl(ArkUINodeHandle node)
 {}
+
+void SetSwiperRenderGroupImpl(ArkUINodeHandle node, ArkUI_Bool isRenderGroup)
+{}
 #endif
 
 namespace NodeModifier {
@@ -3665,6 +3681,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setJsSwiperOnClick = SetJsSwiperOnClick,
         .setSwiperIgnoreHiddenItem = SetSwiperIgnoreHiddenItem,
         .resetSwiperIgnoreHiddenItem = ResetSwiperIgnoreHiddenItem,
+        .setSwiperRenderGroup = SetSwiperRenderGroup,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3825,6 +3842,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setJsSwiperOnClick = SetJsSwiperOnClickImpl,
         .setSwiperIgnoreHiddenItem = SetSwiperIgnoreHiddenItemImpl,
         .resetSwiperIgnoreHiddenItem = ResetSwiperIgnoreHiddenItemImpl,
+        .setSwiperRenderGroup = SetSwiperRenderGroupImpl,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

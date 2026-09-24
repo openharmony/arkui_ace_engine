@@ -27,104 +27,147 @@ VideoControllerAsync::~VideoControllerAsync() = default;
 
 void VideoControllerAsync::Start(AsyncCommandCallback&& callback)
 {
-    if (!startImpl_) {
+    StartImpl impl;
+    {
+        std::lock_guard<std::mutex> lock(implMutex_);
+        impl = startImpl_;
+    }
+    if (!impl) {
         ReportNullPattern("Start", std::move(callback));
         return;
     }
-    startImpl_(std::move(callback));
+    impl(std::move(callback));
 }
 
 void VideoControllerAsync::Pause(AsyncCommandCallback&& callback)
 {
-    if (!pauseImpl_) {
+    PauseImpl impl;
+    {
+        std::lock_guard<std::mutex> lock(implMutex_);
+        impl = pauseImpl_;
+    }
+    if (!impl) {
         ReportNullPattern("Pause", std::move(callback));
         return;
     }
-    pauseImpl_(std::move(callback));
+    impl(std::move(callback));
 }
 
 void VideoControllerAsync::Stop(AsyncCommandCallback&& callback)
 {
-    if (!stopImpl_) {
+    StopImpl impl;
+    {
+        std::lock_guard<std::mutex> lock(implMutex_);
+        impl = stopImpl_;
+    }
+    if (!impl) {
         ReportNullPattern("Stop", std::move(callback));
         return;
     }
-    stopImpl_(std::move(callback));
+    impl(std::move(callback));
 }
 
 void VideoControllerAsync::Reset(AsyncCommandCallback&& callback)
 {
-    if (!resetImpl_) {
+    ResetImpl impl;
+    {
+        std::lock_guard<std::mutex> lock(implMutex_);
+        impl = resetImpl_;
+    }
+    if (!impl) {
         ReportNullPattern("Reset", std::move(callback));
         return;
     }
-    resetImpl_(std::move(callback));
+    impl(std::move(callback));
 }
 
 void VideoControllerAsync::SeekTo(float time, SeekMode seekMode)
 {
-    if (!seekToImpl_) {
+    SeekToImpl impl;
+    {
+        std::lock_guard<std::mutex> lock(implMutex_);
+        impl = seekToImpl_;
+    }
+    if (!impl) {
         ReportNullPattern("SeekTo");
         return;
     }
-    seekToImpl_(time, seekMode);
+    impl(time, seekMode);
 }
 
 void VideoControllerAsync::RequestFullscreen(bool landscape)
 {
-    if (!requestFullscreenImpl_) {
+    RequestFullscreenImpl impl;
+    {
+        std::lock_guard<std::mutex> lock(implMutex_);
+        impl = requestFullscreenImpl_;
+    }
+    if (!impl) {
         ReportNullPattern("RequestFullscreen");
         return;
     }
-    requestFullscreenImpl_(landscape);
+    impl(landscape);
 }
 
 void VideoControllerAsync::ExitFullscreen()
 {
-    if (!exitFullscreenImpl_) {
+    ExitFullscreenImpl impl;
+    {
+        std::lock_guard<std::mutex> lock(implMutex_);
+        impl = exitFullscreenImpl_;
+    }
+    if (!impl) {
         ReportNullPattern("ExitFullscreen");
         return;
     }
-    exitFullscreenImpl_();
+    impl();
 }
 
 void VideoControllerAsync::SetStartImpl(StartImpl&& startImpl)
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     startImpl_ = std::move(startImpl);
 }
 
 void VideoControllerAsync::SetPauseImpl(PauseImpl&& pauseImpl)
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     pauseImpl_ = std::move(pauseImpl);
 }
 
 void VideoControllerAsync::SetStopImpl(StopImpl&& stopImpl)
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     stopImpl_ = std::move(stopImpl);
 }
 
 void VideoControllerAsync::SetResetImpl(ResetImpl&& resetImpl)
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     resetImpl_ = std::move(resetImpl);
 }
 
 void VideoControllerAsync::SetSeekToImpl(SeekToImpl&& seekToImpl)
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     seekToImpl_ = std::move(seekToImpl);
 }
 
 void VideoControllerAsync::SetRequestFullscreenImpl(RequestFullscreenImpl&& requestFullscreenImpl)
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     requestFullscreenImpl_ = std::move(requestFullscreenImpl);
 }
 
 void VideoControllerAsync::SetExitFullscreenImpl(ExitFullscreenImpl&& exitFullscreenImpl)
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     exitFullscreenImpl_ = std::move(exitFullscreenImpl);
 }
 
 void VideoControllerAsync::Clear()
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     startImpl_ = nullptr;
     pauseImpl_ = nullptr;
     stopImpl_ = nullptr;
@@ -136,6 +179,7 @@ void VideoControllerAsync::Clear()
 
 bool VideoControllerAsync::IsBound() const
 {
+    std::lock_guard<std::mutex> lock(implMutex_);
     return startImpl_ || pauseImpl_ || stopImpl_ || resetImpl_ || seekToImpl_ || requestFullscreenImpl_ ||
            exitFullscreenImpl_;
 }

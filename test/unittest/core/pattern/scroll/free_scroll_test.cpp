@@ -18,6 +18,7 @@
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/animation/curves.h"
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/event/touch_event.h"
@@ -1081,6 +1082,117 @@ TEST_F(FreeScrollTest, Scroller003)
     EXPECT_EQ(State::IDLE, pattern_->freeScroll_->state_);
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
+}
+
+/**
+ * @tc.name: ScrollerPageCapiFree001
+ * @tc.desc: Test CAPI NODE_SCROLL_PAGE on a free-scroll routes through ScrollableController::
+ *           ScrollPage -> FreeScrollPage and advances exactly one viewport height per page.
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollerPageCapiFree001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    // CAPI SetScrollPage (next=0) is forwarded to the scroll controller, which for an
+    // Axis::FREE scroll calls FreeScrollPage and shifts the free offset by one viewport.
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT).ToString());
+
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT * 2).ToString());
+}
+
+/**
+ * @tc.name: ScrollerPageCapiFreeReverse001
+ * @tc.desc: Test CAPI NODE_SCROLL_PAGE previous (next=1) on a free-scroll goes back one page.
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollerPageCapiFreeReverse001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT).ToString());
+
+    // previous page returns to the start
+    scroller->ScrollPage(true, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
+}
+
+/**
+ * @tc.name: ScrollerPageCapiFreeNonBound001
+ * @tc.desc: Test ScrollableController::ScrollPage is a safe no-op when not bound to a pattern
+ *           (scroll_.Upgrade() returns null), covering the guard branch.
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollerPageCapiFreeNonBound001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    // controller never bound via SetScrollPattern -> internal scroll_ is null -> no-op, no crash
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
+}
+
+/**
+ * @tc.name: ScrollerNullCurve001
+ * @tc.desc: Test that FreeScrollTo with a null curve hits the default InterpolatingSpring branch
+ *           in FreeScrollController::ScrollTo (if (!curve))
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollerNullCurve001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    const Dimension posX = 50.0_vp;
+    const Dimension posY = 100.0_vp;
+    // Null curve + smooth: ScrollPattern::FreeScrollTo forwards param.curve (nullptr) to
+    // FreeScrollController::ScrollTo, which hits if (!curve) and creates the default
+    // InterpolatingSpring. With duration 0 a non-spring curve would be cancelled by the mock
+    // animation manager, while the spring keeps animating.
+    scroller->FreeScrollTo({ .xOffset = posX, .yOffset = posY, .duration = 0, .curve = nullptr, .smooth = true });
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::EXTERNAL_FLING);
+    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-posX.Value(), -posY.Value()).ToString());
+
+    // Contrast: an explicit non-spring curve with duration 0 does not create an animation.
+    const Dimension posX2 = 80.0_vp;
+    const Dimension posY2 = 160.0_vp;
+    scroller->FreeScrollTo({ .xOffset = posX2, .yOffset = posY2, .duration = 0, .curve = Curves::EASE,
+        .smooth = true });
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 
 /**

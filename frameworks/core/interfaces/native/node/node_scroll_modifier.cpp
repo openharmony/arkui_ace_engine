@@ -419,6 +419,15 @@ void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[9])
     auto canOverScroll = static_cast<bool>((*values)[7]);
     auto canStayOverScroll = static_cast<bool>((*values)[8]);
     auto direction = scrollControllerBase->GetScrollDirection();
+    if (direction == Axis::FREE &&
+        scrollControllerBase->FreeScrollTo({ .xOffset = xOffset,
+            .yOffset = yOffset,
+            .duration = duration,
+            .curve = curve,
+            .smooth = smooth,
+            .canOverScroll = canStayOverScroll })) {
+        return;
+    }
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
     scrollControllerBase->SetCanStayOverScroll(canStayOverScroll);
     scrollControllerBase->AnimateTo(position, duration, curve, smooth, canOverScroll);
@@ -543,7 +552,12 @@ void SetScrollPage(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation
     auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
-    pattern->ScrollPage(next, animation);
+    // Route through the scroll controller, consistent with the JS Scroller::scrollPage
+    // implementation. This handles Axis::FREE (FreeScrollPage), WaterFlow and CJUI nodes,
+    // and correctly applies the page offset/animation.
+    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
+    CHECK_NULL_VOID(scrollControllerBase);
+    scrollControllerBase->ScrollPage(next, animation);
 }
 
 void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)

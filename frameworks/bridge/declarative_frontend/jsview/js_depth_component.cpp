@@ -354,8 +354,10 @@ void JSDepthComponent::ParseAndSetOptions(const JSRef<JSVal>& optionsValue)
     auto depthSpaceValue = jsObject->GetProperty("depthSpace");
     if (depthSpaceValue->IsNumber()) {
         int32_t depthSpace = depthSpaceValue->ToNumber<int32_t>();
-        OHOS::Ace::DepthSpaceType depthSpaceEnum = static_cast<OHOS::Ace::DepthSpaceType>(depthSpace);
-        NG::DepthComponentModel::SetDepthSpace(depthSpaceEnum);
+        if (depthSpace >= static_cast<int32_t>(OHOS::Ace::DepthSpaceType::INSTANCE) &&
+            depthSpace <= static_cast<int32_t>(OHOS::Ace::DepthSpaceType::GLOBAL)) {
+            NG::DepthComponentModel::SetDepthSpace(static_cast<OHOS::Ace::DepthSpaceType>(depthSpace));
+        }
     }
 
     auto colorSpaceValue = jsObject->GetProperty("colorSpace");

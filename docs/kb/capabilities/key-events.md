@@ -73,6 +73,6 @@ Key Events 是 ArkUI 的按键数据模型、组件按键回调、自定义分�
 
 ## 相关主题
 
-- 组件组合键：`docs/kb/capabilities/component-shortcuts.md`
-- 事件分发和拦截：`docs/kb/capabilities/event-dispatch-intercept.md`
-- 事件基础框架：`docs/kb/architecture/event-base-framework.md`
+- [组件组合键](component-shortcuts.md)
+- [事件分发和拦截](event-dispatch-intercept.md)
+- [事件基础框架](../architecture/event-base-framework.md)

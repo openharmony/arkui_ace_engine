@@ -133,6 +133,35 @@ void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
     uiMaterial_->transparencyCallbackId = id;
 }
 
+void RenderContext::SetMaterialColorModeChangeCallback(std::function<void()>&& callback)
+{
+    if (!uiMaterial_) {
+        uiMaterial_ =
+            std::make_shared<UiMaterialInfo>(UiMaterialInfo{.materialColorModeChangeCallback = std::move(callback)});
+        return;
+    }
+    uiMaterial_->materialColorModeChangeCallback = std::move(callback);
+}
+ 
+void RenderContext::OnMaterialColorModeChange()
+{
+    if (!uiMaterial_ || !uiMaterial_->materialColorModeChangeCallback) {
+        return;
+    }
+    auto callback = uiMaterial_->materialColorModeChangeCallback;
+        callback();
+}
+
+RefPtr<UiMaterial> RenderContext::GetSavedMaterialForSuppress() const
+{
+    return savedMaterialForSuppress_;
+}
+
+void RenderContext::SetSavedMaterialForSuppress(const RefPtr<UiMaterial>& material)
+{
+    savedMaterialForSuppress_ = material;
+}
+
 RenderContext::RenderContext() = default;
 RenderContext::~RenderContext() = default;
 
