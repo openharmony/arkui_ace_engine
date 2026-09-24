@@ -18,6 +18,7 @@
 #include <string>
 #include <thread>
 
+#include "base/utils/napi_scope_raii.h"
 #include "component_test/component_test_proxy.h"
 #include "component_test/test_config.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
@@ -208,17 +209,14 @@ napi_value AssertArrayContain(napi_env env, napi_value array, napi_value object)
     NAPI_CALL(env, napi_get_array_length(env, array, &expectLength));
     uint32_t actualArrayIndex = 0;
     for (uint32_t i = 0; i < expectLength; i++) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        ScopeRAII scope(env);
         napi_value expectElement = nullptr;
         napi_has_element(env, array, i, &result);
         if (!result) {
-            napi_close_handle_scope(env, scope);
             break;
         }
         napi_get_element(env, array, i, &expectElement);
         napi_strict_equals(env, expectElement, object, &result);
-        napi_close_handle_scope(env, scope);
         if (result) {
             break;
         }

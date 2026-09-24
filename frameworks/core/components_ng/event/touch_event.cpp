@@ -389,13 +389,10 @@ void TouchEventActuator::ReportTouchEventToUISession(const TouchEventInfo& event
         return;
     }
 
+    int32_t nodeId = -1;
     auto frameNode = GetAttachedNode().Upgrade();
-    if (!frameNode) {
-        return;
-    }
-    int32_t nodeId = frameNode->GetId();
-    if (nodeId < 0) {
-        return;
+    if (frameNode) {
+        nodeId = frameNode->GetId();
     }
 
     std::string action;

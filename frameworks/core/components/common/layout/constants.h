@@ -739,12 +739,6 @@ enum class CopyOptions {
     Distributed,
 };
 
-enum class VisibleType {
-    VISIBLE = 0,
-    INVISIBLE,
-    GONE,
-};
-
 enum class ShapeMode {
     /*
      * unspecified, follow theme.

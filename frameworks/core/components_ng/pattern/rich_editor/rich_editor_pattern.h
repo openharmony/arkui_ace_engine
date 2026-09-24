@@ -103,6 +103,8 @@ class RichEditorForegroundModifier;
 class RichEditorLayoutAlgorithm;
 class RichEditorOverlayModifier;
 class RichEditorScrollController;
+class RichEditorFixedScrollController;
+class RichEditorFreeScrollController;
 class RichEditorUndoManager;
 class CleanNodeResponseArea;
 class ScrollBar;
@@ -791,6 +793,7 @@ public:
     bool OnScrollCallback(float offset, int32_t source) override;
     void OnScrollEndCallback() override;
     bool IsScrollable() const override;
+    void SetScrollable(bool scrollable);
     bool IsAtomicNode() const override;
     RefPtr<FrameNode> GetClientHost() const override;
     bool IsSelectAreaVisible();
@@ -1092,6 +1095,8 @@ private:
     friend class RichEditorLayoutAlgorithm;
     friend class RichEditorPaintMethod;
     friend class RichEditorScrollController;
+    friend class RichEditorFixedScrollController;
+    friend class RichEditorFreeScrollController;
     friend class RichEditorBaseController;
     friend class RichEditorModelNG;
     bool ParseCommand(const std::string& command);
@@ -1347,7 +1352,6 @@ private:
     void UpdateChildrenOffset();
     void InitScrollablePattern();
     void UpdateScrollBarOffset() override;
-    void CheckScrollable();
     void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
     void HandleMouseAutoScroll(AutoScrollParam param);

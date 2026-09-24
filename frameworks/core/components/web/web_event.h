@@ -1748,6 +1748,31 @@ private:
     float newScale_ = 0.0f;
 };
 
+// Browser page zoom factor change event. A zoom factor of 1.0 represents 100% page zoom.
+class ACE_EXPORT ZoomChangeEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ZoomChangeEvent, BaseEventInfo);
+
+public:
+    ZoomChangeEvent(double oldZoomFactor, double newZoomFactor)
+        : BaseEventInfo("ZoomChangeEvent"), oldZoomFactor_(oldZoomFactor), newZoomFactor_(newZoomFactor)
+    {}
+    ~ZoomChangeEvent() = default;
+
+    double GetOnZoomChangeOldZoomFactor() const
+    {
+        return oldZoomFactor_;
+    }
+
+    double GetOnZoomChangeNewZoomFactor() const
+    {
+        return newZoomFactor_;
+    }
+
+private:
+    double oldZoomFactor_ = 0.0;
+    double newZoomFactor_ = 0.0;
+};
+
 class ACE_EXPORT WebOnScrollEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebOnScrollEvent, BaseEventInfo);
 

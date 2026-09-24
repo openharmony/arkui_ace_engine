@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/log/ace_trace.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -1509,6 +1510,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonOnClick(ArkUIRuntimeCallInfo* runt
         auto infoPtr = new GestureEvent(info);
         auto eventObj = FrameNodeBridge::CreateGestureEventInfo(const_cast<EcmaVM*>(vm), infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnClickEvent_end");
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)

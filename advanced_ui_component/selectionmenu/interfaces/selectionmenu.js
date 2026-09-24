@@ -446,15 +446,17 @@ class SelectionMenuComponent extends ViewPU {
     aboutToAppear() {
         if (this.controller) {
             let richEditorSelection = this.controller.getSelection();
-            let start = richEditorSelection.selection[0];
-            let end = richEditorSelection.selection[1];
-            if (start !== end) {
-                this.cutAndCopyEnable = true;
-            }
-            if (start === 0 && this.controller.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
-                this.visibilityValue = Visibility.None;
-            } else {
-                this.visibilityValue = Visibility.Visible;
+            if (richEditorSelection && richEditorSelection.selection) {
+                let start = richEditorSelection.selection[0];
+                let end = richEditorSelection.selection[1];
+                if (start !== end) {
+                    this.cutAndCopyEnable = true;
+                }
+                if (start === 0 && this.controller.getSpans({ start: end + 1, end: end + 1 }).length === 0) {
+                    this.visibilityValue = Visibility.None;
+                } else {
+                    this.visibilityValue = Visibility.Visible;
+                }
             }
         } else if (this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
             this.showExpandedMenuOptions = true;
@@ -536,6 +538,9 @@ class SelectionMenuComponent extends ViewPU {
     }
 
     pushDataToPasteboard(richEditorSelection) {
+        if (!richEditorSelection) {
+            return;
+        }
         let sysBoard = pasteboard.getSystemPasteboard();
         let pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, '');
         if (richEditorSelection.spans && richEditorSelection.spans.length > 0) {
@@ -572,6 +577,9 @@ class SelectionMenuComponent extends ViewPU {
     }
 
     popDataFromPasteboard(richEditorSelection) {
+        if (!richEditorSelection) {
+            return;
+        }
         let start = richEditorSelection.selection[0];
         let end = richEditorSelection.selection[1];
         if (start === end && this.controller) {
@@ -685,6 +693,9 @@ class SelectionMenuComponent extends ViewPU {
             return;
         }
         let richEditorSelection = this.controller.getSelection();
+        if (!richEditorSelection || !richEditorSelection.selection) {
+            return;
+        }
         let start = richEditorSelection.selection[0];
         let end = richEditorSelection.selection[1];
         if (start !== end) {
@@ -901,10 +912,12 @@ class SelectionMenuComponent extends ViewPU {
                                             this.onCut({ content: richEditorSelection });
                                         } else {
                                             this.pushDataToPasteboard(richEditorSelection);
-                                            this.controller.deleteSpans({
-                                                start: richEditorSelection.selection[0],
-                                                end: richEditorSelection.selection[1]
-                                            });
+                                            if (richEditorSelection && richEditorSelection.selection) {
+                                                this.controller.deleteSpans({
+                                                    start: richEditorSelection.selection[0],
+                                                    end: richEditorSelection.selection[1]
+                                                });
+                                            }
                                         }
                                     });
                                 }, MenuItem);

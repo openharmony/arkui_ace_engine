@@ -635,6 +635,16 @@ void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
     delegate->OnScaleChange(oldScaleFactor, newScaleFactor);
 }
 
+void WebClientImpl::OnZoomFactorChanged(double oldZoomFactor, double newZoomFactor)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnZoomChange(oldZoomFactor, newZoomFactor);
+}
+
 void WebClientImpl::OnScroll(double xOffset, double yOffset)
 {
     auto delegate = webDelegate_.Upgrade();

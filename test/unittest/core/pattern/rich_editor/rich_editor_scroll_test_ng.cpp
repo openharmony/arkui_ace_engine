@@ -152,11 +152,11 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level0)
 }
 
 /**
- * @tc.name: CheckScrollable
- * @tc.desc: test CheckScrollable.
+ * @tc.name: CheckScrollEnabled
+ * @tc.desc: test CheckScrollEnabled via scrollController.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollTestOneNg, CheckScrollable, TestSize.Level0)
+HWTEST_F(RichEditorScrollTestOneNg, CheckScrollEnabled, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init richTextRect and contentRect
@@ -170,15 +170,15 @@ HWTEST_F(RichEditorScrollTestOneNg, CheckScrollable, TestSize.Level0)
     /**
      * @tc.steps: step2. check scrollable
      */
-    richEditorPattern->CheckScrollable();
+    richEditorPattern->scrollController_->CheckScrollEnabled();
     EXPECT_FALSE(richEditorPattern->scrollable_);
 
     AddSpan(TEST_INSERT_VALUE);
-    richEditorPattern->CheckScrollable();
+    richEditorPattern->scrollController_->CheckScrollEnabled();
     EXPECT_TRUE(richEditorPattern->scrollable_);
 
     richEditorPattern->richTextRect_ = RectF(0, 0, 100, 80);
-    richEditorPattern->CheckScrollable();
+    richEditorPattern->scrollController_->CheckScrollEnabled();
     EXPECT_FALSE(richEditorPattern->scrollable_);
 
     ClearSpan();
@@ -303,45 +303,55 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern004, TestSize.Level0)
 
 /**
  * @tc.name: OnAutoScroll001
- * @tc.desc: test OnAutoScroll
+ * @tc.desc: test DoAutoScrollStep via scheduler currentParam, covering switch branches
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level0)
 {
-    /**
-     * @tc.steps: step1. init and call function.
-     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AutoScrollParam param;
-    param.showScrollbar = true;
-    param.offset = 0.0f;
+    ASSERT_NE(richEditorPattern->scrollController_, nullptr);
+    auto& scheduler = richEditorPattern->scrollController_->autoScrollScheduler_;
+    ASSERT_NE(scheduler, nullptr);
+
+    // offset 0 => MoveTextRect yields 0 and DoAutoScrollStep short-circuits before
+    // ScheduleAutoScroll, so isAutoScrollRunning_ stays false for every branch.
     richEditorPattern->contentChange_ = false;
     richEditorPattern->contentRect_.SetRect(0, 0, 1, 1);
     richEditorPattern->richTextRect_.SetRect(0, 0, 1, 1);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    param.isFirstHandle = true;
-    param.autoScrollEvent = AutoScrollEvent::HANDLE;
-    richEditorPattern->scrollController_->OnAutoScroll(param);
-    EXPECT_TRUE(param.showScrollbar);
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    param.autoScrollEvent = AutoScrollEvent::DRAG;
-    richEditorPattern->scrollController_->OnAutoScroll(param);
-    EXPECT_TRUE(param.showScrollbar);
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    param.autoScrollEvent = AutoScrollEvent::MOUSE;
-    richEditorPattern->scrollController_->OnAutoScroll(param);
-    EXPECT_TRUE(param.showScrollbar);
+
+    // Helper: load a param into the scheduler then drive the virtual step entry.
+    auto runStep = [&scheduler, &richEditorPattern](AutoScrollEvent event) {
+        AutoScrollParam param;
+        param.showScrollbar = true; // cover scrollbar-appear branch (null bar => no-op)
+        param.offset = 0.0f;        // keep newOffset 0 => no scheduling side effects
+        param.isFirstHandle = true;
+        param.autoScrollEvent = event;
+        scheduler->currentScrollParam_ = param;
+        richEditorPattern->scrollController_->DoAutoScrollStep();
+    };
+
+    // NONE: CHECK_NULL_VOID(event != NONE) returns before MoveTextRect and the switch.
+    runStep(AutoScrollEvent::NONE);
+    EXPECT_FALSE(scheduler->isAutoScrollRunning_);
+
+    // CARET / DRAG: switch no-op cases, then the zero-offset short-circuit.
+    runStep(AutoScrollEvent::CARET);
+    EXPECT_FALSE(scheduler->isAutoScrollRunning_);
+    runStep(AutoScrollEvent::DRAG);
+    EXPECT_FALSE(scheduler->isAutoScrollRunning_);
+
+    // HANDLE: MoveHandleOnScroll (no-op at offset 0) + selectOverlay_->OnHandleMove.
+    runStep(AutoScrollEvent::HANDLE);
+    EXPECT_FALSE(scheduler->isAutoScrollRunning_);
+
+    // MOUSE: pattern->HandleMouseAutoScroll (ConvertTouchOffsetToTextOffset + UpdateSelector).
+    runStep(AutoScrollEvent::MOUSE);
+    EXPECT_FALSE(scheduler->isAutoScrollRunning_);
 }
 
 /**

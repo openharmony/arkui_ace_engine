@@ -21,6 +21,7 @@
 #include "js_native_api_types.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
@@ -224,17 +225,17 @@ void ParsePanDirection(napi_env env, napi_value value, PanDirection& panDirectio
 
 static napi_value GetTag(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     auto gestureInfo = current->recognizer->GetGestureInfo();
     if (!gestureInfo) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     if (gestureInfo->GetTag().has_value()) {
@@ -244,96 +245,91 @@ static napi_value GetTag(napi_env env, napi_callback_info info)
         napi_get_undefined(env, &result);
     }
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value GetType(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     auto gestureInfo = current->recognizer->GetGestureInfo();
     if (!gestureInfo) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_create_int32(env, static_cast<int32_t>(gestureInfo->GetRecognizerType()), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value IsBuiltIn(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     auto gestureInfo = current->recognizer->GetGestureInfo();
     if (!gestureInfo) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_get_boolean(env, gestureInfo->IsSystemGesture(), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value SetEnabled(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_handle_scope(env, &scope));
+    ScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     size_t argc = PARAM_SIZE_ONE;
     napi_value argv[PARAM_SIZE_ONE] = { nullptr };
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info, &argc, argv);
     if (!current || !current->recognizer) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     napi_valuetype valueType = napi_undefined;
     if (napi_typeof(env, argv[PARAM_SIZE_ZERO], &valueType)) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     if (valueType != napi_boolean) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     bool isEnabled = false;
     napi_get_value_bool(env, argv[PARAM_SIZE_ZERO], &isEnabled);
     current->recognizer->SetEnabled(isEnabled);
-    napi_close_handle_scope(env, scope);
     return nullptr;
 }
 
 static napi_value IsEnabled(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_get_boolean(env, current->recognizer->IsEnabled(), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
@@ -360,78 +356,80 @@ static GestureRecognizerState ConvertRefereeState(NG::RefereeState state)
 
 static napi_value GetState(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_create_int32(env, static_cast<int32_t>(ConvertRefereeState(current->recognizer->GetRefereeState())), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value GetId(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     EventTargetInfoWrapper* wrapper = GetEventTargetInfoWrapper(env, info);
     if (!wrapper) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
     napi_value result = nullptr;
     napi_create_string_utf8(env, wrapper->inspectorId.c_str(), NAPI_AUTO_LENGTH, &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value IsBegin(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     EventTargetInfoWrapper* wrapper = GetEventTargetInfoWrapper(env, info);
     if (!wrapper) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_get_boolean(env, wrapper->IsBegin(), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value IsEnd(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     EventTargetInfoWrapper* wrapper = GetEventTargetInfoWrapper(env, info);
     if (!wrapper) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_get_boolean(env, wrapper->IsEnd(), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value CreateEventTargetInfo(
     napi_env env, const RefPtr<NG::Pattern>& pattern, const std::string& inspectorId)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
@@ -448,7 +446,6 @@ static napi_value CreateEventTargetInfo(
     if (status != napi_ok) {
         LOGE("Failed to wrap native object");
         delete wrapper;
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value funcValue = nullptr;
@@ -461,25 +458,24 @@ static napi_value CreateEventTargetInfo(
         napi_set_named_property(env, result, IS_END, funcValue);
     }
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value GetEventTargetInfo(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_create_object(env, &result);
     auto attachNode = current->recognizer->GetAttachedNode().Upgrade();
     if (!attachNode) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     RefPtr<NG::Pattern> pattern = nullptr;
@@ -502,69 +498,69 @@ static napi_value GetEventTargetInfo(napi_env env, napi_callback_info info)
     }
     result = CreateEventTargetInfo(env, pattern, attachNode->GetInspectorIdValue(""));
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value IsValid(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_get_boolean(env, current->recognizer->IsInResponseLinkRecognizers(), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value GetFingerCount(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_create_int32(env, static_cast<int32_t>(current->recognizer->GetFingers()), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value IsFingerCountLimit(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_get_boolean(env, current->recognizer->GetLimitFingerCount(), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value GetDistance(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     auto context = PipelineContext::GetCurrentContextSafely();
     if (!context) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value thisArg;
@@ -592,15 +588,16 @@ static napi_value GetDistance(napi_env env, napi_callback_info info)
     napi_create_double(
         env, RoundToMaxPrecision(context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX))), &napiDistance);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, napiDistance, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(napiDistance, &newResult);
     return newResult;
 }
 
 static napi_value GetDirection(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     napi_value thisArg;
     napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr);
     PanRecognizerWrapper* wrapper = nullptr;
@@ -620,51 +617,48 @@ static napi_value GetDirection(napi_env env, napi_callback_info info)
     napi_value napiDirection = nullptr;
     napi_create_uint32(env, type, &napiDirection);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, napiDirection, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(napiDirection, &newResult);
     return newResult;
 }
 
 static napi_value GetSwipeDirection(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     auto recognizer = AceType::DynamicCast<NG::SwipeRecognizer>(current->recognizer);
     if (!recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value napiDirection = nullptr;
     napi_create_uint32(env, recognizer->GetDirection().type, &napiDirection);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, napiDirection, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(napiDirection, &newResult);
     return newResult;
 }
 
 static napi_value GetDistanceMap(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     auto recognizer = AceType::DynamicCast<NG::PanRecognizer>(current->recognizer);
     if (!recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     auto panDistanceMap = recognizer->GetDistanceMap();
     auto context = PipelineContext::GetCurrentContextSafely();
     if (!context) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value globalObj = nullptr;
@@ -687,25 +681,24 @@ static napi_value GetDistanceMap(napi_env env, napi_callback_info info)
         napi_call_function(env, nativeMap, setFunc, PARAM_SIZE_TWO, argv, &result);
     }
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, nativeMap, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(nativeMap, &newResult);
     return newResult;
 }
 
 static napi_value SetDirection(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_handle_scope(env, &scope));
+    ScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     size_t argc = PARAM_SIZE_ONE;
     napi_value argv[PARAM_SIZE_ONE] = { nullptr };
 
     PanRecognizerWrapper* wrapper = GetCurrentPanRecognizerWrapper(env, info, &argc, argv);
     if (!wrapper) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     if (!wrapper->panGestureOption) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     PanDirection panDirection;
@@ -716,24 +709,23 @@ static napi_value SetDirection(napi_env env, napi_callback_info info)
     }
 
     wrapper->panGestureOption->SetDirection(panDirection);
-    napi_close_handle_scope(env, scope);
     return nullptr;
 }
 
 static napi_value SetDistance(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_handle_scope(env, &scope));
+    ScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     size_t argc = PARAM_SIZE_ONE;
     napi_value argv[PARAM_SIZE_ONE] = { nullptr };
 
     PanRecognizerWrapper* wrapper = GetCurrentPanRecognizerWrapper(env, info, &argc, argv);
     if (!wrapper) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     if (!wrapper->panGestureOption) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     if (argc != PARAM_SIZE_ONE || !GestureObserverListener::MatchValueType(env, argv[PARAM_SIZE_ZERO], napi_number)) {
@@ -747,24 +739,23 @@ static napi_value SetDistance(napi_env env, napi_callback_info info)
             wrapper->panGestureOption->SetDistance(Dimension(distance, DimensionUnit::VP).ConvertToPx());
         }
     }
-    napi_close_handle_scope(env, scope);
     return nullptr;
 }
 
 static napi_value SetFingers(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_handle_scope(env, &scope));
+    ScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     size_t argc = PARAM_SIZE_ONE;
     napi_value argv[PARAM_SIZE_ONE] = { nullptr };
 
     PanRecognizerWrapper* wrapper = GetCurrentPanRecognizerWrapper(env, info, &argc, argv);
     if (!wrapper) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     if (!wrapper->panGestureOption) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     if (argc != PARAM_SIZE_ONE || !GestureObserverListener::MatchValueType(env, argv[PARAM_SIZE_ZERO], napi_number)) {
@@ -776,126 +767,119 @@ static napi_value SetFingers(napi_env env, napi_callback_info info)
         fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGER : fingers;
         wrapper->panGestureOption->SetFingers(DEFAULT_PAN_FINGER);
     }
-    napi_close_handle_scope(env, scope);
     return nullptr;
 }
 
 static napi_value GetTapCount(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     RefPtr<NG::ClickRecognizer> tapRecognizer = AceType::DynamicCast<NG::ClickRecognizer>(current->recognizer);
     if (!tapRecognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value count = nullptr;
     napi_create_uint32(env, static_cast<uint32_t>(tapRecognizer->GetCount()), &count);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, count, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(count, &newResult);
     return newResult;
 }
 
 static napi_value IsRepeat(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     RefPtr<NG::LongPressRecognizer> longPressRecognizer =
         AceType::DynamicCast<NG::LongPressRecognizer>(current->recognizer);
     if (!longPressRecognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value result = nullptr;
     napi_get_boolean(env, longPressRecognizer->GetIsRepeat(), &result);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &newResult);
     return newResult;
 }
 
 static napi_value GetDuration(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     RefPtr<NG::LongPressRecognizer> longPressRecognizer =
         AceType::DynamicCast<NG::LongPressRecognizer>(current->recognizer);
     if (!longPressRecognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value count = nullptr;
     napi_create_int32(env, longPressRecognizer->GetDuration(), &count);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, count, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(count, &newResult);
     return newResult;
 }
 
 static napi_value GetAngle(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     RefPtr<NG::RotationRecognizer> rotationRecognizer =
         AceType::DynamicCast<NG::RotationRecognizer>(current->recognizer);
     if (!rotationRecognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value angle = nullptr;
     napi_create_double(env, rotationRecognizer->GetAngle(), &angle);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, angle, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(angle, &newResult);
     return newResult;
 }
 
 static napi_value GetVelocityThreshold(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
     MultiFingersRecognizerWrapper* current = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!current || !current->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     RefPtr<NG::SwipeRecognizer> swipeRecognizer = AceType::DynamicCast<NG::SwipeRecognizer>(current->recognizer);
     if (!swipeRecognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     auto context = PipelineContext::GetCurrentContextSafely();
     if (!context) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value speed = nullptr;
     napi_create_double(env,
         RoundToMaxPrecision(context->ConvertPxToVp(Dimension(swipeRecognizer->GetSpeed(), DimensionUnit::PX))), &speed);
     napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, speed, &newResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(speed, &newResult);
     return newResult;
 }
 
@@ -963,24 +947,23 @@ static napi_value CreatePanGestureOptionsObject(napi_env env, MultiFingersRecogn
 
 static napi_value GetPanGestureOptions(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    NAPI_CALL(env, napi_open_escapable_handle_scope(env, &scope));
+    EscapableScopeRAII scope(env);
+    if (!scope) {
+        return nullptr;
+    }
 
     auto* wrapper = GetCurrentMultiFingersRecognizerWrapper(env, info);
     if (!wrapper || !wrapper->recognizer) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
     napi_value result = CreatePanGestureOptionsObject(env, wrapper);
     if (!result) {
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
     napi_value escapedResult = nullptr;
-    napi_escape_handle(env, scope, result, &escapedResult);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &escapedResult);
     return escapedResult;
 }
 
@@ -1057,18 +1040,18 @@ MultiFingersRecognizerWrapper* CreateMultiFingersWrapper(const RefPtr<NG::MultiF
 void GestureObserverListener::AddGestureRecognizerInfo(napi_env env, napi_value objValueGestureRecognizer,
     const RefPtr<NG::NGGestureRecognizer>& current, NG::GestureListenerType gestureListenerType)
 {
-    napi_handle_scope scope = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_open_handle_scope(env, &scope));
+    ScopeRAII scope(env);
+    if (!scope) {
+        return;
+    }
 
     auto multiFingersRecognizer = AceType::DynamicCast<NG::MultiFingersRecognizer>(current);
     if (!multiFingersRecognizer) {
-        napi_close_handle_scope(env, scope);
         return;
     }
 
     auto* wrapper = CreateMultiFingersWrapper(multiFingersRecognizer);
     if (!wrapper) {
-        napi_close_handle_scope(env, scope);
         return;
     }
 
@@ -1078,23 +1061,22 @@ void GestureObserverListener::AddGestureRecognizerInfo(napi_env env, napi_value 
 
     BindCommonFunctions(env, objValueGestureRecognizer);
     CreateRecognizerObject(env, objValueGestureRecognizer, current, gestureListenerType);
-    napi_close_handle_scope(env, scope);
 }
 
 void GestureObserverListener::CreateRecognizerObject(napi_env env, napi_value objValue,
     const RefPtr<NG::NGGestureRecognizer>& current, NG::GestureListenerType gestureListenerType)
 {
-    napi_handle_scope scope = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_open_handle_scope(env, &scope));
+    ScopeRAII scope(env);
+    if (!scope) {
+        return;
+    }
 
     auto gestureInfo = current->GetGestureInfo();
     if (!gestureInfo) {
-        napi_close_handle_scope(env, scope);
         return;
     }
 
     BindRecognizerSpecificFunctions(env, objValue, gestureListenerType);
-    napi_close_handle_scope(env, scope);
 }
 
 bool GestureObserverListener::MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)

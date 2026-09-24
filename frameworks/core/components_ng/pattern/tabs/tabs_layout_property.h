@@ -63,6 +63,16 @@ public:
         value->propSidebarUnselectedTextColor_ = CloneSidebarUnselectedTextColor();
         value->propSidebarSelectedBoardColor_ = CloneSidebarSelectedBoardColor();
         value->propBarBackgroundColor_ = CloneBarBackgroundColor();
+        value->propSidebarWidth_ = CloneSidebarWidth();
+        value->propMinSidebarWidth_ = CloneMinSidebarWidth();
+        value->propMaxSidebarWidth_ = CloneMaxSidebarWidth();
+        value->propMinContentWidth_ = CloneMinContentWidth();
+        value->propSidebarBackgroundColor_ = CloneSidebarBackgroundColor();
+        value->propSidebarBackgroundColorSetByUser_ = CloneSidebarBackgroundColorSetByUser();
+        value->propSidebarDivider_ = CloneSidebarDivider();
+        value->propSidebarDividerColorSetByUser_ = CloneSidebarDividerColorSetByUser();
+        value->propDividerColorSetByUser_ = CloneDividerColorSetByUser();
+        value->propBarBackgroundColorSetByUser_ = CloneBarBackgroundColorSetByUser();
         return value;
     }
 
@@ -91,6 +101,16 @@ public:
         ResetSidebarUnselectedTextColor();
         ResetSidebarSelectedBoardColor();
         ResetBarBackgroundColor();
+        ResetSidebarWidth();
+        ResetMinSidebarWidth();
+        ResetMaxSidebarWidth();
+        ResetMinContentWidth();
+        ResetSidebarBackgroundColor();
+        ResetSidebarBackgroundColorSetByUser();
+        ResetSidebarDivider();
+        ResetSidebarDividerColorSetByUser();
+        ResetDividerColorSetByUser();
+        ResetBarBackgroundColorSetByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -222,6 +242,14 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarUnselectedTextColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarSelectedBoardColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinSidebarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxSidebarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarBackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarBackgroundColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarDivider, TabsItemDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarDividerColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

@@ -214,6 +214,16 @@ void TabsSideBarTabListPattern::UpdateTextColorAndIconColor(const RefPtr<FrameNo
     iconNode->MarkDirtyNode();
 }
 
+void TabsSideBarTabListPattern::RefreshAllTabItemColors()
+{
+    // Re-apply text/icon colors for all tab items based on current selected index
+    UpdateTabItemTextAndIconColor(currentIndex_);
+    // Re-apply selected board color for the currently selected item
+    if (currentIndex_ >= 0) {
+        UpdateTabItemStyle(currentIndex_, true);
+    }
+}
+
 void TabsSideBarTabListPattern::InitCurrentIndex(int32_t index)
 {
     // Initialize current index without triggering Swiper animation

@@ -2525,6 +2525,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onScaleChangeV2_ = useNewPipe ? eventHub->GetOnScaleChangeEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                           webCom->GetScaleChangeId(), oldContext);
+        onZoomChangeV2_ = useNewPipe ? eventHub->GetOnZoomChangeEvent()
+                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                         webCom->GetZoomChangeId(), oldContext);
         onPermissionRequestV2_ = useNewPipe ? eventHub->GetOnPermissionRequestEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetPermissionRequestEventId(), oldContext);
@@ -7204,6 +7207,42 @@ void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebScaleChange");
+}
+
+void WebDelegate::OnZoomChange(double oldZoomFactor, double newZoomFactor)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), oldZoomFactor, newZoomFactor]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+#ifdef NG_BUILD
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto onZoomChange = webEventHub->GetOnZoomChangeEvent();
+            CHECK_NULL_VOID(onZoomChange);
+            onZoomChange(std::make_shared<ZoomChangeEvent>(oldZoomFactor, newZoomFactor));
+            return;
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto onZoomChange = webEventHub->GetOnZoomChangeEvent();
+                CHECK_NULL_VOID(onZoomChange);
+                onZoomChange(std::make_shared<ZoomChangeEvent>(oldZoomFactor, newZoomFactor));
+                return;
+            }
+            auto onZoomChangeV2 = delegate->onZoomChangeV2_;
+            if (onZoomChangeV2) {
+                onZoomChangeV2(std::make_shared<ZoomChangeEvent>(oldZoomFactor, newZoomFactor));
+            }
+#endif
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebZoomChange");
 }
 
 void WebDelegate::OnScroll(double xOffset, double yOffset)

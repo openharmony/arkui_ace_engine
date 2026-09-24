@@ -10643,6 +10643,14 @@ Matrix4 ViewAbstract::GetTransform(FrameNode* frameNode)
     return target->GetTransformMatrixValue(value);
 }
 
+Matrix4 ViewAbstract::GetTransform3D(FrameNode* frameNode)
+{
+    Matrix4 value;
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetTransform3DMatrixValue(value);
+}
+
 HitTestMode ViewAbstract::GetHitTestBehavior(FrameNode* frameNode)
 {
     auto gestureHub = frameNode->GetHitTestMode();

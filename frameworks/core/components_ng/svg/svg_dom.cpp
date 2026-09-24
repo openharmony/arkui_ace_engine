@@ -230,6 +230,10 @@ RefPtr<SvgNode> SvgDom::CreateSvgNodeFromDom(
     auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion());
     RefPtr<SvgNode> node = FindAndCreateNode(element, featureEnable);
     CHECK_NULL_RETURN(node, nullptr);
+    if (!svgContext_->IncrementNodeCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgDom node count exceeded limit, stop parsing");
+        return nullptr;
+    }
     if (AceType::InstanceOf<SvgAnimation>(node)) {
         isStatic_.store(false);
     }
@@ -412,6 +416,7 @@ void SvgDom::DrawImage(
     InitStyles();
     svgContext_->ResetHrefResolveCount();
     svgContext_->ResetDrawDepth();
+    svgContext_->ResetAsPathDepth();
     svgContext_->ResetHrefResolving();
     canvas.Save();
     // viewBox scale and imageFit scale

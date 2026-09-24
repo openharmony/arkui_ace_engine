@@ -39,6 +39,11 @@ void SvgClipPath::OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContex
 
 RSRecordingPath SvgClipPath::AsPath(const SvgLengthScaleRule& lengthRule)
 {
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext && !svgContext->IncrementAsPathDepth()) {
+        return RSRecordingPath();
+    }
+    AsPathDepthGuard depthGuard(svgContext);
     RSRecordingPath path;
     for (const auto& child : children_) {
         auto childPath = child->AsPath(lengthRule);

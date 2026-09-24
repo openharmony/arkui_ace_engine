@@ -804,21 +804,20 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRender001, TestSize.Level1)
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
-
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
+
     sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
     overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
-
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_TRUE(topModalNode);
-
     SheetStyle updateStyle;
+
     updateStyle.sheetHeight.sheetMode = SheetMode::LARGE;
     updateStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::REGULAR);
     updateStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
@@ -840,7 +839,6 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRender002, TestSize.Level1)
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
-
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
@@ -848,13 +846,14 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRender002, TestSize.Level1)
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
+
     overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
 
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_TRUE(topModalNode);
-
     SheetStyle updateStyle;
+
     updateStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_REGULAR };
 
     overlayManager->UpdateSheetRender(topModalNode, updateStyle, false);
@@ -881,6 +880,7 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRenderProperty001, TestSize.Level1)
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
+
     overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
 
@@ -889,6 +889,7 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRenderProperty001, TestSize.Level1)
 
     SheetStyle currentStyle;
     SheetStyle newStyle;
+
     newStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
     newStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
 
@@ -917,6 +918,7 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRenderProperty002, TestSize.Level1)
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
+
     overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
 

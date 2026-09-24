@@ -22,6 +22,7 @@
 #include "ui/base/macros.h"
 #include "ui/base/modifier_property.h"
 #include "ui/base/referenced.h"
+#include "ui/common/layout/constants.h"
 #include "ui/event/touch_event.h"
 #include "ui/gestures/gesture_event.h"
 #include "ui/properties/gradient_property.h"
@@ -72,6 +73,7 @@ public:
 
     TextDirection GetDirection();
     TextDirection GetNonAutoLayoutDirection();
+    void SetVisibility(VisibleType visible);
 
 protected:
     View();

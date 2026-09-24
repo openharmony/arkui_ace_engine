@@ -489,10 +489,11 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeOnStart(ArkUIRuntimeCallInfo* ru
         isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView]() {
+    std::function<void(void)> callback = [vm, node = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func), isJsView]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
@@ -530,10 +531,11 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeOnBounce(ArkUIRuntimeCallInfo* r
         isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView]() {
+    std::function<void(void)> callback = [vm, node = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func), isJsView]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
@@ -571,10 +573,11 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeOnFinish(ArkUIRuntimeCallInfo* r
         isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView]() {
+    std::function<void(void)> callback = [vm, node = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func), isJsView]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);

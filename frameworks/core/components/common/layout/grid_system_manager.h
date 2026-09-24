@@ -49,7 +49,7 @@ public:
     ~GridSystemManager() = default;
     ACE_EXPORT static GridSystemManager& GetInstance();
 
-    const SystemGridInfo& GetCurrentGridInfo();
+    SystemGridInfo GetCurrentGridInfo();
 
     static SystemGridInfo GetSystemGridInfo(const GridSizeType& sizeType);
     static RefPtr<GridColumnInfo> GetInfoByType(const GridColumnType& type);
@@ -80,8 +80,6 @@ private:
 
     static GridSystemManager* instance_;
     static std::mutex mutex_;
-
-    SystemGridInfo systemGridInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridSystemManager);
 };

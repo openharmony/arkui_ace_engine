@@ -303,11 +303,16 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnComplete(ArkUIRuntimeCallInfo *runt
             panda::NumberRef::New(vm, event.GetHeight()), panda::NumberRef::New(vm, event.GetComponentWidth()),
             panda::NumberRef::New(vm, event.GetComponentHeight()), panda::NumberRef::New(vm, event.GetLoadingStatus()),
             panda::NumberRef::New(vm, event.GetContentWidth()), panda::NumberRef::New(vm, event.GetContentHeight()),
-            panda::NumberRef::New(vm, event.GetContentOffsetX()),
-            panda::NumberRef::New(vm, event.GetContentOffsetY()) };
+            panda::NumberRef::New(vm, event.GetContentOffsetX()), panda::NumberRef::New(vm, event.GetContentOffsetY())};
+        // The eventPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto eventPtr = new LoadImageSuccessEvent(event);
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
-        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
+        eventObject->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(eventPtr),
+            [](void* env, void* nativePtr, void* data) {
+                delete static_cast<LoadImageSuccessEvent*>(nativePtr);
+            }, nullptr);
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {
@@ -361,9 +366,15 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnError(ArkUIRuntimeCallInfo *runtime
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetComponentWidth()),
             panda::NumberRef::New(vm, event.GetComponentHeight()),
             panda::StringRef::NewFromUtf8(vm, event.GetErrorMessage().c_str()) };
+        // The eventPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto eventPtr = new LoadImageFailEvent(event);
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
-        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
+        eventObject->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(eventPtr),
+            [](void* env, void* nativePtr, void* data) {
+                delete static_cast<LoadImageFailEvent*>(nativePtr);
+            }, nullptr);
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {

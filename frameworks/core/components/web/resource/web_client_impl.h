@@ -203,6 +203,7 @@ public:
     bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
+    void OnZoomFactorChanged(double oldZoomFactor, double newZoomFactor) override;
     void OnScroll(double xOffset, double yOffset) override;
     bool OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
         const std::string &realm) override;

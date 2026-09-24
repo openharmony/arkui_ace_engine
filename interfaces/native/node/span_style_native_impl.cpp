@@ -2217,6 +2217,7 @@ OH_ArkUI_ImageAttachment* OH_ArkUI_ImageAttachment_Create()
 
 void OH_ArkUI_ImageAttachment_Destroy(OH_ArkUI_ImageAttachment* imageAttachment)
 {
+    CHECK_NULL_VOID(imageAttachment);
     delete imageAttachment->pixelMap;
     imageAttachment->pixelMap = nullptr;
     delete imageAttachment;

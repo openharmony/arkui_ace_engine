@@ -36,6 +36,9 @@ void JsClickFunction::Execute()
 
 void JsClickFunction::Execute(const ClickInfo& info)
 {
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new ClickInfo(info);
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     objectTemplate->SetInternalFieldCount(1);
     JSRef<JSObject> obj = objectTemplate->NewInstance();
@@ -71,7 +74,9 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     obj->SetPropertyObject("getCurrentLocalPosition",
         JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
-    obj->Wrap<ClickInfo>(const_cast<ClickInfo*>(&info));
+    obj->Wrap<ClickInfo>(infoPtr, [](void* env, void* nativePtr, void* hint) {
+        delete static_cast<ClickInfo*>(nativePtr);
+    });
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
 }
@@ -129,6 +134,9 @@ void JsWeakClickFunction::Execute()
 
 void JsWeakClickFunction::Execute(const ClickInfo& info)
 {
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new ClickInfo(info);
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     objectTemplate->SetInternalFieldCount(1);
     JSRef<JSObject> obj = objectTemplate->NewInstance();
@@ -163,7 +171,9 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("axisPinch", 0.0f);
     obj->SetPropertyObject("getCurrentLocalPosition",
         JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
-    obj->Wrap<ClickInfo>(const_cast<ClickInfo*>(&info));
+    obj->Wrap<ClickInfo>(infoPtr, [](void* env, void* nativePtr, void* hint) {
+        delete static_cast<ClickInfo*>(nativePtr);
+    });
 
     JSRef<JSVal> param = obj;
     JsWeakFunction::ExecuteJS(1, &param);

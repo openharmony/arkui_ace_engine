@@ -258,6 +258,41 @@ class LazyArkTabsComponent extends ArkComponent {
     this.lazyComponent.onBarDisplayModeChange(value);
     return this;
   }
+
+  sidebarWidth(value: Optional<Length>): this {
+    this.lazyComponent.sidebarWidth(value);
+    return this;
+  }
+
+  minSidebarWidth(value: Optional<Length>): this {
+    this.lazyComponent.minSidebarWidth(value);
+    return this;
+  }
+
+  maxSidebarWidth(value: Optional<Length>): this {
+    this.lazyComponent.maxSidebarWidth(value);
+    return this;
+  }
+
+  minContentWidth(value: Optional<Length>): this {
+    this.lazyComponent.minContentWidth(value);
+    return this;
+  }
+
+  sidebarBackgroundColor(value: Optional<ResourceColor>): this {
+    this.lazyComponent.sidebarBackgroundColor(value);
+    return this;
+  }
+
+  sidebarBackgroundBlurStyle(value: Optional<BlurStyle>): this {
+    this.lazyComponent.sidebarBackgroundBlurStyle(value);
+    return this;
+  }
+
+  sidebarDivider(value: Optional<DividerStyle>): this {
+    this.lazyComponent.sidebarDivider(value);
+    return this;
+  }
 }
 
 class TabsModifier extends LazyArkTabsComponent implements AttributeModifier<TabsAttribute> {

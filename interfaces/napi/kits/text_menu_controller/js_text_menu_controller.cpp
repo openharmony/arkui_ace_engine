@@ -15,6 +15,7 @@
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "frameworks/base/utils/napi_scope_raii.h"
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
@@ -74,8 +75,7 @@ static void DisableTextMenuSystemItems(const std::vector<std::string>& menuItems
 
 static napi_value JSDisableSystemServiceMenuItems(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    ScopeRAII scope(env);
     CHECK_NULL_RETURN(scope, nullptr);
     napi_status status;
     size_t argc = 1;
@@ -85,7 +85,6 @@ static napi_value JSDisableSystemServiceMenuItems(napi_env env, napi_callback_in
     status = napi_get_cb_info(env, info, &argc, argv, &thisvar, &data);
     if (status != napi_ok || argc < 1) {
         TAG_LOGE(AceLogTag::ACE_SELECT_OVERLAY, "Invalid arguments.");
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     napi_valuetype valueType = napi_undefined;
@@ -93,7 +92,6 @@ static napi_value JSDisableSystemServiceMenuItems(napi_env env, napi_callback_in
     if (status != napi_ok || valueType != napi_boolean) {
         TAG_LOGE(AceLogTag::ACE_SELECT_OVERLAY, "Expected boolean.");
         DisableSystemServiceMenuItems(false);
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     bool disableAll = false;
@@ -103,7 +101,6 @@ static napi_value JSDisableSystemServiceMenuItems(napi_env env, napi_callback_in
     } else {
         TAG_LOGE(AceLogTag::ACE_SELECT_OVERLAY, "Failed to get boolean value.");
     }
-    napi_close_handle_scope(env, scope);
     return nullptr;
 }
 
@@ -150,8 +147,7 @@ static void ParseTextMenuItems(std::vector<std::string>& items, napi_env env, na
 
 static napi_value JSDisableMenuItems(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    ScopeRAII scope(env);
     CHECK_NULL_RETURN(scope, nullptr);
     napi_status status;
     size_t argc = 1;
@@ -161,7 +157,6 @@ static napi_value JSDisableMenuItems(napi_env env, napi_callback_info info)
     status = napi_get_cb_info(env, info, &argc, argv, &thisvar, &data);
     if (status != napi_ok || argc < 1) {
         TAG_LOGE(AceLogTag::ACE_SELECT_OVERLAY, "Invalid arguments.");
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     bool isArray = false;
@@ -169,20 +164,17 @@ static napi_value JSDisableMenuItems(napi_env env, napi_callback_info info)
     if (status != napi_ok || !isArray) {
         TAG_LOGE(AceLogTag::ACE_SELECT_OVERLAY, "Invalid argument type.");
         DisableTextMenuSystemItems({});
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     uint32_t length = 0;
     status = napi_get_array_length(env, argv[0], &length);
     if (status != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_SELECT_OVERLAY, "Failed to get array length.");
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     std::vector<std::string> menuItems;
     ParseTextMenuItems(menuItems, env, argv[0], length);
     DisableTextMenuSystemItems(menuItems);
-    napi_close_handle_scope(env, scope);
     return nullptr;
 }
 

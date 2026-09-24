@@ -325,13 +325,13 @@ RefPtr<FrameNode> ButtonContentModifierTestNg::CreateLabelButtonParagraphForLabl
 
 /**
  * @tc.name: ButtonContentModifierTest001
- * @tc.desc: SetBuilderFunc and get value
+ * @tc.desc: SetBuilderFunc and get value.
  * @tc.type: FUNC
  */
 HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Button node
+     * @tc.steps: step1. Init Button node.
      */
     TestProperty testProperty;
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
@@ -348,7 +348,7 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest001, TestSize.Lev
     buttonPattern->HandlePressedStyle();
 
     /**
-     * @tc.steps: step3. make builderFunc
+     * @tc.steps: step3. make builderFunc.
      */
     auto node = [](ButtonConfiguration config) -> RefPtr<FrameNode> {
             EXPECT_EQ(CREATE_VALUE, config.label_);
@@ -358,7 +358,7 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest001, TestSize.Lev
         };
 
     /**
-     * @tc.steps: step4. Set parameters to pattern builderFunc
+     * @tc.steps: step4. Set parameters to pattern builderFunc.
      */
     buttonPattern->SetBuilderFunc(node);
     buttonPattern->BuildContentModifierNode();
@@ -372,7 +372,7 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest001, TestSize.Lev
 HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Button node
+     * @tc.steps: step1. Init Button node.
      */
     TestProperty testProperty;
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
@@ -380,7 +380,7 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest002, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. Set buttonConfiguration
+     * @tc.steps: step2. Set buttonConfiguration.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
@@ -389,7 +389,7 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest002, TestSize.Lev
     buttonPattern->HandlePressedStyle();
 
     /**
-     * @tc.steps: step3. make builderFunc
+     * @tc.steps: step3. make builderFunc.
      */
     auto node = [](ButtonConfiguration config) -> RefPtr<FrameNode> {
             EXPECT_EQ(CREATE_VALUE, config.label_);
@@ -399,7 +399,7 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest002, TestSize.Lev
         };
 
     /**
-     * @tc.steps: step4. Set parameters to pattern builderFunc
+     * @tc.steps: step4. Set parameters to pattern builderFunc.
      */
     buttonPattern->SetBuilderFunc(node);
     buttonPattern->BuildContentModifierNode();

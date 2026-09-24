@@ -239,6 +239,10 @@ public:
     template<typename T>
     void Wrap(T* data) const;
 
+    template<typename T>
+    void Wrap(T* data, void (*callback)(void*, void*, void*),
+        void* hint = nullptr, size_t nativeBindingSize = 0) const;
+
     JsiRef<JsiArray> GetPropertyNames() const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
     JsiRef<JsiValue> GetProperty(int32_t propertyIndex) const;

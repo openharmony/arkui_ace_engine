@@ -893,6 +893,7 @@ ArkUI_StyledString* OH_ArkUI_StyledString_Create(
 
 void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
 {
+    CHECK_NULL_VOID(storage);
     OH_Drawing_DestroyTypographyHandler(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
     for (auto item : storage->items) {
         if (item->placeholder) {
@@ -922,6 +923,7 @@ void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
 
 void OH_ArkUI_StyledString_PushTextStyle(ArkUI_StyledString* storage, OH_Drawing_TextStyle* style)
 {
+    CHECK_NULL_VOID(storage);
     OH_Drawing_TypographyHandlerPushTextStyle(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), style);
     OH_Drawing_TextStyle* textStyle = OH_Drawing_CreateTextStyle();
     // copy text style
@@ -938,6 +940,7 @@ void OH_ArkUI_StyledString_PushTextStyle(ArkUI_StyledString* storage, OH_Drawing
 
 void OH_ArkUI_StyledString_AddText(ArkUI_StyledString* storage, const char* content)
 {
+    CHECK_NULL_VOID(storage);
     OH_Drawing_TypographyHandlerAddText(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), content);
 
     ArkUI_SpanItem* spanItem = new ArkUI_SpanItem;
@@ -952,6 +955,7 @@ void OH_ArkUI_StyledString_AddText(ArkUI_StyledString* storage, const char* cont
 
 void OH_ArkUI_StyledString_PopTextStyle(ArkUI_StyledString* storage)
 {
+    CHECK_NULL_VOID(storage);
     OH_Drawing_TypographyHandlerPopTextStyle(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
     if (storage->styles.empty()) {
         return;
@@ -962,6 +966,7 @@ void OH_ArkUI_StyledString_PopTextStyle(ArkUI_StyledString* storage)
 
 OH_Drawing_Typography* OH_ArkUI_StyledString_CreateTypography(ArkUI_StyledString* storage)
 {
+    CHECK_NULL_RETURN(storage, nullptr);
     OH_Drawing_Typography* paragraph = OH_Drawing_CreateTypography(
         reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
     storage->paragraph = paragraph;
@@ -970,6 +975,7 @@ OH_Drawing_Typography* OH_ArkUI_StyledString_CreateTypography(ArkUI_StyledString
 
 void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawing_PlaceholderSpan* placeholder)
 {
+    CHECK_NULL_VOID(storage);
     OH_Drawing_TypographyHandlerAddPlaceholder(
         reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), placeholder);
     ArkUI_SpanItem* spanItem = new ArkUI_SpanItem;

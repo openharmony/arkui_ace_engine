@@ -324,6 +324,13 @@ void TabsSwipeToCustom(ArkUINodeHandle node, ArkUI_Int32 index)
     tabsController->SwipeTo(index);
 }
 
+int32_t GetBarDisplayModeCustom(ArkUINodeHandle node)
+{
+    auto tabsController = GetTabsController(node);
+    CHECK_NULL_RETURN(tabsController, static_cast<int32_t>(TabBarDisplayMode::BOTTOMTABBAR));
+    return static_cast<int32_t>(tabsController->GetBarDisplayMode());
+}
+
 void SetTabsIndexMock(ArkUINodeHandle node, ArkUI_Int32 indexVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -404,6 +411,7 @@ const ArkUITabsCustomModifier* GetTabsCustomModifier()
         .setTabBarTranslate = SetTabsTabBarTranslateCustom,
         .setTabBarOpacity = SetTabsTabBarOpacityCustom,
         .swipeTo = TabsSwipeToCustom,
+        .getBarDisplayMode = GetBarDisplayModeCustom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

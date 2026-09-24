@@ -565,7 +565,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes001, TestSize.Level0)
     richEditorPattern->UpdateScrollStateAfterLayout(true);
     EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, scroll_from_update)) << "Reach Top Boundary";
 
-    EXPECT_EQ(richEditorPattern->scrollController_->MoveTextRect(0.0f), 0.0f);
+    EXPECT_EQ(richEditorPattern->scrollController_->MoveTextRectWithAxis(0.0f, Axis::VERTICAL, 0.0f), 0.0f);
 
     auto offsetF = OffsetF(0.0f, 0.5f);
     richEditorPattern->scrollController_->MoveCaretToContentRect(offsetF, 8.0f);

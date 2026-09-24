@@ -956,6 +956,12 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
         //   2: [0,-5]        [2,-4] [3,-4]
         // At row 1, a right-to-left scan would return 4, but the true last
         // item is 5 (sitting at col 0).
+        //
+        // val == 0 is intentionally excluded: item 0's origin and its
+        // continuation cells are both stored as 0. Treating 0 as an origin
+        // would return a continuation row when item 0 is the last item
+        // (rowSpan > 1), and InitPosToLastItem would resume filling from that
+        // row, leaving holes on the origin row.
         int32_t maxIdx = -1;
         int32_t maxCol = -1;
         for (const auto& [col, val] : row) {
@@ -972,11 +978,21 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             };
         }
     }
-    return {
-        .itemIdx = 0,
-        .y = 0,
-        .x = 0,
-    };
+    // No positive origin above endLine. Confirm item 0 actually occupies (0, 0)
+    // before returning that origin; otherwise the matrix has no last item
+    // (continuation-only / truncated) and callers treat {-1,-1,-1} as a miss.
+    auto originRow = gridMatrix_.find(0);
+    if (originRow != gridMatrix_.end()) {
+        auto originCell = originRow->second.find(0);
+        if (originCell != originRow->second.end() && originCell->second == 0) {
+            return {
+                .itemIdx = 0,
+                .y = 0,
+                .x = 0,
+            };
+        }
+    }
+    return {};
 }
 
 int32_t GridLayoutInfo::FindItemStartRow(int32_t startRow, int32_t colIdx) const

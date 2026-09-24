@@ -215,10 +215,16 @@ HWTEST_F(GridContainerUtilsTestNG, SaveGridRowGutterOptionyResObjXsSmMdTest, Tes
 
     gutterSizeArrayResObj[1] = AceType::MakeRefPtr<ResourceObject>();
     V2::GridContainerUtils::SaveGridRowGutterOptionyResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    /**
+     * @tc.expected: gutter->resMap_ can find gridrow.gutter.ySm
+     */
     EXPECT_TRUE(gutter->resMap_.find("gridrow.gutter.ySm") != gutter->resMap_.end());
 
     gutterSizeArrayResObj[2] = AceType::MakeRefPtr<ResourceObject>();
     V2::GridContainerUtils::SaveGridRowGutterOptionyResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    /**
+     * @tc.expected: gutter->resMap_ can find gridrow.gutter.yMd
+     */
     EXPECT_TRUE(gutter->resMap_.find("gridrow.gutter.yMd") != gutter->resMap_.end());
     g_isConfigChangePerform = false;
 }

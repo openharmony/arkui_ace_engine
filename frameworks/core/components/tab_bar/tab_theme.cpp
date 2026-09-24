@@ -180,6 +180,10 @@ void TabTheme::Builder::ParsePattern2(const RefPtr<TabTheme>& theme, const RefPt
         pattern->GetAttr<Dimension>("side_bar_padding_level10", 20.0_vp);
     theme->sideBarTextFontSize_ =
         pattern->GetAttr<Dimension>("side_bar_text_font_size", 16.0_fp);
+    theme->sideBarDividerColor_ =
+        pattern->GetAttr<Color>("sidebar_divider_color", Color(0x33182431));
+    theme->sideBarBackgroundColor_ =
+        pattern->GetAttr<Color>("sidebar_background_color", Color(0xfff1f3f5));
 }
 
 } // namespace OHOS::Ace

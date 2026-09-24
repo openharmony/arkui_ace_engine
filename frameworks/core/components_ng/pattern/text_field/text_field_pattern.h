@@ -2208,7 +2208,7 @@ private:
     void ShowSelectAfterDragEvent();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
-    bool HasStateStyle(UIState state) const;
+    virtual bool HasStateStyle(UIState state) const;
     bool IsStyledPlaceholder() const;
 
     // PageTranslateNode override

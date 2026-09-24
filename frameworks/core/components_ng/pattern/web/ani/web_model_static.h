@@ -148,6 +148,7 @@ public:
     static void SetOnFullScreenEnter(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetScaleChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetZoomChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnHttpAuthRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetOnInterceptRequest(

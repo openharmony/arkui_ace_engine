@@ -596,6 +596,7 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
     CHECK_NULL_VOID(svgContext);
     auto refSvgNode = svgContext->GetSvgNodeById(hrefClipPath_);
     CHECK_NULL_VOID(refSvgNode);
+    svgContext->ResetAsPathDepth();
     auto clipPath = refSvgNode->AsPath(viewPort);
     if (!clipPath.IsValid()) {
         LOGW("OnClipPath abandon, clipPath is empty");
@@ -613,6 +614,7 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const SvgCoordinateSystemContext& svg
     if (!AceType::InstanceOf<SvgClipPath>(refSvgNode)) {
         return;
     }
+    svgContext->ResetAsPathDepth();
     refSvgNode->OnClipEffect(canvas, svgCoordinateSystemContext);
 }
 
@@ -625,6 +627,7 @@ void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
     CHECK_NULL_VOID(svgContext);
     auto refFilter = svgContext->GetSvgNodeById(hrefFilterId_);
     CHECK_NULL_VOID(refFilter);
+    svgContext->ResetAsPathDepth();
     auto effectPath = AsPath(viewPort);
     auto bounds = effectPath.GetBounds();
     refFilter->SetEffectFilterArea({
@@ -653,6 +656,7 @@ void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
     CHECK_NULL_VOID(svgContext);
     auto refMask = svgContext->GetSvgNodeById(hrefMaskId_);
     CHECK_NULL_VOID(refMask);
+    svgContext->ResetAsPathDepth();
     refMask->Draw(canvas, viewPort, std::nullopt);
     return;
 }

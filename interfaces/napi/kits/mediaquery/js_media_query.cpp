@@ -17,6 +17,7 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 #include "bridge/common/media_query/media_queryer.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -46,9 +47,8 @@ struct MediaQueryResult {
     {
         /* construct a MediaQueryListener object */
         napi_create_object(env, &result);
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        ScopeRAII scope(env);
+        if (!scope) {
             return;
         }
 
@@ -59,7 +59,6 @@ struct MediaQueryResult {
         napi_value mediaVal = nullptr;
         napi_create_string_utf8(env, media_.c_str(), media_.size(), &mediaVal);
         napi_set_named_property(env, result, "media", mediaVal);
-        napi_close_handle_scope(env, scope);
     }
 };
 
@@ -147,9 +146,8 @@ public:
                 if (delayDeleteCallbacks_ && delayDeleteCallbacks_->find(cbRef) != delayDeleteCallbacks_->end()) {
                     continue;
                 }
-                napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(listener->env_, &scope);
-                if (scope == nullptr) {
+                ScopeRAII scope(listener->env_);
+                if (!scope) {
                     return;
                 }
 
@@ -166,7 +164,6 @@ public:
                     TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "call faild:%{public}s status:%{public}d",
                         listener->media_.c_str(), status);
                 }
-                napi_close_handle_scope(listener->env_, scope);
             }
         }
         TAG_LOGD(AceLogTag::ACE_MEDIA_QUERY, "trigger: %{public}s", mediaInfo.c_str());
@@ -174,9 +171,8 @@ public:
 
     static napi_value On(napi_env env, napi_callback_info info)
     {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        ScopeRAII scope(env);
+        if (!scope) {
             TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "on: Failed to open handle scope");
             return nullptr;
         }
@@ -185,26 +181,22 @@ public:
         size_t argc = ParseArgs(env, info, thisVar, cb);
         if (!(argc == TWO_ARGS && thisVar != nullptr && cb != nullptr)) {
             TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "on: Invalid arguments");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         MediaQueryListener* listener = GetListener(env, thisVar);
         if (!listener) {
             TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "on: Failed to get MediaQueryListener");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         auto jsEngine = listener->GetJsEngine();
         if (!jsEngine) {
             TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "on: Failed to get jsEngine");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         jsEngine->RegisterMediaUpdateCallback(NapiCallback);
         auto iter = listener->FindCbList(cb);
         if (iter != listener->cbList_.end()) {
             TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "on: Callback has already registered in listener cbList");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         napi_ref ref = nullptr;
@@ -212,7 +204,6 @@ public:
         listener->cbList_.emplace_back(ref);
         TAG_LOGW(AceLogTag::ACE_MEDIA_QUERY, "on:%{public}s num=%{public}d", listener->media_.c_str(),
             static_cast<int>(listener->cbList_.size()));
-        napi_close_handle_scope(env, scope);
 
 #if defined(PREVIEW)
         NapiCallback(AceType::RawPtr(jsEngine));
@@ -331,15 +322,13 @@ private:
 
     void Initialize(napi_env env, napi_value thisVar)
     {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        ScopeRAII scope(env);
+        if (!scope) {
             return;
         }
         if (env_ == nullptr) {
             env_ = env;
         }
-        napi_close_handle_scope(env, scope);
         auto jsEngine = GetJsEngine();
         if (!jsEngine) {
             return;

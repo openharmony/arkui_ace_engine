@@ -204,9 +204,44 @@ public:
         drawDepth_ = 0;
     }
 
+    int32_t GetDrawDepth() const
+    {
+        return drawDepth_;
+    }
+
+    bool IsDrawDepthExceededUseLimit() const
+    {
+        return drawDepth_ > MAX_USE_DRAW_DEPTH;
+    }
+
+    bool IncrementAsPathDepth()
+    {
+        return ++asPathDepth_ <= MAX_ASPATH_DEPTH;
+    }
+
+    void DecrementAsPathDepth()
+    {
+        if (asPathDepth_ > 0) {
+            --asPathDepth_;
+        }
+    }
+
+    void ResetAsPathDepth()
+    {
+        asPathDepth_ = 0;
+    }
+
+    bool IncrementNodeCount()
+    {
+        return ++nodeCount_ <= MAX_NODE_COUNT;
+    }
+
 private:
     static constexpr int32_t MAX_HREF_RESOLVE_COUNT = 10000;
     static constexpr int32_t MAX_DRAW_DEPTH = 5000;
+    static constexpr int32_t MAX_USE_DRAW_DEPTH = 350;
+    static constexpr int32_t MAX_ASPATH_DEPTH = 350;
+    static constexpr int32_t MAX_NODE_COUNT = 200000;
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
     // weak references to animators in svgDom
     std::unordered_map<int32_t, WeakPtr<Animator>> animators_;
@@ -225,7 +260,37 @@ private:
     std::set<std::string> hrefResolving_;
     int32_t hrefResolveCount_ = 0;
     int32_t drawDepth_ = 0;
+    int32_t asPathDepth_ = 0;
+    int32_t nodeCount_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
+};
+
+class AsPathDepthGuard {
+public:
+    explicit AsPathDepthGuard(const RefPtr<SvgContext>& context) : context_(context) {}
+    ~AsPathDepthGuard()
+    {
+        if (context_) {
+            context_->DecrementAsPathDepth();
+        }
+    }
+private:
+    RefPtr<SvgContext> context_;
+    ACE_DISALLOW_COPY_AND_MOVE(AsPathDepthGuard);
+};
+
+class DrawDepthGuard {
+public:
+    explicit DrawDepthGuard(const RefPtr<SvgContext>& context) : context_(context) {}
+    ~DrawDepthGuard()
+    {
+        if (context_) {
+            context_->DecrementDrawDepth();
+        }
+    }
+private:
+    RefPtr<SvgContext> context_;
+    ACE_DISALLOW_COPY_AND_MOVE(DrawDepthGuard);
 };
 } // namespace OHOS::Ace::NG
 

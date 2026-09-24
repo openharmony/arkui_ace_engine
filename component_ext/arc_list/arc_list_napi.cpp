@@ -15,6 +15,7 @@
 
 #include "arc_list_napi.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "ext_napi_utils.h"
 #include "core/common/container.h"
 #ifdef PREVIEW
@@ -264,16 +265,13 @@ void CreateForPartialUpdate(napi_env env, int32_t argc, napi_value* argv)
         auto listItemDeepRenderFunc = [jsDeepRender](int32_t nodeId) {
             ACE_SCOPED_TRACE("JSArcListItem::ExecuteDeepRender");
             napi_env env = jsDeepRender->GetEnv();
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
+            ScopeRAII scope(env);
             CHECK_NULL_VOID(scope);
 
             napi_value jsParams[2];
             napi_create_int32(env, nodeId, &jsParams[0]);
             napi_create_int32(env, 1, &jsParams[1]);
             jsDeepRender->Call(2, jsParams);
-
-            napi_close_handle_scope(env, scope);
         }; // listItemDeepRenderFunc lambda
         ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc), listItemStyle, true);
         ListItemModel::GetInstance()->SetIsLazyCreating(isLazy);
