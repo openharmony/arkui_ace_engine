@@ -15,7 +15,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_source_set("ace_resource") {
   if (current_os == "ohos") {
+    branch_protector_ret = "pac_ret"
     sanitize = {
+      cfi = true
+      cfi_cross_dso = true
       integer_overflow = true
       boundary_sanitize = true
       debug = ace_sanitize_debug
@@ -58,6 +61,11 @@ ohos_source_set("ace_resource") {
 }
 
 ohos_source_set("binary_resource") {
+  branch_protector_ret = "pac_ret"
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+  }
   deps = [ ":objcopy_resource" ]
   ace_resource_dir =
       get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
@@ -71,6 +79,11 @@ ohos_source_set("binary_resource") {
 }
 
 ohos_source_set("binary_resource_mac_and_windows") {
+  branch_protector_ret = "pac_ret"
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+  }
   deps = [ ":objcopy_resource_mac_and_windows" ]
   ace_resource_dir =
       get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
