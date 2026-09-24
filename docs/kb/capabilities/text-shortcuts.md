@@ -74,4 +74,4 @@ Dump：宿主 Pattern dump（TextField/RichEditor）；快捷键命中可经 `Ha
 - [Input Method Interaction](./input-method-interaction.md)（输入框↔键盘交互：IME 弹出收起/避让/输入处理契约/公共 API）
 - [Text](../components/basic/text.md)（只读快捷键子集宿主）
 - [TextInput](../components/basic/text-input.md)（全量快捷键宿主）
-- [RichEditor](../components/basic/rich_editor.md)（三策略 undo + 字体样式宿主，若存在）
+- [RichEditor](../components/basic/rich-editor.md)（三策略 undo + 字体样式宿主，若存在）

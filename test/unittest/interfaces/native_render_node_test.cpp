@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include "gtest/gtest.h"
 #define private public
 #define protected public
@@ -22,6 +23,7 @@
 #include "native_node.h"
 #include "native_render.h"
 #include "native_type.h"
+#include "interfaces/native/node/config_manager.h"
 #include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/render_node.h"
@@ -1683,6 +1685,43 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest010, TestSize.Level1)
     ArkUI_RenderNodeHandle renderNode;
     auto result = OH_ArkUI_RenderNodeUtils_GetRenderNode(rootCustomNode, &renderNode);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
+}
+
+/**
+ * @tc.name: NativeRenderNodeAdopterTest011
+ * @tc.desc: Test GetRenderNode continues without short-circuiting for a disposed node in DISABLED and LOG modes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest011, TestSize.Level1)
+{
+    ASSERT_TRUE(NodeModel::InitialFullImpl());
+    ArkUI_Node disposedNode;
+    disposedNode.type = ARKUI_NODE_CUSTOM;
+    disposedNode.magic = ARKUI_NODE_MAGIC_INVALID;
+    ArkUI_RenderNodeHandle renderNode = nullptr;
+    // DISABLED：失效 handle 不再短路返回 401，入口按原逻辑继续（core 对空内部句柄返回 not adopted）
+    ASSERT_TRUE(NodeModel::ConfigManager::SetRuntimeCheckMode(
+        static_cast<int32_t>(OH_ARKUI_NATIVEMODULE_CHECK_TYPE_NODE_DISPOSED),
+        static_cast<int32_t>(OH_ARKUI_NATIVEMODULE_CHECK_MODE_DISABLED)));
+    auto disabledResult = OH_ArkUI_RenderNodeUtils_GetRenderNode(&disposedNode, &renderNode);
+    EXPECT_EQ(disabledResult, ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
+    EXPECT_EQ(renderNode, nullptr);
+    // LOG：只诊断不短路，返回值与副作用与 DISABLED 一致；不再写 disposed 错误文本
+    ASSERT_TRUE(NodeModel::ConfigManager::SetRuntimeCheckMode(
+        static_cast<int32_t>(OH_ARKUI_NATIVEMODULE_CHECK_TYPE_NODE_DISPOSED),
+        static_cast<int32_t>(OH_ARKUI_NATIVEMODULE_CHECK_MODE_LOG)));
+    renderNode = nullptr;
+    auto logResult = OH_ArkUI_RenderNodeUtils_GetRenderNode(&disposedNode, &renderNode);
+    EXPECT_EQ(logResult, disabledResult);
+    EXPECT_EQ(renderNode, nullptr);
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    if (errorMessage != nullptr) {
+        EXPECT_EQ(std::string(errorMessage).find("has been disposed"), std::string::npos);
+    }
+    // 恢复 DISABLED，避免影响后续用例。
+    ASSERT_TRUE(NodeModel::ConfigManager::SetRuntimeCheckMode(
+        static_cast<int32_t>(OH_ARKUI_NATIVEMODULE_CHECK_TYPE_NODE_DISPOSED),
+        static_cast<int32_t>(OH_ARKUI_NATIVEMODULE_CHECK_MODE_DISABLED)));
 }
 
 /**

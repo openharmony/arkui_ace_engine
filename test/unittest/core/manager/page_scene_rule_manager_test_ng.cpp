@@ -17,6 +17,7 @@
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utf_helper.h"
 
 #define private public
 #define protected public
@@ -28,6 +29,8 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/page_scene/page_scene_rule_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -99,7 +102,7 @@ const std::string EMPTY_RULES_JSON = R"({
 
 std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = false,
     bool deduplicate = true, int32_t minReportIntervalMs = DEFAULT_MIN_REPORT_INTERVAL_MS,
-    bool onlyVisible = true, bool includeRect = true)
+    bool onlyVisible = true, bool rectCulling = false, bool includeRect = true)
 {
     return std::string(R"({
         "version": 1,
@@ -121,7 +124,8 @@ std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = fa
                 "sceneType": "TEXT_EDITOR",
                 "enabled": true,
                 "scope": {
-                    "onlyVisible":)" + (onlyVisible ? "true" : "false") + R"(
+                    "onlyVisible":)" + (onlyVisible ? "true" : "false") + R"(,
+                    "rectCulling":)" + (rectCulling ? "true" : "false") + R"(
                 },
                 "selector": {
                     "nodeTypes": ["TextInput", "TextArea", "Search", "RichEditor"]
@@ -242,17 +246,37 @@ RefPtr<FrameNode> CreateTextInputNode(int32_t nodeId, const RectF& paintRect, bo
 
 RefPtr<FrameNode> CreateTextFieldNode(
     const std::string& tag, int32_t nodeId, const RectF& paintRect, const std::string& text, bool focusable = true,
-    const std::u16string& placeholder = u"")
+    const std::u16string& placeholder = u"", TextInputType inputType = TextInputType::UNSPECIFIED,
+    TextContentType contentType = TextContentType::UNSPECIFIED)
 {
     auto node = CreateTestNodeWithPattern(tag, nodeId, paintRect, AceType::MakeRefPtr<TextFieldPattern>(), focusable);
     if (node) {
         auto pattern = node->GetPattern<TextFieldPattern>();
         if (pattern) {
+            pattern->SetTextInputFlag(tag != V2::TEXTAREA_ETS_TAG);
             pattern->UpdateEditingValue(text, static_cast<int32_t>(text.length()));
         }
         auto layoutProperty = node->GetLayoutProperty<TextFieldLayoutProperty>();
         if (layoutProperty) {
             layoutProperty->UpdatePlaceholder(placeholder);
+            if (tag != V2::TEXTAREA_ETS_TAG) {
+                layoutProperty->UpdateMaxLines(1);
+            }
+            layoutProperty->UpdateTextInputType(inputType);
+            layoutProperty->UpdateTextContentType(contentType);
+        }
+    }
+    return node;
+}
+
+RefPtr<FrameNode> CreateRichEditorNode(int32_t nodeId, const RectF& paintRect, const std::string& placeholder)
+{
+    auto node = CreateTestNodeWithPattern(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, paintRect, AceType::MakeRefPtr<RichEditorPattern>());
+    if (node) {
+        auto layoutProperty = node->GetLayoutProperty<RichEditorLayoutProperty>();
+        if (layoutProperty) {
+            layoutProperty->UpdatePlaceholder(UtfUtils::Str8ToStr16(placeholder));
         }
     }
     return node;
@@ -446,29 +470,44 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene003, Tes
     auto pageRoot = CreatePageRoot();
     auto searchNode = CreateTestNode(
         V2::SEARCH_ETS_TAG, TEST_SEARCH_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
-    AddChild(searchNode, CreateTestNode(
-        V2::SEARCH_Field_ETS_TAG, TEST_SEARCH_FIELD_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    AddChild(searchNode, CreateTextFieldNode(V2::SEARCH_Field_ETS_TAG, TEST_SEARCH_FIELD_ID,
+        RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), FIRST_INPUT_TEXT, true,
+        FIRST_PLACEHOLDER_TEXT_U16, TextInputType::PHONE, TextContentType::PHONE_NUMBER));
     AddChild(pageRoot, searchNode);
-    AddChild(pageRoot, CreateTestNode(
-        V2::RICH_EDITOR_ETS_TAG, TEST_RICH_EDITOR_ID, RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    AddChild(pageRoot, CreateRichEditorNode(
+        TEST_RICH_EDITOR_ID, RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), "rich placeholder"));
 
     PageSceneRuleManager manager;
-    EXPECT_TRUE(manager.IsTextInputNodeType(V2::SEARCH_Field_ETS_TAG));
+    EXPECT_FALSE(manager.IsTextInputNodeType(V2::SEARCH_Field_ETS_TAG));
     EXPECT_TRUE(manager.IsTextInputNodeType(V2::RICH_EDITOR_ETS_TAG));
     EXPECT_FALSE(manager.IsTextInputNodeType(V2::TEXT_ETS_TAG));
 
     auto result = manager.MatchPageScene(
-        TEST_PROCESS_ID, BuildRuleJson(), BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
+        TEST_PROCESS_ID, BuildRuleJson(false, true), BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(result->matched);
     EXPECT_EQ(result->matchedCount, TWO_MATCHED_NODES);
 
     auto sceneJson = JsonUtil::ParseJsonString(result->sceneJson);
     ASSERT_TRUE(sceneJson);
-    auto firstNode = sceneJson->GetValue("nodes")->GetArrayItem(0);
+    auto nodesJson = sceneJson->GetValue("nodes");
+    ASSERT_TRUE(nodesJson);
+    auto firstNode = nodesJson->GetArrayItem(0);
     ASSERT_TRUE(firstNode);
     EXPECT_EQ(firstNode->GetInt("nodeId"), TEST_SEARCH_ID);
     EXPECT_EQ(firstNode->GetString("nodeType"), "Search");
+    EXPECT_EQ(firstNode->GetString("text"), FIRST_INPUT_TEXT);
+    EXPECT_EQ(firstNode->GetString("placeholder"), FIRST_PLACEHOLDER_TEXT);
+    EXPECT_EQ(firstNode->GetString("contentType"), "PHONE_NUMBER");
+    EXPECT_EQ(firstNode->GetString("inputType"), "PhoneNumber");
+
+    auto secondNode = nodesJson->GetArrayItem(1);
+    ASSERT_TRUE(secondNode);
+    EXPECT_EQ(secondNode->GetString("nodeType"), "RichEditor");
+    EXPECT_EQ(secondNode->GetString("text"), "");
+    EXPECT_EQ(secondNode->GetString("placeholder"), "rich placeholder");
+    EXPECT_EQ(secondNode->GetString("contentType"), "");
+    EXPECT_EQ(secondNode->GetString("inputType"), "");
 
     EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, result.value()));
     EXPECT_FALSE(manager.ShouldReport(TEST_PROCESS_ID, result.value()));
@@ -518,10 +557,10 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene005, Tes
     auto pageRoot = CreatePageRoot();
     AddChild(pageRoot, CreateTextFieldNode(
         V2::TEXTINPUT_ETS_TAG, TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT),
-        "", true, FIRST_PLACEHOLDER_TEXT_U16));
+        "", true, FIRST_PLACEHOLDER_TEXT_U16, TextInputType::EMAIL_ADDRESS, TextContentType::EMAIL_ADDRESS));
     AddChild(pageRoot, CreateTextFieldNode(
         V2::TEXTAREA_ETS_TAG, TEST_TEXT_AREA_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT),
-        SECOND_INPUT_TEXT));
+        SECOND_INPUT_TEXT, true, u"", TextInputType::NUMBER, TextContentType::PHONE_NUMBER));
 
     PageSceneRuleManager manager;
     auto result = manager.MatchPageScene(
@@ -542,8 +581,14 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene005, Tes
     auto secondNode = nodesJson->GetArrayItem(1);
     ASSERT_TRUE(firstNode);
     ASSERT_TRUE(secondNode);
-    EXPECT_EQ(firstNode->GetString("text"), FIRST_PLACEHOLDER_TEXT);
+    EXPECT_EQ(firstNode->GetString("text"), "");
+    EXPECT_EQ(firstNode->GetString("placeholder"), FIRST_PLACEHOLDER_TEXT);
+    EXPECT_EQ(firstNode->GetString("contentType"), "EMAIL_ADDRESS");
+    EXPECT_EQ(firstNode->GetString("inputType"), "Email");
     EXPECT_EQ(secondNode->GetString("text"), SECOND_INPUT_TEXT);
+    EXPECT_EQ(secondNode->GetString("placeholder"), "");
+    EXPECT_EQ(secondNode->GetString("contentType"), "PHONE_NUMBER");
+    EXPECT_EQ(secondNode->GetString("inputType"), "NUMBER");
 }
 
 /**
@@ -606,7 +651,7 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene006, Tes
 
 /**
  * @tc.name: PageSceneRuleManager_MatchPageScene007
- * @tc.desc: Test onlyVisible filters inputs outside the page viewport while disabled onlyVisible keeps them.
+ * @tc.desc: Test rectCulling filters inputs outside the page viewport independently of onlyVisible.
  * @tc.type: FUNC
  */
 HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene007, TestSize.Level1)
@@ -619,19 +664,58 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene007, Tes
 
     PageSceneRuleManager manager;
     auto visibleOnlyResult = manager.MatchPageScene(
-        TEST_PROCESS_ID, BuildRuleJson(), BuildStartNodes(pageRoot), TEST_PAGE_NAME, true);
+        TEST_PROCESS_ID, BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, true, true),
+        BuildStartNodes(pageRoot), TEST_PAGE_NAME, true);
     ASSERT_TRUE(visibleOnlyResult.has_value());
     EXPECT_FALSE(visibleOnlyResult->matched);
     EXPECT_EQ(visibleOnlyResult->matchedCount, ONE_MATCHED_NODE);
     ASSERT_EQ(visibleOnlyResult->nodeIds.size(), ONE_MATCHED_NODE);
     EXPECT_EQ(visibleOnlyResult->nodeIds.front(), TEST_TEXT_INPUT_ID);
 
+    auto componentVisibleResult = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, true, false),
+        BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
+    ASSERT_TRUE(componentVisibleResult.has_value());
+    EXPECT_TRUE(componentVisibleResult->matched);
+    EXPECT_EQ(componentVisibleResult->matchedCount, TWO_MATCHED_NODES);
+
     auto allNodesResult = manager.MatchPageScene(
-        TEST_PROCESS_ID, BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, false),
+        TEST_PROCESS_ID, BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, false, false),
         BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
     ASSERT_TRUE(allNodesResult.has_value());
     EXPECT_TRUE(allNodesResult->matched);
     EXPECT_EQ(allNodesResult->matchedCount, TWO_MATCHED_NODES);
+}
+
+/**
+ * @tc.name: PageSceneRuleManager_MatchPageScene014
+ * @tc.desc: Test onlyVisible filters a node when its own opacity or an ancestor opacity is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene014, TestSize.Level1)
+{
+    auto pageRoot = CreatePageRoot();
+    auto transparentNode = CreateTextInputNode(
+        TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    auto visibleNode = CreateTextInputNode(
+        TEST_TEXT_AREA_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    AddChild(pageRoot, transparentNode);
+    AddChild(pageRoot, visibleNode);
+    transparentNode->GetRenderContext()->UpdateOpacity(0.0);
+
+    PageSceneRuleManager manager;
+    auto onlyVisibleResult = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(), BuildStartNodes(pageRoot), TEST_PAGE_NAME, true);
+    ASSERT_TRUE(onlyVisibleResult.has_value());
+    EXPECT_FALSE(onlyVisibleResult->matched);
+    EXPECT_EQ(onlyVisibleResult->matchedCount, ONE_MATCHED_NODE);
+
+    auto rectOnlyResult = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, false, true),
+        BuildStartNodes(pageRoot), TEST_PAGE_NAME, true);
+    ASSERT_TRUE(rectOnlyResult.has_value());
+    EXPECT_TRUE(rectOnlyResult->matched);
+    EXPECT_EQ(rectOnlyResult->matchedCount, TWO_MATCHED_NODES);
 }
 
 /**
@@ -683,13 +767,13 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene009, Tes
 
     PageSceneRuleManager manager;
     auto initialResult = manager.MatchPageScene(TEST_PROCESS_ID,
-        BuildRuleJson(false, false, true, 0), BuildStartNodes(matchedRoot), TEST_PAGE_NAME, false);
+        BuildRuleJson(false, false, true, 0, true, true), BuildStartNodes(matchedRoot), TEST_PAGE_NAME, false);
     ASSERT_TRUE(initialResult.has_value());
     EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, initialResult.value()));
 
     UpdateNodeRect(textAreaNode, RectF(SECOND_NODE_X, OFFSCREEN_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
     auto offscreenResult = manager.MatchPageScene(TEST_PROCESS_ID,
-        BuildRuleJson(false, false, true, 0), BuildStartNodes(matchedRoot), TEST_PAGE_NAME, false);
+        BuildRuleJson(false, false, true, 0, true, true), BuildStartNodes(matchedRoot), TEST_PAGE_NAME, false);
     ASSERT_TRUE(offscreenResult.has_value());
     EXPECT_FALSE(offscreenResult->matched);
     EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, offscreenResult.value()));
@@ -700,7 +784,7 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene009, Tes
     AddChild(replacedRoot, CreateTextInputNode(
         TEST_SEARCH_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
     auto replacedResult = manager.MatchPageScene(TEST_PROCESS_ID,
-        BuildRuleJson(false, false, true, 0), BuildStartNodes(replacedRoot), TEST_PAGE_NAME, false);
+        BuildRuleJson(false, false, true, 0, true, true), BuildStartNodes(replacedRoot), TEST_PAGE_NAME, false);
     ASSERT_TRUE(replacedResult.has_value());
     EXPECT_TRUE(replacedResult->matched);
     EXPECT_EQ(replacedResult->nodeIds, (std::vector<int32_t> { TEST_TEXT_INPUT_ID, TEST_SEARCH_ID }));
@@ -852,7 +936,7 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene013, Tes
 
     PageSceneRuleManager manager;
     auto result = manager.MatchPageScene(TEST_PROCESS_ID,
-        BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, false, false),
+        BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, false, false, false),
         BuildStartNodes(pageRoot), TEST_PAGE_NAME, true);
 
     ASSERT_TRUE(result.has_value());
@@ -862,5 +946,65 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene013, Tes
     auto nodeJson = sceneJson->GetValue("nodes")->GetArrayItem(0);
     ASSERT_TRUE(nodeJson);
     EXPECT_TRUE(nodeJson->GetValue("rect")->IsNull());
+}
+
+/**
+ * @tc.name: PageSceneRuleManager_MatchPageScene015
+ * @tc.desc: Test enableAutoFill is carried by default for TextInput/TextArea without rule config,
+ *           omitted when unset, and never carried for Search.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene015, TestSize.Level1)
+{
+    auto pageRoot = CreatePageRoot();
+    auto textInputNode = CreateTextFieldNode(V2::TEXTINPUT_ETS_TAG, TEST_TEXT_INPUT_ID,
+        RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), FIRST_INPUT_TEXT);
+    ASSERT_NE(textInputNode, nullptr);
+    textInputNode->GetLayoutProperty<TextFieldLayoutProperty>()->UpdateEnableAutoFill(false);
+    AddChild(pageRoot, textInputNode);
+    AddChild(pageRoot, CreateTextFieldNode(V2::TEXTAREA_ETS_TAG, TEST_TEXT_AREA_ID,
+        RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), SECOND_INPUT_TEXT));
+    auto searchNode = CreateTestNode(
+        V2::SEARCH_ETS_TAG, TEST_SEARCH_ID, RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    auto searchFieldNode = CreateTextFieldNode(V2::SEARCH_Field_ETS_TAG, TEST_SEARCH_FIELD_ID,
+        RectF(THIRD_NODE_X, THIRD_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT), FIRST_INPUT_TEXT);
+    ASSERT_NE(searchFieldNode, nullptr);
+    searchFieldNode->GetLayoutProperty<TextFieldLayoutProperty>()->UpdateEnableAutoFill(true);
+    AddChild(searchNode, searchFieldNode);
+    AddChild(pageRoot, searchNode);
+
+    PageSceneRuleManager manager;
+    // includeText is false here: enableAutoFill is carried by default without extra rule configuration.
+    auto result = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(), BuildStartNodes(pageRoot), TEST_PAGE_NAME, false);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(result->matched);
+    EXPECT_EQ(result->matchedCount, THREE_MATCHED_NODES);
+
+    auto sceneJson = JsonUtil::ParseJsonString(result->sceneJson);
+    ASSERT_TRUE(sceneJson);
+    auto nodesJson = sceneJson->GetValue("nodes");
+    ASSERT_TRUE(nodesJson);
+    ASSERT_EQ(nodesJson->GetArraySize(), THREE_MATCHED_NODES);
+
+    auto firstNode = nodesJson->GetArrayItem(0);
+    ASSERT_TRUE(firstNode);
+    EXPECT_EQ(firstNode->GetInt("nodeId"), TEST_TEXT_INPUT_ID);
+    EXPECT_TRUE(firstNode->GetValue("enableAutoFill")->IsBool());
+    EXPECT_FALSE(firstNode->GetBool("enableAutoFill"));
+    EXPECT_TRUE(firstNode->GetValue("text")->IsNull());
+
+    auto secondNode = nodesJson->GetArrayItem(1);
+    ASSERT_TRUE(secondNode);
+    EXPECT_EQ(secondNode->GetInt("nodeId"), TEST_TEXT_AREA_ID);
+    EXPECT_TRUE(secondNode->GetValue("enableAutoFill")->IsNull());
+
+    // Search has no enableAutoFill API: even if its internal SearchField property is set,
+    // the Search node does not carry the field.
+    auto thirdNode = nodesJson->GetArrayItem(2);
+    ASSERT_TRUE(thirdNode);
+    EXPECT_EQ(thirdNode->GetInt("nodeId"), TEST_SEARCH_ID);
+    EXPECT_TRUE(thirdNode->GetValue("enableAutoFill")->IsNull());
 }
 } // namespace OHOS::Ace::NG

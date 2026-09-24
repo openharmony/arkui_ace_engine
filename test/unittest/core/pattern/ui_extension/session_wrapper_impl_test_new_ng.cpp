@@ -63,6 +63,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
 #include "interfaces/inner_api/ace/constants.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 
 using namespace testing;
@@ -76,6 +77,13 @@ namespace {
     const char UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING[] =
         "ohos.ace.uiextension.allowCrossProcessNesting";
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class SessionWrapperImplNewTestNg : public testing::Test {
 public:
@@ -135,18 +143,18 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
 
     sessionWrapper->InitForegroundCallback();
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
 
     errcode = OHOS::Rosen::WSError::WS_OK;
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
 
     errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->taskExecutor_ = nullptr;
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
 
     errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
 
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
@@ -158,12 +166,12 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
     errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitForegroundCallback();
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     EXPECT_NE(sessionWrapper->foregroundCallback_, nullptr);
 
     sessionWrapper->session_->persistentId_ = 0;
     sessionWrapper->InitForegroundCallback();
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     EXPECT_NE(sessionWrapper->foregroundCallback_, nullptr);
     EXPECT_TRUE(pattern->IsCompatibleOldVersion());
 }
@@ -1517,5 +1525,107 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg045, TestSize.L
     sessionWrapper->UpdateWantPtr(wantPtr);
     uiExtensionParams = wantPtr->GetParams().GetWantParams("ohos.system.window.uiextension.params");
     EXPECT_EQ(uiExtensionParams.GetIntParam("ohos.system.window.mode", 1000), 0);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg046
+ * @tc.desc: Test the method SetOnAbilityErrorCodeCallback and FireOnAbilityErrorCodeCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg046, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_NE(sessionWrapper, nullptr);
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step1. test FireOnAbilityErrorCodeCallback without registered callback
+     */
+    pattern->FireOnAbilityErrorCodeCallback(UIExtensionOperationPhase::FOREGROUND, 100);
+
+    /**
+     * @tc.steps: step2. test SetOnAbilityErrorCodeCallback and FireOnAbilityErrorCodeCallback
+     */
+    int32_t abilityErrorCode = 0;
+    UIExtensionOperationPhase operationPhase = UIExtensionOperationPhase::FOREGROUND;
+    pattern->SetOnAbilityErrorCodeCallback(
+        [&abilityErrorCode, &operationPhase](const UIExtensionOperationPhase& phase, int32_t code) {
+            abilityErrorCode = code;
+            operationPhase = phase;
+        });
+    pattern->FireOnAbilityErrorCodeCallback(UIExtensionOperationPhase::FOREGROUND, 200);
+    EXPECT_EQ(abilityErrorCode, 200);
+    EXPECT_EQ(operationPhase, UIExtensionOperationPhase::FOREGROUND);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg047
+ * @tc.desc: Test the method InitForegroundCallback transfers abilityCode in FOREGROUND phase.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg047, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->session_->persistentId_ = 0;
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    sessionWrapper->hostPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+
+    bool isAbilityErrorCodeCallbackInvoked = false;
+    bool isErrorCallbackInvoked = false;
+    pattern->SetOnAbilityErrorCodeCallback(
+        [&isAbilityErrorCodeCallbackInvoked](const UIExtensionOperationPhase& phase, int32_t code) {
+            isAbilityErrorCodeCallbackInvoked = true;
+            EXPECT_EQ(code, 100);
+            EXPECT_EQ(phase, UIExtensionOperationPhase::FOREGROUND);
+        });
+    pattern->SetOnErrorCallback(
+        [&isErrorCallbackInvoked](int32_t code, const std::string& name, const std::string& message) {
+            isErrorCallbackInvoked = true;
+        });
+
+    /**
+     * @tc.steps: step1. test foregroundCallback_ for errcode == WS_OK, abilityErrorCode callback should be
+     * invoked, but error callback should not be invoked
+     */
+    sessionWrapper->InitForegroundCallback();
+    ASSERT_NE(sessionWrapper->foregroundCallback_, nullptr);
+    sessionWrapper->foregroundCallback_(OHOS::Rosen::WSError::WS_OK, 100);
+    EXPECT_TRUE(isAbilityErrorCodeCallbackInvoked);
+    EXPECT_FALSE(isErrorCallbackInvoked);
+
+    /**
+     * @tc.steps: step2. test foregroundCallback_ for callSessionId == pattern->GetSessionId(),
+     * abilityCode should be transferred in FOREGROUND phase
+     */
+    isAbilityErrorCodeCallbackInvoked = false;
+    isErrorCallbackInvoked = false;
+    sessionWrapper->foregroundCallback_(OHOS::Rosen::WSError::WS_DO_NOTHING, 100);
+    EXPECT_TRUE(isAbilityErrorCodeCallbackInvoked);
+    EXPECT_TRUE(isErrorCallbackInvoked);
+
+    /**
+     * @tc.steps: step3. test foregroundCallback_ for callSessionId != pattern->GetSessionId(),
+     * callbacks should not be invoked
+     */
+    isAbilityErrorCodeCallbackInvoked = false;
+    isErrorCallbackInvoked = false;
+    sessionWrapper->session_->persistentId_ = 1;
+    sessionWrapper->InitForegroundCallback();
+    sessionWrapper->foregroundCallback_(OHOS::Rosen::WSError::WS_DO_NOTHING, 100);
+    EXPECT_FALSE(isAbilityErrorCodeCallbackInvoked);
+    EXPECT_FALSE(isErrorCallbackInvoked);
 }
 } // namespace OHOS::Ace::NG

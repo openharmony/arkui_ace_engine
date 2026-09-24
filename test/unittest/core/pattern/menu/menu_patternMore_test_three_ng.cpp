@@ -83,9 +83,9 @@ void MenuPatternGetAdjustedPosTestNg::SetUp()
 
 void MenuPatternGetAdjustedPosTestNg::TearDown()
 {
-    MockPipelineContext::TearDown();
     menuPattern_ = nullptr;
     menuFrameNode_ = nullptr;
+    MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 

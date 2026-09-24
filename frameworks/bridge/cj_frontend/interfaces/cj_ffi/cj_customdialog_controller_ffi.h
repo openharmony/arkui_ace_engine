@@ -87,6 +87,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkCustomDialogControllerClose(int64_t id);
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeCustomDialogController : public OHOS::FFI::FFIData, public virtual AceType {
+    DECL_TYPE(NativeCustomDialogController, OHOS::FFI::FFIData)
     DECLARE_ACE_TYPE(NativeCustomDialogController, AceType);
 public:
     NativeCustomDialogController(NativeCustomDialogControllerOptions options);

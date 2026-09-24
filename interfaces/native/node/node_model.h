@@ -37,6 +37,8 @@ class PixelMap;
 extern "C" {
 #endif
 
+constexpr uint32_t ARKUI_NODE_MAGIC_VALID = 0xABCD1234;
+constexpr uint32_t ARKUI_NODE_MAGIC_INVALID = 0xDEAD5678;
 struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
@@ -65,6 +67,7 @@ struct ArkUI_Node {
     void* commonEventListeners = nullptr;
     void* extraCommonData = nullptr;
     void* gridLayoutOptions =  nullptr;
+    uint32_t magic = ARKUI_NODE_MAGIC_INVALID;
 };
 
 constexpr int BASIC_COMPONENT_NUM = 24;

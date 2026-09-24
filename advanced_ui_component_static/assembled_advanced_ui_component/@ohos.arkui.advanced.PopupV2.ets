@@ -858,17 +858,19 @@ export struct PopupV2Component {
   }
 
   private getTitleTextAlign(): TextAlign {
-    let titleAlign = TextAlign.Start;
-    try {
-      let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) &&
-        (this.popupDirection === Direction.Auto || this.popupDirection === undefined)) {
-        titleAlign = TextAlign.End;
+    return TextAlign.Start;
+  }
+
+  private getResolvedTextDirection(): Direction {
+    if (this.popupDirection === undefined || this.popupDirection === Direction.Auto) {
+      try {
+        return I18n.isRTL(I18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr;
+      } catch (error) {
+        console.error(`popup getResolvedTextDirection, error: ${error.toString()}`);
+        return Direction.Ltr;
       }
-    } catch (error) {
-      console.error(`popup getSystemLanguage, error: ${error.toString()}`);
     }
-    return titleAlign
+    return this.popupDirection as Direction;
   }
 
   build() {
@@ -888,7 +890,7 @@ export struct PopupV2Component {
         Column() {
           Flex({ alignItems: ItemAlign.Start }) {
             Text(this.getTitleText())
-              .direction(this.popupDirection)
+              .direction(this.getResolvedTextDirection())
               .flexGrow(1)
               .maxLines(2)
               .align(Alignment.Start)
@@ -947,7 +949,7 @@ export struct PopupV2Component {
           Scroll() {
             Text(this.getMessageText())
               .textAlign(this.getTitleTextAlign())
-              .direction(this.popupDirection)
+              .direction(this.getResolvedTextDirection())
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())

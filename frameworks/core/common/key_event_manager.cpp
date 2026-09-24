@@ -622,7 +622,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     auto smartGestureManager = eventManager ? eventManager->GetOrCreateSmartGestureManager() : nullptr;
     auto trigger = ResolveSmartGestureTrigger(event, smartGestureManager);
     if (trigger.has_value()) {
-        TAG_LOGD(AceLogTag::ACE_GESTURE, "SmartGesture received OperateIntention %{public}d",
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "smart gesture received OperateIntention %{public}d",
             static_cast<uint8_t>(trigger.value()));
         return DispatchSmartGesture(event, GetInstanceId(), trigger);
     }

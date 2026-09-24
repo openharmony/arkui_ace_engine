@@ -159,6 +159,8 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void OnMaterialDisable() override;
+
     void SetSkipColorConfigurationUpdate()
     {
         isColorUpdateFlag_ = true;

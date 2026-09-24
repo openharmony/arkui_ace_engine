@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_DEFS_H
 
 #include "core/components_ng/svg/base/svg_length_scale_rule.h"
+#include "core/components_ng/svg/svg_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,6 +47,11 @@ public:
 
     RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override
     {
+        auto svgContext = svgContext_.Upgrade();
+        if (svgContext && !svgContext->IncrementAsPathDepth()) {
+            return RSRecordingPath();
+        }
+        AsPathDepthGuard depthGuard(svgContext);
         RSRecordingPath path;
         for (auto child : children_) {
             auto childPath = child->AsPath(lengthRule);
@@ -56,6 +62,11 @@ public:
 
     RSRecordingPath AsPath(const Size& viewPort) const override
     {
+        auto svgContext = svgContext_.Upgrade();
+        if (svgContext && !svgContext->IncrementAsPathDepth()) {
+            return RSRecordingPath();
+        }
+        AsPathDepthGuard depthGuard(svgContext);
         RSRecordingPath path;
         for (auto child : children_) {
             auto childPath = child->AsPath(viewPort);

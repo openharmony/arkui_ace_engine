@@ -282,7 +282,10 @@ private:
     void HandleCommandByCompletedState(VideoPlaybackCommand command);
     void HandleCommandByErrorState(VideoPlaybackCommand command);
 
-    void DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor);
+    // hostId is captured on the posting thread and passed through the drain chain;
+    // the drain runs on the background thread and must not resolve the current
+    // pattern/host (strong UI-object references off the UI thread).
+    void DrainNextSerialBgTaskOnBg(int32_t hostId, const SingleTaskExecutor& bgTaskExecutor);
 
     mutable std::mutex ctxMutex_;
     WeakPtr<VideoStateMachinePattern> ctx_;

@@ -23,4 +23,8 @@ bool Base64Util::Decode(const std::string& src, std::string& dst)
     return true;
 }
 
+std::string Base64Util::Encode(const uint8_t* data, size_t size)
+{
+    return "mockbase64data";
+}
 } // namespace OHOS::Ace

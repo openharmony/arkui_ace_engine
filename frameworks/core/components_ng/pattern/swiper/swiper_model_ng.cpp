@@ -2061,6 +2061,14 @@ void SwiperModelNG::CallSwiperShowNext(FrameNode* frameNode)
     controller->ShowNext();
 }
 
+void SwiperModelNG::SetRenderGroupExplicitly(FrameNode* frameNode, bool isRenderGroup)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRenderGroupExplicitly(isRenderGroup);
+}
+
 void SwiperModelNG::AddDigitIndicatorLpx(FrameNode* frameNode, const SwiperDigitalParameters& params)
 {
     CHECK_NULL_VOID(frameNode);

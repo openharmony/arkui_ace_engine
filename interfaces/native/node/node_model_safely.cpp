@@ -17,6 +17,7 @@
 
 #include "node_extened.h"
 #include "node_model.h"
+#include "config_manager.h"
 
 #include "interfaces/native/native_error_message_macros.h"
 #include "base/error/error_code.h"
@@ -161,7 +162,8 @@ ArkUI_NodeHandle CreateNodeSafely(ArkUI_NodeType type)
         return nullptr;
     }
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode, true, true });
+    ArkUI_Node* arkUINode = new ArkUI_Node({ .type = type, .uiNodeHandle = uiNode, .cNode = true,
+        .threadSafeNode = true, .magic = ARKUI_NODE_MAGIC_VALID });
     impl->getExtendedAPI()->setAttachNodePtr(uiNode, reinterpret_cast<void*>(arkUINode));
     std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
     g_nodeSetSafely.emplace(arkUINode);
@@ -172,6 +174,7 @@ void DisposeNodeSafely(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(nativePtr, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nativePtr->uiNodeHandle)) {
         return;
     }
@@ -187,6 +190,9 @@ void DisposeNodeSafely(ArkUI_NodeHandle nativePtr)
     DisposeNativeSource(nativePtr);
     std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
     g_nodeSetSafely.erase(nativePtr);
+    // Prevent the invalidation store from being optimized away before deallocation.
+    volatile uint32_t* magic = &nativePtr->magic;
+    *magic = ARKUI_NODE_MAGIC_INVALID;
     delete nativePtr;
     nativePtr = nullptr;
 }
@@ -196,6 +202,8 @@ int32_t AddChildSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
         !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
@@ -209,6 +217,8 @@ int32_t RemoveChildSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
         !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
@@ -223,10 +233,13 @@ int32_t InsertChildAfterSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle chi
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
         !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
+    CHECK_NODE_DISPOSED(siblingNode, "Sibling node has been disposed");
     ThreadSafeNodeScope threadSafeNodeScope;
     return InsertChildAfter(parentNode, childNode, siblingNode);
 }
@@ -236,10 +249,13 @@ int32_t InsertChildBeforeSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle ch
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
         !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
+    CHECK_NODE_DISPOSED(siblingNode, "Sibling node has been disposed");
     ThreadSafeNodeScope threadSafeNodeScope;
     return InsertChildBefore(parentNode, childNode, siblingNode);
 }
@@ -249,6 +265,8 @@ int32_t InsertChildAtSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childN
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle) ||
         !impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(childNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
@@ -261,6 +279,7 @@ int32_t SetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attrib
 {
     CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
@@ -272,6 +291,7 @@ int32_t ResetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attr
 {
     CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
@@ -283,6 +303,7 @@ const ArkUI_AttributeItem* GetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeA
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return nullptr;
     }
@@ -333,6 +354,7 @@ int32_t SetUserDataSafely(ArkUI_NodeHandle node, void* userData)
 {
     CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return SetUserData(node, userData);
     }
@@ -343,6 +365,7 @@ void* GetUserDataSafely(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return GetUserData(node);
     }
@@ -353,6 +376,7 @@ int32_t SetLengthMetricUnitSafely(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUn
 {
     CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(nodePtr, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
@@ -364,6 +388,7 @@ void MarkDirtySafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
+        CHECK_NODE_DISPOSED(nodePtr, "Node has been disposed");
         if (nodePtr) {
             impl->getMultiThreadManagerAPI()->markNodeTreeNotFree(nodePtr->uiNodeHandle);
         }
@@ -502,6 +527,7 @@ int32_t MeasureNodeSafely(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constra
     CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
+        CHECK_NODE_DISPOSED(node, "Node has been disposed");
         impl->getMultiThreadManagerAPI()->markNodeTreeNotFree(node->uiNodeHandle);
         return MeasureNode(node, constraint);
     }
@@ -513,6 +539,7 @@ int32_t LayoutNodeSafely(ArkUI_NodeHandle node, int32_t positionX, int32_t posit
     CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
+        CHECK_NODE_DISPOSED(node, "Node has been disposed");
         impl->getMultiThreadManagerAPI()->markNodeTreeNotFree(node->uiNodeHandle);
         return LayoutNode(node, positionX, positionY);
     }
@@ -523,6 +550,7 @@ uint32_t GetTotalChildCountSafely(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, 0);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return 0;
     }
@@ -534,6 +562,7 @@ ArkUI_NodeHandle GetChildAtSafely(ArkUI_NodeHandle node, int32_t position)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return nullptr;
     }
@@ -545,6 +574,7 @@ ArkUI_NodeHandle GetFirstChildSafely(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return nullptr;
     }
@@ -556,6 +586,7 @@ ArkUI_NodeHandle GetLastChildSafely(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return nullptr;
     }
@@ -567,6 +598,7 @@ ArkUI_NodeHandle GetPreviousSiblingSafely(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return nullptr;
     }
@@ -578,6 +610,7 @@ ArkUI_NodeHandle GetNextSiblingSafely(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return nullptr;
     }
@@ -589,6 +622,7 @@ ArkUI_NodeHandle GetParentSafely(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(node->uiNodeHandle)) {
         return nullptr;
     }
@@ -600,6 +634,7 @@ int32_t RemoveAllChildrenSafely(ArkUI_NodeHandle parentNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(parentNode, "Node has been disposed");
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(parentNode->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }

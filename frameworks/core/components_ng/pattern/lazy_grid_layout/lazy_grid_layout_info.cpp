@@ -95,7 +95,8 @@ void LazyGridLayoutInfo::UpdatePosMapEnd(int32_t updatedEnd)
         prevIndex = last->first;
     }
     if (prevIndex >= totalItemCount_ - 1) {
-        totalMainSize_ = prevPos - spaceWidth_;
+        // A partial last row does not advance the packing cursor.
+        totalMainSize_ = posMap_.rbegin()->second.endPos;
     } else {
         float estSize = LineCount(prevIndex, totalItemCount_ - 1) * (estimateItemSize_ + spaceWidth_);
         totalMainSize_ = prevPos + estSize - spaceWidth_;
@@ -178,8 +179,9 @@ void LazyGridLayoutInfo::SetSpace(float space)
 {
     if (!NearEqual(space, spaceWidth_)) {
         spaceWidth_ = space;
-        int32_t prevIndex = -1;
-        float prevPos = 0.0f;
+        const int32_t firstIndex = posMap_.empty() ? 0 : posMap_.begin()->first;
+        int32_t prevIndex = firstIndex - 1;
+        float prevPos = (firstIndex / lanes_) * (estimateItemSize_ + spaceWidth_);
         for (auto it = posMap_.begin(); it != posMap_.end(); it++) {
             UpdatePosWithIter(it, prevIndex, prevPos);
         }

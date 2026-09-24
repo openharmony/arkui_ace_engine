@@ -139,6 +139,14 @@ void DatePickerPattern::OnAttachToFrameNode()
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
+void DatePickerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+}
+
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipLayout || config.skipMeasure) {

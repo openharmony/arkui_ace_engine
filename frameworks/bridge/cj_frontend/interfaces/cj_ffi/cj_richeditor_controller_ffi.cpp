@@ -1137,81 +1137,63 @@ static void NativeParagraphsResultListFree(int64_t size, NativeRichEditorParagra
 
 NativeRichEditorSpanResultList NativeRichEditorController::GetSpans(int32_t start, int32_t end)
 {
-    NativeRichEditorSpanResultList result;
+    NativeRichEditorSpanResultList result {};
     auto controller = controller_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    if (richEditorController) {
-        LOGI("RichEditor GetSpans, start: %{public}d", start);
-        LOGI("RichEditor GetSpans, end: %{public}d", end);
-
-        SelectionInfo selectionInfo = richEditorController->GetSpansInfo(start, end);
-        const std::list<ResultObject>& spanObjectList = selectionInfo.GetSelection().resultObjects;
-        if (spanObjectList.size() == 0) {
-            return result;
-        }
-        auto spans = new NativeRichEditorSpanResult[spanObjectList.size()];
-        size_t idx = 0;
-        for (const ResultObject& spanObject : spanObjectList) {
-            NativeRichEditorSpanResult current;
-            if (spanObject.type == SelectSpanType::TYPESPAN) {
-                current.isText = true;
-                NativeRichEditorTextSpanResult textResult;
-                ParseRichEditorTextSpanResult(spanObject, textResult);
-                current.textResult = textResult;
-            } else {
-                current.isText = false;
-                NativeRichEditorImageSpanResult imageResult;
-                ParseRichEditorImageSpanResult(spanObject, imageResult);
-                current.imageResult = imageResult;
-            }
-            spans[idx] = current;
-            idx ++;
-        }
-        result.array = spans;
-        result.size = static_cast<int64_t>(spanObjectList.size());
-        result.free = NativeRichEditorSpanResultListFree;
-        LOGI("FfiOHOSAceFrameworkRichEditorOnSelect parse success");
+    if (!richEditorController) {
+        return result;
     }
+    LOGI("RichEditor GetSpans, start: %{public}d", start);
+    LOGI("RichEditor GetSpans, end: %{public}d", end);
+
+    SelectionInfo selectionInfo = richEditorController->GetSpansInfo(start, end);
+    const std::list<ResultObject>& spanObjectList = selectionInfo.GetSelection().resultObjects;
+    if (spanObjectList.size() == 0) {
+        return result;
+    }
+    auto spans = new NativeRichEditorSpanResult[spanObjectList.size()];
+    size_t idx = 0;
+    for (const ResultObject& spanObject : spanObjectList) {
+        NativeRichEditorSpanResult current {};
+        ParseToSpanResult(spanObject, current);
+        spans[idx] = current;
+        idx ++;
+    }
+    result.array = spans;
+    result.size = static_cast<int64_t>(spanObjectList.size());
+    result.free = NativeRichEditorSpanResultListFree;
+    LOGI("FfiOHOSAceFrameworkRichEditorOnSelect parse success");
     return result;
 }
 
 NativeRichEditorSpanResultList12 NativeRichEditorController::GetSpans12(int32_t start, int32_t end)
 {
-    NativeRichEditorSpanResultList12 result;
+    NativeRichEditorSpanResultList12 result {};
     auto controller = controller_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    if (richEditorController) {
-        LOGI("RichEditor GetSpans, start: %{public}d", start);
-        LOGI("RichEditor GetSpans, end: %{public}d", end);
-
-        SelectionInfo selectionInfo = richEditorController->GetSpansInfo(start, end);
-        const std::list<ResultObject>& spanObjectList = selectionInfo.GetSelection().resultObjects;
-        if (spanObjectList.size() == 0) {
-            return result;
-        }
-        auto spans = new NativeRichEditorSpanResult12[spanObjectList.size()];
-        size_t idx = 0;
-        for (const ResultObject& spanObject : spanObjectList) {
-            NativeRichEditorSpanResult12 current;
-            if (spanObject.type == SelectSpanType::TYPESPAN || spanObject.type == SelectSpanType::TYPESYMBOLSPAN) {
-                current.isText = true;
-                NativeRichEditorTextSpanResult12 textResult;
-                ParseRichEditorTextSpanResult(spanObject, textResult);
-                current.textResult = textResult;
-            } else {
-                current.isText = false;
-                NativeRichEditorImageSpanResult12 imageResult;
-                ParseRichEditorImageSpanResult(spanObject, imageResult);
-                current.imageResult = imageResult;
-            }
-            spans[idx] = current;
-            idx ++;
-        }
-        result.array = spans;
-        result.size = static_cast<int64_t>(spanObjectList.size());
-        result.free = NativeRichEditorSpanResultListFree12;
-        LOGI("FfiOHOSAceFrameworkRichEditorOnSelect parse success");
+    if (!richEditorController) {
+        return result;
     }
+    LOGI("RichEditor GetSpans, start: %{public}d", start);
+    LOGI("RichEditor GetSpans, end: %{public}d", end);
+
+    SelectionInfo selectionInfo = richEditorController->GetSpansInfo(start, end);
+    const std::list<ResultObject>& spanObjectList = selectionInfo.GetSelection().resultObjects;
+    if (spanObjectList.size() == 0) {
+        return result;
+    }
+    auto spans = new NativeRichEditorSpanResult12[spanObjectList.size()];
+    size_t idx = 0;
+    for (const ResultObject& spanObject : spanObjectList) {
+        NativeRichEditorSpanResult12 current {};
+        ParseToSpanResult12(spanObject, current);
+        spans[idx] = current;
+        idx ++;
+    }
+    result.array = spans;
+    result.size = static_cast<int64_t>(spanObjectList.size());
+    result.free = NativeRichEditorSpanResultListFree12;
+    LOGI("FfiOHOSAceFrameworkRichEditorOnSelect parse success");
     return result;
 }
 
@@ -1356,7 +1338,7 @@ void NativeRichEditorController::SetSelection(int32_t start, int32_t end, int32_
 
 NativeParagraphsResultList NativeRichEditorController::GetParagraphs(int32_t start, int32_t end)
 {
-    NativeParagraphsResultList result;
+    NativeParagraphsResultList result {};
     auto controller = controller_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     if (richEditorController) {
@@ -1367,10 +1349,10 @@ NativeParagraphsResultList NativeRichEditorController::GetParagraphs(int32_t sta
         auto spans = new NativeRichEditorParagraphsResult[infos.size()];
         for (size_t i = 0; i < infos.size(); ++i) {
             auto paragraphInfo = infos[i];
-            NativeRichEditorParagraphsResult current;
+            NativeRichEditorParagraphsResult current {};
             current.rangeStart = paragraphInfo.range.first;
             current.rangeEnd = paragraphInfo.range.second;
-            NativeRichEditorParagraphStyleResult nativeParagraphStyle;
+            NativeRichEditorParagraphStyleResult nativeParagraphStyle {};
             ParseRichEditorParagraphStyleResult(paragraphInfo, nativeParagraphStyle);
             current.style = nativeParagraphStyle;
             spans[i] = current;
@@ -1385,7 +1367,7 @@ NativeParagraphsResultList NativeRichEditorController::GetParagraphs(int32_t sta
 
 NativeRichEditorSelectionWithFree NativeRichEditorController::GetSelection()
 {
-    NativeRichEditorSelectionWithFree result;
+    NativeRichEditorSelectionWithFree result {};
     auto controller = controller_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     if (richEditorController) {
@@ -1395,18 +1377,8 @@ NativeRichEditorSelectionWithFree NativeRichEditorController::GetSelection()
         auto spans = new NativeRichEditorSpanResult12[spanObjectList.size()];
         size_t idx = 0;
         for (const ResultObject& spanObject : spanObjectList) {
-            NativeRichEditorSpanResult12 current;
-            if (spanObject.type == SelectSpanType::TYPESPAN || spanObject.type == SelectSpanType::TYPESYMBOLSPAN) {
-                current.isText = true;
-                NativeRichEditorTextSpanResult12 textResult;
-                ParseRichEditorTextSpanResult(spanObject, textResult);
-                current.textResult = textResult;
-            } else {
-                current.isText = false;
-                NativeRichEditorImageSpanResult12 imageResult;
-                ParseRichEditorImageSpanResult(spanObject, imageResult);
-                current.imageResult = imageResult;
-            }
+            NativeRichEditorSpanResult12 current {};
+            ParseToSpanResult12(spanObject, current);
             spans[idx] = current;
             idx ++;
         }
@@ -1598,7 +1570,7 @@ void FfiOHOSAceFrameworkRichEditorControllerUpdateSpanStyleImage(
 NativeRichEditorSpanResultList FfiOHOSAceFrameworkRichEditorControllerGetSpans(
     int64_t controllerId, int32_t start, int32_t end)
 {
-    NativeRichEditorSpanResultList result;
+    NativeRichEditorSpanResultList result {};
     auto nativeController = FFIData::GetData<NativeRichEditorController>(controllerId);
     if (nativeController != nullptr) {
         result = nativeController->GetSpans(start, end);
@@ -1611,7 +1583,7 @@ NativeRichEditorSpanResultList FfiOHOSAceFrameworkRichEditorControllerGetSpans(
 NativeRichEditorSpanResultList12 FfiOHOSAceFrameworkRichEditorControllerGetSpans12(
     int64_t controllerId, int32_t start, int32_t end)
 {
-    NativeRichEditorSpanResultList12 result;
+    NativeRichEditorSpanResultList12 result {};
     auto nativeController = FFIData::GetData<NativeRichEditorController>(controllerId);
     if (nativeController != nullptr) {
         result = nativeController->GetSpans12(start, end);
@@ -1751,6 +1723,71 @@ NativeRichEditorTextStyleResult12 FfiOHOSAceFrameworkRichEditorControllerGetTypi
     } else {
         LOGE("RichEditor: invalid richEditorController id");
         return {};
+    }
+}
+
+void NativeRichEditorController::ParseToSpanResult(
+    const ResultObject& spanObject, NativeRichEditorSpanResult& current)
+{
+    if (spanObject.type == SelectSpanType::TYPESPAN) {
+        current.isText = true;
+        NativeRichEditorTextSpanResult textResult {};
+        ParseRichEditorTextSpanResult(spanObject, textResult);
+        current.textResult = textResult;
+    } else {
+        current.isText = false;
+        NativeRichEditorImageSpanResult imageResult {};
+        ParseRichEditorImageSpanResult(spanObject, imageResult);
+        current.imageResult = imageResult;
+    }
+}
+
+void NativeRichEditorController::ParseToSpanResult12(
+    const ResultObject& spanObject, NativeRichEditorSpanResult12& current)
+{
+    if (spanObject.type == SelectSpanType::TYPESPAN || spanObject.type == SelectSpanType::TYPESYMBOLSPAN) {
+        current.isText = true;
+        NativeRichEditorTextSpanResult12 textResult {};
+        ParseRichEditorTextSpanResult(spanObject, textResult);
+        current.textResult = textResult;
+    } else {
+        current.isText = false;
+        NativeRichEditorImageSpanResult12 imageResult {};
+        ParseRichEditorImageSpanResult(spanObject, imageResult);
+        current.imageResult = imageResult;
+    }
+}
+
+void NativeRichEditorController::ParseAbstractToSpanResult(
+    const NG::RichEditorAbstractSpanResult& spanObject, NativeRichEditorSpanResult& current)
+{
+    if (spanObject.GetType() == NG::SpanResultType::TEXT) {
+        current.isText = true;
+        NativeRichEditorTextSpanResult textResult {};
+        ParseRichEditorAbstractTextSpanResult(spanObject, textResult);
+        current.textResult = textResult;
+    } else {
+        current.isText = false;
+        NativeRichEditorImageSpanResult imageResult {};
+        ParseRichEditorAbstractImageSpanResult(spanObject, imageResult);
+        current.imageResult = imageResult;
+    }
+}
+
+void NativeRichEditorController::ParseAbstractToSpanResult12(
+    const NG::RichEditorAbstractSpanResult& spanObject, NativeRichEditorSpanResult12& current)
+{
+    if (spanObject.GetType() == NG::SpanResultType::TEXT ||
+        spanObject.GetType() == NG::SpanResultType::SYMBOL) {
+        current.isText = true;
+        NativeRichEditorTextSpanResult12 textResult {};
+        ParseRichEditorAbstractTextSpanResult(spanObject, textResult);
+        current.textResult = textResult;
+    } else {
+        current.isText = false;
+        NativeRichEditorImageSpanResult12 imageResult {};
+        ParseRichEditorAbstractImageSpanResult(spanObject, imageResult);
+        current.imageResult = imageResult;
     }
 }
 }

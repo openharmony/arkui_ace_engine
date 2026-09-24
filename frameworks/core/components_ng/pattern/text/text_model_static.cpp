@@ -576,4 +576,31 @@ void TextModelStatic::SetTailIndents(FrameNode* frameNode, const std::optional<T
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TailIndents, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
+
+void TextModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value.has_value()) {
+        TextModelNG::SetStrokeWidth(frameNode, value.value());
+    } else {
+        TextModelNG::ResetStrokeWidth(frameNode);
+    }
+}
+
+void TextModelStatic::SetStrokeColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    if (value.has_value()) {
+        TextModelNG::SetStrokeColor(frameNode, value.value());
+    } else {
+        TextModelNG::ResetStrokeColor(frameNode);
+    }
+}
+
+void TextModelStatic::SetStrokeJoinStyle(FrameNode* frameNode, const std::optional<StrokeJoinStyle>& value)
+{
+    if (value.has_value()) {
+        TextModelNG::SetStrokeJoinStyle(frameNode, value.value());
+    } else {
+        TextModelNG::ResetStrokeJoinStyle(frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

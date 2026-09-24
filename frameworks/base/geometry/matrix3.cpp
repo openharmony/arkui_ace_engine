@@ -127,7 +127,7 @@ Matrix3N::Matrix3N(int32_t columns) : columns_(columns)
 
 bool Matrix3N::SetEntry(int32_t row, int32_t col, double value)
 {
-    if (row >= DIMENSION || col >= columns_) {
+    if (row < 0 || row >= DIMENSION || col < 0 || col >= columns_) {
         return false;
     }
     Matrix3n_[row][col] = value;
@@ -202,7 +202,7 @@ MatrixN3::MatrixN3(int32_t rows) : rows_(rows)
 
 bool MatrixN3::SetEntry(int32_t row, int32_t col, double value)
 {
-    if (row >= rows_ || col >= DIMENSION) {
+    if (row < 0 || row >= rows_ || col < 0 || col >= DIMENSION) {
         return false;
     }
     Matrixn3_[row][col] = value;

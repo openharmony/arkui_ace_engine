@@ -3018,6 +3018,130 @@ void GetTailIndents(ArkUINodeHandle node, ArkUI_Float32* values,
     }
 }
 
+void SetStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 strokeWidthValue, ArkUI_Int32 strokeWidthUnit,
+    void* strokeWidthRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto strokeWidth = Dimension(strokeWidthValue, static_cast<DimensionUnit>(strokeWidthUnit));
+    TextModelNG::SetStrokeWidth(frameNode, strokeWidth);
+    NodeModifier::ProcessResourceObj<CalcDimension>(frameNode, "StrokeWidth", strokeWidth, strokeWidthRawPtr);
+}
+
+void ResetStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetStrokeWidth(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("StrokeWidth");
+    }
+}
+
+ArkUI_Float32 GetStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetStrokeWidth(frameNode).ConvertToVp();
+}
+
+void SetStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* strokeColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!strokeColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(strokeColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("StrokeColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("StrokeColor");
+        }
+    }
+    TextModelNG::SetStrokeColor(frameNode, result);
+}
+
+void SetStrokeColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* strokeColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    CHECK_NULL_VOID(colorPtr);
+    Color result = *colorPtr;
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!strokeColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(strokeColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("StrokeColor", resObj, result, true);
+        } else {
+            pattern->UnRegisterResource("StrokeColor");
+        }
+    }
+    TextModelNG::SetStrokeColor(frameNode, result);
+}
+
+void ResetStrokeColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetStrokeColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("StrokeColor");
+    }
+}
+
+ArkUI_Uint32 GetStrokeColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->HasStrokeColor()) {
+        return layoutProperty->GetStrokeColor().value().GetValue();
+    }
+    // The default stroke color is the font color.
+    return TextModelNG::GetFontColor(frameNode).GetValue();
+}
+
+void SetStrokeJoinStyle(ArkUINodeHandle node, ArkUI_Int32 strokeJoinStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetStrokeJoinStyle(frameNode, static_cast<StrokeJoinStyle>(strokeJoinStyle));
+}
+
+void ResetStrokeJoinStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetStrokeJoinStyle(frameNode);
+}
+
+ArkUI_Int32 GetStrokeJoinStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<ArkUI_Int32>(StrokeJoinStyle::MITER_JOIN));
+    return static_cast<ArkUI_Int32>(TextModelNG::GetStrokeJoinStyle(frameNode));
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -3241,6 +3365,16 @@ const ArkUITextModifier* GetTextModifier()
         .resetTailIndents = ResetTailIndents,
         .getTailIndentsCount = GetTailIndentsCount,
         .getTailIndents = GetTailIndents,
+        .setStrokeWidth = SetStrokeWidth,
+        .resetStrokeWidth = ResetStrokeWidth,
+        .getStrokeWidth = GetStrokeWidth,
+        .setStrokeColor = SetStrokeColor,
+        .setStrokeColorPtr = SetStrokeColorPtr,
+        .resetStrokeColor = ResetStrokeColor,
+        .getStrokeColor = GetStrokeColor,
+        .setStrokeJoinStyle = SetStrokeJoinStyle,
+        .resetStrokeJoinStyle = ResetStrokeJoinStyle,
+        .getStrokeJoinStyle = GetStrokeJoinStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -3388,6 +3522,15 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetTailIndents = ResetTailIndents,
         .getTailIndentsCount = GetTailIndentsCount,
         .getTailIndents = GetTailIndents,
+        .setStrokeWidth = SetStrokeWidth,
+        .resetStrokeWidth = ResetStrokeWidth,
+        .getStrokeWidth = GetStrokeWidth,
+        .setStrokeColor = SetStrokeColor,
+        .resetStrokeColor = ResetStrokeColor,
+        .getStrokeColor = GetStrokeColor,
+        .setStrokeJoinStyle = SetStrokeJoinStyle,
+        .resetStrokeJoinStyle = ResetStrokeJoinStyle,
+        .getStrokeJoinStyle = GetStrokeJoinStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

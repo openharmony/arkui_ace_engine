@@ -25,29 +25,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 class OffscreenCanvasRenderingContext2DPeerImpl : public CanvasRendererPeerImpl {
 protected:
     OffscreenCanvasRenderingContext2DPeerImpl();
-    ~OffscreenCanvasRenderingContext2DPeerImpl() override
-    {
-        RemoveOptions();
-    }
+    ~OffscreenCanvasRenderingContext2DPeerImpl() = default;
 
 public:
     void SetOptions(double width, double height, const std::optional<RenderingContextSettingsPeer*>& optSettings);
-    void RemoveOptions();
     ImageBitmapPeer* TransferToImageBitmap();
-    static void AddOffscreenCanvasPattern(const RefPtr<AceType>& pattern)
+    RefPtr<AceType> GetOffscreenPattern()
     {
-        CHECK_NULL_VOID(pattern);
-        std::lock_guard<std::mutex> lock(mutex_);
-        offscreenPatternMap_[offscreenPatternCount_++] = pattern;
-    }
-    static RefPtr<AceType> GetOffscreenPattern(int32_t id)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        return offscreenPatternMap_[id];
-    }
-    uint32_t GetId()
-    {
-        return id_;
+        return offscreenPattern_;
     }
     void SetWidth(double width)
     {
@@ -67,12 +52,8 @@ public:
     }
 
 private:
-    static std::mutex mutex_;
-    uint32_t id_ = 0;
     double width_ = 0.0;
     double height_ = 0.0;
-    static std::unordered_map<uint32_t, RefPtr<AceType>> offscreenPatternMap_;
-    static uint32_t offscreenPatternCount_;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

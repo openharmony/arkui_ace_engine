@@ -184,6 +184,7 @@ public:
     void BuildSharedTransitionMap();
 
     void ReloadPage();
+    void RebuildPage();
 
     void SetFirstBuildCallback(std::function<void()>&& buildCallback);
 
@@ -352,6 +353,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void FirePageTransitionStart();
+    void FirePageTransitionStart(PageTransitionType type);
     void FirePageTransitionFinish();
 
     void OnAttachToMainTree() override;

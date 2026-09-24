@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <functional>
 #include <list>
+#include <mutex>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -35,6 +36,7 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
 #include "core/components_ng/dump_utils/dump_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
@@ -103,6 +105,7 @@ class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
 class DragDropManager;
+class MaterialProcessor;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
 enum class FocusActiveReason : int32_t;
@@ -471,7 +474,8 @@ public:
     
     void UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) override;
 
-    void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
+    void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+        WindowSizeChangeReason reason) override;
 
     float GetPageAvoidOffset() override;
 
@@ -496,6 +500,10 @@ public:
     void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) override;
 
     KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() override;
+
+    void ApplyDefaultImmersiveStrategy(const std::unordered_set<ImmersiveStrategy>& types);
+
+    bool IsImmersiveStrategySet(ImmersiveStrategy strategy) const;
 
     bool UsingCaretAvoidMode();
 
@@ -648,6 +656,11 @@ public:
     bool IsLayouting() const override
     {
         return taskScheduler_->IsLayouting();
+    }
+
+    bool IsFirstRootLayout() const
+    {
+        return isFirstRootLayout_;
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
@@ -860,6 +873,10 @@ public:
     {
         return memoryMgr_;
     }
+
+    // Lazily created per pipeline scroll placeholder scheduler; stays unset for applications
+    // that never register a placeholder template (zero overhead for the legacy path).
+    const RefPtr<ScrollPlaceholderManager>& GetOrCreateScrollPlaceholderManager();
 
     const RefPtr<NavigationManager>& GetNavigationManager() const;
 
@@ -1160,6 +1177,24 @@ public:
     }
 
     void SetIsWindowSizeDragging(bool isDragging);
+
+    bool IsRightMouseMappingActive() const
+    {
+        return isRightMouseMappingActive_;
+    }
+
+    void SetRightMouseMappingActive(bool active)
+    {
+        isRightMouseMappingActive_ = active;
+    }
+    void SetOnRightMouseMappingCancel(std::function<void()>&& callback)
+    {
+        onRightMouseMappingCancel_ = std::move(callback);
+    }
+
+    bool HitTestMouseTargetForMapping(const MouseEvent& event, const RefPtr<NG::FrameNode>& node,
+        const std::vector<std::string>& tagWhitelist) const;
+
     void GetAllPixelMap();
     std::shared_ptr<UiTranslateManagerImpl> GetUiTranslateManagerImpl();
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
@@ -1284,6 +1319,12 @@ public:
     {
         return windowSizeChangeReason_;
     }
+
+    // MaterialProcessor support. Appended at the end of the public section;
+    // these are non-virtual, so they do not shift any existing vtable slot.
+    void RegisterMaterialNode(const RefPtr<FrameNode>& node);
+    void UnregisterMaterialNode(int32_t nodeId);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1301,7 +1342,7 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
 
-    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
+    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime = -1) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
     void FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope);
@@ -1637,6 +1678,8 @@ private:
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_;
     RefPtr<MemoryManager> memoryMgr_;
+    RefPtr<ScrollPlaceholderManager> scrollPlaceholderManager_;
+    std::once_flag scrollPlaceholderOnceFlag_;
     RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
     RefPtr<RecoverableManager> recoverableMgr_;
@@ -1701,6 +1744,9 @@ private:
     std::list<TouchEvent> compatibleTouchEvents_;
     RefPtr<BackPressHandlerManager> backPressHandlerManager_;
     RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
+    RefPtr<MaterialProcessor> materialProcessor_;
+    bool isRightMouseMappingActive_ = false;
+    std::function<void()> onRightMouseMappingCancel_;
 };
 
 /**

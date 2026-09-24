@@ -100,6 +100,7 @@ public:
     virtual void SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback) = 0;
     virtual void SetResourceLoadId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScaleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetZoomChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetPermissionRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetBackgroundColor(Color backgroundColor) = 0;
@@ -173,6 +174,7 @@ public:
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
     virtual void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) = 0;
     virtual void SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) = 0;
+    virtual void SetTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled) = 0;
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;

@@ -149,8 +149,8 @@ void PreviewSessionWrapperImpl::InitAllCallback()
         return;
     }
     auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
-    foregroundCallback_ =
-        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
+    foregroundCallback_ = [weak = hostPattern_,
+        taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode, int32_t abilityCode) {
             if (errcode != OHOS::Rosen::WSError::WS_OK) {
                 taskExecutor->PostTask(
                     [weak, callSessionId] {
@@ -736,7 +736,7 @@ void PreviewSessionWrapperImpl::NotifySizeChangeReason(
 }
     
 void PreviewSessionWrapperImpl::NotifyOriginAvoidArea(
-    const Rosen::AvoidArea& avoidArea, uint32_t type) const
+    const Rosen::AvoidArea& avoidArea, uint32_t type, WindowSizeChangeReason reason) const
 {
     CHECK_NULL_VOID(session_);
     PLATFORM_LOGI("PreviewUIExtension The avoid area is notified to the provider.");

@@ -31,7 +31,7 @@ public:
     static void ApplyThemeToDotIndicator(
         EcmaVM* vm, ArkUINodeHandle nativeNode, SwiperParameters& swiperParameters, const Local<ObjectRef>& obj)
     {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return;
         }
         auto themeColors = Framework::JSThemeUtils::GetThemeColors();
@@ -55,7 +55,7 @@ public:
 
     static void ApplyThemeToDotIndicatorForce(EcmaVM* vm, SwiperParameters &swiperParameters)
     {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return;
         }
         if (auto themeColors = Framework::JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
@@ -68,7 +68,7 @@ public:
     static void ApplyThemeToIndicatorStyle(
         EcmaVM* vm, ArkUINodeHandle nativeNode, SwiperParameters &swiperParameters, const Local<ObjectRef>& obj)
     {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return;
         }
         auto themeColors = Framework::JSThemeUtils::GetThemeColors();
@@ -95,7 +95,7 @@ public:
     static void ApplyThemeToDigitIndicator(
         EcmaVM* vm, ArkUINodeHandle nativeNode, SwiperDigitalParameters &swiperParameters, const Local<ObjectRef>& obj)
     {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return;
         }
         auto themeColors = Framework::JSThemeUtils::GetThemeColors();
@@ -120,7 +120,7 @@ public:
     static void ApplyThemeToDisplayArrow(
         EcmaVM* vm, ArkUINodeHandle nativeNode, SwiperArrowParameters &swiperParameters, const Local<ObjectRef>& obj)
     {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return;
         }
         auto themeColors = Framework::JSThemeUtils::GetThemeColors();
@@ -144,7 +144,7 @@ public:
 
     static void ApplyThemeToDisplayArrowForce(SwiperArrowParameters &swiperParameters)
     {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return;
         }
         auto themeColors = Framework::JSThemeUtils::GetThemeColors();

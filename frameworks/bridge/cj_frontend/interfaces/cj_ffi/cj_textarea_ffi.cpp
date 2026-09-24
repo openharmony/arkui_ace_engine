@@ -17,7 +17,7 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -25,15 +25,15 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
 // Should use CJUIModifier API later
-NG::TextFieldModelNG* GetTextAreaTextFieldModel()
+TextFieldModel* GetTextAreaTextFieldModel()
 {
-    static NG::TextFieldModelNG* cachedModel = nullptr;
+    static TextFieldModel* cachedModel = nullptr;
     if (cachedModel == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextArea");
         if (module == nullptr) {
             LOGF_ABORT("Can't find textarea dynamic module");
         }
-        cachedModel = reinterpret_cast<NG::TextFieldModelNG*>(module->GetModel());
+        cachedModel = reinterpret_cast<TextFieldModel*>(module->GetModel());
     }
     return cachedModel;
 }
@@ -79,7 +79,7 @@ int32_t NGNativeTextAreaController::GetTextContentLinesNum()
 
 CJRectResult NGNativeTextAreaController::GetTextContentRect()
 {
-    CJRectResult result;
+    CJRectResult result {};
     if (controller_) {
         Rect rect = controller_->GetTextContentRect();
         result.x = rect.Left();
@@ -92,7 +92,7 @@ CJRectResult NGNativeTextAreaController::GetTextContentRect()
 
 CJCaretOffset NGNativeTextAreaController::GetCaretOffset()
 {
-    CJCaretOffset result;
+    CJCaretOffset result {};
     if (controller_) {
         NG::OffsetF caretOffset = controller_->GetCaretPosition();
         result.index = controller_->GetCaretIndex();
@@ -168,7 +168,7 @@ void FfiOHOSAceFrameworkTextAreaControllerSetTextSelection(
 
 CJRectResult FfiOHOSAceFrameworkTextAreaControllerGetTextContentRect(int64_t selfID)
 {
-    CJRectResult result;
+    CJRectResult result {};
     auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
     if (self != nullptr) {
         result = self->GetTextContentRect();
@@ -192,7 +192,7 @@ int32_t FfiOHOSAceFrameworkTextAreaControllerGetTextContentLineCount(int64_t sel
 
 CJCaretOffset FfiOHOSAceFrameworkTextAreaControllerGetCaretOffset(int64_t selfID)
 {
-    CJCaretOffset result;
+    CJCaretOffset result {};
     auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
     if (self != nullptr) {
         result = self->GetCaretOffset();

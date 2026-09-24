@@ -914,7 +914,7 @@ public:
 
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool needSwiperChangeEnd);
     void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode) const;
-    void ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const;
+    void ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode, bool isInterrupt = false) const;
 
     void SetCachedCountIndependent(bool independent)
     {
@@ -929,6 +929,11 @@ public:
     void SetCustomAnimationPrevIndex(int32_t prevIndex)
     {
         customAnimationPrevIndex_ = prevIndex;
+    }
+
+    void SetRenderGroupExplicitly(bool isRenderGroup)
+    {
+        isRenderGroupExplicitlySet_ = isRenderGroup;
     }
 
 protected:
@@ -1629,6 +1634,7 @@ private:
     std::optional<float> lastDragByOffset_;
 
     bool lastSetRenderGroup_ = false;
+    bool isRenderGroupExplicitlySet_ = false;
 
     bool isIgnoreHiddenItem_ = false;
 };

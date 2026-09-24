@@ -122,6 +122,7 @@ struct TouchEvent final : public PointerEvent {
     int32_t eventHandleId = 0;
     bool isNewReferee = false;
     bool isStylusMouseMode = false;
+    bool isScreenLocked = false;
     TouchEvent()
     {
         eventType = UIInputEventType::TOUCH;

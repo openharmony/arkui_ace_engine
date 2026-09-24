@@ -74,19 +74,19 @@ function deepCopyStaticProxy(
 
     let copy: any;
 
-    if (isStaticArrayProxy(obj)) {
+    if (isStaticArrayProxy(obj) || globalThis.Panda?.STValue?.isSTArray?.(obj)) {
         copy = [];
         copiedObjects.set(obj, copy);
         obj.forEach((item: any, index: number) => {
             copy[index] = recursiveCopy(item);
         });
-    } else if (isStaticMapProxy(obj)) {
+    } else if (isStaticMapProxy(obj) || globalThis.Panda?.STValue?.isSTMap?.(obj)) {
         copy = new Map<any, any>();
         copiedObjects.set(obj, copy);
         obj.forEach((mapValue: any, mapKey: any) => {
             copy.set(mapKey, recursiveCopy(mapValue));
         });
-    } else if (isStaticSetProxy(obj)) {
+    } else if (isStaticSetProxy(obj) || globalThis.Panda?.STValue?.isSTSet?.(obj)) {
         copy = new Set<any>();
         copiedObjects.set(obj, copy);
         obj.forEach((setValue: any) => {
@@ -207,7 +207,9 @@ function __Interop_CreateStaticComponent_Internal(
         // only happened in toolchain error, internal error
         throw new BusinessError(NOT_IMPLEMENT, 'No compatibleStaticComponent Method For Create StaticComponent');
     }
-    return InteropExtractorModule.compatibleStaticComponent(factory, options, content);
+    const owner = InteropStaticComponentOwnerRegistry.getCurrentOwner();
+    return InteropExtractorModule.compatibleStaticComponent(
+        factory, options, content, owner?.elmtId);
 }
 
 function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object): void {

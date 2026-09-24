@@ -676,7 +676,8 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
-void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManuallyClick)
+void FormManagerDelegate::OnActionEvent(
+    const std::string& action, bool isManuallyClick)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
@@ -691,7 +692,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManual
     }
 
     auto type = actionType->GetString();
-    if (type != "router" && type != "message" && type != "call") {
+    if (type != "router" && type != "message" && type != "call" && type != "insightIntent") {
         TAG_LOGE(AceLogTag::ACE_FORM, "action type: %{public}s is error.", type.c_str());
         return;
     }
@@ -702,6 +703,9 @@ void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManual
         return;
     } else if (type == "call") {
         OnCallActionEvent(action, isManuallyClick);
+        return;
+    } else if (type == "insightIntent") {
+        OnInsightIntentActionEvent(action);
         return;
     }
 
@@ -1326,6 +1330,20 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action, bool isMa
         formUtils_->BackgroundEvent(runningCardId_, action, instantId,
             wantCache_.GetElement().GetBundleName(), isManuallyClick);
     }
+}
+
+void FormManagerDelegate::OnInsightIntentActionEvent(const std::string& action)
+{
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    if (!eventAction->IsValid() || !eventAction->GetValue("intentName")->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "insightIntent action parse failed, detail action:%{public}s", action.c_str());
+        return;
+    }
+    CHECK_NULL_VOID(formUtils_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    const auto instantId = context->GetInstanceId();
+    formUtils_->InsightIntentEvent(runningCardId_, action, instantId);
 }
 
 void FormManagerDelegate::ProcessLockForm(bool lock)

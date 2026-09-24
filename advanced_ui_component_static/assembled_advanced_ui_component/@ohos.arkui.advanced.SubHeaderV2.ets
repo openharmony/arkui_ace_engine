@@ -311,6 +311,8 @@ export struct SubHeaderV2 {
   @Param
   icon?: SubHeaderV2IconType = undefined;
   @Param
+  endIcon?: SubHeaderV2IconType = undefined;
+  @Param
   title?: SubHeaderV2Title | undefined = undefined;
   @Param
   select?: SubHeaderV2Select | undefined = undefined;
@@ -419,6 +421,7 @@ export struct SubHeaderV2 {
         })
         .attributeModifier(this.title?.secondaryTitleModifier)
         .flexShrink(1)
+      this.endTitleIcon()
     }
     .applyStyles(this.commonListPadding)
   }
@@ -494,14 +497,18 @@ export struct SubHeaderV2 {
   @Builder
   SubTitleStyle($$: ContentIconOption): void {
     Column() {
-      Text($$.content)
-        .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
-          maxLines: DOUBLE_LINE_NUM,
-          alignment: Alignment.Start,
-          fontColor: this.subHeaderV2Theme.fontPrimaryColor,
-        })
-        .attributeModifier(this.title?.primaryTitleModifier)
+      Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+        Text($$.content)
+          .primaryTitleStyles({
+            fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
+            maxLines: DOUBLE_LINE_NUM,
+            alignment: Alignment.Start,
+            fontColor: this.subHeaderV2Theme.fontPrimaryColor,
+          })
+          .attributeModifier(this.title?.primaryTitleModifier)
+          .flexShrink(1)
+        this.endTitleIcon()
+      }
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
@@ -521,28 +528,72 @@ export struct SubHeaderV2 {
 
   @Builder
   SecondTitleStyle($$: ContentIconOption): void {
-    Text($$.content)
-      .secondaryTitleStyles({
-        maxLines: DOUBLE_LINE_NUM,
-        fontWeight: FontWeight.Medium,
-        alignment: Alignment.Start,
-        fontColor: this.subHeaderV2Theme.fontSecondaryColor,
-      })
-      .attributeModifier(this.title?.secondaryTitleModifier)
-      .applyStyles(this.commonListPadding)
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+      Text($$.content)
+        .secondaryTitleStyles({
+          maxLines: DOUBLE_LINE_NUM,
+          fontWeight: FontWeight.Medium,
+          alignment: Alignment.Start,
+          fontColor: this.subHeaderV2Theme.fontSecondaryColor,
+        })
+        .attributeModifier(this.title?.secondaryTitleModifier)
+        .flexShrink(1)
+      this.endTitleIcon()
+    }
+    .applyStyles(this.commonListPadding)
   }
 
   @Builder
   PrimaryTitleStyle($$: ContentIconOption): void {
-    Text($$.content)
-      .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
-        maxLines: DOUBLE_LINE_NUM,
-        alignment: Alignment.Start,
-        fontColor: this.subHeaderV2Theme.fontPrimaryColor,
-      })
-      .attributeModifier(this.title?.primaryTitleModifier)
-      .applyStyles(this.commonContentPadding)
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+      Text($$.content)
+        .primaryTitleStyles({
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
+          maxLines: DOUBLE_LINE_NUM,
+          alignment: Alignment.Start,
+          fontColor: this.subHeaderV2Theme.fontPrimaryColor,
+        })
+        .attributeModifier(this.title?.primaryTitleModifier)
+        .flexShrink(1)
+      this.endTitleIcon()
+    }
+    .applyStyles(this.commonContentPadding)
+  }
+
+  getEndIconResource(): Resource | undefined {
+    if (this.endIcon && (this.endIcon instanceof Resource)) {
+      return this.endIcon as Resource;
+    }
+    return undefined;
+  }
+
+  getEndIconSymbolGlyphModifier(): SymbolGlyphModifier | undefined {
+    if (this.endIcon && (this.endIcon instanceof SymbolGlyphModifier)) {
+      return this.endIcon as SymbolGlyphModifier;
+    }
+    return undefined;
+  }
+
+  @Builder
+  endTitleIcon(): void {
+    if (this.endIcon) {
+      if (Util.isSymbolResource(this.endIcon)) {
+        SymbolGlyph(this.getEndIconResource())
+          .fontSize(LEFT_ICON_SIZE)
+          .fontColor([this.subHeaderV2Theme.leftIconColor])
+          .attributeModifier(this.getEndIconSymbolGlyphModifier())
+          .margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) } as LocalizedMargin)
+          .flexShrink(0)
+      } else {
+        Image(this.endIcon as ResourceStr)
+          .fillColor(this.subHeaderV2Theme.leftIconColor)
+          .width(LEFT_ICON_SIZE)
+          .height(LEFT_ICON_SIZE)
+          .margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) } as LocalizedMargin)
+          .draggable(false)
+          .flexShrink(0)
+      }
+    }
   }
 
   @Builder
@@ -1177,7 +1228,7 @@ export struct SubHeaderV2 {
         }
         .margin({
           top: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level8') : '',
-          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level4') : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.subheader_title_margin_bottom') : '',
         } as Margin)
         .width('100%')
         .flexShrink(1)
@@ -1581,6 +1632,8 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_height', { resourceI
 RESOURCE_CACHE_MAP.set('sys.float.subheader_double_height', { resourceId: 125834254, defaultValue: 72 });
 // subheader_title_font_weight: 125834255 700
 RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 125834255, defaultValue: 700 });
+// subheader_title_margin_bottom: 125837102, 8
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_margin_bottom', { resourceId: 125837102, defaultValue: 8 });
 
 function getResourceValue(resourceName: string): number {
   if (RESOURCE_CACHE_MAP.hasKey(resourceName)) {

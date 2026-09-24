@@ -333,10 +333,11 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
         return;
     }
     bool isShowItem = pattern->copyOption_ != CopyOptions::None;
+    bool selectionMenuHidden = pattern->GetSelectionMenuHidden();
     menuInfo.showCopy = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
-    menuInfo.menuIsShow = IsShowMenu();
+    menuInfo.menuIsShow = IsShowMenu() && !selectionMenuHidden;
     menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
@@ -346,8 +347,9 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.isAskCeliaEnabled = pattern->IsAskCeliaEnabled();
     menuInfo.isShowAskCeliaInRightClick = pattern->IsShowAskCeliaInRightClick();
     pattern->UpdateSelectMenuInfo(menuInfo);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "OnUpdateMenuInfo, IsShowAIMenuOption=%{public}d, AIItemOptionEmpty=%{public}d",
-        pattern->IsShowAIMenuOption(), pattern->GetAIItemOption().empty());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+        "OnUpdateMenuInfo, IsShowAIMenuOption=%{public}d, AIItemOptionEmpty=%{public}d, SelectionMenuHidden=%{public}d",
+        pattern->IsShowAIMenuOption(), pattern->GetAIItemOption().empty(), selectionMenuHidden);
     if (pattern->IsShowAIMenuOption() && !pattern->GetAIItemOption().empty()) {
         // do not support two selected ai entity, hence it's enough to pick first item to determine type
         auto firstSpanItem = pattern->GetAIItemOption().begin()->second;
@@ -563,6 +565,9 @@ void RichEditorSelectOverlay::ToggleMenu()
         auto pattern = GetPattern<RichEditorPattern>();
         IF_PRESENT(pattern, UpdateAIMenuOptions());
         UpdateMenuOffset();
+        if (pattern && pattern->GetSelectionMenuHidden()) {
+            return;
+        }
         ShowMenu();
         SetMenuIsShow(true);
     }

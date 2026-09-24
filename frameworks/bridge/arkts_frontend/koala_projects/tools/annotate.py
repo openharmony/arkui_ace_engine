@@ -128,7 +128,7 @@ if __name__ == "__main__":
     import sys
     import json
 
-    stamp_path = sys.argv[3] if len(sys.argv) >= 4 else None
+    stamp_path = os.path.abspath(sys.argv[3]) if len(sys.argv) >= 4 else None
 
     if len(sys.argv) >= 3:
         base_url_path = os.path.abspath(sys.argv[1])

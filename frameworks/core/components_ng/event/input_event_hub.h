@@ -53,6 +53,10 @@ public:
 
     void AddOnMouseEvent(const RefPtr<InputEvent>& onMouseEvent)
     {
+        if (mouseEventActuator_) {
+            mouseEventActuator_->AddInputEvent(onMouseEvent);
+            return;
+        }
         if (mouseInputEvents_.empty()) {
             mouseInputEvents_.emplace_back(onMouseEvent);
             return;
@@ -140,6 +144,10 @@ public:
 
     void AddOnHoverEvent(const RefPtr<InputEvent>& onHoverEvent)
     {
+        if (hoverEventActuator_) {
+            hoverEventActuator_->AddInputEvent(onHoverEvent);
+            return;
+        }
         if (hoverInputEvents_.empty()) {
             hoverInputEvents_.emplace_back(onHoverEvent);
             return;
@@ -170,6 +178,10 @@ public:
 
     void AddOnHoverMoveEvent(const RefPtr<InputEvent>& onHoverMoveEvent)
     {
+        if (hoverMoveEventActuator_) {
+            hoverMoveEventActuator_->AddInputEvent(onHoverMoveEvent);
+            return;
+        }
         if (hoverMoveInputEvents_.empty()) {
             hoverMoveInputEvents_.emplace_back(onHoverMoveEvent);
             return;
@@ -211,6 +223,10 @@ public:
 
     void AddOnAxisEvent(const RefPtr<InputEvent>& onAxisEvent)
     {
+        if (axisEventActuator_) {
+            axisEventActuator_->AddInputEvent(onAxisEvent);
+            return;
+        }
         if (axisInputEvents_.empty()) {
             axisInputEvents_.emplace_back(onAxisEvent);
             return;

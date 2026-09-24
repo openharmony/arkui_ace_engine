@@ -1511,7 +1511,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData001, TestSize.Level0)
      * @tc.steps: step2. set isShow true and call RecycleImageData.
      * @tc.expected: Returned value is false.
      */
-    EXPECT_FALSE(imagePattern->RecycleImageData());
+    EXPECT_TRUE(imagePattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"));
 }
 
 /**
@@ -1543,7 +1543,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData002, TestSize.Level0)
      * @tc.expected: Returned value is false.
      */
     imagePattern->OnRecycle();
-    EXPECT_FALSE(imagePattern->RecycleImageData());
+    EXPECT_TRUE(imagePattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"));
 }
 
 /**
@@ -1574,7 +1574,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData003, TestSize.Level0)
      * @tc.steps: step2. set isShow false and call RecycleImageData.
      * @tc.expected: Returned value is false.
      */
-    EXPECT_FALSE(imagePattern->RecycleImageData());
+    EXPECT_TRUE(imagePattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"));
 }
 
 /**
@@ -1608,7 +1608,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData004, TestSize.Level0)
     imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
-    EXPECT_FALSE(imagePattern->RecycleImageData());
+    EXPECT_FALSE(imagePattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"));
 }
 
 /**
@@ -2494,7 +2494,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData006, TestSize.Level0)
     imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
-    EXPECT_FALSE(imagePattern->RecycleImageData());
+    EXPECT_FALSE(imagePattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"));
 }
 
 /**
@@ -3270,7 +3270,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData005, TestSize.Level0)
     imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
-    EXPECT_FALSE(imagePattern->RecycleImageData());
+    EXPECT_FALSE(imagePattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"));
 }
 
 /**

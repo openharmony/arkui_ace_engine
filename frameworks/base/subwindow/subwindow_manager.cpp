@@ -926,7 +926,7 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, s
     return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
 }
 
-void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps,
+RefPtr<NG::FrameNode> SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps,
     std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng with error callback enter");
@@ -936,7 +936,7 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps,
         if (callback) {
             callback(ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED, -1);
         }
-        return;
+        return nullptr;
     }
     return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
 }
@@ -1090,7 +1090,7 @@ void SubwindowManager::SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwin
     currentDialogSubwindow_ = subwindow;
 }
 
-const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
+RefPtr<Subwindow> SubwindowManager::GetCurrentDialogWindow()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get current dialog window enter");
     std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);

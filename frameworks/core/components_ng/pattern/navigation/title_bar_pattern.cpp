@@ -69,6 +69,8 @@ const Color SMOOTH_COMMON_BLUR_DARK_BG_COLOR = Color::FromString("#00000000");
 const Color SMOOTH_GRADUAL_BLUR_LIGHT_BG_COLOR = Color::FromString("#F2F1F3F5");
 const Color SMOOTH_GRADUAL_BLUR_DARK_BG_COLOR = Color::FromString("#99000000");
 constexpr int32_t INVERT_COLOR_ANIMATION_DURATION = 133;
+constexpr int32_t MENU_COLORPICKER_NODE_ZINDEX = -3;
+constexpr int32_t BACK_BTN_AND_TEXT_COLORPICKER_NODE_ZINDEX = -3;
 constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_BLUR_ZINDEX = -2;
 constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_ZINDEX = -1;
 const std::vector<std::pair<float, float>> MASK_BLUR_STOPS = { { 1.0f, 0.0f }, { 0.6f, 0.6f }, { 0.0f, 1.0f } };
@@ -2746,7 +2748,11 @@ void TitleBarPattern::ResetTitleBarMaskBlendEffect()
 void TitleBarPattern::UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType)
 {
     CHECK_NULL_VOID(titleBarMaskNode_);
-    if (scrollEffectType != ScrollEffectType::COMMON_BLUR || !IsBrightnessBlendEnabled()) {
+    // The backplate brightness blend applies for COMMON_BLUR when the UI material level is
+    // EXQUISITE or GENTL.
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (scrollEffectType != ScrollEffectType::COMMON_BLUR ||
+        (materialLevel != UiMaterialLevel::EXQUISITE && materialLevel != UiMaterialLevel::GENTLE)) {
         ResetTitleBarMaskBlendEffect();
         return;
     }
@@ -2776,6 +2782,7 @@ void TitleBarPattern::ResetTitleBarMaskNodes()
 
 void TitleBarPattern::EnsureTitleBarEffectComponent()
 {
+#ifndef PREVIEW
     // The EffectComponent is only created when material is enabled for this titleBar.
     if (!IsMaterialEnabled()) {
         return;
@@ -2790,6 +2797,7 @@ void TitleBarPattern::EnsureTitleBarEffectComponent()
         RemoveTitleBarEffectNodeFromParent(titleBarEffectNode_);
         host->AddChild(titleBarEffectNode_);
     }
+#endif
 }
 
 bool TitleBarPattern::IsMaterialEnabled() const
@@ -3094,7 +3102,7 @@ void TitleBarPattern::UpdateBackgroundBlurStyle()
         return;
     }
 
-    maskRenderContext->UpdateBackgroundColor(bgStyle.backgroundColor);
+    maskRenderContext->UpdateBackgroundColor(bgStyle.backgroundColor.ChangeOpacity(opacity));
     auto startBlurRadius = originalBgStyle_.backgroundStyle.blurRadius;
     auto endBlurRadius = scrollEffectBgStyle_.backgroundStyle.blurRadius;
     auto blurRadius = startBlurRadius.Value() + scrollScale_ * (endBlurRadius.Value() - startBlurRadius.Value());
@@ -3625,6 +3633,9 @@ RefPtr<FrameNode> TitleBarPattern::GetOrCreateMenuColorPickerNode()
     auto node = FrameNode::CreateFrameNode(
         "titleMenuColorPickerNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     CHECK_NULL_RETURN(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateZIndex(MENU_COLORPICKER_NODE_ZINDEX);
     auto eventHub = node->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
@@ -3642,6 +3653,9 @@ RefPtr<FrameNode> TitleBarPattern::GetOrCreateBackBtnAndTextColorPickerNode()
     auto node = FrameNode::CreateFrameNode("backBtnAndTextColorPickerNode",
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     CHECK_NULL_RETURN(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateZIndex(BACK_BTN_AND_TEXT_COLORPICKER_NODE_ZINDEX);
     auto eventHub = node->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();

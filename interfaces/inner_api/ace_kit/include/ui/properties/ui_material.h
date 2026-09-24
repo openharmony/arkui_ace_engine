@@ -28,7 +28,7 @@
 namespace OHOS::Ace {
 
 struct LightEffectOptions {
-    Color color = Color::WHITE;
+    std::optional<Color> color = std::nullopt;
     RefPtr<ResourceObject> colorResObj = nullptr;
     bool operator==(const LightEffectOptions& other) const
     {

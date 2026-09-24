@@ -30,6 +30,19 @@ namespace {
 constexpr float ITEM_HEIGHT = 100.0f;
 constexpr int32_t ITEM_COUNT = 40;
 constexpr float GRID_ITEM_WIDTH = 180.0f;
+// Scroll offsets in item-line units so the step sequences stay
+// self-documenting (one line equals ITEM_HEIGHT, per the G.CNS.02
+// magic-number rule).
+constexpr float SCROLL_TWO_LINES = ITEM_HEIGHT * 2;
+constexpr float SCROLL_THREE_LINES = ITEM_HEIGHT * 3;
+// Gap-boundary scenario geometry: uniform rows with a nonzero rowsGap so the
+// (height, height + gap] report-start boundary window is exercisable.
+constexpr float BOUNDARY_ROW_HEIGHT = 50.0f;
+constexpr float BOUNDARY_ROW_GAP = 10.0f;
+// Steps through the window: exact bottom edge (one row height), then two
+// half-gap increments landing mid-window and on the pitch boundary.
+constexpr int32_t BOUNDARY_STEP_COUNT = 3;
+constexpr float BOUNDARY_HALF_GAP_STEP = BOUNDARY_ROW_GAP / 2.0f;
 
 PaddingProperty CreatePadding(float left, float top, float right, float bottom)
 {
@@ -50,16 +63,20 @@ RefPtr<ShapeRect> CreateCustomClipShape(float offsetY, float height)
     return shape;
 }
 
-// The four scrollable layout algorithms. The clip-extension wiring lives in the shared
-// GridLayoutBaseAlgorithm + each algorithm's Measure, so each kind must be exercised.
-enum class LayoutKind { SCROLL, SCROLL_WITH_OPTIONS, IRREGULAR, CUSTOM };
+enum class LayoutKind { SCROLL, SCROLL_WITH_OPTIONS, IRREGULAR };
 } // namespace
 
-// Dedicated fixture mirroring WaterFlowContentClipTest : public WaterFlowTestNg.
+// Extension scenario library: verifies the contentClip extension layout
+// behavior itself (AC-1.1~1.5, AC-2.2, AC-3.1~3.3, AC-4.3). Unlike the parity
+// suite, this file asserts the extension internals (layout fields / fix
+// offsets / report ranges), while the parity suite only asserts
+// developer-visible interface consistency.
 class GridContentClipTest : public GridTestNg {
 protected:
     int32_t cbStart_ = -1;
     int32_t cbEnd_ = -1;
+    int32_t reachStartCount_ = 0;
+    int32_t reachEndCount_ = 0;
 
     void ConfigureLayout(GridModelNG& model, LayoutKind kind)
     {
@@ -70,1045 +87,659 @@ protected:
         if (kind == LayoutKind::IRREGULAR) {
             opt.regularSize = GridItemSize { 1, 1 };
             opt.irregularIndexes = { 1, 3 };
-            // GridItemSize is {rows, columns}. For a vertical grid, items must have rows > 1
-            // to trigger SetIrregular(true) -> GridIrregularLayoutAlgorithm.
-            opt.getSizeByIndex = [](int32_t) { return GridItemSize { 2, 1 }; };
-        } else if (kind == LayoutKind::CUSTOM) {
-            ConfigureCustomOptions(opt);
+            opt.getSizeByIndex = [](int32_t) { return GridItemSize { 1, 2 }; };
         }
         model.SetLayoutOptions(opt);
     }
 
-    void ConfigureCustomOptions(GridLayoutOptions& opt)
+    void SetClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape = nullptr)
     {
-        constexpr int32_t crossCount = 2;
-        opt.getStartIndexByOffset = [crossCount](float offset) -> GridStartLineInfo {
-            if (offset < 0.0f) {
-                return {
-                    .startIndex = 0,
-                    .startLine = 0,
-                    .startOffset = 0 - offset,
-                    .totalOffset = offset
-                };
-            }
-            int32_t line = static_cast<int32_t>(offset / ITEM_HEIGHT);
-            float startOffset = std::fmod(offset, ITEM_HEIGHT);
-            return {
-                .startIndex = line * crossCount,
-                .startLine = line,
-                .startOffset = 0 - startOffset,
-                .totalOffset = offset
-            };
-        };
-        opt.getStartIndexByIndex = [crossCount](int32_t idx) -> GridStartLineInfo {
-            int32_t line = idx / crossCount;
-            return {
-                .startIndex = line * crossCount,
-                .startLine = line,
-                .startOffset = 0.0f,
-                .totalOffset = line * ITEM_HEIGHT
-            };
-        };
+        ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), mode, shape);
     }
 
-    void BuildClipGrid(LayoutKind kind, ContentClipMode mode, float bottomPadding, const RefPtr<ShapeRect>& shape)
+    // BuildGrid scenario knobs, bundled to keep the parameter list small
+    // (G.FUN.01): the paddings activate the corresponding extension band,
+    // cachedCount adds cache rows, withCallbacks installs the scroll
+    // observers.
+    struct BuildOptions {
+        float bottomPadding = 0.0f;
+        float topPadding = 0.0f;
+        bool cachedCount = false;
+        bool withCallbacks = true;
+    };
+
+    // Applies the BuildOptions knobs that need the model/property context:
+    // scroll observers, extension-band paddings, cached count.
+    void ApplyBuildOptions(GridModelNG& model, const BuildOptions& options)
+    {
+        if (options.withCallbacks) {
+            model.SetOnScrollIndex([this](int32_t s, int32_t e) {
+                cbStart_ = s;
+                cbEnd_ = e;
+            });
+            model.SetOnReachStart([this]() { ++reachStartCount_; });
+            model.SetOnReachEnd([this]() { ++reachEndCount_; });
+        }
+        if (options.bottomPadding > 0.0f) {
+            layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, options.bottomPadding));
+        }
+        if (options.topPadding > 0.0f) {
+            layoutProperty_->UpdatePadding(CreatePadding(0.0f, options.topPadding, 0.0f, 0.0f));
+        }
+        if (options.cachedCount) {
+            model.SetCachedCount(1);
+        }
+    }
+
+    void BuildGrid(LayoutKind kind, ContentClipMode mode, BuildOptions options)
     {
         cbStart_ = -1;
         cbEnd_ = -1;
+        reachStartCount_ = 0;
+        reachEndCount_ = 0;
         GridModelNG model = CreateGrid();
         model.SetColumnsTemplate("1fr 1fr");
         model.SetRowsGap(Dimension(0));
         model.SetColumnsGap(Dimension(0));
-        model.SetOnScrollIndex([this](int32_t s, int32_t e) {
-            cbStart_ = s;
-            cbEnd_ = e;
-        });
         ConfigureLayout(model, kind);
-        if (bottomPadding > 0.0f) {
-            layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, bottomPadding));
-        }
-        ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), mode, shape);
+        ApplyBuildOptions(model, options);
+        SetClip(mode);
         CreateGridItems(ITEM_COUNT, GRID_ITEM_WIDTH, ITEM_HEIGHT);
         CreateDone();
     }
 
-    // Content-only: report == active, fix offsets == 0.
-    void VerifyContentOnly()
+    // Builds the gap-boundary scenario grid for the given kind: uniform
+    // BOUNDARY_ROW_HEIGHT rows, BOUNDARY_ROW_GAP rowsGap, top padding 100, and
+    // the kind's layout options (irregular gets a spanned item far below the
+    // top so the boundary region stays uniform). withClip toggles BOUNDARY
+    // contentClip (the set instance); the padding stays on the unset twin so
+    // both instances share the same content geometry.
+    void BuildGapBoundaryGrid(LayoutKind kind, bool withClip)
     {
-        const auto& info = pattern_->GetGridLayoutInfo();
-        EXPECT_EQ(cbStart_, info.reportStartIndex_);
-        EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-        EXPECT_EQ(info.startFixOffset_, 0);
-        EXPECT_EQ(info.endFixOffset_, 0);
-        EXPECT_EQ(info.reportStartIndex_, info.startIndex_);
-        EXPECT_EQ(info.reportEndIndex_, info.endIndex_);
+        ClearOldNodes();
+        GridModelNG model = CreateGrid();
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetRowsGap(Dimension(BOUNDARY_ROW_GAP));
+        GridLayoutOptions opt;
+        if (kind == LayoutKind::IRREGULAR) {
+            opt.regularSize = GridItemSize { 1, 1 };
+            opt.irregularIndexes = { 20 };
+            opt.getSizeByIndex = [](int32_t) { return GridItemSize { 2, 1 }; };
+            model.SetLayoutOptions(opt);
+        } else if (kind == LayoutKind::SCROLL_WITH_OPTIONS) {
+            opt.regularSize = GridItemSize { 1, 1 };
+            model.SetLayoutOptions(opt);
+        }
+        layoutProperty_->UpdatePadding(CreatePadding(0.0f, 100.0f, 0.0f, 0.0f));
+        if (withClip) {
+            SetClip(ContentClipMode::BOUNDARY);
+        }
+        CreateGridItems(ITEM_COUNT, GRID_ITEM_WIDTH, BOUNDARY_ROW_HEIGHT);
+        CreateDone();
     }
 
-    // Extension: onScrollIndex reports content range; endIndex/reportEndIndex match expected.
-    void VerifyClip(int32_t expectedEndIndex, int32_t expectedReportEnd)
+    // Scrolls through the boundary window (cumulative offsets 50 / 55 / 60 =
+    // exact bottom edge, inside-window, pitch boundary) recording the reported
+    // start index after each step.
+    void RunGapBoundarySteps(int32_t reports[BOUNDARY_STEP_COUNT])
+    {
+        const float steps[BOUNDARY_STEP_COUNT] = { -BOUNDARY_ROW_HEIGHT,
+            -BOUNDARY_HALF_GAP_STEP, -BOUNDARY_HALF_GAP_STEP };
+        for (int32_t s = 0; s < BOUNDARY_STEP_COUNT; ++s) {
+            UpdateCurrentOffset(steps[s]);
+            reports[s] = pattern_->GetGridLayoutInfo().ReportStartIndex();
+        }
+    }
+
+    // Inactive (unset/reset/DEFAULT/CONTENT_ONLY): fix offsets 0, report == active.
+    void VerifyNoExtension()
     {
         const auto& info = pattern_->GetGridLayoutInfo();
-        EXPECT_EQ(cbStart_, info.reportStartIndex_);
-        EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-        EXPECT_EQ(info.endIndex_, expectedEndIndex);
-        EXPECT_EQ(info.reportEndIndex_, expectedReportEnd);
+        EXPECT_EQ(info.startFixOffset_, 0.0f);
+        EXPECT_EQ(info.endFixOffset_, 0.0f);
+        EXPECT_EQ(info.ReportStartIndex(), info.startIndex_);
+        EXPECT_EQ(info.ReportEndIndex(), info.endIndex_);
+    }
+
+    // Extension active: extension items participate in layout (endIndex_
+    // includes the extension area), report is the content-area range.
+    void VerifyExtension(int32_t expectedEndIndex, int32_t expectedReportEnd)
+    {
+        const auto& info = pattern_->GetGridLayoutInfo();
+        EXPECT_EQ(info.endIndex_, expectedEndIndex) << "active end index";
+        EXPECT_EQ(info.ReportEndIndex(), expectedReportEnd) << "report end index";
         if (expectedEndIndex > expectedReportEnd) {
-            ASSERT_TRUE(GetItem(info.endIndex_, false));
-            EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
+            auto item = GetItem(expectedEndIndex, false);
+            ASSERT_TRUE(item);
+            EXPECT_TRUE(item->IsActive()) << "extension item active";
         }
     }
 };
 
-// ===================== Scroll layout =====================
-HWTEST_F(GridContentClipTest, GridClipScrollContentOnly001, TestSize.Level1)
+// ===================== AC-1.1: BOUNDARY extension item layout =====================
+
+HWTEST_F(GridContentClipTest, GridClipScrollBoundaryBottomExtension001, TestSize.Level1)
 {
-    BuildClipGrid(LayoutKind::SCROLL, ContentClipMode::CONTENT_ONLY, 0.0f, nullptr);
-    VerifyContentOnly();
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .bottomPadding = 300.0f });
+    // Frame 400, bottom padding 300: the content area [0,100) holds only one
+    // row (item0-1). The extension area [100,400) fills 3 more rows
+    // (item2-7), so endIndex_ is 7 while the reported end stays at item1.
+    VerifyExtension(7, 1);
+    EXPECT_EQ(cbStart_, pattern_->GetGridLayoutInfo().ReportStartIndex());
+    EXPECT_EQ(cbEnd_, pattern_->GetGridLayoutInfo().ReportEndIndex());
 }
 
-HWTEST_F(GridContentClipTest, GridClipScrollBoundary001, TestSize.Level1)
+HWTEST_F(GridContentClipTest, GridClipIrregularBoundaryBottomExtension001, TestSize.Level1)
 {
-    BuildClipGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    VerifyClip(7, 1);
+    BuildGrid(LayoutKind::IRREGULAR, ContentClipMode::BOUNDARY, { .bottomPadding = 300.0f });
+    VerifyExtension(3, 0);
 }
 
-HWTEST_F(GridContentClipTest, GridClipScrollCustom001, TestSize.Level1)
+HWTEST_F(GridContentClipTest, GridClipScrollWithOptionsBoundaryBottomExtension001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL_WITH_OPTIONS, ContentClipMode::BOUNDARY, { .bottomPadding = 300.0f });
+    VerifyExtension(7, 1);
+}
+
+// ===================== AC-1.2: SAFE_AREA + safeAreaPadding extension =====================
+// In SAFE_AREA mode the extension area is the SafeAreaPadding (the
+// safeAreaPadding property expands the safe-area display region). The test
+// environment has no system safe area (safeAreaPad=0), so the extension is
+// activated through an explicit safeAreaPadding.
+
+HWTEST_F(GridContentClipTest, GridClipScrollSafeAreaPaddingExtension001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::SAFE_AREA, {});
+    // Explicit safeAreaPadding expands the safe-area display region (100 top/bottom)
+    layoutProperty_->UpdateSafeAreaPadding(CreatePadding(0.0f, 100.0f, 0.0f, 100.0f));
+    FlushUITasks();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    EXPECT_EQ(info.startFixOffset_, 100.0f) << "SAFE_AREA start extension from safeAreaPadding";
+    EXPECT_EQ(info.endFixOffset_, 100.0f) << "SAFE_AREA end extension from safeAreaPadding";
+    EXPECT_GT(info.endIndex_, info.ReportEndIndex()) << "extension items laid out beyond content area";
+}
+
+HWTEST_F(GridContentClipTest, GridClipIrregularSafeAreaPaddingExtension001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::IRREGULAR, ContentClipMode::SAFE_AREA, {});
+    layoutProperty_->UpdateSafeAreaPadding(CreatePadding(0.0f, 100.0f, 0.0f, 100.0f));
+    FlushUITasks();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    EXPECT_EQ(info.startFixOffset_, 100.0f);
+    EXPECT_EQ(info.endFixOffset_, 100.0f);
+    EXPECT_GT(info.endIndex_, info.ReportEndIndex());
+}
+
+// ===================== BOUNDARY + padding + safeAreaPadding combo =====================
+// Layout behavior of BOUNDARY mode with both padding and safeAreaPadding:
+// content area equals frame minus padding minus safeAreaPadding (safe-area
+// layout counts into content size). The BOUNDARY extension spans from
+// clip(frame) to the content area, covering the padding plus safeAreaPadding
+// region.
+
+HWTEST_F(GridContentClipTest, GridClipScrollBoundaryPaddingAndSafeAreaPadding001, TestSize.Level1)
+{
+    // padding 50/50 + safeAreaPadding 50/50: content area = 400-100-100 = 200
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .bottomPadding = 50.0f, .topPadding = 50.0f });
+    layoutProperty_->UpdateSafeAreaPadding(CreatePadding(0.0f, 50.0f, 0.0f, 50.0f));
+    FlushUITasks();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    EXPECT_GT(info.startFixOffset_, 0.0f) << "BOUNDARY start extension from padding+safeAreaPadding";
+    EXPECT_GT(info.endFixOffset_, 0.0f) << "BOUNDARY end extension from padding+safeAreaPadding";
+    // Extension items participate in layout (lineHeightMap_ contains extension rows)
+    auto extItem = GetItem(info.endIndex_, false);
+    ASSERT_TRUE(extItem);
+    EXPECT_TRUE(extItem->IsActive()) << "extension item active";
+}
+
+// Without safeAreaPadding the SAFE_AREA extension stays inactive (the test
+// environment has no system safe area)
+HWTEST_F(GridContentClipTest, GridClipScrollSafeAreaNoPadNoExtension001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::SAFE_AREA, {});
+    FlushUITasks();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    EXPECT_EQ(info.startFixOffset_, 0.0f);
+    EXPECT_EQ(info.endFixOffset_, 0.0f);
+    EXPECT_EQ(info.endIndex_, info.ReportEndIndex());
+}
+
+// ===================== AC-1.3: CUSTOM shape extension =====================
+
+HWTEST_F(GridContentClipTest, GridClipScrollCustomShapeExtension001, TestSize.Level1)
 {
     auto shape = CreateCustomClipShape(0.0f, 900.0f);
-    BuildClipGrid(LayoutKind::SCROLL, ContentClipMode::CUSTOM, 0.0f, shape);
-    VerifyClip(17, 7);
-}
-
-// ===================== ScrollWithOptions layout =====================
-HWTEST_F(GridContentClipTest, GridClipScrollWithOptionsContentOnly001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::SCROLL_WITH_OPTIONS, ContentClipMode::CONTENT_ONLY, 0.0f, nullptr);
-    VerifyContentOnly();
-}
-
-HWTEST_F(GridContentClipTest, GridClipScrollWithOptionsBoundary001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::SCROLL_WITH_OPTIONS, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    VerifyClip(7, 1);
-}
-
-HWTEST_F(GridContentClipTest, GridClipScrollWithOptionsCustom001, TestSize.Level1)
-{
-    auto shape = CreateCustomClipShape(0.0f, 900.0f);
-    BuildClipGrid(LayoutKind::SCROLL_WITH_OPTIONS, ContentClipMode::CUSTOM, 0.0f, shape);
-    VerifyClip(17, 7);
-}
-
-// ===================== Irregular layout =====================
-HWTEST_F(GridContentClipTest, GridClipIrregularContentOnly001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::IRREGULAR, ContentClipMode::CONTENT_ONLY, 0.0f, nullptr);
-    VerifyContentOnly();
-}
-
-HWTEST_F(GridContentClipTest, GridClipIrregularBoundary001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::IRREGULAR, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    VerifyClip(5, 1);
-}
-
-HWTEST_F(GridContentClipTest, GridClipIrregularCustom001, TestSize.Level1)
-{
-    auto shape = CreateCustomClipShape(0.0f, 900.0f);
-    BuildClipGrid(LayoutKind::IRREGULAR, ContentClipMode::CUSTOM, 0.0f, shape);
-    VerifyClip(15, 5);
-}
-
-// ===================== Custom layout =====================
-HWTEST_F(GridContentClipTest, GridClipCustomContentOnly001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::CUSTOM, ContentClipMode::CONTENT_ONLY, 0.0f, nullptr);
-    VerifyContentOnly();
-}
-
-HWTEST_F(GridContentClipTest, GridClipCustomBoundary001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::CUSTOM, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    VerifyClip(7, 1);
-}
-
-HWTEST_F(GridContentClipTest, GridClipCustomLayoutCustomClip001, TestSize.Level1)
-{
-    auto shape = CreateCustomClipShape(0.0f, 900.0f);
-    BuildClipGrid(LayoutKind::CUSTOM, ContentClipMode::CUSTOM, 0.0f, shape);
-    VerifyClip(17, 7);
-}
-
-// Custom layout: scrollToIndex must preserve the end extension. The custom layout
-// always calls MeasureOnOffset after jump (line 478), and JumpToTargetOffset uses
-// GetViewEndBound — so the extension should remain filled.
-HWTEST_F(GridContentClipTest, GridClipCustomScrollToIndexEndExtension001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::CUSTOM);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info0 = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info0.endFixOffset_, 300.0f);
-    EXPECT_GT(info0.endIndex_, info0.reportEndIndex_);
-
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::CUSTOM, {});
+    // Re-set CUSTOM with a shape (BuildGrid passes a nullptr shape, which
+    // gives CUSTOM no extension)
+    SetClip(ContentClipMode::CUSTOM, shape);
     FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_GT(info.endIndex_, info.reportEndIndex_);
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
+    VerifyExtension(17, 7);
 }
 
-// Custom layout: top extension must keep items laid out after scrolling.
-// FillBackward uses SkipLinesAboveView (which accounts for startFixOffset_) and
-// FindStartingRow (fixed) — so items in the top extension should remain active.
-HWTEST_F(GridContentClipTest, GridClipCustomTopPaddingScrollExtension001, TestSize.Level1)
+// ===================== Scope: user-defined (custom) layout excluded from the extension =====================
+// GridCustomLayoutAlgorithm is out of the contentClip-extension scope: the mode
+// is never injected by GridPattern, so an explicit clip value must leave the
+// custom layout identical with the unset baseline (fix offsets 0, report range
+// == active range, baseline fill).
+
+HWTEST_F(GridContentClipTest, GridClipUserDefinedExcludedNoExtension001, TestSize.Level1)
 {
+    constexpr int32_t crossCount = 2;
+    GridLayoutOptions opt;
+    // Uniform 2-column grid callbacks emulating the scroll baseline by line pitch
+    opt.getStartIndexByOffset = [crossCount](float offset) -> GridStartLineInfo {
+        if (offset < 0.0f) {
+            return { .startIndex = 0, .startLine = 0, .startOffset = 0 - offset, .totalOffset = offset };
+        }
+        int32_t line = static_cast<int32_t>(offset / ITEM_HEIGHT);
+        float startOffset = std::fmod(offset, ITEM_HEIGHT);
+        return {
+            .startIndex = line * crossCount,
+            .startLine = line,
+            .startOffset = 0 - startOffset,
+            .totalOffset = offset
+        };
+    };
+    opt.getStartIndexByIndex = [crossCount](int32_t idx) -> GridStartLineInfo {
+        int32_t line = idx / crossCount;
+        return {
+            .startIndex = line * crossCount,
+            .startLine = line,
+            .startOffset = 0.0f,
+            .totalOffset = line * ITEM_HEIGHT
+        };
+    };
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::CUSTOM);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info0 = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info0.startFixOffset_, 200.0f);
-    EXPECT_EQ(info0.endFixOffset_, 300.0f);
-    EXPECT_EQ(info0.startIndex_, 0);
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
-
-    // Scroll down then jump back to top: both extensions must remain functional.
-    UpdateCurrentOffset(ITEM_HEIGHT * 4);
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_GT(info.endIndex_, info.reportEndIndex_);
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
-}
-
-// ===================== cachedCount (requirement 3) =====================
-HWTEST_F(GridContentClipTest, GridClipScrollCachedCount001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    model.SetCachedCount(1);
-    ConfigureLayout(model, LayoutKind::SCROLL);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.endIndex_, 7);
-    EXPECT_EQ(info.reportEndIndex_, 1);
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
-}
-
-HWTEST_F(GridContentClipTest, GridClipIrregularCachedCount001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    model.SetCachedCount(1);
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.endIndex_, 5);
-    EXPECT_EQ(info.reportEndIndex_, 1);
-}
-
-HWTEST_F(GridContentClipTest, GridClipCustomCachedCount001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    model.SetCachedCount(1);
-    ConfigureLayout(model, LayoutKind::CUSTOM);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.endIndex_, 7);
-    EXPECT_EQ(info.reportEndIndex_, 1);
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
-}
-
-// ===================== SAFE_AREA smoke =====================
-HWTEST_F(GridContentClipTest, GridClipScrollSafeArea001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::SCROLL, ContentClipMode::SAFE_AREA, 0.0f, nullptr);
-    FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(cbStart_, info.reportStartIndex_);
-    EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-    EXPECT_EQ(info.reportEndIndex_, info.endIndex_);
-}
-
-// ===================== onScrollIndex stability on scroll (requirement 2) =====================
-HWTEST_F(GridContentClipTest, GridClipScrollIndexStableOnScroll001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().endIndex_, 7);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().reportEndIndex_, 1);
-
-    UpdateCurrentOffset(ITEM_HEIGHT * 2);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    // After scrolling, the end extension remains filled (UseCurrentLines measures
-    // up to viewEndBound), but onScrollIndex still reports the content-area range.
-    EXPECT_GT(info.endIndex_, info.reportEndIndex_);
-    EXPECT_EQ(info.reportEndIndex_, 1);
-    EXPECT_EQ(cbStart_, info.reportStartIndex_);
-    EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-}
-
-// ===================== Top (start) extension (requirement 1) =====================
-HWTEST_F(GridContentClipTest, GridClipScrollTopPaddingExtension001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
+    model.SetLayoutOptions(opt);
     layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    SetClip(ContentClipMode::BOUNDARY);
+    CreateGridItems(ITEM_COUNT, GRID_ITEM_WIDTH, ITEM_HEIGHT);
     CreateDone();
+    VerifyNoExtension();
+    // Baseline fill: the 200px content area (frame 400 minus top padding 200)
+    // holds 2 rows of the 2-column grid
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().endIndex_, 3) << "baseline fill, no extension rows";
+}
 
+// ===================== AC-2.2: CONTENT_ONLY / unset has no extension =====================
+
+HWTEST_F(GridContentClipTest, GridClipScrollContentOnlyNoExtension001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::CONTENT_ONLY, { .bottomPadding = 300.0f });
+    VerifyNoExtension();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().endIndex_, 1);
+}
+
+HWTEST_F(GridContentClipTest, GridClipDefaultNoExtension001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::DEFAULT, { .bottomPadding = 300.0f });
+    VerifyNoExtension();
+}
+
+// ===================== AC-1.4: start extension stays laid out while scrolling up =====================
+
+HWTEST_F(GridContentClipTest, GridClipScrollUpKeepsStartExtensionActive001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::IRREGULAR, ContentClipMode::BOUNDARY, { .topPadding = 200.0f });
     const auto& info0 = pattern_->GetGridLayoutInfo();
     EXPECT_EQ(info0.startFixOffset_, 200.0f);
 
-    UpdateCurrentOffset(ITEM_HEIGHT * 2);
+    UpdateCurrentOffset(SCROLL_TWO_LINES);
     const auto& info = pattern_->GetGridLayoutInfo();
     EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.reportStartIndex_, 0);
+    EXPECT_EQ(info.ReportStartIndex(), 0);
+    auto item0 = GetItem(0, false);
+    ASSERT_TRUE(item0);
+    EXPECT_TRUE(item0->IsActive()) << "start extension item stays active after scroll up";
 }
 
-HWTEST_F(GridContentClipTest, GridClipCustomTopPaddingExtension001, TestSize.Level1)
+// Scenario: Irregular first jumps into a never-measured middle area (index 30).
+HWTEST_F(GridContentClipTest, GridClipIrregularFirstJumpTopExtensionBackfill001, TestSize.Level1)
 {
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::CUSTOM);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
+    BuildGrid(LayoutKind::IRREGULAR, ContentClipMode::BOUNDARY, { .topPadding = 200.0f });
+    ASSERT_GT(pattern_->GetGridLayoutInfo().startFixOffset_, 0.0f);
 
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
-    UpdateCurrentOffset(ITEM_HEIGHT * 2);
+    ScrollToIndex(30, false, ScrollAlign::START);
     const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.reportStartIndex_, 0);
+    EXPECT_LT(info.startIndex_, info.ReportStartIndex())
+        << "first jump into uncached area must backfill top extension items";
+    auto contentPos = info.GetItemPos(info.ReportStartIndex());
+    ASSERT_NE(contentPos.second, -1);
+    EXPECT_NE(info.lineHeightMap_.find(contentPos.second - 1), info.lineHeightMap_.end())
+        << "line above content start must be measured after first jump";
+    auto item = GetItem(info.startIndex_, false);
+    ASSERT_TRUE(item);
+    EXPECT_TRUE(item->IsActive());
+    auto extRect = pattern_->GetItemRect(info.startIndex_);
+    EXPECT_LT(extRect.Top(), 200.0f) << "extension item rect must intersect top extension area";
 }
 
-// Irregular layout: top extension must keep items in the safeAreaPadding region laid out
-// after scrolling. Without the FindStartingRow fix, SolveForward/SolveBackward ignore
-// startFixOffset_ and incorrectly skip lines still inside the clip extension area.
-HWTEST_F(GridContentClipTest, GridClipIrregularTopPaddingExtension001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
+// ===================== AC-1.5: last item extension-only must not fire onReachEnd =====================
 
+HWTEST_F(GridContentClipTest, GridClipReachEndBoundarySemantics001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .bottomPadding = 300.0f });
+    EXPECT_EQ(reachEndCount_, 0) << "extension-only items must not fire onReachEnd";
+
+    // After scrolling to the bottom (last item visible in the content area),
+    // onReachEnd fires
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_GE(reachEndCount_, 1) << "onReachEnd fires when last item enters content area";
+}
+
+// ===================== AC-3.1: dynamic switch invariants =====================
+
+HWTEST_F(GridContentClipTest, GridClipDynamicSwitchNoCallback001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .withCallbacks = false });
+    cbStart_ = -1;
+    cbEnd_ = -1;
+    // Switch BOUNDARY -> CONTENT_ONLY at rest: no onScrollIndex fired
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::CONTENT_ONLY, nullptr);
+    FlushUITasks();
+    EXPECT_EQ(cbStart_, -1) << "switch must not fire onScrollIndex";
+    EXPECT_EQ(cbEnd_, -1);
+}
+
+HWTEST_F(GridContentClipTest, GridClipDynamicSwitchReportStable001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY,
+        { .bottomPadding = 300.0f, .withCallbacks = false });
     const auto& info0 = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info0.startFixOffset_, 200.0f);
-    EXPECT_EQ(info0.startIndex_, 0);
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
+    int32_t reportStart0 = info0.ReportStartIndex();
+    int32_t reportEnd0 = info0.ReportEndIndex();
+    double to0 = pattern_->GetTotalOffset();
 
-    // Scroll down past item 0, then back up: items in the top extension area must remain
-    // laid out (active). Without the fix, FindStartingRow -> SolveBackward uses targetLen =
-    // currentOffset_ (without startFixOffset_), so the start line doesn't reach back into
-    // the extension area and item 0 is dropped.
-    UpdateCurrentOffset(ITEM_HEIGHT * 4);
-    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    // With the fix, FindStartingRow uses SkipLinesAboveView (which accounts for startFixOffset_)
-    // so the start line stays at row 0 with a negative offset — items in the top extension area
-    // remain laid out. Without the fix, SolveForward uses targetLen = -currentOffset_ (without
-    // startFixOffset_), advancing the start line past row 0 and dropping item 0.
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.startMainLineIndex_, 0);
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::CONTENT_ONLY, nullptr);
+    FlushUITasks();
+    const auto& info1 = pattern_->GetGridLayoutInfo();
+    EXPECT_EQ(info1.ReportStartIndex(), reportStart0) << "report start unchanged on switch";
+    EXPECT_EQ(info1.ReportEndIndex(), reportEnd0) << "report end unchanged on switch";
+    EXPECT_EQ(pattern_->GetTotalOffset(), to0) << "GetTotalOffset unchanged on switch";
 }
 
-// Irregular layout: scrollToIndex triggers MeasureOnJump -> FindRangeOnJump, which must
-// fill the end extension. Without the fix, FindRangeOnJump uses mainSize (not
-// GetViewEndBound) and MeasureOnJump doesn't call MeasureOnOffset when extensions are
-// active, so the end extension is lost after jump.
-HWTEST_F(GridContentClipTest, GridClipIrregularScrollToIndexEndExtension001, TestSize.Level1)
+// ===================== AC-4.3: repeat reporting never negative =====================
+
+HWTEST_F(GridContentClipTest, GridClipRepeatReportNonNegative001, TestSize.Level1)
 {
-    GridModelNG model = CreateGrid();
+    GridModelNG model = CreateRepeatGrid(ITEM_COUNT, [](uint32_t) { return ITEM_HEIGHT; });
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(0));
     model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    SetClip(ContentClipMode::BOUNDARY);
     CreateDone();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    EXPECT_GE(info.ReportStartIndex(), 0) << "report start never negative";
+    EXPECT_GE(info.ReportEndIndex(), -1) << "report end never below -1";
+}
 
+// ===================== F-8: report range must stay inside the content area =====================
+// SyncReportRange's report ends (start/end) are bounded by the content area:
+// with the end extension active, report end never falls onto items outside
+// the content area; after scrolling down until the first row fully leaves
+// the content area, report start excludes items above the content area.
+
+// End extension active: item bottoms inside the report range must not
+// exceed the content-area bottom; extension items stay active but never
+// enter the report range. Note: use the initial layout state (plenty of
+// items) — after scrolling to the absolute bottom the items are exhausted
+// and the extension no longer holds items outside the content area.
+HWTEST_F(GridContentClipTest, GridClipBottomExtensionReportEndWithinContent001, TestSize.Level1)
+{
+    // Bottom padding 300: content area = frame[0,100], extension = [100,400]
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .bottomPadding = 300.0f });
+    const auto& info = pattern_->GetGridLayoutInfo();
+    ASSERT_GT(info.endIndex_, info.ReportEndIndex()) << "extension items must be active beyond content area";
+    // Content-area bottom = frame 400 - bottom padding 300 = 100
+    for (int32_t idx = info.ReportStartIndex(); idx <= info.ReportEndIndex(); ++idx) {
+        auto rect = pattern_->GetItemRect(idx);
+        EXPECT_LE(rect.Bottom(), 100.0f + 1.0f) << "reported item " << idx << " must stay within content area";
+    }
+    // First extension item beyond the reported end: active but its bottom is
+    // outside the content area
+    auto extRect = pattern_->GetItemRect(info.endIndex_);
+    EXPECT_GE(extRect.Bottom(), 100.0f) << "extension-only item must lie beyond content area";
+}
+
+// Scroll down until the first row fully leaves the content area (top
+// extension active): the reported start item's top must not be above the
+// content-area top.
+HWTEST_F(GridContentClipTest, GridClipScrollDownReportStartWithinContent001, TestSize.Level1)
+{
+    // Top padding 200: content area = frame[200,400], extension = [0,200)
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .topPadding = 200.0f });
+    UpdateCurrentOffset(SCROLL_THREE_LINES);
+    const auto& info = pattern_->GetGridLayoutInfo();
+    auto startRect = pattern_->GetItemRect(info.ReportStartIndex());
+    EXPECT_GE(startRect.Top(), 200.0f - 1.0f)
+        << "reported start item must not lie above content area (frame y=200)";
+    for (int32_t idx = info.ReportStartIndex(); idx <= info.ReportEndIndex(); ++idx) {
+        auto rect = pattern_->GetItemRect(idx);
+        EXPECT_LE(rect.Bottom(), 400.0f + 1.0f) << "reported item " << idx << " must stay within content area";
+    }
+}
+
+// ===================== Report-start boundary window with row gap =====================
+// The report-start walk must mirror the unset-baseline anchor advance: a line
+// is skipped only when the NEXT line's top passed the content-area top
+// (bottom + mainGap <= 0), not when its own bottom edge passes it. With a row
+// gap, a fully scrolled-out line whose gap still overlaps the content top
+// stays reported until the anchor would advance past it — otherwise the
+// extension instance would report the next line one frame earlier than the
+// unset baseline inside the (height, height + gap] boundary window.
+
+// Row height 50, rowsGap 10 (pitch 60): the boundary window is offsets
+// (50, 60]. The walk must mirror EACH algorithm's own unset-anchor advance:
+// - scroll / with-options (UpdateStartIndexForExtralOffset): the anchor keeps
+//   a line until the NEXT line's top passes the content top, so the reported
+//   start stays 0 through the window and advances at the pitch boundary (60);
+// - irregular (solver SolveForward): the anchor advances once a line's bottom
+//   passes the content top, so the reported start is already line 1 at 50.
+// The per-algorithm set-vs-unset parity is the hard requirement; the concrete
+// values differ between algorithm families by their pre-existing baseline
+// semantics and must not be unified by the extension.
+HWTEST_F(GridContentClipTest, GridClipReportStartGapBoundary001, TestSize.Level1)
+{
+    const LayoutKind kinds[] = { LayoutKind::SCROLL, LayoutKind::SCROLL_WITH_OPTIONS, LayoutKind::IRREGULAR };
+    for (auto kind : kinds) {
+        // Extension instance (BOUNDARY + top padding): report via the walk
+        BuildGapBoundaryGrid(kind, true);
+        ASSERT_GT(pattern_->GetGridLayoutInfo().startFixOffset_, 0.0f) << "extension must be active";
+        int32_t setReports[BOUNDARY_STEP_COUNT] = { -1, -1, -1 };
+        RunGapBoundarySteps(setReports);
+
+        // Unset twin: same geometry and steps, report via the anchor fast path
+        BuildGapBoundaryGrid(kind, false);
+        int32_t unsetReports[BOUNDARY_STEP_COUNT] = { -1, -1, -1 };
+        RunGapBoundarySteps(unsetReports);
+
+        for (int32_t s = 0; s < BOUNDARY_STEP_COUNT; ++s) {
+            EXPECT_EQ(setReports[s], unsetReports[s])
+                << "kind " << static_cast<int>(kind) << " step " << s << ": set vs unset report mismatch";
+        }
+        if (kind == LayoutKind::IRREGULAR) {
+            // Irregular anchor advances once the bottom passes the content top
+            EXPECT_EQ(setReports[0], 2);
+            EXPECT_EQ(setReports[1], 2);
+            EXPECT_EQ(setReports[2], 2);
+        } else if (kind == LayoutKind::SCROLL) {
+            // Scroll anchor keeps the gap-straddling line until the pitch
+            // boundary. SCROLL_WITH_OPTIONS gets only the parity assertions
+            // above: with the GridIrregularLayoutEnabled flag on it routes to
+            // the irregular algorithm and legitimately takes its strict rule.
+            EXPECT_EQ(setReports[0], 0);
+            EXPECT_EQ(setReports[1], 0);
+            EXPECT_EQ(setReports[2], 2);
+        }
+    }
+}
+
+// ===================== C-4: stale extension state cleared after algorithm-family switch =====================
+// The fix-offset reset relied on CalculateContentClipFixOffset (called inside
+// Measure), but static/adaptive algorithms and Measure early-return paths
+// (empty grid / zero main axis) bypass it — after switching from an
+// extension-active scroll algorithm (fix>0) to dual templates (static
+// algorithm), info_ must not keep stale fix offsets / report ranges.
+// Implementation: ClearContentClipExtension at the matching
+// GridPattern::CreateLayoutAlgorithm branches (algorithm objects are rebuilt
+// every frame; an extension-active Measure recomputes right after).
+HWTEST_F(GridContentClipTest, GridClipStaleExtensionClearedOnStaticSwitch001, TestSize.Level1)
+{
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .topPadding = 200.0f });
     const auto& info0 = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info0.endFixOffset_, 300.0f);
-    EXPECT_GT(info0.endIndex_, info0.reportEndIndex_);
+    ASSERT_GT(info0.startFixOffset_, 0.0f) << "extension must be active before switch";
 
-    // scrollToIndex triggers MeasureOnJump. The end extension must remain filled.
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    // Also set rowsTemplate -> dual templates (columnsTemplate already set)
+    // -> static algorithm (extension-unaware)
+    layoutProperty_->UpdateRowsTemplate("1fr 1fr");
     FlushUITasks();
     const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_GT(info.endIndex_, info.reportEndIndex_);
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
+    EXPECT_EQ(info.startFixOffset_, 0.0f) << "stale fix offset must be cleared on algorithm switch";
+    EXPECT_EQ(info.endFixOffset_, 0.0f) << "stale fix offset must be cleared on algorithm switch";
+    EXPECT_EQ(info.ReportStartIndex(), info.startIndex_) << "report range must track layout range";
+    EXPECT_EQ(info.ReportEndIndex(), info.endIndex_) << "report range must track layout range";
 }
 
-// Irregular layout: scrollToIndex with START align must fill the start extension area.
-// Items above the jump target that fit in startFixOffset_ must remain laid out (active).
-// Without the fix, FindStartingRow NearZero case returns the current start without extending
-// upward, and PrepareLineHeight for START only fills forward, so items in the top padding
-// region are neither measured nor included in the visible range.
-HWTEST_F(GridContentClipTest, GridClipIrregularScrollToIndexStartExtension001, TestSize.Level1)
+// The same choke point also covers the switch to an EMPTY user-defined grid:
+// with the scroll algorithm's extension active (fix offsets > 0), emptying the
+// grid and installing the custom callbacks at runtime switches the algorithm to
+// the out-of-scope custom one, whose Measure early-returns on childrenCount<=0
+// before CalculateContentClipFixOffset's reset — the extension state must be
+// cleared at algorithm creation (C-4), not left stale in info_.
+HWTEST_F(GridContentClipTest, GridClipEmptyGridNoStaleExtension001, TestSize.Level1)
 {
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
+    // 1. Establish the extension state on the scroll algorithm
+    BuildGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, { .topPadding = 200.0f });
     const auto& info0 = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info0.startFixOffset_, 200.0f);
+    ASSERT_GT(info0.startFixOffset_, 0.0f) << "extension must be active before switch";
 
-    // scrollToIndex to a middle item with START align: the jump target lands at the content
-    // top (currentOffset_ == 0). Items above that fit in startFixOffset_ (200px = 2 rows of
-    // 100px) must be measured and included in the visible range.
-    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
-    FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    // The start must extend above the jump target into the padding extension area,
-    // producing a negative currentOffset_ and a startMainLineIndex_ below the jump line.
-    EXPECT_LT(info.currentOffset_, 0.0f);
-    // Items in the start extension area must be active.
-    ASSERT_TRUE(GetItem(info.startIndex_, false));
-    EXPECT_TRUE(GetItem(info.startIndex_, false)->IsActive());
-}
-
-// Irregular layout: scrollToIndex with START align after scrolling down must also fill
-// the start extension area. This verifies the fix works when the jump originates from a
-// scrolled state (matrix is pre-filled, then a jump resets the range).
-HWTEST_F(GridContentClipTest, GridClipIrregularScrollToIndexStartExtensionAfterScroll001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
-
-    // Scroll down first, then jump to a middle item. The start extension must still be filled.
-    UpdateCurrentOffset(ITEM_HEIGHT * 6);
-    pattern_->ScrollToIndex(8, false, ScrollAlign::START);
-    FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    // The start must extend above the jump target, producing a negative offset.
-    // The offset can exceed -startFixOffset_ when a multi-row irregular item forces
-    // the start line further up to include the full item.
-    EXPECT_LT(info.currentOffset_, 0.0f);
-    EXPECT_LT(info.startMainLineIndex_, info.endMainLineIndex_);
-    ASSERT_TRUE(GetItem(info.startIndex_, false));
-    EXPECT_TRUE(GetItem(info.startIndex_, false)->IsActive());
-}
-
-// Irregular layout: after scrollToIndex(6, START) with top padding 200 (startFixOffset_ = 200),
-// scrolling upward must keep items that enter the top padding extension area laid out
-// (active) every frame. Without the fix, MeasureBackward's targetLen ignores startFixOffset_
-// and SolveForwardWithExtension only goes forward from startMainLineIndex_, so lines above
-// the start line that become visible in the extension area have no lineHeightMap_ entry and
-// are skipped by LayoutChildren — the nodes do not participate in layout every frame.
-// Grid matrix (2 columns, items 1 & 3 are 2-row irregulars):
-//   row 0: item0(1x1) | item1(2x1, top)
-//   row 1: item2(1x1) | -1 (item1 cont.)
-//   row 2: item3(2x1, top) | item4(1x1)
-//   row 3: -3 (item3 cont.) | item5(1x1)
-//   row 4: item6(1x1) | item7(1x1)
-// After scrollToIndex(6, START): startMainLineIndex_ = 2, currentOffset_ = -200 (rows 2,3 in
-// padding area, row 4 at content top). Scrolling up 100 (currentOffset_ = -100) makes row 1
-// visible at the frame top (padding area). Item 1 (row 0-1) and item 2 (row 1) must be active.
-HWTEST_F(GridContentClipTest, GridClipIrregularScrollUpKeepsExtensionActive001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
-
-    // Jump to item 6 (row 4) with START align. Items above the jump line that fit in
-    // startFixOffset_ (200px = 2 rows of 100px) must be measured and active.
-    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
+    // 2. Empty the grid at runtime; an empty custom grid never reaches
+    // CalculateContentClipFixOffset (Measure early-returns)
+    while (!frameNode_->GetChildren().empty()) {
+        frameNode_->RemoveChildAtIndex(static_cast<int32_t>(frameNode_->GetChildren().size()) - 1);
+    }
+    // 3. Switch to user-defined (both start-index callbacks present) at runtime
+    GridLayoutOptions opt;
+    opt.getStartIndexByIndex = [](int32_t) -> GridStartLineInfo { return {}; };
+    opt.getStartIndexByOffset = [](float) -> GridStartLineInfo { return {}; };
+    layoutProperty_->UpdateLayoutOptions(opt);
     FlushUITasks();
 
-    // Scroll upward by 100 (currentOffset_ goes from -200 to -100). Row 1 should now be
-    // visible at the frame top (in the padding extension area). Items at row 1 (item 1
-    // continuation and item 2) must remain laid out (active).
-    UpdateCurrentOffset(ITEM_HEIGHT);
     const auto& info = pattern_->GetGridLayoutInfo();
-    // The start line must extend into the extension area (startMainLineIndex_ < 4).
-    EXPECT_LT(info.startMainLineIndex_, 4);
-    // Item 1 (irregular, rows 0-1) and item 2 (row 1) are in the top extension area.
-    ASSERT_TRUE(GetItem(1, false));
-    EXPECT_TRUE(GetItem(1, false)->IsActive());
-    ASSERT_TRUE(GetItem(2, false));
-    EXPECT_TRUE(GetItem(2, false)->IsActive());
-
-    // Continue scrolling upward by another 100 (currentOffset_ reaches 0 / positive).
-    // Row 0 should now enter the extension area. Item 0 and item 1 must remain active.
-    UpdateCurrentOffset(ITEM_HEIGHT);
-    const auto& info2 = pattern_->GetGridLayoutInfo();
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
-    ASSERT_TRUE(GetItem(1, false));
-    EXPECT_TRUE(GetItem(1, false)->IsActive());
-    // Verify the start line extended backward into the extension area.
-    EXPECT_LE(info2.startMainLineIndex_, 1);
+    EXPECT_EQ(info.startFixOffset_, 0.0f) << "stale fix offset must be cleared on switch to empty user-defined grid";
+    EXPECT_EQ(info.endFixOffset_, 0.0f) << "stale fix offset must be cleared on switch to empty user-defined grid";
+    EXPECT_EQ(info.ReportStartIndex(), info.startIndex_) << "report range must track layout range";
+    EXPECT_EQ(info.ReportEndIndex(), info.endIndex_) << "report range must track layout range";
 }
 
-// Custom layout: scrollToIndex to a middle item with START align and top padding.
-// JumpToTargetIndex calls ClearCache (wipes lineHeightMap_ and gridMatrix_) and only fills
-// forward from startMainLineIndex_. FindStartingRow's NearZero branch would call SolveBackward
-// which fails because lineHeightMap_ has no entries above startMainLineIndex_. Without the
-// guard (lineHeightMap_.find(startMainLineIndex_ - 1) != end()), SolveBackward returns {0, 0, 0}
-// and corrupts the visible range (startMainLineIndex_ = 0 with no lineHeightMap_[0],
-// endIndex_ = -1, no items laid out). With the guard, the range stays valid.
-HWTEST_F(GridContentClipTest, GridClipCustomScrollToIndexStartExtension001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ConfigureLayout(model, LayoutKind::CUSTOM);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
-
-    // Jump to item 6 (line 3 in a 2-column grid). START align puts the item at the content
-    // top (currentOffset_ = 0). The custom layout doesn't pre-measure lines above the jump
-    // target (ClearCache wipes the matrix), so the start extension is not filled — but the
-    // visible range must remain valid (not corrupted).
-    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
-    FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    // endIndex_ must be valid (not -1 which indicates corruption from SolveBackward failure).
-    EXPECT_GE(info.endIndex_, 0);
-    EXPECT_GE(info.startMainLineIndex_, 0);
-    // The start item must be active (laid out).
-    ASSERT_TRUE(GetItem(info.startIndex_, false));
-    EXPECT_TRUE(GetItem(info.startIndex_, false)->IsActive());
-}
-
-// Multi-row irregular items store -itemIdx in continuation rows of gridMatrix_. Without
-// abs(), SyncReportRange would report negative indices via onScrollIndex when a continuation
-// row is the first or last visible row in the content area.
-
-// Irregular layout: reportStartIndex_ must be non-negative when a continuation row is at
-// the content start. Item 3 (2x1) starts at row 2; row 3 is its continuation (matrix value
-// -3). Scrolling 3 rows puts row 3 at content start. Without abs(), reportStartIndex_ = -3.
-HWTEST_F(GridContentClipTest, GridClipIrregularReportStartNonNegative001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    model.SetOnScrollIndex([this](int32_t s, int32_t e) {
-        cbStart_ = s;
-        cbEnd_ = e;
-    });
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    // Scroll 3 rows: row 3 (continuation of item 3) lands at content start.
-    UpdateCurrentOffset(ITEM_HEIGHT * 3);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_GE(info.reportStartIndex_, 0);
-    EXPECT_GE(info.reportEndIndex_, 0);
-    EXPECT_GE(cbStart_, 0);
-    EXPECT_GE(cbEnd_, 0);
-}
-
-// Irregular layout: reportEndIndex_ must be non-negative when a continuation row is the
-// last visible row in the content area. Item 1 (2x1) starts at row 0; row 1 is its
-// continuation (matrix value -1 at col 1). With bottom padding 300 (content height = 100),
-// scrolling 1 row makes row 1 the only visible row. Without abs(), reportEndIndex_ = -1.
-HWTEST_F(GridContentClipTest, GridClipIrregularReportEndNonNegative001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    model.SetOnScrollIndex([this](int32_t s, int32_t e) {
-        cbStart_ = s;
-        cbEnd_ = e;
-    });
-    ConfigureLayout(model, LayoutKind::IRREGULAR);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    // Scroll 1 row: row 1 (continuation of item 1 at col 1) is the only visible row.
-    UpdateCurrentOffset(ITEM_HEIGHT);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_GE(info.reportStartIndex_, 0);
-    EXPECT_GE(info.reportEndIndex_, 0);
-    EXPECT_GE(cbStart_, 0);
-    EXPECT_GE(cbEnd_, 0);
-}
-
-// Scroll layout: reachStart_ clamp must allow items in the clip extension area to remain
-// active after scrolling. The clamp only triggers when currentOffset_ exceeds the clip start
-// bound (contentStartOffset_ - startFixOffset_), not for any negative offset.
-HWTEST_F(GridContentClipTest, GridClipScrollReachStartClampExtension001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
-
-    // Scroll down then jump back to top: verifies the reachStart_ clamp doesn't break
-    // the extension layout. After returning to rest, item 0 must remain active.
-    UpdateCurrentOffset(ITEM_HEIGHT * 4);
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.startFixOffset_, 200.0f);
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.currentOffset_, 0.0f);
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
-}
-
-// Scroll layout: UseCurrentLines must measure items in the end extension area.
-// After scrolling down and back up (which triggers UseCurrentLines via FillBlankAtStart),
-// items in the end extension must remain active.
-HWTEST_F(GridContentClipTest, GridClipScrollUseCurrentLinesEndExtension001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info0 = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info0.startFixOffset_, 200.0f);
-    EXPECT_EQ(info0.endFixOffset_, 300.0f);
-    EXPECT_GT(info0.endIndex_, info0.reportEndIndex_);
-
-    // Scroll down then back up: FillBlankAtStart adds lines at the top, triggering
-    // UseCurrentLines to re-measure. The end extension must remain filled.
-    UpdateCurrentOffset(ITEM_HEIGHT * 2);
-    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_GT(info.endIndex_, info.reportEndIndex_);
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
-}
-
-// ===================== Top rest position =====================
-HWTEST_F(GridContentClipTest, GridClipScrollTopRestAtContentTop001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.startFixOffset_, 200.0f);
-    EXPECT_EQ(info.currentOffset_, 0.0f);
-    EXPECT_EQ(info.startIndex_, 0);
-    ASSERT_TRUE(GetItem(0, false));
-    EXPECT_TRUE(GetItem(0, false)->IsActive());
-}
-
-HWTEST_F(GridContentClipTest, GridClipScrollBackToFrontTopRest001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    UpdateCurrentOffset(ITEM_HEIGHT * 10);
-    UpdateCurrentOffset(-ITEM_HEIGHT * 10);
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.startFixOffset_, 200.0f);
-}
-
-// ===================== Report range consistency: both paddings =====================
-HWTEST_F(GridContentClipTest, GridClipBothPaddingReportConsistent001, TestSize.Level1)
-{
-    constexpr float pad = 100.0f;
-    // Phase 1: CONTENT_ONLY baseline.
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    model.SetOnScrollIndex([this](int32_t s, int32_t e) { cbStart_ = s; cbEnd_ = e; });
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, pad, 0.0f, pad));
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-    UpdateCurrentOffset(ITEM_HEIGHT * 3);
-    int32_t baseStart = pattern_->GetGridLayoutInfo().reportStartIndex_;
-    int32_t baseEnd = pattern_->GetGridLayoutInfo().reportEndIndex_;
-
-    // Phase 2: BOUNDARY with the same paddings and scroll delta.
-    GridModelNG model2 = CreateGrid();
-    model2.SetColumnsTemplate("1fr 1fr");
-    model2.SetRowsGap(Dimension(0));
-    model2.SetColumnsGap(Dimension(0));
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, pad, 0.0f, pad));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-    UpdateCurrentOffset(ITEM_HEIGHT * 3);
-
-    const auto& clipInfo = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(clipInfo.reportStartIndex_, baseStart);
-    EXPECT_EQ(clipInfo.reportEndIndex_, baseEnd);
-    EXPECT_GT(clipInfo.endIndex_, clipInfo.reportEndIndex_);
-}
-
-// ===================== Horizontal grid (rowsTemplate) =====================
-HWTEST_F(GridContentClipTest, GridClipScrollHorizontalBoundary001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetRowsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 300.0f, 0.0f)); // right padding -> end extension
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, ITEM_HEIGHT, GRID_ITEM_WIDTH); // width=100 (main), height=180 (cross)
-    CreateDone();
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.endIndex_, 5);
-    EXPECT_EQ(info.reportEndIndex_, 1);
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
-}
-
-// ===================== CONTENT_ONLY with padding: no extension =====================
-HWTEST_F(GridContentClipTest, GridClipScrollContentOnlyWithPadding001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::SCROLL, ContentClipMode::CONTENT_ONLY, 300.0f, nullptr);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.startFixOffset_, 0);
-    EXPECT_EQ(info.endFixOffset_, 0);
-    EXPECT_EQ(info.endIndex_, 1);
-    EXPECT_EQ(info.reportEndIndex_, 1);
-}
-
-// ===================== ScrollWithOptions cachedCount =====================
-HWTEST_F(GridContentClipTest, GridClipScrollWithOptionsCachedCount001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    model.SetCachedCount(1);
-    ConfigureLayout(model, LayoutKind::SCROLL_WITH_OPTIONS);
-    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.endIndex_, 7);
-    EXPECT_EQ(info.reportEndIndex_, 1);
-    ASSERT_TRUE(GetItem(info.endIndex_, false));
-    EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
-}
-
-// ===================== Irregular SAFE_AREA smoke =====================
-HWTEST_F(GridContentClipTest, GridClipIrregularSafeArea001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::IRREGULAR, ContentClipMode::SAFE_AREA, 0.0f, nullptr);
-    FlushUITasks();
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(cbStart_, info.reportStartIndex_);
-    EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-    EXPECT_EQ(info.reportEndIndex_, info.endIndex_);
-}
-
-// ===================== Irregular onScrollIndex stability on scroll =====================
-HWTEST_F(GridContentClipTest, GridClipIrregularIndexStableOnScroll001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::IRREGULAR, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    UpdateCurrentOffset(ITEM_HEIGHT * 2);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(cbStart_, info.reportStartIndex_);
-    EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-}
-
-// ===================== Custom onScrollIndex stability on scroll =====================
-HWTEST_F(GridContentClipTest, GridClipCustomIndexStableOnScroll001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::CUSTOM, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    UpdateCurrentOffset(ITEM_HEIGHT * 2);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(cbStart_, info.reportStartIndex_);
-    EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-}
-
-// ===================== ReachEnd with extension =====================
-HWTEST_F(GridContentClipTest, GridClipScrollReachEnd001, TestSize.Level1)
-{
-    auto shape = CreateCustomClipShape(0.0f, 500.0f); // clip extends beyond content
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(0));
-    model.SetColumnsGap(Dimension(0));
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::CUSTOM, shape);
-    CreateGridItems(4, 180, ITEM_HEIGHT); // 4 items, 2 rows, fits in viewport -> reachEnd at init
-    CreateDone();
-
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(info.reachEnd_, true);
-    EXPECT_EQ(info.endIndex_, 3);
-    EXPECT_EQ(info.reportEndIndex_, 3);
-}
-
-// ===================== Multi scroll cycle: no crash, report range correct =====================
-HWTEST_F(GridContentClipTest, GridClipScrollMultiScrollCycle001, TestSize.Level1)
-{
-    BuildClipGrid(LayoutKind::SCROLL, ContentClipMode::BOUNDARY, 300.0f, nullptr);
-    UpdateCurrentOffset(ITEM_HEIGHT * 5);
-    UpdateCurrentOffset(-ITEM_HEIGHT * 3);
-    UpdateCurrentOffset(ITEM_HEIGHT * 8);
-    const auto& info = pattern_->GetGridLayoutInfo();
-    EXPECT_EQ(cbStart_, info.reportStartIndex_);
-    EXPECT_EQ(cbEnd_, info.reportEndIndex_);
-}
-
-// ===================== Direct unit tests for new methods =====================
-
-// --- SyncReportRange: content area [0, 400], 4 rows, items 0-7 ---
-HWTEST_F(GridContentClipTest, GridClipSyncReportRangeAtTop001, TestSize.Level1)
+// ===================== M-3: SyncReportRange must not invert under extreme geometry =====================
+// With all content above the content area (currentOffset_ far greater than
+// mainSize) and the start extension active: report start resolves through
+// continuation markers to the multi-row item's start (a head on an earlier
+// row), while report end's geometric walk exhausts immediately and takes
+// FindEndIdx of the current row (which skips continuation markers) — before
+// the fix this produced an inverted range reportStart > reportEnd, so a
+// defensive clamp is required.
+HWTEST_F(GridContentClipTest, GridClipSyncReportRangeNoInversion001, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.axis_ = Axis::VERTICAL;
-    info.startMainLineIndex_ = 0;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 2, { { 1, 8 } } },                    // item 8 starts at row2
+        { 3, { { 0, 5 }, { 1, -8 } } },          // row3: item5 and item8's continuation
+    };
+    info.lineHeightMap_ = { { 2, 50.0f }, { 3, 40.0f } };
+    info.startMainLineIndex_ = 3;
     info.endMainLineIndex_ = 3;
-    info.currentOffset_ = 0.0;
-    info.startFixOffset_ = 0.0f;
-    info.endFixOffset_ = 0.0f;
-    for (int32_t i = 0; i < 4; ++i) {
-        info.lineHeightMap_[i] = ITEM_HEIGHT;
-        info.gridMatrix_[i] = { { 0, i * 2 }, { 1, i * 2 + 1 } };
-    }
-    info.SyncReportRange(400.0f, 0.0f);
-    EXPECT_EQ(info.reportStartIndex_, 0);
-    EXPECT_EQ(info.reportEndIndex_, 7);
+    info.startIndex_ = 5;
+    info.endIndex_ = 5;
+    info.currentOffset_ = 500.0;   // no visible row in the content area (all above)
+    info.startFixOffset_ = 100.0f; // extension active, slow path
+    info.SyncReportRange(400.0f, 1.0f);
+    EXPECT_EQ(info.ReportStartIndex(), 8) << "continuation resolution picks item 8 (starts row2)";
+    EXPECT_GE(info.ReportEndIndex(), info.ReportStartIndex()) << "report range must not invert";
+    EXPECT_EQ(info.ReportEndIndex(), 8) << "inverted end must clamp to start";
 }
 
-// --- SyncReportRange: scrolled (currentOffset_ < 0), report end accounts for offset ---
-HWTEST_F(GridContentClipTest, GridClipSyncReportRangeScrolled001, TestSize.Level1)
+// ===================== ADR-2: fast path equals the geometric walk at fix 0 =====================
+// With fix offsets of 0, SyncReportRange takes the fast path (report equals
+// the active range). The geometric-walk branch would land on the same range
+// in the negative-offset state where the start row sits partially above the
+// content-area top: Measure advances startMainLineIndex_ once a line fully
+// leaves the content area, so at fix 0 the start line is always at least
+// partially visible and the start walk stops on it. Hand-derived walk for
+// this fixture (line height 100, gap 20, mainSize 150, currentOffset -50):
+// the start walk keeps row1 (its bottom reaches 50 below the content top),
+// the end walk consumes row1 and row2 and stops there (report end item 5),
+// and the no-end-extension trailing rule then extends the reported end
+// through endIndex_ (item 7) — identical to the fast-path output.
+HWTEST_F(GridContentClipTest, GridClipSyncReportRangeFastPathNegativeOffset001, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.axis_ = Axis::VERTICAL;
-    info.startMainLineIndex_ = 0;
-    info.endMainLineIndex_ = 5;
-    info.currentOffset_ = -150.0; // 1.5 rows scrolled
-    info.startFixOffset_ = 200.0f;
-    info.endFixOffset_ = 0.0f;
-    for (int32_t i = 0; i < 6; ++i) {
-        info.lineHeightMap_[i] = ITEM_HEIGHT;
-        info.gridMatrix_[i] = { { 0, i * 2 }, { 1, i * 2 + 1 } };
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 } } },
+        { 3, { { 0, 6 }, { 1, 7 } } },
+    };
+    info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f }, { 2, 100.0f }, { 3, 100.0f } };
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 3;
+    info.startIndex_ = 2;
+    info.endIndex_ = 7;
+    info.currentOffset_ = -50.0f; // start row partially above the content-area top
+
+    info.SyncReportRange(150.0f, 20.0f);
+    EXPECT_EQ(info.ReportStartIndex(), 2) << "fast path matches the start walk landing on row1";
+    EXPECT_EQ(info.ReportEndIndex(), 7) << "fast path matches the end walk plus the trailing rule";
+}
+
+// ===================== R-10 contract: onScrollBarUpdate offset argument =====================
+// The offset argument must be a VP-unit Dimension carrying the px->vp
+// conversion of the content anchor (GetContentAnchorOffset == currentOffset_
+// when no extension is active). A PX-unit dimension makes the ArkTS bridges
+// (arkts_native_grid_bridge / grid_static_modifier) run ConvertToVp() again
+// on a value already in vp, dividing it by dipScale a second time and
+// shrinking the frontend-visible offset. Host dipScale is 1.0, so the value
+// assertions pin the anchor semantics while the unit assertions are the
+// regression guard.
+HWTEST_F(GridContentClipTest, GridClipScrollBarUpdateOffsetUnitVp001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    int32_t fireCount = 0;
+    Dimension captured(0.0f, DimensionUnit::AUTO);
+    model.SetOnScrollBarUpdate([&fireCount, &captured](int32_t index, const Dimension& offset) {
+        ++fireCount;
+        captured = offset;
+        return std::pair<std::optional<float>, std::optional<float>>();
+    });
+    CreateGridItems(ITEM_COUNT, GRID_ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone();
+
+    ASSERT_GT(fireCount, 0) << "onScrollBarUpdate must fire on initial layout";
+    EXPECT_EQ(captured.Unit(), DimensionUnit::VP) << "offset argument must be a VP-unit dimension";
+    EXPECT_FLOAT_EQ(captured.Value(), 0.0f) << "initial anchor is 0";
+
+    // Half-line scroll keeps the offset mid-line: a full-line delta advances
+    // startIndex_ and the layout normalizes currentOffset_ back to 0 before
+    // the event dispatch, so the anchor would be 0 by design.
+    constexpr float halfLine = ITEM_HEIGHT / 2;
+    UpdateCurrentOffset(-halfLine);
+    EXPECT_FLOAT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -halfLine) << "scroll delta applied";
+    // Bounded convergence flush: a measure-break round defers event dispatch to
+    // the next layout pass (same driver as the parity suite).
+    for (int32_t round = 0; round < 3; ++round) {
+        if (MockPipelineContext::GetCurrent()->IsDirtyLayoutNodesEmpty() && !pattern_->prevMeasureBreak_) {
+            break;
+        }
+        MockPipelineContext::GetCurrent()->FlushUITasks();
     }
-    info.SyncReportRange(400.0f, 0.0f);
-    // currentOffset_=-150: line 0 bottom=-50 (<0, skipped), line 1 bottom=50 (>0, report start=2).
-    // remain=550: walk 6 lines(600), last with top<400 is line 5 (top=350). report end=11.
-    EXPECT_EQ(info.reportStartIndex_, 2);
-    EXPECT_EQ(info.reportEndIndex_, 11);
-}
-
-// --- CreateScrollLayoutAlgorithm: returns GridScrollLayoutAlgorithm when no options ---
-HWTEST_F(GridContentClipTest, GridClipCreateScrollLayoutAlgorithm001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    auto algo = pattern_->CreateScrollLayoutAlgorithm(false, false, false, false);
-    auto scroll = AceType::DynamicCast<GridScrollLayoutAlgorithm>(algo);
-    EXPECT_TRUE(scroll != nullptr);
-}
-
-// --- CreateScrollLayoutAlgorithm: returns GridScrollWithOptionsLayoutAlgorithm when has options ---
-HWTEST_F(GridContentClipTest, GridClipCreateScrollLayoutAlgorithmWithOptions001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetLayoutOptions(GridLayoutOptions {});
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    auto algo = pattern_->CreateScrollLayoutAlgorithm(true, false, false, false);
-    auto withOptions = AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(algo);
-    EXPECT_TRUE(withOptions != nullptr);
-}
-
-// --- SetLayoutAlgorithmContentClip: sets BOUNDARY mode on algorithm ---
-HWTEST_F(GridContentClipTest, GridClipSetLayoutAlgorithmContentClipBoundary001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    auto algo = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
-    pattern_->SetLayoutAlgorithmContentClip(algo);
-    EXPECT_EQ(algo->contentClipMode_, ContentClipMode::BOUNDARY);
-}
-
-// --- SetLayoutAlgorithmContentClip: sets CUSTOM mode + shape on algorithm ---
-HWTEST_F(GridContentClipTest, GridClipSetLayoutAlgorithmContentClipCustom001, TestSize.Level1)
-{
-    auto shape = CreateCustomClipShape(0.0f, 900.0f);
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::CUSTOM, shape);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    auto algo = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
-    pattern_->SetLayoutAlgorithmContentClip(algo);
-    EXPECT_EQ(algo->contentClipMode_, ContentClipMode::CUSTOM);
-    EXPECT_TRUE(algo->clipShapeRect_ != nullptr);
-}
-
-// --- SetLayoutAlgorithmContentClip: no ContentClip -> resets safeAreaPad_ ---
-HWTEST_F(GridContentClipTest, GridClipSetLayoutAlgorithmContentClipNone001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    pattern_->safeAreaPad_ = ExpandEdges { 10.0f, 10.0f, 10.0f, 10.0f };
-    auto algo = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
-    pattern_->SetLayoutAlgorithmContentClip(algo);
-    EXPECT_EQ(algo->contentClipMode_, ContentClipMode::CONTENT_ONLY);
-    EXPECT_EQ(pattern_->safeAreaPad_.has_value(), false);
-}
-
-// --- PostponedTaskForIgnoreCustomized: returns true ---
-HWTEST_F(GridContentClipTest, GridClipPostponedTaskForIgnoreCustomized001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    EXPECT_EQ(pattern_->PostponedTaskForIgnoreCustomized(), true);
-}
-
-// --- PostponedTaskForIgnore: non-CONTENT_CLIP_SAFE_AREA -> default path, no crash ---
-HWTEST_F(GridContentClipTest, GridClipPostponedTaskForIgnoreDefault001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    pattern_->PostponedTaskForIgnore(LayoutSafeAreaBundleType::IGNORE_LAYOUT_SAFE_AREA);
-    SUCCEED();
-}
-
-// --- PostponedTaskForIgnore: CONTENT_CLIP_SAFE_AREA -> sets safeAreaPad_ ---
-HWTEST_F(GridContentClipTest, GridClipPostponedTaskForIgnoreSafeArea001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
-    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
-    CreateDone();
-
-    pattern_->safeAreaPad_.reset();
-    pattern_->PostponedTaskForIgnore(LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
-    EXPECT_EQ(pattern_->safeAreaPad_.has_value(), true);
+    EXPECT_GT(fireCount, 1) << "onScrollBarUpdate must fire again after scroll";
+    EXPECT_EQ(captured.Unit(), DimensionUnit::VP) << "offset argument must stay VP-unit after scroll";
+    EXPECT_FLOAT_EQ(captured.Value(), -halfLine) << "vp value equals the px anchor at dipScale 1";
 }
 } // namespace OHOS::Ace::NG

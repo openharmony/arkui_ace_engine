@@ -458,6 +458,29 @@ std::pair<int32_t, int32_t> NormalizedRange(std::optional<int32_t> start, std::o
     return std::make_pair(rangeStart, rangeEnd);
 }
 
+void ParseBuilderSpanInfo(const Opt_BuilderSpanInfo* info, SpanOptionBase& locOptions,
+    BuilderSpanRecord& builderSpanRecord)
+{
+    CHECK_NULL_VOID(info && info->tag != InteropTag::INTEROP_TAG_UNDEFINED);
+    builderSpanRecord.id = Converter::OptConvert<std::string>(info->value.id);
+    auto offsetOpt = Converter::OptConvert<int32_t>(info->value.offset);
+    if (offsetOpt && offsetOpt.value() >= 0) {
+        locOptions.offset = offsetOpt.value();
+    }
+}
+
+AccessibilitySpanOptions ConvertAccessibilitySpanOptions(const Ark_AccessibilitySpanOptions& src)
+{
+    AccessibilitySpanOptions result;
+    result.accessibilityTextOpt = Converter::OptConvert<std::string>(src.accessibilityText);
+    result.accessibilityDescriptionOpt = Converter::OptConvert<std::string>(src.accessibilityDescription);
+    auto accessibilityLevel = src.accessibilityLevel;
+    if (accessibilityLevel.tag != INTEROP_TAG_UNDEFINED) {
+        result.accessibilityLevelOpt = Converter::Convert<std::string>(accessibilityLevel.value);
+    }
+    return result;
+}
+
 template<>
 UpdateSpanStyle Convert(const Ark_RichEditorUpdateTextSpanStyleOptions& src)
 {
@@ -873,6 +896,43 @@ Opt_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
     auto customNode = CallbackHelper(*value).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
     return Converter::ArkValue<Opt_Int32>(peerImpl->AddBuilderSpanImpl(customNode, locOptions));
 }
+Opt_Int32 AddRichEditorBuilderSpanImpl(Ark_RichEditorController peer,
+                                       const Ark_RichEditorBuilderSpan* builderSpan,
+                                       const Opt_BuilderSpanInfo* info)
+{
+    auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Opt_Int32>(Ark_Empty()));
+    auto controller = (peerImpl->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_Int32>(Ark_Empty()));
+    CHECK_NULL_RETURN(builderSpan, Converter::ArkValue<Opt_Int32>(Ark_Empty()));
+    SpanOptionBase locOptions;
+    BuilderSpanRecord builderSpanRecord;
+    Converter::ParseBuilderSpanInfo(info, locOptions, builderSpanRecord);
+    const auto onAttachOpt = Converter::OptConvert<Callback_BuilderSpanInfo_Void>(builderSpan->onAttach);
+    if (onAttachOpt) {
+        builderSpanRecord.onAttach = [callback = CallbackHelper(onAttachOpt.value())](
+            const BuilderSpanInfo& spanInfo) {
+            callback.InvokeSync(Converter::ArkValue<Ark_BuilderSpanInfo>(spanInfo, Converter::FC));
+        };
+    }
+    const auto onDetachOpt = Converter::OptConvert<Callback_BuilderSpanInfo_Void>(builderSpan->onDetach);
+    if (onDetachOpt) {
+        builderSpanRecord.onDetach = [callback = CallbackHelper(onDetachOpt.value())](
+            const BuilderSpanInfo& spanInfo) {
+            callback.InvokeSync(Converter::ArkValue<Ark_BuilderSpanInfo>(spanInfo, Converter::FC));
+        };
+    }
+    if (builderSpan->accessibilitySpanOptions.tag != INTEROP_TAG_UNDEFINED) {
+        locOptions.accessibilityOptions =
+            Converter::ConvertAccessibilitySpanOptions(builderSpan->accessibilitySpanOptions.value);
+    }
+    auto pattern = peerImpl->GetPattern().Upgrade();
+    auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
+    auto customNode = CallbackHelper(builderSpan->builder).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
+    CHECK_NULL_RETURN(customNode, Converter::ArkValue<Opt_Int32>(Ark_Empty()));
+    return Converter::ArkValue<Opt_Int32>(
+        peerImpl->AddRichEditorBuilderSpanImpl(customNode, locOptions, builderSpanRecord));
+}
 Opt_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
                             const Ark_Resource* value,
                             const Opt_RichEditorSymbolSpanOptions* options)
@@ -954,6 +1014,22 @@ Opt_Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(
     return Converter::ArkValue<Opt_Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult>(values,
         Converter::FC);
 }
+Opt_Array_BuilderSpanInfo GetRichEditorBuilderSpansImpl(Ark_RichEditorController peer,
+                                                        const Opt_RichEditorRange* value)
+{
+    auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Opt_Array_BuilderSpanInfo>(Ark_Empty()));
+    auto controller = (peerImpl->GetTargetController()).Upgrade();
+    CHECK_NULL_RETURN(controller, Converter::ArkValue<Opt_Array_BuilderSpanInfo>(Ark_Empty()));
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Opt_Array_BuilderSpanInfo>(Ark_Empty()));
+    auto options = Converter::OptConvert<RangeOptions>(*value).value_or(RangeOptions());
+    auto range = Converter::NormalizedRange(options.start, options.end);
+    options.start = range.first;
+    options.end = range.second;
+    auto results = peerImpl->GetRichEditorBuilderSpansImpl(
+        options.start.value_or(0), options.end.value_or(INT_MAX));
+    return Converter::ArkValue<Opt_Array_BuilderSpanInfo>(results, Converter::FC);
+}
 Opt_Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
                                                       const Opt_RichEditorRange* value)
 {
@@ -1021,11 +1097,13 @@ const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccess
         RichEditorControllerAccessor::AddTextSpanImpl,
         RichEditorControllerAccessor::AddImageSpanImpl,
         RichEditorControllerAccessor::AddBuilderSpanImpl,
+        RichEditorControllerAccessor::AddRichEditorBuilderSpanImpl,
         RichEditorControllerAccessor::AddSymbolSpanImpl,
         RichEditorControllerAccessor::UpdateSpanStyleImpl,
         RichEditorControllerAccessor::UpdateParagraphStyleImpl,
         RichEditorControllerAccessor::DeleteSpansImpl,
         RichEditorControllerAccessor::GetSpansImpl,
+        RichEditorControllerAccessor::GetRichEditorBuilderSpansImpl,
         RichEditorControllerAccessor::GetParagraphsImpl,
         RichEditorControllerAccessor::GetSelectionImpl,
         RichEditorControllerAccessor::FromStyledStringImpl,

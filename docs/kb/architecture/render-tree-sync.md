@@ -78,7 +78,7 @@
 | 文档 | 稳定路径 | 与渲染树同步的关系 |
 |------|----------|------------------|
 | 渲染主流程规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-01-render-main-flow-spec.md` | 覆盖 FlushVsync 编排；延迟合并的渲染树重建由 `FlushRebuildRenderTree` 在 FlushVsync 前段执行 |
-| 渲染树同步规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-02-render-tree-sync-spec.md` | 覆盖 MarkNeedSyncRenderTree→RebuildRenderContextTree→ProcessRenderTreeDiff 全链路，isPendingState_ 生命周期约束 |
+| 渲染树同步规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-04-render-stage-spec.md` | 覆盖 MarkNeedSyncRenderTree→RebuildRenderContextTree→ProcessRenderTreeDiff 全链路，isPendingState_ 生命周期约束 |
 | 设计文档 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/design.md` | 记录基础渲染管线的模块边界和架构决策 |
 
 ## 常见问题定位
@@ -105,10 +105,10 @@
 
 - [基础渲染管线](basic-render-pipeline.md) — FlushVsync 编排与渲染树延迟合并重建时序
 - [布局框架](layout-framework.md) — FrameNode Measure/Layout，与渲染树同步在帧编排中的位置
-- [FrameNode](../capabilities/frame_node.md) — ArkTS FrameNode API，C++ 底层能力提供者
-- [RenderNode](../capabilities/render_node.md) — RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制（MountPolicy::MIXED 路径）
+- [FrameNode](../capabilities/frame-node.md) — ArkTS FrameNode API，C++ 底层能力提供者
+- [RenderNode](../capabilities/render-node.md) — RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制（MountPolicy::MIXED 路径）
 - [Image](../components/media/image.md) — ImagePattern::OnAttachToMainRenderTree 和 OnWindowHide 依赖 isPendingState_，受已知缺陷影响
-- [转场动画](../capabilities/transition_animation.md) — TransitionEffect 的转出动画通过 HasTransitionOutAnimation 影响可见子节点收集
-- [共享元素动画](../capabilities/geometry_transition.md) — GeometryTransition 触发二次布局和 isDeleteRsNode_ 传播
+- [转场动画](../capabilities/transition-animation.md) — TransitionEffect 的转出动画通过 HasTransitionOutAnimation 影响可见子节点收集
+- [共享元素动画](../capabilities/geometry-transition.md) — GeometryTransition 触发二次布局和 isDeleteRsNode_ 传播
 - [Overlay Capability](../capabilities/overlay-capability.md) — OverlayManager 通过 RebuildRenderContextTree 同步浮层节点
 - [同帧下树重新上树 isPendingState_ 状态错乱](../issues/lifecycle/ispending-state-render-tree-diff.md) — isPendingState_ 同帧下树重新上树问题型 KB

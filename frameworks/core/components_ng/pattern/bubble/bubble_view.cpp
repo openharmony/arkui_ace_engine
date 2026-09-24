@@ -294,7 +294,7 @@ bool BubbleView::ApplySystemMaterialForBubble(
 {
     renderContext->UpdateBackBlurStyle(std::nullopt);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    ViewAbstract::SetSystemMaterial(AceType::RawPtr(bubbleNode), AceType::RawPtr(systemMaterial));
+    ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(bubbleNode), AceType::RawPtr(systemMaterial));
     return true;
 }
 

@@ -246,6 +246,13 @@ public:
     virtual void NotifyDragEnd() {};
     virtual void NotifyPreDragStatus(const PreDragStatus preDragStatus) {};
 
+    // Whether the screen was locked when the drag's triggering touch down arrived.
+    virtual bool GetIsDownScreenLocked() const { return isDownScreenLocked_; }
+
+    // True only for a cross-lock drag: down unlocked, trigger locked. A drag that
+    // started and triggered entirely within a locked screen is NOT cross-lock.
+    virtual bool IsDragStartedAcrossScreenLock(const GestureEvent& info) const;
+
 
     void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered);
 
@@ -254,6 +261,10 @@ public:
     void GetThumbnailPixelMap(bool isSync);
 
     void RecordTouchDownPoint(const TouchEvent& downTouchEvent);
+
+    // Capture screen-locked state from the touch event: isDownScreenLocked_ on DOWN,
+    // isTriggerScreenLocked_ on every event.
+    void CaptureDownScreenLocked(const TouchEvent& touchEvent);
 
     const TouchEvent& GetTouchDownPoint();
 
@@ -264,6 +275,15 @@ public:
     void CallTimerCallback(const RefPtr<FrameNode>& frameNode);
     void SetExecTimerCallback(bool isExecCallback);
     void RemovePixelMap();
+
+    // Exposes the drag pan so that drag hosts (List/Grid item drag manager) can
+    // lock the dragging finger and let the host scroll pan escape it, which is
+    // what makes "one finger dragging + another finger scrolling" possible.
+    const RefPtr<PanRecognizer>& GetDragEventPanRecognizer() const
+    {
+        return panRecognizer_;
+    }
+
 protected:
     DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
 
@@ -275,6 +295,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
+
 protected:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
@@ -322,6 +343,10 @@ private:
     bool isRestartDrag_ = false;
     bool isNewFwk_ = false;
     bool isExecCallback_ = false;
+
+protected:
+    bool isDownScreenLocked_ = false;
+    bool isTriggerScreenLocked_ = false;
 };
 
 } // namespace OHOS::Ace::NG

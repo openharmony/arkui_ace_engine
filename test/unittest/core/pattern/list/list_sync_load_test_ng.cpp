@@ -40,9 +40,8 @@ ListItemModelNG ListSyncLoadTestNg::CreateListItem()
     SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(ITEM_MAIN_SIZE));
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
-        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
-    };
+    frameNode->measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>(
+        [](RefPtr<Kit::FrameNode>& node) { NG::MockPipelineContext::GetCurrent()->DecResponseTime(); });
     return itemModel;
 }
 

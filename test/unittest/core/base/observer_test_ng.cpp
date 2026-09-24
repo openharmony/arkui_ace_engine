@@ -2226,4 +2226,27 @@ HWTEST_F(ObserverTestNg, NotifyDidClickWithHandleFunc001, TestSize.Level1)
     UIObserverHandler::GetInstance().didClickHandleFunc_ = nullptr;
     g_didClickHandleFuncCalled = false;
 }
+
+/**
+ * @tc.name: NotifyDidClickWithHandleFunc002
+ * @tc.desc: Test NotifyDidClick with didClickHandleFunc_ set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, NotifyDidClickWithHandleFunc002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_ETS_TAG, 4006, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    GestureEvent gestureEventInfo;
+    ClickInfo clickInfo = ClickInfo(0);
+
+    g_didClickHandleFuncCalled = false;
+    UIObserverHandler::GetInstance().didClickHandleFunc_ =
+        [](AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+            const RefPtr<FrameNode>&) { g_didClickHandleFuncCalled = true; };
+
+    UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, frameNode);
+    EXPECT_TRUE(g_didClickHandleFuncCalled);
+    UIObserverHandler::GetInstance().didClickHandleFunc_ = nullptr;
+    g_didClickHandleFuncCalled = false;
+}
 }

@@ -124,7 +124,7 @@ public:
         bool isDelete)
     {
         if (cb == nullptr) {
-            TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani start to clear all %{public}s callback list",
+            TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "SubEvent op=off_all kit=ArkUI event=%{public}s",
                 eventType.c_str());
             for (auto& ref : fnList) {
                 env->GlobalReference_Delete(ref);

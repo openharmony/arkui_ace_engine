@@ -190,6 +190,8 @@ void PagePattern::BuildSharedTransitionMap() {}
 
 void PagePattern::ReloadPage() {}
 
+void PagePattern::RebuildPage() {}
+
 void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
 {
     firstBuildCallback_ = std::move(buildCallback);

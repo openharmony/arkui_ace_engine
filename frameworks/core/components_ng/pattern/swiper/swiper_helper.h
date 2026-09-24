@@ -31,7 +31,7 @@ public:
 
     static void DumpAdvanceInfo(SwiperPattern& swiper);
 
-    static std::string GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params);
+    static std::string GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params, int32_t themeScopeId);
     static std::string GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params,
         int32_t themeScopeId);
 
@@ -48,6 +48,8 @@ private:
         RefPtr<SwiperIndicatorLayoutProperty>& indicatorProps, bool isSidebarMiddle, bool isShowArrow);
     static void SetFakeDragImpl(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak);
     static void SetPreMakeItemsImpl(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak);
+    static void DotIndicatorWithThemeValueCheck(
+        std::unique_ptr<JsonValue>& json, const std::shared_ptr<SwiperParameters>& params, int32_t themeScopeId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_HELPER_H

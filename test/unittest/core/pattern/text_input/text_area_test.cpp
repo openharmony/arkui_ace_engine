@@ -16,6 +16,27 @@
 #include "text_area_base.h"
 #include "core/accessibility/accessibility_manager.h"
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t NEWLINE_SELECTION_START_INDEX = 2;
+constexpr int32_t NEWLINE_SELECTION_END_INDEX = 3;
+
+class NewlineCaretParagraph : public MockParagraph {
+    DECLARE_ACE_TYPE(NewlineCaretParagraph, MockParagraph);
+
+public:
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretMetrics, TextAffinity textAffinity, bool) override
+    {
+        if (extent == NEWLINE_SELECTION_END_INDEX && textAffinity == TextAffinity::DOWNSTREAM) {
+            caretMetrics = CaretMetricsF(OffsetF(0.0f, 20.0f), 20.0f);
+        } else {
+            caretMetrics = CaretMetricsF(OffsetF(20.0f, 0.0f), 20.0f);
+        }
+        return true;
+    }
+};
+} // namespace
+
 class TextFieldUXTest : public TextAreaBase {};
 
 /**
@@ -1943,5 +1964,34 @@ HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest003, TestSize.Level1)
     Color defaultColor = Color::BLACK;
     auto result = layoutProperty_->GetScrollBarColorValue(defaultColor);
     EXPECT_EQ(result, colorValue);
+}
+
+/**
+ * @tc.name: SelectedNewlineShowsTwoHandles001
+ * @tc.desc: TextArea keeps two handles on adjacent lines when only a newline is selected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SelectedNewlineShowsTwoHandles001, TestSize.Level1)
+{
+    CreateTextField("你好\n吃饭了吗");
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    auto paragraph = AceType::MakeRefPtr<NewlineCaretParagraph>();
+    controller->paragraph_ = paragraph;
+    controller->UpdateHandleIndex(NEWLINE_SELECTION_START_INDEX, NEWLINE_SELECTION_END_INDEX);
+
+    controller->CalculateHandleOffset();
+    EXPECT_LT(controller->GetFirstHandleRect().Top(), controller->GetSecondHandleRect().Top());
+
+    std::vector<RectF> newlineRect = { RectF(20.0f, 0.0f, 0.0f, 20.0f) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(NEWLINE_SELECTION_START_INDEX, NEWLINE_SELECTION_END_INDEX, _))
+        .WillOnce(SetArgReferee<2>(newlineRect));
+    pattern_->selectOverlay_->SetIsSingleHandle(false);
+    pattern_->selectOverlay_->UpdatePattern({});
+    EXPECT_FALSE(pattern_->selectOverlay_->IsSingleHandle());
+
+    controller->UpdateHandleIndex(NEWLINE_SELECTION_END_INDEX, NEWLINE_SELECTION_START_INDEX);
+    controller->CalculateHandleOffset();
+    EXPECT_GT(controller->GetFirstHandleRect().Top(), controller->GetSecondHandleRect().Top());
 }
 } // namespace OHOS::Ace::NG

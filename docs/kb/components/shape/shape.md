@@ -114,8 +114,8 @@ Shape、Rect、Circle、Ellipse、Line、Polyline、Polygon 和 Path **均已完
 
 ## 相关主题
 
-- Canvas：`docs/kb/components/shape/canvas.md`
-- OffscreenCanvas：`docs/kb/components/shape/offscreen_canvas.md`
-- Layout Framework：`docs/kb/architecture/layout-framework.md`
-- Layout Attributes：`docs/kb/capabilities/layout-attributes.md`
-- Image：`docs/kb/components/media/image.md`
+- [Canvas](canvas.md)
+- [OffscreenCanvas](offscreen-canvas.md)
+- [Layout Framework](../../architecture/layout-framework.md)
+- [Layout Attributes](../../capabilities/layout-attributes.md)
+- [Image](../media/image.md)

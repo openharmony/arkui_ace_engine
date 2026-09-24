@@ -53,6 +53,7 @@ private:
 };
 
 class DisplaySyncImpl : public OHOS::FFI::FFIData {
+    DECL_TYPE(DisplaySyncImpl, OHOS::FFI::FFIData)
 public:
     DisplaySyncImpl();
     ~DisplaySyncImpl() = default;
