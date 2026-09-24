@@ -35,7 +35,7 @@ def main():
         '// Generated from node_utils.cpp; do not edit.\n'
         '#include "interfaces/native/node/node_model.h"\n'
         '#include "interfaces/native/native_interface.h"\n'
-        + match.group(0) + '\n', encoding="utf-8")
+        f'{match.group(0)}\n', encoding="utf-8")
 
 
 if __name__ == "__main__":

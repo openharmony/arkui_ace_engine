@@ -28,6 +28,16 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+RefPtr<Container> GetPageTextContainer(int32_t instanceId)
+{
+    auto container = Container::GetContainer(instanceId);
+    // Container lookup can redirect plugin IDs to their parent; this API must not.
+    if (container && container->GetInstanceId() != instanceId) {
+        container.Reset();
+    }
+    return container;
+}
+
 #ifndef CROSS_PLATFORM
 bool AppendCarrier(const RefPtr<FrameNode>& frame, const RefPtr<PageTranslateNode>& carrier,
     PageTextJson& json, bool& first)
@@ -74,11 +84,7 @@ int32_t CollectPageText(int32_t instanceId, char** data, uint32_t* size, const c
 {
     *data = nullptr;
     *size = 0;
-    auto container = Container::GetContainer(instanceId);
-    // Container lookup can redirect plugin IDs to their parent; this API must not.
-    if (container && container->GetInstanceId() != instanceId) {
-        container.Reset();
-    }
+    auto container = GetPageTextContainer(instanceId);
     auto pipeline = container ? AceType::DynamicCast<PipelineContext>(container->GetPipelineContext()) : nullptr;
     if (!pipeline || pipeline->IsDestroyed()) {
         *reason = "UI context is invalid or destroyed.";
@@ -98,18 +104,19 @@ int32_t CollectPageText(int32_t instanceId, char** data, uint32_t* size, const c
 #ifndef CROSS_PLATFORM
         bool first = true;
         auto manager = pipeline->GetUiTranslateManagerImpl();
+        auto appendNode = [&](const WeakPtr<FrameNode>& node) {
+            if (!success) {
+                return;
+            }
+            auto frame = node.Upgrade();
+            CHECK_NULL_VOID(frame);
+            auto carrier = AceType::DynamicCast<PageTranslateNode>(frame->GetPattern());
+            CHECK_NULL_VOID(carrier);
+            success = AppendCarrier(frame, carrier, json, first);
+        };
         if (manager && success) {
             // Reuse the translation registry without starting reports or changing session state.
-            manager->ForEachArkUITranslateFrameNode([&](const WeakPtr<FrameNode>& node) {
-                if (!success) {
-                    return;
-                }
-                auto frame = node.Upgrade();
-                CHECK_NULL_VOID(frame);
-                auto carrier = AceType::DynamicCast<PageTranslateNode>(frame->GetPattern());
-                CHECK_NULL_VOID(carrier);
-                success = AppendCarrier(frame, carrier, json, first);
-            });
+            manager->ForEachArkUITranslateFrameNode(appendNode);
         }
 #endif
         if (!success || !json.Append("]}")) {

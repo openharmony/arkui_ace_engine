@@ -151,6 +151,7 @@ TEST_F(PageTextCapiTest, originalErrorChannelAvailabilityAndThreadIsolation)
     support = false;
     ArkUI_Context context { 1 };
     OH_ArkUI_NativeModule_UIJsonWrapper* result = nullptr;
+    // 500 is ARKUI_ERROR_CODE_CAPI_INIT_ERROR while the query implementation is unavailable.
     EXPECT_EQ(OH_ArkUI_NativeModule_UIAgentGetPageText(&context, &result), 500);
     EXPECT_EQ(result, nullptr);
     EXPECT_STREQ(OH_ArkUI_NativeModule_GetErrorMessage(), "");

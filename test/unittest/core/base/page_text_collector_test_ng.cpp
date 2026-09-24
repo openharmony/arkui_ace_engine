@@ -133,6 +133,32 @@ public:
         node->GetGeometryNode()->SetFrameSize(SizeF(100, 20));
         return node;
     }
+    RefPtr<RepeatVirtualScroll2Node> CreateRepeatVirtual2Node(int& callbacks)
+    {
+        return AceType::MakeRefPtr<RepeatVirtualScroll2Node>(1200, 8, 8, 0,
+            [&](IndexType, bool, bool) -> std::pair<RIDType, uint32_t> {
+                ++callbacks;
+                return { 0, 0 };
+            },
+            [&](IndexType, IndexType) {
+                ++callbacks;
+            },
+            [&](int32_t, int32_t, int32_t, int32_t, bool, bool) {
+                ++callbacks;
+            },
+            [&](IndexType, IndexType) {
+                ++callbacks;
+            },
+            [&]() {
+                ++callbacks;
+            },
+            [&]() {
+                ++callbacks;
+            },
+            [&]() {
+                ++callbacks;
+            });
+    }
     void Register(const RefPtr<FrameNode>& node)
     {
         pipeline->uiTranslateManager_->AddTranslateListener(WeakPtr<FrameNode>(node));
@@ -419,7 +445,9 @@ TEST_F(PageTextCollectorTest, realArkoalaLazyUsesMountedChildrenWithoutCallbacks
     }
     // Index 4 is the fifth fixture, requested only for the cache without adding it to the render tree.
     ASSERT_EQ(lazy->GetFrameChildByIndex(4, true, true, false), nodes[4]);
+    // Index 2 is the "hidden" fixture; make it inactive to exclude it from text collection.
     nodes[2]->SetActive(false);
+    // Index 3 is the "inactive" fixture; ensure it is excluded from text collection.
     nodes[3]->SetActive(false);
     lazy->RequestSyncTree();
     const int before = callbacks;
@@ -443,29 +471,7 @@ TEST_F(PageTextCollectorTest, realArkoalaLazyUsesMountedChildrenWithoutCallbacks
 TEST_F(PageTextCollectorTest, realRepeatVirtual2PreservesOrderAndCacheState)
 {
     int callbacks = 0;
-    auto repeat = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(1200, 8, 8, 0,
-        [&](IndexType, bool, bool) -> std::pair<RIDType, uint32_t> {
-            ++callbacks;
-            return { 0, 0 };
-        },
-        [&](IndexType, IndexType) {
-            ++callbacks;
-        },
-        [&](int32_t, int32_t, int32_t, int32_t, bool, bool) {
-            ++callbacks;
-        },
-        [&](IndexType, IndexType) {
-            ++callbacks;
-        },
-        [&]() {
-            ++callbacks;
-        },
-        [&]() {
-            ++callbacks;
-        },
-        [&]() {
-            ++callbacks;
-        });
+    auto repeat = CreateRepeatVirtual2Node(callbacks);
     page->AddChild(repeat);
     repeat->onMainTree_ = true;
     std::vector<RefPtr<FrameNode>> nodes {
