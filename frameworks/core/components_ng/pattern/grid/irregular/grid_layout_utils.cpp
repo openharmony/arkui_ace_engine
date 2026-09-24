@@ -60,7 +60,7 @@ void GridLayoutUtils::PreloadGridItems(
     const bool taskAdded = pattern->HasPreloadItemList();
     pattern->SetPreloadItemList(std::move(items));
     if (taskAdded) {
-        // task already in queue, only need to update item list
+        // task already in queue, only need to update the item list
         return;
     }
     PreloadGridItemsHelper(pattern, buildCb);
