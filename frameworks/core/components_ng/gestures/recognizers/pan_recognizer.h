@@ -147,7 +147,7 @@ public:
 
     // Activated externally as well: enables escape mode on this Pan and
     // immediately releases any of the listed fingers that we are tracking.
-    void SetEscapeModeForPan(const std::unordered_set<int32_t>& existingFingers);
+    void SetEscapeModeForPan(const std::unordered_set<int32_t>& existingFingers, bool toEntityManager = false);
 
     void SetScrollEscapeForPan();
 

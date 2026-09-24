@@ -66,11 +66,25 @@ void LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(
 
 void LazyVGridLayoutModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)
 {
+    // columnsTemplate(string) and itemFillPolicy are two forms of the same attribute: last-set-wins (same as Grid).
+    ACE_RESET_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ItemFillPolicy, frameNode);
     if (value.empty()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, "1fr", frameNode);
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, value, frameNode);
+}
+
+void LazyVGridLayoutModelStatic::SetItemFillPolicy(FrameNode* frameNode, const std::optional<PresetFillType>& policy)
+{
+    if (policy.has_value()) {
+        // itemFillPolicy resets the fixed string template so only one form is effective at a time (same as Grid).
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ItemFillPolicy, policy.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            LazyGridLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
 }
 
 void LazyGridLayoutModelStatic::SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle)

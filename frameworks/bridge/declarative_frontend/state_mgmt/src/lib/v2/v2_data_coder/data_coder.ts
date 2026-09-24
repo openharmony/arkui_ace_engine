@@ -30,7 +30,7 @@ class DataCoder {
   /**
    * Serialize an object to a JSON2
    */
-  public static stringify<T>(value: T, forceLegacyFormat: boolean = false): string {
+  public static stringify<T>(value: T, forceLegacyFormat: boolean = false, ignoreReadOnlyProperties: boolean = false): string {
     if (forceLegacyFormat) {
       return JSONCoder.stringify(value);
     }
@@ -39,7 +39,7 @@ class DataCoder {
       ? UIUtilsImpl.instance().getTarget(value)
       : value;
 
-    const result = this.FORMAT_TAG + JSON2.stringify(origValue);
+    const result = this.FORMAT_TAG + JSON2.stringify(origValue, ignoreReadOnlyProperties);
 
     if (ObserveV2.IsMakeObserved(value)) {
       DataCoder.touchAll(value as unknown as object);
@@ -57,11 +57,34 @@ class DataCoder {
       : JSON.parse(text); // fallback to legacy format;
   }
 
+  static isReadOnlyGetter(target: object, prop: string): boolean {
+    let hasGetter = false;
+    let hasSetter = false;
+    let current: object | null = target;
+    while (current !== null && current !== undefined) {
+      const desc = Object.getOwnPropertyDescriptor(current, prop);
+      if (desc) {
+        if (typeof desc.get === 'function') {
+          hasGetter = true;
+        }
+        if (typeof desc.set === 'function') {
+          hasSetter = true;
+        }
+        if (hasGetter || hasSetter) {
+          break;
+        }
+      }
+      current = Object.getPrototypeOf(current);
+    }
+    return hasGetter && !hasSetter;
+  }
+
   /**
    * Restore the state of 'source' object into 'target' object(s), restore aliased prop names
    */
   public static restoreTo<T extends object, S extends object>(
-    target: T | T[], source: T | T[], defaultSubCreator?: StorageDefaultCreator<S>
+    target: T | T[], source: T | T[], defaultSubCreator?: StorageDefaultCreator<S>,
+    ignoreReadOnlyProperties: boolean = false
   ): T | T[] {
     const origTarget = ObserveV2.IsMakeObserved(target)
       ? UIUtilsImpl.instance().getTarget(target)
@@ -83,11 +106,11 @@ class DataCoder {
       if (!nullOrUndef(source) && globalThis.isSendable(source)) {
         this.throwIfNotSendable(origTarget);
         // The root is Sendable; only properties are restored
-        this.restoreObject(origTarget, source, { factory });
+        this.restoreObject(origTarget, source, { factory }, ignoreReadOnlyProperties);
       } else {
         const dst = { root: origTarget };
         const src = { root: source };
-        this.restorePropValue(dst, 'root', src, 'root', { factory });
+        this.restorePropValue(dst, 'root', src, 'root', { factory }, ignoreReadOnlyProperties);
       }
     } finally {
       this.visitedTargets_.clear();
@@ -133,7 +156,7 @@ class DataCoder {
 
   // Recursively restore object 'source' into 'target' considering TransformOptions
   // opts = { alias?, factory?, disabled? }
-  private static restoreObject(target: any, source: any, opts: TransformOptions<any>): void {
+  private static restoreObject(target: any, source: any, opts: TransformOptions<any>, ignoreReadOnlyProperties: boolean = false): void {
     // meta = { [prop]: { alias, factory, disabled } }
     const meta = Meta.gets(target) as Record<string, TransformOptions<any>>;
 
@@ -163,7 +186,7 @@ class DataCoder {
       // we don't allow collections directly nested inside other collections
       this.throwIfCollection(newValue);
 
-      this.restoreObject(newValue, value, opts);
+      this.restoreObject(newValue, value, opts, ignoreReadOnlyProperties);
       return newValue;
     };
 
@@ -231,9 +254,12 @@ class DataCoder {
     if (source && typeof source === 'object') {
       for (const [key, val] of Object.entries(source)) {
         const targetProp = alias2prop.get(key) ?? key;
+        if (ignoreReadOnlyProperties === true && DataCoder.isReadOnlyGetter(target, targetProp)) {
+          continue;
+        }
         const sourceProp = meta[targetProp]?.alias ?? targetProp;
         const propOptions = meta[targetProp] || {};
-        this.restorePropValue(target, targetProp, source, sourceProp, propOptions);
+        this.restorePropValue(target, targetProp, source, sourceProp, propOptions, ignoreReadOnlyProperties);
       }
     }
   }
@@ -241,8 +267,12 @@ class DataCoder {
   // Restore an property value from 'source' to 'target' considering TransformOptions
   // opts = { alias, factory, disabled }
   private static restorePropValue(
-    target: any, targetProp: string, source: any, sourceProp: string, opts: TransformOptions<any> = {}
+    target: any, targetProp: string, source: any, sourceProp: string, opts: TransformOptions<any> = {},
+    ignoreReadOnlyProperties: boolean = false
   ): void {
+    if (ignoreReadOnlyProperties === true && DataCoder.isReadOnlyGetter(target, targetProp)) {
+      return;
+    }
     const srcVal = source[sourceProp];
     const tgtVal = target[targetProp];
 
@@ -276,7 +306,7 @@ class DataCoder {
     }
 
     if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].includes(srcVal?.constructor)) {
-      this.restoreObject(tgtVal, srcVal, opts);
+      this.restoreObject(tgtVal, srcVal, opts, ignoreReadOnlyProperties);
       return;
     }
 
@@ -309,7 +339,7 @@ class DataCoder {
     if (nullOrUndef(tgtVal) && opts.factory) {
       const clazz = opts.factory(srcVal);
       target[targetProp] = clazz ? new clazz() : {};
-      this.restoreObject(target[targetProp], srcVal, {});
+      this.restoreObject(target[targetProp], srcVal, {}, ignoreReadOnlyProperties);
       return;
     }
 
@@ -325,11 +355,11 @@ class DataCoder {
     if (tgtVal.constructor !== srcVal.constructor && opts.factory !== undefined) {
       const clazz = opts.factory(srcVal)
       target[targetProp] = clazz ? new clazz() : {};
-      this.restoreObject(target[targetProp], srcVal, {});
+      this.restoreObject(target[targetProp], srcVal, {}, ignoreReadOnlyProperties);
       return;
     }
 
-    this.restoreObject(tgtVal, srcVal, opts);
+    this.restoreObject(tgtVal, srcVal, opts, ignoreReadOnlyProperties);
   }
 
   // Ensure target is instanceof the clazz

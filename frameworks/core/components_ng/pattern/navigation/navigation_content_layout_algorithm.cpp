@@ -61,6 +61,11 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 continue;
             }
             if (!navDestinationNode->IsVisible()) {
+                // Skip measuring invisible NavDestination, but still apply the
+                // layout constraint so its layout property stays consistent
+                // with the parent when it becomes visible again.
+                auto constraint = navDestinationNode->AdjustLayoutConstarintIfNeeded(layoutConstraint);
+                child->ApplyConstraintWithoutMeasure(constraint);
                 continue;
             }
             UpdatePropertyIfNeedForceMeasure(navDestinationNode);

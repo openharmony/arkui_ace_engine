@@ -68,6 +68,9 @@ const std::string WORD_BREAK_ATTR = "wordBreak";
 const std::string LINE_BREAK_STRATEGY_ATTR = "lineBreakStrategy";
 const std::string ELLIPSIS_MODE_ATTR = "ellipsisMode";
 const std::string TEXT_SELECTABLE_ATTR = "textSelectable";
+const std::string STROKE_WIDTH_ATTR = "strokeWidth";
+const std::string STROKE_COLOR_ATTR = "strokeColor";
+const std::string STROKE_JOIN_STYLE_ATTR = "strokeJoinStyle";
 const auto RES_NAME = NamedResourceId("aa.bb.cc", ResourceType::COLOR);
 const auto RES_NAME1 = NamedResourceId("aa.bb.cc", ResourceType::FLOAT);
 
@@ -1520,5 +1523,101 @@ HWTEST_F(TextModifierTest, setMarqueeOptionsTestEmpty, TestSize.Level1)
     // Case 2
     auto marqueeOptions = ArkValue<Opt_TextMarqueeOptions>();
     modifier_->setMarqueeOptions(node_, &marqueeOptions);
+}
+
+/*
+ * @tc.name: setStrokeWidthTest
+ * @tc.desc: Sets the text stroke width with valid values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setStrokeWidthTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setStrokeWidth, nullptr);
+    // Positive width: outlined text.
+    auto positiveWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(
+        Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 2.5f));
+    modifier_->setStrokeWidth(node_, &positiveWidth);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto checkVal1 = GetAttrValue<std::string>(jsonValue, STROKE_WIDTH_ATTR);
+    EXPECT_THAT(checkVal1, Eq("2.50px"));
+
+    // Negative width: solid text.
+    auto negativeWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(
+        Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_VP, -1.5f));
+    modifier_->setStrokeWidth(node_, &negativeWidth);
+    jsonValue = GetJsonValue(node_);
+    auto checkVal2 = GetAttrValue<std::string>(jsonValue, STROKE_WIDTH_ATTR);
+    EXPECT_THAT(checkVal2, Eq("-1.50vp"));
+
+    // Reset restores the default value 0.
+    auto undefinedWidth = Converter::ArkValue<Opt_LengthMetricsProxy>();
+    modifier_->setStrokeWidth(node_, &undefinedWidth);
+    jsonValue = GetJsonValue(node_);
+    auto checkVal3 = GetAttrValue<std::string>(jsonValue, STROKE_WIDTH_ATTR);
+    EXPECT_THAT(checkVal3, Eq("0.00px"));
+
+    // Percentage values are not supported, reset to default.
+    auto percentWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(
+        Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PERCENT, 50.f));
+    modifier_->setStrokeWidth(node_, &percentWidth);
+    jsonValue = GetJsonValue(node_);
+    auto checkVal4 = GetAttrValue<std::string>(jsonValue, STROKE_WIDTH_ATTR);
+    EXPECT_THAT(checkVal4, Eq("0.00px"));
+}
+
+/*
+ * @tc.name: setStrokeColorTest
+ * @tc.desc: Sets the text stroke color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setStrokeColorTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setStrokeColor, nullptr);
+    const auto color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN);
+    modifier_->setStrokeColor(node_, &color);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto checkVal1 = GetAttrValue<std::string>(jsonValue, STROKE_COLOR_ATTR);
+    EXPECT_THAT(checkVal1, Eq("#FF008000"));
+
+    // Reset restores the default value (font color).
+    auto undefinedColor = Converter::ArkValue<Opt_ResourceColor>();
+    modifier_->setStrokeColor(node_, &undefinedColor);
+    jsonValue = GetJsonValue(node_);
+    auto checkVal2 = GetAttrValue<std::string>(jsonValue, STROKE_COLOR_ATTR);
+    EXPECT_TRUE(checkVal2.has_value());
+}
+
+/*
+ * @tc.name: setStrokeJoinStyleTest
+ * @tc.desc: Sets the join style of the text stroke.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setStrokeJoinStyleTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setStrokeJoinStyle, nullptr);
+    auto inputVal = Converter::ArkValue<Opt_StrokeJoinStyle>(ARK_STROKE_JOIN_STYLE_MITER_JOIN);
+    modifier_->setStrokeJoinStyle(node_, &inputVal);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto checkVal1 = GetAttrValue<std::string>(jsonValue, STROKE_JOIN_STYLE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("MITER_JOIN"));
+
+    inputVal = Converter::ArkValue<Opt_StrokeJoinStyle>(ARK_STROKE_JOIN_STYLE_ROUND_JOIN);
+    modifier_->setStrokeJoinStyle(node_, &inputVal);
+    jsonValue = GetJsonValue(node_);
+    auto checkVal2 = GetAttrValue<std::string>(jsonValue, STROKE_JOIN_STYLE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("ROUND_JOIN"));
+
+    inputVal = Converter::ArkValue<Opt_StrokeJoinStyle>(ARK_STROKE_JOIN_STYLE_BEVEL_JOIN);
+    modifier_->setStrokeJoinStyle(node_, &inputVal);
+    jsonValue = GetJsonValue(node_);
+    auto checkVal3 = GetAttrValue<std::string>(jsonValue, STROKE_JOIN_STYLE_ATTR);
+    EXPECT_THAT(checkVal3, Eq("BEVEL_JOIN"));
+
+    // Reset restores the default value MITER_JOIN.
+    auto undefinedVal = Converter::ArkValue<Opt_StrokeJoinStyle>();
+    modifier_->setStrokeJoinStyle(node_, &undefinedVal);
+    jsonValue = GetJsonValue(node_);
+    auto checkVal4 = GetAttrValue<std::string>(jsonValue, STROKE_JOIN_STYLE_ATTR);
+    EXPECT_THAT(checkVal4, Eq("MITER_JOIN"));
 }
 }

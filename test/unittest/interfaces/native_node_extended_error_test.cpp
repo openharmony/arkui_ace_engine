@@ -380,6 +380,7 @@ HWTEST_F(
     ASSERT_NE(layoutManager, nullptr);
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     layoutManager->node = &node;
     ArkUI_ErrorCode result =
         OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(layoutManager, 0.0, 0.0, nullptr);
@@ -400,6 +401,7 @@ HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterPositionAtCo
     ASSERT_NE(layoutManager, nullptr);
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     layoutManager->node = &node;
     ArkUI_ErrorCode result = OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding(
         layoutManager, 0.0, 0.0, OH_ARKUI_TEXT_ENCODING_UTF8, nullptr);
@@ -522,6 +524,7 @@ HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetGlyphRangeForCharacte
     ASSERT_NE(layoutManager, nullptr);
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     layoutManager->node = &node;
     ArkUI_Boundary dummyRange(0, 0);
     OH_Drawing_Range* charRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);
@@ -544,6 +547,7 @@ HWTEST_F(
     ASSERT_NE(layoutManager, nullptr);
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     layoutManager->node = &node;
     ArkUI_Boundary dummyRange(0, 0);
     OH_Drawing_Range* glyphRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);
@@ -603,6 +607,7 @@ HWTEST_F(NativeNodeExtendedErrorTest,
     ASSERT_NE(layoutManager, nullptr);
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     layoutManager->node = &node;
     ArkUI_Boundary dummyRange(0, 0);
     OH_Drawing_Range* charRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);
@@ -662,6 +667,7 @@ HWTEST_F(NativeNodeExtendedErrorTest, TextLayoutManager_GetCharacterRangeForGlyp
     ASSERT_NE(layoutManager, nullptr);
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     layoutManager->node = &node;
     ArkUI_Boundary dummyRange(0, 0);
     OH_Drawing_Range* glyphRange = reinterpret_cast<OH_Drawing_Range*>(&dummyRange);

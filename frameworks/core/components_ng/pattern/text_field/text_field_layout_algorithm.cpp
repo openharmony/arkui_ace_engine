@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
 #endif
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
+#include "core/components_ng/pattern/common_text/counter_decorator.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
@@ -760,14 +761,7 @@ float TextFieldLayoutAlgorithm::CalculateContentHeight(const LayoutConstraintF& 
 
 void TextFieldLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto counterDecorator = pattern->GetCounterDecorator();
-    CHECK_NULL_VOID(counterDecorator);
-    counterDecorator->LayoutDecorator();
+    CounterDecorator::LayoutCounterNode(layoutWrapper);
 }
 
 void TextFieldLayoutAlgorithm::ErrorLayout(LayoutWrapper* layoutWrapper)

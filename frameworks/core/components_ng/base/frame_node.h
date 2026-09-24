@@ -20,10 +20,11 @@
 #include <functional>
 #include <list>
 #include <mutex>
-#include <string_view>
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <string_view>
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "ui/base/modifier_property.h"
@@ -33,6 +34,7 @@
 #include "base/geometry/ng/vector.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node_extension.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -634,6 +636,11 @@ public:
 
     void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
 
+    bool HitTestMouseTarget(const MouseEvent& event, const PointF& globalPoint, const PointF& parentLocalPoint,
+        const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist = nullptr);
+    bool IsMouseTargetHit(const MouseEvent& event, const PointF& parentRevertPoint,
+        const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion);
+
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
         TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
@@ -705,12 +712,12 @@ public:
 
     std::string& GetNodeName()
     {
-        return nodeName_;
+        return GetExtensionData().nodeName;
     }
 
     void SetNodeName(std::string& nodeName)
     {
-        nodeName_ = nodeName;
+        GetExtensionData().nodeName = nodeName;
     }
 
     void OnWindowShow() override;
@@ -840,6 +847,7 @@ public:
     void NotifyPageSceneVisibilityChanged();
     void NotifyPageSceneActiveChanged();
     void NotifyPageSceneFocusabilityChanged();
+    void NotifyPageSceneOpacityChanged();
 
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, const std::string& tag)
     {
@@ -1217,6 +1225,25 @@ public:
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
 
+    // UI thread only: lazy initialization is not thread-safe.
+    FrameNodeExtension& GetExtensionData()
+    {
+        if (!extensionData_) {
+            extensionData_ = std::make_unique<FrameNodeExtension>();
+        }
+        return *extensionData_;
+    }
+
+    const FrameNodeExtension* GetConstExtensionData() const
+    {
+        return extensionData_.get();
+    }
+
+    FrameNodeExtension* GetMutableExtensionData()
+    {
+        return extensionData_.get();
+    }
+
     ExtensionHandler* GetExtensionHandler() const;
 
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler);
@@ -1299,6 +1326,11 @@ public:
     }
 
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override;
+
+    void SetGeometryTransitionNeedLayout(bool geometryTransitionNeedLayout)
+    {
+        geometryTransitionNeedLayout_ = geometryTransitionNeedLayout;
+    }
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
 
@@ -1362,7 +1394,6 @@ public:
     void MarkAndCheckNewOpIncNode(Axis axis);
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
-    void GetInspectorValue() override;
     void NotifyWebPattern(bool isRegister) override;
 
     FrameNodeChangeInfoFlag GetChangeInfoFlag()
@@ -1646,6 +1677,8 @@ protected:
     void OnCollectRemoved() override;
 
 private:
+    void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility, bool notifyPageScene);
+
     static bool ShouldDetectAceObjTypeConvertion();
     void DispatchAreaChangeWithThrottle(const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
     void GetCurrentAreaChangeInfo(
@@ -1792,6 +1825,8 @@ private:
 
     const CacheVisibleRectResult& GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
+    void LogCacheVisibleRect(const CacheVisibleRectResult& result, bool logFlag) const;
+
     const CacheVisibleRectResult& CalculateCacheVisibleRect(const CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
         uint64_t timestamp);
@@ -1843,8 +1878,8 @@ private:
 
     std::function<void(const ConfigurationChange& configurationChange)> configurationUpdateCallback_;
     std::function<void()> colorModeUpdateCallback_;
-    std::function<void(int32_t)> ndkColorModeUpdateCallback_;
-    std::function<void(float, float)> ndkFontUpdateCallback_;
+    std::unique_ptr<std::function<void(int32_t)>> ndkColorModeUpdateCallback_;
+    std::unique_ptr<std::function<void(float, float)>> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<SmartGestureProperty> smartGestureProperty_;
     bool hasAccessibilityVirtualNode_ = false;
@@ -1863,10 +1898,8 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::shared_ptr<OffsetF> lastHostParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
+    std::unique_ptr<FrameNodeExtension> extensionData_;
     std::set<std::string> allowDrop_;
-    std::function<void()> removeCustomProperties_;
-    std::function<std::string(const std::string& key)> getCustomProperty_;
-    std::function<std::string()> getCustomPropertyMapFunc_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1908,8 +1941,6 @@ private:
     // should not seen by preview inspector or accessibility
     bool isInternal_ = false;
 
-    std::string nodeName_;
-
     ColorMode colorMode_ = ColorMode::LIGHT;
 
     bool enableClickSoundEffect_ = true;
@@ -1933,6 +1964,7 @@ private:
     bool checkboxFlag_ = false;
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
+    bool geometryTransitionNeedLayout_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
     bool dragHitTestBlock_ = false;
@@ -1963,11 +1995,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
-
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
-
-    std::map<std::string, std::function<void()>> destroyCallbacks_;
 
 #ifndef CROSS_PLATFORM
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
@@ -1979,12 +2007,6 @@ private:
     std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
-    struct onSizeChangeDumpInfo {
-        int64_t onSizeChangeTimeStamp;
-        RectF lastFrameRect;
-        RectF currFrameRect;
-    };
-    std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
     FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
     std::optional<RectF> syncedFramePaintRect_;
@@ -1993,7 +2015,7 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
-    std::function<void(RefPtr<Kit::FrameNode>&)> measureCallback_;
+    std::unique_ptr<std::function<void(RefPtr<Kit::FrameNode>&)>> measureCallback_;
 
     bool topWindowBoundary_ = false;
 

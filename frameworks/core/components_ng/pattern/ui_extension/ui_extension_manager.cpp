@@ -233,19 +233,20 @@ void UIExtensionManager::AddAliveUIExtension(
     aliveSecurityUIExtensions_.try_emplace(nodeId, uiExtension);
 }
 
-void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason)
 {
     for (const auto& it : aliveUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
-            uiExtension->DispatchOriginAvoidArea(avoidArea, type);
+            uiExtension->DispatchOriginAvoidArea(avoidArea, type, reason);
         }
     }
 
     for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
-            uiExtension->DispatchOriginAvoidArea(avoidArea, type);
+            uiExtension->DispatchOriginAvoidArea(avoidArea, type, reason);
         }
     }
 }

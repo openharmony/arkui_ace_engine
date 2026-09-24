@@ -463,6 +463,15 @@ void WebModelImpl::SetScaleChangeId(std::function<void(const BaseEventInfo* info
     webComponent->SetScaleChangeId(eventMarker);
 }
 
+void WebModelImpl::SetZoomChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetZoomChangeId(eventMarker);
+}
+
 void WebModelImpl::SetScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -637,6 +646,13 @@ void WebModelImpl::SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
+}
+
+void WebModelImpl::SetTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetTransformRotateAndSkewEnabled(isTransformRotateAndSkewEnabled);
 }
 
 void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)

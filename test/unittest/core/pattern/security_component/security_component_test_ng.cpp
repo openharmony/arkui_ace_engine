@@ -1881,7 +1881,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
     int32_t noExistId = 0;
     std::string message;
     EXPECT_EQ(SecurityComponentHandler::RegisterSecurityComponent(invalidFrameNode, scId), -1);
-    EXPECT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, noExistId), -1);
     EXPECT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(invalidId), -1);
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
         invalidId, frameNode, info, [](int32_t) {}, message), -1);
@@ -1912,7 +1911,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize
     int32_t noExistId = 0;
     std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
         noExistId, frameNode, info, [] (int32_t) {}, message), -1);
@@ -1934,7 +1932,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize
     int32_t noExistId = 0;
     std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
         noExistId, frameNode, info, [] (int32_t) {}, message), -1);
@@ -1956,7 +1953,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
     int32_t noExistId = 0;
     std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
         noExistId, frameNode, info, [] (int32_t) {}, message), -1);

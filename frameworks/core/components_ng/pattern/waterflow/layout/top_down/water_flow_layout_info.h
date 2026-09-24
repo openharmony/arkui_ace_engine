@@ -258,6 +258,7 @@ private:
 
     int32_t FindStartIndex(float viewStartBound) const;
     bool IsStartIndexCandidate(float itemStart, float itemSize, float viewStartBound) const;
+    static bool IsReportStartIndexCandidate(float itemEnd, float itemSize, float reportStartBound);
     void UpdateReportRangeWithItems(const ItemMap::mapped_type& crossItems, ReportRangeContext& reportRange) const;
 
     inline float TopMargin() const

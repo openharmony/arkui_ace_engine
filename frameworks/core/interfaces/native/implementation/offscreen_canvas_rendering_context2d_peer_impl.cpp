@@ -21,13 +21,8 @@
 
 using namespace OHOS::Ace;
 namespace OHOS::Ace::NG::GeneratedModifier {
-std::mutex OffscreenCanvasRenderingContext2DPeerImpl::mutex_;
-std::unordered_map<uint32_t, RefPtr<AceType>> OffscreenCanvasRenderingContext2DPeerImpl::offscreenPatternMap_;
-uint32_t OffscreenCanvasRenderingContext2DPeerImpl::offscreenPatternCount_ = 0;
-
 OffscreenCanvasRenderingContext2DPeerImpl::OffscreenCanvasRenderingContext2DPeerImpl()
 {
-    id_ = offscreenPatternCount_;
     auto* bridge = GetCanvasRuntimeBridgeFromModule();
     if (bridge && bridge->createOffscreenCanvasRenderingContext2DModel) {
         renderingContext2DModel_ = bridge->createOffscreenCanvasRenderingContext2DModel();
@@ -49,7 +44,6 @@ void OffscreenCanvasRenderingContext2DPeerImpl::SetOptions(
         auto offscreenPattern = bridge->createOffscreenPattern(round(width), round(height));
         CHECK_NULL_VOID(offscreenPattern);
         SetOffscreenPattern(offscreenPattern);
-        AddOffscreenCanvasPattern(offscreenPattern);
     }
     if (optSettings && optSettings.value() && optSettings.value()->antialias) {
         bool anti = optSettings.value()->antialias.value();
@@ -58,16 +52,10 @@ void OffscreenCanvasRenderingContext2DPeerImpl::SetOptions(
     }
     SetDensity();
 }
-void OffscreenCanvasRenderingContext2DPeerImpl::RemoveOptions()
-{
-    uint32_t contextId = GetId();
-    std::lock_guard<std::mutex> lock(mutex_);
-    offscreenPatternMap_.erase(contextId);
-}
 ImageBitmapPeer* OffscreenCanvasRenderingContext2DPeerImpl::TransferToImageBitmap()
 {
     ContainerScope scope(instanceId_);
-    auto offscreenCanvasPattern = GetOffscreenPattern(id_);
+    auto offscreenCanvasPattern = GetOffscreenPattern();
     CHECK_NULL_RETURN(offscreenCanvasPattern, nullptr);
     auto* bridge = GetCanvasRuntimeBridgeFromModule();
     CHECK_NULL_RETURN(bridge, nullptr);

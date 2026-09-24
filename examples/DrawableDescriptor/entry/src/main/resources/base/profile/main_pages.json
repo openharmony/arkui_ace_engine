@@ -19,6 +19,7 @@
     "pages/LayeredDrawableDescriptorGetMaskClipPath",
     "pages/LayeredDrawableDescriptorSetBlendMode",
     "pages/AnimationStopModeTest",
-    "pages/AnimatedDrawableDescriptorTestBase64"
+    "pages/AnimatedDrawableDescriptorTestBase64",
+    "pages/DrawableDescriptorFullApiTest"
   ]
 }

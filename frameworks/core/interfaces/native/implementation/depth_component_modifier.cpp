@@ -130,7 +130,11 @@ void SetDepthComponentOptionsImpl(Ark_NativePointer node,
     if (options && options->tag != INTEROP_TAG_UNDEFINED) {
         auto depthSpace = Converter::OptConvert<OHOS::Ace::DepthSpaceType>(options->value.depthSpace);
         if (depthSpace) {
-            DepthComponentModel::SetDepthSpace(frameNode, *depthSpace);
+            auto depthSpaceValue = static_cast<int32_t>(*depthSpace);
+            if (depthSpaceValue >= static_cast<int32_t>(OHOS::Ace::DepthSpaceType::INSTANCE) &&
+                depthSpaceValue <= static_cast<int32_t>(OHOS::Ace::DepthSpaceType::GLOBAL)) {
+                DepthComponentModel::SetDepthSpace(frameNode, *depthSpace);
+            }
         }
         auto render3DScale = Converter::OptConvert<float>(options->value.render3DScale);
         if (render3DScale && GreatNotEqual(*render3DScale, 0.0f) && LessOrEqual(*render3DScale, 1.0f)) {

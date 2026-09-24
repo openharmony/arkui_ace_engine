@@ -19,6 +19,8 @@
 
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
+#include "lattice_napi/js_lattice.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -425,6 +427,122 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj)
     }
     void* objectNapi = nullptr;
     napi_unwrap(env, napiValue, &objectNapi);
+    return objectNapi;
+#else
+    return nullptr;
+#endif
+}
+
+namespace {
+void ParseImageSpanResizableSlice(const JSRef<JSObject>& resizableObj,
+    std::optional<ImageResizableSlice>& slice)
+{
+    auto sliceValue = resizableObj->GetProperty("slice");
+    if (!sliceValue->IsObject()) {
+        return;
+    }
+    auto sliceObj = JSRef<JSObject>::Cast(sliceValue);
+    if (sliceObj->IsEmpty()) {
+        return;
+    }
+    ImageResizableSlice sliceResult;
+    static const char* const edgeKeys[] = { "left", "top", "right", "bottom" };
+    for (uint32_t i = 0; i < sizeof(edgeKeys) / sizeof(edgeKeys[0]); i++) {
+        auto sliceSize = sliceObj->GetProperty(edgeKeys[i]);
+        CalcDimension sliceDimension;
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(sliceSize, sliceDimension, resObj)) {
+            continue;
+        }
+        if (!sliceDimension.IsValid()) {
+            continue;
+        }
+        switch (i) {
+            case 0:
+                sliceResult.left = sliceDimension;
+                break;
+            case 1:
+                sliceResult.top = sliceDimension;
+                break;
+            case 2:
+                sliceResult.right = sliceDimension;
+                break;
+            case 3:
+                sliceResult.bottom = sliceDimension;
+                break;
+            default:
+                break;
+        }
+    }
+    slice = sliceResult;
+}
+
+void ParseImageSpanResizableLattice(const JSRef<JSObject>& resizableObj,
+    std::optional<RefPtr<DrawingLattice>>& lattice)
+{
+    auto latticeValue = resizableObj->GetProperty("lattice");
+    if (latticeValue->IsUndefined() || latticeValue->IsNull() || !latticeValue->IsObject()) {
+        return;
+    }
+    auto* latticePtr = UnwrapNapiValue(latticeValue);
+    CHECK_NULL_VOID(latticePtr);
+    auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(latticePtr);
+    CHECK_NULL_VOID(jsLattice);
+    auto latticeSptr = jsLattice->GetLattice();
+    CHECK_NULL_VOID(latticeSptr);
+    auto drawingLattice = DrawingLattice::CreateDrawingLatticeFromSptr(&latticeSptr);
+    if (drawingLattice) {
+        lattice = drawingLattice;
+    }
+}
+} // namespace
+
+void ParseJsImageSpanResizable(const JSRef<JSVal>& resizable,
+    std::optional<ImageResizableSlice>& slice, std::optional<RefPtr<DrawingLattice>>& lattice)
+{
+    if (!resizable->IsObject()) {
+        return;
+    }
+    auto resizableObj = JSRef<JSObject>::Cast(resizable);
+    if (resizableObj->IsEmpty()) {
+        return;
+    }
+    ParseImageSpanResizableSlice(resizableObj, slice);
+    ParseImageSpanResizableLattice(resizableObj, lattice);
+}
+
+void* UnwrapNapiValueWithType(const JSRef<JSVal>& obj, const napi_type_tag* typeTag)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!obj->IsObject()) {
+        LOGE("info[0] is not an object when try UnwrapNapiValueWithType");
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(typeTag, nullptr);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+#ifdef USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_status status = napi_unwrap_s(env, napiValue, typeTag, &objectNapi);
+    if (status != napi_ok) {
+        LOGE("napi_unwrap_s type tag mismatch, status=%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
     return objectNapi;
 #else
     return nullptr;

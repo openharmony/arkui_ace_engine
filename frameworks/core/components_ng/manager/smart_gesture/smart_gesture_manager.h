@@ -77,6 +77,10 @@ public:
     void SyncPrimaryActionNode(const RefPtr<FrameNode>& node);
     void AddPrimaryActionNode(const RefPtr<FrameNode>& node);
     void RemovePrimaryActionNode(int32_t nodeId);
+    bool GetSmartAutoInActive()
+    {
+        return autoInActive_;
+    }
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -113,6 +117,7 @@ private:
 
     bool productGestureEnabled_ = false;
     bool smartTapAndSlideGesturesEnabled_ = false;
+    bool autoInActive_ = false;
     SmartGestureMonitor monitorCallback_;
     WeakPtr<PipelineContext> context_;
     WeakPtr<FrameNode> selectedNode_;

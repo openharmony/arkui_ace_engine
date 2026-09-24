@@ -61,6 +61,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 #include "session/host/include/extension_session.h"
 #include "session/host/include/session.h"
 #include "ui/rs_surface_node.h"
@@ -1636,6 +1637,24 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     lastError_ = { code, name, message };
 }
 
+void UIExtensionPattern::SetOnAbilityErrorCodeCallback(
+    const std::function<void(const UIExtensionOperationPhase&, int32_t)>&& callback)
+{
+    onAbilityErrorCodeCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::FireOnAbilityErrorCodeCallback(
+    const UIExtensionOperationPhase& operationPhase, int32_t abilityErrorCode)
+{
+    UIEXT_LOGI("OnAbilityErrorCode operationPhase is %{public}d, abilityErrorCode is %{public}d, "
+        "hasCallback is %{public}d.", static_cast<int32_t>(operationPhase), abilityErrorCode,
+        onAbilityErrorCodeCallback_ ? 1 : 0);
+    if (onAbilityErrorCodeCallback_) {
+        ContainerScope scope(instanceId_);
+        onAbilityErrorCodeCallback_(operationPhase, abilityErrorCode);
+    }
+}
+
 void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback)
 {
     onResultCallback_ = std::move(callback);
@@ -1976,10 +1995,11 @@ int32_t UIExtensionPattern::GetInstanceIdFromHost() const
     return instanceId;
 }
 
-void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason)
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
+    sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type, reason);
 }
 
 void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)

@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 
 namespace OHOS::Ace::NG {
@@ -190,8 +191,26 @@ void XComponentControllerNG::UpdateSurfaceBounds()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    auto patternV2 = AceType::DynamicCast<XComponentPatternV2>(pattern);
+    if (patternV2) {
+        UpdateSurfaceBoundsV2(patternV2);
+        return;
+    }
+    UpdateSurfaceBoundsV1(pattern);
+}
+
+void XComponentControllerNG::UpdateSurfaceBoundsV1(const RefPtr<XComponentPattern>& pattern)
+{
+    CHECK_NULL_VOID(pattern);
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = pattern->UpdateSurfaceRect();
     pattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, needFireNativeEvent);
+}
+
+void XComponentControllerNG::UpdateSurfaceBoundsV2(const RefPtr<XComponentPatternV2>& pattern)
+{
+    CHECK_NULL_VOID(pattern);
+    const auto& [offsetChanged, sizeChanged] = pattern->UpdateSurfaceRect();
+    pattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, true);
 }
 
 void XComponentControllerNG::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)

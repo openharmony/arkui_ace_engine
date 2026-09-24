@@ -82,7 +82,7 @@ HWTEST_F(FormRenderDelegateStubTest, FormRenderDelegateStubTest_002, TestSize.Le
     rsNode->Marshalling(data);
     EXPECT_EQ(renderDelegate.HandleOnSurfaceCreate(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
     data.WriteUint64(rsNode->GetId());
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND);
     GTEST_LOG_(INFO) << "FormRenderDelegateStubTest_002 end";
 }
 
@@ -113,7 +113,7 @@ HWTEST_F(FormRenderDelegateStubTest, FormRenderDelegateStubTest_003, TestSize.Le
     formJsInfo.bundleName = "bundleName";
     formJsInfo.moduleName = "moduleName";
     data.WriteParcelable(&formJsInfo);
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND);
     GTEST_LOG_(INFO) << "FormRenderDelegateStubTest_003 end";
 }
 

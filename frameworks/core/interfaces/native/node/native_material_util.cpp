@@ -36,7 +36,10 @@ RefPtr<UiMaterial> CreateUiMaterialFromHandle(ArkUI_ImmersiveMaterialHandle hand
     if (handle->disableLightEffect) {
         options.DisableLightEffect();
     } else if (handle->hasLightEffect) {
-        LightEffectOptions lightEffect { .color = Color(handle->lightEffectOptions.color) };
+        LightEffectOptions lightEffect{.color =
+                                           handle->lightEffectOptions.color.has_value()
+                                               ? std::optional<Color>(Color(handle->lightEffectOptions.color.value()))
+                                               : std::nullopt};
         options.lightEffectOptions = lightEffect;
     }
     uiMaterial->SetImmersiveOptions(options);
@@ -64,7 +67,10 @@ bool CreateHandleFromUiMaterial(const RefPtr<UiMaterial>& material, ArkUI_Immers
         out->disableLightEffect = true;
     } else if (options->lightEffectOptions.has_value()) {
         out->hasLightEffect = true;
-        out->lightEffectOptions.color = options->lightEffectOptions->color.GetValue();
+        out->lightEffectOptions.color =
+            options->lightEffectOptions->color.has_value()
+                ? std::optional<uint32_t>(options->lightEffectOptions->color.value().GetValue())
+                : std::nullopt;
     }
     return true;
 }

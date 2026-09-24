@@ -33,6 +33,7 @@ void ShowTimePickerDialogImpl(const Ark_TimePickerDialogOptions* options)
         CHECK_NULL_VOID(module);
         cachedModifier =
             reinterpret_cast<const NG::TimePickerUtil::ArkUITimePickerDialogModifier*>(module->GetStaticModifier());
+        CHECK_NULL_VOID(cachedModifier);
     }
     cachedModifier->showTimePickerDialog(options);
 }
@@ -46,6 +47,7 @@ void ShowTextPickerDialogImpl(const Ark_Union_TextPickerDialogOptions_TextPicker
         CHECK_NULL_VOID(module);
         cachedModifier =
             reinterpret_cast<const NG::TextPickerUtil::ArkUITextPickerDialogModifier*>(module->GetStaticModifier());
+        CHECK_NULL_VOID(cachedModifier);
     }
     cachedModifier->showTextPickerDialog(options);
 }
@@ -59,6 +61,7 @@ void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)
         CHECK_NULL_VOID(module);
         cachedModifier =
             reinterpret_cast<const NG::DatePickerUtil::ArkUIDatePickerDialogModifier*>(module->GetStaticModifier());
+        CHECK_NULL_VOID(cachedModifier);
     }
     cachedModifier->showDatePickerDialog(options);
 }

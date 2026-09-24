@@ -201,12 +201,12 @@ public:
 
     void SetEnableAutoFill(bool enableAutoFill) override
     {
-        return;
+        enableAutoFill_ = enableAutoFill;
     }
 
     bool GetEnableAutoFill() const override
     {
-        return false;
+        return enableAutoFill_;
     }
 
     void SetIsFocus(bool isFocus) override
@@ -251,6 +251,7 @@ private:
     OHOS::Ace::AceAutoFillType autoFillType;
     OHOS::Ace::NG::RectF pageNodeRect_;
     std::string str_;
+    bool enableAutoFill_ = true;
 };
 
 RefPtr<PageNodeInfoWrap> PageNodeInfoWrap::CreatePageNodeInfoWrap()

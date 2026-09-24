@@ -29,7 +29,7 @@ using VectorFloat32Ptr = void*;
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeNGScroller : public OHOS::FFI::FFIData {
-    DECL_TYPE(Scroller, OHOS::FFI::FFIData)
+    DECL_TYPE(NativeNGScroller, OHOS::FFI::FFIData)
 public:
     NativeNGScroller();
 

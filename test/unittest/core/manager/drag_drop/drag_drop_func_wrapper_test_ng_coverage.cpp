@@ -1550,9 +1550,15 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     EXPECT_EQ(dragEvent->GetData(), nullptr);
     EXPECT_EQ(dragEvent->GetDataLoadParams(), nullptr);
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
-    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _)).WillRepeatedly(Invoke([](std::string&, DragSummaryInfo& info) {
+        info.summary = { { "general.file", 2 } };
+        info.filenameExtensions = { ".jpg", ".png" };
+        return 0;
+    }));
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, dragSummaryInfo, ret);
     EXPECT_EQ(ret, 0);
+    EXPECT_EQ(dragDropManager->GetSummaryMap(), dragSummaryInfo.summary);
+    EXPECT_EQ(dragDropManager->dragSummaryInfo_.filenameExtensions, dragSummaryInfo.filenameExtensions);
 
     auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     ASSERT_NE(unifiedData, nullptr);

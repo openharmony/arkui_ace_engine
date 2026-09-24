@@ -43,8 +43,14 @@ def main():
         if os.path.isdir(stamp_path):
             print(f"[NPM_OP ERROR] {stamp_path} is a directory, should be a file!")
             return 1
-        print("[NPM_OP INFO] Stamp file exists, skipping npm install.")
-        return 0
+        if os.path.isdir(node_modules_path):
+            print("[NPM_OP INFO] Stamp file exists and node_modules present, skipping npm install.")
+            return 0
+        print("[NPM_OP INFO] Stamp file exists but node_modules missing, will re-install.")
+        try:
+            os.remove(stamp_path)
+        except Exception as e:
+            print(f"delete stamp path failed")
 
     if os.path.exists(node_modules_path):
         print("[NPM_OP INFO] Node modules already exist, creating stamp file.")

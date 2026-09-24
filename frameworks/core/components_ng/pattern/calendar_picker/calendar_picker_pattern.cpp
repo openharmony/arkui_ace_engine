@@ -76,8 +76,17 @@ void CalendarPickerPattern::OnModifyDone()
     UpdateEntryButtonBorderWidth();
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         UpdateHostEntryBorderColor();
+        UpdateHostEntryBorderWidth();
     }
     UpdateAccessibilityText();
+}
+
+void CalendarPickerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
 }
 
 void CalendarPickerPattern::UpdateAccessibilityText()
@@ -215,9 +224,34 @@ void CalendarPickerPattern::UpdateHostEntryBorderColor()
     CHECK_NULL_VOID(theme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    BorderColorProperty borderColor;
-    borderColor.SetColor(theme->GetEntryBorderColor());
-    renderContext->UpdateBorderColor(borderColor);
+    BorderColorProperty themeBorderColor;
+    themeBorderColor.SetColor(theme->GetEntryBorderColor());
+    auto preBorderColor = renderContext->GetPreBorderColor();
+    if (preBorderColor.has_value() && !(preBorderColor.value() == themeBorderColor)) {
+        renderContext->UpdateBorderColor(preBorderColor.value());
+    } else {
+        renderContext->UpdateBorderColor(themeBorderColor);
+    }
+}
+
+void CalendarPickerPattern::UpdateHostEntryBorderWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty themeBorderWidth;
+    themeBorderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    auto preBorderWidth = renderContext->GetPreBorderWidth();
+    if (preBorderWidth.has_value() && !(preBorderWidth.value() == themeBorderWidth)) {
+        host->GetLayoutProperty()->UpdateMaterialBorderWidth(preBorderWidth.value());
+        renderContext->UpdateBorderWidth(preBorderWidth.value());
+    } else {
+        host->GetLayoutProperty()->UpdateBorderWidth(themeBorderWidth);
+        renderContext->UpdateBorderWidth(themeBorderWidth);
+    }
 }
 
 void CalendarPickerPattern::UpdateEdgeAlign()
@@ -1296,7 +1330,9 @@ void CalendarPickerPattern::OnColorConfigurationUpdate()
     if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
         pickerProperty->UpdateColor(calendarTheme->GetEntryFontColor());
     }
-    UpdateHostEntryBorderColor();
+    BorderColorProperty borderColor;
+    borderColor.SetColor(calendarTheme->GetEntryBorderColor());
+    host->GetRenderContext()->UpdateBorderColor(borderColor);
 
     if (IsDialogShow()) {
         return;

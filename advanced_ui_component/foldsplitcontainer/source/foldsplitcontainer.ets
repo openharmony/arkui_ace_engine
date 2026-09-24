@@ -19,7 +19,6 @@ import hilog from '@ohos.hilog';
 import { LengthMetrics, Position, Size } from '@ohos.arkui.node';
 import curves from '@ohos.curves';
 import { Callback } from '@ohos.base';
-import mediaQuery from '@ohos.mediaquery';
 
 interface Layout {
   size: Size;
@@ -454,17 +453,9 @@ export struct FoldSplitContainer {
   private windowInstance?: window.Window;
   private containerSize: Size = { width: 0, height: 0 };
   private containerGlobalPosition: Position = { x: 0, y: 0 };
-  private listener?: mediaQuery.MediaQueryListener;
-  private isSmallScreen: boolean = false;
   private isHoverMode: boolean | undefined = undefined;
 
   aboutToAppear() {
-    this.listener = mediaQuery.matchMediaSync('(width<=600vp)');
-    this.isSmallScreen = this.listener.matches;
-    this.listener.on('change', (result) => {
-      this.isSmallScreen = result.matches;
-    });
-
     this.foldStatus = display.getFoldStatus();
     display.on('foldStatusChange', (foldStatus) => {
       if (this.foldStatus !== foldStatus) {
@@ -495,10 +486,6 @@ export struct FoldSplitContainer {
   }
 
   aboutToDisappear() {
-    if (this.listener) {
-      this.listener.off('change');
-      this.listener = undefined;
-    }
     display.off('foldStatusChange');
     if (this.windowInstance) {
       this.windowInstance.off('windowStatusChange');
@@ -600,23 +587,20 @@ export struct FoldSplitContainer {
   private updateLayout() {
     let isHoverMode: boolean = false;
     let regionLayout: RegionLayout;
-    if (this.isSmallScreen) {
-      regionLayout = this.getFoldedRegionLayouts();
-    } else {
-      if (this.foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
-        regionLayout = this.getExpandedRegionLayouts();
-      } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
-        if (this.isPortraitOrientation()) {
-          regionLayout = this.getExpandedRegionLayouts();
-        } else {
-          regionLayout = this.getHoverModeRegionLayouts();
-          isHoverMode = true;
-        }
-      } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_FOLDED) {
-        regionLayout = this.getFoldedRegionLayouts();
+    if (this.foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
+      regionLayout = this.getExpandedRegionLayouts();
+    } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
+      const creaseRegion = this.getLiveFoldCreaseRegion();
+      if (this.isHorizontalCrease(creaseRegion)) {
+        regionLayout = this.getHoverModeRegionLayouts(creaseRegion);
+        isHoverMode = true;
       } else {
         regionLayout = this.getExpandedRegionLayouts();
       }
+    } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_FOLDED) {
+      regionLayout = this.getFoldedRegionLayouts();
+    } else {
+      regionLayout = this.getExpandedRegionLayouts();
     }
 
     if (this.animationOptions === null) {
@@ -701,13 +685,13 @@ export struct FoldSplitContainer {
     return { primary: primaryLayout, secondary: secondaryLayout, extra: extraLayout };
   }
 
-  private getHoverModeRegionLayouts(): RegionLayout {
+  private getHoverModeRegionLayouts(creaseRegion: display.FoldCreaseRegion | null): RegionLayout {
     const width = this.containerSize.width;
     const height = this.containerSize.height;
     const primaryLayout: Layout = initLayout();
     const secondaryLayout: Layout = initLayout();
     const extraLayout: Layout = initLayout();
-    const creaseRegionRect = this.getCreaseRegionRect();
+    const creaseRegionRect = this.getCreaseRegionRect(creaseRegion);
     primaryLayout.position.x = 0;
     primaryLayout.position.y = 0;
     secondaryLayout.position.x = 0;
@@ -790,34 +774,53 @@ export struct FoldSplitContainer {
     return { primary: primaryLayout, secondary: secondaryLayout, extra: extraLayout };
   }
 
-  private getCreaseRegionRect(): display.Rect {
-    const creaseRegion = display.getCurrentFoldCreaseRegion();
-    const rects = creaseRegion.creaseRects;
+  private getCreaseRegionRect(creaseRegion?: display.FoldCreaseRegion | null): display.Rect {
     let left: number = 0;
     let top: number = 0;
     let width: number = 0;
     let height: number = 0;
-    if (rects && rects.length) {
-      const rect = rects[0];
-      left = px2vp(rect.left) - this.containerGlobalPosition.x;
-      top = px2vp(rect.top) - this.containerGlobalPosition.y;
-      width = px2vp(rect.width);
-      height = px2vp(rect.height);
+    try {
+      const region = creaseRegion !== undefined ? creaseRegion : display.getDefaultDisplaySync().getLiveCreaseRegion();
+      if (!region) {
+        return { left, top, width, height };
+      }
+      const rects = region.creaseRects;
+      if (rects && rects.length) {
+        const rect = rects[0];
+        left = px2vp(rect.left) - this.containerGlobalPosition.x;
+        top = px2vp(rect.top) - this.containerGlobalPosition.y;
+        width = px2vp(rect.width);
+        height = px2vp(rect.height);
+      }
+    } catch (err) {
+      Logger.error('Failed to get live crease region.');
     }
 
     return { left, top, width, height };
   }
 
-  private isPortraitOrientation() {
-    const defaultDisplay = display.getDefaultDisplaySync();
-    switch (defaultDisplay.orientation) {
-      case display.Orientation.PORTRAIT:
-      case display.Orientation.PORTRAIT_INVERTED:
-        return true;
-      case display.Orientation.LANDSCAPE:
-      case display.Orientation.LANDSCAPE_INVERTED:
-      default:
-        return false;
+  private isHorizontalCrease(creaseRegion: display.FoldCreaseRegion | null): boolean {
+    if (!creaseRegion) {
+      return false;
+    }
+    try {
+      const creaseRects = creaseRegion.creaseRects;
+      if (creaseRects && creaseRects.length > 0) {
+        const rect = creaseRects[0];
+        return rect.width > rect.height;
+      }
+    } catch (err) {
+      Logger.error('Failed to get live crease region.');
+    }
+    return false;
+  }
+
+  private getLiveFoldCreaseRegion(): display.FoldCreaseRegion | null {
+    try {
+      return display.getDefaultDisplaySync().getLiveCreaseRegion();
+    } catch (err) {
+      Logger.error('Failed to get live crease region.');
+      return null;
     }
   }
 }

@@ -635,6 +635,16 @@ void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
     delegate->OnScaleChange(oldScaleFactor, newScaleFactor);
 }
 
+void WebClientImpl::OnZoomFactorChanged(double oldZoomFactor, double newZoomFactor)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnZoomChange(oldZoomFactor, newZoomFactor);
+}
+
 void WebClientImpl::OnScroll(double xOffset, double yOffset)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1698,6 +1708,8 @@ void WebClientImpl::OnExtensionDisconnect(int32_t connectId)
 std::string WebClientImpl::OnWebNativeMessage(std::shared_ptr<OHOS::NWeb::NWebRuntimeConnectInfo> info,
     std::shared_ptr<OHOS::NWeb::NWebNativeMessageCallback> callback)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnWebNativeMessage in, bundleName: %{public}s",
+        info ? info->GetBundleName().c_str() : "null");
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return "";

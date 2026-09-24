@@ -14,8 +14,8 @@
  */
 #include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
-#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -226,28 +226,47 @@ void WaterFlowLayoutUtils::UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item
 AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& item)
 {
     AdjustOffset pos {};
-    CHECK_NULL_RETURN(item, pos);
-    // FEAT-027: resolve the lazy host through the needLazyLayout-marked path so adjust offsets keep flowing
-    // when ordinary intermediate containers sit between the WaterFlow item and the lazy host.
-    auto hostNode = item->GetHostNode();
-    CHECK_NULL_RETURN(hostNode, pos);
-    auto pattern = LazyLayoutUtils::GetLazyLayoutPattern(hostNode);
-    CHECK_NULL_RETURN(pattern, pos);
-    return pattern->GetAndResetAdjustOffset();
+    RefPtr<UINode> child = AceType::DynamicCast<FrameNode>(item);
+    do {
+        CHECK_NULL_RETURN(child, pos);
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!frameNode) {
+            child = child->GetFirstChild();
+            continue;
+        }
+        if (!frameNode->GetLayoutProperty()->GetNeedLazyLayout()) {
+            return pos;
+        }
+        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+        if (pattern) {
+            return pattern->GetAndResetAdjustOffset();
+        }
+        child = child->GetFirstChild();
+    } while (child);
+    return pos;
 }
 
 RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItem(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    // Scroll placeholder load observation at the WaterFlow child build call point: predict
+    // before the real builder runs on an unbuilt index and sample its duration afterwards.
+    // Observation only; the dummy empty-branch fallback is reported after the acquisition so
+    // it never feeds the cost model.
+    ScrollPlaceholderItemBuildScope buildScope(
+        ScrollPlaceholderComponentType::WATER_FLOW, layoutWrapper, index, isCache);
     if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        buildScope.SetAcquiredWrapper(wrapper);
         if (!wrapper) {
             wrapper = CreateDummyFlowItem();
         }
         return wrapper;
     }
-    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    buildScope.SetAcquiredWrapper(wrapper);
+    return wrapper;
 }
 
 RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItemByIndex(

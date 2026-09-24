@@ -1334,6 +1334,57 @@ class TextTailIndentsModifier extends ModifierWithKey<LengthMetrics | Array<Leng
   }
 }
 
+class TextStrokeWidthModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textStrokeWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetStrokeWidth(node);
+    } else {
+      getUINativeModule().text.setStrokeWidth(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextStrokeColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textStrokeColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetStrokeColor(node);
+    } else {
+      getUINativeModule().text.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextStrokeJoinStyleModifier extends ModifierWithKey<StrokeJoinStyle> {
+  constructor(value: StrokeJoinStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textStrokeJoinStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetStrokeJoinStyle(node);
+    } else {
+      getUINativeModule().text.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1666,6 +1717,18 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   tailIndents(value: LengthMetrics | Array<LengthMetrics>): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTailIndentsModifier.identity, TextTailIndentsModifier, value);
+    return this;
+  }
+  strokeWidth(value: LengthMetrics): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeWidthModifier.identity, TextStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value: ResourceColor): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeColorModifier.identity, TextStrokeColorModifier, value);
+    return this;
+  }
+  strokeJoinStyle(value: StrokeJoinStyle): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeJoinStyleModifier.identity, TextStrokeJoinStyleModifier, value);
     return this;
   }
 }

@@ -25,5 +25,8 @@ ohos_source_set("mock_dm") {
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   public_configs = [ ":dm_config" ]
-  deps = [ "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
+  public_deps = [ "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils" ]
 }

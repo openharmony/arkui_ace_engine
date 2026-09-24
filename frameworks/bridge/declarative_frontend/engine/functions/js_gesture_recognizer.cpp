@@ -236,13 +236,18 @@ void JSPanRecognizer::GetDirection(const JSCallbackInfo& args)
 
 void JSPanRecognizer::GetPanDistance(const JSCallbackInfo& args)
 {
-    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
-    if (recognizer) {
-        auto context = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        double distance = context->ConvertPxToVp(Dimension(distance_, DimensionUnit::PX));
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance))));
+    auto context = PipelineContext::GetCurrentContextSafely();
+    if (!context) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(distance_)));
+        return;
     }
+    double distance = context->ConvertPxToVp(Dimension(distance_, DimensionUnit::PX));
+    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
+    if (!recognizer) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(distance)));
+        return;
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance))));
 }
 
 void JSPanRecognizer::GetPanDistanceMap(const JSCallbackInfo& args)
@@ -261,7 +266,10 @@ void JSPanRecognizer::GetPanDistanceMap(const JSCallbackInfo& args)
         return;
     }
     auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        args.SetReturnValue(JsiRef<JsiObject>(JsiObject(distanceMap)));
+        return;
+    }
     auto panDistanceMap = panRecognizer->GetDistanceMap();
     for (const auto& item : panDistanceMap) {
         double distance = context->ConvertPxToVp(item.second);

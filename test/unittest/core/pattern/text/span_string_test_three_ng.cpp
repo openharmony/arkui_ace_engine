@@ -16,6 +16,9 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -1570,5 +1573,126 @@ HWTEST_F(SpanStringTestThreeNg, TextLayoutTest001, TestSize.Level1)
     EXPECT_EQ(paraSpan->GetParagraphStyle().textIndent, Dimension(30));
     EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Width().ConvertToVp(), 25);
     EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Height().ConvertToVp(), 26);
+}
+
+class TestDrawingLattice : public DrawingLattice {
+    DECLARE_ACE_TYPE(TestDrawingLattice, DrawingLattice);
+
+public:
+    TestDrawingLattice() = default;
+    ~TestDrawingLattice() override = default;
+    std::string DumpToString() override
+    {
+        return "test_lattice";
+    }
+};
+
+/**
+ * @tc.name: SpanStringResizable001
+ * @tc.desc: Test ImageSpan resizableSlice survives TLV round-trip
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestThreeNg, SpanStringResizable001, TestSize.Level1)
+{
+    ImageResizableSlice slice;
+    slice.left = Dimension(10.0, DimensionUnit::VP);
+    slice.top = Dimension(20.0, DimensionUnit::VP);
+    slice.right = Dimension(30.0, DimensionUnit::VP);
+    slice.bottom = Dimension(40.0, DimensionUnit::VP);
+    ImageSpanOptions imageOption {
+        .image = std::string("src/icon.png"),
+        .imageAttribute = ImageSpanAttribute { .resizableSlice = slice }
+    };
+    auto spanStr = AceType::MakeRefPtr<SpanString>(imageOption);
+    ASSERT_NE(spanStr, nullptr);
+    std::vector<uint8_t> buff;
+    spanStr->EncodeTlv(buff);
+    ASSERT_FALSE(buff.empty());
+    auto spanString2 = SpanString::DecodeTlv(buff);
+    ASSERT_NE(spanString2, nullptr);
+    auto spans = spanString2->GetSpanItems();
+    ASSERT_EQ(spans.size(), 1);
+    auto imageItem = AceType::DynamicCast<NG::ImageSpanItem>(spans.front());
+    ASSERT_NE(imageItem, nullptr);
+    ASSERT_TRUE(imageItem->options.imageAttribute.has_value());
+    ASSERT_TRUE(imageItem->options.imageAttribute->resizableSlice.has_value());
+    auto decodedSlice = imageItem->options.imageAttribute->resizableSlice.value();
+    EXPECT_EQ(decodedSlice.left, Dimension(10.0, DimensionUnit::VP));
+    EXPECT_EQ(decodedSlice.top, Dimension(20.0, DimensionUnit::VP));
+    EXPECT_EQ(decodedSlice.right, Dimension(30.0, DimensionUnit::VP));
+    EXPECT_EQ(decodedSlice.bottom, Dimension(40.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: SpanStringResizable002
+ * @tc.desc: Test ImageSpan resizableLattice survives TLV round-trip
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestThreeNg, SpanStringResizable002, TestSize.Level1)
+{
+    auto drawingLattice = AceType::MakeRefPtr<TestDrawingLattice>();
+    ASSERT_NE(drawingLattice, nullptr);
+    ImageSpanOptions imageOption {
+        .image = std::string("src/icon.png"),
+        .imageAttribute = ImageSpanAttribute { .resizableLattice = drawingLattice }
+    };
+    auto spanStr = AceType::MakeRefPtr<SpanString>(imageOption);
+    ASSERT_NE(spanStr, nullptr);
+    auto origItem = AceType::DynamicCast<NG::ImageSpanItem>(spanStr->GetSpanItems().front());
+    ASSERT_NE(origItem, nullptr);
+    ASSERT_TRUE(origItem->options.imageAttribute.has_value());
+    ASSERT_TRUE(origItem->options.imageAttribute->resizableLattice.has_value());
+    std::vector<uint8_t> buff;
+    spanStr->EncodeTlv(buff);
+    ASSERT_FALSE(buff.empty());
+    auto spanString2 = SpanString::DecodeTlv(buff);
+    ASSERT_NE(spanString2, nullptr);
+    auto spans = spanString2->GetSpanItems();
+    ASSERT_EQ(spans.size(), 1);
+    auto imageItem = AceType::DynamicCast<NG::ImageSpanItem>(spans.front());
+    ASSERT_NE(imageItem, nullptr);
+    ASSERT_TRUE(imageItem->options.imageAttribute.has_value());
+}
+
+/**
+ * @tc.name: SpanStringResizable003
+ * @tc.desc: Test ImageSpanAttribute operator== distinguishes different resizableSlice
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestThreeNg, SpanStringResizable003, TestSize.Level1)
+{
+    ImageResizableSlice slice1;
+    slice1.left = Dimension(10.0, DimensionUnit::VP);
+    slice1.top = Dimension(20.0, DimensionUnit::VP);
+    slice1.right = Dimension(30.0, DimensionUnit::VP);
+    slice1.bottom = Dimension(40.0, DimensionUnit::VP);
+    ImageResizableSlice slice2;
+    slice2.left = Dimension(50.0, DimensionUnit::VP);
+    slice2.top = Dimension(60.0, DimensionUnit::VP);
+    slice2.right = Dimension(70.0, DimensionUnit::VP);
+    slice2.bottom = Dimension(80.0, DimensionUnit::VP);
+    ImageSpanAttribute attrA { .resizableSlice = slice1 };
+    ImageSpanAttribute attrB { .resizableSlice = slice1 };
+    ImageSpanAttribute attrC { .resizableSlice = slice2 };
+    EXPECT_TRUE(attrA == attrB);
+    EXPECT_FALSE(attrA == attrC);
+}
+
+/**
+ * @tc.name: SpanStringResizable004
+ * @tc.desc: Test ImageSpanAttribute ToString includes resizableSlice
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestThreeNg, SpanStringResizable004, TestSize.Level1)
+{
+    ImageResizableSlice slice;
+    slice.left = Dimension(10.0, DimensionUnit::VP);
+    slice.top = Dimension(20.0, DimensionUnit::VP);
+    slice.right = Dimension(30.0, DimensionUnit::VP);
+    slice.bottom = Dimension(40.0, DimensionUnit::VP);
+    ImageSpanAttribute attr { .resizableSlice = slice };
+    auto json = attr.ToString();
+    EXPECT_FALSE(json.empty());
+    EXPECT_NE(json.find("resizableSlice"), std::string::npos);
 }
 } // namespace OHOS::Ace::NG

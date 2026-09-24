@@ -369,6 +369,12 @@ let PixelRoundMode;
   PixelRoundMode[PixelRoundMode.PIXEL_ROUND_AFTER_MEASURE = 1] = 'PIXEL_ROUND_AFTER_MEASURE';
 })(PixelRoundMode || (PixelRoundMode = {}));
 
+let ImmersiveStrategy;
+(function (ImmersiveStrategy) {
+  ImmersiveStrategy[ImmersiveStrategy.AVOID_CUTOUT = 0] = 'AVOID_CUTOUT';
+  ImmersiveStrategy[ImmersiveStrategy.AVOID_FLOAT_NAV = 1] = 'AVOID_FLOAT_NAV';
+})(ImmersiveStrategy || (ImmersiveStrategy = {}));
+
 let VerticalAlign;
 (function (VerticalAlign) {
   VerticalAlign[VerticalAlign.Top = 1] = 'Top';
@@ -803,18 +809,6 @@ class LayoutPolicy {
 
 globalThis.LayoutPolicy = LayoutPolicy;
 
-var BlurStyle;
-(function (BlurStyle) {
-  BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
-  BlurStyle[BlurStyle.MediumLight = 101] = 'MediumLight';
-  BlurStyle[BlurStyle.LargeLight = 102] = 'LargeLight';
-  BlurStyle[BlurStyle.XlargeLight = 103] = 'XlargeLight';
-  BlurStyle[BlurStyle.SmallDark = 104] = 'SmallDark';
-  BlurStyle[BlurStyle.MediumDark = 105] = 'MediumDark';
-  BlurStyle[BlurStyle.LargeDark = 106] = 'LargeDark';
-  BlurStyle[BlurStyle.XlargeDark = 107] = 'XlargeDark';
-})(BlurStyle || (BlurStyle = {}));
-
 let Edge;
 (function (Edge) {
   Edge[Edge.Top = 0] = 'Top';
@@ -1086,11 +1080,23 @@ let TabBarStyle;
   TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 2] = 'SIDEBAR_ADAPTABLE';
 })(TabBarStyle || (TabBarStyle = {}));
 
+let TabsSidebarDisplayStyle;
+(function (TabsSidebarDisplayStyle) {
+  TabsSidebarDisplayStyle[TabsSidebarDisplayStyle.EMBED = 0] = 'EMBED';
+  TabsSidebarDisplayStyle[TabsSidebarDisplayStyle.DISPLACE = 1] = 'DISPLACE';
+})(TabsSidebarDisplayStyle || (TabsSidebarDisplayStyle = {}));
+
 let TabBarDisplayMode;
 (function (TabBarDisplayMode) {
   TabBarDisplayMode[TabBarDisplayMode.BOTTOM_TABBAR = 0] = 'BOTTOM_TABBAR';
   TabBarDisplayMode[TabBarDisplayMode.SIDEBAR = 1] = 'SIDEBAR';
 })(TabBarDisplayMode || (TabBarDisplayMode = {}));
+
+let TabVisibility;
+(function (TabVisibility) {
+  TabVisibility[TabVisibility.VISIBLE = 0] = 'VISIBLE';
+  TabVisibility[TabVisibility.HIDDEN = 1] = 'HIDDEN';
+})(TabVisibility || (TabVisibility = {}));
 
 let SharedTransitionEffectType;
 (function (SharedTransitionEffectType) {
@@ -1872,7 +1878,7 @@ let ListItemAlign;
   ListItemAlign[ListItemAlign.End = 2] = 'End';
 })(ListItemAlign || (ListItemAlign = {}));
 
-var BlurStyle;
+let BlurStyle;
 (function (BlurStyle) {
   BlurStyle[BlurStyle.NoMaterial = 0] = 'NoMaterial';
   BlurStyle[BlurStyle.Thin = 1] = 'Thin';
@@ -1892,6 +1898,14 @@ var BlurStyle;
   BlurStyle[BlurStyle.COMPONENT_THICK = 11] = 'COMPONENT_THICK';
   BlurStyle[BlurStyle.COMPONENT_ULTRA_THICK = 12] = 'COMPONENT_ULTRA_THICK';
   BlurStyle[BlurStyle.NONE = 0] = 'NONE';
+  BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
+  BlurStyle[BlurStyle.MediumLight = 101] = 'MediumLight';
+  BlurStyle[BlurStyle.LargeLight = 102] = 'LargeLight';
+  BlurStyle[BlurStyle.XlargeLight = 103] = 'XlargeLight';
+  BlurStyle[BlurStyle.SmallDark = 104] = 'SmallDark';
+  BlurStyle[BlurStyle.MediumDark = 105] = 'MediumDark';
+  BlurStyle[BlurStyle.LargeDark = 106] = 'LargeDark';
+  BlurStyle[BlurStyle.XlargeDark = 107] = 'XlargeDark';
 })(BlurStyle || (BlurStyle = {}));
 
 let BlurStyleActivePolicy;
@@ -2133,6 +2147,18 @@ let SheetKeyboardAvoidMode;
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL = 3] = 'TRANSLATE_AND_SCROLL';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.POPUP_SHEET = 4] = 'POPUP_SHEET';
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
+
+let SheetTitleBarHoverMode;
+(function (SheetTitleBarHoverMode) {
+  SheetTitleBarHoverMode[SheetTitleBarHoverMode.STANDARD = 0] = 'STANDARD';
+  SheetTitleBarHoverMode[SheetTitleBarHoverMode.STACK = 1] = 'STACK';
+})(SheetTitleBarHoverMode || (SheetTitleBarHoverMode = {}));
+
+let SheetTitleBarBackgroundBlur;
+(function (SheetTitleBarBackgroundBlur) {
+  SheetTitleBarBackgroundBlur[SheetTitleBarBackgroundBlur.NONE = 0] = 'NONE';
+  SheetTitleBarBackgroundBlur[SheetTitleBarBackgroundBlur.GRADIENT = 1] = 'GRADIENT';
+})(SheetTitleBarBackgroundBlur || (SheetTitleBarBackgroundBlur = {}));
 
 let FunctionKey;
 (function (FunctionKey) {
@@ -2968,17 +2994,7 @@ class NavPathStack {
     if (ret) {
       return;
     }
-    // find in pop array
-    info.index = -1;
-    info.navDestinationId = undefined;
-    for (let i = this.popArray.length - 1; i >= 0; i--) {
-      if (info.name === this.popArray[i].name) {
-        let infoFind = this.popArray.splice(i, 1);
-        info.index = infoFind[0].index;
-        info.navDestinationId = infoFind[0].navDestinationId;
-        break;
-      }
-    }
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -3011,7 +3027,7 @@ class NavPathStack {
     this.preloadItem = {
       info: info,
       paramString: paramString,
-      onDestroy: options !== undefined ? options.onDestroy : undefined
+      onDestroy: options !== undefined && options !== null ? options.onDestroy : undefined
     };
     
     // Create the preloaded node via native stack

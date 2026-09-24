@@ -22,6 +22,7 @@
 #include "extension/extension_business_info.h"
 #include "int_wrapper.h"
 #include "interfaces/include/ws_common.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 #include "parameters.h"
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
@@ -160,6 +161,7 @@ SessionWrapperImpl::SessionWrapperImpl(const WeakPtr<UIExtensionPattern>& hostPa
     auto pattern = hostPattern.Upgrade();
     uiExtensionId_ = pattern ? pattern->GetUiExtensionId() : 0;
     taskExecutor_ = Container::CurrentTaskExecutor();
+    uiExtensionSafeInfo_ = AceType::MakeRefPtr<UIExtensionSafeInfo>();
 }
 
 SessionWrapperImpl::~SessionWrapperImpl() {}
@@ -170,16 +172,30 @@ void SessionWrapperImpl::InitForegroundCallback()
     CHECK_NULL_VOID(taskExecutor_);
     int32_t callSessionId = GetSessionId();
     foregroundCallback_ = [weakTaskExecutor = WeakClaim(RawPtr(taskExecutor_)),
-        weak = hostPattern_, callSessionId] (OHOS::Rosen::WSError errcode) {
-            if (errcode == OHOS::Rosen::WSError::WS_OK) {
-                return;
-            }
-
+        weak = hostPattern_, callSessionId] (OHOS::Rosen::WSError errcode, int32_t abilityCode) {
             auto taskExecutor = weakTaskExecutor.Upgrade();
             if (taskExecutor == nullptr) {
                 TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                     "InitForegroundCallback: taskExecutor is nullptr");
                     return;
+            }
+
+            taskExecutor->PostTask(
+                [weak, abilityCode, callSessionId] {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    if (callSessionId != pattern->GetSessionId()) {
+                        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                            "foregroundCallback_: The callSessionId(%{public}d)"
+                                " is inconsistent with the curSession(%{public}d)",
+                            callSessionId, pattern->GetSessionId());
+                            return;
+                    }
+                    pattern->FireOnAbilityErrorCodeCallback(UIExtensionOperationPhase::FOREGROUND, abilityCode);
+                }, TaskExecutor::TaskType::UI, "ArkUIUIExtensionAbilityErrorCode");
+
+            if (errcode == OHOS::Rosen::WSError::WS_OK) {
+                return;
             }
 
             taskExecutor->PostTask(
@@ -1333,13 +1349,16 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d], componentId[%d]",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration, GetFrameNodeId());
+    auto avoidAreas = uiExtensionSafeInfo_ ? uiExtensionSafeInfo_->GetAvoidArea() :
+        std::map<Rosen::AvoidAreaType, Rosen::AvoidArea>();
     UIEXT_LOGI("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
-        "reason=%{public}d, duration=%{public}d, persistentId=%{public}d, componentId=%{public}d.",
-        displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(),
-        reason, duration, persistentId, GetFrameNodeId());
-    session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+               "reason=%{public}d, duration=%{public}d, persistentId=%{public}d, componentId=%{public}d, "
+               "avoidAreasCount=%{public}zu.",
+        displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration, persistentId,
+        GetFrameNodeId(), avoidAreas.size());
+    session_->UpdateRectWithLayoutInfo({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
         std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, "NotifyDisplayArea",
-        transaction);
+        transaction, avoidAreas);
     RefreshOccupiedAreaChangeInfo();
 }
 
@@ -1355,9 +1374,21 @@ void SessionWrapperImpl::NotifySizeChangeReason(
     }
 }
 
-void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
+void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason) const
 {
     CHECK_NULL_VOID(session_);
+    if (uiExtensionSafeInfo_) {
+        uiExtensionSafeInfo_->SetAvoidArea(avoidArea, static_cast<Rosen::AvoidAreaType>(type));
+    }
+    bool isNeedSyncTransaction = reason == WindowSizeChangeReason::ROTATION ||
+        reason == WindowSizeChangeReason::SNAPSHOT_ROTATION;
+    if (isNeedSyncTransaction) {
+        UIEXT_LOGD("UIExtension safe area skipped, reason=%{public}d, type=%{public}u, "
+            "persistentId=%{public}d, componentId=%{public}d.",
+            static_cast<int32_t>(reason), type, GetSessionId(), GetFrameNodeId());
+        return;
+    }
     UIEXT_LOGD("NotifyAvoidArea, type: %{public}d, topRect=(%{public}d, %{public}d)-[%{public}d, %{public}d], "
         "bottomRect=(%{public}d,%{public}d)-[%{public}d,%{public}d],persistentId=%{public}d,componentId=%{public}d.",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
@@ -1368,7 +1399,15 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
         (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
         (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
-    session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
+    auto avoidAreas = uiExtensionSafeInfo_ ? uiExtensionSafeInfo_->GetAvoidArea() :
+        std::map<Rosen::AvoidAreaType, Rosen::AvoidArea>();
+    UIEXT_LOGD("UIExtension safe area separate path, reason=%{public}d, avoidAreasCount=%{public}zu, "
+        "type=%{public}u, persistentId=%{public}d, componentId=%{public}d.",
+        static_cast<int32_t>(reason), avoidAreas.size(), type, GetSessionId(), GetFrameNodeId());
+    session_->UpdateRectWithLayoutInfo({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+        Rosen::SizeChangeReason::AVOID_AREA_CHANGE, "NotifyOriginAvoidArea",
+        nullptr, avoidAreas);
 }
 
 bool SessionWrapperImpl::RefreshOccupiedAreaChangeInfo()

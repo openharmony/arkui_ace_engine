@@ -20,6 +20,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/i18n/localization.h"
+#include "base/utils/napi_scope_raii.h"
 #include "test/mock/frameworks/base/i18n/mock_localization.cpp"
 
 using namespace testing;
@@ -484,5 +485,75 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest011, TestSize.Level1)
 
     std::string result = Napi::GetLocalizedParamStr(paramStr, type);
     EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: NapiUtilsTest012
+ * @tc.desc: ScopeRAII
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUtilsTest, NapiUtilsTest012, TestSize.Level1)
+{
+    NativeEngineMock engine;
+    ScopeRAII scope { napi_env(engine) };
+
+    /**
+     * @tc.steps: step1. Create napi string
+     * @tc.expected: Create success
+     */
+    std::string testStr = "test napi string 1";
+    napi_value napiTestStr = nullptr;
+
+    napi_status status = napi_create_string_utf8(napi_env(engine), testStr.c_str(), testStr.length(), &napiTestStr);
+    EXPECT_EQ(status, napi_ok);
+
+    /**
+     * @tc.steps: step2. Call NapiStringToString
+     * @tc.expected: Return value equals raw string
+     */
+    std::string retVal;
+    Napi::NapiStringToString(napi_env(engine), napiTestStr, retVal);
+    EXPECT_EQ(retVal, testStr);
+}
+
+/**
+ * @tc.name: NapiUtilsTest013
+ * @tc.desc: EscapableScopeRAII
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUtilsTest, NapiUtilsTest013, TestSize.Level1)
+{
+    NativeEngineMock engine;
+    EscapableScopeRAII scope { napi_env(engine) };
+
+    /**
+     * @tc.steps: step1. Create napi string
+     * @tc.expected: Create success
+     */
+    std::string testStr = "test napi string 2";
+    napi_value napiTestStr = nullptr;
+
+    napi_status status = napi_create_string_utf8(napi_env(engine), testStr.c_str(), testStr.length(), &napiTestStr);
+    EXPECT_EQ(status, napi_ok);
+
+    /**
+     * @tc.steps: step2. Call NapiStringToString
+     * @tc.expected: Return value equals raw string
+     */
+    std::string retVal;
+    Napi::NapiStringToString(napi_env(engine), napiTestStr, retVal);
+    EXPECT_EQ(retVal, testStr);
+
+    /**
+     * @tc.steps: step3. Call Escape
+     * @tc.expected: escape napi_value
+     */
+    napi_value result = scope.Escape(napiTestStr);
+    EXPECT_NE(result, nullptr);
+
+    result = nullptr;
+    status = scope.Escape(napiTestStr, &result);
+    EXPECT_EQ(status, napi_escape_called_twice);
+    EXPECT_EQ(result, nullptr);
 }
 } // namespace OHOS::Ace

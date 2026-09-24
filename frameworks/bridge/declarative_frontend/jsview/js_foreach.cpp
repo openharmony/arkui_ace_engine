@@ -62,20 +62,14 @@ void CallJsFuncWithFromTo(const JSRef<JSFunc>& func, int32_t from, int32_t to)
 }
 } // namespace
 
-namespace {
-enum {
-    PARAM_ELMT_ID = 0,
-    PARAM_JS_ARRAY = 1,
-    PARAM_DIFF_ID = 2,
-    PARAM_DUPLICATE_ID = 3,
-    PARAM_DELETE_ID = 4,
-    PARAM_ID_ARRAY_LENGTH = 5,
-};
-} // namespace
-
 // Create(...)
 // NG:       no params
-// Classic:  cmpilerGenId, array, itemGenFunc, idGenFunction
+// Classic positional arguments (legacy pipeline only):
+//   0: compilerGenId (string | number)
+//   1: unused legacy slot (object)
+//   2: array (object)
+//   3: itemGenerator (function)
+//   4: keyGenerator (function, optional)
 void JSForEach::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -83,8 +77,8 @@ void JSForEach::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (info.Length() < 4 || !info[2]->IsObject() || !info[3]->IsFunction() ||
-        (!info[0]->IsNumber() && !info[0]->IsString()) || info[1]->IsUndefined() || !info[1]->IsObject()) {
+    if (info.Length() < 4 || !info[1]->IsObject() || !info[2]->IsObject() || !info[3]->IsFunction() ||
+        (!info[0]->IsNumber() && !info[0]->IsString())) {
         TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach");
         return;
     }
@@ -147,28 +141,27 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(index > 0)));
 }
 
-// Partial update / NG only
-// Gets idList as a input and stores it.
-// Fill diffIds with new indexes as an output.
-// Fill duplicateIds with duplica IDs detected.
-// nodeId/elmtId : number
-// idList : string[]
-// diffIds : number[]
-// duplicateIds : number[]
-// no return value
+// Partial update / NG only. Gets idList as input and stores it; fills diffIds with new
+// indexes, duplicateIds with detected duplicates, and deleteIds with removed elmtIds
+// as outputs.
+// Positional arguments:
+//   0: elmtId (number)
+//   1: idList (string[], input: the newly generated ids)
+//   2: diffIds (number[], output, must be empty: filled from index 0)
+//   3: duplicateIds (number[], output, must be empty: filled from index 0)
+//   4: deleteIds (number[], output: appended at current length)
 void JSForEach::SetIdArray(const JSCallbackInfo& info)
 {
-    if (info.Length() != PARAM_ID_ARRAY_LENGTH || !info[PARAM_ELMT_ID]->IsNumber() ||
-        !info[PARAM_JS_ARRAY]->IsArray() || !info[PARAM_DIFF_ID]->IsArray() ||
-        !info[PARAM_DUPLICATE_ID]->IsArray() || !info[PARAM_DELETE_ID]->IsArray()) {
+    if (info.Length() != 5 || !info[0]->IsNumber() || !info[1]->IsArray() || !info[2]->IsArray() ||
+        !info[3]->IsArray() || !info[4]->IsArray()) {
         TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach.SetIdArray");
         return;
     }
 
-    const auto elmtId = info[PARAM_ELMT_ID]->ToNumber<int32_t>();
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[PARAM_JS_ARRAY]);
-    JSRef<JSArray> diffIds = JSRef<JSArray>::Cast(info[PARAM_DIFF_ID]);
-    JSRef<JSArray> duplicateIds = JSRef<JSArray>::Cast(info[PARAM_DUPLICATE_ID]);
+    const auto elmtId = info[0]->ToNumber<int32_t>();
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
+    JSRef<JSArray> diffIds = JSRef<JSArray>::Cast(info[2]);
+    JSRef<JSArray> duplicateIds = JSRef<JSArray>::Cast(info[3]);
     std::list<std::string> newIdArr;
 
     if (diffIds->Length() > 0 || duplicateIds->Length() > 0) {
@@ -205,7 +198,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
     ForEachModel::GetInstance()->SetRemovedElmtIds(removedElmtIds);
 
     if (removedElmtIds.size()) {
-        JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[PARAM_DELETE_ID]);
+        JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[4]);
         size_t index = jsArr->Length();
 
         for (const auto& rmElmtId : removedElmtIds) {
@@ -258,6 +251,10 @@ void JSForEach::OnMove(const JSCallbackInfo& info)
     }
 }
 
+// NOTE: this function and its CallJsFuncWithIndex/CallJsFuncWithFromTo helpers are duplicated
+// verbatim in js_lazy_foreach.cpp, js_repeat.cpp and js_repeat_virtual_scroll_2.cpp (the latter
+// with an extra repeatElmtId parameter). Any change here must be mirrored there; consolidating
+// them into js_view_common_def.h is the tracked follow-up.
 void JSForEach::JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");

@@ -17,6 +17,7 @@
 #include "prompt_controller.h"
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
+#include "interfaces/napi/kits/ui_material/ui_material_napi.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -433,10 +434,12 @@ void GetToastSystemMaterial(napi_env env, napi_value systemMaterialNApi, RefPtr<
     }
 
     UiMaterial* material = nullptr;
-    napi_unwrap(env, systemMaterialNApi, reinterpret_cast<void**>(&material));
-    if (material) {
-        systemMaterial = material->Copy();
+    napi_status status =
+        napi_unwrap_s(env, systemMaterialNApi, &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&material));
+    if (status != napi_ok || !material) {
+        return;
     }
+    systemMaterial = material->Copy();
 }
 
 bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
@@ -1712,8 +1715,12 @@ RefPtr<UiMaterial> GetSystemMaterialParam(napi_env env, const std::shared_ptr<Pr
     }
 
     UiMaterial* material = nullptr;
-    napi_unwrap(env, asyncContext->systemMaterialApi, reinterpret_cast<void**>(&material));
-    return material ? material->Copy() : nullptr;
+    napi_status status =
+        napi_unwrap_s(env, asyncContext->systemMaterialApi, &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&material));
+    if (status != napi_ok || !material) {
+        return nullptr;
+    }
+    return material->Copy();
 }
 
 std::optional<DistortionMode> GetDistortionModeParam(

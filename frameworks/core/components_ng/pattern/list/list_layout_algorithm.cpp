@@ -25,6 +25,7 @@
 #include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
@@ -63,14 +64,23 @@ static RefPtr<LayoutWrapper> GetListItemWithEmptyBranch(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    // Scroll placeholder load observation at the List child build call point: predict before
+    // the real builder runs on an unbuilt index and sample its duration afterwards. Observation
+    // only; the dummy empty-branch fallback is reported after the acquisition so it never feeds
+    // the cost model.
+    ScrollPlaceholderItemBuildScope buildScope(
+        ScrollPlaceholderComponentType::LIST, layoutWrapper, index, isCache);
     if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        buildScope.SetAcquiredWrapper(wrapper);
         if (!wrapper) {
             wrapper = CreateDummyListItemChild();
         }
         return wrapper;
     }
-    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    buildScope.SetAcquiredWrapper(wrapper);
+    return wrapper;
 }
 } // namespace
 
@@ -116,6 +126,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     axis_ = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     isStackFromEnd_ = listLayoutProperty->GetStackFromEnd().value_or(false);
     isReverse_ = listLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    // Pre-recycle
+    ScrollableUtils::RecycleItemsOutOfBoundary(axis_, -currentDelta_, GetStartIndex(), GetEndIndex(), layoutWrapper);
 
     const auto& layoutConstraintOps = listLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraintOps);
@@ -2270,14 +2282,24 @@ void ListLayoutAlgorithm::MeasureLazyChild(const RefPtr<LayoutWrapper>& wrapper,
 AdjustOffset ListLayoutAlgorithm::GetAdjustOffset(const RefPtr<LayoutWrapper>& item)
 {
     AdjustOffset offset {};
-    CHECK_NULL_RETURN(item, offset);
-    // FEAT-027: resolve the lazy host through the needLazyLayout-marked path so adjust offsets keep flowing
-    // when ordinary intermediate containers sit between the List child and the lazy host.
-    auto hostNode = item->GetHostNode();
-    CHECK_NULL_RETURN(hostNode, offset);
-    auto pattern = LazyLayoutUtils::GetLazyLayoutPattern(hostNode);
-    CHECK_NULL_RETURN(pattern, offset);
-    return pattern->GetAndResetAdjustOffset();
+    RefPtr<UINode> child = AceType::DynamicCast<FrameNode>(item);
+    do {
+        CHECK_NULL_RETURN(child, offset);
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!frameNode) {
+            child = child->GetFirstChild();
+            continue;
+        }
+        if (!frameNode->GetLayoutProperty()->GetNeedLazyLayout()) {
+            return offset;
+        }
+        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+        if (pattern) {
+            return pattern->GetAndResetAdjustOffset();
+        }
+        child = child->GetFirstChild();
+    } while (child);
+    return offset;
 }
 
 void ListLayoutAlgorithm::ApplyLazyVGridAdjustOffset(
@@ -2609,19 +2631,22 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         auto wrapper = GetChildByIndex(layoutWrapper, curIndex + itemStartIndex_, !show);
         bool forceCache = cachedCount <= minCacheCount;
         if (!wrapper) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, currPos });
+            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, true, currPos });
             return curIndex - 1;
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         auto childNode = wrapper->GetHostNode();
         bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
-        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, true)) &&
-            !wrapper->CheckHasPreMeasured()) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, currPos });
-        }
-        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
-            return curIndex - 1;
+        bool needPredict = !isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, true)) &&
+                           !wrapper->CheckHasPreMeasured();
+        if (needPredict) {
+            bool needParentLayout = isDirty && !childNode->IsLayoutComplete();
+            predictList.emplace_back(
+                PredictLayoutItem { curIndex, cachedCount, -1, forceCache, needParentLayout, currPos });
+            if (needParentLayout) {
+                return curIndex - 1;
+            }
         }
         int32_t currCache = 1;
         auto mainLen = GetChildMainSize(wrapper, curIndex);
@@ -2634,7 +2659,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
-                predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, currPos });
+                predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, false, currPos });
                 cachedItemPosition_[curIndex] = pos;
                 ExpandWithSafeAreaPadding(wrapper);
                 wrapper->SetActive(show);
@@ -2670,19 +2695,22 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         auto wrapper = GetChildByIndex(layoutWrapper, curIndex + itemStartIndex_, !show);
         bool forceCache = cachedCount <= minCacheCount;
         if (!wrapper) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, currPos });
+            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, true, currPos });
             return curIndex + 1;
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         auto childNode = wrapper->GetHostNode();
         bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
-        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, false)) &&
-            !wrapper->CheckHasPreMeasured()) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, currPos });
-        }
-        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
-            return curIndex + 1;
+        bool needPredict = !isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, false)) &&
+                           !wrapper->CheckHasPreMeasured();
+        if (needPredict) {
+            bool needParentLayout = isDirty && !childNode->IsLayoutComplete();
+            predictList.emplace_back(
+                PredictLayoutItem { curIndex, -1, cachedCount, forceCache, needParentLayout, currPos });
+            if (needParentLayout) {
+                return curIndex + 1;
+            }
         }
         int32_t currCache = 1;
         auto mainLen = GetChildMainSize(wrapper, curIndex);
@@ -2695,7 +2723,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
-                predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, currPos });
+                predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, false, currPos });
                 cachedItemPosition_[curIndex] = pos;
                 ExpandWithSafeAreaPadding(wrapper);
                 wrapper->SetActive(show);
@@ -2919,14 +2947,14 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    if (!pattern->GetPredictLayoutParamV2().has_value()) {
+    auto predictParam = pattern->GetPredictLayoutParamV2();
+    if (!predictParam.has_value()) {
         return;
     }
     bool needMarkDirty = false;
-    auto param = pattern->GetPredictLayoutParamV2().value();
-    bool show = param.show;
+    auto& param = predictParam.value();
     bool isMainThreadBusy = ScrollableUtils::IsMainThreadBusy(frameNode);
-    
+
     for (auto it = param.items.begin(); it != param.items.end();) {
         if (isMainThreadBusy && !(*it).forceCache) {
             ++it;
@@ -2937,8 +2965,9 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
         }
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto index = !pattern->IsStackFromEnd() ? (*it).index : frameNode->GetTotalChildCount() - (*it).index - 1;
-        auto wrapper =
-            GetListItemWithEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, !show);
+        const bool addToRenderTree = param.show && !(*it).needParentLayout;
+        auto wrapper = GetListItemWithEmptyBranch(
+            AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), addToRenderTree, !addToRenderTree);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;
@@ -2954,7 +2983,7 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
             auto itemNode = wrapper->GetHostNode();
             CHECK_NULL_VOID(itemNode);
             itemNode->GetGeometryNode()->SetParentLayoutConstraint(param.layoutConstraint);
-            FrameNode::ProcessOffscreenNode(itemNode, show);
+            FrameNode::ProcessOffscreenNode(itemNode, param.show);
         } else {
             param.listMainSizeValues.forward = (*it).forwardCacheCount > -1;
             param.listMainSizeValues.backward = (*it).backwardCacheCount > -1;
@@ -3206,7 +3235,8 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
             break;
         } else if (GreatNotEqual(pos.second.startPos, prevContentStartOffset_)) {
             if ((GetEndIndex() == totalItemCount_ - 1) &&
-                NearEqual(GetEndPosition(), prevContentMainSize_ - prevContentEndOffset_) && !canOverScrollStart_) {
+                NearEqual(GetEndPosition(), prevContentMainSize_ - prevContentEndOffset_) &&
+                !(canOverScrollStart_ || canOverScrollEnd_)) {
                 startIndex = pos.first;
                 startPos = contentStartOffset_;
                 adjustOffset_ = pos.second.startPos - prevContentStartOffset_;

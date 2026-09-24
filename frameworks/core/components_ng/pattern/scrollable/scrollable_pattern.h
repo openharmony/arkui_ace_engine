@@ -252,11 +252,19 @@ public:
         return scrollableEvent_->GetScrollable();
     }
 
-    void SetScrollPanEscape(const std::unordered_set<int32_t>& fingerIds)
+    void SetScrollPanEscape(const std::unordered_set<int32_t>& fingerIds, bool toEntityManager = false)
     {
         auto scrollable = GetScrollable();
         CHECK_NULL_VOID(scrollable);
-        scrollable->SetEscapeModeForScroll(fingerIds);
+        scrollable->SetEscapeModeForScroll(fingerIds, toEntityManager);
+    }
+
+    // Number of fingers currently touching this scrollable. Drag hosts use it to
+    // tell "one finger dragging + another finger scrolling" apart from a lone
+    // dragging finger. Maintained by InitTouchEvent() from the raw touch stream.
+    size_t GetActiveTouchFingerIdsSize() const
+    {
+        return activeTouchFingerIds_.size();
     }
 
     virtual bool OnScrollCallback(float offset, int32_t source);
@@ -518,8 +526,7 @@ public:
     virtual bool CanOverScroll(int32_t source)
     {
         auto canOverScroll =
-            (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable() &&
-                (!ScrollableIdle() || animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG));
+            IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable();
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -528,11 +535,13 @@ public:
     }
     bool CanOverScrollStart(int32_t source)
     {
-        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::END) || animateOverScrollStart_;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::END) && (!ScrollableIdle() ||
+            animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG || animateOverScrollStart_);
     }
     bool CanOverScrollEnd(int32_t source)
     {
-        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::START) || animateOverScrollEnd_;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::START) && (!ScrollableIdle() ||
+            animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG || animateOverScrollEnd_);
     }
     void SetCanStayOverScroll(bool canStayOverScroll)
     {
@@ -684,7 +693,7 @@ public:
 
     virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
 
-    virtual bool IsScrollReachEdge() const
+    virtual bool IsScrollEdgeFinish() const
     {
         return true;
     }
@@ -873,6 +882,38 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+    // Registered by a drag host (List/Grid item drag manager) while an item floats or
+    // is dragged. Fired on every real scroll frame, with the scroll source, so the drag
+    // host can tell "another finger is scrolling the container" apart from "the content
+    // moved for some other reason". The drag edge auto-scroll animator does not come
+    // through here, it drives its own hotZoneScrollCallback_.
+    void SetDragScrollCallback(std::function<void(int32_t)>&& func)
+    {
+        dragScrollCallback_ = func;
+    }
+
+    void FireDragScrollCallback(int32_t source)
+    {
+        if (!dragScrollCallback_) {
+            return;
+        }
+        // Copy before invoking: the handler may end the drag session and clear this
+        // very slot, which would otherwise destroy the running closure.
+        auto callback = dragScrollCallback_;
+        callback(source);
+    }
+
+    // True when the scroll was driven by a finger on this container: the drag itself,
+    // the fling that follows it, or a scroll bar drag. Wheel/crown (SCROLL_FROM_AXIS,
+    // SCROLL_FROM_CROWN) and programmatic scrolls (JUMP, LAYOUT, INDEXER, STATUSBAR,
+    // ANIMATION_CONTROLLER) are not, and must not be mistaken for "another finger is
+    // scrolling".
+    static bool IsFingerDrivenScrollSource(int32_t source)
+    {
+        return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION ||
+            source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING;
+    }
+
     void SetIsOverScroll(bool val);
     bool GetIsOverScroll() const;
 
@@ -1047,11 +1088,6 @@ public:
         const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
 
     ACE_FORCE_EXPORT void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
-
-    bool EnableCachePredictNodes() const override
-    {
-        return true;
-    }
 
 protected:
     ACE_FORCE_EXPORT void SuggestOpIncGroup(bool flag);
@@ -1298,6 +1334,7 @@ private:
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
+    std::unordered_set<int32_t> activeTouchFingerIds_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
@@ -1362,6 +1399,7 @@ private:
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
     RefPtr<VelocityMotion> fixedVelocityMotion_;
     std::function<void(void)> hotZoneScrollCallback_;
+    std::function<void(int32_t)> dragScrollCallback_;
     void UnRegister2DragDropManager(FrameNode* frameNode);
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;

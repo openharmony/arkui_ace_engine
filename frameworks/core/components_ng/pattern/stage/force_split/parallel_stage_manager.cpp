@@ -1380,6 +1380,7 @@ void ParallelStageManager::RemoveSecondaryPagesOfPrimaryPage()
     CHECK_NULL_VOID(pipeline);
     if (secondaryPageStack_.empty()) {
         touchedPrimaryColumnPage_.Reset();
+        homePageTouched_ = std::nullopt;
         return;
     }
     for (auto iter = secondaryPageStack_.begin(); iter != secondaryPageStack_.end(); iter++) {
@@ -1396,6 +1397,7 @@ void ParallelStageManager::RemoveSecondaryPagesOfPrimaryPage()
     pipeline->RequestFrame();
     secondaryPageStack_.clear();
     touchedPrimaryColumnPage_.Reset();
+    homePageTouched_ = std::nullopt;
 }
 
 void ParallelStageManager::FireParallelPageShow(const RefPtr<UINode>& node, PageTransitionType transitionType,
@@ -1510,6 +1512,7 @@ int32_t ParallelStageManager::UpdateSecondaryPageNeedRemoved(bool needClearSecon
     const auto& children = stageNode_->GetChildren();
     if (!needClearSecondaryPage || children.empty()) {
         touchedPrimaryColumnPage_.Reset();
+        homePageTouched_ = std::nullopt;
         return 0;
     }
     RefPtr<FrameNode> stopPage = nullptr;
@@ -1541,6 +1544,7 @@ int32_t ParallelStageManager::UpdateSecondaryPageNeedRemoved(bool needClearSecon
         }
     }
     touchedPrimaryColumnPage_.Reset();
+    homePageTouched_ = std::nullopt;
     if (stopPage) {
         if (!stopPageFound) {
             secondaryPageStack_.clear();

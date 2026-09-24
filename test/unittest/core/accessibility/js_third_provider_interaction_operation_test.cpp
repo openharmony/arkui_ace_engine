@@ -20,6 +20,8 @@
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "accessibility_def.h"
@@ -1092,6 +1094,203 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, ProviderDefaultGetThirdAccessi
     ASSERT_NE(provider, nullptr);
     auto weakThirdManager = provider->AccessibilityProvider::GetThirdAccessibilityManager();
     EXPECT_TRUE(weakThirdManager.expired());
+}
+
+namespace {
+class MockThirdExecuteJsAccessibilityManager : public Framework::JsAccessibilityManager {
+public:
+    MOCK_METHOD0(GenerateAccessibilityWorkMode, AccessibilityWorkMode());
+};
+
+void SetScreenReaderEnabledForThirdExecute(
+    const RefPtr<Framework::JsAccessibilityManager>& manager, bool enabled)
+{
+    manager->isScreenReaderEnabled_ = enabled;
+    manager->isScreenReaderEnabledInitialized_ = true;
+}
+
+void PrepareThirdExecuteEnvironment(const RefPtr<NG::PipelineContext>& context,
+    const RefPtr<MockFrontend>& mockFrontend,
+    const RefPtr<MockThirdExecuteJsAccessibilityManager>& manager, bool screenReaderEnabled)
+{
+    ON_CALL(*manager, GenerateAccessibilityWorkMode())
+        .WillByDefault(testing::Return(AccessibilityWorkMode { .isTouchExplorationEnabled = true }));
+    manager->SetPipelineContext(context);
+    manager->Register(true);
+    SetScreenReaderEnabledForThirdExecute(manager, screenReaderEnabled);
+    RefPtr<AccessibilityManager> accessibilityManager = manager;
+    ON_CALL(*mockFrontend, GetAccessibilityManager()).WillByDefault(testing::Return(accessibilityManager));
+    context->weakFrontend_ = mockFrontend;
+}
+} // namespace
+
+/**
+ * @tc.name: ExecuteActionForThirdSendFocusEvent001
+ * @tc.desc: screen reader enabled, accessibility focus action sends focused event and draws focus bound
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, ExecuteActionForThirdSendFocusEvent001, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdExecuteJsAccessibilityManager>>();
+    auto mockFrontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
+    PrepareThirdExecuteEnvironment(context, mockFrontend, manager, true);
+
+    auto provider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto hostNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto hostRender = AceType::MakeRefPtr<MockRenderContext>();
+    hostNode->renderContext_ = hostRender;
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        provider, manager, hostNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+
+    OHOS::Accessibility::AccessibilityElementInfo nodeInfo;
+    OHOS::Accessibility::Rect screenRect(0, 0, 100, 100);
+    nodeInfo.SetRectInScreen(screenRect);
+
+    provider->providerMockResult_.elementId_ = -100;
+
+    auto ret = jsInteractionOperation->ExecuteActionForThird(5, nodeInfo,
+        static_cast<int32_t>(OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS));
+
+    EXPECT_EQ(ret, true);
+    // focus bound is drawn on host node
+    EXPECT_EQ(hostRender->GetAccessibilityFocus().value_or(false), true);
+    // screen reader enabled + focus action: accessibility focused event is sent,
+    // provider is queried with the tree id spliced element id
+    EXPECT_EQ(provider->providerMockResult_.elementId_, 5);
+}
+
+/**
+ * @tc.name: ExecuteActionForThirdNoEventScreenReaderOff002
+ * @tc.desc: screen reader disabled, accessibility focus action draws focus bound but sends no event
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, ExecuteActionForThirdNoEventScreenReaderOff002, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdExecuteJsAccessibilityManager>>();
+    auto mockFrontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
+    PrepareThirdExecuteEnvironment(context, mockFrontend, manager, false);
+
+    auto provider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto hostNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto hostRender = AceType::MakeRefPtr<MockRenderContext>();
+    hostNode->renderContext_ = hostRender;
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        provider, manager, hostNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+
+    OHOS::Accessibility::AccessibilityElementInfo nodeInfo;
+    OHOS::Accessibility::Rect screenRect(0, 0, 100, 100);
+    nodeInfo.SetRectInScreen(screenRect);
+
+    provider->providerMockResult_.elementId_ = -100;
+
+    auto ret = jsInteractionOperation->ExecuteActionForThird(6, nodeInfo,
+        static_cast<int32_t>(OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS));
+
+    EXPECT_EQ(ret, true);
+    // focus bound is still drawn without screen reader
+    EXPECT_EQ(hostRender->GetAccessibilityFocus().value_or(false), true);
+    // screen reader disabled: no accessibility focused event sent
+    EXPECT_EQ(provider->providerMockResult_.elementId_, -100);
+}
+
+/**
+ * @tc.name: ExecuteActionForThirdSendClearFocusEvent003
+ * @tc.desc: screen reader enabled, clear accessibility focus action sends focus cleared event and clears focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, ExecuteActionForThirdSendClearFocusEvent003, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdExecuteJsAccessibilityManager>>();
+    auto mockFrontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
+    PrepareThirdExecuteEnvironment(context, mockFrontend, manager, true);
+
+    auto provider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto hostNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto hostRender = AceType::MakeRefPtr<MockRenderContext>();
+    hostNode->renderContext_ = hostRender;
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        provider, manager, hostNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+
+    OHOS::Accessibility::AccessibilityElementInfo nodeInfo;
+    OHOS::Accessibility::Rect screenRect(0, 0, 100, 100);
+    nodeInfo.SetRectInScreen(screenRect);
+
+    // host node currently holds accessibility focus
+    hostRender->UpdateAccessibilityFocus(true);
+    provider->providerMockResult_.elementId_ = -100;
+
+    auto ret = jsInteractionOperation->ExecuteActionForThird(7, nodeInfo,
+        static_cast<int32_t>(OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS));
+
+    EXPECT_EQ(ret, true);
+    // focus bound is cleared on host node
+    EXPECT_EQ(hostRender->GetAccessibilityFocus().value_or(true), false);
+    // screen reader enabled + clear focus action: accessibility focus cleared event is sent
+    EXPECT_EQ(provider->providerMockResult_.elementId_, 7);
+}
+
+/**
+ * @tc.name: ExecuteActionForThirdNoEventOtherAction004
+ * @tc.desc: other actions send no accessibility event and do not touch focus bound
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, ExecuteActionForThirdNoEventOtherAction004, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdExecuteJsAccessibilityManager>>();
+    auto mockFrontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
+    PrepareThirdExecuteEnvironment(context, mockFrontend, manager, true);
+
+    auto provider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto hostNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto hostRender = AceType::MakeRefPtr<MockRenderContext>();
+    hostNode->renderContext_ = hostRender;
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        provider, manager, hostNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+
+    OHOS::Accessibility::AccessibilityElementInfo nodeInfo;
+    provider->providerMockResult_.elementId_ = -100;
+
+    auto ret = jsInteractionOperation->ExecuteActionForThird(8, nodeInfo,
+        static_cast<int32_t>(OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_CLICK));
+
+    EXPECT_EQ(ret, true);
+    // other action: no event sent and focus bound untouched
+    EXPECT_EQ(provider->providerMockResult_.elementId_, -100);
+    EXPECT_EQ(hostRender->GetAccessibilityFocus().has_value(), false);
+}
+
+/**
+ * @tc.name: ExecuteActionForThirdNoContext005
+ * @tc.desc: execute action for third returns false when pipeline context is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, ExecuteActionForThirdNoContext005, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdExecuteJsAccessibilityManager>>();
+    ON_CALL(*manager, GenerateAccessibilityWorkMode())
+        .WillByDefault(testing::Return(AccessibilityWorkMode { .isTouchExplorationEnabled = true }));
+    manager->Register(true);
+
+    auto provider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto hostNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        provider, manager, hostNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+
+    OHOS::Accessibility::AccessibilityElementInfo nodeInfo;
+
+    auto ret = jsInteractionOperation->ExecuteActionForThird(0, nodeInfo,
+        static_cast<int32_t>(OHOS::Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS));
+
+    EXPECT_EQ(ret, false);
 }
 
 } // namespace OHOS::Ace::NG

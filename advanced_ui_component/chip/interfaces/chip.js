@@ -23,6 +23,8 @@ const mediaquery = requireNapi('mediaquery');
 const resourceManager = requireNapi('resourceManager');
 const componentUtils = requireNapi('arkui.componentUtils');
 const hilog = requireNapi('hilog');
+const deviceInfo = requireNapi('deviceInfo');
+const uiMaterial = requireNapi('arkui.uiMaterial');
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
@@ -80,6 +82,8 @@ export function Chip(options, parent = null) {
               chipActivated: options.activated,
               chipNodeBackgroundColor: options.backgroundColor,
               chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+              backgroundSystemMaterial: options.backgroundSystemMaterial,
+              activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
               chipNodeRadius: options.borderRadius,
               chipDirection: options.direction,
               chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -109,6 +113,8 @@ export function Chip(options, parent = null) {
               chipActivated: options.activated,
               chipNodeBackgroundColor: options.backgroundColor,
               chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+              backgroundSystemMaterial: options.backgroundSystemMaterial,
+              activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
               chipNodeRadius: options.borderRadius,
               chipDirection: options.direction,
               chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -134,6 +140,8 @@ export function Chip(options, parent = null) {
             chipActivated: options.activated,
             chipNodeBackgroundColor: options.backgroundColor,
             chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+            backgroundSystemMaterial: options.backgroundSystemMaterial,
+            activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
             chipNodeRadius: options.borderRadius,
             chipDirection: options.direction,
             chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -676,6 +684,16 @@ export class ChipComponent extends ViewPU {
       this,
       'chipNodeActivatedBackgroundColor'
     );
+    this.__backgroundSystemMaterial = new SynchedPropertyObjectOneWayPU(
+      params.backgroundSystemMaterial,
+      this,
+      'backgroundSystemMaterial'
+    );
+    this.__activatedBackgroundSystemMaterial = new SynchedPropertyObjectOneWayPU(
+      params.activatedBackgroundSystemMaterial,
+      this,
+      'activatedBackgroundSystemMaterial'
+    );
     this.__isHovering = new ObservedPropertySimplePU(false, this, 'isHovering');
     this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(params.chipNodeRadius, this, 'chipNodeRadius');
     this.__chipEnabled = new SynchedPropertySimpleOneWayPU(params.chipEnabled, this, 'chipEnabled');
@@ -769,6 +787,12 @@ export class ChipComponent extends ViewPU {
     }
     if (params.chipNodeActivatedBackgroundColor === undefined) {
       this.__chipNodeActivatedBackgroundColor.set(this.theme.chipNode.activatedBackgroundColor);
+    }
+    if (params.backgroundSystemMaterial === undefined) {
+      this.__backgroundSystemMaterial.set(undefined);
+    }
+    if (params.activatedBackgroundSystemMaterial === undefined) {
+      this.__activatedBackgroundSystemMaterial.set(undefined);
     }
     if (params.isHovering !== undefined) {
       this.isHovering = params.isHovering;
@@ -869,6 +893,8 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolOptions.reset(params.suffixSymbolOptions);
     this.__chipNodeBackgroundColor.reset(params.chipNodeBackgroundColor);
     this.__chipNodeActivatedBackgroundColor.reset(params.chipNodeActivatedBackgroundColor);
+    this.__backgroundSystemMaterial.reset(params.backgroundSystemMaterial);
+    this.__activatedBackgroundSystemMaterial.reset(params.activatedBackgroundSystemMaterial);
     this.__chipNodeRadius.reset(params.chipNodeRadius);
     this.__chipEnabled.reset(params.chipEnabled);
     this.__chipActivated.reset(params.chipActivated);
@@ -890,6 +916,8 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolOptions.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeActivatedBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
+    this.__backgroundSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
+    this.__activatedBackgroundSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
     this.__isHovering.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeRadius.purgeDependencyOnElmtId(rmElmtId);
     this.__chipEnabled.purgeDependencyOnElmtId(rmElmtId);
@@ -928,6 +956,8 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolOptions.aboutToBeDeleted();
     this.__chipNodeBackgroundColor.aboutToBeDeleted();
     this.__chipNodeActivatedBackgroundColor.aboutToBeDeleted();
+    this.__backgroundSystemMaterial.aboutToBeDeleted();
+    this.__activatedBackgroundSystemMaterial.aboutToBeDeleted();
     this.__isHovering.aboutToBeDeleted();
     this.__chipNodeRadius.aboutToBeDeleted();
     this.__chipEnabled.aboutToBeDeleted();
@@ -1049,6 +1079,22 @@ export class ChipComponent extends ViewPU {
 
   set chipNodeActivatedBackgroundColor(newValue) {
     this.__chipNodeActivatedBackgroundColor.set(newValue);
+  }
+
+  get backgroundSystemMaterial() {
+    return this.__backgroundSystemMaterial.get();
+  }
+
+  set backgroundSystemMaterial(newValue) {
+    this.__backgroundSystemMaterial.set(newValue);
+  }
+
+  get activatedBackgroundSystemMaterial() {
+    return this.__activatedBackgroundSystemMaterial.get();
+  }
+
+  set activatedBackgroundSystemMaterial(newValue) {
+    this.__activatedBackgroundSystemMaterial.set(newValue);
   }
 
   get isHovering() {
@@ -1678,6 +1724,16 @@ export class ChipComponent extends ViewPU {
     return sourceColor.blendColor(ColorMetrics.resourceColor('#19000000')).color;
   }
 
+  getBackgroundSystemMaterial() {
+    if (deviceInfo.sdkApiVersion < 26) {
+      return undefined;
+    }
+    if (this.getChipActive()) {
+      return this.activatedBackgroundSystemMaterial;
+    }
+    return this.backgroundSystemMaterial;
+  }
+
   getChipNodeHeight() {
     if (this.isChipSizeEnum()) {
       return this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight;
@@ -1999,6 +2055,7 @@ export class ChipComponent extends ViewPU {
       Button.type(ButtonType.Normal);
       Button.clip(false);
       Button.backgroundColor(this.getChipNodeBackGroundColor());
+      Button.systemMaterial(this.getBackgroundSystemMaterial());
       Button.borderRadius(this.getChipNodeRadius());
       Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
@@ -2061,6 +2118,8 @@ export class ChipComponent extends ViewPU {
       Row.justifyContent(FlexAlign.Center);
       Row.padding(this.getChipNodePadding());
       Row.constraintSize(this.getChipConstraintWidth());
+      Row.backgroundColor(this.getChipActive() ? this.chipNodeActivatedBackgroundColor : Color.Transparent);
+      Row.borderRadius(this.getChipNodeRadius());
     }, Row);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();

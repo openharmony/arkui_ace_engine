@@ -1499,7 +1499,7 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnModifyDone_UpdateH
 
 /**
  * @tc.name: CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor002
- * @tc.desc: Verify host border color uses CalendarTheme entry border color when API target is 26 or above.
+ * @tc.desc: Verify host border color uses theme default when developer did not set custom border color.
  * @tc.type: FUNC
  */
 HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor002, TestSize.Level1)
@@ -1521,13 +1521,43 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnModifyDone_UpdateH
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
 
+    pickerPattern->OnModifyDone();
+    auto resultBorderColor = renderContext->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(resultBorderColor.leftColor.value_or(Color::TRANSPARENT), theme->GetEntryBorderColor());
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor003
+ * @tc.desc: Verify developer-set border color is preserved when API target is 26 or above.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor003, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Developer sets a custom border color:OnModifyDone should preserve it.
     BorderColorProperty borderColor;
     borderColor.SetColor(Color::RED);
     renderContext->UpdateBorderColor(borderColor);
 
     pickerPattern->OnModifyDone();
     auto resultBorderColor = renderContext->GetBorderColor().value_or(BorderColorProperty());
-    EXPECT_EQ(resultBorderColor.leftColor.value_or(Color::TRANSPARENT), theme->GetEntryBorderColor());
+    EXPECT_EQ(resultBorderColor.leftColor.value_or(Color::TRANSPARENT), Color::RED);
 
     container->SetApiTargetVersion(backupApiVersion);
 }

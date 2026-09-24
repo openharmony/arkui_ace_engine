@@ -67,6 +67,9 @@ struct IndexPage {
     new TextList(35, 'EdgeEffectSample', 'pages/Scroll/EdgeEffectSample'),
     new TextList(36, 'ComplexDashboardScrollSample', 'pages/Scroll/ComplexDashboardScrollSample'),
     new TextList(37, 'ComplexControlMatrixScrollSample', 'pages/Scroll/ComplexControlMatrixScrollSample'),
+    new TextList(38, 'ScrollDashboardInteractiveSample', 'pages/Scroll/ScrollDashboardInteractiveSample'),
+    new TextList(39, 'ScrollNestedListComprehensiveSample', 'pages/Scroll/ScrollNestedListComprehensiveSample'),
+    new TextList(40, 'ScrollBarComprehensiveSample', 'pages/Scroll/ScrollBarComprehensiveSample'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

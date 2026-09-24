@@ -16,12 +16,143 @@
 #include "adapter/ohos/entrance/form_utils_impl.h"
 
 #include "form_mgr.h"
+#include "form_constants.h"
+
+#include "insight_intent/insight_intent_execute_param.h"
+#include "want_params.h"
+#include "want_params_wrapper.h"
+
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 namespace {
     constexpr int32_t ERR_OK = 0;
+
+    void SetIntentTargetElement(const std::unique_ptr<JsonValue>& eventAction, AAFwk::Want& want)
+    {
+        const auto bundleName = eventAction->GetValue("bundleName")->GetString();
+        const auto moduleName = eventAction->GetValue("moduleName")->GetString();
+        const auto abilityName = eventAction->GetValue("abilityName")->GetString();
+        if (bundleName.empty() && moduleName.empty() && abilityName.empty()) {
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_FORM,
+            "InsightIntentEvent passthrough target, bundleName: %{public}s, moduleName: %{public}s, "
+            "abilityName: %{public}s", bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+        AppExecFwk::ElementName element;
+        element.SetBundleName(bundleName);
+        element.SetModuleName(moduleName);
+        element.SetAbilityName(abilityName);
+        want.SetElement(element);
+    }
+
+    bool GetIntentExecuteMode(const std::unique_ptr<JsonValue>& params, int32_t& executeMode)
+    {
+        executeMode = static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND);
+        if (!params->IsValid()) {
+            return true;
+        }
+        auto executeModeJson = params->GetValue("executeMode");
+        if (!executeModeJson->IsValid()) {
+            return true;
+        }
+        if (!executeModeJson->IsNumber()) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent executeMode is not a number");
+            return false;
+        }
+        executeMode = executeModeJson->GetInt();
+        if (executeMode < static_cast<int32_t>(AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND)
+            || executeMode > static_cast<int32_t>(AppExecFwk::ExecuteMode::SERVICE_EXTENSION_ABILITY)) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent executeMode out of range: %{public}d", executeMode);
+            return false;
+        }
+        return true;
+    }
+
+    void SetWantParamByType(const std::unique_ptr<JsonValue>& child, AAFwk::WantParams& wantParams)
+    {
+        auto key = child->GetKey();
+        if (child->IsString()) {
+            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+        } else if (child->IsNumber()) {
+            wantParams.SetParam(key, AAFwk::Integer::Box(child->GetInt()));
+        } else if (child->IsBool()) {
+            wantParams.SetParam(key, AAFwk::Boolean::Box(child->GetBool()));
+        } else {
+            if (child->IsObject() || child->IsArray()) {
+                TAG_LOGW(AceLogTag::ACE_FORM,
+                    "InsightIntentEvent intentParams contains object/array value, "
+                    "downgrade to empty string, key: %{public}s", key.c_str());
+            }
+            wantParams.SetParam(key, AAFwk::String::Box(child->GetString()));
+        }
+    }
+
+    void ParseIntentParams(const std::unique_ptr<JsonValue>& params, AAFwk::WantParams& wantParams)
+    {
+        if (!params->IsValid()) {
+            return;
+        }
+        auto intentParams = params->GetValue("intentParams");
+        if (!intentParams->IsValid()) {
+            return;
+        }
+        auto child = intentParams->GetChild();
+        while (child->IsValid()) {
+            SetWantParamByType(child, wantParams);
+            child = child->GetNext();
+        }
+    }
+
+    void ParseRouterEventParams(const std::unique_ptr<JsonValue>& params, AAFwk::Want& want)
+    {
+        if (params->IsValid()) {
+            auto child = params->GetChild();
+            while (child->IsValid()) {
+                auto key = child->GetKey();
+                if (child->IsNull()) {
+                    want.SetParam(key, std::string());
+                } else if (child->IsString()) {
+                    want.SetParam(key, child->GetString());
+                } else if (child->IsNumber()) {
+                    want.SetParam(key, child->GetInt());
+                } else {
+                    want.SetParam(key, std::string());
+                }
+                child = child->GetNext();
+            }
+        }
+        want.SetParam("params", params->ToString());
+    }
+
+    bool SetRouterEventElement(
+        const std::unique_ptr<JsonValue>& eventAction, const std::string& defaultBundleName, AAFwk::Want& want)
+    {
+        auto uri = eventAction->GetValue("uri");
+        if (uri->IsValid()) {
+            want.SetUri(uri->GetString());
+        }
+        auto bundle = eventAction->GetValue("bundleName")->GetString();
+        auto ability = eventAction->GetValue("abilityName")->GetString();
+        if (!ability.empty()) {
+            if (bundle.empty()) {
+                bundle = defaultBundleName;
+            }
+            want.SetElementName(bundle, ability);
+        } else if (uri->IsValid()) {
+            if (!bundle.empty()) {
+                want.SetElementName(bundle, std::string());
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
 }
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
@@ -33,46 +164,14 @@ int32_t FormUtilsImpl::RouterEvent(
     CHECK_NULL_RETURN(token_, -1);
     AAFwk::Want want;
     auto eventAction = JsonUtil::ParseJsonString(action);
-    auto uri = eventAction->GetValue("uri");
-    auto params = eventAction->GetValue("params");
-    if (params->IsValid()) {
-        auto child = params->GetChild();
-        while (child->IsValid()) {
-            auto key = child->GetKey();
-            if (child->IsNull()) {
-                want.SetParam(key, std::string());
-            } else if (child->IsString()) {
-                want.SetParam(key, child->GetString());
-            } else if (child->IsNumber()) {
-                want.SetParam(key, child->GetInt());
-            } else {
-                want.SetParam(key, std::string());
-            }
-            child = child->GetNext();
-        }
-    }
-    want.SetParam("params", params->ToString());
+    ParseRouterEventParams(eventAction->GetValue("params"), want);
     AddWantFreeInstallFlagForRouterEvent(eventAction->GetValue("flag"), want);
-    auto abilityName = eventAction->GetValue("abilityName");
-    if (uri->IsValid() && !abilityName->IsValid()) {
-        auto uriStr = uri->GetString();
-        want.SetUri(uriStr);
-        auto bundleName = eventAction->GetValue("bundleName");
-        auto bundle = bundleName->GetString();
-        if (!bundle.empty()) {
-            want.SetElementName(bundle, std::string());
-        }
-    } else {
-        auto bundleName = eventAction->GetValue("bundleName");
-        auto bundle = bundleName->GetString();
-        auto ability = abilityName->GetString();
-        if (ability.empty()) {
-            return -1;
-        }
-        if (bundle.empty()) {
-            bundle = defaultBundleName;
-        }
-        want.SetElementName(bundle, ability);
+    auto enableRouteSecondPage = eventAction->GetValue("enableRouteSecondPage");
+    bool isRouteSecondPageEnabled = enableRouteSecondPage->IsValid()
+        && enableRouteSecondPage->IsBool() && enableRouteSecondPage->GetBool();
+    want.SetParam(AppExecFwk::Constants::PARAM_ENABLE_ROUTE_SECOND_PAGE, isRouteSecondPageEnabled);
+    if (!SetRouterEventElement(eventAction, defaultBundleName, want)) {
+        return -1;
     }
 
     return AppExecFwk::FormMgr::GetInstance().RouterEvent(formId, want, token_);
@@ -151,5 +250,61 @@ int32_t FormUtilsImpl::BackgroundEvent(const int64_t formId, const std::string& 
     want.SetParam("params", params->ToString());
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_MANUAL_CLICK_KEY, isManuallyClick);
     return AppExecFwk::FormMgr::GetInstance().BackgroundEvent(formId, want, token);
+}
+
+int32_t FormUtilsImpl::InsightIntentEvent(
+    const int64_t formId, const std::string& action, const int32_t containerId)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "InsightIntentEvent enter, formId: %{public}" PRId64 ", containerId: %{public}d", formId, containerId);
+    ContainerScope scope(containerId);
+    auto container = Container::Current();
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    if (aceContainer == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent aceContainer is null");
+        return -1;
+    }
+    auto token = aceContainer->GetToken();
+    if (token == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent token is null");
+        return -1;
+    }
+
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    if (!eventAction->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent action is not valid json");
+        return -1;
+    }
+    auto intentNameJson = eventAction->GetValue("intentName");
+    const auto intentName = intentNameJson->GetString();
+    if (intentName.empty()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "InsightIntentEvent intentName is empty");
+        return -1;
+    }
+    auto params = eventAction->GetValue("params");
+    int32_t executeMode = 0;
+    if (!GetIntentExecuteMode(params, executeMode)) {
+        return -1;
+    }
+
+    AAFwk::WantParams wantParams;
+    ParseIntentParams(params, wantParams);
+
+    AAFwk::Want want;
+    AAFwk::WantParams executeWantParams;
+    executeWantParams.SetParam(
+        AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, AAFwk::String::Box(intentName));
+    executeWantParams.SetParam(
+        AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("0"));
+    executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE,
+        AAFwk::Integer::Box(executeMode));
+    executeWantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM,
+        AAFwk::WantParamWrapper::Box(wantParams));
+    want.SetParams(executeWantParams);
+    SetIntentTargetElement(eventAction, want);
+    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent send IPC, intentName: %{public}s", intentName.c_str());
+    auto ret = AppExecFwk::FormMgr::GetInstance().InsightIntentEvent(formId, want, token);
+    TAG_LOGI(AceLogTag::ACE_FORM, "InsightIntentEvent IPC result: %{public}d", ret);
+    return ret;
 }
 } // namespace OHOS::Ace

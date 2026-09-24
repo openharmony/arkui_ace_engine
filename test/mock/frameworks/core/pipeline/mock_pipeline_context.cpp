@@ -74,6 +74,7 @@
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
+#include "core/components_ng/manager/material/material_processor.h"
 
 namespace OHOS::Ace {
 
@@ -339,6 +340,17 @@ PipelineContext::PipelineContext(): safeAreaManager_(MakeRefPtr<SafeAreaManager>
     if (!recycleManager_) {
         recycleManager_ = std::make_unique<RecycleManager>();
     }
+}
+
+// Host test binary does not link the real pipeline_context.cpp; provide the same lazy
+// creation so syntax-side observation hooks resolve and exercise the real manager.
+const RefPtr<ScrollPlaceholderManager>& PipelineContext::GetOrCreateScrollPlaceholderManager()
+{
+    if (!scrollPlaceholderManager_) {
+        scrollPlaceholderManager_ = MakeRefPtr<ScrollPlaceholderManager>(instanceId_);
+        scrollPlaceholderManager_->SetPipelineContext(WeakClaim(this));
+    }
+    return scrollPlaceholderManager_;
 }
 
 float PipelineContext::GetCurrentRootWidth()
@@ -631,7 +643,7 @@ void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
@@ -1120,6 +1132,18 @@ void PipelineContext::UpdateNavSafeAreaWithoutAnimation(
 
 void PipelineContext::UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) {}
 
+void PipelineContext::ApplyDefaultImmersiveStrategy(const std::unordered_set<ImmersiveStrategy>& types)
+{
+    CHECK_NULL_VOID(safeAreaManager_);
+    safeAreaManager_->ApplyDefaultImmersiveStrategy(types);
+}
+ 
+bool PipelineContext::IsImmersiveStrategySet(ImmersiveStrategy strategy) const
+{
+    CHECK_NULL_RETURN(safeAreaManager_, false);
+    return safeAreaManager_->IsImmersiveStrategySet(strategy);
+}
+
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return KeyBoardAvoidMode::OFFSET;
@@ -1241,7 +1265,8 @@ void PipelineContext::SetIsDragging(bool isDragging)
 
 void PipelineContext::ResetDragging() {}
 
-void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
+void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type,
+    WindowSizeChangeReason reason) {}
 
 void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
@@ -1524,7 +1549,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount) {}
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {}
 
 bool PipelineBase::ReachResponseDeadline() const
 {
@@ -1619,9 +1644,10 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
 {
-    return AceType::MakeRefPtr<UIExtensionManager>();
+    static const RefPtr<UIExtensionManager> uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    return uiExtensionManager;
 }
 #endif
 
@@ -2125,6 +2151,10 @@ int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& cal
 void PipelineContext::OnSurfaceDensityChanged(double density) {}
 void PipelineContext::RegisterListenerForTranslate(const WeakPtr<FrameNode> node) {}
 void PipelineContext::UnRegisterListenerForTranslate(int32_t nodeId) {}
+
+void PipelineContext::RegisterMaterialNode(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::UnregisterMaterialNode(int32_t nodeId) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

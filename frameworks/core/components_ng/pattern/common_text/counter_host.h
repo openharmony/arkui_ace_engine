@@ -29,15 +29,17 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 
 namespace OHOS::Ace::NG {
 
 // Forward declarations to minimize include dependencies in this interface header.
 class FrameNode;
 class RenderContext;
-class TextInputResponseArea;
+class TextComponentDecorator;
 
 class ICounterHost : public virtual AceType {
+    DECLARE_ACE_TYPE(ICounterHost, AceType);
 public:
     ~ICounterHost() override = default;
 
@@ -74,6 +76,8 @@ public:
     virtual TextDirection GetLayoutDirection() const { return TextDirection::LTR; }
     virtual TextDirection GetNonAutoLayoutDirection() const { return TextDirection::LTR; }
 
+    virtual bool NeedRestoreMeasureConstraint() const { return false; }
+
     virtual float GetPaddingLeft() const { return 0.0f; }
     virtual float GetPaddingRight() const { return 0.0f; }
     virtual float GetPaddingBottom() const { return 0.0f; }
@@ -100,6 +104,8 @@ public:
     virtual void SetUnderlineColor(const Color& color) {}
     virtual void SetUnderlineWidth(float width) {}
     virtual void ApplyUnderlineTheme() {}
+
+    virtual RefPtr<TextComponentDecorator> GetCounterDecorator() const { return nullptr; }
 };
 
 } // namespace OHOS::Ace::NG

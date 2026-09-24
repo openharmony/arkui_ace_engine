@@ -20,629 +20,629 @@ type ComponentObj = {
   component: any
 }
 
-class GridScrollerModifier extends ModifierWithKey<Scroller> {
-  constructor(value: Scroller) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridScroller');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.setGridScroller(node, undefined);
-    }
-    else {
-      getUINativeModule().grid.setGridScroller(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-class GridLayoutOptionsModifier extends ModifierWithKey<GridLayoutOptions> {
-  constructor(value: GridLayoutOptions) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridLayoutOptions');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
-    } else {
-      getUINativeModule().grid.setGridLayoutOptions(node,
-        isArray(this.value.regularSize) ? this.value.regularSize : undefined,
-        isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes : undefined,
-        isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
-        isFunction(this.value?.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
-        isFunction(this.value?.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined,
-        isFunction(this.value?.onGetStartIndexByOffset) ? this.value.onGetStartIndexByOffset : undefined,
-        isFunction(this.value?.onGetStartIndexByIndex) ? this.value.onGetStartIndexByIndex : undefined);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue?.regularSize, this.value?.regularSize) ||
-      !isBaseOrResourceEqual(this.stageValue?.irregularIndexes, this.value?.irregularIndexes) ||
-      !isBaseOrResourceEqual(this.stageValue?.onGetIrregularSizeByIndex, this.value?.onGetIrregularSizeByIndex) ||
-      !isBaseOrResourceEqual(this.stageValue?.onGetRectByIndex, this.value?.onGetRectByIndex) ||
-      !isBaseOrResourceEqual(this.stageValue?.onGetStartIndexByOffset, this.value?.onGetStartIndexByOffset) ||
-      !isBaseOrResourceEqual(this.stageValue?.onGetStartIndexByIndex, this.value?.onGetStartIndexByIndex);
-  }
-}
-class GridColumnsTemplateModifier extends ModifierWithKey<string | ItemFillPolicy> {
-  constructor(value: string | ItemFillPolicy) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridColumnsTemplate');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetColumnsTemplate(node);
-    }
-    else {
-      getUINativeModule().grid.setColumnsTemplate(node, this.value);
-    }
-  }
-}
-class GridRowsTemplateModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridRowsTemplate');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetRowsTemplate(node);
-    }
-    else {
-      getUINativeModule().grid.setRowsTemplate(node, this.value);
-    }
-  }
-}
-class GridColumnsGapModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridColumnsGap');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetColumnsGap(node);
-    }
-    else {
-      getUINativeModule().grid.setColumnsGap(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-class GridRowsGapModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridRowsGap');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetRowsGap(node);
-    }
-    else {
-      getUINativeModule().grid.setRowsGap(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-class GridScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
-  constructor(value: string | number | Resource) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridScrollBarWidth');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetScrollBarWidth(node);
-    }
-    else {
-      getUINativeModule().grid.setScrollBarWidth(node, this.value);
-    }
-  }
-}
-class GridScrollBarModifier extends ModifierWithKey<BarState> {
-  constructor(value: BarState) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridScrollBar');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetScrollBar(node);
-    }
-    else {
-      getUINativeModule().grid.setScrollBar(node, this.value);
-    }
-  }
-}
-class GridScrollBarColorModifier extends ModifierWithKey<string | number | Color> {
-  constructor(value: string | number | Color) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridScrollBarColor');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetScrollBarColor(node);
-    }
-    else {
-      getUINativeModule().grid.setScrollBarColor(node, this.value);
-    }
-  }
-}
-class GridEditModeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridEditMode');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetEditMode(node);
-    }
-    else {
-      getUINativeModule().grid.setEditMode(node, this.value);
-    }
-  }
-}
-class GridCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions> {
-  constructor(value: ArkScrollableCacheOptions) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridCachedCount');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetCachedCount(node);
-    }
-    else {
-      getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
-    }
-  }
-}
-class GridMultiSelectableModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridMultiSelectable');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetMultiSelectable(node);
-    }
-    else {
-      getUINativeModule().grid.setMultiSelectable(node, this.value);
-    }
-  }
-}
-class GridNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
-  constructor(value: NestedScrollOptions) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridNestedScroll');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetNestedScroll(node);
-    } else {
-      getUINativeModule().grid.setNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !(
-        (this.stageValue?.scrollForward === this.value?.scrollForward) &&
-        (this.stageValue?.scrollBackward === this.value?.scrollBackward));
-  }
-}
-class GridEnableScrollModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridEnableScroll');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetEnableScroll(node);
-    }
-    else {
-      getUINativeModule().grid.setEnableScroll(node, this.value);
-    }
-  }
-}
-class GridFrictionModifier extends ModifierWithKey<number | Resource> {
-  constructor(value: number | Resource) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridFriction');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetFriction(node);
-    }
-    else {
-      getUINativeModule().grid.setFriction(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-class GridFocusWrapModeModifier extends ModifierWithKey<FocusWrapMode> {
-  constructor(value: FocusWrapMode) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridFocusWrapMode');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetFocusWrapMode(node);
-    }
-    else {
-      getUINativeModule().grid.setFocusWrapMode(node, this.value);
-    }
-  }
-}
-class GridOnScrollFrameBeginModifier extends ModifierWithKey<(offset: number, state: ScrollState) => { offsetRemain: number }> {
-  constructor(value: (offset: number, state: ScrollState) => { offsetRemain: number; }) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnScrollFrameBegin');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetOnScrollFrameBegin(node);
-    }
-    else {
-      getUINativeModule().scrollable.setOnScrollFrameBegin(node, this.value);
-    }
-  }
-}
-class GridOnWillScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number,
-  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult> {
-  constructor(value: (xOffset: number, yOffset: number,
-    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnWillScroll');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetOnWillScroll(node);
-    }
-    else {
-      getUINativeModule().scrollable.setOnWillScroll(node, this.value);
-    }
-  }
-}
-class GridOnDidScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number, scrollState: ScrollState) => void> {
-  constructor(value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnDidScroll');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetOnDidScroll(node);
-    }
-    else {
-      getUINativeModule().scrollable.setOnDidScroll(node, this.value);
-    }
-  }
-}
-class GridSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridSupportLazyLoadingEmptyBranch');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.setSupportLazyLoadingEmptyBranch(node, false);
-    }
-    else {
-      getUINativeModule().grid.setSupportLazyLoadingEmptyBranch(node, this.value);
-    }
-  }
-}
-class GridOnReachStartModifier extends ModifierWithKey<() => void> {
-  constructor(value: () => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnReachStart');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetOnReachStart(node);
-    }
-    else {
-      getUINativeModule().scrollable.setOnReachStart(node, this.value);
-    }
-  }
-}
-class GridOnReachEndModifier extends ModifierWithKey<() => void> {
-  constructor(value: () => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnReachEnd');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetOnReachEnd(node);
-    }
-    else {
-      getUINativeModule().scrollable.setOnReachEnd(node, this.value);
-    }
-  }
-}
-class GridOnScrollStartModifier extends ModifierWithKey<() => void> {
-  constructor(value: () => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnScrollStart');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetOnScrollStart(node);
-    }
-    else {
-      getUINativeModule().scrollable.setOnScrollStart(node, this.value);
-    }
-  }
-}
-class GridOnScrollStopModifier extends ModifierWithKey<() => void> {
-  constructor(value: () => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnScrollStop');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetOnScrollStop(node);
-    }
-    else {
-      getUINativeModule().scrollable.setOnScrollStop(node, this.value);
-    }
-  }
-}
-class GridOnScrollIndexModifier extends ModifierWithKey<(first: number, last: number) => void> {
-  constructor(value: (first: number, last: number) => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnScrollIndex');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnScrollIndex(node);
-    }
-    else {
-      getUINativeModule().grid.setOnScrollIndex(node, this.value);
-    }
-  }
-}
-class GridOnScrollBarUpdateModifier extends ModifierWithKey<(index: number, offset: number) => ComputedBarAttribute> {
-  constructor(value: (index: number, offset: number) => ComputedBarAttribute) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnScrollBarUpdate');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnScrollBarUpdate(node);
-    }
-    else {
-      getUINativeModule().grid.setOnScrollBarUpdate(node, this.value);
-    }
-  }
-}
-class GridOnItemDragStartModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number) => void | (() => any)> {
-  constructor(value: (event: ItemDragInfo, itemIndex: number) => void | (() => any)) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnItemDragStart');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnItemDragStart(node);
-    }
-    else {
-      getUINativeModule().grid.setOnItemDragStart(node, this.value);
-    }
-  }
-}
-class GridOnItemDragEnterModifier extends ModifierWithKey<(event: ItemDragInfo) => void> {
-  constructor(value: (event: ItemDragInfo) => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnItemDragEnter');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnItemDragEnter(node);
-    }
-    else {
-      getUINativeModule().grid.setOnItemDragEnter(node, this.value);
-    }
-  }
-}
-class GridOnItemDragMoveModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number, insertIndex: number) => void> {
-  constructor(value: (event: ItemDragInfo, itemIndex: number, insertIndex: number) => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnItemDragMove');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnItemDragMove(node);
-    }
-    else {
-      getUINativeModule().grid.setOnItemDragMove(node, this.value);
-    }
-  }
-}
-class GridOnItemDragLeaveModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number) => void> {
-  constructor(value: (event: ItemDragInfo, itemIndex: number) => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnItemDragLeave');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnItemDragLeave(node);
-    }
-    else {
-      getUINativeModule().grid.setOnItemDragLeave(node, this.value);
-    }
-  }
-}
-class GridOnItemDropModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void> {
-  constructor(value: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnItemDrop');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnItemDrop(node);
-    }
-    else {
-      getUINativeModule().grid.setOnItemDrop(node, this.value);
-    }
-  }
-}
-class GridMaxCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridMaxCount');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetMaxCount(node);
-    }
-    else {
-      getUINativeModule().grid.setMaxCount(node, this.value);
-    }
-  }
-}
-class GridMinCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridMinCount');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetMinCount(node);
-    }
-    else {
-      getUINativeModule().grid.setMinCount(node, this.value);
-    }
-  }
-}
-class GridCellLengthModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridCellLength');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetCellLength(node);
-    }
-    else {
-      getUINativeModule().grid.setCellLength(node, this.value);
-    }
-  }
-}
-class GridLayoutDirectionModifier extends ModifierWithKey<GridDirection> {
-  constructor(value: GridDirection) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridLayoutDirection');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetLayoutDirection(node);
-    }
-    else {
-      getUINativeModule().grid.setLayoutDirection(node, this.value);
-    }
-  }
-}
-class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridSupportAnimation');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetSupportAnimation(node);
-    }
-    else {
-      getUINativeModule().grid.setSupportAnimation(node, this.value);
-    }
-  }
-}
-class GridClipModifier extends ModifierWithKey<boolean | object> {
-  constructor(value: boolean | object) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridClip');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().common.resetClipWithEdge(node);
-    }
-    else {
-      getUINativeModule().common.setClipWithEdge(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return true;
-  }
-}
-class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
-  constructor(value: GridItemAlignment) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridAlignItems');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetAlignItems(node);
-    }
-    else {
-      getUINativeModule().grid.setAlignItems(node, this.value);
-    }
-  }
-}
-class GridSyncLoadModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridSyncLoad');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetSyncLoad(node);
-    }
-    else {
-      getUINativeModule().grid.setSyncLoad(node, this.value);
-    }
-  }
-}
-class GridEditModeOptionsModifier extends ModifierWithKey<EditModeOptions | undefined> {
-  constructor(options: EditModeOptions | undefined) {
-    super(options);
-  }
-  static identity: Symbol = Symbol('gridEditModeOptions');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetEditModeOptions(node);
-    }
-    else {
-      getUINativeModule().grid.setEditModeOptions(node, this.value);
-    }
-  }
-}
-class GridEnableEditModeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridEnableEditMode');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetGridEnableEditMode(node);
-    } else {
-      getUINativeModule().grid.setGridEnableEditMode(node, this.value);
-    }
-  }
-}
-class GridOnEditModeChangeModifier extends ModifierWithKey<Callback<boolean> | undefined> {
-  constructor(callback: Callback<boolean> | undefined) {
-    super(callback);
-  }
-  static identity: Symbol = Symbol('gridOnEditModeChange');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnEditModeChange(node);
-    } else {
-      getUINativeModule().grid.setOnEditModeChange(node, this.value);
-    }
-  }
-}
-function loadComponent(): ComponentObj|undefined {
+function loadComponent(): ComponentObj | undefined {
   if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
+    class GridScrollerModifier extends ModifierWithKey<Scroller> {
+      constructor(value: Scroller) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridScroller');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.setGridScroller(node, undefined);
+        }
+        else {
+          getUINativeModule().grid.setGridScroller(node, this.value);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    class GridLayoutOptionsModifier extends ModifierWithKey<GridLayoutOptions> {
+      constructor(value: GridLayoutOptions) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridLayoutOptions');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+        } else {
+          getUINativeModule().grid.setGridLayoutOptions(node,
+            isArray(this.value.regularSize) ? this.value.regularSize : undefined,
+            isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes : undefined,
+            isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
+            isFunction(this.value?.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
+            isFunction(this.value?.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined,
+            isFunction(this.value?.onGetStartIndexByOffset) ? this.value.onGetStartIndexByOffset : undefined,
+            isFunction(this.value?.onGetStartIndexByIndex) ? this.value.onGetStartIndexByIndex : undefined);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue?.regularSize, this.value?.regularSize) ||
+          !isBaseOrResourceEqual(this.stageValue?.irregularIndexes, this.value?.irregularIndexes) ||
+          !isBaseOrResourceEqual(this.stageValue?.onGetIrregularSizeByIndex, this.value?.onGetIrregularSizeByIndex) ||
+          !isBaseOrResourceEqual(this.stageValue?.onGetRectByIndex, this.value?.onGetRectByIndex) ||
+          !isBaseOrResourceEqual(this.stageValue?.onGetStartIndexByOffset, this.value?.onGetStartIndexByOffset) ||
+          !isBaseOrResourceEqual(this.stageValue?.onGetStartIndexByIndex, this.value?.onGetStartIndexByIndex);
+      }
+    }
+    class GridColumnsTemplateModifier extends ModifierWithKey<string | ItemFillPolicy> {
+      constructor(value: string | ItemFillPolicy) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridColumnsTemplate');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetColumnsTemplate(node);
+        }
+        else {
+          getUINativeModule().grid.setColumnsTemplate(node, this.value);
+        }
+      }
+    }
+    class GridRowsTemplateModifier extends ModifierWithKey<string> {
+      constructor(value: string) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridRowsTemplate');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetRowsTemplate(node);
+        }
+        else {
+          getUINativeModule().grid.setRowsTemplate(node, this.value);
+        }
+      }
+    }
+    class GridColumnsGapModifier extends ModifierWithKey<Length> {
+      constructor(value: Length) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridColumnsGap');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetColumnsGap(node);
+        }
+        else {
+          getUINativeModule().grid.setColumnsGap(node, this.value);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    class GridRowsGapModifier extends ModifierWithKey<Length> {
+      constructor(value: Length) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridRowsGap');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetRowsGap(node);
+        }
+        else {
+          getUINativeModule().grid.setRowsGap(node, this.value);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    class GridScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
+      constructor(value: string | number | Resource) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridScrollBarWidth');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetScrollBarWidth(node);
+        }
+        else {
+          getUINativeModule().grid.setScrollBarWidth(node, this.value);
+        }
+      }
+    }
+    class GridScrollBarModifier extends ModifierWithKey<BarState> {
+      constructor(value: BarState) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridScrollBar');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetScrollBar(node);
+        }
+        else {
+          getUINativeModule().grid.setScrollBar(node, this.value);
+        }
+      }
+    }
+    class GridScrollBarColorModifier extends ModifierWithKey<string | number | Color> {
+      constructor(value: string | number | Color) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridScrollBarColor');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetScrollBarColor(node);
+        }
+        else {
+          getUINativeModule().grid.setScrollBarColor(node, this.value);
+        }
+      }
+    }
+    class GridEditModeModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridEditMode');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetEditMode(node);
+        }
+        else {
+          getUINativeModule().grid.setEditMode(node, this.value);
+        }
+      }
+    }
+    class GridCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions> {
+      constructor(value: ArkScrollableCacheOptions) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridCachedCount');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetCachedCount(node);
+        }
+        else {
+          getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
+        }
+      }
+    }
+    class GridMultiSelectableModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridMultiSelectable');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetMultiSelectable(node);
+        }
+        else {
+          getUINativeModule().grid.setMultiSelectable(node, this.value);
+        }
+      }
+    }
+    class GridNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
+      constructor(value: NestedScrollOptions) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridNestedScroll');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetNestedScroll(node);
+        } else {
+          getUINativeModule().grid.setNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !(
+            (this.stageValue?.scrollForward === this.value?.scrollForward) &&
+            (this.stageValue?.scrollBackward === this.value?.scrollBackward));
+      }
+    }
+    class GridEnableScrollModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridEnableScroll');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetEnableScroll(node);
+        }
+        else {
+          getUINativeModule().grid.setEnableScroll(node, this.value);
+        }
+      }
+    }
+    class GridFrictionModifier extends ModifierWithKey<number | Resource> {
+      constructor(value: number | Resource) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridFriction');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetFriction(node);
+        }
+        else {
+          getUINativeModule().grid.setFriction(node, this.value);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    class GridFocusWrapModeModifier extends ModifierWithKey<FocusWrapMode> {
+      constructor(value: FocusWrapMode) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridFocusWrapMode');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetFocusWrapMode(node);
+        }
+        else {
+          getUINativeModule().grid.setFocusWrapMode(node, this.value);
+        }
+      }
+    }
+    class GridOnScrollFrameBeginModifier extends ModifierWithKey<(offset: number, state: ScrollState) => { offsetRemain: number }> {
+      constructor(value: (offset: number, state: ScrollState) => { offsetRemain: number; }) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnScrollFrameBegin');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().scrollable.resetOnScrollFrameBegin(node);
+        }
+        else {
+          getUINativeModule().scrollable.setOnScrollFrameBegin(node, this.value);
+        }
+      }
+    }
+    class GridOnWillScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number,
+      scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult> {
+      constructor(value: (xOffset: number, yOffset: number,
+        scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnWillScroll');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().scrollable.resetOnWillScroll(node);
+        }
+        else {
+          getUINativeModule().scrollable.setOnWillScroll(node, this.value);
+        }
+      }
+    }
+    class GridOnDidScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number, scrollState: ScrollState) => void> {
+      constructor(value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnDidScroll');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().scrollable.resetOnDidScroll(node);
+        }
+        else {
+          getUINativeModule().scrollable.setOnDidScroll(node, this.value);
+        }
+      }
+    }
+    class GridSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridSupportLazyLoadingEmptyBranch');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.setSupportLazyLoadingEmptyBranch(node, false);
+        }
+        else {
+          getUINativeModule().grid.setSupportLazyLoadingEmptyBranch(node, this.value);
+        }
+      }
+    }
+    class GridOnReachStartModifier extends ModifierWithKey<() => void> {
+      constructor(value: () => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnReachStart');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().scrollable.resetOnReachStart(node);
+        }
+        else {
+          getUINativeModule().scrollable.setOnReachStart(node, this.value);
+        }
+      }
+    }
+    class GridOnReachEndModifier extends ModifierWithKey<() => void> {
+      constructor(value: () => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnReachEnd');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().scrollable.resetOnReachEnd(node);
+        }
+        else {
+          getUINativeModule().scrollable.setOnReachEnd(node, this.value);
+        }
+      }
+    }
+    class GridOnScrollStartModifier extends ModifierWithKey<() => void> {
+      constructor(value: () => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnScrollStart');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().scrollable.resetOnScrollStart(node);
+        }
+        else {
+          getUINativeModule().scrollable.setOnScrollStart(node, this.value);
+        }
+      }
+    }
+    class GridOnScrollStopModifier extends ModifierWithKey<() => void> {
+      constructor(value: () => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnScrollStop');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().scrollable.resetOnScrollStop(node);
+        }
+        else {
+          getUINativeModule().scrollable.setOnScrollStop(node, this.value);
+        }
+      }
+    }
+    class GridOnScrollIndexModifier extends ModifierWithKey<(first: number, last: number) => void> {
+      constructor(value: (first: number, last: number) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnScrollIndex');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnScrollIndex(node);
+        }
+        else {
+          getUINativeModule().grid.setOnScrollIndex(node, this.value);
+        }
+      }
+    }
+    class GridOnScrollBarUpdateModifier extends ModifierWithKey<(index: number, offset: number) => ComputedBarAttribute> {
+      constructor(value: (index: number, offset: number) => ComputedBarAttribute) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnScrollBarUpdate');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnScrollBarUpdate(node);
+        }
+        else {
+          getUINativeModule().grid.setOnScrollBarUpdate(node, this.value);
+        }
+      }
+    }
+    class GridOnItemDragStartModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number) => void | (() => any)> {
+      constructor(value: (event: ItemDragInfo, itemIndex: number) => void | (() => any)) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnItemDragStart');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnItemDragStart(node);
+        }
+        else {
+          getUINativeModule().grid.setOnItemDragStart(node, this.value);
+        }
+      }
+    }
+    class GridOnItemDragEnterModifier extends ModifierWithKey<(event: ItemDragInfo) => void> {
+      constructor(value: (event: ItemDragInfo) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnItemDragEnter');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnItemDragEnter(node);
+        }
+        else {
+          getUINativeModule().grid.setOnItemDragEnter(node, this.value);
+        }
+      }
+    }
+    class GridOnItemDragMoveModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number, insertIndex: number) => void> {
+      constructor(value: (event: ItemDragInfo, itemIndex: number, insertIndex: number) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnItemDragMove');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnItemDragMove(node);
+        }
+        else {
+          getUINativeModule().grid.setOnItemDragMove(node, this.value);
+        }
+      }
+    }
+    class GridOnItemDragLeaveModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number) => void> {
+      constructor(value: (event: ItemDragInfo, itemIndex: number) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnItemDragLeave');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnItemDragLeave(node);
+        }
+        else {
+          getUINativeModule().grid.setOnItemDragLeave(node, this.value);
+        }
+      }
+    }
+    class GridOnItemDropModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void> {
+      constructor(value: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridOnItemDrop');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnItemDrop(node);
+        }
+        else {
+          getUINativeModule().grid.setOnItemDrop(node, this.value);
+        }
+      }
+    }
+    class GridMaxCountModifier extends ModifierWithKey<number> {
+      constructor(value: number) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridMaxCount');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetMaxCount(node);
+        }
+        else {
+          getUINativeModule().grid.setMaxCount(node, this.value);
+        }
+      }
+    }
+    class GridMinCountModifier extends ModifierWithKey<number> {
+      constructor(value: number) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridMinCount');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetMinCount(node);
+        }
+        else {
+          getUINativeModule().grid.setMinCount(node, this.value);
+        }
+      }
+    }
+    class GridCellLengthModifier extends ModifierWithKey<number> {
+      constructor(value: number) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridCellLength');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetCellLength(node);
+        }
+        else {
+          getUINativeModule().grid.setCellLength(node, this.value);
+        }
+      }
+    }
+    class GridLayoutDirectionModifier extends ModifierWithKey<GridDirection> {
+      constructor(value: GridDirection) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridLayoutDirection');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetLayoutDirection(node);
+        }
+        else {
+          getUINativeModule().grid.setLayoutDirection(node, this.value);
+        }
+      }
+    }
+    class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridSupportAnimation');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetSupportAnimation(node);
+        }
+        else {
+          getUINativeModule().grid.setSupportAnimation(node, this.value);
+        }
+      }
+    }
+    class GridClipModifier extends ModifierWithKey<boolean | object> {
+      constructor(value: boolean | object) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridClip');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().common.resetClipWithEdge(node);
+        }
+        else {
+          getUINativeModule().common.setClipWithEdge(node, this.value);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return true;
+      }
+    }
+    class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
+      constructor(value: GridItemAlignment) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridAlignItems');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetAlignItems(node);
+        }
+        else {
+          getUINativeModule().grid.setAlignItems(node, this.value);
+        }
+      }
+    }
+    class GridSyncLoadModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridSyncLoad');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetSyncLoad(node);
+        }
+        else {
+          getUINativeModule().grid.setSyncLoad(node, this.value);
+        }
+      }
+    }
+    class GridEditModeOptionsModifier extends ModifierWithKey<EditModeOptions | undefined> {
+      constructor(options: EditModeOptions | undefined) {
+        super(options);
+      }
+      static identity: Symbol = Symbol('gridEditModeOptions');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetEditModeOptions(node);
+        }
+        else {
+          getUINativeModule().grid.setEditModeOptions(node, this.value);
+        }
+      }
+    }
+    class GridEnableEditModeModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('gridEnableEditMode');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetGridEnableEditMode(node);
+        } else {
+          getUINativeModule().grid.setGridEnableEditMode(node, this.value);
+        }
+      }
+    }
+    class GridOnEditModeChangeModifier extends ModifierWithKey<Callback<boolean> | undefined> {
+      constructor(callback: Callback<boolean> | undefined) {
+        super(callback);
+      }
+      static identity: Symbol = Symbol('gridOnEditModeChange');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().grid.resetOnEditModeChange(node);
+        } else {
+          getUINativeModule().grid.setOnEditModeChange(node, this.value);
+        }
+      }
+    }
     class ArkGridComponent extends ArkScrollable<GridAttribute> {
       constructor(nativePtr: any, classType: any) {
         super(nativePtr, classType);
@@ -1082,8 +1082,7 @@ function createComponent(nativePtr: any, classType?: any): any {
 }
 
 function exportComponent(): void {
-  loadComponent();
-  globalThis.ArkGridComponent = loadComponent.componentObj?.component;
+  globalThis.ArkGridComponent = (loadComponent as any).componentObj?.component;
 }
 
 function exportView(): void {

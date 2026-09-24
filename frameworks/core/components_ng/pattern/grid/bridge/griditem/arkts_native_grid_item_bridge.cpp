@@ -135,10 +135,19 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemRowStart(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> rowStartArg = runtimeCallInfo->GetCallArgRef(NUM_1); // rowStart value
     CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), false, panda::JSValueRef::Undefined(vm));
+    if (ArkTSUtils::IsJsView(firstArg, vm)) {
+        int32_t rowStart = 0;
+        if (ArkTSUtils::ParseJsInt32(vm, rowStartArg, rowStart)) {
+            GetArkUINodeModifiers()->getGridItemModifier()->setGridItemRowStart(nativeNode, rowStart);
+        } else {
+            GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemRowStart(nativeNode);
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (rowStartArg->IsNumber()) {
-        int32_t stars = rowStartArg->Int32Value(vm);
-        GetArkUINodeModifiers()->getGridItemModifier()->setGridItemRowStart(nativeNode, stars);
-    } else if (!ArkTSUtils::IsJsView(firstArg, vm)) {
+        int32_t start = rowStartArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getGridItemModifier()->setGridItemRowStart(nativeNode, start);
+    } else {
         GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemRowStart(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -163,10 +172,19 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemRowEnd(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> rowEndArg = runtimeCallInfo->GetCallArgRef(NUM_1); // rowEnd value
     CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), false, panda::JSValueRef::Undefined(vm));
+    if (ArkTSUtils::IsJsView(firstArg, vm)) {
+        int32_t rowEnd = 0;
+        if (ArkTSUtils::ParseJsInt32(vm, rowEndArg, rowEnd)) {
+            GetArkUINodeModifiers()->getGridItemModifier()->setGridItemRowEnd(nativeNode, rowEnd);
+        } else {
+            GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemRowEnd(nativeNode);
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (rowEndArg->IsNumber()) {
         int32_t end = rowEndArg->Int32Value(vm);
         GetArkUINodeModifiers()->getGridItemModifier()->setGridItemRowEnd(nativeNode, end);
-    } else if (!ArkTSUtils::IsJsView(firstArg, vm)) {
+    } else {
         GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemRowEnd(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -191,10 +209,19 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemColumnStart(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> columnStartArg = runtimeCallInfo->GetCallArgRef(NUM_1); // columnStart value
     CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), false, panda::JSValueRef::Undefined(vm));
+    if (ArkTSUtils::IsJsView(firstArg, vm)) {
+        int32_t columnStart = 0;
+        if (ArkTSUtils::ParseJsInt32(vm, columnStartArg, columnStart)) {
+            GetArkUINodeModifiers()->getGridItemModifier()->setGridItemColumnStart(nativeNode, columnStart);
+        } else {
+            GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemColumnStart(nativeNode);
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (columnStartArg->IsNumber()) {
-        int32_t stars = columnStartArg->Int32Value(vm);
-        GetArkUINodeModifiers()->getGridItemModifier()->setGridItemColumnStart(nativeNode, stars);
-    } else if (!ArkTSUtils::IsJsView(firstArg, vm)) {
+        int32_t start = columnStartArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getGridItemModifier()->setGridItemColumnStart(nativeNode, start);
+    } else {
         GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemColumnStart(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -219,10 +246,19 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemColumnEnd(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> columnEndArg = runtimeCallInfo->GetCallArgRef(NUM_1); // columnEnd value
     CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), false, panda::JSValueRef::Undefined(vm));
+    if (ArkTSUtils::IsJsView(firstArg, vm)) {
+        int32_t columnEnd = 0;
+        if (ArkTSUtils::ParseJsInt32(vm, columnEndArg, columnEnd)) {
+            GetArkUINodeModifiers()->getGridItemModifier()->setGridItemColumnEnd(nativeNode, columnEnd);
+        } else {
+            GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemColumnEnd(nativeNode);
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (columnEndArg->IsNumber()) {
-        int32_t columnEnd = columnEndArg->Int32Value(vm);
-        GetArkUINodeModifiers()->getGridItemModifier()->setGridItemColumnEnd(nativeNode, columnEnd);
-    } else if (!ArkTSUtils::IsJsView(firstArg, vm)) {
+        int32_t end = columnEndArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getGridItemModifier()->setGridItemColumnEnd(nativeNode, end);
+    } else {
         GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemColumnEnd(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);

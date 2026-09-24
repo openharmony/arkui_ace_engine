@@ -90,8 +90,8 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterSelectTextEventCallbackInner(data, reply, option);
             break;
         }
-        case SENDCOMMAND_ASYNC_EVENT: {
-            SendCommandInnerAsync(data, reply, option);
+        case SENDCOMMAND_SYNC_EVENT: {
+            SendCommandInnerSync(data, reply, option);
             break;
         }
         case SENDCOMMAND_EVENT: {
@@ -278,14 +278,14 @@ int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel&
 
 int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    sptr<IRemoteObject> report = data.ReadRemoteObject();
-    if (report == nullptr) {
-        LOGW("read reportStub object is nullptr,connect failed");
+    sptr<IRemoteObject> reportProxy = data.ReadRemoteObject();
+    if (reportProxy == nullptr) {
+        LOGW("read reportProxy object is nullptr,connect failed");
         return FAILED;
     }
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManagerOhos* uisession = reinterpret_cast<UiSessionManagerOhos*>(UiSessionManager::GetInstance());
-    uisession->SaveReportStub(report, processId);
+    uisession->SaveReportProxy(reportProxy, processId);
     uisession->SendBaseInfo(processId);
     return NO_ERROR;
 }
@@ -383,11 +383,17 @@ int32_t UiContentStub::SendCommandInner(
     return NO_ERROR;
 }
 
-int32_t UiContentStub::SendCommandInnerAsync(
+int32_t UiContentStub::SendCommandInnerSync(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     int32_t id = data.ReadInt32();
-    return SendCommandAsync(id, data.ReadString());
+    std::string command = data.ReadString();
+    int32_t result = SendCommandSync(id, command);
+    if (!reply.WriteInt32(result)) {
+        LOGE("SendCommandInnerSync write reply failed");
+        return FAILED;
+    }
+    return NO_ERROR;
 }
 
 int32_t UiContentStub::SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)

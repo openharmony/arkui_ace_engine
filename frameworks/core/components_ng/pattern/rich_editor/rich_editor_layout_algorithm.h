@@ -52,6 +52,10 @@ public:
     static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpans(std::list<RefPtr<SpanItem>> spans,
         bool isSingleLineMode);
 
+    // counter measure and layout
+    float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper);
+    void CounterLayout(LayoutWrapper* layoutWrapper);
+
     const std::optional<RectF>& GetTextRect()
     {
         return richTextRect_;
@@ -91,6 +95,9 @@ private:
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
     RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
+    void LayoutCancelButton(LayoutWrapper* layoutWrapper);
+    void MeasureCancelButton(LayoutWrapper* layoutWrapper);
+    RefPtr<LayoutWrapper> FindContentLayoutWrapper(const ChildrenListWithGuard& children);
 
     bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 
@@ -140,6 +147,7 @@ private:
     std::unordered_set<uint64_t> paragraphKeySet_;
     bool isHorizontalScrolling_ = false;
     bool isSingleLineMode_ = false;
+    float cancelButtonWidth_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

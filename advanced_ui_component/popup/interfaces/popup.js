@@ -24,6 +24,7 @@ const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const componentUtils = requireNapi('arkui.componentUtils');
 const Configuration = requireNapi('configuration');
 const SystemDateTime = requireNapi('systemDateTime');
+const i18n = requireNapi('i18n');
 
 const o = 10003;
 const t = 10002;
@@ -903,11 +904,19 @@ export class d1 extends ViewPU {
         return o1;
     }
     getTitleTextAlign() {
-        let k2 = TextAlign.Start;
-        if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
-            k2 = TextAlign.End;
+        return TextAlign.Start;
+    }
+    getResolvedTextDirection() {
+        if (this.popupDirection === Direction.Auto || this.popupDirection === undefined) {
+            try {
+                return i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr;
+            }
+            catch (error) {
+                console.error(`popup getResolvedTextDirection, error: ${error.toString()}`);
+                return Direction.Ltr;
+            }
         }
-        return k2;
+        return this.popupDirection;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -966,7 +975,7 @@ export class d1 extends ViewPU {
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.getTitleText());
-                        Text.direction(this.popupDirection);
+                        Text.direction(this.getResolvedTextDirection());
                         Text.flexGrow(1);
                         Text.maxLines(2);
                         Text.align(Alignment.Start);
@@ -1040,7 +1049,7 @@ export class d1 extends ViewPU {
                     }, Scroll);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.getMessageText());
-                        Text.direction(this.popupDirection);
+                        Text.direction(this.getResolvedTextDirection());
                         Text.fontSize(this.getMessageFontSize());
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());

@@ -148,13 +148,27 @@ void SwiperIndicatorPattern::OnModifyDone()
     } else {
         ClearIndicatorIconState();
         host->Clean();
+        if (dotIndicatorModifier_) {
+            dotIndicatorModifier_->SetCustomIconIndexes({});
+        }
     }
-
     if (dotIndicatorModifier_) {
+        dotIndicatorModifier_->SetContentChange();
         dotIndicatorModifier_->StopAnimation();
     }
-
     InitIndicatorEvent();
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        auto indicatorPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indicatorPattern);
+        indicatorPattern->ShowNext();
+    });
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        auto indicatorPattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(indicatorPattern);
+        indicatorPattern->ShowPrevious();
+    });
 }
 
 void SwiperIndicatorPattern::InitIndicatorEvent()
@@ -262,16 +276,10 @@ std::optional<int32_t> SwiperIndicatorPattern::GetCustomIconVisibleIndex(int32_t
     CHECK_NULL_RETURN(swiperPattern, std::nullopt);
     auto isRtl = swiperPattern->IsHorizontalAndRightToLeft();
     auto toVisualSlot = [isRtl](const std::optional<int32_t>& slot, int32_t visibleCount) -> std::optional<int32_t> {
-        if (!slot.has_value()) {
+        if (!slot.has_value() || slot.value() < 0 || slot.value() >= visibleCount) {
             return std::nullopt;
         }
-        if (slot.value() < 0 || slot.value() >= visibleCount) {
-            return std::nullopt;
-        }
-        if (!isRtl) {
-            return slot;
-        }
-        return visibleCount - 1 - slot.value();
+        return isRtl ? std::optional<int32_t>(visibleCount - 1 - slot.value()) : slot;
     };
     auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
     if (maxDisplayCount <= 0) {
@@ -399,12 +407,13 @@ void SwiperIndicatorPattern::UpdateDotIndicatorIconNode(const RefPtr<FrameNode>&
     auto containerWidth = isSelected ? selectedWidth : itemWidth;
     auto containerHeight = isSelected ? selectedHeight : itemHeight;
     auto indicatorScale = theme->GetIndicatorScale();
-    if (IsPressed() || IsHover()) {
+    bool isHoverActive = IsHover() && swiperPattern->GetMaxDisplayCount() == 0;
+    if (IsPressed() || isHoverActive) {
         containerWidth *= indicatorScale;
         containerHeight *= indicatorScale;
     }
     bool isIconHover = false;
-    if (IsHover()) {
+    if (isHoverActive) {
         auto visibleIndex = GetCustomIconVisibleIndex(itemIndex);
         auto centers = GetCustomIconCenterX();
         auto geometryNode = indicatorNode->GetGeometryNode();

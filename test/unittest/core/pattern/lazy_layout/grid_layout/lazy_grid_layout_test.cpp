@@ -2810,4 +2810,136 @@ HWTEST_F(LazyGridLayoutTest, EstimateLinesTotalHeight001, TestSize.Level1)
     EXPECT_FLOAT_EQ(layoutInfo->totalMainSize_, 366.0f);
     EXPECT_FLOAT_EQ(layoutInfo->estimateItemSize_, -1.0f);
 }
+
+/**
+ * @tc.name: SetSpaceWithNonzeroFirstLine001
+ * @tc.desc: Changing the gap preserves the estimated prefix before the first cached line.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, SetSpaceWithNonzeroFirstLine001, TestSize.Level1)
+{
+    for (int32_t lanes : { 1, 2, 3 }) {
+        SCOPED_TRACE(lanes);
+        LazyGridLayoutInfo layoutInfo;
+        layoutInfo.SetLanes(lanes);
+        layoutInfo.SetTotalItemCount(6 * lanes);
+        layoutInfo.SetSpace(10.0f);
+        // Cache only the third and fourth lines, leaving an estimated prefix and suffix.
+        for (int32_t index = 2 * lanes; index < 4 * lanes; ++index) {
+            float startPos = (index / lanes) * 110.0f;
+            layoutInfo.SetPosMap(index, { index % lanes, startPos, startPos + 100.0f });
+        }
+        layoutInfo.UpdatePosMap(0.0f);
+
+        for (float space : { 20.0f, 0.0f }) {
+            SCOPED_TRACE(space);
+            layoutInfo.SetSpace(space);
+            for (int32_t index = 2 * lanes; index < 4 * lanes; ++index) {
+                const auto& pos = layoutInfo.posMap_.at(index);
+                EXPECT_FLOAT_EQ(pos.startPos, (index / lanes) * (100.0f + space));
+                EXPECT_FLOAT_EQ(pos.endPos - pos.startPos, 100.0f);
+            }
+        }
+    }
+}
+
+/**
+ * @tc.name: RowsGapAfterLaneChangeAndScroll001
+ * @tc.desc: A gap change keeps offscreen cached lines and the total height correct after changing lanes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, RowsGapAfterLaneChangeAndScroll001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyGridLayout();
+    layoutProperty_->UpdateColumnsTemplate("1fr");
+    CreateContent(40);
+    CreateDone();
+    scrollablePattern_->UpdateCurrentOffset(-610, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr");
+    FlushUITasks(scrollableFrameNode_);
+
+    // Leave the first cached line outside the current measurement window.
+    scrollablePattern_->UpdateCurrentOffset(-800, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    auto layoutInfo = pattern_->layoutInfo_;
+    ASSERT_FALSE(layoutInfo->posMap_.empty());
+    const int32_t firstIndex = layoutInfo->posMap_.begin()->first;
+    ASSERT_GT(firstIndex, 0);
+    ASSERT_GT(layoutInfo->startIndex_, firstIndex + 1);
+    ASSERT_FLOAT_EQ(layoutInfo->totalMainSize_, 2000.0f);
+
+    layoutProperty_->UpdateRowGap(Dimension(20));
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_FLOAT_EQ(layoutInfo->posMap_.at(firstIndex).startPos, (firstIndex / 2) * 120.0f);
+    EXPECT_FLOAT_EQ(layoutInfo->totalMainSize_, 2380.0f); // 20 lines and 19 gaps.
+}
+
+/**
+ * @tc.name: UpdatePosMapWithCachedLastLine001
+ * @tc.desc: Rebasing a cached full or partial last line uses its end position for the total height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, UpdatePosMapWithCachedLastLine001, TestSize.Level1)
+{
+    for (int32_t count : { 5, 6 }) {
+        SCOPED_TRACE(count);
+        LazyGridLayoutInfo layoutInfo;
+        layoutInfo.SetLanes(2);
+        layoutInfo.SetTotalItemCount(count);
+        layoutInfo.SetSpace(10.0f);
+        layoutInfo.SetPosMap(0, { 0, 0.0f, 100.0f });
+        layoutInfo.SetPosMap(1, { 1, 0.0f, 100.0f });
+        layoutInfo.SetPosMap(2, { 0, 110.0f, 260.0f });
+        layoutInfo.SetPosMap(3, { 1, 110.0f, 260.0f });
+        for (int32_t index = 4; index < count; ++index) {
+            layoutInfo.SetPosMap(index, { index % 2, 270.0f, 370.0f });
+        }
+        layoutInfo.UpdatePosMap(0.0f);
+        ASSERT_FLOAT_EQ(layoutInfo.totalMainSize_, 370.0f);
+
+        // Resize the middle line in both directions while the last line stays cached.
+        for (float height : { 100.0f, 180.0f }) {
+            SCOPED_TRACE(height);
+            float previousTotal = layoutInfo.totalMainSize_;
+            layoutInfo.SetPosMap(2, { 0, 110.0f, 110.0f + height });
+            layoutInfo.SetPosMap(3, { 1, 110.0f, 110.0f + height });
+            layoutInfo.UpdatePosMap(previousTotal);
+            EXPECT_FLOAT_EQ(layoutInfo.posMap_.rbegin()->second.endPos, height + 220.0f);
+            EXPECT_FLOAT_EQ(layoutInfo.totalMainSize_, height + 220.0f);
+        }
+    }
+}
+
+/**
+ * @tc.name: ResizeBeforeCachedPartialLastLine001
+ * @tc.desc: Resizing a visible line keeps the section height consistent with a cached partial last line.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, ResizeBeforeCachedPartialLastLine001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyGridLayout();
+    layoutProperty_->UpdateRowGap(Dimension(10));
+    CreateContent(21);
+    CreateDone();
+    scrollablePattern_->UpdateCurrentOffset(-10000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    scrollablePattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    auto layoutInfo = pattern_->layoutInfo_;
+    ASSERT_FALSE(layoutInfo->posMap_.empty());
+    ASSERT_EQ(layoutInfo->posMap_.rbegin()->first, 20);
+    ASSERT_FLOAT_EQ(layoutInfo->totalMainSize_, 1200.0f);
+    for (int32_t index : { 2, 3 }) {
+        auto child = GetChildFrameNode(frameNode_, index);
+        ASSERT_NE(child, nullptr);
+        child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100), CalcLength(150)));
+        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_FLOAT_EQ(layoutInfo->posMap_.at(20).endPos, 1250.0f);
+    EXPECT_FLOAT_EQ(layoutInfo->totalMainSize_, 1250.0f);
+}
 } // namespace OHOS::Ace::NG

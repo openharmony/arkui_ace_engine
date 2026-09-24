@@ -49,6 +49,7 @@ public:
         isResolved_ = false;
         xVals_.emplace_back(xVal);
         yVals_.emplace_back(yVal);
+        TrimPoints();
     }
 
     /**
@@ -103,6 +104,17 @@ public:
     }
 
 private:
+    void TrimPoints()
+    {
+        if (countNum_ <= 0 || static_cast<int32_t>(xVals_.size()) <= countNum_ * 2) {
+            return;
+        }
+        // countNum_ * 2: hysteresis buffer to avoid trim on every UpdatePoint,
+        // and to leave enough points for IsVelocityWithinTimeWindow filtering.
+        xVals_.erase(xVals_.begin(), xVals_.end() - countNum_);
+        yVals_.erase(yVals_.begin(), yVals_.end() - countNum_);
+    }
+
     std::vector<double> xVals_;
     std::vector<double> yVals_;
     std::vector<double> params_;

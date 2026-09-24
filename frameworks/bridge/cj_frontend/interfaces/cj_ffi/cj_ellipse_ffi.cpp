@@ -57,4 +57,15 @@ int64_t FfiOHOSAceFrameworkEllipseInsCreate(double width, int32_t widthUnit, dou
     }
     return ret_->GetID();
 }
+
+void FfiOHOSAceFrameworkEllipseCreateEx(NativeOptionLength width, NativeOptionLength height)
+{
+    GetEllipseModel()->Create();
+    if (width.hasValue) {
+        FfiOHOSAceFrameworkShapeSetWidth(width.value.value, width.value.unitType);
+    }
+    if (height.hasValue) {
+        FfiOHOSAceFrameworkShapeSetHeight(height.value.value, height.value.unitType);
+    }
+}
 }

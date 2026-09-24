@@ -103,7 +103,7 @@ public:
         const RefPtr<NG::UINode>& customNode) override;
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
-    void OpenCustomDialogNG(const DialogProperties& dialogProps,
+    RefPtr<NG::FrameNode> OpenCustomDialogNG(const DialogProperties& dialogProps,
         std::function<void(int32_t errorCode, int32_t dialogId)>&& callback) override;
     void CloseCustomDialogNG(int32_t dialogId) override;
     void CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback) override;

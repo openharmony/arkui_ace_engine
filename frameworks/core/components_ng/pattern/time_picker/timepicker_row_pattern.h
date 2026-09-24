@@ -723,6 +723,7 @@ private:
     bool CheckOnModifyDonePrerequisites(const RefPtr<FrameNode>& host);
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);

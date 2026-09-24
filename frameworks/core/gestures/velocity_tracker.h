@@ -81,6 +81,7 @@ private:
     double UpdateAxisVelocity(LeastSquareImpl& axis);
     
     void UpdateVelocity();
+    void InitPointNumber();
 
     Axis mainAxis_ { Axis::FREE };
     TouchEvent firstTrackPoint_;

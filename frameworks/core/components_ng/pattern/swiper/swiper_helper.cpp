@@ -500,7 +500,7 @@ void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
     DumpLog::GetInstance().AddDesc("mainDeltaSum:" + std::to_string(swiper.mainDeltaSum_));
 }
 
-std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params)
+std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params, int32_t themeScopeId)
 {
     CHECK_NULL_RETURN(params, "");
     auto jsonValue = JsonUtil::Create(true);
@@ -527,6 +527,7 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
     } else {
         jsonValue->PutRef("indicatorIcon", JsonUtil::CreateArray(true));
     }
+    DotIndicatorWithThemeValueCheck(jsonValue, params, themeScopeId);
     return jsonValue->ToString();
 }
 
@@ -574,5 +575,30 @@ float SwiperHelper::CalculateFriction(float gamma)
     const float coefficient = ACE_E / (1.0f -  ACE_E);
     auto fx = (gamma + coefficient) * (log(ACE_E - (ACE_E - 1.0f) * gamma) - 1.0f);
     return scrollRatio * fx / gamma;
+}
+
+void SwiperHelper::DotIndicatorWithThemeValueCheck(
+    std::unique_ptr<JsonValue>& json, const std::shared_ptr<SwiperParameters>& params, int32_t themeScopeId)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (themeScopeId == 0) {
+            auto defaultTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
+            if (!defaultTheme) {
+                return;
+            }
+        }
+
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SwiperIndicatorTheme>(themeScopeId);
+        CHECK_NULL_VOID(theme);
+
+        if (params->parametersByUser.find("color") == params->parametersByUser.end()) {
+            json->Replace("color", theme->GetColor().ColorToString().c_str());
+        }
+        if (params->parametersByUser.find("selectedColor") == params->parametersByUser.end()) {
+            json->Replace("selectedColor", theme->GetSelectedColor().ColorToString().c_str());
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

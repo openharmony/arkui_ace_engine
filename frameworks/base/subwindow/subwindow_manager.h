@@ -148,7 +148,7 @@ public:
     ACE_FORCE_EXPORT void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     ACE_FORCE_EXPORT void OpenCustomDialogNG(
         const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
-    ACE_FORCE_EXPORT void OpenCustomDialogNG(const DialogProperties& dialogProps,
+    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> OpenCustomDialogNG(const DialogProperties& dialogProps,
         std::function<void(int32_t errorCode, int32_t dialogId)>&& callback);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback);
@@ -168,7 +168,7 @@ public:
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
-    const RefPtr<Subwindow>& GetCurrentDialogWindow();
+    RefPtr<Subwindow> GetCurrentDialogWindow();
     ACE_FORCE_EXPORT void DeleteHotAreas(int32_t subwindowId, int32_t nodeId, SubwindowType type);
 
     void ClearToastInSubwindow();

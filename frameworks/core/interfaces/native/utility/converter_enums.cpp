@@ -49,6 +49,7 @@
 
 #include "ace_engine_types.h"
 #include "arkoala_api_generated.h"
+#include "converter_primitives.h"
 
 namespace OHOS::Ace::NG::Converter {
 // Declaration
@@ -452,11 +453,11 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_Li
 template<>
 void AssignCast(std::optional<PresetFillType>& dst, const Ark_PresetFillType& src)
 {
-    switch (src) {
-        case ARK_PRESET_FILL_TYPE_BREAKPOINT_DEFAULT: dst = PresetFillType::BREAKPOINT_DEFAULT; break;
-        case ARK_PRESET_FILL_TYPE_BREAKPOINT_SM1MD2LG3: dst = PresetFillType::BREAKPOINT_SM1MD2LG3; break;
-        case ARK_PRESET_FILL_TYPE_BREAKPOINT_SM2MD3LG5: dst = PresetFillType::BREAKPOINT_SM2MD3LG5; break;
-        default: LOGE("Unexpected enum value in Ark_PresetFillType: %{public}d", src);
+    auto result = ConvertArkPresetFillType(src);
+    if (result.has_value()) {
+        dst = result;
+    } else {
+        LOGE("Unexpected enum value in Ark_PresetFillType: %{public}d", src);
     }
 }
 
@@ -832,7 +833,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputType>& dst, const Ark_In
         case ARK_INPUT_TYPE_NEW_PASSWORD: dst = TextInputType::NEW_PASSWORD; break;
         case ARK_INPUT_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
         case ARK_INPUT_TYPE_URL: dst = TextInputType::URL; break;
-        case ARK_INPUT_TYPE_ONE_TIME_CODE: dst = TextInputType::JS_ONE_TIME_CODE; break;
+        case ARK_INPUT_TYPE_ONE_TIME_CODE: dst = TextInputType::ONE_TIME_CODE; break;
         default: LOGE("Unexpected enum value in Ark_InputType: %{public}d", src);
     }
 }

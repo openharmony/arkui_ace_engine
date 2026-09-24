@@ -717,6 +717,11 @@ export enum KeyboardAvoidMode {
     NONE = 4,
 }
 
+export enum ImmersiveStrategy {
+    AVOID_CUTOUT = 0,
+    AVOID_FLOAT_NAV = 1,
+}
+
 export class ResolvedUIContext extends UIContext {
     public strategy: ResolveStrategy = ResolveStrategy.UNDEFINED;
     constructor(instanceId: int32, strategy: ResolveStrategy) {
@@ -989,6 +994,12 @@ export class UIContext {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         ArkUIAniModule._SetKeyboardAvoidMode(mode);
         this.keyboardAvoidMode_ = mode;
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public applyDefaultImmersiveStrategy(...types: ImmersiveStrategy[]): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._ApplyDefaultImmersiveStrategy(types);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 

@@ -522,6 +522,10 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         if (this.__extendableComponent && this.__builderRootNode) {
             this.__extendableComponent!.setPeerNode(this.__builderRootNode!);
         }
+        if (this.__buildOptions?.useParallel && this.__extendableComponent) {
+            this.__extendableComponent!.detachFromParent();
+            this.__extendableComponent!.attachToParent(ExtendableComponent.current as (ExtendableComponent | undefined));
+        }
     }
 
     public disableTreeUpdate(): void {
@@ -617,8 +621,12 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         const currentExtendableComponent = ExtendableComponent.current;
         GlobalStateManager.SetLocalManager(this.__managerGlobal);
         if (this.__extendableComponent) {
-            this.__extendableComponent!.detachFromParent();
-            this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            if (!this.__buildOptions?.useParallel) {
+                this.__extendableComponent!.detachFromParent();
+                this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            } else {
+                this.__extendableComponent!.__setParent__Internal(currentExtendableComponent as (ExtendableComponent | undefined));
+            }
             ExtendableComponent.current = this.__extendableComponent;
         }
         try {
@@ -635,8 +643,12 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         const currentExtendableComponent = ExtendableComponent.current;
         GlobalStateManager.SetLocalManager(this.__managerGlobal);
         if (this.__extendableComponent) {
-            this.__extendableComponent!.detachFromParent();
-            this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            if (!this.__buildOptions?.useParallel) {
+                this.__extendableComponent!.detachFromParent();
+                this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            } else {
+                this.__extendableComponent!.__setParent__Internal(currentExtendableComponent as (ExtendableComponent | undefined));
+            }
             ExtendableComponent.current = this.__extendableComponent;
         }
         try {
@@ -653,8 +665,12 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         const currentExtendableComponent = ExtendableComponent.current;
         GlobalStateManager.SetLocalManager(this.__managerGlobal);
         if (this.__extendableComponent) {
-            this.__extendableComponent!.detachFromParent();
-            this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            if (!this.__buildOptions?.useParallel) {
+                this.__extendableComponent!.detachFromParent();
+                this.__extendableComponent!.attachToParent(currentExtendableComponent as (ExtendableComponent | undefined));
+            } else {
+                this.__extendableComponent!.__setParent__Internal(currentExtendableComponent as (ExtendableComponent | undefined));
+            }
             ExtendableComponent.current = this.__extendableComponent;
         }
         try {

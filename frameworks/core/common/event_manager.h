@@ -137,6 +137,7 @@ public:
     bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
     void DispatchTouchCancelToRecognizer(
         TouchEventTarget* touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items);
+    void RegisterEscapeRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer);
     bool PostEventDispatchTouchEvent(const TouchEvent& point);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
     void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
@@ -520,6 +521,8 @@ private:
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(const TouchEvent& touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
+    void HandleEscapeRecognizer(const TouchEvent& touchEvent);
+    void SweepEscapeRecognizers();
     void ProcessPostEventDownPhase(const TouchEvent& point, const TouchTestResult& targets);
     void ProcessTouchEventDownPhase(const TouchEvent& point, const TouchTestResult& targets,
         const RefPtr<NG::GestureReferee>& currentReferee, int32_t touchId);
@@ -629,6 +632,13 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::unordered_map<int32_t, int32_t> deviceIdChecker_;
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
+    // Recognizers that escaped the original gesture tree and are now bound to
+    // this EventManager for direct dispatch (AC-Escape-2/3). RefPtr because an
+    // escaped recognizer is removed from touchTestResults_ and needs a new
+    // owner to stay alive; NGGestureRecognizer does not hold EventManager, so
+    // no reference cycle. Lifecycle (add on escape / erase on finger up) is
+    // handled by TASK-5/9; TASK-3 only provides the container + dispatch.
+    std::vector<RefPtr<NG::NGGestureRecognizer>> escapeRecognizers_;
     std::vector<WeakPtr<NG::FrameNode>> onTouchTestDoneFrameNodeList_;
     bool passThroughResult_ = false;
     bool isDragCancelPending_ = false;

@@ -109,7 +109,7 @@ public:
         return false;
     }
 
-    virtual void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount);
+    virtual void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime = -1);
 
     virtual void SetVsyncCallback(AceVsyncCallback&& callback);
 

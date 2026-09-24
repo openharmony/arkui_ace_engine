@@ -100,7 +100,7 @@ public:
      * and clear the component's rule states. Called on page navigation
      * to ensure old page's triggered state does not leak into new page.
      */
-    void FlushExitOnNavigate(int32_t processId, int32_t webId);
+    void FlushExitOnNavigate(int32_t processId, int32_t webId, int32_t hostNodeId);
 
     /**
      * Called by each WebDelegate when a rule match result is ready.
@@ -125,7 +125,8 @@ public:
         const std::vector<PageSceneControlInfo>& controls);
     bool IsDuplicatedEvent(const WebRule& rule, int32_t matchedCount,
         const std::vector<PageSceneControlInfo>& controls, const RuleMatchState& ruleState);
-    bool IsWithinMinInterval(const WebRule& rule, const RuleMatchState& ruleState);
+    bool IsWithinMinInterval(const WebRule& rule, const RuleMatchState& ruleState,
+        const std::string& eventName);
 
     // --- JSON building (migrated from WebDelegate) ---
     std::string BuildSelectorJson(const WebRule& rule, const PageSceneGlobalConfig& globalConfig);
@@ -140,13 +141,13 @@ public:
      * Does NOT call OnMatchResult — caller decides when/how to report.
      */
     std::vector<std::string> ProcessQueryResultCore(int32_t processId, int32_t webId,
-        const std::string& selectorJson, const std::string& rawResult, bool isGetResult);
+        int32_t hostNodeId, const std::string& selectorJson, const std::string& rawResult, bool isGetResult);
 
     /**
      * Convenience wrapper: ProcessQueryResultCore + immediate OnMatchResult per result.
      * Used for observer callbacks where each result is reported individually.
      */
-    void ProcessQueryResult(int32_t processId, int32_t webId,
+    void ProcessQueryResult(int32_t processId, int32_t webId, int32_t hostNodeId,
         const std::string& selectorJson, const std::string& rawResult, bool isGetResult);
 
 private:
@@ -168,10 +169,10 @@ private:
 
     // Internal helpers (caller must hold mutex_)
     void ProcessEmptyControlsInner(const std::string& ruleSetId, int32_t processId, int32_t webId,
-        const std::string& selectorJson, std::map<int32_t, WebPageSceneRuleSet>& rules,
+        int32_t hostNodeId, const std::string& selectorJson, std::map<int32_t, WebPageSceneRuleSet>& rules,
         std::vector<std::string>& results);
     void ProcessMatchedControlsInner(const std::string& ruleSetId, int32_t processId, int32_t webId,
-        const std::string& selectorJson, int32_t matchedCount, bool isGetResult,
+        int32_t hostNodeId, const std::string& selectorJson, int32_t matchedCount, bool isGetResult,
         const std::vector<PageSceneControlInfo>& controls,
         std::map<int32_t, WebPageSceneRuleSet>& rules,
         std::vector<std::string>& results);
@@ -185,11 +186,12 @@ private:
     void UpdateRuleStateInner(int32_t processId, int32_t webId, const std::string& ruleId,
         bool matched, int32_t matchedCount, bool reported,
         const std::vector<PageSceneControlInfo>& controls,
-        std::map<int32_t, WebPageSceneRuleSet>& rules);
+        std::map<int32_t, WebPageSceneRuleSet>& rules,
+        const std::string& eventName = "");
     std::optional<WebRule> FindRuleByIdInner(int32_t processId, const std::string& ruleId,
         const std::map<int32_t, WebPageSceneRuleSet>& rules);
     std::string BuildSceneJsonInner(const std::string& ruleSetId,
-        int32_t webId, const WebRule& rule, bool matched, int32_t matchedCount,
+        int32_t webId, int32_t hostNodeId, const WebRule& rule, bool matched, int32_t matchedCount,
         const std::vector<PageSceneControlInfo>& controls, const std::string& eventName);
 
     std::mutex mutex_;

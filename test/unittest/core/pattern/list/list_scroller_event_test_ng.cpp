@@ -17,6 +17,26 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+// ScrollablePattern tracks activeTouchFingerIds_ from the changed touch only, and
+// EventManager dispatches one changed touch per finger, so every finger that is
+// expected to be tracked needs its own DOWN event.
+TouchEventInfo MakeTouchEventInfo(int32_t changedFingerId, TouchType changedType,
+    const std::vector<std::pair<int32_t, TouchType>>& touches)
+{
+    TouchEventInfo info("default");
+    for (const auto& [fingerId, touchType] : touches) {
+        TouchLocationInfo touch(fingerId);
+        touch.SetTouchType(touchType);
+        info.AddTouchLocationInfo(std::move(touch));
+    }
+    TouchLocationInfo changedTouch(changedFingerId);
+    changedTouch.SetTouchType(changedType);
+    info.AddChangedTouchLocationInfo(std::move(changedTouch));
+    return info;
+}
+} // namespace
+
 class ListScrollerEventTestNg : public ListTestNg {};
 
 /**
@@ -871,6 +891,12 @@ HWTEST_F(ListScrollerEventTestNg, TouchUpWithRemainingFinger001, TestSize.Level1
     callback(downInfo);
     EXPECT_FALSE(scrollable->IsAnimationNotRunning());
 
+    // The second finger goes down as well, otherwise it is never tracked and the
+    // partial release below would look like the last finger leaving the screen.
+    auto secondDownInfo = MakeTouchEventInfo(1, TouchType::DOWN, { { 0, TouchType::MOVE }, { 1, TouchType::DOWN } });
+    callback(secondDownInfo);
+    EXPECT_EQ(pattern_->activeTouchFingerIds_.size(), 2u);
+
     TouchEventInfo partialUpInfo("default");
     TouchLocationInfo releasedTouch(0);
     releasedTouch.SetTouchType(TouchType::UP);
@@ -924,6 +950,12 @@ HWTEST_F(ListScrollerEventTestNg, TouchUpWithRemainingFinger002, TestSize.Level1
     downInfo.AddChangedTouchLocationInfo(std::move(changedDownTouch));
     callback(downInfo);
     EXPECT_FALSE(scrollable->IsAnimationNotRunning());
+
+    // The second finger goes down as well, otherwise it is never tracked and the
+    // partial release below would look like the last finger leaving the screen.
+    auto secondDownInfo = MakeTouchEventInfo(1, TouchType::DOWN, { { 0, TouchType::MOVE }, { 1, TouchType::DOWN } });
+    callback(secondDownInfo);
+    EXPECT_EQ(pattern_->activeTouchFingerIds_.size(), 2u);
 
     TouchEventInfo partialUpInfo("default");
     TouchLocationInfo releasedTouch(0);

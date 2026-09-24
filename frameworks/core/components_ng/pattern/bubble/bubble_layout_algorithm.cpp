@@ -2379,15 +2379,21 @@ void BubbleLayoutAlgorithm::UpdateTargetVisibleRect(const RefPtr<FrameNode>& tar
     if (!useVisibleRect || !targetNode->GetAncestorNodeOfFrame(true)) {
         return;
     }
-    RectF visibleRect;
-    RectF frameRect;
-    targetNode->GetVisibleRect(visibleRect, frameRect);
-    if (visibleRect.IsEmpty()) {
+    auto targetRect = targetNode->GetPaintRectToWindowWithTransform();
+    auto parent = targetNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto parentRect = parent->GetPaintRectToWindowWithTransform();
+        targetRect = targetRect.Constrain(parentRect);
+        if (targetRect.IsEmpty()) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    if (targetRect.IsEmpty()) {
         targetFullyInvisible_ = true;
     } else {
-        // visibleRect is window-relative, same as GetPaintRectOffset above
-        targetSize_ = visibleRect.GetSize();
-        targetOffset_ = OffsetF(visibleRect.GetX(), visibleRect.GetY());
+        targetSize_ = targetRect.GetSize();
+        targetOffset_ = targetRect.GetOffset();
     }
 }
 

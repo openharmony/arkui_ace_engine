@@ -15,15 +15,15 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 
-#include "base/geometry/shape.h"
+#include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_observer.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -271,10 +271,11 @@ void GridLayoutBaseAlgorithm::PostClipContentSafeAreaBundle(LayoutWrapper* layou
     host->PostBundle({}, false, LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
 }
 
-void GridLayoutBaseAlgorithm::CalculateContentClipFixOffset(
-    LayoutWrapper* layoutWrapper, float mainSize, float mainGap)
+void GridLayoutBaseAlgorithm::CalculateContentClipFixOffset(LayoutWrapper* layoutWrapper, float mainSize)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    // Force-reset at the start of every Measure (ADR-3) so the fix offsets stay 0
+    // when the extension is inactive (zero-change).
     info_.startFixOffset_ = 0.0f;
     info_.endFixOffset_ = 0.0f;
     if (contentClipMode_ == ContentClipMode::CONTENT_ONLY) {
@@ -323,13 +324,22 @@ RefPtr<LayoutWrapper> GridLayoutBaseAlgorithm::GetGridItem(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    // Scroll placeholder load observation at the Grid child build call point: predict before
+    // the real builder runs on an unbuilt index and sample its duration afterwards. Observation
+    // only; the dummy empty-branch fallback is reported after the acquisition so it never feeds
+    // the cost model.
+    ScrollPlaceholderItemBuildScope buildScope(
+        ScrollPlaceholderComponentType::GRID, layoutWrapper, index, isCache);
     if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        buildScope.SetAcquiredWrapper(wrapper);
         if (!wrapper) {
             wrapper = CreateDummyGridItemChild();
         }
         return wrapper;
     }
-    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+    buildScope.SetAcquiredWrapper(wrapper);
+    return wrapper;
 }
 } // namespace OHOS::Ace::NG

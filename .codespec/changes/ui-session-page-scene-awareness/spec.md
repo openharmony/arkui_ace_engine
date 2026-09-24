@@ -19,7 +19,7 @@
 | 状态 | Baselined |
 | 复杂度 | 标准 + 安全/DFX专项 |
 | 创建日期 | 2026-06-18 |
-| 最后更新 | 2026-08-10 |
+| 最后更新 | 2026-08-22 |
 
 ## 本次变更范围
 
@@ -30,20 +30,24 @@
 | ADDED | Web / UIExtension 规则透传 | 宿主到 Web / UIExtension 控件的规则生命周期透传通路 |
 | ADDED | DFX 防重复和防并发契约 | 已注册未注销不可重复注册；已有 Get 请求未返回不可再次 Get |
 | MODIFIED | UISession `ReportService` 回调能力 | 新增页面场景命中结果回调，不改变已有事件语义 |
-| MODIFIED | PageScene 稳定点检测调度 | 输入类控件上下树及会影响规则匹配的可见性相关状态、有效可获焦性变化只合并受影响规则的待检测状态；页面稳定后全量扫描当前页面树并上报命中或已命中后的退出事件 |
-| MODIFIED | PageScene 文本输入类控件状态变化触发 | 主树文本输入类控件的 `visibility`、`active` 和有效可获焦性变化可触发规则级重检；不改变控件显示、激活或焦点系统本身的行为 |
+| MODIFIED | PageScene 过滤字段语义 | `scope.onlyVisible` 仅过滤组件属性可见性；新增 `scope.rectCulling` 控制节点 rect 是否与当前页面 viewport 相交；Web PageScene 规则保持原协议 |
+| MODIFIED | PageScene 稳定点检测调度 | 输入类控件上下树、可见属性变化、opacity 变化及 rect/viewport 相关页面稳定事件只合并受影响规则的待检测状态；页面稳定后全量扫描当前页面树并上报命中或已命中后的退出事件 |
+| MODIFIED | PageScene 文本输入类控件状态变化触发 | 主树文本输入类控件及其父级的 `visibility`、`active`、opacity 变化可触发规则级重检；源节点只产生一次 dirty，匹配时重新读取父子树状态；不改变控件显示、激活或焦点系统本身的行为 |
 | REMOVED | 无 | 不废弃现有 UISession 能力 |
 
 ## 本次状态通知增量摘要
 
-本节只描述本次 `visibility` / `active` / 有效可获焦性状态通知带来的行为差异。页面切换、滚动、Swiper/Tabs 切换和弹窗等页面级稳定事件的原有调度语义不变。
+本节描述 `onlyVisible` / `rectCulling` 语义及 `visibility` / `active` / opacity 状态通知带来的行为差异。页面切换、滚动、Swiper/Tabs 切换和弹窗等页面级稳定事件的原有调度语义不变。
 
 | 对比维度 | 修改前 | 修改后 |
 |----------|--------|--------|
 | 文本输入类控件状态变化入口 | 控件仅改变 `visibility`、`active` 或可获焦相关状态时，没有专用 PageScene 状态通知；只有后续上下树或页面级稳定事件才能间接触发重新检测 | 主树文本输入类控件发生相关状态变化时，先判断该变化是否可能改变各条规则的匹配结果，仅把受影响规则合并为待检测状态 |
-| 可见性规则 | 状态变化本身不按 `scope.onlyVisible` 定向挂起规则 | `visibility` 变化影响 `onlyVisible=true` 的规则；`active` 变化只影响 `onlyVisible=true` 的规则 |
+| 可见性规则 | `onlyVisible` 同时承担组件可见性和屏幕范围过滤 | `onlyVisible` 只过滤 visible/active、非零尺寸及最终 opacity；屏幕范围过滤由 `rectCulling` 独立控制 |
+| 矩形裁剪规则 | 无独立配置，屏幕范围隐含在 `onlyVisible` 中 | `rectCulling=true` 才判断节点 rect 与 page viewport 相交；缺省为 `false` |
+| 透明度规则 | 不检查节点自身或祖先 opacity | `onlyVisible=true` 时过滤自身或祖先最终 opacity 为零的节点 |
 | 可获焦规则 | 控件从不可获焦变为可获焦，或反向变化，不会因该变化本身定向挂起规则 | 仅当变化前后的有效可获焦性结果不同，且规则配置 `includeUnfocusableTextInput=false` 时挂起；控件自身可获焦、父级可获焦和 enabled 状态均按最终有效结果判断 |
 | `visibility` 与可获焦性的交叉影响 | 未专门处理 | `visibility` 同时参与有效可获焦性计算，因此当 `onlyVisible=true` 或 `includeUnfocusableTextInput=false` 任一条件成立时，该规则均需重新检测 |
+| 父子树通知 | 父节点变化可能沿后代产生重复 PageScene 查询 | 父节点变化只产生一次 dirty；稳定点从 pageRoot 重新计算父子可见性、active、opacity 和 rect |
 | 重复状态变化 | 依赖其他检测入口 | 同一规则在稳定前收到多次相关状态变化时合并为一个待检测状态，不按事件次数重复扫描 |
 | 页面稳定门控 | 已有待检测状态只在页面稳定后执行匹配 | 语义保持不变：不稳定时不消费待检测状态；稳定后才消费并全量扫描当前页面树 |
 | 扫描策略 | 页面稳定点全量扫描当前页面树 | 保持全量扫描；本次未引入文本输入候选索引、增量计数或逐节点可见区域变化通知 |
@@ -130,8 +134,10 @@ sequenceDiagram
 |--------|----------|------|
 | AC-2.1 | GIVEN 规则中 `policy.reportOnRegister=true`，WHEN `RegisterPageSceneRules` 注册成功，THEN 宿主立即扫描当前页面顶部控件树并执行 `TEXT_EDITOR` 匹配 | 正常 |
 | AC-2.2 | GIVEN 当前页面顶部控件树中命中文本输入类控件数量大于等于 `condition.threshold`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 宿主通过 `ReportPageSceneEvent` 上报 `TEXT_EDITOR` 场景结果 | 正常 |
-| AC-2.3 | GIVEN `scope.onlyVisible=true`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 不可见或与当前页面窗口范围无交集的控件不参与计数；本阶段不逐层计算滚动容器裁剪 | 边界 |
-| AC-2.4 | GIVEN `globalConfig.includeUnfocusableTextInput=false`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 不可获焦文本输入类控件不参与计数 | 边界 |
+| AC-2.3 | GIVEN `scope.onlyVisible=true`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN visible/active 不通过、transform 后宽高为 0、或自身/祖先最终 opacity 为 0 的控件不参与计数；不因屏外而排除 | 边界 |
+| AC-2.4 | GIVEN `scope.rectCulling=true`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 仅统计节点 transform rect 与当前页面 viewport 存在交集的控件；不逐层计算滚动容器裁剪 | 边界 |
+| AC-2.5 | GIVEN `scope.onlyVisible=false` 且 `scope.rectCulling=true`，WHEN 执行匹配，THEN 透明、隐藏或零尺寸属性不作为过滤条件，但屏外节点不参与计数 | 边界 |
+| AC-2.6 | GIVEN `globalConfig.includeUnfocusableTextInput=false`，WHEN 执行 `TEXT_EDITOR` 匹配，THEN 不可获焦文本输入类控件不参与计数 | 边界 |
 
 ### US-3: 文本输入类控件上下树和匹配状态变化后稳定检测
 
@@ -140,12 +146,14 @@ sequenceDiagram
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
 | AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 文本输入类控件上树，或主树文本输入类控件发生 `visibility`、`active`、有效可获焦性变化，THEN 宿主仅按下方“状态变化影响矩阵”合并受影响规则的待检测状态；页面稳定后全量扫描当前页面树并重新执行规则过滤 | 正常 |
-| AC-3.2 | GIVEN `policy.deduplicate=true` 且同一规则的命中节点 ID 列表已上报，WHEN 节点仅发生坐标变化且仍满足 `onlyVisible`，THEN 不重复上报 | 边界 |
-| AC-3.3 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 上下树、`onlyVisible=true` 时移入/移出屏幕，或相关状态变化导致节点是否参与匹配发生变化，且页面已稳定，THEN 重新应用规则检测并允许上报新的状态 | 正常 |
+| AC-3.2 | GIVEN `policy.deduplicate=true` 且同一规则的命中节点 ID 列表已上报，WHEN 节点仅发生坐标变化，THEN 不重复上报 | 边界 |
+| AC-3.3 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 上下树、`rectCulling=true` 时移入/移出 viewport，或相关状态变化导致节点是否参与匹配发生变化，且页面已稳定，THEN 重新应用规则检测并允许上报新的状态 | 正常 |
 | AC-3.4 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 文本输入类控件下树，THEN 宿主挂起待检测规则；页面稳定后通过全量扫描自然排除已下树节点 | 边界 |
 | AC-3.5 | GIVEN 已注册 `TEXT_EDITOR` 规则且同一规则曾上报过命中事件，WHEN 后续页面稳定点检查发现当前页面不再满足规则，THEN 宿主额外上报一次场景退出事件 `TEXT_EDITOR_EXIT`；若此前未上报过命中或已上报过退出，则不得重复上报退出事件 | 正常 |
+| AC-3.6 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 输入节点自身或祖先 opacity 在零与非零之间变化，THEN `onlyVisible=true` 的相关规则在稳定点重新检测；同值 opacity 更新不产生新的 dirty | 正常 |
+| AC-3.7 | GIVEN 父节点 visibility/active/opacity 变化影响子树，WHEN 页面达到稳定点，THEN 重新读取父子树状态并得到正确的子孙输入节点集合；同一稳定点同一规则最多执行一次检测 | 性能/边界 |
 
-状态变化影响矩阵：
+状态变化影响矩阵（`rectCulling` 仅由页面几何/viewport 稳定事件触发，不增加逐节点矩阵维度）：
 
 | `scope.onlyVisible` | `includeUnfocusableTextInput` | `visibility` 变化 | `active` 变化 | 有效可获焦性变化 |
 |---------------------|---------------------------------|-------------------|---------------|--------------------|
@@ -235,17 +243,22 @@ sequenceDiagram
 | R-3 | 异常 | 已注册未注销时再次注册 | 返回重复注册错误，不覆盖已有规则 | 防高并发重复注册 | AC-1.3, AC-8.1 |
 | R-4 | 行为 | `policy.reportOnRegister=true` 且注册成功 | 全量扫描当前页面顶部控件树并执行规则匹配 | 只采集规则所需字段 | AC-2.1 |
 | R-5 | 行为 | 页面内符合规则的可见输入类控件数量大于等于阈值 | 上报 `TEXT_EDITOR` | 首版阈值为 2，operator 为 `COUNT_GTE` | AC-2.2 |
-| R-6 | 边界 | `scope.onlyVisible=true` | 不可见或与当前页面窗口范围无交集的控件不参与计数 | `onlyVisible=false` 时屏外节点仍参与；本阶段不逐层计算滚动容器裁剪 | AC-2.3 |
-| R-7 | 边界 | `includeUnfocusableTextInput=false` | 不可获焦文本输入类控件不参与计数 | 默认 false | AC-2.4 |
+| R-6 | 边界 | `scope.onlyVisible=true` | visible/active 不通过、transform 后宽高为 0、或最终 opacity 为 0 的控件不参与计数 | 不因屏外而排除；本阶段不逐层计算滚动容器裁剪 | AC-2.3 |
+| R-6A | 边界 | `scope.rectCulling=true` | 仅与当前页面 viewport 有交集的控件参与计数 | 缺省为 false；边界仅接触不视为相交 | AC-2.4 |
+| R-6B | 边界 | `scope.onlyVisible=false && scope.rectCulling=true` | 透明、隐藏或零尺寸属性不作为过滤条件，仅执行 rect 相交过滤 | 屏外节点不参与计数 | AC-2.5 |
+| R-6C | 兼容 | 未提供 `scope.rectCulling` | 按 false 处理；`onlyVisible=true` 不隐含屏幕范围过滤 | 需要屏内过滤时必须显式传 true | AC-2.4 |
+| R-7 | 边界 | `includeUnfocusableTextInput=false` | 不可获焦文本输入类控件不参与计数 | 默认 false | AC-2.6 |
 | R-8 | 行为 | 文本输入类控件上树 | 挂起对应规则的待检测任务，稳定点全量扫描当前页面树 | 不维护候选索引或增量计数 | AC-3.1 |
 | R-9 | 边界 | 命中节点 ID 列表与上次相同且开启去重 | 不重复上报 | rect、页面名和文本不参与重复状态判断 | AC-3.2 |
-| R-10 | 行为 | 上下树或屏幕范围过滤导致命中节点 ID 列表变化 | 页面稳定后重新应用规则并允许上报 | 仍需满足最小上报间隔 | AC-3.3 |
+| R-10 | 行为 | 上下树或 rectCulling 过滤导致命中节点 ID 列表变化 | 页面稳定后重新应用规则并允许上报 | 仍需满足最小上报间隔 | AC-3.3 |
 | R-10A | 边界 | 文本输入类控件下树 | 挂起待检测规则，稳定点全量扫描时排除已下树节点 | 不维护候选索引或增量计数 | AC-3.4 |
 | R-10B | 行为 | 同一规则已上报过命中，后续稳定点检查不再命中 | 上报一次 `TEXT_EDITOR_EXIT`，`matched=false`，`matchedCount` 为当前计数；上报后清理命中态，后续未命中不重复上报退出 | 退出事件不受命中去重和最小命中上报间隔抑制；再次命中后可重新上报 `TEXT_EDITOR` | AC-3.5 |
-| R-10C | 行为 | 主树文本输入类控件的 `visibility` 发生变化 | 当 `onlyVisible=true` 或 `includeUnfocusableTextInput=false` 时，合并该规则的待检测状态 | 可见性同时影响可见过滤和有效可获焦性；两个条件均不满足时不增加 | AC-3.1, AC-3.3 |
+| R-10C | 行为 | 主树文本输入类控件或其父级的 `visibility` 发生变化 | 当 `onlyVisible=true` 或 `includeUnfocusableTextInput=false` 时，合并该规则的待检测状态 | 可见性同时影响可见过滤和有效可获焦性；父级变化只产生一次子树 dirty | AC-3.1, AC-3.3, AC-3.7 |
 | R-10D | 行为 | 主树文本输入类控件的 `active` 发生变化 | 仅为 `onlyVisible=true` 的规则合并待检测状态 | `active` 不参与有效可获焦性过滤 | AC-3.1, AC-3.3 |
 | R-10E | 行为 | 主树文本输入类控件的有效可获焦性结果发生变化 | 仅为 `includeUnfocusableTextInput=false` 的规则合并待检测状态 | 控件自身可获焦、父级可获焦和 enabled 状态均比较变化前后的最终有效结果；结果不变时不增加 | AC-3.1, AC-3.3 |
 | R-10F | 边界 | 状态变化不影响规则使用的过滤维度，或同一规则在稳定前重复收到相关状态变化 | 不为不相关规则增加待检测状态；相关规则只保留一个待检测状态 | `onlyVisible=false` 且 `includeUnfocusableTextInput=true` 时，三类状态变化均不增加该规则的待检测状态 | AC-3.1 |
+| R-10G | 行为 | 输入节点或其祖先 opacity 实际发生变化 | `onlyVisible=true` 的相关规则在稳定点重新检测；opacity 同值更新不产生 dirty | 最终 opacity 为零时过滤；半透明且大于零时不因 opacity 过滤 | AC-3.6 |
+| R-10H | 性能 | 父节点 visibility/active/opacity 变化影响子树 | 源节点只合并一次 dirty，稳定点从当前 pageRoot 全量重算父子状态 | 同一稳定点同一规则只匹配一次；nodeId 去重规则不变 | AC-3.7 |
 | R-11 | 行为 | SA 调用合法 `GetPageScene` 且无未完成请求 | 执行一次匹配并回调本次结果 | 一次性规则不落长期注册状态 | AC-4.1 |
 | R-12 | 异常 | 已有 `GetPageScene` 未返回时再次 Get | 返回请求忙错误，不启动新扫描 | 防高并发重复查询 | AC-4.4, AC-8.2 |
 | R-13 | 行为 | 规则允许 Web 来源参与且 `webRules` 存在 | 宿主向 Web 控件透传 `webRules` 及反注册/查询请求 | `webRules` 按原始 JSON 值透传 | AC-1.4, AC-4.2, AC-5.1, AC-5.3, AC-5.4 |
@@ -288,6 +301,7 @@ sequenceDiagram
       "enabled": true,
       "scope": {
         "onlyVisible": true,
+        "rectCulling": false,
         "includeWeb": true,
         "includeUIExtension": true
       },
@@ -323,7 +337,8 @@ sequenceDiagram
 | `globalConfig.includeUnfocusableTextInput` | 是否将不可获焦文本输入类控件纳入匹配计数 |
 | `sourceConfig.arkui` / `web` / `uiExtension` | 是否启用对应来源 |
 | `webRules` | Web 专用预留规则。当 `sourceConfig.web=true` 或规则级 `scope.includeWeb=true` 时生效，宿主原样透传给 Web 控件 |
-| `scope.onlyVisible` | 是否过滤不可见或不在屏幕范围内的控件 |
+| `scope.onlyVisible` | 是否过滤组件属性不可见的控件：visible/active 不通过、transform 后宽高为 0、或自身/祖先最终 opacity 为 0 |
+| `scope.rectCulling` | 是否过滤与当前页面 viewport 无交集的控件；缺省为 `false`，不执行 rect 相交判断 |
 | `selector.nodeTypes` | 参与统计的文本输入类控件类型 |
 | `condition.operator` | 首版支持 `COUNT_GTE`，表示 `COUNT Greater Than or Equal` |
 | `condition.threshold` | 首版 `TEXT_EDITOR` 场景为 2 |
@@ -437,8 +452,8 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 | AC | 关联规则 | 关联 Task | 验证方式 | 证据 |
 |----|----------|-----------|----------|------|
 | AC-1.1 - AC-1.5 | R-1, R-2, R-3, R-13, R-15 | TASK-001, TASK-002, TASK-004, TASK-005 | 单测/集成/sample | Stage 3 填写 |
-| AC-2.1 - AC-2.4 | R-4, R-5, R-6, R-7 | TASK-002, TASK-003 | 单测/集成 | Stage 3 填写 |
-| AC-3.1 - AC-3.5 | R-8, R-9, R-10, R-10A - R-10F, R-19, R-20 | TASK-003, TASK-007 | 单测/集成 | Stage 3 填写 |
+| AC-2.1 - AC-2.6 | R-4, R-5, R-6, R-6A - R-6C, R-7 | TASK-002, TASK-003 | 单测/集成 | Stage 3 填写 |
+| AC-3.1 - AC-3.7 | R-8, R-9, R-10, R-10A - R-10H, R-19, R-20 | TASK-003, TASK-003A, TASK-007 | 单测/集成 | Stage 3 填写 |
 	| AC-4.1 - AC-4.4 | R-11, R-12, R-13 | TASK-001, TASK-002, TASK-003, TASK-004 | 单测/集成/sample | Stage 3 填写 |
 	| AC-5.1 - AC-5.4 | R-13, R-14, R-15 | TASK-004, TASK-005 | 单测/mock | Stage 3 填写 |
 	| AC-5A.1 - AC-5A.3 | R-18, R-23, R-24 | TASK-001, TASK-002, TASK-004, TASK-005, TASK-007 | 单测/sample/mock | Stage 3 填写 |
@@ -452,7 +467,7 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 |------|------------|----------|----------|
 | VM-1 | R-1, R-3 | 单元测试 | 注册成功、重复注册失败且不覆盖旧规则 |
 | VM-2 | R-4 - R-7 | 单元测试/集成测试 | 首次扫描、阈值、可见性、可获焦过滤 |
-| VM-3 | R-8 - R-10F, R-19, R-20 | 单元测试/集成测试 | 上下树和相关状态变化的规则级挂起、四种规则配置组合、有效可获焦性前后值判断、稳定前 pending 合并与保留、稳定点全量扫描、节点 ID 列表变化重报、坐标变化去重、最小上报间隔、已命中后跌出阈值上报一次退出事件 |
+| VM-3 | R-8 - R-10H, R-19, R-20 | 单元测试/集成测试 | 上下树和相关状态变化的规则级挂起、onlyVisible/rectCulling 四象限、opacity/父子树重算、有效可获焦性前后值判断、稳定前 pending 合并与保留、稳定点全量扫描、节点 ID 列表变化重报、坐标变化去重、最小上报间隔、已命中后跌出阈值上报一次退出事件 |
 | VM-4 | R-11, R-12 | 单元测试/并发测试 | 主动查询成功、未返回再次查询返回 busy |
 | VM-5 | R-13 - R-15 | mock/单元测试 | Web/UIExtension 规则注册、反注册、查询请求透传 |
 | VM-6 | R-16, R-16A, R-17 | 单元测试/日志检查 | `includeText=false` 不输出正文、`includeText=true` 输出节点用户输入文本或占位提示文本、rect/focusable 输出 |
@@ -464,7 +479,7 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 - **已有 API 行为变更:** 否。
 - **已有组件视觉、激活和焦点行为变更:** 否；本次只增加 PageScene 内部重检通知，不改变状态设置结果和焦点切换语义。
 - **PageScene 检测时机变更:** 是；主树文本输入类控件发生规则相关的可见性或有效可获焦性变化后，可新增待检测状态并在页面稳定后重检。
-- **配置文件格式变更:** 否。
+- **配置文件格式变更:** 是，ArkUI PageScene 在 `scope` 下新增可选 `rectCulling`，缺省为 `false`；Web PageScene 规则格式不变。
 - **数据存储格式变更:** 否。
 - **最低支持版本:** TBD。
 - **API 版本号策略:** System innerAPI，版本策略随 UISession 内部接口管理。
@@ -475,7 +490,8 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 |----------|----------|---------|
 | 仅允许系统 SA 调用 | 沿用 UISession native SA token 和 interface token 校验 | AC-1.1, AC-4.1 |
 | 场景感知独立于 ContentChange / ComponentChange | 不把已有能力作为语义载体；只复用 ContentChangeManager 的页面级稳定点调度 | AC-1.1, AC-2.1, AC-3.1, AC-7.1 |
-| 状态变化按规则配置裁剪 | 文本输入类控件状态变化只影响使用对应过滤维度的规则；不相关规则不得增加待检测状态 | AC-3.1, AC-3.3 |
+| 状态变化按规则配置裁剪 | 文本输入类控件及其父级状态变化只影响使用对应过滤维度的规则；不相关规则不得增加待检测状态 | AC-3.1, AC-3.3, AC-3.6 |
+| 父子树 dirty 与稳定点重算 | 父级 visibility/active/opacity 变化只合并一次 dirty；稳定点从当前 pageRoot 重算父子可见属性、opacity 和 rect | AC-3.6, AC-3.7 |
 | 有效可获焦性变化判定 | 可获焦相关原始状态变化前后，只有最终有效可获焦性结果不同才触发该维度的重检 | AC-3.1, AC-3.3 |
 | 待检测状态受稳定点门控 | 状态变化可在任意帧合并待检测状态；滚动、Swiper 滚动或转场期间不得消费，稳定后才允许匹配 | AC-3.1, AC-7.2 |
 | Pipeline 不感知 PageScene 规则 | VSync 尾部只进入 `ContentChangeManager::OnVsyncEnd`，规则判断和 flush 封装在 ContentChangeManager / UiSessionManager 内 | AC-7.4 |
@@ -490,7 +506,7 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 | 类型 | 指标/阈值 | 验证方式 | 证据 |
 |------|-----------|----------|------|
 | 性能 | 同一规则命中事件上报间隔不小于 `policy.minReportIntervalMs`；相同命中集合不重复上报；退出事件每次命中态到未命中态只上报一次 | 单元测试/集成测试 | Stage 3 填写 |
-| 性能 | 本阶段不引入候选索引优化；上下树和相关状态变化按规则配置裁剪并合并待检测状态，同一规则在稳定前不因重复事件执行多次扫描；稳定点仍允许全量扫描当前页面树 | 单元测试/集成测试 | Stage 3 填写 |
+| 性能 | rect 仅在 `onlyVisible || rectCulling || includeRect` 时计算，page viewport 仅在 `rectCulling=true` 时计算；状态变化按规则配置裁剪并合并 dirty，稳定点同一规则只扫描一次 | 单元测试/集成测试 | Stage 3 填写 |
 | 内存 | 反注册或 SA 死亡后释放规则、回调、pending Get、去重缓存和子来源状态 | 单元测试/泄漏检查 | Stage 3 填写 |
 | 安全 | 非 SA 调用被拒绝；ArkUI 宿主来源默认不上报文本正文，`includeText=true` 时仅回调/文件验证路径携带用户输入文本或占位提示文本，日志不打印正文 | 单元测试/安全检查 | Stage 3 填写 |
 | 可靠性 | Web/UIExtension 规则透传失败不影响 ArkUI 宿主匹配；并发注册/Get 不破坏状态 | mock/并发测试 | Stage 3 填写 |
@@ -502,8 +518,8 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 
 | 设备类型 | 行为差异 | 规格/约束 | 验证方式 | 证据 |
 |----------|----------|-----------|----------|------|
-| 手机 | 无差异 | 按当前窗口可见区域计算 `onlyVisible` 和 `rect` | 集成测试 | Stage 3 填写 |
-| 平板 | 多窗口场景需验证当前宿主窗口 | `currentPageName`、rect、可见性以当前窗口为准 | 集成测试 | Stage 3 填写 |
+| 手机 | 无差异 | `onlyVisible` 按组件可见属性过滤；`rectCulling=true` 时按当前窗口 viewport 过滤 | 集成测试 | Stage 3 填写 |
+| 平板 | 多窗口场景需验证当前宿主窗口 | `currentPageName`、rect、组件可见性和 rectCulling 以当前窗口为准 | 集成测试 | Stage 3 填写 |
 | PC | 窗口尺寸和焦点状态变化较多 | 验证 rect 与 focusable 更新 | 集成测试 | Stage 3 填写 |
 
 ## 全局特性影响
@@ -521,6 +537,8 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 - [x] AC 与统一规则表交叉一致。
 - [x] 文本输出边界明确：默认不上报文本正文，`includeText=true` 时节点携带用户输入文本或占位提示文本。
 - [x] `visibility`、`active`、有效可获焦性三类状态变化的规则影响矩阵、pending 合并和稳定点消费语义明确。
+- [x] `onlyVisible` 与 `rectCulling` 过滤职责、缺省值、组合行为和兼容性明确。
+- [x] opacity、父子树 dirty、稳定点统一重算及 nodeId 去重规则明确。
 
 ## context-references
 
@@ -542,4 +560,7 @@ context-queries:
 | SubSource | Web 或 UIExtension 等由宿主控件承载的子内容源 |
 | 稳定点 | 页面切换、滚动、Swiper/Tabs 切换、弹窗显示隐藏等完成后，或 VSync 尾部确认无滚动/转场/Swiper 滚动时执行场景检测的时机 |
 | 有效可获焦性 | 控件在自身可获焦、父级可获焦、enabled、可见性及祖先可见性等条件共同作用后的最终可获焦结果；本次状态通知以变化前后最终结果是否不同为准 |
+| `onlyVisible` | 组件属性可见性过滤开关，不负责屏幕 viewport 相交判断 |
+| `rectCulling` | 节点 transform rect 与当前页面 viewport 相交过滤开关，缺省为 `false` |
+| 组件属性可见性 | 节点及祖先 visible/active、transform 后宽高和 opacity 累乘结果共同决定的可见资格 |
 | 待检测状态（pending） | 已确定需要在后续稳定点重新执行的规则集合；同一规则重复加入时合并，不稳定期间保留，稳定后消费并执行匹配 |

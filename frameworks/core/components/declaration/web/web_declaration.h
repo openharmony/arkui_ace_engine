@@ -42,6 +42,7 @@ struct WebEvent : Event {
     EventMarker refreshAccessedHistoryId;
     EventMarker resourceLoadId;
     EventMarker scaleChangeId;
+    EventMarker zoomChangeId;
     EventMarker permissionRequestId;
     EventMarker searchResultReceiveEventId;
     EventMarker scrollId;
@@ -305,6 +306,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.scaleChangeId;
+    }
+
+    void SetZoomChangeId(const EventMarker& zoomChangeId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.zoomChangeId = zoomChangeId;
+    }
+
+    const EventMarker& GetZoomChangeId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.zoomChangeId;
     }
 
     void SetScrollId(const EventMarker& scrollId)

@@ -72,6 +72,11 @@ public:
         OnAppendChild(child);
     }
 
+    const std::vector<RefPtr<SvgNode>>& GetChildren() const
+    {
+        return children_;
+    }
+
     void InheritAttr(const SvgBaseAttribute& parent)
     {
         auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion());
