@@ -8431,7 +8431,9 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPositionForFinger) };
     auto fingerInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     fingerInfoObj->SetNativePointerFieldCount(vm, 1);
-    fingerInfoObj->SetNativePointerField(vm, 0, const_cast<FingerInfo*>(&fingerInfo));
+    auto* fingerInfoPtr = new FingerInfo(fingerInfo);
+    fingerInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(fingerInfoPtr),
+        &SyncDestructorInterceptor<FingerInfo>);
     return fingerInfoObj;
 }
 

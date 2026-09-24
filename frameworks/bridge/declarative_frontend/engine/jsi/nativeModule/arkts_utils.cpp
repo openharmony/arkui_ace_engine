@@ -20,6 +20,7 @@
 #include "jsnapi_expo.h"
 
 #include "base/i18n/localization.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -3930,6 +3931,7 @@ Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
     auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         info->GetVM(), 0));
     if (!eventInfo) {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "GetModifierKeyState failed: native pointer is null");
         return JSValueRef::Undefined(info->GetVM());
     }
     auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
