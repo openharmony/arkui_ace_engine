@@ -357,6 +357,7 @@ void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, 
         return;
     }
     if (foreground) {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
         containerId_ = id;
     }
 }
@@ -366,11 +367,13 @@ void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t
     if (windowName == IGNORE_WINDOW_NAME) {
         return;
     }
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     focusContainerId_ = id;
 }
 
 int32_t EventRecorder::GetContainerId(bool isFocus)
 {
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     if (isFocus) {
         return focusContainerId_;
     } else {
@@ -378,13 +381,21 @@ int32_t EventRecorder::GetContainerId(bool isFocus)
     }
 }
 
-const std::string& EventRecorder::GetPageUrl()
+std::string EventRecorder::GetPageUrl()
 {
-    auto pageUrl = GetPageUrlByContainerId(focusContainerId_);
-    if (!pageUrl.empty()) {
-        pageUrl_ = pageUrl;
+    int32_t containerId = 0;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        containerId = focusContainerId_;
     }
-    return pageUrl_;
+    auto pageUrl = GetPageUrlByContainerId(containerId);
+    if (pageUrl.empty()) {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        return pageUrl_;
+    }
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    pageUrl_ = pageUrl;
+    return pageUrl;
 }
 
 const std::string& EventRecorder::GetNavDstName() const
@@ -429,7 +440,10 @@ void EventRecorder::NotifyEventCacheEnd() {}
 
 void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name)
 {
-    pageUrl_ = pageUrl;
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        pageUrl_ = pageUrl;
+    }
     NodeDataCache::Get().OnPageShow(pageUrl);
     Recorder::EventParamsBuilder builder;
     builder.SetType(std::to_string(PageEventType::ROUTER_PAGE))

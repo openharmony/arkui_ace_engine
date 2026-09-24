@@ -379,7 +379,9 @@ void TextSelectController::CalculateHandleOffset()
         return;
     }
     CaretMetricsF secondHandleMetrics;
-    CalcCaretMetricsByPosition(GetSecondHandleIndex(), secondHandleMetrics, TextAffinity::UPSTREAM);
+    auto secondHandleIndex = GetSecondHandleIndex();
+    CalcCaretMetricsByPosition(
+        secondHandleIndex, secondHandleMetrics, GetHandleTextAffinity(secondHandleIndex, TextAffinity::UPSTREAM));
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleMetrics.offset);
     secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
@@ -392,7 +394,9 @@ void TextSelectController::CalculateHandleOffset()
     }
 
     CaretMetricsF firstHandleMetrics;
-    CalcCaretMetricsByPosition(GetFirstHandleIndex(), firstHandleMetrics, TextAffinity::DOWNSTREAM);
+    auto firstHandleIndex = GetFirstHandleIndex();
+    CalcCaretMetricsByPosition(
+        firstHandleIndex, firstHandleMetrics, GetHandleTextAffinity(firstHandleIndex, TextAffinity::DOWNSTREAM));
     OffsetF firstHandleOffset = firstHandleMetrics.offset;
 
     RectF firstHandle;
@@ -400,6 +404,27 @@ void TextSelectController::CalculateHandleOffset()
     firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), firstHandleMetrics.height });
     AdjustHandleOffset(firstHandle);
     firstHandleInfo_.rect = firstHandle;
+}
+
+bool TextSelectController::IsSelectedLineBreak() const
+{
+    CHECK_NULL_RETURN(contentController_, false);
+    auto start = GetStartIndex();
+    auto end = GetEndIndex();
+    const auto& content = contentController_->GetTextUtf16Value();
+    return start >= 0 && end == start + 1 && end <= static_cast<int32_t>(content.length()) &&
+           content[start] == WIDE_NEWLINE[0];
+}
+
+TextAffinity TextSelectController::GetHandleTextAffinity(int32_t index, TextAffinity defaultAffinity) const
+{
+    CHECK_NULL_RETURN(contentController_, defaultAffinity);
+    const auto& content = contentController_->GetTextUtf16Value();
+    if (IsSelected() && index == GetEndIndex() && index > 0 && index <= static_cast<int32_t>(content.length()) &&
+        content[index - 1] == WIDE_NEWLINE[0]) {
+        return TextAffinity::DOWNSTREAM;
+    }
+    return defaultAffinity;
 }
 
 std::string TextSelectController::ToString() const
@@ -498,8 +523,10 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool move
 {
     CaretMetricsF firstHandleMetrics;
     firstHandleInfo_.index = index;
+    auto firstHandleIndex = GetFirstHandleIndex();
+    auto defaultAffinity = HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM;
     CalcCaretMetricsByPosition(
-        GetFirstHandleIndex(), firstHandleMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
+        firstHandleIndex, firstHandleMetrics, GetHandleTextAffinity(firstHandleIndex, defaultAffinity));
     OffsetF firstHandleOffset = firstHandleMetrics.offset;
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
@@ -520,8 +547,10 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool mov
 {
     CaretMetricsF secondHandleMetrics;
     secondHandleInfo_.index = index;
+    auto secondHandleIndex = GetSecondHandleIndex();
+    auto defaultAffinity = HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM;
     CalcCaretMetricsByPosition(
-        GetSecondHandleIndex(), secondHandleMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
+        secondHandleIndex, secondHandleMetrics, GetHandleTextAffinity(secondHandleIndex, defaultAffinity));
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleMetrics.offset);
     secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
@@ -617,8 +646,10 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
 void TextSelectController::UpdateFirstHandleOffset()
 {
     CaretMetricsF caretMetrics;
+    auto firstHandleIndex = GetFirstHandleIndex();
+    auto defaultAffinity = HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM;
     CalcCaretMetricsByPosition(
-        GetFirstHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
+        firstHandleIndex, caretMetrics, GetHandleTextAffinity(firstHandleIndex, defaultAffinity));
     firstHandleInfo_.rect.SetOffset(caretMetrics.offset);
     firstHandleInfo_.rect.SetHeight(caretMetrics.height);
     firstHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
@@ -629,8 +660,10 @@ void TextSelectController::UpdateFirstHandleOffset()
 void TextSelectController::UpdateSecondHandleOffset()
 {
     CaretMetricsF caretMetrics;
+    auto secondHandleIndex = GetSecondHandleIndex();
+    auto defaultAffinity = HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM;
     CalcCaretMetricsByPosition(
-        GetSecondHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
+        secondHandleIndex, caretMetrics, GetHandleTextAffinity(secondHandleIndex, defaultAffinity));
     secondHandleInfo_.rect.SetOffset(caretMetrics.offset);
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
     secondHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());

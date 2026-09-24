@@ -44,6 +44,9 @@ public:
     {
         return Level::YES_STR;
     }
+    void SetSpecificSupportAction() override;
+
+    bool IsScrollable() const override;
 
 protected:
     virtual RefPtr<FrameNode> GetSwiperNode() const;

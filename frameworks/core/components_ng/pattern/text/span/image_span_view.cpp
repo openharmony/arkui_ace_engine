@@ -62,6 +62,31 @@ void ImageSpanView::SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
     ImageModelNG::SetAlt(frameNode, srcInfo);
 }
 
+void ImageSpanView::SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice)
+{
+    ImageModelNG::SetResizableSlice(frameNode, slice);
+}
+
+void ImageSpanView::ResetResizableSlice(FrameNode* frameNode)
+{
+    ImageModelNG::ResetResizableSlice(frameNode);
+}
+
+void ImageSpanView::SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice)
+{
+    ImageModelNG::SetResizableLattice(frameNode, lattice);
+}
+
+void ImageSpanView::ResetResizableLattice(FrameNode* frameNode)
+{
+    ImageModelNG::ResetResizableLattice(frameNode);
+}
+
+ImageResizableSlice ImageSpanView::GetResizableSlice(FrameNode* frameNode)
+{
+    return ImageModelNG::GetResizableSlice(frameNode);
+}
+
 void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

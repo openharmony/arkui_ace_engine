@@ -17,6 +17,8 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/ace_type.h"
+#include "ui/base/referenced.h"
+#include "ui/base/utils/utils.h"
 #include "ui/view_stack/view_stack_processor.h"
 
 #include "core/interfaces/native/node/tabs_modifier.h"
@@ -25,11 +27,8 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
-#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "base/utils/system_properties.h"
 
@@ -292,38 +291,31 @@ void Tabs::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option)
         const_cast<ScrollableBarModeOptions*>(&option));
 }
 
-RefPtr<NG::TabsControllerNG> GetTabsControllerNode(const RefPtr<FrameNode>& node)
-{
-    auto tabsNode = GetTabsNode(node);
-    CHECK_NULL_RETURN(tabsNode, nullptr);
-    auto swiperNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_RETURN(swiperNode, nullptr);
-    auto swiperPattern = swiperNode->GetPattern<NG::SwiperPattern>();
-    CHECK_NULL_RETURN(swiperPattern, nullptr);
-    auto swiperControllerNode = swiperPattern->GetSwiperController();
-    CHECK_NULL_RETURN(swiperControllerNode, nullptr);
-    return AceType::DynamicCast<NG::TabsControllerNG>(swiperControllerNode);
-}
-
 void Tabs::SetTabBarTranslate(const NG::TranslateOptions& options)
 {
-    auto tabsController = GetTabsControllerNode(node_);
-    CHECK_NULL_VOID(tabsController);
-    tabsController->SetTabBarTranslate(options);
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTabBarTranslate(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)), &options);
 }
 
 void Tabs::SetTabBarOpacity(float opacity)
 {
-    auto tabsController = GetTabsControllerNode(node_);
-    CHECK_NULL_VOID(tabsController);
-    tabsController->SetTabBarOpacity(opacity);
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setTabBarOpacity(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)), opacity);
 }
 
 void Tabs::SwipeTo(const int32_t index)
 {
-    auto tabsController = GetTabsControllerNode(node_);
-    CHECK_NULL_VOID(tabsController);
-    tabsController->SwipeTo(index);
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->swipeTo(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)), index);
 }
 
 RefPtr<FrameNode> Tabs::GetTabBar()
@@ -350,7 +342,7 @@ void Tabs::SetOnChange(OnChangeEvent onChangeEvent)
     CHECK_NULL_VOID(frameNodeImpl);
     auto aceFrameNode = frameNodeImpl->GetAceNode();
     CHECK_NULL_VOID(aceFrameNode);
-    auto onChange = [onChangeEvent](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo*)> onChange = [onChangeEvent](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
             return;
@@ -368,7 +360,7 @@ void Tabs::SetOnTabBarClick(OnTabBarClickEvent onTabBarClickEvent)
     CHECK_NULL_VOID(frameNodeImpl);
     auto aceFrameNode = frameNodeImpl->GetAceNode();
     CHECK_NULL_VOID(aceFrameNode);
-    auto onTabBarClick = [onTabBarClickEvent](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo*)> onTabBarClick = [onTabBarClickEvent](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
             return;
@@ -648,5 +640,15 @@ void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption, const RefPtr
     CHECK_NULL_VOID(modifier);
     modifier->handleBackgroundEffectInactiveColor(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
         AceType::RawPtr(resObj));
+}
+
+NG::TabBarDisplayMode Tabs::GetBarDisplayMode() const
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_RETURN(tabsNode, NG::TabBarDisplayMode::BOTTOMTABBAR);
+    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
+    CHECK_NULL_RETURN(modifier, NG::TabBarDisplayMode::BOTTOMTABBAR);
+    auto mode = modifier->getBarDisplayMode(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)));
+    return static_cast<NG::TabBarDisplayMode>(mode);
 }
 } // namespace OHOS::Ace::Kit

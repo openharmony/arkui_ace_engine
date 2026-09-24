@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 
 namespace OHOS::Ace::NG {
+using IndexerThemeColors = std::unordered_map<std::string, Color>;
+
 class ACE_FORCE_EXPORT IndexerModelNG : public OHOS::Ace::IndexerModel {
 public:
     void CreateWithResourceObj(IndexerJsResourceType jsType, const RefPtr<ResourceObject>& resObj) override;
@@ -139,6 +141,8 @@ public:
     static void RemovePopupTitleBackground(FrameNode* frameNode);
     static void ChangeFlagForSetByUser(FrameNode* frameNode, std::string type, bool setByUser);
     static void CreateStatic(std::vector<std::string>& indexerArray, int32_t selectedVal, bool isArc = false);
+
+    static void SetIndexerThemeColors(FrameNode* frameNode, const IndexerThemeColors& indexerThemeColors);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

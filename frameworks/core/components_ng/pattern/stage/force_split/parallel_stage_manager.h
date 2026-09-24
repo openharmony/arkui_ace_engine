@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PARALLEL_STAGE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PARALLEL_STAGE_MANAGER_H
 
+#include <optional>
+
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/pattern/stage/stage_manager.h"
 #include "frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
@@ -57,12 +59,12 @@ public:
     
     void MarkDirtyPageAndOverlay(const RefPtr<FrameNode>& needMarkDirtyPage, PropertyChangeFlag changeFlag);
 
-    void SetHomePageTouched(bool homePageTouched)
+    void SetHomePageTouched(const std::optional<bool>& touch)
     {
-        homePageTouched_ = homePageTouched;
+        homePageTouched_ = touch;
     }
 
-    bool GetHomePageTouched()
+    const std::optional<bool>& GetHomePageTouched() const
     {
         return homePageTouched_;
     }
@@ -274,7 +276,7 @@ private:
 
     std::list<WeakPtr<FrameNode>> secondaryPageStack_;
     bool isInStageOperation_ = false;
-    bool homePageTouched_ = false;
+    std::optional<bool> homePageTouched_;
     bool needClearSecondaryPage_ = false;
     bool isTopFullScreenPage_ = false;
     bool isTopFullScreenPageChanged_ = false;

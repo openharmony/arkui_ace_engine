@@ -209,6 +209,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnColorConfigurationUpdate() override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
@@ -239,6 +240,7 @@ private:
     void UpdateEntryButtonColor();
     void UpdateEntryButtonBorderWidth();
     void UpdateHostEntryBorderColor();
+    void UpdateHostEntryBorderWidth();
     void UpdateEdgeAlign();
     void UpdateAccessibilityText();
     void FlushAddAndSubButton();

@@ -117,6 +117,9 @@ public:
     static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
     static void SetIncrementalUpdatePolicy(const JSCallbackInfo& info);
     static void SetTailIndents(const JSCallbackInfo& info);
+    static void SetStrokeWidth(const JSCallbackInfo& info);
+    static void SetStrokeColor(const JSCallbackInfo& info);
+    static void SetStrokeJoinStyle(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

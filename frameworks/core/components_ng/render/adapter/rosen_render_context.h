@@ -676,6 +676,8 @@ public:
 
     void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier) override;
 
+    void ReloadBackgroundImage() override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -765,6 +767,7 @@ protected:
     void UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnExcludeFromRenderGroupUpdate(bool exclude) override;
+    void OnMarkLayeredRenderUpdate(bool isLayeredRender) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
     void OnAttractionEffectUpdate(const AttractionEffect& effect) override;

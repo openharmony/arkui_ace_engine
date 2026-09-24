@@ -527,6 +527,17 @@ void TabsModelStatic::SetOnChange(FrameNode* frameNode, std::function<void(const
     tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
+void TabsModelStatic::SetOnBarDisplayModeChange(FrameNode* frameNode,
+    std::function<void(TabBarDisplayMode)>&& onBarDisplayModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnBarDisplayModeChangeEvent(std::move(onBarDisplayModeChange));
+}
+
 void TabsModelStatic::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
 {
     CHECK_NULL_VOID(frameNode);
@@ -691,6 +702,9 @@ void TabsModelStatic::SetBarBackgroundBlurStyle(FrameNode* frameNode, const Blur
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    tabsPattern->SetBarBlurStyleOption(styleOption);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto pipeline = tabBarNode->GetContext();
@@ -723,8 +737,10 @@ void TabsModelStatic::SetBarBackgroundColor(FrameNode* frameNode, const std::opt
     CHECK_NULL_VOID(tabBarRenderContext);
     if (backgroundColorOpt) {
         tabBarRenderContext->UpdateBackgroundColor(backgroundColorOpt.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColor, backgroundColorOpt.value(), frameNode);
     } else {
         tabBarRenderContext->ResetBackgroundColor();
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarBackgroundColor, frameNode);
     }
 }
 

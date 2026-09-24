@@ -93,8 +93,7 @@ public:
     void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
-    bool RecycleImageData();
-    bool RecycleImageDataForNav();
+    bool DoRecycleImageData(const std::string& logSuffix, const std::string& traceTag, bool checkNetworkImage = true);
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnVisibleChange(bool isVisible) override;

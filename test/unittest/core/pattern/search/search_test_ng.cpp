@@ -1065,7 +1065,6 @@ HWTEST_F(SearchTestNg, SetCancelButtonStyle002, TestSize.Level1)
     EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
 }
 
-
 /**
  * @tc.name: SetCancelImageIcon001
  * @tc.desc: Set cancel image icon

@@ -23,7 +23,6 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_constants.h"
-#include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -31,8 +30,6 @@
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_v2/grid/grid_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#include <limits>
 
 using namespace OHOS::Ace::Framework;
 
@@ -52,9 +49,42 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
 namespace {
-
-void ParseGridStartLineInfo(const EcmaVM* vm, const Local<JSValueRef>& value, GridStartLineInfo& gridStartLineInfo)
+void ParseJSGridStartLineInfo(const EcmaVM* vm, const Local<JSValueRef>& value, GridStartLineInfo& gridStartLineInfo)
 {
+    if (value.IsEmpty() || value->IsUndefined()) {
+        return;
+    }
+
+    if (value->IsObject(vm)) {
+        auto obj = value->ToObject(vm);
+        auto startIndex = ArkTSUtils::GetProperty(vm, obj, "startIndex");
+        if (!startIndex.IsEmpty() && startIndex->IsNumber()) {
+            gridStartLineInfo.startIndex = startIndex->Int32Value(vm);
+        }
+        auto startLine = ArkTSUtils::GetProperty(vm, obj, "startLine");
+        if (!startLine.IsEmpty() && startLine->IsNumber()) {
+            gridStartLineInfo.startLine = startLine->Int32Value(vm);
+        }
+        auto startOffset = ArkTSUtils::GetProperty(vm, obj, "startOffset");
+        if (!startOffset.IsEmpty() && startOffset->IsNumber()) {
+            auto offset = Dimension(startOffset->ToNumber(vm)->Value(), DimensionUnit::VP);
+            gridStartLineInfo.startOffset = offset.ConvertToPx();
+        }
+        auto totalOffset = ArkTSUtils::GetProperty(vm, obj, "totalOffset");
+        if (!totalOffset.IsEmpty() && totalOffset->IsNumber()) {
+            auto offset = Dimension(totalOffset->ToNumber(vm)->Value(), DimensionUnit::VP);
+            gridStartLineInfo.totalOffset = offset.ConvertToPx();
+        }
+    }
+}
+
+void ParseGridStartLineInfo(
+    const EcmaVM* vm, const Local<JSValueRef>& value, GridStartLineInfo& gridStartLineInfo, bool isJSView = false)
+{
+    if (isJSView) {
+        ParseJSGridStartLineInfo(vm, value, gridStartLineInfo);
+        return;
+    }
     if (!value->IsArray(vm)) {
         return;
     }
@@ -191,21 +221,21 @@ void ParseGetStartIndexByOffset(
     }
     if (getStartIndexByOffset->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getStartIndexByOffset->ToObject(vm);
-        auto onGetStartIndexByOffset = [func = panda::CopyableGlobal(vm, functionRef), isJSView](float offset) {
+        auto onGetStartIndexByOffset = [func = panda::CopyableGlobal(vm, functionRef), isJSView](double offset) {
             GridStartLineInfo gridStartLineInfo;
             auto vm = func.GetEcmaVM();
             CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, gridStartLineInfo);
             panda::LocalScope scope(vm);
             panda::TryCatch trycatch(vm);
-            auto offsetValue = ArkTSUtils::ToJsValueWithVM(vm, offset);
+            auto offsetValue = ArkTSUtils::ToJsValueWithVM(vm, Dimension(offset).ConvertToVp());
             auto result = func->Call(vm, func.ToLocal(), &offsetValue, 1);
             if (isJSView) {
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
             }
-            if (!result->IsArray(vm)) {
+            if (result.IsEmpty() || result->IsUndefined()) {
                 return gridStartLineInfo;
             }
-            ParseGridStartLineInfo(vm, result, gridStartLineInfo);
+            ParseGridStartLineInfo(vm, result, gridStartLineInfo, isJSView);
             return gridStartLineInfo;
         };
         option.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
@@ -230,10 +260,10 @@ void ParseGetStartIndexByIndex(
         if (isJSView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
-        if (!result->IsArray(vm)) {
+        if (result.IsEmpty() || result->IsUndefined()) {
             return gridStartLineInfo;
         }
-        ParseGridStartLineInfo(vm, result, gridStartLineInfo);
+        ParseGridStartLineInfo(vm, result, gridStartLineInfo, isJSView);
         return gridStartLineInfo;
     };
     option.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
@@ -465,8 +495,6 @@ void GridBridge::RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* 
         "resetSyncLoad",
         "setEditModeOptions",
         "resetEditModeOptions",
-        "setScrollSnapStrategy",
-        "resetScrollSnapStrategy",
         "setGridEnableEditMode",
         "resetGridEnableEditMode",
         "setOnEditModeChange",
@@ -550,8 +578,6 @@ void GridBridge::RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* 
         panda::FunctionRef::New(vm, GridBridge::ResetSyncLoad),
         panda::FunctionRef::New(vm, GridBridge::SetEditModeOptions),
         panda::FunctionRef::New(vm, GridBridge::ResetEditModeOptions),
-        panda::FunctionRef::New(vm, GridBridge::SetScrollSnapStrategy),
-        panda::FunctionRef::New(vm, GridBridge::ResetScrollSnapStrategy),
         panda::FunctionRef::New(vm, GridBridge::SetEnableEditMode),
         panda::FunctionRef::New(vm, GridBridge::ResetEnableEditMode),
         panda::FunctionRef::New(vm, GridBridge::SetOnEditModeChange),
@@ -1437,109 +1463,6 @@ ArkUINativeModuleValue GridBridge::ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetSyncLoad(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-
-ArkUINativeModuleValue GridBridge::SetScrollSnapStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    ArkUINodeHandle nativeNode = nullptr;
-    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, node, vm), false, panda::JSValueRef::Undefined(vm));
-    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    // undefined / null / invalid value clears the strategy (last-set-wins falls back to default).
-    if (valueArg->IsUndefined() || valueArg->IsNull()) {
-        GridModelNG::ResetScrollSnapStrategy(frameNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    if (valueArg->IsNumber()) {
-        int32_t align = valueArg->Int32Value(vm);
-        if (align <= static_cast<int32_t>(ScrollSnapAlign::NONE) ||
-            align > static_cast<int32_t>(ScrollSnapAlign::END)) {
-            GridModelNG::ResetScrollSnapStrategy(frameNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-        ScrollSnapStrategy strategy;
-        strategy.align = static_cast<ScrollSnapAlign>(align);
-        GridModelNG::SetScrollSnapStrategy(frameNode, strategy);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    if (valueArg->IsObject(vm)) {
-        auto obj = valueArg->ToObject(vm);
-        auto snapFuncValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "calculateSnapOffset"));
-        auto approachFuncValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "calculateApproachOffset"));
-        // A custom provider requires calculateSnapOffset to be a function.
-        if (!snapFuncValue->IsFunction(vm)) {
-            GridModelNG::ResetScrollSnapStrategy(frameNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-        ScrollSnapStrategy strategy;
-        strategy.hasProvider = true;
-        bool isJSView = ArkTSUtils::IsJsView(vm, node);
-        auto weakNode = AceType::WeakClaim(frameNode);
-        Local<panda::FunctionRef> snapFuncRef = snapFuncValue->ToObject(vm);
-        strategy.calculateSnapOffset =
-            [func = panda::CopyableGlobal(vm, snapFuncRef), weakNode, isJSView](double velocity) -> double {
-            auto vm = func.GetEcmaVM();
-            CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false,
-                std::numeric_limits<double>::quiet_NaN());
-            panda::LocalScope scope(vm);
-            panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(weakNode);
-            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, velocity) };
-            auto result = func->Call(vm, func.ToLocal(), params, 1); // 1: array length
-            if (isJSView) {
-                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
-            }
-            if (!result->IsNumber()) {
-                return std::numeric_limits<double>::quiet_NaN();
-            }
-            return result->ToNumber(vm)->Value();
-        };
-        if (approachFuncValue->IsFunction(vm)) {
-            Local<panda::FunctionRef> approachFuncRef = approachFuncValue->ToObject(vm);
-            strategy.calculateApproachOffset =
-                [func = panda::CopyableGlobal(vm, approachFuncRef), weakNode, isJSView](
-                    double velocity, double decayOffset) -> double {
-                auto vm = func.GetEcmaVM();
-                CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false,
-                    std::numeric_limits<double>::quiet_NaN());
-                panda::LocalScope scope(vm);
-                panda::TryCatch trycatch(vm);
-                PipelineContext::SetCallBackNode(weakNode);
-                panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, velocity),
-                    panda::NumberRef::New(vm, decayOffset) };
-                auto result = func->Call(vm, func.ToLocal(), params, 2); // 2: array length
-                if (isJSView) {
-                    ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
-                }
-                if (!result->IsNumber()) {
-                    return std::numeric_limits<double>::quiet_NaN();
-                }
-                return result->ToNumber(vm)->Value();
-            };
-        }
-        GridModelNG::SetScrollSnapStrategy(frameNode, strategy);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    GridModelNG::ResetScrollSnapStrategy(frameNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue GridBridge::ResetScrollSnapStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    ArkUINodeHandle nativeNode = nullptr;
-    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    CHECK_EQUAL_RETURN(ArkTSUtils::GetNativeNode(nativeNode, node, vm), false, panda::JSValueRef::Undefined(vm));
-    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    GridModelNG::ResetScrollSnapStrategy(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -867,6 +867,134 @@ HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridLayoutInfo::FindEndIdx005
+ * @tc.desc: Item 0 is encoded as 0. When it is the only origin, FindEndIdx must
+ *           return the filler origin (0, 0), not the EndIndexInfo default {-1,-1,-1}.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx005, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 } } },
+    };
+
+    auto result = info.FindEndIdx(0);
+    EXPECT_EQ(result.itemIdx, 0);
+    EXPECT_EQ(result.y, 0);
+    EXPECT_EQ(result.x, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FindEndIdx006
+ * @tc.desc: Item 0 with rowSpan>1 stores continuation cells as 0 as well.
+ *           Querying the continuation row must still return origin (0,0), so
+ *           InitPosToLastItem resumes on the origin row. val>=0 would wrongly
+ *           return y=1 and leave a hole at (0,1) when filling the next item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx006, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    // item 0 occupies (0,0) and (1,0); both cells are 0 because -0 == 0.
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 } } },
+        { 1, { { 0, 0 } } },
+    };
+
+    auto result = info.FindEndIdx(1);
+    EXPECT_EQ(result.itemIdx, 0);
+    EXPECT_EQ(result.y, 0);
+    EXPECT_EQ(result.x, 0);
+
+    auto resultOriginRow = info.FindEndIdx(0);
+    EXPECT_EQ(resultOriginRow.itemIdx, 0);
+    EXPECT_EQ(resultOriginRow.y, 0);
+    EXPECT_EQ(resultOriginRow.x, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FindEndIdx007
+ * @tc.desc: Item 0 with columnSpan>1 occupies several 0 cells on the origin row.
+ *           The returned position must be the origin (0,0), not a later 0 cell.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx007, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 } } },
+    };
+
+    auto result = info.FindEndIdx(0);
+    EXPECT_EQ(result.itemIdx, 0);
+    EXPECT_EQ(result.y, 0);
+    EXPECT_EQ(result.x, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FindEndIdx008
+ * @tc.desc: Continuation-only matrix: (0,0) stores -1, not item 0. Must return
+ *           the miss sentinel {-1,-1,-1} instead of inventing item 0 at origin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx008, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 0, { { 0, -1 } } },
+    };
+
+    auto result = info.FindEndIdx(0);
+    EXPECT_EQ(result.itemIdx, -1);
+    EXPECT_EQ(result.y, -1);
+    EXPECT_EQ(result.x, -1);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FindEndIdx009
+ * @tc.desc: Item 0 recorded at column 1 with (0,0) empty. Without a verified
+ *           origin at (0,0), FindEndIdx must not fall back to {0,0,0}.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx009, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 0, { { 1, 0 } } },
+    };
+
+    auto result = info.FindEndIdx(0);
+    EXPECT_EQ(result.itemIdx, -1);
+    EXPECT_EQ(result.y, -1);
+    EXPECT_EQ(result.x, -1);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::FindEndIdx010
+ * @tc.desc: Matrix starts at a later line with only continuations and no row 0.
+ *           No positive origin and no item 0 at (0,0) → miss sentinel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, FindEndIdx010, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 2, { { 0, -5 }, { 1, -8 } } },
+    };
+
+    auto result = info.FindEndIdx(2);
+    EXPECT_EQ(result.itemIdx, -1);
+    EXPECT_EQ(result.y, -1);
+    EXPECT_EQ(result.x, -1);
+}
+
+/**
  * @tc.name: GridLayoutInfo::ClearMapsToEnd001
  * @tc.desc: Test ClearMapsToEnd removes lines from index onwards
  * @tc.type: FUNC

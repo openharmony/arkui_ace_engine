@@ -108,7 +108,7 @@ public:
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
-    virtual int32_t GetTextContentLength();
+    virtual int32_t GetTextContentLength() const;
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
     RefPtr<LayoutProperty> CreateLayoutProperty() override;
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -126,6 +126,8 @@ public:
     bool IsTextNode() const;
     bool DefaultSupportDrag() override;
     void OnModifyDone() override;
+    void RegisterTranslateListener();
+    void UnRegisterTranslateListener(int32_t nodeId);
     void OnWindowHide() override;
     void OnWindowShow() override;
     void OnLanguageConfigurationUpdate() override;
@@ -671,6 +673,7 @@ protected:
     std::vector<SubComponentInfoEx> subComponentInfos_;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<PipelineContext> translatePipeline_;
     Status status_ = Status::NONE;
     CopyOptions copyOption_ = CopyOptions::None;
     SourceType sourceType_ = SourceType::NONE;
@@ -773,6 +776,7 @@ private:
     void FlushContainerOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    void ApplyImageSpanAttribute(const RefPtr<ImageSpanNode>& imageNode, const ImageSpanAttribute& imgAttr);
     void ProcessSpanString();
     void SetCurrentDragTool(SourceTool tool);
     std::optional<RenderContext::ContextParam> GetContextParam() const override;

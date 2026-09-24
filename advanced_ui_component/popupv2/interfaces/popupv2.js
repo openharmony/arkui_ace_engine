@@ -32,6 +32,7 @@ const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const Configuration = requireNapi('configuration');
 const SystemDateTime = requireNapi('systemDateTime');
+const i18n = requireNapi('i18n');
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -678,12 +679,19 @@ export class PopupV2ComponentV2 extends ViewV2 {
         return applyMaxSize;
     }
     getTitleTextAlign() {
-        let titleAlign = TextAlign.Start;
-        if ((Configuration.getLocale().dir === 'rtl') &&
-            (this.popupDirection === Direction.Auto || this.popupDirection === undefined)) {
-            titleAlign = TextAlign.End;
+        return TextAlign.Start;
+    }
+    getResolvedTextDirection() {
+        if (this.popupDirection === Direction.Auto || this.popupDirection === undefined) {
+            try {
+                return i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr;
+            }
+            catch (error) {
+                console.error(`popup getResolvedTextDirection, error: ${error.toString()}`);
+                return Direction.Ltr;
+            }
         }
-        return titleAlign;
+        return this.popupDirection;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -743,7 +751,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.getTitleText());
-                        Text.direction(this.popupDirection);
+                        Text.direction(this.getResolvedTextDirection());
                         Text.flexGrow(1);
                         Text.maxLines(2);
                         Text.align(Alignment.Start);
@@ -819,7 +827,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                     }, Scroll);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.getMessageText());
-                        Text.direction(this.popupDirection);
+                        Text.direction(this.getResolvedTextDirection());
                         Text.fontSize(this.getMessageFontSize());
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());

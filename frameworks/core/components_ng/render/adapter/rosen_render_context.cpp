@@ -1463,6 +1463,14 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
     bgLoadingCtx_->LoadImageData();
 }
 
+void RosenRenderContext::ReloadBackgroundImage()
+{
+    auto bgImage = GetBackgroundImage();
+    if (bgImage.has_value()) {
+        OnBackgroundImageUpdate(bgImage.value());
+    }
+}
+
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat)
 {
     FREE_RS_CONTEXT_CHECK(OnBackgroundImageRepeatUpdate, imageRepeat);
@@ -1936,6 +1944,7 @@ bool RosenRenderContext::HasMaterialFilter() const
     CHECK_NULL_RETURN(rsNode_, false);
     return rsNode_->GetModifierByType(OHOS::Rosen::ModifierNG::RSModifierType::MATERIAL_FILTER) != nullptr;
 }
+
 
 bool RosenRenderContext::IsSelfDrawingNode() const
 {
@@ -5709,6 +5718,7 @@ void RosenRenderContext::UpdateBackBlur(
     FREE_RS_CONTEXT_CHECK_MULTI_THREAD(UpdateBackBlur, radius, blurOption, sysOptions);
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBackdropBlurOption = blurOption;
     if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         // Same with previous value
         return;
@@ -7281,6 +7291,10 @@ void RosenRenderContext::DumpInfo()
     if (GetExcludeFromRenderGroupValue(false)) {
         DumpLog::GetInstance().AddDesc(std::string("excludeRenderGroup:1"));
     }
+
+    if (GetMarkLayeredRenderValue(false)) {
+        DumpLog::GetInstance().AddDesc(std::string("markLayeredRender:1"));
+    }
 }
 
 void RosenRenderContext::DumpAdvanceInfo()
@@ -7458,8 +7472,10 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     if (isTransitionIn) {
         // Isolate the animation callback function, to avoid changing the callback timing of current implicit animation.
         AnimationUtils::AnimateWithCurrentOptions(
-            [this]() {
-                transitionEffect_->Appear();
+            // Executing `Appear` may trigger a frontend callback, which could overwrite `transitionEffect_`;
+            // therefore, `transitionEffect_` should be copied before use.
+            [this, effect = transitionEffect_]() {
+                effect->Appear();
                 ++appearingTransitionCount_;
             },
             [weakThis = WeakClaim(this)]() {
@@ -7491,8 +7507,8 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
         //    is accomplished by setting the last param (timing sensitive) to false, which avoids creating an empty
         //    'timer' animation.
         AnimationUtils::AnimateWithCurrentOptions(
-            [this]() {
-                transitionEffect_->Disappear();
+            [this, effect = transitionEffect_]() {
+                effect->Disappear();
                 // update transition out count
                 ++disappearingTransitionCount_;
             },
@@ -7879,6 +7895,14 @@ void RosenRenderContext::OnExcludeFromRenderGroupUpdate(bool exclude)
     FREE_RS_CONTEXT_CHECK(OnExcludeFromRenderGroupUpdate, exclude);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->ExcludedFromNodeGroup(exclude);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnMarkLayeredRenderUpdate(bool isLayeredRender)
+{
+    FREE_RS_CONTEXT_CHECK(OnMarkLayeredRenderUpdate, isLayeredRender);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkLayerPartRender(isLayeredRender);
     RequestNextFrame();
 }
 
@@ -8855,21 +8879,26 @@ bool RosenRenderContext::SetKeyFrameNodeOpacityAnimation(int32_t duration, int32
                 keyFrameNode_->SetAlpha(0.0f);
             }
         },
-        [this, isDragEnd]() {
-            if (keyFrameNode_) {
-                keyFrameNode_->SetAlpha(1.0f);
+        [weak = WeakClaim(this), isDragEnd]() {
+            auto rosenRender = weak.Upgrade();
+            if (!rosenRender) {
+                animationFlag = false;
+                return;
             }
-            FreezeKeyFrameNode(false);
+            if (rosenRender->keyFrameNode_) {
+                rosenRender->keyFrameNode_->SetAlpha(1.0f);
+            }
+            rosenRender->FreezeKeyFrameNode(false);
             if (isDragEnd) {
-                RemoveKeyFrameNode();
+                rosenRender->RemoveKeyFrameNode();
             }
-            if (callbackAnimateEnd_ && *callbackAnimateEnd_) {
-                (*callbackAnimateEnd_)();
+            if (rosenRender->callbackAnimateEnd_ && *(rosenRender->callbackAnimateEnd_)) {
+                (*(rosenRender->callbackAnimateEnd_))();
             }
-            FlushImplicitTransaction();
+            rosenRender->FlushImplicitTransaction();
             animationFlag = false;
-            if (callbackCachedAnimateAction_ && *callbackCachedAnimateAction_) {
-                (*callbackCachedAnimateAction_)();
+            if (rosenRender->callbackCachedAnimateAction_ && *(rosenRender->callbackCachedAnimateAction_)) {
+                (*(rosenRender->callbackCachedAnimateAction_))();
             }
         });
     return true;

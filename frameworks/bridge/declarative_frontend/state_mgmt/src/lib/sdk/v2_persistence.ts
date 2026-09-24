@@ -44,6 +44,8 @@ interface ConnectOptions<T extends object> {
   defaultCreator?: StorageDefaultCreator<T>;
   // (Optional) Encryption parameter.
   areaMode?: number;
+  // (Optional) Ignore read-only properties when persisting and restoring.
+  ignoreReadOnlyProperties?: boolean;
 }
 
 interface ConnectOptionsCollections<T extends CollectionType<S>, S extends object> extends ConnectOptions<T> {
@@ -294,6 +296,7 @@ class PersistenceV2Impl extends StorageHelper {
   protected map_: Map<string, any>;
   protected globalMap_: Map<string, any>;
   protected globalMapAreaMode_: Map<string, number>;
+  protected ignoreReadOnlyProperties_: Map<string, boolean>;
   protected keysArr_: Set<string>;
   protected globalKeysArr_: Array<Set<string>>;
   protected cb_: PersistErrorCallback = undefined;
@@ -304,6 +307,7 @@ class PersistenceV2Impl extends StorageHelper {
     this.map_ = new Proxy(new Map<string, any>(), new SetMapProxyHandler());
     this.globalMap_ = new Proxy(new Map<string, any>(), new SetMapProxyHandler());
     this.globalMapAreaMode_ = new Map<string, number>();
+    this.ignoreReadOnlyProperties_ = new Map<string, boolean>();
     this.keysArr_ = new Set<string>();
     this.globalKeysArr_ = [new Set(), new Set(), new Set(), new Set(), new Set()];
     this.idToKey_ = new Map<number, string>();
@@ -433,6 +437,7 @@ class PersistenceV2Impl extends StorageHelper {
     // Not in memory, but in disk
     const areaMode: number = this.getAreaMode(connectOptions.areaMode);
     this.globalMapAreaMode_.set(key, areaMode);
+    this.ignoreReadOnlyProperties_.set(key, connectOptions.ignoreReadOnlyProperties === true);
     if (PersistenceV2Impl.storage_.has(key, areaMode)) {
       let defaultSubCreator;
       if ('defaultSubCreator' in connectOptions) {
@@ -444,7 +449,8 @@ class PersistenceV2Impl extends StorageHelper {
         key, id, observedValue,
         type,
         defaultSubCreator,
-        areaMode
+        areaMode,
+        this.ignoreReadOnlyProperties_.get(key) === true
       );
       if (!error) {
           // No error, return valid  object
@@ -540,7 +546,7 @@ class PersistenceV2Impl extends StorageHelper {
       const areaMode = this.globalMapAreaMode_.get(key);
       try {
         const data = this.globalMap_.get(key);
-        const stringified = DataCoder.stringify(data, false);
+        const stringified = DataCoder.stringify(data, false, this.ignoreReadOnlyProperties_.get(key) === true);
         PersistenceV2Impl.storage_.set(key, stringified, areaMode);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
@@ -585,6 +591,7 @@ class PersistenceV2Impl extends StorageHelper {
       this.globalMap_.delete(key);
       areaMode = this.globalMapAreaMode_.get(key);
       this.globalMapAreaMode_.delete(key);
+      this.ignoreReadOnlyProperties_.delete(key);
     } else if (keyType === MapType.MODULE_MAP) {
       this.map_.delete(key);
     }
@@ -690,7 +697,8 @@ class PersistenceV2Impl extends StorageHelper {
     key: string, id: number, observedValue: T,
     type: TypeConstructorWithArgs<T>,
     defaultSubCreator?: StorageDefaultCreator<S>,
-    areaMode?: number
+    areaMode?: number,
+    ignoreReadOnlyProperties: boolean = false
   ): [T | undefined, boolean] {
     let newObservedValue: T;
     let json: string = '';
@@ -715,7 +723,7 @@ class PersistenceV2Impl extends StorageHelper {
         }
         // Adding ref for persistence
         ObserveV2.getObserve().startRecordDependencies(this, id);
-        newObservedValue = DataCoder.restoreTo(observedValue, parsedValue, defaultSubCreator) as T;
+        newObservedValue = DataCoder.restoreTo(observedValue, parsedValue, defaultSubCreator, ignoreReadOnlyProperties) as T;
         ObserveV2.getObserve().stopRecordDependencies();
       } else {
         // Adding ref for persistence
@@ -771,7 +779,7 @@ class PersistenceV2Impl extends StorageHelper {
           const value: object = keyType === MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
 
           ObserveV2.getObserve().startRecordDependencies(this, id);
-          const json = DataCoder.stringify(value, keyType !== MapType.GLOBAL_MAP);
+          const json = DataCoder.stringify(value, keyType !== MapType.GLOBAL_MAP, this.ignoreReadOnlyProperties_.get(key) === true);
           ObserveV2.getObserve().stopRecordDependencies();
 
           if (keyType === MapType.GLOBAL_MAP) {

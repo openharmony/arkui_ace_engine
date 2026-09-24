@@ -1578,6 +1578,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);
     JSClass<JSText>::StaticMethod("incrementalUpdatePolicy", &JSText::SetIncrementalUpdatePolicy);
     JSClass<JSText>::StaticMethod("tailIndents", &JSText::SetTailIndents);
+    JSClass<JSText>::StaticMethod("strokeWidth", &JSText::SetStrokeWidth);
+    JSClass<JSText>::StaticMethod("strokeColor", &JSText::SetStrokeColor);
+    JSClass<JSText>::StaticMethod("strokeJoinStyle", &JSText::SetStrokeJoinStyle);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -2076,5 +2079,88 @@ void JSText::SetTailIndents(const JSCallbackInfo& info)
     }
     
     TextModel::GetInstance()->SetTailIndents(tailIndents);
+}
+
+void JSText::SetStrokeWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension value;
+    RefPtr<ResourceObject> resObj;
+    JSRef<JSVal> args = info[0];
+
+    UnRegisterResource("StrokeWidth");
+    if (args->IsNull() || args->IsUndefined()) {
+        TextModel::GetInstance()->ResetStrokeWidth();
+        return;
+    }
+    bool unitIsUndefined = false;
+    if (args->IsObject()) {
+        auto widthObj = JSRef<JSObject>::Cast(args);
+        auto unitObj = widthObj->GetProperty("unit");
+        unitIsUndefined = unitObj->IsUndefined() || unitObj->IsNull();
+    }
+    if (!ParseLengthMetricsToDimension(args, value, resObj, DimensionUnit::VP) ||
+        value.Unit() == DimensionUnit::PERCENT) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::SetStrokeWidth parse failed, reset to default!");
+        TextModel::GetInstance()->ResetStrokeWidth();
+        return;
+    }
+    if (unitIsUndefined) {
+        value.SetUnit(DimensionUnit::VP);
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("StrokeWidth", resObj, value);
+    }
+    TextModel::GetInstance()->SetStrokeWidth(value);
+}
+
+void JSText::SetStrokeColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color strokeColor;
+    RefPtr<ResourceObject> resourceObject;
+    JSRef<JSVal> args = info[0];
+
+    UnRegisterResource("StrokeColor");
+    if (args->IsNull() || args->IsUndefined()) {
+        TextModel::GetInstance()->ResetStrokeColor();
+        return;
+    }
+    if (!ParseJsColorForMaterial(args, strokeColor, resourceObject)) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::SetStrokeColor parse failed, reset to default!");
+        TextModel::GetInstance()->ResetStrokeColor();
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("StrokeColor", resourceObject, strokeColor, true);
+    }
+    TextModel::GetInstance()->SetStrokeColor(strokeColor);
+}
+
+void JSText::SetStrokeJoinStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> args = info[0];
+    if (args->IsNull() || args->IsUndefined()) {
+        TextModel::GetInstance()->ResetStrokeJoinStyle();
+        return;
+    }
+    if (!args->IsNumber()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::SetStrokeJoinStyle parse failed, reset to default!");
+        TextModel::GetInstance()->ResetStrokeJoinStyle();
+        return;
+    }
+    uint32_t index = args->ToNumber<uint32_t>();
+    if (index < STROKE_JOIN_STYLES.size()) {
+        TextModel::GetInstance()->SetStrokeJoinStyle(STROKE_JOIN_STYLES[index]);
+    } else {
+        TextModel::GetInstance()->ResetStrokeJoinStyle();
+    }
 }
 } // namespace OHOS::Ace::Framework

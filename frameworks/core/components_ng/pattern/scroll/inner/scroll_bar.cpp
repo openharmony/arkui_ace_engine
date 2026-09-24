@@ -606,7 +606,7 @@ void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const 
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     ResponseLinkResult& responseLinkResult)
 {
-    if (longPressRecognizer_ && isScrollable_ && scrollBarInteractive_) {
+    if (longPressRecognizer_ && isScrollable_ && GetScrollBarInteractive()) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         longPressRecognizer_->SetNodeId(frameNode->GetId());
@@ -640,7 +640,7 @@ void ScrollBar::InitLongPressEvent()
 
 void ScrollBar::HandleLongPress(bool smooth)
 {
-    CHECK_NULL_VOID(scrollBarInteractive_);
+    CHECK_NULL_VOID(GetScrollBarInteractive());
     Point point(locationInfo_.GetX(), locationInfo_.GetY());
     bool reverse = false;
     if (AnalysisUpOrDown(point, reverse) && isMousePressed_ && scrollPageCallback_) {
@@ -1005,7 +1005,7 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetE
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     ResponseLinkResult& responseLinkResult, bool inBarRect)
 {
-    if (panRecognizer_ && isScrollable_ && scrollBarInteractive_) {
+    if (panRecognizer_ && isScrollable_ && GetScrollBarInteractive()) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         panRecognizer_->SetNodeId(frameNode->GetId());

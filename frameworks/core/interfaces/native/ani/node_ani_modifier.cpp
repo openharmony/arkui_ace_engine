@@ -25,6 +25,7 @@
 #include "custom_node_ani_modifier.h"
 #include "detached_free_root_ani_modifier.h"
 #include "keyboard_avoid_mode_ani_modifier.h"
+#include "immersive_strategy_ani_modifier.h"
 #include "drag_ani_modifier.h"
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "drag_controller_ani_modifier.h"
@@ -69,6 +70,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
         .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
         .getKeyboardAvoidModeAniModifier = OHOS::Ace::NG::GetKeyboardAvoidModeAniModifier,
+        .getImmersiveStrategyAniModifier = OHOS::Ace::NG::GetImmersiveStrategyAniModifier,
         .getLazyForEachNodeAniModifier = OHOS::Ace::NG::GetLazyForEachNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,

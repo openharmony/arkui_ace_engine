@@ -749,6 +749,7 @@ HWTEST_F(ScrollableOptionErrorTest, CloseAllSwipeActions_WrongType_002, TestSize
     ArkUI_Node fakeNode;
     fakeNode.type = ARKUI_NODE_COLUMN;
     fakeNode.uiNodeHandle = nullptr;
+    fakeNode.magic = ARKUI_NODE_MAGIC_VALID;
     auto result = OH_ArkUI_List_CloseAllSwipeActions(&fakeNode, nullptr, nullptr);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED);
 

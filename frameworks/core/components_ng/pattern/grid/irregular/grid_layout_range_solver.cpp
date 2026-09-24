@@ -33,15 +33,17 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
         return { 0, 0, 0.0f };
     }
     if (NearZero(info_->currentOffset_)) {
-        // With startFixOffset_ > 0 (contentClip extension), items above the start line that
-        // fit in the clip extension area should be included. Use SolveBackward to find the
-        // new start line, matching the currentOffset_ > 0 branch below. When startFixOffset_
-        // == 0 (CONTENT_ONLY) or no items above exist, fall back to the original behavior.
-        // The lineHeightMap_ check guards against layouts that don't pre-measure lines above
-        // (e.g., custom layout after ClearCache in JumpToTargetIndex): without it, SolveBackward
-        // returns {0, 0, 0} on missing entries and corrupts the visible range.
+        // With the start extension active, rows visible in the start extension
+        // must join the starting row too (fix #1/#3: the original code returned
+        // only the current start, leaving extension rows out of layout). The
+        // guard must cover SolveBackward's whole backward span (M-1): checking
+        // only startMainLineIndex_-1 lets an upward walk of more than one row hit
+        // a missing lineHeightMap_ entry, making SolveBackward silently return
+        // {0,0,0} and the visible range jump back to item 0. With
+        // startFixOffset_ == 0 the condition fails and the original behavior
+        // is returned.
         if (GreatNotEqual(info_->startFixOffset_, 0.0f) && info_->startMainLineIndex_ > 0 &&
-            info_->lineHeightMap_.find(info_->startMainLineIndex_ - 1) != info_->lineHeightMap_.end()) {
+            CanSolveBackwardSpan(mainGap, info_->startFixOffset_, info_->startMainLineIndex_)) {
             auto res = SolveBackward(mainGap, info_->startFixOffset_, info_->startMainLineIndex_);
             res.pos -= info_->startFixOffset_;
             return res;
@@ -49,9 +51,13 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
         return { info_->startMainLineIndex_, info_->startIndex_, 0.0f };
     }
     if (Negative(info_->currentOffset_)) {
-        // With startFixOffset_ > 0 (contentClip extension), use SkipLinesAboveView which
-        // accounts for the clip start bound. When startFixOffset_ == 0 (CONTENT_ONLY),
-        // fall back to SolveForward to preserve the exact original boundary behavior.
+        // With the start extension active, first use SkipLinesAboveView to skip
+        // rows above the content-area top (0) — its reference is the content-area
+        // top, not the clip start — then the upward walk inside
+        // SolveForwardWithExtension includes newly visible rows in the start
+        // extension area (between the clip start -startFixOffset_ and the
+        // content-area top). With startFixOffset_ == 0 fall back to
+        // SolveForward.
         if (GreatNotEqual(info_->startFixOffset_, 0.0f)) {
             auto res = SolveForwardWithExtension(mainGap);
             if (res.has_value()) {
@@ -60,18 +66,37 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
         }
         return SolveForward(mainGap, -info_->currentOffset_, info_->startMainLineIndex_);
     }
-    // currentOffset_ > 0: blank at start. With startFixOffset_ > 0, the blank can extend into the
-    // clip extension area (down to -startFixOffset_), so increase targetLen by startFixOffset_ and
-    // correct the returned offset. When startFixOffset_ == 0, both adjustments are no-ops.
-    // The lineHeightMap_ check guards against layouts that don't pre-measure lines above
-    // (same rationale as the NearZero branch above).
+    // currentOffset_ > 0: blank at the top. When the extension is active the
+    // blank can extend to the clip start, at minus startFixOffset_. TargetLen
+    // gains startFixOffset_ and the returned offset is corrected. Both corrections are
+    // no-ops when startFixOffset_ == 0. Backward-span guard as in the NearZero
+    // branch (M-1): on guard failure fall back to the baseline SolveBackward
+    // (no extension correction).
     if (GreatNotEqual(info_->startFixOffset_, 0.0f) && info_->startMainLineIndex_ > 0 &&
-        info_->lineHeightMap_.find(info_->startMainLineIndex_ - 1) != info_->lineHeightMap_.end()) {
+        CanSolveBackwardSpan(mainGap, info_->currentOffset_ + info_->startFixOffset_,
+            info_->startMainLineIndex_)) {
         auto res = SolveBackward(mainGap, info_->currentOffset_ + info_->startFixOffset_, info_->startMainLineIndex_);
         res.pos -= info_->startFixOffset_;
         return res;
     }
     return SolveBackward(mainGap, info_->currentOffset_, info_->startMainLineIndex_);
+}
+
+bool GridLayoutRangeSolver::CanSolveBackwardSpan(float mainGap, float targetLen, int32_t idx) const
+{
+    // Mirror SolveBackward's accumulation exactly (len starts at mainGap) and
+    // verify lineHeightMap_ has every entry in the backward span down to row
+    // zero, returning false on the first missing entry so the caller falls back
+    // to the baseline path without the extension correction.
+    float len = mainGap;
+    while (idx > 0 && LessNotEqual(len, targetLen)) {
+        auto it = info_->lineHeightMap_.find(--idx);
+        if (it == info_->lineHeightMap_.end()) {
+            return false;
+        }
+        len += it->second + mainGap;
+    }
+    return true;
 }
 
 std::optional<GridLayoutRangeSolver::StartingRowInfo> GridLayoutRangeSolver::SolveForwardWithExtension(float mainGap)
@@ -80,16 +105,11 @@ std::optional<GridLayoutRangeSolver::StartingRowInfo> GridLayoutRangeSolver::Sol
     if (it == info_->lineHeightMap_.end()) {
         return std::nullopt;
     }
-    // Extend backward to include lines visible in the start contentClip extension area.
-    // SkipLinesAboveView only goes forward from startMainLineIndex_; when scrolling upward,
-    // lines above startMainLineIndex_ become visible in the extension area (top padding region
-    // when contentClip = BOUNDARY). Without this backward walk, those lines are never included
-    // in the visible range, so their items are not laid out every frame.
-    // A previous line is visible if its bottom (currOffset - mainGap) is at or below the clip
-    // start bound (-startFixOffset_), mirroring the SkipLinesAboveView visibility test.
-    // When startFixOffset_ == 0 (CONTENT_ONLY), the condition is never satisfied (the clip
-    // start is 0, and offset - mainGap < 0 always holds for a line above), so the backward walk
-    // is a no-op, preserving the original behavior.
+    // Walk backward from the found row to include rows that became visible in
+    // the start extension while scrolling up: the previous row's bottom edge
+    // (offset - mainGap) is visible once it is below the clip start
+    // (-startFixOffset_). With startFixOffset_ == 0 the condition never holds
+    // (the row above has offset - mainGap < 0), so the walk is a no-op.
     auto currIt = it;
     auto currOffset = offset;
     while (currIt != info_->lineHeightMap_.begin()) {
@@ -101,6 +121,14 @@ std::optional<GridLayoutRangeSolver::StartingRowInfo> GridLayoutRangeSolver::Sol
         currIt = prevIt;
     }
     auto [startRow, startIdx] = CheckMultiRow(currIt->first);
+    if (startRow < 0 || startIdx < 0) {
+        // gridMatrix_ lacks the current row (M-2): CheckMultiRow returns
+        // {-1,-1}. Feeding that into the backtrack loop would treat startRow=-1
+        // as a multi-row item start, subtract every height above (extreme
+        // negative pos) and leak -1 indices into the visible range. Degrade to
+        // the current row itself without the multi-row backtrack.
+        return StartingRowInfo { currIt->first, info_->startIndex_, currOffset };
+    }
     for (int32_t i = currIt->first; i > startRow; --i) {
         auto prevIt = info_->lineHeightMap_.find(i - 1);
         if (prevIt != info_->lineHeightMap_.end()) {
@@ -123,7 +151,9 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
         case ScrollAlign::START: {
             auto [startRow, startIdx] = CheckMultiRow(jumpLineIdx);
             float offset = -info_->GetHeightInRange(startRow, jumpLineIdx, mainGap);
-            // Use GetViewEndBound so the end extension (endFixOffset_) is filled on jump.
+            // Use GetViewEndBound so the end extension area (endFixOffset_) is
+            // also filled on jumps. Degenerates to mainSize when
+            // endFixOffset_ == 0, matching the original behavior.
             auto [endLineIdx, endIdx] = SolveForwardForEndIdx(
                 mainGap, info_->GetViewEndBound(mainSize) - info_->contentStartOffset_, jumpLineIdx);
             return { startRow, startIdx, offset, endLineIdx, endIdx };
@@ -188,17 +218,32 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float m
     if (Negative(targetLen)) {
         return { -1, -1 };
     }
-    float len = 0.0f;
     auto it = info_->lineHeightMap_.find(line);
     if (it == info_->lineHeightMap_.end()) {
         return { -1, -1 };
     }
 
-    for (; LessNotEqual(len, targetLen) && it != info_->lineHeightMap_.end(); ++it) {
-        len += it->second + mainGap;
+    // lineHeightMap_ can be discontinuous: a bottom-edge jump fills the whole
+    // matrix but measures only the view heights, and a later top-edge jump
+    // re-measures from the top, leaving a hole between the measured ranges.
+    // Map-order iteration would silently skip the hole and treat stale
+    // far-away lines as adjacent, returning an end line inside the unmeasured
+    // hole (the range then fails UpdateLayoutInfo's height validity check).
+    // This is a bugfix over the original map-order walk, which was only
+    // correct under a fully consecutive map. Walk consecutive line numbers
+    // and stop at the first missing entry; the following fill passes extend
+    // the measured range from there.
+    float len = it->second + mainGap;
+    int32_t endLine = line;
+    for (int32_t next = line + 1; LessNotEqual(len, targetLen); ++next) {
+        auto nextIt = info_->lineHeightMap_.find(next);
+        if (nextIt == info_->lineHeightMap_.end()) {
+            break;
+        }
+        len += nextIt->second + mainGap;
+        endLine = next;
     }
-    --it;
-    return { it->first, info_->FindEndIdx(it->first).itemIdx };
+    return { endLine, info_->FindEndIdx(endLine).itemIdx };
 }
 
 Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int32_t idx)

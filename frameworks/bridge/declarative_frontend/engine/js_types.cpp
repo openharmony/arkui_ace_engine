@@ -94,7 +94,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     auto eventInfo = static_cast<TouchEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         info->GetVM(), 0));
     if (!eventInfo) {
-        return JSValueRef::Undefined(info->GetVM());
+        return ArrayRef::New(info->GetVM(), 0);
     }
     const auto& history = eventInfo->GetHistory();
     Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
@@ -158,7 +158,7 @@ Local<JSValueRef> JsGetMouseHistoricalPoints(panda::JsiRuntimeCallInfo* info)
     auto eventInfo =
         static_cast<MouseInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (!eventInfo) {
-        return JSValueRef::Undefined(info->GetVM());
+        return ArrayRef::New(info->GetVM(), 0);
     }
 
     const auto& history = eventInfo->GetHistory();

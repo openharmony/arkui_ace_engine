@@ -192,6 +192,7 @@ public:
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
+        layoutAlgorithm->SetIsFloatingBar(isFloatingBar_);
         return layoutAlgorithm;
     }
 
@@ -687,6 +688,30 @@ public:
         useNewMaterial_ = useNewMaterial;
     }
 
+        void SetIsFloatingBar(bool isFloatingBar)
+    {
+        isFloatingBar_ = isFloatingBar;
+    }
+
+    void SetColorInvertColorMode(ColorMode colorMode)
+    {
+        colorInvertColorMode_ = colorMode;
+    }
+
+    ColorMode GetColorInvertColorMode() const
+    {
+        return colorInvertColorMode_;
+    }
+
+    bool IsColorInvertActive() const
+    {
+        return colorInvertColorMode_ != ColorMode::COLOR_MODE_UNDEFINED;
+    }
+
+    // Apply per-item defaultVisibility filtering to bottom tab bar items.
+    // Called when bottom tab bar becomes visible or when defaultVisibility changes.
+    void ApplyDefaultVisibility();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -925,6 +950,8 @@ private:
 
     bool shouldPlayMaskAnimation_ = true;
     bool useNewMaterial_ = false;
+    bool isFloatingBar_ = false;
+    ColorMode colorInvertColorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };

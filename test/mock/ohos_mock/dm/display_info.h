@@ -34,7 +34,7 @@ enum class DisplaySourceMode : uint32_t {
     CLONE = 1,
 };
 
-class DisplayInfo {
+class DisplayInfo : public OHOS::RefBase {
 public:
     DisplayId GetDisplayId() const;
     int32_t GetDpi() const;

@@ -273,7 +273,10 @@ float WaterFlowLayoutInfoSW::EndPos() const
         return endPos_;
     }
     if (StartIndex() > EndIndex()) {
-        // when lanes_ is empty, the endPos of all section is same.
+        if (lanes_.empty() || lanes_[0].empty()) {
+            return 0.0f;
+        }
+        // Preserve the lane position when there are no items.
         return lanes_[0][0].endPos;
     }
     for (auto it = lanes_.rbegin(); it != lanes_.rend(); ++it) {
@@ -291,7 +294,10 @@ float WaterFlowLayoutInfoSW::StartPos() const
         return startPos_;
     }
     if (StartIndex() > EndIndex()) {
-        // when lanes_ is empty, the startPos of all section is same.
+        if (lanes_.empty() || lanes_[0].empty()) {
+            return 0.0f;
+        }
+        // Preserve the lane position when there are no items.
         return lanes_[0][0].startPos;
     }
     for (const auto& section : lanes_) {
@@ -890,6 +896,11 @@ void WaterFlowLayoutInfoSW::ClearData()
     endIndex_ = -1;
     reportStartIndex_ = 0;
     reportEndIndex_ = -1;
+    itemStart_ = false;
+    itemEnd_ = false;
+    offsetEnd_ = false;
+    startPos_ = 0.0f;
+    endPos_ = 0.0f;
 }
 
 float WaterFlowLayoutInfoSW::GetAverageItemHeight() const

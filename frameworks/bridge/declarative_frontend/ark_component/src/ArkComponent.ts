@@ -1855,6 +1855,20 @@ class ExcludeFromRenderGroupModifier extends ModifierWithKey<boolean|undefined> 
   }
 }
 
+class MarkLayeredRenderModifier extends ModifierWithKey<boolean|undefined> {
+  constructor(value: boolean|undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('markLayeredRender');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMarkLayeredRender(node);
+    } else {
+      getUINativeModule().common.setMarkLayeredRender(node, this.value);
+    }
+  }
+}
+
 class RenderFitModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -5314,6 +5328,12 @@ class ArkComponent {
   excludeFromRenderGroup(value: boolean | undefined): this {
     modifierWithKey(
       this._modifiersWithKeys, ExcludeFromRenderGroupModifier.identity, ExcludeFromRenderGroupModifier, value);
+    return this;
+  }
+
+  markLayeredRender(value: boolean | undefined): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MarkLayeredRenderModifier.identity, MarkLayeredRenderModifier, value);
     return this;
   }
 

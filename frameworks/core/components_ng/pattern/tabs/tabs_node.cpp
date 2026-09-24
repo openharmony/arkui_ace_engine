@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -112,6 +113,102 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     barGridAlignJson->Put("lg", std::to_string(barGridAlign.lg).c_str());
 
     json->PutExtAttr("barGridAlign", barGridAlignJson, filter);
+
+    SidebarInfoToJsonValue(json, filter);
+}
+
+void TabsNode::SidebarInfoToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto tabsPattern = GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto layoutProperty = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    // barStyle
+    auto barLayoutStyle = layoutProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    std::string barStyleStr = "TabBarStyle.BOTTOM";
+    if (barLayoutStyle == TabBarLayoutStyle::SIDEBAR) {
+        barStyleStr = "TabBarStyle.SIDEBAR";
+    } else if (barLayoutStyle == TabBarLayoutStyle::SIDEBAR_ADAPTABLE) {
+        barStyleStr = "TabBarStyle.SIDEBAR_ADAPTABLE";
+    }
+    json->PutExtAttr("barStyle", barStyleStr.c_str(), filter);
+
+    // sidebarPosition
+    auto sidebarPosition = layoutProperty->GetSidebarPositionValue(BarPosition::START);
+    json->PutExtAttr("sidebarPosition",
+        sidebarPosition == BarPosition::START ? "BarPosition.Start" : "BarPosition.End", filter);
+
+    // sidebarHeader
+    json->PutExtAttr("sidebarHeader", tabsPattern->GetSidebarHeaderNode() ? "hasHeader" : "noHeader", filter);
+
+    // sidebarSearchable
+    const auto& searchableOptions = tabsPattern->GetTabsSidebarSearchableOptions();
+    if (!searchableOptions.isNull) {
+        auto searchableJson = JsonUtil::Create(true);
+        searchableJson->Put("searchText", searchableOptions.searchText.value_or("").c_str());
+        searchableJson->Put("placeholder", searchableOptions.placeholder.value_or("").c_str());
+        searchableJson->Put("searchCallback", searchableOptions.searchCallback ? "set" : "unset");
+        searchableJson->Put("searchFilter", searchableOptions.searchFilter ? "set" : "unset");
+        json->PutExtAttr("sidebarSearchable", searchableJson, filter);
+    } else {
+        json->PutExtAttr("sidebarSearchable", "null", filter);
+    }
+
+    // barDisplayModeBreakpoint
+    auto breakpoint = layoutProperty->GetBarDisplayModeBreakpointValue(TabBarDisplayModeBreakpoint{});
+    if (!breakpoint.isNull) {
+        auto breakpointJson = JsonUtil::Create(true);
+        auto displayModeStr = [](TabBarDisplayMode mode) -> std::string {
+            return mode == TabBarDisplayMode::SIDEBAR ? "TabBarDisplayMode.SIDEBAR" : "TabBarDisplayMode.BOTTOM_TABBAR";
+        };
+        breakpointJson->Put("sm", displayModeStr(breakpoint.sm).c_str());
+        breakpointJson->Put("md", displayModeStr(breakpoint.md).c_str());
+        breakpointJson->Put("lg", displayModeStr(breakpoint.lg).c_str());
+        json->PutExtAttr("barDisplayModeBreakpoint", breakpointJson, filter);
+    } else {
+        json->PutExtAttr("barDisplayModeBreakpoint", "null", filter);
+    }
+
+    // sidebarSelectedIconColor
+    auto selectedIconColor = layoutProperty->GetSidebarSelectedIconColor();
+    if (selectedIconColor.has_value()) {
+        json->PutExtAttr("sidebarSelectedIconColor", selectedIconColor->ColorToString().c_str(), filter);
+    } else {
+        json->PutExtAttr("sidebarSelectedIconColor", "null", filter);
+    }
+
+    // sidebarSelectedTextColor
+    auto selectedTextColor = layoutProperty->GetSidebarSelectedTextColor();
+    if (selectedTextColor.has_value()) {
+        json->PutExtAttr("sidebarSelectedTextColor", selectedTextColor->ColorToString().c_str(), filter);
+    } else {
+        json->PutExtAttr("sidebarSelectedTextColor", "null", filter);
+    }
+
+    // sidebarUnselectedIconColor
+    auto unselectedIconColor = layoutProperty->GetSidebarUnselectedIconColor();
+    if (unselectedIconColor.has_value()) {
+        json->PutExtAttr("sidebarUnselectedIconColor", unselectedIconColor->ColorToString().c_str(), filter);
+    } else {
+        json->PutExtAttr("sidebarUnselectedIconColor", "null", filter);
+    }
+
+    // sidebarUnselectedTextColor
+    auto unselectedTextColor = layoutProperty->GetSidebarUnselectedTextColor();
+    if (unselectedTextColor.has_value()) {
+        json->PutExtAttr("sidebarUnselectedTextColor", unselectedTextColor->ColorToString().c_str(), filter);
+    } else {
+        json->PutExtAttr("sidebarUnselectedTextColor", "null", filter);
+    }
+
+    // sidebarSelectedBoardColor
+    auto selectedBoardColor = layoutProperty->GetSidebarSelectedBoardColor();
+    if (selectedBoardColor.has_value()) {
+        json->PutExtAttr("sidebarSelectedBoardColor", selectedBoardColor->ColorToString().c_str(), filter);
+    } else {
+        json->PutExtAttr("sidebarSelectedBoardColor", "null", filter);
+    }
 }
 
 bool TabsNode::Scrollable() const

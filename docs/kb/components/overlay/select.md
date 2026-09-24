@@ -115,6 +115,5 @@ Select 已完成组件化改造，JSView 文件不存在，Bridge 和动态属�
 
 ## 相关主题
 
-- Menu 组件（菜单组件，Select 下拉弹出类似菜单交互）
-- Checkbox/CheckboxGroup 组件（选择类组件）
-- 组件化改造通用方案
+- [Menu 组件（菜单组件，Select 下拉弹出类似菜单交互）](menu.md)
+- [Checkbox/CheckboxGroup 组件（选择类组件）](../selector/checkbox.md)

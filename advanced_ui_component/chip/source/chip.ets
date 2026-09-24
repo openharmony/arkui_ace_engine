@@ -23,6 +23,8 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
+import deviceInfo from '@ohos.deviceInfo';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -216,6 +218,8 @@ interface ChipOptions {
   activated?: boolean;
   backgroundColor?: ResourceColor;
   activatedBackgroundColor?: ResourceColor;
+  backgroundSystemMaterial?: uiMaterial.Material;
+  activatedBackgroundSystemMaterial?: uiMaterial.Material;
   borderRadius?: Dimension;
   size?: ChipSize | SizeOptions;
   direction?: Direction;
@@ -242,6 +246,8 @@ export function Chip(options: ChipOptions) {
     chipActivated: options.activated,
     chipNodeBackgroundColor: options.backgroundColor,
     chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+    backgroundSystemMaterial: options.backgroundSystemMaterial,
+    activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
     chipNodeRadius: options.borderRadius,
     chipDirection: options.direction,
     chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -430,6 +436,8 @@ export struct ChipComponent {
   @Prop suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions
   @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
   @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
+  @Prop backgroundSystemMaterial?: uiMaterial.Material = undefined
+  @Prop activatedBackgroundSystemMaterial?: uiMaterial.Material = undefined
   @State isHovering: boolean = false;
   @Prop chipNodeRadius: Dimension | undefined = void (0)
   @Prop chipEnabled: boolean = true
@@ -876,6 +884,16 @@ export struct ChipComponent {
     return sourceColor
       .blendColor(ColorMetrics.resourceColor("#19000000"))
       .color
+  }
+
+  private getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    if (deviceInfo.sdkApiVersion < 26) {
+      return undefined;
+    }
+    if (this.getChipActive()) {
+      return this.activatedBackgroundSystemMaterial;
+    }
+    return this.backgroundSystemMaterial;
   }
 
   private getChipNodeHeight(): Length {
@@ -1332,12 +1350,15 @@ export struct ChipComponent {
       .justifyContent(FlexAlign.Center)
       .padding(this.getChipNodePadding())
       .constraintSize(this.getChipConstraintWidth())
+      .backgroundColor(this.getChipActive() ? this.chipNodeActivatedBackgroundColor : Color.Transparent)
+      .borderRadius(this.getChipNodeRadius())
     }
     .constraintSize(this.getChipConstraintWidth())
     .direction(this.chipDirection)
     .type(ButtonType.Normal)
     .clip(false)
     .backgroundColor(this.getChipNodeBackGroundColor())
+    .systemMaterial(this.getBackgroundSystemMaterial())
     .borderRadius(this.getChipNodeRadius())
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())

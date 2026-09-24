@@ -44,6 +44,7 @@
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -87,6 +88,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
@@ -421,41 +423,13 @@ public:
         return nullptr;
     }
 
-    bool EnableCachePredictNodes() const
-    {
-        CHECK_NULL_RETURN(hostNode_, false);
-        const auto& pattern = hostNode_->GetPattern();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->EnableCachePredictNodes();
-    }
-
-    bool NeedReacquireFrameNode(const RefPtr<LayoutWrapper>& child, bool isCache) const
-    {
-        CHECK_NULL_RETURN(child, false);
-        const bool isActive = child->IsActive();
-        bool needReacquire = isActive == isCache;
-        if (!needReacquire && isActive) {
-            const auto hostNode = child->GetHostNode();
-            needReacquire = hostNode && !hostNode->IsOnMainTree();
-        }
-        return needReacquire && EnableCachePredictNodes();
-    }
-
     RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
             auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
-            if (child && (!isCache || EnableCachePredictNodes())) {
-                partFrameNodeChildren_[index] = child;
-            }
-            return child;
-        } else if (NeedReacquireFrameNode(itor->second, isCache)) {
-            // Re-acquire the node when entering the viewport.
-            // Pending analysis scenarios: cachedItems_ erase, but not notify partFrameNodeChildren_.
-            auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
-            if (child) {
+            if (child && !isCache) {
                 partFrameNodeChildren_[index] = child;
             }
             return child;
@@ -508,8 +482,7 @@ public:
     void RemoveChildInRenderTree(uint32_t index)
     {
         auto itor = partFrameNodeChildren_.find(index);
-        if (itor == partFrameNodeChildren_.end() ||
-            (!itor->second->IsActive() && EnableCachePredictNodes())) {
+        if (itor == partFrameNodeChildren_.end()) {
             return;
         }
         itor->second->SetActive(false);
@@ -533,12 +506,8 @@ public:
 
     void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false)
     {
-        int32_t startIndex = start;
-        int32_t endIndex = end;
-        if (showCache || EnableCachePredictNodes()) {
-            startIndex = start - cacheStart;
-            endIndex = end + cacheEnd;
-        }
+        int32_t startIndex = showCache ? start - cacheStart : start;
+        int32_t endIndex = showCache ? end + cacheEnd : end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
             if ((startIndex <= endIndex && index >= startIndex && index <= endIndex) ||
@@ -792,9 +761,10 @@ FrameNode::~FrameNode()
             destroyCallback.second();
         }
     }
-    if (removeCustomProperties_) {
-        removeCustomProperties_();
-        removeCustomProperties_ = nullptr;
+    auto* ext = GetMutableExtensionData();
+    if (ext && ext->removeCustomProperties) {
+        ext->removeCustomProperties();
+        ext->removeCustomProperties = nullptr;
     }
     CleanRenderTreeLifeCycle();
     pattern_->DetachFromFrameNode(this);
@@ -1358,7 +1328,9 @@ void FrameNode::DumpDragInfo()
 
 void FrameNode::DumpOnSizeChangeInfo()
 {
-    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
+    auto* ext = GetMutableExtensionData();
+    CHECK_NULL_VOID(ext);
+    for (auto it = ext->onSizeChangeDumpInfos.rbegin(); it != ext->onSizeChangeDumpInfos.rend(); ++it) {
         DumpLog::GetInstance().AddDesc(std::string("onSizeChange Time: ")
                                            .append(ConvertTimestampToStr(it->onSizeChangeTimeStamp))
                                            .append(" lastFrameRect: ")
@@ -1726,10 +1698,11 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
 // if return true, can not get property from customPropertyMap_
 bool FrameNode::IsJsCustomPropertyUpdated() const
 {
-    if (customPropertyMap_.empty()) {
+    const auto* ext = GetConstExtensionData();
+    if (!ext || ext->customPropertyMap.empty()) {
         return true;
     }
-    for (const auto& iter : customPropertyMap_) {
+    for (const auto& iter : ext->customPropertyMap) {
         if (iter.second.size() > 1 && iter.second[1] == "0") {
             return true;
         }
@@ -1771,16 +1744,17 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
         json->Put("inspectorLabel", GetInspectorLabel().c_str());
     }
     ExtraCustomPropertyToJsonValue(json, filter);
-    if (IsCNode() || !IsJsCustomPropertyUpdated()) {
+    const auto* extPtr = GetConstExtensionData();
+    if (extPtr && (IsCNode() || !IsJsCustomPropertyUpdated())) {
         auto jsonNode = JsonUtil::Create(true);
-        for (const auto& iter : customPropertyMap_) {
+        for (const auto& iter : extPtr->customPropertyMap) {
             jsonNode->Put(iter.first.c_str(), iter.second[0].c_str());
         }
-        if (!customPropertyMap_.empty()) {
+        if (!extPtr->customPropertyMap.empty()) {
             json->Put("customProperty", jsonNode->ToString().c_str());
         }
-    } else if (getCustomPropertyMapFunc_) {
-        json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
+    } else if (extPtr && extPtr->getCustomPropertyMapFunc) {
+        json->Put("customProperty", extPtr->getCustomPropertyMapFunc().c_str());
     }
     json->Put("enableClickSoundEffect", enableClickSoundEffect_);
 }
@@ -2026,6 +2000,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.skinUpdate) {
+        if (pattern_) {
+            pattern_->OnSkinConfigurationUpdate();
+        }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -2059,6 +2036,9 @@ void FrameNode::HandleColorModeConfigurationUpdate(const ConfigurationChange& co
         cb();
     }
     FireColorNDKCallback();
+    if (renderContext_) {
+        renderContext_->OnMaterialColorModeChange();
+    }
     MarkModifyDone();
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (cornerMarkNode_) {
@@ -2084,8 +2064,8 @@ void FrameNode::MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag)
 void FrameNode::FireColorNDKCallback()
 {
     std::shared_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-    if (ndkColorModeUpdateCallback_) {
-        auto colorModeChange = ndkColorModeUpdateCallback_;
+    if (ndkColorModeUpdateCallback_ && *ndkColorModeUpdateCallback_) {
+        auto colorModeChange = *ndkColorModeUpdateCallback_;
         auto context = GetContext();
         CHECK_NULL_VOID(context);
         colorModeChange(context->GetColorMode() == ColorMode::DARK);
@@ -2095,7 +2075,10 @@ void FrameNode::FireColorNDKCallback()
 void FrameNode::SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
 {
     std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-    ndkColorModeUpdateCallback_ = callback;
+    if (!ndkColorModeUpdateCallback_) {
+        ndkColorModeUpdateCallback_ = std::make_unique<std::function<void(int32_t)>>();
+    }
+    *ndkColorModeUpdateCallback_ = callback;
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     colorMode_ = context->GetColorMode();
@@ -2104,8 +2087,9 @@ void FrameNode::SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>
 void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)
 {
     std::shared_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
-    if ((configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) && ndkFontUpdateCallback_) {
-        auto fontChangeCallback = ndkFontUpdateCallback_;
+    if ((configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) && ndkFontUpdateCallback_ &&
+        *ndkFontUpdateCallback_) {
+        auto fontChangeCallback = *ndkFontUpdateCallback_;
         auto pipeline = GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
@@ -2113,6 +2097,12 @@ void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChan
 }
 
 void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
+{
+    NotifyVisibleChange(preVisibility, currentVisibility, true);
+}
+
+void FrameNode::NotifyVisibleChange(
+    VisibleType preVisibility, VisibleType currentVisibility, bool notifyPageScene)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
         if (preVisibility == VisibleType::VISIBLE && currentVisibility != VisibleType::VISIBLE) {
@@ -2140,7 +2130,7 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
     }
     pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
     UpdateChildrenVisible(preVisibility, currentVisibility);
-    if (preVisibility != currentVisibility) {
+    if (notifyPageScene && preVisibility != currentVisibility) {
         NotifyPageSceneVisibilityChanged();
     }
     auto pipeline = GetContext();
@@ -2189,17 +2179,36 @@ void FrameNode::NotifyPageSceneFocusabilityChanged()
 #endif
 }
 
+void FrameNode::NotifyPageSceneOpacityChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::OPACITY);
+#endif
+}
+
 void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
     auto layoutProperty = GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;
     }
-    NotifyVisibleChange(preVisibility, currentVisibility);
+    NotifyVisibleChange(preVisibility, currentVisibility, false);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
+#ifndef CROSS_PLATFORM
+    if (context) {
+        auto contentChangeMgr = context->GetContentChangeManager();
+        if (contentChangeMgr) {
+            contentChangeMgr->OnContentChangeNodeDestroyed(GetId());
+        }
+    }
+#endif
     for (auto [_, callback] : removeToolbarItemCallbacks_) {
         if (callback) {
             callback();
@@ -2240,9 +2249,11 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
             context->UnRegisterLpxDirtyNode(WeakClaim(this));
         }
     }
-    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->OnAccessibilityDetachFromMainTree();
+    if (isAccessibilityPropertyInitialized_ || AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->OnAccessibilityDetachFromMainTree();
+    }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
     UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, false);
 #endif
@@ -2351,7 +2362,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
 void FrameNode::SetMeasureCallback(const std::function<void(RefPtr<Kit::FrameNode>)>& measureCallback)
 {
-    measureCallback_ = std::move(measureCallback);
+    if (!measureCallback_) {
+        measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>();
+    }
+    *measureCallback_ = std::move(measureCallback);
 }
 
 void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode)
@@ -2500,10 +2514,10 @@ void FrameNode::ThrottledAreaChangeTask()
     }
     auto currParentOffsetToWindow =
         CalculateOffsetRelativeToWindow(pipeline->GetVsyncTime(), false) - currFrameRect.GetOffset();
-    eventHub_->HandleOnAreaChange(lastFrameRect_, lastParentOffsetToWindow_,
+    bool areaChanged = eventHub_->HandleOnAreaChange(lastFrameRect_, lastParentOffsetToWindow_,
         currFrameRect, currParentOffsetToWindow);
     throttledAreaChangeCallbackOnTheWay_ = false;
-    lastAreaChangeTriggerTime_ = GetCurrentTimestamp();
+    lastAreaChangeTriggerTime_ = areaChanged ? GetCurrentTimestamp() : lastAreaChangeTriggerTime_;
 }
 
 void FrameNode::ProcessThrottledAreaChangeCallback()
@@ -2529,7 +2543,7 @@ void FrameNode::ProcessThrottledAreaChangeCallback()
         auto delay = static_cast<uint32_t>(static_cast<int64_t>(onAreaChangeMinInterval_) - interval);
         executor->PostDelayedTask(
             std::move(task), TaskExecutor::TaskType::UI, delay < 0 ? 0 : delay, "ThrottledAreaChangeCallback",
-            PriorityType::IDLE);
+            PriorityType::LOW);
     } else {
         ThrottledAreaChangeTask();
     }
@@ -2593,10 +2607,11 @@ void FrameNode::TriggerOnSizeChangeCallback()
         auto currFrameRect = GetRectWithRender();
         if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
             onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
-            if (onSizeChangeDumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
-                onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
+            auto& dumpInfos = GetExtensionData().onSizeChangeDumpInfos;
+            if (dumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
+                dumpInfos.erase(dumpInfos.begin());
             }
-            onSizeChangeDumpInfos.emplace_back(dumpInfo);
+            dumpInfos.emplace_back(dumpInfo);
             if (eventHub_->HasOnSizeChanged()) {
                 eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             }
@@ -3045,7 +3060,7 @@ void FrameNode::SetNodeFreeze(bool isFreeze)
 
 void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskType)
 {
-    if (!isLayoutDirtyMarked_ && (layoutTaskType == LayoutType::NONE)) {
+    if (!isLayoutDirtyMarked_ && layoutTaskType == LayoutType::NONE && !geometryTransitionNeedLayout_) {
         return;
     }
 
@@ -3087,6 +3102,7 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
         }
     }
     SetRootMeasureNode(false);
+    geometryTransitionNeedLayout_ = false;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
@@ -3923,6 +3939,77 @@ RectF FrameNode::CheckResponseRegionForStylus(RectF& rect, const TouchEvent& tou
         return rect;
     }
     return pattern_->ExpandDefaultResponseRegion(rect);
+}
+
+bool FrameNode::IsMouseTargetHit(const MouseEvent& event, const PointF& parentRevertPoint,
+    const std::vector<std::string>* tagWhitelist, bool& isOutOfRegion)
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceTool = event.sourceTool;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    auto checkedResponseRegion = CheckResponseRegionForStylus(origRect, touchRestrict.touchEvent);
+    auto responseRegionList = GetResponseRegionList(checkedResponseRegion,
+        static_cast<int32_t>(touchRestrict.sourceType), static_cast<int32_t>(touchRestrict.sourceTool));
+    isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent, &responseRegionList);
+
+    bool hasWhitelist = tagWhitelist && !tagWhitelist->empty();
+    bool tagAllowed = !hasWhitelist;
+    if (hasWhitelist) {
+        for (const auto& allowedTag : *tagWhitelist) {
+            if (GetTag() == allowedTag) {
+                tagAllowed = true;
+                break;
+            }
+        }
+    }
+
+    bool ret = tagAllowed && !isOutOfRegion;
+    return ret;
+}
+
+bool FrameNode::HitTestMouseTarget(const MouseEvent& event, const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, const std::vector<std::string>* tagWhitelist)
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    if (!isActive_) {
+        return false;
+    }
+
+    auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
+    localMat_ = cacheMatrixInfo.localMatrix;
+
+    bool ret = false;
+    if (!frameChildren_.empty()) {
+        auto paintRect = cacheMatrixInfo.paintRectWithTransform;
+        auto origRect = renderContext_->GetPaintRectWithoutTransform();
+
+        auto localPoint = parentLocalPoint - paintRect.GetOffset();
+        renderContext_->GetPointWithTransform(localPoint);
+        auto revertPoint = parentRevertPoint;
+        MapPointTo(revertPoint, cacheMatrixInfo.revertMatrix);
+        auto subRevertPoint = revertPoint - origRect.GetOffset();
+
+        for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+            auto child = iter->Upgrade();
+            if (!child) {
+                continue;
+            }
+            if (child->HitTestMouseTarget(event, globalPoint, localPoint, subRevertPoint,
+                tagWhitelist)) {
+                ret = true;
+                break;
+            }
+        }
+    }
+    if (!ret) {
+        bool isOutOfRegion = false;
+        ret = IsMouseTargetHit(event, parentRevertPoint, tagWhitelist, isOutOfRegion);
+    }
+    return ret;
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -6266,8 +6353,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetFrameSize(SizeF({ round(size.Width()), round(size.Height()) }));
     }
 
-    if (measureCallback_) {
-        measureCallback_(kitNode_);
+    if (measureCallback_ && *measureCallback_) {
+        (*measureCallback_)(kitNode_);
     }
 
     PostTaskForIgnore();
@@ -7567,14 +7654,15 @@ RectF FrameNode::ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<Fr
 void FrameNode::SetCustomPropertyCallback(std::function<void()>&& func,
     std::function<std::string(const std::string&)>&& getFunc, std::function<std::string()>&& getAllCustomPropertiesFunc)
 {
-    if (!removeCustomProperties_) {
-        removeCustomProperties_ = std::move(func);
+    auto& extensionData = GetExtensionData();
+    if (!extensionData.removeCustomProperties) {
+        extensionData.removeCustomProperties = std::move(func);
     }
-    if (!getCustomProperty_) {
-        getCustomProperty_ = std::move(getFunc);
+    if (!extensionData.getCustomProperty) {
+        extensionData.getCustomProperty = std::move(getFunc);
     }
-    if (!getCustomPropertyMapFunc_) {
-        getCustomPropertyMapFunc_ = std::move(getAllCustomPropertiesFunc);
+    if (!extensionData.getCustomPropertyMapFunc) {
+        extensionData.getCustomPropertyMapFunc = std::move(getAllCustomPropertiesFunc);
     }
 }
 
@@ -7650,6 +7738,24 @@ void FrameNode::GetVisibleRectWithClip(
     }
 }
 
+void FrameNode::LogCacheVisibleRect(const CacheVisibleRectResult& result, bool logFlag) const
+{
+    if (!logFlag) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_UIEVENT,
+        "Node(%{public}s/%{public}d/%{public}s/%{public}s) wo:%{public}s iwo:%{public}s vr:%{public}s ivr:%{public}s "
+        "cs:[%{public}f,%{public}f] ics:[%{public}f,%{public}f] fr:%{public}s ifr:%{public}s ibr:%{public}s",
+        tag_.c_str(), nodeId_, std::to_string(GetAccessibilityId()).c_str(),
+        GetInspectorId().value_or("").c_str(), result.windowOffset.ToString().c_str(),
+        result.innerWindowOffset.ToString().c_str(), result.visibleRect.ToString().c_str(),
+        result.innerVisibleRect.ToString().c_str(),
+        result.cumulativeScale.x, result.cumulativeScale.y,
+        result.innerCumulativeScale.x, result.innerCumulativeScale.y,
+        result.frameRect.ToString().c_str(), result.innerFrameRect.ToString().c_str(),
+        result.innerBoundaryRect.ToString().c_str());
+}
+
 const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
 {
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
@@ -7666,6 +7772,7 @@ const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp,
         cachedVisibleRectResult_ = { timestamp,
             { rectToParent.GetOffset(), rectToParent.GetOffset(), rectToParent, rectToParent, scale, innerScale,
                 rectToParent, rectToParent, rectToParent } };
+        LogCacheVisibleRect(cachedVisibleRectResult_.second, logFlag);
         return cachedVisibleRectResult_.second;
     }
 
@@ -7679,14 +7786,7 @@ const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp,
         result = &CalculateCacheVisibleRect(
             parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
-    if (logFlag) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT,
-            "OnVisibleAreaChange Node(%{public}s/%{public}d) windowOffset:%{public}s visibleRect:%{public}s "
-            "innerVisibleRect:%{public}s frameRect:%{public}s innerBoundaryRect:%{public}s",
-            tag_.c_str(), nodeId_, result->windowOffset.ToString().c_str(), result->visibleRect.ToString().c_str(),
-            result->innerVisibleRect.ToString().c_str(), result->frameRect.ToString().c_str(),
-            result->innerBoundaryRect.ToString().c_str());
-    }
+    LogCacheVisibleRect(*result, logFlag);
     return *result;
 }
 
@@ -8005,23 +8105,6 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
     return total;
 }
 
-void FrameNode::GetInspectorValue()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED) && defined(OHOS_PLATFORM)
-    if (tag_ == V2::WEB_ETS_TAG) {
-        UiSessionManager::GetInstance()->WebTaskNumsChange(1);
-        auto pattern = GetPattern<NG::WebPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
-            UiSessionManager::GetInstance()->AddValueForTree(webId, value->ToString());
-            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-        };
-        pattern->GetAllWebAccessibilityNodeInfos(cb, nodeId_);
-    }
-#endif
-    UINode::GetInspectorValue();
-}
-
 void FrameNode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
 {
     // return when reaches a child that has no layoutAlgorithm and no need to clear the entire tree
@@ -8187,12 +8270,15 @@ void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
 {
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
-    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
-        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
-        child->Put("onSizeChange Time", it->onSizeChangeTimeStamp);
-        child->Put("lastFrameRect", it->lastFrameRect.ToString().c_str());
-        child->Put("currFrameRect", it->currFrameRect.ToString().c_str());
-        children->Put(child);
+    auto* ext = GetMutableExtensionData();
+    if (ext) {
+        for (auto it = ext->onSizeChangeDumpInfos.rbegin(); it != ext->onSizeChangeDumpInfos.rend(); ++it) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            child->Put("onSizeChange Time", it->onSizeChangeTimeStamp);
+            child->Put("lastFrameRect", it->lastFrameRect.ToString().c_str());
+            child->Put("currFrameRect", it->currFrameRect.ToString().c_str());
+            children->Put(child);
+        }
     }
     children->Put("SizeChangeInfo", children);
 }
@@ -8423,23 +8509,27 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
     if (IsCNode()) {
         return;
     }
-    if (!getCustomProperty_) {
-        getCustomProperty_ = getFunc;
+    auto& extensionData = GetExtensionData();
+    if (!extensionData.getCustomProperty) {
+        extensionData.getCustomProperty = getFunc;
     }
-    if (getCustomPropertyMapFunc && (!getCustomPropertyMapFunc_)) {
-        getCustomPropertyMapFunc_ = std::move(getCustomPropertyMapFunc);
+    if (getCustomPropertyMapFunc && (!extensionData.getCustomPropertyMapFunc)) {
+        extensionData.getCustomPropertyMapFunc = std::move(getCustomPropertyMapFunc);
     }
 }
 
 bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto& customPropertyMap = frameNodeExtension.customPropertyMap;
+    auto& getCustomProperty = frameNodeExtension.getCustomProperty;
+    auto iter = customPropertyMap.find(key);
+    if (iter != customPropertyMap.end() && !iter->second.empty()) {
         if (iter->second[1] == "1") {
             value = iter->second[0];
             return true;
-        } else if (getCustomProperty_) {
-            value = getCustomProperty_(key);
+        } else if (getCustomProperty) {
+            value = getCustomProperty(key);
             iter->second[0] = value;
             iter->second[1] = "1";
             return true;
@@ -8450,8 +8540,9 @@ bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end()) {
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto iter = frameNodeExtension.customPropertyMap.find(key);
+    if (iter != frameNodeExtension.customPropertyMap.end()) {
         value = iter->second[0];
         return true;
     }
@@ -8460,20 +8551,21 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
 
 void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
 {
-    customPropertyMap_[key] = { value, "1" };
+    GetExtensionData().customPropertyMap[key] = { value, "1" };
 }
 
 void FrameNode::RemoveCustomProperty(const std::string& key)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end()) {
-        customPropertyMap_.erase(iter);
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto iter = frameNodeExtension.customPropertyMap.find(key);
+    if (iter != frameNodeExtension.customPropertyMap.end()) {
+        frameNodeExtension.customPropertyMap.erase(iter);
     }
 }
 
 void FrameNode::SetCustomPropertyMapFlagByKey(const std::string& key)
 {
-    auto& valueVector = customPropertyMap_[key];
+    auto& valueVector = GetExtensionData().customPropertyMap[key];
     if (valueVector.empty()) {
         valueVector = { "", "0" };
     } else {
@@ -8521,11 +8613,18 @@ void FrameNode::ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json,
 
 bool FrameNode::IsDebugInspectorId()
 {
+    static constexpr size_t TAG_PREFIX_LEN = 2;
     if (!SystemProperties::GetDebugEnabled()) {
         return false;
     }
     auto debugInspectorId = SystemProperties::GetDebugInspectorId();
-    return debugInspectorId == GetInspectorId().value_or("");
+    if (debugInspectorId == GetInspectorId().value_or("")) {
+        return true;
+    }
+    if (debugInspectorId.find("T:") == 0) {
+        return GetTag() == debugInspectorId.substr(TAG_PREFIX_LEN);
+    }
+    return false;
 }
 
 RefPtr<UINode> FrameNode::GetCurrentPageRootNode()
@@ -8582,8 +8681,9 @@ void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
 
 bool FrameNode::GetCustomPropertyByKey(const std::string& key, std::string& value)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto iter = frameNodeExtension.customPropertyMap.find(key);
+    if (iter != frameNodeExtension.customPropertyMap.end() && !iter->second.empty()) {
         value = iter->second[0];
         return true;
     }
@@ -8595,20 +8695,23 @@ void FrameNode::AddNodeDestroyCallback(const std::string& callbackKey, std::func
     if (!callback) {
         return;
     }
-    destroyCallbacks_[callbackKey] = std::move(callback);
+    GetExtensionData().destroyCallbacks[callbackKey] = std::move(callback);
 }
 
 void FrameNode::RemoveNodeDestroyCallback(const std::string& callbackKey)
 {
-    auto iter = destroyCallbacks_.find(callbackKey);
-    if (iter != destroyCallbacks_.end()) {
-        destroyCallbacks_.erase(iter);
+    auto& destroyCallbacks = GetExtensionData().destroyCallbacks;
+    auto iter = destroyCallbacks.find(callbackKey);
+    if (iter != destroyCallbacks.end()) {
+        destroyCallbacks.erase(iter);
     }
 }
 
 void FrameNode::FireOnExtraNodeDestroyCallback()
 {
-    for (const auto& callback : destroyCallbacks_) {
+    auto* ext = GetMutableExtensionData();
+    CHECK_NULL_VOID(ext);
+    for (const auto& callback : ext->destroyCallbacks) {
         callback.second();
     }
 }
@@ -9200,7 +9303,10 @@ void FrameNode::SetConfigurationModeUpdateCallback(
 void FrameNode::SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
 {
     std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
-    ndkFontUpdateCallback_ = callback;
+    if (!ndkFontUpdateCallback_) {
+        ndkFontUpdateCallback_ = std::make_unique<std::function<void(float, float)>>();
+    }
+    *ndkFontUpdateCallback_ = callback;
 }
 
 void FrameNode::SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
@@ -9218,8 +9324,8 @@ void FrameNode::AddDelayLayoutChild(const RefPtr<FrameNode>& child)
 
 void FrameNode::SetRemoveCustomProperties(std::function<void()> func)
 {
-    if (!removeCustomProperties_) {
-        removeCustomProperties_ = func;
+    if (!GetExtensionData().removeCustomProperties) {
+        GetExtensionData().removeCustomProperties = func;
     }
 }
 

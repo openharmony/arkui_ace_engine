@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
@@ -355,7 +356,35 @@ public:
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
     void ClearSheetCloseIconMaterial();
-    void SetSheetCloseIconMaterial();
+    void SetSheetCloseIconMaterial(RefPtr<UiMaterial> closeButtonNodeMaterial);
+    void UpdateSheetScrollBar(const NG::SheetStyle& sheetStyle);
+
+    double GetTitleBarEffectHeight(const SheetStyle& sheetStyle, float titleBarHeight);
+
+    void UpdateCloseIconMaterialByLevel(const RefPtr<UiMaterial>& material);
+    void ApplyTitleBarBackgroundBlur();
+    void RefreshTitleBarBlurByCurrentOffset();
+    void RegisterTitleBlurNestedScroll(WeakPtr<NestableScrollContainer> child);
+    void UnRegisterTitleBlurNestedScroll();
+    float GetTitleBlurNestedScrollOffset();
+    void RegisterTitleBarScrollObserver();
+    void UnRegisterTitleBarScrollObserver();
+    void UpdateTitleEffectBlurAndMaskColorProgress(float progress);
+    void UpdateZIndexAndTitleEffectNode();
+    void OnContentScrollUpdate(double currentOffset, double frameOffset, bool isFling);
+    void OnFlingEnd(double currentOffset);
+    void UpdateStackModeZIndex();
+    RefPtr<FrameNode> GetTitleBarEffectNode() const
+    {
+        return titleBarEffectNode_;
+    }
+    bool IsTitleBarBlurDisabledByFling() const
+    {
+        return isTitleBarBlurDisabledByFling_;
+    }
+    void MountTitleBarEffectNode();
+    void ResetTitleBarEffectNode();
+    Color GetTitleBarEffectBgColor(const NG::SheetStyle& sheetStyle, UiMaterialLevel materialLevel, bool isDarkMode);
 
     void ClearSheetRenderMaterial();
     void SetSheetRenderMaterial();
@@ -775,6 +804,11 @@ public:
 
     void UpdateTitleColumnSize();
 
+    float GetTitleBuilderHeightStackMode() const;
+    bool CheckSheetHaveTitle(const NG::SheetStyle& sheetStyle);
+    bool CheckTitleIsStackMode(const SheetStyle& sheetStyle);
+    bool CheckTitleIsHasEffectNode(const SheetStyle& sheetStyle);
+
     float GetTitleBuilderHeight() const;
 
     static Dimension GetDragBarHeight(const RefPtr<FrameNode>& dragBarNode = nullptr);
@@ -840,7 +874,7 @@ public:
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
-        auto titleHeight = GetTitleBuilderHeight();
+        auto titleHeight = GetTitleBuilderHeightStackMode();
         if (sheetType_ == SheetType::SHEET_CENTER) {
             return centerHeight_ - titleHeight;
         }
@@ -1099,6 +1133,15 @@ public:
     void RegisterShowCloseRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
     void RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode);
     void RegisterShadowRes(const RefPtr<FrameNode>& sheetNode);
+    void RegisterTitleBarMaskColorRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterTitleBarMaskExtraHeightRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterTitleBarEffectiveDistanceRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void UpdateTitleBarMaskColor(const RefPtr<ResourceObject>& resObj, const WeakPtr<FrameNode>& sheetNodeWK);
+    void UpdateTitleBarMaskExtraHeight(const RefPtr<ResourceObject>& resObj, const WeakPtr<FrameNode>& sheetNodeWK);
+    void UpdateTitleBarEffectiveDistance(const RefPtr<ResourceObject>& resObj, const WeakPtr<FrameNode>& sheetNodeWK);
+
+    bool CheckSheetTypeForTitleEffectNode();
+
     void UpdateBorderWidth(const RefPtr<FrameNode>& sheetNodeWK);
     void UpdateBorderColor(const RefPtr<FrameNode>& sheetNodeWK);
     void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode);
@@ -1356,6 +1399,16 @@ private:
     float sheetHeightForTranslate_ { 0.0 };
     bool enableDragControl_ = true;
     bool needDoubleAvoidAfterLayout_ = false;
+
+    RefPtr<FrameNode> titleBarEffectNode_;
+    bool isTitleBarBlurDisabledByFling_ = false;
+    bool hasTitleBarScrollObs_ = false;
+
+    std::optional<SheetTitleBarBackgroundBlurOptions> preTitleBlurOptions_ = std::nullopt;
+    bool preTitleStackMode_ = false;
+    std::optional<DisplayMode> preScrollBarState_ = std::nullopt;
+    std::optional<float> preScrollSelfHeight_ = std::nullopt;
+    std::list<WeakPtr<FrameNode>> nestedScrollNodeList_;
 };
 } // namespace OHOS::Ace::NG
 

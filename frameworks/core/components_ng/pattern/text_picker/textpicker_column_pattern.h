@@ -520,6 +520,7 @@ private:
     RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void OnAroundButtonClick(RefPtr<EventParam> param);
+    void OnAroundButtonClickFinish(bool isDown, int32_t absStep);
     void OnMiddleButtonTouchDown();
     void OnMiddleButtonTouchMove();
     void OnMiddleButtonTouchUp();
@@ -616,6 +617,7 @@ private:
     bool clickBreak_ = false;
     bool touchBreak_ = false;
     bool animationBreak_ = false;
+    int32_t clickScrollSteps_ = -1;
     bool needOptionPropertyHeightReset_ = false;
     bool isLoop_ = true;
 

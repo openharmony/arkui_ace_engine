@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
+class RichEditorPattern;
 class RichEditorOverlayModifier : public TextOverlayModifier {
     DECLARE_ACE_TYPE(RichEditorOverlayModifier, TextOverlayModifier);
 
@@ -64,13 +65,19 @@ public:
     }
     void StartFloatingCaretLand(const OffsetF& originCaretOffset);
     void ChangeOverlay();
+    void SetHoverColorAndRects(const std::vector<RoundRect>& hoverRects, uint32_t hoverColor);
+    void ClearHoverColorAndRects();
 private:
     void PaintPreviewTextDecoration(DrawingContext& drawingContext) const;
     void PaintCaret(DrawingContext& drawingContext) const;
     void PaintFloatingCaret(DrawingContext& drawingContext) const;
     void PaintScrollBar(DrawingContext& context);
+    void PaintFreeScrollBar(DrawingContext& context, const RefPtr<RichEditorPattern>& pattern);
+    void PaintFixedScrollBar(DrawingContext& context);
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void DrawScrollBar(DrawingContext& drawingContext);
+    void UpdateFreeScrollBar(const RefPtr<RichEditorPattern>& pattern);
+    void UpdateFixedScrollBar(const RefPtr<RichEditorPattern>& pattern);
 
     RefPtr<PropertyBool> caretVisible_;
     RefPtr<PropertyBool> originCaretVisible_;
@@ -94,6 +101,8 @@ private:
     PreviewTextStyle previewTextStyle_;
     bool caretLanding_ = false;
     bool isContentNode_ = false;
+    std::vector<RoundRect> hoverRects_;
+    RefPtr<PropertyInt> hoverColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

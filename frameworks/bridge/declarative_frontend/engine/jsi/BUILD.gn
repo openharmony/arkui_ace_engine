@@ -475,9 +475,11 @@ template("declarative_js_engine_ark") {
     }
 
     include_dirs = []
-    if (defined(vendor_configs.extra_view_register_sources)) {
-      include_dirs += vendor_configs.ace_advance_dirs
-      sources += vendor_configs.extra_view_register_sources
+    if (defined(global_parts_info.multimedia_image_extension)) {
+      sources += [
+        "$ace_root/frameworks/core/components_ng/pattern/cached_image/arkts_native_media_cached_image_bridge.cpp",
+        "$ace_root/frameworks/core/components_ng/pattern/cached_image/jsi_extra_view_register.cpp"
+      ]
     } else {
       sources += [ "jsi_extra_view_register.cpp" ]
     }

@@ -101,7 +101,8 @@ HWTEST_F(WaterFlowSWLazyLayoutTest, DirtyLazyLayoutItemChildRequest001, TestSize
     item->GetLayoutProperty()->SetNeedLazyLayout(true);
 
     int32_t measureCount = 0;
-    item->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>(
+        [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; });
     item->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     ASSERT_TRUE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));

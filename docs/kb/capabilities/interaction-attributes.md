@@ -69,6 +69,6 @@
 
 ## 相关主题
 
-- `docs/kb/capabilities/drag-capability.md`
-- `docs/kb/capabilities/ui-context.md`
-- `docs/kb/architecture/drag-framework.md`
+- [drag-capability](drag-capability.md)
+- [ui-context](ui-context.md)
+- [drag-framework](../architecture/drag-framework.md)

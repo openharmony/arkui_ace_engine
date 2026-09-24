@@ -1111,6 +1111,14 @@ public:
             new NWebCommandActionInfoImpl(event_type, x, y, distanceX, distanceY, scale, duration, tapCount, speed));
     }
 
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateAutoFillInfo(
+        const std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>>& items,
+        OHOS::NWeb::AutoFillMode defaultMode = OHOS::NWeb::AutoFillMode::Overwrite)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(items, defaultMode));
+    }
+
     ~NWebCommandActionInfoImpl() override = default;
 
     std::string GetEventType() const override { return event_type_; }
@@ -1126,6 +1134,10 @@ public:
     int32_t GetDuration() const override { return duration_; }
     int32_t GetTapCount() const override { return tapCount_; }
     int32_t GetSpeed() const override { return speed_; }
+
+    // inputAutoFill getters
+    std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>> GetAutoFillItems() const override { return autofill_items_; }
+    OHOS::NWeb::AutoFillMode GetDefaultMode() const override { return default_mode_; }
 private:
     NWebCommandActionInfoImpl(const std::string& event_type,
                               const std::string& value,
@@ -1145,6 +1157,10 @@ private:
         : event_type_(event_type), x_(x), y_(y), distanceX_(distanceX), distanceY_(distanceY),
           scale_(scale), duration_(duration), tapCount_(tapCount), speed_(speed) {}
 
+    NWebCommandActionInfoImpl(const std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>>& items,
+        OHOS::NWeb::AutoFillMode defaultMode)
+        : event_type_("inputAutoFill"), autofill_items_(items), default_mode_(defaultMode) {}
+
     std::string event_type_ = "";
     std::string input_value_ = "";
     std::string xpath_ = "";
@@ -1158,6 +1174,8 @@ private:
     int32_t duration_ = 0;
     int32_t tapCount_ = 1;
     int32_t speed_ = 0;
+    std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>> autofill_items_;
+    OHOS::NWeb::AutoFillMode default_mode_ = OHOS::NWeb::AutoFillMode::Overwrite;
 };
 
 // ===== PageScene Rule-Based Perception Data Structures =====
@@ -1183,6 +1201,7 @@ public:
 
     WebDelegate() = delete;
     ~WebDelegate() override;
+    bool MaybeRelease() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
         : WebResource(type, context, std::move(onError)), instanceId_(Container::CurrentId())
     {}
@@ -1279,6 +1298,7 @@ public:
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled);
+    void UpdateTransformRotateAndSkewEnabled(bool isTransformRotateAndSkewEnabled);
     void UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition);
     void UpdateGestureFocusMode(const GestureFocusMode& mode);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
@@ -1373,6 +1393,8 @@ public:
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
+    std::vector<uint8_t> SerializeWebState();
+    bool RestoreWebState(const std::vector<uint8_t>& state);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -1422,6 +1444,7 @@ public:
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);
+    void FillTextChangeExtraInfo(AccessibilityEvent& event, int64_t accessibilityId);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth,
@@ -1438,6 +1461,7 @@ public:
     bool OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
+    void OnZoomChange(double oldZoomFactor, double newZoomFactor);
     void OnScroll(double xOffset, double yOffset);
     bool LoadDataWithRichText();
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
@@ -1744,6 +1768,7 @@ public:
     bool HideMagnifier();
     void UpdateSingleHandleVisible(bool isVisible);
     void SetTouchHandleExistState(bool touchHandleExist);
+    void SetClickExtEnabled();
 
     void SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomLeft,
         double borderRadiusBottomRight);
@@ -1784,6 +1809,8 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void RequestWebDomJsonStringWithOptions(
+        const std::function<void(const std::string)>&& callback, int32_t mode);
     void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
     void SetIsSystemRtlEnable(bool enable);
     void FetchCloudControlWebAutoLayoutConfig();
@@ -1805,9 +1832,12 @@ public:
     void ExecuteAllRuleSetMatch();
 
 private:
+    void ExecuteAllRuleSetMatchInternal();
+    void ResetPageSceneOnNavigate();
     void InitWebEvent();
     void RegisterWebEvent();
     void ReleasePlatformResource();
+    void DestroyNWeb();
     void Stop();
     void UnregisterEvent();
     std::string GetUrlStringParam(const std::string& param, const std::string& name) const;
@@ -1906,6 +1936,8 @@ private:
         const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
     void RegisterFreeMultiWindowListener();
     void UnregisterFreeMultiWindowListener();
+    uint64_t GetDelegateRSHandle();
+    uint64_t GetDelegateUIContextToken();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1950,6 +1982,7 @@ private:
     EventCallbackV2 onRenderExitedV2_;
     EventCallbackV2 onResourceLoadV2_;
     EventCallbackV2 onScaleChangeV2_;
+    EventCallbackV2 onZoomChangeV2_;
     EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
@@ -2060,6 +2093,7 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+    uint32_t rotation_ = 0;
 
     // autofill sync state
     std::string pendingAutoFillJsonStr_;
@@ -2070,7 +2104,11 @@ private:
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
 
+    sptr<OHOS::IRemoteObject> connectToRender_ = nullptr;
+
     bool isVisible_ = false;
+    int32_t pageSceneRequeryCount_ = 0;
+    bool isRequeryScheduled_ = false;
 
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
     sptr<OHOS::Rosen::DisplayManager::IDisplayAttributeListener> displayListener_ = nullptr;

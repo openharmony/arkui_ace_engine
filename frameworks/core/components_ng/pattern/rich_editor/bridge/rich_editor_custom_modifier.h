@@ -70,6 +70,7 @@ struct ArkUIRichEditorCustomModifier {
     std::optional<float> (*getEnvFontScale)(RefPtr<NG::RichEditorBaseController> controller);
     RefPtr<NG::RichEditorTheme> (*buildRichEditorTheme)(const RefPtr<ThemeConstants>& themeConstants);
     RefPtr<TokenThemeWrapper> (*buildRichEditorThemeWrapper)(const RefPtr<ThemeConstants>& themeConstants);
+    void (*requestRichEditorKeyboardForStylus)(const RefPtr<NG::FrameNode>& frameNode, int32_t& resultCode);
 };
 }
 

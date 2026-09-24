@@ -49,6 +49,10 @@ struct PageSceneNodeInfo {
     int32_t nodeId = -1;
     std::string nodeType;
     std::string text;
+    std::string placeholder;
+    std::string contentType;
+    std::string inputType;
+    std::optional<bool> enableAutoFill;
     bool focusable = false;
     PageSceneRectInfo rect;
 };
@@ -58,6 +62,7 @@ struct PageSceneRule {
     std::string sceneType;
     bool enabled = true;
     bool onlyVisible = true;
+    bool rectCulling = false;
     bool includeWeb = false;
     bool includeUIExtension = false;
     bool includeNodeIds = true;
@@ -120,6 +125,8 @@ private:
 
     std::vector<PageSceneNodeInfo> visibleInputNodes_;
     RectF pageViewportRect_;
+
+    bool IsOpacityVisible(const RefPtr<FrameNode>& node) const;
 };
 
 class PageSceneRuleManager {

@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/svg_dom.h"
 
+#include <stack>
+
 #include "core/components_ng/svg/parse/svg_fe_blend.h"
 #include "core/components_ng/svg/parse/svg_fe_flood.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
@@ -54,6 +56,33 @@ const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
 constexpr int32_t ONE_BYTE_TO_HEX_LEN = 2;
 constexpr int32_t MAX_PARSE_DEPTH = 5000;
+constexpr size_t MAX_SVG_CLASS_NAME_COUNT = 1024 * 100;
+constexpr size_t MAX_SVG_STYLE_DECL_COUNT = 1024 * 100;
+
+void SplitStrWithLimit(const std::string& str, const std::string& sep,
+    std::vector<std::string>& out, size_t maxCount)
+{
+    out.clear();
+    if (str.empty() || sep.empty()) {
+        return;
+    }
+    std::string::size_type startPos = 0;
+    std::string::size_type pos = str.find_first_of(sep, startPos);
+    while (pos != std::string::npos) {
+        if (pos > startPos) {
+            out.emplace_back(StringUtils::TrimStr(str.substr(startPos, pos - startPos)));
+            if (out.size() == maxCount) {
+                LOGW("SVG attribute split count exceeds limit (%{public}zu), truncating", maxCount);
+                return;
+            }
+        }
+        startPos = pos + sep.size();
+        pos = str.find_first_of(sep, startPos);
+    }
+    if (startPos < str.size() && out.size() < maxCount) {
+        out.emplace_back(StringUtils::TrimStr(str.substr(startPos)));
+    }
+}
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -201,6 +230,10 @@ RefPtr<SvgNode> SvgDom::CreateSvgNodeFromDom(
     auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion());
     RefPtr<SvgNode> node = FindAndCreateNode(element, featureEnable);
     CHECK_NULL_RETURN(node, nullptr);
+    if (!svgContext_->IncrementNodeCount()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgDom node count exceeded limit, stop parsing");
+        return nullptr;
+    }
     if (AceType::InstanceOf<SvgAnimation>(node)) {
         isStatic_.store(false);
     }
@@ -256,7 +289,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     std::vector<std::string> styleNameVector;
-    StringUtils::SplitStr(value, " ", styleNameVector);
+    SplitStrWithLimit(value, " ", styleNameVector, MAX_SVG_CLASS_NAME_COUNT);
     for (const auto& styleName : styleNameVector) {
         auto attrMap = svgContext_->GetAttrMap(styleName);
         if (attrMap.empty()) {
@@ -273,12 +306,12 @@ void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     std::vector<std::string> attrPairVector;
-    StringUtils::SplitStr(value, ";", attrPairVector);
+    SplitStrWithLimit(value, ";", attrPairVector, MAX_SVG_STYLE_DECL_COUNT);
     for (const auto& attrPair : attrPairVector) {
-        std::vector<std::string> attrVector;
-        StringUtils::SplitStr(attrPair, ":", attrVector);
-        if (attrVector.size() == 2) {
-            svgNode->SetAttr(attrVector[0], attrVector[1]);
+        auto colonPos = attrPair.find(':');
+        if (colonPos != std::string::npos && colonPos > 0 && colonPos < attrPair.size() - 1) {
+            svgNode->SetAttr(StringUtils::TrimStr(attrPair.substr(0, colonPos)),
+                StringUtils::TrimStr(attrPair.substr(colonPos + 1)));
         }
     }
 }
@@ -343,6 +376,25 @@ std::string SvgDom::GetDumpInfo()
     return "";
 }
 
+size_t SvgDom::GetNodeCount() const
+{
+    CHECK_NULL_RETURN(root_, 0);
+    std::stack<RefPtr<SvgNode>> nodeStack;
+    nodeStack.push(root_);
+    size_t count = 0;
+    while (!nodeStack.empty()) {
+        auto node = nodeStack.top();
+        nodeStack.pop();
+        count++;
+        for (const auto& child : node->GetChildren()) {
+            if (child) {
+                nodeStack.push(child);
+            }
+        }
+    }
+    return count;
+}
+
 void SvgDom::InitStyles()
 {
     CHECK_NULL_VOID(root_);
@@ -364,6 +416,7 @@ void SvgDom::DrawImage(
     InitStyles();
     svgContext_->ResetHrefResolveCount();
     svgContext_->ResetDrawDepth();
+    svgContext_->ResetAsPathDepth();
     svgContext_->ResetHrefResolving();
     canvas.Save();
     // viewBox scale and imageFit scale

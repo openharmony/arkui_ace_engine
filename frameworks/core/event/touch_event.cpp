@@ -306,6 +306,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.pressedKeyCodes_ = pressedKeyCodes_;
     event.isInjected = isInjected;
     event.isPrivacyMode = isPrivacyMode;
+    event.isScreenLocked = isScreenLocked;
     event.inputXDeltaSlope = inputXDeltaSlope;
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;

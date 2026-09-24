@@ -254,7 +254,7 @@ class GestureGroupHandler extends GestureHandler {
     super(CommonGestureType.GESTURE_GROUP);
     if (options !== undefined && options !== null) {
       this.mode = options.mode;
-      this.gestures = options.gestures;
+      this.gestures = [...options.gestures];
     }
   }
 
@@ -4534,6 +4534,57 @@ class TextTailIndentsModifier extends ModifierWithKey {
 }
 TextTailIndentsModifier.identity = Symbol('textTailIndents');
 
+class TextStrokeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetStrokeWidth(node);
+    } else {
+      getUINativeModule().text.setStrokeWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextStrokeWidthModifier.identity = Symbol('textStrokeWidth');
+
+class TextStrokeColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetStrokeColor(node);
+    } else {
+      getUINativeModule().text.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextStrokeColorModifier.identity = Symbol('textStrokeColor');
+
+class TextStrokeJoinStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetStrokeJoinStyle(node);
+    } else {
+      getUINativeModule().text.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextStrokeJoinStyleModifier.identity = Symbol('textStrokeJoinStyle');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -4861,6 +4912,18 @@ class ArkTextComponent extends ArkComponent {
   }
   tailIndents(value) {
     modifierWithKey(this._modifiersWithKeys, TextTailIndentsModifier.identity, TextTailIndentsModifier, value);
+    return this;
+  }
+  strokeWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeWidthModifier.identity, TextStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeColorModifier.identity, TextStrokeColorModifier, value);
+    return this;
+  }
+  strokeJoinStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextStrokeJoinStyleModifier.identity, TextStrokeJoinStyleModifier, value);
     return this;
   }
 }
@@ -9477,6 +9540,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebOnScaleChangeModifier.identity, WebOnScaleChangeModifier, callback);
     return this;
   }
+  onZoomChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnZoomChangeModifier.identity, WebOnZoomChangeModifier, callback);
+    return this;
+  }
   onHttpAuthRequest(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnHttpAuthRequestModifier.identity, WebOnHttpAuthRequestModifier, callback);
     return this;
@@ -10154,6 +10221,21 @@ class WebOnScaleChangeModifier extends ModifierWithKey {
   }
 }
 WebOnScaleChangeModifier.identity = Symbol('webOnScaleChangeModifier');
+
+class WebOnZoomChangeModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().web.resetOnZoomChange(node);
+        }
+        else {
+            getUINativeModule().web.setOnZoomChange(node, this.value);
+        }
+    }
+}
+WebOnZoomChangeModifier.identity = Symbol('webOnZoomChangeModifier');
 
 class WebOnRequestSelectedModifier extends ModifierWithKey {
     constructor(value) {
@@ -13641,7 +13723,7 @@ class LazyColumnLayoutSpaceModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !isObject(this.value)) {
       getUINativeModule().lazyColumnLayout.resetSpace(node);
     }
     else {

@@ -48,7 +48,7 @@ TextClock **已组件化**（有 bridge/ 子目录、DynamicModule、统一 Brid
 | Dynamic Modifier | `frameworks/core/components_ng/pattern/text_clock/bridge/text_clock_dynamic_modifier.cpp` | 动态属性路径 |
 | Static Modifier | `frameworks/core/components_ng/pattern/text_clock/bridge/text_clock_static_modifier.cpp` | 静态编译路径 |
 | Dynamic Module | `frameworks/core/components_ng/pattern/text_clock/bridge/text_clock_dynamic_module.cpp` | DynamicModule 派生类 |
-| ContentModifier Helper | `frameworks/core/components_ng/pattern/text_clock/text_clock_content_modifier_helper.h` | ContentModifier 辅助结构 |
+| ContentModifier Helper | `frameworks/core/components_ng/pattern/text_clock/bridge/text_clock_content_modifier_helper.h` | ContentModifier 辅助结构 |
 
 ### 外部依赖入口
 

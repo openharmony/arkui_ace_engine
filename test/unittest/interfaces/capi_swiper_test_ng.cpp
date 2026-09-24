@@ -51,6 +51,7 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperFinishAnimationTestWrongNodeType, TestSiz
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
     node.uiNodeHandle = nullptr;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     auto ret = OH_ArkUI_Swiper_FinishAnimation(&node);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }
@@ -77,6 +78,7 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperStartFakeDragTestWrongNodeType, TestSize.
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
     node.uiNodeHandle = nullptr;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     bool isSuccessful = false;
     auto ret = OH_ArkUI_Swiper_StartFakeDrag(&node, &isSuccessful);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
@@ -104,6 +106,7 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperFakeDragByTestWrongNodeType, TestSize.Lev
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
     node.uiNodeHandle = nullptr;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     bool isConsumedOffset = false;
     auto ret = OH_ArkUI_Swiper_FakeDragBy(&node, 10.0f, &isConsumedOffset);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
@@ -131,6 +134,7 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperStopFakeDragTestWrongNodeType, TestSize.L
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
     node.uiNodeHandle = nullptr;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     bool isSuccessful = false;
     auto ret = OH_ArkUI_Swiper_StopFakeDrag(&node, &isSuccessful);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
@@ -164,6 +168,7 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperIsFakeDraggingTestZeroNodeType, TestSize.
     ArkUI_Node node;
     node.type = 0;
     node.uiNodeHandle = nullptr;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     bool isFakeDragging = false;
     auto ret = OH_ArkUI_Swiper_IsFakeDragging(&node, &isFakeDragging);
     const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
@@ -196,6 +201,7 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperShowPreviousTestWrongNodeType, TestSize.L
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
     node.uiNodeHandle = nullptr;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     auto ret = OH_ArkUI_Swiper_ShowPrevious(&node);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }
@@ -221,6 +227,7 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperShowNextTestWrongNodeType, TestSize.Level
     ArkUI_Node node;
     node.type = ARKUI_NODE_TEXT;
     node.uiNodeHandle = nullptr;
+    node.magic = ARKUI_NODE_MAGIC_VALID;
     auto ret = OH_ArkUI_Swiper_ShowNext(&node);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }

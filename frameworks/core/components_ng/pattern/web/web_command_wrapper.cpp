@@ -20,6 +20,25 @@
 namespace OHOS {
 namespace Ace {
 
+// Concrete implementation of AutoFillItem for ace_engine internal use.
+class AutoFillItemImpl : public OHOS::NWeb::AutoFillItem {
+public:
+    AutoFillItemImpl(const std::string& xpath, const std::string& content,
+                     int32_t index, OHOS::NWeb::AutoFillMode mode)
+        : xpath_(xpath), content_(content), index_(index), mode_(mode) {}
+
+    std::string GetXPath() const override { return xpath_; }
+    std::string GetContent() const override { return content_; }
+    int32_t GetIndex() const override { return index_; }
+    OHOS::NWeb::AutoFillMode GetMode() const override { return mode_; }
+
+private:
+    std::string xpath_;
+    std::string content_;
+    int32_t index_ = 0;
+    OHOS::NWeb::AutoFillMode mode_ = OHOS::NWeb::AutoFillMode::Overwrite;
+};
+
 // Initialize static constants
 const char* const WebCommandWrapper::EVENT_TYPE_KEY = "event_type";
 const char* const WebCommandWrapper::XPATH_KEY = "XPath";
@@ -55,6 +74,7 @@ WebCommandEventType WebCommandWrapper::ParseEventType(const std::string& eventTy
         {"inputCopy", WebCommandEventType::INPUT_COPY},
         {"inputFocus", WebCommandEventType::INPUT_FOCUS},
         {"inputSetCursor", WebCommandEventType::INPUT_SET_CURSOR},
+        {"inputAutoFill", WebCommandEventType::INPUT_AUTO_FILL},
     };
     auto it = eventTypeMap.find(eventTypeStr);
     if (it != eventTypeMap.end()) {
@@ -611,6 +631,108 @@ int WebCommandWrapper::BuildGestureActionInfo(
         TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: unknown gesture type %{public}s", eventTypeStr.c_str());
         return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
     }
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+int WebCommandWrapper::ParseAutoFillDefaultMode(
+    const std::unique_ptr<JsonValue>& comJson,
+    OHOS::NWeb::AutoFillMode& outDefaultMode)
+{
+    outDefaultMode = OHOS::NWeb::AutoFillMode::Overwrite;
+    auto defaultModeValue = comJson->GetValue("defaultMode");
+    if (!defaultModeValue || !defaultModeValue->IsString()) {
+        return WEB_COMMAND_BUILD_SUCCESS;
+    }
+    std::string defaultModeStr = defaultModeValue->GetString();
+    if (defaultModeStr == "insert") {
+        outDefaultMode = OHOS::NWeb::AutoFillMode::Insert;
+    } else if (defaultModeStr != "overwrite") {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: inputAutoFill defaultMode is invalid");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+    }
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+OHOS::NWeb::AutoFillMode WebCommandWrapper::ParseAutoFillItemMode(
+    const std::unique_ptr<JsonValue>& itemValue)
+{
+    auto optionsValue = itemValue->GetValue("options");
+    if (!optionsValue || !optionsValue->IsObject()) {
+        return OHOS::NWeb::AutoFillMode::Unspecified;
+    }
+    auto modeValue = optionsValue->GetValue("mode");
+    if (!modeValue || !modeValue->IsString()) {
+        return OHOS::NWeb::AutoFillMode::Unspecified;
+    }
+    std::string modeStr = modeValue->GetString();
+    if (modeStr == "insert") {
+        return OHOS::NWeb::AutoFillMode::Insert;
+    }
+    if (modeStr == "overwrite") {
+        return OHOS::NWeb::AutoFillMode::Overwrite;
+    }
+    return OHOS::NWeb::AutoFillMode::Unspecified;
+}
+
+int WebCommandWrapper::BuildAutoFillActionInfo(
+    const std::unique_ptr<JsonValue>& comJson,
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo)
+{
+    OHOS::NWeb::AutoFillMode defaultMode = OHOS::NWeb::AutoFillMode::Overwrite;
+    int modeResult = ParseAutoFillDefaultMode(comJson, defaultMode);
+    if (modeResult != WEB_COMMAND_BUILD_SUCCESS) {
+        return modeResult;
+    }
+
+    auto itemsValue = comJson->GetValue("items");
+    if (!itemsValue || !itemsValue->IsArray()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: inputAutoFill items is missing or not array");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+    }
+
+    std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>> items;
+    int arraySize = itemsValue->GetArraySize();
+    for (int i = 0; i < arraySize; i++) {
+        auto itemValue = itemsValue->GetArrayItem(i);
+        if (!itemValue || !itemValue->IsObject()) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: inputAutoFill item[%d] is not object, skip", i);
+            continue;
+        }
+
+        std::string xpath;
+        auto xpathValue = itemValue->GetValue("xpath");
+        if (xpathValue && xpathValue->IsString()) {
+            xpath = xpathValue->GetString();
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WEB, "CommandWarning: inputAutoFill item[%d] xpath is missing or not string", i);
+        }
+
+        std::string content;
+        auto contentValue = itemValue->GetValue("content");
+        if (contentValue && contentValue->IsString()) {
+            content = contentValue->GetString();
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WEB, "CommandWarning: inputAutoFill item[%d] content is missing or not string", i);
+        }
+
+        int32_t index = 0;
+        auto indexValue = itemValue->GetValue("index");
+        if (indexValue && indexValue->IsNumber()) {
+            index = indexValue->GetInt();
+        }
+
+        OHOS::NWeb::AutoFillMode mode = ParseAutoFillItemMode(itemValue);
+        // Pass all items (including invalid ones) to Chromium layer for per-item validation.
+        // Chromium will continue processing remaining items on error and return the first error code.
+        items.push_back(std::make_shared<AutoFillItemImpl>(xpath, content, index, mode));
+    }
+
+    if (items.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: inputAutoFill no valid items");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+    }
+
+    outActionInfo = NWebCommandActionInfoImpl::CreateAutoFillInfo(items, defaultMode);
     return WEB_COMMAND_BUILD_SUCCESS;
 }
 

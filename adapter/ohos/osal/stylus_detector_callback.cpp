@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 
 namespace OHOS::Ace {
 
@@ -54,7 +55,9 @@ int32_t StylusDetectorCallBack::RequestFocus(int32_t nodeId, const RefPtr<TaskEx
                 focusHub->RequestFocusImmediately();
             }
             if (frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
-                resultCode = 0;
+                auto* richEditorCustomModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+                CHECK_NULL_VOID(richEditorCustomModifier);
+                richEditorCustomModifier->requestRichEditorKeyboardForStylus(frameNode, resultCode);
                 return;
             }
             if (IsTextCategoryComponent(frameNode->GetTag())) {

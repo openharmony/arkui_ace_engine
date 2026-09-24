@@ -616,6 +616,23 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
     arkCallback.InvokeSync(parameter);
 }
 
+void OnZoomChange(const CallbackHelper<OnZoomChangeCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    const auto frameNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<ZoomChangeEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_OnZoomChangeEvent parameter;
+    parameter.oldZoomFactor = Converter::ArkValue<Ark_Float64>(eventInfo->GetOnZoomChangeOldZoomFactor());
+    parameter.newZoomFactor = Converter::ArkValue<Ark_Float64>(eventInfo->GetOnZoomChangeNewZoomFactor());
+    arkCallback.InvokeSync(parameter);
+}
+
 bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {

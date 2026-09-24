@@ -50,6 +50,8 @@ public:
     static RefPtr<LayoutWrapper> GetGridItem(LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true,
         bool isCache = false);
 
+    // contentClip mode dispatch (FP2/ADR-1): injected by GridPattern; only
+    // non-CONTENT_ONLY when an explicit extension mode is active.
     void SetContentClipMode(ContentClipMode mode)
     {
         contentClipMode_ = mode;
@@ -63,6 +65,22 @@ public:
     void SetContentClipSafeAreaPad(const std::optional<ExpandEdges>& safeAreaPad)
     {
         safeAreaPad_ = safeAreaPad;
+    }
+
+    bool IsContentClipSafeArea() const
+    {
+        return contentClipMode_ == ContentClipMode::SAFE_AREA;
+    }
+
+    // Intermediate-pass detection for the SAFE_AREA two-pass layout (ADR-5): the
+    // algorithm has no safe-area snapshot yet (first pass / re-activation), or its
+    // snapshot differs from the system's current accumulated value (stale pass
+    // after a safe-area change). That layout pass is internal: the pattern
+    // suppresses developer-visible events and only syncs internal layout state.
+    bool IsSafeAreaIntermediatePass(const ExpandEdges& currentSafeAreaPad) const
+    {
+        return IsContentClipSafeArea() &&
+               (!safeAreaPad_.has_value() || !(safeAreaPad_.value() == currentSafeAreaPad));
     }
 
 protected:
@@ -80,7 +98,10 @@ protected:
 
     void CalcContentOffset(LayoutWrapper* layoutWrapper, float mainSize);
 
-    void CalculateContentClipFixOffset(LayoutWrapper* layoutWrapper, float mainSize, float mainGap);
+    // Compute the contentClip extension amounts (FP3/ADR-3): forcibly reset at
+    // the start of every Measure; for non-CONTENT_ONLY modes resolves the clip
+    // rect and derives startFixOffset_/endFixOffset_.
+    void CalculateContentClipFixOffset(LayoutWrapper* layoutWrapper, float mainSize);
 
     GridLayoutInfo info_;
     bool measureInNextFrame_ = false;

@@ -47,6 +47,7 @@ HWTEST_F(SwiperUpdateItemRenderGroupTestNg,
     ASSERT_NE(renderContext, nullptr);
 
     renderContext->UpdateRenderGroup(false);
+    pattern_->isRenderGroupExplicitlySet_ = true;
     pattern_->lastSetRenderGroup_ = false;
     pattern_->UpdateItemRenderGroup(true);
 
@@ -70,6 +71,7 @@ HWTEST_F(SwiperUpdateItemRenderGroupTestNg,
     ASSERT_NE(renderContext, nullptr);
 
     renderContext->UpdateRenderGroup(false);
+    pattern_->isRenderGroupExplicitlySet_ = true;
     pattern_->lastSetRenderGroup_ = false;
     pattern_->groupedItems_.clear();
 
@@ -213,6 +215,7 @@ HWTEST_F(SwiperUpdateItemRenderGroupTestNg,
     ASSERT_NE(renderContext, nullptr);
 
     renderContext->UpdateRenderGroup(true);
+    pattern_->isRenderGroupExplicitlySet_ = true;
     pattern_->lastSetRenderGroup_ = false;
     pattern_->groupedItems_.clear();
 
@@ -270,5 +273,97 @@ HWTEST_F(SwiperUpdateItemRenderGroupTestNg,
 
     EXPECT_FALSE(swiperPattern->lastSetRenderGroup_);
     EXPECT_TRUE(swiperPattern->groupedItems_.empty());
+}
+
+/**
+ * @tc.name: SetRenderGroupExplicitlyFalse_OnlySetsFlag
+ * @tc.desc: SetRenderGroupExplicitly(false) only clears the explicitly-set flag,
+ *   does not modify renderContext (renderContext remains as-is)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperUpdateItemRenderGroupTestNg, SetRenderGroupExplicitlyFalse_OnlySetsFlag, TestSize.Level1)
+{
+    CreateSwiperWithItems();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(frameNode_, nullptr);
+ 
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+ 
+    // Set renderGroup to false via the common path
+    renderContext->UpdateRenderGroup(false);
+    pattern_->isRenderGroupExplicitlySet_ = true;
+    EXPECT_TRUE(renderContext->HasRenderGroup());
+ 
+    // Clear the explicitly-set flag (developer set undefined)
+    pattern_->SetRenderGroupExplicitly(false);
+    EXPECT_FALSE(pattern_->isRenderGroupExplicitlySet_);
+ 
+    // renderContext is NOT cleared by SetRenderGroupExplicitly(false)
+    EXPECT_TRUE(renderContext->HasRenderGroup());
+    EXPECT_FALSE(renderContext->GetRenderGroupValue());
+}
+ 
+/**
+ * @tc.name: SetRenderGroupExplicitlyFalse_InternalLogicNotOverridden
+ * @tc.desc: After SetRenderGroupExplicitly(false) (developer set undefined),
+ *   the isRenderGroupExplicitlySet_ flag is false, so UpdateItemRenderGroup(true)
+ *   should NOT be overridden by the renderGroup=false check even though renderContext
+ *   still has HasRenderGroup()=true, GetRenderGroupValue()=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperUpdateItemRenderGroupTestNg, SetRenderGroupExplicitlyFalse_InternalLogicNotOverridden, TestSize.Level1)
+{
+    CreateSwiperWithItems();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(frameNode_, nullptr);
+ 
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+ 
+    // First set renderGroup(false) with explicitly-set flag to override internal logic
+    renderContext->UpdateRenderGroup(false);
+    pattern_->isRenderGroupExplicitlySet_ = true;
+    pattern_->lastSetRenderGroup_ = false;
+    pattern_->groupedItems_.clear();
+ 
+    pattern_->UpdateItemRenderGroup(true);
+    // With renderGroup explicitly set to false, itemRenderGroup should be overridden to false
+    EXPECT_FALSE(pattern_->lastSetRenderGroup_);
+ 
+    // Developer sets undefined: clear the explicitly-set flag
+    pattern_->SetRenderGroupExplicitly(false);
+    EXPECT_FALSE(pattern_->isRenderGroupExplicitlySet_);
+    // renderContext still has HasRenderGroup()=true, GetRenderGroupValue()=false
+    EXPECT_TRUE(renderContext->HasRenderGroup());
+ 
+    // After clearing flag, UpdateItemRenderGroup(true) should no longer be overridden
+    pattern_->UpdateItemRenderGroup(true);
+    EXPECT_TRUE(pattern_->lastSetRenderGroup_);
+    EXPECT_FALSE(pattern_->groupedItems_.empty());
+}
+ 
+/**
+ * @tc.name: SetRenderGroupExplicitly_OnlySetsFlag
+ * @tc.desc: SetRenderGroupExplicitly only sets the isRenderGroupExplicitlySet_ flag,
+ *   it does not call UpdateItemRenderGroup or modify renderContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperUpdateItemRenderGroupTestNg, SetRenderGroupExplicitly_OnlySetsFlag, TestSize.Level1)
+{
+    CreateSwiperWithItems();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(frameNode_, nullptr);
+ 
+    // Initially not explicitly set
+    EXPECT_FALSE(pattern_->isRenderGroupExplicitlySet_);
+ 
+    // Set renderGroup explicitly (developer set a boolean value)
+    pattern_->SetRenderGroupExplicitly(true);
+    EXPECT_TRUE(pattern_->isRenderGroupExplicitlySet_);
+ 
+    // Clear the flag (developer set undefined)
+    pattern_->SetRenderGroupExplicitly(false);
+    EXPECT_FALSE(pattern_->isRenderGroupExplicitlySet_);
 }
 } // namespace OHOS::Ace::NG

@@ -26,9 +26,6 @@ class JSIndexerTheme {
 public:
     static void ApplyTheme()
     {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-            return;
-        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             // no need to apply custom theme colors
@@ -38,12 +35,20 @@ public:
         CHECK_NULL_VOID(stack);
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
         CHECK_NULL_VOID(frameNode);
-        NG::IndexerModelNG::SetColor(frameNode, themeColors->FontSecondary());
-        NG::IndexerModelNG::SetSelectedColor(frameNode, themeColors->FontEmphasize());
-        NG::IndexerModelNG::SetPopupColor(frameNode, themeColors->FontEmphasize());
-        NG::IndexerModelNG::SetPopupUnselectedColor(frameNode, themeColors->FontPrimary());
-        NG::IndexerModelNG::SetPopupTitleBackground(frameNode, themeColors->CompBackgroundTertiary());
-        NG::IndexerModelNG::SetSelectedBackgroundColor(frameNode, themeColors->CompEmphasizeSecondary());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            NG::IndexerThemeColors indexerThemeColors;
+            indexerThemeColors.emplace("color", themeColors->FontSecondary());
+            indexerThemeColors.emplace("selectedColor", themeColors->FontEmphasize());
+            indexerThemeColors.emplace("popupColor", themeColors->FontEmphasize());
+            NG::IndexerModelNG::SetIndexerThemeColors(frameNode, indexerThemeColors);
+        } else {
+            NG::IndexerModelNG::SetColor(frameNode, themeColors->FontSecondary());
+            NG::IndexerModelNG::SetSelectedColor(frameNode, themeColors->FontEmphasize());
+            NG::IndexerModelNG::SetPopupColor(frameNode, themeColors->FontEmphasize());
+            NG::IndexerModelNG::SetPopupUnselectedColor(frameNode, themeColors->FontPrimary());
+            NG::IndexerModelNG::SetPopupTitleBackground(frameNode, themeColors->CompBackgroundTertiary());
+            NG::IndexerModelNG::SetSelectedBackgroundColor(frameNode, themeColors->CompEmphasizeSecondary());
+        }
     }
 };
 } // namespace OHOS::Ace::Framework

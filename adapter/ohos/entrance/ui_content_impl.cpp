@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,7 @@
 #include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "adapter/ohos/entrance/ui_session/ui_session_batch_command.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/navigation_route_ohos.h"
@@ -199,7 +200,6 @@ const std::string UIEXTENSION_CONFIG_WINDOW_MODE = "ohos.system.window.mode";
 constexpr int32_t INVALID_WINDOW_MODE = 1000;
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
-constexpr uint32_t LOG_DELAY_TIME = 250; // 250ms
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
@@ -599,7 +599,8 @@ std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> ParseAvoidAreasToMap(
 }
 
 void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
-    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    OHOS::Rosen::WindowSizeChangeReason reason = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED)
 {
     if (avoidAreas.empty()) {
         return;
@@ -607,7 +608,8 @@ void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
     CHECK_NULL_VOID(context);
     // for ui extension component
     for (auto& avoidArea : avoidAreas) {
-        context->UpdateOriginAvoidArea(avoidArea.second, static_cast<uint32_t>(avoidArea.first));
+        context->UpdateOriginAvoidArea(avoidArea.second, static_cast<uint32_t>(avoidArea.first),
+            static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
     }
 }
 
@@ -632,13 +634,14 @@ void AvoidAreasUpdateOnDynamicComponent(const RefPtr<NG::PipelineContext>& conte
 }
 
 std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
-    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    OHOS::Rosen::WindowSizeChangeReason reason)
 {
     CHECK_NULL_RETURN(pipelineContext, {});
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_RETURN(context, {});
     auto safeAreaMap = ParseAvoidAreasToMap(avoidAreas);
-    AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+    AvoidAreasUpdateOnUIExtension(context, avoidAreas, reason);
     return safeAreaMap;
 }
 
@@ -708,19 +711,24 @@ public:
             navigationBar_ = ConvertAvoidArea(avoidArea);
         } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
             cutoutSafeArea_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+            floatNavSafeArea_ = ConvertAvoidArea(avoidArea);
         }
         auto safeArea = systemSafeArea_;
         auto navSafeArea = navigationBar_;
         auto cutoutSafeArea = cutoutSafeArea_;
+        auto floatNavArea = floatNavSafeArea_;
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea, navSafeArea, cutoutSafeArea, type, avoidArea] {
+            [pipeline, safeArea, navSafeArea, cutoutSafeArea, floatNavArea, type, avoidArea] {
                 if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
                     pipeline->UpdateSystemSafeArea(safeArea, true);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea, true);
                 } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea, true);
+                } else if (type == Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+                    pipeline->UpdateFloatNavSafeArea(floatNavArea);
                 }
                 // for ui extension component
                 pipeline->UpdateOriginAvoidArea(avoidArea, static_cast<uint32_t>(type));
@@ -780,6 +788,7 @@ private:
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets navigationBar_;
     NG::SafeAreaInsets cutoutSafeArea_;
+    NG::SafeAreaInsets floatNavSafeArea_;
     int32_t instanceId_ = -1;
 };
 
@@ -2227,10 +2236,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     } else {
         LOGD("configuration is nullptr,use default type");
     }
-    static std::once_flag onceFlag;
-    std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
-    AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
-    AceNewPipeJudgement::InitAceNewPipeConfig();
     auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
     if (xcomponentModifier && xcomponentModifier->getApsSdrRatio) {
         auto apsSdrRatioSize = ApsMonitorImpl::GetInstance().GetApsSdrRatio(
@@ -2247,6 +2252,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     LOGD("GetApsSdrRatio XCOMPONENT_SIZE_RATIO:%{public}f, XCOMPONENT_TOUCH_RATIO:%{public}f",
         NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1],
         NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1]);
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
+    AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
+    AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
     auto apiTargetVersion = context->GetApplicationInfo()->apiTargetVersion;
@@ -2768,15 +2777,20 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     // Use metadata to control whether the cutout safeArea takes effect.
+    // Only set the switch when the avoid_cutout metadata is present (true/false);
+    // leave it unset (nullopt) when absent so AVOID_CUTOUT strategy can take effect as fallback.
+    bool hasCutoutSwitch = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout"; });
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
-    if (pipeline) {
-        auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-        if (pipelineContext) {
-            auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-            if (safeAreaManager) {
+    if (pipelineContext) {
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        if (safeAreaManager) {
+            if (hasCutoutSwitch) {
                 safeAreaManager->SetUseCutout(useCutout);
             }
+            // AVOID_FLOAT_NAV: register delegate to pull float nav safe area from window when empty.
+            safeAreaManager->SetFloatNavPullDelegate([this](bool enable) { ApplyFloatNavigationAvoidArea(enable); });
         }
     }
     pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
@@ -2867,6 +2881,22 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
     return errorCode;
+}
+
+void UIContentImpl::ApplyFloatNavigationAvoidArea(bool enable)
+{
+    CHECK_NULL_VOID(window_);
+    window_->SetFloatNavigationAvoidAreaEnabled(enable);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineNG = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineNG);
+    if (enable) {
+        auto insets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION);
+        pipelineNG->UpdateFloatNavSafeAreaWithoutAnimation(insets);
+    } else {
+        pipelineNG->UpdateFloatNavSafeAreaWithoutAnimation(NG::SafeAreaInsets());
+    }
 }
 
 bool GetIsSystemWindow(const RefPtr<Platform::AceContainer>& container)
@@ -3188,8 +3218,6 @@ void UIContentImpl::Destroy()
         ResschedEventListener::GetInstance()->UnRegisterFromRSS(window_->GetWindowId());
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     }
-    taskTimeForComeIn_.lastTaskTime = 0;
-    taskTimeForExit_.lastTaskTime = 0;
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()
@@ -4066,13 +4094,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        auto logTask = [config, reason, rsTransaction, stringifiedMap, keyboardRect]() {
-            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardRect %{public}s",
-                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
-                stringifiedMap.c_str(), keyboardRect.ToString().c_str());
-        };
-        taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithKeyboardInfo";
-        ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
+        TAG_LOGD(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardRect %{public}s",
+            config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+            stringifiedMap.c_str(), keyboardRect.ToString().c_str());
     } else {
         if (SystemProperties::GetSyncDebugTraceEnabled()) {
             ACE_LAYOUT_SCOPED_TRACE(
@@ -4081,13 +4105,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        auto logTask = [config, reason, rsTransaction, stringifiedMap]() {
-            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardInfo is null",
-                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
-                stringifiedMap.c_str());
-        };
-        taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithoutKeyboardInfo";
-        ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
+        TAG_LOGD(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardInfo is null",
+            config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+            stringifiedMap.c_str());
     }
 
     // Page rotation has most of the same logic as regular rotation,
@@ -4266,7 +4286,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                     taskId, weak = WeakPtr(viewportConfigMgr_), beforeConfig = config]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
-        auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas);
+        auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas, reason);
         if (pipelineContext) {
             if (reason != OHOS::Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE) {
                 pipelineContext->SetDisplayWindowRectInfo(
@@ -6233,11 +6253,71 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
 
+void LogBatchItemDiagnostic(const BatchDiagnostic& diagnostic)
+{
+    if (diagnostic.hasNodeId) {
+        LOGW("UISession batch command failed: nodeId=%{public}d, reason=%{public}s, commandSummary=%{public}s, "
+             "valueLength=%{public}d",
+            diagnostic.nodeId, UiSessionBatchCommand::GetReasonName(diagnostic.reason),
+            UiSessionBatchCommand::GetSummaryName(diagnostic.commandSummary), diagnostic.valueLength);
+        return;
+    }
+    LOGW("UISession batch command failed: ordinal=%{public}zu, keyLength=%{public}zu, reason=%{public}s, "
+         "commandSummary=%{public}s, valueLength=%{public}d",
+        diagnostic.ordinal, diagnostic.keyLength, UiSessionBatchCommand::GetReasonName(diagnostic.reason),
+        UiSessionBatchCommand::GetSummaryName(diagnostic.commandSummary), diagnostic.valueLength);
+}
+
+void LogBatchLevelDiagnostic(const BatchLevelDiagnostic& diagnostic)
+{
+    LOGW("UISession batch failed: reason=%{public}s, commandCount=%{public}zu, commandLength=%{public}zu",
+        UiSessionBatchCommand::GetReasonName(diagnostic.reason), diagnostic.commandCount, diagnostic.commandLength);
+}
+
+bool IsSupportedBatchTextTarget(const RefPtr<NG::FrameNode>& node)
+{
+    const auto& tag = node->GetTag();
+    return tag == V2::TEXTINPUT_ETS_TAG || tag == V2::TEXTAREA_ETS_TAG || tag == V2::SEARCH_ETS_TAG ||
+           tag == V2::RICH_EDITOR_ETS_TAG;
+}
+
+BatchResolvedTarget ResolveBatchTextTarget(int32_t nodeId)
+{
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+    if (!uiNode) {
+        return { .status = BatchTargetStatus::NOT_FOUND };
+    }
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (!frameNode || !IsSupportedBatchTextTarget(frameNode)) {
+        return { .status = BatchTargetStatus::UNSUPPORTED_TYPE };
+    }
+    return { .status = BatchTargetStatus::READY, .execute = [frameNode](const std::string& command) {
+                return frameNode->OnRecvCommand(command) == NG::RET_SUCCESS;
+            } };
+}
+
+BatchDispatchCallbacks CreateBatchDispatchCallbacks(const RefPtr<TaskExecutor>& taskExecutor)
+{
+    BatchDispatchCallbacks callbacks;
+    if (taskExecutor) {
+        callbacks.postTask = [taskExecutor](std::function<void()>&& task) {
+            return taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "UiSessionBatchSendCommand");
+        };
+    }
+    callbacks.resolveTarget = ResolveBatchTextTarget;
+    callbacks.itemDiagnosticSink = LogBatchItemDiagnostic;
+    callbacks.batchDiagnosticSink = LogBatchLevelDiagnostic;
+    return callbacks;
+}
+
 void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifdef RELAXED_INTERACTION_SUPPORT
     auto relaxedCommandCallback = [weakTaskExecutor = taskExecutor](const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (UiSessionBatchCommand::Dispatch(command, CreateBatchDispatchCallbacks(taskExecutor))) {
+            return;
+        }
+#ifdef RELAXED_INTERACTION_SUPPORT
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [command]() {
@@ -6250,9 +6330,11 @@ void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& tas
                 pipelineContext->ProcessCommand(command);
             },
             TaskExecutor::TaskType::UI, "UiSessionRelaxedSendCommand");
+#else
+        LOGW("SendCommand failed: relaxed interaction is unsupported, commandLength=%{public}zu", command.size());
+#endif
     };
     UiSessionManager::GetInstance()->SaveRelaxedCommandFunction(relaxedCommandCallback);
-#endif
 }
 
 void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6304,6 +6386,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
     SaveArkUIPageTranslateFunctions(taskExecutor);
+    SaveGetCurrentAbilityLanguageInfoFunction(taskExecutor);
     SaveTraverseWebForPageSceneCallback(taskExecutor);
     auto pageSceneMatcher = std::make_shared<NG::PageSceneRuleManager>();
     auto pageSceneDetectCallback = [weakTaskExecutor = taskExecutor, pageSceneMatcher](
@@ -6428,6 +6511,57 @@ void UIContentImpl::SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>&
     UiSessionManager::GetInstance()->SaveArkUIPageTranslateFunctions(
         std::move(getTextFunction), std::move(startFunction), std::move(endFunction),
         std::move(resetFunction), std::move(resultFunction));
+}
+
+void UIContentImpl::SaveGetCurrentAbilityLanguageInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    const int32_t instanceId = instanceId_;
+    auto getAbilityLanguageInfo = [weakTaskExecutor = taskExecutor, instanceId](
+                                      std::string& language, std::string& region) -> int32_t {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            LOGW("GetCurrentAbilityLanguageInfo task executor is null");
+            return FAILED;
+        }
+
+        int32_t result = FAILED;
+        std::string resultLanguage;
+        std::string resultRegion;
+        constexpr uint32_t GET_ABILITY_LANGUAGE_INFO_TIMEOUT_TIME = 1500;
+        auto task = [instanceId, &result, &resultLanguage, &resultRegion]() {
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            if (!container) {
+                LOGW("GetCurrentAbilityLanguageInfo container is null");
+                return;
+            }
+            auto languageTag = container->GetResourceInfo().GetResourceConfiguration().GetLanguage();
+            if (languageTag.empty()) {
+                LOGW("GetCurrentAbilityLanguageInfo language tag is empty");
+                return;
+            }
+            std::string script;
+            Localization::ParseLocaleTag(languageTag, resultLanguage, script, resultRegion, false);
+            if (resultLanguage.empty() || resultRegion.empty()) {
+                LOGW("GetCurrentAbilityLanguageInfo locale is empty, languageEmpty=%{public}d, "
+                     "regionEmpty=%{public}d",
+                    resultLanguage.empty(), resultRegion.empty());
+                return;
+            }
+            result = NO_ERROR;
+        };
+        if (!taskExecutor->PostSyncTaskTimeout(task, TaskExecutor::TaskType::UI,
+                GET_ABILITY_LANGUAGE_INFO_TIMEOUT_TIME, "UiSessionGetCurrentAbilityLanguageInfo")) {
+            LOGW("GetCurrentAbilityLanguageInfo post UI task failed");
+            return FAILED;
+        }
+        if (result != NO_ERROR) {
+            return result;
+        }
+        language = std::move(resultLanguage);
+        region = std::move(resultRegion);
+        return NO_ERROR;
+    };
+    UiSessionManager::GetInstance()->SaveGetCurrentAbilityLanguageInfoFunction(std::move(getAbilityLanguageInfo));
 }
 
 void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6593,7 +6727,7 @@ void UIContentImpl::RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& task
 
 void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandAsync = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+    auto sendCommandSync = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         if (!taskExecutor) {
             LOGI("Task executor is null");
@@ -6604,16 +6738,16 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
             [id, command, &result]() {
                 auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
                 if (!node) {
-                    LOGI("UiSessionSendCommandAsyncPattern: Node is null for id: %{public}d", id);
+                    LOGI("UiSessionSendCommandSyncPattern: Node is null for id: %{public}d", id);
                     result = 13;
                     return;
                 }
                 result = node->OnRecvCommand(command);
             },
-            TaskExecutor::TaskType::UI, "UiSessionSendCommandAsyncPattern");
+            TaskExecutor::TaskType::UI, "UiSessionSendCommandSyncPattern");
         return result;
     };
-    UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
+    UiSessionManager::GetInstance()->SaveForSendCommandSyncFunction(sendCommandSync);
     auto sendCommand = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);

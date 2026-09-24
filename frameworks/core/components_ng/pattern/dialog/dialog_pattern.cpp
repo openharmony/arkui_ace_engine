@@ -26,6 +26,9 @@
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
+#ifndef CROSS_PLATFORM
+#include "base/ressched/ressched_report.h"
+#endif
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/multi_thread.h"
@@ -474,7 +477,8 @@ bool DialogPattern::SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode)
             return true;
         }
         // Normal processing for other cases
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties_.systemMaterial));
+        ViewAbstract::SetSystemMaterialForOverlay(
+            AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties_.systemMaterial));
         return true;
     }
     return false;
@@ -3153,6 +3157,7 @@ void DialogPattern::ReportShow()
 {
 #ifndef CROSS_PLATFORM
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report show event.");
+    ResSchedReport::GetInstance().ReportDialogShow();
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
             ComponentEventType::COMPONENT_EVENT_DIALOG);

@@ -201,7 +201,7 @@ float ScrollableUtils::GetMoveOffset(
     auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
     auto curGeometry = curFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(curGeometry, notMove);
-    auto curFrameSize = curGeometry->GetFrameSize();
+    auto curFrameSize = curFrameNode->GetPaintRectWithTransform().GetSize();
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
         "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",

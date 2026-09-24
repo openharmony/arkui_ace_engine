@@ -46,6 +46,10 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabContentOnWillHideModifier.identity, TabContentOnWillHideModifier, event);
         return this;
       }
+      tabBarVisibility(visibility: TabVisibility, displayMode?: TabBarDisplayMode): TabContent {
+        modifierWithKey(this._modifiersWithKeys, TabContentTabBarVisibilityModifier.identity, TabContentTabBarVisibilityModifier, { visibility, displayMode });
+        return this;
+      }
     }
     
     class TabContentTabBarModifier extends ModifierWithKey<SubTabBarStyle | BottomTabBarStyle> {
@@ -148,6 +152,25 @@ function loadComponent(): ComponentObj | undefined {
         }
       }
     }
+
+    class TabContentTabBarVisibilityModifier extends ModifierWithKey<TabContentTabBarVisibility> {
+      constructor(value: TabContentTabBarVisibility) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabcontenttabbarvisibility');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabContent.resetTabBarVisibility(node);
+        } else {
+          getUINativeModule().tabContent.setTabBarVisibility(node, this.value.visibility, this.value.displayMode);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return this.stageValue.visibility !== this.value.visibility ||
+          this.stageValue.displayMode !== this.value.displayMode;
+      }
+    }
     
     loadComponent.componentObj = { 'component': ArkTabContentComponent };
   }
@@ -202,6 +225,10 @@ class JSTabContent extends JSContainerBase {
 
   static onWillHide(value: any): void {
     getUINativeModule().tabContent.setTabContentOnWillHide(true, value);
+  }
+
+  static tabBarVisibility(visibility: any, displayMode?: any): void {
+    getUINativeModule().tabContent.setTabBarVisibility(true, visibility, displayMode);
   }
 
   static attributeModifier(modifier: any): void {

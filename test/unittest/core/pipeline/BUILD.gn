@@ -31,12 +31,13 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.cpp",
     "$ace_root/frameworks/core/components_ng/dump_utils/dump_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/syntax/with_env_node.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/material/material_processor.cpp",
     "$ace_root/frameworks/core/event/resample_algo.cpp",
     "$ace_root/frameworks/core/pipeline/container_window_manager.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/environment_manager.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
+    "$ace_root/frameworks/core/event/event_info_convertor.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_cpu_boost.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_event_report.cpp",
@@ -148,9 +149,11 @@ ace_unittest("pipeline_context_test_ng") {
     "pipeline_context_test_ng_six.cpp",
     "pipeline_context_test_ng_three.cpp",
     "pipeline_context_test_ng_two.cpp",
+    "right_mouse_mapping_test_ng.cpp",
   ]
   external_deps = [
     "c_utils:utils",
+    "cJSON:cjson",
     "graphic_2d:2d_graphics",
     "napi:ace_napi",
   ]

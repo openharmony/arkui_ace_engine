@@ -11,8 +11,8 @@
 | 来源 | 需求 Owner 提出 |
 | CodeSpec ID | issue-76660-withenv-direction |
 | 关联 Issue | https://gitcode.com/openharmony/arkui_ace_engine/issues/76660 |
-| 提出人 | TBD |
-| 目标发行版本 | TBD |
+| 提出人 | 未指定（需求记录未提供） |
+| 目标发行版本 | 未规划版本 |
 | 候选 Profile | arkui (arkui/component, arkui/sdk-api) |
 | 优先级 | P0 |
 | 状态 | Baselined |
@@ -110,6 +110,8 @@
 | 2025-05-25 | Owner | 自定义 env 范围 | 自定义 env 已交付，重构牵连但非新交付 | — |
 | 2025-05-25 | Owner | 维测合同 | 可以添加 dump 信息，较为次要 | — |
 | 2025-05-25 | Owner | 框架核心能力 | 初版设值/查值/更新通知未规格化和测试验收，框架能力和 direction 共生交付 | — |
+| 2026-08-05 | Owner | 下树与再次挂树语义 | detached/off-main-tree 组件不再拥有旧 WithEnv 祖先；已读取的 direction Env 恢复 `Auto`，CustomEnv 恢复组件初始化默认值；未读取变量保持懒初始化 | 合并进 spec/design/plan |
+| 2026-08-05 | Owner | 默认值边界 | 本期只定义 direction 默认值 `Auto`；不得为 fontScale 发明默认值或扩大本期规格 | 合并进 spec/design/review |
 
 ### 功能范围确认
 
@@ -196,11 +198,11 @@
 |------|------|
 | 基线版本 | v1.0 |
 | 基线日期 | 2025-05-25 |
-| Owner | TBD |
-| 确认人 | TBD |
+| Owner | 未指定（需求记录未提供） |
+| 确认人 | 需求 Owner（历史记录未保留实名） |
 | 复杂度 | 标准 |
 | Profile | arkui (arkui/component, arkui/sdk-api) |
-| 目标发行版本 | TBD |
+| 目标发行版本 | 未规划版本 |
 | 版本状态 | proposed |
 
 ### 问题陈述
@@ -237,10 +239,15 @@ WithEnv 环境变量框架初版采用朴素爬树遍历实现，性能差且难
 | AC-4 | WHEN 自定义组件使用 `@Env(WritableEnvKey.DIRECTION)` 但无 WithEnv 祖先 THEN `directionValue` 保持默认值（组件定义的初始值） | 边界 | US-2 |
 | AC-5 | WHEN 子节点显式设置 `.direction(Direction.Ltr)` 而 WithEnv 设置 `.env(WritableEnvKey.DIRECTION, Direction.Rtl)` THEN 子节点使用 `Direction.Ltr` | 正常 | US-3 |
 | AC-6 | WHEN WithEnv 容器内嵌套另一个 WithEnv 且内层设置不同的 direction THEN 内层容器内的子节点使用内层的 direction 值 | 正常 | US-1 |
-| AC-7 | WHEN 不使用 WithEnv 组件的页面执行组件创建/布局/渲染 THEN 路径上无 env 相关的额外函数调用、分支判断或内存分配 | 边界 | US-4 |
-| AC-8 | WHEN 子节点查询 env 值 THEN 查值时间复杂度优于 O(n) 爬树遍历 | 正常 | US-4 |
-| AC-9 | WHEN 节点在组件树中挂载/卸载/移动 THEN env 缓存正确维护，无泄漏或脏数据 | 正常 | US-4 |
+| AC-7 | WHEN 不使用 relevant Env/CustomEnv 的组件上下树 THEN 不进入前端 tree-state 处理，不产生 env 查值或状态通知 | 边界 | US-4 |
+| AC-8 | WHEN 子节点查询 env 值 THEN 返回当前最近祖先值；O(1) 缓存仅作为后续设计目标，不作为本期通过条件 | 正常 | US-4 |
+| AC-9 | WHEN 节点在组件树中挂载/卸载/移动 THEN env 作用域与依赖按当前树位置维护，无旧 owner 脏数据 | 正常 | US-4 |
 | AC-10 | WHEN 重构完成后 THEN 已有 CustomEnv/CustomEnvKey/customEnv 功能行为不变 | 正常 | US-4 |
+| AC-11 | WHEN 已读取 WithEnv 覆盖值的组件进入 detached/off-main-tree 状态 THEN direction Env 恢复 `Auto`，CustomEnv 恢复组件初始化时保存的本地默认值 | 恢复 | US-2, US-4 |
+| AC-12 | WHEN 组件只声明但从未读取相关 Env/CustomEnv THEN 首次挂树、下树和再次挂树均不得提前查值或触发状态更新 | 兼容 | US-2, US-4 |
+| AC-13 | WHEN 组件在 detached/off-main-tree 状态首次读取 Env/CustomEnv 后挂入 WithEnv 子树 THEN 已初始化值更新为新祖先链的最近 WithEnv 值 | 恢复 | US-2, US-4 |
+
+AC-7/AC-8 在 2025-05-25 已确认“性能仅为理想目标、非硬性通过条件”。2026-08-05 的规格整理据此将其收敛为“未消费路径不进入前端处理”和“查值正确性”契约；O(1) 缓存、零分支/零调用不进入本期 `spec.md` 验收。
 
 ### 范围边界
 
@@ -251,9 +258,11 @@ WithEnv 环境变量框架初版采用朴素爬树遍历实现，性能差且难
 - WithEnv 内部框架重构（朴素爬树 → 高性能架构）
 - API 声明按 `32825.diff` 更新
 - 自定义 env 因重构的连带适配
+- 已初始化 `@Env`/`@CustomEnv` 在下树、首次挂树和 reparent 时按当前树作用域恢复；未初始化变量保持既有懒初始化
 
 **不包含：**
 - `fontScale` 功能实现（仅架构扩展性设计考量）
+- `fontScale` 默认值定义与其用户可见生命周期规格
 - `ReadonlySystemEnvKey` 具体键实现（仅 API 占位）
 - 跨仓变更
 
@@ -261,10 +270,10 @@ WithEnv 环境变量框架初版采用朴素爬树遍历实现，性能差且难
 
 | 子系统 | 仓库 | 模块/路径 | 当前职责 | 影响类型 | Owner |
 |--------|------|-----------|----------|----------|-------|
-| ArkUI | ace_engine | WithEnv 组件 pattern | 容器组件，持有 env 值 | 修改 | TBD |
-| ArkUI | ace_engine | @Env 装饰器运行时 | 装饰器，注入 env 值到组件变量 | 修改 | TBD |
-| ArkUI | ace_engine | env 查值/通知框架内部 | 朴素爬树遍历实现 | 重写 | TBD |
-| ArkUI | ace_engine | SDK API 声明 (.d.ts) | WithEnv 和 common 类型声明 | 修改 | TBD |
+| ArkUI | ace_engine | WithEnv 组件 pattern | 容器组件，持有 env 值 | 修改 | 未指定 |
+| ArkUI | ace_engine | @Env 装饰器运行时 | 装饰器，注入 env 值到组件变量 | 修改 | 未指定 |
+| ArkUI | ace_engine | env 查值/通知框架内部 | 最近祖先解析与通知 | 修改 | 未指定 |
+| ArkUI | ace_engine | SDK API 声明 (.d.ts) | WithEnv 和 common 类型声明 | 修改 | 未指定 |
 
 ### API 变更项清单
 
@@ -308,7 +317,7 @@ WithEnv 环境变量框架初版采用朴素爬树遍历实现，性能差且难
 - [x] 所有 P0/P1 用户故事有 AC
 - [x] 每条 AC 可测试、可度量
 - [x] 范围内/外已确认
-- [ ] `manifest.target_release` 已确认或明确 TBD — 当前 TBD
+- [x] `manifest.target_release` 已明确为未规划版本（`unplanned`）
 - [x] `manifest.profile` 已确认
 - [x] 涉及仓、模块、SIG 已识别
 - [x] 不涉及项已标记 N/A

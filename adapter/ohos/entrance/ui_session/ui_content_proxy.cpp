@@ -536,20 +536,30 @@ int32_t UIContentServiceProxy::SendCommand(int32_t id, const std::string& comman
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::SendCommandAsync(int32_t id, const std::string& command)
+int32_t UIContentServiceProxy::SendCommandSync(int32_t id, const std::string& command)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LOGW("SendCommand Async write interface token failed");
+        LOGW("SendCommandSync write interface token failed");
         return FAILED;
     }
     if (!data.WriteInt32(id) || !data.WriteString(command)) {
-        LOGW("SendCommand Async write data failed");
+        LOGW("SendCommandSync write data failed");
         return FAILED;
     }
-    return Remote()->SendRequest(SENDCOMMAND_ASYNC_EVENT, data, reply, option);
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SENDCOMMAND_SYNC_EVENT, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendCommandSync send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        return REPLY_ERROR;
+    }
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        LOGW("SendCommandSync read reply failed");
+        return REPLY_ERROR;
+    }
+    return result;
 }
 
 int32_t UIContentServiceProxy::SendCommand(const std::string command)

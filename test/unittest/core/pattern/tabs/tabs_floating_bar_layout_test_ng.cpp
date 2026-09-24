@@ -905,4 +905,105 @@ HWTEST_F(TabsFloatingBarLayoutTestNg, MeasureTabBar002, TestSize.Level1)
     EXPECT_NE(layoutProperty_, nullptr);
 }
 
+/**
+ * @tc.name: TabBarPatternSetIsFloatingBar001
+ * @tc.desc: Test TabBarPattern SetIsFloatingBar propagates isFloatingBar_ to layout algorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarLayoutTestNg, TabBarPatternSetIsFloatingBar001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    model.SetBarOverlap(true);
+    model.SetIsVertical(false);
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetIsFloatingBar(true);
+    EXPECT_TRUE(tabBarPattern_->isFloatingBar_);
+
+    auto layoutAlgorithm = tabBarPattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    EXPECT_TRUE(tabBarLayoutAlgorithm->isFloatingBar_);
+}
+
+/**
+ * @tc.name: TabBarPatternSetIsFloatingBar002
+ * @tc.desc: Test TabBarPattern SetIsFloatingBar false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarLayoutTestNg, TabBarPatternSetIsFloatingBar002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_FALSE(tabBarPattern_->isFloatingBar_);
+    tabBarPattern_->SetIsFloatingBar(false);
+    EXPECT_FALSE(tabBarPattern_->isFloatingBar_);
+
+    auto layoutAlgorithm = tabBarPattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    EXPECT_FALSE(tabBarLayoutAlgorithm->isFloatingBar_);
+}
+
+/**
+ * @tc.name: TabBarPatternColorInvertColorMode001
+ * @tc.desc: Test TabBarPattern SetColorInvertColorMode and GetColorInvertColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarLayoutTestNg, TabBarPatternColorInvertColorMode001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    // Default: COLOR_MODE_UNDEFINED
+    EXPECT_EQ(tabBarPattern_->GetColorInvertColorMode(), ColorMode::COLOR_MODE_UNDEFINED);
+    EXPECT_FALSE(tabBarPattern_->IsColorInvertActive());
+
+    tabBarPattern_->SetColorInvertColorMode(ColorMode::DARK);
+    EXPECT_EQ(tabBarPattern_->GetColorInvertColorMode(), ColorMode::DARK);
+    EXPECT_TRUE(tabBarPattern_->IsColorInvertActive());
+
+    tabBarPattern_->SetColorInvertColorMode(ColorMode::LIGHT);
+    EXPECT_EQ(tabBarPattern_->GetColorInvertColorMode(), ColorMode::LIGHT);
+    EXPECT_TRUE(tabBarPattern_->IsColorInvertActive());
+}
+
+/**
+ * @tc.name: TabBarPatternColorInvertColorMode002
+ * @tc.desc: Test TabBarPattern IsColorInvertActive returns false for COLOR_MODE_UNDEFINED
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarLayoutTestNg, TabBarPatternColorInvertColorMode002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_FALSE(tabBarPattern_->IsColorInvertActive());
+
+    tabBarPattern_->SetColorInvertColorMode(ColorMode::DARK);
+    EXPECT_TRUE(tabBarPattern_->IsColorInvertActive());
+
+    tabBarPattern_->SetColorInvertColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    EXPECT_FALSE(tabBarPattern_->IsColorInvertActive());
+}
+
 } // namespace OHOS::Ace::NG

@@ -98,6 +98,14 @@ void SetTabBarOpacityImpl(Ark_TabsController peer,
     auto convValue = Converter::Convert<float>(opacity);
     peerImpl->TriggerSetTabBarOpacity(convValue);
 }
+Ark_TabBarDisplayMode GetBarDisplayModeImpl(Ark_TabsController peer)
+{
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, ARK_TAB_BAR_DISPLAY_MODE_BOTTOM_TABBAR);
+    auto controller = peerImpl->GetControllerWeakPtr().Upgrade();
+    CHECK_NULL_RETURN(controller, ARK_TAB_BAR_DISPLAY_MODE_BOTTOM_TABBAR);
+    return static_cast<Ark_TabBarDisplayMode>(controller->GetBarDisplayMode());
+}
 } // TabsControllerAccessor
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
 {
@@ -109,6 +117,7 @@ const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
         TabsControllerAccessor::PreloadItemsImpl,
         TabsControllerAccessor::SetTabBarTranslateImpl,
         TabsControllerAccessor::SetTabBarOpacityImpl,
+        TabsControllerAccessor::GetBarDisplayModeImpl,
     };
     return &TabsControllerAccessorImpl;
 }

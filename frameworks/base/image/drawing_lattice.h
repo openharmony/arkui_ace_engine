@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Ace {
-class ACE_EXPORT DrawingLattice : public AceType {
+class ACE_FORCE_EXPORT DrawingLattice : public AceType {
     DECLARE_ACE_TYPE(DrawingLattice, AceType);
 
 public:

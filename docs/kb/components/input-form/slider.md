@@ -72,7 +72,6 @@ Slider 已完成组件化改造，JSView 文件不存在，Bridge 和动态属�
 | node_modifier 委托层 | `frameworks/core/interfaces/native/node/node_slider_modifier.cpp` | 通过 `DynamicModuleHelper` 转发到 Slider 动态模块 |
 | Peer / Accessor 委托层 | `frameworks/core/interfaces/native/implementation/slider_modifier.cpp`、`slider_extender_accessor.cpp`、`slider_ops_accessor.cpp` | 静态 ArkTS Peer / extender / ops accessor 通过动态模块获取实现 |
 
-独立 SO：`libarkui_slider.z.so`。组件化改造参考：`./组件化重构通用方案.md`。
 
 ### 外部依赖入口
 
@@ -135,7 +134,6 @@ Slider 功能域：`specs/05-ui-components/04-input-form-components/05-slider/`
 
 ## 相关主题
 
-- Toggle 组件：`docs/kb/components/selector/toggle.md`
-- Text 组件：`docs/kb/components/basic/text.md`
-- Image 组件：`docs/kb/components/media/image.md`
-- 组件化重构通用方案：`./组件化重构通用方案.md`
+- [Toggle 组件](../selector/toggle.md)
+- [Text 组件](../basic/text.md)
+- [Image 组件](../media/image.md)

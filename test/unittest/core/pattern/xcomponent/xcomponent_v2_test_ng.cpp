@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
@@ -592,6 +593,79 @@ HWTEST_F(XComponentV2TestNg, XComponentSurfaceHolderTest001, TestSize.Level1)
      */
     code = surfaceHolder.RemoveSurfaceCallback(&surfaceCallback);
     EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: XComponentSurfaceHolderTest002
+ * @tc.desc: Test SetSurfaceConfig links holder to config and returns PARAM_INVALID when no interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentSurfaceHolderTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a config and a holder
+     */
+    ArkUI_XComponentSurfaceConfig config;
+    OH_ArkUI_SurfaceHolder holder;
+    /**
+     * @tc.steps: step2. call SetSurfaceConfig with valid config
+     * @tc.expected: config_ is set, returns PARAM_INVALID (no interface).
+     *   Note: surfaceHolders_ insertion is the C API wrapper's responsibility.
+     */
+    auto code = holder.SetSurfaceConfig(&config);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(holder.config_, &config);
+}
+
+/**
+ * @tc.name: XComponentSurfaceHolderTest003
+ * @tc.desc: Test SetSurfaceConfig switches to new config and unlinks from old config's set
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentSurfaceHolderTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create two configs and one holder
+     */
+    ArkUI_XComponentSurfaceConfig config1;
+    ArkUI_XComponentSurfaceConfig config2;
+    OH_ArkUI_SurfaceHolder holder;
+    /**
+     * @tc.steps: step2. set config1
+     * @tc.expected: holder.config_ is config1
+     */
+    holder.SetSurfaceConfig(&config1);
+    EXPECT_EQ(holder.config_, &config1);
+    /**
+     * @tc.steps: step3. switch to config2
+     * @tc.expected: holder unlinked from config1's set, linked to config2
+     */
+    holder.SetSurfaceConfig(&config2);
+    EXPECT_EQ(config1.surfaceHolders_.count(&holder), 0u);
+    EXPECT_EQ(holder.config_, &config2);
+}
+
+/**
+ * @tc.name: XComponentSurfaceHolderTest004
+ * @tc.desc: Test SetSurfaceConfig with nullptr returns PARAM_INVALID and leaves config_ unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentSurfaceHolderTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create config and holder, link them
+     */
+    ArkUI_XComponentSurfaceConfig config;
+    OH_ArkUI_SurfaceHolder holder;
+    holder.SetSurfaceConfig(&config);
+    EXPECT_EQ(holder.config_, &config);
+    /**
+     * @tc.steps: step2. call SetSurfaceConfig with nullptr
+     * @tc.expected: returns PARAM_INVALID, config_ unchanged (nullptr early return before unlink)
+     */
+    auto code = holder.SetSurfaceConfig(nullptr);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(holder.config_, &config);
 }
 
 /**
@@ -1206,5 +1280,27 @@ HWTEST_F(XComponentV2TestNg, XComponentV2SetSurfaceRectTest, TestSize.Level1)
     XComponentModelNG::SetXComponentSurfaceRect(AceType::RawPtr(frameNode), 0.0, 0.0, 100.0, 100.0);
     EXPECT_EQ(pattern->selfIdealSurfaceHeight_, 100.0);
     EXPECT_EQ(pattern->selfIdealSurfaceWidth_, 100.0);
+}
+
+/**
+ * @tc.name: XComponentV2ControllerSetSurfaceRectTest
+ * @tc.desc: Test controller surface rect update uses V2 implementation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentV2ControllerSetSurfaceRectTest, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<XComponentPatternV2>(
+        XComponentType::SURFACE, XComponentNodeType::DECLARATIVE_NODE);
+    pattern->drawSize_ = SizeF(400.0f, 400.0f);
+    XComponentControllerNG controller;
+    controller.SetPattern(pattern);
+    controller.SetIdealSurfaceWidth(100.0f);
+    controller.SetIdealSurfaceHeight(80.0f);
+    controller.SetIdealSurfaceOffsetX(12.0f);
+    controller.SetIdealSurfaceOffsetY(16.0f);
+    controller.UpdateSurfaceBounds();
+
+    EXPECT_EQ(pattern->surfaceSize_, SizeF(100.0f, 80.0f));
+    EXPECT_EQ(pattern->surfaceOffset_, OffsetF(12.0f, 16.0f));
 }
 } // namespace OHOS::Ace::NG

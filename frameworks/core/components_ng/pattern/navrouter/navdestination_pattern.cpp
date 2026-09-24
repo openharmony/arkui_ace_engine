@@ -564,14 +564,14 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
+    if (!backupStyle_.has_value()) {
+        backupStyle_ = windowManager->GetSystemBarStyle();
+    }
+    currStyle_ = style;
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
     CHECK_NULL_VOID(navigationNode);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    if (!backupStyle_.has_value()) {
-        backupStyle_ = windowManager->GetSystemBarStyle();
-        navigationPattern->SetBackupStyle(backupStyle_);
-    }
-    currStyle_ = style;
+    navigationPattern->SetBackupStyle(backupStyle_);
     if (navigationPattern->IsFullPageNavigation() && navigationPattern->IsTopNavDestination(host)) {
         if (currStyle_.value() != nullptr) {
             windowManager->SetSystemBarStyle(currStyle_.value());

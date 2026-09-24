@@ -234,9 +234,11 @@ bool FolderStackLayoutAlgorithm::IsFullWindow(
         foldStackLayoutProperty, realWidth, realHeight, safeArea, windowMode, fullScreen)) {
         return true;
     }
+
+    bool isWindowFullScreen = IsWindowFullScreenMode(windowMode);
     if (!NearEqual(realWidth, rootWidth - safeArea.left_.Length() - safeArea.right_.Length()) ||
         !NearEqual(realHeight, rootHeight - safeArea.top_.Length() - safeArea.bottom_.Length()) ||
-        windowMode != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        !isWindowFullScreen) {
         return false;
     }
     return true;
@@ -263,8 +265,9 @@ bool FolderStackLayoutAlgorithm::CheckExpandConstraintFullScreen(
     if (ignoreOpts.edges & NG::LAYOUT_SAFE_AREA_EDGE_END) {
         fullScreen.AddWidth(safeArea.right_.Length());
     }
+    bool isWindowFullScreen = IsWindowFullScreenMode(windowMode);
     if (NearEqual(realWidth, fullScreen.Width()) && NearEqual(realHeight, fullScreen.Height()) &&
-        windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        isWindowFullScreen) {
         return true;
     }
     return false;
@@ -325,18 +328,14 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
     }
     CHECK_NULL_RETURN(displayInfo, false);
     bool isFullWindow = IsFullWindow(frameSize, foldStackLayoutProperty, layoutWrapper);
-    bool isFoldable = OHOS::Ace::SystemProperties::IsBigFoldProduct();
-    bool isPortraitFoldable = OHOS::Ace::SystemProperties::IsPortraitFoldProduct();
     auto foldStatus = displayInfo->GetFoldStatus();
-    auto rotation = displayInfo->GetRotation();
-    auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
-    auto isPortrait = rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
+    auto creaseDirection = displayInfo->GetFoldCreaseDirection();
     TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
-        "folderStack state isFullWindow:%{public}d, isFoldable:%{public}d, "
-        "foldStatus:%{public}d, isLandscape:%{public}d",
-        isFullWindow, isFoldable, foldStatus, isLandscape);
+        "folderStack state isFullWindow:%{public}d, "
+        "foldStatus:%{public}d, creaseDirection:%{public}d",
+        isFullWindow, foldStatus, static_cast<int32_t>(creaseDirection));
     return isFullWindow && foldStatus == FoldStatus::HALF_FOLD &&
-        ((isLandscape && isFoldable) || (isPortrait && isPortraitFoldable));
+        creaseDirection == FoldCreaseDirection::HORIZONTAL;
 }
 
 void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrapper)
@@ -346,8 +345,7 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<FolderStackPattern>();
     CHECK_NULL_VOID(pattern);
-    if (isIntoFolderStack_ == pattern->IsInHoverMode() ||
-        (!OHOS::Ace::SystemProperties::IsBigFoldProduct() && !OHOS::Ace::SystemProperties::IsPortraitFoldProduct())) {
+    if (isIntoFolderStack_ == pattern->IsInHoverMode()) {
         return;
     }
     auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();

@@ -241,7 +241,7 @@ void SecuritySessionWrapperImpl::NotifySizeChangeReason(
 }
 
 void SecuritySessionWrapperImpl::NotifyOriginAvoidArea(
-    const Rosen::AvoidArea& avoidArea, uint32_t type) const
+    const Rosen::AvoidArea& avoidArea, uint32_t type, WindowSizeChangeReason reason) const
 {
 }
 

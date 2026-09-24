@@ -97,6 +97,7 @@ private:
     static napi_value SetHdrComposition(napi_env env, napi_callback_info info);
     static void ParseHdrCompositionOptions(napi_env env, napi_value napiOptions, HdrCompositionOptions& options);
     static napi_value Invalidate(napi_env env, napi_callback_info info);
+    static napi_value SetSVGResourceLimitLevel(napi_env env, napi_callback_info info);
 
     static thread_local napi_ref baseConstructor_;
     static thread_local napi_ref layeredConstructor_;

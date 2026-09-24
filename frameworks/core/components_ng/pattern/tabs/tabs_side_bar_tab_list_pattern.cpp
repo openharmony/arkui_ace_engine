@@ -27,6 +27,10 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -35,13 +39,79 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension DEFAULT_TAB_BAR_ITEM_HEIGHT = 56.0_vp;
-const Dimension SIDEBAR_TAB_ICON_TEXT_GAP = 16.0_vp;
-const Dimension SIDEBAR_TAB_LEFT_RIGHT_PADDING = 8.0_vp;
+const Dimension SIDEBAR_TAB_ITEM_MARGIN = 8.0_vp;
+constexpr float SIDEBAR_TAB_MAX_FONT_SCALE = 2.0f;
+constexpr float SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL8 = 1.75f;
+constexpr float SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL10 = 2.0f;
+
+// Get vertical margin for text node based on font scale.
+// Default: padding_level4, >=1.75: padding_level8, >=2.0: padding_level10
+Dimension GetVerticalMarginForFontScale(float fontScale, const RefPtr<TabTheme>& tabTheme)
+{
+    if (GreatOrEqual(fontScale, SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL10)) {
+        return tabTheme->GetSideBarPaddingLevel10();
+    } else if (GreatOrEqual(fontScale, SIDEBAR_TAB_FONT_SCALE_THRESHOLD_LEVEL8)) {
+        return tabTheme->GetSideBarPaddingLevel8();
+    }
+    return tabTheme->GetSideBarPaddingLevel4();
+}
+
+std::u16string ToLowerU16Str(std::u16string str)
+{
+    for (auto& ch : str) {
+        if (ch >= u'A' && ch <= u'Z') {
+            ch += (u'a' - u'A');
+        }
+    }
+    return str;
+}
 }
 
 void TabsSideBarTabListPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+}
+
+void TabsSideBarTabListPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto tabTheme = host->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    auto columnNode = GetTabItemContainerNode();
+    CHECK_NULL_VOID(columnNode);
+    auto fontScale = context->GetFontScaleFromEnv(host);
+    auto verticalMargin = GetVerticalMarginForFontScale(fontScale, tabTheme);
+    for (const auto& child : columnNode->GetChildren()) {
+        auto tabItemNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(tabItemNode);
+        // Only update icon+text type tab items (Button > Row > Image + Text).
+        // Skip custom builder/content tab items — their layout is user-defined.
+        const auto& itemChild = tabItemNode->GetChildren();
+        if (itemChild.empty() || itemChild.front()->GetTag() != V2::ROW_ETS_TAG) {
+            continue;
+        }
+        // Update text node top/bottom margin based on current font scale
+        auto rowNode = AceType::DynamicCast<FrameNode>(itemChild.front());
+        CHECK_NULL_CONTINUE(rowNode);
+        constexpr size_t ICON_AND_TEXT_SIZE = 2;
+        if (rowNode->GetChildren().size() < ICON_AND_TEXT_SIZE) {
+            continue;
+        }
+        auto textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
+        CHECK_NULL_CONTINUE(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_CONTINUE(textLayoutProperty);
+        MarginProperty textMargin;
+        textMargin.left = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+        textMargin.right = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+        textMargin.top = CalcLength(verticalMargin);
+        textMargin.bottom = CalcLength(verticalMargin);
+        textLayoutProperty->UpdateMargin(textMargin);
+        tabItemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void TabsSideBarTabListPattern::SetCurrentIndex(int32_t index)
@@ -60,6 +130,97 @@ void TabsSideBarTabListPattern::SetCurrentIndex(int32_t index)
     // Notify Swiper to switch page
     if (swiperController_) {
         swiperController_->SwipeTo(index);
+    }
+
+    UpdateTabItemTextAndIconColor(index);
+}
+
+void TabsSideBarTabListPattern::UpdateTabItemTextAndIconColor(int32_t selectedIndex)
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(scrollNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(columnNode);
+    int32_t childCount = columnNode->GetTotalChildCount();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabTheme = tabsNode->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+
+    for (int32_t index = 0; index < childCount; index++) {
+        auto tabItemNode = DynamicCast<FrameNode>(columnNode->GetChildAtIndex(index));
+        CHECK_NULL_CONTINUE(tabItemNode);
+        auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(index));
+        CHECK_NULL_CONTINUE(tabContentNode);
+        auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+        CHECK_NULL_CONTINUE(tabContentPattern);
+        const auto& tabBarParam = tabContentPattern->GetTabBarParam();
+
+        if (tabBarParam.HasContent() || tabBarParam.HasBuilder()) {
+            continue;
+        }
+        
+        bool isSelected = (index == selectedIndex);
+        Color textColor = isSelected ? tabTheme->GetSideBarSelectedTextColor() :
+            tabTheme->GetSideBarUnselectedTextColor();
+        Color iconColor = isSelected ? tabTheme->GetSideBarSelectedIconColor() :
+            tabTheme->GetSideBarUnselectedIconColor();
+        auto rowNode = AceType::DynamicCast<FrameNode>(tabItemNode->GetChildren().front());
+        CHECK_NULL_CONTINUE(rowNode);
+        UpdateTextColorAndIconColor(rowNode, textColor, iconColor, isSelected);
+    }
+}
+
+void TabsSideBarTabListPattern::UpdateTextColorAndIconColor(const RefPtr<FrameNode>& rowNode,
+    Color textColor, Color iconColor, bool isSelected)
+{
+    auto iconNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
+    CHECK_NULL_VOID(iconNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    if (isSelected) {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarSelectedTextColor().value();
+        }
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarSelectedIconColor().value();
+        }
+    } else {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarUnselectedTextColor().value();
+        }
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarUnselectedIconColor().value();
+        }
+    }
+
+    textLayoutProperty->UpdateTextColor(textColor);
+    imagePaintProperty->UpdateSvgFillColor(iconColor);
+    textNode->MarkModifyDone();
+    textNode->MarkDirtyNode();
+    iconNode->MarkModifyDone();
+    iconNode->MarkDirtyNode();
+}
+
+void TabsSideBarTabListPattern::RefreshAllTabItemColors()
+{
+    // Re-apply text/icon colors for all tab items based on current selected index
+    UpdateTabItemTextAndIconColor(currentIndex_);
+    // Re-apply selected board color for the currently selected item
+    if (currentIndex_ >= 0) {
+        UpdateTabItemStyle(currentIndex_, true);
     }
 }
 
@@ -82,9 +243,7 @@ void TabsSideBarTabListPattern::UpdateTabItemStyle(int32_t index, bool selected)
     CHECK_NULL_VOID(host);
     auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(scrollNode);
-    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    auto columnNode = GetTabItemContainerNode();
     CHECK_NULL_VOID(columnNode);
     if (index < 0 || index >= static_cast<int32_t>(columnNode->GetChildren().size())) {
         return;
@@ -94,6 +253,15 @@ void TabsSideBarTabListPattern::UpdateTabItemStyle(int32_t index, bool selected)
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto color = selected ? tabTheme->GetSideBarListItemActivedColor() : Color::TRANSPARENT;
+    if (selected) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+        if (tabsNode) {
+            auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+            if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedBoardColor().has_value()) {
+                color = tabLayoutProperty->GetSidebarSelectedBoardColor().value();
+            }
+        }
+    }
     renderContext->UpdateBackgroundColor(color);
     itemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -101,6 +269,10 @@ void TabsSideBarTabListPattern::UpdateTabItemStyle(int32_t index, bool selected)
 void TabsSideBarTabListPattern::ApplySearchFilter(
     std::function<bool(int32_t, const std::string& text)> searchFilter, const std::u16string& searchText)
 {
+    // Store active search state for cross-concern visibility coordination
+    activeSearchFilter_ = searchFilter;
+    activeSearchText_ = searchText;
+
     auto host = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
@@ -108,34 +280,23 @@ void TabsSideBarTabListPattern::ApplySearchFilter(
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
     auto tabContentNum = swiperNode->TotalChildCount();
-    if (host->GetChildren().empty()) {
-        return;
-    }
-    auto scrollNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
-    CHECK_NULL_VOID(scrollNode);
-    if (scrollNode->GetChildren().empty()) {
-        return;
-    }
-    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildren().front());
+    auto columnNode = GetTabItemContainerNode();
     CHECK_NULL_VOID(columnNode);
     auto children = columnNode->GetChildren();
     int32_t tabIndex = 0;
     // Pre-compute searchText lowercase and UTF-8 conversion outside loop
-    auto toLowerU16 = [](std::u16string str) {
-        for (auto& ch : str) {
-            if (ch >= u'A' && ch <= u'Z') {
-                ch += (u'a' - u'A');
-            }
-        }
-        return str;
-    };
-    auto searchTextLower = toLowerU16(searchText);
+    auto searchTextLower = ToLowerU16Str(searchText);
     auto searchText8 = UtfUtils::Str16ToStr8(searchText);
     for (auto it = children.begin(); it != children.end(); ++it, ++tabIndex) {
         auto itemNode = AceType::DynamicCast<FrameNode>(*it);
         CHECK_NULL_CONTINUE(itemNode);
         auto property = itemNode->GetLayoutProperty();
         CHECK_NULL_CONTINUE(property);
+        // Check defaultVisibility: if hidden by defaultVisibility, override search result to GONE
+        if (IsHiddenByDefaultVisibility(tabIndex)) {
+            property->UpdateVisibility(VisibleType::GONE);
+            continue;
+        }
         bool isVisible = true;
         do {
             if (searchText.empty()) {
@@ -153,7 +314,7 @@ void TabsSideBarTabListPattern::ApplySearchFilter(
             CHECK_NULL_BREAK(tabContentNode);
             auto pattern = tabContentNode->GetPattern<TabContentPattern>();
             CHECK_NULL_BREAK(pattern);
-            auto tabTextLower = toLowerU16(UtfUtils::Str8ToStr16(pattern->GetTabBarParam().GetText()));
+            auto tabTextLower = ToLowerU16Str(UtfUtils::Str8ToStr16(pattern->GetTabBarParam().GetText()));
             isVisible = tabTextLower.find(searchTextLower) != std::u16string::npos;
         } while (false);
         property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::GONE);
@@ -229,6 +390,10 @@ void TabsSideBarTabListPattern::CreateOrUpdateTabItemTextAndIcon(
     CHECK_NULL_VOID(tabContentPattern);
     auto tabItemContainerNode = GetTabItemContainerNode();
     CHECK_NULL_VOID(tabItemContainerNode);
+    auto tabTheme = tabItemNode->GetTheme<TabTheme>(true);
+    CHECK_NULL_VOID(tabTheme);
+    auto context = tabItemNode->GetContext();
+    CHECK_NULL_VOID(context);
     RefPtr<FrameNode> rowNode = nullptr;
     if (tabItemNode->GetChildren().size() != 1 || !tabItemNode->GetChildren().front() ||
         tabItemNode->GetChildren().front()->GetTag() != V2::ROW_ETS_TAG) {
@@ -241,8 +406,12 @@ void TabsSideBarTabListPattern::CreateOrUpdateTabItemTextAndIcon(
         linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         linearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
         linearLayoutProperty->SetIsVertical(false);
-        // Row fills TabItem width & height so icon+text content area covers the full item
-        linearLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        // Row fills TabItem width (100%) so icon+text content area covers the full item width.
+        // Height is WRAP content — do NOT use MATCH_PARENT for height because TabItem
+        // itself has WRAP height with minHeight=56vp; MATCH_PARENT on Row would cause
+        // circular expansion in an unconstrained Scroll container.
+        linearLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), std::nullopt));
         rowNode->MountToParent(tabItemNode);
     } else {
         rowNode = AceType::DynamicCast<FrameNode>(tabItemNode->GetChildren().front());
@@ -266,50 +435,56 @@ void TabsSideBarTabListPattern::CreateOrUpdateTabItemTextAndIcon(
         }
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(iconNode);
-        // Text uses layoutWeight(1) to fill remaining Row width after icon+margin,
-        // so it won't overflow Row and ellipsis works when text is too long.
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty) {
-            textLayoutProperty->UpdateLayoutWeight(1);
-        }
-        // Set margin-right on icon to create gap between icon and text
-        auto iconLayoutProperty = iconNode->GetLayoutProperty();
-        if (iconLayoutProperty) {
-            MarginProperty margin;
-            margin.right = CalcLength(SIDEBAR_TAB_ICON_TEXT_GAP);
-            iconLayoutProperty->UpdateMargin(margin);
-        }
         iconNode->MountToParent(rowNode);
         textNode->MountToParent(rowNode);
         // Row mounts to ColumnNode (not directly to tabListNode)
         auto index = std::clamp(position, 0, static_cast<int32_t>(tabItemContainerNode->GetChildren().size()));
         tabItemNode->MountToParent(tabItemContainerNode, index);
-        return;
+    } else {
+        if (isFrameNode) {
+            auto builderNode = tabContentPattern->FireCustomStyleNode();
+            rowNode->ReplaceChild(AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back()), builderNode);
+        }
+        auto oldIcon = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
+        CHECK_NULL_VOID(oldIcon);
+        if (tabBarParam.GetSymbol().has_value() && oldIcon->GetTag() != V2::SYMBOL_ETS_TAG) {
+            auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+            rowNode->ReplaceChild(oldIcon, icon);
+        } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
+            auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+            rowNode->ReplaceChild(oldIcon, icon);
+        }
+        iconNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
+        textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
     }
-    if (isFrameNode) {
-        auto builderNode = tabContentPattern->FireCustomStyleNode();
-        rowNode->ReplaceChild(AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back()), builderNode);
-    }
-    auto oldIcon = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
-    CHECK_NULL_VOID(oldIcon);
-    if (tabBarParam.GetSymbol().has_value() && oldIcon->GetTag() != V2::SYMBOL_ETS_TAG) {
-        auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        rowNode->ReplaceChild(oldIcon, icon);
-    } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
-        auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
-        rowNode->ReplaceChild(oldIcon, icon);
-    }
-    iconNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().front());
-    textNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildren().back());
-    // Set margin-right on icon for icon-text gap
+    // Set left/right margin on icon for edge spacing and half of the icon-text gap
     if (iconNode) {
         auto iconLayoutProperty = iconNode->GetLayoutProperty();
         if (iconLayoutProperty) {
-            MarginProperty margin;
-            margin.right = CalcLength(SIDEBAR_TAB_ICON_TEXT_GAP);
-            iconLayoutProperty->UpdateMargin(margin);
+            MarginProperty iconMargin;
+            iconMargin.left = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            iconMargin.right = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            iconLayoutProperty->UpdateMargin(iconMargin);
+        }
+    }
+    // Set left/right + top/bottom margin on text for edge spacing, icon-text gap, and vertical spacing
+    if (textNode) {
+        auto textLayoutProperty = textNode->GetLayoutProperty();
+        if (textLayoutProperty) {
+            // Text uses layoutWeight(1) to fill remaining Row width after icon+margin
+            textLayoutProperty->UpdateLayoutWeight(1);
+            // Text margin: left/right for edge spacing + icon-text gap,
+            // top/bottom for vertical spacing (default padding_level4)
+            MarginProperty textMargin;
+            textMargin.left = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            textMargin.right = CalcLength(SIDEBAR_TAB_ITEM_MARGIN);
+            auto fontScale = context->GetFontScaleFromEnv(textNode);
+            auto verticalMargin = GetVerticalMarginForFontScale(fontScale, tabTheme);
+            textMargin.top = CalcLength(verticalMargin);
+            textMargin.bottom = CalcLength(verticalMargin);
+            textLayoutProperty->UpdateMargin(textMargin);
         }
     }
     rowNode->MarkModifyDone();
@@ -339,17 +514,29 @@ void TabsSideBarTabListPattern::UpdateTabBarItemTextProperties(
     textRenderContext->UpdateClipEdge(true);
     if (!isFrameNode) {
         textLayoutProperty->UpdateContent(tabBarParam.GetText());
-        textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
+        textLayoutProperty->UpdateFontSize(tabTheme->GetSideBarTextFontSize());
         textLayoutProperty->UpdateTextAlign(TextAlign::START); // Left-aligned (Row layout)
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    }
-    if (!tabBarParam.GetIcon().empty()) {
-        textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabTextSize());
+        textLayoutProperty->UpdateMaxFontScale(SIDEBAR_TAB_MAX_FONT_SCALE);
+        textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     }
     if (!isFrameNode) {
         TabContentModelNG::UpdateLabelStyle(labelStyle, textLayoutProperty);
     }
+
+    bool isSelected = (myIndex == indicator);
+    Color textColor = isSelected ? tabTheme->GetSideBarSelectedTextColor() :
+        tabTheme->GetSideBarUnselectedTextColor();
+    auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    if (isSelected) {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarSelectedTextColor().value();
+        }
+    } else {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedTextColor().has_value()) {
+            textColor = tabLayoutProperty->GetSidebarUnselectedTextColor().value();
+        }
+    }
+    textLayoutProperty->UpdateTextColor(textColor);
 }
 
 void TabsSideBarTabListPattern::UpdateTabBarItemIconProperties(
@@ -387,6 +574,23 @@ void TabsSideBarTabListPattern::UpdateTabBarItemIconProperties(
     }
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
+
+    auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
+    bool isSelected = (myIndex == indicator);
+    Color iconColor = isSelected ? tabTheme->GetSideBarSelectedIconColor() :
+        tabTheme->GetSideBarUnselectedIconColor();
+    if (isSelected) {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarSelectedIconColor().value();
+        }
+    } else {
+        if (tabLayoutProperty && tabLayoutProperty->GetSidebarUnselectedIconColor().has_value()) {
+            iconColor = tabLayoutProperty->GetSidebarUnselectedIconColor().value();
+        }
+    }
+    imagePaintProperty->UpdateSvgFillColor(iconColor);
 }
 
 void TabsSideBarTabListPattern::AddOrUpdateTabItemWithIconAndText(
@@ -398,16 +602,6 @@ void TabsSideBarTabListPattern::AddOrUpdateTabItemWithIconAndText(
     CHECK_NULL_VOID(tabContentPattern);
     auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
     CHECK_NULL_VOID(tabsNode);
-    auto tabItemNodeProperty = tabItemNode->GetLayoutProperty();
-    CHECK_NULL_VOID(tabItemNodeProperty);
-    tabItemNodeProperty->MarkUserDefinedHeightConfigured();
-    std::optional<CalcLength> width = std::nullopt;
-    auto&& layoutConstraint = tabItemNodeProperty->GetCalcLayoutConstraint();
-    if (layoutConstraint && layoutConstraint->selfIdealSize) {
-        width = layoutConstraint->selfIdealSize->Width();
-    }
-    std::optional<CalcLength> height = CalcLength(DEFAULT_TAB_BAR_ITEM_HEIGHT);
-    tabItemNodeProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 
     auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabLayoutProperty);
@@ -458,6 +652,7 @@ RefPtr<FrameNode> TabsSideBarTabListPattern::GetOrCreateTabItemNode(int32_t id)
         });
     CHECK_NULL_RETURN(tabItemNode, nullptr);
     auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(tabItemNode));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     buttonModifier->setBlendColor(
         nodeHandle, tabTheme->GetSideBarListItemPressedColor(), tabTheme->GetSideBarListItemHoverColor());
     buttonModifier->setFocusBorderColor(nodeHandle, tabTheme->GetSideBarListItemFocusColor());
@@ -467,12 +662,99 @@ RefPtr<FrameNode> TabsSideBarTabListPattern::GetOrCreateTabItemNode(int32_t id)
     buttonModifier->setButtonBorderRadius(nodeHandle, radius, radius, radius, radius);
     auto property = tabItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, nullptr);
-    PaddingProperty padding;
-    padding.left = CalcLength(SIDEBAR_TAB_LEFT_RIGHT_PADDING);
-    padding.right = CalcLength(SIDEBAR_TAB_LEFT_RIGHT_PADDING);
-    property->UpdatePadding(padding);
+    // Width: 100% of parent; Height: match-content with minimum 56vp
     property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), std::nullopt));
+    property->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(DEFAULT_TAB_BAR_ITEM_HEIGHT)));
+    property->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
     return tabItemNode;
+}
+
+bool TabsSideBarTabListPattern::IsHiddenByDefaultVisibility(
+    const RefPtr<TabContentPattern>& tabContentPattern, const RefPtr<TabsNode>& tabsNode) const
+{
+    CHECK_NULL_RETURN(tabContentPattern, false);
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, false);
+    return tabsPattern->IsTabShouldHideByVisibility(tabContentPattern->GetDefaultVisibility());
+}
+
+bool TabsSideBarTabListPattern::IsHiddenByDefaultVisibility(int32_t tabIndex) const
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, false);
+    if (tabIndex >= swiperNode->TotalChildCount()) {
+        return false;
+    }
+    auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(tabIndex));
+    CHECK_NULL_RETURN(tabContentNode, false);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    return IsHiddenByDefaultVisibility(tabContentPattern, tabsNode);
+}
+
+void TabsSideBarTabListPattern::ApplyDefaultVisibility()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsProperty);
+    // The sidebar does not display in Bottom style, so there is no need to update the visibility of the internal tab.
+    auto barLayoutStyle = tabsProperty->GetBarLayoutStyleValue(TabBarLayoutStyle::BOTTOM);
+    if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
+        return;
+    }
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto tabContentNum = swiperNode->TotalChildCount();
+    auto columnNode = GetTabItemContainerNode();
+    CHECK_NULL_VOID(columnNode);
+    auto children = columnNode->GetChildren();
+    // Pre-compute search state for cross-concern visibility coordination
+    bool hasActiveSearch = !activeSearchText_.empty();
+    auto searchTextLower = ToLowerU16Str(activeSearchText_);
+    auto searchText8 = UtfUtils::Str16ToStr8(activeSearchText_);
+    int32_t tabIndex = 0;
+    for (auto it = children.begin(); it != children.end(); ++it, ++tabIndex) {
+        auto itemNode = AceType::DynamicCast<FrameNode>(*it);
+        CHECK_NULL_CONTINUE(itemNode);
+        auto property = itemNode->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(property);
+        if (tabIndex >= tabContentNum) {
+            continue;
+        }
+        // Check defaultVisibility
+        if (IsHiddenByDefaultVisibility(tabIndex)) {
+            property->UpdateVisibility(VisibleType::GONE);
+            continue;
+        }
+        // Neither defaultVisibility nor search hides this tab
+        if (!hasActiveSearch) {
+            property->UpdateVisibility(VisibleType::VISIBLE);
+            continue;
+        }
+        // defaultVisibility says visible — but check search filter too
+        bool searchVisible = true;
+        do {
+            if (activeSearchFilter_) {
+                searchVisible = activeSearchFilter_(tabIndex, searchText8);
+                break;
+            }
+            auto tabContentNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildByIndex(tabIndex));
+            CHECK_NULL_BREAK(tabContentNode);
+            auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+            CHECK_NULL_BREAK(tabContentPattern);
+            auto tabTextLower = ToLowerU16Str(UtfUtils::Str8ToStr16(tabContentPattern->GetTabBarParam().GetText()));
+            searchVisible = tabTextLower.find(searchTextLower) != std::u16string::npos;
+        } while (false);
+        property->UpdateVisibility(searchVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+    }
+    host->MarkNeedSyncRenderTree();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TabsSideBarTabListPattern::AddOrUpdateTabListItem(
@@ -552,6 +834,12 @@ void TabsSideBarTabListPattern::AddOrUpdateTabListItem(
         auto color = (myIndex == indicator)
             ? tabTheme->GetSideBarListItemActivedColor()
             : Color::TRANSPARENT;
+        if (myIndex == indicator) {
+            auto tabLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+            if (tabLayoutProperty && tabLayoutProperty->GetSidebarSelectedBoardColor().has_value()) {
+                color = tabLayoutProperty->GetSidebarSelectedBoardColor().value();
+            }
+        }
         itemRenderContext->UpdateBackgroundColor(color);
     }
     if (currentIndex_ == -1) {
@@ -559,5 +847,11 @@ void TabsSideBarTabListPattern::AddOrUpdateTabListItem(
     }
 
     tabItemContainerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+
+    // Apply defaultVisibility for this single tab item
+    auto tabItemProperty = tabItemNode->GetLayoutProperty();
+    CHECK_NULL_VOID(tabItemProperty);
+    bool shouldHide = IsHiddenByDefaultVisibility(tabContentPattern, tabsNode);
+    tabItemProperty->UpdateVisibility(shouldHide ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

@@ -44,6 +44,15 @@ public:
         return isIntoFolderStack_;
     }
 
+    static bool IsWindowFullScreenMode(WindowMode windowMode)
+    {
+        bool isWindowFullScreen = windowMode == WindowMode::WINDOW_MODE_FULLSCREEN;
+#ifdef ANDROID_PLATFORM
+        isWindowFullScreen = true;
+#endif
+        return isWindowFullScreen;
+    }
+
 private:
     void LayoutHoverStack(LayoutWrapper* layoutWrapper, const RefPtr<FolderStackGroupNode>& hostNode,
         const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty);

@@ -965,11 +965,17 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(C
     auto onGestureJudgeFunc = [ffiCallback = CJLambda::Create(callback), node = frameNode](
                                   const RefPtr<NG::GestureInfo>& gestureInfo,
                                   const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
-        CJGestureInfo cjGestureInfo;
-        CJBaseGestureEvent baseGestureEvent;
-        if (gestureInfo->GetTag()) {
-            cjGestureInfo.tag = gestureInfo->GetTag().value().c_str();
+        CJGestureInfo cjGestureInfo {};
+        CJBaseGestureEvent baseGestureEvent {};
+        auto tag = gestureInfo->GetTag();
+        std::string tagStr;
+        if (tag.has_value()) {
+            tagStr = tag.value();
+            cjGestureInfo.tag = tagStr.c_str();
+        } else {
+            cjGestureInfo.tag = "";
         }
+        // lifetime: cjGestureInfo.tag points into tagStr's buffer; do not modify tagStr before ffiCallback()
         cjGestureInfo.type = static_cast<int32_t>(gestureInfo->GetType());
         cjGestureInfo.isSystemGesture = gestureInfo->IsSystemGesture();
 
@@ -1007,7 +1013,7 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
         const std::list<WeakPtr<NG::NGGestureRecognizer>>& others
     )-> GestureJudgeResult {
         ACE_SCORING_EVENT("onGestureRecognizerJudgeBegin");
-        CJBaseGestureEvent baseGestureEvent;
+        CJBaseGestureEvent baseGestureEvent {};
         CJBaseEvent ffiBaseEvent {};
         CJEventTarget ffiEventTarget {};
         CJArea ffiArea {};

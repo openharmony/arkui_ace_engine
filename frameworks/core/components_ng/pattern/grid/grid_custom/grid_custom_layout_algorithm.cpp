@@ -74,7 +74,7 @@ void GridCustomLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     bool matchChildren = ShouldMatchChildrenByLayoutPolicy(mainSize, layoutPolicy, info_.axis_);
     Init(props);
-    CalculateContentClipFixOffset(wrapper_, mainSize, mainGap_);
+    CalculateContentClipFixOffset(wrapper_, mainSize);
 
     if (info_.targetIndex_) {
         MeasureToTarget(mainSize);
@@ -287,7 +287,7 @@ void GridCustomLayoutAlgorithm::MeasureForward(float mainSize)
 
 void GridCustomLayoutAlgorithm::MeasureBackward(float mainSize)
 {
-    if (NeedJump(mainSize) || reloadFlag_) {
+    if (IsScrollBarDrag() || NeedJump(mainSize) || reloadFlag_) {
         JumpToTargetOffset(mainSize);
         return;
     }
