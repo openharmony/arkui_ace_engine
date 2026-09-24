@@ -1448,7 +1448,7 @@ ArkUINativeModuleValue ListBridge::SetOnItemDragStart(ArkUIRuntimeCallInfo* runt
         if (!builderFunc) {
             return nullptr;
         }
-        // use another VSP instance while executing the builder function
+        // use another VSP instance while executing the builder function.
         ViewStackModel::GetInstance()->NewScope();
         {
             PipelineContext::SetCallBackNode(weakNode);
