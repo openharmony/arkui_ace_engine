@@ -605,7 +605,7 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         }
 
         if (Negative(offset) && (source == SCROLL_FROM_ANIMATION_SPRING || !navBarPattern_->CanCoordScrollUp(offset))) {
-            // When rebounding form scrolling over, trigger the ProcessNavBarReactOnEnd callback.
+            // When rebounding from scrolling over, trigger the ProcessNavBarReactOnEnd callback.
             isReactInParentMovement_ = false;
             ProcessNavBarReactOnEnd();
         }
