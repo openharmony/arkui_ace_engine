@@ -1125,21 +1125,7 @@ ScrollSnapAlign ListPattern::GetScrollSnapAlign() const
     CHECK_NULL_RETURN(host, ScrollSnapAlign::NONE);
     auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, ScrollSnapAlign::NONE);
-    // FEAT-029: a built-in scrollSnapStrategy align overrides the legacy attribute.
-    auto strategy = listProperty->GetScrollSnapStrategy();
-    if (strategy.has_value() && strategy.value().align != ScrollSnapAlign::NONE) {
-        return strategy.value().align;
-    }
     return listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
-}
-
-ScrollSnapStrategy ListPattern::GetScrollSnapStrategy() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, ScrollSnapStrategy());
-    auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(listProperty, ScrollSnapStrategy());
-    return listProperty->GetScrollSnapStrategy().value_or(ScrollSnapStrategy());
 }
 
 bool ListPattern::IsAtTop() const
@@ -1486,13 +1472,7 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     auto snapDirection = snapAnimationOptions.snapDirection;
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
-    // FEAT-029: provider-only scrollSnapStrategy uses the shared two-stage flow; a built-in strategy
-    // align is folded into GetScrollSnapAlign() and keeps the legacy List snap pipeline.
-    auto strategy = listProperty->GetScrollSnapStrategy().value_or(ScrollSnapStrategy());
-    if (strategy.hasProvider && strategy.align == ScrollSnapAlign::NONE) {
-        return StartItemSnapAnimation(snapAnimationOptions);
-    }
-    auto scrollSnapAlign = GetScrollSnapAlign();
+    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     CHECK_NULL_RETURN(scrollSnapAlign != ScrollSnapAlign::NONE, false);
     if (snapDirection != SnapDirection::NONE) {
         return ScrollToSnapIndex(snapDirection, scrollSnapAlign);
@@ -4189,14 +4169,20 @@ void ListPattern::ApplyEditModeToCachedItems(bool enabled)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (itemPosition_.empty()) {
         return;
     }
     bool needReserveCheckBoxSpace = enabled && NeedJudgeWithHotZone();
+    auto cachedLines = std::max(layoutProperty->GetCachedCountWithDefault(), 0);
+    bool showCached = layoutProperty->GetShowCachedItemsValue(false);
+    auto cachedItems = static_cast<int64_t>(cachedLines) * std::max(lanes_, 1);
 
     auto startIndex = itemPosition_.begin()->first;
-    for (int32_t index = startIndex - 1; index >= 0; --index) {
-        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, true);
+    auto cacheStartIndex = static_cast<int32_t>(std::max<int64_t>(startIndex - cachedItems, 0));
+    for (int32_t index = startIndex - 1; index >= cacheStartIndex; --index) {
+        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, !showCached);
         if (!childWrapper) {
             continue;
         }
@@ -4208,8 +4194,9 @@ void ListPattern::ApplyEditModeToCachedItems(bool enabled)
 
     int32_t totalCount = std::max(maxListItemIndex_ + 1, 0);
     auto endIndex = itemPosition_.rbegin()->first;
-    for (int32_t index = endIndex + 1; index < totalCount; ++index) {
-        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, true);
+    auto cacheEndIndex = static_cast<int32_t>(std::min<int64_t>(endIndex + cachedItems + 1, totalCount));
+    for (int32_t index = endIndex + 1; index < cacheEndIndex; ++index) {
+        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, !showCached);
         if (!childWrapper) {
             continue;
         }

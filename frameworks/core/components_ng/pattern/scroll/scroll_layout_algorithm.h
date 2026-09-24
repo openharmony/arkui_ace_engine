@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,6 +106,8 @@ private:
     void EstimateInitialOffset(LayoutWrapper* layoutWrapper, Axis axis, SizeF selfSize, double& estimateCurrentOffset);
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
+    void CheckChildOutOfScrollRange(LayoutWrapper* layoutWrapper, const RefPtr<GeometryNode>& childGeometryNode,
+        const SizeF& scrollSize);
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
     void CalcContentOffset(LayoutWrapper* layoutWrapper);
     OffsetF GetAlignmentPosition(const RefPtr<ScrollLayoutProperty>& layoutProperty, Axis axis,

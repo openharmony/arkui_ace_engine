@@ -18,6 +18,7 @@
 
 #include "ui/base/geometry/offset.h"
 #include "ui/base/referenced.h"
+#include "ui/properties/color.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/touch_event.h"
@@ -33,6 +34,12 @@ struct ControlInteractionInfo {
     std::optional<SizeF> curFrameSize = std::nullopt;
     Dimension innerMoveOffset = Dimension();
     Dimension outerMoveOffset = Dimension();
+};
+
+struct LightEffectParams {
+    float posZ;
+    float intensity;
+    Color color;
 };
 
 class ControlInteractionBase {
@@ -54,6 +61,7 @@ private:
     static void InitLightEffect(RefPtr<FrameNode>& targetNode);
     static void UpdateLightPositionAndColor(RefPtr<FrameNode>& targetNode, float x, float y);
     static void ResetLightPositionAndColor(RefPtr<FrameNode>& targetNode);
+    static LightEffectParams GetLightEffectParamsBySize(float widthVp, float heightVp, ColorMode colorMode);
 };
 } // namespace OHOS::Ace::NG
 

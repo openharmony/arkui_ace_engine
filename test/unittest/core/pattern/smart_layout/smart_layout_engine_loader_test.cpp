@@ -49,7 +49,7 @@ public:
     void ApplyColumnConstraints() override {}
     void ApplyRowConstraints() override {}
     void ApplyGeneralConstraints() override {}
-    void ApplyScaleUpConstraints(double emptyRatioThreshold) override {}
+    void ApplyScaleUpConstraints() override {}
     void SetBoundingBox(const SmartLayoutRect& box) override
     {
         boundingBox_ = box;

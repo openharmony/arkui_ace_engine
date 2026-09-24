@@ -108,6 +108,14 @@ void TimePickerRowPattern::OnAttachToFrameNode()
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
+void TimePickerRowPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+}
+
 bool TimePickerRowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipLayout || config.skipMeasure) {

@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "fold demo module"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "fold demo"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "FoldDemo"
+    }
+  ]
+}

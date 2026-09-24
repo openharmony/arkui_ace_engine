@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
+#include "base/log/event_report.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
@@ -434,6 +435,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     }
     childWrapper->Layout();
+    CheckChildOutOfScrollRange(layoutWrapper, childGeometryNode, geometryNode->GetFrameSize());
     UpdateOverlay(layoutWrapper);
     if (scrollNode && scrollNode->GetSuggestOpIncActivatedOnce()) {
         MarkAndCheckNewOpIncNode(childWrapper, axis);
@@ -466,6 +468,30 @@ bool ScrollLayoutAlgorithm::UnableOverScroll(LayoutWrapper* layoutWrapper) const
     return (Positive(currentOffset_) && !scrollPattern->CanOverScrollStart(scrollPattern->GetScrollSource())) ||
            (Negative(currentOffset_) && GreatNotEqual(-currentOffset_, scrollableDistance_) &&
                !scrollPattern->CanOverScrollEnd(scrollPattern->GetScrollSource()));
+}
+
+void ScrollLayoutAlgorithm::CheckChildOutOfScrollRange(
+    LayoutWrapper* layoutWrapper, const RefPtr<GeometryNode>& childGeometryNode, const SizeF& scrollSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(childGeometryNode);
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
+    CHECK_NULL_VOID(scrollPattern);
+    auto scrollable = scrollPattern->GetScrollable();
+    if (scrollable && scrollable->IsSpringMotionRunning()) {
+        return;
+    }
+    RectF scrollRect(0.0f, 0.0f, scrollSize.Width(), scrollSize.Height());
+    auto childRect = childGeometryNode->GetFrameRect();
+    if (scrollRect.IsEmpty() || childRect.IsEmpty()) {
+        return;
+    }
+    if (!childRect.IsIntersectWith(scrollRect)) {
+        EventReport::ReportScrollableErrorEvent("Scroll", ScrollableErrorType::CHILD_OUT_OF_SCROLL_RANGE,
+            "Child component is completely laid out of the scroll range.");
+    }
 }
 
 void ScrollLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)

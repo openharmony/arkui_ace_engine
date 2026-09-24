@@ -198,7 +198,7 @@ private:
     void MarkDirtyIfNeeded();
 
 #ifdef OHOS_PLATFORM
-    void InsertSurfaceNode(const std::shared_ptr<SurfaceBufferNode>& surfaceNode);
+    void InsertSurfaceNode(const std::shared_ptr<SurfaceBufferNode>& surfaceNode, size_t& bufferSize);
     std::string GetPSurfaceName() override
     {
         CHECK_NULL_RETURN(producerSurface_, "");

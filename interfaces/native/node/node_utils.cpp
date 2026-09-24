@@ -17,6 +17,7 @@
 #include <memory>
 #include "node_extened.h"
 #include "node_model.h"
+#include "config_manager.h"
 
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
@@ -37,6 +38,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* s
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Int32 tempSize[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutSize(node->uiNodeHandle, &tempSize);
     size->width = tempSize[0];
@@ -52,6 +54,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPosition(ArkUI_NodeHandle node, ArkUI_IntOff
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Float32 tempPosition[2] = { 0.0f, 0.0f };
     impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutPositionWithoutMargin(
         node->uiNodeHandle, &tempPosition);
@@ -69,6 +72,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkU
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindow(node->uiNodeHandle, &tempOffset, false);
     globalOffset->x = tempOffset[0];
@@ -85,6 +89,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreen(node->uiNodeHandle, &tempOffset, false);
     screenOffset->x = tempOffset[0];
@@ -98,6 +103,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle nod
     CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(offset, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getGlobalPositionOnDisplay(
         node->uiNodeHandle, &tempOffset, false);
@@ -115,6 +121,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindowWithTransform(
         node->uiNodeHandle, &tempOffset, false);
@@ -139,6 +146,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreenWithTransform(
         node->uiNodeHandle, &tempOffset, false);
@@ -252,7 +260,11 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
 
 void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value)
 {
-    if (node == nullptr || !OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+    if (node == nullptr) {
+        return;
+    }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
         return;
     }
     if (name == nullptr || value == nullptr) {
@@ -267,6 +279,7 @@ void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* 
     if (node == nullptr) {
         return;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (name == nullptr) {
         LOGF_ABORT("RemoveCustomProperty input params name is nullptr");
     }
@@ -281,6 +294,7 @@ int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* 
     CHECK_NULL_RETURN_WITH_MESSAGE(
         name, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Name parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     char* value = nullptr;
     impl->getNodeModifiers()->getFrameNodeModifier()->getCustomProperty(node->uiNodeHandle, name, &value);
     *handle  = new ArkUI_CustomProperty({ .value = value });
@@ -295,6 +309,7 @@ int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_Ac
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(head, "Node has been disposed");
     ArkUINodeHandle* innerNodes = nullptr;
     int32_t totalSize = 0;
     impl->getNodeModifiers()->getFrameNodeModifier()->getActiveChildrenInfo(
@@ -317,6 +332,7 @@ ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node)
         return nullptr;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getParent(node->uiNodeHandle);
     return OHOS::Ace::NodeModel::GetArkUINode(attachNode);
 }
@@ -327,6 +343,7 @@ ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetCurrentPageRootNode(ArkUI_NodeHandle node
         return nullptr;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getCurrentPageRootNode(node->uiNodeHandle);
     return OHOS::Ace::NodeModel::GetArkUINode(attachNode);
 }
@@ -337,6 +354,7 @@ bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node)
         return 0;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     return impl->getNodeModifiers()->getFrameNodeModifier()->getNodeTag(node->uiNodeHandle);
 }
 
@@ -345,6 +363,7 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return -1;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != -1) {
         return node->type;
     }
@@ -361,6 +380,7 @@ int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindow
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     char* name = nullptr;
     int32_t error = impl->getNodeModifiers()->getFrameNodeModifier()->getWindowInfoByNode(
         node->uiNodeHandle, &name);
@@ -468,6 +488,7 @@ int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqu
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto id = impl->getNodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(node->uiNodeHandle);
     *uniqueId = id;
     if (*uniqueId < 0) {
@@ -481,6 +502,7 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO,
         __FUNCTION__, "Parent node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Parent node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO,
             __FUNCTION__, "Parent node is not a C node");
@@ -488,6 +510,7 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
     }
     CHECK_NULL_RETURN_WITH_MESSAGE(child, ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED,
         __FUNCTION__, "Child node parameter is null");
+    CHECK_NODE_DISPOSED(child, "Child node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(child)) {
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED,
             __FUNCTION__, "Child node is not a C node");
@@ -509,11 +532,13 @@ int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_No
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
         __FUNCTION__, "Parent node or child node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Parent node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
             __FUNCTION__, "Parent node is not a C node");
         return OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
     }
+    CHECK_NODE_DISPOSED(child, "Child node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(child)) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
             __FUNCTION__, "Child node is not a C node");
@@ -539,6 +564,7 @@ int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnR
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->isOnRenderTree(node->uiNodeHandle);
     *isOnRenderTree = static_cast<bool>(result);
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -550,6 +576,8 @@ int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         target_parent, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Target parent node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
+    CHECK_NODE_DISPOSED(target_parent, "Parent node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNodeOrAllowCrossLanguageTreeOperating(node) ||
         !OHOS::Ace::NodeModel::CheckIsCNodeOrAllowCrossLanguageTreeOperating(target_parent)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -571,6 +599,7 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Option parameter is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->cNode == false) {
         SET_ERROR_MESSAGE(
             ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is not a C node");
@@ -600,6 +629,7 @@ int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     
     ArkUICrossLanguageOption arkUIOption;
     auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptionsFull(
@@ -670,6 +700,7 @@ int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is not a C node");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -688,6 +719,7 @@ int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(
         node->uiNodeHandle, index);
     if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
@@ -703,6 +735,7 @@ int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(
         node->uiNodeHandle, index);
     if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
@@ -718,6 +751,7 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
         node->uiNodeHandle, position, expandMode);
     CHECK_NULL_RETURN_WITH_MESSAGE(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID,
@@ -729,6 +763,7 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
 ArkUI_ErrorCode OH_ArkUI_NativeModule_SetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy policy)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is not a custom node");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -755,6 +790,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetChildMountPolicy(ArkUI_NodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__,
         "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUINodeMountPolicy NodeMountPolicy;
     auto res = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getNodeMountPolicy(
         node->uiNodeHandle, &NodeMountPolicy);
@@ -772,6 +808,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntO
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToParent(node->uiNodeHandle, &tempOffset, false);
     globalOffset->x = tempOffset[0];
@@ -853,6 +890,7 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonEvent(ArkUI_NodeHandle node, ArkUI_N
     if (NDKCommonEventList.find(eventType) == NDKCommonEventList.end()) {
         return ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::MakeCommonEventMap(node, eventType, userData, callback)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -902,6 +940,7 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonEvent(ArkUI_NodeHandle node, ArkUI
     if (NDKCommonEventList.find(eventType) == NDKCommonEventList.end()) {
         return ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::ClearCommonEventMap(node, eventType)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -950,6 +989,7 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::MakeCommonEventMap(node, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT,
         userData, callback)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -972,6 +1012,7 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::ClearCommonEventMap(node, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -988,6 +1029,7 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent(ArkUI_Nod
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::MakeCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE, userData, callback)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -1001,6 +1043,7 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent(ArkUI_N
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::ClearCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -1040,6 +1083,7 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(targetNode, "Node has been disposed");
     ArkUI_Float32 tempOffset[2] = { position.x, position.y };
     ArkUI_Float32 tempPosition[2];
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
@@ -1062,6 +1106,7 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(targetNode, "Node has been disposed");
     ArkUI_Float32 tempOffset[2] = { windowPosition.x, windowPosition.y };
     ArkUI_Float32 tempPosition[2];
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(

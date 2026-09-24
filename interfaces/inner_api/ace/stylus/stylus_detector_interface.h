@@ -94,6 +94,7 @@ public:
         const std::shared_ptr<IStylusDetectorCallback>& callback) = 0;
     virtual void UnRegisterStylusInteractionListener(const std::string& bundleName) = 0;
     virtual bool Notify(const NotifyInfo& notifyInfo) = 0;
+    virtual void InitImfHook() {}
 
 protected:
     virtual ~StylusDetectorInterface() {}

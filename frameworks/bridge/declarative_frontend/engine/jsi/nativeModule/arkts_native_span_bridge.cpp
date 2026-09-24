@@ -797,11 +797,12 @@ ArkUINativeModuleValue SpanBridge::SetOnHover(ArkUIRuntimeCallInfo *runtimeCallI
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = secondArg->ToObject(vm);
-        OnHoverFunc callback = [vm, frameNode,
+        auto targetNode = AceType::WeakClaim(frameNode);
+        OnHoverFunc callback = [vm, node = targetNode,
             func = panda::CopyableGlobal(vm, func)](bool isHover, HoverInfo& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
 
             // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
             // It is not allowed to hold this address elsewhere.

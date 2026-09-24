@@ -181,6 +181,40 @@ function loadComponent(): ComponentObj | undefined {
 		}
 		(ImageSpanSupportSvg2Modifier as any).identity = Symbol('supportSvg2');
 
+		class ImageSpanResizableModifier extends ModifierWithKey<any> {
+			constructor(value: any) {
+				super(value);
+			}
+			applyPeer(node: any, reset: boolean): void {
+				if (reset) {
+					getUINativeModule().imageSpan.resetResizableSlice(node);
+					getUINativeModule().imageSpan.resetResizableLattice(node);
+				} else {
+					if (!isUndefined(this.value.lattice) && !isNull(this.value.lattice)) {
+						getUINativeModule().imageSpan.setResizableLattice(node, this.value.lattice);
+					} else {
+						getUINativeModule().imageSpan.resetResizableLattice(node);
+					}
+					let sliceLeft: any;
+					let sliceTop: any;
+					let sliceRight: any;
+					let sliceBottom: any;
+					if (!isUndefined(this.value.slice) && !isNull(this.value.slice)) {
+						let tmpSlice = this.value.slice;
+						sliceLeft = tmpSlice.left;
+						sliceTop = tmpSlice.top;
+						sliceRight = tmpSlice.right;
+						sliceBottom = tmpSlice.bottom;
+					}
+					getUINativeModule().imageSpan.setResizableSlice(node, sliceLeft, sliceTop, sliceRight, sliceBottom);
+				}
+			}
+			checkObjectDiff(): boolean {
+				return true;
+			}
+		}
+		(ImageSpanResizableModifier as any).identity = Symbol('imageSpanResizable');
+
 		class ImageSpanBorderRadiusModifier extends ModifierWithKey<any> {
 			constructor(value: any) {
 				super(value);
@@ -291,6 +325,10 @@ function loadComponent(): ComponentObj | undefined {
 				modifierWithKey(this._modifiersWithKeys, ImageSpanSupportSvg2Modifier.identity, ImageSpanSupportSvg2Modifier, value);
 				return this;
 			}
+			resizable(value: ResizableOptions): this {
+				modifierWithKey(this._modifiersWithKeys, ImageSpanResizableModifier.identity, ImageSpanResizableModifier, value);
+				return this;
+			}
 			borderRadius(value: Length | BorderRadiuses): this {
 				modifierWithKey(this._modifiersWithKeys, ImageSpanBorderRadiusModifier.identity, ImageSpanBorderRadiusModifier, value);
 				return this;
@@ -357,6 +395,26 @@ class JSImageSpan extends JSViewAbstract {
 
 	static supportSvg2(value: any): void {
 		getUINativeModule().imageSpan.setSupportSvg2(true, value);
+	}
+
+	static resizable(value: any): void {
+		if (isUndefined(value) || isNull(value)) {
+			return;
+		}
+		if (!isUndefined(value.lattice) && !isNull(value.lattice)) {
+			getUINativeModule().imageSpan.setResizableLattice(true, value.lattice);
+		}
+		let sliceLeft: any;
+		let sliceTop: any;
+		let sliceRight: any;
+		let sliceBottom: any;
+		if (!isUndefined(value.slice) && !isNull(value.slice)) {
+			sliceLeft = value.slice.left;
+			sliceTop = value.slice.top;
+			sliceRight = value.slice.right;
+			sliceBottom = value.slice.bottom;
+		}
+		getUINativeModule().imageSpan.setResizableSlice(true, sliceLeft, sliceTop, sliceRight, sliceBottom);
 	}
 
 	static attributeModifier(modifier: any): void {

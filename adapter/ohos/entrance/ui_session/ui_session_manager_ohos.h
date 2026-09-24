@@ -80,14 +80,12 @@ public:
     void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) override;
     void GetInspectorTree(ParamConfig config = ParamConfig()) override;
     void SaveInspectorTreeFunction(InspectorFunction&& function) override;
-    void AddValueForTree(int32_t id, const std::string& value) override;
-    void WebTaskNumsChange(int32_t num) override;
     void ReportInspectorTreeValue(const std::string& data) override;
     void SaveForSendCommandFunction(NotifySendCommandFunction&& function) override;
-    void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) override;
+    void SaveForSendCommandSyncFunction(NotifySendCommandSyncFunction&& function) override;
     void NotifyAllWebPattern(bool isRegister) override;
     void NotifySendCommandPattern(int32_t id, const std::string& command) override;
-    int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) override;
+    int32_t NotifySendCommandSyncPattern(int32_t id, const std::string& command) override;
     void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) override;
     void SaveGetHitTestInfoCallback(GetHitTestInfoFunction&& function) override;
     void GetLatestHitTestNodeInfosForTouch(InteractionParamConfig config) override;
@@ -174,7 +172,7 @@ public:
     void SaveWebPageSceneFunction(WebPageSceneFunction&& function) override;
     bool IsWebSourceEnabled(const std::string& ruleJson);
 
-    void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
+    void SaveReportProxy(sptr<IRemoteObject> reportProxy, int32_t processId);
 
 private:
     bool PostToCurrentTranslateManager(const char* caller,
@@ -192,6 +190,7 @@ private:
         bool enabled = true;
         bool reportOnRegister = true;
         bool onlyVisible = true;
+        bool rectCulling = false;
     };
 
     struct PageSceneRuleSetInfo {

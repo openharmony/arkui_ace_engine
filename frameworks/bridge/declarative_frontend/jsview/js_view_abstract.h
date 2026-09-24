@@ -681,6 +681,7 @@ public:
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
     static void JSRenderGroup(const JSCallbackInfo& info);
     static void JSExcludeFromRenderGroup(const JSCallbackInfo& info);
+    static void JSMarkLayeredRender(const JSCallbackInfo& info);
     static void JSRenderFit(const JSCallbackInfo& info);
     static void JSUseUnion(const JSCallbackInfo& info);
     static void JsExpandSafeArea(const JSCallbackInfo& info);
@@ -830,7 +831,9 @@ public:
                 return false;
             }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+            CHECK_EQUAL_RETURN(params->Length(), 0, false);
             auto param = params->GetValueAt(0);
+            if (!param->IsString()) return false;
             if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
                 result = static_cast<T>(resourceAdapter->GetIntByName(param->ToString()));
                 return true;

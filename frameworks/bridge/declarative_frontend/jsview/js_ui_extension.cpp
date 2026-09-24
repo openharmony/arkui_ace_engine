@@ -20,6 +20,7 @@
 #include "want_params.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/want/want_wrap.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -169,11 +170,13 @@ void JSUIExtensionProxy::DeleteCallbackFromList(uint32_t argc, napi_env env, nap
 {
     if (argc == 1) {
         if (type == RegisterType::SYNC) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SubEvent op=off_all kit=ArkUI event=syncReceiverRegister");
             for (const auto& item : onSyncOnCallbackList_) {
                 napi_delete_reference(env, item.first);
             }
             onSyncOnCallbackList_.clear();
         } else if (type == RegisterType::ASYNC) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SubEvent op=off_all kit=ArkUI event=asyncReceiverRegister");
             for (const auto& item : onAsyncOnCallbackList_) {
                 napi_delete_reference(env, item.first);
             }
@@ -201,10 +204,14 @@ std::list<std::function<void(const RefPtr<NG::UIExtensionProxy>&)>> JSUIExtensio
 {
     std::list<std::function<void(const RefPtr<NG::UIExtensionProxy>&)>> reList;
     if (type == RegisterType::SYNC) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "SubEvent op=get_on_func_list kit=ArkUI event=syncReceiverRegister");
         for (const auto& item : onSyncOnCallbackList_) {
             reList.emplace_back(item.second);
         }
     } else if (type == RegisterType::ASYNC) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "SubEvent op=get_on_func_list kit=ArkUI event=asyncReceiverRegister");
         for (const auto& item : onAsyncOnCallbackList_) {
             reList.emplace_back(item.second);
         }

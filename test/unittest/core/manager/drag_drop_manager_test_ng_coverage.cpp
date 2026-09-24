@@ -1595,7 +1595,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage057, TestSi
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
-        GetDragSummary(_, _, _, _, _, _))
+        GetDragSummary(_))
         .WillRepeatedly(testing::Return(1));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetDragExtraInfo(_))
@@ -1603,13 +1603,18 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage057, TestSi
     dragDropManager->RequireSummary();
 
     EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
-        GetDragSummary(_, _, _, _, _, _))
-        .WillRepeatedly(testing::Return(0));
+        GetDragSummary(_))
+        .WillRepeatedly(testing::Invoke([](DragSummaryInfo& summaryInfo) {
+            summaryInfo.summary = { { "general.file", 2 } };
+            summaryInfo.filenameExtensions = { ".jpg", ".png" };
+            return 0;
+        }));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetDragExtraInfo(_))
         .WillRepeatedly(testing::Return(0));
     dragDropManager->RequireSummary();
-    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(dragDropManager->summaryMap_, (std::map<std::string, int64_t> { { "general.file", 2 } }));
+    EXPECT_EQ(dragDropManager->dragSummaryInfo_.filenameExtensions, (std::vector<std::string> { ".jpg", ".png" }));
 }
 
 /**

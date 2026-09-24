@@ -41,9 +41,8 @@ GridItemModelNG GridSyncLoadTestNg::CreateGridItemForSyncLoad(float width, float
     ViewAbstract::SetFocusable(true);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
-        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
-    };
+    frameNode->measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>(
+        [](RefPtr<Kit::FrameNode>& node) { NG::MockPipelineContext::GetCurrent()->DecResponseTime(); });
     return itemModel;
 }
 

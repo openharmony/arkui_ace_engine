@@ -504,6 +504,21 @@ public:
     // Hook: subclasses with per-finger state must override and clean it up.
     virtual void OnFingerEscaped(int32_t /*fingerId*/) {}
 
+    void SetEscapedToEventManager(bool escaped)
+    {
+        isEscaped_ = escaped;
+    }
+
+    bool IsEscapedToManager() const
+    {
+        return isEscaped_;
+    }
+
+    const std::unordered_set<int32_t>& GetEscapedFingerIds() const
+    {
+        return escapedFingerIds_;
+    }
+
     void SetTriggeredIds(const std::unordered_set<int32_t>& existingFingers)
     {
         triggeredFingerIds_.insert(existingFingers.begin(), existingFingers.end());
@@ -523,6 +538,10 @@ protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
         disposal_ = disposal;
+        if (isEscaped_ && disposal == GestureDisposal::ACCEPT) {
+            OnAccepted();
+            return;
+        }
         BatchAdjudicate(recognizer, disposal);
     }
     virtual void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
@@ -617,6 +636,7 @@ protected:
 
     std::unordered_set<int32_t> escapedFingerIds_;
     std::unordered_set<int32_t> triggeredFingerIds_;
+    bool isEscaped_ = false;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

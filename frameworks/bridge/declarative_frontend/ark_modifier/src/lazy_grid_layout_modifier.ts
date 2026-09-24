@@ -28,7 +28,7 @@ class LazyArkLazyVGridLayoutComponent extends ArkScrollable {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
 
-  columnsTemplate(value: string): this {
+  columnsTemplate(value: string | ItemFillPolicy): this {
     this.lazyComponent.columnsTemplate(value);
     return this;
   }

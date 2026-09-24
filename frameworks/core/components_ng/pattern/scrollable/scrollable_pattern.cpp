@@ -926,90 +926,6 @@ void ScrollablePattern::SetDragEndCallback(const RefPtr<Scrollable>& scrollable)
     scrollable->SetDragEndCallback(std::move(dragEnd));
 }
 
-bool ScrollablePattern::StartItemSnapAnimation(const SnapAnimationOptions& snapAnimationOptions)
-{
-    auto strategy = GetScrollSnapStrategy();
-    if (!strategy.IsEnabled() || !IsScrollable()) {
-        return false;
-    }
-    auto scrollable = GetScrollable();
-    CHECK_NULL_RETURN(scrollable, false);
-    auto currentOffset = static_cast<float>(GetTotalOffset());
-    auto maxOffset = GetItemSnapMaxOffset();
-    auto minOffset = 0.0f;
-
-    if (strategy.hasProvider) {
-        // Custom provider: two-stage snap (approach offset -> handoff -> final snap target).
-        auto decayOffset = std::abs(snapAnimationOptions.snapDelta);
-        auto approachOffset = decayOffset;
-        if (strategy.calculateApproachOffset) {
-            // Negative / non-finite / throwing providers fall back to the natural decay offset.
-            auto resolved = strategy.calculateApproachOffset(snapAnimationOptions.animationVelocity, decayOffset);
-            if (std::isfinite(resolved) && GreatOrEqual(resolved, 0.0)) {
-                approachOffset = static_cast<float>(resolved);
-            }
-        }
-        float direction = !NearZero(snapAnimationOptions.animationVelocity)
-                              ? (snapAnimationOptions.animationVelocity > 0.0f ? 1.0f : -1.0f)
-                              : (snapAnimationOptions.snapDelta >= 0.0f ? 1.0f : -1.0f);
-        auto snapFunc = strategy.calculateSnapOffset;
-        auto align = strategy.align;
-        auto velocity = snapAnimationOptions.animationVelocity;
-        auto predictDelta = snapAnimationOptions.snapDelta;
-        auto targetGetter = [weak = WeakClaim(this), currentOffset, minOffset, maxOffset, snapFunc, align, velocity,
-                                predictDelta](float handoffVelocity) -> float {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN(pattern, currentOffset);
-            if (snapFunc) {
-                auto resolved = snapFunc(handoffVelocity);
-                if (std::isfinite(resolved)) {
-                    return ScrollSnapUtils::ClampSnapOffset(
-                        static_cast<float>(resolved), minOffset, maxOffset);
-                }
-            }
-            // Provider fallback: the built-in alignment target when an align is also configured,
-            // otherwise the end of the approach motion.
-            if (align == ScrollSnapAlign::NONE) {
-                return currentOffset;
-            }
-            auto candidates = pattern->BuildItemSnapCandidates(align);
-            auto selection = ScrollSnapUtils::SelectSnapTarget(candidates, currentOffset, handoffVelocity,
-                predictDelta, ScrollSnapUtils::DEFAULT_SNAP_THRESHOLD, Scrollable::GetVelocityScale());
-            if (!selection.found) {
-                return currentOffset;
-            }
-            return ScrollSnapUtils::ClampSnapOffset(selection.targetOffset, minOffset, maxOffset);
-        };
-        scrollable->StartItemSnapTwoStageAnimation(approachOffset * direction,
-            snapAnimationOptions.animationVelocity, snapAnimationOptions.fromScrollBar, std::move(targetGetter),
-            snapAnimationOptions.source);
-        return true;
-    }
-
-    // Built-in align strategy: deterministic candidate selection then an interruptible spring.
-    auto candidates = BuildItemSnapCandidates(strategy.align);
-    if (candidates.empty()) {
-        return false;
-    }
-    auto selection = snapAnimationOptions.snapDirection != SnapDirection::NONE
-        ? ScrollSnapUtils::SelectByDirection(
-            candidates, currentOffset, snapAnimationOptions.snapDirection == SnapDirection::FORWARD)
-        : ScrollSnapUtils::SelectSnapTarget(candidates, currentOffset, snapAnimationOptions.animationVelocity,
-            snapAnimationOptions.snapDelta, ScrollSnapUtils::DEFAULT_SNAP_THRESHOLD,
-            Scrollable::GetVelocityScale());
-    if (!selection.found) {
-        return false;
-    }
-    auto target = ScrollSnapUtils::ClampSnapOffset(selection.targetOffset, minOffset, maxOffset);
-    auto delta = target - currentOffset;
-    if (NearZero(delta)) {
-        return true;
-    }
-    scrollable->StartScrollSnapAnimation(
-        delta, snapAnimationOptions.animationVelocity, snapAnimationOptions.fromScrollBar, snapAnimationOptions.source);
-    return true;
-}
-
 void ScrollablePattern::SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);
@@ -1293,6 +1209,7 @@ void ScrollablePattern::OnTouchpadInteraction(PointF point)
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (GetAxis() == Axis::FREE) {
+        activeTouchFingerIds_.clear();
         gestureHub->RemoveTouchEvent(touchEvent_);
         touchEvent_.Reset();
         return; // using custom touch event in free scroll mode
@@ -1309,21 +1226,27 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         auto scrollable = pattern->scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
         CHECK_NULL_VOID(!info.GetChangedTouches().empty());
-        switch (info.GetChangedTouches().front().GetTouchType()) {
+        const auto& changedTouch = info.GetChangedTouches().front();
+        auto fingerId = changedTouch.GetFingerId();
+        switch (changedTouch.GetTouchType()) {
             case TouchType::DOWN:
+                pattern->activeTouchFingerIds_.insert(fingerId);
                 scrollable->HandleTouchDown();
                 pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
+                pattern->activeTouchFingerIds_.erase(fingerId);
                 if (!pattern->ShouldIgnoreTouchUpWithActiveFingers() ||
-                    std::none_of(info.GetTouches().begin(), info.GetTouches().end(), [](const auto& touch) {
-                        return touch.GetTouchType() != TouchType::UP && touch.GetTouchType() != TouchType::CANCEL;
-                    })) {
+                    pattern->activeTouchFingerIds_.empty()) {
                     scrollable->HandleTouchUp();
                 }
                 break;
             case TouchType::CANCEL:
-                scrollable->HandleTouchCancel();
+                pattern->activeTouchFingerIds_.erase(fingerId);
+                if (!pattern->ShouldIgnoreTouchUpWithActiveFingers() ||
+                    pattern->activeTouchFingerIds_.empty()) {
+                    scrollable->HandleTouchCancel();
+                }
                 break;
             default:
                 break;
@@ -1372,6 +1295,7 @@ void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     // call OnDetachFromFrameNodeMultiThread() by multi thread
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
+    activeTouchFingerIds_.clear();
     CHECK_NULL_VOID(frameNode);
     UnRegister2DragDropManager(frameNode);
     auto context = frameNode->GetContextWithCheck();
@@ -2414,7 +2338,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
             if (isFormUser) {
                 pattern->HandleAnimateFromUserStop();
             }
-            if (pattern->GetScrollEdgeType() != ScrollEdgeType::SCROLL_NONE && pattern->IsScrollReachEdge()) {
+            if (pattern->GetScrollEdgeType() != ScrollEdgeType::SCROLL_NONE && pattern->IsScrollEdgeFinish()) {
                 pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
             }
         });
@@ -2660,6 +2584,12 @@ bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
     }
 
     auto result = OnScrollCallback(overOffset, source);
+    if (result) {
+        // An item may be floating or dragged: let the drag host know the container
+        // really scrolled, and by which source, so it can interrupt a float or hand
+        // the scrolling over to the finger that is driving the container.
+        FireDragScrollCallback(source);
+    }
     SelectOverlayScrollNotifier::NotifyOnScrollCallback(WeakClaim(this), overOffset, source);
     return result;
 }
@@ -3805,6 +3735,15 @@ void ScrollablePattern::OnScrollStop(
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+#ifndef CROSS_PLATFORM
+        if (pipeline) {
+            auto mgr = pipeline->GetContentChangeManager();
+            if (mgr && mgr->IsStartEventReportEnabled() && AnimateStoped() && IsScrollableStopped() &&
+                !GetIsDragging() && ScrollBarIdle() && InnerScrollBarIdle()) {
+                mgr->OnContentChangeInterrupted(host, ChangeType::SCROLL);
+            }
+        }
+#endif
     }
     if (pipeline) {
         pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
@@ -5300,8 +5239,7 @@ void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, ui
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    CHECK_EQUAL_VOID(mgr->IsIgnoringEventType(type), true);
-    mgr->OnScrollChangeEnd(keyNode);
+    mgr->OnScrollChangeEnd(keyNode, type);
 #endif
 }
 
@@ -5326,6 +5264,7 @@ void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyN
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeStart(keyNode);
+    mgr->OnContentChangeStart(keyNode, ChangeType::SCROLL);
 #endif
 }
 

@@ -20,6 +20,8 @@
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "accessibility_system_ability_client.h"
@@ -437,6 +439,204 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest007, Te
     jsAccessibilityManager->OnDumpChildInfoForThirdRecursive(hostElementId, params, info, jsAccessibilityManager);
     // tbm  make sure check method;
     EXPECT_NE(frameNode, nullptr);
+}
+
+namespace {
+class MockThirdFocusJsAccessibilityManager : public Framework::JsAccessibilityManager {
+public:
+    MOCK_METHOD0(GenerateAccessibilityWorkMode, AccessibilityWorkMode());
+};
+
+void SetScreenReaderEnabledForThirdFocus(
+    const RefPtr<Framework::JsAccessibilityManager>& manager, bool enabled)
+{
+    manager->isScreenReaderEnabled_ = enabled;
+    manager->isScreenReaderEnabledInitialized_ = true;
+}
+
+void SetContextAccessibilityManagerForThirdFocus(
+    const RefPtr<NG::PipelineContext>& context,
+    const RefPtr<MockFrontend>& mockFrontend,
+    const RefPtr<MockThirdFocusJsAccessibilityManager>& manager)
+{
+    RefPtr<AccessibilityManager> accessibilityManager = manager;
+    ON_CALL(*mockFrontend, GetAccessibilityManager()).WillByDefault(testing::Return(accessibilityManager));
+    context->weakFrontend_ = mockFrontend;
+}
+} // namespace
+
+/**
+ * @tc.name: ActThirdAccessibilityFocusKeepThirdProviderFocus002
+ * @tc.desc: screen reader disabled, focusing one third node keeps other focused third provider nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdAccessibilityHoverNgTest, ActThirdAccessibilityFocusKeepThirdProviderFocus002, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdFocusJsAccessibilityManager>>();
+    ON_CALL(*manager, GenerateAccessibilityWorkMode())
+        .WillByDefault(testing::Return(AccessibilityWorkMode { .isTouchExplorationEnabled = true }));
+    manager->SetPipelineContext(context);
+    manager->Register(true);
+    auto mockFrontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
+    SetContextAccessibilityManagerForThirdFocus(context, mockFrontend, manager);
+    SetScreenReaderEnabledForThirdFocus(manager, false);
+
+    auto currentHost = FrameNode::CreateFrameNode("currentHost", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto otherHost = FrameNode::CreateFrameNode("otherHost", 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto currentRender = AceType::MakeRefPtr<MockRenderContext>();
+    auto otherRender = AceType::MakeRefPtr<MockRenderContext>();
+    currentHost->renderContext_ = currentRender;
+    otherHost->renderContext_ = otherRender;
+
+    auto currentProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    currentProvider->providerMockResult_.receiveClear_ = false;
+    auto otherProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    otherProvider->providerMockResult_.receiveClear_ = false;
+    auto currentOp = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        currentProvider, manager, currentHost);
+    auto otherOp = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        otherProvider, manager, otherHost);
+    currentOp->SetBelongTreeId(0);
+    otherOp->SetBelongTreeId(0);
+    manager->RegisterJsThirdProviderInteractionOperation(1, currentOp);
+    manager->RegisterJsThirdProviderInteractionOperation(2, otherOp);
+
+    otherRender->UpdateAccessibilityFocus(true);
+
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    Accessibility::Rect screenRect(0, 0, 100, 100);
+    nodeInfo.SetRectInScreen(screenRect);
+
+    auto ret = manager->ActThirdAccessibilityFocus(2, nodeInfo, currentHost, context, false);
+
+    EXPECT_EQ(ret, true);
+    // screen reader disabled: other focused provider is kept
+    EXPECT_EQ(otherProvider->providerMockResult_.receiveClear_, false);
+    EXPECT_EQ(otherRender->GetAccessibilityFocus().value_or(false), true);
+    // current host still gains focus
+    EXPECT_EQ(currentRender->GetAccessibilityFocus().value_or(false), true);
+}
+
+/**
+ * @tc.name: ActThirdAccessibilityFocusClearSelfOnly003
+ * @tc.desc: clear focus action only clears the given node, never triggers provider focus clear
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdAccessibilityHoverNgTest, ActThirdAccessibilityFocusClearSelfOnly003, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdFocusJsAccessibilityManager>>();
+    ON_CALL(*manager, GenerateAccessibilityWorkMode())
+        .WillByDefault(testing::Return(AccessibilityWorkMode { .isTouchExplorationEnabled = true }));
+    manager->SetPipelineContext(context);
+    manager->Register(true);
+    auto mockFrontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
+    SetContextAccessibilityManagerForThirdFocus(context, mockFrontend, manager);
+    SetScreenReaderEnabledForThirdFocus(manager, true);
+
+    auto currentHost = FrameNode::CreateFrameNode("currentHost", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto otherHost = FrameNode::CreateFrameNode("otherHost", 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto currentRender = AceType::MakeRefPtr<MockRenderContext>();
+    auto otherRender = AceType::MakeRefPtr<MockRenderContext>();
+    currentHost->renderContext_ = currentRender;
+    otherHost->renderContext_ = otherRender;
+
+    auto currentProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    currentProvider->providerMockResult_.receiveClear_ = false;
+    auto otherProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    otherProvider->providerMockResult_.receiveClear_ = false;
+    auto currentOp = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        currentProvider, manager, currentHost);
+    auto otherOp = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        otherProvider, manager, otherHost);
+    currentOp->SetBelongTreeId(0);
+    otherOp->SetBelongTreeId(0);
+    manager->RegisterJsThirdProviderInteractionOperation(1, currentOp);
+    manager->RegisterJsThirdProviderInteractionOperation(2, otherOp);
+
+    currentRender->UpdateAccessibilityFocus(true);
+    otherRender->UpdateAccessibilityFocus(true);
+
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    Accessibility::Rect screenRect(0, 0, 100, 100);
+    nodeInfo.SetRectInScreen(screenRect);
+
+    auto ret = manager->ActThirdAccessibilityFocus(1, nodeInfo, currentHost, context, true);
+
+    EXPECT_EQ(ret, true);
+    // only the given node focus is cleared, other focused provider is untouched
+    EXPECT_EQ(currentRender->GetAccessibilityFocus().value_or(true), false);
+    EXPECT_EQ(otherRender->GetAccessibilityFocus().value_or(false), true);
+    EXPECT_EQ(otherProvider->providerMockResult_.receiveClear_, false);
+    EXPECT_EQ(currentProvider->providerMockResult_.receiveClear_, false);
+}
+
+/**
+ * @tc.name: ActThirdAccessibilityFocusSkipInvalidThirdProvider004
+ * @tc.desc: null host, expired operator and unfocused host are skipped safely when clearing focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdAccessibilityHoverNgTest, ActThirdAccessibilityFocusSkipInvalidThirdProvider004, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto manager = AceType::MakeRefPtr<testing::NiceMock<MockThirdFocusJsAccessibilityManager>>();
+    ON_CALL(*manager, GenerateAccessibilityWorkMode())
+        .WillByDefault(testing::Return(AccessibilityWorkMode { .isTouchExplorationEnabled = true }));
+    manager->SetPipelineContext(context);
+    manager->Register(true);
+    auto mockFrontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
+    SetContextAccessibilityManagerForThirdFocus(context, mockFrontend, manager);
+    SetScreenReaderEnabledForThirdFocus(manager, true);
+
+    auto currentHost = FrameNode::CreateFrameNode("currentHost", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto currentRender = AceType::MakeRefPtr<MockRenderContext>();
+    currentHost->renderContext_ = currentRender;
+
+    // 1. operator with null host
+    auto nullHostProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    nullHostProvider->providerMockResult_.receiveClear_ = false;
+    RefPtr<FrameNode> nullHost;
+    auto nullHostOp = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        nullHostProvider, manager, nullHost);
+    nullHostOp->SetBelongTreeId(0);
+    manager->RegisterJsThirdProviderInteractionOperation(10, nullHostOp);
+
+    // 2. operator that will expire before the focus act
+    {
+        auto tempHost = FrameNode::CreateFrameNode("tempHost", 2, AceType::MakeRefPtr<Pattern>(), true);
+        tempHost->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+        auto tempProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+        tempProvider->providerMockResult_.receiveClear_ = false;
+        auto tempOp = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+            tempProvider, manager, tempHost);
+        tempOp->SetBelongTreeId(0);
+        manager->RegisterJsThirdProviderInteractionOperation(11, tempOp);
+        tempHost->renderContext_->UpdateAccessibilityFocus(true);
+    }
+
+    // 3. operator whose host is not accessibility focused
+    auto unfocusedHost = FrameNode::CreateFrameNode("unfocusedHost", 3, AceType::MakeRefPtr<Pattern>(), true);
+    unfocusedHost->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    auto unfocusedProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    unfocusedProvider->providerMockResult_.receiveClear_ = false;
+    auto unfocusedOp = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        unfocusedProvider, manager, unfocusedHost);
+    unfocusedOp->SetBelongTreeId(0);
+    manager->RegisterJsThirdProviderInteractionOperation(12, unfocusedOp);
+
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    Accessibility::Rect screenRect(0, 0, 100, 100);
+    nodeInfo.SetRectInScreen(screenRect);
+
+    auto ret = manager->ActThirdAccessibilityFocus(1, nodeInfo, currentHost, context, false);
+
+    EXPECT_EQ(ret, true);
+    // invalid operators are skipped without clearing
+    EXPECT_EQ(nullHostProvider->providerMockResult_.receiveClear_, false);
+    EXPECT_EQ(unfocusedProvider->providerMockResult_.receiveClear_, false);
+    // current host still gains focus
+    EXPECT_EQ(currentRender->GetAccessibilityFocus().value_or(false), true);
 }
 
 } // namespace OHOS::Ace::NG

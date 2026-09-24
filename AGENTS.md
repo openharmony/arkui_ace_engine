@@ -53,7 +53,7 @@ This file defines working rules for agents in `ace_engine`.
 ### Build Outputs
 
 - Main output dir: `out/rk3568/arkui/ace_engine/`
-- Detailed library listing: `docs/kb/architecture/build-outputs.md`
+- Detailed library listing: [docs/build-outputs.md](docs/build-outputs.md)
 
 ### Frontend Support
 
@@ -63,7 +63,7 @@ This file defines working rules for agents in `ace_engine`.
 | **ArkTS Frontend** | ArkTS static version | Incremental engine-based frontend |
 | **JavaScript Frontend** | JavaScript | Legacy web-style development |
 
-- Frontend architecture details: `docs/kb/frontend/frontend-overview.md`
+- Frontend architecture details: [docs/frontend-overview.md](docs/frontend-overview.md)
 
 ## 3. Knowledge Base
 
@@ -77,7 +77,7 @@ Use the KB as the first-stop context before any deep code analysis. Always treat
   - `python3 docs/kb_search.py <keyword>`
 - Use KB query results to precisely locate files for follow-up code inspection.
 - Use `rg` in `docs/` as a fallback when script results are insufficient.
-- Entry points: `docs/knowledge_base_README.md`, `docs/knowledge_base_INDEX.json`, and KB directories under `docs/` (for example: `pattern/`, `common/`, `layout/`, `api/`, `sdk/`, `architecture/`).
+- Entry points: `docs/kb/README.md`, `docs/context_registry.json`, and KB directories under `docs/kb/` (for example: `components/`, `capabilities/`, `architecture/`, `api/`, `syntax/`, `frontend/`, `issues/`).
 
 Before editing any file, the agent MUST state:
 1. Task category (from the routing table below)
@@ -100,9 +100,9 @@ Before editing any file, the agent MUST state:
 | **Term: PipelineContext, FlushTask, UITaskScheduler** | `docs/kb/architecture/layout-framework.md` |
 | **Term: Modifier, node_modifier, ArkUIModifier** | `docs/kb/api/` or `docs/kb/components/<category>/` |
 | **Term: CustomNode, CustomSpan, FrameNodeAdapter** | `docs/kb/components/custom-node/` |
-| **Term: LazyForEach, Repeat, Swiper+LazyForEach** | `docs/kb/syntax/lazy_for_each.md`, `docs/kb/syntax/repeat.md` |
+| **Term: LazyForEach, Repeat, Swiper+LazyForEach** | `docs/kb/syntax/lazy-for-each.md`, `docs/kb/syntax/repeat.md` |
 | **Term: DragFrameSuite, DragDropManager** | `docs/kb/architecture/drag-framework.md` |
-| **Term: ComponentReuse, RecycleNode** | `docs/kb/architecture/component_reuse_framework.md` |
+| **Term: ComponentReuse, RecycleNode** | `docs/kb/architecture/component-reuse-framework.md` |
 | **Term: Subwindow, Popup, Menu, bindSheet** | `docs/kb/architecture/subwindow-mechanism.md` |
 | **Term: ResourceAdapter, instanceId, dark mode switching** | `docs/kb/architecture/resource-dynamic-switching.md` |
 | **Term: NodePaintMethod, RenderContext** | `docs/kb/capabilities/` |
@@ -113,11 +113,11 @@ Before editing any file, the agent MUST state:
 | **Path: `bridge/declarative_frontend/` or `bridge/arkts_frontend/`** | `docs/kb/frontend/` |
 | **Path: `core/accessibility/`** | `docs/kb/architecture/accessibility.md` |
 
-> List component categories: `ls docs/kb/components/` or check `docs/knowledge_base_INDEX.json`
+> List component categories: `ls docs/kb/components/` or check `docs/context_registry.json`
 
 ### 3.3 KB Authoring
 
-- Detailed templates/rules: `docs/knowledge_base_README.md`
+- Detailed templates/rules: `docs/kb/README.md`
 
 ## 4. Core Working Principles (Must Follow)
 

@@ -169,6 +169,7 @@ public:
         json->PutExtAttr("maintainVisibleContentPosition",
             propMaintainVisibleContentPosition_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("ignoreHiddenItem", propIgnoreHiddenItem_.value_or(false) ? "true" : "false", filter);
+        WithThemeValueCheck(json, filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -291,6 +292,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreHiddenItem, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:
+    void WithThemeValueCheck(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
     bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might
                                    // be ignored in some situations.
     bool ignorePrevMarginAndNextMargin_ = false;

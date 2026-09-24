@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,21 @@ int32_t RichEditorController::AddPlaceholderSpan(const RefPtr<UINode>& customNod
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
     return richEditorPattern->AddPlaceholderSpan(customNode, options, TextChangeReason::CONTROLLER);
+}
+
+int32_t RichEditorController::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,
+    const BuilderSpanRecord& builderSpanRecord)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, 0);
+    return richEditorPattern->AddPlaceholderSpan(customNode, options, builderSpanRecord, TextChangeReason::CONTROLLER);
+}
+
+std::vector<BuilderSpanInfo> RichEditorController::GetRichEditorBuilderSpans(int32_t start, int32_t end)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, {});
+    return richEditorPattern->GetRichEditorBuilderSpans(start, end);
 }
 
 void RichEditorController::UpdateSpanStyle(

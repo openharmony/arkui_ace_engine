@@ -264,6 +264,36 @@ void SelectPattern::OnModifyDone()
     }
 }
 
+void SelectPattern::OnMaterialDisable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(selectPaintProperty);
+    if (selectPaintProperty->HasBackgroundColor()) {
+        return;
+    }
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto eventHub = host->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (theme->IsTV() && !eventHub->IsEnabled()) {
+        renderContext->UpdateBackgroundColor(
+            theme->GetButtonBackgroundColor().BlendOpacity(theme->GetDisabledBackgroundColorAlpha()));
+        BorderColorProperty disabledBorderColorProperty;
+        const Color& disabledBorderColor = theme->GetSelectNormalBorderColor();
+        disabledBorderColorProperty.SetColor(
+            disabledBorderColor.BlendOpacity(theme->GetDisabledBackgroundColorAlpha()));
+        renderContext->UpdateBorderColor(disabledBorderColorProperty);
+    } else {
+        renderContext->UpdateBackgroundColor(theme->GetButtonBackgroundColor());
+    }
+}
+
 bool SelectPattern::IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const
 {
     if (sourceType != SourceType::TOUCH) {

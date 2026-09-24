@@ -284,7 +284,6 @@ ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto childNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     auto* childNativeUINode = reinterpret_cast<UINode*>(childNativeNode);
@@ -292,6 +291,7 @@ ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runti
     if (childNativeUINode->IsAdopted()) {
         return panda::NumberRef::New(vm, ERROR_CODE_NODE_IS_ADOPTED);
     }
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getRenderNodeModifier()->appendChild(nativeNode, childNativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -301,7 +301,6 @@ ArkUINativeModuleValue RenderNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto child = nodePtr(secondArg->ToNativePointer(vm)->Value());
     auto* childNativeUINode = reinterpret_cast<UINode*>(child);
@@ -309,6 +308,7 @@ ArkUINativeModuleValue RenderNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* 
     if (childNativeUINode->IsAdopted()) {
         return panda::NumberRef::New(vm, ERROR_CODE_NODE_IS_ADOPTED);
     }
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
     if (thirdArg.IsNull()) {
         GetArkUINodeModifiers()->getRenderNodeModifier()->insertChildAfter(nativeNode, child, nullptr);

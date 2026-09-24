@@ -62,10 +62,10 @@ void RosenTransitionEffect::UpdateTransitionContext(
 void RosenTransitionEffect::Disappear(bool activeTransition)
 {
     ApplyAnimationOption(
-        [this, activeTransition]() {
+        [this, effect = chainedEffect_, activeTransition]() {
             OnDisappear(activeTransition);
-            if (chainedEffect_) {
-                chainedEffect_->Disappear(activeTransition);
+            if (effect) {
+                effect->Disappear(activeTransition);
             }
         },
         activeTransition);
@@ -74,10 +74,12 @@ void RosenTransitionEffect::Disappear(bool activeTransition)
 // Appears with animation option
 void RosenTransitionEffect::Appear()
 {
-    ApplyAnimationOption([this]() {
+    ApplyAnimationOption([this, effect = chainedEffect_]() {
+        // Executing `Appear` may trigger a frontend callback, which could overwrite `chainedEffect_`;
+        // therefore, `chainedEffect_` should be copied before use.
         OnAppear();
-        if (chainedEffect_) {
-            chainedEffect_->Appear();
+        if (effect) {
+            effect->Appear();
         }
     });
 }

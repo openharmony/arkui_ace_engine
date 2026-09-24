@@ -90,9 +90,9 @@ int32_t UIContentServiceStubImpl::SendCommand(int32_t id, const std::string& com
     return NO_ERROR;
 }
 
-int32_t UIContentServiceStubImpl::SendCommandAsync(int32_t id, const std::string& command)
+int32_t UIContentServiceStubImpl::SendCommandSync(int32_t id, const std::string& command)
 {
-    return UiSessionManager::GetInstance()->NotifySendCommandAsyncPattern(id, command);
+    return UiSessionManager::GetInstance()->NotifySendCommandSyncPattern(id, command);
 }
 
 int32_t UIContentServiceStubImpl::SendCommand(const std::string command)

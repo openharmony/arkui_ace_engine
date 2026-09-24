@@ -92,7 +92,8 @@ int32_t GetNodeHandleFromFrameNode(
     *handle = new ArkUI_Node({ .type = -1,
         .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode),
         .cNode = false,
-        .buildNode = true });
+        .buildNode = true,
+        .magic = ARKUI_NODE_MAGIC_VALID });
     if (isBindNativeXComponent) {
         OHOS::Ace::NodeModel::RegisterBindNativeNode(*handle);
         (*handle)->isBindNative = true;
@@ -146,7 +147,8 @@ int32_t GetNodeHandleFromBuilderNode(
     *handle = new ArkUI_Node({ .type = -1,
         .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode),
         .cNode = false,
-        .buildNode = true });
+        .buildNode = true,
+        .magic = ARKUI_NODE_MAGIC_VALID });
     if (impl) {
         impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
     }
@@ -254,11 +256,6 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     if (nodeContent == nullptr) {
         LOGE("nodeContent is nullptr");
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node content parameter is null");
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    if (content == nullptr) {
-        LOGE("content is nullptr");
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content output parameter is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ani_ref nodeContentPeerRef;

@@ -202,6 +202,10 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetFallbackLineSpacing(textLayoutProperty->GetFallbackLineSpacingValue(false));
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle, layoutTextColor, textColor);
+    // Stroke color defaults to the font color when only stroke width is set.
+    if (textLayoutProperty->HasStrokeWidth()) {
+        textStyle.SetStrokeColor(textLayoutProperty->GetStrokeColor().value_or(textColor));
+    }
     inheritTextStyle_ = textStyle;
 }
 

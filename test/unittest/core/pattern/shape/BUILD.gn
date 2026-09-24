@@ -55,6 +55,7 @@ test_sources = [
   "path_pattern_test_ng.cpp",
   "path_pattern_tdd_test_ng.cpp",
   "polygon_model_ng_test.cpp",
+  "polygon_model_ng_tdd_test.cpp",
   "polygon_paint_property_test.cpp",
   "shape_abstract_model_ng_test.cpp",
   "shape_abstract_model_static_test.cpp",

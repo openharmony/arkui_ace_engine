@@ -92,6 +92,6 @@
 
 ## 相关主题
 
-- `docs/kb/architecture/component_reuse_framework.md`：组件复用框架（`RecycleManager` / `RecycleDummyNode` / `ViewPU`）
-- `docs/kb/frontend/state_management/custom_component.md`：自定义组件复用机制
+- [component-reuse-framework](../../architecture/component-reuse-framework.md)：组件复用框架（`RecycleManager` / `RecycleDummyNode` / `ViewPU`）
+- [custom-component](../../frontend/state_management/custom-component.md)：自定义组件复用机制
 - 功能域 `07-03-03`（自定义组件复用）、`04-19-01`（组件复用框架）

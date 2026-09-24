@@ -76,7 +76,7 @@ void PixelMapDrawableDescriptor::CreatePixelMap()
         return;
     }
     uint32_t errorCode = 0;
-    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len, errorCode);
+    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len, errorCode, svgLimitsId_);
     if (!imageSource) {
         return;
     }

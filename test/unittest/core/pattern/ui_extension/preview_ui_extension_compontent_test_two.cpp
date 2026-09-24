@@ -501,7 +501,8 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperNotifyOrigin
     auto wrapper = CreatePreviewSessionWrapperImpl(pattern);
     ASSERT_NE(wrapper, nullptr);
     Rosen::AvoidArea avoidArea;
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM));
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM),
+        WindowSizeChangeReason::UNDEFINED);
     EXPECT_FALSE(wrapper->IsSessionValid());
 #endif
 }
@@ -776,8 +777,8 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperInitAllCallb
     AttachValidSession(wrapper);
     wrapper->InitAllCallback();
     ASSERT_NE(wrapper->foregroundCallback_, nullptr);
-    wrapper->foregroundCallback_(Rosen::WSError::WS_ERROR_INVALID_PARAM);
-    wrapper->foregroundCallback_(Rosen::WSError::WS_OK);
+    wrapper->foregroundCallback_(Rosen::WSError::WS_ERROR_INVALID_PARAM, 0);
+    wrapper->foregroundCallback_(Rosen::WSError::WS_OK, 0);
     EXPECT_NE(wrapper->taskExecutor_, nullptr);
 #endif
 }
@@ -1073,8 +1074,10 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperNotifyOrigin
     ASSERT_NE(wrapper, nullptr);
     AttachValidSession(wrapper);
     Rosen::AvoidArea avoidArea;
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM));
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_CUTOUT));
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM),
+        WindowSizeChangeReason::UNDEFINED);
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_CUTOUT),
+        WindowSizeChangeReason::UNDEFINED);
     EXPECT_NE(wrapper->session_, nullptr);
 #endif
 }
@@ -1741,8 +1744,10 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperBulk012, Tes
     auto wrapper = CreatePreviewSessionWrapperImpl(pattern);
     ASSERT_NE(wrapper, nullptr);
     Rosen::AvoidArea avoidArea;
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM));
-    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_SYSTEM),
+        WindowSizeChangeReason::UNDEFINED);
+    wrapper->NotifyOriginAvoidArea(avoidArea, static_cast<uint32_t>(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR),
+        WindowSizeChangeReason::UNDEFINED);
     EXPECT_NE(wrapper, nullptr);
 #endif
 }

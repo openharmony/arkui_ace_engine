@@ -28,6 +28,7 @@ build_component_ng("sheet_pattern_ng") {
     "sheet_manager.cpp",
     "sheet_mask_accessibility_property.cpp",
     "sheet_object.cpp",
+    "sheet_title_bar.cpp",
     "sheet_presentation_layout_algorithm.cpp",
     "sheet_presentation_pattern.cpp",
     "sheet_view.cpp",
@@ -37,6 +38,7 @@ build_component_ng("sheet_pattern_ng") {
     "sheet_wrapper_pattern.cpp",
     "side/sheet_presentation_side_layout_algorithm.cpp",
     "side/sheet_side_object.cpp",
+    "../scrollable/scroller_observer_manager.cpp",
   ]
 
   ark_sources = [

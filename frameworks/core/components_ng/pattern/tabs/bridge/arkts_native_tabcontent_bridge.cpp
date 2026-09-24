@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/swiper/bridge/arkts_native_swiper_bridge.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/sub_tab_bar_style_peer.h"
@@ -38,6 +39,13 @@ namespace {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
+constexpr int TABCONTENT_ARG_INDEX_0 = 0;
+constexpr int TABCONTENT_ARG_INDEX_1 = 1;
+constexpr int TABCONTENT_ARG_INDEX_2 = 2;
+constexpr int32_t TAB_VISIBILITY_VISIBLE = static_cast<int32_t>(TabVisibility::VISIBLE);
+constexpr int32_t TAB_VISIBILITY_HIDDEN = static_cast<int32_t>(TabVisibility::HIDDEN);
+constexpr int32_t BAR_DISPLAY_MODE_BOTTOMTABBAR = static_cast<int32_t>(TabBarDisplayMode::BOTTOMTABBAR);
+constexpr int32_t BAR_DISPLAY_MODE_SIDEBAR = static_cast<int32_t>(TabBarDisplayMode::SIDEBAR);
 #ifdef PIXEL_MAP_SUPPORTED
 constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
@@ -265,7 +273,7 @@ void SetIndicator(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNod
     }
     if (!info->IsObject(vm) ||
         !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "height"), indicatorHeight, indicatorHightResObj) ||
+            vm, ArkTSUtils::GetProperty(vm, obj, "height"), indicatorHeight, indicatorHightResObj, false) ||
         indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
         if (tabTheme) {
@@ -276,15 +284,15 @@ void SetIndicator(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNod
     }
     if (!info->IsObject(vm) ||
         !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "width"), indicatorWidth, indicatorWidthResObj) ||
+            vm, ArkTSUtils::GetProperty(vm, obj, "width"), indicatorWidth, indicatorWidthResObj, false) ||
         indicatorWidth.Value() < 0.0f || indicatorWidth.Unit() == DimensionUnit::PERCENT) {
         indicator.width = 0.0_vp;
     } else {
         indicator.width = indicatorWidth;
     }
     if (!info->IsObject(vm) ||
-        !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), indicatorBorderRadius, indicatorRadiusResObj) ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), indicatorBorderRadius,
+            indicatorRadiusResObj, false) ||
         indicatorBorderRadius.Value() < 0.0f || indicatorBorderRadius.Unit() == DimensionUnit::PERCENT) {
         indicator.borderRadius = 0.0_vp;
     } else {
@@ -292,7 +300,7 @@ void SetIndicator(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNod
     }
     if (!info->IsObject(vm) ||
         !ArkTSUtils::ParseJsDimensionVp(
-            vm, ArkTSUtils::GetProperty(vm, obj, "marginTop"), indicatorMarginTop, indicatorMarginTopResObj) ||
+            vm, ArkTSUtils::GetProperty(vm, obj, "marginTop"), indicatorMarginTop, indicatorMarginTopResObj, false) ||
         indicatorMarginTop.Value() < 0.0f || indicatorMarginTop.Unit() == DimensionUnit::PERCENT) {
         RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
         if (tabTheme) {
@@ -334,8 +342,9 @@ void SetBoard(EcmaVM* vm, const Local<JSValueRef>& info, FrameNode* frameNode)
     BoardStyle board;
     CalcDimension borderRadius;
     RefPtr<ResourceObject> borderRadiusResObj;
-    if (!info->IsObject(vm) || !ArkTSUtils::ParseJsDimensionVp(
-        vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), borderRadius, borderRadiusResObj) ||
+    if (!info->IsObject(vm) ||
+        !ArkTSUtils::ParseJsDimensionVp(
+            vm, ArkTSUtils::GetProperty(vm, obj, "borderRadius"), borderRadius, borderRadiusResObj, false) ||
         borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
         CHECK_NULL_VOID(frameNode);
         RefPtr<TabTheme> tabTheme = frameNode->GetTheme<TabTheme>(true);
@@ -358,7 +367,7 @@ void GetFontContent(EcmaVM* vm, const Local<JSValueRef>& font, LabelStyle& label
     RefPtr<ResourceObject> familyColorResObj;
     auto size = ArkTSUtils::GetProperty(vm, obj, "size");
     CalcDimension fontSize;
-    if (ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, sizeResObj) && NonNegative(fontSize.Value()) &&
+    if (ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, sizeResObj, true, false) && NonNegative(fontSize.Value()) &&
         fontSize.Unit() != DimensionUnit::PERCENT) {
         labelStyle.fontSize = fontSize;
     }
@@ -492,7 +501,7 @@ void SetLabelStyle(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle
         auto minFontSizeValue = ArkTSUtils::GetProperty(vm, obj, "minFontSize");
         CalcDimension minFontSize;
         RefPtr<ResourceObject> minResObj;
-        if (ArkTSUtils::ParseJsDimensionFp(vm, minFontSizeValue, minFontSize, minResObj) &&
+        if (ArkTSUtils::ParseJsDimensionFp(vm, minFontSizeValue, minFontSize, minResObj, true, false) &&
             NonNegative(minFontSize.Value()) && minFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.minFontSize = minFontSize;
         }
@@ -500,7 +509,7 @@ void SetLabelStyle(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle
         auto maxFontSizeValue = ArkTSUtils::GetProperty(vm, obj, "maxFontSize");
         CalcDimension maxFontSize;
         RefPtr<ResourceObject> maxResObj;
-        if (ArkTSUtils::ParseJsDimensionFp(vm, maxFontSizeValue, maxFontSize, maxResObj) &&
+        if (ArkTSUtils::ParseJsDimensionFp(vm, maxFontSizeValue, maxFontSize, maxResObj, true, false) &&
             NonNegative(maxFontSize.Value()) && maxFontSize.Unit() != DimensionUnit::PERCENT) {
             labelStyle.maxFontSize = maxFontSize;
         }
@@ -561,7 +570,7 @@ void SetPadding(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle, F
     NG::PaddingProperty padding;
     bool useLocalizedPadding = false;
     RefPtr<ResourceObject> resPaddingObj;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, info, length, resPaddingObj) && NonNegative(length.Value()) &&
+    if (ArkTSUtils::ParseJsDimensionVp(vm, info, length, resPaddingObj, false) && NonNegative(length.Value()) &&
         length.Unit() != DimensionUnit::PERCENT) {
         padding.left = NG::CalcLength(length);
         padding.right = NG::CalcLength(length);
@@ -601,18 +610,19 @@ void SetPadding(EcmaVM* vm, const Local<JSValueRef>& info, bool isSubTabStyle, F
             padding.left = NG::CalcLength(left);
         }
         CalcDimension right;
-        if (ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, paddingObj, "right"), right,
-            resObjRight) && NonNegative(right.Value()) && right.Unit() != DimensionUnit::PERCENT) {
+        if (ArkTSUtils::ParseJsDimensionVp(
+            vm, ArkTSUtils::GetProperty(vm, paddingObj, "right"), right, resObjRight, false) &&
+            NonNegative(right.Value()) && right.Unit() != DimensionUnit::PERCENT) {
             padding.right = NG::CalcLength(right);
         }
         CalcDimension top;
-        if (ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, paddingObj, "top"), top, resObjTop) &&
+        if (ArkTSUtils::ParseJsDimensionVp(vm, ArkTSUtils::GetProperty(vm, paddingObj, "top"), top, resObjTop, false) &&
             NonNegative(top.Value()) && top.Unit() != DimensionUnit::PERCENT) {
             padding.top = NG::CalcLength(top);
         }
         CalcDimension bottom;
         if (ArkTSUtils::ParseJsDimensionVp(
-                vm, ArkTSUtils::GetProperty(vm, paddingObj, "bottom"), bottom, resObjBottom) &&
+            vm, ArkTSUtils::GetProperty(vm, paddingObj, "bottom"), bottom, resObjBottom, false) &&
             NonNegative(bottom.Value()) && bottom.Unit() != DimensionUnit::PERCENT) {
             padding.bottom = NG::CalcLength(bottom);
         }
@@ -856,6 +866,7 @@ void TabContentBridge::RegisterTabContentAttributes(panda::Local<panda::ObjectRe
         "setTabContentSize", "resetTabContentSize",
         "setTabContentOnWillShow", "resetTabContentOnWillShow",
         "setTabContentOnWillHide", "resetTabContentOnWillHide",
+        "setTabBarVisibility", "resetTabBarVisibility",
     };
     Local<panda::JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::Create),
@@ -872,6 +883,8 @@ void TabContentBridge::RegisterTabContentAttributes(panda::Local<panda::ObjectRe
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillShow),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabContentOnWillHide),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillHide),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabBarVisibility),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabBarVisibility),
     };
     auto tabContent = panda::ObjectRef::NewWithNamedProperties(
         vm, ArraySize(functionNames), functionNames, funcValues);
@@ -1166,4 +1179,44 @@ ArkUINativeModuleValue TabContentBridge::ResetTabContentOnWillHide(ArkUIRuntimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabContentBridge::SetTabBarVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABCONTENT_ARG_INDEX_0);
+    Local<JSValueRef> visibilityArg = runtimeCallInfo->GetCallArgRef(TABCONTENT_ARG_INDEX_1);
+    Local<JSValueRef> displayModeArg = runtimeCallInfo->GetCallArgRef(TABCONTENT_ARG_INDEX_2);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    ArkUI_Int32 visibility = TAB_VISIBILITY_VISIBLE;
+    if (!visibilityArg.IsNull() && !visibilityArg->IsUndefined() && visibilityArg->IsNumber()) {
+        auto visibilityVal = visibilityArg->Int32Value(vm);
+        if (visibilityVal >= TAB_VISIBILITY_VISIBLE && visibilityVal <= TAB_VISIBILITY_HIDDEN) {
+            visibility = visibilityVal;
+        }
+    }
+    ArkUI_Int32 displayMode = BAR_DISPLAY_MODE_BOTTOMTABBAR;
+    ArkUI_Bool hasDisplayMode = false;
+    if (!displayModeArg.IsNull() && !displayModeArg->IsUndefined() && displayModeArg->IsNumber()) {
+        auto displayModeVal = displayModeArg->Int32Value(vm);
+        if (displayModeVal >= BAR_DISPLAY_MODE_BOTTOMTABBAR && displayModeVal <= BAR_DISPLAY_MODE_SIDEBAR) {
+            displayMode = displayModeVal;
+            hasDisplayMode = true;
+        }
+    }
+    GetArkUINodeModifiers()->getTabContentModifier()->setTabBarVisibility(
+        nativeNode, visibility, displayMode, hasDisplayMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabContentBridge::ResetTabBarVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabContentModifier()->resetTabBarVisibility(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

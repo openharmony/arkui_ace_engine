@@ -279,6 +279,70 @@ HWTEST_F(ViewAbstractTestNg, SetExcludeFromRenderGroup002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMarkLayeredRender001
+ * @tc.desc: Test the SetMarkLayeredRender function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetMarkLayeredRender001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeInStack = stack->GetMainFrameNode();
+    ASSERT_NE(nodeInStack, nullptr);
+    auto renderContextInStack = nodeInStack->GetRenderContext();
+    ASSERT_NE(renderContextInStack, nullptr);
+    /**
+     * @tc.steps: step2. Set true to MarkLayeredRender property and get.
+     * @tc.expected: step2. MarkLayeredRender property value is same with the value set.
+     */
+    ViewAbstract::SetMarkLayeredRender(true);
+    ASSERT_TRUE(renderContextInStack->GetMarkLayeredRender().has_value());
+    EXPECT_EQ(renderContextInStack->GetMarkLayeredRender().value(), true);
+    /**
+     * @tc.steps: step3. Set false to MarkLayeredRender property and get.
+     * @tc.expected: step3. MarkLayeredRender property value is same with the value set.
+     */
+    ViewAbstract::SetMarkLayeredRender(false);
+    ASSERT_TRUE(renderContextInStack->GetMarkLayeredRender().has_value());
+    EXPECT_EQ(renderContextInStack->GetMarkLayeredRender().value(), false);
+}
+
+/**
+ * @tc.name: SetMarkLayeredRender002
+ * @tc.desc: Test the SetMarkLayeredRender function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetMarkLayeredRender002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check ViewStackProcessor state.
+     */
+    auto stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto node = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContextOfNode = node->GetRenderContext();
+    ASSERT_NE(renderContextOfNode, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+    /**
+     * @tc.steps: step2. Set true to MarkLayeredRender property and get.
+     * @tc.expected: step2. MarkLayeredRender property value is same with the value set.
+     */
+    ViewAbstract::SetMarkLayeredRender(nodePtr, true);
+    ASSERT_TRUE(renderContextOfNode->GetMarkLayeredRender().has_value());
+    EXPECT_EQ(renderContextOfNode->GetMarkLayeredRender().value(), true);
+    /**
+     * @tc.steps: step3. Set false to MarkLayeredRender property and get.
+     * @tc.expected: step3. MarkLayeredRender property value is same with the value set.
+     */
+    ViewAbstract::SetMarkLayeredRender(nodePtr, false);
+    ASSERT_TRUE(renderContextOfNode->GetMarkLayeredRender().has_value());
+    EXPECT_EQ(renderContextOfNode->GetMarkLayeredRender().value(), false);
+}
+
+/**
  * @tc.name: SetSystemMaterial001
  * @tc.desc: Test the SetSystemMaterial function of View_Abstract
  * @tc.type: FUNC

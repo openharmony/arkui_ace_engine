@@ -34,6 +34,7 @@ public:
 protected:
     static constexpr int32_t testPid = 100;
     static constexpr int32_t testWebId = 1;
+    static constexpr int32_t testHostNodeId = 1001;
     static constexpr int32_t defaultRuleThreshold = 2;
     void ClearSingletonRules();
     // Register a rule set with one enabled rule of given threshold (default 2).
@@ -92,7 +93,7 @@ std::string PageSceneMatchTest::GetExpectedSelector()
 HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_NoRulesReturnsEmpty, TestSize.Level0)
 {
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, "", R"({"errorCode":0,"controls":[]})", false);
+        testPid, testWebId, testHostNodeId, "", R"({"errorCode":0,"controls":[]})", false);
     EXPECT_TRUE(results.empty());
 }
 
@@ -106,7 +107,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_EmptyControlsNoPriorState, T
     RegisterRuleSet("rs_pqrc1");
     std::string selector = GetExpectedSelector();
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, selector, R"({"errorCode":0,"controls":[]})", false);
+        testPid, testWebId, testHostNodeId, selector, R"({"errorCode":0,"controls":[]})", false);
     EXPECT_TRUE(results.empty());
 }
 
@@ -123,7 +124,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_EmptyControlsWithPriorTrigge
     WebPageSceneManager::GetInstance().UpdateRuleState(
         testPid, testWebId, "r1", true, 2, false, {});
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, selector, R"({"errorCode":0,"controls":[]})", false);
+        testPid, testWebId, testHostNodeId, selector, R"({"errorCode":0,"controls":[]})", false);
     ASSERT_EQ(results.size(), 1u);
     auto parsed = JsonUtil::ParseJsonString(results[0]);
     ASSERT_NE(parsed, nullptr);
@@ -153,7 +154,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_MatchedControlsConditionMet,
         ]
     })";
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, selector, rawResult, false);
+        testPid, testWebId, testHostNodeId, selector, rawResult, false);
     ASSERT_EQ(results.size(), 1u);
     auto parsed = JsonUtil::ParseJsonString(results[0]);
     ASSERT_NE(parsed, nullptr);
@@ -178,7 +179,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_MatchedControlsConditionNotM
         ]
     })";
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, selector, rawResult, false);
+        testPid, testWebId, testHostNodeId, selector, rawResult, false);
     // matchedCount=1 < threshold=2, and no prior trigger -> DeriveSceneType returns ""
     EXPECT_TRUE(results.empty());
 }
@@ -201,7 +202,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_MatchedControlsNotMetWithPri
         ]
     })";
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, selector, rawResult, false);
+        testPid, testWebId, testHostNodeId, selector, rawResult, false);
     ASSERT_EQ(results.size(), 1u);
     auto parsed = JsonUtil::ParseJsonString(results[0]);
     ASSERT_NE(parsed, nullptr);
@@ -222,7 +223,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_IsGetResultUsesSceneType, Te
         "controls": [{ "nodeId": 1, "nodeType": "input" }]
     })";
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, selector, rawResult, true);
+        testPid, testWebId, testHostNodeId, selector, rawResult, true);
     ASSERT_EQ(results.size(), 1u);
     auto parsed = JsonUtil::ParseJsonString(results[0]);
     ASSERT_NE(parsed, nullptr);
@@ -246,7 +247,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_WrongSelectorNoResult, TestS
         "controls": [{ "nodeId": 1, "nodeType": "input" }]
     })";
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        testPid, testWebId, wrongSelector, rawResult, false);
+        testPid, testWebId, testHostNodeId, wrongSelector, rawResult, false);
     EXPECT_TRUE(results.empty());
 }
 
@@ -260,7 +261,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResultCore_WrongSelectorNoResult, TestS
 HWTEST_F(PageSceneMatchTest, ProcessQueryResult_NoRulesNoCrash, TestSize.Level0)
 {
     WebPageSceneManager::GetInstance().ProcessQueryResult(
-        testPid, testWebId, "", R"({"errorCode":0,"controls":[]})", false);
+        testPid, testWebId, testHostNodeId, "", R"({"errorCode":0,"controls":[]})", false);
     // No crash expected
 }
 
@@ -277,7 +278,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResult_ProducesResultsAndReports, TestS
         testPid, testWebId, "r1", true, 2, false, {});
     // ProcessQueryResult internally calls OnMatchResult (no-op in mock UiSessionManager)
     WebPageSceneManager::GetInstance().ProcessQueryResult(
-        testPid, testWebId, selector, R"({"errorCode":0,"controls":[]})", false);
+        testPid, testWebId, testHostNodeId, selector, R"({"errorCode":0,"controls":[]})", false);
     // After processing, state should reflect the EXIT (triggered reset to false)
     auto rules = WebPageSceneManager::GetInstance().GetPageSceneRules(testPid);
     ASSERT_TRUE(rules.has_value());
@@ -293,7 +294,7 @@ HWTEST_F(PageSceneMatchTest, ProcessQueryResult_ProducesResultsAndReports, TestS
  */
 HWTEST_F(PageSceneMatchTest, FlushExitOnNavigate_NoRulesNoCrash, TestSize.Level0)
 {
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId, testHostNodeId);
     // No crash expected
 }
 
@@ -305,7 +306,7 @@ HWTEST_F(PageSceneMatchTest, FlushExitOnNavigate_NoRulesNoCrash, TestSize.Level0
 HWTEST_F(PageSceneMatchTest, FlushExitOnNavigate_NoComponentStateNoOp, TestSize.Level0)
 {
     RegisterRuleSet("rs_feon1");
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId, testHostNodeId);
     auto rules = WebPageSceneManager::GetInstance().GetPageSceneRules(testPid);
     ASSERT_TRUE(rules.has_value());
     EXPECT_TRUE(rules->componentRuleStates.empty());
@@ -322,7 +323,7 @@ HWTEST_F(PageSceneMatchTest, FlushExitOnNavigate_NoTriggeredStateNoReport, TestS
     // Establish state but without textEditorTriggered
     WebPageSceneManager::GetInstance().UpdateRuleState(
         testPid, testWebId, "r1", false, 0, false, {});
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId, testHostNodeId);
     // No EXIT produced since textEditorTriggered was false
     auto rules = WebPageSceneManager::GetInstance().GetPageSceneRules(testPid);
     ASSERT_TRUE(rules.has_value());
@@ -345,7 +346,7 @@ HWTEST_F(PageSceneMatchTest, FlushExitOnNavigate_WithTriggeredProducesExit, Test
     ASSERT_TRUE(rulesBefore.has_value());
     EXPECT_TRUE(rulesBefore->componentRuleStates[testWebId]["r1"].textEditorTriggered);
     // OnMatchResult non-empty sceneJson is no-op in mock UiSessionManager
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId, testHostNodeId);
     // After FlushExitOnNavigate, component state should be erased
     auto rulesAfter = WebPageSceneManager::GetInstance().GetPageSceneRules(testPid);
     ASSERT_TRUE(rulesAfter.has_value());
@@ -368,7 +369,7 @@ HWTEST_F(PageSceneMatchTest, FlushExitOnNavigate_OtherComponentUnaffected, TestS
     WebPageSceneManager::GetInstance().UpdateRuleState(
         testPid, otherWebId, "r1", true, 2, true, {});
     // Flush only testWebId
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(testPid, testWebId, testHostNodeId);
     auto rules = WebPageSceneManager::GetInstance().GetPageSceneRules(testPid);
     ASSERT_TRUE(rules.has_value());
     // testWebId should be erased

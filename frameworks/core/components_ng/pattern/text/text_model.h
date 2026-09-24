@@ -281,6 +281,12 @@ public:
     virtual void ResetIncrementalUpdatePolicy() {};
     virtual void BindJSTextController(std::function<void()>&& func) {};
     virtual void SetTailIndents(const NG::TailIndents& value) = 0;
+    virtual void SetStrokeWidth(const Dimension& value) {};
+    virtual void ResetStrokeWidth() {};
+    virtual void SetStrokeColor(const Color& value) {};
+    virtual void ResetStrokeColor() {};
+    virtual void SetStrokeJoinStyle(StrokeJoinStyle value) {};
+    virtual void ResetStrokeJoinStyle() {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

@@ -25,22 +25,37 @@ public:
 
 /**
  * @tc.name: UltralimitShake001
- * @tc.desc: test testInput text UltralimitShake
+ * @tc.desc: test TextFieldPattern UltralimitShake all branches (null/non-null decorator, null decoratedNode_)
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestFour, UltralimitShake001, TestSize.Level0)
 {
+    // B1: basic UltralimitShake with null counterDecorator_
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
     auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateNumberOfLines(1024);
-
     pattern->UltralimitShake();
+
+    // B2: UltralimitShake with non-null counterDecorator_ (via AddCounterNode)
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLength(10);
+    });
+    GetFocus();
+    pattern_->AddCounterNode();
+    ASSERT_TRUE(pattern_->counterDecorator_);
+    pattern_->UltralimitShake();
+
+    // B3: CounterDecorator::UltralimitShake with null decoratedNode_
+    auto decorator = AceType::DynamicCast<CounterDecorator>(pattern_->counterDecorator_);
+    ASSERT_NE(decorator, nullptr);
+    decorator->decoratedNode_ = nullptr;
+    decorator->UltralimitShake();
+    SUCCEED();
 }
 
 /**
@@ -352,11 +367,12 @@ HWTEST_F(TextFieldPatternTestFour, CursorMove001, TestSize.Level0)
 
 /**
  * @tc.name: HandleCounterBorder001
- * @tc.desc: test testInput text HandleCounterBorder
+ * @tc.desc: test HandleCounterBorder all branches (underline true/false + style true/false)
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestFour, HandleCounterBorder001, TestSize.Level0)
 {
+    // B1: showCountBorderStyle_=true + underline mode
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
@@ -369,6 +385,28 @@ HWTEST_F(TextFieldPatternTestFour, HandleCounterBorder001, TestSize.Level0)
     layoutProperty->UpdateShowUnderline(true);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
     pattern->HandleCounterBorder();
+
+    // B2: showCountBorderStyle_=true + non-underline mode -> ApplyInnerBorderColor
+    auto textFieldNode2 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode2, nullptr);
+    auto pattern2 = textFieldNode2->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern2, nullptr);
+    pattern2->showCountBorderStyle_ = true;
+    pattern2->HandleCounterBorder();
+    auto paintProperty2 = textFieldNode2->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty2, nullptr);
+    EXPECT_TRUE(paintProperty2->HasInnerBorderWidth());
+
+    // B3: showCountBorderStyle_=false + non-underline mode -> SetThemeBorderAttr
+    auto textFieldNode3 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode3, nullptr);
+    auto pattern3 = textFieldNode3->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern3, nullptr);
+    pattern3->showCountBorderStyle_ = false;
+    pattern3->HandleCounterBorder();
+    SUCCEED();
 }
 
 /**
@@ -1912,6 +1950,158 @@ HWTEST_F(TextFieldPatternTestFour, GetInnerFocusPaintRectTest005, TestSize.Level
      */
     EXPECT_GE(paintRect.GetRect().Width(), 0.0);
     EXPECT_GE(paintRect.GetRect().Height(), 0.0);
+}
+
+/**
+ * @tc.name: HandleDeleteOnCounterScene001
+ * @tc.desc: Test HandleDeleteOnCounterScene with/without maxLength (both branches)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, HandleDeleteOnCounterScene001, TestSize.Level0)
+{
+    CreateTextField();
+    // B1: hasMaxLength=true -> reset showCountBorderStyle_ + HandleCountStyle
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLength(10);
+    pattern->showCountBorderStyle_ = true;
+    pattern->HandleDeleteOnCounterScene();
+    EXPECT_FALSE(pattern->showCountBorderStyle_);
+
+    // B2: hasMaxLength=false -> early return, showCountBorderStyle_ unchanged
+    auto textFieldNode2 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode2, nullptr);
+    auto pattern2 = textFieldNode2->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern2, nullptr);
+    auto layoutProperty2 = textFieldNode2->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty2, nullptr);
+    layoutProperty2->UpdateShowCounter(true);
+    pattern2->showCountBorderStyle_ = true;
+    pattern2->HandleDeleteOnCounterScene();
+    EXPECT_TRUE(pattern2->showCountBorderStyle_);
+}
+
+/**
+ * @tc.name: ProcessCounter001
+ * @tc.desc: Test ProcessCounter when IsShowCount true/false (both branches)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, ProcessCounter001, TestSize.Level0)
+{
+    CreateTextField();
+    // B1: IsShowCount=true -> AddCounterNode + UpdateTextFieldMargin
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateShowCounter(true);
+    layoutProperty->UpdateMaxLength(10);
+    pattern->ProcessCounter();
+    EXPECT_NE(pattern->counterDecorator_, nullptr);
+
+    // B2: IsShowCount=false -> CleanCounterNode
+    auto textFieldNode2 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode2, nullptr);
+    auto pattern2 = textFieldNode2->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern2, nullptr);
+    auto layoutProperty2 = textFieldNode2->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty2, nullptr);
+    layoutProperty2->UpdateShowCounter(false);
+    pattern2->ProcessCounter();
+    EXPECT_EQ(pattern2->counterDecorator_, nullptr);
+}
+
+/**
+ * @tc.name: HandleCountStyle001
+ * @tc.desc: Test HandleCountStyle with delete operations pending (early return)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, HandleCountStyle001, TestSize.Level0)
+{
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // Push a delete operation so noDeleteOperation is false
+    pattern->deleteBackwardOperations_.push(1);
+    // B1: noDeleteOperation=false -> early return
+    pattern->HandleCountStyle();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: ApplyInnerBorderColor001
+ * @tc.desc: Test ApplyInnerBorderColor with/without HasBorderWidthFlagByUser (both branches)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, ApplyInnerBorderColor001, TestSize.Level0)
+{
+    CreateTextField();
+    // B1: !HasBorderWidthFlagByUser() -> UpdateInnerBorderWidth + UpdateInnerBorderColor
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCounterTextOverflowColor(Color::RED);
+    pattern->ApplyInnerBorderColor();
+    EXPECT_TRUE(paintProperty->HasInnerBorderWidth());
+    EXPECT_TRUE(paintProperty->HasInnerBorderColor());
+
+    // B2: HasBorderWidthFlagByUser=true -> renderContext->UpdateBorderColor
+    auto textFieldNode2 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode2, nullptr);
+    auto pattern2 = textFieldNode2->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern2, nullptr);
+    auto paintProperty2 = textFieldNode2->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty2, nullptr);
+    auto layoutProperty2 = textFieldNode2->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty2, nullptr);
+    layoutProperty2->UpdateCounterTextOverflowColor(Color::GREEN);
+    NG::BorderWidthProperty userWidth;
+    userWidth.SetBorderWidth(Dimension(2.0_vp));
+    paintProperty2->UpdateBorderWidthFlagByUser(userWidth);
+    pattern2->ApplyInnerBorderColor();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: UpdateShowCountBorderStyle001
+ * @tc.desc: Test UpdateShowCountBorderStyle with text > maxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, UpdateShowCountBorderStyle001, TestSize.Level0)
+{
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLength(5);
+    pattern->showCountBorderStyle_ = false;
+    // Set text content length > maxLength
+    pattern->UpdateShowCountBorderStyle();
+    SUCCEED();
 }
 
 } // namespace OHOS::Ace::NG

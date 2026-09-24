@@ -20,7 +20,9 @@
 #include <functional>
 #include <mutex>
 #include <optional>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "interfaces/inner_api/ace/constants.h"
 #include "interfaces/inner_api/ace/navigation_controller.h"
@@ -82,6 +84,8 @@ using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 using TouchpadInteractionBeginCallback = std::function<void(const NonPointerEvent&, const std::function<void()>&)>;
 using AbilityRuntimeContextCallback = std::function<void(int32_t)>;
+using MouseTargetHitCallback = std::function<bool(const MouseEvent&,
+    const RefPtr<NG::FrameNode>&, const std::vector<std::string>&)>;
 
 class PipelineBase;
 class ContainerHandler;

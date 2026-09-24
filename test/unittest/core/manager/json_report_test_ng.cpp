@@ -444,4 +444,92 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest014, TestSize.Level1)
     std::string JsonStr1 = "{\"GestureType\":\"Tap\",\"id\":1,\"point\":[100,100],\"count\":10,\"fingers\":1}";
     EXPECT_EQ(JsonStr, JsonStr1);
 }
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest015
+ * @tc.desc: Test TouchEventJsonReport with all required fields
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest015, TestSize.Level1)
+{
+    std::vector<TouchEventJsonReport::FingerData> fingers;
+    TouchEventJsonReport::FingerData f1;
+    f1.fingerId = 10;
+    f1.pointX = 100.0f;
+    f1.pointY = 200.0f;
+    fingers.push_back(f1);
+    TouchEventJsonReport report(12345, "Down", 9999, 10, 100.0f, 200.0f, std::move(fingers));
+    auto value = report.GetJsonData();
+    ASSERT_NE(value, nullptr);
+    EXPECT_EQ(value->GetString("GestureType"), "TouchEvent");
+    EXPECT_EQ(value->GetInt("nodeId"), 12345);
+    EXPECT_EQ(value->GetString("action"), "Down");
+    EXPECT_EQ(value->GetInt("fingerId"), 10);
+    EXPECT_TRUE(value->Contains("point"));
+    EXPECT_TRUE(value->Contains("fingers"));
+    EXPECT_FALSE(value->Contains("deviceId"));
+    EXPECT_FALSE(value->Contains("appPackage"));
+    EXPECT_FALSE(value->Contains("window"));
+}
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest016
+ * @tc.desc: Test TouchEventJsonReport point array and fingers array
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest016, TestSize.Level1)
+{
+    std::vector<TouchEventJsonReport::FingerData> fingers;
+    TouchEventJsonReport::FingerData f1;
+    f1.fingerId = 0;
+    f1.pointX = 100.0f;
+    f1.pointY = 200.0f;
+    fingers.push_back(f1);
+    TouchEventJsonReport::FingerData f2;
+    f2.fingerId = 1;
+    f2.pointX = 300.0f;
+    f2.pointY = 400.0f;
+    fingers.push_back(f2);
+
+    TouchEventJsonReport report(100, "Down", 1000, 0, 150.0f, 250.0f, std::move(fingers));
+    auto value = report.GetJsonData();
+    ASSERT_NE(value, nullptr);
+    auto point = value->GetValue("point");
+    ASSERT_NE(point, nullptr);
+    EXPECT_TRUE(point->IsArray());
+    EXPECT_DOUBLE_EQ(point->GetArrayItem(0)->GetDouble(), 150.0);
+    EXPECT_DOUBLE_EQ(point->GetArrayItem(1)->GetDouble(), 250.0);
+
+    auto fingersArray = value->GetValue("fingers");
+    ASSERT_NE(fingersArray, nullptr);
+    EXPECT_TRUE(fingersArray->IsArray());
+    EXPECT_EQ(fingersArray->GetArraySize(), 2);
+    auto finger0 = fingersArray->GetArrayItem(0);
+    EXPECT_EQ(finger0->GetInt("fingerId"), 0);
+    auto point0 = finger0->GetValue("point");
+    EXPECT_DOUBLE_EQ(point0->GetArrayItem(0)->GetDouble(), 100.0);
+    EXPECT_DOUBLE_EQ(point0->GetArrayItem(1)->GetDouble(), 200.0);
+    auto finger1 = fingersArray->GetArrayItem(1);
+    EXPECT_EQ(finger1->GetInt("fingerId"), 1);
+    auto point1 = finger1->GetValue("point");
+    EXPECT_DOUBLE_EQ(point1->GetArrayItem(0)->GetDouble(), 300.0);
+    EXPECT_DOUBLE_EQ(point1->GetArrayItem(1)->GetDouble(), 400.0);
+}
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest017
+ * @tc.desc: Test TouchEventJsonReport data minimization
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest017, TestSize.Level1)
+{
+    std::vector<TouchEventJsonReport::FingerData> emptyFingers;
+    TouchEventJsonReport report(100, "Cancel", 3000, 0, 0.0f, 0.0f, std::move(emptyFingers));
+    auto value = report.GetJsonData();
+    ASSERT_NE(value, nullptr);
+    EXPECT_FALSE(value->Contains("appPackage"));
+    EXPECT_FALSE(value->Contains("window"));
+    EXPECT_FALSE(value->Contains("bundleName"));
+    EXPECT_FALSE(value->Contains("deviceId"));
+}
 } // namespace OHOS::Ace::NG

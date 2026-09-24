@@ -18,7 +18,7 @@
 
 #include <string>
 #include <memory>
-
+#include <vector>
 namespace OHOS::NWeb {
 class NWebAccessibilityNodeInfo;
 class NWebAgentManager;
@@ -27,6 +27,13 @@ namespace OHOS::Ace {
 void SetReturnStatus(const std::string& status);
 void SetReturnNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> node);
 void SetComponentType(const std::string& type);
+// Test-only knobs to control WebDelegate::SerializeWebState / RestoreWebState return values.
+// SetMockSerializeWebState enables configurable mode and sets the returned state; the empty-by-default
+// behavior is restored by ResetMockSerializeWebState. RestoreWebState returns false by default.
+void SetMockSerializeWebState(const std::vector<uint8_t>& result);
+void ResetMockSerializeWebState();
+void SetMockRestoreWebState(bool result);
+void ResetMockRestoreWebState();
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_MOCK_WEB_DELEGATE_H

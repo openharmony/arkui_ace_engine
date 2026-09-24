@@ -65,6 +65,7 @@ constexpr int32_t US_CONVERT = 1000;
 constexpr int32_t ROUND_XMAGE_PIXEL_GAP = 2;
 constexpr int32_t EIGHTY_TO_HUNDRED_TIME = 3000;
 constexpr int32_t NODE_COUNT = 2;
+constexpr float HDR_BRIGHTNESS_OFF = 0.0f;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -317,23 +318,16 @@ void MovingPhotoPattern::InitEvent()
     }
 
     if (touchEvent_) {
-        if (isEnableAnalyzer_) {
-            gestureHub->RemoveTouchEvent(touchEvent_);
-            touchEvent_ = nullptr;
-        } else {
-            gestureHub->AddTouchEvent(touchEvent_);
-        }
+        gestureHub->AddTouchEvent(touchEvent_);
         return;
     }
-    if (!isEnableAnalyzer_) {
-        auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleTouchEvent(info);
-        };
-        touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-        gestureHub->AddTouchEvent(touchEvent_);
-    }
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchEvent(info);
+    };
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchEvent_);
 }
 
 void MovingPhotoPattern::LongPressEventModify(bool status)
@@ -421,7 +415,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
     isFastKeyUp_ = false;
     if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         if (currentPlayStatus_ == PlaybackStatus::STARTED) {
-            PausePlayback();
+            PausePlayback(false);
         } else if (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE) {
             currentPlayStatus_ = PlaybackStatus::NONE;
             StopAnimation();
@@ -530,6 +524,9 @@ void MovingPhotoPattern::UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode)
     if (dynamicRangeMode_ == DynamicRangeMode::STANDARD) {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, imageNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, imageNode);
+        if (renderContextForMediaPlayer_) {
+            renderContextForMediaPlayer_->SetHDRBrightness(HDR_BRIGHTNESS_OFF);
+        }
     }
 }
 
@@ -1669,10 +1666,10 @@ void MovingPhotoPattern::StartAnimation()
 }
 
 void MovingPhotoPattern::RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
-    const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode)
+    const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode, bool isZoomIn)
 {
     if (playbackMode == PlaybackMode::REPEAT || playbackMode == PlaybackMode::AUTO ||
-        isRefreshMovingPhoto_ || !isEnableTransition_) {
+        isRefreshMovingPhoto_ || !isEnableTransition_ || !isZoomIn) {
         videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
         imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     } else {
@@ -1709,7 +1706,7 @@ void MovingPhotoPattern::StopPlayback()
     }
 }
 
-void MovingPhotoPattern::PausePlayback()
+void MovingPhotoPattern::PausePlayback(bool isZoomIn)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto PausePlayback");
     isFastKeyUp_ = false;
@@ -1722,7 +1719,7 @@ void MovingPhotoPattern::PausePlayback()
     }
     isPlayByController_ = false;
     Pause();
-    StopAnimation();
+    StopAnimation(isZoomIn);
 }
 
 void MovingPhotoPattern::PauseVideo()
@@ -2051,7 +2048,7 @@ RefPtr<FrameNode> MovingPhotoPattern::GetTempNode()
     return image;
 }
 
-void MovingPhotoPattern::StopAnimation()
+void MovingPhotoPattern::StopAnimation(bool isZoomIn)
 {
     if (handleImageError_) {
         return;
@@ -2083,7 +2080,7 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(videoRsContext);
 
     videoRsContext->UpdateOpacity(1.0);
-    RsContextUpdateTransformScale(imageRsContext, videoRsContext, autoAndRepeatLevel_);
+    RsContextUpdateTransformScale(imageRsContext, videoRsContext, autoAndRepeatLevel_, isZoomIn);
     image->MarkModifyDone();
     video->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);

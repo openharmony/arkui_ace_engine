@@ -575,6 +575,9 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Polyline" },
         { "XComponent" },
         { "Toggle" },
+        { "Bubble" },
+        { "Dialog" },
+        { "Sheet" },
         { "ImageAnimator" },
         { "DatePicker" },
         { "DatePickerDialog" },
@@ -1937,10 +1940,6 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetScrollSnapAlign));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollSnapAlign"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetScrollSnapAlign));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollSnapStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetScrollSnapStrategy));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollSnapStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetScrollSnapStrategy));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetDivider));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
@@ -2194,6 +2193,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnScaleChange));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnScaleChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnScaleChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnZoomChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnZoomChange));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnZoomChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnZoomChange));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnContextMenuHide"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnContextMenuHide));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnContextMenuHide"),
@@ -3616,6 +3619,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetExcludeFromRenderGroup));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetExcludeFromRenderGroup"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetExcludeFromRenderGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarkLayeredRender"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMarkLayeredRender));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarkLayeredRender"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMarkLayeredRender));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setChainWeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetChainWeight));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetChainWeight"),
@@ -3962,6 +3969,18 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTailIndents));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTailIndents"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTailIndents));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetStrokeWidth));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetStrokeWidth));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetStrokeColor));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetStrokeColor));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeJoinStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetStrokeJoinStyle));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeJoinStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetStrokeJoinStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 }
 

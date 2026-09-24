@@ -40,7 +40,7 @@ public:
 
     // default theme
     void SetDefaultTheme(const RefPtr<TokenTheme>& theme, ColorMode colorMode);
-    const RefPtr<TokenTheme>& GetDefaultTheme();
+    ACE_FORCE_EXPORT const RefPtr<TokenTheme>& GetDefaultTheme();
     void UpdateDefaultThemeBySystemTheme(ColorMode colorMode);
 
     // cache (key: theme id - value: ark theme instance)

@@ -112,7 +112,7 @@ constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 8;
 constexpr int32_t POPUP_MIN_EDGE = 1;
-constexpr int32_t POPUP_POSITION_BUFFER = 20;
+constexpr double POPUP_POSITION_BUFFER = 20;
 constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
@@ -1226,6 +1226,13 @@ void AceContainer::UnActiveWindow(int32_t instanceId)
             if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
+            auto aceView = container->GetAceView();
+            if (aceView) {
+                auto aceViewOhos = AceType::DynamicCast<Platform::AceViewOhos>(aceView);
+                if (aceViewOhos) {
+                    aceViewOhos->CancelMouseMapping();
+                }
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUIWindowUnActivate", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
@@ -1590,6 +1597,36 @@ void AceContainer::InitializeCallback()
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI, "ArkUISurfaceDestroyed");
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
+
+    auto&& mouseTargetHitCallback = [weakPipeline = WeakPtr<NG::PipelineContext>(
+        AceType::DynamicCast<NG::PipelineContext>(pipelineContext_))](const MouseEvent& event,
+        const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& tagWhitelist) -> bool {
+        auto pipeline = weakPipeline.Upgrade();
+        CHECK_NULL_RETURN(pipeline, false);
+        return pipeline->HitTestMouseTargetForMapping(event, node, tagWhitelist);
+    };
+    auto aceViewOhos = AceType::DynamicCast<Platform::AceViewOhos>(aceView_);
+    if (aceViewOhos) {
+        aceViewOhos->RegisterMouseTargetHitCallback(mouseTargetHitCallback);
+    }
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    if (pipeline && aceViewOhos) {
+        aceViewOhos->RegisterRightMouseMappingActiveCallback(
+            [weakPipeline = WeakPtr<NG::PipelineContext>(pipeline)](bool active) {
+                auto p = weakPipeline.Upgrade();
+                if (p) {
+                    p->SetRightMouseMappingActive(active);
+                }
+            });
+        auto cancelCb = [weakView = WeakPtr<Platform::AceViewOhos>(aceViewOhos)]() {
+            auto view = weakView.Upgrade();
+            if (view) {
+                view->CancelMouseMapping();
+            }
+        };
+        pipeline->SetOnRightMouseMappingCancel(std::move(cancelCb));
+    }
+
     InitDragEventCallback();
 }
 
@@ -2001,6 +2038,10 @@ private:
         double deltaX = 0;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+        // windowRect_ members are int32_t/uint32_t; convert to double to avoid signed/unsigned mixing.
+        double windowPosX = static_cast<double>(windowRect_.posX_);
+        double windowWidth = static_cast<double>(windowRect_.width_);
+        double windowRight = windowPosX + windowWidth;
         // windowRect_: window; rectf: web container; rect_: input element; size: fill popup.
         // This method computes deltaX so the popup stays close to the input element.
         // Stage 1: only compute the offset when the popup is no wider than both the
@@ -2008,31 +2049,28 @@ private:
         // is inside the window; otherwise return 0. A POPUP_POSITION_BUFFER (20px)
         // tolerance is applied to the window's x and the web container's bounds so a
         // sub-pixel overflow does not skip the computation.
-        if (size.width > rectf.Width() || size.width > windowRect_.width_ ||
-            windowRect_.posX_ > POPUP_POSITION_BUFFER ||
-            windowRect_.posX_ < -POPUP_POSITION_BUFFER ||
-            rectf.Left() < windowRect_.posX_ - POPUP_POSITION_BUFFER ||
-            rectf.Left() + rectf.Width() > windowRect_.posX_ + windowRect_.width_ + POPUP_POSITION_BUFFER) {
+        if (size.width > rectf.Width() || size.width > windowWidth ||
+            windowPosX > POPUP_POSITION_BUFFER ||
+            windowPosX < -POPUP_POSITION_BUFFER ||
+            rectf.Left() < windowPosX - POPUP_POSITION_BUFFER ||
+            rectf.Left() + rectf.Width() > windowRight + POPUP_POSITION_BUFFER) {
             TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
                 "GetPopupConfigWillUpdateX skip: size.width=%{public}f, rectf.width=%{public}f, "
-                "windowRect.width=%{public}d, windowRect.posX=%{public}d, rectf.left=%{public}f, "
-                "rectf.right=%{public}f, windowRight=%{public}d",
-                size.width, rectf.Width(), static_cast<int32_t>(windowRect_.width_),
-                static_cast<int32_t>(windowRect_.posX_), rectf.Left(),
-                rectf.Left() + rectf.Width(),
-                static_cast<int32_t>(windowRect_.posX_) + static_cast<int32_t>(windowRect_.width_));
+                "windowRect.width=%{public}f, windowRect.posX=%{public}f, rectf.left=%{public}f, "
+                "rectf.right=%{public}f, windowRight=%{public}f",
+                size.width, rectf.Width(), windowWidth, windowPosX, rectf.Left(),
+                rectf.Left() + rectf.Width(), windowRight);
             return deltaX;
         }
         // Stage 2: estimate the popup's initial position.
         // The exact initial position is obtained from BubbleAvoidanceRule in
         // bubble_layout_algorithm.cpp; by default the popup is centered in the web container.
-        double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-        double basePosition = rectf.Left() + edgeDist;
+        double basePosition = rectf.Left() + (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
         // If the space to the right or left of the web container fits the popup,
         // recompute the initial position; check the right side first.
-        if (windowRect_.posX_ + windowRect_.width_ - rectf.Left() - rectf.Width() > size.width) {
+        if (windowRight - rectf.Left() - rectf.Width() > size.width) {
             basePosition = rectf.Left() + rectf.Width();
-        } else if (rectf.Left() - windowRect_.posX_ > size.width) {
+        } else if (rectf.Left() - windowPosX > size.width) {
             basePosition = rectf.Left() - size.width;
         }
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "GetPopupConfigWillUpdateX basePosition=%{public}f", basePosition);
@@ -2231,6 +2269,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         node.depth = -1;
         node.autoFillType = static_cast<AbilityBase::AutoFillType>(info->GetAutoFillType());
         node.isFocus = info->GetIsFocus();
+        node.enableAutoFill = info->GetEnableAutoFill();
         node.value = info->GetValue();
         node.placeholder = info->GetPlaceholder();
         node.metadata = info->GetMetadata();
@@ -2801,7 +2840,10 @@ void AceContainer::SetIsFormRender(bool isFormRender)
 void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
     float height, uint32_t windowId, UIEnvCallback callback)
 {
-    aceView_ = view;
+    {
+        std::lock_guard<std::mutex> lock(viewMutex_);
+        aceView_ = view;
+    }
     auto instanceId = aceView_->GetInstanceId();
     auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
     if (!isSubContainer_) {
@@ -3948,6 +3990,9 @@ void AceContainer::HotReload()
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             ConfigurationChange configurationChange { .hotReloadUpdate = true };
+            if (frontend->GetType() == FrontendType::ARK_TS) {
+                configurationChange.hotReloadFullRebuild = true;
+            }
             pipeline->FlushReload(configurationChange);
         },
         TaskExecutor::TaskType::UI, "ArkUIHotReload");
@@ -4272,6 +4317,13 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();
     currentEvents_[originId] = currentEvent;
+    // down state for cross-screen-lock drag detection; reset on up/cancel.
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        downScreenLockedMap_[originId] = currentEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED);
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP ||
+               pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        downScreenLockedMap_.erase(originId);
+    }
     auto callbacksIter = stopDragCallbackMap_.begin();
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
@@ -4416,6 +4468,15 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
     }
     dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
     dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
+    bool downLocked = false;
+    auto downIter = downScreenLockedMap_.find(dragPointerEvent.originId);
+    if (downIter != downScreenLockedMap_.end()) {
+        downLocked = downIter->second;
+    }
+    if (!downLocked && currentPointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SCREEN_LOCKED)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Drag crossed screen lock, abort dragController start.");
+        return false;
+    }
     return true;
 }
 

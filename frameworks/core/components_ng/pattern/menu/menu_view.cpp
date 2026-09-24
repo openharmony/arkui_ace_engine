@@ -1260,7 +1260,7 @@ bool MenuView::ApplySystemMaterialForMenu(const RefPtr<FrameNode>& menuNode, con
     const RefPtr<RenderContext>& renderContext)
 {
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(systemMaterial));
+    ViewAbstract::SetSystemMaterialForOverlay(AceType::RawPtr(menuNode), AceType::RawPtr(systemMaterial));
     return true;
 }
 

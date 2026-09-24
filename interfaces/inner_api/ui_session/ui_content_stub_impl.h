@@ -46,7 +46,7 @@ public:
     int32_t RegisterLifeCycleEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterSelectTextEventCallback(const EventCallback& eventCallback) override;
     int32_t SendCommand(int32_t id, const std::string& command) override;
-    int32_t SendCommandAsync(int32_t id, const std::string& command) override;
+    int32_t SendCommandSync(int32_t id, const std::string& command) override;
     int32_t SendCommand(const std::string command) override;
     int32_t UnregisterClickEventCallback() override;
     int32_t UnregisterSearchEventCallback() override;

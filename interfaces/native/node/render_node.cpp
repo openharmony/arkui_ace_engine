@@ -18,6 +18,7 @@
 #include <cstdlib>
 
 #include "node_model.h"
+#include "config_manager.h"
 
 #include "base/error/error_code.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
@@ -40,6 +41,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AddRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         child, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
         return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
@@ -65,6 +67,7 @@ ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child position is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
         return ARKUI_ERROR_CODE_NOT_CUSTOM_NODE;
@@ -86,6 +89,7 @@ int32_t OH_ArkUI_RenderNodeUtils_RemoveRenderNode(ArkUI_NodeHandle node, ArkUI_R
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         child, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
         return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
@@ -105,6 +109,7 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
         return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
@@ -127,6 +132,7 @@ int32_t OH_ArkUI_RenderNodeUtils_Invalidate(ArkUI_NodeHandle node)
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->invalidate(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -2205,6 +2211,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUIRenderNodeHandle renderNodeHandle = nullptr;
     int renderNodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNode(
@@ -2225,6 +2232,7 @@ ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(ArkUI_NodeHa
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNodeChildrenCount(
         node->uiNodeHandle, count);
     if (result != ARKUI_ERROR_CODE_NO_ERROR) {
@@ -2245,6 +2253,7 @@ ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     ArkUIRenderNodeHandle renderNode = nullptr;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNodeAt(

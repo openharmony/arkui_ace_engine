@@ -52,9 +52,9 @@ public:
     using Size = std::pair<int32_t, int32_t>;
 
     static RefPtr<ImageSource> Create(int32_t fd);
-    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size, uint32_t& errorCode);
-    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
-    static RefPtr<ImageSource> Create(const std::string& filePath);
+    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size, uint32_t& errorCode, int32_t svgLimitsId = 0);
+    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size, int32_t svgLimitsId = 0);
+    static RefPtr<ImageSource> Create(const std::string& filePath, int32_t svgLimitsId = 0);
     static bool IsAstc(const uint8_t* data, size_t size);
     static Size GetASTCInfo(const uint8_t* data, size_t size);
     virtual std::string GetProperty(const std::string& key) = 0;

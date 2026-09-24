@@ -17,6 +17,8 @@
 
 #include <cstring>
 #include <memory>
+
+#include "config_manager.h"
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_extened.h"
@@ -213,7 +215,10 @@ ArkUIFullNodeAPI* GetFullImplForErrorMessage()
 
 bool InitialFullImpl()
 {
-    return InitialFullNodeImpl(ARKUI_NODE_API_VERSION, impl);
+    if (!InitialFullNodeImpl(ARKUI_NODE_API_VERSION, impl)) {
+        return false;
+    }
+    return true;
 }
 
 std::set<ArkUI_NodeHandle> g_nodeSet;
@@ -259,7 +264,8 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         return nullptr;
     }
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode, true });
+    ArkUI_Node* arkUINode = new ArkUI_Node({
+        .type = type, .uiNodeHandle = uiNode, .cNode = true, .magic = ARKUI_NODE_MAGIC_VALID });
     impl->getExtendedAPI()->setAttachNodePtr(uiNode, reinterpret_cast<void*>(arkUINode));
     g_nodeSet.emplace(arkUINode);
     return arkUINode;
@@ -308,6 +314,7 @@ void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
 void DisposeNode(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
+    CHECK_NODE_DISPOSED(nativePtr, "Node has been disposed");
     if (!CheckIsCNode(nativePtr)) {
         return;
     }
@@ -316,6 +323,9 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
     DisposeNativeSource(nativePtr);
     g_nodeSet.erase(nativePtr);
+    // Prevent the invalidation store from being optimized away before deallocation.
+    volatile uint32_t* magic = &nativePtr->magic;
+    *magic = ARKUI_NODE_MAGIC_INVALID;
     delete nativePtr;
     nativePtr = nullptr;
 }
@@ -330,6 +340,8 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
@@ -359,6 +371,8 @@ int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
@@ -385,6 +399,8 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
@@ -396,6 +412,7 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(siblingNode, "Sibling node has been disposed");
     int result = impl->getBasicAPI()->insertChildAfter(parentNode->uiNodeHandle, childNode->uiNodeHandle,
         siblingNode ? siblingNode->uiNodeHandle : nullptr);
     if (result != ERROR_CODE_NO_ERROR) {
@@ -415,6 +432,8 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
@@ -426,6 +445,7 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
+    CHECK_NODE_DISPOSED(siblingNode, "Sibling node has been disposed");
     int result = impl->getBasicAPI()->insertChildBefore(parentNode->uiNodeHandle, childNode->uiNodeHandle,
         siblingNode ? siblingNode->uiNodeHandle : nullptr);
     if (result != ERROR_CODE_NO_ERROR) {
@@ -445,6 +465,8 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(parentNode, "Parent node has been disposed");
+    CHECK_NODE_DISPOSED(childNode, "Child node has been disposed");
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
         SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
@@ -493,6 +515,7 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type == -1 && attribute != NODE_LAYOUT_RECT && !IsSupportAttributeTypeWithBindNative(node, attribute)) {
         SET_ERROR_MESSAGE(
             ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node attribute is not supported");
@@ -511,6 +534,7 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type == -1 && attribute != NODE_LAYOUT_RECT) {
         SET_ERROR_MESSAGE(
             ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node attribute is not supported");
@@ -528,6 +552,7 @@ const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttribu
     if (node == nullptr) {
         return nullptr;
     }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     return GetNodeAttribute(node, attribute);
 }
 
@@ -1012,7 +1037,12 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 
 int32_t SetUserData(ArkUI_NodeHandle node, void* userData)
 {
-    if (!node || !CheckIsCNode(node)) {
+    if (!node) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
+    if (!CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -1026,12 +1056,18 @@ int32_t SetUserData(ArkUI_NodeHandle node, void* userData)
 
 void* GetUserData(ArkUI_NodeHandle node)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     return node->userData;
 }
 
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
 {
-    if (!nodePtr || !CheckIsCNode(nodePtr)) {
+    if (!nodePtr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    CHECK_NODE_DISPOSED(nodePtr, "Node has been disposed");
+    if (!CheckIsCNode(nodePtr)) {
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -1057,7 +1093,11 @@ void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     // spanNode inherited from UINode
-    if (!nodePtr || !CheckIsCNode(nodePtr)) {
+    if (!nodePtr) {
+        return;
+    }
+    CHECK_NODE_DISPOSED(nodePtr, "Node has been disposed");
+    if (!CheckIsCNode(nodePtr)) {
         return;
     }
     ArkUIDirtyFlag flag = ARKUI_DIRTY_FLAG_MEASURE;
@@ -1648,7 +1688,8 @@ ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
     }
-    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
+    ArkUI_Node* arkUINode = new ArkUI_Node({
+        .type = -1, .uiNodeHandle = node, .cNode = false, .magic = ARKUI_NODE_MAGIC_VALID });
     arkUINode->type = GetNodeTypeByTag(arkUINode);
     impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
     return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
@@ -1841,6 +1882,7 @@ int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_Node
         __FUNCTION__, "Native module not initialized");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->addChild(
         reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -1856,6 +1898,7 @@ int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_N
         __FUNCTION__, "Native module not initialized");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
         reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, position);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -1871,6 +1914,7 @@ int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_N
         __FUNCTION__, "Native module not initialized");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
         reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {

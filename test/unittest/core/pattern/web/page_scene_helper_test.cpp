@@ -383,7 +383,7 @@ HWTEST_F(PageSceneHelperTest, IsWithinMinInterval_ZeroInterval, TestSize.Level0)
     rule.policy.minReportIntervalMs = 0;
     RuleMatchState state;
     state.lastReportTimeMs = 1000;
-    EXPECT_FALSE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state));
+    EXPECT_FALSE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state, "TEXT_EDITOR"));
 }
 
 /**
@@ -397,7 +397,7 @@ HWTEST_F(PageSceneHelperTest, IsWithinMinInterval_ZeroLastReport, TestSize.Level
     rule.policy.minReportIntervalMs = 1000;
     RuleMatchState state;
     state.lastReportTimeMs = 0;
-    EXPECT_FALSE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state));
+    EXPECT_FALSE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state, "TEXT_EDITOR"));
 }
 
 /**
@@ -412,7 +412,7 @@ HWTEST_F(PageSceneHelperTest, IsWithinMinInterval_WithinWindow, TestSize.Level0)
     RuleMatchState state;
     state.lastReportTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count();
-    EXPECT_TRUE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state));
+    EXPECT_TRUE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state, "TEXT_EDITOR"));
 }
 
 /**
@@ -426,7 +426,7 @@ HWTEST_F(PageSceneHelperTest, IsWithinMinInterval_OutsideWindow, TestSize.Level0
     rule.policy.minReportIntervalMs = 1; // 1ms
     RuleMatchState state;
     state.lastReportTimeMs = 1; // very old timestamp
-    EXPECT_FALSE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state));
+    EXPECT_FALSE(WebPageSceneManager::GetInstance().IsWithinMinInterval(rule, state, "TEXT_EDITOR"));
 }
 
 // ===== DeriveSceneType =====

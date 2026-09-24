@@ -21,7 +21,7 @@
 #include <cmath>
 #include <filesystem>
 #include <iomanip>
-#include <iostream>
+
 #include <string>
 #include <string_view>
 #include <sstream>
@@ -40,6 +40,7 @@
 #include "page_node_info.h"
 
 #include "adapter/ohos/capability/html/span_to_html.h"
+#include "base/base64/base64_util.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -47,6 +48,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
@@ -115,6 +117,7 @@
 #include "core/event/statusbar/statusbar_event_proxy.h"
 #include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "common_event_manager.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -140,6 +143,7 @@ constexpr std::string_view AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_ori
 constexpr std::string_view AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
 constexpr std::string_view AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
 constexpr std::string_view COMMAND_ACTION_JSON = "persist.sys.abilityms.command.action.book.info";
+constexpr std::string_view ESC_TO_BACK_SUPPORT = "const.multimodalinput.esc_to_back_support";
 constexpr std::string_view WEB_INFO_PC = "8";
 constexpr std::string_view WEB_INFO_TABLET = "4";
 constexpr std::string_view WEB_INFO_PHONE = "2";
@@ -162,10 +166,15 @@ constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t MOUSE_EVENT_MAX_SIZE = 10;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 constexpr int32_t MAXIMUM_ROTATION_DELAY_TIME = 800;
+// SerializeWebState serializes the web back-forward navigation history (access stack).
+// The official @ohos.web.webview API documentation recommends not restoring state > 512KB.
+constexpr size_t MAX_WEB_STATE_SIZE = 512 * 1024; // 512KB, per SDK restoreWebState recommendation
 constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
 constexpr int32_t LONG_PRESS_DURATION_MS = 650;
 constexpr int32_t LONG_PRESS_DURATION_STEP_UNIT = 8;
+constexpr int32_t MIN_REPORT_TIME = 100;
+constexpr float TEXT_CONTENT_RATIO = 0.15f;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -1356,9 +1365,10 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
         isMenuShownFromWebBeforeStartClose_ = false;
         isLastEventMenuClose_ = true;
         lastMenuCloseTimestamp_ = GetCurrentTimestamp();
-    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DISAPPEAR && isMenuShownFromWeb_) {
-        OnCursorChange(OHOS::NWeb::CursorType::CT_DRAG, nullptr, true);
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR && isMenuShownFromWeb_) {
+        if (!isHoverExit_) {
+            OnCursorChange(OHOS::NWeb::CursorType::CT_DRAG, nullptr, true);
+        }
         isMenuShownFromWeb_ = false;
     }
 }
@@ -1531,6 +1541,7 @@ void WebPattern::OnAttachToMainTree()
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
+    RegisterRecoverable();
 
     if (delegate_->GetPageFinishedState()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnAttachToMainTree delegate_ pageFinishedState is true");
@@ -1557,6 +1568,7 @@ void WebPattern::OnDetachFromMainTree()
     isAttachedToMainTree_ = false;
     // report component is in background.
     delegate_->OnRenderToBackground();
+    UnregisterRecoverable();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1577,6 +1589,7 @@ void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SetRecoverableViewHostNode(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     SetRotation(pipeline->GetTransformHint());
@@ -1659,6 +1672,94 @@ void WebPattern::SetRotation(uint32_t rotation)
     renderSurface_->SetTransformHint(rotation);
     CHECK_NULL_VOID(delegate_);
     delegate_->SetTransformHint(rotation);
+}
+
+void WebPattern::RegisterRecoverable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& inspectorId = host->GetInspectorId();
+    if (inspectorId.has_value() && !inspectorId->empty()) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebPattern::RegisterRecoverable id: %{public}s "
+            "duplicate id may cause restore conflict",
+            inspectorId->c_str());
+        RecoverableView::RegisterRecoverable(inspectorId.value());
+        return;
+    }
+    std::string path = host->GetPath();
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterRecoverable: src path: %{public}s", path.c_str());
+    auto pos = path.rfind("Navigation");
+    if (pos != std::string::npos) {
+        pos = path.find("NavDestination", pos);
+    }
+    if (pos == std::string::npos) {
+        pos = path.find("page");
+    }
+    if (pos != std::string::npos) {
+        pos = path.find("/", pos);
+        if (pos != std::string::npos) {
+            path = path.substr(pos);
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterRecoverable: dst path: %{public}s", path.c_str());
+
+    RecoverableView::RegisterRecoverable(path);
+}
+
+bool WebPattern::OnSaveData(std::string& data)
+{
+    CHECK_NULL_RETURN(delegate_, false);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnSaveData: WebId %{public}d", GetWebId());
+    auto state = delegate_->SerializeWebState();
+    if (state.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::OnSaveData state is empty: WebId %{public}d", GetWebId());
+        return false;
+    }
+    if (state.size() > MAX_WEB_STATE_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::OnSaveData: state too large: %{public}zu", state.size());
+        return false;
+    }
+    data = Base64Util::Encode(state.data(), state.size());
+
+    return true;
+}
+
+void WebPattern::RestoreWebState()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: WebId %{public}d", GetWebId());
+    if (isUrlLoaded_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState GetRestoreInfo isUrlLoaded failed");
+        return;
+    }
+    CHECK_NULL_VOID(delegate_);
+    std::string result;
+    if (!GetRestoreInfo(result)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState GetRestoreInfo failed, WebId %{public}d", GetWebId());
+        return;
+    }
+    if (result.size() > MAX_WEB_STATE_SIZE * 2) { // base64 is ~4/3 of raw size
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: base64 data too large: %{public}zu", result.size());
+        return;
+    }
+    std::string decoded;
+    if (!Base64Util::Decode(result, decoded)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState Decode failed: WebId %{public}d", GetWebId());
+        return;
+    }
+    if (decoded.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState Decode empty: WebId %{public}d", GetWebId());
+        return;
+    }
+    if (decoded.size() > MAX_WEB_STATE_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: decoded data too large: %{public}zu", decoded.size());
+        return;
+    }
+    std::vector<uint8_t> state(decoded.begin(), decoded.end());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreWebState: %{public}zu WebId %{public}d", state.size(), GetWebId());
+    if (delegate_->RestoreWebState(state)) {
+        isUrlLoaded_ = true;
+    }
 }
 
 void WebPattern::InitEventAfterUpdate()
@@ -2524,10 +2625,15 @@ bool WebPattern::CheckShouldBlockMouseEvent(const MouseInfo &info)
         }
         if (info.GetAction() == MouseAction::HOVER_EXIT) {
             isSupplementMouseLeave_ = true;
+            isHoverExit_ = true;
+        }
+        if (info.GetAction() == MouseAction::HOVER) {
+            isHoverExit_ = false;
         }
         TAG_LOGD(AceLogTag::ACE_WEB,
             "WebSendMouseEvent stopped because BindedMenu is showing. isUpSupplementDown_:%{public}d, "
-            "isSupplementMouseLeave_: %{public}d ", isUpSupplementDown_, isSupplementMouseLeave_);
+            "isSupplementMouseLeave_: %{public}d, isHoverExit_: %{public}d", isUpSupplementDown_,
+            isSupplementMouseLeave_, isHoverExit_);
         return true;
     }
 
@@ -3559,6 +3665,33 @@ bool WebPattern::IsContextMenuShow()
            (contextMenuOverlay_ && contextMenuOverlay_->IsCurrentMenuVisibile());
 }
 
+bool WebPattern::HandleEscToBackSupport(PipelineContext* pipeline)
+{
+    // 1. FullScreen
+    if (OnBackPressedForFullScreen()) {
+        return true;
+    }
+    // 2. Soft Keyboard
+    if (OnBackPressed()) {
+        return true;
+    }
+    // 3. For web delegate
+    if (Backward()) {
+        return true;
+    }
+    // 4. For PipelineContext
+    if (pipeline->OnBackPressed()) {
+        return true;
+    }
+    // 5. For WindowManager
+    auto windowManager = pipeline->GetWindowManager();
+    if (windowManager != nullptr) {
+        windowManager->WindowPerformBack();
+        return true;
+    }
+    return false;
+}
+
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (IsContextMenuShow() && keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
@@ -3571,6 +3704,9 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             CloseContextSelectionMenu();
             CloseDefaultContextMenu();
         }
+    }
+    if (keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
+        isEscKeyDownConsumed_ = false;
     }
     bool ret = false;
     auto host = GetHost();
@@ -3669,6 +3805,17 @@ void WebPattern::KeyboardReDispatch(
     if (keyEvent == webKeyEvent_.rend()) {
         TAG_LOGW(AceLogTag::ACE_WEB, "KeyEvent is not find keycode");
         return;
+    }
+    if (keyEvent->code == KeyCode::KEY_ESCAPE && keyEvent->action == KeyAction::DOWN) {
+        isEscKeyDownConsumed_ = isUsed;
+    }
+    if (keyEvent->code == KeyCode::KEY_ESCAPE && keyEvent->action == KeyAction::UP) {
+        if(!isUsed && !isEscKeyDownConsumed_ && system::GetBoolParameter(std::string(ESC_TO_BACK_SUPPORT), false)) {
+            if(HandleEscToBackSupport(pipelineContext)) {
+                webKeyEvent_.erase((++keyEvent).base());
+                return;
+            }
+        }
     }
     if (!isUsed) {
         taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
@@ -3798,6 +3945,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         offlineWebRendered_ = true;
         SetActiveStatusInner(true);
     }
+    RestoreWebState();
 
     // first update size to load url.
     if (!isUrlLoaded_) {
@@ -4338,6 +4486,13 @@ void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnTransformRotateAndSkewEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateTransformRotateAndSkewEnabled(value);
+    }
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     if (delegate_) {
@@ -4646,6 +4801,8 @@ void WebPattern::OnModifyDone()
             renderSurface_->InitSurface();
             renderSurface_->SetTransformHint(rotation_);
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
+            delegate_->SetTransformHint(rotation_);
+
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
 #if defined(ENABLE_ROSEN_BACKEND)
@@ -4784,6 +4941,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateIntrinsicSizeEnabled(GetIntrinsicSizeEnabledValue(false));
         delegate_->UpdateCssDisplayChangeEnabled(GetCssDisplayChangeEnabledValue(false));
+        delegate_->UpdateTransformRotateAndSkewEnabled(GetTransformRotateAndSkewEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
 
@@ -6055,6 +6213,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
 {
     HintToTypeWrap hintToTypeWrap;
     if (NWEB_AUTOFILL_TYPE_OFF == attribute) {
+        node->SetEnableAutoFill(false);
         return hintToTypeWrap;
     }
     auto placeholder = node->GetPlaceholder();
@@ -10090,6 +10249,14 @@ int WebPattern::SendCommandToNWeb(std::unique_ptr<JsonValue> comJson)
         return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
     }
 
+    // Batch command: {"command":"inputAutoFill","params":{...}}
+    // Uses "command" key for routing, separate from single-command "event_type" format
+    auto commandValue = comJson->GetValue("command");
+    if (commandValue && commandValue->IsString() && commandValue->GetString() == "inputAutoFill") {
+        return ExecuteAutoFillCommand(comJson);
+    }
+
+    // Single commands: {"event_type":"...","xpath":"...",...}
     auto eventTypeValue = comJson->GetValue("event_type");
     if (!eventTypeValue || !eventTypeValue->IsString()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] CommandError: event_type is missing or not string type");
@@ -10211,6 +10378,40 @@ int WebPattern::ExecuteGestureCommand(const std::unique_ptr<JsonValue>& comJson,
             actionInfo->GetX(), actionInfo->GetY(), actionInfo->GetScale(), actionInfo->GetSpeed());
     }
     return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+}
+
+int WebPattern::ExecuteAutoFillCommand(const std::unique_ptr<JsonValue>& comJson)
+{
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteAutoFillCommand: delegate_ is nullptr");
+        return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    }
+    auto manager = delegate_->GetNWebCommandActionManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteAutoFillCommand: CommandActionManager is nullptr");
+        return static_cast<int>(WebCommandResult::FAILED);
+    }
+
+    // Batch command format: {"command":"inputAutoFill","params":{...}}
+    // "params" is required, containing defaultMode and items array
+    auto paramsValue = comJson->GetValue("params");
+    if (!paramsValue || !paramsValue->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "[WebCommandAction] ExecuteAutoFillCommand: params is missing or not an object");
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> actionInfo;
+    int result = WebCommandWrapper::BuildAutoFillActionInfo(paramsValue, actionInfo);
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "[WebCommandAction] ExecuteAutoFillCommand: BuildAutoFillActionInfo failed, result=%{public}d", result);
+        return result;
+    }
+
+    result = manager->HandleAutoFillCommand(actionInfo);
+    TAG_LOGI(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteAutoFillCommand done, result=%{public}d", result);
+    return result;
 }
 
 int WebPattern::CheckGestureCoordinatesInWebBounds(double screenX, double screenY)
@@ -10619,6 +10820,21 @@ void WebPattern::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std
                 TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTree WebId:%{public}d success", webId);
                 finishCallback(windowId, webId, request, jsonValue->ToString(), WebRequestErrorCode::OK);
             });
+        return;
+    }
+    if (request == WEB_INTERFACE_REQUEST_DOM_TREE_VIEWPORT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTreeViewport WebId:%{public}d", webId);
+        delegate_->RequestWebDomJsonStringWithOptions(
+            [weak = AceType::WeakClaim(this), windowId, webId, request, finishCallback](std::string result){
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTreeViewport callback");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
+                pattern->webDomDocument_->UpdateOffset(offset);
+                auto jsonValue = pattern->webDomDocument_->CreateTempFromJsonString(result);
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTreeViewport WebId:%{public}d success", webId);
+                finishCallback(windowId, webId, request, jsonValue->ToString(), WebRequestErrorCode::OK);
+            }, static_cast<int32_t>(OHOS::NWeb::NWebDomExtractionMode::VIEWPORT_ONLY));
         return;
     }
     return;
@@ -11496,6 +11712,32 @@ void SnapshotTouchReporter::OnPan()
     item->Put("time", static_cast<int64_t>(GetMilliseconds()));
     item->Put("type", static_cast<uint8_t>(GestureType::PAN));
     infos_->Put(item);
+}
+
+void WebPattern::EnableAgentManager()
+{
+    CHECK_NULL_VOID(delegate_);
+    auto agentManager = delegate_->GetNWebAgentManager();
+    if (!agentManager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "EnableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
+        return;
+    }
+    agentManager->SetContentChangeDetectionConfig(MIN_REPORT_TIME, TEXT_CONTENT_RATIO);
+    agentManager->SetDomExtractionConfig(true);
+    agentManager->SetAgentEnabled(true);
+}
+
+bool WebPattern::ShouldEnableAgentManager()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto clickOptimizer = pipelineContext->GetClickOptimizer();
+    if (clickOptimizer && clickOptimizer->GetClickExtEnabled()) {
+        return true;
+    }
+    return false;
 }
 
 namespace {

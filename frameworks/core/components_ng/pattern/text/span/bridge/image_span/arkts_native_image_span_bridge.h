@@ -44,6 +44,10 @@ public:
     static ArkUINativeModuleValue SetImageSpanSrc(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportSvg2(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSupportSvg2(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetResizableSlice(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetResizableSlice(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

@@ -771,7 +771,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModelNG002, TestSize.Level0)
 
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    auto backgroundColor = renderContext->GetBackgroundColorValue(Color::WHITE);
     EXPECT_EQ(backgroundColor, Color::WHITE);
 }
 
@@ -1364,6 +1364,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternOnAttachToFrameNode001, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
 
     qrCodePattern->OnAttachToFrameNode();
+    qrCodePattern->OnAttachToMainTree();
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::WHITE);
 }
 

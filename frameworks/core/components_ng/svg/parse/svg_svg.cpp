@@ -40,6 +40,11 @@ RefPtr<SvgNode> SvgSvg::Create()
 
 RSRecordingPath SvgSvg::AsPath(const SvgLengthScaleRule& lengthRule)
 {
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext && !svgContext->IncrementAsPathDepth()) {
+        return RSRecordingPath();
+    }
+    AsPathDepthGuard depthGuard(svgContext);
     RSRecordingPath path;
     for (const auto& child : children_) {
         CHECK_NULL_RETURN(child, path);
@@ -51,6 +56,11 @@ RSRecordingPath SvgSvg::AsPath(const SvgLengthScaleRule& lengthRule)
 
 RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
 {
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext && !svgContext->IncrementAsPathDepth()) {
+        return RSRecordingPath();
+    }
+    AsPathDepthGuard depthGuard(svgContext);
     RSRecordingPath path;
     for (const auto& child : children_) {
         RSRecordingPath childPath = child->AsPath(viewPort);

@@ -14,6 +14,9 @@
  */
 function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
   getUINativeModule().loadNativeModule(componentName);
+  if (abcName === '') {
+    return;
+  }
   let module = globalThis.requireNapi(abcName);
   if (componentName === 'CalendarPickerDialog' || componentName === 'TimePickerDialog' || componentName === 'DatePickerDialog') {
     module.exportViewDialog();
@@ -31,6 +34,8 @@ if (globalThis.Hyperlink === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkhyperlink');
       module.exportView();
       getUINativeModule().hyperlink.create(address, content);
+    },
+    pop: function() {
     },
     name: 'JSHyperlink'
   }
@@ -72,6 +77,8 @@ if (globalThis.Gauge === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().gauge.create(params);
+    },
+    pop: function() {
     },
     name: 'JSGauge'
   }
@@ -254,6 +261,8 @@ if (globalThis.Marquee === undefined) {
       module.loadComponent();
       getUINativeModule().marquee.create(params);
     },
+    pop: function() {
+    },
  	name: 'JSMarquee'
   };
 }
@@ -322,6 +331,8 @@ if (globalThis.QRCode === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().qrcode.create(value);
+    },
+    pop: function() {
     },
     name: 'JSQRCode'
   }
@@ -569,6 +580,8 @@ if (globalThis.TextInput === undefined) {
       module.loadComponent();
       getUINativeModule().textInput.create(params);
     },
+    pop: function() {
+    },
     name: 'JSTextInput'
   }
 }
@@ -582,6 +595,8 @@ if (globalThis.TextArea === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().textArea.create(params);
+    },
+    pop: function() {
     },
     name: 'JSTextArea'
   }
@@ -597,6 +612,8 @@ if (globalThis.DataPanel === undefined) {
       module.loadComponent();
       getUINativeModule().dataPanel.create(params);
     },
+    pop: function() {
+    },
     name: 'JSDataPanel'
   }
 }
@@ -610,6 +627,8 @@ if (globalThis.SymbolGlyph === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().symbolGlyph.create(params);
+    },
+    pop: function() {
     },
     name: 'JSSymbolGlyph'
   };
@@ -625,6 +644,8 @@ if (globalThis.SymbolSpan === undefined) {
       module.loadComponent();
       getUINativeModule().symbolSpan.jsCreate(params);
     },
+    pop: function() {
+    },
     name: 'JSSymbolSpan'
   };
 }
@@ -637,6 +658,8 @@ if (globalThis.PatternLock === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkpatternlock');
       module.exportView();
       getUINativeModule().patternlock.create(value);
+    },
+    pop: function() {
     },
     name: 'JSPatternLock'
   }
@@ -784,6 +807,8 @@ if (globalThis.Counter === undefined) {
       module.loadComponent();
       getUINativeModule().counter.create();
     },
+    pop: function() {
+    },
     name : 'JSCounter'
   };
 }
@@ -795,6 +820,8 @@ if (globalThis.RichEditor === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkricheditor');
       module.exportView();
       getUINativeModule().richEditor.create(params);
+    },
+    pop: function() {
     },
     name: 'JSRichEditor'
   };
@@ -810,6 +837,8 @@ if (globalThis.Search === undefined) {
       module.loadComponent();
       getUINativeModule().search.jsCreate(params);
     },
+    pop: function() {
+    },
     name: 'JSSearch'
   };
 }
@@ -823,6 +852,8 @@ if (globalThis.Badge === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().badge.create(params);
+    },
+    pop: function() {
     },
     name: 'JSBadge'
   };
@@ -842,6 +873,8 @@ if (globalThis.ImageSpan === undefined) {
       Image.createImageSpan(params);
       getUINativeModule().imageSpan.create();
     },
+    pop: function() {
+    },
     name: 'JSImageSpan'
   };
 }
@@ -855,6 +888,8 @@ if (globalThis.TextTimer === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().texttimer.create(params?.isCountDown, params?.count, params?.controller, params?.startTime);
+    },
+    pop: function() {
     },
     name: 'JSTextTimer'
   }
@@ -870,6 +905,8 @@ if (globalThis.Progress === undefined) {
       module.loadComponent();
       getUINativeModule().progress.create(value?.value, value?.total, value?.style, value?.type);
     },
+    pop: function() {
+    },
     name: 'JSProgress'
   }
 }
@@ -883,6 +920,8 @@ if (globalThis.TextClock === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().textclock.create(params);
+    },
+    pop: function() {
     },
     name: 'JSTextClock'
   };
@@ -994,6 +1033,8 @@ if (globalThis.LoadingProgress === undefined) {
       module.exportView();
       module.loadComponent();
       getUINativeModule().loadingProgress.create(params);
+    },
+    pop: function() {
     },
  	name: 'JSLoadingProgress'
   };

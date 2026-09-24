@@ -333,6 +333,11 @@ public:
         return imageReleaseManageObjectEnabled_;
     }
 
+    static bool GetSvgCacheSkipEnabled()
+    {
+        return svgCacheSkipEnabled_;
+    }
+
     static bool GetImageAutoResizeEnabled()
     {
         return autoResizeEnabled_;
@@ -886,6 +891,7 @@ private:
     static bool recycleImageEnabled_;
     static bool navigationImageRecycleEnabled_;
     static bool imageReleaseManageObjectEnabled_;
+    static bool svgCacheSkipEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;

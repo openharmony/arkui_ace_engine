@@ -159,6 +159,10 @@ class EnvV2 {
   return key === 'system.arkui.layout.direction' || key === 'system.arkui.fontScale';
 }
 
+  public static getDirectQuerySystemEnvDefaultValue(key: string): unknown {
+    return key === 'system.arkui.layout.direction' ? 'Auto' : undefined;
+  }
+
   public static registerSimpleTypeMonitorFunc<K extends SimpleTypeEnvKey>(key: K, envValue: IEnvironmentValue<EnvTypeMap[K]>, view: PUV2ViewBase, varName: string): void {
     stateMgmtConsole.debug(`registerSimpleTypeMonitorFunc: Env ${key} ${varName} ${view.debugInfo__()}.`);
     const prop = EnvV2.getSimpleEnvProp(key);

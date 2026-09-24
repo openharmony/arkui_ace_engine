@@ -168,10 +168,10 @@ public:
         }
     }
 
-    void SetEscapeModeForScroll(const std::unordered_set<int32_t>& fingerIds)
+    void SetEscapeModeForScroll(const std::unordered_set<int32_t>& fingerIds, bool toEntityManager = false)
     {
         CHECK_NULL_VOID(panRecognizerNG_);
-        panRecognizerNG_->SetEscapeModeForPan(fingerIds);
+        panRecognizerNG_->SetEscapeModeForPan(fingerIds, toEntityManager);
     }
 
     void SetScrollEndCallback(const ScrollEventCallback& scrollEndCallback)
@@ -537,22 +537,6 @@ public:
 
     void StartScrollSnapAnimation(
         float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source = SCROLL_FROM_NONE);
-
-    /**
-     * FEAT-029: two-stage item snap for a custom ScrollSnapOffsetProvider.
-     *
-     * Stage 1 (approach) springs from the current position by [approachDelta]; on completion the
-     * [targetGetter] is invoked with the estimated instantaneous handoff velocity to resolve the
-     * absolute final target, and stage 2 springs to that target. Both stages are interruptible by a
-     * new gesture through the existing snap-animation stop paths. When [approachDelta] is near zero
-     * the approach stage is skipped.
-     */
-    void StartItemSnapTwoStageAnimation(float approachDelta, float scrollSnapVelocity, bool fromScrollBar,
-        std::function<float(float handoffVelocity)>&& targetGetter, int32_t source = SCROLL_FROM_NONE);
-
-    // Runs one spring stage of the two-stage item snap; invoked with finalStage=true by the handoff of
-    // the approach stage. Not intended for external use.
-    void RunItemSnapStage(float endPos, float velocity, bool finalStage, std::function<void(float)>&& onHandoff);
 
     void StopSnapController()
     {

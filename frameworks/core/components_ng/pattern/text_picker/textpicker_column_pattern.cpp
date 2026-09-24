@@ -1492,6 +1492,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     // AccessibilityEventType::SCROLL_START
 
     if (animation_) {
+        clickScrollSteps_ = -1;
         AnimationUtils::StopAnimation(animation_);
     }
 
@@ -2054,6 +2055,9 @@ double TextPickerColumnPattern::GetDragDeltaLessThanJumpInterval(
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             ScrollOption(shiftDistance);
             InnerHandleScroll(dragDelta < 0, true, false);
+            if (clickScrollSteps_ >= 0) {
+                clickScrollSteps_++;
+            }
         }
         dragDelta = additionalShift;
         if (NearZero(dragDelta)) {
@@ -2229,6 +2233,23 @@ void TextPickerColumnPattern::SetAccessibilityAction()
     });
 }
 
+void TextPickerColumnPattern::OnAroundButtonClickFinish(bool isDown, int32_t absStep)
+{
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
+    int32_t completedSteps = std::max(0, clickScrollSteps_);
+    clickScrollSteps_ = -1;
+    aroundClickProperty_->Set(0.0);
+    for (int32_t i = completedSteps; i < absStep; i++) {
+        if (!InnerHandleScroll(isDown, false, false)) {
+            break;
+        }
+    }
+    if (completedSteps < absStep) {
+        HandleScrollStopEventCallback(true);
+    }
+}
+
 void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
 {
     if (clickBreak_) {
@@ -2238,33 +2259,41 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     int32_t step = param->itemIndex - middleIndex;
     if (step != 0) {
         if (animation_) {
+            clickScrollSteps_ = -1;
             AnimationUtils::StopAnimation(animation_);
             yOffset_ = 0.0;
         }
 
         StopHapticController();
         isHapticPlayOnce_ = true;
+        int32_t absStep = std::abs(step);
+        bool isDown = step > 0;
         int32_t index = static_cast<int32_t>(currentIndex_) + step;
-        auto overFirst = index < 0 && step < 0;
-        auto overLast =
-            index > static_cast<int32_t>(GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
+        auto overFirst = index < 0 && !isDown;
+        auto overLast = index > static_cast<int32_t>(GetOptionCount() ? GetOptionCount() - 1 : 0) && isDown;
         if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
             return;
         }
 
-        double distance =
-            (step > 0 ? optionProperties_[middleIndex].prevDistance : optionProperties_[middleIndex].nextDistance) *
-            std::abs(step);
+        double distance = (isDown ? optionProperties_[middleIndex].prevDistance :
+            optionProperties_[middleIndex].nextDistance) * absStep;
         AnimationOption option;
         option.SetCurve(Curves::FAST_OUT_SLOW_IN);
         option.SetDuration(CLICK_ANIMATION_DURATION);
         yLast_ = 0.0;
+        clickScrollSteps_ = 0;
         aroundClickProperty_->Set(0.0);
-        animation_ = AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), step, distance]() {
-            auto column = weak.Upgrade();
-            CHECK_NULL_VOID(column);
-            column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
-        });
+        animation_ = AnimationUtils::StartAnimation(option,
+            [weak = AceType::WeakClaim(this), step, distance]() {
+                auto column = weak.Upgrade();
+                CHECK_NULL_VOID(column);
+                column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
+            },
+            [weak = AceType::WeakClaim(this), isDown, absStep]() {
+                auto column = weak.Upgrade();
+                CHECK_NULL_VOID(column);
+                column->OnAroundButtonClickFinish(isDown, absStep);
+            });
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
@@ -2498,6 +2527,7 @@ void TextPickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, yLast_, SceneStatus::START);
 
     if (animation_) {
+        clickScrollSteps_ = -1;
         AnimationUtils::StopAnimation(animation_);
     }
 

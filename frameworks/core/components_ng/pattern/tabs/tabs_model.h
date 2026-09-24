@@ -55,7 +55,21 @@ enum class TabJsResType {
     SCROLLABLE_BAR_MARGIN,
     COLOR,
     INACTIVE_COLOR,
-    BlurStyle_INACTIVE_COLOR
+    BlurStyle_INACTIVE_COLOR,
+    SIDEBAR_SELECTED_ICONCOLOR,
+    SIDEBAR_SELECTED_TEXTCOLOR,
+    SIDEBAR_UNSELECTED_ICONCOLOR,
+    SIDEBAR_UNSELECTED_TEXTCOLOR,
+    SIDEBAR_SELECTED_BOARDCOLOR,
+    SIDEBAR_WIDTH,
+    SIDEBAR_MIN_SIDEBAR_WIDTH,
+    SIDEBAR_MAX_SIDEBAR_WIDTH,
+    SIDEBAR_MIN_CONTENT_WIDTH,
+    SIDEBAR_BACKGROUND_COLOR,
+    SIDEBAR_DIVIDER_STROKE_WIDTH,
+    SIDEBAR_DIVIDER_COLOR,
+    SIDEBAR_DIVIDER_START_MARGIN,
+    SIDEBAR_DIVIDER_END_MARGIN
 };
 
 struct TabsItemDivider final {
@@ -180,6 +194,11 @@ public:
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetBarBackgroundColorByUser(bool isByUser) = 0;
+    virtual void SetSidebarSelectedIconColor(const Color& color) {}
+    virtual void SetSidebarSelectedTextColor(const Color& color) {}
+    virtual void SetSidebarUnselectedIconColor(const Color& color) {}
+    virtual void SetSidebarUnselectedTextColor(const Color& color) {}
+    virtual void SetSidebarSelectedBoardColor(const Color& color) {}
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
     virtual void ResetScrollableBarModeOptions() = 0;
@@ -197,11 +216,13 @@ public:
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) {}
     virtual void ResetBarFloatingStyle() {}
+    virtual void SetSidebarDisplayStyle(NG::SidebarDisplayStyle sidebarDisplayStyle) {}
     virtual void SetBarLayoutStyle(NG::TabBarLayoutStyle barLayoutStyle) {}
     virtual void SetSidebarPosition(BarPosition position) {}
     virtual void SetSidebarHeader(const RefPtr<AceType>& header) {}
     virtual void SetSidebarSearchableOptions(const NG::TabsSidebarSearchableOptions& options) {}
     virtual void SetBarDisplayModeBreakpoint(const NG::TabBarDisplayModeBreakpoint& breakpoint) {}
+    virtual void SetOnBarDisplayModeChange(std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

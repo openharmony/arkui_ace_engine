@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,6 +185,44 @@ bool RichEditorEventHub::HasOnDidChange() const
     CHECK_NULL_RETURN(pattern, false);
     pattern->SetContentChange(true);
     return static_cast<bool>(onDidChange_);
+}
+
+void RichEditorEventHub::SetOnScrollChangeEvent(std::function<void(float, float)>&& func)
+{
+    onScrollChangeEvent_ = std::move(func);
+}
+
+bool RichEditorEventHub::HasOnScrollChange() const
+{
+    return static_cast<bool>(onScrollChangeEvent_);
+}
+
+void RichEditorEventHub::FireOnScrollChangeEvent(float offsetX, float offsetY)
+{
+    if (!onScrollChangeEvent_) {
+        return;
+    }
+    auto callback = onScrollChangeEvent_;
+    callback(offsetX, offsetY);
+}
+
+void RichEditorEventHub::SetOnContentSizeChange(std::function<void(float, float)>&& func)
+{
+    onContentSizeChangeEvent_ = std::move(func);
+}
+
+bool RichEditorEventHub::HasOnContentSizeChange() const
+{
+    return static_cast<bool>(onContentSizeChangeEvent_);
+}
+
+void RichEditorEventHub::FireOnContentSizeChange(float width, float height)
+{
+    if (!onContentSizeChangeEvent_) {
+        return;
+    }
+    auto callback = onContentSizeChangeEvent_;
+    callback(width, height);
 }
 
 void RichEditorEventHub::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
@@ -381,5 +419,19 @@ void RichEditorChangeValue::reset()
     rangeBefore_ = TextRange();
     rangeAfter_ = TextRange();
     changeReason_ = TextChangeReason::UNKNOWN;
+}
+
+void RichEditorEventHub::SetOnInputFilterError(const std::function<void(const std::u16string&)>& onInputFilterError)
+{
+    onInputFilterError_ = onInputFilterError;
+}
+
+void RichEditorEventHub::FireOnInputFilterError(const std::u16string& value) const
+{
+    if (!onInputFilterError_) {
+        return;
+    }
+    auto callback = onInputFilterError_;
+    callback(value);
 }
 } // namespace OHOS::Ace::NG

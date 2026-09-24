@@ -42,6 +42,18 @@ ArkUI Rating 组件提供星级评分交互能力，支持 stars（星数）、s
 | dynamic | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/rating.d.ts` | |
 | static | `<OH_ROOT>/interface/sdk-js/api/arkui/component/rating.static.d.ets` | |
 
+### API 解析实现路径
+
+Rating **已组件化**（有 `bridge/` 子目录、DynamicModule、统一 Bridge，旧 JSView 已移除），输出独立 SO。
+
+| 路径 | 入口文件 | 说明 |
+|------|----------|------|
+| 统一 Bridge | `frameworks/core/components_ng/pattern/rating/bridge/arkts_native_rating_bridge.cpp` | ArkTS Native Bridge |
+| Dynamic Modifier | `frameworks/core/components_ng/pattern/rating/bridge/rating_dynamic_modifier.cpp` | 动态属性路径 |
+| Static Modifier | `frameworks/core/components_ng/pattern/rating/bridge/rating_static_modifier.cpp` | 静态编译路径 |
+| Dynamic Module | `frameworks/core/components_ng/pattern/rating/bridge/rating_dynamic_module.cpp` | DynamicModule 派生类 |
+| Content Modifier | `frameworks/core/components_ng/pattern/rating/bridge/rating_content_modifier_helper.h` | ContentModifier 自定义内容 |
+
 ### 测试入口
 
 | 稳定路径 | 用途 |
@@ -72,6 +84,6 @@ ArkUI Rating 组件提供星级评分交互能力，支持 stars（星数）、s
 
 ## 相关主题
 
-- Slider 组件
-- 自定义内容-表单类
-- Toggle 组件
+- [Slider 组件](slider.md)
+- [自定义内容-表单类](../../capabilities/content-modifier-form.md)
+- [Toggle 组件](../selector/toggle.md)

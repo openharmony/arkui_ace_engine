@@ -102,6 +102,6 @@ Divider 功能域：`specs/05-ui-components/01-layout-components/02-divider/`（
 
 ## 相关主题
 
-- Blank：`docs/kb/components/basic/blank.md`
-- Layout Framework：`docs/kb/architecture/layout-framework.md`
-- 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
+- [Blank](blank.md)
+- [Layout Framework](../../architecture/layout-framework.md)
+- [基础布局属性](../../capabilities/layout-attributes.md)

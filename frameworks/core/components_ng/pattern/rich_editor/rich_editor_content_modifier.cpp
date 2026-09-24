@@ -72,6 +72,7 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
 
     for (auto iter = lb; iter <= ub && iter != paragraphs.end(); ++iter) {
         const auto& info = *iter;
+        CHECK_NULL_CONTINUE(info.paragraph);
         float x = AdjustParagraphX(info, contentRect);
         float y = info.topPos + offset.GetY();
         x += offset.GetX() - contentRect.GetX();
@@ -130,6 +131,16 @@ void RichEditorContentModifier::SetRichTextRectX(float value)
 void RichEditorContentModifier::SetRichTextRectY(float value)
 {
     richTextRectY_->Set(value);
+}
+
+float RichEditorContentModifier::GetRichTextRectX() const
+{
+    return richTextRectX_ ? richTextRectX_->Get() : 0.0f;
+}
+
+float RichEditorContentModifier::GetRichTextRectY() const
+{
+    return richTextRectY_ ? richTextRectY_->Get() : 0.0f;
 }
 
 void RichEditorContentModifier::SetClipOffset(OffsetF offset)

@@ -770,6 +770,17 @@ ani_long BuilderProxyNodeMockConstruct(ani_env* env, [[maybe_unused]] ani_object
     return reinterpret_cast<ani_long>(mockNode);
 }
 
+ani_long InteropProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)
+{
+    auto nodeId = reinterpret_cast<ArkUI_Int32>(id);
+    ani_long nativeObj {};
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, nativeObj);
+    auto interopProxyNode = modifier->getCommonAniModifier()->interopProxyNodeConstruct(nodeId);
+    CHECK_NULL_RETURN(interopProxyNode, nativeObj);
+    return reinterpret_cast<ani_long>(interopProxyNode);
+}
+
 void SetOnNodeDestroyEvent(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object event)
 {

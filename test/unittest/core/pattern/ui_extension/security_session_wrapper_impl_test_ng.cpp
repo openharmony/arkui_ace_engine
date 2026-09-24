@@ -67,6 +67,13 @@ namespace {
 const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
 } // namespace
 
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
+
 class SecuritySessionWrapperImplTestNg : public testing::Test {
 public:
     void SetUp() override;
@@ -172,7 +179,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg001, 
     AAFwk::Want want;
     AAFwk::WantParams params;
     auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     sessionWrapper->backgroundCallback_(errcode);
     sessionWrapper->destructionCallback_(errcode);
     sessionCallbacks->transferAbilityResultFunc_(0, want);
@@ -185,7 +192,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg001, 
     sessionCallbacks->notifyExtensionEventFunc_(0);
 
     errcode = OHOS::Rosen::WSError::WS_OK;
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     sessionWrapper->backgroundCallback_(errcode);
     sessionWrapper->destructionCallback_(errcode);
     sessionCallbacks->transferAbilityResultFunc_(0, want);
@@ -231,7 +238,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg002, 
     AAFwk::Want want;
     AAFwk::WantParams params;
     auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     sessionWrapper->backgroundCallback_(errcode);
     sessionWrapper->destructionCallback_(errcode);
     sessionCallbacks->transferAbilityResultFunc_(0, want);
@@ -244,7 +251,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg002, 
     sessionCallbacks->notifyExtensionEventFunc_(0);
 
     errcode = OHOS::Rosen::WSError::WS_OK;
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     sessionWrapper->backgroundCallback_(errcode);
     sessionWrapper->destructionCallback_(errcode);
     sessionCallbacks->transferAbilityResultFunc_(0, want);
@@ -287,7 +294,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg003, 
     AAFwk::WantParams params;
     auto sessionCallbacks =
         sessionWrapper->session_->GetExtensionSessionEventCallback();
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     sessionWrapper->backgroundCallback_(errcode);
     sessionWrapper->destructionCallback_(errcode);
     sessionCallbacks->transferAbilityResultFunc_(0, want);
@@ -300,7 +307,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg003, 
     sessionCallbacks->notifyExtensionEventFunc_(0);
 
     errcode = OHOS::Rosen::WSError::WS_OK;
-    sessionWrapper->foregroundCallback_(errcode);
+    sessionWrapper->foregroundCallback_(errcode, 0);
     sessionWrapper->backgroundCallback_(errcode);
     sessionWrapper->destructionCallback_(errcode);
     sessionCallbacks->transferAbilityResultFunc_(0, want);
@@ -844,6 +851,62 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg019, 
      */
     sessionWrapper->UpdateInstanceId(10);
     EXPECT_EQ(sessionWrapper->patternInstanceId_, 10);
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg020
+ * @tc.desc: Test the method InitAllCallback transfers abilityCode on foreground error
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg020, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->session_->persistentId_ = 0;
+    ASSERT_NE(sessionWrapper->taskExecutor_, nullptr);
+
+    sessionWrapper->hostPattern_ = CreateSecurityUEC();
+    ASSERT_NE(sessionWrapper->hostPattern_.Upgrade(), nullptr);
+    ASSERT_EQ(sessionWrapper->hostPattern_.Upgrade()->GetSessionId(), sessionWrapper->GetSessionId());
+
+    bool isForegroundErrorNotified = false;
+    int32_t foregroundErrorCode = 0;
+    sessionWrapper->hostPattern_.Upgrade()->SetOnErrorCallback(
+        [&isForegroundErrorNotified, &foregroundErrorCode](
+            int32_t code, const std::string& name, const std::string& message) {
+            isForegroundErrorNotified = true;
+            foregroundErrorCode = code;
+        });
+    sessionWrapper->InitAllCallback();
+
+    /**
+     * @tc.steps: step2. test foregroundCallback_ for errcode == WS_OK, error callback should not be invoked
+     */
+    sessionWrapper->foregroundCallback_(OHOS::Rosen::WSError::WS_OK, 100);
+    EXPECT_FALSE(isForegroundErrorNotified);
+
+    /**
+     * @tc.steps: step3. test foregroundCallback_ for errcode != WS_OK with non-zero abilityCode,
+     * foreground error should be notified with the fixed foreground error code
+     */
+    sessionWrapper->foregroundCallback_(OHOS::Rosen::WSError::WS_DO_NOTHING, 100);
+    EXPECT_TRUE(isForegroundErrorNotified);
+    EXPECT_EQ(foregroundErrorCode, ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED);
+
+    /**
+     * @tc.steps: step4. test foregroundCallback_ for errcode != WS_OK with zero abilityCode
+     */
+    isForegroundErrorNotified = false;
+    foregroundErrorCode = 0;
+    sessionWrapper->foregroundCallback_(OHOS::Rosen::WSError::WS_DO_NOTHING, 0);
+    EXPECT_TRUE(isForegroundErrorNotified);
+    EXPECT_EQ(foregroundErrorCode, ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED);
 #endif
 }
 } // namespace OHOS::Ace::NG

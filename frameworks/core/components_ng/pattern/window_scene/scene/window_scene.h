@@ -71,6 +71,7 @@ private:
     bool IsWindowSizeEqual();
     void RegisterResponseRegionCallback();
     void RegisterFocusCallback();
+    bool CreateAndAttachBlankWindow(const RefPtr<FrameNode>& host, const SizeF& size);
     void CleanBlankWindow();
     void SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     void SetOpacityAnimation(RefPtr<FrameNode>& window);

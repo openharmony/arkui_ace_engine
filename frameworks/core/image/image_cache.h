@@ -103,6 +103,7 @@ public:
 
 private:
     bool ProcessImageDataCacheInner(size_t dataSize, std::vector<CacheNode<RefPtr<NG::ImageData>>>& needErase);
+    void DumpImgObjCacheInfo();
 
     std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
     mutable std::mutex imageCacheMutex_;
