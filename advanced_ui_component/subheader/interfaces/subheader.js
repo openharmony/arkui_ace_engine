@@ -301,6 +301,7 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_padding_bottom', { res
 RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_loading_padding_bottom',
     { resourceId: 125835814, defaultValue: 4 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_margin_start', { resourceId: 125835815, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_margin_bottom', { resourceId: 125837102, defaultValue: 8 });
 
 export class SubHeader extends ViewPU {
     constructor(d11, e11, f11, g11 = -1, h11 = undefined, i11) {
@@ -310,6 +311,8 @@ export class SubHeader extends ViewPU {
         }
         this.__icon = new SynchedPropertyObjectOneWayPU(e11.icon, this, 'icon');
         this.iconSymbolOptions = null;
+        this.__endIcon = new SynchedPropertyObjectOneWayPU(e11.endIcon, this, 'endIcon');
+        this.endIconSymbolOptions = null;
         this.__primaryTitle = new SynchedPropertyObjectOneWayPU(e11.primaryTitle, this, 'primaryTitle');
         this.__primaryTitleModifier = new ObservedPropertyObjectPU(new TextModifier(), this, 'primaryTitleModifier');
         this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(e11.secondaryTitle, this, 'secondaryTitle');
@@ -362,6 +365,12 @@ export class SubHeader extends ViewPU {
         }
         if (c11.iconSymbolOptions !== undefined) {
             this.iconSymbolOptions = c11.iconSymbolOptions;
+        }
+        if (c11.endIcon === undefined) {
+            this.__endIcon.set(null);
+        }
+        if (c11.endIconSymbolOptions !== undefined) {
+            this.endIconSymbolOptions = c11.endIconSymbolOptions;
         }
         if (c11.primaryTitle === undefined) {
             this.__primaryTitle.set(null);
@@ -427,6 +436,7 @@ export class SubHeader extends ViewPU {
 
     updateStateVars(b11) {
         this.__icon.reset(b11.icon);
+        this.__endIcon.reset(b11.endIcon);
         this.__primaryTitle.reset(b11.primaryTitle);
         this.__secondaryTitle.reset(b11.secondaryTitle);
         this.__operationType.reset(b11.operationType);
@@ -438,6 +448,7 @@ export class SubHeader extends ViewPU {
 
     purgeVariableDependenciesOnElmtId(a11) {
         this.__icon.purgeDependencyOnElmtId(a11);
+        this.__endIcon.purgeDependencyOnElmtId(a11);
         this.__primaryTitle.purgeDependencyOnElmtId(a11);
         this.__primaryTitleModifier.purgeDependencyOnElmtId(a11);
         this.__secondaryTitle.purgeDependencyOnElmtId(a11);
@@ -459,6 +470,7 @@ export class SubHeader extends ViewPU {
 
     aboutToBeDeleted() {
         this.__icon.aboutToBeDeleted();
+        this.__endIcon.aboutToBeDeleted();
         this.__primaryTitle.aboutToBeDeleted();
         this.__primaryTitleModifier.aboutToBeDeleted();
         this.__secondaryTitle.aboutToBeDeleted();
@@ -486,6 +498,14 @@ export class SubHeader extends ViewPU {
 
     set icon(z10) {
         this.__icon.set(z10);
+    }
+
+    get endIcon() {
+        return this.__endIcon.get();
+    }
+
+    set endIcon(u11) {
+        this.__endIcon.set(u11);
     }
 
     get primaryTitle() {
@@ -749,7 +769,7 @@ export class SubHeader extends ViewPU {
                         Row.create();
                         Row.margin({
                             top: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level8') : '',
-                            bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level4') : '',
+                            bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.subheader_title_margin_bottom') : '',
                         });
                         Row.width('100%');
                         Row.flexShrink(1);
@@ -1291,6 +1311,54 @@ export class SubHeader extends ViewPU {
         return h8;
     }
 
+    endTitleIcon(s8 = null) {
+        this.observeComponentCreation2((t8, u8) => {
+            If.create();
+            if (this.endIcon) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((v8, w8) => {
+                        If.create();
+                        if (Util.isSymbolResource(ObservedObject.GetRawObject(this.endIcon))) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((z8, a9) => {
+                                    SymbolGlyph.create(this.endIcon);
+                                    SymbolGlyph.fontSize(this.endIconSymbolOptions?.fontSize ?
+                                        Util.symbolFontSize(this.endIconSymbolOptions?.fontSize) :
+                                        getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                                    SymbolGlyph.fontColor(this.endIconSymbolOptions?.fontColor ?? [this.subHeaderTheme.leftIconColor]);
+                                    SymbolGlyph.fontWeight(this.endIconSymbolOptions?.fontWeight);
+                                    SymbolGlyph.renderingStrategy(this.endIconSymbolOptions?.renderingStrategy);
+                                    SymbolGlyph.effectStrategy(this.endIconSymbolOptions?.effectStrategy);
+                                    SymbolGlyph.margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+                                    SymbolGlyph.flexShrink(0);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((x8, y8) => {
+                                    Image.create(this.endIcon);
+                                    Image.fillColor(this.subHeaderTheme.leftIconColor);
+                                    Image.width(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                                    Image.height(getResourceValue('sys.float.subheader_left_icon_size') + 'vp');
+                                    Image.margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+                                    Image.draggable(false);
+                                    Image.flexShrink(0);
+                                }, Image);
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
     leftArea(e8 = null) {
         this.observeComponentCreation2((f8, g8) => {
             If.create();
@@ -1464,11 +1532,12 @@ export class SubHeader extends ViewPU {
             Text.flexShrink(1);
         }, Text);
         Text.pop();
+        this.endTitleIcon.bind(this)();
         Flex.pop();
     }
 
-    SubTitleStyle(z6, a7 = null) {
-        this.observeComponentCreation2((f7, g7) => {
+    SubTitleStyle(i7, j7 = null) {
+        this.observeComponentCreation2((q7, r7) => {
             Column.create();
             Column.width('100%');
             Column.padding({
@@ -1480,8 +1549,11 @@ export class SubHeader extends ViewPU {
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((d7, e7) => {
-            Text.create(z6.content);
+        this.observeComponentCreation2((o7, p7) => {
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
+        }, Flex);
+        this.observeComponentCreation2((m7, n7) => {
+            Text.create(i7.content);
             __Text__primaryTitleStyles({
                 fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
                 maxLines: DOUBLE_LINE_NUM,
@@ -1489,10 +1561,13 @@ export class SubHeader extends ViewPU {
                 fontColor: this.subHeaderTheme.fontPrimaryColor,
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTitleModifier));
+            Text.flexShrink(1);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((b7, c7) => {
-            Text.create(z6.subContent);
+        this.endTitleIcon.bind(this)();
+        Flex.pop();
+        this.observeComponentCreation2((k7, l7) => {
+            Text.create(i7.subContent);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
                 fontWeight: getResourceValue('sys.float.subheader_subtitle_font_weight'),
@@ -1508,9 +1583,19 @@ export class SubHeader extends ViewPU {
         Column.pop();
     }
 
-    SecondTitleStyle(v6, w6 = null) {
-        this.observeComponentCreation2((x6, y6) => {
-            Text.create(v6.content);
+    SecondTitleStyle(c7, d7 = null) {
+        this.observeComponentCreation2((g7, h7) => {
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
+            Flex.padding({
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
+            });
+        }, Flex);
+        this.observeComponentCreation2((e7, f7) => {
+            Text.create(c7.content);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Medium,
@@ -1518,15 +1603,11 @@ export class SubHeader extends ViewPU {
                 fontColor: this.subHeaderTheme.fontSecondaryColor,
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
-            Text.padding({
-                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
-                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
-                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
-            });
+            Text.flexShrink(1);
         }, Text);
         Text.pop();
+        this.endTitleIcon.bind(this)();
+        Flex.pop();
     }
 
     SelectStyle(p6, q6 = null) {
@@ -1555,9 +1636,19 @@ export class SubHeader extends ViewPU {
         Select.pop();
     }
 
-    PrimaryTitleStyle(l6, m6 = null) {
-        this.observeComponentCreation2((n6, o6) => {
-            Text.create(l6.content);
+    PrimaryTitleStyle(q6, r6 = null) {
+        this.observeComponentCreation2((u6, v6) => {
+            Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
+            Flex.padding({
+                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
+            });
+        }, Flex);
+        this.observeComponentCreation2((s6, t6) => {
+            Text.create(q6.content);
             __Text__primaryTitleStyles({
                 fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
                 maxLines: DOUBLE_LINE_NUM,
@@ -1565,15 +1656,11 @@ export class SubHeader extends ViewPU {
                 fontColor: this.subHeaderTheme.fontPrimaryColor,
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTitleModifier));
-            Text.padding({
-                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
-                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
-                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
-            });
+            Text.flexShrink(1);
         }, Text);
         Text.pop();
+        this.endTitleIcon.bind(this)();
+        Flex.pop();
     }
 
     ButtonStyle(b6, c6 = null) {

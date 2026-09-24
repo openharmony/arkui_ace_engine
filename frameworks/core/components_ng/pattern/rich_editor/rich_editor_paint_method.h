@@ -17,18 +17,22 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/text/text_paint_method.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_foreground_modifier.h"
 
 namespace OHOS::Ace::NG {
 class ParagraphManager;
+class RichEditorContentModifier;
 
 class ACE_EXPORT RichEditorPaintMethod : public TextPaintMethod {
     DECLARE_ACE_TYPE(RichEditorPaintMethod, TextPaintMethod);
 public:
     RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager, float baselineOffset,
-        const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod);
+        const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod,
+        const RefPtr<RichEditorForegroundModifier>& foregroundModifier);
 
     ~RichEditorPaintMethod() override = default;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    void RefreshRichTextRect(const RefPtr<RichEditorContentModifier>& contentMod);
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
     void UpdateContentOverlayModifier(PaintWrapper* paintWrapper);
     void SetCaretState(PaintWrapper* paintWrapper);
@@ -37,8 +41,12 @@ public:
     static std::vector<RectF> CalculateSelectedRect(
         const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& selectedRects, float contentWidth);
 
+    RefPtr<Modifier> GetForegroundModifier(PaintWrapper* paintWrapper) override;
+    void UpdateForegroundModifier(PaintWrapper* paintWrapper) override;
+
 private:
     const ParagraphManager* pManager_;
+    RefPtr<RichEditorForegroundModifier> foregroundModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPaintMethod);
 };
 } // namespace OHOS::Ace::NG

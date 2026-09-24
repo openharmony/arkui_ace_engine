@@ -158,6 +158,26 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, BarBackgroundColorModifier.identity, BarBackgroundColorModifier, value);
         return this;
       }
+      sidebarSelectedIconColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarSelectedIconColorModifier.identity, TabSidebarSelectedIconColorModifier, value);
+        return this;
+      }
+      sidebarSelectedTextColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarSelectedTextColorModifier.identity, TabSidebarSelectedTextColorModifier, value);
+        return this;
+      }
+      sidebarUnselectedIconColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarUnselectedIconColorModifier.identity, TabSidebarUnselectedIconColorModifier, value);
+        return this;
+      }
+      sidebarUnselectedTextColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarUnselectedTextColorModifier.identity, TabSidebarUnselectedTextColorModifier, value);
+        return this;
+      }
+      sidebarSelectedBoardColor(value: ResourceColor) {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarSelectedBoardColorModifier.identity, TabSidebarSelectedBoardColorModifier, value);
+        return this;
+      }
       barBackgroundBlurStyle(value: BlurStyle): TabsAttribute {
         if (isUndefined(value)) {
           modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, undefined);
@@ -238,6 +258,10 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabsOnContentWillChange.identity, TabsOnContentWillChange, handler);
         return this;
       }
+      sidebarDisplayStyle(value: TabsSidebarDisplayStyle): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, SidebarDisplayStyleModifier.identity, SidebarDisplayStyleModifier, value);
+        return this;
+      }
       barStyle(value: TabBarStyle): TabsAttribute {
         modifierWithKey(this._modifiersWithKeys, TabsBarStyleModifier.identity, TabsBarStyleModifier, value);
         return this;
@@ -256,6 +280,38 @@ function loadComponent(): ComponentObj | undefined {
       }
       barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): TabsAttribute {
         modifierWithKey(this._modifiersWithKeys, TabsBarDisplayModeBreakpointModifier.identity, TabsBarDisplayModeBreakpointModifier, value);
+        return this;
+      }
+      onBarDisplayModeChange(event: (mode: TabBarDisplayMode) => void): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsOnBarDisplayModeChangeModifier.identity, TabsOnBarDisplayModeChangeModifier, event);
+        return this;
+      }
+      sidebarWidth(value: Optional<Length>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarWidthModifier.identity, TabSidebarWidthModifier, value);
+        return this;
+      }
+      minSidebarWidth(value: Optional<Length>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabMinSidebarWidthModifier.identity, TabMinSidebarWidthModifier, value);
+        return this;
+      }
+      maxSidebarWidth(value: Optional<Length>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabMaxSidebarWidthModifier.identity, TabMaxSidebarWidthModifier, value);
+        return this;
+      }
+      minContentWidth(value: Optional<Length>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabMinContentWidthModifier.identity, TabMinContentWidthModifier, value);
+        return this;
+      }
+      sidebarBackgroundColor(value: Optional<ResourceColor>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarBackgroundColorModifier.identity, TabSidebarBackgroundColorModifier, value);
+        return this;
+      }
+      sidebarBackgroundBlurStyle(value: Optional<BlurStyle>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarBackgroundBlurStyleModifier.identity, TabSidebarBackgroundBlurStyleModifier, value);
+        return this;
+      }
+      sidebarDivider(value: Optional<DividerStyle>): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabSidebarDividerModifier.identity, TabSidebarDividerModifier, value);
         return this;
       }
     }
@@ -625,6 +681,101 @@ function loadComponent(): ComponentObj | undefined {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
+
+    class TabSidebarSelectedIconColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarSelectedIconColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarSelectedIconColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarSelectedIconColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarSelectedTextColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarSelectedTextColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarSelectedTextColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarSelectedTextColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarUnselectedIconColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarUnselectedIconColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarUnselectedIconColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarUnselectedIconColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarUnselectedTextColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarUnselectedTextColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarUnselectedTextColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarUnselectedTextColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+
+    class TabSidebarSelectedBoardColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarSelectedBoardColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabsSidebarSelectedBoardColor(node);
+        } else {
+          getUINativeModule().tabs.setTabsSidebarSelectedBoardColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
     
     class BarBackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle> {
       constructor(value: ArkBackgroundBlurStyle) {
@@ -981,6 +1132,25 @@ function loadComponent(): ComponentObj | undefined {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     } 
+
+    class SidebarDisplayStyleModifier extends ModifierWithKey<TabsSidebarDisplayStyle> {
+      constructor(value: TabsSidebarDisplayStyle) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarDisplayStyle');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetSidebarDisplayStyle(node);
+        } else {
+          getUINativeModule().tabs.setSidebarDisplayStyle(node, this.value);
+        }
+      }
+
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
     
     class TabsBarStyleModifier extends ModifierWithKey<TabBarStyle> {
       constructor(value: TabBarStyle) {
@@ -1065,6 +1235,138 @@ function loadComponent(): ComponentObj | undefined {
       }
     }
 
+    class TabsOnBarDisplayModeChangeModifier extends ModifierWithKey<(mode: TabBarDisplayMode) => void> {
+      constructor(value: (mode: TabBarDisplayMode) => void) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('onBarDisplayModeChange');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetOnBarDisplayModeChange(node);
+        } else {
+          getUINativeModule().tabs.setOnBarDisplayModeChange(node, this.value);
+        }
+      }
+    }
+
+    class TabSidebarWidthModifier extends ModifierWithKey<Optional<Length>> {
+      constructor(value: Optional<Length>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarWidth');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabSidebarWidth(node);
+        }
+        else {
+          getUINativeModule().tabs.setTabSidebarWidth(node, this.value);
+        }
+      }
+    }
+
+    class TabMinSidebarWidthModifier extends ModifierWithKey<Optional<Length>> {
+      constructor(value: Optional<Length>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('minSidebarWidth');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabMinSidebarWidth(node);
+        }
+        else {
+          getUINativeModule().tabs.setTabMinSidebarWidth(node, this.value);
+        }
+      }
+    }
+
+    class TabMaxSidebarWidthModifier extends ModifierWithKey<Optional<Length>> {
+      constructor(value: Optional<Length>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('maxSidebarWidth');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabMaxSidebarWidth(node);
+        }
+        else {
+          getUINativeModule().tabs.setTabMaxSidebarWidth(node, this.value);
+        }
+      }
+    }
+
+    class TabMinContentWidthModifier extends ModifierWithKey<Optional<Length>> {
+      constructor(value: Optional<Length>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('minContentWidth');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabMinContentWidth(node);
+        }
+        else {
+          getUINativeModule().tabs.setTabMinContentWidth(node, this.value);
+        }
+      }
+    }
+
+    class TabSidebarBackgroundColorModifier extends ModifierWithKey<Optional<ResourceColor>> {
+      constructor(value: Optional<ResourceColor>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarBackgroundColor');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabSidebarBackgroundColor(node);
+        }
+        else {
+          getUINativeModule().tabs.setTabSidebarBackgroundColor(node, this.value);
+        }
+      }
+    }
+
+    class TabSidebarBackgroundBlurStyleModifier extends ModifierWithKey<Optional<BlurStyle>> {
+      constructor(value: Optional<BlurStyle>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarBackgroundBlurStyle');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabSidebarBackgroundBlurStyle(node);
+        }
+        else {
+          getUINativeModule().tabs.setTabSidebarBackgroundBlurStyle(node, this.value);
+        }
+      }
+    }
+
+    class TabSidebarDividerModifier extends ModifierWithKey<Optional<DividerStyle>> {
+      constructor(value: Optional<DividerStyle>) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('sidebarDivider');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetTabSidebarDivider(node);
+        }
+        else {
+          getUINativeModule().tabs.setTabSidebarDivider(node, this.value);
+        }
+      }
+      checkObjectDiff() {
+        return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+          this.stageValue?.color === this.value?.color &&
+          this.stageValue?.startMargin === this.value?.startMargin &&
+          this.stageValue?.endMargin === this.value?.endMargin);
+      }
+    }
         loadComponent.componentObj = { 'component': ArkTabsComponent };
   }
   return loadComponent.componentObj;
@@ -1184,6 +1486,26 @@ class JSTabs extends JSContainerBase {
     getUINativeModule().tabs.setBarBackgroundColor(true, value);
   }
 
+  static sidebarSelectedIconColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarSelectedIconColor(true, value);
+  }
+
+  static sidebarSelectedTextColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarSelectedTextColor(true, value);
+  }
+
+  static sidebarUnselectedIconColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarUnselectedIconColor(true, value);
+  }
+
+  static sidebarUnselectedTextColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarUnselectedTextColor(true, value);
+  }
+
+  static sidebarSelectedBoardColor(value: any): void {
+    getUINativeModule().tabs.setTabsSidebarSelectedBoardColor(true, value);
+  }
+
   static barBackgroundBlurStyle(value: any, additional: any): void {
     getUINativeModule().tabs.setBarBackgroundBlurStyle(true, value, additional);
   }
@@ -1237,6 +1559,10 @@ class JSTabs extends JSContainerBase {
     getUINativeModule().tabs.setTabsBarFloatingStyle(true, value);
   }
 
+  static sidebarDisplayStyle(value: any): void {
+    getUINativeModule().tabs.setSidebarDisplayStyle(true, value);
+  }
+
   static barStyle(value: any): void {
     getUINativeModule().tabs.setBarStyle(true, value);
   }
@@ -1255,6 +1581,38 @@ class JSTabs extends JSContainerBase {
 
   static barDisplayModeBreakpoint(value: any): void {
     getUINativeModule().tabs.setBarDisplayModeBreakpoint(true, value);
+  }
+
+  static onBarDisplayModeChange(value: any): void {
+    getUINativeModule().tabs.setOnBarDisplayModeChange(true, value);
+  }
+
+  static sidebarWidth(value: any): void {
+    getUINativeModule().tabs.setTabSidebarWidth(true, value);
+  }
+
+  static minSidebarWidth(value: any): void {
+    getUINativeModule().tabs.setTabMinSidebarWidth(true, value);
+  }
+
+  static maxSidebarWidth(value: any): void {
+    getUINativeModule().tabs.setTabMaxSidebarWidth(true, value);
+  }
+
+  static minContentWidth(value: any): void {
+    getUINativeModule().tabs.setTabMinContentWidth(true, value);
+  }
+
+  static sidebarBackgroundColor(value: any): void {
+    getUINativeModule().tabs.setTabSidebarBackgroundColor(true, value);
+  }
+
+  static sidebarBackgroundBlurStyle(value: any): void {
+    getUINativeModule().tabs.setTabSidebarBackgroundBlurStyle(true, value);
+  }
+
+  static sidebarDivider(value: any): void {
+    getUINativeModule().tabs.setTabSidebarDivider(true, value);
   }
 
   static attributeModifier(modifier: any): void {

@@ -47,6 +47,10 @@ class StackOfRenderedComponents {
   public top(): StackOfRenderedComponentsItem | undefined {
     return this.stack_.length ? this.stack_[this.stack_.length - 1] : undefined;
   }
+
+  public size(): number {
+    return this.stack_.length;
+  }
 }
 
 class ObserveV2 {
@@ -74,6 +78,7 @@ class ObserveV2 {
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly ENV_PREFIX = '__env_'; // ENV_PREFIX + attrName => backing store attribute name
   public static readonly IS_CUSTOM_ENV_INIT = '_isCustomEnvConstructionFinalized__Internal';
+  public static readonly CUSTOM_ENV_LOCAL_PREFIX = '__custom_env_local_';
   public static readonly OB_PREFIX_LEN = 5;
   public static readonly NO_REUSE = -1; // mark no reuse on-going
   // used by array Handler to create dependency on artificial 'length'
@@ -131,6 +136,10 @@ class ObserveV2 {
   // by state changes => fireChange while
   // UINode rerender or @monitor function execution
   private startDirty_: boolean = false;
+
+  // set when an exception escaped updateDirty() processing;
+  // next fireChange() force-schedules one recovery round of updateDirty()
+  private pendingRecovery_: boolean = false;
 
   // flag to indicate change observation is disabled
   private disabled_: boolean = false;
@@ -271,9 +280,23 @@ class ObserveV2 {
           instance.__initialRenderForPreRender__Internal();
         }
 
+        // call ViewStackProcessor::Finish to reset view stack.
+        if ('finishUpdateFunc' in instance && typeof instance.finishUpdateFunc === 'function' &&
+            'getUniqueId' in instance && typeof instance.getUniqueId === 'function') {
+          try {
+            instance.finishUpdateFunc(instance.getUniqueId());
+          } catch (e) {
+            stateMgmtConsole.error('ERROR: finishUpdateFunc failed:', e);
+          }
+        }
+
         // Push to pool before endPreRender
         if (pool && typeof pool.push === 'function') {
+          if (pool.isActive()) {
             pool.push(reuseId, instance, componentClass);
+          } else {
+            instance.resetRecycleCustomNode();
+          }
         }
       } finally {
         PUV2ViewBase.__endPreRender__Internal();
@@ -316,7 +339,7 @@ class ObserveV2 {
 
       if (idRefs) {
         idRefs[id]?.forEach(key => {
-          symRefs?.[key]?.delete(id)
+          symRefs?.[key]?.delete(id);
           if (symRefs?.[key]?.size === 0) {
             delete symRefs[key];
           }
@@ -675,7 +698,7 @@ class ObserveV2 {
       if (changedIdSet === undefined) {
         changedIdSet = new Set<number>();
       }
-      targetSymbolRefs[MonitorV2.OB_ANY].forEach(item => changedIdSet!.add(item))
+      targetSymbolRefs[MonitorV2.OB_ANY].forEach(item => changedIdSet!.add(item));
     }
     if (!changedIdSet || changedIdSet.size === 0) {
       return;
@@ -702,12 +725,24 @@ class ObserveV2 {
       // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
       const hasPendingChanges = (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size) > 0;
       const isReuseInProgress = (this.currentReuseId_ !== ObserveV2.NO_REUSE);
-      const shouldUpdateDirty = (!hasPendingChanges && !this.startDirty_ && !isReuseInProgress);
+      // force-schedule one recovery round after updateDirty() processing threw,
+      // pending changes from the crashed round are still queued in the sets below
+      const isRecoveryPending = this.pendingRecovery_;
+      const shouldUpdateDirty = ((isRecoveryPending || !hasPendingChanges) && !this.startDirty_ && !isReuseInProgress);
 
       if (shouldUpdateDirty) {
+        if (isRecoveryPending) {
+          stateMgmtConsole.warn('Scheduling recovery update round: processing pending state changes from the previously failed update round');
+        }
+        this.pendingRecovery_ = false;
         Promise.resolve().then(this.updateDirtyBoundFunction_)
           .catch(error => {
             stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
+            // reset transient singleton flags before reporting:
+            // keep the update pipeline schedulable once the application
+            // swallows the error via a global uncaught-exception handler
+            this.startDirty_ = false;
+            this.pendingRecovery_ = true;
             _arkUIUncaughtPromiseError(error);
           });
       }
@@ -730,20 +765,49 @@ class ObserveV2 {
     } // for
 
     // execute the AddMonitor synchronous function and @SyncMonitor function
-    while (this.monitorSyncIdsChangedForAddMonitorBased_.size) {
-      stateMgmtConsole.debug(`AddMonitor API/@SyncMonitor monitorSyncIdsChangedForAddMonitor_ ${this.monitorSyncIdsChangedForAddMonitorBased_.size}`)
-      const monitorIdSet: Set<number> = this.monitorSyncIdsChangedForAddMonitorBased_;
-      this.monitorSyncIdsChangedForAddMonitorBased_ = new Set<number>();
-      // update the value and dependency for each path and get the MonitorV2 id needs to be execute
-      let funcsToRun = this.updateDirtyMonitorPath(monitorIdSet);
-      if (funcsToRun.size) {
-        this.runAddMonitorBasedFunctions(funcsToRun);
-      }
-    }
+    this.executeSyncMonitors_();
 
     // report the stateVar changed when recording the profiler
     if (stateMgmtDFX.enableProfiler && !ignoreOnProfiler) {
       stateMgmtDFX.reportStateInfoToProfilerV2(target, attrName, changedIdSet);
+    }
+  }
+
+  // execute the AddMonitor synchronous function and @SyncMonitor function block.
+  // item errors are isolated so the remaining monitors of the batch still run;
+  // the first error is re-thrown after the block, keeping the original
+  // behavior that the assigning application code sees the exception
+  private executeSyncMonitors_(): void {
+    const syncBlockStackDepth = this.stackOfRenderedComponents_.size();
+    let firstSyncItemError: Error | undefined = undefined;
+    const onSyncItemError = (e: Error, what: string, recordedStackDepth: number): void => {
+      this.unwindRecordingStack_(recordedStackDepth);
+      stateMgmtConsole.applicationError(`Exception during ${what} - continuing with the remaining synchronous monitors of this batch`, e);
+      if (firstSyncItemError === undefined) {
+        // re-thrown after the block, reaches the assigning application code like before
+        firstSyncItemError = e;
+      } else {
+        // additional errors cannot propagate any more, report them directly
+        _arkUIUncaughtPromiseError(e);
+      }
+    };
+    try {
+      while (this.monitorSyncIdsChangedForAddMonitorBased_.size) {
+        stateMgmtConsole.debug(`AddMonitor API/@SyncMonitor monitorSyncIdsChangedForAddMonitorBased_ ${this.monitorSyncIdsChangedForAddMonitorBased_.size}`);
+        const monitorIdSet: Set<number> = this.monitorSyncIdsChangedForAddMonitorBased_;
+        this.monitorSyncIdsChangedForAddMonitorBased_ = new Set<number>();
+        // update the value and dependency for each path and get the MonitorV2 id needs to be execute
+        let funcsToRun = this.updateDirtyMonitorPath(monitorIdSet, onSyncItemError);
+        if (funcsToRun.size) {
+          this.runAddMonitorBasedFunctions(funcsToRun, onSyncItemError);
+        }
+      }
+    } catch (e) {
+      this.unwindRecordingStack_(syncBlockStackDepth);
+      throw e;
+    }
+    if (firstSyncItemError !== undefined) {
+      throw firstSyncItemError;
     }
   }
 
@@ -796,9 +860,24 @@ class ObserveV2 {
     }
 }
   public updateDirty(): void {
+    const recordedStackDepth = this.stackOfRenderedComponents_.size();
     this.startDirty_ = true;
-    this.isParentChildOptimizable_ ? this.updateDirty2Optimized(): this.updateDirty2(false);
-    this.startDirty_ = false;
+    try {
+      this.isParentChildOptimizable_ ? this.updateDirty2Optimized(): this.updateDirty2(false);
+    } catch (e) {
+      // @Computed and @Monitor item errors are isolated per item (see
+      // handleUpdateItemError_); anything else escaping an update round
+      // keeps pending change sets as they are and requests a recovery
+      // round from the next fireChange() call
+      this.pendingRecovery_ = true;
+      // also discard any dependency-recording frames the escaped exception left behind
+      this.unwindRecordingStack_(recordedStackDepth);
+      stateMgmtConsole.applicationError(
+        'Exception escaped the current update round, a recovery update will be triggered by the next state change', e);
+      throw e;
+    } finally {
+      this.startDirty_ = false;
+    }
   }
 
   /**
@@ -840,51 +919,81 @@ class ObserveV2 {
   public onVSyncUpdate(containerId: number): boolean {
     stateMgmtConsole.debug(`ObservedV2.flushDirtyViewsOnVSync containerId=${containerId} start`);
     aceDebugTrace.begin(`ObservedV2.onVSyncUpdate`);
-    let maxFlushTimes = 3; // Refer PipelineContext::FlushDirtyNodeUpdate()
-    // Obtain and unregister the removed elmtIds
-    UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+    try {
+      let maxFlushTimes = 3; // Refer PipelineContext::FlushDirtyNodeUpdate()
+      // Obtain and unregister the removed elmtIds
+      UINodeRegisterProxy.obtainDeletedElmtIds();
+      UINodeRegisterProxy.unregisterElmtIdsFromIViews();
 
-    // Process updates in priority order: computed properties, monitors, UI nodes
-    do {
-      this.updateComputedAndMonitors();
-      const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
-
-      // Clear the ViewV2 map for the current containerId
-      this.viewV2NeedUpdateMap_.delete(containerId);
-
-      if (viewV2Map?.size) {
-        // Update elements, generating new elmtIds in elmtIdsChanged_ for nested updates
-        viewV2Map.forEach((elmtIds, view) => {
-          this.updateUINodesSynchronously(elmtIds, view);
-        });
-
-        if (this.elmtIdsChanged_.size) {
-          this.groupElementIdsByContainer();
+      // Process updates in priority order: computed properties, monitors, UI nodes
+      do {
+        if (!this.flushContainerViewsOnce_(containerId)) {
+          break; // Exit loop early since no updates are possible
         }
-      } else {
-        stateMgmtConsole.error(`No views to update for containerId=${containerId}`);
-        break; // Exit loop early since no updates are possible
-      }
-    } while (this.hasPendingUpdates(containerId) && --maxFlushTimes > 0);
+      } while (this.hasPendingUpdates(containerId) && --maxFlushTimes > 0);
 
-    // Check if more updates are needed
+      // Check if more updates are needed
+      const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
+      if (!viewV2Map || viewV2Map.size === 0) {
+        if (viewV2Map?.size === 0) {
+          this.viewV2NeedUpdateMap_.delete(containerId);
+        }
+        this.releaseContainerSchedule_(containerId);
+        return false;
+      }
+      stateMgmtConsole.debug(`ObservedV2.onVSyncUpdate there are still views to be updated for containerId=${containerId}`);
+      return true;
+    } catch (e) {
+      // any error escaping the vsync round (not isolated per view above):
+      // report it and force-release this container's schedule so the next
+      // state change can schedule again - no automatic reschedule to avoid
+      // per-frame crash floods
+      this.releaseContainerSchedule_(containerId);
+      stateMgmtConsole.applicationError(
+        'Exception escaped the vsync update round, the container schedule was released, a recovery update will be triggered by the next state change', e);
+      throw e;
+    } finally {
+      aceDebugTrace.end();
+    }
+  }
+
+  // run one iteration of the vsync flush loop for containerId;
+  // returns false when no views were pending for this container
+  private flushContainerViewsOnce_(containerId: number): boolean {
+    this.updateComputedAndMonitors();
     const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
 
-    if (!viewV2Map || viewV2Map.size === 0) {
-      if (viewV2Map?.size === 0) {
-        this.viewV2NeedUpdateMap_.delete(containerId);
-      }
+    // Clear the ViewV2 map for the current containerId
+    this.viewV2NeedUpdateMap_.delete(containerId);
 
-      ViewStackProcessor.scheduleUpdateOnNextVSync(null, containerId);
-
-      // After all processing, remove from scheduled set
-      this.scheduledContainerIds_.delete(containerId);
+    if (!viewV2Map?.size) {
+      stateMgmtConsole.error(`No views to update for containerId=${containerId}`);
       return false;
     }
-    aceDebugTrace.end();
-    stateMgmtConsole.debug(`ObservedV2.onVSyncUpdate there are still views to be updated for containerId=${containerId}`);
+    // Update elements, generating new elmtIds in elmtIdsChanged_ for nested updates
+    viewV2Map.forEach((elmtIds, view) => this.updateViewInVSyncRound_(elmtIds, view));
+    if (this.elmtIdsChanged_.size) {
+      this.groupElementIdsByContainer();
+    }
     return true;
+  }
+
+  // re-render the given elements of one view, isolate a failing view:
+  // it stays stale, the remaining views of this round still update
+  private updateViewInVSyncRound_(elmtIds: Array<number>, view: ViewBuildNodeBase): void {
+    const recordedStackDepth = this.stackOfRenderedComponents_.size();
+    try {
+      this.updateUINodesSynchronously(elmtIds, view);
+    } catch (e) {
+      this.handleUpdateItemError_(e, `UI re-render of view ${view.constructor.name}`, recordedStackDepth);
+    }
+  }
+
+  // release this container's vsync schedule so the next state change can schedule again
+  private releaseContainerSchedule_(containerId: number): void {
+    ViewStackProcessor.scheduleUpdateOnNextVSync(null, containerId);
+    // remove from scheduled set
+    this.scheduledContainerIds_.delete(containerId);
   }
 
   public hasPendingUpdates(containerId: number): boolean {
@@ -984,37 +1093,69 @@ class ObserveV2 {
       // Handle the id for AddMonitor API configured with asynchronous options
       // Handle also Monitor With Options (that is always async) here
       while (this.monitorAsyncIdsChangedForAddMonitorBased_.size) {
-        stateMgmtConsole.debug(`AddMonitor asynchronous ${this.monitorAsyncIdsChangedForAddMonitorBased_.size}`)
+        stateMgmtConsole.debug(`AddMonitor asynchronous ${this.monitorAsyncIdsChangedForAddMonitorBased_.size}`);
         const monitorIdSet = this.monitorAsyncIdsChangedForAddMonitorBased_;
         if (snapshot) {
           this.monitorAsyncIdsChangedForAddMonitorBased_.forEach(Set.prototype.delete, snapshot['monitorAsyncIdsChangedForAddMonitorBased_']);
         }
         this.monitorAsyncIdsChangedForAddMonitorBased_ = new Set<number>();
         // update the value and dependency for each path and get the MonitorV2 id needs to be execute
-        let funcsToRun = this.updateDirtyMonitorPath(monitorIdSet);
+        let funcsToRun = this.updateDirtyMonitorPath(monitorIdSet,
+          (e: Error, what: string, recordedStackDepth: number): void => this.handleUpdateItemError_(e, what, recordedStackDepth));
         if (funcsToRun.size) {
-          this.runAddMonitorBasedFunctions(funcsToRun);
+          this.runAddMonitorBasedFunctions(funcsToRun,
+            (e: Error, what: string, recordedStackDepth: number): void => this.handleUpdateItemError_(e, what, recordedStackDepth));
         }
       }
-    } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size  > 0)
+    } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
+  }
+
+  // discard dependency-recording frames above targetDepth,
+  // used after an exception escaped a region that manages recording frames
+  private unwindRecordingStack_(targetDepth: number): void {
+    while (this.stackOfRenderedComponents_.size() > targetDepth) {
+      this.stopRecordDependencies();
+    }
+  }
+
+  // handle an exception thrown by a single @Computed re-calculation or
+  // @Monitor function execution during an update round:
+  // report it like the pipeline does for any uncaught error, but keep the
+  // current round going so the remaining @Computed/@Monitor/UINode updates
+  // of this round are not lost
+  private handleUpdateItemError_(e: Error, what: string, recordedStackDepth: number): void {
+    // defensive: discard dependency-recording frames the failing item may have left on the stack
+    this.unwindRecordingStack_(recordedStackDepth);
+    stateMgmtConsole.applicationError(`Exception during ${what} update - continuing with the remaining updates of this round`, e);
+    // native side reports to the uncaught-exception pipeline and returns without throwing
+    _arkUIUncaughtPromiseError(e);
   }
 
   public updateDirtyComputedProps(computed: Array<number>): void {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
     aceDebugTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
-    computed.forEach((id) => {
-      const comp = this.id2Others_[id]?.deref();
-      if (comp instanceof ComputedV2) {
-        const target = comp.getTarget();
-        if (target instanceof ViewV2 && !target.isViewActive()) {
-          // add delayed ComputedIds id
-          target.addDelayedComputedIds(id);
-        } else {
-          comp.fireChange();
-        }
-      }
-    });
+    computed.forEach((id) => this.updateComputedItem_(id));
     aceDebugTrace.end();
+  }
+
+  // update a single @Computed property, isolate its exceptions from the rest of the batch
+  private updateComputedItem_(id: number): void {
+    const comp = this.id2Others_[id]?.deref();
+    if (!(comp instanceof ComputedV2)) {
+      return;
+    }
+    const target = comp.getTarget();
+    if (target instanceof ViewV2 && !target.isViewActive()) {
+      // add delayed ComputedIds id
+      target.addDelayedComputedIds(id);
+      return;
+    }
+    const recordedStackDepth = this.stackOfRenderedComponents_.size();
+    try {
+      comp.fireChange();
+    } catch (e) {
+      this.handleUpdateItemError_(e, `@Computed '${comp.getComputedFuncName()}'`, recordedStackDepth);
+    }
   }
   /**
    * @function resetMonitorValues
@@ -1046,23 +1187,28 @@ class ObserveV2 {
   public updateDirtyMonitors(monitors: Set<number>): void {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitors: ${monitors.size} @monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
     aceDebugTrace.begin(`ObservedV2.updateDirtyMonitors: ${monitors.size} @monitor`);
-
-    let monitor: MonitorV2 | undefined;
-    let monitorTarget: Object;
-
-    monitors.forEach((watchId) => {
-      monitor = this.id2Others_[watchId]?.deref();
-      if (monitor instanceof MonitorV2) {
-        monitorTarget = monitor.getTarget();
-        if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
-          // monitor notifyChange delayed if target is a View that is not active
-          monitorTarget.addDelayedMonitorIds(watchId);
-        } else {
-          monitor.notifyChange(); // can delete this.elmtIdsChanged_
-        }
-      }
-    });
+    monitors.forEach((watchId) => this.updateMonitorItem_(watchId));
     aceDebugTrace.end();
+  }
+
+  // run a single @Monitor/AddMonitor, isolate its exceptions from the rest of the batch
+  private updateMonitorItem_(watchId: number): void {
+    const monitor = this.id2Others_[watchId]?.deref();
+    if (!(monitor instanceof MonitorV2)) {
+      return;
+    }
+    const monitorTarget = monitor.getTarget();
+    if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
+      // monitor notifyChange delayed if target is a View that is not active
+      monitorTarget.addDelayedMonitorIds(watchId);
+      return;
+    }
+    const recordedStackDepth = this.stackOfRenderedComponents_.size();
+    try {
+      monitor.notifyChange(); // can delete this.elmtIdsChanged_
+    } catch (e) {
+      this.handleUpdateItemError_(e, `${monitor.getDecoratorName()} '${monitor.getMonitorFuncName()}'`, recordedStackDepth);
+    }
   }
 
   /**
@@ -1072,47 +1218,81 @@ class ObserveV2 {
    * and with @Monitor with options
    *
    * @param monitors - Set with IDs of MonitorsV2
+   * @param onItemError - optional error handler: when given, a failing monitor
+   * is isolated and the remaining monitors of the batch still run; without it
+   * exceptions propagate to the caller
    */
-  public runAddMonitorBasedFunctions(monitors: Set<number>): void {
+  public runAddMonitorBasedFunctions(monitors: Set<number>,
+      onItemError?: (e: Error, what: string, recordedStackDepth: number) => void): void {
     stateMgmtConsole.debug(`ObservedV2.runAddMonitorBasedFunctions: ${monitors.size}. AddMonitor/@SyncMonitor/@MonitorWithOpts funcs: ${JSON.stringify(Array.from(monitors))} ...`);
     aceDebugTrace.begin(`ObservedV2.runAddMonitorBasedFunctions: ${monitors.size}`);
 
-    let monitor: MonitorV2 | undefined;
+    monitors.forEach((watchId) => this.runAddMonitorItem_(watchId, onItemError));
 
-    monitors.forEach((watchId) => {
-      monitor = this.id2Others_[watchId]?.deref();
-      if (monitor instanceof MonitorV2) {
-        monitor.runMonitorFunction();
-      }
-    });
     aceDebugTrace.end();
   }
 
-  public updateDirtyMonitorPath(monitorIds: Set<number>): Set<number> {
+  // run one AddMonitor/@SyncMonitor/@MonitorWithOpts function, isolate its
+  // exceptions from the rest of the batch when onItemError is given
+  private runAddMonitorItem_(watchId: number,
+      onItemError?: (e: Error, what: string, recordedStackDepth: number) => void): void {
+    const monitor = this.id2Others_[watchId]?.deref();
+    if (!(monitor instanceof MonitorV2)) {
+      return;
+    }
+    if (!onItemError) {
+      monitor.runMonitorFunction();
+      return;
+    }
+    const recordedStackDepth = this.stackOfRenderedComponents_.size();
+    try {
+      monitor.runMonitorFunction();
+    } catch (e) {
+      onItemError(e, `${monitor.getDecoratorName()} '${monitor.getMonitorFuncName()}'`, recordedStackDepth);
+    }
+  }
+
+  public updateDirtyMonitorPath(monitorIds: Set<number>,
+      onItemError?: (e: Error, what: string, recordedStackDepth: number) => void): Set<number> {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPath: ${monitorIds.size} addMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitorIds))} ...`);
     aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitorIds.size} addMonitor/@SyncMonitor`);
-    let ret: number = 0;
-    let funcsToRun = new Set<number>;
+    const funcsToRun = new Set<number>;
     monitorIds.forEach((monitorId) => {
-      const monitor = this.id2Others_[monitorId]?.deref();
-      if (monitor instanceof MonitorV2) {
-        const monitorTarget = monitor.getTarget();
-        if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
-          monitorTarget.addDelayedMonitorIds(monitorId)
-        } else {
-          // find the path MonitorValue and record dependency again
-          // get path owning MonitorV2 id
-          ret = monitor.notifyChangeForEachPath(monitorId);
-        }
-      }
-
-      // Collect AddMonitor functions that need to be executed later
+      const ret = this.updateMonitorPathItem_(monitorId, onItemError);
       if (ret > 0) {
         funcsToRun.add(ret);
       }
     });
     aceDebugTrace.end();
     return funcsToRun;
+  }
+
+  // update value and dependency for a single AddMonitor/@SyncMonitor path,
+  // isolate its exceptions from the rest of the batch when onItemError is given;
+  // returns the MonitorV2 id whose function needs to execute, or -1
+  private updateMonitorPathItem_(monitorId: number,
+      onItemError?: (e: Error, what: string, recordedStackDepth: number) => void): number {
+    const monitor = this.id2Others_[monitorId]?.deref();
+    if (!(monitor instanceof MonitorV2)) {
+      return -1;
+    }
+    const monitorTarget = monitor.getTarget();
+    if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
+      monitorTarget.addDelayedMonitorIds(monitorId);
+      return -1;
+    }
+    if (!onItemError) {
+      return monitor.notifyChangeForEachPath(monitorId);
+    }
+    const recordedStackDepth = this.stackOfRenderedComponents_.size();
+    try {
+      // find the path MonitorValue and record dependency again
+      // get path owning MonitorV2 id
+      return monitor.notifyChangeForEachPath(monitorId);
+    } catch (e) {
+      onItemError(e, `${monitor.getDecoratorName()} '${monitor.getMonitorFuncName()}' path update`, recordedStackDepth);
+      return -1;
+    }
   }
 
 

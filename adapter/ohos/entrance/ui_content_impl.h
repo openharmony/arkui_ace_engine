@@ -36,7 +36,6 @@
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "adapter/ohos/entrance/ace_viewport_config.h"
 #include "base/thread/task_executor.h"
-#include "base/utils/delay_task.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/update_config_manager.h"
@@ -146,6 +145,7 @@ public:
     void SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SaveGetCurrentAbilityLanguageInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void ChangeSensitiveNodes(bool isSensitive) override;
 
     // Window color
@@ -424,7 +424,6 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor);
-    void SaveComponentTreeQueryFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor);
@@ -589,8 +588,6 @@ protected:
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
-    TaskTimeRecord taskTimeForComeIn_;
-    TaskTimeRecord taskTimeForExit_;
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
     std::mutex updateDecorVisibleMutex_;
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
@@ -614,6 +611,7 @@ protected:
 
 private:
     void ProcessWindowSizeLayoutBreakPointChange(double density);
+    void ApplyFloatNavigationAvoidArea(bool enable);
 };
 
 } // namespace OHOS::Ace

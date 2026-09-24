@@ -24,6 +24,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/render/render_context.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
@@ -162,7 +163,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
-    FirePageTransitionStart();
+    FirePageTransitionStart(type);
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_, type]() {
         auto pattern = weak.Upgrade();
@@ -512,6 +513,46 @@ void PagePattern::ReloadPage()
     customNode->FireReloadFunction(true);
 }
 
+namespace {
+RefPtr<CustomNodeBase> FindCustomNode(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto customNode = AceType::DynamicCast<CustomNodeBase>(node);
+    if (customNode) {
+        return customNode;
+    }
+    for (const auto& child : node->GetChildren()) {
+        auto result = FindCustomNode(child);
+        if (result) {
+            return result;
+        }
+    }
+    return nullptr;
+}
+} // namespace
+
+void PagePattern::RebuildPage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customNodeBase = FindCustomNode(host);
+    if (!customNodeBase) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT,
+            "HotReload RebuildPage: CustomNodeBase not found, host tag=%{public}s id=%{public}d",
+            host->GetTag().c_str(), host->GetId());
+        return;
+    }
+    auto customNode = AceType::DynamicCast<CustomNode>(customNodeBase);
+    if (customNode) {
+        customNode->FlushReload();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT,
+            "HotReload RebuildPage: CustomNodeBase is not CustomNode, jsViewName=%{public}s",
+            customNodeBase->GetJSViewName().c_str());
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
+}
+
 RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
 {
     RefPtr<PageTransitionEffect> result;
@@ -569,6 +610,11 @@ void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
 
 void PagePattern::FirePageTransitionStart()
 {
+    FirePageTransitionStart(PageTransitionType::NONE);
+}
+
+void PagePattern::FirePageTransitionStart(PageTransitionType type)
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
@@ -578,6 +624,9 @@ void PagePattern::FirePageTransitionStart()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnTransitionAdded(host->GetId());
+    if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
+        mgr->OnContentChangeStart(host, ChangeType::PAGE);
+    }
 #endif
 }
 

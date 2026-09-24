@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/form/form_layout_wrapper.h"
 #include "core/components_ng/pattern/form/form_special_style.h"
+#include "core/components_ng/pattern/form/form_task_executor.h"
 #include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
 
@@ -231,13 +232,14 @@ private:
     void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void FireFormSurfaceChangeCallback(float width, float height, float borderWidth = 0.0);
     void FireFormSurfaceDetachCallback();
-    void FireOnUpdateFormDone(int64_t id) const;
+    void FireOnUpdateFormDone(int64_t id);
     void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;
     void EnableDrag();
     void UpdateConfiguration();
     void HandleFormComponent(RequestFormInfo& info);
+    bool IsCardIdentityChanged(const RequestFormInfo& info) const;
     void SetParamForWantTask(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
     void AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline);
@@ -248,7 +250,7 @@ private:
     void UpdateForbiddenIcon(FormChildNodeType nodeType);
     void UpdateForbiddenText(FormChildNodeType nodeType);
 
-    void HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr);
+    void HandleSnapshot(uint32_t delayTime);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
     RefPtr<FrameNode> CreateImageNode();
@@ -341,6 +343,7 @@ private:
 
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;
+    RefPtr<NG::FormTaskExecutor> formTaskExecutor_;
     RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
     FormSpecialStyle formSpecialStyle_;

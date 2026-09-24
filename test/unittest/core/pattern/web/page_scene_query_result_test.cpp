@@ -33,6 +33,7 @@ public:
 protected:
     static constexpr int32_t TEST_PID = 700;
     static constexpr int32_t TEST_WEB_ID = 10;
+    static constexpr int32_t TEST_HOST_NODE_ID = 2001;
     static constexpr int32_t testNodeIdBase = 100;
     static constexpr double testRectX = 10.0;
     static constexpr double testRectY = 20.0;
@@ -113,7 +114,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResultCore_MatchedProducesSceneJs
     // 3 controls >= threshold 2 → matched
     std::string rawResult = MakeControlsJson(3);
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        TEST_PID, TEST_WEB_ID, selectorJson, rawResult, false);
+        TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, false);
     ASSERT_EQ(results.size(), 1u);
     auto parsed = JsonUtil::ParseJsonString(results[0]);
     ASSERT_NE(parsed, nullptr);
@@ -131,7 +132,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResultCore_NotMatchedNoPriorTrigg
     // 1 control < threshold 2, no prior trigger → no result
     std::string rawResult = MakeControlsJson(1);
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        TEST_PID, TEST_WEB_ID, selectorJson, rawResult, false);
+        TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, false);
     EXPECT_TRUE(results.empty());
 }
 
@@ -142,7 +143,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResultCore_EmptyControlsNoPriorTr
     // Empty controls with errorCode=0 but no controls
     std::string rawResult = R"({"errorCode":0,"controls":[]})";
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        TEST_PID, TEST_WEB_ID, selectorJson, rawResult, false);
+        TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, false);
     // No prior trigger, so EXIT not derived, no results
     EXPECT_TRUE(results.empty());
 }
@@ -152,7 +153,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResultCore_UnregisteredProcess_Em
     std::string selectorJson = R"({"nodeTypes":["input"]})";
     std::string rawResult = MakeControlsJson(3);
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        9999, TEST_WEB_ID, selectorJson, rawResult, false);
+        9999, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, false);
     EXPECT_TRUE(results.empty());
 }
 
@@ -162,7 +163,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResultCore_ErrorErrorCode_Empty, 
     std::string selectorJson = BuildSelectorJsonForRule();
     std::string rawResult = R"({"errorCode":2})";
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        TEST_PID, TEST_WEB_ID, selectorJson, rawResult, false);
+        TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, false);
     EXPECT_TRUE(results.empty());
 }
 
@@ -173,7 +174,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResultCore_GetResultAlwaysReports
     // isGetResult=true → reports even with 1 control (below threshold)
     std::string rawResult = MakeControlsJson(1);
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        TEST_PID, TEST_WEB_ID, selectorJson, rawResult, true);
+        TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, true);
     ASSERT_EQ(results.size(), 1u);
     auto parsed = JsonUtil::ParseJsonString(results[0]);
     ASSERT_NE(parsed, nullptr);
@@ -188,7 +189,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResultCore_SceneJsonIncludesNodes
     std::string selectorJson = BuildSelectorJsonForRule();
     std::string rawResult = MakeControlsJson(2);
     auto results = WebPageSceneManager::GetInstance().ProcessQueryResultCore(
-        TEST_PID, TEST_WEB_ID, selectorJson, rawResult, false);
+        TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, false);
     ASSERT_EQ(results.size(), 1u);
     auto parsed = JsonUtil::ParseJsonString(results[0]);
     ASSERT_NE(parsed, nullptr);
@@ -218,7 +219,7 @@ HWTEST_F(PageSceneQueryResultTest, FlushExitOnNavigate_TriggeredRuleProducesEXIT
     EXPECT_TRUE(rules->componentRuleStates[TEST_WEB_ID]["r1"].textEditorTriggered);
 
     // Flush → should produce EXIT and clear state
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(TEST_PID, TEST_WEB_ID);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID);
     rules = WebPageSceneManager::GetInstance().GetPageSceneRules(TEST_PID);
     ASSERT_TRUE(rules.has_value());
     // componentRuleStates for this webId should be erased
@@ -229,7 +230,7 @@ HWTEST_F(PageSceneQueryResultTest, FlushExitOnNavigate_NoTriggeredRule_NoEffect,
 {
     RegisterRuleSet();
     // No UpdateRuleState called → nothing triggered
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(TEST_PID, TEST_WEB_ID);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID);
     auto rules = WebPageSceneManager::GetInstance().GetPageSceneRules(TEST_PID);
     ASSERT_TRUE(rules.has_value());
     // No component states at all, still valid
@@ -239,7 +240,7 @@ HWTEST_F(PageSceneQueryResultTest, FlushExitOnNavigate_NoTriggeredRule_NoEffect,
 HWTEST_F(PageSceneQueryResultTest, FlushExitOnNavigate_UnregisteredProcess_NoCrash, TestSize.Level0)
 {
     // Should not crash on unregistered process
-    WebPageSceneManager::GetInstance().FlushExitOnNavigate(9999, TEST_WEB_ID);
+    WebPageSceneManager::GetInstance().FlushExitOnNavigate(9999, TEST_WEB_ID, TEST_HOST_NODE_ID);
 }
 
 // ===== OnMatchResult =====
@@ -266,7 +267,7 @@ HWTEST_F(PageSceneQueryResultTest, ProcessQueryResult_Matched_NoCrash, TestSize.
     std::string rawResult = MakeControlsJson(3);
     // This calls ProcessQueryResultCore + OnMatchResult per result
     WebPageSceneManager::GetInstance().ProcessQueryResult(
-        TEST_PID, TEST_WEB_ID, selectorJson, rawResult, false);
+        TEST_PID, TEST_WEB_ID, TEST_HOST_NODE_ID, selectorJson, rawResult, false);
     // If we get here without crash, the full pipeline works
 }
 

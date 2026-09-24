@@ -155,7 +155,7 @@ void TabTheme::Builder::ParsePattern2(const RefPtr<TabTheme>& theme, const RefPt
     theme->sideBarListItemCornerRadius_ =
         pattern->GetAttr<Dimension>("corner_radius_level6", 12.0_vp);
     theme->sideBarListItemActivedColor_ =
-        pattern->GetAttr<Color>("comp_emphasize_tertiary", Color(0x19007DFF));
+        pattern->GetAttr<Color>("sidebar_board_actived_color", Color(0x19007DFF));
     theme->sideBarListItemHoverColor_ =
         pattern->GetAttr<Color>("interactive_hover", Color(0x0c182431));
     theme->sideBarListItemPressedColor_ =
@@ -164,6 +164,26 @@ void TabTheme::Builder::ParsePattern2(const RefPtr<TabTheme>& theme, const RefPt
         pattern->GetAttr<Color>("interactive_focus", Color(0x007DFF));
     theme->sideBarListItemFocusWidth_ =
         pattern->GetAttr<Dimension>("outline_extra_larger", 2.0_vp);
+    theme->sideBarSelectedIconColor_ =
+        pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
+    theme->sideBarSelectedTextColor_ =
+        pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
+    theme->sideBarUnselectedIconColor_ =
+        pattern->GetAttr<Color>("sidebar_unselected_icon_color", Color(0x99182431));
+    theme->sideBarUnselectedTextColor_ =
+        pattern->GetAttr<Color>("sidebar_unselected_text_color", Color(0x99182431));
+    theme->sideBarPaddingLevel4_ =
+        pattern->GetAttr<Dimension>("side_bar_padding_level4", 8.0_vp);
+    theme->sideBarPaddingLevel8_ =
+        pattern->GetAttr<Dimension>("side_bar_padding_level8", 16.0_vp);
+    theme->sideBarPaddingLevel10_ =
+        pattern->GetAttr<Dimension>("side_bar_padding_level10", 20.0_vp);
+    theme->sideBarTextFontSize_ =
+        pattern->GetAttr<Dimension>("side_bar_text_font_size", 16.0_fp);
+    theme->sideBarDividerColor_ =
+        pattern->GetAttr<Color>("sidebar_divider_color", Color(0x33182431));
+    theme->sideBarBackgroundColor_ =
+        pattern->GetAttr<Color>("sidebar_background_color", Color(0xfff1f3f5));
 }
 
 } // namespace OHOS::Ace

@@ -56,7 +56,7 @@ export function ArkComponentRoot(
                     });
                     return true;
                 }, (_: boolean | undefined) => {
-                    scheduleCallback(() => {
+                    ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                         component.aboutToDisappear();
                     });
                 });
@@ -78,6 +78,12 @@ export function ArkComponentRoot(
                     return new Long(ptr);
                 } else {
                     return new Long(childPeerPtr);
+                }
+            }, (): void => {
+                const root = weakNode.deref();
+                if (root) {
+                    root.armRebuild();
+                    root.rebuildPage();
                 }
             });
             if (component instanceof CustomDelegate) {

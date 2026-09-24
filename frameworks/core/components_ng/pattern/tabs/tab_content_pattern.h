@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -359,6 +360,16 @@ public:
         return tabBarInspectorId_;
     }
 
+    void SetDefaultVisibility(const TabContentDefaultVisibility& defaultVisibility)
+    {
+        defaultVisibility_ = defaultVisibility;
+    }
+
+    const TabContentDefaultVisibility& GetDefaultVisibility() const
+    {
+        return defaultVisibility_;
+    }
+
     const BottomTabBarStyle& GetBottomTabBarStyle() const
     {
         return bottomTabBarStyle_;
@@ -592,6 +603,8 @@ public:
 
     void OnAttachToMainTree() override;
 
+    void OnModifyDone() override;
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;
@@ -607,6 +620,8 @@ private:
     TabBarSymbol symbol_;
     ImageInfoConfig drawableIndicatorConfig_;
     bool isDrawableIndicator_ = false;
+    TabContentDefaultVisibility defaultVisibility_;
+    TabContentDefaultVisibility lastAppliedVisibility_;
 
     bool firstTimeLayout_ = true;
     bool secondTimeLayout_ = false;

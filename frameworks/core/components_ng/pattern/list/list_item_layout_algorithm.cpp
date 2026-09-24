@@ -87,20 +87,11 @@ void ListItemLayoutAlgorithm::MeasureItemChild(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
     if (needReserveEditModeCheckBoxSpace_ && editModeCheckBoxNodeIndex_ >= 0) {
         auto checkBoxHotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(layoutWrapper);
-        if (axis_ == Axis::HORIZONTAL) {
-            auto maxHeight = layoutConstraint.maxSize.Height();
-            if (Positive(maxHeight) && !NearEqual(maxHeight, Infinity<float>())) {
-                auto contentHeight = std::max(0.0f, maxHeight - checkBoxHotZoneWidth);
-                layoutConstraint.maxSize.SetHeight(contentHeight);
-                layoutConstraint.percentReference.SetHeight(contentHeight);
-            }
-        } else {
-            auto maxWidth = layoutConstraint.maxSize.Width();
-            if (Positive(maxWidth) && !NearEqual(maxWidth, Infinity<float>())) {
-                auto contentWidth = std::max(0.0f, maxWidth - checkBoxHotZoneWidth);
-                layoutConstraint.maxSize.SetWidth(contentWidth);
-                layoutConstraint.percentReference.SetWidth(contentWidth);
-            }
+        auto maxCrossSize = layoutConstraint.maxSize.CrossSize(axis_);
+        if (Positive(maxCrossSize) && !NearEqual(maxCrossSize, Infinity<float>())) {
+            auto contentCrossSize = std::max(0.0f, maxCrossSize - checkBoxHotZoneWidth);
+            layoutConstraint.maxSize.SetCrossSize(contentCrossSize, axis_);
+            layoutConstraint.percentReference.SetCrossSize(contentCrossSize, axis_);
         }
     }
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
@@ -138,16 +129,10 @@ void ListItemLayoutAlgorithm::UpdateEditModeSelfSize(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     auto checkBoxHotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(layoutWrapper);
-    if (axis_ == Axis::HORIZONTAL) {
-        auto maxHeight = layoutConstraint->maxSize.Height();
-        if (NearEqual(maxHeight, Infinity<float>()) || !layoutConstraint->selfIdealSize.Height().has_value()) {
-            frameSize.SetHeight(frameSize.Height() + checkBoxHotZoneWidth);
-        }
-    } else {
-        auto maxWidth = layoutConstraint->maxSize.Width();
-        if (NearEqual(maxWidth, Infinity<float>()) || !layoutConstraint->selfIdealSize.Width().has_value()) {
-            frameSize.SetWidth(frameSize.Width() + checkBoxHotZoneWidth);
-        }
+    auto maxCrossSize = layoutConstraint->maxSize.CrossSize(axis_);
+    auto selfIdealCrossSize = layoutConstraint->selfIdealSize.CrossSize(axis_);
+    if (NearEqual(maxCrossSize, Infinity<float>()) || !selfIdealCrossSize.has_value()) {
+        frameSize.SetCrossSize(frameSize.CrossSize(axis_) + checkBoxHotZoneWidth, axis_);
     }
     geometryNode->SetFrameSize(frameSize);
 }

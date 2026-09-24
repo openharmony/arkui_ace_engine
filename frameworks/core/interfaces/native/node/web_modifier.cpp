@@ -424,6 +424,32 @@ void ResetOnScaleChangeCallBack(ArkUINodeHandle node)
     WebModelNG::SetOnScaleChange(frameNode, nullptr);
 }
 
+void SetOnZoomChangeCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* zoomChangePtr = reinterpret_cast<std::function<void(ZoomChangeEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(zoomChangePtr);
+        auto callback = [zoomChangeCallback = *zoomChangePtr](const BaseEventInfo* event) {
+            if (auto zoomChangeEvent = static_cast<const ZoomChangeEvent*>(event)) {
+                auto& nonConstEvent = const_cast<ZoomChangeEvent&>(*zoomChangeEvent);
+                zoomChangeCallback(nonConstEvent);
+            }
+        };
+        WebModelNG::SetOnZoomChange(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnZoomChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnZoomChangeCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnZoomChange(frameNode, nullptr);
+}
+
 void SetOnRequestSelectedCallBack(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3047,6 +3073,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnInputMethodAttached = ResetOnInputMethodAttached,
         .setEnableFullscreenVideoOverlay = SetEnableFullscreenVideoOverlay,
         .resetEnableFullscreenVideoOverlay = ResetEnableFullscreenVideoOverlay,
+        .setOnZoomChangeCallBack = SetOnZoomChangeCallBack,
+        .resetOnZoomChangeCallBack = ResetOnZoomChangeCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3314,6 +3342,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnInputMethodAttached = ResetOnInputMethodAttached,
         .setEnableFullscreenVideoOverlay = SetEnableFullscreenVideoOverlay,
         .resetEnableFullscreenVideoOverlay = ResetEnableFullscreenVideoOverlay,
+        .setOnZoomChangeCallBack = SetOnZoomChangeCallBack,
+        .resetOnZoomChangeCallBack = ResetOnZoomChangeCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -555,6 +555,47 @@ HWTEST_F(WebModelStaticTest, SetOnScroll001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnZoomChange001
+ * @tc.desc: Test WebModelStatic zoom change callback registration and reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnZoomChange001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = WebModelStatic::CreateFrameNode(stack->ClaimNodeId());
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    bool callbackCalled = false;
+    double oldZoomFactor = 0.0;
+    double newZoomFactor = 0.0;
+    auto zoomChangeCallback = [&callbackCalled, &oldZoomFactor, &newZoomFactor](const BaseEventInfo* info) {
+        callbackCalled = true;
+        auto* event = TypeInfoHelper::DynamicCast<ZoomChangeEvent>(info);
+        EXPECT_NE(event, nullptr);
+        if (!event) {
+            return;
+        }
+        oldZoomFactor = event->GetOnZoomChangeOldZoomFactor();
+        newZoomFactor = event->GetOnZoomChangeNewZoomFactor();
+    };
+    WebModelStatic::SetZoomChangeId(AccessibilityManager::RawPtr(frameNode), zoomChangeCallback);
+    webEventHub->FireOnZoomChangeEvent(std::make_shared<ZoomChangeEvent>(1.0, 1.5));
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_DOUBLE_EQ(oldZoomFactor, 1.0);
+    EXPECT_DOUBLE_EQ(newZoomFactor, 1.5);
+
+    callbackCalled = false;
+    WebModelStatic::SetZoomChangeId(AccessibilityManager::RawPtr(frameNode), nullptr);
+    webEventHub->FireOnZoomChangeEvent(std::make_shared<ZoomChangeEvent>(1.5, 2.0));
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
  * @tc.name: SetGeolocationAccessEnabled002
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -1026,9 +1067,10 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, true);
+    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, true, true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckCssDisplayChangeEnabled(true), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckTransformRotateAndSkewEnabled(true), true);
 #endif
 }
 
@@ -1048,9 +1090,10 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions002, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, false);
+    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true, false, false);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckCssDisplayChangeEnabled(false), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckTransformRotateAndSkewEnabled(false), true);
 #endif
 }
 

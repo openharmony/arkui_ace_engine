@@ -401,13 +401,15 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode* frameNode, const ScriptItems
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
                                            bool supportDefaultIntrinsicSize,
-                                           bool supportCssDisplayChange)
+                                           bool supportCssDisplayChange,
+                                           bool supportTransformRotateAndSkew)
 {
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
     webPatternStatic->UpdateCssDisplayChangeEnabled(supportCssDisplayChange);
+    webPatternStatic->UpdateTransformRotateAndSkewEnabled(supportTransformRotateAndSkew);
 }
 
 void WebModelStatic::SetBypassVsyncCondition(FrameNode *frameNode,
@@ -1048,6 +1050,19 @@ void WebModelStatic::SetScaleChangeId(FrameNode* frameNode, std::function<void(c
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnScaleChangeEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetZoomChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    if (!callback) {
+        webEventHub->SetOnZoomChangeEvent(nullptr);
+        return;
+    }
+    auto uiCallback = [func = std::move(callback)](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    webEventHub->SetOnZoomChangeEvent(std::move(uiCallback));
 }
 
 void WebModelStatic::SetOnHttpAuthRequest(

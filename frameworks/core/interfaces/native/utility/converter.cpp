@@ -18,6 +18,7 @@
 
 #include "arkoala_api_generated.h"
 #include "converter.h"
+#include "converter_primitives.h"
 
 // SORTED_SECTION
 #include "base/geometry/response_region.h"
@@ -43,6 +44,7 @@
 #include "core/components_ng/pattern/date_picker/picker_date.h"
 #include "core/components_ng/pattern/date_picker/picker_time.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
+#include "core/components_ng/pattern/tabs/tabs_declaration.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/property/union_effect_container_options.h"
@@ -915,14 +917,7 @@ std::u16string Convert(const Ark_String& src)
 template<>
 std::string Convert(const Ark_String& src)
 {
-    if (src.chars == nullptr || src.length == 0) return "";
-    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
-    if (src.length >= sizeof(data[0]) && data[0] == UTF16_BOM) {
-        // Handle utf16 strings
-        ++data;
-        return UtfUtils::Str16ToStr8(std::u16string(data, src.length - sizeof(data[0])));
-    }
-    return std::string(src.chars, src.length);
+    return ConvertArkString(src);
 }
 
 template<>
@@ -4680,5 +4675,24 @@ std::optional<Color> OptConvertColorForMaterial(const Ark_ResourceColor& value)
         }
     }
     return result;
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<TabBarDisplayMode>& dst, const Ark_TabBarDisplayMode& src)
+{
+    switch (src) {
+        case ARK_TAB_BAR_DISPLAY_MODE_BOTTOM_TABBAR: dst = TabBarDisplayMode::BOTTOMTABBAR; break;
+        case ARK_TAB_BAR_DISPLAY_MODE_SIDEBAR: dst = TabBarDisplayMode::SIDEBAR; break;
+        default: LOGE("Unexpected enum value in Ark_TabBarDisplayMode: %{public}d", src);
+    }
+}
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<SidebarDisplayStyle>& dst, const Ark_TabsSidebarDisplayStyle& src)
+{
+    switch (src) {
+        case ARK_TABS_SIDEBAR_DISPLAY_STYLE_EMBED: dst = SidebarDisplayStyle::EMBED; break;
+        case ARK_TABS_SIDEBAR_DISPLAY_STYLE_DISPLACE: dst = SidebarDisplayStyle::DISPLACE; break;
+        default: LOGE("Unexpected enum value in Ark_TabsSidebarDisplayStyle: %{public}d", src);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter

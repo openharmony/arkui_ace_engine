@@ -207,6 +207,14 @@ StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false)
     if (!lib || !(engine_ = lib->CreateStylusDetector())) {
         engine_ = StylusDetectorInstance(StylusDetectorDefault::GetInstance(), [](StylusDetectorInterface* e) {});
     }
+    InitImfHook();
+}
+
+void StylusDetectorMgr::InitImfHook()
+{
+    CHECK_NULL_VOID(engine_);
+    TAG_LOGI(AceLogTag::ACE_STYLUS, "InitImfHook for engine_");
+    engine_->InitImfHook();
 }
 
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const

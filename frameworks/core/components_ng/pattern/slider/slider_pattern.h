@@ -430,7 +430,7 @@ private:
     void UpdateDragFrameNode();
     void UpdateDragPointNode();
     void UpdateBlurCoverNode();
-    void UpdateSelectedTrackFrameNode(float centerX, float centerY);
+    void UpdateSelectedTrackFrameNode();
     void UpdateParticleFrameNode(float centerX, float centerY);
     void UpdateParticleFrameOffset(Axis direction, bool reverse);
     void UpdateEmitterProperties(float centerX, float centerY, Axis direction, bool reverse);
@@ -451,6 +451,7 @@ private:
     AnimationOption CreateDragAnimationOption() const;
     AnimationOption CreateLowGradeSpringOption() const;
     float GetBlockRadius() const;
+    OffsetF GetRealPosition(float x, float y);
     float GetDragFrameBaseScale() const;
     void StartLongPressTimer();
     void HandleLongPress();
@@ -462,6 +463,7 @@ private:
     std::list<NG::ParticleOption> CreateParticleOptions(
         float emitterWidth, float emitterHeight, Axis direction, float blockCenterPx, bool reverse);
     void StopParticleEffect();
+    void SetVelocityFieldEnabled(bool enabled);
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

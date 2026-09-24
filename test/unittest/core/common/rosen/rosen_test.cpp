@@ -93,11 +93,11 @@ HWTEST_F(RosenTest, CastToRosenTest002, TestSize.Level1)
      * @tc.steps: step2. callback RegisterVsyncCallback.
      * @tc.expected: step2. Return expected results.
      */
-    auto callback = [](uint64_t deltaNanoTimestamp, uint32_t deltaFrameCount) {
+    auto callback = [](uint64_t deltaNanoTimestamp, uint32_t deltaFrameCount, int64_t deltaVsyncStartTime) {
         nanoTimestamp_ += deltaNanoTimestamp;
         frameCount_ += deltaFrameCount;
         if (callback_) {
-            callback_(nanoTimestamp_, frameCount_);
+            callback_(nanoTimestamp_, frameCount_, deltaVsyncStartTime);
         }
     };
     object.RegisterVsyncCallback(callback);

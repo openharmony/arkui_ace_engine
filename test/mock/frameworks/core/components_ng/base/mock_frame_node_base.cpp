@@ -242,9 +242,6 @@ RefPtr<UINode> FrameNode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
     return {};
 }
 
-void FrameNode::GetInspectorValue()
-{}
-
 const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needReset)
 {
     static const RefPtr<LayoutAlgorithmWrapper> value {};

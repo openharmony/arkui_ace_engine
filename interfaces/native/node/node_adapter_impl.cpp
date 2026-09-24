@@ -14,6 +14,7 @@
  */
 
 #include "node/node_model.h"
+#include "node/config_manager.h"
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
@@ -237,6 +238,7 @@ int32_t OH_ArkUI_NodeAdapterEvent_SetItem(ArkUI_NodeAdapterEvent* event, ArkUI_N
         event, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Event parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NODE_DISPOSED(handle, "Node has been disposed");
     auto* innerEvent = reinterpret_cast<ArkUINodeAdapterEvent*>(event);
     innerEvent->handle = handle->uiNodeHandle;
     innerEvent->nodeSet = true;

@@ -32,12 +32,15 @@ import {
     IObservedObject,
     OBSERVE,
     LocalStorage,
-    StateMgmtDFX
+    StateMgmtDFX,
+    ObservedObjectRegistry
 } from '../stateManagement';
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType, IMutableStateMeta, STATE_MGMT_FACTORY, WatchFuncType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl } from 'arkui/base/UIContextImpl';
+import { destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
+import { ArkInteropProxyNodePeer } from 'arkui/base/InteropProxyNode';
 import { UIContext } from "@ohos/arkui/UIContext"
 import { CustomComponent, CustomDelegate, BaseCustomComponent } from './customComponent';
 import { setNeedCreate } from '../ArkComponentRoot';
@@ -96,6 +99,23 @@ export interface CompatibleComponentInfo {
     component: ESValue
 }
 
+function createInteropProxyNode(rootPtr: KPointer, instanceId: int32, ownerElmtId: double): KPointer {
+    let destroyed = false;
+    const proxyNode = ArkInteropProxyNodePeer.create(ownerElmtId.toInt());
+    proxyNode.peer.addChild(rootPtr);
+    proxyNode.registerDestroyEvent((_nodeId: int): void => {
+        if (destroyed) {
+            return;
+        }
+        destroyed = true;
+        destroyUiDetachedRoot(rootPtr, instanceId);
+    });
+    setTimeout(() => {
+        proxyNode.dispose();
+    }, 0);
+    return proxyNode.getPeerPtr();
+}
+
 
 /** @memo */
 export function compatibleComponent(
@@ -138,7 +158,8 @@ export function compatibleComponent(
 export function compatibleStaticComponent<T extends BaseCustomComponent<T_Options>, T_Options>(
     factory: () => T,
     options?: () => T_Options,
-    content?: () => void
+    content?: () => void,
+    ownerElmtId?: double
 ): [() => void, number] {
     StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('compatibleStaticComponent');
     const instantiateImpl = /** @memo */ (): void => {
@@ -172,13 +193,16 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     }
     const staticComponent = (peerNode as ArkCustomComponentRootPeer).getComponent();
     uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
+    const rootPtr = peerNode.getPeerPtr();
+    const ptrForDynamic = ownerElmtId === undefined ? rootPtr :
+        createInteropProxyNode(rootPtr, uiContext.getInstanceId(), ownerElmtId);
     ArkThemeScopeManager.getInstance().restoreColorMode()
     return [
         () => {
             ArkThemeScopeManager.getInstance().executeReload(node);
             (staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);
             },
-            peerNode.getPeerPtr().toDouble(),
+            ptrForDynamic.toDouble(),
         ];
 }
 
@@ -1323,7 +1347,7 @@ export function enableCompatibleObservedV2ForDynamic<T>(
     value: T
 ): T {
     if (value instanceof IObservedObject) {
-        addCompatibleWatchFuncForDynamic(value as IObservedObject)
+        addCompatibleWatchFuncForDynamic(value as IObservedObject, new Set<IObservedObject>())
     }
     return value;
 }
@@ -1343,15 +1367,23 @@ function createDynamicCompatibleStateMeta(): [()=> void,()=> void] {
     return [addRef, fireChange];
 }
 
-function addCompatibleWatchFuncForDynamic(value: IObservedObject): void {
+function addCompatibleWatchFuncForDynamic(value: IObservedObject, visited: Set<IObservedObject>): void {
+    // Prevent cyclic recursion
+    if (visited.has(value)) {
+        return;
+    }
+    visited.add(value);
+
+    ObservedObjectRegistry.get(value)?.getMutableStateMetas()?.forEach((meta: MutableStateMeta) => {
+        let result = createDynamicCompatibleStateMeta();
+        meta.registerDynamicHookFunc(result[0], result[1]);
+    });
+
     let values = Object.values(value);
     for(let i =0; i < values.length; i++){
         let attr = values[i];
-        if (attr instanceof MutableStateMeta) {
-            let result = createDynamicCompatibleStateMeta();
-            (attr as MutableStateMeta).registerDynamicHookFunc(result[0], result[1]);
-        } else if (attr instanceof IObservedObject) {
-            addCompatibleWatchFuncForDynamic(attr as IObservedObject);
+        if (attr instanceof IObservedObject) {
+            addCompatibleWatchFuncForDynamic(attr as IObservedObject, visited);
         }
     }
 }

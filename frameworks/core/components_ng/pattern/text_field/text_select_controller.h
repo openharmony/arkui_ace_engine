@@ -157,6 +157,8 @@ public:
         return (sameX && sameY);
     }
 
+    bool IsSelectedLineBreak() const;
+
     void UpdateParagraph(const RefPtr<Paragraph>& paragraph)
     {
         paragraph_ = paragraph;
@@ -242,6 +244,7 @@ private:
 
     void FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics);
     void FitCaretMetricsToTouchPoint(CaretMetricsF& caretMetrics, const Offset& touchOffset);
+    TextAffinity GetHandleTextAffinity(int32_t index, TextAffinity defaultAffinity) const;
     void CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity);
     void CalcCaretMetricsByPositionNearTouchOffset(
         int32_t extent, CaretMetricsF& caretMetrics, const OffsetF& touchOffset);

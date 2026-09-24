@@ -129,6 +129,7 @@ vpe_enabled = false
 if (defined(global_parts_info.multimedia_video_processing_engine)) {
   vpe_enabled = true
 }
+native_root = "${ace_root}/frameworks/core/interfaces/native"
 
 if (!defined(aosp_libs_dir)) {
   aosp_libs_dir = "//prebuilts/aosp_prebuilt_libs/asdk_libs"

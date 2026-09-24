@@ -64,7 +64,7 @@ std::string RosenWindow::GetWindowName() const
     return "";
 }
 
-void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
+void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount, int64_t vsyncStartTime) {}
 
 uint32_t RosenWindow::GetStatusBarHeight() const
 {

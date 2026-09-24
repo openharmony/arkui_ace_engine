@@ -1135,7 +1135,17 @@ abstract class ViewPU extends PUV2ViewBase
           ObserveV2.getObserve().startRecordDependencies(this, elmtId);
         }
 
-        compilerAssignedUpdateFunc(elmtId, isFirstRender);
+        if (InteropConfigureStateMgmt.needsInterop()) {
+          const interopOwner = InteropStaticComponentOwnerRegistry.setCurrentOwner(
+            elmtId);
+          try {
+            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+          } finally {
+            InteropStaticComponentOwnerRegistry.restoreCurrentOwner(interopOwner);
+          }
+        } else {
+          compilerAssignedUpdateFunc(elmtId, isFirstRender);
+        }
         if (!isFirstRender) {
           _popFunc();
         }

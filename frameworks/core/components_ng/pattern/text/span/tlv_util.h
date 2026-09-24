@@ -158,6 +158,9 @@ constexpr uint8_t TLV_TEXTVERTICALALIGN_TAG = 0xA2;
 
 constexpr uint8_t TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG = 0xA3;
 
+constexpr uint8_t TLV_IMAGESPANATTRIBUTE_RESIZABLESLICE_TAG = 0xBC;
+constexpr uint8_t TLV_IMAGESPANATTRIBUTE_RESIZABLELATTICE_TAG = 0xBD;
+
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION = 0xA4;
 constexpr uint8_t TLV_TEXTDIRECTION_TAG = 0xA5;
 
@@ -306,6 +309,7 @@ public:
     static NG::PaddingProperty ReadPaddingProperty(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteImageSpanAttribute(std::vector<uint8_t>& buff, ImageSpanAttribute& value);
     static ImageSpanAttribute ReadImageSpanAttribute(std::vector<uint8_t>& buff, int32_t& cursor);
+    static ImageResizableSlice ReadImageResizableSlice(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteLeadingMargin(std::vector<uint8_t>& buff, NG::LeadingMargin& value);
     static NG::LeadingMargin ReadLeadingMargin(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteTextDecorations(std::vector<uint8_t>& buff, const std::vector<TextDecoration>& values);

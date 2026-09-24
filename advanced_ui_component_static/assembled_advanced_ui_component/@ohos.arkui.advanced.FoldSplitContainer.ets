@@ -23,7 +23,6 @@ import window from '@ohos.window';
 import hilog from '@ohos.hilog';
 import { LengthMetrics, NodePosition, Size } from '@ohos.arkui.node';
 import curves from '@ohos.curves';
-import mediaQuery from '@ohos.mediaquery';
 
 @Builder
 type FoldVoidCallback = () => void;
@@ -421,15 +420,9 @@ export struct FoldSplitContainer {
   private windowInstance?: window.Window;
   private containerSize: Size = { width: 0, height: 0 } as Size;
   private containerGlobalPosition: NodePosition = { x: 0, y: 0 } as NodePosition;
-  private listener?: mediaQuery.MediaQueryListener = this.getUIContext().getMediaQuery().matchMediaSync('(width<=600vp)');
-  private isSmallScreen: boolean = false;
   private isHoverMode: boolean | undefined = undefined;
 
   aboutToAppear() {
-    this.listener?.onChange((result) => {
-      this.isSmallScreen = result.matches;
-    });
-
     try {
       this.foldStatus = display.getFoldStatus();
     } catch (err) {
@@ -485,10 +478,6 @@ export struct FoldSplitContainer {
   }
 
   aboutToDisappear() {
-    if (this.listener) {
-      this.listener?.offChange();
-      this.listener = undefined;
-    }
     try {
       display.offFoldStatusChange();
     } catch (err) {
@@ -604,23 +593,19 @@ export struct FoldSplitContainer {
   private updateLayout(propName: string) {
     let isHoverMode: boolean = false;
     let regionLayout: RegionLayout;
-    if (this.isSmallScreen) {
-      regionLayout = this.getFoldedRegionLayouts();
-    } else {
-      if (this.foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
-        regionLayout = this.getExpandedRegionLayouts();
-      } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
-        if (this.isPortraitOrientation()) {
-          regionLayout = this.getExpandedRegionLayouts();
-        } else {
-          regionLayout = this.getHoverModeRegionLayouts();
-          isHoverMode = true;
-        }
-      } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_FOLDED) {
-        regionLayout = this.getFoldedRegionLayouts();
+    if (this.foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
+      regionLayout = this.getExpandedRegionLayouts();
+    } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
+      if (this.isHorizontalCrease()) {
+        regionLayout = this.getHoverModeRegionLayouts();
+        isHoverMode = true;
       } else {
         regionLayout = this.getExpandedRegionLayouts();
       }
+    } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_FOLDED) {
+      regionLayout = this.getFoldedRegionLayouts();
+    } else {
+      regionLayout = this.getExpandedRegionLayouts();
     }
 
     if (this.animationOptions === null) {
@@ -802,39 +787,37 @@ export struct FoldSplitContainer {
   }
 
   private getCreaseRegionRect(): display.Rect {
-    const creaseRegion = display.getCurrentFoldCreaseRegion();
-    const rects = creaseRegion.creaseRects;
     let left: Long = 0;
     let top: Long = 0;
     let width: Long = 0;
     let height: Long = 0;
-    if (rects && rects.length) {
-      const rect = rects[0];
-      left = (this.getUIContext().px2vp(rect.left) - this.containerGlobalPosition.x).toLong();
-      top = (this.getUIContext().px2vp(rect.top) - this.containerGlobalPosition.y).toLong();
-      width = this.getUIContext().px2vp(rect.width).toLong();
-      height = this.getUIContext().px2vp(rect.height).toLong();
+    try {
+      const creaseRegion = display.getDefaultDisplaySync().getLiveCreaseRegion();
+      const rects = creaseRegion.creaseRects;
+      if (rects && rects.length) {
+        const rect = rects[0];
+        left = (this.getUIContext().px2vp(rect.left) - this.containerGlobalPosition.x).toLong();
+        top = (this.getUIContext().px2vp(rect.top) - this.containerGlobalPosition.y).toLong();
+        width = this.getUIContext().px2vp(rect.width).toLong();
+        height = this.getUIContext().px2vp(rect.height).toLong();
+      }
+    } catch (err) {
+      Logger.error('Failed to get live crease region.');
     }
 
     return { left, top, width, height };
   }
 
-  private isPortraitOrientation() {
-    let orientation : display.Orientation = display.Orientation.PORTRAIT;
+  private isHorizontalCrease(): boolean {
     try {
-      orientation = display.getDefaultDisplaySync().orientation;
+      const creaseRects = display.getDefaultDisplaySync().getLiveCreaseRegion().creaseRects;
+      if (creaseRects && creaseRects.length > 0) {
+        const rect = creaseRects[0];
+        return rect.width > rect.height;
+      }
     } catch (err) {
-      Logger.error('Failed display.getDefaultDisplaySync(). code:%{public}d, message:%{public}s',
-        err.code, err.message);
+      Logger.error('Failed to get live crease region.');
     }
-    switch (orientation) {
-      case display.Orientation.PORTRAIT:
-      case display.Orientation.PORTRAIT_INVERTED:
-        return true;
-      case display.Orientation.LANDSCAPE:
-      case display.Orientation.LANDSCAPE_INVERTED:
-      default:
-        return false;
-    }
+    return false;
   }
 }

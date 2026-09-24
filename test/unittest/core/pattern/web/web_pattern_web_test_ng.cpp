@@ -1537,6 +1537,78 @@ HWTEST_F(WebPatternWebTest, HandleKeyEvent_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleKeyEvent_004
+ * @tc.desc: HandleKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleKeyEvent_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern, nullptr);
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
+    webEventhub->SetOnPreKeyEvent([](KeyEventInfo& keyEventInfo) {
+        std::cout << "onPrekeyevent" << std::endl;
+        return false;
+    });
+    std::vector<KeyCode> code;
+    code.push_back(KeyCode::KEY_ESCAPE);
+    std::vector<uint8_t> enhanceData;
+    enhanceData.push_back(100);
+    TimeStamp timeStamp;
+    KeyEvent keuEvent(
+        KeyCode::KEY_ESCAPE, KeyAction::DOWN, code, 1, timeStamp, 1, 1, SourceType::KEYBOARD, enhanceData);
+    bool flag = webPattern->HandleKeyEvent(keuEvent);
+    EXPECT_FALSE(flag);
+#endif
+}
+
+/**
+ * @tc.name: HandleEscToBackSupport_001
+ * @tc.desc: HandleEscToBackSupport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleEscToBackSupport_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern, nullptr);
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
+    webEventhub->SetOnPreKeyEvent([](KeyEventInfo& keyEventInfo) {
+        std::cout << "onPrekeyevent" << std::endl;
+        return false;
+    });
+    std::vector<KeyCode> code;
+    code.push_back(KeyCode::KEY_ESCAPE);
+    std::vector<uint8_t> enhanceData;
+    enhanceData.push_back(100);
+    TimeStamp timeStamp;
+    KeyEvent keuEvent(KeyCode::KEY_ESCAPE, KeyAction::UP, code, 1, timeStamp, 1, 1, SourceType::KEYBOARD, enhanceData);
+    bool flag = webPattern->HandleEscToBackSupport(Referenced::RawPtr(pipelineContext));
+    EXPECT_TRUE(flag);
+#endif
+}
+
+/**
  * @tc.name: OnModifyDoneNodestatus
  * @tc.desc: OnModifyDone.
  * @tc.type: FUNC

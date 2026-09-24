@@ -335,6 +335,8 @@ HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest016, TestSize
     constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_SURFACE_CHANGE_EVENT);
     MessageParcel data;
     OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
+    formSurfaceInfo.width = 1.0f;
+    formSurfaceInfo.height = 1.0f;
     data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
     data.WriteParcelable(&formSurfaceInfo);
     MessageParcel reply;

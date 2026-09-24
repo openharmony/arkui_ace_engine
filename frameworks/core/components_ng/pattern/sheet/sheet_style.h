@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -63,6 +64,11 @@ enum SheetType {
     SHEET_BOTTOM_FREE_WINDOW,
     SHEET_BOTTOM_OFFSET,
     SHEET_MINIMIZE,
+};
+
+enum class SheetTitleBarHoverMode {
+    STANDARD = 0,
+    STACK = 1,
 };
 
 enum class SheetAccessibilityDetents {
@@ -187,6 +193,29 @@ enum class SheetKeyboardAvoidMode {
     POPUP_SHEET,
 };
 
+enum class SheetTitleBarBackgroundBlur {
+    NONE = 0,
+    GRADIENT = 1,
+};
+
+struct SheetTitleBarBackgroundBlurOptions {
+    std::optional<SheetTitleBarBackgroundBlur> blurStyle;
+    std::optional<CalcDimension> maskExtraHeight;
+    std::optional<Color> maskColor;
+    std::optional<CalcDimension> effectiveDistance;
+
+    bool operator==(const SheetTitleBarBackgroundBlurOptions& other) const
+    {
+        return blurStyle == other.blurStyle && maskExtraHeight == other.maskExtraHeight &&
+               maskColor == other.maskColor && effectiveDistance == other.effectiveDistance;
+    }
+
+    bool operator!=(const SheetTitleBarBackgroundBlurOptions& other) const
+    {
+        return !operator==(other);
+    }
+};
+
 struct BlurSnapshotOptions {
     std::optional<bool> enableFreeze;
     bool operator==(const BlurSnapshotOptions& other) const
@@ -234,6 +263,10 @@ struct SheetStyle {
     RefPtr<UiMaterial> systemMaterialECSub;
     std::optional<EdgeLightMode> sheetEdgeLightMode;
     std::optional<BlurSnapshotOptions> blurSnapshotOptions;
+    std::optional<SheetTitleBarBackgroundBlurOptions> titleBarBackgroundBlur;
+    std::optional<SheetTitleBarHoverMode> titleBarHoverMode;
+    std::optional<DisplayMode> scrollBarState;
+    RefPtr<UiMaterial> closeButtonMaterial;
 
     SheetStyle() = default;
     // constructor for image generator dialog
@@ -262,7 +295,10 @@ struct SheetStyle {
                 showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition &&
                 radiusRenderStrategy == sheetStyle.radiusRenderStrategy &&
                 systemMaterial == sheetStyle.systemMaterial && sheetEdgeLightMode == sheetStyle.sheetEdgeLightMode &&
-                blurSnapshotOptions == sheetStyle.blurSnapshotOptions);
+                blurSnapshotOptions == sheetStyle.blurSnapshotOptions &&
+                titleBarBackgroundBlur == sheetStyle.titleBarBackgroundBlur &&
+                titleBarHoverMode == sheetStyle.titleBarHoverMode && scrollBarState == sheetStyle.scrollBarState &&
+                closeButtonMaterial == sheetStyle.closeButtonMaterial);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -315,6 +351,11 @@ struct SheetStyle {
         sheetEdgeLightMode = sheetStyle.sheetEdgeLightMode ? sheetStyle.sheetEdgeLightMode : sheetEdgeLightMode;
         blurSnapshotOptions =
             sheetStyle.blurSnapshotOptions.has_value() ? sheetStyle.blurSnapshotOptions : blurSnapshotOptions;
+        titleBarBackgroundBlur =
+            sheetStyle.titleBarBackgroundBlur.has_value() ? sheetStyle.titleBarBackgroundBlur : titleBarBackgroundBlur;
+        titleBarHoverMode = sheetStyle.titleBarHoverMode.has_value() ? sheetStyle.titleBarHoverMode : titleBarHoverMode;
+        scrollBarState = sheetStyle.scrollBarState.has_value() ? sheetStyle.scrollBarState : scrollBarState;
+        closeButtonMaterial = sheetStyle.closeButtonMaterial ? sheetStyle.closeButtonMaterial : closeButtonMaterial;
     }
 
     // Register the set/get method of the resource.
@@ -338,6 +379,9 @@ struct SheetStyle {
     ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(BorderColor);
     ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(Radius);
     ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(BackgroundColor);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(TitleBarMaskExtraHeight);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(TitleBarMaskColor);
+    ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(TitleBarEffectiveDistance);
     std::vector<RefPtr<ResourceObject>> detentsObj_;
 };
 

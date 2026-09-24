@@ -1245,13 +1245,18 @@ void TextFieldModelNG::SetBackBorder()
     if (renderContext->HasBorderRadius()) {
         SetBackBorderRadius();
     }
-    if (renderContext->HasBorderColor()) {
+    auto material = renderContext->GetSystemMaterial();
+    bool hasImmersiveMaterial = material && material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE);
+    // Material values are visual overrides, not user border settings.
+    auto borderColor = hasImmersiveMaterial ? renderContext->GetPreBorderColor() : renderContext->GetBorderColor();
+    auto borderWidth = hasImmersiveMaterial ? renderContext->GetPreBorderWidth() : renderContext->GetBorderWidth();
+    if (borderColor.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderColorFlagByUser, renderContext->GetBorderColor().value());
+            TextFieldPaintProperty, BorderColorFlagByUser, borderColor.value());
     }
-    if (renderContext->HasBorderWidth()) {
+    if (borderWidth.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value());
+            TextFieldPaintProperty, BorderWidthFlagByUser, borderWidth.value());
     }
     if (renderContext->HasBorderStyle()) {
         ACE_UPDATE_PAINT_PROPERTY(
@@ -2820,14 +2825,14 @@ void TextFieldModelNG::SetBorderColor(FrameNode* frameNode, NG::BorderColorPrope
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderColorFlagByUser, borderColors, frameNode);
 }
 
-void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles)
+void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, const NG::BorderStyleProperty& borderStyles)
 {
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBorderStyle(frameNode, borderStyles);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderStyleFlagByUser, borderStyles, frameNode);
 }
 
-void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin)
+void TextFieldModelNG::SetMargin(FrameNode* frameNode, const NG::PaddingProperty& margin)
 {
     CHECK_NULL_VOID(frameNode);
     MarginProperty userMargin;

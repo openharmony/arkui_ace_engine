@@ -2104,6 +2104,10 @@
         "name": "OH_ArkUI_DragEvent_GetDataTypes"
     },
     {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_DragEvent_GetSummary"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_DragEvent_GetDragResult"
     },
@@ -6528,6 +6532,22 @@
         "name": "OH_ArkUI_ImageAttachment_GetSupportSvg"
     },
     {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_SetResizableSlice"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_GetResizableSlice"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_SetResizableLattice"
+    },
+    {
+        "first_introduced": "26",
+        "name": "OH_ArkUI_ImageAttachment_GetResizableLattice"
+    },
+    {
         "first_introduced": "24",
         "name": "OH_ArkUI_TextEditorStyledStringController_GetSelection"
     },
@@ -7011,5 +7031,9 @@
     {
         "first_introduced": "26.0.0",
         "name": "OH_ArkUI_NativeModule_LineSpacingOptions_GetOnlyBetweenLines"
+    },
+    {
+        "first_introduced": "26.2.0",
+        "name": "OH_ArkUI_NativeModule_SetRuntimeCheckMode"
     }
 ]

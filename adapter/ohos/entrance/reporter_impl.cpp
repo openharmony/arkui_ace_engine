@@ -17,7 +17,6 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "frameworks/base/utils/time_util.h"
 #include "frameworks/core/common/layout_inspector.h"

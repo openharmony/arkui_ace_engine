@@ -100,6 +100,8 @@ public:
 
     virtual DrawableType GetDrawableType();
 
+    virtual void SetSVGResourceLimitLevel(const int32_t id);
+
     OptionalDecodeSize GetDecodeSize();
 
     void SetDecodeSize(int32_t width, int32_t height);
@@ -129,6 +131,9 @@ public:
     {
         return len_;
     }
+
+protected:
+    int32_t svgLimitsId_ = 0;
 
 private:
     bool GetPixelMapFromBuffer();
@@ -163,11 +168,13 @@ public:
     }
 
     LayeredDrawableDescriptor(UINT8 jsonBuf, size_t len, const SharedResourceManager& resourceMgr, std::string path,
-        uint32_t iconType, DataInfo& foregroundInfo, DataInfo& backgroundInfo, bool foregroundOverBackground = false)
+        uint32_t iconType, DataInfo& foregroundInfo, DataInfo& backgroundInfo, bool foregroundOverBackground = false,
+        int32_t svgLimitsId = 0)
         : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType),
           foregroundOverBackground_(foregroundOverBackground)
     {
-        InitLayeredParam(foregroundInfo, backgroundInfo);
+        svgLimitsId_ = svgLimitsId;
+        InitLayeredParam(foregroundInfo, backgroundInfo, svgLimitsId);
         InitialResource(resourceMgr);
         jsonBuf_.reset();
         InitBlendMode();
@@ -199,7 +206,7 @@ public:
 
     static std::string GetStaticMaskClipPath();
 
-    void InitLayeredParam(DataInfo& foregroundInfo, DataInfo& backgroundInfo);
+    void InitLayeredParam(DataInfo& foregroundInfo, DataInfo& backgroundInfo, int32_t svgLimitsId = 0);
 
     void SetForeground(SharedPixelMap foreground);
 
@@ -270,7 +277,7 @@ public:
         RState& state, DrawableType& drawableType, uint32_t density, bool foregroundOverBackground = false);
     static std::unique_ptr<DrawableDescriptor> Create(DataInfo& foregroundInfo, DataInfo& backgroundInfo,
         std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr,
-        bool foregroundOverBackground = false);
+        bool foregroundOverBackground = false, int32_t svgLimitId = 0);
     static std::unique_ptr<DrawableDescriptor> Create(std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo,
         const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType,
         bool foregroundOverBackground = false);

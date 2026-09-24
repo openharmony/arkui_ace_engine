@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,12 @@ public:
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func);
     void FireOnDidChange(const RichEditorChangeValue& info);
     bool HasOnDidChange() const;
+    void SetOnScrollChangeEvent(std::function<void(float, float)>&& func);
+    bool HasOnScrollChange() const;
+    void FireOnScrollChangeEvent(float offsetX, float offsetY);
+    void SetOnContentSizeChange(std::function<void(float, float)>&& func);
+    bool HasOnContentSizeChange() const;
+    void FireOnContentSizeChange(float width, float height);
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func);
     void FireOnCut(NG::TextCommonEvent& value);
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func);
@@ -96,6 +102,8 @@ public:
     void SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)>&& func);
     void FireOnStyledStringDidChange(const StyledStringChangeValue& info);
     bool HasOnStyledStringDidChange() const;
+    void SetOnInputFilterError(const std::function<void(const std::u16string&)>& onInputFilterError);
+    void FireOnInputFilterError(const std::u16string& value) const;
 
 private:
     long long timestamp_ = 0;
@@ -112,11 +120,14 @@ private:
     std::function<void(const bool&)> onEditingChange_;
     std::function<bool(const RichEditorChangeValue&)> onWillChange_;
     std::function<void(const RichEditorChangeValue&)> onDidChange_;
+    std::function<void(float, float)> onScrollChangeEvent_;
+    std::function<void(float, float)> onContentSizeChangeEvent_;
     std::function<void(NG::TextCommonEvent&)> onCut_;
     std::function<void(NG::TextCommonEvent&)> onCopy_;
     std::function<void(NG::TextCommonEvent&)> onShare_;
     std::function<bool(const StyledStringChangeValue&)> onStyledStringWillChange_;
     std::function<void(const StyledStringChangeValue&)> onStyledStringDidChange_;
+    std::function<void(const std::u16string&)> onInputFilterError_;
     IMEAttachCallback onWillAttachIME_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };

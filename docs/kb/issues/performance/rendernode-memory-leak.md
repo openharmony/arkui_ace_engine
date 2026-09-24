@@ -10,13 +10,25 @@
 C API RenderNode 采用双层内存模型（外层 `ArkUI_RenderNode` + 内层 `RenderNodeStruct`）。修复前，`OH_ArkUI_RenderNodeUtils_DisposeNode` 只释放外层结构体，未释放内层 `RenderNodeStruct`，导致每次创建-销毁 RenderNode 都泄漏一个 `RenderNodeStruct` 对象（含 `shared_ptr<RSNode>` 及相关字段）。该问题已由变更 `d452e978454bc8838c5d7e5b09eb2793877d0057` 修复；当前代码会在释放外层对象前调用 `deleteInnerRenderNodeStruct`。
 
 双层内存模型说明：
-- 外层 `ArkUI_RenderNode`（`render_node.h:27-29`）：仅含 `ArkUIRenderNodeHandle renderNodeHandle` 字段。`ArkUIRenderNodeHandle` 是 `_ArkUIRenderNode*` 不透明句柄，当前内部实现将其解释为 `RenderNodeStruct*`
-- 内层 `RenderNodeStruct`（`node_render_node_modifier.cpp:65-70`）：含 `shared_ptr<RSNode> rsNode`、`int32_t nodeId`、`bool getFromAdoptedFrameNode`、`bool getFromNativeFrameNode`，通过 `new RenderNodeStruct` 创建
+- 外层 `ArkUI_RenderNode`（`render_node.h`）：仅含 `ArkUIRenderNodeHandle renderNodeHandle` 字段。`ArkUIRenderNodeHandle` 是 `_ArkUIRenderNode*` 不透明句柄，当前内部实现将其解释为 `RenderNodeStruct*`
+- 内层 `RenderNodeStruct`（`node_render_node_modifier.cpp`）：含 `shared_ptr<RSNode> rsNode`、`int32_t nodeId`、`bool getFromAdoptedFrameNode`、`bool getFromNativeFrameNode`，通过 `new RenderNodeStruct` 创建
 
 修复前的典型表现：
 - 频繁调用 `OH_ArkUI_RenderNodeUtils_CreateNode` / `DisposeNode` 后内存持续增长
 - 通过 `GetChild`/`GetFirstChild`/`GetNextSibling` 等方法获取子节点后调用 `DisposeNode`，内存不回收
 - 长时间运行的 C API 应用中，RenderNode 相关内存占用量单调递增
+
+
+## 关联模块
+
+| kind | role | name | evidence | confidence |
+|------|------|------|----------|------------|
+| capability | symptom_surface | render_node | interfaces/native/node/render_node.cpp | verified |
+| capability | root_cause_owner | node_render_node_modifier | frameworks/core/interfaces/native/node/node_render_node_modifier.cpp | verified |
+| capability | root_cause_owner | render_node | interfaces/native/node/render_node.h | verified |
+
+kind: `component` / `capability` / `architecture`
+role: `symptom_surface` / `trigger` / `root_cause_owner` / `fix_location` / `dependency`
 
 ## 根因分类
 
@@ -56,11 +68,11 @@ C API RenderNode 采用双层内存模型（外层 `ArkUI_RenderNode` + 内层 `
 | 3 | 检查 `DisposeNode` 中 `renderNodeHandle` 是否在释放后置空 | 修复后应置空 | 未置空可能导致 use-after-free |
 
 关键代码定位：
-- `interfaces/native/node/render_node.cpp:148-168`：`OH_ArkUI_RenderNodeUtils_DisposeNode` 实现
-- `frameworks/core/interfaces/native/node/node_render_node_modifier.cpp:65-70`：`RenderNodeStruct` 定义（含 `shared_ptr<RSNode>`、`nodeId`、`getFromAdoptedFrameNode`、`getFromNativeFrameNode`）
-- `frameworks/core/interfaces/native/node/node_render_node_modifier.cpp:242-257`：`CreateRenderNodeStruct` 通过 `new RenderNodeStruct` 创建内层结构体
-- `frameworks/core/interfaces/native/node/node_render_node_modifier.cpp:2462-2467`：`DeleteInnerRenderNodeStruct` 释放内层结构体
-- `interfaces/native/node/render_node.h:27-29`：`ArkUI_RenderNode` 外层结构体定义（仅含 `renderNodeHandle` 字段）
+- `interfaces/native/node/render_node.cpp`：`OH_ArkUI_RenderNodeUtils_DisposeNode` 实现
+- `frameworks/core/interfaces/native/node/node_render_node_modifier.cpp`：`RenderNodeStruct` 定义（含 `shared_ptr<RSNode>`、`nodeId`、`getFromAdoptedFrameNode`、`getFromNativeFrameNode`）
+- `frameworks/core/interfaces/native/node/node_render_node_modifier.cpp`：`CreateRenderNodeStruct` 通过 `new RenderNodeStruct` 创建内层结构体
+- `frameworks/core/interfaces/native/node/node_render_node_modifier.cpp`：`DeleteInnerRenderNodeStruct` 释放内层结构体
+- `interfaces/native/node/render_node.h`：`ArkUI_RenderNode` 外层结构体定义（仅含 `renderNodeHandle` 字段）
 
 ## 修复方案
 
@@ -70,7 +82,7 @@ C API RenderNode 采用双层内存模型（外层 `ArkUI_RenderNode` + 内层 `
 
 核心修复代码：
 ```cpp
-// node_render_node_modifier.cpp:2462-2467 — 新增释放函数
+// node_render_node_modifier.cpp — 新增释放函数
 void DeleteInnerRenderNodeStruct(ArkUIRenderNodeHandle node)
 {
     auto* nodeStruct = reinterpret_cast<RenderNodeStruct*>(node);
@@ -78,12 +90,12 @@ void DeleteInnerRenderNodeStruct(ArkUIRenderNodeHandle node)
     delete nodeStruct;
 }
 
-// render_node.cpp:148-168 — DisposeNode 中调用
+// render_node.cpp — DisposeNode 中调用
 int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
 {
     // ...参数校验...
     impl->getNodeModifiers()->getNDKRenderNodeModifier()->deleteInnerRenderNodeStruct(node->renderNodeHandle);
-    // deleteInnerRenderNodeStruct does not set node->renderNodeHandle to nullptr  (render_node.cpp:162)
+    // deleteInnerRenderNodeStruct does not set node->renderNodeHandle to nullptr  (render_node.cpp)
     node->renderNodeHandle = nullptr;  // 防止 use-after-free
     delete node;
     node = nullptr;
@@ -103,9 +115,9 @@ int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
 - 代码审查时重点检查 C API 中 `new`/`delete` 的配对，特别是跨层结构体（外层持有内层指针）
 - 建议对 C API RenderNode 的生命周期管理增加内存泄漏自动化测试
 - `GetChild`/`GetFirstChild`/`GetNextSibling`/`GetPreviousSibling`/`GetChildren` 返回的 `ArkUI_RenderNode` 均需通过 `DisposeNode` 释放，且 `DisposeNode` 必须调用 `deleteInnerRenderNodeStruct` 释放内层
-- 注意 `render_node.cpp:162` 的注释：`deleteInnerRenderNodeStruct` 不会将 `renderNodeHandle` 置空，调用方必须在 `deleteInnerRenderNodeStruct` 后手动置空 `node->renderNodeHandle` 以防止 use-after-free
+- 注意 `render_node.cpp` 的注释：`deleteInnerRenderNodeStruct` 不会将 `renderNodeHandle` 置空，调用方必须在 `deleteInnerRenderNodeStruct` 后手动置空 `node->renderNodeHandle` 以防止 use-after-free
 
 ## 相关主题
 
 - [基础渲染管线](../../architecture/basic-render-pipeline.md)：基础渲染管线 KB
-- [RenderNode](../../capabilities/render_node.md)：RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制
+- [RenderNode](../../capabilities/render-node.md)：RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制

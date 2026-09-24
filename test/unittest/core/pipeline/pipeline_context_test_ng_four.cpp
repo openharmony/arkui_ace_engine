@@ -425,6 +425,26 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg009, TestSize.Level
 }
 
 /**
+ * @tc.name: PipelineContextFourTestNg009IsFirstRootLayout
+ * @tc.desc: IsFirstRootLayout() is true initially, false after root ETS dirty request (C8 gate).
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg009IsFirstRootLayout, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    context_->isFirstRootLayout_ = true;
+    EXPECT_TRUE(context_->IsFirstRootLayout());
+    auto rootEtNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootEtNode, nullptr);
+    context_->AddDirtyLayoutNode(rootEtNode);
+    EXPECT_FALSE(context_->IsFirstRootLayout());
+    // Gate is irreversible: stays false on subsequent root dirty requests.
+    context_->AddDirtyLayoutNode(rootEtNode);
+    EXPECT_FALSE(context_->IsFirstRootLayout());
+}
+
+/**
  * @tc.name: PipelineContextFourTestNg010
  * @tc.desc: Test AddDirtyRenderNode with normal node having inspector ID.
  * @tc.type: FUNC

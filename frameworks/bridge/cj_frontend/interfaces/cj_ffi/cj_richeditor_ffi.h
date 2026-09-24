@@ -87,7 +87,7 @@ struct NativeRichEditorChangeValue {
 };
 
 class ACE_EXPORT NativePasteEvent : public OHOS::FFI::FFIData {
-    DECL_TYPE(NativeTextCommonEvent, OHOS::FFI::FFIData)
+    DECL_TYPE(NativePasteEvent, OHOS::FFI::FFIData)
 public:
     explicit NativePasteEvent(OHOS::Ace::NG::TextCommonEvent* event) {
         event_ = event;

@@ -152,11 +152,10 @@ SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridSizeType& sizeType
     return SystemGridInfo();
 }
 
-const SystemGridInfo& GridSystemManager::GetCurrentGridInfo()
+SystemGridInfo GridSystemManager::GetCurrentGridInfo()
 {
     GridSizeType sizeType = ScreenSystemManager::GetInstance().GetCurrentSize();
-    systemGridInfo_ = GetSystemGridInfo(sizeType);
-    return systemGridInfo_;
+    return GetSystemGridInfo(sizeType);
 }
 
 SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridTemplateType& templateType, double width)

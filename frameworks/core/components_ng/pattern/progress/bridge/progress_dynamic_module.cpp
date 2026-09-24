@@ -74,7 +74,7 @@ const void* ProgressDynamicModule::GetCjModifier()
 void* ProgressDynamicModule::GetModel()
 {
     static NG::ProgressModelNG model;
-    return &model;
+    return static_cast<ProgressModel*>(&model);
 }
 
 const void* ProgressDynamicModule::GetCustomModifier(const std::string& name)

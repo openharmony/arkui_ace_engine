@@ -68,6 +68,7 @@
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
+#include "bridge/declarative_frontend/jsview/js_immersive_strategy.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -526,6 +527,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SaveButton", JSSaveButton::JSBind },
     { "WithTheme", JSWithTheme::JSBind },
     { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
+    { "__ImmersiveStrategy__", JSImmersiveStrategy::JSBind },
     { "TextMenu", JSTextMenu::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
@@ -799,6 +801,14 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         return;
     }
 #endif
+    if (module == "Canvas") {
+        JSCanvasPattern::JSBind(globalObj);
+        JSCanvasGradient::JSBind(globalObj);
+        JSCanvasImageData::JSBind(globalObj);
+        JSMatrix2d::JSBind(globalObj);
+        JSRenderImage::JSBind(globalObj, nativeEngine);
+        return;
+    }
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
@@ -808,12 +818,6 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSSwiperControllerBinding::JSBind(globalObj);
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
-    } else if ((*func).first == "Canvas") {
-        JSCanvasPattern::JSBind(globalObj);
-        JSCanvasGradient::JSBind(globalObj);
-        JSCanvasImageData::JSBind(globalObj);
-        JSMatrix2d::JSBind(globalObj);
-        JSRenderImage::JSBind(globalObj, nativeEngine);
     }
 
     (*func).second(globalObj);

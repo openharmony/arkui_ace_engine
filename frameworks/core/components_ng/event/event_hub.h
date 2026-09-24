@@ -311,7 +311,7 @@ public:
     virtual void FireOnDetach();
     void ClearStateStyle();
     void OnDetachClear();
-    void HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
+    bool HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
         const std::unique_ptr<OffsetF>& lastParentOffsetToWindow,
         const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
     void FireUntriggeredInnerOnAreaChanged(

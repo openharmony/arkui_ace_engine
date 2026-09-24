@@ -104,6 +104,7 @@ struct DragDataCore {
     int32_t dragAnimationType { static_cast<int32_t>(DragAnimationType::DEFAULT) };
     bool isSetMaterialFilter { false };
     std::shared_ptr<Rosen::Filter> materialFilter { nullptr };
+    std::vector<std::string> filenameExtensions;
 };
 
 struct DragBundleInfo {

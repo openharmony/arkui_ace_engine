@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_MANAGER_H
 
 #include <list>
+#include <mutex>
 #include <set>
+#include <shared_mutex>
 #include <vector>
 
 #include "base/memory/ace_type.h"
@@ -127,7 +129,7 @@ public:
     bool IsDefaultFontChanged();
     ACE_FORCE_EXPORT bool IsUseAppCustomFont() const;
     void SetAppCustomFont(const std::string& familyName);
-    ACE_FORCE_EXPORT const std::string& GetAppCustomFont() const;
+    ACE_FORCE_EXPORT std::string GetAppCustomFont() const;
     void AddFontObserver(WeakPtr<FontChangeObserver> node);
     void RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node);
     std::vector<std::string> GetFontNames();
@@ -163,6 +165,7 @@ protected:
     static float fontWeightScale_;
     static bool isDefaultFontChanged_;
     static std::string appCustomFont_;
+    static std::shared_mutex appCustomFontMutex_;
 
 private:
     void FontNodeChangeStyleNG();

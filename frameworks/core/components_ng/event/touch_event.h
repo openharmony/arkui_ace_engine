@@ -18,7 +18,6 @@
 
 #include <list>
 
-#include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/event/touch_event.h"
@@ -164,6 +163,9 @@ private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
     bool ShouldResponse() override;
     void TriggerCallBacks(TouchEventInfo& event);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+    void ReportTouchEventToUISession(const TouchEventInfo& event);
+#endif
     TouchEventInfo CreateTouchEventInfo(const TouchEvent& lastPoint);
     TouchLocationInfo CreateChangedTouchInfo(const TouchEvent& lastPoint, const TouchEvent& event);
     TouchLocationInfo CreateTouchItemInfo(const TouchPoint& pointItem, const TouchEvent& event, TouchType type);

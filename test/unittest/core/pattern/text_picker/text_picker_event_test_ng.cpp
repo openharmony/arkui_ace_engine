@@ -21,6 +21,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/common/mock_theme_default.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -240,9 +241,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest001, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -278,9 +281,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest002, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -354,9 +359,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest004, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 0);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -392,9 +399,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest005, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 2);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -430,9 +439,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest006, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 2);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -506,9 +517,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest008, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 2);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -544,9 +557,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest009, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 4);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -582,9 +597,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest010, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 4);
+    MockAnimationManager::Enable(false);
 }
 
 /**
@@ -658,9 +675,11 @@ HWTEST_F(TextPickerEventTestNg, TextPickerColumnPatternOnClickEventTest012, Test
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
     textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    MockAnimationManager::Enable(true);
     textPickerColumnPattern_->OnAroundButtonClick(param);
     index = textPickerColumnPattern_->GetCurrentIndex();
     EXPECT_EQ(index, 4);
+    MockAnimationManager::Enable(false);
 
     // color is set = Color::xxx
     param->instance = nullptr;

@@ -1356,6 +1356,7 @@ HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect001, TestSize.Lev
     auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    parent->GetGeometryNode()->SetFrameSize(SizeF(150.0f, 150.0f));
     auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
     ASSERT_NE(parentRenderContext, nullptr);
     parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 150.0f, 150.0f));
@@ -1409,6 +1410,7 @@ HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect002, TestSize.Lev
     auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    parent->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
     auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
     ASSERT_NE(parentRenderContext, nullptr);
     parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 100.0f, 100.0f));
@@ -1458,6 +1460,7 @@ HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect003, TestSize.Lev
     auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    parent->GetGeometryNode()->SetFrameSize(SizeF(500.0f, 500.0f));
     auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
     ASSERT_NE(parentRenderContext, nullptr);
     parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 500.0f, 500.0f));

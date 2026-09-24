@@ -298,11 +298,14 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_right_icon_size', { resourceId: 1258
 RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_padding_bottom', { resourceId: 125835813, defaultValue: 4 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_single_right_loading_padding_bottom', { resourceId: 125835814, defaultValue: 4 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_right_loading_margin_start', { resourceId: 125835815, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_margin_bottom', { resourceId: 125837102, defaultValue: 8 });
 
 @Component
 export struct SubHeader {
   @Prop icon: Resource | null = null;
   iconSymbolOptions?: SymbolOptions | null = null;
+  @Prop endIcon: Resource | null = null;
+  endIconSymbolOptions?: SymbolOptions | null = null;
   @Prop primaryTitle: string | null = null;
   @State primaryTitleModifier: TextModifier = new TextModifier();
   @Prop secondaryTitle: string | null = null;
@@ -499,7 +502,7 @@ export struct SubHeader {
         }
         .margin({
           top: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level8') : '',
-          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.padding_level4') : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? getResourceValue('sys.float.subheader_title_margin_bottom') : '',
         })
         .width('100%')
         .flexShrink(1)
@@ -730,6 +733,32 @@ export struct SubHeader {
   }
 
   @Builder
+  endTitleIcon(): void {
+    if (this.endIcon) {
+      if (Util.isSymbolResource(this.endIcon)) {
+        SymbolGlyph(this.endIcon)
+          .fontSize(this.endIconSymbolOptions?.fontSize ?
+          Util.symbolFontSize(this.endIconSymbolOptions?.fontSize) :
+          getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
+          .fontColor(this.endIconSymbolOptions?.fontColor ?? [this.subHeaderTheme.leftIconColor])
+          .fontWeight(this.endIconSymbolOptions?.fontWeight)
+          .renderingStrategy(this.endIconSymbolOptions?.renderingStrategy)
+          .effectStrategy(this.endIconSymbolOptions?.effectStrategy)
+          .margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) })
+          .flexShrink(0)
+      } else {
+        Image(this.endIcon)
+          .fillColor(this.subHeaderTheme.leftIconColor)
+          .width(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
+          .height(getResourceValue('sys.float.subheader_left_icon_size') + 'vp')
+          .margin({ start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) })
+          .draggable(false)
+          .flexShrink(0)
+      }
+    }
+  }
+
+  @Builder
   leftArea(): void {
     if (this.titleBuilder) {
       this.titleBuilder();
@@ -806,6 +835,7 @@ export struct SubHeader {
         })
         .attributeModifier(this.secondaryTitleModifier)
         .flexShrink(1)
+      this.endTitleIcon()
     }
     .commonListPadding()
   }
@@ -813,14 +843,18 @@ export struct SubHeader {
   @Builder
   SubTitleStyle($$: ContentIconOption): void {
     Column() {
-      Text($$.content)
-        .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
-          maxLines: DOUBLE_LINE_NUM,
-          alignment: Alignment.Start,
-          fontColor: this.subHeaderTheme.fontPrimaryColor,
-        })
-        .attributeModifier(this.primaryTitleModifier)
+      Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+        Text($$.content)
+          .primaryTitleStyles({
+            fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+            maxLines: DOUBLE_LINE_NUM,
+            alignment: Alignment.Start,
+            fontColor: this.subHeaderTheme.fontPrimaryColor,
+          })
+          .attributeModifier(this.primaryTitleModifier)
+          .flexShrink(1)
+        this.endTitleIcon()
+      }
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
@@ -840,15 +874,19 @@ export struct SubHeader {
 
   @Builder
   SecondTitleStyle($$: ContentIconOption): void {
-    Text($$.content)
-      .secondaryTitleStyles({
-        maxLines: DOUBLE_LINE_NUM,
-        fontWeight: FontWeight.Medium,
-        alignment: Alignment.Start,
-        fontColor: this.subHeaderTheme.fontSecondaryColor,
-      })
-      .attributeModifier(this.secondaryTitleModifier)
-      .commonListPadding()
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+      Text($$.content)
+        .secondaryTitleStyles({
+          maxLines: DOUBLE_LINE_NUM,
+          fontWeight: FontWeight.Medium,
+          alignment: Alignment.Start,
+          fontColor: this.subHeaderTheme.fontSecondaryColor,
+        })
+        .attributeModifier(this.secondaryTitleModifier)
+        .flexShrink(1)
+      this.endTitleIcon()
+    }
+    .commonListPadding()
   }
 
   @Builder
@@ -877,15 +915,19 @@ export struct SubHeader {
 
   @Builder
   PrimaryTitleStyle($$: ContentIconOption): void {
-    Text($$.content)
-      .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
-        maxLines: DOUBLE_LINE_NUM,
-        alignment: Alignment.Start,
-        fontColor: this.subHeaderTheme.fontPrimaryColor,
-      })
-      .attributeModifier(this.primaryTitleModifier)
-      .commonContentPadding()
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+      Text($$.content)
+        .primaryTitleStyles({
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+          maxLines: DOUBLE_LINE_NUM,
+          alignment: Alignment.Start,
+          fontColor: this.subHeaderTheme.fontPrimaryColor,
+        })
+        .attributeModifier(this.primaryTitleModifier)
+        .flexShrink(1)
+      this.endTitleIcon()
+    }
+    .commonContentPadding()
   }
 
   @Builder

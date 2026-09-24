@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cmath>
+
 #include "custom_layout_options.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -327,5 +329,56 @@ HWTEST_F(GridCustomLayoutTestNg, FillBackward_GridMatrixAndLineHeightMapSize_003
     // gridMatrix = lineHeightMap + 1 (lookahead optimization)
     EXPECT_EQ(static_cast<int32_t>(pattern_->info_.gridMatrix_.size()), 8);
     EXPECT_EQ(static_cast<int32_t>(pattern_->info_.lineHeightMap_.size()), 7);
+}
+
+/**
+ * @tc.name: ScrollBarDragBackwardUsesCallback
+ * @tc.desc: Test that scrollbar drag toward end uses the developer getStartIndexByOffset callback
+ *           (via JumpToTargetOffset) instead of self-driven FillBackward. A negative delta
+ *           decreases currentOffset_ and triggers MeasureBackward, where IsScrollBarDrag()
+ *           routes to JumpToTargetOffset. FillBackward never invokes the callback, so the flag
+ *           cleanly distinguishes the two paths.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutTestNg, ScrollBarDragBackwardUsesCallback, TestSize.Level1)
+{
+    int32_t crossCount = 2;
+    bool offsetCallbackInvoked = false;
+    GridLayoutOptions options = GetRegularDemoOptions(crossCount, ITEM_MAIN_SIZE);
+    auto wrappedOffsetCallback = [crossCount, &offsetCallbackInvoked](float offset) -> GridStartLineInfo {
+        offsetCallbackInvoked = true;
+        if (offset < 0.0f) {
+            return { .startIndex = 0, .startLine = 0, .startOffset = 0 - offset, .totalOffset = offset };
+        }
+        int32_t line = offset / static_cast<int32_t>(ITEM_MAIN_SIZE);
+        float startOffset = std::fmod(offset, ITEM_MAIN_SIZE);
+        return {
+            .startIndex = line * crossCount,
+            .startLine = line,
+            .startOffset = 0 - startOffset,
+            .totalOffset = offset
+        };
+    };
+    options.getStartIndexByOffset = std::move(wrappedOffsetCallback);
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(options);
+    CreateFixedItems(50);
+    CreateDone();
+
+    // Scroll forward to reach middle of content (startMainLineIndex_ > 0)
+    ScrollBy(0, HEIGHT * 2);
+    ASSERT_GT(pattern_->info_.startMainLineIndex_, 0);
+    // Reset the flag: the forward scroll above also goes through JumpToTargetOffset.
+    offsetCallbackInvoked = false;
+
+    // Drag scrollbar toward END. A negative delta decreases currentOffset_, triggering
+    // MeasureBackward. With IsScrollBarDrag() true, it routes to JumpToTargetOffset, which
+    // calls GetStartIndexByOffset (the developer callback). Without the optimization,
+    // MeasureBackward would fall through to FillBackward, which never calls the callback.
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE / 2, SCROLL_FROM_BAR);
+
+    EXPECT_TRUE(offsetCallbackInvoked);
 }
 } // namespace OHOS::Ace::NG

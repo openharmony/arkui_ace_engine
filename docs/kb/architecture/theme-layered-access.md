@@ -63,6 +63,6 @@ ArkUI 主题分层访问通过 ThemeManager 单例管理四级主题解析：Tok
 
 ## 相关主题
 
-- 资源访问
-- Theme框架
-- 资源动态切换
+- [资源访问](resource-access.md)
+- [Theme框架](theme-framework.md)
+- [资源动态切换](resource-dynamic-switching.md)

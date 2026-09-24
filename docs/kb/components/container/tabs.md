@@ -57,11 +57,11 @@ Tabs 当前未完成组件化改造（无 `bridge/` 子目录、JSView 文件仍
 
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
-| JSView（声明式组件） | `frameworks/bridge/declarative_frontend/jsview/js_tabs.cpp` | `JSTabs::SetXxx()` → `TabsModel::GetInstance()->SetXxx()` |
-| JSView（TabContent） | `frameworks/bridge/declarative_frontend/jsview/js_tab_content.cpp` | `JSTabContent::SetXxx()` → `TabContentModel::GetInstance()->SetXxx()` |
+| JSView（声明式组件） | `frameworks/core/components_ng/pattern/tabs/bridge/arkts_native_tabs_bridge.cpp` | `JSTabs::SetXxx()` → `TabsModel::GetInstance()->SetXxx()` |
+| JSView（TabContent） | `frameworks/core/components_ng/pattern/tabs/bridge/arkts_native_tabcontent_bridge.cpp` | `JSTabContent::SetXxx()` → `TabContentModel::GetInstance()->SetXxx()` |
 | JSView（Controller） | `frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.cpp` | TabsController JS 侧桥接 |
 | JSView（Feature） | `frameworks/bridge/declarative_frontend/jsview/js_tabs_feature.cpp` | TabsFeature JS 侧桥接 |
-| ArkTS Bridge（动态属性） | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.cpp` | Bridge → ModelNG |
+| ArkTS Bridge（动态属性） | `frameworks/core/components_ng/pattern/tabs/bridge/arkts_native_tabs_bridge.cpp` | Bridge → ModelNG |
 | 前端 Modifier（ArkTS 侧） | `frameworks/bridge/declarative_frontend/ark_modifier/src/tabs_modifier.ts` | ArkTS Tabs Modifier 类 |
 
 组件化改造参考：改造后 JSView 和 Bridge 双路径将统一到 `pattern/tabs/bridge/`，并输出独立 so。
@@ -109,7 +109,5 @@ Design 文档：`specs/05-ui-components/03-scroll-container-components/09-tabs-t
 
 ## 相关主题
 
-- TabContent：`frameworks/core/components_ng/pattern/tabs/tab_content_pattern.cpp`
-- TabBar：`frameworks/core/components_ng/pattern/tabs/tab_bar_pattern.cpp`
-- Swiper：Tabs 内嵌 Swiper 实现标签页滑动切换，详见 Swiper KB
-- Divider：TabBar 使用 Divider 布局属性
+- [Swiper：Tabs 内嵌 Swiper 实现标签页滑动切换，详见 Swiper KB](swiper.md)
+- [Divider：TabBar 使用 Divider 布局属性](../basic/divider.md)

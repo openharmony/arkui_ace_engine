@@ -30,23 +30,19 @@ const int32_t RESPONSE_DATA_TYPE_BUFFER = 3;
 const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
 const std::string BUNDLE_NAME_PREFIX = "bundleName:";
 const std::string MODULE_NAME_PREFIX = "moduleName:";
- 
-std::string ParseRawfileWebSrc(const std::string& webSrc, const std::string& bundleName,
-    const std::string& moduleName)
+
+void ParseRawfileWebSrc(std::string& webSrc, const std::string& bundleName, const std::string& moduleName)
 {
     if (webSrc.substr(0, RAWFILE_PREFIX.size()) != RAWFILE_PREFIX) {
-        return webSrc;
+        return;
     }
-    auto container = OHOS::Ace::Container::CurrentSafely();
-    if (!container) {
-        return webSrc;
-    }
+    auto container = OHOS::Ace::Container::Current();
+    CHECK_NULL_VOID(container);
     if ((!bundleName.empty() && !moduleName.empty()) &&
         (bundleName != container->GetBundleName() || moduleName != container->GetModuleName())) {
-        return RAWFILE_PREFIX + BUNDLE_NAME_PREFIX + bundleName + "/" + MODULE_NAME_PREFIX + moduleName + "/" +
+        webSrc = RAWFILE_PREFIX + BUNDLE_NAME_PREFIX + bundleName + "/" + MODULE_NAME_PREFIX + moduleName + "/" +
             webSrc.substr(RAWFILE_PREFIX.size());
     }
-    return webSrc;
 }
 }
 
@@ -146,8 +142,8 @@ Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
     CHECK_NULL_RETURN(peer && peer->handler, BAD_REQUEST);
     return Converter::ArkValue<Ark_Int32>(peer->handler->GetStatusCode());
 }
-void SetResponseDataImpl(Ark_WebResourceResponse peer,
-                         const Ark_Union_String_I32_Resource_Buffer* data)
+void DoSetResponseDataImpl(Ark_WebResourceResponse peer,
+                           const Ark_Union_String_I32_Resource_Buffer* data, bool parseRawfile)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(data);
@@ -162,13 +158,15 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
             peer->handler->SetFileHandle(fd);
             peer->responseDataType = RESPONSE_DATA_TYPE_NUMBER;
         },
-        [peer](const Ark_Resource& responseData) {
+        [peer, parseRawfile](const Ark_Resource& responseData) {
             std::optional<std::string> resourceUrl = Converter::OptConvert<std::string>(responseData);
-            std::string bundleName = Converter::Convert<std::string>(responseData.bundleName);
-            std::string moduleName = Converter::Convert<std::string>(responseData.moduleName);
             std::string url;
             if (resourceUrl) {
-                resourceUrl = ParseRawfileWebSrc(resourceUrl.value(), bundleName, moduleName);
+                if (parseRawfile) {
+                    ParseRawfileWebSrc(resourceUrl.value(),
+                        Converter::Convert<std::string>(responseData.bundleName),
+                        Converter::Convert<std::string>(responseData.moduleName));
+                }
                 auto np = resourceUrl.value().find_first_of("/");
                 url = (np == std::string::npos) ? resourceUrl.value() : resourceUrl.value().erase(np, 1);
             }
@@ -220,6 +218,16 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
             peer->responseDataType.reset();
         }
     );
+}
+void SetResponseDataImpl(Ark_WebResourceResponse peer,
+                         const Ark_Union_String_I32_Resource_Buffer* data)
+{
+    DoSetResponseDataImpl(peer, data, false);
+}
+void SetResponseBodyImpl(Ark_WebResourceResponse peer,
+                         const Ark_Union_String_I32_Resource_Buffer* data)
+{
+    DoSetResponseDataImpl(peer, data, true);
 }
 void SetResponseEncodingImpl(Ark_WebResourceResponse peer,
                              const Ark_String* encoding)
@@ -298,6 +306,7 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
         WebResourceResponseAccessor::SetResponseCodeImpl,
         WebResourceResponseAccessor::SetResponseIsReadyImpl,
         WebResourceResponseAccessor::GetResponseIsReadyImpl,
+        WebResourceResponseAccessor::SetResponseBodyImpl,
     };
     return &WebResourceResponseAccessorImpl;
 }

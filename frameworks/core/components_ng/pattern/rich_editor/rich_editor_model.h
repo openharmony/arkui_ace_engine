@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,8 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
+#include "base/image/drawing_lattice.h"
+#include "base/image/image_resizable_slice.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -100,6 +102,8 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        resizableSlice.reset();
+        resizableLattice.reset();
         useThemeFontColor = true;
         useThemeDecorationColor = true;
         isInitDecoration = false;
@@ -140,6 +144,8 @@ struct UpdateSpanStyle {
 
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
+    std::optional<ImageResizableSlice> resizableSlice = std::nullopt;
+    std::optional<RefPtr<DrawingLattice>> resizableLattice = std::nullopt;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
     bool isInitDecoration = false;
@@ -343,6 +349,12 @@ struct BuilderSpanOptions : SpanOptionBase {
     RefPtr<NG::UINode> customNode;
 };
 
+struct BuilderSpanRecord {
+    std::optional<std::string> id;
+    std::function<void(const BuilderSpanInfo&)> onAttach;
+    std::function<void(const BuilderSpanInfo&)> onDetach;
+};
+
 struct PlaceholderOptions {
     std::optional<std::u16string> value;
     std::optional<FontWeight> fontWeight;
@@ -410,6 +422,9 @@ public:
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
     virtual int32_t AddSymbolSpan(const SymbolSpanOptions& options) = 0;
     virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options) = 0;
+    virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options,
+        const BuilderSpanRecord& builderSpanRecord) = 0;
+    virtual std::vector<BuilderSpanInfo> GetRichEditorBuilderSpans(int32_t start, int32_t end) = 0;
     virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
     virtual void UpdateSpanStyle(
         int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;

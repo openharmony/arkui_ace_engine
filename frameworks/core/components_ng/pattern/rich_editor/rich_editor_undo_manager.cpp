@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -565,7 +565,18 @@ void StyledStringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isU
         curStyledString->BindWithSpans(updateSpans);
         curStyledString->NotifySpanWatcher();
     } else {
-        curStyledString->ReplaceSpanString(start, length, styledString);
+        // re-filter: apply inputFilter to undo/redo content (consistent with TextInput)
+        // Skip copy when no filter is active — preserves original behavior (R17 safe)
+        auto filter = pattern->GetActiveFilter();
+        if (filter.empty()) {
+            curStyledString->ReplaceSpanString(start, length, styledString);
+        } else {
+            // FilterStyledStringBeforeInsert creates a deep copy internally,
+            // protecting the record's styledStringAfter from modification
+            RefPtr<SpanString> filtered = styledString;
+            pattern->FilterStyledStringBeforeInsert(filtered);
+            curStyledString->ReplaceSpanString(start, length, filtered);
+        }
     }
 }
 
@@ -681,7 +692,9 @@ void SpansUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
     pattern->CloseSelectOverlay();
     pattern->ResetSelection();
     pattern->StopTwinkling();
+    pattern->SetSuppressBuilderSpanCallback(record.IsRestoreBuilderSpan());
     pattern->DeleteForward(record.rangeBefore.start, record.rangeBefore.GetLength());
+    pattern->SetSuppressBuilderSpanCallback(false);
     ApplyOptions(record.optionsListAfter.value_or(OptionsList{}), record.IsRestoreBuilderSpan(), isUndo);
 }
 

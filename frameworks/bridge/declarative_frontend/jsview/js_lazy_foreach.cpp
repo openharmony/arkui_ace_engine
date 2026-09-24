@@ -16,18 +16,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 
 #include <functional>
-#include <memory>
 #include <set>
 #include <string>
+#include <utility>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_lazy_foreach_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_callback_state.h"
-#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h"
@@ -63,88 +61,6 @@ LazyForEachModel* LazyForEachModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-// FEAT-031 error codes, keep in sync with ComponentTreeQueryError.
-constexpr int32_t QUERY_ERR_OK = 0;
-constexpr int32_t QUERY_ERR_DATA_SOURCE = 4;
-constexpr int32_t QUERY_ERR_SERIALIZATION = 5;
-
-napi_env GetNapiEnvForDataExtraction()
-{
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, nullptr);
-    return reinterpret_cast<napi_env>(nativeEngine);
-}
-
-// JSON.stringify(value) via the current native engine; empty string on failure.
-std::string StringifyJsValue(const JSRef<JSVal>& value)
-{
-    auto env = GetNapiEnvForDataExtraction();
-    if (env == nullptr || value.IsEmpty()) {
-        return "";
-    }
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        return "";
-    }
-    std::string result;
-    do {
-        napi_value napiValue = JsConverter::ConvertJsValToNapiValue(value);
-        napi_value globalValue = nullptr;
-        napi_get_global(env, &globalValue);
-        napi_value jsonClass = nullptr;
-        napi_get_named_property(env, globalValue, "JSON", &jsonClass);
-        napi_value stringifyFunc = nullptr;
-        napi_get_named_property(env, jsonClass, "stringify", &stringifyFunc);
-        if (napiValue == nullptr || globalValue == nullptr || jsonClass == nullptr || stringifyFunc == nullptr) {
-            break;
-        }
-        napi_value stringifyResult = nullptr;
-        if (napi_call_function(env, jsonClass, stringifyFunc, 1, &napiValue, &stringifyResult) != napi_ok) {
-            napi_get_and_clear_last_exception(env, &stringifyResult);
-            break;
-        }
-        size_t len = 0;
-        if (napi_get_value_string_utf8(env, stringifyResult, nullptr, 0, &len) != napi_ok) {
-            break;
-        }
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(len + 1);
-        if (napi_get_value_string_utf8(env, stringifyResult, buffer.get(), len + 1, &len) != napi_ok) {
-            break;
-        }
-        result = buffer.get();
-    } while (false);
-    napi_close_handle_scope(env, scope);
-    return result;
-}
-} // namespace
-
-std::string JSLazyForEachBuilder::GetDataByIndexAsJson(int32_t index, int32_t& errorCode)
-{
-    errorCode = QUERY_ERR_DATA_SOURCE;
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
-    if (getDataFunc_.IsEmpty()) {
-        return "";
-    }
-    if (index < 0) {
-        return "";
-    }
-    // Only call getData(index) for the already instantiated item; never build.
-    auto data = CallJSFunction(getDataFunc_, dataSourceObj_, index);
-    if (data.IsEmpty() || data->IsNull() || data->IsUndefined()) {
-        return "";
-    }
-    auto dataJson = StringifyJsValue(data);
-    if (dataJson.empty()) {
-        errorCode = QUERY_ERR_SERIALIZATION;
-        return "";
-    }
-    errorCode = QUERY_ERR_OK;
-    return dataJson;
-}
 
 void JSDataChangeListener::JSBind(BindingTarget globalObj)
 {
@@ -190,178 +106,143 @@ RefPtr<JSLazyForEachActuator> CreateActuator(const std::string& viewId)
 
 namespace {
 
-enum {
-    PARAM_VIEW_ID = 0,
-    PARAM_PARENT_VIEW,
-    PARAM_DATA_SOURCE,
-    PARAM_ITEM_GENERATOR,
-    PARAM_KEY_GENERATOR,
-    PARAM_OPTIONS,
-    PARAM_UPDATE_CHANGEDNODE,
-
-    MIN_PARAM_SIZE = PARAM_KEY_GENERATOR,
-    MAX_PARAM_SIZE = 7,
+// Strongly typed view of the create() arguments; optional members are undefined when absent.
+struct LazyForEachCreateParams {
+    JSRef<JSVal> viewId;
+    JSRef<JSObject> parentView;
+    JSRef<JSObject> dataSource;
+    JSRef<JSFunc> itemGenerator;
+    JSRef<JSVal> keyGenerator;
+    JSRef<JSVal> options;
+    bool updateChangedNode = false;
 };
 
-void ParseOptionalParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX_PARAM_SIZE])
+// LazyForEach.create() positional arguments as invoked by the compiled ArkTS glue:
+//   0: viewId (string, required)
+//   1: parentView (object, required)
+//   2: dataSource (object, required)
+//   3: itemGenerator (function, required)
+//   4: keyGenerator (function, optional)
+//   5: options (object, or legacy updateChangedNode boolean, optional)
+//   6: updateChangedNode (boolean, optional)
+bool ParseCreateParams(const JSCallbackInfo& info, LazyForEachCreateParams& params)
 {
-    if (info.Length() > PARAM_KEY_GENERATOR) {
-        params[PARAM_KEY_GENERATOR] = info[PARAM_KEY_GENERATOR];
-        if (info.Length() > MIN_PARAM_SIZE + 1 && info[PARAM_OPTIONS]->IsObject()) {
-            params[PARAM_OPTIONS] = info[PARAM_OPTIONS];
-        }
-        if (info.Length() > MIN_PARAM_SIZE + 1 && info[PARAM_OPTIONS]->IsBoolean()) {
-            params[PARAM_UPDATE_CHANGEDNODE] = info[PARAM_OPTIONS];
-        }
+    if (info.Length() < 4) {
+        return false;
     }
-
-    if (info.Length() > PARAM_UPDATE_CHANGEDNODE) {
-        params[PARAM_UPDATE_CHANGEDNODE] = info[PARAM_UPDATE_CHANGEDNODE];
+    if (!info[0]->IsString()) {
+        return false;
     }
-}
-
-bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX_PARAM_SIZE])
-{
-    if (info.Length() < MIN_PARAM_SIZE) {
+    if (!info[1]->IsObject()) {
+        return false;
+    }
+    if (!info[2]->IsObject()) {
+        return false;
+    }
+    if (!info[3]->IsFunction()) {
+        return false;
+    }
+    if (info.Length() > 4 && !(info[4]->IsFunction() || info[4]->IsUndefined())) {
+        return false;
+    }
+    if (info.Length() > 5 && !(info[5]->IsObject() || info[5]->IsBoolean())) {
+        return false;
+    }
+    if (info.Length() > 6 && !info[6]->IsBoolean()) {
         return false;
     }
 
-    if (!info[PARAM_VIEW_ID]->IsNumber() && !info[PARAM_VIEW_ID]->IsString()) {
-        return false;
-    }
-    if (!info[PARAM_PARENT_VIEW]->IsObject()) {
-        return false;
-    }
-    if (!info[PARAM_DATA_SOURCE]->IsObject()) {
-        return false;
-    }
-    if (!info[PARAM_ITEM_GENERATOR]->IsFunction()) {
-        return false;
-    }
-    if (info.Length() > MIN_PARAM_SIZE &&
-        !(info[PARAM_KEY_GENERATOR]->IsFunction() || info[PARAM_KEY_GENERATOR]->IsUndefined())) {
-        return false;
-    }
-    if (info.Length() > PARAM_UPDATE_CHANGEDNODE && !info[PARAM_UPDATE_CHANGEDNODE]->IsBoolean()) {
-        return false;
-    }
-    if (info.Length() > PARAM_OPTIONS && !(info[PARAM_OPTIONS]->IsObject() || info[PARAM_OPTIONS]->IsBoolean())) {
-        return false;
-    }
+    params.viewId = info[0];
+    params.parentView = JSRef<JSObject>::Cast(info[1]);
+    params.dataSource = JSRef<JSObject>::Cast(info[2]);
+    params.itemGenerator = JSRef<JSFunc>::Cast(info[3]);
+    // Out-of-range operator[] yields undefined, so absent optionals read back as undefined.
+    params.keyGenerator = info[4];
+    params.options = info[5];
 
-    params[PARAM_VIEW_ID] = info[PARAM_VIEW_ID];
-    params[PARAM_PARENT_VIEW] = info[PARAM_PARENT_VIEW];
-    params[PARAM_DATA_SOURCE] = info[PARAM_DATA_SOURCE];
-    params[PARAM_ITEM_GENERATOR] = info[PARAM_ITEM_GENERATOR];
-
-    ParseOptionalParams(info, params);
-
+    // The options slot historically also carries the updateChangedNode boolean; the
+    // trailing updateChangedNode argument wins when both are supplied.
+    if (info[5]->IsBoolean()) {
+        params.updateChangedNode = info[5]->ToBoolean();
+    }
+    if (info.Length() > 6) {
+        params.updateChangedNode = info[6]->ToBoolean();
+    }
     return true;
 }
 
-LazyForEachReleaseStrategy ParseLazyForEachReleaseStrategy(const JSRef<JSVal>& value)
+// Resolves a strategy option expressed either as its SDK numeric enum value or as the
+// enum member name; table entries carry both spellings. Numeric strings such as "1"
+// are accepted as well because they parse as numbers first.
+template<typename T, size_t N>
+T ParseEnumValue(const JSRef<JSVal>& value, const std::pair<const char*, T> (&table)[N], T defaultValue)
 {
-    // try to convert to number
-    int32_t intValue = 0;
-    if (ConvertFromJSValue(value, intValue)) {
-        if (intValue == 1) {
-            return LazyForEachReleaseStrategy::PROGRESSIVE;
-        }
-        return LazyForEachReleaseStrategy::BATCH;
+    std::string literal;
+    int32_t number = 0;
+    if (ConvertFromJSValue(value, number)) {
+        literal = std::to_string(number);
+    } else if (!ConvertFromJSValue(value, literal)) {
+        return defaultValue;
     }
-    
-    // try to convert to string
-    std::string strValue;
-    if (ConvertFromJSValue(value, strValue)) {
-        if (strValue == "PROGRESSIVE" || strValue == "1") {
-            return LazyForEachReleaseStrategy::PROGRESSIVE;
-        }
-        if (strValue == "BATCH" || strValue == "0") {
-            return LazyForEachReleaseStrategy::BATCH;
+    for (const auto& entry : table) {
+        if (literal == entry.first) {
+            return entry.second;
         }
     }
-    
-    return LazyForEachReleaseStrategy::BATCH;
+    return defaultValue;
 }
 
-LazyForEachCustomComponentFreezeMode ParseLazyForEachCustomComponentFreezeMode(const JSRef<JSVal>& value)
+LazyForEachReleaseStrategy ParseReleaseStrategy(const JSRef<JSVal>& value)
 {
-    // try to convert to number
-    int32_t intValue = 0;
-    if (ConvertFromJSValue(value, intValue)) {
-        if (intValue == 1) {
-            return LazyForEachCustomComponentFreezeMode::DISABLED;
-        }
-        if (intValue == 2) {
-            return LazyForEachCustomComponentFreezeMode::ENABLED;
-        }
-        return LazyForEachCustomComponentFreezeMode::AUTO;
-    }
-    
-    // try to convert to string
-    std::string strValue;
-    if (ConvertFromJSValue(value, strValue)) {
-        if (strValue == "DISABLED" || strValue == "1") {
-            return LazyForEachCustomComponentFreezeMode::DISABLED;
-        }
-        if (strValue == "ENABLED" || strValue == "2") {
-            return LazyForEachCustomComponentFreezeMode::ENABLED;
-        }
-        if (strValue == "AUTO" || strValue == "0") {
-            return LazyForEachCustomComponentFreezeMode::AUTO;
-        }
-    }
-    
-    return LazyForEachCustomComponentFreezeMode::AUTO;
+    static constexpr std::pair<const char*, LazyForEachReleaseStrategy> TABLE[] = {
+        { "0", LazyForEachReleaseStrategy::BATCH },
+        { "BATCH", LazyForEachReleaseStrategy::BATCH },
+        { "1", LazyForEachReleaseStrategy::PROGRESSIVE },
+        { "PROGRESSIVE", LazyForEachReleaseStrategy::PROGRESSIVE },
+    };
+    return ParseEnumValue(value, TABLE, LazyForEachReleaseStrategy::BATCH);
 }
 
-LazyForEachMemOptStrategy ParseLazyForEachMemOptStrategy(const JSRef<JSVal>& value)
+LazyForEachCustomComponentFreezeMode ParseCustomComponentFreezeMode(const JSRef<JSVal>& value)
 {
+    static constexpr std::pair<const char*, LazyForEachCustomComponentFreezeMode> TABLE[] = {
+        { "0", LazyForEachCustomComponentFreezeMode::AUTO },
+        { "AUTO", LazyForEachCustomComponentFreezeMode::AUTO },
+        { "1", LazyForEachCustomComponentFreezeMode::DISABLED },
+        { "DISABLED", LazyForEachCustomComponentFreezeMode::DISABLED },
+        { "2", LazyForEachCustomComponentFreezeMode::ENABLED },
+        { "ENABLED", LazyForEachCustomComponentFreezeMode::ENABLED },
+    };
+    return ParseEnumValue(value, TABLE, LazyForEachCustomComponentFreezeMode::AUTO);
+}
+
+LazyForEachMemOptStrategy ParseMemOptStrategy(const JSRef<JSVal>& value)
+{
+    // Unlike the other options, an absent value keeps the three-state UNDEFINED marker
+    // so downstream code can tell "not configured" apart from an explicit DEFAULT.
     if (value->IsUndefined() || value->IsNull()) {
         return LazyForEachMemOptStrategy::UNDEFINED;
     }
-
-    // try to convert to number
-    int32_t intValue = 0;
-    if (ConvertFromJSValue(value, intValue)) {
-        if (intValue == 1) {
-            return LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
-        }
-        return LazyForEachMemOptStrategy::DEFAULT;
-    }
-    
-    // try to convert to string
-    std::string strValue;
-    if (ConvertFromJSValue(value, strValue)) {
-        if (strValue == "ENABLE_AUTO_CACHE_OPTIMIZATION" || strValue == "1") {
-            return LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
-        }
-        if (strValue == "DEFAULT" || strValue == "0") {
-            return LazyForEachMemOptStrategy::DEFAULT;
-        }
-    }
-    
-    return LazyForEachMemOptStrategy::DEFAULT;
+    static constexpr std::pair<const char*, LazyForEachMemOptStrategy> TABLE[] = {
+        { "0", LazyForEachMemOptStrategy::DEFAULT },
+        { "DEFAULT", LazyForEachMemOptStrategy::DEFAULT },
+        { "1", LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION },
+        { "ENABLE_AUTO_CACHE_OPTIMIZATION", LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION },
+    };
+    return ParseEnumValue(value, TABLE, LazyForEachMemOptStrategy::DEFAULT);
 }
 
 LazyForEachOptions ParseOptions(const JSRef<JSVal>& optionsVal)
 {
     LazyForEachOptions options;
-    
-    if (!optionsVal->IsObject() || optionsVal->IsUndefined()) {
+    if (!optionsVal->IsObject()) {
         return options;
     }
-    
     JSRef<JSObject> optionsObj = JSRef<JSObject>::Cast(optionsVal);
-    
-    JSRef<JSVal> cacheVal = optionsObj->GetProperty("customComponentFreezeMode");
-    options.enableCustomComponentFreeze = ParseLazyForEachCustomComponentFreezeMode(cacheVal);
-    
-    JSRef<JSVal> strategyVal = optionsObj->GetProperty("releaseStrategy");
-    options.releaseStrategy = ParseLazyForEachReleaseStrategy(strategyVal);
-
-    JSRef<JSVal> memOptVal = optionsObj->GetProperty("memoryOptimizationStrategy");
-    options.memOptStrategy = ParseLazyForEachMemOptStrategy(memOptVal);
+    options.enableCustomComponentFreeze =
+        ParseCustomComponentFreezeMode(optionsObj->GetProperty("customComponentFreezeMode"));
+    options.releaseStrategy = ParseReleaseStrategy(optionsObj->GetProperty("releaseStrategy"));
+    options.memOptStrategy = ParseMemOptStrategy(optionsObj->GetProperty("memoryOptimizationStrategy"));
     return options;
 }
 
@@ -394,18 +275,14 @@ void JSLazyForEach::JSBind(BindingTarget globalObj)
 
 void JSLazyForEach::Create(const JSCallbackInfo& info)
 {
-    JSRef<JSVal> params[MAX_PARAM_SIZE];
-    if (!ParseAndVerifyParams(info, params)) {
+    LazyForEachCreateParams params;
+    if (!ParseCreateParams(info, params)) {
         TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Invalid arguments for LazyForEach");
         return;
     }
-    if (!params[PARAM_PARENT_VIEW]->IsObject()|| !params[PARAM_DATA_SOURCE]->IsObject()
-        || !params[PARAM_ITEM_GENERATOR]->IsFunction() || !params[PARAM_VIEW_ID]->IsString()) {
-            return;
-    }
-    std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 
-    JSRef<JSObject> parentViewObj = JSRef<JSObject>::Cast(params[PARAM_PARENT_VIEW]);
+    std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params.viewId->ToString());
+    JSRef<JSObject> parentViewObj = params.parentView;
 
     // LazyForEach is not in observeComponentCreation, mark isDeleting_ here
     JSRef<JSVal> isDeleting = parentViewObj->GetProperty("isDeleting_");
@@ -413,37 +290,28 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         return;
     }
 
-    JSRef<JSObject> dataSourceObj = JSRef<JSObject>::Cast(params[PARAM_DATA_SOURCE]);
-    JSRef<JSFunc> itemGenerator = JSRef<JSFunc>::Cast(params[PARAM_ITEM_GENERATOR]);
-    JSLazyForEachTheme::ObtainItemGeneratorForThemeSupport(info.GetVm(), itemGenerator);
-    ItemKeyGenerator keyGenFunc;
-    bool updateChangedNodeFlag = false;
+    JSLazyForEachTheme::ObtainItemGeneratorForThemeSupport(info.GetVm(), params.itemGenerator);
 
-    if (params[PARAM_KEY_GENERATOR]->IsUndefined()) {
-        keyGenFunc = [viewId](const JSRef<JSVal>&, size_t index) { return viewId + "-" + std::to_string(index); };
-    } else if (params[PARAM_KEY_GENERATOR]->IsFunction()) {
-        keyGenFunc = [viewId, keyGenerator = JSRef<JSFunc>::Cast(params[PARAM_KEY_GENERATOR])](
+    ItemKeyGenerator keyGenFunc;
+    if (params.keyGenerator->IsFunction()) {
+        keyGenFunc = [viewId, keyGenerator = JSRef<JSFunc>::Cast(params.keyGenerator)](
                          const JSRef<JSVal>& jsVal, size_t index) {
-            JSRef<JSVal> params[] = { jsVal, JSRef<JSVal>::Make(ToJSValue(index)) };
-            auto key = keyGenerator->Call(JSRef<JSObject>(), ArraySize(params), params);
+            JSRef<JSVal> args[] = { jsVal, JSRef<JSVal>::Make(ToJSValue(index)) };
+            auto key = keyGenerator->Call(JSRef<JSObject>(), ArraySize(args), args);
             return viewId + "-" + (key->IsString() || key->IsNumber() ? key->ToString() : std::to_string(index));
         };
-    }
-
-    if (!params[PARAM_UPDATE_CHANGEDNODE]->IsUndefined()) {
-        updateChangedNodeFlag = params[PARAM_UPDATE_CHANGEDNODE]->ToBoolean();
+    } else {
+        keyGenFunc = [viewId](const JSRef<JSVal>&, size_t index) { return viewId + "-" + std::to_string(index); };
     }
 
     const auto& actuator = CreateActuator(viewId);
     actuator->SetJSExecutionContext(info.GetExecutionContext());
     actuator->SetParentViewObj(parentViewObj);
-    actuator->SetDataSourceObj(dataSourceObj);
-    actuator->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
-    actuator->SetUpdateChangedNodeFlag(updateChangedNodeFlag);
-    // Parse and set options
-    LazyForEachOptions options = ParseOptions(params[PARAM_OPTIONS]);
-    actuator->SetOptions(options);
-    
+    actuator->SetDataSourceObj(params.dataSource);
+    actuator->SetItemGenerator(params.itemGenerator, std::move(keyGenFunc));
+    actuator->SetUpdateChangedNodeFlag(params.updateChangedNode);
+    actuator->SetOptions(ParseOptions(params.options));
+
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
         auto createFunc = [actuator]() {
             LazyForEachModel::GetInstance()->Create(actuator);
@@ -483,6 +351,10 @@ void JSLazyForEach::OnMove(const JSCallbackInfo& info)
     }
 }
 
+// NOTE: this function and its CallJsFuncWithIndex/CallJsFuncWithFromTo helpers are duplicated
+// verbatim in js_foreach.cpp, js_repeat.cpp and js_repeat_virtual_scroll_2.cpp (the latter with
+// an extra repeatElmtId parameter). Any change here must be mirrored there; consolidating them
+// into js_view_common_def.h is the tracked follow-up.
 void JSLazyForEach::JsParseItemDragEventHandler(
     const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj)
 {

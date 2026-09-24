@@ -206,6 +206,11 @@ class LazyArkSwiperComponent extends ArkComponent {
     this.lazyComponent.ignoreHiddenItem(value);
     return this;
   }
+
+  renderGroup(value: boolean): this {
+    this.lazyComponent.renderGroup(value);
+    return this;
+  }
 }
 
 class SwiperModifier extends LazyArkSwiperComponent implements AttributeModifier<SwiperAttribute> {

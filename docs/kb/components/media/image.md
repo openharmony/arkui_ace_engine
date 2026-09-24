@@ -87,7 +87,6 @@ Image 组件**尚未进行组件化改造**，属性解析仍采用双路径架�
 | **C API（NDK）** | `frameworks/core/interfaces/native/node/node_image_modifier.cpp` + `interfaces/native/node/style_modifier.cpp` | Image 无专属 `image_native_impl.*`；`NODE_IMAGE_*` 枚举通过通用 node_model/style_modifier 框架分发到 `node_image_modifier` |
 | **前端 Modifier（ArkTS 侧）** | `frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts` | ArkTS `ImageModifier` 类定义 |
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后上述 JSView 和 Bridge 双路径将统一到 `pattern/image/bridge/arkts_native_image_bridge.cpp`，并输出独立 so。
 
 ### 外部依赖入口
 
@@ -157,12 +156,11 @@ Image 功能域：`specs/05-ui-components/08-image-components/01-image/`
 
 ## 相关主题
 
-- `ImageAnimator`：`docs/kb/components/media/image_animator.md`
-- `DrawableDescriptor`：`docs/kb/capabilities/drawable_descriptor.md`
-- `ImageLoading`：`docs/kb/capabilities/image-loading.md`
-- `SVG`：`docs/kb/capabilities/svg.md`
-- `ImageAnalyzer`：`docs/kb/capabilities/image-analyzer.md`
-- `BackgroundImage`：`docs/kb/capabilities/background-image.md`
+- [ImageAnimator](image-animator.md)
+- [DrawableDescriptor](../../capabilities/drawable-descriptor.md)
+- [ImageLoading](../../capabilities/image-loading.md)
+- [SVG](../../capabilities/svg.md)
+- [ImageAnalyzer](../../capabilities/image-analyzer.md)
+- [BackgroundImage](../../capabilities/background-image.md)
 - [渲染树同步](../../architecture/render-tree-sync.md) — ImagePattern::OnAttachToMainRenderTree 和 OnWindowHide 依赖 isPendingState_
 - [同帧下树重新上树 isPendingState_ 状态错乱](../../issues/lifecycle/ispending-state-render-tree-diff.md) — Image 节点同帧下树重新上树后 RecycleImageData 误触
-- API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

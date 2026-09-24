@@ -1517,6 +1517,11 @@ declare enum JoinStyle {
   ROUND = 1,
   BEVEL = 2,
 }
+declare enum StrokeJoinStyle {
+  MITER_JOIN = 0,
+  ROUND_JOIN = 1,
+  BEVEL_JOIN = 2,
+}
 declare type CancelButtonStyle = string;
 declare interface IconOptions {
   size?: Length;
@@ -1577,6 +1582,10 @@ declare enum TabBarStyle {
   SIDEBAR = 1,
   SIDEBAR_ADAPTABLE = 2,
 }
+declare enum TabsSidebarDisplayStyle {
+  EMBED = 0,
+  DISPLACE = 1,
+}
 declare type TabsSidebarSearchFilterCallback = (tabIndex: number, text: string) => boolean;
 declare interface TabsSidebarSearchableOptions {
   searchText?: ResourceStr;
@@ -1587,6 +1596,14 @@ declare interface TabsSidebarSearchableOptions {
 declare enum TabBarDisplayMode {
   BOTTOM_TABBAR = 0,
   SIDEBAR = 1,
+}
+declare enum TabVisibility {
+  VISIBLE = 0,
+  HIDDEN = 1,
+}
+declare interface TabContentTabBarVisibility {
+  visibility?: TabVisibility;
+  displayMode?: TabBarDisplayMode;
 }
 declare interface TabsBreakpointType<T> {
   sm?: T;
@@ -1829,6 +1846,7 @@ declare type EmbeddedComponentAttribute = any;
 declare interface EmbedOptions {
   supportDefaultIntrinsicSize?: boolean;
   supportCssDisplayChange?: boolean;
+  supportTransformRotateAndSkew?: boolean;
 }
 declare class FileSelectorParam {
   constructor();

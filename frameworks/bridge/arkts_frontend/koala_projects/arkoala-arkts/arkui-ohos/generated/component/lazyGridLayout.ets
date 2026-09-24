@@ -18,6 +18,7 @@
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
 import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
+import { ItemFillPolicy_serializer, ItemFillPolicy } from './units'
 import { int32, int64, float32 } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -144,7 +145,7 @@ export class ArkLazyVGridLayoutPeer extends ArkLazyGridLayoutAttributePeer {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._LazyVGridLayoutInterface_setLazyVGridLayoutOptions(this.peer.ptr)
     }
-    setColumnsTemplateAttribute(value: string | undefined): void {
+    setColumnsTemplate0Attribute(value: string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -153,7 +154,19 @@ export class ArkLazyVGridLayoutPeer extends ArkLazyGridLayoutAttributePeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._LazyVGridLayoutAttribute_setColumnsTemplate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._LazyVGridLayoutAttribute_setColumnsTemplate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setColumnsTemplate1Attribute(value: ItemFillPolicy | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            ItemFillPolicy_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyVGridLayoutAttribute_setColumnsTemplate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -185,6 +198,9 @@ export interface LazyVGridLayoutAttribute extends LazyGridLayoutAttribute {
         throw new Error('Unimplemented method setLazyVGridLayoutOptions')
     }
     columnsTemplate(value: string | undefined): this {
+        throw new Error('Unimplemented method columnsTemplate')
+    }
+    columnsTemplate(value: ItemFillPolicy | undefined): this {
         throw new Error('Unimplemented method columnsTemplate')
     }
     attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -250,8 +266,11 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutAttributeCompo
         return this
     }
     public columnsTemplate(value: string | undefined): this {
-        const value_casted = value as (string | undefined)
-        this.getPeer()?.setColumnsTemplateAttribute(value_casted)
+        this.getPeer()?.setColumnsTemplate0Attribute(value)
+        return this
+    }
+    public columnsTemplate(value: ItemFillPolicy | undefined): this {
+        this.getPeer()?.setColumnsTemplate1Attribute(value)
         return this
     }
     public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {

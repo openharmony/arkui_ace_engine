@@ -141,6 +141,8 @@ public:
     void AddTextSpan(const JSCallbackInfo& args);
     void AddSymbolSpan(const JSCallbackInfo& args);
     void AddPlaceholderSpan(const JSCallbackInfo& args);
+    void AddRichEditorBuilderSpan(const JSCallbackInfo& args);
+    void GetRichEditorBuilderSpans(const JSCallbackInfo& args);
     void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
     void ParseAccessibilityOptions(const JSRef<JSObject>& options, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
@@ -158,6 +160,14 @@ public:
     void FromStyledString(const JSCallbackInfo& args);
 
 private:
+    static void ParseBuilderSpanCallbacks(const JSCallbackInfo& args, const JSRef<JSObject>& builderSpanObj,
+        BuilderSpanRecord& builderSpanRecord);
+    static void ParseBuilderSpanCallback(const JSCallbackInfo& args, const JSRef<JSObject>& builderSpanObj,
+        const char* propName, std::function<void(const BuilderSpanInfo&)>& target);
+    void ParseBuilderSpanInfo(const JSCallbackInfo& args, const JSRef<JSObject>& customObject,
+        SpanOptionBase& options, BuilderSpanRecord& builderSpanRecord);
+    static JSRef<JSVal> CreateJSBuilderSpanInfo(const BuilderSpanInfo& info);
+    RefPtr<NG::UINode> ExecuteBuilder(const JSCallbackInfo& args);
     static void ParseUserGesture(
         const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
     static void ParseUserClickEvent(const JSCallbackInfo& args, const JSRef<JSObject>& gestureObj,

@@ -56,6 +56,18 @@ std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
     return {};
 }
 
+std::vector<Rect> DisplayInfoUtils::GetLiveFoldCreaseRegion()
+{
+    displayInfo_->SetLiveFoldCreaseRegion({});
+    return {};
+}
+
+FoldCreaseDirection DisplayInfoUtils::GetFoldCreaseDirection()
+{
+    displayInfo_->SetFoldCreaseDirection(FoldCreaseDirection::UNKNOWN);
+    return FoldCreaseDirection::UNKNOWN;
+}
+
 Rect DisplayInfoUtils::GetDisplayAvailableRect(int32_t displayId) const
 {
     return Rect();

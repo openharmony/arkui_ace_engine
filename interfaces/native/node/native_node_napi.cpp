@@ -87,7 +87,8 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         *handle = new ArkUI_Node({ .type = -1,
             .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr),
             .cNode = false,
-            .buildNode = true });
+            .buildNode = true,
+            .magic = ARKUI_NODE_MAGIC_VALID });
         if (isBindNativeXComponent) {
             OHOS::Ace::NodeModel::RegisterBindNativeNode(*handle);
             (*handle)->isBindNative = true;
@@ -159,7 +160,8 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         *handle = new ArkUI_Node({ .type = -1,
             .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode),
             .cNode = false,
-            .buildNode = true });
+            .buildNode = true,
+            .magic = ARKUI_NODE_MAGIC_VALID });
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }

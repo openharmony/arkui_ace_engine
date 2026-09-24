@@ -23,6 +23,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/sync_customized_callback.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -264,6 +265,10 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, SnapshotDFXInfo& dfx
         dfxInfo.imageCount++;
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_RETURN(imageNode, false);
+        if (AceType::InstanceOf<ImageSpanNode>(imageNode) && !imageNode->IsActive()) {
+            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "imageSpanNode is inactive, skip");
+            return true;
+        }
         auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
         CHECK_NULL_RETURN(imagePattern, false);
         auto imageLoadContext = imagePattern->GetImageLoadingContext().Upgrade();

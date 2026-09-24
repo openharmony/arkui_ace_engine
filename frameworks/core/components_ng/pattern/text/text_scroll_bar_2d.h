@@ -32,13 +32,13 @@ struct UpdateScrollBarData {
 using ScrollBarScrollCallback = std::function<void(float offset, int32_t source, bool isVertical)>;
 using ScrollBarEndScrollCallback = std::function<void(bool isVertical)>;
 
-class ACE_FORCE_EXPORT TextScrollBar2D final : public AceType {
+class ACE_FORCE_EXPORT TextScrollBar2D : public AceType {
     DECLARE_ACE_TYPE(TextScrollBar2D, AceType);
     ACE_DISALLOW_COPY_AND_MOVE(TextScrollBar2D);
 
 public:
     explicit TextScrollBar2D(const WeakPtr<ScrollablePattern>& pattern);
-    ~TextScrollBar2D() final;
+    ~TextScrollBar2D() override;
 
     void Update(const std::unique_ptr<ScrollBarProperty>& props);
     void UpdateVerticalBar(float offset, float estimatedHeight, const Size& viewPort, Offset viewOffset);

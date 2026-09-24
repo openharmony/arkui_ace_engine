@@ -16,6 +16,7 @@
 #include "interfaces/native/native_error_message_macros.h"
 #include "native_interface.h"
 #include "node/animate_impl.h"
+#include "node/config_manager.h"
 #include "node/dialog_model.h"
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
@@ -307,6 +308,12 @@ void* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
 
 void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const char* structName)
 {
+    if (structName == nullptr) {
+        TAG_LOGE(
+            OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "fail to get %{public}d node api family, struct name is null", type);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "struct name is null");
+        return nullptr;
+    }
     if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family, impl library is not found", type);
@@ -356,6 +363,17 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
             break;
     }
     return nullptr;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_SetRuntimeCheckMode(
+    OH_ArkUI_NativeModule_RuntimeCheckType checkType, OH_ArkUI_NativeModule_RuntimeCheckMode mode)
+{
+    // Ensures the internal bridge is installed so the UI thread predicate and the
+    // application debug flag are available to the config manager.
+    OHOS::Ace::NodeModel::GetOrCreateFullImpl();
+    bool success = OHOS::Ace::NodeModel::ConfigManager::SetRuntimeCheckMode(
+        static_cast<int32_t>(checkType), static_cast<int32_t>(mode));
+    return success ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 #ifdef __cplusplus
