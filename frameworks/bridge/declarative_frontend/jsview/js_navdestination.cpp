@@ -36,19 +36,10 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<NavDestinationModel> NavDestinationModel::instance_ = nullptr;
-std::mutex NavDestinationModel::mutex_;
-
 NavDestinationModel* NavDestinationModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new NG::NavDestinationModelNG());
-        }
-        return instance_.get();
-    }
-    return instance_.get();
+    static const std::unique_ptr<NavDestinationModel> instance = std::make_unique<NG::NavDestinationModelNG>();
+    return instance.get();
 }
 
 } // namespace OHOS::Ace
