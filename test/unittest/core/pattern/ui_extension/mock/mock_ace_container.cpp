@@ -297,6 +297,11 @@ bool AceContainer::IsCrossAxisWindow()
     return false;
 }
 
+bool AceContainer::IsPipWindow() const
+{
+    return false;
+}
+
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 
 void AceContainer::DispatchExtensionDataToHostWindow(

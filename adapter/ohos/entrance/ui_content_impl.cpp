@@ -5734,10 +5734,21 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [height]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto task = [height, instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_VOID(pipeline);
-        pipeline->SetContainerModalTitleHeight(height);
+        auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(container->GetDisplayId());
+        float vpr = display ? display->GetVirtualPixelRatio() : 0.0f;
+        if (NearZero(static_cast<double>(vpr))) {
+            // Fallback when the display or its vpr is unavailable, so no DM-side scale can be used here.
+            pipeline->SetContainerModalTitleHeight(height);
+        } else {
+            double heightVp = height / static_cast<double>(vpr);
+            pipeline->SetContainerModalTitleHeightWithVp(heightVp);
+        }
     };
     auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
     if (uiTaskRunner.IsRunOnCurrentThread()) {

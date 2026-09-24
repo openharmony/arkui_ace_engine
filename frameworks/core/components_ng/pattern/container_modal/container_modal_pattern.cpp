@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cmath>
+
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/pipeline/container_window_manager.h"
 
@@ -657,6 +659,24 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
         height = 0;
     }
     titleHeight_ = Dimension(Dimension(height, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    SetControlButtonsRowHeight();
+    auto customTitleRow = GetCustomTitleRow();
+    UpdateRowHeight(customTitleRow, titleHeight_);
+    auto gestureRow = GetGestureRow();
+    UpdateRowHeight(gestureRow, titleHeight_);
+}
+
+void ContainerModalPattern::SetContainerModalTitleHeightWithVp(double heightVp)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModal SetContainerModalTitleHeightWithVp heightVp=%{public}f",
+        heightVp);
+    if (std::isfinite(heightVp) == false) {
+        return;
+    }
+    if (heightVp < 0) {
+        heightVp = 0;
+    }
+    titleHeight_ = Dimension(heightVp, DimensionUnit::VP);
     SetControlButtonsRowHeight();
     auto customTitleRow = GetCustomTitleRow();
     UpdateRowHeight(customTitleRow, titleHeight_);

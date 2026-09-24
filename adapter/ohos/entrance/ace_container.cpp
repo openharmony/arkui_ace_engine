@@ -4223,6 +4223,12 @@ bool AceContainer::IsSubWindow() const
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
 }
 
+bool AceContainer::IsPipWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_PIP;
+}
+
 bool AceContainer::IsDialogWindow() const
 {
     CHECK_NULL_RETURN(uiWindow_, false);

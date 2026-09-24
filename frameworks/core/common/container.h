@@ -308,6 +308,7 @@ public:
 
     virtual bool IsMainWindow() const { return false; }
     virtual bool IsSubWindow() const { return false; }
+    virtual bool IsPipWindow() const { return false; }
     virtual bool IsDialogWindow() const { return false; }
     virtual bool IsSystemWindow() const { return false; }
     virtual bool IsHostMainWindow() const { return false; }

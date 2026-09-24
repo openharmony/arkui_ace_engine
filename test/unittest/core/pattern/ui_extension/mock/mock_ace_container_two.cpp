@@ -170,6 +170,10 @@ bool AceContainer::IsSubWindow() const
 {
     return true;
 }
+bool AceContainer::IsPipWindow() const
+{
+    return false;
+}
 bool AceContainer::IsDialogWindow() const
 {
     return true;
