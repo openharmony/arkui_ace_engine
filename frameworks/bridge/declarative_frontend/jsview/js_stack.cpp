@@ -164,11 +164,10 @@ void JSStack::SetSize(const JSCallbackInfo& info)
 
 void JSStack::SetSyncLoad(const JSCallbackInfo& info)
 {
-    bool enabled = true;
-    if (info[0]->IsBoolean()) {
-        enabled = info[0]->ToBoolean();
+    if (!info[0]->IsBoolean()) {
+        return; // non-boolean/undefined: leave the property unset
     }
-    StackModel::GetInstance()->SetSyncLoad(enabled);
+    StackModel::GetInstance()->SetSyncLoad(info[0]->ToBoolean());
 }
 
 void JSStack::Create(const JSCallbackInfo& info)
