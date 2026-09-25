@@ -48,6 +48,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/picture_drawable_descriptor.h"
 #include "core/gestures/drag_event.h"
@@ -62,6 +63,59 @@ constexpr int32_t NEED_MASK_INDEX = 3;
 constexpr int32_t KERNEL_MAX_LENGTH_EXCEPT_OTHER = 245;
 constexpr size_t NEED_MASK_START_OFFSET = 2;
 constexpr int32_t INVALID_ID = -1;
+constexpr char DMA_RELEASE_ASYNC_TRACE_NAME[] = "RecycledDmaPixelMapsRelease";
+using DmaPixelMapList = std::vector<std::shared_ptr<Media::PixelMap>>;
+
+void CollectDmaPixelMap(const RefPtr<CanvasImage>& canvasImage, DmaPixelMapList& pixelMaps)
+{
+    auto pixelMapImage = AceType::DynamicCast<PixelMapImage>(canvasImage);
+    CHECK_NULL_VOID(pixelMapImage);
+    auto pixelMap = pixelMapImage->GetPixelMap();
+    if (!pixelMap || pixelMap->GetAllocatorType() != AllocatorType::DMA_ALLOC) {
+        return;
+    }
+    auto mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(mediaPixelMap);
+    auto iter = std::find_if(pixelMaps.begin(), pixelMaps.end(), [&mediaPixelMap](const auto& item) {
+        return item.get() == mediaPixelMap.get();
+    });
+    if (iter == pixelMaps.end()) {
+        pixelMaps.emplace_back(std::move(mediaPixelMap));
+    }
+}
+
+template<typename T>
+RefPtr<CanvasImage> GetCanvasImageFromHolder(const RefPtr<T>& holder)
+{
+    return holder ? holder->GetCanvasImage() : nullptr;
+}
+
+DmaPixelMapList CollectDmaPixelMaps(std::initializer_list<RefPtr<CanvasImage>> canvasImages)
+{
+    DmaPixelMapList pixelMaps;
+    for (const auto& canvasImage : canvasImages) {
+        CollectDmaPixelMap(canvasImage, pixelMaps);
+    }
+    return pixelMaps;
+}
+
+void ReleaseDmaPixelMapsOnBackground(DmaPixelMapList&& pixelMaps)
+{
+    if (pixelMaps.empty()) {
+        return;
+    }
+    static std::atomic<int32_t> releaseIdGenerator = 0;
+    auto releaseId = releaseIdGenerator.fetch_add(1, std::memory_order_relaxed);
+    ACE_SCOPED_TRACE("PostRecycledDmaPixelMaps releaseId:%d count:%zu", releaseId, pixelMaps.size());
+    AceAsyncTraceBegin(releaseId, DMA_RELEASE_ASYNC_TRACE_NAME);
+    ImageUtils::PostToBg(
+        [releaseId, pixelMaps = std::move(pixelMaps)]() mutable {
+            ACE_SCOPED_TRACE("RunRecycledDmaPixelMaps releaseId:%d count:%zu", releaseId, pixelMaps.size());
+            pixelMaps.clear();
+            AceAsyncTraceEnd(releaseId, DMA_RELEASE_ASYNC_TRACE_NAME);
+        },
+        "ArkUIImageReleaseRecycledDmaPixelMaps", Container::CurrentId(), PriorityType::LOW);
+}
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -1698,8 +1752,15 @@ void ImagePattern::OnRecycle()
 {
     TAG_LOGD(AceLogTag::ACE_IMAGE, "OnRecycle. %{public}s", imageDfxConfig_.ToStringWithoutSrc().c_str());
     ACE_SCOPED_TRACE("OnRecycle %s", imageDfxConfig_.ToStringWithSrc().c_str());
+    auto dmaPixelMaps = CollectDmaPixelMaps({ image_, altImage_, altErrorImage_,
+        GetCanvasImageFromHolder(loadingCtx_), GetCanvasImageFromHolder(altLoadingCtx_),
+        GetCanvasImageFromHolder(altErrorCtx_), GetCanvasImageFromHolder(imagePaintMethod_),
+        GetCanvasImageFromHolder(contentMod_) });
+
     DoRecycleImageData("OnRecycle", "OnRecycle", false);
     UnregisterWindowStateChangedCallback();
+
+    ReleaseDmaPixelMapsOnBackground(std::move(dmaPixelMaps));
 }
 
 void ImagePattern::OnReuse()

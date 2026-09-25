@@ -61,6 +61,10 @@ public:
     void UpdatePaintMethod(
         const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig = {});
     bool NeedsContentTransition();
+    const RefPtr<CanvasImage>& GetCanvasImage() const
+    {
+        return canvasImage_;
+    }
 
 private:
     void UpdatePaintConfig(PaintWrapper* paintWrapper);
