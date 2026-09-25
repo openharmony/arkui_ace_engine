@@ -104,9 +104,56 @@ const std::unordered_map<std::string, std::function<double(SvgBaseAttribute&)>> 
         } },
 };
 
+void SkipLeadingWhitespaceAndQuote(const std::string& url, size_t& pos, size_t end)
+{
+    while (pos < end && std::isspace(static_cast<unsigned char>(url[pos]))) {
+        ++pos;
+    }
+    if (pos < end && (url[pos] == '\'' || url[pos] == '"')) {
+        ++pos;
+    }
+    while (pos < end && std::isspace(static_cast<unsigned char>(url[pos]))) {
+        ++pos;
+    }
+}
+
+void SkipTrailingWhitespaceAndQuote(const std::string& url, size_t pos, size_t& idEnd)
+{
+    while (idEnd > pos && std::isspace(static_cast<unsigned char>(url[idEnd - 1]))) {
+        --idEnd;
+    }
+    if (idEnd > pos && (url[idEnd - 1] == '\'' || url[idEnd - 1] == '"')) {
+        --idEnd;
+    }
+    while (idEnd > pos && std::isspace(static_cast<unsigned char>(url[idEnd - 1]))) {
+        --idEnd;
+    }
+}
+
+// Extracts node ID from SVG url() reference, e.g. "url(#gradient1)" -> "gradient1"
+// Supports optional whitespace and quotes: url( '#id' ) / url( "#id" )
+// Returns original string if format doesn't match url(#...) pattern
 std::string GetNodeIdFromUrl(const std::string& url)
 {
-    return std::regex_replace(url, std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
+    constexpr std::string_view URL_PREFIX = "url(";
+    constexpr size_t URL_PREFIX_LEN = URL_PREFIX.size();
+    constexpr size_t MIN_URL_LEN = URL_PREFIX_LEN + 2;
+    if (url.size() < MIN_URL_LEN || url.compare(0, URL_PREFIX_LEN, URL_PREFIX) != 0 || url.back() != ')') {
+        return url;
+    }
+    size_t pos = URL_PREFIX_LEN;
+    size_t end = url.size() - 1;
+    SkipLeadingWhitespaceAndQuote(url, pos, end);
+    if (pos >= end || url[pos] != '#') {
+        return url;
+    }
+    ++pos;
+    size_t idEnd = end;
+    SkipTrailingWhitespaceAndQuote(url, pos, idEnd);
+    if (idEnd == pos) {
+        return url;
+    }
+    return url.substr(pos, idEnd - pos);
 }
 
 void SetCompatibleFill(const std::string& value, SvgBaseAttribute& attrs)
@@ -143,9 +190,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 auto value = StringUtils::TrimStr(val);
                 if (value.find("url(") == 0) {
-                    auto src = std::regex_replace(value,
-                        std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
-                    attrs.clipState.SetHref(src);
+                    attrs.clipState.SetHref(GetNodeIdFromUrl(value));
                 }
             } },
         { DOM_SVG_SRC_CLIP_RULE,
@@ -157,9 +202,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 auto value = StringUtils::TrimStr(val);
                 if (value.find("url(") == 0) {
-                    auto src = std::regex_replace(value,
-                        std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
-                    attrs.clipState.SetHref(src);
+                    attrs.clipState.SetHref(GetNodeIdFromUrl(value));
                 }
             } },
         { SVG_CLIP_PATH_UNITS,
@@ -187,9 +230,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                     return;
                 }
                 if (value.find("url(") == 0) {
-                    auto src = std::regex_replace(value,
-                        std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
-                    attrs.fillState.SetHref(src);
+                    attrs.fillState.SetHref(GetNodeIdFromUrl(value));
                 }
             } },
         { DOM_SVG_SRC_FILL_OPACITY,
@@ -253,9 +294,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
                     return;
                 }
                 if (value.find("url(") == 0) {
-                    auto src = std::regex_replace(value,
-                        std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
-                    attrs.strokeState.SetHref(src);
+                    attrs.strokeState.SetHref(GetNodeIdFromUrl(value));
                 }
             } },
         { DOM_SVG_SRC_STROKE_DASHARRAY,

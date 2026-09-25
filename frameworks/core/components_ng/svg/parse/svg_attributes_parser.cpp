@@ -377,7 +377,7 @@ bool SvgAttributesParser::CheckColorAlpha(const std::string& colorStr, Color& re
             auto blue = static_cast<uint8_t>(std::stoi(matches[RGBA_MATCH_BLUE]));
             auto alpha = static_cast<double>(std::stod(matches[RGBA_MATCH_ALPHA]));
             // Scale up from 0~1.0 to 255
-            result = Color::FromARGB(static_cast<uint8_t>(std::min(MAX_ALPHA, alpha)) * 0xff, red, green, blue);
+            result = Color::FromRGBO(red, green, blue, std::min(MAX_ALPHA, alpha));
             return true;
         }
     }
