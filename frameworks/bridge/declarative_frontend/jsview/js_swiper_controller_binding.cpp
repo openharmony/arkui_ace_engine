@@ -22,6 +22,7 @@
 #include "base/error/error_code.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/napi_scope_raii.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -59,13 +60,12 @@ void HandleDeferred(const std::shared_ptr<SwiperControllerAsyncContext>& asyncCo
     auto deferred = asyncContext->deferred;
     CHECK_NULL_VOID(deferred);
 
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok) {
+    napi_value result = nullptr;
+    ScopeRAII scope(env);
+    if (!scope) {
         return;
     }
 
-    napi_value result = nullptr;
     if (errorCode == ERROR_CODE_NO_ERROR) {
         napi_get_null(env, &result);
         napi_resolve_deferred(env, deferred, result);
@@ -73,7 +73,6 @@ void HandleDeferred(const std::shared_ptr<SwiperControllerAsyncContext>& asyncCo
         result = CreateErrorValue(env, errorCode, message);
         napi_reject_deferred(env, deferred, result);
     }
-    napi_close_handle_scope(env, scope);
 }
 
 void ReturnPromise(const JSCallbackInfo& info, napi_value result)

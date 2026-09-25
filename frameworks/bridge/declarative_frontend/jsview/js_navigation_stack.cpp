@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -92,8 +93,7 @@ std::string JSNavigationStackExtend::GetSerializedParamByIndex(int32_t index)
     if (!env) {
         return "";
     }
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    ScopeRAII scope(env);
     if (!scope) {
         return "";
     }
@@ -114,7 +114,6 @@ std::string JSNavigationStackExtend::GetSerializedParamByIndex(int32_t index)
     std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
     napi_get_value_string_utf8(env, serializedParam, paramChar.get(), len + 1, &len);
 
-    napi_close_handle_scope(env, scope);
     return paramChar.get();
 }
 
@@ -146,27 +145,23 @@ RefPtr<JSNavigationStackExtend> JSNavigationStackExtend::GetOrCreateNavigationSt
     if (env == nullptr) {
         return nullptr;
     }
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
+    EscapableScopeRAII scope(env);
+    if (!scope) {
         return nullptr;
     }
     napi_value global;
     napi_status ret = napi_get_global(env, &global);
     if (ret != napi_ok) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     napi_value constructor;
     ret = napi_get_named_property(env, global, JS_NAV_PATH_STACK_EXTENT_CLASS_NAME, &constructor);
     if (ret != napi_ok) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     napi_value stackObj;
     ret = napi_new_instance(env, constructor, 0, nullptr, &stackObj);
     if (ret != napi_ok) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
     napi_value setNativeStackFunc;
@@ -175,11 +170,9 @@ RefPtr<JSNavigationStackExtend> JSNavigationStackExtend::GetOrCreateNavigationSt
     napi_create_int64(env, reinterpret_cast<int64_t>(stack->GetStaticStackPtr()), &napiStackPtr);
     ret = napi_call_function(env, stackObj, setNativeStackFunc, 1, &napiStackPtr, nullptr);
     if (ret != napi_ok) {
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
-    napi_close_handle_scope(env, scope);
-    auto jsStackEntend = AceType::MakeRefPtr<JSNavigationStackExtend>(stackObj);
+    auto jsStackEntend = AceType::MakeRefPtr<JSNavigationStackExtend>(scope.Escape(stackObj));
     stack->SetNavigationStackExtend(jsStackEntend);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will create an extend obj");
     return jsStackEntend;
@@ -1700,13 +1693,11 @@ std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
     if (!env) {
         return JS_STRINGIFIED_UNDEFINED;
     }
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
+    ScopeRAII scope(env);
+    if (!scope) {
         return JS_STRINGIFIED_UNDEFINED;
     }
     if (dataSourceObj_->IsEmpty()) {
-        napi_close_handle_scope(env, scope);
         return JS_STRINGIFIED_UNDEFINED;
     }
     napi_value navPathStack = JsConverter::ConvertJsValToNapiValue(dataSourceObj_);
@@ -1727,14 +1718,12 @@ std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
     if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
         napi_get_and_clear_last_exception(env, &stringifyParam);
-        napi_close_handle_scope(env, scope);
         return JS_STRINGIFIED_UNDEFINED;
     }
     size_t len = 0;
     napi_get_value_string_utf8(env, stringifyParam, nullptr, 0, &len);
     std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
     napi_get_value_string_utf8(env, stringifyParam, paramChar.get(), len + 1, &len);
-    napi_close_handle_scope(env, scope);
     return paramChar.get();
 }
 

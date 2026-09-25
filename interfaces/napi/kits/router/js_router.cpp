@@ -16,6 +16,7 @@
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
@@ -260,9 +261,8 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
 
 void TriggerCallback(std::shared_ptr<RouterAsyncContext> asyncContext)
 {
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(asyncContext->env, &scope);
-    if (scope == nullptr) {
+    ScopeRAII scope(asyncContext->env);
+    if (!scope) {
         return;
     }
 
@@ -297,7 +297,6 @@ void TriggerCallback(std::shared_ptr<RouterAsyncContext> asyncContext)
             napi_call_function(asyncContext->env, nullptr, callback, 1, &error, &ret);
         }
     }
-    napi_close_handle_scope(asyncContext->env, scope);
 }
 
 using ErrorCallback = std::function<void(const std::string&, int32_t)>;
@@ -951,9 +950,8 @@ void CallBackToJSTread(std::shared_ptr<RouterAsyncContext> context)
     }
     taskExecutor->PostTask(
         [context]() {
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(context->env, &scope);
-            if (scope == nullptr) {
+            ScopeRAII scope(context->env);
+            if (!scope) {
                 return;
             }
 
@@ -984,8 +982,6 @@ void CallBackToJSTread(std::shared_ptr<RouterAsyncContext> context)
                     napi_call_function(context->env, nullptr, callback, 0, nullptr, &ret);
                 }
             }
-
-            napi_close_handle_scope(context->env, scope);
         },
         TaskExecutor::TaskType::JS, "ArkUIRouterAlertCallback",
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
