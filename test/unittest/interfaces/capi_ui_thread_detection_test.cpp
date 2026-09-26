@@ -175,21 +175,22 @@ protected:
     void RunAndExpectDiagnostic(std::function<void()> action)
     {
         ResetPrintLogCount();
+        ResetDiagnosticLog();
         action();
-        EXPECT_GT(GetPrintLogCount(), 0);
+        EXPECT_GT(GetDiagnosticLogCount(), 0);
+        const auto* diag = GetLastDiagnosticLog();
+        ASSERT_NE(diag, nullptr);
+        ASSERT_NE(diag->checkName, nullptr);
+        EXPECT_TRUE(strstr(diag->checkName, "UI_THREAD") != nullptr);
+        ASSERT_NE(diag->reason, nullptr);
+        EXPECT_TRUE(strstr(diag->reason, "C API must be called on the UI thread") != nullptr);
     }
 
     void RunAndExpectNoDiagnostic(std::function<void()> action)
     {
-        bool (*savedThread)() = g_runtimeCheckThread;
-        SetMockIsCurrentThreadSafe(SafeThread);
-        ResetPrintLogCount();
+        ResetDiagnosticLog();
         action();
-        int baseline = GetPrintLogCount();
-        g_runtimeCheckThread = savedThread;
-        ResetPrintLogCount();
-        action();
-        EXPECT_EQ(GetPrintLogCount(), baseline);
+        EXPECT_EQ(GetDiagnosticLogCount(), 0);
     }
 
     // === 模式控制 ===
