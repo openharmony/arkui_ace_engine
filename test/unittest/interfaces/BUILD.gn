@@ -353,7 +353,14 @@ ohos_unittest("native_node_napi_test") {
     "native_node_two_part_test.cpp",
     "native_styled_string_test.cpp",
     "capi_swiper_test_ng.cpp",
-    "capi_textpicker_option_test.cpp"
+    "capi_textpicker_option_test.cpp",
+    "capi_ui_thread_detection_test.cpp"
+  ]
+
+  sources += [
+    "$ace_root/interfaces/native/node/node_adapter_impl.cpp",
+    "$ace_root/interfaces/native/node/render_node.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_log_wrapper.cpp",
   ]
 
   configs = [

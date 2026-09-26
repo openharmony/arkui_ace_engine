@@ -143,6 +143,7 @@ public:
         g_runtimeCheckBridge = &bridge_;
         SetMockBasicAPIProvider(RuntimeBasicAPI);
         ResetPrintLogCount();
+        ResetDiagnosticLog();
     }
 
     void TearDown() override
@@ -331,7 +332,7 @@ HWTEST_F(RuntimeCheckBehaviorTest, MissingBackendOrThreadPredicateIsSafe, TestSi
     ASSERT_TRUE(manager_.SetRuntimeCheckMode(0, static_cast<int32_t>(CheckMode::CRASH)));
     manager_.CheckUIThread("MissingThreadPredicate");
     EXPECT_EQ(bridge_.threadQueries.load(), 0);
-    EXPECT_EQ(GetPrintLogCount(), 0);
+    EXPECT_EQ(GetDiagnosticLogCount(), 0);
 }
 
 HWTEST_F(RuntimeCheckBehaviorTest, ThreadPredicateResultIsRespected, TestSize.Level1)
@@ -393,18 +394,22 @@ HWTEST_F(RuntimeCheckBehaviorTest, ExplicitLogOverridesDebugCrashAndEmitsLog, Te
     AceApplicationInfo::GetInstance().SetDebugForParallel(true);
     ASSERT_TRUE(manager_.SetRuntimeCheckMode(0, static_cast<int32_t>(CheckMode::LOG)));
     SetThreadSafe(false);
-    ResetPrintLogCount();
+    ResetDiagnosticLog();
     manager_.CheckUIThread("ExplicitLog");
-    EXPECT_GT(GetPrintLogCount(), 0);
+    EXPECT_GT(GetDiagnosticLogCount(), 0);
+    const auto* diag = GetLastDiagnosticLog();
+    ASSERT_NE(diag, nullptr);
+    EXPECT_TRUE(diag->checkName != nullptr && strstr(diag->checkName, "UI_THREAD") != nullptr);
+    EXPECT_TRUE(diag->reason != nullptr && strstr(diag->reason, "C API must be called on the UI thread") != nullptr);
 }
 
 HWTEST_F(RuntimeCheckBehaviorTest, NullApiNameStillEmitsLog, TestSize.Level1)
 {
     ASSERT_TRUE(manager_.SetRuntimeCheckMode(0, static_cast<int32_t>(CheckMode::LOG)));
     SetThreadSafe(false);
-    ResetPrintLogCount();
+    ResetDiagnosticLog();
     manager_.CheckUIThread(nullptr);
-    EXPECT_GT(GetPrintLogCount(), 0);
+    EXPECT_GT(GetDiagnosticLogCount(), 0);
 }
 
 HWTEST_F(RuntimeCheckBehaviorTest, DisabledAndSafeCallsDoNotLog, TestSize.Level1)
@@ -414,17 +419,17 @@ HWTEST_F(RuntimeCheckBehaviorTest, DisabledAndSafeCallsDoNotLog, TestSize.Level1
         SetThreadSafe(true);
         ASSERT_TRUE(manager_.SetRuntimeCheckMode(0, static_cast<int32_t>(CheckMode::DISABLED)));
         SetThreadSafe(false);
-        ResetPrintLogCount();
+        ResetDiagnosticLog();
         const auto threadQueries = bridge_.threadQueries.load();
         manager_.CheckUIThread("DisabledCall");
         EXPECT_EQ(bridge_.threadQueries.load(), threadQueries);
-        EXPECT_EQ(GetPrintLogCount(), 0);
+        EXPECT_EQ(GetDiagnosticLogCount(), 0);
         SetThreadSafe(true);
         for (auto mode : { CheckMode::LOG, CheckMode::CRASH }) {
             ASSERT_TRUE(manager_.SetRuntimeCheckMode(0, static_cast<int32_t>(mode)));
-            ResetPrintLogCount();
+            ResetDiagnosticLog();
             manager_.CheckUIThread("SafeCall");
-            EXPECT_EQ(GetPrintLogCount(), 0);
+            EXPECT_EQ(GetDiagnosticLogCount(), 0);
         }
     }
 }
@@ -633,27 +638,30 @@ HWTEST_F(RuntimeCheckBehaviorTest, DisabledDisposedNodeCheckDoesNotLog, TestSize
     AceApplicationInfo::GetInstance().SetDebugForParallel(true);
     ASSERT_TRUE(manager_.SetRuntimeCheckMode(
         static_cast<int32_t>(CheckType::NODE_DISPOSED), static_cast<int32_t>(CheckMode::DISABLED)));
-    ResetPrintLogCount();
+    ResetDiagnosticLog();
     ArkUI_Node node;
     node.magic = ARKUI_NODE_MAGIC_INVALID;
     manager_.CheckNodeDisposed(&node, "DisabledDisposedNode", nullptr);
-    EXPECT_EQ(GetPrintLogCount(), 0);
+    EXPECT_EQ(GetDiagnosticLogCount(), 0);
 }
 
 HWTEST_F(RuntimeCheckBehaviorTest, OnlyDisposedNodesEmitLogs, TestSize.Level1)
 {
     ASSERT_TRUE(manager_.SetRuntimeCheckMode(
         static_cast<int32_t>(CheckType::NODE_DISPOSED), static_cast<int32_t>(CheckMode::LOG)));
-    ResetPrintLogCount();
+    ResetDiagnosticLog();
     ArkUI_Node node;
     node.magic = ARKUI_NODE_MAGIC_VALID;
     manager_.CheckNodeDisposed(&node, "ValidNode", nullptr);
     manager_.CheckNodeDisposed(nullptr, "NullNode", nullptr);
-    EXPECT_EQ(GetPrintLogCount(), 0);
+    EXPECT_EQ(GetDiagnosticLogCount(), 0);
 
     node.magic = ARKUI_NODE_MAGIC_INVALID;
     manager_.CheckNodeDisposed(&node, "DisposedNode", nullptr);
-    EXPECT_GT(GetPrintLogCount(), 0);
+    EXPECT_GT(GetDiagnosticLogCount(), 0);
+    const auto* diag = GetLastDiagnosticLog();
+    ASSERT_NE(diag, nullptr);
+    EXPECT_TRUE(diag->checkName != nullptr && strstr(diag->checkName, "NODE_DISPOSED") != nullptr);
 }
 
 HWTEST_F(RuntimeCheckBehaviorTest, NamespaceFunctionsForwardToThePrivateManager, TestSize.Level1)
@@ -663,15 +671,18 @@ HWTEST_F(RuntimeCheckBehaviorTest, NamespaceFunctionsForwardToThePrivateManager,
     EXPECT_TRUE(ConfigManager::SetRuntimeCheckMode(
         static_cast<int32_t>(CheckType::NODE_DISPOSED), static_cast<int32_t>(CheckMode::LOG)));
     SetThreadSafe(false);
-    ResetPrintLogCount();
+    ResetDiagnosticLog();
     ConfigManager::CheckUIThread("NamespaceThreadCheck");
-    const auto threadLogCount = GetPrintLogCount();
-    EXPECT_GT(threadLogCount, 0);
+    EXPECT_GT(GetDiagnosticLogCount(), 0);
 
     ArkUI_Node node;
     node.magic = ARKUI_NODE_MAGIC_INVALID;
     ConfigManager::CheckNodeDisposed(&node, "NamespaceDisposedCheck", "Disposed argument");
-    EXPECT_GT(GetPrintLogCount(), threadLogCount);
+    EXPECT_GT(GetDiagnosticLogCount(), 1);
+    const auto* diag = GetLastDiagnosticLog();
+    ASSERT_NE(diag, nullptr);
+    EXPECT_TRUE(diag->checkName != nullptr && strstr(diag->checkName, "NODE_DISPOSED") != nullptr);
+    EXPECT_TRUE(diag->reason != nullptr && strstr(diag->reason, "Disposed argument") != nullptr);
 
     SetThreadSafe(true);
     EXPECT_TRUE(ConfigManager::SetRuntimeCheckMode(

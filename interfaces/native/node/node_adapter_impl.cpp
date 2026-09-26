@@ -26,6 +26,7 @@ extern "C" {
 
 ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create(void)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_Create");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(fullImpl, nullptr);
     auto* nodeAdapter = fullImpl->getNodeAdapterAPI()->create();
@@ -34,6 +35,7 @@ ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create(void)
 
 void OH_ArkUI_NodeAdapter_Dispose(ArkUI_NodeAdapterHandle handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_Dispose");
     CHECK_NULL_VOID(handle);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(fullImpl);
@@ -42,6 +44,7 @@ void OH_ArkUI_NodeAdapter_Dispose(ArkUI_NodeAdapterHandle handle)
 
 int32_t OH_ArkUI_NodeAdapter_SetTotalNodeCount(ArkUI_NodeAdapterHandle handle, uint32_t size)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_SetTotalNodeCount");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -57,6 +60,7 @@ int32_t OH_ArkUI_NodeAdapter_SetTotalNodeCount(ArkUI_NodeAdapterHandle handle, u
 
 uint32_t OH_ArkUI_NodeAdapter_GetTotalNodeCount(ArkUI_NodeAdapterHandle handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_GetTotalNodeCount");
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
@@ -67,6 +71,7 @@ typedef void (*InnerArkUINodeAdapterEvent)(ArkUINodeAdapterEvent* event);
 int32_t OH_ArkUI_NodeAdapter_RegisterEventReceiver(
     ArkUI_NodeAdapterHandle handle, void* userData, void (*receiver)(ArkUI_NodeAdapterEvent* event))
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_RegisterEventReceiver");
     CHECK_NULL_RETURN_WITH_MESSAGE(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -82,6 +87,7 @@ int32_t OH_ArkUI_NodeAdapter_RegisterEventReceiver(
 
 void OH_ArkUI_NodeAdapter_UnregisterEventReceiver(ArkUI_NodeAdapterHandle handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_UnregisterEventReceiver");
     CHECK_NULL_VOID(handle);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(fullImpl);
@@ -90,6 +96,7 @@ void OH_ArkUI_NodeAdapter_UnregisterEventReceiver(ArkUI_NodeAdapterHandle handle
 
 int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_ReloadAllItems");
     CHECK_NULL_RETURN_WITH_MESSAGE(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
         "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -106,6 +113,7 @@ int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle)
 int32_t OH_ArkUI_NodeAdapter_ReloadItem(
     ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_ReloadItem");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -122,6 +130,7 @@ int32_t OH_ArkUI_NodeAdapter_ReloadItem(
 int32_t OH_ArkUI_NodeAdapter_RemoveItem(
     ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_RemoveItem");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -138,6 +147,7 @@ int32_t OH_ArkUI_NodeAdapter_RemoveItem(
 int32_t OH_ArkUI_NodeAdapter_InsertItem(
     ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_InsertItem");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -153,6 +163,7 @@ int32_t OH_ArkUI_NodeAdapter_InsertItem(
 
 int32_t OH_ArkUI_NodeAdapter_MoveItem(ArkUI_NodeAdapterHandle handle, uint32_t from, uint32_t to)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_MoveItem");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -168,6 +179,7 @@ int32_t OH_ArkUI_NodeAdapter_MoveItem(ArkUI_NodeAdapterHandle handle, uint32_t f
 
 int32_t OH_ArkUI_NodeAdapter_GetAllItems(ArkUI_NodeAdapterHandle handle, ArkUI_NodeHandle** items, uint32_t* size)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapter_GetAllItems");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node adapter handle is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -209,6 +221,7 @@ ArkUI_NodeAdapterEventType OH_ArkUI_NodeAdapterEvent_GetType(ArkUI_NodeAdapterEv
 
 ArkUI_NodeHandle OH_ArkUI_NodeAdapterEvent_GetRemovedNode(ArkUI_NodeAdapterEvent* event)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapterEvent_GetRemovedNode");
     CHECK_NULL_RETURN(event, nullptr);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(fullImpl, nullptr);
@@ -218,6 +231,7 @@ ArkUI_NodeHandle OH_ArkUI_NodeAdapterEvent_GetRemovedNode(ArkUI_NodeAdapterEvent
 
 ArkUI_NodeHandle OH_ArkUI_NodeAdapterEvent_GetHostNode(ArkUI_NodeAdapterEvent* event)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeAdapterEvent_GetHostNode");
     CHECK_NULL_RETURN(event, nullptr);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(fullImpl, nullptr);

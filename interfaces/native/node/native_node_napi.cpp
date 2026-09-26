@@ -17,6 +17,7 @@
 
 #include <memory>
 #include "napi/native_node_api.h"
+#include "node/config_manager.h"
 #include "node/node_extened.h"
 #include "node/node_model.h"
 
@@ -51,6 +52,7 @@ void GetStringFromNapiValue(napi_env env, napi_value value, std::string& result)
 
 int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkUI_NodeHandle* handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_GetNodeHandleFromNapiValue");
     napi_handle_scope scope = nullptr;
     auto status = napi_open_handle_scope(env, &scope);
     if (status != napi_ok) {
@@ -175,6 +177,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
 
 int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_ContextHandle* context)
 {
+    CHECK_UI_THREAD("OH_ArkUI_GetContextFromNapiValue");
     bool hasProperty = false;
     auto result = napi_has_named_property(env, value, "instanceId_", &hasProperty);
     if (result != napi_ok || !hasProperty) {
@@ -211,6 +214,7 @@ int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_C
 
 int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, ArkUI_NodeContentHandle* content)
 {
+    CHECK_UI_THREAD("OH_ArkUI_GetNodeContentFromNapiValue");
     bool hasProperty = false;
     auto result = napi_has_named_property(env, value, "nativePtr_", &hasProperty);
     if (result != napi_ok || !hasProperty) {
@@ -238,6 +242,7 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
 
 ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
 {
+    CHECK_UI_THREAD("OH_ArkUI_InitModuleForArkTSEnv");
     CHECK_NULL_RETURN_WITH_MESSAGE(env, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Napi environment is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Failed to initialize native module");
@@ -352,6 +357,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
 
 void OH_ArkUI_NotifyArkTSEnvDestroy(napi_env env)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NotifyArkTSEnvDestroy");
     CHECK_NULL_VOID(env);
     CHECK_NULL_VOID(OHOS::Ace::NodeModel::InitialFullImpl());
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -686,6 +692,7 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageId(
 int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData,
     void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
 {
+    CHECK_UI_THREAD("OH_ArkUI_PostFrameCallback");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, __FUNCTION__, "UI context parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -711,6 +718,7 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
 int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData))
 {
+    CHECK_UI_THREAD("OH_ArkUI_PostIdleCallback");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, __FUNCTION__, "UI context parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(

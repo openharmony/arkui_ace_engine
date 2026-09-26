@@ -19,4 +19,13 @@
 void ResetPrintLogCount();
 int GetPrintLogCount();
 
+struct DiagnosticLog {
+    const char* checkName;
+    const char* apiName;
+    const char* reason;
+};
+int GetDiagnosticLogCount();
+void ResetDiagnosticLog();
+const DiagnosticLog* GetLastDiagnosticLog();
+
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_LOG_MOCK_LOG_WRAPPER_H
