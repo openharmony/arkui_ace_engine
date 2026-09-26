@@ -109,15 +109,30 @@ public:
         Mount(node);
         return node;
     }
-    std::string Collect()
+    std::string Collect(int32_t instanceId = 0)
     {
         char* data = nullptr;
         uint32_t size = 0;
         const char* reason = nullptr;
-        EXPECT_EQ(CollectPageText(0, &data, &size, &reason), 0);
+        EXPECT_EQ(CollectPageText(instanceId, &data, &size, &reason), 0);
         std::string result(data ? data : "", size);
         std::free(data);
         return result;
+    }
+    RefPtr<MockPipelineContext> CreateOtherPipeline()
+    {
+        // Instance 1 is distinct from the fixture's original instance 0.
+        auto other = AceType::MakeRefPtr<MockPipelineContext>();
+        other->instanceId_ = 1;
+        other->uiTranslateManager_ = std::make_shared<UiTranslateManagerImpl>(nullptr);
+        RefPtr<MockContainer> container = AceType::MakeRefPtr<testing::NiceMock<MockContainer>>(other);
+        container->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
+        ON_CALL(*container, GetInstanceId()).WillByDefault(testing::Return(other->GetInstanceId()));
+        MockContainer::SetGetContainerCallback(
+            [original = MockContainer::Current(), container](int32_t id) -> RefPtr<Container> {
+                return id == container->GetInstanceId() ? container : original;
+            });
+        return other;
     }
     RefPtr<FrameNode> UnmountedText(int32_t id, const std::u16string& text)
     {
@@ -164,9 +179,9 @@ public:
     {
         pipeline->uiTranslateManager_->AddTranslateListener(WeakPtr<FrameNode>(node));
     }
-    void ExpectContents(const std::vector<std::string>& expected)
+    void ExpectContents(const std::vector<std::string>& expected, int32_t instanceId = 0)
     {
-        auto json = JsonUtil::ParseJsonString(Collect());
+        auto json = JsonUtil::ParseJsonString(Collect(instanceId));
         auto texts = json->GetValue("texts");
         std::vector<std::string> actual;
         for (int32_t i = 0; i < texts->GetArraySize(); ++i) {
@@ -178,6 +193,101 @@ public:
     RefPtr<FrameNode> stage;
     RefPtr<FrameNode> page;
 };
+
+TEST_F(PageTextCollectorTest, contextMigrationUnregistersBeforeInstanceCallback)
+{
+    auto other = CreateOtherPipeline();
+    auto node = Text(ElementRegister::GetInstance()->MakeUniqueId(), u"migrating text");
+    node->AttachContext(AceType::RawPtr(pipeline));
+    auto pattern = node->GetPattern<TextPattern>();
+    pattern->RegisterTranslateListener();
+    auto oldManager = pipeline->uiTranslateManager_;
+    ASSERT_EQ(oldManager->listenerMap_.count(node->GetId()), 1U);
+    bool callbackCalled = false;
+    node->updateJSInstanceCallback_ = [&](int32_t instanceId) {
+        callbackCalled = true;
+        EXPECT_EQ(instanceId, other->GetInstanceId());
+        EXPECT_EQ(oldManager->listenerMap_.count(node->GetId()), 0U);
+        EXPECT_EQ(Collect(), "{\"texts\":[]}");
+    };
+
+    node->AttachContext(AceType::RawPtr(other));
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(node->GetAttachedContext(), AceType::RawPtr(other));
+    EXPECT_EQ(Collect(), "{\"texts\":[]}");
+    ExpectContents({ "migrating text" }, other->GetInstanceId());
+
+    // Reattaching to the same context must retain the single registration.
+    node->AttachContext(AceType::RawPtr(other));
+    EXPECT_EQ(other->uiTranslateManager_->listenerMap_.count(node->GetId()), 1U);
+    pattern->RegisterTranslateListener();
+    EXPECT_EQ(pattern->translatePipeline_.Upgrade(), other);
+    node->updateJSInstanceCallback_ = nullptr;
+    node->AttachContext(AceType::RawPtr(pipeline));
+    EXPECT_TRUE(other->uiTranslateManager_->listenerMap_.empty());
+    ExpectContents({ "migrating text" });
+}
+
+TEST_F(PageTextCollectorTest, subtreeMigrationMovesTextAndPlaceholderRegistrations)
+{
+    auto other = CreateOtherPipeline();
+    stage->AttachContext(AceType::RawPtr(pipeline), true);
+    auto subtree = FrameNode::CreateFrameNode(
+        "Column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    page->AddChild(subtree);
+    Mount(subtree);
+    auto text = Text(ElementRegister::GetInstance()->MakeUniqueId(), u"text", subtree);
+    auto inputPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    auto input = FrameNode::CreateFrameNode(
+        "TextInput", ElementRegister::GetInstance()->MakeUniqueId(), inputPattern);
+    input->GetLayoutProperty<TextFieldLayoutProperty>()->UpdatePlaceholder(u"input placeholder");
+    subtree->AddChild(input);
+    Mount(input);
+    inputPattern->ReportPageTranslatePlaceholderDrawn();
+    auto editorPattern = AceType::MakeRefPtr<RichEditorPattern>();
+    auto editor = FrameNode::CreateFrameNode(
+        "RichEditor", ElementRegister::GetInstance()->MakeUniqueId(), editorPattern);
+    editor->GetLayoutProperty<RichEditorLayoutProperty>()->UpdatePlaceholder(u"editor placeholder");
+    editorPattern->isShowPlaceholder_ = true;
+    subtree->AddChild(editor);
+    Mount(editor);
+    editorPattern->ReportPageTranslatePlaceholderDrawn();
+    ExpectContents({ "text", "input placeholder", "editor placeholder" });
+
+    auto target = FrameNode::CreateFrameNode(
+        "Column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    Mount(target);
+    target->AttachContext(AceType::RawPtr(other));
+    page->RemoveChild(subtree);
+    for (const auto& node : { text, input, editor }) {
+        EXPECT_EQ(node->GetAttachedContext(), nullptr);
+        EXPECT_EQ(pipeline->uiTranslateManager_->listenerMap_.count(node->GetId()), 0U);
+    }
+    EXPECT_EQ(Collect(), "{\"texts\":[]}");
+
+    target->AddChild(subtree);
+    for (const auto& node : { text, input, editor }) {
+        EXPECT_TRUE(node->IsOnMainTree());
+        EXPECT_EQ(node->GetAttachedContext(), AceType::RawPtr(other));
+        EXPECT_EQ(other->uiTranslateManager_->listenerMap_.count(node->GetId()), 1U);
+    }
+    EXPECT_EQ(Collect(), "{\"texts\":[]}");
+    ExpectContents({ "text", "input placeholder", "editor placeholder" }, other->GetInstanceId());
+    target->RemoveChild(subtree);
+    EXPECT_TRUE(other->uiTranslateManager_->listenerMap_.empty());
+    EXPECT_EQ(Collect(other->GetInstanceId()), "{\"texts\":[]}");
+    target->DetachFromMainTree(true);
+}
+
+TEST_F(PageTextCollectorTest, nullContextDoesNotRemoveExistingRegistration)
+{
+    auto node = Text(ElementRegister::GetInstance()->MakeUniqueId(), u"retained text");
+    node->AttachContext(AceType::RawPtr(pipeline));
+    node->AttachContext(nullptr);
+    EXPECT_EQ(node->GetAttachedContext(), AceType::RawPtr(pipeline));
+    EXPECT_EQ(pipeline->uiTranslateManager_->listenerMap_.count(node->GetId()), 1U);
+    ExpectContents({ "retained text" });
+}
 
 TEST_F(PageTextCollectorTest, emptyRegistryAndMissingPageOrManager)
 {

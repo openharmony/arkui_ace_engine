@@ -2149,8 +2149,19 @@ int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& cal
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density) {}
-void PipelineContext::RegisterListenerForTranslate(const WeakPtr<FrameNode> node) {}
-void PipelineContext::UnRegisterListenerForTranslate(int32_t nodeId) {}
+void PipelineContext::RegisterListenerForTranslate(const WeakPtr<FrameNode> node)
+{
+    CHECK_NULL_VOID(uiTranslateManager_);
+    uiTranslateManager_->AddTranslateListener(node);
+    CHECK_NULL_VOID(contentChangeMgr_);
+    contentChangeMgr_->ReportTranslateTextFrameNode(node);
+}
+
+void PipelineContext::UnRegisterListenerForTranslate(int32_t nodeId)
+{
+    CHECK_NULL_VOID(uiTranslateManager_);
+    uiTranslateManager_->RemoveTranslateListener(nodeId);
+}
 
 void PipelineContext::RegisterMaterialNode(const RefPtr<FrameNode>& node) {}
 
