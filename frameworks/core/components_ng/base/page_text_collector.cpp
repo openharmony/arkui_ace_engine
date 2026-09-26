@@ -16,7 +16,6 @@
 
 #include <cmath>
 #include <iterator>
-#include <new>
 
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -96,39 +95,31 @@ int32_t CollectPageText(int32_t instanceId, char** data, uint32_t* size, const c
     }
     ContainerScope scope(instanceId);
     *reason = "Page text serialization, allocation or size check failed.";
-#ifdef __cpp_exceptions
-    try {
-#endif
-        PageTextJson json;
-        bool success = json.Append("{\"texts\":[");
+    PageTextJson json;
+    bool success = json.Append("{\"texts\":[");
 #ifndef CROSS_PLATFORM
-        bool first = true;
-        auto manager = pipeline->GetUiTranslateManagerImpl();
-        auto appendNode = [&](const WeakPtr<FrameNode>& node) {
-            if (!success) {
-                return;
-            }
-            auto frame = node.Upgrade();
-            CHECK_NULL_VOID(frame);
-            auto carrier = AceType::DynamicCast<PageTranslateNode>(frame->GetPattern());
-            CHECK_NULL_VOID(carrier);
-            success = AppendCarrier(frame, carrier, json, first);
-        };
-        if (manager && success) {
-            // Reuse the translation registry without starting reports or changing session state.
-            manager->ForEachArkUITranslateFrameNode(appendNode);
+    bool first = true;
+    auto manager = pipeline->GetUiTranslateManagerImpl();
+    auto appendNode = [&success, &json, &first](const WeakPtr<FrameNode>& node) {
+        if (!success) {
+            return;
         }
-#endif
-        if (!success || !json.Append("]}")) {
-            *reason = json.GetError();
-            return ARKUI_ERROR_CODE_INTERNAL_ERROR;
-        }
-        *data = json.Release(*size);
-        return ARKUI_ERROR_CODE_NO_ERROR;
-#ifdef __cpp_exceptions
-    } catch (const std::bad_alloc&) {
-        return ARKUI_ERROR_CODE_INTERNAL_ERROR;
+        auto frame = node.Upgrade();
+        CHECK_NULL_VOID(frame);
+        auto carrier = AceType::DynamicCast<PageTranslateNode>(frame->GetPattern());
+        CHECK_NULL_VOID(carrier);
+        success = AppendCarrier(frame, carrier, json, first);
+    };
+    if (manager && success) {
+        // Reuse the translation registry without starting reports or changing session state.
+        manager->ForEachArkUITranslateFrameNode(appendNode);
     }
 #endif
+    if (!success || !json.Append("]}")) {
+        *reason = json.GetError();
+        return ARKUI_ERROR_CODE_INTERNAL_ERROR;
+    }
+    *data = json.Release(*size);
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NG
