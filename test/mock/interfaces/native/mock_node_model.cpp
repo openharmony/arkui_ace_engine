@@ -72,6 +72,9 @@ const ArkUIBasicAPI* MockGetBasicAPI()
 ArkUIFullNodeAPI* MockGetFullImpl()
 {
     static ArkUIFullNodeAPI impl = {
+        .getBasicAPI = []() -> const ArkUIBasicAPI* {
+            return g_testBasicAPIProvider ? g_testBasicAPIProvider() : nullptr;
+        },
         .getNodeModifiers = MockGetNodeModifiers,
     };
     return &impl;
