@@ -14,11 +14,11 @@
  */
 
 #include "node_model.h"
+#include "node/config_manager.h"
 
 #include <cstring>
 #include <memory>
 
-#include "config_manager.h"
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_extened.h"
@@ -211,6 +211,12 @@ ArkUIFullNodeAPI* GetFullImplForErrorMessage()
         return nullptr;
     }
     return errorMessageImpl;
+}
+
+const ArkUIBasicAPI* GetBasicAPI()
+{
+    const auto* full = GetOrCreateFullImpl();
+    return full == nullptr ? nullptr : full->getBasicAPI();
 }
 
 bool InitialFullImpl()

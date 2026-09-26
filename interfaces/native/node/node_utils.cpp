@@ -557,6 +557,7 @@ int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_No
 
 int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnRenderTree)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_IsInRenderState");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
