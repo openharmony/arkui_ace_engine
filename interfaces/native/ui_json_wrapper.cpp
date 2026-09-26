@@ -65,7 +65,7 @@ const char* OH_ArkUI_NativeModule_UIJsonWrapperGetData(const OH_ArkUI_NativeModu
 
 uint32_t OH_ArkUI_NativeModule_UIJsonWrapperGetSize(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)
 {
-    return wrapper->size;
+    return wrapper ? wrapper->size : 0;
 }
 
 void OH_ArkUI_NativeModule_UIJsonWrapperDestroy(OH_ArkUI_NativeModule_UIJsonWrapper* wrapper)

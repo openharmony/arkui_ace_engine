@@ -29,7 +29,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapperCreate(const char* data, uint
     OH_ArkUI_NativeModule_UIJsonWrapper** outOwned);
 /** Borrowed, NUL-terminated bytes; NULL wrapper returns NULL. */
 const char* OH_ArkUI_NativeModule_UIJsonWrapperGetData(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
-/** Byte count excluding the terminator. wrapper must be non-NULL. */
+/** Byte count excluding the terminator. NULL wrapper returns zero. */
 uint32_t OH_ArkUI_NativeModule_UIJsonWrapperGetSize(const OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);
 /** NULL is a no-op. Must not race with readers or another destroy. */
 void OH_ArkUI_NativeModule_UIJsonWrapperDestroy(OH_ArkUI_NativeModule_UIJsonWrapper* wrapper);

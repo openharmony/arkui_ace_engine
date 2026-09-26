@@ -192,6 +192,7 @@ TEST(UIJsonWrapperTest, immutableCopyMetadataNullAndConcurrentReaders)
     worker.join();
     OH_ArkUI_NativeModule_UIJsonWrapperDestroy(result);
     EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapperGetData(nullptr), nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_UIJsonWrapperGetSize(nullptr), 0u);
     OH_ArkUI_NativeModule_UIJsonWrapperDestroy(nullptr);
 }
 
