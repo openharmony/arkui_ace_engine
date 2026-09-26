@@ -45,10 +45,5 @@ ohos_unittest("capi_page_text_test") {
   ]
   external_deps = [ "bounds_checking_function:libsec_static" ]
   defines = [ "ARKUI_CAPI_UNITTEST" ]
-  cflags_cc = [
-    "-std=c++17",
-
-    # The wrapper's uint32_t/size_t overflow check is only needed on 32-bit.
-    "-Wno-tautological-constant-out-of-range-compare",
-  ]
+  cflags_cc = [ "-std=c++17" ]
 }

@@ -16,7 +16,6 @@
 #define FOUNDATION_ACE_PAGE_TEXT_JSON_H
 
 #include <algorithm>
-#include <charconv>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
@@ -66,15 +65,25 @@ public:
         return true;
     }
 
-    template<typename T>
-    bool Number(T value)
+    bool Number(int32_t value)
     {
-        char buffer[64];
-        auto result = std::to_chars(buffer, buffer + sizeof(buffer), value);
-        if (result.ec != std::errc()) {
+        char buffer[16];
+        const auto length = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "%d", value);
+        if (length < 0) {
             return Fail("Page text number serialization failed.");
         }
-        return Append({ buffer, static_cast<size_t>(result.ptr - buffer) });
+        return Append({ buffer, static_cast<size_t>(length) });
+    }
+
+    bool Number(float value)
+    {
+        char buffer[64];
+        const auto length = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "%.*g",
+            std::numeric_limits<float>::max_digits10, static_cast<double>(value));
+        if (length < 0) {
+            return Fail("Page text number serialization failed.");
+        }
+        return Append({ buffer, static_cast<size_t>(length) });
     }
 
     bool String(std::string_view value)

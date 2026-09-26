@@ -35,24 +35,26 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_UIJsonWrapperCreate(const char* data, uint
     if (!data) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (size >= std::numeric_limits<size_t>::max()) {
+    const size_t dataSize = static_cast<size_t>(size);
+    if (dataSize == std::numeric_limits<size_t>::max()) {
         return ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
+    const size_t bufferSize = dataSize + 1;
     auto* wrapper = new (std::nothrow) OH_ArkUI_NativeModule_UIJsonWrapper;
     if (!wrapper) {
         return ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
-    wrapper->data = static_cast<char*>(std::malloc(static_cast<size_t>(size) + 1));
+    wrapper->data = static_cast<char*>(std::malloc(bufferSize));
     if (!wrapper->data) {
         delete wrapper;
         return ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
-    if (memcpy_s(wrapper->data, static_cast<size_t>(size) + 1, data, size) != EOK) {
+    if (memcpy_s(wrapper->data, bufferSize, data, dataSize) != EOK) {
         std::free(wrapper->data);
         delete wrapper;
         return ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
-    wrapper->data[size] = '\0';
+    wrapper->data[dataSize] = '\0';
     wrapper->size = size;
     *outOwned = wrapper;
     return ARKUI_ERROR_CODE_NO_ERROR;
