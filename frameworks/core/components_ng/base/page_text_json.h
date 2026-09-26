@@ -78,9 +78,7 @@ public:
     bool Number(float value)
     {
         char buffer[64];
-        const int precision = static_cast<int>(std::numeric_limits<float>::max_digits10);
-        const auto length = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "%.*g",
-            precision, static_cast<double>(value));
+        const auto length = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "%.9g", static_cast<double>(value));
         if (length < 0) {
             return Fail("Page text number serialization failed.");
         }
