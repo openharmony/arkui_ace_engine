@@ -37,6 +37,7 @@ std::set<ArkUIPropertyHandle> g_propertySet;
 
 int32_t OH_ArkUI_RenderNodeUtils_AddRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AddRenderNode");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -60,6 +61,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AddRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
 ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(
     ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child, int32_t position)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt");
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         child, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
@@ -85,6 +87,7 @@ ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(
 
 int32_t OH_ArkUI_RenderNodeUtils_RemoveRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_RemoveRenderNode");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -107,6 +110,7 @@ int32_t OH_ArkUI_RenderNodeUtils_RemoveRenderNode(ArkUI_NodeHandle node, ArkUI_R
 
 int32_t OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NODE_DISPOSED(node, "Node has been disposed");
@@ -127,6 +131,7 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_RenderNodeUtils_Invalidate(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_Invalidate");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -139,6 +144,7 @@ int32_t OH_ArkUI_RenderNodeUtils_Invalidate(ArkUI_NodeHandle node)
 
 ArkUI_RenderNodeHandle OH_ArkUI_RenderNodeUtils_CreateNode()
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateNode");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
 
@@ -153,6 +159,7 @@ ArkUI_RenderNodeHandle OH_ArkUI_RenderNodeUtils_CreateNode()
 
 int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeNode");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -175,6 +182,7 @@ int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
 
 int32_t OH_ArkUI_RenderNodeUtils_AddChild(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AddChild");
     if (!(node && child)) {
         SET_ERROR_MESSAGE(
             OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or child is null");
@@ -194,6 +202,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AddChild(ArkUI_RenderNodeHandle node, ArkUI_Ren
 int32_t OH_ArkUI_RenderNodeUtils_InsertChildAfter(
     ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle child, ArkUI_RenderNodeHandle sibling)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_InsertChildAfter");
     if (!(node && child && sibling)) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node, child, or sibling is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -211,6 +220,7 @@ int32_t OH_ArkUI_RenderNodeUtils_InsertChildAfter(
 
 int32_t OH_ArkUI_RenderNodeUtils_RemoveChild(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_RemoveChild");
     if (!(node && child)) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or child is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -228,6 +238,7 @@ int32_t OH_ArkUI_RenderNodeUtils_RemoveChild(ArkUI_RenderNodeHandle node, ArkUI_
 
 int32_t OH_ArkUI_RenderNodeUtils_ClearChildren(ArkUI_RenderNodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_ClearChildren");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -243,6 +254,7 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearChildren(ArkUI_RenderNodeHandle node)
 
 int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t index, ArkUI_RenderNodeHandle* child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetChild");
     if (!child) {
         LOGF_ABORT("Render child output parameter is null");
     }
@@ -271,6 +283,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t i
 
 int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetFirstChild");
     if (!child) {
         LOGF_ABORT("Render child output parameter is null");
     }
@@ -294,6 +307,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkU
 
 int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetNextSibling");
     if (!sibling) {
         LOGF_ABORT("Render sibling output parameter is null");
     }
@@ -317,6 +331,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetPreviousSibling");
     if (!sibling) {
         LOGF_ABORT("Render sibling output parameter is null");
     }
@@ -341,6 +356,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node,
 int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
     ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle** children, int32_t* count)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetChildren");
     if (!children) {
         LOGF_ABORT("Render children output parameter is null");
     }
@@ -375,6 +391,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
 
 int32_t OH_ArkUI_RenderNodeUtils_GetChildrenCount(ArkUI_RenderNodeHandle node, int32_t* count)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetChildrenCount");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -394,6 +411,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildrenCount(ArkUI_RenderNodeHandle node, i
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBackgroundColor(ArkUI_RenderNodeHandle node, uint32_t color)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetBackgroundColor");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -409,6 +427,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBackgroundColor(ArkUI_RenderNodeHandle node,
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBackgroundColor(ArkUI_RenderNodeHandle node, uint32_t* color)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetBackgroundColor");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -424,6 +443,8 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBackgroundColor(ArkUI_RenderNodeHandle node,
 
 int32_t OH_ArkUI_RenderNodeUtils_SetOpacity(ArkUI_RenderNodeHandle node, float opacity)
 {
+    // guard restored
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetOpacity");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, opacity)) {
@@ -444,6 +465,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetOpacity(ArkUI_RenderNodeHandle node, float o
 
 int32_t OH_ArkUI_RenderNodeUtils_GetOpacity(ArkUI_RenderNodeHandle node, float* opacity)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetOpacity");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -459,6 +481,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetOpacity(ArkUI_RenderNodeHandle node, float* 
 
 int32_t OH_ArkUI_RenderNodeUtils_SetSize(ArkUI_RenderNodeHandle node, int32_t width, int32_t height)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetSize");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (width < 0 || height < 0) {
@@ -479,6 +502,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetSize(ArkUI_RenderNodeHandle node, int32_t wi
 
 int32_t OH_ArkUI_RenderNodeUtils_GetSize(ArkUI_RenderNodeHandle node, int32_t* width, int32_t* height)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetSize");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -494,6 +518,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetSize(ArkUI_RenderNodeHandle node, int32_t* w
 
 int32_t OH_ArkUI_RenderNodeUtils_SetPosition(ArkUI_RenderNodeHandle node, int32_t x, int32_t y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetPosition");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -509,6 +534,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetPosition(ArkUI_RenderNodeHandle node, int32_
 
 int32_t OH_ArkUI_RenderNodeUtils_GetPosition(ArkUI_RenderNodeHandle node, int32_t* x, int32_t* y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetPosition");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -524,6 +550,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPosition(ArkUI_RenderNodeHandle node, int32_
 
 int32_t OH_ArkUI_RenderNodeUtils_SetPivot(ArkUI_RenderNodeHandle node, float x, float y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetPivot");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -539,6 +566,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetPivot(ArkUI_RenderNodeHandle node, float x, 
 
 int32_t OH_ArkUI_RenderNodeUtils_GetPivot(ArkUI_RenderNodeHandle node, float* x, float* y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetPivot");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -554,6 +582,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPivot(ArkUI_RenderNodeHandle node, float* x,
 
 int32_t OH_ArkUI_RenderNodeUtils_SetScale(ArkUI_RenderNodeHandle node, float x, float y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetScale");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -569,6 +598,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetScale(ArkUI_RenderNodeHandle node, float x, 
 
 int32_t OH_ArkUI_RenderNodeUtils_GetScale(ArkUI_RenderNodeHandle node, float* x, float* y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetScale");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -584,6 +614,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetScale(ArkUI_RenderNodeHandle node, float* x,
 
 int32_t OH_ArkUI_RenderNodeUtils_SetTranslation(ArkUI_RenderNodeHandle node, float x, float y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetTranslation");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -599,6 +630,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetTranslation(ArkUI_RenderNodeHandle node, flo
 
 int32_t OH_ArkUI_RenderNodeUtils_GetTranslation(ArkUI_RenderNodeHandle node, float* x, float* y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetTranslation");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -614,6 +646,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetTranslation(ArkUI_RenderNodeHandle node, flo
 
 int32_t OH_ArkUI_RenderNodeUtils_SetRotation(ArkUI_RenderNodeHandle node, float x, float y, float z)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetRotation");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -629,6 +662,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetRotation(ArkUI_RenderNodeHandle node, float 
 
 int32_t OH_ArkUI_RenderNodeUtils_GetRotation(ArkUI_RenderNodeHandle node, float* x, float* y, float* z)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetRotation");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -644,6 +678,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRotation(ArkUI_RenderNodeHandle node, float*
 
 int32_t OH_ArkUI_RenderNodeUtils_SetTransform(ArkUI_RenderNodeHandle node, float* matrix)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetTransform");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -659,6 +694,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetTransform(ArkUI_RenderNodeHandle node, float
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowColor(ArkUI_RenderNodeHandle node, uint32_t color)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetShadowColor");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -674,6 +710,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowColor(ArkUI_RenderNodeHandle node, uin
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowColor(ArkUI_RenderNodeHandle node, uint32_t* color)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetShadowColor");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -689,6 +726,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowColor(ArkUI_RenderNodeHandle node, uin
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowOffset(ArkUI_RenderNodeHandle node, int32_t x, int32_t y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetShadowOffset");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -704,6 +742,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowOffset(ArkUI_RenderNodeHandle node, in
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowOffset(ArkUI_RenderNodeHandle node, int32_t* x, int32_t* y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetShadowOffset");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -719,6 +758,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowOffset(ArkUI_RenderNodeHandle node, in
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowAlpha(ArkUI_RenderNodeHandle node, float alpha)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetShadowAlpha");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, alpha)) {
@@ -738,6 +778,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowAlpha(ArkUI_RenderNodeHandle node, flo
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowAlpha(ArkUI_RenderNodeHandle node, float* alpha)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetShadowAlpha");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -753,6 +794,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowAlpha(ArkUI_RenderNodeHandle node, flo
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowElevation(ArkUI_RenderNodeHandle node, float elevation)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetShadowElevation");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (elevation < 0) {
@@ -772,6 +814,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowElevation(ArkUI_RenderNodeHandle node,
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowElevation(ArkUI_RenderNodeHandle node, float* radius)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetShadowElevation");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -787,6 +830,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowElevation(ArkUI_RenderNodeHandle node,
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowRadius(ArkUI_RenderNodeHandle node, float* radius)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetShadowRadius");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -802,6 +846,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowRadius(ArkUI_RenderNodeHandle node, fl
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowRadius(ArkUI_RenderNodeHandle node, float radius)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetShadowRadius");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (radius < 0) {
@@ -821,6 +866,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowRadius(ArkUI_RenderNodeHandle node, fl
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderStyle(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderStyleOption* borderStyle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetBorderStyle");
     if (node == nullptr || borderStyle == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "Render node or border style option is null");
@@ -839,6 +885,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderStyle(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderStyle(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderStyleOption** borderStyle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetBorderStyle");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
 
@@ -858,6 +905,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderStyle(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderWidth(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderWidthOption* borderWidth)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetBorderWidth");
     if (node == nullptr || borderWidth == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "Render node or border width option is null");
@@ -876,6 +924,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderWidth(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderWidth(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderWidth** borderWidth)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetBorderWidth");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -892,6 +941,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderWidth(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderColor(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderColor* borderColor)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetBorderColor");
     if (node == nullptr || borderColor == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "Render node or border color option is null");
@@ -910,6 +960,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderColor(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderColor** borderColor)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetBorderColor");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -927,6 +978,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, Ark
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node,
     ArkUI_NodeBorderRadiusOption* borderRadius)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetBorderRadius");
     if (node == nullptr || borderRadius == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "Render node or border radius option is null");
@@ -947,6 +999,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node,
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(ArkUI_RenderNodeHandle node,
     ArkUI_NodeBorderRadiusOption** borderRadius)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetBorderRadius");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -965,6 +1018,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(ArkUI_RenderNodeHandle node,
 
 int32_t OH_ArkUI_RenderNodeUtils_SetMarkNodeGroup(ArkUI_RenderNodeHandle node, bool markNodeGroup)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetMarkNodeGroup");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -981,6 +1035,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMarkNodeGroup(ArkUI_RenderNodeHandle node, b
 int32_t OH_ArkUI_RenderNodeUtils_SetBounds(ArkUI_RenderNodeHandle node,
     int32_t x, int32_t y, int32_t width, int32_t height)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetBounds");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (width < 0 || height < 0) {
@@ -1002,6 +1057,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBounds(ArkUI_RenderNodeHandle node,
 int32_t OH_ArkUI_RenderNodeUtils_GetBounds(ArkUI_RenderNodeHandle node, int32_t* x, int32_t* y, int32_t* width,
     int32_t* height)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetBounds");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1018,6 +1074,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBounds(ArkUI_RenderNodeHandle node, int32_t*
 
 int32_t OH_ArkUI_RenderNodeUtils_SetDrawRegion(ArkUI_RenderNodeHandle node, float x, float y, float w, float h)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetDrawRegion");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1033,6 +1090,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetDrawRegion(ArkUI_RenderNodeHandle node, floa
 
 int32_t OH_ArkUI_RenderNodeUtils_SetClipToFrame(ArkUI_RenderNodeHandle node, int32_t clipToFrame)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetClipToFrame");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, clipToFrame)) {
@@ -1052,6 +1110,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetClipToFrame(ArkUI_RenderNodeHandle node, int
 
 int32_t OH_ArkUI_RenderNodeUtils_GetClipToFrame(ArkUI_RenderNodeHandle node, int32_t* clipToFrame)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetClipToFrame");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1067,6 +1126,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetClipToFrame(ArkUI_RenderNodeHandle node, int
 
 int32_t OH_ArkUI_RenderNodeUtils_SetClipToBounds(ArkUI_RenderNodeHandle node, int32_t clipToBounds)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetClipToBounds");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, clipToBounds)) {
@@ -1086,6 +1146,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetClipToBounds(ArkUI_RenderNodeHandle node, in
 
 int32_t OH_ArkUI_RenderNodeUtils_GetClipToBounds(ArkUI_RenderNodeHandle node, int32_t* clipToBounds)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetClipToBounds");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1102,6 +1163,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetClipToBounds(ArkUI_RenderNodeHandle node, in
 int32_t OH_ArkUI_RenderNodeUtils_AttachContentModifier(
     ArkUI_RenderNodeHandle node, ArkUI_RenderContentModifierHandle modifier)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AttachContentModifier");
     if (node == nullptr || modifier == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or content modifier is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -1119,6 +1181,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachContentModifier(
 
 ArkUI_RenderContentModifierHandle OH_ArkUI_RenderNodeUtils_CreateContentModifier()
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateContentModifier");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     auto* modifierPtr = impl->getNodeModifiers()->getNDKRenderNodeModifier()->createModifier();
@@ -1132,6 +1195,7 @@ ArkUI_RenderContentModifierHandle OH_ArkUI_RenderNodeUtils_CreateContentModifier
 
 void OH_ArkUI_RenderNodeUtils_DisposeContentModifier(ArkUI_RenderContentModifierHandle modifier)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeContentModifier");
     CHECK_NULL_VOID(modifier);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
@@ -1144,6 +1208,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeContentModifier(ArkUI_RenderContentModifier
 int32_t OH_ArkUI_RenderNodeUtils_AttachFloatProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_FloatPropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AttachFloatProperty");
     if (modifier == nullptr || property == nullptr) {
         SET_ERROR_MESSAGE(
             OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content modifier or float property is null");
@@ -1163,6 +1228,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachFloatProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachVector2Property(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_Vector2PropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AttachVector2Property");
     if (modifier == nullptr || property == nullptr) {
         SET_ERROR_MESSAGE(
             OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content modifier or vector2 property is null");
@@ -1182,6 +1248,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachVector2Property(
 int32_t OH_ArkUI_RenderNodeUtils_AttachColorProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_ColorPropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AttachColorProperty");
     if (modifier == nullptr || property == nullptr) {
         SET_ERROR_MESSAGE(
             OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content modifier or color property is null");
@@ -1201,6 +1268,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachColorProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_FloatAnimatablePropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty");
     if (modifier == nullptr || property == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "Content modifier or float animatable property is null");
@@ -1220,6 +1288,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_Vector2AnimatablePropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty");
     if (modifier == nullptr || property == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
             __FUNCTION__, "Content modifier or vector2 animatable property is null");
@@ -1239,6 +1308,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_ColorAnimatablePropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty");
     if (modifier == nullptr || property == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
             __FUNCTION__, "Content modifier or color animatable property is null");
@@ -1257,6 +1327,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty(
 
 ArkUI_FloatPropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatProperty(float value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateFloatProperty");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     auto* propertyPtr = impl->getNodeModifiers()->getNDKRenderNodeModifier()->createFloatProperty(value);
@@ -1270,6 +1341,7 @@ ArkUI_FloatPropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatProperty(float val
 
 int32_t OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(ArkUI_FloatPropertyHandle property, float value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1285,6 +1357,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(ArkUI_FloatPropertyHandle
 
 int32_t OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(ArkUI_FloatPropertyHandle property, float* value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1300,6 +1373,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(ArkUI_FloatPropertyHandle
 
 void OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(ArkUI_FloatPropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeFloatProperty");
     CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
@@ -1311,6 +1385,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(ArkUI_FloatPropertyHandle pro
 
 ArkUI_Vector2PropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2Property(float x, float y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateVector2Property");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     auto* propertyPtr = impl->getNodeModifiers()->getNDKRenderNodeModifier()->createVector2Property(x, y);
@@ -1324,6 +1399,7 @@ ArkUI_Vector2PropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2Property(float
 
 int32_t OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(ArkUI_Vector2PropertyHandle property, float x, float y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1339,6 +1415,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(ArkUI_Vector2PropertyHa
 
 int32_t OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(ArkUI_Vector2PropertyHandle property, float* x, float* y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1354,6 +1431,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(ArkUI_Vector2PropertyHa
 
 void OH_ArkUI_RenderNodeUtils_DisposeVector2Property(ArkUI_Vector2PropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeVector2Property");
     CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
@@ -1365,6 +1443,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeVector2Property(ArkUI_Vector2PropertyHandle
 
 ArkUI_ColorPropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorProperty(uint32_t value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateColorProperty");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     auto* propertyPtr = impl->getNodeModifiers()->getNDKRenderNodeModifier()->createColorProperty(value);
@@ -1378,6 +1457,7 @@ ArkUI_ColorPropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorProperty(uint32_t 
 
 int32_t OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(ArkUI_ColorPropertyHandle property, uint32_t value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetColorPropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1393,6 +1473,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(ArkUI_ColorPropertyHandle
 
 int32_t OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(ArkUI_ColorPropertyHandle property, uint32_t* value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetColorPropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1408,6 +1489,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(ArkUI_ColorPropertyHandle
 
 void OH_ArkUI_RenderNodeUtils_DisposeColorProperty(ArkUI_ColorPropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeColorProperty");
     CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
@@ -1419,6 +1501,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeColorProperty(ArkUI_ColorPropertyHandle pro
 
 ArkUI_FloatAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatAnimatableProperty(float value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateFloatAnimatableProperty");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     auto* propertyPtr = impl->getNodeModifiers()->getNDKRenderNodeModifier()->createFloatAnimatableProperty(value);
@@ -1433,6 +1516,7 @@ ArkUI_FloatAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(
     ArkUI_FloatAnimatablePropertyHandle property, float value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1449,6 +1533,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(
 int32_t OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(
     ArkUI_FloatAnimatablePropertyHandle property, float* value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1464,6 +1549,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(
 
 void OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(ArkUI_FloatAnimatablePropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty");
     CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
@@ -1475,6 +1561,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(ArkUI_FloatAnimatab
 
 ArkUI_Vector2AnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2AnimatableProperty(float x, float y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateVector2AnimatableProperty");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     auto* propertyPtr = impl->getNodeModifiers()->getNDKRenderNodeModifier()->createVector2AnimatableProperty(x, y);
@@ -1489,6 +1576,7 @@ ArkUI_Vector2AnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2Anim
 int32_t OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(
     ArkUI_Vector2AnimatablePropertyHandle property, float x, float y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1505,6 +1593,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(
 int32_t OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(
     ArkUI_Vector2AnimatablePropertyHandle property, float* x, float* y)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1520,6 +1609,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(
 
 void OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(ArkUI_Vector2AnimatablePropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty");
     CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
@@ -1531,6 +1621,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(ArkUI_Vector2Anim
 
 ArkUI_ColorAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorAnimatableProperty(uint32_t value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_CreateColorAnimatableProperty");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     auto* propertyPtr = impl->getNodeModifiers()->getNDKRenderNodeModifier()->createColorAnimatableProperty(value);
@@ -1545,6 +1636,7 @@ ArkUI_ColorAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(
     ArkUI_ColorAnimatablePropertyHandle property, uint32_t value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1561,6 +1653,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(
 int32_t OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(
     ArkUI_ColorAnimatablePropertyHandle property, uint32_t* value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1576,6 +1669,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(
 
 void OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(ArkUI_ColorAnimatablePropertyHandle property)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty");
     CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
@@ -1588,6 +1682,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(ArkUI_ColorAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw(ArkUI_RenderContentModifierHandle modifier, void* userData,
     void (*callback)(ArkUI_DrawContext* context, void* userData))
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw");
     ACE_ENGINE_HISTOGRAM_BOOLEAN(METRIC_PREFIX_NATIVE_RENDER "SetContentModifierOnDraw",
         modifier != nullptr);
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -1719,6 +1814,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption(ArkUI_NodeBorderWidth
 void OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(
     ArkUI_NodeBorderWidthOption* option, float width, ArkUI_EdgeDirection direction)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth");
     CHECK_NULL_VOID(option);
     if (OHOS::Ace::LessNotEqual(width, 0.0)) {
         return;
@@ -1965,6 +2061,7 @@ void OH_ArkUI_RenderNodeUtils_SetCommandPathOptionCommands(ArkUI_CommandPathOpti
 
 int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeMaskOption* option)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetMask");
     if (node == nullptr || option == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or mask option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -2002,6 +2099,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_Rend
 
 int32_t OH_ArkUI_RenderNodeUtils_SetClip(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeClipOption* option)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetClip");
     if (node == nullptr || option == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or clip option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -2204,6 +2302,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(ArkUI_RenderNodeClipOp
 
 int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle* renderNode)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetRenderNode");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         renderNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -2227,6 +2326,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
 
 ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(ArkUI_NodeHandle node, int32_t* count)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount");
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(count, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Count is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -2244,6 +2344,7 @@ ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(ArkUI_NodeHa
 ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(
     ArkUI_NodeHandle node, int32_t position, ArkUI_RenderNodeHandle* child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_GetRenderNodeAt");
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(child, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
     if (position < 0) {
@@ -2294,6 +2395,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(ArkUI_RenderBlurStyleO
 int32_t OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(
     ArkUI_RenderNodeHandle node, ArkUI_RenderBlurStyleOption* option)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -2312,6 +2414,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(
 
 int32_t OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption(ArkUI_RenderNodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -2328,6 +2431,7 @@ int32_t OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption(ArkUI_RenderNodeHandl
 int32_t OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption(
     ArkUI_RenderNodeHandle node, ArkUI_RenderBlurStyleOption* option)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -2346,6 +2450,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption(
 
 int32_t OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption(ArkUI_RenderNodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -2361,6 +2466,7 @@ int32_t OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption(ArkUI_RenderNodeHandl
 
 int32_t OH_ArkUI_RenderNodeUtils_SetContentBlurOption(ArkUI_RenderNodeHandle node, ArkUI_RenderBlurStyleOption* option)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_SetContentBlurOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -2379,6 +2485,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetContentBlurOption(ArkUI_RenderNodeHandle nod
 
 int32_t OH_ArkUI_RenderNodeUtils_ResetContentBlurOption(ArkUI_RenderNodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_RenderNodeUtils_ResetContentBlurOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();

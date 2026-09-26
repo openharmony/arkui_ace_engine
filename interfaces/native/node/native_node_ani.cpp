@@ -15,6 +15,7 @@
 
 #include "native_node_ani.h"
 
+#include "node/config_manager.h"
 #include "node/node_extened.h"
 #include "node/node_model.h"
 #include "node/resource.h"
@@ -206,6 +207,7 @@ std::string GetArrayPropertyByNameRef(ani_env* env, ani_object value)
 extern "C" {
 int32_t OH_ArkUI_NativeModule_GetNodeHandleFromAniValue(ani_env* env, ani_object value, ArkUI_NodeHandle* handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_GetNodeHandleFromAniValue");
     if (env == nullptr) {
         LOGE("env is nullptr");
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Env parameter is null");
@@ -248,6 +250,7 @@ int32_t OH_ArkUI_NativeModule_GetContextFromAniValue(ani_env* env, ani_object co
 int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     ani_env* env, ani_object nodeContent, ArkUI_NodeContentHandle* content)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_GetNodeContentFromAniValue");
     if (env == nullptr) {
         LOGE("env is nullptr");
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Env parameter is null");

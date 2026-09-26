@@ -20,6 +20,7 @@
 
 namespace {
 std::atomic<int> g_printLogCount { 0 };
+std::atomic<int> g_diagnosticCount { 0 };
 } // namespace
 
 void ResetPrintLogCount()
@@ -30,6 +31,21 @@ void ResetPrintLogCount()
 int GetPrintLogCount()
 {
     return g_printLogCount.load(std::memory_order_relaxed);
+}
+
+int GetDiagnosticCount()
+{
+    return g_diagnosticCount.load(std::memory_order_relaxed);
+}
+
+void ResetDiagnosticCount()
+{
+    g_diagnosticCount.store(0, std::memory_order_relaxed);
+}
+
+void IncrementDiagnosticCount()
+{
+    g_diagnosticCount.fetch_add(1, std::memory_order_relaxed);
 }
 
 namespace OHOS::Ace {

@@ -1883,6 +1883,7 @@ extern "C" {
 
 int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeContent_AddNode");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
@@ -1899,6 +1900,7 @@ int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_Node
 
 int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node, int32_t position)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeContent_InsertNode");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
@@ -1915,6 +1917,7 @@ int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_N
 
 int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeContent_RemoveNode");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
@@ -1931,6 +1934,7 @@ int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_N
 
 int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle content, ArkUI_NodeContentCallback callback)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeContent_RegisterCallback");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
@@ -1959,6 +1963,7 @@ ArkUI_NodeContentHandle OH_ArkUI_NodeContentEvent_GetNodeContentHandle(ArkUI_Nod
 
 int32_t OH_ArkUI_NodeContent_SetUserData(ArkUI_NodeContentHandle content, void* userData)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeContent_SetUserData");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
@@ -1972,6 +1977,7 @@ int32_t OH_ArkUI_NodeContent_SetUserData(ArkUI_NodeContentHandle content, void* 
 
 void* OH_ArkUI_NodeContent_GetUserData(ArkUI_NodeContentHandle content)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeContent_GetUserData");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, nullptr);
     return impl->getNodeModifiers()->getNodeContentModifier()->getUserData(

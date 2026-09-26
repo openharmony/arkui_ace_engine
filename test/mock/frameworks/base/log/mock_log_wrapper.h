@@ -19,4 +19,9 @@
 void ResetPrintLogCount();
 int GetPrintLogCount();
 
+// 新增：诊断计数 API（由 config_manager 的 DiagnosticCallback 调用）
+int GetDiagnosticCount();
+void ResetDiagnosticCount();
+void IncrementDiagnosticCount();
+
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_LOG_MOCK_LOG_WRAPPER_H

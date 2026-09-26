@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::NodeModel::ConfigManager {
 namespace {
+
 constexpr char UI_THREAD_CHECK_NAME[] = "UI_THREAD";
 constexpr char UI_THREAD_CHECK_REASON[] = "C API must be called on the UI thread";
 constexpr char NODE_DISPOSED_CHECK_NAME[] = "NODE_DISPOSED";
