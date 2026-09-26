@@ -1276,6 +1276,14 @@ typedef enum {
     ARKUI_NAV_DESTINATION_STATE_ON_WILL_APPEAR = 6,
     /** Before the NavDestination removed from the component tree. */
     ARKUI_NAV_DESTINATION_STATE_ON_WILL_DISAPPEAR = 7,
+    /** The NavDestination is active. */
+    ARKUI_NAV_DESTINATION_STATE_ON_ACTIVE = 8,
+    /** The NavDestination is inactive. */
+    ARKUI_NAV_DESTINATION_STATE_ON_INACTIVE = 9,
+    /** Before the NavDestination is created. */
+    ARKUI_NAV_DESTINATION_STATE_ABOUT_TO_APPEAR = 10,
+    /** Before the NavDestination is destroyed. */
+    ARKUI_NAV_DESTINATION_STATE_ABOUT_TO_DISAPPEAR = 11,
     /** The NavDestination returns from the component.*/
     ARKUI_NAV_DESTINATION_STATE_ON_BACK_PRESS = 100,
 } ArkUI_NavDestinationState;

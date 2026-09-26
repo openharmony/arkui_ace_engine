@@ -109,6 +109,10 @@ declare namespace uiObserver {
         ON_WILL_HIDE = 5,
         ON_WILL_APPEAR = 6,
         ON_WILL_DISAPPEAR = 7,
+        ON_ACTIVE = 8,
+        ON_INACTIVE = 9,
+        ABOUT_TO_APPEAR = 10,
+        ABOUT_TO_DISAPPEAR = 11,
         ON_BACKPRESS = 100
     }
 

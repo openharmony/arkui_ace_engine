@@ -72,6 +72,9 @@ public:
         customNode_ = customNode;
     }
 
+    void FireAboutToAppear();
+    void FireAboutToDisappear();
+
     void SetNavDestinationMode(NavDestinationMode mode);
 
     NavDestinationMode GetNavDestinationMode() const;
