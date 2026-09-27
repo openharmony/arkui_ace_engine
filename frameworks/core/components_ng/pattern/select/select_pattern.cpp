@@ -2231,6 +2231,7 @@ void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
     if (jsonIsSelect->GetBool()) {
         SetSelected(jsonIsOn->GetInt());
         UpdateText(jsonIsOn->GetInt());
+        isSelected_ = true;
     }
 }
 
