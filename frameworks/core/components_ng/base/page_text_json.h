@@ -50,10 +50,20 @@ public:
         const size_t required = size_ + value.size() + 1;
         if (required > capacity_) {
             size_t capacity = std::max(required, capacity_ + std::min(capacity_, (limit + 1) - capacity_));
-            auto* data = static_cast<char*>(std::realloc(data_, capacity));
+            auto* data = static_cast<char*>(std::malloc(capacity));
             if (!data) {
                 return Fail("Page text JSON allocation failed.");
             }
+            for (size_t offset = 0; offset < size_;) {
+                const size_t length = std::min<size_t>(size_ - offset, SECUREC_MEM_MAX_LEN);
+                if (memcpy_s(data + offset, length, data_ + offset, length) != EOK) {
+                    std::free(data);
+                    return Fail("Page text JSON copy failed.");
+                }
+                offset += length;
+            }
+            data[size_] = '\0';
+            std::free(data_);
             data_ = data;
             capacity_ = capacity;
         }
