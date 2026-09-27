@@ -69,7 +69,7 @@ ace_unittest("inspector_test_ng") {
   if (is_host_product) {
     type = "host_components"
   }
-  sources = [ "inspector_test_ng.cpp", "page_text_collector_test_ng.cpp" ]
+  sources = [ "inspector_test_ng.cpp" ]
 }
 
 ace_unittest("simplified_inspector_test_ng") {
