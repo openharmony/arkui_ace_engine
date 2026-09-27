@@ -22,13 +22,15 @@ namespace OHOS::Ace::Framework {
 namespace {
 const NG::ArkUIIndicatorControllerModifier* GetIndicatorControllerModifier()
 {
-    static const NG::ArkUIIndicatorControllerModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
+    static const NG::ArkUIIndicatorControllerModifier* cachedModifier = []()
+        -> const NG::ArkUIIndicatorControllerModifier* {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("IndicatorComponent");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const NG::ArkUIIndicatorControllerModifier*>(
+        if (module == nullptr) {
+            return nullptr;
+        }
+        return reinterpret_cast<const NG::ArkUIIndicatorControllerModifier*>(
             module->GetCustomModifier("indicator_controller"));
-    }
+    }();
     return cachedModifier;
 }
 } // namespace

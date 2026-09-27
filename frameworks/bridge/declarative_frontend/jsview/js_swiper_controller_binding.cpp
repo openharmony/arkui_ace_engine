@@ -44,11 +44,17 @@ napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& er
 {
     napi_value code = nullptr;
     std::string codeStr = std::to_string(errCode);
-    napi_create_string_utf8(env, codeStr.c_str(), codeStr.length(), &code);
+    if (napi_create_string_utf8(env, codeStr.c_str(), codeStr.length(), &code) != napi_ok) {
+        return nullptr;
+    }
     napi_value msg = nullptr;
-    napi_create_string_utf8(env, errMsg.c_str(), errMsg.length(), &msg);
+    if (napi_create_string_utf8(env, errMsg.c_str(), errMsg.length(), &msg) != napi_ok) {
+        return nullptr;
+    }
     napi_value error = nullptr;
-    napi_create_error(env, code, msg, &error);
+    if (napi_create_error(env, code, msg, &error) != napi_ok) {
+        return nullptr;
+    }
     return error;
 }
 
@@ -87,15 +93,14 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
 
 const NG::NodeModifier::ArkUICustomSwiperControllerModifier* GetSwiperControllerModifier()
 {
-    static const NG::NodeModifier::ArkUICustomSwiperControllerModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
+    static const NG::NodeModifier::ArkUICustomSwiperControllerModifier* cachedModifier = []() {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
         if (module == nullptr) {
             LOGF_ABORT("Can't find swiper dynamic module");
         }
-        cachedModifier = reinterpret_cast<const NG::NodeModifier::ArkUICustomSwiperControllerModifier*>(
+        return reinterpret_cast<const NG::NodeModifier::ArkUICustomSwiperControllerModifier*>(
             module->GetCustomModifier("swiperController"));
-    }
+    }();
     return cachedModifier;
 }
 } // namespace
@@ -154,6 +159,7 @@ void JSSwiperControllerBinding::ShowNext(const JSCallbackInfo& args)
 void JSSwiperControllerBinding::ShowPrevious(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(controller_);
     if (auto* modifier = GetSwiperControllerModifier()) {
         modifier->showPrevious(controller_);
     }
@@ -266,6 +272,7 @@ void JSSwiperControllerBinding::NewPreloadItems(const JSCallbackInfo& args)
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
     auto env = reinterpret_cast<napi_env>(nativeEngine);
     auto asyncContext = std::make_shared<SwiperControllerAsyncContext>();
     asyncContext->env = env;
@@ -319,6 +326,10 @@ void JSSwiperControllerBinding::StopFakeDrag(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     bool ret = false;
+    if (!controller_) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(ret)));
+        return;
+    }
     if (auto* modifier = GetSwiperControllerModifier()) {
         ret = modifier->stopFakeDrag(controller_);
     }
@@ -329,6 +340,10 @@ void JSSwiperControllerBinding::IsFakeDragging(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     bool ret = false;
+    if (!controller_) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(ret)));
+        return;
+    }
     if (auto* modifier = GetSwiperControllerModifier()) {
         ret = modifier->isFakeDragging(controller_);
     }

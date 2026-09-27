@@ -40,6 +40,7 @@ constexpr int32_t MAX_PARSE_DEPTH = 3;
 constexpr uint32_t MAX_PARSE_LENGTH = 1024;
 constexpr uint32_t MAX_PARSE_PROPERTY_SIZE = 15;
 constexpr int32_t INVALID_DESTINATION_MODE = -1;
+constexpr uint32_t MAX_RECOVERY_PARAM_LEN = 110241024;
 constexpr char JS_STRINGIFIED_UNDEFINED[] = "undefined";
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
 constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
@@ -1818,7 +1819,14 @@ void JSNavigationStack::CallPushDestinationInner(const NG::NavdestinationRecover
     JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
     navPathInfo->SetProperty<std::string>("name", infoName);
     if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
-        navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
+        if (infoParam.size() > MAX_RECOVERY_PARAM_LEN) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "CallPushDestinationInner failed, infoParam too long!");
+        } else {
+            auto parsed = JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str());
+            if (parsed->IsObject()) {
+                navPathInfo->SetPropertyObject("param", parsed);
+            }
+        }
     }
     navPathInfo->SetProperty<int32_t>("mode", infoMode);
     JSRef<JSObject> navigationOptions = JSRef<JSObject>::New();
@@ -2231,6 +2239,10 @@ bool JSNavigationStack::GetOhmUrl(const RefPtr<NG::UINode>& customNode, std::str
     auto thisVal = (JSRef<JSObject>*)(thisObjTmp);
     CHECK_NULL_RETURN(thisVal, false);
     JSRef<JSObject> thisObj = *(thisVal);
+    if (thisObj->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination custom node this object is empty");
+        return false;
+    }
     auto constructor = thisObj->GetProperty("constructor");
     if (constructor->IsUndefined()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination file custom node is undefined");
@@ -2272,6 +2284,9 @@ std::string JSNavigationStack::GetComponentInfo(int32_t index)
         return "";
     }
     auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return "";
+    }
     auto info = pathInfo->GetPropertyValue<std::string>("componentInfo", "");
     JSRef<JSVal> undefinedVal = JSVal::Undefined();
     pathInfo->SetPropertyObject("componentInfo", undefinedVal);
