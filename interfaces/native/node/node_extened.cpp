@@ -272,6 +272,7 @@ int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
 
 int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)
 {
+    CHECK_UI_THREAD("SetMeasuredSize");
     if (node == nullptr || !CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
@@ -285,6 +286,7 @@ int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)
 
 int32_t SetLayoutPosition(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
+    CHECK_UI_THREAD("SetLayoutPosition");
     if (node == nullptr || !CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
@@ -322,6 +324,7 @@ int32_t GetLayoutConstraint(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* layou
 
 ArkUI_IntSize GetMeasuredSize(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("GetMeasuredSize");
     ArkUI_IntSize size = {0, 0};
     if (node == nullptr) {
         return size;
@@ -335,6 +338,7 @@ ArkUI_IntSize GetMeasuredSize(ArkUI_NodeHandle node)
 
 ArkUI_IntOffset GetLayoutPosition(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("GetLayoutPosition");
     ArkUI_IntOffset offset;
     if (node == nullptr) {
         return offset;
@@ -348,6 +352,7 @@ ArkUI_IntOffset GetLayoutPosition(ArkUI_NodeHandle node)
 
 int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 {
+    CHECK_UI_THREAD("MeasureNode");
     if (node == nullptr || constraint == nullptr || !CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node or layout constraint is invalid");
         return ERROR_CODE_PARAM_INVALID;
@@ -374,6 +379,7 @@ int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 
 int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
+    CHECK_UI_THREAD("LayoutNode");
     if (node == nullptr || !CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
