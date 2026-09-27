@@ -735,8 +735,8 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager013, TestSize.Level1)
     config->orientation_ = 1;
     uiExtensionManager->UpdateSessionViewportConfig(*config);
 
-    auto isDensityFollowHost = pattern->GetSessionViewportConfig().isDensityFollowHost_;
-    SessionViewportConfig newConfig { isDensityFollowHost, 2.0f, 1, 1, 1 };
+    auto dpiFollowStrategy = pattern->GetSessionViewportConfig().dpiFollowStrategy_;
+    SessionViewportConfig newConfig { dpiFollowStrategy, 2.0f, 1, 1, 1 };
     pattern->SetSessionViewportConfig(newConfig);
     EXPECT_NE(pattern->sessionWrapper_, nullptr);
     pattern->sessionWrapper_ = nullptr;

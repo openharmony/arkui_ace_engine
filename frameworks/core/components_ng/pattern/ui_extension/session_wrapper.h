@@ -141,7 +141,7 @@ public:
         WindowSizeChangeReason reason) const = 0;
     virtual bool NotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout = false) = 0;
-    virtual void SetDensityDpiImpl(bool densityDpi) {}
+    virtual void SetDensityDpiImpl(DpiFollowStrategy dpiFollowStrategy) {}
 
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;

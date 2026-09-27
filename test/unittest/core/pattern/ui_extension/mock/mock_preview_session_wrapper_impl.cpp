@@ -251,7 +251,7 @@ bool PreviewSessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     return true;
 }
 
-void PreviewSessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
+void PreviewSessionWrapperImpl::SetDensityDpiImpl(DpiFollowStrategy dpiFollowStrategy)
 {
 }
 

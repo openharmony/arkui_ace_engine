@@ -124,7 +124,7 @@ void PreviewUIExtensionPattern::OnConnect()
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
-    DispatchFollowHostDensity(GetDensityDpi());
+    DispatchFollowHostDensity(GetEffectiveDpiFollowStrategy());
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
@@ -291,6 +291,15 @@ void PreviewUIExtensionPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("displayArea: ").append(displayArea_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
     DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(ToString(state_)));
+    ContainerScope dpiScope(instanceId_);
+    auto dpiContext = PipelineBase::GetCurrentContext();
+    DumpLog::GetInstance().AddDesc(
+        std::string("dpiFollowStrategy: ").append(std::to_string(static_cast<int32_t>(dpiFollowStrategy_))));
+    DumpLog::GetInstance().AddDesc(
+        std::string("densityFollowHostMarked: ")
+            .append(std::to_string(dpiContext && dpiContext->IsUIExtensionDensityFollowHost())));
+    DumpLog::GetInstance().AddDesc(std::string("dpiFollowStrategyEffective: ")
+                                       .append(std::to_string(static_cast<int32_t>(GetEffectiveDpiFollowStrategy()))));
     std::string eventProxyStr = "[]";
     if (platformEventProxy_) {
         eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
@@ -331,6 +340,13 @@ void PreviewUIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("displayArea: ", displayArea_.ToString().c_str());
     json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
     json->Put("abilityState: ", ToString(state_));
+    ContainerScope dpiScope(instanceId_);
+    auto dpiContext = PipelineBase::GetCurrentContext();
+    json->Put("dpiFollowStrategy: ", std::to_string(static_cast<int32_t>(dpiFollowStrategy_)).c_str());
+    json->Put("densityFollowHostMarked: ",
+        std::to_string(dpiContext && dpiContext->IsUIExtensionDensityFollowHost()).c_str());
+    json->Put(
+        "dpiFollowStrategyEffective: ", std::to_string(static_cast<int32_t>(GetEffectiveDpiFollowStrategy())).c_str());
     std::string eventProxyStr = "[]";
     if (platformEventProxy_) {
         eventProxyStr = platformEventProxy_->GetCurEventProxyToString();

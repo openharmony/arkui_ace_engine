@@ -75,8 +75,9 @@ RefPtr<FrameNode> UIExtensionStatic::CreateFrameNode(
     return nullptr;
 }
 
-void UIExtensionStatic::UpdateUecConfig(FrameNode* frameNode, bool isTransferringCaller, bool densityDpi,
-    bool isWindowModeFollowHost, const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
+void UIExtensionStatic::UpdateUecConfig(FrameNode* frameNode, bool isTransferringCaller,
+    DpiFollowStrategy dpiFollowStrategy, bool isWindowModeFollowHost,
+    const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(frameNode->GetPattern());
@@ -85,7 +86,7 @@ void UIExtensionStatic::UpdateUecConfig(FrameNode* frameNode, bool isTransferrin
     if (pattern->GetIsTransferringCaller() != isTransferringCaller) {
         pattern->SetIsTransferringCaller(isTransferringCaller);
     }
-    pattern->SetDensityDpi(densityDpi);
+    pattern->SetDpiFollowStrategy(dpiFollowStrategy);
     pattern->SetIsWindowModeFollowHost(isWindowModeFollowHost);
     pattern->SetPlaceholderMap(placeholderMap);
 }

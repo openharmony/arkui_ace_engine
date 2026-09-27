@@ -28,6 +28,7 @@
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_utils.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
@@ -38,7 +39,6 @@
 namespace OHOS::Ace::Ani {
 #ifdef WINDOW_SCENE_SUPPORTED
 namespace {
-constexpr int32_t FOLLOW_HOST_DPI = 0;
 const char UI_EXTENSION_PLACEHOLDER_TYPE_INITIAL[] = "initPlaceholder";
 const char UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED[] = "undefinedPlaceholder";
 const char UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION[] = "rotationPlaceholder";
@@ -272,9 +272,9 @@ ani_status NativeUiExtension::SetUiextensionOption(
         "SetUiextensionOption isTransferringCaller: %{public}d, dpiFollowStrategy: %{public}d,"
         "isWindowModeFollowHost: %{public}d, placeholderMap size: %{public}d",
         isTransferringCaller, dpiFollowStrategy, isWindowModeFollowHost, static_cast<int32_t>(placeholderMap.size()));
-    bool densityDpi = (dpiFollowStrategy == FOLLOW_HOST_DPI) ? true : false;
+    NG::DpiFollowStrategy dpiFollowStrategyValue = NG::ParseDpiFollowStrategy(dpiFollowStrategy);
     NG::UIExtensionStatic::UpdateUecConfig(
-        frameNode, isTransferringCaller, densityDpi, isWindowModeFollowHost, placeholderMap);
+        frameNode, isTransferringCaller, dpiFollowStrategyValue, isWindowModeFollowHost, placeholderMap);
 #endif
     return ANI_OK;
 }

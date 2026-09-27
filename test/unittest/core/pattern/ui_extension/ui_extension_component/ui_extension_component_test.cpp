@@ -414,10 +414,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternValidSessionTest, TestSiz
     pattern->OnVisibleChange(true);
     pattern->OnVisibleChange(false);
     pattern->isVisible_ = true;
-    pattern->SetDensityDpi(true);
-    EXPECT_EQ(pattern->GetDensityDpi(), true);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    EXPECT_EQ(pattern->GetDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_HOST_DPI);
     pattern->OnDpiConfigurationUpdate();
-    EXPECT_EQ(pattern->GetDensityDpi(), true);
+    EXPECT_EQ(pattern->GetDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_HOST_DPI);
     pattern->OnWindowShow();
     pattern->OnWindowHide();
     const DirtySwapConfig config;
@@ -454,10 +454,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternInValidSessionTest, TestS
     pattern->OnVisibleChange(true);
     pattern->OnVisibleChange(false);
     pattern->isVisible_ = true;
-    pattern->SetDensityDpi(true);
-    EXPECT_EQ(pattern->GetDensityDpi(), true);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    EXPECT_EQ(pattern->GetDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_HOST_DPI);
     pattern->OnDpiConfigurationUpdate();
-    EXPECT_EQ(pattern->GetDensityDpi(), true);
+    EXPECT_EQ(pattern->GetDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_HOST_DPI);
     pattern->OnWindowShow();
     pattern->OnWindowHide();
     const DirtySwapConfig config;
@@ -1264,7 +1264,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPlaceholderTest, TestSize.Level1
 
 /**
  * @tc.name: UIExtensionComponentTest002
- * @tc.desc: Test pattern SetDensityDpi function
+ * @tc.desc: Test pattern SetDpiFollowStrategy function
  * @tc.type: FUNC
  */
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest002, TestSize.Level1)
@@ -1283,21 +1283,21 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest002, TestSize.Level
      */
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
-    bool densityDpi = pattern->GetDensityDpi();
+    bool densityDpi = pattern->GetDpiFollowStrategy() == DpiFollowStrategy::FOLLOW_HOST_DPI;
     EXPECT_FALSE(densityDpi);
 
     /**
-     * @tc.steps: step3. SetDensityDpi false
+     * @tc.steps: step3. SetDpiFollowStrategy FOLLOW_UI_EXTENSION_ABILITY_DPI
      */
-    pattern->SetDensityDpi(false);
-    densityDpi = pattern->GetDensityDpi();
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    densityDpi = pattern->GetDpiFollowStrategy() == DpiFollowStrategy::FOLLOW_HOST_DPI;
     EXPECT_FALSE(densityDpi);
 
     /**
-     * @tc.steps: step4. SetDensityDpi true
+     * @tc.steps: step4. SetDpiFollowStrategy FOLLOW_HOST_DPI
      */
-    pattern->SetDensityDpi(true);
-    densityDpi = pattern->GetDensityDpi();
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    densityDpi = pattern->GetDpiFollowStrategy() == DpiFollowStrategy::FOLLOW_HOST_DPI;
     EXPECT_TRUE(densityDpi);
 }
 
@@ -2437,7 +2437,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentEmbeddedInitOptionsTest
     config.wantWrap = wantWrap;
     config.sessionType = SessionType::EMBEDDED_UI_EXTENSION;
     config.placeholderMap = placeholderMap;
-    config.densityDpi = true;
+    config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
     config.isWindowModeFollowHost = true;
     model.Create(config);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -2445,7 +2445,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentEmbeddedInitOptionsTest
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    EXPECT_TRUE(pattern->densityDpi_);
+    EXPECT_TRUE(pattern->dpiFollowStrategy_ == DpiFollowStrategy::FOLLOW_HOST_DPI);
     EXPECT_TRUE(pattern->isWindowModeFollowHost_);
     EXPECT_FALSE(pattern->placeholderMap_.empty());
 
@@ -2454,5 +2454,58 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentEmbeddedInitOptionsTest
     ASSERT_NE(pattern->onDrawReadyCallback_, nullptr);
     pattern->onDrawReadyCallback_();
     EXPECT_TRUE(onDrawReadyCalled);
+}
+
+/**
+ * @tc.name: UIExtensionPatternDpiWhitelist001
+ * @tc.desc: Test pattern GetEffectiveDpiFollowStrategy composes dpi follow strategy tri-state with window switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternDpiWhitelist001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step1. strategy FOLLOW_UI_EXTENSION_ABILITY_DPI (default), window switch off
+     * @tc.expected: effective value is false (same as current behavior)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(false);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    EXPECT_EQ(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step2. strategy FOLLOW_HOST_DPI_ALL, window switch on
+     * @tc.expected: effective value is true (follows switch)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(true);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    EXPECT_NE(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step3. strategy FOLLOW_HOST_DPI_ALL, window switch off
+     * @tc.expected: effective value is false (follows switch)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(false);
+    EXPECT_EQ(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step4. strategy FOLLOW_UI_EXTENSION_ABILITY_DPI (default), window switch on
+     * @tc.expected: effective value is true (window switch forces default/provider strategy as
+     * FOLLOW_HOST_DPI_ALL)
+     */
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    pipeline->SetUIExtensionDensityFollowHost(true);
+    EXPECT_NE(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step5. strategy FOLLOW_HOST_DPI, window switch off
+     * @tc.expected: effective value is true (developer semantics kept)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(false);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    EXPECT_NE(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
 }
 } // namespace OHOS::Ace::NG

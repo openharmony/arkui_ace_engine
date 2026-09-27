@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/event/ace_events.h"
@@ -700,6 +700,157 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg014, TestSize.L
     sessionWrapper->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     sessionWrapper->CreateSession(want, config);
     EXPECT_EQ(parentWindowType, container->GetWindowType());
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewDpiWhitelist001
+ * @tc.desc: Test CreateSession composes dpiFollowStrategy_ and derived effective value (VM-3/VM-10).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewDpiWhitelist001, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    auto pattern = sessionWrapper->hostPattern_.Upgrade();
+    ASSERT_NE(pattern, nullptr);
+    AAFwk::Want want;
+    SessionConfig config;
+    sessionWrapper->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step1. strategy FOLLOW_UI_EXTENSION_ABILITY_DPI (default), window switch off
+     * @tc.expected: config carries raw strategy, effective value is false (same as current behavior)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(false);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().dpiFollowStrategy_,
+        DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    EXPECT_EQ(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step2. strategy FOLLOW_HOST_DPI_ALL, window switch on
+     * @tc.expected: config carries raw strategy, effective value is true (follows switch)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(true);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().dpiFollowStrategy_,
+        DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    EXPECT_NE(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step3. strategy FOLLOW_HOST_DPI_ALL, window switch off
+     * @tc.expected: effective value is false (follows switch)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(false);
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().dpiFollowStrategy_,
+        DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    EXPECT_EQ(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step4. strategy FOLLOW_UI_EXTENSION_ABILITY_DPI (default), window switch on
+     * @tc.expected: effective value is true (window switch forces default/provider strategy
+     * as FOLLOW_HOST_DPI_ALL)
+     */
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    pipeline->SetUIExtensionDensityFollowHost(true);
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().dpiFollowStrategy_,
+        DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    EXPECT_NE(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step5. strategy FOLLOW_HOST_DPI, window switch off
+     * @tc.expected: config carries raw strategy, effective value is true (developer semantics kept)
+     */
+    pipeline->SetUIExtensionDensityFollowHost(false);
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().dpiFollowStrategy_, DpiFollowStrategy::FOLLOW_HOST_DPI);
+    EXPECT_NE(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step6. strategy FOLLOW_HOST_DPI_ALL, window switch on (switch overrides strategy)
+     * @tc.expected: Rosen config receives FOLLOW_HOST_DPI_ALL (switch-prioritized effective strategy)
+     */
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    pipeline->SetUIExtensionDensityFollowHost(true);
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().dpiFollowStrategy_,
+        DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    EXPECT_NE(pattern->GetEffectiveDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    /**
+     * @tc.steps: step7. strategy FOLLOW_HOST_DPI, window switch on (switch overrides developer strategy)
+     * @tc.expected: effective strategy is FOLLOW_HOST_DPI_ALL (switch takes priority), raw stays FOLLOW_HOST_DPI
+     */
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().dpiFollowStrategy_,
+        DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    EXPECT_EQ(pattern->GetDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_HOST_DPI);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewParseDpiFollowStrategy001
+ * @tc.desc: Test ParseDpiFollowStrategy maps raw strategy values to enum with default fallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewParseDpiFollowStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. valid enum values (dts DpiFollowStrategy members)
+     * @tc.expected: mapped to corresponding native strategy
+     */
+    EXPECT_EQ(ParseDpiFollowStrategy(0), DpiFollowStrategy::FOLLOW_HOST_DPI);
+    EXPECT_EQ(ParseDpiFollowStrategy(1), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    EXPECT_EQ(ParseDpiFollowStrategy(2), DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+
+    /**
+     * @tc.steps: step2. invalid values (unset static frontend default -1, out-of-range)
+     * @tc.expected: fall back to default provider strategy
+     */
+    EXPECT_EQ(ParseDpiFollowStrategy(-1), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    EXPECT_EQ(ParseDpiFollowStrategy(3), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewDpiWhitelist003
+ * @tc.desc: Test UEC in UIExtension subwindow and EC in UIExtension window both keep FORBID_CASCADE guard (VM-7/VM-8).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewDpiWhitelist003, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    auto pattern = sessionWrapper->hostPattern_.Upgrade();
+    ASSERT_NE(pattern, nullptr);
+    int32_t errorCode = 0;
+    pattern->SetOnErrorCallback(
+        [&errorCode](int32_t code, const std::string& name, const std::string& message) { errorCode = code; });
+    AAFwk::Want want;
+    SessionConfig config;
+
+    /**
+     * @tc.steps: step1. UEC created in UIExtension ability host subwindow (mock instanceId 4 injects flags)
+     * @tc.expected: FORBID_CASCADE error 100013 still fired (nesting restriction kept, relaxation reverted)
+     */
+    sessionWrapper->instanceId_ = 4;
+    sessionWrapper->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(errorCode, 100013);
+
+    /**
+     * @tc.steps: step2. EC created in UIExtension window (mock IsUIExtensionWindow returns true)
+     * @tc.expected: FORBID_CASCADE error 100013 still fired (EC guard remains)
+     */
+    errorCode = 0;
+    sessionWrapper->instanceId_ = 3;
+    sessionWrapper->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
+    sessionWrapper->CreateSession(want, config);
+    EXPECT_EQ(errorCode, 100013);
 }
 
 /**

@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "interfaces/include/ws_common.h"
@@ -437,7 +438,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
     bool transferringCaller = false;
-    bool densityDpi = false;
+    NG::DpiFollowStrategy dpiFollowStrategy = NG::DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI;
     bool windowModeStrategy = false;
     std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
     if (info.Length() > 1 && info[1]->IsObject()) {
@@ -448,7 +449,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
         if (enableDensityDPI->IsNumber()) {
-            densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
+            dpiFollowStrategy = NG::ParseDpiFollowStrategy(enableDensityDPI->ToNumber<int32_t>());
         }
         JSRef<JSVal> windowModeStrategyValue = obj->GetProperty("windowModeFollowStrategy");
         if (windowModeStrategyValue->IsNumber()) {
@@ -457,7 +458,8 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         InsertPlaceholderObj(obj, placeholderMap);
         ResolveAreaPlaceholderParams(obj, placeholderMap);
     }
-    UIExtensionModel::GetInstance()->Create(want, placeholderMap, transferringCaller, densityDpi, windowModeStrategy);
+    UIExtensionModel::GetInstance()->Create(
+        want, placeholderMap, transferringCaller, dpiFollowStrategy, windowModeStrategy);
 }
 
 void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)

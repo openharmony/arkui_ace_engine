@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_utils.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
@@ -768,13 +769,11 @@ bool PreviewSessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     return true;
 }
     
-void PreviewSessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
+void PreviewSessionWrapperImpl::SetDensityDpiImpl(DpiFollowStrategy dpiFollowStrategy)
 {
     CHECK_NULL_VOID(session_);
-    if (isDensityDpi) {
-        float density = PipelineBase::GetCurrentDensity();
-        session_->NotifyDensityFollowHost(isDensityDpi, density);
-    }
+    float density = PipelineBase::GetCurrentDensity();
+    session_->NotifyDensityFollowHost(ConvertToRosenDpiFollowStrategy(dpiFollowStrategy), density);
 }
     
 void PreviewSessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
