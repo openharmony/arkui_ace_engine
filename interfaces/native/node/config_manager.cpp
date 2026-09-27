@@ -114,7 +114,8 @@ public:
 
     bool IsCurrentThreadSafe() const
     {
-        const auto* impl = GetBasicAPI();
+        const auto* full = GetFullImpl();
+        const auto* impl = full ? full->getBasicAPI() : nullptr;
         // Without the bridge there is no container/pipeline context either: treated as safe.
         return impl == nullptr || impl->isCurrentThreadSafe == nullptr || impl->isCurrentThreadSafe();
     }
@@ -143,7 +144,8 @@ private:
             return debugBuild != 0;
         }
 
-        const auto* impl = GetBasicAPI();
+        const auto* full = GetFullImpl();
+        const auto* impl = full ? full->getBasicAPI() : nullptr;
         const bool hasDebugGetter = impl != nullptr && impl->isDebugForParallel != nullptr;
         // Read readiness first so an initialization-time false value is never cached as final.
         const bool isDebugSet =
