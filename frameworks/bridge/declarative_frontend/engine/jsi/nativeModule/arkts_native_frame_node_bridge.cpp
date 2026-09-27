@@ -261,7 +261,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(EcmaVM* vm, const Touch
     touchInfoObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
-    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<TouchLocationInfo*>(&touchInfo)));
+    auto* touchInfoPtr = new TouchLocationInfo(touchInfo);
+    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(touchInfoPtr),
+        &SyncDestructorInterceptor<TouchLocationInfo>);
     return touchInfoObj;
 }
 

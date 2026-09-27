@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 #include <cstddef>
+#include <utility>
 
 #include "stack_base_test_ng.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/animation/geometry_transition.h"
@@ -24,6 +26,23 @@ namespace OHOS::Ace::NG {
 namespace {
 const int32_t FIRST_CHILD = 0;
 const int32_t SECOND_CHILD = 1;
+
+class DeadlineLayoutWrapper final : public LayoutWrapperNode {
+    DECLARE_ACE_TYPE(DeadlineLayoutWrapper, LayoutWrapperNode);
+
+public:
+    DeadlineLayoutWrapper(
+        WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
+        : LayoutWrapperNode(std::move(hostNode), std::move(geometryNode), std::move(layoutProperty))
+    {}
+
+    bool ReachResponseDeadline() const override
+    {
+        return reachResponseDeadline_;
+    }
+
+    bool reachResponseDeadline_ = false;
+};
 } // namespace
 class StackNewTestNG : public StackBaseTestNG {};
 
@@ -1068,6 +1087,7 @@ HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable001, TestSize.Level0)
      * @tc.steps: step2. Call IsAsyncLoadAvailable with null layoutProperty.
      * @tc.expected: step2. Return false.
      */
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(nullptr));
     EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
 }
 
@@ -1190,6 +1210,141 @@ HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable004, TestSize.Level0)
      * @tc.expected: step4. Return true.
      */
     EXPECT_TRUE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable005
+ * @tc.desc: Test implicit async measure against the previous frame size and current constraint cap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable005, TestSize.Level0)
+{
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = CreateStack([](StackModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto stackLayoutProperty = frameNode->GetLayoutProperty<StackLayoutProperty>();
+    ASSERT_NE(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateSyncLoad(false);
+
+    constexpr float width = 300.0f;
+    constexpr float height = 200.0f;
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(width, height);
+    constraint.selfIdealSize.Reset();
+    stackLayoutProperty->UpdateLayoutConstraint(constraint);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), stackLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->isConstraintNotChanged_ = true;
+
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(width, height));
+    EXPECT_TRUE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+
+    geometryNode->SetFrameSize(SizeF(width - 1.0f, height));
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+    geometryNode->SetFrameSize(SizeF(width, height - 1.0f));
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+    geometryNode->SetFrameSize(SizeF(0.0f, height));
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+    geometryNode->SetFrameSize(SizeF(width, 0.0f));
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable006
+ * @tc.desc: Test implicit async measure without geometry or a previous layout constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable006, TestSize.Level0)
+{
+    auto algorithm = StackLayoutAlgorithm();
+    auto stackLayoutProperty = AceType::MakeRefPtr<StackLayoutProperty>();
+    stackLayoutProperty->UpdateSyncLoad(false);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(300.0f, 200.0f));
+    auto wrapperWithoutConstraint = AceType::MakeRefPtr<LayoutWrapperNode>(
+        WeakPtr<FrameNode>(), geometryNode, stackLayoutProperty);
+    ASSERT_NE(wrapperWithoutConstraint, nullptr);
+    wrapperWithoutConstraint->isConstraintNotChanged_ = true;
+    EXPECT_FALSE(stackLayoutProperty->GetLayoutConstraint().has_value());
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(wrapperWithoutConstraint.GetRawPtr()));
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(300.0f, 200.0f);
+    constraint.selfIdealSize.Reset();
+    stackLayoutProperty->UpdateLayoutConstraint(constraint);
+    auto wrapperWithoutGeometry = AceType::MakeRefPtr<LayoutWrapperNode>(
+        WeakPtr<FrameNode>(), nullptr, stackLayoutProperty);
+    ASSERT_NE(wrapperWithoutGeometry, nullptr);
+    wrapperWithoutGeometry->isConstraintNotChanged_ = true;
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(wrapperWithoutGeometry.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable007
+ * @tc.desc: Test implicit async measure with known capped geometry and no host node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable007, TestSize.Level0)
+{
+    auto algorithm = StackLayoutAlgorithm();
+    auto stackLayoutProperty = AceType::MakeRefPtr<StackLayoutProperty>();
+    stackLayoutProperty->UpdateSyncLoad(false);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(300.0f, 200.0f);
+    constraint.selfIdealSize.Reset();
+    stackLayoutProperty->UpdateLayoutConstraint(constraint);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(constraint.maxSize);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        WeakPtr<FrameNode>(), geometryNode, stackLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->isConstraintNotChanged_ = true;
+
+    EXPECT_TRUE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: AsyncMeasureDeadline001
+ * @tc.desc: Stop measuring at the deadline and reset temporary state on the next measure pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, AsyncMeasureDeadline001, TestSize.Level0)
+{
+    auto frameNode = CreateStack([](StackModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto stackLayoutProperty = frameNode->GetLayoutProperty<StackLayoutProperty>();
+    ASSERT_NE(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateSyncLoad(false);
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(300.0f, 200.0f);
+    stackLayoutProperty->UpdateLayoutConstraint(constraint);
+
+    auto deadlineWrapper = AceType::MakeRefPtr<DeadlineLayoutWrapper>(
+        frameNode, frameNode->GetGeometryNode(), stackLayoutProperty);
+    ASSERT_NE(deadlineWrapper, nullptr);
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        WeakPtr<FrameNode>(), AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    deadlineWrapper->AppendChild(childWrapper);
+    deadlineWrapper->reachResponseDeadline_ = true;
+
+    StackLayoutAlgorithm algorithm;
+    algorithm.Measure(deadlineWrapper.GetRawPtr());
+    EXPECT_TRUE(algorithm.MeasureInNextFrame());
+
+    algorithm.layoutPolicyChildren_.emplace_back(childWrapper);
+    auto nextWrapper = AceType::MakeRefPtr<DeadlineLayoutWrapper>(
+        frameNode, frameNode->GetGeometryNode(), stackLayoutProperty);
+    ASSERT_NE(nextWrapper, nullptr);
+    algorithm.Measure(nextWrapper.GetRawPtr());
+
+    EXPECT_FALSE(algorithm.MeasureInNextFrame());
+    EXPECT_TRUE(algorithm.layoutPolicyChildren_.empty());
 }
 
 /**
@@ -1324,5 +1479,56 @@ HWTEST_F(StackNewTestNG, OnDirtyLayoutWrapperSwap003, TestSize.Level0)
     pattern->prevMeasureBreak_ = false;
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
     EXPECT_FALSE(pattern->prevMeasureBreak_);
+}
+
+/**
+ * @tc.name: PostAsyncLoadTask001
+ * @tc.desc: Mark Stack and its children dirty when async measure should continue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, PostAsyncLoadTask001, TestSize.Level0)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->FlushAsyncLoadTask();
+
+    auto frameNode = CreateStack([](StackModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<StackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->GetLayoutProperty()->CleanDirty();
+
+    pattern->prevMeasureBreak_ = true;
+    pattern->PostAsyncLoadTask();
+
+    context->FlushAsyncLoadTask();
+
+    EXPECT_TRUE(CheckMeasureSelfAndChildFlag(frameNode->GetLayoutProperty()->GetPropertyChangeFlag()));
+}
+
+/**
+ * @tc.name: PostAsyncLoadTask002
+ * @tc.desc: Do not mark Stack dirty when async measure has already completed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, PostAsyncLoadTask002, TestSize.Level0)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->FlushAsyncLoadTask();
+
+    auto frameNode = CreateStack([](StackModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<StackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->GetLayoutProperty()->CleanDirty();
+
+    pattern->prevMeasureBreak_ = true;
+    pattern->PostAsyncLoadTask();
+    pattern->prevMeasureBreak_ = false;
+
+    context->FlushAsyncLoadTask();
+
+    EXPECT_TRUE(CheckNoChanged(frameNode->GetLayoutProperty()->GetPropertyChangeFlag()));
 }
 } // namespace OHOS::Ace::NG

@@ -1278,8 +1278,6 @@ ArkUINativeModuleValue ImageBridge::SetOnComplete(ArkUIRuntimeCallInfo* runtimeC
             panda::NumberRef::New(vm, event.GetContentOffsetX()),
             panda::NumberRef::New(vm, event.GetContentOffsetY()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-        eventObject->SetNativePointerFieldCount(vm, 1);
-        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
         func->Call(vm, func.ToLocal(), params, 1);
     };
@@ -1333,8 +1331,6 @@ ArkUINativeModuleValue ImageBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
             panda::NumberRef::New(vm, event.GetComponentHeight()),
             panda::StringRef::NewFromUtf8(vm, event.GetErrorMessage().c_str()), errObject };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-        eventObject->SetNativePointerFieldCount(vm, 1);
-        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
         func->Call(vm, func.ToLocal(), params, 1);
     };

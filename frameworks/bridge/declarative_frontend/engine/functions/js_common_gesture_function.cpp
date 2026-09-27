@@ -40,7 +40,10 @@ JSRef<JSObject> JsCommonGestureFunction::GetTapLocation(const FingerInfo& finger
         "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     tapLocation->SetPropertyObject("getCurrentLocalPosition",
         JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPositionForFinger));
-    tapLocation->Wrap<FingerInfo>(const_cast<FingerInfo*>(&fingerInfo));
+    auto* fingerInfoPtr = new FingerInfo(fingerInfo);
+    tapLocation->Wrap<FingerInfo>(fingerInfoPtr, [](void* env, void* nativePtr, void* hint) {
+        delete static_cast<FingerInfo*>(nativePtr);
+    });
 
     return tapLocation;
 }

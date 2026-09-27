@@ -79,6 +79,7 @@ void JsClickFunction::Execute(const ClickInfo& info)
     });
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
+    obj->Wrap<ClickInfo>(nullptr);
 }
 
 void JsClickFunction::Execute(EcmaVM* vm, GestureEvent& info)
@@ -177,6 +178,7 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
 
     JSRef<JSVal> param = obj;
     JsWeakFunction::ExecuteJS(1, &param);
+    obj->Wrap<ClickInfo>(nullptr);
 }
 
 void JsWeakClickFunction::Execute(GestureEvent& info)
@@ -219,6 +221,7 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
     obj->Wrap<GestureEvent>(&info);
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
     JsWeakFunction::ExecuteJS(1, &param);
+    obj->Wrap<GestureEvent>(nullptr);
 }
 
 void JsWeakClickFunction::Execute(MouseInfo& info)
@@ -270,6 +273,7 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
     JsWeakFunction::ExecuteJS(1, &param);
+    obj->Wrap<MouseInfo>(nullptr);
 }
 
 } // namespace OHOS::Ace::Framework

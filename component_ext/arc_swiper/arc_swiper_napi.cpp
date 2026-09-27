@@ -19,6 +19,7 @@
 #include "arc_swiper_indicator.h"
 #include "ext_napi_utils.h"
 
+#include "base/utils/napi_scope_raii.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
@@ -218,20 +219,16 @@ napi_value JsOnChange(napi_env env, napi_callback_info info)
     }
     auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
     std::function<void(const BaseEventInfo*)> onChange = [asyncEvent](const BaseEventInfo* info) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(asyncEvent->GetEnv(), &scope);
+        ScopeRAII scope(asyncEvent->GetEnv());
         CHECK_NULL_VOID(scope);
 
         const auto* eventInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!eventInfo) {
-            napi_close_handle_scope(asyncEvent->GetEnv(), scope);
             return;
         }
         napi_value arrayValue = ExtNapiUtils::CreateInt32(asyncEvent->GetEnv(), eventInfo->GetIndex());
         napi_value argv[1] = { arrayValue };
         asyncEvent->Call(1, argv);
-
-        napi_close_handle_scope(asyncEvent->GetEnv(), scope);
     };
     auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
     CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
@@ -305,8 +302,7 @@ napi_value JsOnAnimationStart(napi_env env, napi_callback_info info)
     AnimationStartEvent onAnimationStart = [asyncEvent](int32_t index, int32_t targetIndex,
         const AnimationCallbackInfo& info) {
         napi_env env = asyncEvent->GetEnv();
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        ScopeRAII scope(env);
         CHECK_NULL_VOID(scope);
 
         napi_value arrayValueOne = ExtNapiUtils::CreateInt32(env, index);
@@ -315,8 +311,6 @@ napi_value JsOnAnimationStart(napi_env env, napi_callback_info info)
 
         napi_value argv[3] = { arrayValueOne, arrayValueTwo, arrayValueThree };
         asyncEvent->Call(3, argv);
-
-        napi_close_handle_scope(env, scope);
     };
     auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
     CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
@@ -337,8 +331,7 @@ napi_value JsOnAnimationEnd(napi_env env, napi_callback_info info)
     auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
     AnimationEndEvent onAnimationEnd = [asyncEvent](int32_t index, const AnimationCallbackInfo& info) {
         napi_env env = asyncEvent->GetEnv();
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        ScopeRAII scope(env);
         CHECK_NULL_VOID(scope);
 
         napi_value arrayValueOne = ExtNapiUtils::CreateInt32(env, index);
@@ -346,8 +339,6 @@ napi_value JsOnAnimationEnd(napi_env env, napi_callback_info info)
 
         napi_value argv[2] = { arrayValueOne, arrayValueTwo };
         asyncEvent->Call(2, argv);
-
-        napi_close_handle_scope(env, scope);
     };
     auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
     CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
@@ -368,8 +359,7 @@ napi_value JsOnGestureSwipe(napi_env env, napi_callback_info info)
     auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
     GestureSwipeEvent onGestureSwipe = [asyncEvent](int32_t index, const AnimationCallbackInfo& info) {
         napi_env env = asyncEvent->GetEnv();
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        ScopeRAII scope(env);
         CHECK_NULL_VOID(scope);
 
         napi_value arrayValueOne = ExtNapiUtils::CreateInt32(env, index);
@@ -377,8 +367,6 @@ napi_value JsOnGestureSwipe(napi_env env, napi_callback_info info)
 
         napi_value argv[2] = { arrayValueOne, arrayValueTwo };
         asyncEvent->Call(2, argv);
-
-        napi_close_handle_scope(env, scope);
     };
     auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
     CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
@@ -452,14 +440,12 @@ napi_value JsSetCustomContentTransition(napi_env env, napi_callback_info info)
         std::function<void(const RefPtr<SwiperContentTransitionProxy>&)> onTransition =
             [asyncEvent](const RefPtr<SwiperContentTransitionProxy>& proxy) {
             napi_env env = asyncEvent->GetEnv();
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
+            ScopeRAII scope(env);
             CHECK_NULL_VOID(scope);
 
             napi_value arrayValueOne = GetSwiperContentTransitionProxyJsObject(env, proxy);
             napi_value argv[1] = { arrayValueOne };
             asyncEvent->Call(1, argv);
-            napi_close_handle_scope(env, scope);
         };
         transitionInfo.transition = std::move(onTransition);
     }
@@ -526,11 +512,9 @@ napi_value FinishAnimation(napi_env env, napi_callback_info info)
     if (argc > 0 && ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_function)) {
         auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
         onFinish = [asyncEvent]() {
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(asyncEvent->GetEnv(), &scope);
+            ScopeRAII scope(asyncEvent->GetEnv());
             CHECK_NULL_VOID(scope);
             asyncEvent->Call(0, nullptr);
-            napi_close_handle_scope(asyncEvent->GetEnv(), scope);
         };
     }
     controller->FinishAnimation(onFinish);

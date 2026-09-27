@@ -21,11 +21,6 @@
 namespace OHOS::Ace::NG {
 
 /**
- * @brief Content-to-edge padding in VP for smart layout scale-up (UX spec).
- */
-constexpr double SMART_LAYOUT_CONTENT_PADDING = 12.0;
-
-/**
  * @brief Layout handling type for smart layout
  */
 enum class SmartLayoutType {

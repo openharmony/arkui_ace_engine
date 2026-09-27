@@ -22,6 +22,7 @@ group("capi_unittest") {
   deps = [
     "accessors:capi_accessors_unittest",
     "modifiers:capi_modifiers_unittest",
+    "runtime_check:runtime_check_unittest",
     "utils:capi_utils_unittest",
   ]
 }

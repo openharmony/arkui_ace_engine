@@ -68,6 +68,16 @@ ImageLoadingContext::~ImageLoadingContext()
             }
         }
     }
+    // clear the cache when GetSvgCacheSkipEnabled() is true and the type of image is SVG
+    if (SystemProperties::GetSvgCacheSkipEnabled() && imageObj_ && imageObj_->GetSVGDom()) {
+        auto pipelineCtx = PipelineContext::GetCurrentContext();
+        if (pipelineCtx) {
+            auto cache = pipelineCtx->GetImageCache();
+            if (cache) {
+                cache->ClearCacheImgObj(src_.GetKey());
+            }
+        }
+    }
 }
 
 SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize)

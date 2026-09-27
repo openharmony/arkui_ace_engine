@@ -152,9 +152,9 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
             resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
             resConfig->GetColorMode(), resConfig->GetInputDevice());
     }
-    sysResourceManager_ = newResMgr;
     {
         std::unique_lock<std::shared_mutex> lock(resourceMutex_);
+        sysResourceManager_ = newResMgr;
         resourceManager_ = sysResourceManager_;
     }
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();

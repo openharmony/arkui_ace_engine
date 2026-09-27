@@ -105,4 +105,17 @@ bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std
 
 void ResSchedReport::HandleSwiperChange(std::unordered_map<std::string, std::string>& payload)
 {}
+
+namespace {
+// Keep in sync with RES_TYPE_DIALOG_EVENT in frameworks/base/ressched/ressched_report.cpp.
+constexpr uint32_t RES_TYPE_DIALOG_EVENT = 225;
+}
+
+void ResSchedReport::ReportDialogShow()
+{
+    if (reportDataFunc_) {
+        std::unordered_map<std::string, std::string> payload;
+        reportDataFunc_(RES_TYPE_DIALOG_EVENT, 0, payload);
+    }
+}
 } // namespace OHOS::Ace

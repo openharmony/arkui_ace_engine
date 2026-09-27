@@ -99,7 +99,6 @@ public:
     bool IsShowMouseMenu();
     bool IsCurrentMenuVisibile();
     bool IsHandleReverse();
-    bool IsOwnerClipContent();
     void RemoveSelectionHoldCallback();
     void SetSelectionHoldCallback();
 

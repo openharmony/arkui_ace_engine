@@ -51,12 +51,12 @@ ArkUINativeModuleValue StackBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtimeCal
 
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    bool syncLoad = true;
-    if (!argSyncLoad->IsUndefined() && !argSyncLoad->IsNull()) {
-        syncLoad = argSyncLoad->BooleaValue(vm);
+    if (argSyncLoad->IsUndefined() || argSyncLoad->IsNull()) {
+        GetArkUINodeModifiers()->getStackModifier()->resetSyncLoad(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getStackModifier()->setSyncLoad(nativeNode, argSyncLoad->BooleaValue(vm));
     }
 
-    GetArkUINodeModifiers()->getStackModifier()->setSyncLoad(nativeNode, syncLoad);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,9 @@
 #include "image_base.h"
 
 #include "base/image/image_defines.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/image/mock_image_loader.h"
 
 namespace OHOS::Ace::NG {
 class ImageTestTwoNg : public ImageBases {};
@@ -160,6 +163,166 @@ HWTEST_F(ImageTestTwoNg, ImagePatternOnRecycle, TestSize.Level0)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->OnRecycle();
     EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnRecycleReleaseDmaPixelMapOnBackground
+ * @tc.desc: release the Media PixelMap backing a recycled DMA image on a background thread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnRecycleReleaseDmaPixelMapOnBackground, TestSize.Level0)
+{
+    for (auto& thread : g_threads) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+    g_threads.clear();
+
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    bool released = false;
+    std::thread::id releaseThreadId;
+    auto rawPixelMap = reinterpret_cast<Media::PixelMap*>(new char);
+    auto mediaPixelMap = std::shared_ptr<Media::PixelMap>(rawPixelMap, [&released, &releaseThreadId](auto* pixelMap) {
+        releaseThreadId = std::this_thread::get_id();
+        released = true;
+        delete reinterpret_cast<char*>(pixelMap);
+    });
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pixelMap, GetAllocatorType()).WillOnce(Return(AllocatorType::DMA_ALLOC));
+    EXPECT_CALL(*pixelMap, GetPixelMapSharedPtr()).WillOnce(Return(mediaPixelMap));
+    imagePattern->image_ = AceType::MakeRefPtr<PixelMapImage>(pixelMap);
+    pixelMap = nullptr;
+    mediaPixelMap.reset();
+
+    auto recycleThreadId = std::this_thread::get_id();
+    imagePattern->OnRecycle();
+    for (auto& thread : g_threads) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+    g_threads.clear();
+
+    EXPECT_TRUE(released);
+    EXPECT_NE(releaseThreadId, recycleThreadId);
+}
+
+/**
+ * @tc.name: ImagePatternOnRecycleSkipNonDmaPixelMap
+ * @tc.desc: do not post a background release task for a recycled non-DMA image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnRecycleSkipNonDmaPixelMap, TestSize.Level0)
+{
+    for (auto& thread : g_threads) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+    g_threads.clear();
+
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pixelMap, GetAllocatorType()).WillOnce(Return(AllocatorType::HEAP_ALLOC));
+    EXPECT_CALL(*pixelMap, GetPixelMapSharedPtr()).Times(0);
+    imagePattern->image_ = AceType::MakeRefPtr<PixelMapImage>(pixelMap);
+
+    imagePattern->OnRecycle();
+
+    EXPECT_EQ(imagePattern->image_, nullptr);
+    EXPECT_TRUE(g_threads.empty());
+}
+
+/**
+ * @tc.name: ImagePatternOnRecycleWithoutHostOrRenderContext
+ * @tc.desc: recycle safely when the image pattern has no host or its host has no render context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnRecycleWithoutHostOrRenderContext, TestSize.Level0)
+{
+    auto detachedPattern = AceType::MakeRefPtr<ImagePattern>();
+    detachedPattern->OnRecycle();
+
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto renderContext = frameNode->renderContext_;
+    ASSERT_NE(renderContext, nullptr);
+    frameNode->renderContext_.Reset();
+
+    imagePattern->OnRecycle();
+
+    EXPECT_EQ(frameNode->GetRenderContext(), nullptr);
+    frameNode->renderContext_ = renderContext;
+}
+
+/**
+ * @tc.name: ImagePatternOnRecycleCollectDmaPixelMapBranches
+ * @tc.desc: cover null, unique, and duplicated DMA PixelMap collection paths.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnRecycleCollectDmaPixelMapBranches, TestSize.Level0)
+{
+    for (auto& thread : g_threads) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+    g_threads.clear();
+
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto nullMediaPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*nullMediaPixelMap, GetAllocatorType()).WillOnce(Return(AllocatorType::DMA_ALLOC));
+    EXPECT_CALL(*nullMediaPixelMap, GetPixelMapSharedPtr()).WillOnce(Return(nullptr));
+
+    auto rawMediaPixelMapA = reinterpret_cast<Media::PixelMap*>(new char);
+    auto mediaPixelMapA = std::shared_ptr<Media::PixelMap>(
+        rawMediaPixelMapA, [](auto* pixelMap) { delete reinterpret_cast<char*>(pixelMap); });
+    auto dmaPixelMapA = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*dmaPixelMapA, GetAllocatorType()).Times(2).WillRepeatedly(Return(AllocatorType::DMA_ALLOC));
+    EXPECT_CALL(*dmaPixelMapA, GetPixelMapSharedPtr()).Times(2).WillRepeatedly(Return(mediaPixelMapA));
+
+    auto rawMediaPixelMapB = reinterpret_cast<Media::PixelMap*>(new char);
+    auto mediaPixelMapB = std::shared_ptr<Media::PixelMap>(
+        rawMediaPixelMapB, [](auto* pixelMap) { delete reinterpret_cast<char*>(pixelMap); });
+    auto dmaPixelMapB = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*dmaPixelMapB, GetAllocatorType()).WillOnce(Return(AllocatorType::DMA_ALLOC));
+    EXPECT_CALL(*dmaPixelMapB, GetPixelMapSharedPtr()).WillOnce(Return(mediaPixelMapB));
+
+    auto dmaImageA = AceType::MakeRefPtr<PixelMapImage>(dmaPixelMapA);
+    imagePattern->image_ = AceType::MakeRefPtr<PixelMapImage>(nullptr);
+    imagePattern->altImage_ = AceType::MakeRefPtr<PixelMapImage>(nullMediaPixelMap);
+    imagePattern->altErrorImage_ = dmaImageA;
+    imagePattern->loadingCtx_ =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr), true);
+    imagePattern->loadingCtx_->canvasImage_ = dmaImageA;
+    imagePattern->altLoadingCtx_ =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr), true);
+    imagePattern->altLoadingCtx_->canvasImage_ = AceType::MakeRefPtr<PixelMapImage>(dmaPixelMapB);
+
+    imagePattern->OnRecycle();
+
+    EXPECT_EQ(g_threads.size(), 1u);
+    for (auto& thread : g_threads) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+    g_threads.clear();
 }
 
 /**
