@@ -211,7 +211,6 @@ void NavDestinationEventHub::FireOnWillAppear()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "%{public}s lifecycle change to onWillAppear state. navdestinationId:%{public}d, navigationId:%{public}d",
         name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
-    navDestination->FireAboutToAppear();
     state_ = NavDestinationState::ON_WILL_APPEAR;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_APPEAR);
