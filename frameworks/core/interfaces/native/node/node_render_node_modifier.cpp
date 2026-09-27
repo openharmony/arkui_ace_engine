@@ -490,6 +490,13 @@ ArkUI_Int32 GetId(ArkUIRenderNodeHandle node)
     return nodePtr->GetId();
 }
 
+ArkUIRSNodeHandle GetRSNode(ArkUIRenderNodeHandle node)
+{
+    auto rsNode = GetRsNodeFromStruct(node);
+    CHECK_NULL_RETURN(rsNode, nullptr);
+    return reinterpret_cast<ArkUIRSNodeHandle>(rsNode.get());
+}
+
 int32_t GetChildIndex(std::shared_ptr<RSNode> parent, std::shared_ptr<RSNode> child)
 {
     CHECK_NULL_RETURN(parent, -1);
@@ -2683,6 +2690,7 @@ const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()
         .resetForegroundBlurOption = ResetForegroundBlurOption,
         .setContentBlurOption = SetContentBlurOption,
         .resetContentBlurOption = ResetContentBlurOption,
+        .getRSNode = GetRSNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -84,6 +84,7 @@ template("ace_core_interfaces_native_node") {
       "node/navigator_modifier.cpp",
       "node/node_adapter_impl.cpp",
       "node/node_animate.cpp",
+      "node/animation_group_util.cpp",
       "node/node_api.cpp",
       "node/node_api_multi_thread.cpp",
       "node/node_arc_list_item_modifier.cpp",

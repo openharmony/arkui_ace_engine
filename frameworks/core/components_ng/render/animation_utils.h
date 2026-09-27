@@ -21,6 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "core/pipeline/pipeline_base.h"
+#include "ui/animation/animation_constants.h"
 
 namespace OHOS::Rosen {
 class RSUIContext;
@@ -136,6 +137,21 @@ public:
     static void AddInteractiveAnimation(
         const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
         const std::function<void()>& callback);
+
+    static std::shared_ptr<AnimationUtils::InteractiveAnimation> CreateGroupInteractiveAnimation(
+        const InteractiveAnimationCallback& addCallback, const AnimationOption& option,
+        const RefPtr<Curve>& curve, const FinishCallback& callback);
+
+    static void FinishInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+        InteractiveAnimationFinishPosition position);
+
+    static void PauseInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
+
+    static InteractiveAnimationStatus GetInteractiveAnimationStatus(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
+
     static void SetNavGroupNodeTransAnimationCallback();
     static std::shared_ptr<Rosen::RSUIContext> GetCurrentRSUIContext(RefPtr<PipelineBase> context);
     static uint64_t GetRSUIContextToken(RefPtr<PipelineBase> context);

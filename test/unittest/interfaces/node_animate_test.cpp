@@ -1638,4 +1638,653 @@ HWTEST_F(NodeAnimateTest, MotionPathOptions_SetRotatable_NullOptions_001, TestSi
     EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_SetRotatable"), std::string::npos);
     EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
 }
+
+// =============================================================================
+// AnimationGroup v2 — PropertyAnimation tests
+// =============================================================================
+
+/**
+ * @tc.name: PropertyAnimation_Create_001
+ * @tc.desc: Test PropertyAnimation_Create with valid and invalid property types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_Create_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION);
+    ASSERT_NE(anim, nullptr);
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+
+    anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION_Z);
+    ASSERT_NE(anim, nullptr);
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+
+    anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_BACKGROUND_COLOR);
+    ASSERT_NE(anim, nullptr);
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+
+    anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(
+        static_cast<OH_ArkUI_AnimationPropertyType>(-1));
+    EXPECT_EQ(anim, nullptr);
+
+    anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(
+        static_cast<OH_ArkUI_AnimationPropertyType>(999));
+    EXPECT_EQ(anim, nullptr);
+}
+
+/**
+ * @tc.name: PropertyAnimation_SetFromValue_001
+ * @tc.desc: Test SetFromValue with correct and incorrect value sizes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_SetFromValue_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION);
+    ASSERT_NE(anim, nullptr);
+
+    ArkUI_NumberValue val2[2] = {{.f32 = 10.0f}, {.f32 = 20.0f}};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, val2, 2), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue val1[1] = {{.f32 = 10.0f}};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, val1, 1),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, nullptr, 2),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+/**
+ * @tc.name: PropertyAnimation_SetFromValue_TranslationZ_001
+ * @tc.desc: Test SetFromValue for TRANSLATION_Z requires exactly 1 f32 value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_SetFromValue_TranslationZ_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION_Z);
+    ASSERT_NE(anim, nullptr);
+
+    ArkUI_NumberValue val[1] = {{.f32 = 5.0f}};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, val, 1), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetToValue(anim, val, 1), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue val2[2] = {{.f32 = 5.0f}, {.f32 = 6.0f}};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, val2, 2),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+/**
+ * @tc.name: PropertyAnimation_SetFromValue_OpacityRange_001
+ * @tc.desc: Test SetFromValue rejects opacity outside [0, 1].
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_SetFromValue_OpacityRange_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+
+    ArkUI_NumberValue valOk[1] = {{.f32 = 0.5f}};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, valOk, 1), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NumberValue valNeg[1] = {{.f32 = -0.1f}};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, valNeg, 1),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_NumberValue valOver[1] = {{.f32 = 1.1f}};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(anim, valOver, 1),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+/**
+ * @tc.name: PropertyAnimation_GetFromValue_NotSet_001
+ * @tc.desc: Test GetFromValue returns NO_ATTRIBUTE_FOUND when not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_GetFromValue_NotSet_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+
+    ArkUI_NumberValue out[1] = {};
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_GetFromValue(anim, out, 1),
+        ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+/**
+ * @tc.name: PropertyAnimation_SetDuration_001
+ * @tc.desc: Test SetDuration rejects non-positive values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_SetDuration_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetDuration(anim, 500), ARKUI_ERROR_CODE_NO_ERROR);
+    int32_t duration = 0;
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_GetDuration(anim, &duration), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(duration, 500);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetDuration(anim, 0),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetDuration(anim, -1),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+/**
+ * @tc.name: PropertyAnimation_SetTempo_001
+ * @tc.desc: Test SetTempo rejects non-positive values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_SetTempo_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetTempo(anim, 2.0f), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetTempo(anim, 0.0f),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetTempo(anim, -1.0f),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+/**
+ * @tc.name: PropertyAnimation_SetCurve_SpringAllowed_001
+ * @tc.desc: Test SetCurve accepts spring curves (duration-independent) on property animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_SetCurve_SpringAllowed_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+
+    auto* spring = OH_ArkUI_Curve_CreateSpringMotion(0.3f, 0.5f, 0.0f);
+    ASSERT_NE(spring, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetCurve(anim, spring), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_CurveHandle outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_GetCurve(anim, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(outBorrowedCurve, nullptr);
+
+    OH_ArkUI_Curve_DisposeCurve(spring);
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+/**
+ * @tc.name: PropertyAnimation_GetCurve_OutParamName_001
+ * @tc.desc: Test GetCurve outputs into outBorrowedCurve parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PropertyAnimation_GetCurve_OutParamName_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+
+    ArkUI_CurveHandle outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_GetCurve(anim, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND);
+
+    auto* linear = OH_ArkUI_Curve_CreateCurveByType(ARKUI_CURVE_LINEAR);
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetCurve(anim, linear), ARKUI_ERROR_CODE_NO_ERROR);
+
+    outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_GetCurve(anim, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(outBorrowedCurve, nullptr);
+
+    OH_ArkUI_Curve_DisposeCurve(linear);
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+}
+
+// =============================================================================
+// AnimationGroup v2 — KeyframeAnimation tests
+// =============================================================================
+
+/**
+ * @tc.name: KeyframeAnimation_Create_001
+ * @tc.desc: Test KeyframeAnimation_Create with valid and invalid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimation_Create_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+
+    auto* kf = OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY, 3);
+    ASSERT_NE(kf, nullptr);
+    OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(kf);
+
+    auto* kf2 = OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION_Z, 2);
+    ASSERT_NE(kf2, nullptr);
+    OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(kf2);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_Create(
+        static_cast<OH_ArkUI_AnimationPropertyType>(-1), 2), nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY, 1), nullptr);
+}
+
+/**
+ * @tc.name: KeyframeAnimation_SetKeyTime_001
+ * @tc.desc: Test SetKeyTime validates index and keyTime range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimation_SetKeyTime_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* kf = OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY, 3);
+    ASSERT_NE(kf, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTime(kf, 0, 0.0f), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTime(kf, 1, 0.5f), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTime(kf, 2, 1.0f), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTime(kf, 3, 0.0f),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTime(kf, 0, -0.1f),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTime(kf, 0, 1.1f),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(kf);
+}
+
+/**
+ * @tc.name: KeyframeAnimation_SetCurve_RejectsSpring_001
+ * @tc.desc: Test SetCurve rejects duration-independent curves on keyframe animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimation_SetCurve_RejectsSpring_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* kf = OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY, 2);
+    ASSERT_NE(kf, nullptr);
+
+    auto* spring = OH_ArkUI_Curve_CreateSpringMotion(0.3f, 0.5f, 0.0f);
+    ASSERT_NE(spring, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetCurve(kf, 0, spring), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_Curve_DisposeCurve(spring);
+    OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(kf);
+}
+
+/**
+ * @tc.name: KeyframeAnimation_GetCurve_OutParamName_001
+ * @tc.desc: Test GetCurve outputs into outBorrowedCurve parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimation_GetCurve_OutParamName_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* kf = OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY, 2);
+    ASSERT_NE(kf, nullptr);
+
+    auto* linear = OH_ArkUI_Curve_CreateCurveByType(ARKUI_CURVE_LINEAR);
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetCurve(kf, 0, linear), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_CurveHandle outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_GetCurve(kf, 0, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(outBorrowedCurve, nullptr);
+
+    OH_ArkUI_Curve_DisposeCurve(linear);
+    OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(kf);
+}
+
+// =============================================================================
+// AnimationGroup v2 — PathAnimation tests
+// =============================================================================
+
+/**
+ * @tc.name: PathAnimation_SetCurve_RejectsSpring_001
+ * @tc.desc: Test SetCurve rejects duration-independent curves on path animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PathAnimation_SetCurve_RejectsSpring_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* path = OH_ArkUI_NativeModule_PathAnimation_Create("M0,0 L100,100");
+    ASSERT_NE(path, nullptr);
+
+    auto* spring = OH_ArkUI_Curve_CreateInterpolatingSpring(0.0f, 1.0f, 100.0f, 10.0f);
+    ASSERT_NE(spring, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PathAnimation_SetCurve(path, spring),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_Curve_DisposeCurve(spring);
+    OH_ArkUI_NativeModule_PathAnimation_Destroy(path);
+}
+
+/**
+ * @tc.name: PathAnimation_GetCurve_OutParamName_001
+ * @tc.desc: Test GetCurve outputs into outBorrowedCurve parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, PathAnimation_GetCurve_OutParamName_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* path = OH_ArkUI_NativeModule_PathAnimation_Create("M0,0 L100,100");
+    ASSERT_NE(path, nullptr);
+
+    ArkUI_CurveHandle outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_PathAnimation_GetCurve(path, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND);
+
+    auto* linear = OH_ArkUI_Curve_CreateCurveByType(ARKUI_CURVE_LINEAR);
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PathAnimation_SetCurve(path, linear), ARKUI_ERROR_CODE_NO_ERROR);
+
+    outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_PathAnimation_GetCurve(path, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(outBorrowedCurve, nullptr);
+
+    OH_ArkUI_Curve_DisposeCurve(linear);
+    OH_ArkUI_NativeModule_PathAnimation_Destroy(path);
+}
+
+// =============================================================================
+// AnimationGroup v2 — AnimationGroup tests
+// =============================================================================
+
+/**
+ * @tc.name: AnimationGroup_SetCurve_RejectsSpring_001
+ * @tc.desc: Test AnimationGroup_SetCurve rejects duration-independent curves.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_SetCurve_RejectsSpring_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* spring = OH_ArkUI_Curve_CreateSpringMotion(0.3f, 0.5f, 0.0f);
+    ASSERT_NE(spring, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_SetCurve(group, spring),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_Curve_DisposeCurve(spring);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_GetCurve_OutParamName_001
+ * @tc.desc: Test AnimationGroup_GetCurve outputs into outBorrowedCurve parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_GetCurve_OutParamName_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    ArkUI_CurveHandle outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_GetCurve(group, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND);
+
+    auto* linear = OH_ArkUI_Curve_CreateCurveByType(ARKUI_CURVE_LINEAR);
+    ASSERT_NE(linear, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_SetCurve(group, linear), ARKUI_ERROR_CODE_NO_ERROR);
+
+    outBorrowedCurve = nullptr;
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_GetCurve(group, &outBorrowedCurve),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(outBorrowedCurve, nullptr);
+
+    OH_ArkUI_Curve_DisposeCurve(linear);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddPropertyAnimation_SpringCurveAllowed_001
+ * @tc.desc: Test AddPropertyAnimation accepts spring curves (duration-independent) on property animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddPropertyAnimation_SpringCurveAllowed_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+    ArkUI_NumberValue val[1] = {{.f32 = 0.5f}};
+    ASSERT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetToValue(anim, val, 1), ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto* spring = OH_ArkUI_Curve_CreateSpringMotion(0.3f, 0.5f, 0.0f);
+    ASSERT_NE(spring, nullptr);
+    ASSERT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetCurve(anim, spring), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPropertyAnimation(group, anim),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_Curve_DisposeCurve(spring);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddPropertyAnimation_RejectsDuplicate_001
+ * @tc.desc: Test AddPropertyAnimation rejects adding the same animation twice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddPropertyAnimation_RejectsDuplicate_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+    ArkUI_NumberValue val[1] = {{.f32 = 0.5f}};
+    ASSERT_EQ(OH_ArkUI_NativeModule_PropertyAnimation_SetToValue(anim, val, 1), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPropertyAnimation(group, anim),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPropertyAnimation(group, anim),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddPropertyAnimation_RejectsEmptyToValue_001
+ * @tc.desc: Test AddPropertyAnimation rejects animation with empty toValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddPropertyAnimation_RejectsEmptyToValue_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPropertyAnimation(group, anim),
+        ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddKeyframeAnimation_RejectsSpringKeyframe_001
+ * @tc.desc: Test AddKeyframeAnimation rejects spring curve on keyframes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddKeyframeAnimation_RejectsSpringKeyframe_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* kf = OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY, 2);
+    ASSERT_NE(kf, nullptr);
+
+    auto* spring = OH_ArkUI_Curve_CreateSpringMotion(0.3f, 0.5f, 0.0f);
+    ASSERT_NE(spring, nullptr);
+    OH_ArkUI_NativeModule_KeyframeAnimation_SetCurve(kf, 0, spring);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddKeyframeAnimation(group, kf),
+        ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID);
+
+    OH_ArkUI_Curve_DisposeCurve(spring);
+    OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(kf);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddKeyframeAnimation_RejectsDuplicate_001
+ * @tc.desc: Test AddKeyframeAnimation rejects adding the same animation twice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddKeyframeAnimation_RejectsDuplicate_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* kf = OH_ArkUI_NativeModule_KeyframeAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY, 2);
+    ASSERT_NE(kf, nullptr);
+
+    ArkUI_NumberValue vals[2] = {{.f32 = 0.0f}, {.f32 = 1.0f}};
+    ASSERT_EQ(OH_ArkUI_NativeModule_KeyframeAnimation_SetValues(kf, vals, 2), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddKeyframeAnimation(group, kf), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddKeyframeAnimation(group, kf), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(kf);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddPathAnimation_RejectsSpring_001
+ * @tc.desc: Test AddPathAnimation rejects spring curve.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddPathAnimation_RejectsSpring_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* path = OH_ArkUI_NativeModule_PathAnimation_Create("M0,0 L100,100");
+    ASSERT_NE(path, nullptr);
+
+    auto* spring = OH_ArkUI_Curve_CreateResponsiveSpringMotion(0.3f, 0.5f, 0.0f);
+    ASSERT_NE(spring, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_PathAnimation_SetCurve(path, spring), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPathAnimation(group, path), ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_Curve_DisposeCurve(spring);
+    OH_ArkUI_NativeModule_PathAnimation_Destroy(path);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddPathAnimation_RejectsDuplicate_001
+ * @tc.desc: Test AddPathAnimation rejects adding the same animation twice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddPathAnimation_RejectsDuplicate_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto* path = OH_ArkUI_NativeModule_PathAnimation_Create("M0,0 L100,100");
+    ASSERT_NE(path, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPathAnimation(group, path),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPathAnimation(group, path),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_PathAnimation_Destroy(path);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AddAnimationGroup_RejectsEmptyGroup_001
+ * @tc.desc: Test AddAnimationGroup rejects a group with no child animations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AddAnimationGroup_RejectsEmptyGroup_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    auto dummyContext = reinterpret_cast<ArkUI_ContextHandle>(0x1);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AddAnimationGroup(dummyContext, group, "testKey"),
+        ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID);
+
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AddAnimationGroup_NullParams_001
+ * @tc.desc: Test AddAnimationGroup rejects null context, group, or key.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AddAnimationGroup_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AddAnimationGroup(nullptr, group, "key"),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AddAnimationGroup(
+        reinterpret_cast<ArkUI_ContextHandle>(0x1), nullptr, "key"),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AddAnimationGroup(
+        reinterpret_cast<ArkUI_ContextHandle>(0x1), group, nullptr),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
+
+/**
+ * @tc.name: AnimationGroup_AddPropertyAnimation_NullParams_001
+ * @tc.desc: Test AddPropertyAnimation rejects null group or animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimationGroup_AddPropertyAnimation_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto* group = OH_ArkUI_NativeModule_AnimationGroup_Create();
+    ASSERT_NE(group, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPropertyAnimation(group, nullptr),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    auto* anim = OH_ArkUI_NativeModule_PropertyAnimation_Create(OH_ARKUI_ANIMATION_PROPERTY_OPACITY);
+    ASSERT_NE(anim, nullptr);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AnimationGroup_AddPropertyAnimation(nullptr, anim),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_NativeModule_PropertyAnimation_Destroy(anim);
+    OH_ArkUI_NativeModule_AnimationGroup_Destroy(group);
+}
 } // namespace OHOS::Ace

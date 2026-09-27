@@ -16,16 +16,13 @@
 #define ARKUI_NATIVE_ANIMATE_IMPL_H
 
 #include <cstdint>
+#include <variant>
 #include <vector>
 
 #include "native_animate.h"
 #include "native_type.h"
 
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 struct ArkUI_Matrix4 {
     ArkUIMatrix4Handle matrix = nullptr;
@@ -106,9 +103,67 @@ struct ArkUI_Animator {
     ArkUI_AnimatorOption* option;
     ArkUIAnimatorOption* animatorOption;
 };
-#ifdef __cplusplus
+struct OH_ArkUI_PropertyAnimation {
+    OH_ArkUI_AnimationPropertyType propertyType;
+    std::vector<ArkUI_NumberValue> fromValue;
+    std::vector<ArkUI_NumberValue> toValue;
+    int32_t duration = 1000;
+    bool hasDuration = false;
+    int32_t delay = 0;
+    float tempo = 1.0f;
+    int32_t iterations = 1;
+    ArkUI_CurveHandle curve = nullptr;
+    ArkUI_RenderNodeHandle targetNode = nullptr;
+    bool autoReverse = false;
 };
-#endif
+
+struct OH_ArkUI_KeyframeAnimation {
+    struct Keyframe {
+        float keyTime;
+        std::vector<ArkUI_NumberValue> values;
+        ArkUI_CurveHandle curve = nullptr;
+    };
+    OH_ArkUI_AnimationPropertyType propertyType;
+    std::vector<Keyframe> keyframes;
+    int32_t duration = 1000;
+    bool hasDuration = false;
+    int32_t delay = 0;
+    float tempo = 1.0f;
+    int32_t iterations = 1;
+    ArkUI_RenderNodeHandle targetNode = nullptr;
+    bool autoReverse = false;
+};
+
+struct OH_ArkUI_PathAnimation {
+    char* path = nullptr;
+    int32_t duration = 1000;
+    bool hasDuration = false;
+    int32_t delay = 0;
+    float tempo = 1.0f;
+    int32_t iterations = 1;
+    ArkUI_CurveHandle curve = nullptr;
+    bool autoRotation = false;
+    ArkUI_RenderNodeHandle targetNode = nullptr;
+    bool autoReverse = false;
+};
+
+using ChildAnimation = std::variant<OH_ArkUI_PropertyAnimationHandle,
+    OH_ArkUI_KeyframeAnimationHandle, OH_ArkUI_PathAnimationHandle>;
+
+struct OH_ArkUI_AnimationGroup {
+    std::vector<ChildAnimation> childAnimations;
+    int32_t duration = 1000;
+    bool hasDuration = false;
+    int32_t delay = 0;
+    float tempo = 1.0f;
+    int32_t iterations = 1;
+    ArkUI_CurveHandle curve = nullptr;
+    ArkUI_ExpectedFrameRateRange* expectedFrameRateRange = nullptr;
+    void (*onFinish)(void* userData) = nullptr;
+    void* userData = nullptr;
+    ArkUI_RenderNodeHandle targetNode = nullptr;
+    bool autoReverse = false;
+};
 
 namespace OHOS::Ace::AnimateModel {
 
