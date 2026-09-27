@@ -193,6 +193,7 @@ int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->setDrawCompleteEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onDrawCompleted));
 
@@ -206,6 +207,7 @@ int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node)
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->resetDrawCompleteEvent(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -217,6 +219,7 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->setLayoutEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onLayoutCompleted));
 
@@ -229,6 +232,7 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node)
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->resetLayoutEvent(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
