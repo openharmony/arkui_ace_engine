@@ -61,6 +61,17 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
+
 const TrailOptimization trailOptimization = {
     .progressThreshold = 0.98f,
     .responseDecayFactor = 0.9f,
@@ -1750,14 +1761,14 @@ void MenuPattern::ShowPreviewMenuScaleAnimation(
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-MenuParam MenuPattern::GetMenuParam() const
+const MenuParam& MenuPattern::GetMenuParam() const
 {
+    static const MenuParam emptyParam;
     auto menuWrapper = GetMenuWrapper();
-    CHECK_NULL_RETURN(menuWrapper, MenuParam());
+    CHECK_NULL_RETURN(menuWrapper, emptyParam);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(menuWrapperPattern, MenuParam());
-    auto menuParam = menuWrapperPattern->GetMenuParam();
-    return menuParam;
+    CHECK_NULL_RETURN(menuWrapperPattern, emptyParam);
+    return menuWrapperPattern->GetMenuParam();
 }
 
 bool MenuPattern::ShouldUpdateShadow() const
@@ -1867,13 +1878,14 @@ void MenuPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     if (filter.IsFastFilter()) {
         return;
     }
-    auto menuParam = GetMenuParam();
+    const auto& menuParam = GetMenuParam();
     json->PutExtAttr("distortionMode",
         DistortionModeToString(menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)).c_str(), filter);
     json->PutExtAttr("edgeLightMode",
         EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str(), filter);
     json->PutExtAttr("distortionEnabled", IsUseDistortionAnimation() ? "true" : "false", filter);
     json->PutExtAttr("edgeLightEnabled", IsUseEdgeLightAnimation() ? "true" : "false", filter);
+    json->PutExtAttr("hasSystemMaterial", menuParam.systemMaterial ? "true" : "false", filter);
 }
 
 OffsetF MenuPattern::GetDistortionMenuOffset(Placement placement) const
@@ -3542,6 +3554,23 @@ void MenuPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("MenuType: ").append(std::to_string(static_cast<int32_t>(GetMenuType()))));
+    const auto& menuParam = GetMenuParam();
+    bool hasSystemMaterial = menuParam.systemMaterial != nullptr;
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(menuParam.systemMaterial));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        DumpLog::GetInstance().AddDesc("MaterialType: " +
+            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
+                                      : std::string("MaterialType.NONE")));
+    }
+    DumpLog::GetInstance().AddDesc(
+        "DistortionMode: " +
+        DistortionModeToString(menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)));
+    DumpLog::GetInstance().AddDesc(
+        "EdgeLightMode: " + EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)));
+    DumpLog::GetInstance().AddDesc("DistortionEnabled: " + std::string(IsUseDistortionAnimation() ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc("EdgeLightEnabled: " + std::string(IsUseEdgeLightAnimation() ? "true" : "false"));
 }
 
 float MenuPattern::GetSelectMenuWidth()
@@ -3764,6 +3793,22 @@ bool MenuPattern::IsMenuScrollable() const
 void MenuPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("MenuType", static_cast<int32_t>(GetMenuType()));
+    const auto& menuParam = GetMenuParam();
+    bool hasSystemMaterial = menuParam.systemMaterial != nullptr;
+    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(menuParam.systemMaterial));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        json->Put("MaterialType",
+            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
+                                     : "MaterialType.NONE");
+    }
+    json->Put("DistortionMode",
+        DistortionModeToString(menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)).c_str());
+    json->Put("EdgeLightMode",
+        EdgeLightModeToString(menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str());
+    json->Put("DistortionEnabled", IsUseDistortionAnimation() ? "true" : "false");
+    json->Put("EdgeLightEnabled", IsUseEdgeLightAnimation() ? "true" : "false");
 }
 
 OffsetF MenuPattern::GetPreviewMenuAnimationOffset(

@@ -54,6 +54,9 @@
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components/common/properties/ui_material.h"
+#include "base/json/json_util.h"
+#include "core/components_ng/base/inspector_filter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1402,5 +1405,101 @@ HWTEST_F(SelectPatternTestNg, SetItemSelected022, TestSize.Level1)
     auto val = selectPattern->GetSelected();
 
     EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SelectPattern_ToJsonValue_HasSystemMaterial_False
+ * @tc.desc: Test SelectPattern::ToJsonValue outputs hasSystemMaterial "false" by default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SelectPattern_ToJsonValue_HasSystemMaterial_False, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    selectPattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "false");
+}
+
+/**
+ * @tc.name: SelectPattern_ToJsonValue_HasSystemMaterial_True
+ * @tc.desc: Test ToJsonValue outputs hasSystemMaterial "true" and distortionMode/edgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SelectPattern_ToJsonValue_HasSystemMaterial_True, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto renderContext = select->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->SetSystemMaterial(AceType::MakeRefPtr<UiMaterial>());
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    selectPattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "true");
+    EXPECT_FALSE(json->GetString("distortionMode").empty());
+    EXPECT_FALSE(json->GetString("edgeLightMode").empty());
+}
+
+/**
+ * @tc.name: SelectPattern_DumpInfo_HasSystemMaterial
+ * @tc.desc: Test SelectPattern::DumpInfo outputs HasSystemMaterial and does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SelectPattern_DumpInfo_HasSystemMaterial, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    selectPattern->DumpInfo();
+    bool hasHasSystemMaterial = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("HasSystemMaterial") != std::string::npos) {
+            hasHasSystemMaterial = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasHasSystemMaterial);
+}
+
+/**
+ * @tc.name: SelectPattern_DumpInfoJson_HasSystemMaterial
+ * @tc.desc: Test SelectPattern::DumpInfo(json) outputs HasSystemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SelectPattern_DumpInfoJson_HasSystemMaterial, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    selectPattern->DumpInfo(json);
+    EXPECT_STREQ(json->GetString("HasSystemMaterial").c_str(), "false");
 }
 } // namespace OHOS::Ace::NG

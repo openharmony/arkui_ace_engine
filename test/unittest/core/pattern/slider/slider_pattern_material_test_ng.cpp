@@ -174,6 +174,67 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_HasSystemMaterial_False_001,
 }
 
 /**
+ * @tc.name: SliderPattern_ToJsonValue_HasSystemMaterial_True_001
+ * @tc.desc: Test ToJsonValue outputs hasSystemMaterial "true" when system material is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_ToJsonValue_HasSystemMaterial_True_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "true");
+}
+
+/**
+ * @tc.name: SliderPattern_ToJsonValue_HasSystemMaterial_False_001
+ * @tc.desc: Test ToJsonValue outputs hasSystemMaterial "false" when no system material
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_ToJsonValue_HasSystemMaterial_False_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "false");
+}
+
+/**
+ * @tc.name: SliderPattern_DumpInfo_HasSystemMaterial_001
+ * @tc.desc: Test DumpInfo outputs HasSystemMaterial and does not crash (AC-4.1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_DumpInfo_HasSystemMaterial_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    bool hasHasSystemMaterial = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("HasSystemMaterial") != std::string::npos) {
+            hasHasSystemMaterial = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasHasSystemMaterial);
+}
+
+/**
  * @tc.name: SliderPattern_HasSystemMaterial_NullRenderContext_001
  * @tc.desc: Test HasSystemMaterial returns false when render context is null
  * @tc.type: FUNC

@@ -298,6 +298,8 @@ public:
     }
     void ResetFontColor();
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    bool HasSystemMaterial() const;
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
     void SetArrowColor(const Color& color);

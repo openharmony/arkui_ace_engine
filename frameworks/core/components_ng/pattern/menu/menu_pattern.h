@@ -919,7 +919,7 @@ private:
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
     Placement GetFinalPlacement() const;
     OffsetF GetDistortionMenuOffset(Placement placement) const;
-    MenuParam GetMenuParam() const;
+    const MenuParam& GetMenuParam() const;
     bool IsUseEdgeLightAnimation() const;
     void PlayDistortAnimation(const OffsetF& menuPosition, int32_t delay = 0);
     void PlayTranslateAnimation(
