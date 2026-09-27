@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_impl.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
+#include "interfaces/native/node/config_manager.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/native_error_message_macros.h"
 #include "native_type.h"
@@ -797,6 +798,7 @@ int32_t OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(
     }
     ArkUI_NodeHandle nativeNode = *node;
     *provider = nullptr;
+    CHECK_NODE_DISPOSED(nativeNode, "Node has been disposed");
 
     if (!OHOS::Ace::NodeModel::IsValidArkUINode(nativeNode)) {
         SET_ERROR_MESSAGE(

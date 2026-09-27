@@ -17,6 +17,7 @@
 
 #include "native_interface_xcomponent.h"
 
+#include "node/config_manager.h"
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
@@ -367,6 +368,7 @@ int32_t OH_NativeXComponent_AttachNativeRootNode(
     if (component == nullptr || root == nullptr) {
         return ReturnNativeXComponentParamError(__FUNCTION__, "component or root node is null");
     }
+    CHECK_NODE_DISPOSED(root, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(root)) {
         return ReturnNativeXComponentParamError(__FUNCTION__, "root node is not a C node");
     }
@@ -380,6 +382,7 @@ int32_t OH_NativeXComponent_DetachNativeRootNode(
     if (component == nullptr || root == nullptr) {
         return ReturnNativeXComponentParamError(__FUNCTION__, "component or root node is null");
     }
+    CHECK_NODE_DISPOSED(root, "Node has been disposed");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(root)) {
         return ReturnNativeXComponentParamError(__FUNCTION__, "root node is not a C node");
     }
@@ -453,8 +456,11 @@ int32_t OH_NativeXComponent_GetTouchEventSourceType(
 
 OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle node)
 {
-    if (node == nullptr ||
-        (node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+    if (node == nullptr) {
+        return nullptr;
+    }
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
+    if (node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE) {
         return nullptr;
     }
     auto xComponentModifier = GetArkUIXComponentModifierWithMessage(__FUNCTION__);
@@ -490,6 +496,7 @@ int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
 int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* userData,
     void (*callback)(ArkUI_NodeHandle node, ArkUI_XComponent_ImageAnalyzerState statusCode, void* userData))
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -507,6 +514,7 @@ int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* user
 
 int32_t OH_ArkUI_XComponent_StopImageAnalyzer(ArkUI_NodeHandle node)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -520,6 +528,7 @@ int32_t OH_ArkUI_XComponent_StopImageAnalyzer(ArkUI_NodeHandle node)
 
 OH_ArkUI_SurfaceHolder* OH_ArkUI_SurfaceHolder_Create(ArkUI_NodeHandle node)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return nullptr;
     }
@@ -680,6 +689,7 @@ OHNativeWindow* OH_ArkUI_XComponent_GetNativeWindow(OH_ArkUI_SurfaceHolder* surf
 
 int32_t OH_ArkUI_XComponent_SetAutoInitialize(ArkUI_NodeHandle node, bool autoInitialize)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -694,6 +704,7 @@ int32_t OH_ArkUI_XComponent_SetAutoInitialize(ArkUI_NodeHandle node, bool autoIn
 
 int32_t OH_ArkUI_XComponent_Initialize(ArkUI_NodeHandle node)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -708,6 +719,7 @@ int32_t OH_ArkUI_XComponent_Initialize(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_XComponent_Finalize(ArkUI_NodeHandle node)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -721,6 +733,7 @@ int32_t OH_ArkUI_XComponent_Finalize(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitialized)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -799,6 +812,7 @@ int32_t OH_NativeXComponent_GetKeyEventScrollLockState(OH_NativeXComponent_KeyEv
 int32_t OH_ArkUI_XComponent_SetExpectedFrameRateRange(
     ArkUI_NodeHandle node, OH_NativeXComponent_ExpectedRateRange range)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -817,6 +831,7 @@ int32_t OH_ArkUI_XComponent_SetExpectedFrameRateRange(
 int32_t OH_ArkUI_XComponent_RegisterOnFrameCallback(ArkUI_NodeHandle node,
     void (*callback)(ArkUI_NodeHandle node, uint64_t timestamp, uint64_t targetTimestamp))
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -835,6 +850,7 @@ int32_t OH_ArkUI_XComponent_RegisterOnFrameCallback(ArkUI_NodeHandle node,
 
 int32_t OH_ArkUI_XComponent_UnregisterOnFrameCallback(ArkUI_NodeHandle node)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -849,6 +865,7 @@ int32_t OH_ArkUI_XComponent_UnregisterOnFrameCallback(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_XComponent_SetNeedSoftKeyboard(ArkUI_NodeHandle node, bool needSoftKeyboard)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -863,6 +880,7 @@ int32_t OH_ArkUI_XComponent_SetNeedSoftKeyboard(ArkUI_NodeHandle node, bool need
 
 ArkUI_AccessibilityProvider* OH_ArkUI_AccessibilityProvider_Create(ArkUI_NodeHandle node)
 {
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (!CheckValidXComponentNode(node, __FUNCTION__)) {
         return nullptr;
     }
