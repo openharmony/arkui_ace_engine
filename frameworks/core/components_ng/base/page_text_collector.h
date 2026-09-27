@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,20 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "drag_and_drop.h"
-#include "drawable_descriptor.h"
-#include "native_animate.h"
-#include "native_dialog.h"
-#include "native_gesture.h"
-#include "native_interface.h"
-#include "native_interface_accessibility.h"
-#include "native_interface_xcomponent.h"
-#include "native_key_event.h"
-#include "native_node.h"
-#include "native_node_napi.h"
-#include "native_type.h"
-#include "native_xcomponent_key_event.h"
-#include "ui_input_event.h"
-
-#include "ui_info_collection.h"
+#ifndef FOUNDATION_ACE_PAGE_TEXT_COLLECTOR_H
+#define FOUNDATION_ACE_PAGE_TEXT_COLLECTOR_H
+#include <cstdint>
+#include "base/utils/macros.h"
+namespace OHOS::Ace::NG {
+ACE_FORCE_EXPORT int32_t CollectPageText(int32_t instanceId, char** data, uint32_t* size, const char** reason);
+}
+#endif

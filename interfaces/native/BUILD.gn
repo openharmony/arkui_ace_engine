@@ -71,6 +71,8 @@ ohos_shared_library("ace_ndk") {
     "native_interface_xcomponent.cpp",
     "native_styled_string_descriptor.cpp",
     "native_error_message_wrapper.cpp",
+    "ui_info_collection.cpp",
+    "ui_json_wrapper.cpp",
     "node/animate_impl.cpp",
     "node/config_manager.cpp",
     "node/container_picker_option.cpp",

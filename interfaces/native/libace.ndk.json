@@ -7034,6 +7034,26 @@
     },
     {
         "first_introduced": "26.2.0",
+        "name": "OH_ArkUI_NativeModule_UIAgentGetPageText"
+    },
+    {
+        "first_introduced": "26.2.0",
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperCreate"
+    },
+    {
+        "first_introduced": "26.2.0",
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperGetData"
+    },
+    {
+        "first_introduced": "26.2.0",
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperGetSize"
+    },
+    {
+        "first_introduced": "26.2.0",
+        "name": "OH_ArkUI_NativeModule_UIJsonWrapperDestroy"
+    },
+    {
+        "first_introduced": "26.2.0",
         "name": "OH_ArkUI_NativeModule_SetRuntimeCheckMode"
     }
 ]

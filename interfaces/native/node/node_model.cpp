@@ -14,6 +14,7 @@
  */
 
 #include "node_model.h"
+#include "core/interfaces/native/node/page_text_api.h"
 #include "node/config_manager.h"
 
 #include <cstring>
@@ -191,6 +192,17 @@ bool InitialFullNodeImpl(int version, ArkUIFullNodeAPI*& inputImpl)
     return true;
 }
 } // namespace
+
+const ArkUIPageTextAPI* GetPageTextAPI()
+{
+    using Entry = const ArkUIPageTextAPI* (*)(int32_t);
+    auto* module = FindModule();
+    if (!module) {
+        return nullptr;
+    }
+    auto entry = reinterpret_cast<Entry>(FindFunction(module, "GetArkUIPageTextAPI"));
+    return entry ? entry(1) : nullptr;
+}
 
 ArkUIFullNodeAPI* GetFullImpl()
 {

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/page_text_collector.h"
+#include "core/interfaces/native/node/page_text_api.h"
+
 #include "core/interfaces/native/node/node_api.h"
 
 #include <securec.h>
@@ -2817,6 +2820,12 @@ extern "C" {
 ACE_FORCE_EXPORT CJUIFullNodeAPI* GetCJUIFullNodeAPI()
 {
     return &OHOS::Ace::NG::fullCJUIApi;
+}
+
+ACE_FORCE_EXPORT const ArkUIPageTextAPI* GetArkUIPageTextAPI(int32_t version)
+{
+    static const ArkUIPageTextAPI api { OHOS::Ace::NG::CollectPageText, [](char* data) { std::free(data); } };
+    return version == 1 ? &api : nullptr;
 }
 
 ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
