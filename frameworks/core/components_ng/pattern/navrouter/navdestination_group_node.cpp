@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "core/common/force_split/force_split_utils.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -289,6 +290,26 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
 RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
     return customNode_.Upgrade();
+}
+
+void NavDestinationGroupNode::FireAboutToAppear()
+{
+    auto customNode = customNode_.Upgrade();
+    CHECK_NULL_VOID(customNode);
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        pattern, NavDestinationState::ABOUT_TO_APPEAR);
+}
+
+void NavDestinationGroupNode::FireAboutToDisappear()
+{
+    auto customNode = customNode_.Upgrade();
+    CHECK_NULL_VOID(customNode);
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        pattern, NavDestinationState::ABOUT_TO_DISAPPEAR);
 }
 
 int32_t NavDestinationGroupNode::GetNavigationNodeId() const

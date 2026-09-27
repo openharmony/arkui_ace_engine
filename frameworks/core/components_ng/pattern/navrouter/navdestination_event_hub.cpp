@@ -36,6 +36,7 @@ void NavDestinationEventHub::FireOnDisappear()
         state_ = NavDestinationState::ON_DISAPPEAR;
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
         FireDisappearCallback(navDestination);
+        navDestination->FireAboutToDisappear();
         pattern->SetCustomNode(nullptr);
         return;
     }
@@ -49,6 +50,7 @@ void NavDestinationEventHub::FireOnDisappear()
         eventHub->state_ = NavDestinationState::ON_DISAPPEAR;
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
         eventHub->FireDisappearCallback(destination);
+        destination->FireAboutToDisappear();
         pattern->SetCustomNode(nullptr);
     });
 }
@@ -209,6 +211,7 @@ void NavDestinationEventHub::FireOnWillAppear()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "%{public}s lifecycle change to onWillAppear state. navdestinationId:%{public}d, navigationId:%{public}d",
         name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
+    navDestination->FireAboutToAppear();
     state_ = NavDestinationState::ON_WILL_APPEAR;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_APPEAR);
