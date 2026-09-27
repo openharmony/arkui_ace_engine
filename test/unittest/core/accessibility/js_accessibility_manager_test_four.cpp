@@ -1018,4 +1018,120 @@ HWTEST_F(JsAccessibilityManagerTestFour, GetPagePath001, TestSize.Level1)
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end GetPagePath001";
 }
+
+/**
+ * @tc.name: IsSelectReaderEnabled001
+ * @tc.desc: Test IsSelectReaderEnabled returns default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestFour, IsSelectReaderEnabled001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin IsSelectReaderEnabled001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test IsSelectReaderEnabled
+     * @tc.expected: IsSelectReaderEnabled returns default value false
+     */
+    bool isEnabled = jsAccessibilityManager->IsSelectReaderEnabled();
+    EXPECT_FALSE(isEnabled);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end IsSelectReaderEnabled001";
+}
+
+/**
+ * @tc.name: IsEventIgnoredByWorkModeSelectReader001
+ * @tc.desc: Test IsEventIgnoredByWorkMode when select reader is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestFour, IsEventIgnoredByWorkModeSelectReader001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin IsEventIgnoredByWorkModeSelectReader001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and create test data.
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    AccessibilityEvent event;
+    event.nodeId = 1;
+
+    /**
+     * @tc.steps: step2. screen reader disabled and select reader enabled
+     * @tc.expected: SCROLLING_EVENT is not ignored, other work mode events are ignored.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
+    jsAccessibilityManager->isSelectReaderEnabled_ = true;
+    jsAccessibilityManager->isSelectReaderEnabledInitialized_ = true;
+    event.type = AccessibilityEventType::SCROLLING_EVENT;
+    EXPECT_FALSE(jsAccessibilityManager->IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
+    EXPECT_TRUE(jsAccessibilityManager->IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::COMPONENT_CHANGE;
+    EXPECT_TRUE(jsAccessibilityManager->IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    EXPECT_TRUE(jsAccessibilityManager->IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::FOCUS;
+    EXPECT_TRUE(jsAccessibilityManager->IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::CLICK;
+    EXPECT_FALSE(jsAccessibilityManager->IsEventIgnoredByWorkMode(event));
+
+    /**
+     * @tc.steps: step3. screen reader disabled and select reader disabled
+     * @tc.expected: SCROLLING_EVENT is ignored.
+     */
+    jsAccessibilityManager->isSelectReaderEnabled_ = false;
+    event.type = AccessibilityEventType::SCROLLING_EVENT;
+    EXPECT_TRUE(jsAccessibilityManager->IsEventIgnoredByWorkMode(event));
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end IsEventIgnoredByWorkModeSelectReader001";
+}
+
+/**
+ * @tc.name: UpdateAccessibilityVisibleSelectReader001
+ * @tc.desc: Test UpdateAccessibilityVisible when select reader is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestFour, UpdateAccessibilityVisibleSelectReader001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin UpdateAccessibilityVisibleSelectReader001";
+
+    /**
+     * @tc.steps: step1. construct page node with parent node, parent accessibility visible is false
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), false);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), false);
+    parentNode->AddChild(pageNode);
+    pageNode->SetAccessibilityVisible(true);
+    parentNode->SetAccessibilityVisible(false);
+
+    /**
+     * @tc.steps: step2. screen reader and select reader are both disabled
+     * @tc.expected: page node visible is false because parent accessibility visible is false.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
+    jsAccessibilityManager->isSelectReaderEnabled_ = false;
+    jsAccessibilityManager->isSelectReaderEnabledInitialized_ = true;
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    jsAccessibilityManager->UpdateAccessibilityVisible(pageNode, nodeInfo);
+    EXPECT_FALSE(nodeInfo.GetAccessibilityVisible());
+
+    /**
+     * @tc.steps: step3. screen reader disabled and select reader enabled
+     * @tc.expected: behaves the same as screen reader enabled, visible is node's own value.
+     */
+    jsAccessibilityManager->isSelectReaderEnabled_ = true;
+    Accessibility::AccessibilityElementInfo nodeInfoSelect;
+    jsAccessibilityManager->UpdateAccessibilityVisible(pageNode, nodeInfoSelect);
+    EXPECT_TRUE(nodeInfoSelect.GetAccessibilityVisible());
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end UpdateAccessibilityVisibleSelectReader001";
+}
 } // namespace OHOS::Ace::NG
