@@ -517,20 +517,40 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   protected __onCustomEnvValueUpdate__Internal(envKey: number, updatedEnvValue?: CustomEnvValue): void {
-    stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no @CustomEnv property registered`);
+    const customEnvProperties = this.__getCustomEnvPropertyNameToKey__Internal();
+
+    stateMgmtConsole.debug(`${this.debugInfo__()}: received custom env update from backend, key ${envKey},
+      hasValue ${updatedEnvValue}, registeredProperties ${customEnvProperties.length}`);
+
+    if (customEnvProperties.length === 0) {
+      stateMgmtConsole.debug(
+        `${this.debugInfo__()}: custom env update ignored for key ${envKey}: no @CustomEnv property registered`);
+      return;
+    }
+    const matchingProperties = envKey ?
+      customEnvProperties.filter(([, customEnvKey]) => customEnvKey === envKey) : customEnvProperties;
+    if (matchingProperties.length === 0) {
+      stateMgmtConsole.debug(
+        `${this.debugInfo__()}: custom env update ignored for key ${envKey}: no matching @CustomEnv property`);
+      return;
+    }
     let needUpdated: boolean = false;
-    this.__getCustomEnvPropertyNameToKey__Internal()
-      .forEach(([varName, customEnvKey]) => {
-        if (envKey && customEnvKey !== envKey) {
-          stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no matching @CustomEnv property`);
-          return;
-        }
-        const storeProp = ObserveV2.OB_PREFIX + varName;
-        this[storeProp] = updatedEnvValue;
+    // A callback without a value invalidates the cached value. Query the backend again because it does not
+    // necessarily mean that the override was removed. Two arguments preserve an explicitly supplied undefined.
+    const hasUpdatedEnvValue = arguments.length > 1;
+    matchingProperties.forEach(([varName, customEnvKey]) => {
+      const storeProp = ObserveV2.OB_PREFIX + varName;
+      const queriedValue = hasUpdatedEnvValue ? undefined : this.findCustomValueByKey(customEnvKey);
+      const effectiveValue = hasUpdatedEnvValue ? updatedEnvValue :
+        (queriedValue?.found ? queriedValue.value : this[ObserveV2.CUSTOM_ENV_LOCAL_PREFIX + varName]);
+      if (this[storeProp] !== effectiveValue) {
+        ObserveV2.unregisterCustomEnvOwner(this, this[storeProp], varName);
+        this[storeProp] = effectiveValue;
         ObserveV2.getObserve().fireChange(this, varName);
         this.__notifyDecoratedWatch__Internal(varName);
         needUpdated = true;
-      });
+      }
+    });
     if (needUpdated) {
       stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update for key ${envKey}`);
       ObserveV2.getObserve().updateDirty2(false);
@@ -587,8 +607,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       }
       const defaultValue = this[ObserveV2.CUSTOM_ENV_LOCAL_PREFIX + varName];
       const queriedValue = isAttached ? this.findCustomValueByKey(key) : undefined;
-      const effectiveValue = queriedValue !== undefined ? queriedValue : defaultValue;
+      const effectiveValue = queriedValue?.found ? queriedValue.value : defaultValue;
       if (this[storeProp] !== effectiveValue) {
+        ObserveV2.unregisterCustomEnvOwner(this, this[storeProp], varName);
         this[storeProp] = effectiveValue;
         ObserveV2.getObserve().fireChange(this, varName);
         this.__notifyDecoratedWatch__Internal(varName);
@@ -850,7 +871,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           this.__notifyDecoratedWatch__Internal(varName);
           needUpdated = true;
         }
-      })
+      });
     if (needUpdated) {
       // update ui synchronously
       stateMgmtConsole.debug(`updateInstanceIdForEnvValue ${this.debugInfo__()} instance, there are envValue updated, update ui synchronously.`);
