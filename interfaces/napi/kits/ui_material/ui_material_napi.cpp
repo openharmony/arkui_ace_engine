@@ -384,15 +384,12 @@ napi_value UiMaterialNapi::JSConvertToECMaterial(napi_env env, napi_callback_inf
 
     napi_value constructor = nullptr;
     napi_get_named_property(env, argValue[0], "constructor", &constructor);
-    napi_escapable_handle_scope scope;
-    napi_open_escapable_handle_scope(env, &scope);
     napi_value result = nullptr;
     napi_new_instance(env, constructor, 0, nullptr, &result);
 
     UiMaterial* newMaterial = nullptr;
     status = napi_unwrap_s(env, result, &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&newMaterial));
     if (status != napi_ok || !newMaterial) {
-        napi_close_escapable_handle_scope(env, scope);
         return argValue[0];
     }
     ImmersiveOptions newOptions = *originalOptions;
@@ -400,11 +397,8 @@ napi_value UiMaterialNapi::JSConvertToECMaterial(napi_env env, napi_callback_inf
 
     newMaterial->SetImmersiveOptions(newOptions);
     newMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
-    
-    napi_value escapeResult = nullptr;
-    napi_escape_handle(env, scope, result, &escapeResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return escapeResult;
+
+    return result;
 }
 
 napi_value UiMaterialNapi::JSConvertToECSubMaterial(napi_env env, napi_callback_info info)
@@ -436,15 +430,12 @@ napi_value UiMaterialNapi::JSConvertToECSubMaterial(napi_env env, napi_callback_
     }
     napi_value constructor = nullptr;
     napi_get_named_property(env, argValue[0], "constructor", &constructor);
-    napi_escapable_handle_scope scope;
-    napi_open_escapable_handle_scope(env, &scope);
     napi_value result = nullptr;
     napi_new_instance(env, constructor, 0, nullptr, &result);
 
     UiMaterial* newMaterial = nullptr;
     status = napi_unwrap_s(env, result, &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&newMaterial));
     if (status != napi_ok || !newMaterial) {
-        napi_close_escapable_handle_scope(env, scope);
         return argValue[0];
     }
 
@@ -454,10 +445,7 @@ napi_value UiMaterialNapi::JSConvertToECSubMaterial(napi_env env, napi_callback_
     newMaterial->SetImmersiveOptions(newOptions);
     newMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
     
-    napi_value escapeResult = nullptr;
-    napi_escape_handle(env, scope, result, &escapeResult);
-    napi_close_escapable_handle_scope(env, scope);
-    return escapeResult;
+    return result;
 }
 
 napi_value UiMaterialNapi::JSIsImmersiveMaterialSupported(napi_env env, napi_callback_info info)
