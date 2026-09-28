@@ -22,8 +22,11 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
+
+class TabsPattern;
 
 class ACE_EXPORT TabsLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(TabsLayoutAlgorithm, LayoutAlgorithm);
@@ -120,8 +123,8 @@ private:
     void UpdateSideBarAndSideBarDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
     void UpdateTabBarAndDividerVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
     void UpdateBgMaskNodeVisibility(LayoutWrapper* layoutWrapper, bool isVisible);
-    void MeasureInSideBarMode(
-        LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize);
+    void MeasureInSideBarMode(LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty,
+        const SizeF& idealSize, bool needMeasureEnterComponents);
     float MeasureSideBar(
         LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize);
     float MeasureSideBarDivider(
@@ -137,6 +140,14 @@ private:
         const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize,
         const OffsetF& paddingOffset, std::vector<OffsetF>& offsetList) const;
     void LayoutInSideBarMode(LayoutWrapper* layoutWrapper);
+    bool CheckIfNeedModeChangeAnimation(const RefPtr<TabsLayoutProperty>& layoutProperty,
+        const RefPtr<TabsPattern>& tabsPattern, bool displayModeChanged, bool firstLayout);
+    void LayoutSidebarForAnimation(LayoutWrapper* layoutWrapper,
+        const RefPtr<TabsLayoutProperty>& layoutProperty,
+        const RefPtr<GeometryNode>& geometryNode);
+    void LayoutBottomComponentsForAnimation(LayoutWrapper* layoutWrapper,
+        const RefPtr<TabsLayoutProperty>& layoutProperty, const RefPtr<TabsNode>& tabsNode,
+        const RefPtr<GeometryNode>& geometryNode);
 
     LayoutCalPolicy widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
     LayoutCalPolicy heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
@@ -147,6 +158,10 @@ private:
     bool lastFloatingBar_ = false;
     std::optional<float> floatingBarMargin_;
     std::optional<TabBarDisplayMode> currentBarDisplayMode_;
+    // True only during the animation-start Measure/Layout pass (fromMode layout that also
+    // measures+layouts the entering component). Reset after Layout; the re-entrant layout
+    // inside the animation closure does not set this.
+    bool measuringForAnimStart_ = false;
 };
 
 } // namespace OHOS::Ace::NG
