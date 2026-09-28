@@ -22,6 +22,7 @@
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
+#include "base/utils/napi_scope_raii.h"
 #include "core/components_ng/base/frame_node.h"
 #include "interfaces/native/native_error_message_macros.h"
 
@@ -53,9 +54,8 @@ void GetStringFromNapiValue(napi_env env, napi_value value, std::string& result)
 int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkUI_NodeHandle* handle)
 {
     CHECK_UI_THREAD("OH_ArkUI_GetNodeHandleFromNapiValue");
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok) {
+    OHOS::Ace::ScopeRAII scope(env);
+    if (!scope) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to open napi handle scope");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -68,7 +68,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         if (result != napi_ok) {
             LOGE("fail to get nodePtr");
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get nodePtr property");
-            napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         // BuilderNode case.
@@ -78,7 +77,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
             LOGE("fail to get nodePtr external value");
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
                 "Failed to get nodePtr external value");
-            napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
@@ -98,7 +96,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }
-        napi_close_handle_scope(env, scope);
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
     result = napi_has_named_property(env, value, "builderNode_", &hasProperty);
@@ -109,7 +106,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         if (result != napi_ok) {
             LOGE("fail to get builderNode");
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get builderNode property");
-            napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         napi_value nodePtr = nullptr;
@@ -118,7 +114,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
             LOGE("fail to get nodePtr in builderNode");
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
                 "Failed to get nodePtr property in builderNode");
-            napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         void* nativePtr = nullptr;
@@ -127,7 +122,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
             LOGE("fail to get nodePtr external value in builderNode");
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
                 "Failed to get nodePtr external value in builderNode");
-            napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         auto* uiNode = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
@@ -136,7 +130,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
             LOGE("fail to get frameNode value in builderNode");
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
                 "Failed to get frameNode value in builderNode");
-            napi_close_handle_scope(env, scope);
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
         if (frameNode->GetTag() == "BuilderProxyNode") {
@@ -144,7 +137,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
             if (!impl) {
                 SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
                     __FUNCTION__, "Native module not initialized");
-                napi_close_handle_scope(env, scope);
                 return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND;
             }
             auto* child = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
@@ -153,7 +145,6 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
                 LOGE("fail to get child in BuilderProxyNode");
                 SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
                     "Failed to get child node in BuilderProxyNode");
-                napi_close_handle_scope(env, scope);
                 return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
             }
             frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(child);
@@ -167,10 +158,8 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }
-        napi_close_handle_scope(env, scope);
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
-    napi_close_handle_scope(env, scope);
     SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get node handle from napi value");
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
 }
