@@ -464,6 +464,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
         MonitorV2.clearWatchesFromTarget(this);
         ComputedV2.clearComputedFromTarget(this);
+        ObserveV2.removeCustomEnvOwner(this);
 
         ObserveV2.getObserve().clearBinding(this.id_);
         delete ObserveV2.getObserve().id2cmp_[this.id_];

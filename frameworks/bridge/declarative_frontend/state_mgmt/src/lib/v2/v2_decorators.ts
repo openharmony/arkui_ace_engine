@@ -458,16 +458,13 @@ const CustomEnv = (envKey: CustomEnvKey): PropertyDecorator => {
         ObserveV2.getObserve().addRef(this, varName);
         if (!Object.prototype.hasOwnProperty.call(this, storeProp)) {
           const envValue = this.findCustomValueByKey(envKeyId);
-          if (envValue?.found) {
-            this[storeProp] = envValue.value;
-          } else {
-            return this[localValueProp];
-          }
+          this[storeProp] = envValue?.found ? envValue.value : this[localValueProp];
         }
         const proxiedValue = ObserveV2.autoProxyObject(this, storeProp);
-        return ObserveV2.registerCustomEnvOwner(this as ViewPU, proxiedValue, varName);
+        return ObserveV2.registerCustomEnvOwner(this as PUV2ViewBase, proxiedValue, varName);
       },
       set(value) {
+        // Compiler output initializes the declared default through this setter.
         if (!this[isCustomEnvInit]) {
           this[localValueProp] = value;
           this[isCustomEnvInit] = true;

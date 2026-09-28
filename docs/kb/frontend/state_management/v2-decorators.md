@@ -29,7 +29,7 @@ V2 装饰器是 API 12+ 的下一代状态管理 API，全部定义在 `v2/v2_de
 | `@Consumer` | 后代消费（V2 的 `@Consume`） | `Consumer`（`v2/v2_decorators.ts`）+ `connectConsumer2Provider`（`v2/v2_decorated_variables.ts`） |
 | `@Type` | PersistenceV2 序列化类型标记 | `Meta` 类（`v2/v2_data_coder/json_coder.ts`）+ `__Type__` |
 | `@Env` | 系统环境注入（只读） | `Env`（`v2/v2_decorators.ts`）+ `EnvV2`（`v2/v2_env.ts`） |
-| `@CustomEnv` | 自定义环境注入（首次允许赋值） | `CustomEnv`（`v2/v2_decorators.ts`） |
+| `@CustomEnv` | 自定义环境注入；工具链在构造函数中通过属性 setter 保存默认值 | `CustomEnv`（`v2/v2_decorators.ts`） |
 
 ### 源码入口
 
@@ -62,7 +62,7 @@ V2 装饰器是 API 12+ 的下一代状态管理 API，全部定义在 `v2/v2_de
 | `@Env` UIContext 隔离 | `EnvV2` `envValues[instanceId][key]`；`registerEnv` 优先级：递归父 → UIContext 注册表 → 工厂创建 |
 | `@Env` 直接查询 key | `system.arkui.layout.direction`、`system.arkui.fontScale` |
 | `@Env` 只读 | setter 抛错 |
-| `@CustomEnv` 首次赋值 | `isCustomEnvInit` false 时允许，存为本地默认 |
+| `@CustomEnv` 默认值 | 工具链在构造函数中生成属性赋值，由 setter 初始调用保存默认值；getter 将当前生效值存入 `storeProp` 并代理集合 |
 | `@Type` 元信息继承 | `Meta` WeakMap on prototype，原型链继承；嵌套对象缺 factory 抛 `PERSISTENCE_V2_LACK_TYPE` |
 | `@Event` 无追踪 | 无 `trackInternal`，默认 `() => {}`（`??=`） |
 | `@Trace` 赋相同值不触发 | setter 严格 `!==` 比较 |
@@ -109,7 +109,7 @@ V2 装饰器是 API 12+ 的下一代状态管理 API，全部定义在 `v2/v2_de
 | `@Provider` 销毁后 `@Consumer` 访问 | `WeakRef.deref()` undefined → 抛 `MISSING_PROVIDE_DEFAULT_VALUE_FOR_CONSUME_CONSUMER` |
 | `@Type` 缺失反序列化失败 | 嵌套对象 null 时抛 `PERSISTENCE_V2_LACK_TYPE` |
 | `@Env` 是否可写 | 只读，setter 抛错 |
-| `@CustomEnv` 首次赋值规则 | `isCustomEnvInit` false 时允许首次赋值 |
+| `@CustomEnv` 初始化规则 | 构造函数通过属性 setter 初始化；无默认值时不生成赋值语句 |
 
 ## 调试入口
 

@@ -1508,13 +1508,13 @@ class ObserveV2 {
     }
   }
 
-  public static notifyCustomEnvOwner(target: ViewPU): void {
+  public static notifyCustomEnvOwner(target: object): void {
     const owners = (target as CustomEnvValue)[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER] as Map<number, Set<string>> | undefined;
     if (!owners) {
       return;
     }
     for (const [viewId, varNames] of owners) {
-      const view = SubscriberManager.Find(viewId) as ViewPU;
+      const view = SubscriberManager.Find(viewId) as PUV2ViewBase;
       if (!view) {
         owners.delete(viewId);
         continue;
@@ -1525,7 +1525,7 @@ class ObserveV2 {
     }
   }
 
-  public static registerCustomEnvOwner(view: ViewPU, proxiedValue: object, varName: string): object {
+  public static registerCustomEnvOwner(view: PUV2ViewBase, proxiedValue: object, varName: string): object {
     if (!proxiedValue || !(Array.isArray(proxiedValue) || proxiedValue instanceof Set ||
       proxiedValue instanceof Map || proxiedValue instanceof Date)) {
       return proxiedValue;
@@ -1545,15 +1545,26 @@ class ObserveV2 {
     return proxiedValue;
   }
 
-  public static removeCustomEnvOwner(view: ViewPU): void {
-    view.__getCustomEnvPropertyNameToKey__Internal();
-    if (!view[CUSTOM_ENV_DECO_META]) {
+  public static unregisterCustomEnvOwner(view: PUV2ViewBase, customEnvValue: object, varName: string): void {
+    if (!customEnvValue || typeof customEnvValue !== 'object') {
       return;
     }
-    const viewId = view.id__();
+    const owners = (customEnvValue as CustomEnvValue)[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER] as
+      Map<number, Set<string>> | undefined;
+    const varNames = owners?.get(view.id__());
+    varNames?.delete(varName);
+    if (varNames?.size === 0) {
+      owners?.delete(view.id__());
+    }
+  }
+
+  public static removeCustomEnvOwner(view: PUV2ViewBase): void {
+    if (!ObserveV2.customEnvInUse_) {
+      return;
+    }
     for (const [varName] of view.__getCustomEnvPropertyNameToKey__Internal()) {
-      const coll = (view as CustomEnvValue)[ObserveV2.OB_PREFIX + varName];
-      coll?.[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER]?.delete(viewId);
+      const customEnvValue = (view as CustomEnvValue)[ObserveV2.OB_PREFIX + varName];
+      ObserveV2.unregisterCustomEnvOwner(view, customEnvValue, varName);
     }
   }
 
