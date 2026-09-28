@@ -28,8 +28,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BORDER_WIDTH_VALUE = 2.0f;
-constexpr float BORDER_RADIUS_VALUE = 8.0f;
-constexpr uint32_t BORDER_COLOR_VALUE = 0xFF0000FF;
 constexpr int32_t BORDER_STYLE_SOLID = 1;
 } // namespace
 
