@@ -2488,6 +2488,7 @@ frameworks/core/components_ng/pattern/calendar_picker/ @arkui001
 frameworks/core/components_ng/pattern/canvas/ @arkuilayout1
 frameworks/core/components_ng/pattern/checkbox/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/checkboxgroup/ @arkuipopupwindow_all
+frameworks/core/components_ng/pattern/common_text/ @huawei_g_five
 frameworks/core/components_ng/pattern/common_view/ @ArkUI_Event
 frameworks/core/components_ng/pattern/container_modal/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/corner_mark/ @arkui_framework_xnode
