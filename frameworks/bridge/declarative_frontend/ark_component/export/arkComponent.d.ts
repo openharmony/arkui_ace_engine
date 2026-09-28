@@ -401,6 +401,7 @@ declare class ArkImageAnimatorComponent extends ArkComponent implements CommonMe
     fixedSize(value: boolean): ImageAnimatorAttribute;
     preDecode(value: number): ImageAnimatorAttribute;
     fillMode(value: FillMode): ImageAnimatorAttribute;
+    interpolation(value: ImageInterpolation): ImageAnimatorAttribute;
     iterations(value: number): ImageAnimatorAttribute;
     monitorInvisibleArea(value: boolean): ImageAnimatorAttribute;
     onStart(event: VoidCallback): VideoAttribute;

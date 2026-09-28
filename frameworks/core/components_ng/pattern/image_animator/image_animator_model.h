@@ -33,6 +33,7 @@ public:
     virtual void SetDuration(int32_t duration) = 0;
     virtual void SetIteration(int32_t iteration) = 0;
     virtual void SetFillMode(int32_t fillMode) = 0;
+    virtual void SetImageInterpolation(int32_t interpolation) = 0;
     virtual void SetPreDecode(int32_t preDecode) = 0;
     virtual void SetIsReverse(bool isReverse) = 0;
     virtual void SetFixedSize(bool fixedSize) = 0;

@@ -63,6 +63,11 @@ class LazyArkImageAnimatorComponent extends ArkComponent {
     return this;
   }
 
+  interpolation(value: ImageInterpolation): this {
+    this.lazyComponent.interpolation(value);
+    return this;
+  }
+
   iterations(value: number): this {
     this.lazyComponent.iterations(value);
     return this;

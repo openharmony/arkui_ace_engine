@@ -49,6 +49,10 @@ function loadComponent(): ComponentObj | undefined {
             modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity, ImageAnimatorFillModeModifier, value);
             return this;
         }
+        interpolation(value: ImageInterpolation): this {
+            modifierWithKey(this._modifiersWithKeys, ImageAnimatorInterpolationModifier.identity, ImageAnimatorInterpolationModifier, value);
+            return this;
+        }
         iterations(value: number): this {
             modifierWithKey(this._modifiersWithKeys, ImageAnimatorIterationsModifier.identity, ImageAnimatorIterationsModifier, value);
             return this;
@@ -253,6 +257,24 @@ function loadComponent(): ComponentObj | undefined {
     }
     (ImageAnimatorFillModeModifier as any).identity = Symbol('imageAnimatorFillMode');
 
+    class ImageAnimatorInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
+        constructor(value: ImageInterpolation) {
+            super(value);
+        }
+        applyPeer(node: any, reset: boolean): void {
+            if (reset) {
+                getUINativeModule().imageAnimator.resetInterpolation(node);
+            }
+            else {
+                getUINativeModule().imageAnimator.setInterpolation(node, this.value);
+            }
+        }
+        checkObjectDiff(): boolean {
+            return this.stageValue !== this.value;
+        }
+    }
+    (ImageAnimatorInterpolationModifier as any).identity = Symbol('imageAnimatorInterpolation');
+
     class ImageAnimatorIterationsModifier extends ModifierWithKey<number> {
         constructor(value: number) {
             super(value);
@@ -386,6 +408,9 @@ class JSImageAnimator extends JSContainerBase {
     static preDecode(value: any): void {} //This interface has been deprecated.
     static fillMode(value: any): void {
         getUINativeModule().imageAnimator.setFillMode(true, value);
+    }
+    static interpolation(value: any): void {
+        getUINativeModule().imageAnimator.setInterpolation(true, value);
     }
     static iterations(value: any): void {
         getUINativeModule().imageAnimator.setIterations(true, value);

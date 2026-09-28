@@ -29,6 +29,7 @@ public:
     void SetDuration(int32_t duration) override;
     void SetIteration(int32_t iteration) override;
     void SetFillMode(int32_t fillMode) override;
+    void SetImageInterpolation(int32_t interpolation) override {};
     void SetPreDecode(int32_t preDecode) override;
     void SetIsReverse(bool isReverse) override;
     void SetFixedSize(bool fixedSize) override;

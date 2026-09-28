@@ -94,7 +94,8 @@ void ParseImageObject(const EcmaVM* vm, const Local<JSValueRef>& image, ImagePro
 void ImageAnimatorBridge::RegisterImageAnimatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     const char* functionNames[] = { "create", "setState", "resetState", "setDuration", "resetDuration", "setFixedSize",
-        "resetFixedSize", "setFillMode", "resetFillMode", "setReverse", "resetReverse", "setImages", "setJSImages",
+        "resetFixedSize", "setFillMode", "resetFillMode", "setInterpolation", "resetInterpolation", "setReverse",
+        "resetReverse", "setImages", "setJSImages",
         "resetImages", "setIterations", "resetIterations", "setAutoMonitorInvisibleArea", "setImageAnimatorOnStart",
         "resetImageAnimatorOnStart", "setImageAnimatorOnPause", "resetImageAnimatorOnPause", "setImageAnimatorOnRepeat",
         "resetImageAnimatorOnRepeat", "setImageAnimatorOnCancel", "resetImageAnimatorOnCancel",
@@ -110,6 +111,8 @@ void ImageAnimatorBridge::RegisterImageAnimatorAttributes(Local<panda::ObjectRef
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFixedSize),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFillMode),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFillMode),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetInterpolation),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetInterpolation),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetReverse),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetReverse),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImages),
@@ -286,6 +289,44 @@ ArkUINativeModuleValue ImageAnimatorBridge::ResetFillMode(ArkUIRuntimeCallInfo* 
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getImageAnimatorModifier()->resetFillMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageAnimatorBridge::SetInterpolation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsNumber()) {
+        int32_t interpolation = secondArg->Int32Value(vm);
+        if (interpolation < static_cast<int32_t>(ImageInterpolation::NONE) ||
+            interpolation > static_cast<int32_t>(ImageInterpolation::HIGH)) {
+            nodeModifiers->getImageAnimatorModifier()->resetInterpolation(nativeNode);
+        } else {
+            nodeModifiers->getImageAnimatorModifier()->setInterpolation(nativeNode, interpolation);
+        }
+    } else {
+        nodeModifiers->getImageAnimatorModifier()->resetInterpolation(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageAnimatorBridge::ResetInterpolation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getImageAnimatorModifier()->resetInterpolation(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

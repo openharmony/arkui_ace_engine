@@ -30,6 +30,7 @@ public:
     void SetDuration(int32_t duration) override;
     void SetIteration(int32_t iteration) override;
     void SetFillMode(int32_t fillMode) override;
+    void SetImageInterpolation(int32_t interpolation) override;
     void SetPreDecode(int32_t preDecode) override;
     void SetIsReverse(bool isReverse) override;
     void SetFixedSize(bool fixedSize) override;
@@ -48,12 +49,15 @@ public:
     static void SetState(FrameNode* frameNode, int32_t state);
     static void SetFixedSize(FrameNode* frameNode, bool fixedSize);
     static void SetFillMode(FrameNode* frameNode, int32_t fillMode);
+    static void SetImageInterpolation(FrameNode* frameNode, int32_t interpolation);
+    static void ResetImageInterpolation(FrameNode* frameNode);
     static void SetIteration(FrameNode* frameNode, int32_t iteration);
     static bool IsReverse(FrameNode* frameNode);
     static int32_t GetDuration(FrameNode* frameNode);
     static int32_t GetState(FrameNode* frameNode);
     static bool IsFixedSize(FrameNode* frameNode);
     static int32_t GetFillMode(FrameNode* frameNode);
+    static int32_t GetInterpolation(FrameNode* frameNode);
     static int32_t GetIteration(FrameNode* frameNode);
     static int32_t GetImagesSize(FrameNode* frameNode);
     static void SetAutoMonitorInvisibleArea(FrameNode* frameNode, bool autoMonitorInvisibleArea = false);

@@ -7943,6 +7943,8 @@ struct ArkUIImageAnimatorModifier {
     void (*resetFixedSize)(ArkUINodeHandle node);
     void (*setFillMode)(ArkUINodeHandle node, ArkUI_Int32 fillMode);
     void (*resetFillMode)(ArkUINodeHandle node);
+    void (*setInterpolation)(ArkUINodeHandle node, ArkUI_Int32 interpolation);
+    void (*resetInterpolation)(ArkUINodeHandle node);
     void (*setReverse)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetReverse)(ArkUINodeHandle node);
     void (*setImages)(ArkUINodeHandle node, struct ArkUIImagePropertiesStruct* images, ArkUI_Int32 length);
@@ -7958,6 +7960,7 @@ struct ArkUIImageAnimatorModifier {
     ArkUI_Int32 (*getState)(ArkUINodeHandle node);
     ArkUI_Bool (*getFixedSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getFillMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getInterpolation)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIteration)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImagesSize)(ArkUINodeHandle node);
     void (*setImageAnimatorOnStart)(ArkUINodeHandle node, void* callback);

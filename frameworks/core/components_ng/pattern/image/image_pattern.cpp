@@ -2319,6 +2319,7 @@ void ImagePattern::DumpRenderInfo()
     DumpResizable(renderProp);
     DumpHdrBrightness(renderProp);
     DumpAntiAlias(renderProp);
+    DumpInterpolation(renderProp);
 }
 
 inline void ImagePattern::DumpAntiAlias(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)

@@ -98,6 +98,11 @@ void ImageAnimatorModelNG::SetFillMode(int32_t fillMode)
     GetImageAnimatorPattern()->SetFillMode(static_cast<FillMode>(fillMode));
 }
 
+void ImageAnimatorModelNG::SetImageInterpolation(int32_t interpolation)
+{
+    GetImageAnimatorPattern()->SetImageInterpolation(static_cast<ImageInterpolation>(interpolation));
+}
+
 void ImageAnimatorModelNG::SetPreDecode(int32_t preDecode)
 {
     GetImageAnimatorPattern()->SetPreDecode(preDecode);
@@ -228,6 +233,16 @@ void ImageAnimatorModelNG::SetFillMode(FrameNode* frameNode, int32_t fillMode)
     GetImageAnimatorPattern(frameNode)->SetFillMode(static_cast<FillMode>(fillMode));
 }
 
+void ImageAnimatorModelNG::SetImageInterpolation(FrameNode* frameNode, int32_t interpolation)
+{
+    GetImageAnimatorPattern(frameNode)->SetImageInterpolation(static_cast<ImageInterpolation>(interpolation));
+}
+
+void ImageAnimatorModelNG::ResetImageInterpolation(FrameNode* frameNode)
+{
+    GetImageAnimatorPattern(frameNode)->ResetImageInterpolation();
+}
+
 void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, int32_t iteration)
 {
     GetImageAnimatorPattern(frameNode)->SetIteration(iteration);
@@ -276,6 +291,14 @@ int32_t ImageAnimatorModelNG::GetFillMode(FrameNode* frameNode)
     auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(pattern, 1);
     return static_cast<int32_t>(pattern->GetFillMode());
+}
+
+int32_t ImageAnimatorModelNG::GetInterpolation(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(ImageInterpolation::NONE));
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, static_cast<int32_t>(ImageInterpolation::NONE));
+    return static_cast<int32_t>(pattern->GetInterpolation());
 }
 
 int32_t ImageAnimatorModelNG::GetIteration(FrameNode* frameNode)
