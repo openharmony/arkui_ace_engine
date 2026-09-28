@@ -1714,6 +1714,7 @@ frameworks/compatible/components/picker/ @arkui001
 frameworks/compatible/components/picker-view/ @arkui001
 frameworks/compatible/components/tab_bar/ @arkui_navigation
 frameworks/compatible/components/toggle/ @arkuipopupwindow_all
+frameworks/compatible/components/video/ @arkuilayout1
 
 
 [Frameworks Core Old Abilities]
