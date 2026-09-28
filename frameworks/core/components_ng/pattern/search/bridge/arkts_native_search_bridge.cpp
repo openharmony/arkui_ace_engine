@@ -407,7 +407,7 @@ void SearchBridge::RegisterSearchAttributes(Local<panda::ObjectRef> object, Ecma
 
     auto search = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
-    LOGE("Finish RegisterColumnAttributes nativeModule");
+    LOGI("Finish RegisterSearchAttributes nativeModule");
 }
 
 ArkUINativeModuleValue SearchBridge::SetSearchInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
