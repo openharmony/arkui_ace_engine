@@ -200,6 +200,8 @@ public:
     static void SetBarLayoutStyle(FrameNode* frameNode, TabBarLayoutStyle barLayoutStyle);
     static void SetSidebarPosition(FrameNode* frameNode, BarPosition position);
     static void SetSidebarHeader(FrameNode* frameNode, const RefPtr<AceType>& header);
+    static void SetSidebarFooter(FrameNode* frameNode, const RefPtr<AceType>& footer);
+    static void SetSidebarBottomBar(FrameNode* frameNode, const RefPtr<AceType>& bottomBar);
     static void SetSidebarSearchableOptions(FrameNode* frameNode, const TabsSidebarSearchableOptions& options);
     static void SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint);
     static void SetOnBarDisplayModeChange(FrameNode* frameNode,

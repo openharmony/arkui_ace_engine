@@ -2057,6 +2057,8 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     sidebarPosition(value: BarPosition): TabsAttribute;
     sidebarDisplayStyle(value: TabsSidebarDisplayStyle): TabsAttribute;
     sidebarHeader(value: ComponentContent): TabsAttribute;
+    sidebarFooter(value: ComponentContent): TabsAttribute;
+    sidebarBottomBar(value: ComponentContent): TabsAttribute;
     sidebarSearchable(value?: TabsSidebarSearchableOptions): TabsAttribute;
     barDisplayModeBreakpoint(value: TabsBreakpointType<TabBarDisplayMode>): TabsAttribute;
     onBarDisplayModeChange(event: (mode: TabBarDisplayMode) => void): TabsAttribute;

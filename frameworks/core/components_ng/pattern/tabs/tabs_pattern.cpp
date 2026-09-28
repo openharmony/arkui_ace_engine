@@ -2236,7 +2236,13 @@ void TabsPattern::SyncPropertiesToSideBar()
     // 2. Sync header
     sideBarPattern->SetHeaderNode(sidebarHeaderNode_);
 
-    // 3. Sync searchable
+    // 3. Sync footer
+    sideBarPattern->SetFooterNode(sidebarFooterNode_);
+
+    // 4. Sync bottomBar
+    sideBarPattern->SetBottomBarNode(sidebarBottomBarNode_);
+
+    // 5. Sync searchable
     sideBarPattern->SetSideBarSearchableOptions(searchableOptions_);
 
     // 4. Replay bar modifier on the sidebar node first (matches tabBar execution order

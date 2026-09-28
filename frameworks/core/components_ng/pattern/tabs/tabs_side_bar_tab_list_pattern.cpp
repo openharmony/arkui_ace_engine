@@ -137,11 +137,7 @@ void TabsSideBarTabListPattern::SetCurrentIndex(int32_t index)
 
 void TabsSideBarTabListPattern::UpdateTabItemTextAndIconColor(int32_t selectedIndex)
 {
-    auto host = AceType::DynamicCast<FrameNode>(GetHost());
-    CHECK_NULL_VOID(host);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(scrollNode);
-    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    auto columnNode = GetTabItemContainerNode();
     CHECK_NULL_VOID(columnNode);
     int32_t childCount = columnNode->GetTotalChildCount();
     auto tabsNode = AceType::DynamicCast<TabsNode>(tabsNode_.Upgrade());

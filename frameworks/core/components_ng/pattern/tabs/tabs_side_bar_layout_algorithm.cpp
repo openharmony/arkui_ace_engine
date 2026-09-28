@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension TAB_LIST_TOP_MARGIN = 4.0_vp;
+const Dimension TAB_LIST_BOTTOM_MARGIN = 4.0_vp;
 const Dimension SIDEBAR_PADDING = 16.0_vp;
 const Dimension GRADUAL_BLUR_MASK_EXTRA_HEIGHT = 32.0_vp;
 } // namespace
@@ -44,7 +45,15 @@ void TabsSideBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!NearEqual(containerHeight, 0.0f)) {
         totalFixedHeight += TAB_LIST_TOP_MARGIN.ConvertToPx();
     }
-    MeasureTabList(layoutWrapper, size, totalFixedHeight);
+
+    float bottomBarHeight = MeasureBottomBarContainer(layoutWrapper, size);
+    MeasureBottomBarMaskNode(layoutWrapper, size, bottomBarHeight);
+    float bottomFixedHeight = bottomBarHeight;
+    if (!NearEqual(bottomBarHeight, 0.0f)) {
+        bottomFixedHeight += TAB_LIST_BOTTOM_MARGIN.ConvertToPx();
+    }
+
+    MeasureTabList(layoutWrapper, size, totalFixedHeight, bottomFixedHeight);
 }
 
 float TabsSideBarLayoutAlgorithm::MeasureHeaderContainer(LayoutWrapper* layoutWrapper, const SizeF& size)
@@ -126,8 +135,86 @@ void TabsSideBarLayoutAlgorithm::MeasureHeaderContainerMaskNode(
     }
 }
 
+float TabsSideBarLayoutAlgorithm::MeasureBottomBarContainer(LayoutWrapper* layoutWrapper, const SizeF& size)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_RETURN(hostNode, 0.0f);
+    auto sideBarPattern = hostNode->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_RETURN(sideBarPattern, 0.0f);
+    auto bottomBarContainerNode = sideBarPattern->GetBottomBarContainerNode();
+    CHECK_NULL_RETURN(bottomBarContainerNode, 0.0f);
+    auto property = bottomBarContainerNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(property, 0.0f);
+    if (property->GetVisibilityValue(VisibleType::GONE) != VisibleType::VISIBLE) {
+        return 0.0f;
+    }
+    auto index = hostNode->GetChildIndexById(bottomBarContainerNode->GetId());
+    if (index < 0) {
+        return 0.0f;
+    }
+    auto bottomBarContainerWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(bottomBarContainerWrapper, 0.0f);
+
+    float padding = SIDEBAR_PADDING.ConvertToPx();
+    float contentWidth = std::max(0.0f, size.Width() - padding - padding);
+    float contentHeight = size.Height();
+    LayoutConstraintF childConstraint;
+    childConstraint.maxSize.SetWidth(contentWidth);
+    childConstraint.maxSize.SetHeight(contentHeight);
+    childConstraint.minSize.SetWidth(0.0f);
+    childConstraint.minSize.SetHeight(0.0f);
+    childConstraint.percentReference.SetWidth(contentWidth);
+    childConstraint.percentReference.SetHeight(contentHeight);
+    bottomBarContainerWrapper->Measure(childConstraint);
+    return bottomBarContainerWrapper->GetGeometryNode()->GetFrameSize().Height();
+}
+
+void TabsSideBarLayoutAlgorithm::MeasureBottomBarMaskNode(
+    LayoutWrapper* layoutWrapper, const SizeF& size, float bottomBarHeight)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(hostNode);
+    auto sideBarPattern = hostNode->GetPattern<TabsSideBarPattern>();
+    CHECK_NULL_VOID(sideBarPattern);
+    float extraHeight = GRADUAL_BLUR_MASK_EXTRA_HEIGHT.ConvertToPx();
+    float maskHeight = bottomBarHeight + extraHeight;
+    float maskWidth = size.Width();
+    LayoutConstraintF maskConstraint;
+    maskConstraint.selfIdealSize.SetWidth(maskWidth);
+    maskConstraint.selfIdealSize.SetHeight(maskHeight);
+    maskConstraint.maxSize.SetWidth(maskWidth);
+    maskConstraint.maxSize.SetHeight(maskHeight);
+    maskConstraint.minSize.SetWidth(0.0f);
+    maskConstraint.minSize.SetHeight(0.0f);
+    RefPtr<FrameNode> effectNodes[] = { sideBarPattern->GetBottomBarMaskBlurNode(),
+        sideBarPattern->GetBottomBarMaskNode() };
+    for (const auto& effectNode : effectNodes) {
+        CHECK_NULL_CONTINUE(effectNode);
+        auto property = effectNode->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(property);
+        if (NearEqual(bottomBarHeight, 0.0f)) {
+            property->UpdateVisibility(VisibleType::INVISIBLE);
+            continue;
+        }
+        bool shouldVisible = sideBarPattern->IsBottomBarScrollEffectEnabled();
+        property->UpdateVisibility(shouldVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        if (!shouldVisible) {
+            continue;
+        }
+        auto maskIndex = hostNode->GetChildIndexById(effectNode->GetId());
+        if (maskIndex < 0) {
+            continue;
+        }
+        auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
+        CHECK_NULL_CONTINUE(maskWrapper);
+        maskWrapper->Measure(maskConstraint);
+    }
+}
+
 void TabsSideBarLayoutAlgorithm::MeasureTabList(
-    LayoutWrapper* layoutWrapper, const SizeF& size, float totalFixedHeight)
+    LayoutWrapper* layoutWrapper, const SizeF& size, float totalFixedHeight, float bottomFixedHeight)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
@@ -149,6 +236,7 @@ void TabsSideBarLayoutAlgorithm::MeasureTabList(
     // this makes scroll content render behind the header.
     PaddingProperty safeAreaPadding;
     safeAreaPadding.top = CalcLength(totalFixedHeight);
+    safeAreaPadding.bottom = CalcLength(bottomFixedHeight);
     property->UpdateSafeAreaPadding(safeAreaPadding);
 
     float padding = SIDEBAR_PADDING.ConvertToPx();
@@ -183,6 +271,22 @@ void TabsSideBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutChild(layoutWrapper, hostNode, sideBarPattern->GetHeaderContainerMaskBlurNode(), OffsetF{0.0f, 0.0f});
     LayoutChild(layoutWrapper, hostNode, sideBarPattern->GetHeaderContainerMaskNode(), OffsetF{0.0f, 0.0f});
     LayoutChild(layoutWrapper, hostNode, sideBarPattern->GetTabListNode(), OffsetF{offsetX, 0.0f});
+
+    auto bottomBarContainer = sideBarPattern->GetBottomBarContainerNode();
+    auto bottomBarMaskBlur = sideBarPattern->GetBottomBarMaskBlurNode();
+    auto bottomBarMask = sideBarPattern->GetBottomBarMaskNode();
+    if (bottomBarContainer && bottomBarContainer->GetGeometryNode()) {
+        float bottomBarHeight = bottomBarContainer->GetGeometryNode()->GetFrameSize().Height();
+        float sidebarHeight = geometryNode->GetFrameSize().Height();
+
+        float extraHeight = GRADUAL_BLUR_MASK_EXTRA_HEIGHT.ConvertToPx();
+        float maskOffsetY = std::max(0.0f, sidebarHeight - bottomBarHeight - extraHeight);
+        LayoutChild(layoutWrapper, hostNode, bottomBarMaskBlur, OffsetF{0.0f, maskOffsetY});
+        LayoutChild(layoutWrapper, hostNode, bottomBarMask, OffsetF{0.0f, maskOffsetY});
+
+        float offsetY = std::max(0.0f, sidebarHeight - bottomBarHeight);
+        LayoutChild(layoutWrapper, hostNode, bottomBarContainer, OffsetF{offsetX, offsetY});
+    }
 }
 
 void TabsSideBarLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper,

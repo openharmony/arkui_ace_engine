@@ -232,6 +232,24 @@ public:
         return sidebarHeaderNode_;
     }
 
+    void SetSidebarFooterNode(const RefPtr<NG::UINode>& footer)
+    {
+        sidebarFooterNode_ = footer;
+    }
+    const RefPtr<NG::UINode>& GetSidebarFooterNode() const
+    {
+        return sidebarFooterNode_;
+    }
+
+    void SetSidebarBottomBarNode(const RefPtr<NG::UINode>& bottomBar)
+    {
+        sidebarBottomBarNode_ = bottomBar;
+    }
+    const RefPtr<NG::UINode>& GetSidebarBottomBarNode() const
+    {
+        return sidebarBottomBarNode_;
+    }
+
     TabBarDisplayMode CalculateTabBarDisplayMode(float width);
 
     RefPtr<FrameNode> GetSideBarNode() const
@@ -446,6 +464,8 @@ private:
     RefPtr<FrameNode> sideBarNode_ = nullptr;
     RefPtr<FrameNode> sideBarDividerNode_ = nullptr;
     RefPtr<NG::UINode> sidebarHeaderNode_;
+    RefPtr<NG::UINode> sidebarFooterNode_;
+    RefPtr<NG::UINode> sidebarBottomBarNode_;
     TabsSidebarSearchableOptions searchableOptions_;
     std::function<void(WeakPtr<NG::FrameNode>)> barModifierApply_;
     bool hasBarBlurStyle_ = false;

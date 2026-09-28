@@ -933,6 +933,14 @@ void SetSidebarHeaderImpl(ArkUINodeHandle node, ArkUINodeHandle headerNode) {}
 
 void ResetSidebarHeaderImpl(ArkUINodeHandle node) {}
 
+void SetSidebarFooterImpl(ArkUINodeHandle node, ArkUINodeHandle footerNode) {}
+
+void ResetSidebarFooterImpl(ArkUINodeHandle node) {}
+
+void SetSidebarBottomBarImpl(ArkUINodeHandle node, ArkUINodeHandle bottomBarNode) {}
+
+void ResetSidebarBottomBarImpl(ArkUINodeHandle node) {}
+
 void SetSidebarSearchableImpl(ArkUINodeHandle node, struct ArkUITabsSidebarSearchableOptions* options) {}
 
 void ResetSidebarSearchableImpl(ArkUINodeHandle node) {}
@@ -2072,6 +2080,42 @@ void ResetSidebarHeader(ArkUINodeHandle node)
     TabsModelNG::SetSidebarHeader(frameNode, nullptr);
 }
 
+void SetSidebarFooter(ArkUINodeHandle node, ArkUINodeHandle footerNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (footerNode) {
+        TabsModelNG::SetSidebarFooter(frameNode, AceType::Claim(reinterpret_cast<AceType*>(footerNode)));
+    } else {
+        TabsModelNG::SetSidebarFooter(frameNode, nullptr);
+    }
+}
+
+void ResetSidebarFooter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarFooter(frameNode, nullptr);
+}
+
+void SetSidebarBottomBar(ArkUINodeHandle node, ArkUINodeHandle bottomBarNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (bottomBarNode) {
+        TabsModelNG::SetSidebarBottomBar(frameNode, AceType::Claim(reinterpret_cast<AceType*>(bottomBarNode)));
+    } else {
+        TabsModelNG::SetSidebarBottomBar(frameNode, nullptr);
+    }
+}
+
+void ResetSidebarBottomBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarBottomBar(frameNode, nullptr);
+}
+
 void SetSidebarSearchable(ArkUINodeHandle node, struct ArkUITabsSidebarSearchableOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2461,6 +2505,10 @@ const ArkUITabsModifier* GetTabsModifier()
             .resetSidebarPosition = ResetSidebarPosition,
             .setSidebarHeader = SetSidebarHeader,
             .resetSidebarHeader = ResetSidebarHeader,
+            .setSidebarFooter = SetSidebarFooter,
+            .resetSidebarFooter = ResetSidebarFooter,
+            .setSidebarBottomBar = SetSidebarBottomBar,
+            .resetSidebarBottomBar = ResetSidebarBottomBar,
             .setSidebarSearchable = SetSidebarSearchable,
             .resetSidebarSearchable = ResetSidebarSearchable,
             .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpoint,
@@ -2607,6 +2655,10 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetSidebarPosition = ResetSidebarPositionImpl,
         .setSidebarHeader = SetSidebarHeaderImpl,
         .resetSidebarHeader = ResetSidebarHeaderImpl,
+        .setSidebarFooter = SetSidebarFooterImpl,
+        .resetSidebarFooter = ResetSidebarFooterImpl,
+        .setSidebarBottomBar = SetSidebarBottomBarImpl,
+        .resetSidebarBottomBar = ResetSidebarBottomBarImpl,
         .setSidebarSearchable = SetSidebarSearchableImpl,
         .resetSidebarSearchable = ResetSidebarSearchableImpl,
         .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpointImpl,

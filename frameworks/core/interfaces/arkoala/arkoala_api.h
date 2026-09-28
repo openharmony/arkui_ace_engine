@@ -5765,6 +5765,10 @@ struct ArkUITabsModifier {
     void (*resetSidebarPosition)(ArkUINodeHandle node);
     void (*setSidebarHeader)(ArkUINodeHandle node, ArkUINodeHandle headerNode);
     void (*resetSidebarHeader)(ArkUINodeHandle node);
+    void (*setSidebarFooter)(ArkUINodeHandle node, ArkUINodeHandle footerNode);
+    void (*resetSidebarFooter)(ArkUINodeHandle node);
+    void (*setSidebarBottomBar)(ArkUINodeHandle node, ArkUINodeHandle bottomBarNode);
+    void (*resetSidebarBottomBar)(ArkUINodeHandle node);
     void (*setSidebarSearchable)(ArkUINodeHandle node, struct ArkUITabsSidebarSearchableOptions* options);
     void (*resetSidebarSearchable)(ArkUINodeHandle node);
     void (*setBarDisplayModeBreakpoint)(ArkUINodeHandle node, struct ArkUITabBarDisplayModeBreakpoint* breakpoint);

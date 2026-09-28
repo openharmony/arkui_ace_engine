@@ -274,6 +274,14 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, TabsSidebarHeaderModifier.identity, TabsSidebarHeaderModifier, value);
         return this;
       }
+      sidebarFooter(value: ComponentContent): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsSidebarFooterModifier.identity, TabsSidebarFooterModifier, value);
+        return this;
+      }
+      sidebarBottomBar(value: ComponentContent): TabsAttribute {
+        modifierWithKey(this._modifiersWithKeys, TabsSidebarBottomBarModifier.identity, TabsSidebarBottomBarModifier, value);
+        return this;
+      }
       sidebarSearchable(value: TabsSidebarSearchableOptions): TabsAttribute {
         modifierWithKey(this._modifiersWithKeys, TabsSidebarSearchableModifier.identity, TabsSidebarSearchableModifier, value);
         return this;
@@ -1205,6 +1213,36 @@ function loadComponent(): ComponentObj | undefined {
       }
     }
 
+    class TabsSidebarFooterModifier extends ModifierWithKey<ComponentContent> {
+      constructor(value: ComponentContent) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabsSidebarFooter');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetSidebarFooter(node);
+        } else {
+          getUINativeModule().tabs.setSidebarFooter(node, this.value);
+        }
+      }
+    }
+
+    class TabsSidebarBottomBarModifier extends ModifierWithKey<ComponentContent> {
+      constructor(value: ComponentContent) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('tabsSidebarBottomBar');
+
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().tabs.resetSidebarBottomBar(node);
+        } else {
+          getUINativeModule().tabs.setSidebarBottomBar(node, this.value);
+        }
+      }
+    }
+
     class TabsSidebarSearchableModifier extends ModifierWithKey<TabsSidebarSearchableOptions> {
       constructor(value: TabsSidebarSearchableOptions) {
         super(value);
@@ -1573,6 +1611,14 @@ class JSTabs extends JSContainerBase {
 
   static sidebarHeader(value: any): void {
     getUINativeModule().tabs.setSidebarHeader(true, value);
+  }
+
+  static sidebarFooter(value: any): void {
+    getUINativeModule().tabs.setSidebarFooter(true, value);
+  }
+
+  static sidebarBottomBar(value: any): void {
+    getUINativeModule().tabs.setSidebarBottomBar(true, value);
   }
 
   static sidebarSearchable(value: any): void {

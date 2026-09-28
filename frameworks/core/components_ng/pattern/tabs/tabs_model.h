@@ -220,6 +220,8 @@ public:
     virtual void SetBarLayoutStyle(NG::TabBarLayoutStyle barLayoutStyle) {}
     virtual void SetSidebarPosition(BarPosition position) {}
     virtual void SetSidebarHeader(const RefPtr<AceType>& header) {}
+    virtual void SetSidebarFooter(const RefPtr<AceType>& footer) {}
+    virtual void SetSidebarBottomBar(const RefPtr<AceType>& bottomBar) {}
     virtual void SetSidebarSearchableOptions(const NG::TabsSidebarSearchableOptions& options) {}
     virtual void SetBarDisplayModeBreakpoint(const NG::TabBarDisplayModeBreakpoint& breakpoint) {}
     virtual void SetOnBarDisplayModeChange(std::function<void(NG::TabBarDisplayMode)>&& onBarDisplayModeChange) {}

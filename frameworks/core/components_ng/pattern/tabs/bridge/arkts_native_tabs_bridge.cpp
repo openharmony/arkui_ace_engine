@@ -291,7 +291,8 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         "resetTabMinSidebarWidth", "setTabMaxSidebarWidth", "resetTabMaxSidebarWidth", "setTabMinContentWidth",
         "resetTabMinContentWidth", "setTabSidebarBackgroundColor", "resetTabSidebarBackgroundColor",
         "setTabSidebarBackgroundBlurStyle", "resetTabSidebarBackgroundBlurStyle", "setTabSidebarDivider",
-        "resetTabSidebarDivider"
+        "resetTabSidebarDivider", "setSidebarFooter", "resetSidebarFooter",
+        "setSidebarBottomBar", "resetSidebarBottomBar"
     };
     Local<JSValueRef> functionValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::Create),
@@ -416,6 +417,10 @@ void TabsBridge::RegisterTabsAttributes(panda::Local<panda::ObjectRef> object, p
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabSidebarBackgroundBlurStyle),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabSidebarDivider),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabSidebarDivider),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetSidebarFooter),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetSidebarFooter),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetSidebarBottomBar),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetSidebarBottomBar),
     };
     auto tabs = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
@@ -3207,6 +3212,78 @@ ArkUINativeModuleValue TabsBridge::ResetSidebarHeader(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetSidebarHeader(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetSidebarFooter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> footerArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    if (!footerArg.IsNull() && !footerArg->IsUndefined() && footerArg->IsObject(vm)) {
+        auto paramObject = footerArg->ToObject(vm);
+        auto builderNode = ArkTSUtils::GetProperty(vm, paramObject, "builderNode_");
+        if (builderNode->IsObject(vm)) {
+            auto builderNodeObject = builderNode->ToObject(vm);
+            auto nodePtrVal = ArkTSUtils::GetProperty(vm, builderNodeObject, "nodePtr_");
+            if (!nodePtrVal.IsEmpty() && nodePtrVal->IsNativePointer(vm)) {
+                ArkUINodeHandle footerNode = nodePtr(nodePtrVal->ToNativePointer(vm)->Value());
+                GetArkUINodeModifiers()->getTabsModifier()->setSidebarFooter(nativeNode, footerNode);
+                return panda::JSValueRef::Undefined(vm);
+            }
+        }
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->resetSidebarFooter(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetSidebarFooter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetSidebarFooter(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetSidebarBottomBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> bottomBarArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    if (!bottomBarArg.IsNull() && !bottomBarArg->IsUndefined() && bottomBarArg->IsObject(vm)) {
+        auto paramObject = bottomBarArg->ToObject(vm);
+        auto builderNode = ArkTSUtils::GetProperty(vm, paramObject, "builderNode_");
+        if (builderNode->IsObject(vm)) {
+            auto builderNodeObject = builderNode->ToObject(vm);
+            auto nodePtrVal = ArkTSUtils::GetProperty(vm, builderNodeObject, "nodePtr_");
+            if (!nodePtrVal.IsEmpty() && nodePtrVal->IsNativePointer(vm)) {
+                ArkUINodeHandle bottomBarNode = nodePtr(nodePtrVal->ToNativePointer(vm)->Value());
+                GetArkUINodeModifiers()->getTabsModifier()->setSidebarBottomBar(nativeNode, bottomBarNode);
+                return panda::JSValueRef::Undefined(vm);
+            }
+        }
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->resetSidebarBottomBar(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetSidebarBottomBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetSidebarBottomBar(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
