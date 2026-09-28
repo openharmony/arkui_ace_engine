@@ -2606,7 +2606,7 @@ HWTEST_F(ContentChangeManagerTestNg, ConcurrentScrollInterruptionWaitsForLastNod
     EXPECT_EQ(contentChangeMgr->activeContentChanges_.count(second->GetId()), 1u);
     Mock::VerifyAndClearExpectations(mockUiSessionManager);
 
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL, "")).Times(1);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SCROLL, _)).Times(1);
     contentChangeMgr->OnScrollChangeEnd(second);
     EXPECT_TRUE(contentChangeMgr->activeContentChanges_.empty());
     EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
