@@ -54,6 +54,8 @@ public:
     virtual bool HasFocus() const = 0;
 
     virtual bool GetShowCounterValue() const = 0;
+    // RichEditor overrides to return true so MeasureDecorator uses GetTextLength()
+    virtual bool ShouldUseHostTextLength() const { return false; }
     virtual int32_t GetCounterType() const { return -1; }
     virtual bool GetShowHighlightBorder() const { return true; }
     virtual bool HasCounterTextColor() const { return false; }

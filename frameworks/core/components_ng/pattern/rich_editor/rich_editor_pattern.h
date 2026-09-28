@@ -405,7 +405,7 @@ public:
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
     void InsertValueInStyledString(const std::u16string& insertValue, bool shouldCommitInput = false,
-        bool isPaste = false, bool preFiltered = false);
+        bool isPaste = false, bool preFiltered = false, bool isInsertValueSplit = false);
     void HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
         std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput);
     void HandleComposingTextBeforeInsertion(const std::u16string& insertValue);
@@ -1036,6 +1036,7 @@ public:
     void SetThemeBorderAttr() override;
 
     // ===== ICounterHost interface (optional override) =====
+    bool ShouldUseHostTextLength() const override { return true; }
     int32_t GetCounterType() const override;
     bool GetShowHighlightBorder() const override;
     bool HasCounterTextColor() const override;
@@ -1069,6 +1070,10 @@ public:
     Dimension GetInnerBorderWidthValue() const;
     Color GetInnerBorderColorValue(const Color& defaultColor) const;
     RefPtr<TextComponentDecorator> GetCounterDecorator() const override;
+    std::vector<RefPtr<TextInputResponseArea>> GetAllResponseArea() const override
+    {
+        return { cleanNodeResponseArea_ };
+    }
 
     // Public for RichEditorModelNG access
     RefPtr<FrameNode> GetHost() const override;

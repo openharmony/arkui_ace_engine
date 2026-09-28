@@ -24,6 +24,9 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -172,6 +175,76 @@ void RequestRichEditorKeyboardForStylus(const RefPtr<NG::FrameNode>& frameNode, 
 }
 
 namespace NodeModifier {
+void SetRichEditorShowCounter(ArkUINodeHandle node, ArkUIShowCountOptions* showCountOptions,
+    void* counterTextColorRawPtr, void* counterTextOverflowColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(showCountOptions);
+    RichEditorModelNG::SetShowCounter(frameNode, static_cast<bool>(showCountOptions->open));
+    RichEditorModelNG::SetCounter(frameNode, showCountOptions->thresholdPercentage);
+    RichEditorModelNG::SetShowHighlightBorder(frameNode, static_cast<bool>(showCountOptions->highlightBorder));
+    if (showCountOptions->counterTextColorIsSet) {
+        RichEditorModelNG::SetCounterTextColor(frameNode, Color(showCountOptions->counterTextColor));
+    } else {
+        RichEditorModelNG::ResetCounterTextColor(frameNode);
+    }
+    if (showCountOptions->counterTextOverflowColorIsSet) {
+        RichEditorModelNG::SetCounterTextOverflowColor(frameNode, Color(showCountOptions->counterTextOverflowColor));
+    } else {
+        RichEditorModelNG::ResetCounterTextOverflowColor(frameNode);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (counterTextColorRawPtr) {
+            auto resObjTextColor = AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextColor", resObjTextColor, Color(showCountOptions->counterTextColor));
+        } else {
+            pattern->UnRegisterResource("counterTextColor");
+        }
+        if (counterTextOverflowColorRawPtr) {
+            auto resObjTextOverflowColor =
+                AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextOverflowColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextOverflowColor", resObjTextOverflowColor,
+                Color(showCountOptions->counterTextOverflowColor));
+        } else {
+            pattern->UnRegisterResource("counterTextOverflowColor");
+        }
+    }
+}
+
+void ResetRichEditorShowCounter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetShowCounter(frameNode, false);
+    RichEditorModelNG::SetCounter(frameNode, -1);
+    RichEditorModelNG::SetShowHighlightBorder(frameNode, true);
+    RichEditorModelNG::ResetCounterTextColor(frameNode);
+    RichEditorModelNG::ResetCounterTextOverflowColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("counterTextColor");
+        pattern->UnRegisterResource("counterTextOverflowColor");
+    }
+}
+
+void GetRichEditorShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    options->open = RichEditorModelNG::GetShowCounter(frameNode);
+    options->thresholdPercentage = RichEditorModelNG::GetCounterType(frameNode);
+    options->highlightBorder = RichEditorModelNG::GetShowCounterBorder(frameNode);
+    options->counterTextColor = RichEditorModelNG::GetCounterTextColor(frameNode).GetValue();
+    options->counterTextOverflowColor = RichEditorModelNG::GetCounterTextOverflowColor(frameNode).GetValue();
+}
+
 const ArkUIRichEditorCustomModifier* GetRichEditorCustomModifier()
 {
     static const ArkUIRichEditorCustomModifier modifier = {

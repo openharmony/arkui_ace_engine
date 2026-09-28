@@ -932,10 +932,8 @@ float RichEditorLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWr
     CHECK_NULL_RETURN(pattern, 0.0f);
     auto counterDecorator = pattern->GetCounterDecorator();
     CHECK_NULL_RETURN(counterDecorator, 0.0f);
-    std::u16string textContent;
-    pattern->GetContentBySpans(textContent);
     bool showPlaceHolder = pattern->IsShowPlaceholder();
-    return counterDecorator->MeasureDecorator(contentWidth, textContent, showPlaceHolder);
+    return counterDecorator->MeasureDecorator(contentWidth, u"", showPlaceHolder);
 }
 
 void RichEditorLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
