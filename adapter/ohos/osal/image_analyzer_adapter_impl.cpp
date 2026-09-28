@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/napi_scope_raii.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ai/image_analyzer_adapter_impl.h"
 #include "core/common/ai/image_analyzer_mgr.h"
@@ -54,8 +55,7 @@ void* ImageAnalyzerAdapterImpl::GetNapiEnv() const
 
 void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env_, &scope);
+    EscapableScopeRAII scope(env_);
     napi_value analyzerConfig = nullptr;
     napi_get_reference_value(env_, analyzerConfigRef_, &analyzerConfig);
 
@@ -71,8 +71,7 @@ void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
         }
         napi_set_named_property(env_, analyzerConfig, "types", typeNapi);
     }
-    napi_escape_handle(env_, scope, analyzerConfig, &analyzerConfig);
-    napi_close_escapable_handle_scope(env_, scope);
+    scope.Escape(analyzerConfig, &analyzerConfig);
     return analyzerConfig;
 }
 
@@ -81,9 +80,8 @@ void* ImageAnalyzerAdapterImpl::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelM
 #if defined(PIXEL_MAP_SUPPORTED)
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, {});
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env_, &scope);
-    if (status != napi_ok || scope == nullptr) {
+    ScopeRAII scope(env_);
+    if (!scope) {
         return nullptr;
     }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -91,7 +89,6 @@ void* ImageAnalyzerAdapterImpl::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelM
     auto napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
     napi_ref napiValueRef = nullptr;
     napi_create_reference(env_, napiValue, 1, &napiValueRef);
-    napi_close_handle_scope(env_, scope);
     return napiValueRef;
 #else
     return nullptr;
