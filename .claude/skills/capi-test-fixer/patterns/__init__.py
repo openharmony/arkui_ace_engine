@@ -1,1 +1,0 @@
-"""Patterns module for C API test fixer."""
