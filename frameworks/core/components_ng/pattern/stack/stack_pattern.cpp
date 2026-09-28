@@ -44,15 +44,15 @@ void StackPattern::PostAsyncLoadTask()
         if (pattern->prevMeasureBreak_) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     });
 }
 
 bool StackPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure) {
-        return !config.skipLayout;
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
