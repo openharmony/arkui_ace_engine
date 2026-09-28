@@ -79,6 +79,10 @@ abstract class NativeViewPartialUpdate {
     console.warn("NativeViewPU(Mock).setIsV2() -  unimplemented!");
   }
 
+  setAsyncLoadConfig(asyncLoadConfig: string): void {
+    console.warn("NativeViewPU(Mock).setAsyncLoadConfig() -  unimplemented!");
+  }
+
   resetRecycleCustomNode(): void {
     console.warn("NativeViewPU(Mock).resetRecycleCustomNode() -  unimplemented!");
   }

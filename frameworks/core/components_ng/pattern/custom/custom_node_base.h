@@ -18,10 +18,12 @@
 
 #include <functional>
 #include <list>
+#include <optional>
 #include <string>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/base/async_load_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
@@ -75,6 +77,12 @@ public:
 
     void SetDidBuildFunction(std::function<void()>&& didBuildFunc);
     void FireDidBuild();
+
+    // Asynchronous-loading configuration of this component, absent unless the application
+    // called enableAsyncLoad on its context. Value-copied on the way in so no JS reference
+    // is retained. Consumed by CustomNode to defer its first build.
+    void SetAsyncLoadConfig(std::optional<AsyncLoadConfig>&& config);
+    const std::optional<AsyncLoadConfig>& GetAsyncLoadConfig() const;
 
     void SetDestroyFunction(std::function<void()>&& destroyFunc);
     void FireOnDisappear();
@@ -182,6 +190,7 @@ private:
     std::function<void()> appearFunc_;
     std::function<void()> didBuildFunc_;
     std::function<void()> destroyFunc_;
+    std::optional<AsyncLoadConfig> asyncLoadConfig_;
     std::function<void()> pageTransitionFunc_;
     std::function<void(bool)> reloadFunc_;
     std::function<void()> completeReloadFunc_;

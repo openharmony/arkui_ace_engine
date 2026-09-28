@@ -1216,6 +1216,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount, in
         scrollPlaceholderManager_->NotifyVsync(static_cast<int64_t>(nanoTimestamp),
             static_cast<int64_t>(vsyncPeriod));
     }
+    if (asyncLoadManager_) {
+        asyncLoadManager_->OnVsync(static_cast<int64_t>(nanoTimestamp), static_cast<int64_t>(vsyncPeriod));
+    }
     uint64_t timeStamp = (nanoTimestamp > vsyncPeriod) ? (nanoTimestamp - vsyncPeriod + ONE_MS_IN_NS) : ONE_MS_IN_NS;
     resampleTimeStamp_ = (timeStamp > compensationValue_) ? (timeStamp - compensationValue_) : 0;
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -8601,6 +8604,17 @@ const RefPtr<ScrollPlaceholderManager>& PipelineContext::GetOrCreateScrollPlaceh
         }
     });
     return scrollPlaceholderManager_;
+}
+
+const RefPtr<AsyncLoadManager>& PipelineContext::GetOrCreateAsyncLoadManager()
+{
+    std::call_once(asyncLoadOnceFlag_, [this]() {
+        if (!asyncLoadManager_) {
+            asyncLoadManager_ = MakeRefPtr<AsyncLoadManager>(instanceId_);
+            asyncLoadManager_->SetPipelineContext(WeakClaim(this));
+        }
+    });
+    return asyncLoadManager_;
 }
 
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const

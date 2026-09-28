@@ -76,6 +76,27 @@ public:
     void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos) override;
     void NodeDidBuild();
 
+    // --- Asynchronous loading (components that called enableAsyncLoad) ---
+    // The first build of such a component is deferred instead of running synchronously on
+    // the frame that mounts it; the content is then produced by a low-priority UI task and,
+    // if that has not finished in time, by the manager's force-load on timeout.
+    bool IsAsyncLoadPending() const
+    {
+        return asyncLoadPending_;
+    }
+    void RegisterAsyncLoad();
+    // Shows the configured placeholder while the content is deferred. A configuration without
+    // a usable id leaves the component invisible instead of substituting a system default.
+    void MountAsyncLoadPlaceholder();
+    void DetachAsyncLoadPlaceholder();
+    // Full, unbudgeted build used by the timeout path: guarantees the content reaches the
+    // screen eventually (AC-1.2).
+    void ForceLoadNow();
+    void PostAsyncLoadTask();
+    void RunAsyncLoadTask();
+    // Drops this node's entry from the manager once its content is on screen.
+    void NotifyAsyncLoadFinished();
+
     int32_t FrameCount() const override
     {
         return 1;
@@ -310,6 +331,14 @@ private:
     bool needMarkParent_ = true;
     bool prevJsActive_ = true;
     bool isDidBuild_ = false;
+    // Asynchronous loading: true while the content build is deferred, i.e. between the
+    // first Build() of an async-enabled component and its completion or force-load.
+    bool asyncLoadPending_ = false;
+    // Set once the deferred build has finished (normally or by force-load) so later
+    // rebuilds take the ordinary synchronous path.
+    bool asyncLoadSettled_ = false;
+    bool asyncLoadRegistered_ = false;
+    RefPtr<UINode> asyncLoadPlaceholder_;
     std::list<ExtraInfo> extraInfos_;
     WeakPtr<UINode> navigationNode_;
     std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;

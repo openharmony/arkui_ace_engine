@@ -43,6 +43,32 @@ interface IReusePool {
 }
 
 /**
+ * Asynchronous-loading configuration accepted by
+ * CustomComponentContext.enableAsyncLoad().
+ *
+ * Declared structurally instead of importing the public
+ * @ohos.arkui.StateManagement declarations, so the standalone
+ * state-management build stays independent of the SDK type set.
+ */
+interface CustomComponentAsyncLoadOptions {
+  /**
+   * Placeholder displayed while the component is loaded asynchronously.
+   * `id` refers to a template registered through the placeholder register.
+   * `size` is a layout suggestion and is not transported to the native side
+   * in this iteration; the placeholder keeps the template's own layout.
+   */
+  placeholder?: {
+    id?: string;
+    size?: object;
+  };
+  /**
+   * Timeout threshold in ms. Positive: force-load after that many ms.
+   * 0: force-load in subsequent frames without waiting. Negative: never time out.
+   */
+  timeout?: number;
+}
+
+/**
  * Context object returned by UIUtils.getCustomComponentContext().
  * A dedicated interface (rather than exposing PUV2ViewBase directly) keeps
  * the framework API surface isolated from any same-named methods an app
@@ -50,6 +76,7 @@ interface IReusePool {
  */
 interface CustomComponentContext {
   getReusePool(): IReusePool | undefined;
+  enableAsyncLoad(options?: CustomComponentAsyncLoadOptions): void;
 }
 
 /**

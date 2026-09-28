@@ -27,6 +27,10 @@
 
 namespace {
 constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
+constexpr char ASYNC_LOAD_BUILD_TASK[] = "AsyncLoadBuild";
+// Per-attempt budget for spreading an asynchronous build over frames, kept well inside a
+// frame budget so the deferred build does not itself become a dropped-frame source.
+constexpr int64_t ASYNC_LOAD_BUILD_BUDGET_MS = 2;
 constexpr int32_t MEMORY_LEVEL_LOW = 1;
 constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
 }
@@ -42,7 +46,17 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
 
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
-    Render();
+    if (GetAsyncLoadConfig().has_value() && !asyncLoadSettled_) {
+        // Asynchronous loading: the first build of an enabled component does not create the
+        // content on this frame. The content is produced by a low-priority UI task, and if
+        // that overruns the configured timeout, by the manager's force-load.
+        asyncLoadPending_ = true;
+        RegisterAsyncLoad();
+        MountAsyncLoadPlaceholder();
+        PostAsyncLoadTask();
+    } else {
+        Render();
+    }
     if (extraInfos) {
         extraInfos_ = *extraInfos;
     }
@@ -66,6 +80,19 @@ void CustomNode::OnAttachToMainTree(bool recursive)
 void CustomNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     UINode::OnDetachFromMainTree(recursive, context);
+    // Invariant: a detached node must not keep a queue entry, otherwise the manager would
+    // force-load a node that is no longer on the tree. Placed before the early return below
+    // because that return is unrelated to asynchronous loading.
+    if (asyncLoadRegistered_ || asyncLoadPending_) {
+        asyncLoadRegistered_ = false;
+        asyncLoadPending_ = false;
+        if (context) {
+            auto manager = context->GetOrCreateAsyncLoadManager();
+            if (manager) {
+                manager->OnNodeDestroyed(GetId());
+            }
+        }
+    }
     auto callback = onEnvTreeStateChangeFunc_;
     if (!callback) {
         return;
@@ -148,6 +175,141 @@ void CustomNode::NodeDidBuild()
     FireTriggerLifecycleFunc(LifeCycleEvent::ON_BUILD);
     FireDidBuild();
     isDidBuild_ = true;
+    if (asyncLoadPending_) {
+        // Content is on screen: release the deferred state and drop the queue entry so the
+        // manager stops tracking this node (design D8 reuses this existing completion point).
+        asyncLoadPending_ = false;
+        asyncLoadSettled_ = true;
+        // Content is mounted by now, so the placeholder goes away within the same frame: the
+        // swap is never observable as a frame with neither, nor as two visible children.
+        DetachAsyncLoadPlaceholder();
+        NotifyAsyncLoadFinished();
+    }
+}
+
+void CustomNode::RegisterAsyncLoad()
+{
+    if (asyncLoadRegistered_) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto config = GetAsyncLoadConfig();
+    CHECK_NULL_VOID(config.has_value());
+    auto manager = context->GetOrCreateAsyncLoadManager();
+    CHECK_NULL_VOID(manager);
+    asyncLoadRegistered_ = true;
+    // The callback performs this node's own build, which keeps node-construction details out
+    // of the manager.
+    manager->Register(GetId(), config.value(), [weak = WeakClaim(this)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->ForceLoadNow();
+    });
+}
+
+void CustomNode::NotifyAsyncLoadFinished()
+{
+    if (!asyncLoadRegistered_) {
+        return;
+    }
+    asyncLoadRegistered_ = false;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetOrCreateAsyncLoadManager();
+    CHECK_NULL_VOID(manager);
+    manager->OnLoaded(GetId());
+}
+
+void CustomNode::PostAsyncLoadTask()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            node->RunAsyncLoadTask();
+        },
+        TaskExecutor::TaskType::UI, ASYNC_LOAD_BUILD_TASK);
+}
+
+void CustomNode::RunAsyncLoadTask()
+{
+    if (!asyncLoadPending_) {
+        return;
+    }
+    // A small budget spreads the build over frames: when Render() cannot finish within it, the
+    // framework keeps renderFunction_ intact, so this task is posted again for a later frame.
+    // The manager's timeout force-load remains the backstop if it never finishes.
+    Render(ASYNC_LOAD_BUILD_BUDGET_MS);
+    if (asyncLoadPending_) {
+        PostAsyncLoadTask();
+    }
+}
+
+void CustomNode::MountAsyncLoadPlaceholder()
+{
+    if (asyncLoadPlaceholder_) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto config = GetAsyncLoadConfig();
+    CHECK_NULL_VOID(config.has_value());
+    auto manager = context->GetOrCreateAsyncLoadManager();
+    CHECK_NULL_VOID(manager);
+    auto placeholder = manager->CreatePlaceholder(config.value());
+    if (!placeholder) {
+        // Not configured, or the id is empty/unregistered: the component stays invisible until
+        // its content is ready (spec EX-2 / EX-3).
+        return;
+    }
+    placeholder->MountToParent(Claim(this));
+    asyncLoadPlaceholder_ = placeholder;
+}
+
+void CustomNode::DetachAsyncLoadPlaceholder()
+{
+    auto placeholder = asyncLoadPlaceholder_;
+    if (!placeholder) {
+        return;
+    }
+    asyncLoadPlaceholder_.Reset();
+    auto context = GetContext();
+    if (context) {
+        auto manager = context->GetOrCreateAsyncLoadManager();
+        if (manager) {
+            manager->DetachPlaceholder(Claim(this), placeholder);
+            return;
+        }
+    }
+    RemoveChild(placeholder);
+}
+
+void CustomNode::ForceLoadNow()
+{
+    if (!asyncLoadPending_) {
+        return;
+    }
+    asyncLoadSettled_ = true;
+    // deadline 0 means no budget limit: build the whole content synchronously so the component
+    // is guaranteed to reach the screen. NodeDidBuild() then clears the pending flag and
+    // releases the placeholder, so those two are not cleared here.
+    Render(0);
+    if (asyncLoadPending_) {
+        // Render() did not reach NodeDidBuild (nothing to build): release anyway so the node
+        // does not stay tracked and the placeholder does not linger.
+        asyncLoadPending_ = false;
+        DetachAsyncLoadPlaceholder();
+        NotifyAsyncLoadFinished();
+    }
+    MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
 }
 
 void CustomNode::FireCustomDisappear()

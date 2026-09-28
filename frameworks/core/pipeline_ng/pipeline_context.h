@@ -36,6 +36,7 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/async_load/async_load_manager.h"
 #include "core/components_ng/manager/scroll_placeholder/scroll_placeholder_manager.h"
 #include "core/components_ng/dump_utils/dump_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -878,6 +879,11 @@ public:
     // that never register a placeholder template (zero overhead for the legacy path).
     const RefPtr<ScrollPlaceholderManager>& GetOrCreateScrollPlaceholderManager();
 
+    // Lazily created per pipeline scheduler for custom components that enabled asynchronous
+    // loading; stays unset for applications that never call enableAsyncLoad (zero overhead
+    // for the existing synchronous path).
+    const RefPtr<AsyncLoadManager>& GetOrCreateAsyncLoadManager();
+
     const RefPtr<NavigationManager>& GetNavigationManager() const;
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
@@ -1680,6 +1686,8 @@ private:
     RefPtr<MemoryManager> memoryMgr_;
     RefPtr<ScrollPlaceholderManager> scrollPlaceholderManager_;
     std::once_flag scrollPlaceholderOnceFlag_;
+    RefPtr<AsyncLoadManager> asyncLoadManager_;
+    std::once_flag asyncLoadOnceFlag_;
     RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
     RefPtr<RecoverableManager> recoverableMgr_;

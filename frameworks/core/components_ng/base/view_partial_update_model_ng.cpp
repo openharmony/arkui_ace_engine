@@ -61,6 +61,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     }
     customNode->SetAppearFunction(std::move(info.appearFunc));
     customNode->SetDidBuildFunction(std::move(info.didBuildFunc));
+    customNode->SetAsyncLoadConfig(std::move(info.asyncLoadConfig));
     auto renderFunc =
         [renderFunction = std::move(info.renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
         auto node = renderFunction(deadline, isTimeout);

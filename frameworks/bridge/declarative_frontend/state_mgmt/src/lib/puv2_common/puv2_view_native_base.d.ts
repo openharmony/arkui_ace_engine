@@ -39,6 +39,7 @@ declare class NativeViewPartialUpdate {
   sendStateInfo(stateInfo: string): void;
   setIsV2(isV2: boolean): void;
   setReusableMemOptStrategy(reusableMemOptStrategy: number): void;
+  setAsyncLoadConfig(asyncLoadConfig: string): void;
   startMemOpt(): void;
   requestProgressiveRelease(): void;
   allowReusableV2Descendant(): boolean;

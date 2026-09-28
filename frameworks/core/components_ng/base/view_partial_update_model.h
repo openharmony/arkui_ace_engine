@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/base/async_load_config.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "frameworks/core/components_ng/pattern/custom/custom_node_base.h"
 
@@ -68,6 +69,9 @@ struct NodeInfoPU {
     std::string jsViewName;
     bool isV2 = false;
     int32_t reusableMemOptStrategy = -1;
+    // Asynchronous-loading configuration; absent for components that did not call
+    // enableAsyncLoad, which keeps them on the existing synchronous path.
+    std::optional<AsyncLoadConfig> asyncLoadConfig;
     NG::ExtraInfo extraInfo;
 };
 

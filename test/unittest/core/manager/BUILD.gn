@@ -244,6 +244,12 @@ ace_unittest("scroll_placeholder_manager_test_ng") {
   sources = [ "scroll_placeholder_manager_test_ng.cpp" ]
 }
 
+ace_unittest("async_load_manager_test_ng") {
+  module_name = "ScrollingSet-AsyncLoad"
+  type = "new"
+  sources = [ "async_load_manager_test_ng.cpp" ]
+}
+
 ace_unittest("safe_area_manager_test_ng") {
   module_name = "StateManagement-ComponentExtention"
   type = "new"
@@ -432,6 +438,7 @@ group("core_manager_unittest") {
   testonly = true
   deps = [
     ":active_recognizer_manager_test_ng",
+    ":async_load_manager_test_ng",
     ":avoid_info_manager_test_ng",
     ":content_change_manager_test_ng",
     ":content_change_manager_translate_test_ng",

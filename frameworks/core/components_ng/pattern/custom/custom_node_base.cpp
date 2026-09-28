@@ -82,6 +82,16 @@ void CustomNodeBase::SetDidBuildFunction(std::function<void()>&& didBuildFunc)
     didBuildFunc_ = std::move(didBuildFunc);
 }
 
+void CustomNodeBase::SetAsyncLoadConfig(std::optional<AsyncLoadConfig>&& config)
+{
+    asyncLoadConfig_ = std::move(config);
+}
+
+const std::optional<AsyncLoadConfig>& CustomNodeBase::GetAsyncLoadConfig() const
+{
+    return asyncLoadConfig_;
+}
+
 void CustomNodeBase::SetUpdateFunction(std::function<void()>&& updateFunc)
 {
     updateFunc_ = std::move(updateFunc);

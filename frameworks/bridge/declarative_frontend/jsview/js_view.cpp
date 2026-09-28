@@ -919,7 +919,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .creatorId = GetCreatorId(),
         .jsViewName = GetJSViewName(),
         .isV2 = GetJSIsV2(),
-        .reusableMemOptStrategy = GetJSReusableMemOptStrategy() };
+        .reusableMemOptStrategy = GetJSReusableMemOptStrategy(),
+        .asyncLoadConfig = GetJSAsyncLoadConfig() };
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -1505,6 +1506,33 @@ void JSViewPartialUpdate::JSSetIsV2(const bool isV2)
     isV2_ = isV2;
 }
 
+void JSViewPartialUpdate::JSSetAsyncLoadConfig(const std::string& asyncLoadConfig)
+{
+    // Malformed or empty payload clears the configuration, which keeps the component on the
+    // existing synchronous path rather than half-enabling asynchronous loading.
+    asyncLoadConfig_.reset();
+    if (asyncLoadConfig.empty()) {
+        return;
+    }
+    auto configJson = JsonUtil::ParseJsonString(asyncLoadConfig);
+    if (!configJson || !configJson->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "AsyncLoadConfig: payload is not a JSON object, ignored");
+        return;
+    }
+    AsyncLoadConfig config;
+    auto placeholderId = configJson->GetValue("placeholderId");
+    if (placeholderId && placeholderId->IsString()) {
+        config.placeholderId = placeholderId->GetString();
+    }
+    auto timeout = configJson->GetValue("timeout");
+    if (timeout && timeout->IsNumber()) {
+        config.timeoutMs = timeout->GetInt();
+    }
+    asyncLoadConfig_ = config;
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "AsyncLoadConfig: timeout set %{public}d, placeholder set %{public}d",
+        config.timeoutMs.has_value(), config.HasPlaceholder());
+}
+
 napi_value GetDialogController(napi_env env)
 {
     napi_value globalValue = nullptr;
@@ -1806,6 +1834,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::Method(
         "setReusableMemOptStrategy", &JSViewPartialUpdate::JSSetReusableMemOptStrategy);
+    JSClass<JSViewPartialUpdate>::Method(
+        "setAsyncLoadConfig", &JSViewPartialUpdate::JSSetAsyncLoadConfig);
     JSClass<JSViewPartialUpdate>::Method("startMemOpt", &JSViewPartialUpdate::JSStartMemOpt);
     JSClass<JSViewPartialUpdate>::Method(
         "requestProgressiveRelease", &JSViewPartialUpdate::JSRequestProgressiveRelease);

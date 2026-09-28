@@ -23,6 +23,7 @@
 #include <tuple>
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/async_load_config.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 
@@ -416,6 +417,17 @@ public:
         return reusableMemOptStrategy_;
     }
 
+    // Receives the serialized asynchronous-loading configuration pushed by the
+    // puv2 side through nativeViewPartialUpdate.setAsyncLoadConfig(). The JS/C++
+    // boundary here is push-only: the ACELite side never reads back into the JS
+    // object, mirroring setIsV2 / setReusableMemOptStrategy.
+    void JSSetAsyncLoadConfig(const std::string& asyncLoadConfig);
+
+    const std::optional<AsyncLoadConfig>& GetJSAsyncLoadConfig() const
+    {
+        return asyncLoadConfig_;
+    }
+
     void JSStartMemOpt();
     void JSRequestProgressiveRelease();
 
@@ -482,6 +494,7 @@ private:
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
     int32_t reusableMemOptStrategy_ = -1;
+    std::optional<AsyncLoadConfig> asyncLoadConfig_;
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;

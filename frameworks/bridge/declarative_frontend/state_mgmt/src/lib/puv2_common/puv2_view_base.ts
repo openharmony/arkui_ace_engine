@@ -160,6 +160,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   protected __preRenderedChildren__Internal?: Map<string, PUV2ViewBase>;
   public __isPreRendered__Internal: boolean = false;
   private __customComponentContext__Internal?: CustomComponentContext;
+  private __asyncLoadConfig__Internal?: CustomComponentAsyncLoadOptions;
   public __isGlobalPoolActive__Internal : boolean = false;
   static __preRenderCounter__Internal: number = 0;
 
@@ -436,6 +437,31 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       return this.nativeViewPartialUpdate.setReusableMemOptStrategy(1);
     }
     return this.nativeViewPartialUpdate.setReusableMemOptStrategy(0);
+  }
+
+  /**
+   * Stores the asynchronous-loading configuration for this component instance and
+   * pushes the native-consumable subset to the C++ side.
+   *
+   * Reached by apps only through the CustomComponentContext returned by
+   * UIUtils.getCustomComponentContext(); framework internal.
+   *
+   * Only serializable members are transported (placeholder id, timeout). The
+   * placeholder size is a layout suggestion that may hold a Resource and is
+   * therefore not serialized here; the placeholder keeps the template's own layout.
+   */
+  public __enableAsyncLoad__Internal(options?: CustomComponentAsyncLoadOptions): void {
+    this.__asyncLoadConfig__Internal = options;
+    const payload: Record<string, string | number> = {};
+    const placeholderId = options?.placeholder?.id;
+    if (typeof placeholderId === 'string') {
+      payload['placeholderId'] = placeholderId;
+    }
+    const timeout = options?.timeout;
+    if (typeof timeout === 'number' && !Number.isNaN(timeout)) {
+      payload['timeout'] = timeout;
+    }
+    this.nativeViewPartialUpdate.setAsyncLoadConfig(JSON.stringify(payload));
   }
 
   public __setHasStartMemOpt__Internal(hasStartMemOpt: boolean): void {
@@ -1031,6 +1057,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       this.__customComponentContext__Internal = ((thizz: PUV2ViewBase): CustomComponentContext => ({
         getReusePool(): IReusePool | undefined {
           return PUV2ViewBase.prototype.getReusePool.call(thizz);
+        },
+        enableAsyncLoad(options?: CustomComponentAsyncLoadOptions): void {
+          return PUV2ViewBase.prototype.__enableAsyncLoad__Internal.call(thizz, options);
         }
       }))(this);
     }
