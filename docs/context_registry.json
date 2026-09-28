@@ -12647,6 +12647,72 @@
       "last_verified": "2026-08-10"
     },
     {
+      "id": "RepeatRenderDataDuplicate",
+      "name": "Repeat Render Data Duplicate",
+      "name_cn": "Repeat渲染数据重复",
+      "kind": "issue",
+      "category": "rendering",
+      "keywords": [
+        "RepeatRenderDataDuplicate",
+        "Repeat",
+        "Repeat渲染数据重复",
+        "重复渲染",
+        "数据重复",
+        "key重复",
+        "id重复",
+        "节点复用",
+        "重复显示",
+        "状态错位"
+      ],
+      "aliases": [
+        "Repeat数据重复",
+        "Repeat重复渲染",
+        "Repeat key冲突",
+        "Repeat节点复用错乱"
+      ],
+      "kb": "docs/kb/issues/rendering/repeat-render-data-duplicate.md",
+      "func_ids": [
+        "07-05-03"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
+    },
+    {
+      "id": "LazyForEachPrebuildNodeRepeatCreation",
+      "name": "LazyForEach Prebuild Node Repeat Creation",
+      "name_cn": "LazyForEach 预加载节点反复创建",
+      "kind": "issue",
+      "category": "rendering",
+      "keywords": [
+        "LazyForEachPrebuildNodeRepeatCreation",
+        "LazyForEach",
+        "预加载节点反复创建",
+        "预加载",
+        "预构建",
+        "PreBuild",
+        "超时续建",
+        "keyGenerator",
+        "键值生成函数",
+        "不稳定key",
+        "随机值key",
+        "时间戳key",
+        "preBuildingIndex_",
+        "缓存未命中",
+        "重复创建节点"
+      ],
+      "aliases": [
+        "LazyForEach预加载超时重建",
+        "LazyForEach key不稳定循环建节点",
+        "预构建反复创建"
+      ],
+      "kb": "docs/kb/issues/rendering/lazy-for-each-prebuild-node-repeat-creation.md",
+      "func_ids": [
+        "07-05-02"
+      ],
+      "status": "active",
+      "last_verified": "2026-09-20"
+    },
+    {
       "id": "CustomDelegateUIContextNullOnCreate",
       "name": "Custom Delegate UIContext Null On Create",
       "name_cn": "CustomDelegate 创建时 UIContext 为空",

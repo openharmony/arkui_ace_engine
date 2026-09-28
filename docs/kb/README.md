@@ -246,6 +246,8 @@ docs/kb/
 | KeyboardAvoidTimingChange | 键盘避让执行顺序变化 | `docs/kb/issues/layout/keyboard-avoid-timing-change.md` | 新建 |
 | ResourceAdapterInstanceIdMismatch | 资源适配器实例ID缓存不匹配 | `docs/kb/issues/rendering/resource-adapter-instance-id-mismatch.md` | 新建 |
 | AboutToDisappearUnmountBlockedOnReuse | aboutToDisappear下树屏蔽与组件复用冲突 | `docs/kb/issues/lifecycle/about-to-disappear-unmount-blocked-on-reuse.md` | 新建 |
+| RepeatRenderDataDuplicate | Repeat 渲染数据重复 | `docs/kb/issues/rendering/repeat-render-data-duplicate.md` | 新建 |
+| LazyForEachPrebuildNodeRepeatCreation | LazyForEach 预加载节点反复创建 | `docs/kb/issues/rendering/lazy-for-each-prebuild-node-repeat-creation.md` | 新建 |
 | MenuSwipeMisrecognizedAsClick | Menu滑动误判为点击关闭 | `docs/kb/issues/interaction/menu-swipe-misrecognized-as-click.md` | 新建 |
 | ScrollEndNotifyOnDetach | 滚动组件下树误触发父组件onScrollEnd | `docs/kb/issues/interaction/scroll-end-notify-on-detach.md` | 新建 |
 | UIContextInstanceIdLeak | UIContext 实例 ID 泄漏 | `docs/kb/issues/lifecycle/uicontext-instance-id-leak.md` | 新建 |
